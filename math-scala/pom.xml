@@ -36,54 +36,9 @@
 
   <packaging>jar</packaging>
 
-  <!-- this is needed for scalatest plugin until they publish it to central -->
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype</id>
-      <url>https://oss.sonatype.org/content/groups/public</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
-    <defaultGoal>install</defaultGoal>
-
     <plugins>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-sources/mahout</source>
-              </sources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>add-test-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-test-sources/mahout</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- create test jar so other modules can reuse the math test utility classes. -->
+      <!-- create test jar so other modules can reuse the math-scala test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -106,47 +61,47 @@
       </plugin>
 
       <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-        <version>2.15.2</version>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
         <executions>
           <execution>
+            <id>add-scala-sources</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-compile</id>
+            <phase>process-resources</phase>
             <goals>
               <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
               <goal>testCompile</goal>
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <sourceDir>src/main/scala</sourceDir>
-          <jvmArgs>
-            <jvmArg>-Xms64m</jvmArg>
-            <jvmArg>-Xmx1024m</jvmArg>
-          </jvmArgs>
-        </configuration>
       </plugin>
 
       <!--this is what scalatest recommends to do to enable scala tests -->
 
       <!-- disable surefire -->
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-surefire-plugin</artifactId>-->
-        <!--<version>2.7</version>-->
-        <!--<configuration>-->
-          <!--<skipTests>true</skipTests>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <version>1.0-M2</version>
-        <configuration>
-          <reportsDirectory>${project.build.directory}/scalatest-reports</reportsDirectory>
-          <junitxml>.</junitxml>
-          <filereports>WDF TestSuite.txt</filereports>
-        </configuration>
         <executions>
           <execution>
             <id>test</id>
@@ -172,10 +127,10 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
     </dependency>
-      
+
     <dependency>
       <groupId>com.github.scopt</groupId>
-      <artifactId>scopt_${scala.major}</artifactId>
+      <artifactId>scopt_${scala.compat.version}</artifactId>
       <version>3.3.0</version>
     </dependency>
 
@@ -207,9 +162,7 @@
     </dependency>
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.major}</artifactId>
-      <version>2.0</version>
-      <scope>test</scope>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
   </dependencies>

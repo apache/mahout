@@ -109,7 +109,7 @@
     <hbase.version>1.0.0</hbase.version>
     <lucene.version>4.6.1</lucene.version>
     <slf4j.version>1.7.10</slf4j.version>
-    <scala.major>2.10</scala.major>
+    <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
     <spark.version>1.1.1</spark.version>
     <h2o.version>0.1.25</h2o.version>
@@ -207,19 +207,31 @@
       </dependency>
 
       <dependency>
-        <artifactId>mahout-math-scala_${scala.major}</artifactId>
+        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
-        <artifactId>mahout-math-scala_${scala.major}</artifactId>
         <classifier>tests</classifier>
       </dependency>
 
       <dependency>
-        <artifactId>mahout-spark_${scala.major}</artifactId>
+        <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
@@ -352,6 +364,12 @@
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-test-framework</artifactId>
         <version>${lucene.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest_${scala.compat.version}</artifactId>
+        <version>2.2.4</version>
         <scope>test</scope>
       </dependency>
 
@@ -679,9 +697,36 @@
           <version>1.8</version>
         </plugin>
         <plugin>
-          <groupId>org.scala-tools</groupId>
-          <artifactId>maven-scala-plugin</artifactId>
-          <version>2.15.2</version>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <version>3.2.0</version>
+          <configuration>
+            <jvmArgs>
+              <jvmArg>-Xms64m</jvmArg>
+              <jvmArg>-Xmx1024m</jvmArg>
+            </jvmArgs>
+            <args>
+              <arg>-target:jvm-${maven.compiler.target}</arg>
+              <arg>-deprecation</arg>
+              <arg>-feature</arg>
+              <arg>-language:existentials</arg>
+              <arg>-language:implicitConversions</arg>
+              <arg>-language:postfixOps</arg>
+            </args>
+            <sourceDir>src/main/scala</sourceDir>
+            <testSourceDir>src/test/scala</testSourceDir>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.scalatest</groupId>
+          <artifactId>scalatest-maven-plugin</artifactId>
+          <version>1.0</version>
+          <configuration>
+            <reportsDirectory>${project.build.directory}/scalatest-reports</reportsDirectory>
+            <junitxml>.</junitxml>
+            <filereports>WDF TestSuite.txt</filereports>
+            <argLine>-Xmx1024m</argLine>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -844,6 +889,7 @@
       <id>hadoop1</id>
       <properties>
         <hadoop.classifier>hadoop1</hadoop.classifier>
+        <hadoop.version>2.6.0</hadoop.version>
       </properties>
     </profile>
     <profile>

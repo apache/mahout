@@ -186,10 +186,6 @@ then
        CLASSPATH=${CLASSPATH}:$f;
     done
 
-    for f in $MAHOUT_HOME/mr/target/mahout-mr-*.jar; do
-       CLASSPATH=${CLASSPATH}:$f;
-    done
-
     for f in $MAHOUT_HOME/h2o/target/mahout-h2o-*.jar; do
        CLASSPATH=${CLASSPATH}:$f;
     done
@@ -199,10 +195,6 @@ then
   if [ "$SPARK" == "1" ]; then
 
     for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar ; do
-      CLASSPATH=${CLASSPATH}:$f;
-    done
-
-    for f in $MAHOUT_HOME/mr/target/mahout-mr-*.jar ; do
       CLASSPATH=${CLASSPATH}:$f;
     done
 
