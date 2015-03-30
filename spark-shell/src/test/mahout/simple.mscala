@@ -34,7 +34,7 @@ val r = drmAtA.mapBlock() {
 r.collect
 
 // local write
-r.writeDRM("file:///home/dmitriy/A")
+r.dfsWrite("file:///home/dmitriy/A")
 
 // hdfs write -- uncomment to test
-// r.writeDRM("hdfs://localhost:11010/A")
+// r.dfsWrite("hdfs://localhost:11010/A")
