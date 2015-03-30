@@ -99,6 +99,7 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
     set +e
     $HADOOP dfs -rmr ${WORK_DIR}/20news-all
     $HADOOP dfs -rmr ${WORK_DIR}/spark-model
+    $HADOOP dfs -mkdir ${WORK_DIR}
     set -e
     $HADOOP dfs -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
   fi
