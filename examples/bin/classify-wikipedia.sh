@@ -47,7 +47,7 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
   fi
 fi
 
-WORK_DIR=/tmp/mahout-work-${USER}
+WORK_DIR=/tmp/mahout-work-wiki
 algorithm=( CBayes BinaryCBayes clean)
 if [ -n "$1" ]; then
   choice=$1
@@ -112,39 +112,80 @@ if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
     echo "Copying wikipedia data to HDFS"
     set +e
     $HADOOP dfs -rmr ${WORK_DIR}/wikixml
+    $HADOOP dfs -mkdir ${WORK_DIR}
     set -e
     $HADOOP dfs -put ${WORK_DIR}/wikixml ${WORK_DIR}/wikixml
   fi
 
   echo "Creating sequence files from wikiXML"
-  $MAHOUT_HOME/bin/mahout seqwiki -c ${WORK_DIR}/country.txt -i ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml -o ${WORK_DIR}/wikipediainput
+  $MAHOUT_HOME/bin/mahout seqwiki -c ${WORK_DIR}/country.txt \
+                                  -i ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml \
+                                  -o ${WORK_DIR}/wikipediainput
    
   # if using the 10 class problem use bigrams
   if [ "x$alg" == "xCBayes" ] ; then
     echo "Converting sequence files to vectors using bigrams"
-    $MAHOUT_HOME/bin/mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipediaVecs -wt tfidf -lnorm -nv -ow -ng 2
+    $MAHOUT_HOME/bin/mahout seq2sparse -i ${WORK_DIR}/wikipediainput \
+                                       -o ${WORK_DIR}/wikipediaVecs \
+                                       -wt tfidf \
+                                       -lnorm -nv \
+                                       -ow -ng 2
   fi
   
   # if using the 2 class problem try different options
   if [ "x$alg" == "xBinaryCBayes" ] ; then
-    echo "Converting sequence files to vectors using 4-grams and a max Document Frequenct of 30"
-    $MAHOUT_HOME/bin/mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipediaVecs -wt tfidf -lnorm -nv -ow -ng 4 -x 30 
+    echo "Converting sequence files to vectors using unigrams and a max document frequency of 30%"
+    $MAHOUT_HOME/bin/mahout seq2sparse -i ${WORK_DIR}/wikipediainput \
+                                       -o ${WORK_DIR}/wikipediaVecs \
+                                       -wt tfidf \
+                                       -lnorm \
+                                       -nv \
+                                       -ow \
+                                       -ng 1 \
+                                       -x 30
   fi
   
   echo "Creating training and holdout set with a random 80-20 split of the generated vector dataset"
-  $MAHOUT_HOME/bin/mahout split -i ${WORK_DIR}/wikipediaVecs/tfidf-vectors/ --trainingOutput ${WORK_DIR}/training --testOutput ${WORK_DIR}/testing -rp 20 -ow -seq -xm sequential
+  $MAHOUT_HOME/bin/mahout split -i ${WORK_DIR}/wikipediaVecs/tfidf-vectors/ \
+                                --trainingOutput ${WORK_DIR}/training \
+                                --testOutput ${WORK_DIR}/testing \
+                                -rp 20 \
+                                -ow \
+                                -seq \
+                                -xm sequential
 
   echo "Training Naive Bayes model"
-  $MAHOUT_HOME/bin/mahout trainnb -i ${WORK_DIR}/training -el -o ${WORK_DIR}/model -li ${WORK_DIR}/labelindex -ow -c
+  $MAHOUT_HOME/bin/mahout trainnb -i ${WORK_DIR}/training \
+                                  -el \
+                                  -o ${WORK_DIR}/model \
+                                  -li ${WORK_DIR}/labelindex \
+                                  -ow \
+                                  -c
 
   echo "Self testing on training set"
-  $MAHOUT_HOME/bin/mahout testnb -i ${WORK_DIR}/training -m ${WORK_DIR}/model -l ${WORK_DIR}/labelindex -ow -o ${WORK_DIR}/output -c
+  $MAHOUT_HOME/bin/mahout testnb -i ${WORK_DIR}/training \
+                                 -m ${WORK_DIR}/model \
+                                 -l ${WORK_DIR}/labelindex \
+                                 -ow \
+                                 -o ${WORK_DIR}/output \
+                                 -c
 
   echo "Testing on holdout set: Bayes"
-  $MAHOUT_HOME/bin/mahout testnb -i ${WORK_DIR}/testing -m ${WORK_DIR}/model -l ${WORK_DIR}/labelindex -ow -o ${WORK_DIR}/output -seq
+  $MAHOUT_HOME/bin/mahout testnb -i ${WORK_DIR}/testing \
+                                 -m ${WORK_DIR}/model \
+                                 -l ${WORK_DIR}/labelindex \
+                                 -ow \
+                                 -o ${WORK_DIR}/output \
+                                 -seq
 
  echo "Testing on holdout set: CBayes"
-  $MAHOUT_HOME/bin/mahout testnb -i ${WORK_DIR}/testing -m ${WORK_DIR}/model -l ${WORK_DIR}/labelindex -ow -o ${WORK_DIR}/output  -c -seq
+  $MAHOUT_HOME/bin/mahout testnb -i ${WORK_DIR}/testing \
+                                 -m ${WORK_DIR}/model -l \
+                                 ${WORK_DIR}/labelindex \
+                                 -ow \
+                                 -o ${WORK_DIR}/output  \
+                                 -c \
+                                 -seq
 fi
 
 elif [ "x$alg" == "xclean" ]; then
