@@ -182,7 +182,11 @@ then
   done
 
   if [ "$H2O" == "1" ]; then
-    for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar; do
+    for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/mr/target/mahout-mr-*.jar; do
        CLASSPATH=${CLASSPATH}:$f;
     done
 
@@ -194,7 +198,11 @@ then
   # add jars for running from the command line if we requested shell or spark CLI driver
   if [ "$SPARK" == "1" ]; then
 
-    for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar ; do
+    for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/mr/target/mahout-mr-*.jar ; do
       CLASSPATH=${CLASSPATH}:$f;
     done
 
@@ -227,11 +235,11 @@ then
   done
 else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/hdfs/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mr/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/integration/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math-scala/target/classes
-  #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/src/main/resources
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes

@@ -28,8 +28,8 @@
   </parent>
 
   <!-- modules inherit parent's group id and version. -->
-  <artifactId>mahout-mrlegacy</artifactId>
-  <name>Mahout MapReduce Legacy</name>
+  <artifactId>mahout-mr</artifactId>
+  <name>Mahout Map-Reduce</name>
   <description>Scalable machine learning libraries</description>
 
   <packaging>jar</packaging>
@@ -106,7 +106,7 @@
   </build>
 
   <dependencies>
-
+  
     <!-- our modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -120,7 +120,25 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-hdfs</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-hdfs</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Third Party -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>11.0.2</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
@@ -182,11 +200,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -232,5 +245,5 @@
     </dependency>
 
   </dependencies>
-
+  
 </project>

@@ -43,11 +43,11 @@ public final class Varint {
    * <a href="http://code.google.com/apis/protocolbuffers/docs/encoding.html">
    * Google Protocol Buffers</a>. It uses zig-zag encoding to efficiently
    * encode signed values. If values are known to be nonnegative,
-   * {@link #writeUnsignedVarLong(long, DataOutput)} should be used.
+   * {@link #writeUnsignedVarLong(long, java.io.DataOutput)} should be used.
    *
    * @param value value to encode
    * @param out to write bytes to
-   * @throws IOException if {@link DataOutput} throws {@link IOException}
+   * @throws java.io.IOException if {@link java.io.DataOutput} throws {@link java.io.IOException}
    */
   public static void writeSignedVarLong(long value, DataOutput out) throws IOException {
     // Great trick from http://code.google.com/apis/protocolbuffers/docs/encoding.html#types
@@ -58,12 +58,12 @@ public final class Varint {
    * Encodes a value using the variable-length encoding from
    * <a href="http://code.google.com/apis/protocolbuffers/docs/encoding.html">
    * Google Protocol Buffers</a>. Zig-zag is not used, so input must not be negative.
-   * If values can be negative, use {@link #writeSignedVarLong(long, DataOutput)}
+   * If values can be negative, use {@link #writeSignedVarLong(long, java.io.DataOutput)}
    * instead. This method treats negative input as like a large unsigned value.
    *
    * @param value value to encode
    * @param out to write bytes to
-   * @throws IOException if {@link DataOutput} throws {@link IOException}
+   * @throws java.io.IOException if {@link java.io.DataOutput} throws {@link java.io.IOException}
    */
   public static void writeUnsignedVarLong(long value, DataOutput out) throws IOException {
     while ((value & 0xFFFFFFFFFFFFFF80L) != 0L) {
@@ -74,7 +74,7 @@ public final class Varint {
   }
 
   /**
-   * @see #writeSignedVarLong(long, DataOutput)
+   * @see #writeSignedVarLong(long, java.io.DataOutput)
    */
   public static void writeSignedVarInt(int value, DataOutput out) throws IOException {
     // Great trick from http://code.google.com/apis/protocolbuffers/docs/encoding.html#types
@@ -82,7 +82,7 @@ public final class Varint {
   }
 
   /**
-   * @see #writeUnsignedVarLong(long, DataOutput)
+   * @see #writeUnsignedVarLong(long, java.io.DataOutput)
    */
   public static void writeUnsignedVarInt(int value, DataOutput out) throws IOException {
     while ((value & 0xFFFFFF80) != 0L) {
@@ -95,10 +95,10 @@ public final class Varint {
   /**
    * @param in to read bytes from
    * @return decode value
-   * @throws IOException if {@link DataInput} throws {@link IOException}
+   * @throws java.io.IOException if {@link java.io.DataInput} throws {@link java.io.IOException}
    * @throws IllegalArgumentException if variable-length value does not terminate
    *  after 9 bytes have been read
-   * @see #writeSignedVarLong(long, DataOutput)
+   * @see #writeSignedVarLong(long, java.io.DataOutput)
    */
   public static long readSignedVarLong(DataInput in) throws IOException {
     long raw = readUnsignedVarLong(in);
@@ -113,10 +113,10 @@ public final class Varint {
   /**
    * @param in to read bytes from
    * @return decode value
-   * @throws IOException if {@link DataInput} throws {@link IOException}
+   * @throws java.io.IOException if {@link java.io.DataInput} throws {@link java.io.IOException}
    * @throws IllegalArgumentException if variable-length value does not terminate
    *  after 9 bytes have been read
-   * @see #writeUnsignedVarLong(long, DataOutput)
+   * @see #writeUnsignedVarLong(long, java.io.DataOutput)
    */
   public static long readUnsignedVarLong(DataInput in) throws IOException {
     long value = 0L;
@@ -133,8 +133,8 @@ public final class Varint {
   /**
    * @throws IllegalArgumentException if variable-length value does not terminate
    *  after 5 bytes have been read
-   * @throws IOException if {@link DataInput} throws {@link IOException}
-   * @see #readSignedVarLong(DataInput)
+   * @throws java.io.IOException if {@link java.io.DataInput} throws {@link java.io.IOException}
+   * @see #readSignedVarLong(java.io.DataInput)
    */
   public static int readSignedVarInt(DataInput in) throws IOException {
     int raw = readUnsignedVarInt(in);
@@ -149,8 +149,8 @@ public final class Varint {
   /**
    * @throws IllegalArgumentException if variable-length value does not terminate
    *  after 5 bytes have been read
-   * @throws IOException if {@link DataInput} throws {@link IOException}
-   * @see #readUnsignedVarLong(DataInput)
+   * @throws java.io.IOException if {@link java.io.DataInput} throws {@link java.io.IOException}
+   * @see #readUnsignedVarLong(java.io.DataInput)
    */
   public static int readUnsignedVarInt(DataInput in) throws IOException {
     int value = 0;
