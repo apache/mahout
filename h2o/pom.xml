@@ -133,9 +133,15 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-hdfs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+   <dependency>
       <!-- for MatrixWritable and VectorWritable -->
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
+      <artifactId>mahout-mr</artifactId>
       <version>${project.version}</version>
     </dependency>
 
