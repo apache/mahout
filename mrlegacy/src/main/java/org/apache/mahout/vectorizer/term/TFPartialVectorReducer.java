@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectorizer.term;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -44,6 +45,7 @@ import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Converts a document in to a sparse vector
@@ -61,15 +63,21 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
   protected void reduce(Text key, Iterable<StringTuple> values, Context context)
     throws IOException, InterruptedException {
     Iterator<StringTuple> it = values.iterator();
+
     if (!it.hasNext()) {
       return;
     }
-    StringTuple value = it.next();
 
-    Vector vector = new RandomAccessSparseVector(dimension, value.length()); // guess at initial size
+    List<String> value = Lists.newArrayList();
+
+    while (it.hasNext()) {
+      value.addAll(it.next().getEntries());
+    }
+
+    Vector vector = new RandomAccessSparseVector(dimension, value.size()); // guess at initial size
 
     if (maxNGramSize >= 2) {
-      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxNGramSize);
+      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.iterator()), maxNGramSize);
       sf.reset();
       try {
         do {
@@ -85,7 +93,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
         Closeables.close(sf, true);
       }
     } else {
-      for (String term : value.getEntries()) {
+      for (String term : value) {
         if (!term.isEmpty() && dictionary.containsKey(term)) { // unigram
           int termId = dictionary.get(term);
           vector.setQuick(termId, vector.getQuick(termId) + 1);
