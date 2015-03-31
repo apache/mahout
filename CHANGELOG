@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.10.0 - unreleased
 
+  MAHOUT-1522: Handle logging levels via log4j.xml (akm)
+
   MAHOUT-1602: Euclidean Distance Similarity Math (Leonardo Fernandez Sanchez, smarthi)
 
   MAHOUT-1619: HighDFWordsPruner overwrites cache files (Burke Webster, smarthi)
