@@ -17,7 +17,6 @@
 
 package org.apache.mahout.vectorizer.collocations.llr;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -90,9 +89,8 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
   @Override
   protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
 
-    ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxShingleSize);
-    sf.reset();
-    try {
+    try (ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxShingleSize)){
+      sf.reset();
       int count = 0; // ngram count
 
       OpenObjectIntHashMap<String> ngrams =
@@ -160,8 +158,6 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
 
       context.getCounter(Count.NGRAM_TOTAL).increment(count);
       sf.end();
-    } finally {
-      Closeables.close(sf, true);
     }
   }
 
