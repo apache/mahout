@@ -17,7 +17,6 @@
 
 package org.apache.mahout.vectorizer;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
@@ -36,7 +35,7 @@ import org.apache.mahout.vectorizer.pruner.PrunedPartialVectorMergeReducer;
 import org.apache.mahout.vectorizer.pruner.WordsPrunerReducer;
 
 import java.io.IOException;
-import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class HighDFWordsPruner {
@@ -56,7 +55,7 @@ public final class HighDFWordsPruner {
                                   int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
 
     int partialVectorIndex = 0;
-    List<Path> partialVectorPaths = Lists.newArrayList();
+    List<Path> partialVectorPaths = new ArrayList<>();
     for (Path path : docFrequenciesFeatures.getSecond()) {
       Path partialVectorOutputPath = new Path(prunedPartialTFDir, "partial-" + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
@@ -79,8 +78,7 @@ public final class HighDFWordsPruner {
                     + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setLong(MAX_DF, maxDF);
     conf.setLong(MIN_DF, minDF);
-    DistributedCache.setCacheFiles(
-            new URI[]{dictionaryFilePath.toUri()}, conf);
+    DistributedCache.addCacheFile(dictionaryFilePath.toUri(), conf);
 
     Job job = HadoopUtil.prepareJob(input, output, SequenceFileInputFormat.class,
             Mapper.class, null, null, WordsPrunerReducer.class,

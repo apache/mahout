@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.10.0 - unreleased
 
+  MAHOUT-1619: HighDFWordsPruner overwrites cache files (Burke Webster, smarthi)
+
   MAHOUT-1516: classify-20newsgroups.sh failed: /tmp/mahout-work-jpan/20news-all does not exists in hdfs. (Jian Pan via apalumbo)
 
   MAHOUT-1559: Add documentation for and clean up the wikipedia classifier example (apalumbo)
