@@ -16,7 +16,9 @@ package org.apache.mahout.vectorizer.pruner;
  * limitations under the License.
  */
 
+import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -28,6 +30,7 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
+import org.apache.mahout.vectorizer.DictionaryVectorizer;
 import org.apache.mahout.vectorizer.HighDFWordsPruner;
 
 import java.io.IOException;
@@ -75,7 +78,8 @@ public class WordsPrunerReducer extends
     maxDf = conf.getLong(HighDFWordsPruner.MAX_DF, Long.MAX_VALUE);
     minDf = conf.getLong(HighDFWordsPruner.MIN_DF, -1);
 
-    Path dictionaryFile = HadoopUtil.getSingleCachedFile(conf);
+    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    Path dictionaryFile = HadoopUtil.findInCacheByPartOfFilename(DictionaryVectorizer.DICTIONARY_FILE, localFiles);
 
     // key is feature, value is the document frequency
     for (Pair<IntWritable, LongWritable> record
