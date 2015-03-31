@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions;
  * items (dimensions) where both users have expressed a preference for that item. This is simply the square
  * root of the sum of the squares of differences in position (preference) along each dimension.</p>
  * 
- * <p>The similarity could be computed as 1 / (1 + distance), so the resulting values are in the range (0,1].
+ * <p>The similarity could be computed as 1 / (1 + distance / sqrt(n)), so the resulting values are in the range (0,1].
  * This would weight against pairs that overlap in more dimensions, which should indicate more similarity, 
  * since more dimensions offer more opportunities to be farther apart. Actually, it is computed as 
  * sqrt(n) / (1 + distance), where n is the number of dimensions, in order to help correct for this.
