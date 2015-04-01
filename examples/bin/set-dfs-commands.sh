@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+#   
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 
+# 
+# Requires $HADOOP_HOME to be set.
+#
+# Figures out the major version of Hadoop we're using and sets commands
+# for dfs commands
+#
+# Run by each example script.
+
+# Check Hadoop version
+v=`hadoop version | egrep "Hadoop [0-9]+.[0-9]+.[0-9]+" | cut -f 2 -d ' ' | cut -f 1 -d '.'`
+if [ $v -eq "1" ]
+then
+  DFS="$HADOOP_HOME/bin/hadoop dfs"
+  DFSRM="$DFS -rmr"
+elif [ $v -eq "2" ]
+then
+  DFS="$HADOOP_HOME/bin/hdfs dfs"
+  DFSRM="$DFS -rm -r"
+else
+  echo 
+fi

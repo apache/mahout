@@ -24,16 +24,18 @@
 #
 # To run:  change into the mahout directory and type:
 # ./examples/bin/run-rf.sh <num-rows>
-WORK_DIR=/tmp/mahout-work-${USER}/
+WORK_DIR=/tmp/mahout-work-${USER}
 input="rf-input.csv"
 
+# Set commands for dfs
+./set-dfs-commands.sh
 
 # Remove old files
 echo
 echo "Removing old temp files if they exist; this will mention they're not there if not."
 echo
-$HADOOP_HOME/bin/hadoop fs -rmr -skipTrash $WORK_DIR forest
-$HADOOP_HOME/bin/hadoop fs -mkdir $WORK_DIR
+$HADOOP_HOME/bin/hadoop dfs -rmr -skipTrash $WORK_DIR forest
+$HADOOP_HOME/bin/hadoop dfs -mkdir $WORK_DIR
 
 # Create test data
 numrows=$1
@@ -42,8 +44,8 @@ echo "Writing random data to $input"
 ./examples/bin/create-rf-data.sh $numrows $input
 
 # Put the test file in HDFS
-$HADOOP_HOME/bin/hadoop fs -rmr -skipTrash ${WORK_DIR}
-$HADOOP_HOME/bin/hadoop fs -mkdir -p ${WORK_DIR}/input
+$HADOOP_HOME/bin/hadoop dfs -rmr -skipTrash ${WORK_DIR}
+$HADOOP_HOME/bin/hadoop dfs -mkdir -p ${WORK_DIR}/input
 if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
   HADOOP="$HADOOP_HOME/bin/hadoop"
   if [ ! -e $HADOOP ]; then
@@ -84,6 +86,6 @@ echo
 ./bin/mahout testforest -DXmx10000m -Dmapred.output.compress=false -i $WORK_DIR/test.csv -ds $WORK_DIR/info -m $WORK_DIR/forest -a -mr -o $WORK_DIR/predictions
 
 # Remove old files
-$HADOOP_HOME/bin/hadoop fs -rmr -skipTrash $WORK_DIR
+$HADOOP_HOME/bin/hadoop dfs -rmr -skipTrash $WORK_DIR
 rm $input
 
