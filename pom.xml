@@ -148,14 +148,27 @@
       <!-- our modules -->
 
       <dependency>
-        <artifactId>mahout-mrlegacy</artifactId>
+        <artifactId>mahout-hdfs</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
-        <artifactId>mahout-mrlegacy</artifactId>
+        <artifactId>mahout-hdfs</artifactId>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <artifactId>mahout-mr</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+        <artifactId>mahout-mr</artifactId>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
@@ -456,7 +469,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>11.0.2</version>
+        <version>14.0.1</version>
       </dependency>
 
       <dependency>
@@ -860,7 +873,8 @@
   <modules>
     <module>buildtools</module>
     <module>math</module>
-    <module>mrlegacy</module>
+    <module>hdfs</module>
+    <module>mr</module>
     <module>integration</module>
     <module>examples</module>
     <module>distribution</module>

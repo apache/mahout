@@ -227,7 +227,7 @@ public class TestForest extends Configured implements Tool {
     Random rng = RandomUtils.getRandom();
 
     List<double[]> resList = Lists.newArrayList();
-    if (dataFS.getFileStatus(dataPath).isDirectory()) {
+    if (dataFS.getFileStatus(dataPath).isDir()) {
       //the input is a directory of files
       testDirectory(outputPath, converter, forest, dataset, resList, rng);
     }  else {

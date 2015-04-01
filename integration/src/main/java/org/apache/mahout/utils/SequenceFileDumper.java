@@ -62,7 +62,7 @@ public final class SequenceFileDumper extends AbstractJob {
     Configuration conf = new Configuration();
     Path input = getInputPath();
     FileSystem fs = input.getFileSystem(conf);
-    if (fs.getFileStatus(input).isDirectory()) {
+    if (fs.getFileStatus(input).isDir()) {
       pathArr = FileUtil.stat2Paths(fs.listStatus(input, PathFilters.logsCRCFilter()));
     } else {
       pathArr = new Path[1];

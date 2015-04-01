@@ -132,10 +132,10 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- for MatrixWritable and VectorWritable -->
     <dependency>
-      <!-- for MatrixWritable and VectorWritable -->
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
+      <artifactId>mahout-hdfs</artifactId>
       <version>${project.version}</version>
     </dependency>
 

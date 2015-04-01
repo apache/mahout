@@ -97,7 +97,7 @@ public final class VectorDumper extends AbstractJob {
     FileSystem fs = FileSystem.get(conf);
     Path input = getInputPath();
     FileStatus fileStatus = fs.getFileStatus(input);
-    if (fileStatus.isDirectory()) {
+    if (fileStatus.isDir()) {
       pathArr = FileUtil.stat2Paths(fs.listStatus(input, PathFilters.logsCRCFilter()));
     } else {
       FileStatus[] inputPaths = fs.globStatus(input);
