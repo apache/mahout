@@ -114,14 +114,14 @@ if [ "x$clustertype" == "xkmeans" ]; then
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/tfidf-vectors/ \
     -c ${WORK_DIR}/reuters-kmeans-clusters \
     -o ${WORK_DIR}/reuters-kmeans \
-    -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
+    -dm org.apache.mahout.common.distance.EuclideanDistanceMeasure \
     -x 10 -k 20 -ow --clustering \
   && \
   $MAHOUT clusterdump \
-    -i ${WORK_DIR}/reuters-kmeans/clusters-*-final \
+    -i `hadoop dfs -ls -d ${WORK_DIR}/reuters-kmeans/clusters-*-final | awk'{print $8}'` \
     -o ${WORK_DIR}/reuters-kmeans/clusterdump \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
-    -dt sequencefile -b 100 -n 20 --evaluate -dm org.apache.mahout.common.distance.CosineDistanceMeasure -sp 0 \
+    -dt sequencefile -b 100 -n 20 --evaluate -dm org.apache.mahout.common.distance.EuclideanDistanceMeasure -sp 0 \
     --pointsDir ${WORK_DIR}/reuters-kmeans/clusteredPoints \
     && \
   cat ${WORK_DIR}/reuters-kmeans/clusterdump
@@ -134,7 +134,7 @@ elif [ "x$clustertype" == "xfuzzykmeans" ]; then
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans/tfidf-vectors/ \
     -c ${WORK_DIR}/reuters-fkmeans-clusters \
     -o ${WORK_DIR}/reuters-fkmeans \
-    -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
+    -dm org.apache.mahout.common.distance.EuclideanDistanceMeasure \
     -x 10 -k 20 -ow -m 1.1 \
   && \
   $MAHOUT clusterdump \
