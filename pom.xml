@@ -794,6 +794,9 @@
       <id>hadoop2</id>
       <activation>
         <activeByDefault>true</activeByDefault>
+        <property>
+          <name>env.JENKINS_URL</name>
+        </property>
       </activation>
       <properties>
         <hadoop.classifier>hadoop2</hadoop.classifier>
