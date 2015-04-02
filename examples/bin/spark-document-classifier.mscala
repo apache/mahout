@@ -25,7 +25,7 @@
  *    $MAHOUT_HOME/examples/bin/classify-wikipedia.sh --> option 2 
  *
  * then from the mahout spark-shell:
- *    :load $MAHOUT_HOME/examples/spark-document-classifier.mscala
+ *    :load {MAHOUT_HOME}/examples/spark-document-classifier.mscala
 */
  
 import org.apache.mahout.classifier.naivebayes._
@@ -40,6 +40,8 @@ val pathToData = "/tmp/mahout-work-wiki/"
 
 // read in our full set as vectorized by seq2sparse in classify-wikipedia.sh
 val fullData = drmDfsRead(pathToData + "wikipediaVecs/tfidf-vectors")
+
+// uncomment if you want to train and test on the split "fullData" set and adjust below as necessary
 //val trainData = drmDfsRead(pathToData + "training")
 //val testData = drmDfsRead(pathToData + "testing")
 
@@ -65,7 +67,7 @@ val dictionaryMap = dictionaryRDD.collect.map(x => x._1.toString -> x._2.toInt).
 val dfCountMap = documentFrequencyCountRDD.collect.map(x => x._1.toInt -> x._2.toLong).toMap
 
 // for this simple example, tokenize our document into unigrams using native string methods andvectorize using 
-// our dictionary and document frequencies.  You could also use a lucene analyzer for bigrams, trigrams, etc.   
+// our dictionary and document frequencies.  You could also use a lucene analyzer for bigrams, trigrams, etc.
 def vectorizeDocument(document: String,
 		      dictionaryMap: Map[String,Int],
 		      dfMap: Map[Int,Long]): Vector = {
@@ -115,13 +117,13 @@ def argmax(v: Vector): (Int, Double) = {
 }
   
 // our final classifier
-def classifyDocument(clvec: Vector) : String ={
+def classifyDocument(clvec: Vector) : String = {
   val cvec = classifier.classifyFull(clvec)
   val (bestIdx, bestScore) = argmax(cvec)
   reverseLabelMap(bestIdx)
 }   
 
-// A random United States footbal article
+// A random United States football article
 //http://www.reuters.com/article/2015/01/28/us-nfl-superbowl-security-idUSKBN0L12JR20150128
 val UStextToClassify = new String("(Reuters) - Super Bowl security officials acknowledge the NFL championship game represents" +
   " a high profile target on a world stage but are unaware of any specific credible threats against" + 
@@ -150,7 +152,7 @@ val UStextToClassify = new String("(Reuters) - Super Bowl security officials ack
   " planning process are going to have their best and brightest out there this weekend and we will have" +
   " a very safe Super Bowl.")
 
-// A random United Kingdom footbal article 
+// A random United Kingdom football article
 // http://www.reuters.com/article/2015/01/26/manchester-united-swissquote-idUSL6N0V52RZ20150126
 val UKtextToClassify = new String("(Reuters) - Manchester United have signed a sponsorship deal with online financial trading company" +
   " Swissquote, expanding the commercial partnerships that have helped to make the English club one of" +
@@ -180,16 +182,23 @@ val UKtextToClassify = new String("(Reuters) - Manchester United have signed a s
 val usVec = vectorizeDocument(UStextToClassify, dictionaryMap, dfCountMap)
 val ukVec = vectorizeDocument(UKtextToClassify, dictionaryMap, dfCountMap)
 
-println("Classifing the news article about the superbowl (united states)")
+println("Classifying the news article about superbowl security (united states)")
 classifyDocument(usVec)
 
-println("Classifing the news article about the Manchester United (united kingdom)")
+println("Classifying the news article about Manchester United (united kingdom)")
 classifyDocument(ukVec)
 
-// to classify new text, simply run this method on a string
-def classifyText(txt: String): String ={
+// to classify new text, tie everything together in a new method
+def classifyText(txt: String): String = {
   val v = vectorizeDocument(txt, dictionaryMap, dfCountMap)
   classifyDocument(v)
 }
+
+// now we can simply call our classifyText method on any string
+classifyText("Hello world from Queens")
+
+classifyText("Hello world from London")
+
+
   
 
