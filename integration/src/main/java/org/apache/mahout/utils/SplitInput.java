@@ -300,7 +300,7 @@ public class SplitInput extends AbstractJob {
       // input dir contains one file per category.
       FileStatus[] fileStats = fs.listStatus(inputDir, PathFilters.logsCRCFilter());
       for (FileStatus inputFile : fileStats) {
-        if (!inputFile.isDirectory()) {
+        if (!inputFile.isDir()) {
           splitFile(inputFile.getPath());
         }
       }

@@ -114,7 +114,7 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
     // and 0.23.
     try {
       return buildNewMapperContext(configuration, output);
-    } catch (Exception e) {
+    } catch (Exception|IncompatibleClassChangeError e) {
       try {
         return buildOldMapperContext(mapper, configuration, output);
       } catch (Exception ex) {
@@ -133,7 +133,7 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
     // and 0.23.
     try {
       return buildNewReducerContext(configuration, output, keyClass, valueClass);
-    } catch (Exception e) {
+    } catch (Exception|IncompatibleClassChangeError e) {
       try {
         return buildOldReducerContext(reducer, configuration, output, keyClass, valueClass);
       } catch (Exception ex) {
