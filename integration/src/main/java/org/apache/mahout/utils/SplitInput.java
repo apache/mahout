@@ -289,7 +289,7 @@ public class SplitInput extends AbstractJob {
     if (fs.getFileStatus(inputDir) == null) {
       throw new IOException(inputDir + " does not exist");
     }
-    if (!fs.getFileStatus(inputDir).isDirectory()) {
+    if (!fs.getFileStatus(inputDir).isDir()) {
       throw new IOException(inputDir + " is not a directory");
     }
 
@@ -300,7 +300,7 @@ public class SplitInput extends AbstractJob {
       // input dir contains one file per category.
       FileStatus[] fileStats = fs.listStatus(inputDir, PathFilters.logsCRCFilter());
       for (FileStatus inputFile : fileStats) {
-        if (!inputFile.isDirectory()) {
+        if (!inputFile.isDir()) {
           splitFile(inputFile.getPath());
         }
       }
@@ -317,7 +317,7 @@ public class SplitInput extends AbstractJob {
     if (fs.getFileStatus(inputFile) == null) {
       throw new IOException(inputFile + " does not exist");
     }
-    if (fs.getFileStatus(inputFile).isDirectory()) {
+    if (fs.getFileStatus(inputFile).isDir()) {
       throw new IOException(inputFile + " is a directory");
     }
 
@@ -650,10 +650,10 @@ public class SplitInput extends AbstractJob {
       Configuration conf = getConf();
       FileSystem fs = trainingOutputDirectory.getFileSystem(conf);
       FileStatus trainingOutputDirStatus = fs.getFileStatus(trainingOutputDirectory);
-      Preconditions.checkArgument(trainingOutputDirStatus != null && trainingOutputDirStatus.isDirectory(),
+      Preconditions.checkArgument(trainingOutputDirStatus != null && trainingOutputDirStatus.isDir(),
           "%s is not a directory", trainingOutputDirectory);
       FileStatus testOutputDirStatus = fs.getFileStatus(testOutputDirectory);
-      Preconditions.checkArgument(testOutputDirStatus != null && testOutputDirStatus.isDirectory(),
+      Preconditions.checkArgument(testOutputDirStatus != null && testOutputDirStatus.isDir(),
           "%s is not a directory", testOutputDirectory);
     }
   }

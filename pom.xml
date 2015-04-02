@@ -18,15 +18,16 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.mahout</groupId>
-  <artifactId>mahout</artifactId>
-  <version>1.0-SNAPSHOT</version>
 
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>9</version>
+    <version>16</version>
   </parent>
+
+  <groupId>org.apache.mahout</groupId>
+  <artifactId>mahout</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -47,17 +48,17 @@
     (hopefully) correct category. Frequent itemset mining takes a set of item groups (terms in a query session,
     shopping cart content) and identifies, which individual items usually appear together.
   </description>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
   <organization>
     <name>The Apache Software Foundation</name>
     <url>http://www.apache.org/</url>
   </organization>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <mailingLists>
     <mailingList>
       <name>User list</name>
@@ -93,19 +94,26 @@
       </otherArchives>
     </mailingList>
   </mailingLists>
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+  <scm>
+    <connection>scm:git:git@github.com:apache/mahout.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/mahout.git</developerConnection>
+    <url>scm:git:git@github.com:apache/mahout.git</url>
+    <tag>HEAD</tag>
+  </scm>
   <properties>
     <skipTests>false</skipTests>
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <msurefire.version>2.16</msurefire.version>
+    <msurefire.version>2.17</msurefire.version>
     <mpmd.version>3.0.1</mpmd.version>
     <mcheckstyle.version>2.10</mcheckstyle.version>
     <mfindbugs.version>2.5.2</mfindbugs.version>
     <mjavadoc.version>2.9.1</mjavadoc.version>
-    <hadoop.version>2.6.0</hadoop.version>
-    <hadoop.classifier>hadoop2</hadoop.classifier>
     <hbase.version>1.0.0</hbase.version>
     <lucene.version>4.6.1</lucene.version>
     <slf4j.version>1.7.10</slf4j.version>
@@ -138,24 +146,33 @@
     </repository>
   </repositories>
 
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
-
   <dependencyManagement>
     <dependencies>
 
       <!-- our modules -->
 
       <dependency>
-        <artifactId>mahout-mrlegacy</artifactId>
+        <artifactId>mahout-hdfs</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
-        <artifactId>mahout-mrlegacy</artifactId>
+        <artifactId>mahout-hdfs</artifactId>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <artifactId>mahout-mr</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+        <artifactId>mahout-mr</artifactId>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
@@ -286,26 +303,6 @@
             <artifactId>core</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-common</artifactId>
-        <version>${hadoop.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-auth</artifactId>
-        <version>${hadoop.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-mapreduce-client-core</artifactId>
-        <version>${hadoop.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-yarn-common</artifactId>
-        <version>${hadoop.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.lucene</groupId>
@@ -456,7 +453,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>11.0.2</version>
+        <version>14.0.1</version>
       </dependency>
 
       <dependency>
@@ -536,55 +533,6 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>2.2.1</version>
-          <executions>
-            <execution>
-              <id>attach-sources</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>jar-no-fork</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>${mjavadoc.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <version>1.7</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.4</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.4</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.8</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.1</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.6</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-eclipse-plugin</artifactId>
           <version>2.9</version>
           <configuration>
@@ -626,14 +574,13 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.4.1</version>
+          <version>2.5.1</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
-            <releaseProfiles>release,mahout_release</releaseProfiles>
-            <remoteTagging>true</remoteTagging>
+            <releaseProfiles>release,apache-release</releaseProfiles>
             <goals>deploy</goals>
             <autoVersionSubmodules>true</autoVersionSubmodules>
-            <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+            <arguments>${arguments}</arguments>
           </configuration>
         </plugin>
         <plugin>
@@ -646,31 +593,6 @@
             <source>${maven.compiler.source}</source>
             <target>${maven.compiler.target}</target>
             <optimize>true</optimize>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${msurefire.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <version>${msurefire.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-remote-resources-plugin</artifactId>
-          <version>1.4</version>
-          <configuration>
-            <skipTests>${skipTests}</skipTests>
-            <appendedResourcesDirectory>./src/main/appended-resources</appendedResourcesDirectory>
-            <resourceBundles>
-              <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-            </resourceBundles>
-            <supplementalModels>
-              <supplementalModel>supplemental-models.xml</supplementalModel>
-            </supplementalModels>
           </configuration>
         </plugin>
         <plugin>
@@ -732,19 +654,6 @@
           <systemPropertyVariables>
             <mahout.test.directory>${project.build.directory}</mahout.test.directory>
           </systemPropertyVariables>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-remote-resources-plugin</artifactId>
-        <inherited>false</inherited>
-        <configuration>
-          <resourceBundles>
-            <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-          </resourceBundles>
-          <supplementalModels>
-            <supplementalModel>supplemental-models.xml</supplementalModel>
-          </supplementalModels>
         </configuration>
       </plugin>
       <plugin>
@@ -813,7 +722,6 @@
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
-        <version>0.10</version>
         <configuration>
           <licenses>
             <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
@@ -850,17 +758,12 @@
         </configuration>
       </plugin>
     </plugins>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
   </build>
   <modules>
     <module>buildtools</module>
     <module>math</module>
-    <module>mrlegacy</module>
+    <module>hdfs</module>
+    <module>mr</module>
     <module>integration</module>
     <module>examples</module>
     <module>distribution</module>
@@ -875,8 +778,54 @@
       <id>hadoop1</id>
       <properties>
         <hadoop.classifier>hadoop1</hadoop.classifier>
+        <hadoop.version>1.2.1</hadoop.version>
+      </properties>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+            <version>${hadoop.version}</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+    <profile>
+      <id>hadoop2</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>env.JENKINS_URL</name>
+        </property>
+      </activation>
+      <properties>
+        <hadoop.classifier>hadoop2</hadoop.classifier>
         <hadoop.version>2.6.0</hadoop.version>
       </properties>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>${hadoop.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-auth</artifactId>
+            <version>${hadoop.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>${hadoop.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-common</artifactId>
+            <version>${hadoop.version}</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
     </profile>
     <profile>
       <id>fastinstall</id>
@@ -912,42 +861,14 @@
       <build>
         <plugins>
           <plugin>
-            <inherited>true</inherited>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
+                <phase>verify</phase>
                 <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <inherited>true</inherited>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>${mjavadoc.version}</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <inherited>true</inherited>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>sign</goal>
+                  <goal>jar-no-fork</goal>
                 </goals>
               </execution>
             </executions>
@@ -1080,17 +1001,6 @@
       </build>
     </profile>
   </profiles>
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout</url>
-  </scm>
-  <distributionManagement>
-    <site>
-      <id>Website</id>
-      <url>scp://people.apache.org/home/isabel/public_html/mahout_site</url>
-    </site>
-  </distributionManagement>
   <reporting>
     <plugins>
       <!-- surefire runs unit tests -->

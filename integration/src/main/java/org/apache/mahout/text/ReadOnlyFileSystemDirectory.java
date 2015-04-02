@@ -79,7 +79,7 @@ public class ReadOnlyFileSystemDirectory extends BaseDirectory {
     try {
       FileStatus status = fs.getFileStatus(directory);
       if (status != null) {
-        isDir = status.isDirectory();
+        isDir = status.isDir();
       }
     } catch (IOException e) {
       log.error(e.getMessage(), e);
@@ -99,7 +99,7 @@ public class ReadOnlyFileSystemDirectory extends BaseDirectory {
     try {
       FileStatus status = fs.getFileStatus(directory);
       if (status != null) {
-        isDir = status.isDirectory();
+        isDir = status.isDir();
       }
     } catch (IOException e) {
       log.error(e.getMessage(), e);

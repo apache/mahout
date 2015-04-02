@@ -1,5 +1,11 @@
 @echo off
 
+echo "===============DEPRECATION WARNING==============="
+echo "This script is no longer supported for new drivers as of Mahout 0.10.0"
+echo "Mahout's bash script is supported and if someone wants to contribute a fix for this"
+echo "it would be appreciated."
+
+
 @rem
 @rem The Mahout command script
 @rem

@@ -2,6 +2,16 @@ Mahout Change Log
 
 Release 0.10.0 - unreleased
 
+  MAHOUT-1667: Hadoop 1 and 2 profile in POM (sslavic)
+
+  MAHOUT-1564: Naive Bayes Classifier for New Text Documents (apalumbo)
+
+  MAHOUT-1524: Script to auto-generate and view the Mahout website on a local machine (Saleem Ansari via apalumbo)
+
+  MAHOUT-1589: Deprecate mahout.cmd due to lack of support
+
+  MAHOUT-1655: Refactors mr-legacy into mahout-hdfs and mahout-mr, Spark now depends on much reduced mahout-hdfs
+
   MAHOUT-1522: Handle logging levels via log4j.xml (akm)
 
   MAHOUT-1602: Euclidean Distance Similarity Math (Leonardo Fernandez Sanchez, smarthi)
@@ -225,6 +235,8 @@ Release 0.10.0 - unreleased
   MAHOUT-1329: Mahout for hadoop 2 (gcapan, Sergey Svinarchuk)
 
   MAHOUT-1310: Mahout support windows (Sergey Svinarchuk via ssc)
+
+  MAHOUT-1278: Upgraded to apache parent pom version 16 (sslavic)
 
 Release 0.9 - 2014-02-01
 
