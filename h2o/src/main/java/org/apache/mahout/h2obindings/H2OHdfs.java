@@ -167,7 +167,7 @@ public class H2OHdfs {
       }
 
       if (reader.getKeyClass() == Text.class) {
-        labels = frame.anyVec().makeZero();
+        labels = H2OHelper.makeEmptyStrVec(frame.anyVec());
         labelwriter = labels.open();
       }
 
