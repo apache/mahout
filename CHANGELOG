@@ -2,8 +2,10 @@ Mahout Change Log
 
 Release 0.10.0 - unreleased
 
-  MAHOUT-1638: H2O bindings fail at drmParallelizeWithRowLabels(...) (Anand Avati via apalumbo)
+  MAHOUT-1661: All Lanczos modules marked as @Deprecated and slated for removal in future releases (Shannon Quinn)
 
+  MAHOUT-1638: H2O bindings fail at drmParallelizeWithRowLabels(...) (Anand Avati via apalumbo)
+  
   MAHOUT-1667: Hadoop 1 and 2 profile in POM (sslavic)
 
   MAHOUT-1564: Naive Bayes Classifier for New Text Documents (apalumbo)

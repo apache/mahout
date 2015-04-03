@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * http://mahout.apache.org/users/dim-reduction/ssvd.html
  * @see org.apache.mahout.math.hadoop.stochasticsvd.SSVDSolver
  */
+@Deprecated
 public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
   public static final String RAW_EIGENVECTORS = "rawEigenvectors";
