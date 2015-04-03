@@ -90,11 +90,11 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
     if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
         echo "Copying Reuters data to Hadoop"
         set +e
-        #$DFSRM ${WORK_DIR}/reuters-sgm
-        #$DFSRM ${WORK_DIR}/reuters-out
+        $DFSRM ${WORK_DIR}/reuters-sgm
+        $DFSRM ${WORK_DIR}/reuters-out
         set -e
-        #$DFS -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm
-        #$DFS -put ${WORK_DIR}/reuters-out ${WORK_DIR}/reuters-out
+        $DFS -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm
+        $DFS -put ${WORK_DIR}/reuters-out ${WORK_DIR}/reuters-out
     fi
   fi
   echo "Converting to Sequence Files from Directory"
