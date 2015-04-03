@@ -45,6 +45,8 @@ class MahoutSparkILoop extends SparkILoop {
       conf.set("spark.executor.uri", execUri)
     }
 
+    conf.set("spark.executor.memory", "1g")
+
     sparkContext = mahoutSparkContext(
       masterUrl = master,
       appName = "Mahout Spark Shell",
