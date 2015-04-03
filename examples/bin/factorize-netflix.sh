@@ -44,6 +44,11 @@ MAHOUT="../../bin/mahout"
 
 WORK_DIR=/tmp/mahout-work-${USER}
 
+START_PATH=`pwd`
+
+# Set commands for dfs
+source ${START_PATH}/set-dfs-commands.sh
+
 echo "Preparing data..."
 $MAHOUT org.apache.mahout.cf.taste.hadoop.example.als.netflix.NetflixDatasetConverter $1 $2 $3 ${WORK_DIR}
 
@@ -56,19 +61,14 @@ $MAHOUT evaluateFactorization --input ${WORK_DIR}/probeSet/ratings.tsv --output 
     --userFeatures ${WORK_DIR}/als/out/U/ --itemFeatures ${WORK_DIR}/als/out/M/ --tempDir ${WORK_DIR}/als/tmp
 
 if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
-  HADOOP="$HADOOP_HOME/bin/hadoop"
-  if [ ! -e $HADOOP ]; then
-    echo "Can't find hadoop in $HADOOP, exiting"
-    exit 1
-  fi
 
   # print the error, should be around 0.923
   echo -e "\nRMSE is:\n"
-  $HADOOP fs -tail ${WORK_DIR}/als/rmse/rmse.txt
+  $DFS -tail ${WORK_DIR}/als/rmse/rmse.txt
   echo -e "\n"
   echo "removing work directory"
   set +e
-  $HADOOP fs -rmr ${WORK_DIR}
+  $DFSRM ${WORK_DIR}
 
 else
 

@@ -24,68 +24,58 @@
 #
 # To run:  change into the mahout directory and type:
 # ./examples/bin/run-rf.sh <num-rows>
+
 WORK_DIR=/tmp/mahout-work-${USER}
-input="rf-input.csv"
+INPUT="${WORK_DIR}/input"
+mkdir -p $INPUT
+INPUT_PATH="${INPUT}/rf-input.csv"
 
 # Set commands for dfs
-./set-dfs-commands.sh
-
-# Remove old files
-echo
-echo "Removing old temp files if they exist; this will mention they're not there if not."
-echo
-$HADOOP_HOME/bin/hadoop dfs -rmr -skipTrash $WORK_DIR forest
-$HADOOP_HOME/bin/hadoop dfs -mkdir $WORK_DIR
+source ./examples/bin/set-dfs-commands.sh
 
 # Create test data
 numrows=$1
-echo
-echo "Writing random data to $input"
-./examples/bin/create-rf-data.sh $numrows $input
+echo "Writing random data to $INPUT_PATH"
+./examples/bin/create-rf-data.sh $numrows $INPUT_PATH
 
 # Put the test file in HDFS
-$HADOOP_HOME/bin/hadoop dfs -rmr -skipTrash ${WORK_DIR}
-$HADOOP_HOME/bin/hadoop dfs -mkdir -p ${WORK_DIR}/input
-if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
-  HADOOP="$HADOOP_HOME/bin/hadoop"
-  if [ ! -e $HADOOP ]; then
-    echo "Can't find hadoop in $HADOOP, exiting"
-    exit 1
-  fi
-fi
 if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
   echo "Copying random data to HDFS"
   set +e
-  $HADOOP dfs -rmr ${WORK_DIR}
+  $DFSRM $WORK_DIR
+  $DFS -mkdir -p $INPUT
   set -e
-  $HADOOP dfs -put $input ${WORK_DIR}/input/$input
+  $DFS -put $INPUT_PATH $INPUT
 fi
 
 # Split original file into train and test
 echo "Creating training and holdout set with a random 60-40 split of the generated vector dataset"
 ./bin/mahout split \
-  -i ${WORK_DIR}/input \
+  -i $INPUT \
   --trainingOutput ${WORK_DIR}/train.csv \
   --testOutput ${WORK_DIR}/test.csv \
   --randomSelectionPct 40 --overwrite -xm sequential
 
 # Describe input file schema
 # Note:  "-d 4 N L" indicates four numerical fields and one label, as built by the step above.
-./bin/mahout describe -p $WORK_DIR/input/$input -f $WORK_DIR/info -d 4 N L
+./bin/mahout describe -p $INPUT_PATH -f ${WORK_DIR}/info -d 4 N L
 
 # Train rf model
 echo
 echo "Training random forest."
 echo
-./bin/mahout buildforest -DXmx10000m -Dmapred.max.split.size=1000000 -d $WORK_DIR/train.csv -ds $WORK_DIR/info -sl 7 -p -t 500 -o $WORK_DIR/forest
+./bin/mahout buildforest -DXmx10000m -Dmapred.max.split.size=1000000 -d ${WORK_DIR}/train.csv -ds ${WORK_DIR}/info -sl 7 -p -t 500 -o ${WORK_DIR}/forest
 
 # Test predictions
 echo
 echo "Testing predictions on test set."
 echo
-./bin/mahout testforest -DXmx10000m -Dmapred.output.compress=false -i $WORK_DIR/test.csv -ds $WORK_DIR/info -m $WORK_DIR/forest -a -mr -o $WORK_DIR/predictions
+./bin/mahout testforest -DXmx10000m -Dmapred.output.compress=false -i ${WORK_DIR}/test.csv -ds ${WORK_DIR}/info -m ${WORK_DIR}/forest -a -mr -o ${WORK_DIR}/predictions
 
 # Remove old files
-$HADOOP_HOME/bin/hadoop dfs -rmr -skipTrash $WORK_DIR
-rm $input
+if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]
+then
+  $DFSRM $WORK_DIR
+fi
+rm -r $WORK_DIR
 
