@@ -25,6 +25,7 @@ import org.apache.mahout.math.VectorIterable;
 
 import java.util.Map;
 
+@Deprecated
 public class LanczosState {
 
   protected  Matrix diagonalMatrix;
