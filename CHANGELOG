@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.10.0 - unreleased
 
+  MAHOUT-1662: Potential Path bug in SequenceFileVaultIterator breaks DisplaySpectralKMeans (Shannon Quinn)
+
   MAHOUT-1656: Change SNAPSHOT version from 1.0 to 0.10.0 (smarthi)
 
   MAHOUT-1593: cluster-reuters.sh does not work complaining java.lang.IllegalStateException (smarthi via akm)
