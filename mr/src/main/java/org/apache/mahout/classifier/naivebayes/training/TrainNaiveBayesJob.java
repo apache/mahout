@@ -51,7 +51,6 @@ public final class TrainNaiveBayesJob extends AbstractJob {
   public static final String WEIGHTS_PER_FEATURE = "__SPF";
   public static final String WEIGHTS_PER_LABEL = "__SPL";
   public static final String LABEL_THETA_NORMALIZER = "_LTN";
-
   public static final String SUMMED_OBSERVATIONS = "summedObservations";
   public static final String WEIGHTS = "weights";
   public static final String THETAS = "thetas";
@@ -70,6 +69,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     addOption(buildOption(TRAIN_COMPLEMENTARY, "c", "train complementary?", false, false, String.valueOf(false)));
     addOption(LABEL_INDEX, "li", "The path to store the label index in", false);
     addOption(DefaultOptionCreator.overwriteOption().create());
+
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
