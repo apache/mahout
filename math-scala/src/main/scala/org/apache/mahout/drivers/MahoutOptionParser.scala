@@ -50,7 +50,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
         "(optional). Default: empty.")
     }
 
-    opt[String]('o', "output") required() action { (x, options) =>
+    opt[String]('o', "output") action { (x, options) =>
       if (x.endsWith("/")) {
         options + ("output" -> x)
       } else {
