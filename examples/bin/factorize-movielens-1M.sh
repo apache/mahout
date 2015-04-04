@@ -39,13 +39,28 @@ then
 fi
 
 MAHOUT="../../bin/mahout"
-
 WORK_DIR=/tmp/mahout-work-${USER}
+HDFS_WORK_DIR=/tmp/mahout-work-${USER}
+
 echo "creating work directory at ${WORK_DIR}"
 mkdir -p ${WORK_DIR}/movielens
 
 echo "Converting ratings..."
 cat $1 |sed -e s/::/,/g| cut -d, -f1,2,3 > ${WORK_DIR}/movielens/ratings.csv
+
+if [ "$MAHOUT_LOCAL" == "" ]
+then
+    hadoop dfs -rm -r ${HDFS_WORK_DIR}
+    echo "creating hdfs work directory at ${HDFS_WORK_DIR}"
+    hadoop dfs -mkdir -p ${HDFS_WORK_DIR}/movielens
+    hadoop dfs -copyFromLocal ${WORK_DIR}/movielens/ratings.csv ${HDFS_WORK_DIR}/movielens/ratings.csv
+    rm -rf ${WORK_DIR}
+    WORK_DIR=$HDFS_WORK_DIR
+    CAT='hadoop dfs -cat'
+else
+    CAT='cat'
+fi
+
 
 # create a 90% percent training set and a 10% probe set
 $MAHOUT splitDataset --input ${WORK_DIR}/movielens/ratings.csv --output ${WORK_DIR}/dataset \
@@ -66,12 +81,17 @@ $MAHOUT recommendfactorized --input ${WORK_DIR}/als/out/userRatings/ --output ${
 
 # print the error
 echo -e "\nRMSE is:\n"
-cat ${WORK_DIR}/als/rmse/rmse.txt
+$CAT ${WORK_DIR}/als/rmse/rmse.txt
 echo -e "\n"
 
 echo -e "\nSample recommendations:\n"
-shuf ${WORK_DIR}/recommendations/part-m-00000 |head
+$CAT ${WORK_DIR}/recommendations/part-m-00000 |shuf |head
 echo -e "\n\n"
 
 echo "removing work directory"
-rm -rf ${WORK_DIR}
+if [ "$MAHOUT_LOCAL" == "" ]
+then
+    hadoop dfs -rm -r ${WORK_DIR}
+else
+    rm -rf ${WORK_DIR}
+fi
