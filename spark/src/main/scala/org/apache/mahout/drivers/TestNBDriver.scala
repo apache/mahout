@@ -18,7 +18,6 @@
 package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes.{NBModel, NaiveBayes}
-import org.apache.mahout.classifier.stats.ConfusionMatrix
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
 import scala.collection.immutable.HashMap
@@ -37,37 +36,33 @@ object TestNBDriver extends MahoutSparkDriver {
     parser = new MahoutSparkOptionParser(programName = "spark-testnb") {
       head("spark-testnb", "Mahout 0.10.0")
 
-      //Input output options, non-driver specific
-      parseIOOptions(numInputs = 1)
+      // Input options, non-driver specific
+      // we have no output except the confusion matrix to stdout so we don't need an
+      // output option
 
-      //Algorithm control options--driver specific
+      note("Input, option")
+      opt[String]('i', "input") required() action { (x, options) =>
+        options + ("input" -> x)
+      } text ("Input: path to test data " +
+        " (required)")
+
+      // Algorithm control options--driver specific
       opts = opts ++ testNBOptipns
       note("\nAlgorithm control options:")
 
-      //default testComplementary is false
+      // default testComplementary is false
       opts = opts + ("testComplementary" -> false)
       opt[Unit]("testComplementary") abbr ("c") action { (_, options) =>
         options + ("testComplementary" -> true)
       } text ("Test a complementary model, Default: false.")
 
 
-
       opt[String]("pathToModel") abbr ("m") action { (x, options) =>
         options + ("pathToModel" -> x)
       } text ("Path to the Trained Model")
 
-
-      //How to search for input
-      parseFileDiscoveryOptions()
-
-      //IndexedDataset output schema--not driver specific, IndexedDataset specific
-      parseIndexedDatasetFormatOptions()
-
-      //Spark config options--not driver specific
+      // Spark config options--not driver specific
       parseSparkOptions()
-
-      //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
-      parseGenericOptions()
 
       help("help") abbr ("h") text ("prints this usage text\n")
 
@@ -96,7 +91,6 @@ object TestNBDriver extends MahoutSparkDriver {
     start()
 
     val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
-    val outputPath = parser.opts("output").asInstanceOf[String]
 
     // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
 
