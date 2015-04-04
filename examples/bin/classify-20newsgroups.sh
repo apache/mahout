@@ -42,7 +42,7 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
 fi
 
 WORK_DIR=/tmp/mahout-work-${USER}
-algorithm=( cnaivebayes-MapReduce naivebayes-MapReduce cnaivebayes-Spark naivebayes-Spark sgd-MapReduce clean)
+algorithm=( cnaivebayes-MapReduce naivebayes-MapReduce cnaivebayes-Spark naivebayes-Spark sgd clean)
 if [ -n "$1" ]; then
   choice=$1
 else
@@ -165,7 +165,6 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
       echo "Testing on holdout set"
       ./bin/mahout spark-testnb \
         -i ${WORK_DIR}/20news-test-vectors\
-        -o ${WORK_DIR}\
         -m ${WORK_DIR}/spark-model $c -ma $MASTER
     fi
 elif [ "x$alg" == "xsgd-MapReduce" ]; then

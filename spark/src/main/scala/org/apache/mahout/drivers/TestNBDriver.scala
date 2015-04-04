@@ -36,8 +36,15 @@ object TestNBDriver extends MahoutSparkDriver {
     parser = new MahoutSparkOptionParser(programName = "spark-testnb") {
       head("spark-testnb", "Mahout 0.10.0")
 
-      // Input output options, non-driver specific
-      parseIOOptions(numInputs = 1)
+      // Input options, non-driver specific
+      // we have no output except the confusion matrix to stdout so we don't need an
+      // output option
+
+      note("Input, option")
+      opt[String]('i', "input") required() action { (x, options) =>
+        options + ("input" -> x)
+      } text ("Input: path to test data " +
+        " (required)")
 
       // Algorithm control options--driver specific
       opts = opts ++ testNBOptipns
