@@ -135,7 +135,7 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
 
       echo "Training Naive Bayes model"
       ./bin/mahout trainnb \
-        -i ${WORK_DIR}/20news-train-vectors -el \
+        -i ${WORK_DIR}/20news-train-vectors \
         -o ${WORK_DIR}/model \
         -li ${WORK_DIR}/labelindex \
         -ow $c

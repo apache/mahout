@@ -48,8 +48,6 @@ public final class TrainNaiveBayesJob extends AbstractJob {
   private static final String TRAIN_COMPLEMENTARY = "trainComplementary";
   private static final String ALPHA_I = "alphaI";
   private static final String LABEL_INDEX = "labelIndex";
-  private static final String EXTRACT_LABELS = "extractLabels";
-  private static final String LABELS = "labels";
   public static final String WEIGHTS_PER_FEATURE = "__SPF";
   public static final String WEIGHTS_PER_LABEL = "__SPL";
   public static final String LABEL_THETA_NORMALIZER = "_LTN";
@@ -67,9 +65,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption(LABELS, "l", "comma-separated list of labels to include in training", false);
 
-    addOption(buildOption(EXTRACT_LABELS, "el", "Extract the labels from the input", false, false, ""));
     addOption(ALPHA_I, "a", "smoothing parameter", String.valueOf(1.0f));
     addOption(buildOption(TRAIN_COMPLEMENTARY, "c", "train complementary?", false, false, String.valueOf(false)));
     addOption(LABEL_INDEX, "li", "The path to store the label index in", false);
@@ -170,17 +166,12 @@ public final class TrainNaiveBayesJob extends AbstractJob {
 
   private long createLabelIndex(Path labPath) throws IOException {
     long labelSize = 0;
-    if (hasOption(LABELS)) {
-      Iterable<String> labels = Splitter.on(",").split(getOption(LABELS));
-      labelSize = BayesUtils.writeLabelIndex(getConf(), labels, labPath);
-    } else if (hasOption(EXTRACT_LABELS)) {
-      Iterable<Pair<Text,IntWritable>> iterable =
-          new SequenceFileDirIterable<Text, IntWritable>(getInputPath(),
-                                                         PathType.LIST,
-                                                         PathFilters.logsCRCFilter(),
-                                                         getConf());
-      labelSize = BayesUtils.writeLabelIndex(getConf(), labPath, iterable);
-    }
+    Iterable<Pair<Text,IntWritable>> iterable =
+      new SequenceFileDirIterable<Text, IntWritable>(getInputPath(),
+                                                     PathType.LIST,
+                                                     PathFilters.logsCRCFilter(),
+                                                     getConf());
+    labelSize = BayesUtils.writeLabelIndex(getConf(), labPath, iterable);
     return labelSize;
   }
 }
