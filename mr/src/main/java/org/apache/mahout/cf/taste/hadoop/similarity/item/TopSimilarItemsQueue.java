@@ -17,12 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
-import com.google.common.collect.Lists;
-import org.apache.lucene.util.PriorityQueue;
-import org.apache.mahout.cf.taste.similarity.precompute.SimilarItem;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.lucene.util.PriorityQueue;
+import org.apache.mahout.cf.taste.similarity.precompute.SimilarItem;
 
 public class TopSimilarItemsQueue extends PriorityQueue<SimilarItem> {
 
@@ -36,7 +36,7 @@ public class TopSimilarItemsQueue extends PriorityQueue<SimilarItem> {
   }
 
   public List<SimilarItem> getTopItems() {
-    List<SimilarItem> items = Lists.newArrayListWithCapacity(maxSize);
+    List<SimilarItem> items = new ArrayList<>(maxSize);
     while (size() > 0) {
       SimilarItem topItem = pop();
       // filter out "sentinel" objects necessary for maintaining an efficient priority queue

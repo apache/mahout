@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.collect.Sets;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
@@ -31,6 +30,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -387,7 +387,7 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
   public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     Vector hiddenActivation = inputToHidden(instance);
     hiddenToOutput(hiddenActivation);
-    Collection<Integer> goodLabels = Sets.newHashSet();
+    Collection<Integer> goodLabels = new HashSet<>();
     goodLabels.add(actual);
     updateRanking(hiddenActivation, goodLabels, 2, rnd);
   }

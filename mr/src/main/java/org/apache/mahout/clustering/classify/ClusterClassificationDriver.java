@@ -18,12 +18,12 @@
 package org.apache.mahout.clustering.classify;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -159,7 +159,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
    * @throws IOException
    */
   private static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf) throws IOException {
-    List<Cluster> clusterModels = Lists.newArrayList();
+    List<Cluster> clusterModels = new ArrayList<>();
     Path finalClustersPath = finalClustersPath(conf, clusterOutputPath);
     Iterator<?> it = new SequenceFileDirValueIterator<Writable>(finalClustersPath, PathType.LIST,
         PathFilters.partFilter(), null, false, conf);
@@ -225,7 +225,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
   
   private static void classifyAndWrite(List<Cluster> clusterModels, Double clusterClassificationThreshold,
       boolean emitMostLikely, SequenceFile.Writer writer, VectorWritable vw, Vector pdfPerCluster) throws IOException {
-    Map<Text, Text> props = Maps.newHashMap();
+    Map<Text, Text> props = new HashMap<>();
     if (emitMostLikely) {
       int maxValueIndex = pdfPerCluster.maxValueIndex();
       WeightedPropertyVectorWritable weightedPropertyVectorWritable =
@@ -238,7 +238,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
   
   private static void writeAllAboveThreshold(List<Cluster> clusterModels, Double clusterClassificationThreshold,
       SequenceFile.Writer writer, VectorWritable vw, Vector pdfPerCluster) throws IOException {
-    Map<Text, Text> props = Maps.newHashMap();
+    Map<Text, Text> props = new HashMap<>();
     for (Element pdf : pdfPerCluster.nonZeroes()) {
       if (pdf.get() >= clusterClassificationThreshold) {
         WeightedPropertyVectorWritable wvw = new WeightedPropertyVectorWritable(pdf.get(), vw.get(), props);

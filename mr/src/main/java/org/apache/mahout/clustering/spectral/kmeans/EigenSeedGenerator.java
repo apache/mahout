@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.spectral.kmeans;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -38,9 +39,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
 
 /**
  * Given an Input Path containing a {@link org.apache.hadoop.io.SequenceFile}, select k vectors and write them to the
@@ -72,15 +70,14 @@ public final class EigenSeedGenerator {
       }
 
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
-      SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class);
-      Map<Integer,Double> maxEigens = Maps.newHashMapWithExpectedSize(k); // store
+      Map<Integer,Double> maxEigens = new HashMap<>(k); // store
                                                                           // max
                                                                           // value
                                                                           // of
                                                                           // each
                                                                           // column
-      Map<Integer,Text> chosenTexts = Maps.newHashMapWithExpectedSize(k);
-      Map<Integer,ClusterWritable> chosenClusters = Maps.newHashMapWithExpectedSize(k);
+      Map<Integer,Text> chosenTexts = new HashMap<>(k);
+      Map<Integer,ClusterWritable> chosenClusters = new HashMap<>(k);
 
       for (FileStatus fileStatus : inputFiles) {
         if (!fileStatus.isDir()) {
@@ -108,13 +105,12 @@ public final class EigenSeedGenerator {
         }
       }
 
-      try {
+      try (SequenceFile.Writer writer =
+               SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class)){
         for (Integer key : maxEigens.keySet()) {
           writer.append(chosenTexts.get(key), chosenClusters.get(key));
         }
         log.info("EigenSeedGenerator:: Wrote {} Klusters to {}", chosenTexts.size(), outFile);
-      } finally {
-        Closeables.close(writer, false);
       }
     }
 

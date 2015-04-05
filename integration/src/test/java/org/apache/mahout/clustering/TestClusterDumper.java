@@ -17,8 +17,11 @@
 
 package org.apache.mahout.clustering;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -51,10 +54,6 @@ import org.apache.mahout.vectorizer.TFIDF;
 import org.apache.mahout.vectorizer.Weight;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 public final class TestClusterDumper extends MahoutTestCase {
 
@@ -92,13 +91,10 @@ public final class TestClusterDumper extends MahoutTestCase {
   }
 
   private void getSampleData(String[] docs2) throws IOException {
-    sampleData = Lists.newArrayList();
+    sampleData = new ArrayList<>();
     RAMDirectory directory = new RAMDirectory();
-
-    IndexWriter writer = new IndexWriter(directory,
-           new IndexWriterConfig(Version.LUCENE_46, new StandardAnalyzer(Version.LUCENE_46)));
-
-    try {
+    try (IndexWriter writer = new IndexWriter(directory,
+        new IndexWriterConfig(Version.LUCENE_46, new StandardAnalyzer(Version.LUCENE_46)))){
       for (int i = 0; i < docs2.length; i++) {
         Document doc = new Document();
         Field id = new StringField("id", "doc_" + i, Field.Store.YES);
@@ -116,12 +112,9 @@ public final class TestClusterDumper extends MahoutTestCase {
         doc.add(text);
         writer.addDocument(doc);
       }
-    } finally {
-      Closeables.close(writer, false);
     }
 
     IndexReader reader = DirectoryReader.open(directory);
-
 
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);

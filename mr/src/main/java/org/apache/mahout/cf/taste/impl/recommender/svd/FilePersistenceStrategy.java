@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -57,25 +56,17 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
       log.info("{} does not yet exist, no factorization found", file.getAbsolutePath());
       return null;
     }
-    DataInputStream in = null;
-    try {
+    try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))){
       log.info("Reading factorization from {}...", file.getAbsolutePath());
-      in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
       return readBinary(in);
-    } finally {
-      Closeables.close(in, true);
     }
   }
 
   @Override
   public void maybePersist(Factorization factorization) throws IOException {
-    DataOutputStream out = null;
-    try {
+    try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)))){
       log.info("Writing factorization to {}...", file.getAbsolutePath());
-      out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
       writeBinary(factorization, out);
-    } finally {
-      Closeables.close(out, false);
     }
   }
 
@@ -118,7 +109,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
     int numUsers = in.readInt();
     int numItems = in.readInt();
 
-    FastByIDMap<Integer> userIDMapping = new FastByIDMap<Integer>(numUsers);
+    FastByIDMap<Integer> userIDMapping = new FastByIDMap<>(numUsers);
     double[][] userFeatures = new double[numUsers][numFeatures];
 
     for (int n = 0; n < numUsers; n++) {
@@ -130,7 +121,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
       }
     }
 
-    FastByIDMap<Integer> itemIDMapping = new FastByIDMap<Integer>(numItems);
+    FastByIDMap<Integer> itemIDMapping = new FastByIDMap<>(numItems);
     double[][] itemFeatures = new double[numItems][numFeatures];
 
     for (int n = 0; n < numItems; n++) {

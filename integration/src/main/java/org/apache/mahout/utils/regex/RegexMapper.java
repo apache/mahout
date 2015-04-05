@@ -17,17 +17,17 @@
 
 package org.apache.mahout.utils.regex;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.ClassUtils;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.regex.Pattern;
 
 public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
 
@@ -45,7 +45,7 @@ public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> 
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
-    groupsToKeep = Lists.newArrayList();
+    groupsToKeep = new ArrayList<>();
     Configuration config = context.getConfiguration();
     String regexStr = config.get(REGEX);
     regex = Pattern.compile(regexStr);
@@ -72,7 +72,7 @@ public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> 
   @Override
   protected void map(LongWritable key, Text text, Context context) throws IOException, InterruptedException {
     String result = RegexUtils.extract(text.toString(), regex, groupsToKeep, " ", transformer);
-    if (result != null && !result.isEmpty()) {
+    if (!result.isEmpty()) {
       String format = formatter.format(result);
       context.write(key, new Text(format));
     }

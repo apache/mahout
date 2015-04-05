@@ -20,9 +20,11 @@ package org.apache.mahout.classifier.naivebayes;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -43,11 +45,6 @@ import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.io.Closeables;
 
 public final class BayesUtils {
 
@@ -104,14 +101,11 @@ public final class BayesUtils {
   public static int writeLabelIndex(Configuration conf, Iterable<String> labels, Path indexPath)
     throws IOException {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class);
     int i = 0;
-    try {
+    try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class)) {
       for (String label : labels) {
         writer.append(new Text(label), new IntWritable(i++));
       }
-    } finally {
-      Closeables.close(writer, false);
     }
     return i;
   }
@@ -119,10 +113,9 @@ public final class BayesUtils {
   public static int writeLabelIndex(Configuration conf, Path indexPath,
                                     Iterable<Pair<Text,IntWritable>> labels) throws IOException {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class);
-    Collection<String> seen = Sets.newHashSet();
+    Collection<String> seen = new HashSet<>();
     int i = 0;
-    try {
+    try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class)){
       for (Object label : labels) {
         String theLabel = SLASH.split(((Pair<?, ?>) label).getFirst().toString())[1];
         if (!seen.contains(theLabel)) {
@@ -130,8 +123,6 @@ public final class BayesUtils {
           seen.add(theLabel);
         }
       }
-    } finally {
-      Closeables.close(writer, false);
     }
     return i;
   }
@@ -154,7 +145,7 @@ public final class BayesUtils {
   }
 
   public static Map<String,Vector> readScoresFromCache(Configuration conf) throws IOException {
-    Map<String,Vector> sumVectors = Maps.newHashMap();
+    Map<String,Vector> sumVectors = new HashMap<>();
     for (Pair<Text,VectorWritable> entry
         : new SequenceFileDirIterable<Text,VectorWritable>(HadoopUtil.getSingleCachedFile(conf),
           PathType.LIST, PathFilters.partFilter(), conf)) {

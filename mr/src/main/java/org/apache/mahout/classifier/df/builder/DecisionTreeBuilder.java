@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.df.builder;
 
-import com.google.common.collect.Sets;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Instance;
@@ -34,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -263,7 +263,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
       // tree is complemented
       Collection<Double> subsetValues = null;
       if (complemented) {
-        subsetValues = Sets.newHashSet();
+        subsetValues = new HashSet<>();
         for (double value : values) {
           subsetValues.add(value);
         }

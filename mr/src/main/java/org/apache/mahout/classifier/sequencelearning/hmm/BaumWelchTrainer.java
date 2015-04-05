@@ -21,12 +21,11 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -95,7 +94,7 @@ public final class BaumWelchTrainer {
 
       //constructing random-generated HMM
       HmmModel model = new HmmModel(nrOfHiddenStates, nrOfObservedStates, new Date().getTime());
-      List<Integer> observations = Lists.newArrayList();
+      List<Integer> observations = new ArrayList<>();
 
       //reading observations
       try (Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8")) {
@@ -114,11 +113,8 @@ public final class BaumWelchTrainer {
         observationsArray, epsilon, maxIterations, true);
 
       //serializing trained model
-      DataOutputStream stream  = new DataOutputStream(new FileOutputStream(output));
-      try {
+      try (DataOutputStream stream = new DataOutputStream(new FileOutputStream(output))){
         LossyHmmSerializer.serialize(trainedModel, stream);
-      } finally {
-        Closeables.close(stream, false);
       }
 
       //printing tranied model

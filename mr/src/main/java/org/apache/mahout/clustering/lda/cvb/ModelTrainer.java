@@ -16,19 +16,10 @@
  */
 package org.apache.mahout.clustering.lda.cvb;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.apache.hadoop.fs.Path;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.MatrixSlice;
-import org.apache.mahout.math.SparseRowMatrix;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorIterable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +28,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.MatrixSlice;
+import org.apache.mahout.math.SparseRowMatrix;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorIterable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Multithreaded LDA model trainer class, which primarily operates by running a "map/reduce"
@@ -141,7 +141,7 @@ public class ModelTrainer {
     long startTime = System.nanoTime();
     int i = 0;
     double[] times = new double[100];
-    Map<Vector, Vector> batch = Maps.newHashMap();
+    Map<Vector, Vector> batch = new HashMap<>();
     int numTokensInBatch = 0;
     long batchStart = System.nanoTime();
     while (docIterator.hasNext() && docTopicIterator.hasNext()) {
@@ -185,7 +185,7 @@ public class ModelTrainer {
   public void batchTrain(Map<Vector, Vector> batch, boolean update, int numDocTopicsIters) {
     while (true) {
       try {
-        List<TrainerRunnable> runnables = Lists.newArrayList();
+        List<TrainerRunnable> runnables = new ArrayList<>();
         for (Map.Entry<Vector, Vector> entry : batch.entrySet()) {
           runnables.add(new TrainerRunnable(readModel, null, entry.getKey(),
               entry.getValue(), new SparseRowMatrix(numTopics, numTerms, true),

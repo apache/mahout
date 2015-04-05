@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -50,8 +51,6 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Abstract superclass of a couple implementations, providing shared functionality.
@@ -142,12 +141,12 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
       Preference newPref = new GenericPreference(userID, prefs.getItemID(i), prefs.getValue(i));
       if (random.nextDouble() < trainingPercentage) {
         if (oneUserTrainingPrefs == null) {
-          oneUserTrainingPrefs = Lists.newArrayListWithCapacity(3);
+          oneUserTrainingPrefs = new ArrayList<>(3);
         }
         oneUserTrainingPrefs.add(newPref);
       } else {
         if (oneUserTestPrefs == null) {
-          oneUserTestPrefs = Lists.newArrayListWithCapacity(3);
+          oneUserTestPrefs = new ArrayList<>(3);
         }
         oneUserTestPrefs.add(newPref);
       }
@@ -173,7 +172,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   private double getEvaluation(FastByIDMap<PreferenceArray> testPrefs, Recommender recommender)
     throws TasteException {
     reset();
-    Collection<Callable<Void>> estimateCallables = Lists.newArrayList();
+    Collection<Callable<Void>> estimateCallables = new ArrayList<>();
     AtomicInteger noEstimateCounter = new AtomicInteger();
     for (Map.Entry<Long,PreferenceArray> entry : testPrefs.entrySet()) {
       estimateCallables.add(
@@ -217,7 +216,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   private static Collection<Callable<Void>> wrapWithStatsCallables(Iterable<Callable<Void>> callables,
                                                                    AtomicInteger noEstimateCounter,
                                                                    RunningAverageAndStdDev timing) {
-    Collection<Callable<Void>> wrapped = Lists.newArrayList();
+    Collection<Callable<Void>> wrapped = new ArrayList<>();
     int count = 0;
     for (Callable<Void> callable : callables) {
       boolean logStats = count++ % 1000 == 0; // log every 1000 or so iterations

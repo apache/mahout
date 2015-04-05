@@ -19,13 +19,13 @@ package org.apache.mahout.driver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.util.ProgramDriver;
 import org.slf4j.Logger;
@@ -135,10 +135,10 @@ public final class MahoutDriver {
       mainProps = new Properties();
     }
 
-    Map<String,String[]> argMap = Maps.newHashMap();
+    Map<String,String[]> argMap = new HashMap<>();
     int i = 0;
     while (i < args.length && args[i] != null) {
-      List<String> argValues = Lists.newArrayList();
+      List<String> argValues = new ArrayList<>();
       String arg = args[i];
       i++;
       if (arg.startsWith("-D")) { // '-Dkey=value' or '-Dkey=value1,value2,etc' case
@@ -170,7 +170,7 @@ public final class MahoutDriver {
     }
 
     // Now add command-line args
-    List<String> argsList = Lists.newArrayList();
+    List<String> argsList = new ArrayList<>();
     argsList.add(progName);
     for (Map.Entry<String,String[]> entry : argMap.entrySet()) {
       String arg = entry.getKey();

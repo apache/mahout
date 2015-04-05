@@ -18,8 +18,6 @@
 package org.apache.mahout.classifier.df;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -34,6 +32,7 @@ import org.apache.mahout.classifier.df.node.Node;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -45,7 +44,7 @@ public class DecisionForest implements Writable {
   private final List<Node> trees;
   
   private DecisionForest() {
-    trees = Lists.newArrayList();
+    trees = new ArrayList<>();
   }
   
   public DecisionForest(List<Node> trees) {
@@ -225,15 +224,12 @@ public class DecisionForest implements Writable {
 
     DecisionForest forest = null;
     for (Path path : files) {
-      FSDataInputStream dataInput = new FSDataInputStream(fs.open(path));
-      try {
+      try (FSDataInputStream dataInput = new FSDataInputStream(fs.open(path))) {
         if (forest == null) {
           forest = read(dataInput);
         } else {
           forest.readFields(dataInput);
         }
-      } finally {
-        Closeables.close(dataInput, true);
       }
     }
 

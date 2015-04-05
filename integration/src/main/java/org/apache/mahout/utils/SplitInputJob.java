@@ -63,6 +63,7 @@ public final class SplitInputJob {
    * training sets respectively
    *
    * @param initialConf
+   *          Initial configuration
    * @param inputPath
    *          path to input data SequenceFile
    * @param outputPath

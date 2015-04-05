@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -34,6 +32,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -80,15 +79,15 @@ public final class Driver {
 
     File file = new File(luceneDir);
     Preconditions.checkArgument(file.isDirectory(),
-                                "Lucene directory: " + file.getAbsolutePath()
-                                    + " does not exist or is not a directory");
+        "Lucene directory: " + file.getAbsolutePath()
+            + " does not exist or is not a directory");
     Preconditions.checkArgument(maxDocs >= 0, "maxDocs must be >= 0");
     Preconditions.checkArgument(minDf >= 1, "minDf must be >= 1");
     Preconditions.checkArgument(maxDFPercent <= 99, "maxDFPercent must be <= 99");
 
     Directory dir = FSDirectory.open(file);
     IndexReader reader = DirectoryReader.open(dir);
-    
+
 
     Weight weight;
     if ("tf".equalsIgnoreCase(weightType)) {
@@ -100,7 +99,7 @@ public final class Driver {
     }
 
     TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
-    
+
     LuceneIterable iterable;
     if (norm == LuceneIterable.NO_NORMALIZING) {
       iterable = new LuceneIterable(reader, idField, field, termInfo, weight, LuceneIterable.NO_NORMALIZING,
@@ -111,22 +110,16 @@ public final class Driver {
 
     log.info("Output File: {}", outFile);
 
-    VectorWriter vectorWriter = getSeqFileWriter(outFile);
-    try {
+    try (VectorWriter vectorWriter = getSeqFileWriter(outFile)) {
       long numDocs = vectorWriter.write(iterable, maxDocs);
       log.info("Wrote: {} vectors", numDocs);
-    } finally {
-      Closeables.close(vectorWriter, false);
     }
 
     File dictOutFile = new File(dictOut);
     log.info("Dictionary Output file: {}", dictOutFile);
     Writer writer = Files.newWriter(dictOutFile, Charsets.UTF_8);
-    DelimitedTermInfoWriter tiWriter = new DelimitedTermInfoWriter(writer, delimiter, field);
-    try {
+    try (DelimitedTermInfoWriter tiWriter = new DelimitedTermInfoWriter(writer, delimiter, field)) {
       tiWriter.write(termInfo);
-    } finally {
-      Closeables.close(tiWriter, false);
     }
 
     if (!"".equals(seqDictOut)) {
@@ -135,12 +128,9 @@ public final class Driver {
       Path path = new Path(seqDictOut);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(conf);
-      SequenceFile.Writer seqWriter = null;
-      try {
-        seqWriter = SequenceFile.createWriter(fs, conf, path, Text.class, IntWritable.class);
+      try (SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, Text.class, IntWritable.class)) {
         Text term = new Text();
         IntWritable termIndex = new IntWritable();
-
         Iterator<TermEntry> termEntries = termInfo.getAllEntries();
         while (termEntries.hasNext()) {
           TermEntry termEntry = termEntries.next();
@@ -148,10 +138,7 @@ public final class Driver {
           termIndex.set(termEntry.getTermIdx());
           seqWriter.append(term, termIndex);
         }
-      } finally {
-        Closeables.close(seqWriter, false);
       }
-
     }
   }
 
@@ -215,7 +202,7 @@ public final class Driver {
 
     Option maxPercentErrorDocsOpt = obuilder.withLongName("maxPercentErrorDocs").withRequired(false).withArgument(
         abuilder.withName("maxPercentErrorDocs").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The max percentage of docs that can have a null term vector. These are noise document and can occur if the " 
+        "The max percentage of docs that can have a null term vector. These are noise document and can occur if the "
             + "analyzer used strips out all terms in the target field. This percentage is expressed as a value "
             + "between 0 and 1. The default is 0.").withShortName("err").create();
 
@@ -302,7 +289,7 @@ public final class Driver {
     // TODO: Make this parameter driven
 
     SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class,
-                                                              VectorWritable.class);
+        VectorWritable.class);
 
     return new SequenceFileVectorWriter(seqWriter);
   }

@@ -17,8 +17,12 @@
 
 package org.apache.mahout.classifier.df.mapreduce.inmem;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -35,10 +39,6 @@ import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Node;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * MapReduce implementation where each mapper loads a full copy of the data in-memory. The forest trees are
@@ -80,7 +80,7 @@ public class InMemBuilder extends Builder {
   protected DecisionForest parseOutput(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
     
-    Map<Integer,MapredOutput> output = Maps.newHashMap();
+    Map<Integer,MapredOutput> output = new HashMap<>();
     
     Path outputPath = getOutputPath(conf);
     FileSystem fs = outputPath.getFileSystem(conf);
@@ -101,7 +101,7 @@ public class InMemBuilder extends Builder {
    * Process the output, extracting the trees
    */
   private static DecisionForest processOutput(Map<Integer,MapredOutput> output) {
-    List<Node> trees = Lists.newArrayList();
+    List<Node> trees = new ArrayList<>();
     
     for (Map.Entry<Integer,MapredOutput> entry : output.entrySet()) {
       MapredOutput value = entry.getValue();

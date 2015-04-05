@@ -17,14 +17,6 @@
 
 package org.apache.mahout.text.wikipedia;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -40,7 +32,14 @@ import org.apache.mahout.common.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Maps over Wikipedia xml format and output all document having the category listed in the input category
@@ -89,13 +88,13 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     Configuration conf = context.getConfiguration();
 
     if (inputCategories == null) {
-      Set<String> newCategories = Sets.newHashSet();
+      Set<String> newCategories = new HashSet<>();
       DefaultStringifier<Set<String>> setStringifier =
-          new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(newCategories));
+          new DefaultStringifier<>(conf, GenericsUtil.getClass(newCategories));
       String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));
       Set<String> inputCategoriesSet = setStringifier.fromString(categoriesStr);
-      inputCategories = Lists.newArrayList(inputCategoriesSet);
-      inputCategoryPatterns = Lists.newArrayListWithCapacity(inputCategories.size());
+      inputCategories = new ArrayList<>(inputCategoriesSet);
+      inputCategoryPatterns = new ArrayList<>(inputCategories.size());
       for (String inputCategory : inputCategories) {
         inputCategoryPatterns.add(Pattern.compile(".*\\b" + inputCategory + "\\b.*"));
       }

@@ -17,13 +17,12 @@
 
 package org.apache.mahout.classifier.naivebayes.test;
 
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import com.google.common.io.Closeables;
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -127,10 +126,10 @@ public class TestNaiveBayesDriver extends AbstractJob {
     } else {
       classifier = new StandardNaiveBayesClassifier(model);
     }
-    SequenceFile.Writer writer = SequenceFile.createWriter(fs, getConf(), new Path(getOutputPath(), "part-r-00000"),
-        Text.class, VectorWritable.class);
 
-    try {
+    try (SequenceFile.Writer writer =
+             SequenceFile.createWriter(fs, getConf(), new Path(getOutputPath(), "part-r-00000"),
+                 Text.class, VectorWritable.class)) {
       SequenceFileDirIterable<Text, VectorWritable> dirIterable =
           new SequenceFileDirIterable<>(getInputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
       // loop through the part-r-* files in getInputPath() and get classification scores for all entries
@@ -138,8 +137,6 @@ public class TestNaiveBayesDriver extends AbstractJob {
         writer.append(new Text(SLASH.split(pair.getFirst().toString())[1]),
             new VectorWritable(classifier.classifyFull(pair.getSecond().get())));
       }
-    } finally {
-      Closeables.close(writer, false);
     }
   }
 

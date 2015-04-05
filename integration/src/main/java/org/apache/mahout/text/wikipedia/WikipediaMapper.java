@@ -18,12 +18,12 @@
 package org.apache.mahout.text.wikipedia;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -106,9 +106,9 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     super.setup(context);
     Configuration conf = context.getConfiguration();
  
-    Set<String> newCategories = Sets.newHashSet();
+    Set<String> newCategories = new HashSet<>();
     DefaultStringifier<Set<String>> setStringifier =
-          new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(newCategories));
+          new DefaultStringifier<>(conf, GenericsUtil.getClass(newCategories));
 
     String categoriesStr = conf.get("wikipedia.categories");
     inputCategories = setStringifier.fromString(categoriesStr);

@@ -18,9 +18,11 @@ package org.apache.mahout.clustering.classify;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -41,19 +43,16 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterab
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-
 /**
  * This classifier works with any ClusteringPolicy and its associated Clusters.
  * It is initialized with a policy and a list of compatible clusters and
  * thereafter it can classify any new Vector into one or more of the clusters
  * based upon the pdf() function which each cluster supports.
- * 
+ * <p/>
  * In addition, it is an OnlineLearner and can be trained. Training amounts to
  * asking the actual model to observe the vector and closing the classifier
  * causes all the models to computeParameters.
- * 
+ * <p/>
  * Because a ClusterClassifier implements Writable, it can be written-to and
  * read-from a sequence file as a single entity. For sequential and MapReduce
  * clustering in conjunction with a ClusterIterator; however, it utilizes an
@@ -63,42 +62,41 @@ import com.google.common.io.Closeables;
  * produce them.
  */
 public class ClusterClassifier extends AbstractVectorClassifier implements OnlineLearner, Writable {
-  
+
   private static final String POLICY_FILE_NAME = "_policy";
-  
+
   private List<Cluster> models;
-  
+
   private String modelClass;
-  
+
   private ClusteringPolicy policy;
-  
+
   /**
    * The public constructor accepts a list of clusters to become the models
-   * 
-   * @param models
-   *          a List<Cluster>
-   * @param policy
-   *          a ClusteringPolicy
+   *
+   * @param models a List<Cluster>
+   * @param policy a ClusteringPolicy
    */
   public ClusterClassifier(List<Cluster> models, ClusteringPolicy policy) {
     this.models = models;
     modelClass = models.get(0).getClass().getName();
     this.policy = policy;
   }
-  
+
   // needed for serialization/De-serialization
-  public ClusterClassifier() {}
-  
+  public ClusterClassifier() {
+  }
+
   // only used by MR ClusterIterator
   protected ClusterClassifier(ClusteringPolicy policy) {
     this.policy = policy;
   }
-  
+
   @Override
   public Vector classify(Vector instance) {
     return policy.classify(instance, this);
   }
-  
+
   @Override
   public double classifyScalar(Vector instance) {
     if (models.size() == 2) {
@@ -108,12 +106,12 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     }
     throw new IllegalStateException();
   }
-  
+
   @Override
   public int numCategories() {
     return models.size();
   }
-  
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(models.size());
@@ -123,12 +121,12 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
       cluster.write(out);
     }
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     int size = in.readInt();
     modelClass = in.readUTF();
-    models = Lists.newArrayList();
+    models = new ArrayList<>();
     ClusteringPolicyWritable clusteringPolicyWritable = new ClusteringPolicyWritable();
     clusteringPolicyWritable.readFields(in);
     policy = clusteringPolicyWritable.getValue();
@@ -138,73 +136,66 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
       models.add(element);
     }
   }
-  
+
   @Override
   public void train(int actual, Vector instance) {
     models.get(actual).observe(new VectorWritable(instance));
   }
-  
+
   /**
    * Train the models given an additional weight. Unique to ClusterClassifier
-   * 
-   * @param actual
-   *          the int index of a model
-   * @param data
-   *          a data Vector
-   * @param weight
-   *          a double weighting factor
+   *
+   * @param actual the int index of a model
+   * @param data   a data Vector
+   * @param weight a double weighting factor
    */
   public void train(int actual, Vector data, double weight) {
     models.get(actual).observe(new VectorWritable(data), weight);
   }
-  
+
   @Override
   public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     models.get(actual).observe(new VectorWritable(instance));
   }
-  
+
   @Override
   public void train(long trackingKey, int actual, Vector instance) {
     models.get(actual).observe(new VectorWritable(instance));
   }
-  
+
   @Override
   public void close() {
     policy.close(this);
   }
-  
+
   public List<Cluster> getModels() {
     return models;
   }
-  
+
   public ClusteringPolicy getPolicy() {
     return policy;
   }
-  
+
   public void writeToSeqFiles(Path path) throws IOException {
     writePolicy(policy, path);
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(path.toUri(), config);
-    SequenceFile.Writer writer = null;
     ClusterWritable cw = new ClusterWritable();
     for (int i = 0; i < models.size(); i++) {
-      try {
+      try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, config,
+          new Path(path, "part-" + String.format(Locale.ENGLISH, "%05d", i)), IntWritable.class,
+          ClusterWritable.class)) {
         Cluster cluster = models.get(i);
         cw.setValue(cluster);
-        writer = new SequenceFile.Writer(fs, config,
-            new Path(path, "part-" + String.format(Locale.ENGLISH, "%05d", i)), IntWritable.class,
-            ClusterWritable.class);
         Writable key = new IntWritable(i);
         writer.append(key, cw);
-      } finally {
-        Closeables.close(writer, false);
       }
     }
   }
-  
+
   public void readFromSeqFiles(Configuration conf, Path path) throws IOException {
     Configuration config = new Configuration();
-    List<Cluster> clusters = Lists.newArrayList();
+    List<Cluster> clusters = new ArrayList<>();
     for (ClusterWritable cw : new SequenceFileDirValueIterable<ClusterWritable>(path, PathType.LIST,
         PathFilters.logsCRCFilter(), config)) {
       Cluster cluster = cw.getValue();
@@ -215,7 +206,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     modelClass = models.get(0).getClass().getName();
     this.policy = readPolicy(path);
   }
-  
+
   public static ClusteringPolicy readPolicy(Path path) throws IOException {
     Path policyPath = new Path(path, POLICY_FILE_NAME);
     Configuration config = new Configuration();
@@ -227,7 +218,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     Closeables.close(reader, true);
     return cpw.getValue();
   }
-  
+
   public static void writePolicy(ClusteringPolicy policy, Path path) throws IOException {
     Path policyPath = new Path(path, POLICY_FILE_NAME);
     Configuration config = new Configuration();

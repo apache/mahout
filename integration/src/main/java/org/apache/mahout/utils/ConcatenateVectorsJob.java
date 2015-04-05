@@ -17,11 +17,9 @@
 
 package org.apache.mahout.utils;
 
-
 import java.io.IOException;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -113,12 +111,8 @@ public class ConcatenateVectorsJob extends AbstractJob {
     Preconditions.checkArgument(paths.length > 0, path.getName() + " is a file, should be a directory");
 
     Path file = paths[0].getPath();
-    SequenceFile.Reader reader = null;
-    try {
-      reader = new SequenceFile.Reader(fs, file, fs.getConf());
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(fs, file, fs.getConf())){
       return reader.getKeyClass().asSubclass(Writable.class);
-    } finally {
-      Closeables.close(reader, true);
     }
   }
 }

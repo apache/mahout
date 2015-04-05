@@ -17,8 +17,15 @@
 
 package org.apache.mahout.classifier.df.mapreduce.inmem;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Random;
+
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -32,13 +39,6 @@ import org.apache.mahout.classifier.df.mapreduce.Builder;
 import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
 
 /**
  * Custom InputFormat that generates InputSplits given the desired number of trees.<br>
@@ -94,7 +94,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
 
     int id = 0;
 
-    List<InputSplit> splits = Lists.newArrayListWithCapacity(numSplits);
+    List<InputSplit> splits = new ArrayList<>(numSplits);
 
     for (int index = 0; index < numSplits - 1; index++) {
       splits.add(new InMemInputSplit(id, splitSize, nextSeed()));

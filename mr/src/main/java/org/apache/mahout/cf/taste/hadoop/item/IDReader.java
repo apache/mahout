@@ -17,12 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -142,10 +142,9 @@ public class IDReader {
   }
 
   private Map<Long, FastIDSet> readUserItemFilter(String pathString) throws IOException {
-    Map<Long, FastIDSet> result = Maps.newHashMap();
-    InputStream in = openFile(pathString);
+    Map<Long, FastIDSet> result = new HashMap<>();
 
-    try {
+    try (InputStream in = openFile(pathString)) {
       for (String line : new FileLineIterable(in)) {
         try {
           String[] tokens = SEPARATOR.split(line);
@@ -157,8 +156,6 @@ public class IDReader {
           log.warn("userItemFile line ignored: {}", line);
         }
       }
-    } finally {
-      Closeables.close(in, true);
     }
 
     return result;
@@ -202,9 +199,8 @@ public class IDReader {
 
     if (pathString != null) {
       result = new FastIDSet();
-      InputStream in = openFile(pathString);
 
-      try {
+      try (InputStream in = openFile(pathString)){
         for (String line : new FileLineIterable(in)) {
           try {
             result.add(Long.parseLong(line));
@@ -212,8 +208,6 @@ public class IDReader {
             log.warn("line ignored: {}", line);
           }
         }
-      } finally {
-        Closeables.close(in, true);
       }
     }
 

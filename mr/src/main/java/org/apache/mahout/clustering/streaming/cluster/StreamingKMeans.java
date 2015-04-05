@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.streaming.cluster;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +26,6 @@ import java.util.Random;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Centroid;
@@ -323,7 +323,7 @@ public class StreamingKMeans implements Iterable<Centroid> {
       if (!collapseClusters && centroids.size() > clusterOvershoot * numClusters) {
         numClusters = (int) Math.max(numClusters, clusterLogFactor * Math.log(numProcessedDatapoints));
 
-        List<Centroid> shuffled = Lists.newArrayList();
+        List<Centroid> shuffled = new ArrayList<>();
         for (Vector vector : centroids) {
           shuffled.add((Centroid) vector);
         }

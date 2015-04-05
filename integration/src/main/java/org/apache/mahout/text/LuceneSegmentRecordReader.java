@@ -98,6 +98,5 @@ public class LuceneSegmentRecordReader extends RecordReader<Text, NullWritable> 
   @Override
   public void close() throws IOException {
     segmentReader.close();
-    //searcher.close();
   }
 }

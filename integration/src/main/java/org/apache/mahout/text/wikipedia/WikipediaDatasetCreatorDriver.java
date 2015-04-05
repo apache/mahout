@@ -19,10 +19,10 @@ package org.apache.mahout.text.wikipedia;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -154,7 +154,7 @@ public final class WikipediaDatasetCreatorDriver {
     // Dont ever forget this. People should keep track of how hadoop conf
     // parameters can make or break a piece of code
     
-    Set<String> categories = Sets.newHashSet();
+    Set<String> categories = new HashSet<>();
     for (String line : new FileLineIterable(new File(catFile))) {
       categories.add(line.trim().toLowerCase(Locale.ENGLISH));
     }

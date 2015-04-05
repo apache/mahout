@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,17 +21,16 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -41,6 +40,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -62,42 +62,43 @@ public final class Driver {
   /** used for JSON serialization/deserialization */
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private Driver() { }
-  
+  private Driver() {
+  }
+
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-    
+
     Option inputOpt = obuilder
         .withLongName("input")
         .withRequired(true)
         .withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create())
         .withDescription(
-          "The file or directory containing the ARFF files.  If it is a directory, all .arff files will be converted")
+            "The file or directory containing the ARFF files.  If it is a directory, all .arff files will be converted")
         .withShortName("d").create();
-    
+
     Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The output directory.  Files will have the same name as the input, but with the extension .mvc")
+        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The output directory.  Files will have the same name as the input, but with the extension .mvc")
         .withShortName("o").create();
-    
+
     Option maxOpt = obuilder.withLongName("max").withRequired(false).withArgument(
-      abuilder.withName("max").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The maximum number of vectors to output.  If not specified, then it will loop over all docs")
+        abuilder.withName("max").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The maximum number of vectors to output.  If not specified, then it will loop over all docs")
         .withShortName("m").create();
-    
+
     Option dictOutOpt = obuilder.withLongName("dictOut").withRequired(true).withArgument(
-      abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The file to output the label bindings").withShortName("t").create();
-    
+        abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The file to output the label bindings").withShortName("t").create();
+
     Option jsonDictonaryOpt = obuilder.withLongName("json-dictonary").withRequired(false)
-            .withDescription("Write dictonary in JSON format").withShortName("j").create();
-    
+        .withDescription("Write dictonary in JSON format").withShortName("j").create();
+
     Option delimiterOpt = obuilder.withLongName("delimiter").withRequired(false).withArgument(
-      abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The delimiter for outputing the dictionary").withShortName("l").create();
-    
+        abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The delimiter for outputing the dictionary").withShortName("l").create();
+
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(maxOpt)
@@ -108,9 +109,9 @@ public final class Driver {
       Parser parser = new Parser();
       parser.setGroup(group);
       CommandLine cmdLine = parser.parse(args);
-      
+
       if (cmdLine.hasOption(helpOpt)) {
-        
+
         CommandLineUtil.printHelp(group);
         return;
       }
@@ -137,7 +138,7 @@ public final class Driver {
               return name.endsWith(".arff");
             }
           });
-          
+
           for (File file : files) {
             writeFile(outDir, file, maxDocs, model, dictOut, delimiter, jsonDictonary);
           }
@@ -145,31 +146,28 @@ public final class Driver {
           writeFile(outDir, input, maxDocs, model, dictOut, delimiter, jsonDictonary);
         }
       }
-      
+
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
-  
+
   protected static void writeLabelBindings(File dictOut, ARFFModel arffModel, String delimiter, boolean jsonDictonary)
-    throws IOException {
-    Writer writer = Files.newWriterSupplier(dictOut, Charsets.UTF_8, true).getOutput();
-    try {
+      throws IOException {
+    try (Writer writer = Files.newWriterSupplier(dictOut, Charsets.UTF_8, true).getOutput()) {
       if (jsonDictonary) {
         writeLabelBindingsJSON(writer, arffModel);
       } else {
         writeLabelBindings(writer, arffModel, delimiter);
       }
-    } finally {
-      Closeables.close(writer, false);
     }
   }
 
-  protected static void writeLabelBindingsJSON(Writer writer, ARFFModel arffModel) throws IOException  {
+  protected static void writeLabelBindingsJSON(Writer writer, ARFFModel arffModel) throws IOException {
 
     // Turn the map of labels into a list order by order of appearance
-    List<Entry<String, Integer>> attributes = Lists.newArrayList();
+    List<Entry<String, Integer>> attributes = new ArrayList<>();
     attributes.addAll(arffModel.getLabelBindings().entrySet());
     Collections.sort(attributes, new Comparator<Map.Entry<String, Integer>>() {
       @Override
@@ -177,13 +175,13 @@ public final class Driver {
         return t.getValue().compareTo(t1.getValue());
       }
     });
-    
+
     // write a map for each object
-    List<Map<String, Object>> jsonObjects = Lists.newLinkedList();
-    for (int i = 0; i < attributes.size(); i++) { 
-      
+    List<Map<String, Object>> jsonObjects = new LinkedList<>();
+    for (int i = 0; i < attributes.size(); i++) {
+
       Entry<String, Integer> modelRepresentation = attributes.get(i);
-      Map<String, Object> jsonRepresentation = Maps.newHashMap();
+      Map<String, Object> jsonRepresentation = new HashMap<>();
       jsonObjects.add(jsonRepresentation);
       // the last one is the class label
       jsonRepresentation.put("label", i < (attributes.size() - 1) ? String.valueOf(false) : String.valueOf(true));
@@ -232,37 +230,34 @@ public final class Driver {
       }
     }
   }
-  
+
   protected static void writeFile(String outDir,
-                                File file,
-                                long maxDocs,
-                                ARFFModel arffModel,
-                                File dictOut,
-                                String delimiter,
-                                boolean jsonDictonary) throws IOException {
+                                  File file,
+                                  long maxDocs,
+                                  ARFFModel arffModel,
+                                  File dictOut,
+                                  String delimiter,
+                                  boolean jsonDictonary) throws IOException {
     log.info("Converting File: {}", file);
     ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1, arffModel
         .getNominalMap());
     Iterable<Vector> iteratable = new ARFFVectorIterable(file, model);
     String outFile = outDir + '/' + file.getName() + ".mvc";
-    
-    VectorWriter vectorWriter = getSeqFileWriter(outFile);
-    try {
+
+    try (VectorWriter vectorWriter = getSeqFileWriter(outFile)) {
       long numDocs = vectorWriter.write(iteratable, maxDocs);
       writeLabelBindings(dictOut, model, delimiter, jsonDictonary);
       log.info("Wrote: {} vectors", numDocs);
-    } finally {
-      Closeables.close(vectorWriter, false);
     }
   }
-  
+
   private static VectorWriter getSeqFileWriter(String outFile) throws IOException {
     Path path = new Path(outFile);
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class,
-      VectorWritable.class);
+        VectorWritable.class);
     return new SequenceFileVectorWriter(seqWriter);
   }
-  
+
 }

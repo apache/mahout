@@ -17,24 +17,22 @@
 
 package org.apache.mahout.clustering.lda;
 
+import com.google.common.io.Closeables;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -43,6 +41,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -168,7 +167,7 @@ public final class LDAPrintTopics {
           out.write("===========");
           out.write('\n');
         }
-        List<Pair<String,Double>> topKasList = Lists.newArrayListWithCapacity(topK.size());
+        List<Pair<String,Double>> topKasList = new ArrayList<>(topK.size());
         for (Pair<String,Double> wordWithScore : topK) {
           topKasList.add(wordWithScore);
         }
@@ -197,8 +196,8 @@ public final class LDAPrintTopics {
                                                                     Configuration job,
                                                                     List<String> wordList,
                                                                     int numWordsToPrint) {
-    List<Queue<Pair<String,Double>>> queues = Lists.newArrayList();
-    Map<Integer,Double> expSums = Maps.newHashMap();
+    List<Queue<Pair<String,Double>>> queues = new ArrayList<>();
+    Map<Integer,Double> expSums = new HashMap<>();
     for (Pair<IntPairWritable,DoubleWritable> record
         : new SequenceFileDirIterable<IntPairWritable, DoubleWritable>(
             new Path(dir, "part-*"), PathType.GLOB, null, null, true, job)) {

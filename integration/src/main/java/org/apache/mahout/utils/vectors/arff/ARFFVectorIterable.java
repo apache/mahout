@@ -17,10 +17,6 @@
 
 package org.apache.mahout.utils.vectors.arff;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import org.apache.mahout.math.Vector;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +27,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Locale;
+
+import com.google.common.io.Files;
+import org.apache.commons.io.Charsets;
+import org.apache.mahout.math.Vector;
 
 /**
  * Read in ARFF (http://www.cs.waikato.ac.nz/~ml/weka/arff.html) and create {@link Vector}s

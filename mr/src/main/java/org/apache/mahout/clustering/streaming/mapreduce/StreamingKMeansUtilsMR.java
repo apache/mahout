@@ -22,7 +22,6 @@ import java.io.IOException;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -133,31 +132,23 @@ public final class StreamingKMeansUtilsMR {
    */
   public static void writeCentroidsToSequenceFile(Iterable<Centroid> centroids, Path path, Configuration conf)
     throws IOException {
-    SequenceFile.Writer writer = null;
-    try {
-      writer = SequenceFile.createWriter(FileSystem.get(conf), conf,
-          path, IntWritable.class, CentroidWritable.class);
+    try (SequenceFile.Writer writer = SequenceFile.createWriter(FileSystem.get(conf), conf,
+        path, IntWritable.class, CentroidWritable.class)) {
       int i = 0;
       for (Centroid centroid : centroids) {
         writer.append(new IntWritable(i++), new CentroidWritable(centroid));
       }
-    } finally {
-      Closeables.close(writer, true);
     }
   }
 
   public static void writeVectorsToSequenceFile(Iterable<? extends Vector> datapoints, Path path, Configuration conf)
     throws IOException {
-    SequenceFile.Writer writer = null;
-    try {
-      writer = SequenceFile.createWriter(FileSystem.get(conf), conf,
-          path, IntWritable.class, VectorWritable.class);
+    try (SequenceFile.Writer writer = SequenceFile.createWriter(FileSystem.get(conf), conf,
+        path, IntWritable.class, VectorWritable.class)){
       int i = 0;
       for (Vector vector : datapoints) {
         writer.append(new IntWritable(i++), new VectorWritable(vector));
       }
-    } finally {
-      Closeables.close(writer, true);
     }
   }
 }

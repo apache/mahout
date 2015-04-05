@@ -17,14 +17,14 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.common.RandomUtils;
 
-import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.DataModel;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -80,13 +80,13 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
     }
 
     /* get internal item IDs which we will need several times */
-    itemsByUser = Maps.newHashMap();
+    itemsByUser = new HashMap<>();
     LongPrimitiveIterator userIDs = dataModel.getUserIDs();
     while (userIDs.hasNext()) {
       long userId = userIDs.nextLong();
       int userIndex = userIndex(userId);
       FastIDSet itemIDsFromUser = dataModel.getItemIDsFromUser(userId);
-      List<Integer> itemIndexes = Lists.newArrayListWithCapacity(itemIDsFromUser.size());
+      List<Integer> itemIndexes = new ArrayList<>(itemIDsFromUser.size());
       itemsByUser.put(userIndex, itemIndexes);
       for (long itemID2 : itemIDsFromUser) {
         int i2 = itemIndex(itemID2);

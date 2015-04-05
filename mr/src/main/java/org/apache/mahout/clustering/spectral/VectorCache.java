@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -70,12 +69,9 @@ public final class VectorCache {
     DistributedCache.setCacheFiles(new URI[]{output.toUri()}, conf);
 
     // set up the writer
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output,
-            IntWritable.class, VectorWritable.class);
-    try {
+    try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output,
+        IntWritable.class, VectorWritable.class)){
       writer.append(key, new VectorWritable(vector));
-    } finally {
-      Closeables.close(writer, false);
     }
 
     if (deleteOnExit) {
@@ -112,12 +108,9 @@ public final class VectorCache {
    */
   public static Vector load(Configuration conf, Path input) throws IOException {
     log.info("Loading vector from: {}", input);
-    SequenceFileValueIterator<VectorWritable> iterator =
-            new SequenceFileValueIterator<>(input, true, conf);
-    try {
+    try (SequenceFileValueIterator<VectorWritable> iterator =
+             new SequenceFileValueIterator<>(input, true, conf)){
       return iterator.next().get();
-    } finally {
-      Closeables.close(iterator, true);
     }
   }
 }

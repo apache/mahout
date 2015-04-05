@@ -33,7 +33,8 @@ public class LuceneIndexHelper {
   public static void fieldShouldExistInIndex(IndexReader reader, String fieldName) throws IOException {
     IndexableField field = reader.document(0).getField(fieldName);
     if (field == null || !field.fieldType().stored()) {
-      throw new IllegalArgumentException("Field '" + fieldName + "' is possibly not stored since first document in index does not contain this field.");
+      throw new IllegalArgumentException("Field '" + fieldName +
+          "' is possibly not stored since first document in index does not contain this field.");
     }
   }
 

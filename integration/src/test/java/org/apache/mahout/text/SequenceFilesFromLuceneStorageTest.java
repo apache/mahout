@@ -16,7 +16,13 @@
  */
 package org.apache.mahout.text;
 
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -37,12 +43,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-
-import static java.util.Arrays.asList;
-
 public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTest {
 
   private SequenceFilesFromLuceneStorage lucene2Seq;
@@ -57,11 +57,8 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
 
     lucene2Seq = new SequenceFilesFromLuceneStorage();
     lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath1(), getIndexPath2()),
-      seqFilesOutputPath,
-      SingleFieldDocument.ID_FIELD,
-      asList(SingleFieldDocument.FIELD));
-
+      Arrays.asList(getIndexPath1(), getIndexPath2()), seqFilesOutputPath,
+      SingleFieldDocument.ID_FIELD, Collections.singletonList(SingleFieldDocument.FIELD));
   }
 
   @After
@@ -83,7 +80,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     lucene2Seq.run(lucene2SeqConf);
 
     Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-    Map<String, Text> map = Maps.newHashMap();
+    Map<String, Text> map = new HashMap<>();
     while (iterator.hasNext()) {
       Pair<Text, Text> next = iterator.next();
       map.put(next.getFirst().toString(), next.getSecond());
@@ -106,10 +103,8 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     commitDocuments(getDirectory(getIndexPath1AsFile()), new UnstoredFieldsDocument("5", "This is test document 5"));
 
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath1()),
-      seqFilesOutputPath,
-      SingleFieldDocument.ID_FIELD,
-      asList(UnstoredFieldsDocument.FIELD, UnstoredFieldsDocument.UNSTORED_FIELD));
+      Collections.singletonList(getIndexPath1()), seqFilesOutputPath,
+      SingleFieldDocument.ID_FIELD, Arrays.asList(UnstoredFieldsDocument.FIELD, UnstoredFieldsDocument.UNSTORED_FIELD));
 
     lucene2Seq.run(lucene2SeqConf);
   }
@@ -139,10 +134,8 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   public void testRunQuery() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs);
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath1()),
-      seqFilesOutputPath,
-      SingleFieldDocument.ID_FIELD,
-      asList(SingleFieldDocument.FIELD));
+      Collections.singletonList(getIndexPath1()), seqFilesOutputPath,
+      SingleFieldDocument.ID_FIELD, Collections.singletonList(SingleFieldDocument.FIELD));
 
     Query query = new TermQuery(new Term(lucene2SeqConf.getFields().get(0), "599"));
 
@@ -159,15 +152,18 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   @Test
   public void testRunMultipleFields() throws IOException {
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath1()),
-      seqFilesOutputPath,
+      Collections.singletonList(getIndexPath1()), seqFilesOutputPath,
       SingleFieldDocument.ID_FIELD,
-      asList(MultipleFieldsDocument.FIELD, MultipleFieldsDocument.FIELD1, MultipleFieldsDocument.FIELD2));
+      Arrays.asList(MultipleFieldsDocument.FIELD, MultipleFieldsDocument.FIELD1, MultipleFieldsDocument.FIELD2));
 
-    MultipleFieldsDocument multipleFieldsDocument1 = new MultipleFieldsDocument("1", "This is field 1-1", "This is field 1-2", "This is field 1-3");
-    MultipleFieldsDocument multipleFieldsDocument2 = new MultipleFieldsDocument("2", "This is field 2-1", "This is field 2-2", "This is field 2-3");
-    MultipleFieldsDocument multipleFieldsDocument3 = new MultipleFieldsDocument("3", "This is field 3-1", "This is field 3-2", "This is field 3-3");
-    commitDocuments(getDirectory(getIndexPath1AsFile()), multipleFieldsDocument1, multipleFieldsDocument2, multipleFieldsDocument3);
+    MultipleFieldsDocument multipleFieldsDocument1 =
+        new MultipleFieldsDocument("1", "This is field 1-1", "This is field 1-2", "This is field 1-3");
+    MultipleFieldsDocument multipleFieldsDocument2 =
+        new MultipleFieldsDocument("2", "This is field 2-1", "This is field 2-2", "This is field 2-3");
+    MultipleFieldsDocument multipleFieldsDocument3 =
+        new MultipleFieldsDocument("3", "This is field 3-1", "This is field 3-2", "This is field 3-3");
+    commitDocuments(getDirectory(getIndexPath1AsFile()), multipleFieldsDocument1,
+        multipleFieldsDocument2, multipleFieldsDocument3);
 
     lucene2Seq.run(lucene2SeqConf);
 
@@ -181,10 +177,8 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   @Test
   public void testRunNumericField() throws IOException {
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath1()),
-      seqFilesOutputPath,
-      SingleFieldDocument.ID_FIELD,
-      asList(NumericFieldDocument.FIELD, NumericFieldDocument.NUMERIC_FIELD));
+      Collections.singletonList(getIndexPath1()), seqFilesOutputPath,
+      SingleFieldDocument.ID_FIELD, Arrays.asList(NumericFieldDocument.FIELD, NumericFieldDocument.NUMERIC_FIELD));
 
     NumericFieldDocument doc1 = new NumericFieldDocument("1", "This is field 1", 100);
     NumericFieldDocument doc2 = new NumericFieldDocument("2", "This is field 2", 200);
@@ -206,10 +200,10 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
 
     lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-        asList(getIndexPath1()),
+        Collections.singletonList(getIndexPath1()),
         seqFilesOutputPath,
         "nonExistingField",
-        asList(SingleFieldDocument.FIELD));
+        Collections.singletonList(SingleFieldDocument.FIELD));
 
     lucene2Seq.run(lucene2SeqConf);
   }
@@ -219,10 +213,10 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
 
     lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-        asList(getIndexPath1()),
+        Collections.singletonList(getIndexPath1()),
         seqFilesOutputPath,
         SingleFieldDocument.ID_FIELD,
-        asList(SingleFieldDocument.FIELD, "nonExistingField"));
+        Arrays.asList(SingleFieldDocument.FIELD, "nonExistingField"));
 
     lucene2Seq.run(lucene2SeqConf);
   }
@@ -240,10 +234,10 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     commitDocuments(getDirectory(getIndexPath1AsFile()), document);
 
     lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-        asList(getIndexPath1()),
+        Collections.singletonList(getIndexPath1()),
         seqFilesOutputPath,
         SingleFieldDocument.ID_FIELD,
-        asList(SingleFieldDocument.FIELD, "indexed"));
+        Arrays.asList(SingleFieldDocument.FIELD, "indexed"));
 
     lucene2Seq.run(lucene2SeqConf);
   }

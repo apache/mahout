@@ -17,7 +17,11 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.index.Terms;
@@ -25,10 +29,6 @@ import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.util.BytesRef;
 import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
 
 
 /**
@@ -47,7 +47,7 @@ public class CachedTermInfo implements TermInfo {
     int numDocs = reader.numDocs();
     double percent = numDocs * maxDfPercent / 100.0;
     //Should we use a linked hash map so that we know terms are in order?
-    termEntries = Maps.newLinkedHashMap();
+    termEntries = new LinkedHashMap<>();
     int count = 0;
     BytesRef text;
     while ((text = te.next()) != null) {

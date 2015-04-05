@@ -17,7 +17,6 @@
 
 package org.apache.mahout.text;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -53,10 +52,7 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
       fs.listStatus(fst.getPath(),
                     new PrefixAdditionFilter(getConf(), dirPath, getOptions(), writer, getCharset(), fs));
     } else {
-      InputStream in = null;
-      try {
-        in = fs.open(fst.getPath());
-
+      try (InputStream in = fs.open(fst.getPath())){
         StringBuilder file = new StringBuilder();
         for (String aFit : new FileLineIterable(in, getCharset(), false)) {
           file.append(aFit).append('\n');
@@ -65,8 +61,6 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
             ? current.getName()
             : current.getName() + Path.SEPARATOR + fst.getPath().getName();
         writer.write(getPrefix() + Path.SEPARATOR + name, file.toString());
-      } finally {
-        Closeables.close(in, false);
       }
     }
   }

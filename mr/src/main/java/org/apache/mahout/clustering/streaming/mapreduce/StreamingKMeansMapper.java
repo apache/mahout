@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.streaming.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
@@ -59,7 +59,7 @@ public class StreamingKMeansMapper extends Mapper<Writable, VectorWritable, IntW
         StreamingKMeansDriver.INVALID_DISTANCE_CUTOFF);
     if (estimatedDistanceCutoff == StreamingKMeansDriver.INVALID_DISTANCE_CUTOFF) {
       estimateDistanceCutoff = true;
-      estimatePoints = Lists.newArrayList();
+      estimatePoints = new ArrayList<>();
     }
     // There is no way of estimating the distance cutoff unless we have some data.
     clusterer = new StreamingKMeans(searcher, numClusters, estimatedDistanceCutoff);

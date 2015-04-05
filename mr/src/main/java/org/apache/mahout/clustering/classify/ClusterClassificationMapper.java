@@ -18,12 +18,12 @@
 package org.apache.mahout.clustering.classify;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -67,7 +67,7 @@ public class ClusterClassificationMapper extends
     threshold = conf.getFloat(ClusterClassificationConfigKeys.OUTLIER_REMOVAL_THRESHOLD, 0.0f);
     emitMostLikely = conf.getBoolean(ClusterClassificationConfigKeys.EMIT_MOST_LIKELY, false);
     
-    clusterModels = Lists.newArrayList();
+    clusterModels = new ArrayList<>();
     
     if (clustersIn != null && !clustersIn.isEmpty()) {
       Path clustersInPath = new Path(clustersIn);
@@ -128,13 +128,13 @@ public class ClusterClassificationMapper extends
     DistanceMeasure distanceMeasure = distanceMeasureCluster.getMeasure();
     double distance = distanceMeasure.distance(cluster.getCenter(), vw.get());
 
-    Map<Text, Text> props = Maps.newHashMap();
+    Map<Text, Text> props = new HashMap<>();
     props.put(new Text("distance"), new Text(Double.toString(distance)));
     context.write(clusterId, new WeightedPropertyVectorWritable(weight, vw.get(), props));
   }
   
   public static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf) throws IOException {
-    List<Cluster> clusters = Lists.newArrayList();
+    List<Cluster> clusters = new ArrayList<>();
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     Iterator<?> it = new SequenceFileDirValueIterator<Writable>(

@@ -37,29 +37,20 @@ public final class ModelSerializer {
   }
 
   public static void writeBinary(String path, CrossFoldLearner model) throws IOException {
-    DataOutputStream out = new DataOutputStream(new FileOutputStream(path));
-    try {
+    try (DataOutputStream out = new DataOutputStream(new FileOutputStream(path))) {
       PolymorphicWritable.write(out, model);
-    } finally {
-      Closeables.close(out, false);
     }
   }
 
   public static void writeBinary(String path, OnlineLogisticRegression model) throws IOException {
-    DataOutputStream out = new DataOutputStream(new FileOutputStream(path));
-    try {
+    try (DataOutputStream out = new DataOutputStream(new FileOutputStream(path))) {
       PolymorphicWritable.write(out, model);
-    } finally {
-      Closeables.close(out, false);
     }
   }
 
   public static void writeBinary(String path, AdaptiveLogisticRegression model) throws IOException {
-    DataOutputStream out = new DataOutputStream(new FileOutputStream(path));
-    try {
+    try (DataOutputStream out = new DataOutputStream(new FileOutputStream(path))){
       PolymorphicWritable.write(out, model);
-    } finally {
-      Closeables.close(out, false);
     }
   }
 
