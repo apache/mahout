@@ -29,9 +29,11 @@ import com.google.common.base.Preconditions;
 /*
  * Moded combiner/reducer. If vector comes in as length A or length B, concatenated.ˇ
  * If it is length A + B, combiner has already concatenated.
- * 
+ *
+ * @deprecated as of 0.10.0.
+ *
  */
-
+@Deprecated
 public class ConcatenateVectorsReducer extends Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable> {
   
   int dimsA = 0;

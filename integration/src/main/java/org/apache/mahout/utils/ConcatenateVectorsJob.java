@@ -44,10 +44,12 @@ import org.apache.mahout.math.VectorWritable;
  * Uses clever hack which requires different matrices to have a different number of columns.
  * Courtesy of Jake Mannix, https://issues.apache.org/jira/browse/MAHOUT-884
  * If vectors are same length, this will not concatenate them in the right order
- * 
+ *
+ * @deprecated as of 0.10.0
+ *
  * TODO: generalize to multiple matrices, should the teeming masses so desire
  */
-
+@Deprecated
 public class ConcatenateVectorsJob extends AbstractJob {
   
   static final String MATRIXA_DIMS = "mahout.concatenatevectors.matrixA_dims";

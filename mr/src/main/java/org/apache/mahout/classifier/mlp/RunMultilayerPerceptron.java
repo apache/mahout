@@ -44,7 +44,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
-/** Run {@link MultilayerPerceptron} classification. */
+/** Run {@link MultilayerPerceptron} classification.
+ * @deprecated as of as of 0.10.0.
+ * */
+@Deprecated
 public class RunMultilayerPerceptron {
 
   private static final Logger log = LoggerFactory.getLogger(RunMultilayerPerceptron.class);
