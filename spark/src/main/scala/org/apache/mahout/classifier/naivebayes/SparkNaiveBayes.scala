@@ -32,7 +32,6 @@ import collection._
 import JavaConversions._
 import org.apache.spark.SparkContext._
 
-import org.apache.mahout.classifier.naivebayes._
 import org.apache.mahout.sparkbindings._
 
 /**
@@ -107,13 +106,12 @@ object SparkNaiveBayes extends NaiveBayes{
    * @return a result analyzer with confusion matrix and accuracy statistics
    */
 override def test[K: ClassTag](model: NBModel,
-                        testSet: DrmLike[String],
-                        testComplementary: Boolean = false,
-                        cParser: CategoryParser = seq2SparseCategoryParser)
-                       (implicit ctx: DistributedContext): ResultAnalyzer = {
+                               testSet: DrmLike[K],
+                               testComplementary: Boolean = false,
+                               cParser: CategoryParser = seq2SparseCategoryParser)
+                              (implicit ctx: DistributedContext): ResultAnalyzer = {
 
     val labelMap = model.labelIndex
-
     val numLabels = model.numLabels
 
     testSet.checkpoint()
@@ -133,32 +131,8 @@ override def test[K: ClassTag](model: NBModel,
         "Complementary Label Assignment requires Complementary Training")
     }
 
-    /**  need to change the model around so that we can broadcast it?            */
-    /*   for now just classifying each sequentially.                             */
-    /* */
-    /*  val bcastWeightMatrix = drmBroadcast(model.weightsPerLabelAndFeature)
-      val bcastFeatureWeights = drmBroadcast(model.weightsPerFeature)
-      val bcastLabelWeights = drmBroadcast(model.weightsPerLabel)
-      val bcastWeightNormalizers = drmBroadcast(model.perlabelThetaNormalizer)
-      val bcastLabelIndex = labelMap
-      val alphaI = model.alphaI
-      val bcastIsComplementary = model.isComplementary
-    */
     val scoredTestSet = testSet.mapBlock(ncol = numLabels){
       case (keys, block)=>
-        /*val closureModel = new NBModel(bcastWeightMatrix,
-                                       bcastFeatureWeights,
-                                       bcastLabelWeights,
-                                       bcastWeightNormalizers,
-                                       bcastLabelIndex,
-                                       alphaI,
-                                       bcastIsComplementary)
-        val classifier = closureModel match {
-          case xx if model.isComplementary => new ComplementaryNBClassifier(closureModel)
-          case _ => new StandardNBClassifier(closureModel)
-        }*/
-
-
         val numInstances = keys.size
         val blockB= block.like(numInstances, numLabels)
         for(i <- 0 until numInstances){
@@ -167,48 +141,23 @@ override def test[K: ClassTag](model: NBModel,
         keys -> blockB
     }
 
+    testSet.uncache()
+
     // may want to strip this down if we think that numDocuments x numLabels wont fit into memory
     val testSetLabelMap = scoredTestSet.getRowLabelBindings
 
     // collect so that we can slice rows.
     val inCoreScoredTestSet = scoredTestSet.collect
 
-    testSet.uncache()
-    // */
-
-
-    /** Sequentially: */
-    /*start of sequential
-     // Since we cant broadcast the model as is do it sequentially up front for now
-     val inCoreTestSet = testSet.collect
-
-     // get the labels of the test set and extract the keys
-     val testSetLabelMap = testSet.getRowLabelBindings //.map(x => cParser(x._1) -> x._2)
-
-
-
-     // empty Matrix in which we'll set the classification scores
-     val inCoreScoredTestSet = testSet.like(numTestInstances, numLabels)
-
-     testSet.uncache()
-
-     for (i <- 0 until numTestInstances) {
-       inCoreScoredTestSet(i, ::) := classifier.classifyFull(inCoreTestSet(i, ::))
-     }
-
-     endof sequential
-     */
-    // todo: reverse the labelMaps in training and through the model?
-
     // reverse the label map and extract the labels
     val reverseTestSetLabelMap = testSetLabelMap.map(x => x._2 -> cParser(x._1))
 
+    // reverse the label map from out model
     val reverseLabelMap = labelMap.map(x => x._2 -> x._1)
 
     val analyzer = new ResultAnalyzer(labelMap.keys.toList.sorted, "DEFAULT")
 
-    // need to do this with out collecting
-    // val inCoreScoredTestSet = scoredTestSet.collect
+    // assign labels- winner takes all
     for (i <- 0 until numTestInstances) {
       val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i,::))
       val classifierResult = new ClassifierResult(reverseLabelMap(bestIdx), bestScore)

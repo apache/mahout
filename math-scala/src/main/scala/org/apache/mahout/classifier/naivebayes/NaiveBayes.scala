@@ -217,7 +217,7 @@ trait NaiveBayes extends java.io.Serializable{
                         testSet: DrmLike[K],
                         testComplementary: Boolean = false,
                         cParser: CategoryParser = seq2SparseCategoryParser)
-                        (implicit ctx: DistributedContext): ResultAnalyzer = {
+                       (implicit ctx: DistributedContext): ResultAnalyzer = {
 
     val labelMap = model.labelIndex
 
@@ -246,7 +246,7 @@ trait NaiveBayes extends java.io.Serializable{
     val inCoreTestSet = testSet.collect
 
     // get the labels of the test set and extract the keys
-    val testSetLabelMap = testSet.getRowLabelBindings //.map(x => cParser(x._1) -> x._2)
+    val testSetLabelMap = testSet.getRowLabelBindings
 
     // empty Matrix in which we'll set the classification scores
     val inCoreScoredTestSet = testSet.like(numTestInstances, numLabels)
@@ -266,10 +266,9 @@ trait NaiveBayes extends java.io.Serializable{
 
     val analyzer = new ResultAnalyzer(labelMap.keys.toList.sorted, "DEFAULT")
 
-    // need to do this with out collecting
-    // val inCoreScoredTestSet = scoredTestSet.collect
+    // assign labels- winner takes all
     for (i <- 0 until numTestInstances) {
-      val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i,::))
+      val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i, ::))
       val classifierResult = new ClassifierResult(reverseLabelMap(bestIdx), bestScore)
       analyzer.addInstance(reverseTestSetLabelMap(i), classifierResult)
     }
