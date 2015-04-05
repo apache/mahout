@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.similarity.precompute;
 
+import java.io.IOException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -56,7 +57,7 @@ public class MultithreadedBatchItemSimilaritiesTest {
     batchSimilarities.computeItemSimilarities(1, 1, mock(SimilarItemsWriter.class));
   }
 
-  @Test
+  @Test(expected = IOException.class)
   public void higherDegreeOfParallelismThanBatches() throws Exception {
 
     FastByIDMap<PreferenceArray> userData = new FastByIDMap<>();
