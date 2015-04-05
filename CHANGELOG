@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.10.0 - unreleased
 
+  MAHOUT-1622: MultithreadedBatchItemSimilarities outputs incorrect number of similarities (Jesse Daniels, Anand Avati via smarthi)
+
   MAHOUT-1605: Make VisualizerTest locale independent (Frank Rosner, Anand Avati via smarthi)
 
   MAHOUT-1652: Java 7 upgrade (smarthi)
