@@ -33,6 +33,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
@@ -76,5 +77,25 @@ public class MultithreadedBatchItemSimilaritiesTest {
       batchSimilarities.computeItemSimilarities(2, 1, mock(SimilarItemsWriter.class));
       fail();
     } catch (IOException e) {}
+  }
+  
+  @Test
+  public void testCorrectNumberOfOutputSimilarities() {
+     FastByIDMap<PreferenceArray> userData = new FastByIDMap<PreferenceArray>();
+     userData.put(1, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(1, 1, 1),
+         new GenericPreference(1, 2, 1), new GenericPreference(1, 3, 1))));
+     userData.put(2, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(2, 1, 1),
+         new GenericPreference(2, 2, 1), new GenericPreference(2, 4, 1))));
+
+     DataModel dataModel = new GenericDataModel(userData);
+     ItemBasedRecommender recommender =
+         new GenericItemBasedRecommender(dataModel, new TanimotoCoefficientSimilarity(dataModel));
+
+     BatchItemSimilarities batchSimilarities = new MultithreadedBatchItemSimilarities(recommender, 10, 2);
+
+     try {
+       int numOutputSimilarities = batchSimilarities.computeItemSimilarities(2, 1, mock(SimilarItemsWriter.class));
+       assertEquals(numOutputSimilarities, 10);
+     } catch (IOException e) {}
   }
 }
