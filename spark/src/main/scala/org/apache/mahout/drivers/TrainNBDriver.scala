@@ -90,7 +90,7 @@ object TrainNBDriver extends MahoutSparkDriver {
 
     val complementary = parser.opts("trainComplementary").asInstanceOf[Boolean]
     val outputPath = parser.opts("output").asInstanceOf[String]
-    val alpha = parser.opts("alphaI").asInstanceOf[Float]
+    val alpha = parser.opts("alphaI").asInstanceOf[Double]
     val overwrite = parser.opts("overwrite").asInstanceOf[Boolean]
 
     val fullPathToModel = outputPath + NBModel.modelBaseDirectory
@@ -102,7 +102,7 @@ object TrainNBDriver extends MahoutSparkDriver {
     val trainingSet = readTrainingSet
     // Use Spark-Optimized Naive Bayes here to extract labels and aggregate options
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
-    val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, complementary, alpha)
+    val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, complementary, alpha.toFloat)
 
     model.dfsWrite(outputPath)
 
