@@ -19,6 +19,7 @@ package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes._
 import org.apache.mahout.classifier.naivebayes.SparkNaiveBayes
+import org.apache.mahout.common.Hadoop1HDFSUtil
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps.drm2RLikeOps
@@ -51,6 +52,20 @@ object TrainNBDriver extends MahoutSparkDriver {
         options + ("trainComplementary" -> true)
       } text ("Train a complementary model, Default: false.")
 
+      // Laplace smoothing paramater default is 1.0
+      opts = opts + ("alphaI" -> 1.0f)
+      opt[Double]("alphaI") abbr ("a") action { (x, options) =>
+        options + ("alphaI" -> x)
+      } text ("Laplace soothing factor default is 1.0") validate { x =>
+        if (x > 0) success else failure("Option --alphaI must be > 0")
+      }
+
+      // Overwrite the output directory (with the model) if it exists?  Default: false
+      opts = opts + ("overwrite" -> false)
+      opt[Unit]("overwrite") abbr ("ow") action { (_, options) =>
+        options + ("overwrite" -> true)
+      } text ("Overwrite the output directory (with the model) if it exists? Default: false")
+
       // Spark config options--not driver specific
       parseSparkOptions()
 
@@ -75,11 +90,19 @@ object TrainNBDriver extends MahoutSparkDriver {
 
     val complementary = parser.opts("trainComplementary").asInstanceOf[Boolean]
     val outputPath = parser.opts("output").asInstanceOf[String]
+    val alpha = parser.opts("alphaI").asInstanceOf[Float]
+    val overwrite = parser.opts("overwrite").asInstanceOf[Boolean]
+
+    val fullPathToModel = outputPath + NBModel.modelBaseDirectory
+
+    if (overwrite) {
+       Hadoop1HDFSUtil.delete(fullPathToModel)
+    }
 
     val trainingSet = readTrainingSet
     // Use Spark-Optimized Naive Bayes here to extract labels and aggregate options
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
-    val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, complementary)
+    val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, complementary, alpha)
 
     model.dfsWrite(outputPath)
 
