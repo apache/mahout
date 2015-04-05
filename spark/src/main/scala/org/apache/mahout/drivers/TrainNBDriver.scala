@@ -21,6 +21,7 @@ import org.apache.mahout.classifier.naivebayes._
 import org.apache.mahout.classifier.naivebayes.SparkNaiveBayes
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.drm.RLikeDrmOps.drm2RLikeOps
 import scala.collection.immutable.HashMap
 
 
@@ -65,7 +66,7 @@ object TrainNBDriver extends MahoutSparkDriver {
   /** Read the training set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
   private def readTrainingSet: DrmLike[_]= {
     val inputPath = parser.opts("input").asInstanceOf[String]
-    val trainingSet= drm.drmDfsRead(inputPath)
+    val trainingSet= drm.drmDfsRead(inputPath).par(auto = true)
     trainingSet
   }
 
