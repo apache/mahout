@@ -17,6 +17,19 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.io.Resources;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.cli2.util.HelpFormatter;
+import org.apache.commons.io.Charsets;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,24 +40,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import com.google.common.io.Resources;
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
-import org.apache.commons.cli2.util.HelpFormatter;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.Vector;
-
 
 /**
  * Train a logistic regression for the examples from Chapter 13 of Mahout in Action
@@ -73,8 +71,7 @@ public final class TrainLogistic {
       CsvRecordFactory csv = lmp.getCsvRecordFactory();
       OnlineLogisticRegression lr = lmp.createRegression();
       for (int pass = 0; pass < passes; pass++) {
-        BufferedReader in = open(inputFile);
-        try {
+        try (BufferedReader in = open(inputFile)) {
           // read variable names
           csv.firstLine(in.readLine());
 
@@ -105,16 +102,11 @@ public final class TrainLogistic {
 
             line = in.readLine();
           }
-        } finally {
-          Closeables.close(in, true);
         }
       }
 
-      OutputStream modelOutput = new FileOutputStream(outputFile);
-      try {
+      try (OutputStream modelOutput = new FileOutputStream(outputFile)) {
         lmp.saveTo(modelOutput);
-      } finally {
-        Closeables.close(modelOutput, false);
       }
 
       output.println(lmp.getNumFeatures());
@@ -257,12 +249,12 @@ public final class TrainLogistic {
     TrainLogistic.inputFile = getStringArgument(cmdLine, inputFile);
     TrainLogistic.outputFile = getStringArgument(cmdLine, outputFile);
 
-    List<String> typeList = Lists.newArrayList();
+    List<String> typeList = new ArrayList<>();
     for (Object x : cmdLine.getValues(types)) {
       typeList.add(x.toString());
     }
 
-    List<String> predictorList = Lists.newArrayList();
+    List<String> predictorList = new ArrayList<>();
     for (Object x : cmdLine.getValues(predictors)) {
       predictorList.add(x.toString());
     }

@@ -104,7 +104,7 @@ public class H2OHelper {
     // Fill matrix, column at a time.
     for (Vec v : frame.vecs()) {
       for (int r = 0; r < frame.numRows(); r++) {
-        double d = 0.0;
+        double d;
         if (!v.isNA(r) && ((d = v.at(r)) != 0.0)) {
           m.setQuick(r, c, d);
         }
@@ -114,7 +114,7 @@ public class H2OHelper {
 
     // If string keyed, set the stings as rowlabels.
     if (labels != null) {
-      HashMap<String,Integer> map = new HashMap<String,Integer>();
+      Map<String,Integer> map = new HashMap<>();
       ValueString vstr = new ValueString();
       for (long i = 0; i < labels.length(); i++) {
         map.put(labels.atStr(vstr, i).toString(), (int)i);
@@ -190,9 +190,9 @@ public class H2OHelper {
       public double sumSqr;
       @Override
       public void map(Chunk chks[]) {
-        for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[c].len(); r++) {
-            sumSqr += (chks[c].atd(r) * chks[c].atd(r));
+        for (Chunk chk : chks) {
+          for (int r = 0; r < chk.len(); r++) {
+            sumSqr += (chk.atd(r) * chk.atd(r));
           }
         }
       }
@@ -244,7 +244,7 @@ public class H2OHelper {
       return null;
     }
 
-    Map<Integer,String> rmap = new HashMap<Integer,String>();
+    Map<Integer,String> rmap = new HashMap<>();
 
     for(Map.Entry<String,Integer> entry : map.entrySet()) {
       rmap.put(entry.getValue(),entry.getKey());
@@ -259,12 +259,11 @@ public class H2OHelper {
    * Chunk size is the number of elements stored per partition per column.
    *
    * @param nrow Number of rows in the DRM.
-   * @param ncol Number of columns in the DRM.
    * @param minHint Minimum number of partitions to create, if passed value is not -1.
    * @param exactHint Exact number of partitions to create, if passed value is not -1.
    * @return Calculated optimum chunk size.
    */
-  private static int chunkSize(long nrow, int ncol, int minHint, int exactHint) {
+  private static int chunkSize(long nrow, int minHint, int exactHint) {
     int chunkSz;
     int partsHint = Math.max(minHint, exactHint);
 
@@ -332,7 +331,6 @@ public class H2OHelper {
       Vec.Writer writer = labels.open();
       Map<Integer,String> rmap = reverseMap(map);
       for (int r = 0; r < m.rowSize(); r++) {
-        // TODO: fix bug here... Exception is being thrown when setting Strings
         writer.set(r, rmap.get(r));
       }
 
@@ -378,7 +376,7 @@ public class H2OHelper {
    * @return Created Frame.
    */
   public static Frame emptyFrame(long nrow, int ncol, int minHint, int exactHint, Vec.VectorGroup vg) {
-    int chunkSz = chunkSize(nrow, ncol, minHint, exactHint);
+    int chunkSz = chunkSize(nrow, minHint, exactHint);
     int nchunks = (int)((nrow - 1) / chunkSz) + 1; // Final number of Chunks per Vec
     long espc[] = new long[nchunks + 1];
 

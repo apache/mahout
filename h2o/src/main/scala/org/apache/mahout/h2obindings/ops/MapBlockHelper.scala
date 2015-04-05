@@ -34,27 +34,25 @@ object MapBlockHelper {
       case `i` => val startint: Int = startlong.asInstanceOf[Int]
         startint until (startint + in.rowSize) toArray
       case `l` => startlong until (startlong + in.rowSize) toArray
-      case `s` => {
+      case `s` =>
         val arr = new Array[String](in.rowSize)
         val vstr = new ValueString
         for (i <- 0 to (in.rowSize - 1)) {
           arr(i) = labels.atStr(vstr, i + startlong).toString
         }
         arr
-      }
     }
 
     val _bmf = bmf.asInstanceOf[BlockMapFunc[K,R]]
     val out = _bmf((inarray.asInstanceOf[Array[K]], in))
 
     implicitly[ClassTag[R]] match {
-      case `s` => {
+      case `s` =>
         val vstr = new ValueString
         for (str <- out._1) {
           nclabel.addStr(vstr.setTo(str.asInstanceOf[String]))
         }
-      }
-      case _ => Unit
+      case _ =>
     }
     out._2
   }

@@ -17,6 +17,10 @@
 
 package org.apache.mahout.cf.taste.example.kddcup;
 
+import org.apache.commons.io.Charsets;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.common.Pair;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,12 +28,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.zip.GZIPOutputStream;
-
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Closeables;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
-import org.apache.mahout.common.Pair;
 
 /**
  * <p>This class converts a KDD Cup input file into a compressed CSV format. The output format is
@@ -53,9 +51,8 @@ public final class ToCSV {
     }
 
     OutputStream outStream = new GZIPOutputStream(new FileOutputStream(outputFile));
-    Writer outWriter = new BufferedWriter(new OutputStreamWriter(outStream, Charsets.UTF_8));
 
-    try {
+    try (Writer outWriter = new BufferedWriter(new OutputStreamWriter(outStream, Charsets.UTF_8))){
       for (Pair<PreferenceArray,long[]> user : new DataFileIterable(inputFile)) {
         PreferenceArray prefs = user.getFirst();
         long[] timestamps = user.getSecond();
@@ -74,8 +71,6 @@ public final class ToCSV {
           outWriter.write('\n');
         }
       }
-    } finally {
-      Closeables.close(outWriter, false);
     }
   }
 

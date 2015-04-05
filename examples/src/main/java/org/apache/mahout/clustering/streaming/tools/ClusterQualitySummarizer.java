@@ -99,8 +99,6 @@ public class ClusterQualitySummarizer extends AbstractJob {
 
     Configuration conf = new Configuration();
     try {
-//      Configuration.dumpConfiguration(conf, new OutputStreamWriter(System.out));
-
       fileOut = new PrintWriter(new FileOutputStream(outputFile));
       fileOut.printf("cluster,distance.mean,distance.sd,distance.q0,distance.q1,distance.q2,distance.q3,"
           + "distance.q4,count,is.train\n");

@@ -17,15 +17,8 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.List;
-
-import com.google.common.base.Charsets;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -34,15 +27,21 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.NewsgroupHelper;
 import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Run the 20 news groups test data through SGD, as trained by {@link org.apache.mahout.classifier.sgd.TrainNewsGroups}.
@@ -72,7 +71,7 @@ public final class TestNewsGroups {
     Dictionary newsGroups = new Dictionary();
     Multiset<String> overallCounts = HashMultiset.create();
 
-    List<File> files = Lists.newArrayList();
+    List<File> files = new ArrayList<>();
     for (File newsgroup : base.listFiles()) {
       if (newsgroup.isDirectory()) {
         newsGroups.intern(newsgroup.getName());

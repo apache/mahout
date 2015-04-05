@@ -23,7 +23,6 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
 import RLikeDrmOps._
-import org.apache.mahout.math.drm.logical._
 
 /** Elementwise matrix operation tests */
 class AewBSuite extends FunSuite with DistributedH2OSuite {

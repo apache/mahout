@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
 import org.apache.hadoop.conf.Configuration;
@@ -27,7 +26,6 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
-
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
 import org.apache.mahout.ep.State;
@@ -35,6 +33,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,12 +79,7 @@ public final class TrainASFEmail extends AbstractJob {
       }
     };
     SequenceFileDirIterator<Text, VectorWritable> iter =
-        new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()),
-                                                          PathType.LIST,
-                                                          trainFilter,
-                                                          null,
-                                                          true,
-                                                          conf);
+        new SequenceFileDirIterator<>(new Path(base.toString()), PathType.LIST, trainFilter, null, true, conf);
     long numItems = 0;
     while (iter.hasNext()) {
       Pair<Text, VectorWritable> next = iter.next();
@@ -95,10 +89,9 @@ public final class TrainASFEmail extends AbstractJob {
 
     System.out.println(numItems + " training files");
 
-
     SGDInfo info = new SGDInfo();
 
-    iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, trainFilter,
+    iter = new SequenceFileDirIterator<>(new Path(base.toString()), PathType.LIST, trainFilter,
             null, true, conf);
     int k = 0;
     while (iter.hasNext()) {
@@ -120,7 +113,7 @@ public final class TrainASFEmail extends AbstractJob {
     ModelSerializer.writeBinary(output + "/asf.model",
             learningAlgorithm.getBest().getPayload().getLearner().getModels().get(0));
 
-    List<Integer> counts = Lists.newArrayList();
+    List<Integer> counts = new ArrayList<>();
     System.out.println("Word counts");
     for (String count : overallCounts.elementSet()) {
       counts.add(overallCounts.count(count));

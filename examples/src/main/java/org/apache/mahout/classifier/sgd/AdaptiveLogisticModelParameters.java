@@ -17,6 +17,10 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import org.apache.mahout.math.stats.GlobalOnlineAuc;
+import org.apache.mahout.math.stats.GroupedOnlineAuc;
+import org.apache.mahout.math.stats.OnlineAuc;
+
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -26,16 +30,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import org.apache.mahout.math.stats.GlobalOnlineAuc;
-import org.apache.mahout.math.stats.GroupedOnlineAuc;
-import org.apache.mahout.math.stats.OnlineAuc;
 
 public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
 
@@ -155,7 +154,7 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
     setNumFeatures(in.readInt());
     setMaxTargetCategories(in.readInt());
     int targetCategoriesSize = in.readInt();
-    List<String> targetCategories = Lists.newArrayListWithCapacity(targetCategoriesSize);
+    List<String> targetCategories = new ArrayList<>(targetCategoriesSize);
     for (int i = 0; i < targetCategoriesSize; i++) {
       targetCategories.add(in.readUTF());
     }
@@ -180,11 +179,8 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
   }
 
   public static AdaptiveLogisticModelParameters loadFromFile(File in) throws IOException {
-    InputStream input = new FileInputStream(in);
-    try {
+    try (InputStream input = new FileInputStream(in)) {
       return loadFromStream(input);
-    } finally {
-      Closeables.close(input, true);
     }
   }
 

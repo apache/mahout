@@ -17,11 +17,9 @@
 
 package org.apache.mahout.common
 
-import org.apache.hadoop.io.{Writable, SequenceFile}
-import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.conf.Configuration
-import collection._
-import JavaConversions._
+import org.apache.hadoop.fs.Path
+import org.apache.hadoop.io.{SequenceFile, Writable}
 
 /**
  * Deprecated Hadoop 1 api which we currently explicitly import via Mahout dependencies. May not work
@@ -37,7 +35,7 @@ object Hadoop1HDFSUtil extends HDFSUtil {
     val partFilePath:Path = fs.listStatus(dfsPath)
 
         // Filter out anything starting with .
-        .filter { s => (!s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDir)}
+        .filter { s => !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDir }
 
         // Take path
         .map(_.getPath)

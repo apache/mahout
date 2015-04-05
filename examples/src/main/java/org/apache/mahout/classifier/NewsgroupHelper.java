@@ -17,11 +17,11 @@
 
 package org.apache.mahout.classifier;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+import org.apache.commons.io.Charsets;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -81,8 +81,7 @@ public final class NewsgroupHelper {
     long date = (long) (1000 * (DATE_REFERENCE + actual * MONTH + 1 * WEEK * rand.nextDouble()));
     Multiset<String> words = ConcurrentHashMultiset.create();
 
-    BufferedReader reader = Files.newReader(file, Charsets.UTF_8);
-    try {
+    try (BufferedReader reader = Files.newReader(file, Charsets.UTF_8)) {
       String line = reader.readLine();
       Reader dateString = new StringReader(DATE_FORMATS[leakType % 3].format(new Date(date)));
       countWords(analyzer, words, dateString, overallCounts);
@@ -101,8 +100,6 @@ public final class NewsgroupHelper {
       if (leakType < 3) {
         countWords(analyzer, words, reader, overallCounts);
       }
-    } finally {
-      Closeables.close(reader, true);
     }
 
     Vector v = new RandomAccessSparseVector(FEATURES);
