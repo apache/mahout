@@ -107,7 +107,7 @@ object SparkNaiveBayes extends NaiveBayes{
    * @return a result analyzer with confusion matrix and accuracy statistics
    */
 override def test[K: ClassTag](model: NBModel,
-                        testSet: DrmLike[K],
+                        testSet: DrmLike[String],
                         testComplementary: Boolean = false,
                         cParser: CategoryParser = seq2SparseCategoryParser)
                        (implicit ctx: DistributedContext): ResultAnalyzer = {
