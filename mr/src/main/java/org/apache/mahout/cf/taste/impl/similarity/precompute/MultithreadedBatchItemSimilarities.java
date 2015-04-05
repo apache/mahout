@@ -26,7 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -167,7 +167,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
     @Override
     public void run() {
-      while (numActiveWorkers.get() != 0) {
+      while (numActiveWorkers.get() != 0 || !results.isEmpty()) {
         try {
           List<SimilarItems> similarItemsOfABatch = results.poll(10, TimeUnit.MILLISECONDS);
           if (similarItemsOfABatch != null) {
@@ -206,7 +206,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
         try {
           long[] itemIDBatch = itemIDBatches.take();
 
-          List<SimilarItems> similarItemsOfBatch = Lists.newArrayListWithCapacity(itemIDBatch.length);
+          List<SimilarItems> similarItemsOfBatch = new ArrayList<>(itemIDBatch.length);
           for (long itemID : itemIDBatch) {
             List<RecommendedItem> similarItems = getRecommender().mostSimilarItems(itemID, getSimilarItemsPerItem());
 
