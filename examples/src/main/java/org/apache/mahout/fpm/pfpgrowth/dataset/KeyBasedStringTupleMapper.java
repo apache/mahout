@@ -18,11 +18,11 @@
 package org.apache.mahout.fpm.pfpgrowth.dataset;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -53,13 +53,13 @@ public class KeyBasedStringTupleMapper extends Mapper<LongWritable,Text,Text,Str
       context.getCounter("Map", "ERROR").increment(1);
       return;
     }
-    Collection<String> oKey = Lists.newArrayList();
+    Collection<String> oKey = new ArrayList<>();
     for (int groupingField : groupingFields) {
       oKey.add(fields[groupingField]);
       context.setStatus(fields[groupingField]);
     }
     
-    List<String> oValue = Lists.newArrayList();
+    List<String> oValue = new ArrayList<>();
     for (int selectedField : selectedFields) {
       oValue.add(fields[selectedField]);
     }

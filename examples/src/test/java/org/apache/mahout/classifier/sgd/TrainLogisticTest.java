@@ -20,7 +20,6 @@ package org.apache.mahout.classifier.sgd;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.examples.MahoutTestCase;
@@ -36,6 +35,7 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class TrainLogisticTest extends MahoutTestCase {
 
@@ -65,7 +65,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     assertTrue(lmp.useBias());
     assertEquals("color", lmp.getTargetVariable());
     CsvRecordFactory csv = lmp.getCsvRecordFactory();
-    assertEquals("[1, 2]", Sets.newTreeSet(csv.getTargetCategories()).toString());
+    assertEquals("[1, 2]", new TreeSet<>(csv.getTargetCategories()).toString());
     assertEquals("[Intercept Term, x, y]", Sets.newTreeSet(csv.getPredictors()).toString());
 
     // verify model by building dissector
@@ -75,15 +75,12 @@ public class TrainLogisticTest extends MahoutTestCase {
     verifyModel(lmp, csv, data, model, expectedValues);
 
     // test saved model
-    InputStream in = new FileInputStream(new File(outputFile));
-    try {
+    try (InputStream in = new FileInputStream(new File(outputFile))){
       LogisticModelParameters lmpOut = LogisticModelParameters.loadFrom(in);
       CsvRecordFactory csvOut = lmpOut.getCsvRecordFactory();
       csvOut.firstLine(data.get(0));
       OnlineLogisticRegression lrOut = lmpOut.createRegression();
       verifyModel(lmpOut, csvOut, data, lrOut, expectedValues);
-    } finally {
-      Closeables.close(in, true);
     }
 
     sw = new StringWriter();

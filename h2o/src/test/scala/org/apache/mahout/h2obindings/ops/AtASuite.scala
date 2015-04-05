@@ -21,13 +21,11 @@ import org.scalatest.FunSuite
 import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.drm._
-import org.apache.mahout.h2obindings._
-import org.apache.mahout.h2obindings.drm._
 import RLikeOps._
 import RLikeDrmOps._
 import org.apache.mahout.math.drm._
 
-/** Tests for {@link XtX} */
+/** Tests for @link XtX */
 class AtASuite extends FunSuite with DistributedH2OSuite {
   test("AtA slim") {
     val inCoreA = dense((1, 2), (2, 3))

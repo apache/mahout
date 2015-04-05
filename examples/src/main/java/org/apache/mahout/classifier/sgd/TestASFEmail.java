@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -26,6 +25,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
@@ -79,7 +79,7 @@ public final class TestASFEmail {
       }
     };
     SequenceFileDirIterator<Text, VectorWritable> iter =
-        new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, testFilter,
+        new SequenceFileDirIterator<>(new Path(base.toString()), PathType.LIST, testFilter,
         null, true, conf);
 
     long numItems = 0;
@@ -91,7 +91,7 @@ public final class TestASFEmail {
 
     System.out.println(numItems + " test files");
     ResultAnalyzer ra = new ResultAnalyzer(asfDictionary.values(), "DEFAULT");
-    iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, testFilter,
+    iter = new SequenceFileDirIterator<>(new Path(base.toString()), PathType.LIST, testFilter,
             null, true, conf);
     while (iter.hasNext()) {
       Pair<Text, VectorWritable> next = iter.next();

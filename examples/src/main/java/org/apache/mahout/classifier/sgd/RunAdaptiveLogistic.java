@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -26,10 +25,12 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.classifier.sgd.AdaptiveLogisticRegression.Wrapper;
 import org.apache.mahout.ep.State;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -75,9 +76,9 @@ public final class RunAdaptiveLogistic {
 
     BufferedReader in = TrainAdaptiveLogistic.open(inputFile);
     int k = 0;
-    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), Charsets.UTF_8));
 
-    try {
+    try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile),
+        Charsets.UTF_8))) {
       out.write(idColumn + ",target,score");
       out.newLine();
 
@@ -92,7 +93,7 @@ public final class RunAdaptiveLogistic {
         results.clear();
         if (maxScoreOnly) {
           results.put(csv.getTargetLabel(scores.maxValueIndex()),
-            scores.maxValue());
+              scores.maxValue());
         } else {
           for (int i = 0; i < scores.size(); i++) {
             results.put(csv.getTargetLabel(i), scores.get(i));
@@ -110,8 +111,6 @@ public final class RunAdaptiveLogistic {
         line = in.readLine();
       }
       out.flush();
-    } finally {
-      out.close();
     }
     output.println(k + " records processed totally.");
   }

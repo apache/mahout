@@ -27,7 +27,6 @@ import org.junit.Test;
 
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.Repeat;
-import com.google.common.io.Closeables;
 
 public final class VectorWritableTest extends RandomizedTest {
   private static final int MAX_VECTOR_SIZE = 100;
@@ -105,19 +104,13 @@ public final class VectorWritableTest extends RandomizedTest {
 
   private static void writeAndRead(Writable toWrite, Writable toRead) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    DataOutputStream dos = new DataOutputStream(baos);
-    try {
+    try (DataOutputStream dos = new DataOutputStream(baos)){
       toWrite.write(dos);
-    } finally {
-      Closeables.close(dos, false);
     }
 
     ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-    DataInputStream dis = new DataInputStream(bais);
-    try {
+    try (DataInputStream dis = new DataInputStream(bais)) {
       toRead.readFields(dis);
-    } finally {
-      Closeables.close(dos, true);
     }
   }
 }

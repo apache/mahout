@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.sgd.bankmarketing;
 
-import com.google.common.collect.Maps;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.vectorizer.encoders.ConstantValueEncoder;
@@ -25,6 +24,7 @@ import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
 import org.apache.mahout.vectorizer.encoders.StaticWordValueEncoder;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TelephoneCall {
@@ -34,7 +34,7 @@ public class TelephoneCall {
 
   private RandomAccessSparseVector vector;
 
-  private Map<String, String> fields = Maps.newLinkedHashMap();
+  private Map<String, String> fields = new LinkedHashMap<>();
 
   public TelephoneCall(Iterable<String> fieldNames, Iterable<String> values) {
     vector = new RandomAccessSparseVector(FEATURES);
@@ -44,37 +44,52 @@ public class TelephoneCall {
       String fieldValue = value.next();
       fields.put(name, fieldValue);
 
-      if (name.equals("age")) {
-        double v = Double.parseDouble(fieldValue);
-        featureEncoder.addToVector(name, Math.log(v), vector);
-
-      } else if (name.equals("balance")) {
-        double v;
-        v = Double.parseDouble(fieldValue);
-        if (v < -2000) {
-          v = -2000;
+      switch (name) {
+        case "age": {
+          double v = Double.parseDouble(fieldValue);
+          featureEncoder.addToVector(name, Math.log(v), vector);
+          break;
         }
-        featureEncoder.addToVector(name, Math.log(v + 2001) - 8, vector);
-
-      } else if (name.equals("duration")) {
-        double v;
-        v = Double.parseDouble(fieldValue);
-        featureEncoder.addToVector(name, Math.log(v + 1) - 5, vector);
-
-      } else if (name.equals("pdays")) {
-        double v;
-        v = Double.parseDouble(fieldValue);
-        featureEncoder.addToVector(name, Math.log(v + 2), vector);
-
-      } else if (name.equals("job") || name.equals("marital") || name.equals("education") || name.equals("default") ||
-                 name.equals("housing") || name.equals("loan") || name.equals("contact") || name.equals("campaign") ||
-                 name.equals("previous") || name.equals("poutcome")) {
-        featureEncoder.addToVector(name + ":" + fieldValue, 1, vector);
-
-      } else if (name.equals("day") || name.equals("month") || name.equals("y")) {
-        // ignore these for vectorizing
-      } else {
-        throw new IllegalArgumentException(String.format("Bad field name: %s", name));
+        case "balance": {
+          double v;
+          v = Double.parseDouble(fieldValue);
+          if (v < -2000) {
+            v = -2000;
+          }
+          featureEncoder.addToVector(name, Math.log(v + 2001) - 8, vector);
+          break;
+        }
+        case "duration": {
+          double v;
+          v = Double.parseDouble(fieldValue);
+          featureEncoder.addToVector(name, Math.log(v + 1) - 5, vector);
+          break;
+        }
+        case "pdays": {
+          double v;
+          v = Double.parseDouble(fieldValue);
+          featureEncoder.addToVector(name, Math.log(v + 2), vector);
+          break;
+        }
+        case "job":
+        case "marital":
+        case "education":
+        case "default":
+        case "housing":
+        case "loan":
+        case "contact":
+        case "campaign":
+        case "previous":
+        case "poutcome":
+          featureEncoder.addToVector(name + ":" + fieldValue, 1, vector);
+          break;
+        case "day":
+        case "month":
+        case "y":
+          // ignore these for vectorizing
+          break;
+        default:
+          throw new IllegalArgumentException(String.format("Bad field name: %s", name));
       }
     }
   }

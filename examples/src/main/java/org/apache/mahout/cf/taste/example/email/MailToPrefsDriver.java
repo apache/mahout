@@ -17,13 +17,6 @@
 
 package org.apache.mahout.cf.taste.example.email;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -52,6 +45,13 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VarIntWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Convert the Mail archives (see {@link org.apache.mahout.text.SequenceFilesFromMailArchives}) to a preference
@@ -228,7 +228,7 @@ public final class MailToPrefsDriver extends AbstractJob {
                                                    Configuration baseConf,
                                                    int chunkSizeInMegabytes, int[] maxTermDimension)
     throws IOException {
-    List<Path> chunkPaths = Lists.newArrayList();
+    List<Path> chunkPaths = new ArrayList<>();
 
     Configuration conf = new Configuration(baseConf);
 

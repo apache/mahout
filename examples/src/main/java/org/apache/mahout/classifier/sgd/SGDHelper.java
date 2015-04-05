@@ -17,13 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
+import com.google.common.collect.Multiset;
 import org.apache.mahout.classifier.NewsgroupHelper;
 import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Matrix;
@@ -32,9 +26,14 @@ import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multiset;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
 
 public final class SGDHelper {
 
@@ -50,7 +49,7 @@ public final class SGDHelper {
     CrossFoldLearner model = learningAlgorithm.getBest().getPayload().getLearner();
     model.close();
 
-    Map<String, Set<Integer>> traceDictionary = Maps.newTreeMap();
+    Map<String, Set<Integer>> traceDictionary = new TreeMap<>();
     ModelDissector md = new ModelDissector();
 
     NewsgroupHelper helper = new NewsgroupHelper();
@@ -66,7 +65,7 @@ public final class SGDHelper {
       md.update(v, traceDictionary, model);
     }
 
-    List<String> ngNames = Lists.newArrayList(dictionary.values());
+    List<String> ngNames = new ArrayList<>(dictionary.values());
     List<ModelDissector.Weight> weights = md.summary(100);
     System.out.println("============");
     System.out.println("Model Dissection");
@@ -78,7 +77,7 @@ public final class SGDHelper {
   }
 
   public static List<File> permute(Iterable<File> files, Random rand) {
-    List<File> r = Lists.newArrayList();
+    List<File> r = new ArrayList<>();
     for (File file : files) {
       int i = rand.nextInt(r.size() + 1);
       if (i == r.size()) {

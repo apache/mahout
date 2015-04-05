@@ -17,13 +17,9 @@
 
 package org.apache.mahout.h2obindings.drm
 
-import org.scalatest.FunSuite
-import org.apache.mahout.math._
-import scalabindings._
-import drm._
-import RLikeOps._
-import RLikeDrmOps._
 import org.apache.mahout.h2obindings.test.DistributedH2OSuite
+import org.apache.mahout.math.drm._
+import org.scalatest.FunSuite
 
 
 class DrmLikeSuite extends FunSuite with DistributedH2OSuite with DrmLikeSuiteBase
