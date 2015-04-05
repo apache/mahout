@@ -43,7 +43,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 
-/** Train a {@link MultilayerPerceptron}. */
+/** Train a {@link MultilayerPerceptron}.
+ * @deprecated as of as of 0.10.0.
+ * */
+@Deprecated
 public final class TrainMultilayerPerceptron {
 
   private static final Logger log = LoggerFactory.getLogger(TrainMultilayerPerceptron.class);

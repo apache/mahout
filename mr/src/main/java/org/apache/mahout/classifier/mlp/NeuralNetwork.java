@@ -49,7 +49,9 @@ import com.google.common.io.Closeables;
  * AbstractNeuralNetwork defines the general operations for a neural network
  * based model. Typically, all derivative models such as Multilayer Perceptron
  * and Autoencoder consist of neurons and the weights between neurons.
+ * @deprecated as of as of 0.10.0.
  */
+@Deprecated
 public abstract class NeuralNetwork {
   
   private static final Logger log = LoggerFactory.getLogger(NeuralNetwork.class);
