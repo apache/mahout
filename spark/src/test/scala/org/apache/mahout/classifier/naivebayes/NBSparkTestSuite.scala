@@ -146,7 +146,7 @@ class NBSparkTestSuite extends FunSuite with MahoutSuite with DistributedSparkSu
     //   val testTFIDFDrm = drm.drmParallelizeWithRowLabels(m = matrixSetup, numPartitions = 2)
 
     // self test on this model
-    val result = NaiveBayes.test(materializedModel, TFIDFDrm , false)
+    val result = SparkNaiveBayes.test(materializedModel, TFIDFDrm , false)
 
     println(result)
 
