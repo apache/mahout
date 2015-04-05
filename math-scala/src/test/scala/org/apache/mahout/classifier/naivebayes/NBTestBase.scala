@@ -168,4 +168,124 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
     }
   }
 
+  test("train and test a model") {
+
+    // test from simulated sparse TF-IDF data
+    val inCoreTFIDF = sparse(
+      (0, 0.7) ::(1, 0.1) ::(2, 0.1) ::(3, 0.3) :: Nil,
+      (0, 0.4) ::(1, 0.4) ::(2, 0.1) ::(3, 0.1) :: Nil,
+      (0, 0.1) ::(1, 0.0) ::(2, 0.8) ::(3, 0.1) :: Nil,
+      (0, 0.1) ::(1, 0.1) ::(2, 0.1) ::(3, 0.7) :: Nil
+    )
+
+    val labelIndex = new java.util.HashMap[String,Integer]()
+    labelIndex.put("/Cat1/", 0)
+    labelIndex.put("/Cat2/", 1)
+    labelIndex.put("/Cat3/", 2)
+    labelIndex.put("/Cat4/", 3)
+
+    val TFIDFDrm = drm.drmParallelize(m = inCoreTFIDF, numPartitions = 2)
+
+    // train a Standard NB Model- no label index here
+    val model = NaiveBayes.train(TFIDFDrm, labelIndex, false)
+
+    // validate the model- will throw an exception if model is invalid
+    model.validate()
+
+    // save the model
+    model.dfsWrite(TmpDir)
+
+    // reload a new model which should be equal to the original
+    // this will automatically trigger a validate() call
+    val materializedModel= NBModel.dfsRead(TmpDir)
+
+
+    // check to se if the new model is complementary
+    materializedModel.isComplementary should be (model.isComplementary)
+
+    // check the label indexMaps
+    for(elem <- model.labelIndex){
+      model.labelIndex(elem._1) == materializedModel.labelIndex(elem._1) should be (true)
+    }
+
+
+    //self test on the original set
+    val inCoreTFIDFWithLabels = inCoreTFIDF.clone()
+    inCoreTFIDFWithLabels.setRowLabelBindings(labelIndex)
+    val TFIDFDrmWithLabels = drm.drmParallelizeWithRowLabels(m = inCoreTFIDFWithLabels, numPartitions = 2)
+
+    NaiveBayes.test(materializedModel,TFIDFDrmWithLabels , false)
+
+  }
+
+  test("train and test a model with the confusion matrix") {
+
+    val rowBindings = new java.util.HashMap[String,Integer]()
+    rowBindings.put("/Cat1/doc_a/", 0)
+    rowBindings.put("/Cat2/doc_b/", 1)
+    rowBindings.put("/Cat1/doc_c/", 2)
+    rowBindings.put("/Cat2/doc_d/", 3)
+    rowBindings.put("/Cat1/doc_e/", 4)
+    rowBindings.put("/Cat2/doc_f/", 5)
+    rowBindings.put("/Cat1/doc_g/", 6)
+    rowBindings.put("/Cat2/doc_h/", 7)
+    rowBindings.put("/Cat1/doc_i/", 8)
+    rowBindings.put("/Cat2/doc_j/", 9)
+
+    val seed = 1
+
+    val matrixSetup = Matrices.uniformView(10, 50 , seed)
+
+    println("TFIDF matrix")
+    println(matrixSetup)
+
+    matrixSetup.setRowLabelBindings(rowBindings)
+
+    val TFIDFDrm = drm.drmParallelizeWithRowLabels(matrixSetup)
+
+  //  println("Parallelized and Collected")
+  //  println(TFIDFDrm.collect)
+
+    val (labelIndex, aggregatedTFIDFDrm) = NaiveBayes.extractLabelsAndAggregateObservations(TFIDFDrm)
+
+    println("Aggregated by key")
+    println(aggregatedTFIDFDrm.collect)
+    println(labelIndex)
+
+
+    // train a Standard NB Model- no label index here
+    val model = NaiveBayes.train(aggregatedTFIDFDrm, labelIndex, false)
+
+    // validate the model- will throw an exception if model is invalid
+    model.validate()
+
+    // save the model
+    model.dfsWrite(TmpDir)
+
+    // reload a new model which should be equal to the original
+    // this will automatically trigger a validate() call
+    val materializedModel= NBModel.dfsRead(TmpDir)
+
+    // check to se if the new model is complementary
+    materializedModel.isComplementary should be (model.isComplementary)
+
+    // check the label indexMaps
+    for(elem <- model.labelIndex){
+      model.labelIndex(elem._1) == materializedModel.labelIndex(elem._1) should be (true)
+    }
+
+ //   val testTFIDFDrm = drm.drmParallelizeWithRowLabels(m = matrixSetup, numPartitions = 2)
+
+    // self test on this model
+    val result = NaiveBayes.test(materializedModel, TFIDFDrm , false)
+
+    println(result)
+
+    result.getConfusionMatrix.getMatrix.getQuick(0, 0) should be(5)
+    result.getConfusionMatrix.getMatrix.getQuick(0, 1) should be(0)
+    result.getConfusionMatrix.getMatrix.getQuick(1, 0) should be(0)
+    result.getConfusionMatrix.getMatrix.getQuick(1, 1) should be(5)
+
+  }
+
 }

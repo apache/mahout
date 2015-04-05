@@ -78,7 +78,7 @@ object TrainNBDriver extends MahoutSparkDriver {
     val trainingSet = readTrainingSet
     // Use Spark-Optimized Naive Bayes here to extract labels and aggregate options
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
-    val model = NaiveBayes.train(aggregatedObservations, labelIndex, complementary)
+    val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, complementary)
 
     model.dfsWrite(outputPath)
 
