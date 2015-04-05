@@ -65,9 +65,6 @@ if [ "x$alg" == "xnaivebayes-Spark" -o "x$alg" == "xcnaivebayes-Spark" ]; then
     echo "Plese set your MASTER env variable to point to your Spark Master URL. exiting..."
     exit 1
   fi
-  set +e
-     $HADOOP dfs -rmr ${WORK_DIR}/spark-model
-  set -e
 fi
 
 if [ "x$alg" != "xclean" ]; then
@@ -161,7 +158,7 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
       echo "Training Naive Bayes model"
       ./bin/mahout spark-trainnb \
         -i ${WORK_DIR}/20news-train-vectors \
-        -o ${WORK_DIR}/spark-model $c -ma $MASTER
+        -o ${WORK_DIR}/spark-model $c -ow -a 0.5 -ma $MASTER
 
       echo "Self testing on training set"
       ./bin/mahout spark-testnb \
