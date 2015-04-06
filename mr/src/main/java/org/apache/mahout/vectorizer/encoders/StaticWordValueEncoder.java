@@ -17,10 +17,10 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
+import com.google.common.base.Charsets;
+
 import java.util.Collections;
 import java.util.Map;
-
-import org.apache.commons.io.Charsets;
 
 /**
  * Encodes a categorical values with an unbounded vocabulary.  Values are encoding by incrementing a

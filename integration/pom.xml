@@ -137,17 +137,6 @@
       <artifactId>lucene-analyzers-common</artifactId>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-core</artifactId>
-      <version>${lucene.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
-    </dependency>
-
 
     <dependency>
       <groupId>org.mongodb</groupId>

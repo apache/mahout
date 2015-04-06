@@ -17,7 +17,7 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
-import org.apache.commons.io.Charsets;
+import com.google.common.base.Charsets;
 import org.apache.mahout.math.Vector;
 
 /**
