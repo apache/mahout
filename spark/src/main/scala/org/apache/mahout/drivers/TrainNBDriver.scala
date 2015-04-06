@@ -53,7 +53,7 @@ object TrainNBDriver extends MahoutSparkDriver {
       } text ("Train a complementary model, Default: false.")
 
       // Laplace smoothing paramater default is 1.0
-      opts = opts + ("alphaI" -> 1.0f)
+      opts = opts + ("alphaI" -> 1.0)
       opt[Double]("alphaI") abbr ("a") action { (x, options) =>
         options + ("alphaI" -> x)
       } text ("Laplace soothing factor default is 1.0") validate { x =>

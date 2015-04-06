@@ -158,7 +158,7 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
       echo "Training Naive Bayes model"
       ./bin/mahout spark-trainnb \
         -i ${WORK_DIR}/20news-train-vectors \
-        -o ${WORK_DIR}/spark-model $c -ow -a 0.5 -ma $MASTER
+        -o ${WORK_DIR}/spark-model $c -ow -ma $MASTER
 
       echo "Self testing on training set"
       ./bin/mahout spark-testnb \
