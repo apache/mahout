@@ -34,6 +34,7 @@ import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.StopwordAnalyzerBase;
+import org.apache.lucene.util.Version;
 
 /**
  * Custom Lucene Analyzer designed for aggressive feature reduction
@@ -41,12 +42,13 @@ import org.apache.lucene.analysis.util.StopwordAnalyzerBase;
  * stop words, excluding non-alpha-numeric tokens, and porter stemming.
  */
 public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
-
+  private static final Version LUCENE_VERSION = Version.LUCENE_46;
+  
   // extended set of stop words composed of common mail terms like "hi",
   // HTML tags, and Java keywords asmany of the messages in the archives
   // are subversion check-in notifications
     
-  private static final CharArraySet STOP_SET = new CharArraySet(Arrays.asList(
+  private static final CharArraySet STOP_SET = new CharArraySet(LUCENE_VERSION, Arrays.asList(
     "3d","7bit","a0","about","above","abstract","across","additional","after",
     "afterwards","again","against","align","all","almost","alone","along",
     "already","also","although","always","am","among","amongst","amoungst",
@@ -106,17 +108,22 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   private static final Matcher MATCHER = ALPHA_NUMERIC.matcher("");
 
   public MailArchivesClusteringAnalyzer() {
-    super(STOP_SET);
+    super(LUCENE_VERSION, STOP_SET);
   }
 
+  public MailArchivesClusteringAnalyzer(CharArraySet stopSet) {
+    super(LUCENE_VERSION, stopSet);
+
+  }
+  
   @Override
   protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-    Tokenizer tokenizer = new StandardTokenizer(reader);
-    TokenStream result = new StandardFilter(tokenizer);
-    result = new LowerCaseFilter(result);
+    Tokenizer tokenizer = new StandardTokenizer(LUCENE_VERSION, reader);
+    TokenStream result = new StandardFilter(LUCENE_VERSION, tokenizer);
+    result = new LowerCaseFilter(LUCENE_VERSION, result);
     result = new ASCIIFoldingFilter(result);
     result = new AlphaNumericMaxLengthFilter(result);
-    result = new StopFilter(result, STOP_SET);
+    result = new StopFilter(LUCENE_VERSION, result, STOP_SET);
     result = new PorterStemFilter(result);
     return new TokenStreamComponents(tokenizer, result);
   }
