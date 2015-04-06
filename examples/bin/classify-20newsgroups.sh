@@ -65,6 +65,10 @@ if [ "x$alg" == "xnaivebayes-Spark" -o "x$alg" == "xcnaivebayes-Spark" ]; then
     echo "Plese set your MASTER env variable to point to your Spark Master URL. exiting..."
     exit 1
   fi
+  if [ "$MAHOUT_LOCAL" != "" ] ; then
+    echo "Options 3 and 4 can not run in MAHOUT_LOCAL mode. exiting..."
+    exit 1
+  fi
 fi
 
 if [ "x$alg" != "xclean" ]; then
