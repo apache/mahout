@@ -23,8 +23,8 @@ INPUT="examples/src/main/resources/cf-data-purchase.txt" # purchase actions
 INPUT2="examples/src/main/resources/cf-data-view.txt" # view actions
 
 #setup env
-LOCAL=$MAHOUT-LOCAL # save state
-export MAHOUT-LOCAL=true #set so the raw local file system is used
+LOCAL=$MAHOUT_LOCAL # save state
+export MAHOUT_LOCAL=true #set so the raw local file system is used
 
 echo "This runs spark-itemsimilarity on two user actions in two intput files"
 echo "The example uses fake purchases and views of products, calculating"
@@ -40,6 +40,6 @@ rm -r $OUTPUT
 
 mahout spark-itemsimilarity -i $INPUT -i2 $INPUT2 -o $OUTPUT -ma local
 
-export MAHOUT-LOCAL=$LOCAL #restore state
+export MAHOUT_LOCAL=$LOCAL #restore state
 
 echo "Look in " $OUTPUT " for spark-itemsimilarity indicator data."
