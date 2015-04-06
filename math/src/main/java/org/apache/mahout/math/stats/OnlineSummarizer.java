@@ -40,7 +40,7 @@ import com.tdunning.math.stats.TDigest;
  */
 public class OnlineSummarizer {
 
-  private TDigest quantiles = TDigest.createTreeDigest(100.0);
+  private TDigest quantiles = TDigest.createDigest(100.0);
 
   // mean and variance estimates
   private double mean;
