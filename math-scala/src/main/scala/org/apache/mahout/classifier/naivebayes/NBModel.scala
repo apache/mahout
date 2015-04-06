@@ -100,7 +100,7 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
     //todo:  write something other than a DRM for label Index, is Complementary, alphaI.
 
     // add a directory to put all of the DRMs in
-    val fullPathToModel = pathToModel + "/naiveBayesModel"
+    val fullPathToModel = pathToModel + NBModel.modelBaseDirectory
 
     drmParallelize(weightsPerLabelAndFeature).dfsWrite(fullPathToModel + "/weightsPerLabelAndFeatureDrm.drm")
     drmParallelize(sparse(weightsPerFeature)).dfsWrite(fullPathToModel + "/weightsPerFeatureDrm.drm")
@@ -150,6 +150,9 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
 }
 
 object NBModel extends java.io.Serializable {
+
+  val modelBaseDirectory = "/naiveBayesModel"
+
   /**
    * Read a trained model in from from the filesystem.
    * @param pathToModel directory from which to read individual model components
@@ -159,7 +162,7 @@ object NBModel extends java.io.Serializable {
     //todo:  Takes forever to read we need a more practical method of writing models. Readers/Writers?
 
     // read from a base directory for all drms
-    val fullPathToModel = pathToModel + "/naiveBayesModel"
+    val fullPathToModel = pathToModel + modelBaseDirectory
 
     val weightsPerFeatureDrm = drmDfsRead(fullPathToModel + "/weightsPerFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val weightsPerFeature = weightsPerFeatureDrm.collect(0, ::)

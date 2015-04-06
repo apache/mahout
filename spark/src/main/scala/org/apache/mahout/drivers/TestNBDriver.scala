@@ -20,6 +20,7 @@ package org.apache.mahout.drivers
 import org.apache.mahout.classifier.naivebayes.{SparkNaiveBayes, NBModel}
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.drm.RLikeDrmOps.drm2RLikeOps
 import scala.collection.immutable.HashMap
 
 
