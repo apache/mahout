@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.streaming.cluster;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +27,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import org.apache.mahout.clustering.ClusteringUtils;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
@@ -169,7 +169,7 @@ public class BallKMeans implements Iterable<Centroid> {
     // If there will be no points assigned to the test set, return now.
     if (testProbability == 0) {
       return new Pair<List<? extends WeightedVector>, List<? extends WeightedVector>>(datapoints,
-          Lists.<WeightedVector>newArrayList());
+          new ArrayList<WeightedVector>());
     }
 
     int numTest = (int) (testProbability * datapoints.size());
@@ -190,7 +190,7 @@ public class BallKMeans implements Iterable<Centroid> {
    */
   public UpdatableSearcher cluster(List<? extends WeightedVector> datapoints) {
     Pair<List<? extends WeightedVector>, List<? extends WeightedVector>> trainTestSplit = splitTrainTest(datapoints);
-    List<Vector> bestCentroids = Lists.newArrayList();
+    List<Vector> bestCentroids = new ArrayList<>();
     double cost = Double.POSITIVE_INFINITY;
     double bestCost = Double.POSITIVE_INFINITY;
     for (int i = 0; i < numRuns; ++i) {
@@ -377,11 +377,11 @@ public class BallKMeans implements Iterable<Centroid> {
     DistanceMeasure distanceMeasure = centroids.getDistanceMeasure();
     // closestClusterDistances.get(i) is the distance from the i'th cluster to its closest
     // neighboring cluster.
-    List<Double> closestClusterDistances = Lists.newArrayListWithExpectedSize(numClusters);
+    List<Double> closestClusterDistances = new ArrayList<>(numClusters);
     // clusterAssignments[i] == j means that the i'th point is assigned to the j'th cluster. When
     // these don't change, we are done.
     // Each point is assigned to the invalid "-1" cluster initially.
-    List<Integer> clusterAssignments = Lists.newArrayList(Collections.nCopies(datapoints.size(), -1));
+    List<Integer> clusterAssignments = new ArrayList<>(Collections.nCopies(datapoints.size(), -1));
 
     boolean changed = true;
     for (int i = 0; changed && i < maxNumIterations; i++) {
@@ -398,7 +398,7 @@ public class BallKMeans implements Iterable<Centroid> {
 
       // Copies the current cluster centroids to newClusters and sets their weights to 0. This is
       // so we calculate the new centroids as we go through the datapoints.
-      List<Centroid> newCentroids = Lists.newArrayList();
+      List<Centroid> newCentroids = new ArrayList<>();
       for (Vector centroid : centroids) {
         // need a deep copy because we will mutate these values
         Centroid newCentroid = (Centroid)centroid.clone();

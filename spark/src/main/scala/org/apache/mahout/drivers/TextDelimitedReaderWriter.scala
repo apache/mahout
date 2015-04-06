@@ -22,7 +22,7 @@ import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.apache.spark.SparkContext._
 import org.apache.mahout.math.RandomAccessSparseVector
 import com.google.common.collect.{BiMap, HashBiMap}
-import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
+import org.apache.mahout.math.drm.{DrmLike, DrmLikeOps, DistributedContext, CheckpointedDrm}
 import org.apache.mahout.sparkbindings._
 import scala.collection.JavaConversions._
 
@@ -108,7 +108,8 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         .asInstanceOf[DrmRdd[Int]]
 
       // wrap the DrmRdd and a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
-      val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
+      //val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
+      val drmInteractions = drmWrap[Int](indexedInteractions)
 
       new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
 
@@ -186,17 +187,18 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
             val id = element.split(columnIdStrengthDelim)(0)
             val columnID = columnIDDictionary_bcast.value.get(id).get
             val pair = element.split(columnIdStrengthDelim)
-            if (pair.size == 2)// there was a strength
-              row.setQuick(columnID,pair(1).toDouble)
+            if (pair.size == 2) // there was a strength
+              row.setQuick(columnID, pair(1).toDouble)
             else // no strength so set DRM value to 1.0d, this ignores 'omitScore', which is a write param
-              row.setQuick(columnID,1.0d)
+              row.setQuick(columnID, 1.0d)
           }
           rowIndex -> row
         }
         .asInstanceOf[DrmRdd[Int]]
 
-      // wrap the DrmRdd and a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
-      val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
+      // wrap the DrmRdd in a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
+      //val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
+      val drmInteractions = drmWrap[Int](indexedInteractions)
 
       new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
 

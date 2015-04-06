@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Random;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
@@ -218,11 +217,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     Random random = RandomUtils.getRandom();
 
     FileSystem fs = FileSystem.get(pathToM(-1).toUri(), getConf());
-    SequenceFile.Writer writer = null;
-    try {
-      writer = new SequenceFile.Writer(fs, getConf(), new Path(pathToM(-1), "part-m-00000"), IntWritable.class,
-          VectorWritable.class);
-
+    try (SequenceFile.Writer writer =
+             new SequenceFile.Writer(fs, getConf(), new Path(pathToM(-1), "part-m-00000"),
+                 IntWritable.class, VectorWritable.class)) {
       IntWritable index = new IntWritable();
       VectorWritable featureVector = new VectorWritable();
 
@@ -236,8 +233,6 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         featureVector.set(row);
         writer.append(index, featureVector);
       }
-    } finally {
-      Closeables.close(writer, false);
     }
   }
 

@@ -22,7 +22,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -32,6 +31,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -71,7 +71,7 @@ public class ResplitSequenceFiles {
   private void run(PrintWriter printWriter) throws IOException {
     conf = new Configuration();
     SequenceFileDirIterable<Writable, Writable> inputIterable = new
-        SequenceFileDirIterable<Writable, Writable>(new Path(inputFile), PathType.LIST, conf);
+        SequenceFileDirIterable<>(new Path(inputFile), PathType.LIST, conf);
     fs = FileSystem.get(conf);
 
     int numEntries = Iterables.size(inputIterable);

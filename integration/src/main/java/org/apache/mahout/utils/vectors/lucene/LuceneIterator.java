@@ -17,14 +17,14 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
+import java.io.IOException;
+import java.util.Set;
+import java.util.TreeSet;
+
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import org.apache.lucene.index.IndexReader;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.vectorizer.Weight;
-
-import java.io.IOException;
-import java.util.Set;
 
 /**
  * An {@link java.util.Iterator} over {@link org.apache.mahout.math.Vector}s that uses a Lucene index as the source
@@ -77,7 +77,7 @@ public class LuceneIterator extends AbstractLuceneIterator {
         "Must be: 0.0 <= maxPercentErrorDocs <= 1.0");
     this.idField = idField;
     if (idField != null) {
-      idFieldSelector = Sets.newTreeSet();
+      idFieldSelector = new TreeSet<>();
       idFieldSelector.add(idField);
     } else {
       /*The field in the index  containing the index. If null, then the Lucene internal doc id is used

@@ -16,9 +16,13 @@
  */
 package org.apache.mahout.clustering.lda.cvb;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
@@ -44,10 +48,6 @@ import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
 
 /**
  * See {@link CachingCVB0Mapper} for more details on scalability and room for improvement.
@@ -274,7 +274,7 @@ public class CVB0Driver extends AbstractJob {
     conf.set(MODEL_WEIGHT, "1"); // TODO
     conf.set(TEST_SET_FRACTION, String.valueOf(testFraction));
 
-    List<Double> perplexities = Lists.newArrayList();
+    List<Double> perplexities = new ArrayList<>();
     for (int i = 1; i <= iterationNumber; i++) {
       // form path to model
       Path modelPath = modelPath(topicModelStateTempPath, i);

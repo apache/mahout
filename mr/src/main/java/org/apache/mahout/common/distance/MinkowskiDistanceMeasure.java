@@ -17,10 +17,10 @@
 
 package org.apache.mahout.common.distance;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.DoubleParameter;
 import org.apache.mahout.common.parameters.Parameter;
@@ -50,7 +50,7 @@ public class MinkowskiDistanceMeasure implements DistanceMeasure {
 
   @Override
   public void createParameters(String prefix, Configuration conf) {
-    parameters = Lists.newArrayList();
+    parameters = new ArrayList<>();
     Parameter<?> param =
         new DoubleParameter(prefix, "exponent", conf, EXPONENT, "Exponent for Fractional Lagrange distance");
     parameters.add(param);

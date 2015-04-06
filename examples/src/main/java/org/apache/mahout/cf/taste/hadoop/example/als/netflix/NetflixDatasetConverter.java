@@ -17,19 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop.example.als.netflix;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -38,6 +28,14 @@ import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.iterator.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /** converts the raw files provided by netflix to an appropriate input format */
 public final class NetflixDatasetConverter {
@@ -68,17 +66,16 @@ public final class NetflixDatasetConverter {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(outputPath.toUri(), conf);
 
+    Preconditions.checkArgument(trainingDataDir != null, "Training Data location needs to be specified");
     log.info("Creating training set at {}/trainingSet/ratings.tsv ...", outputPath);
-    BufferedWriter writer  = null;
-    try {
-      FSDataOutputStream outputStream = fs.create(new Path(outputPath, "trainingSet/ratings.tsv"));
-      writer = new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8));
+    try (BufferedWriter writer =
+             new BufferedWriter(
+                 new OutputStreamWriter(
+                     fs.create(new Path(outputPath, "trainingSet/ratings.tsv")), Charsets.UTF_8))){
 
       int ratingsProcessed = 0;
       for (File movieRatings : new File(trainingDataDir).listFiles()) {
-        FileLineIterator lines = null;
-        try  {
-          lines = new FileLineIterator(movieRatings);
+        try (FileLineIterator lines = new FileLineIterator(movieRatings)) {
           boolean firstLineRead = false;
           String movieID = null;
           while (lines.hasNext()) {
@@ -97,17 +94,14 @@ public final class NetflixDatasetConverter {
               firstLineRead = true;
             }
           }
-        } finally {
-          Closeables.close(lines, true);
         }
+
       }
       log.info("{} ratings processed. done.", ratingsProcessed);
-    } finally {
-      Closeables.close(writer, false);
     }
 
     log.info("Reading probes...");
-    List<Preference> probes = Lists.newArrayListWithExpectedSize(2817131);
+    List<Preference> probes = new ArrayList<>(2817131);
     long currentMovieID = -1;
     for (String line : new FileLineIterable(new File(qualifyingTxt))) {
       if (line.contains(MOVIE_DENOTER)) {
@@ -120,11 +114,9 @@ public final class NetflixDatasetConverter {
     log.info("{} probes read...", probes.size());
 
     log.info("Reading ratings, creating probe set at {}/probeSet/ratings.tsv ...", outputPath);
-    writer = null;
-    try {
-      FSDataOutputStream outputStream = fs.create(new Path(outputPath, "probeSet/ratings.tsv"));
-      writer = new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8));
-
+    try (BufferedWriter writer =
+             new BufferedWriter(new OutputStreamWriter(
+                 fs.create(new Path(outputPath, "probeSet/ratings.tsv")), Charsets.UTF_8))){
       int ratingsProcessed = 0;
       for (String line : new FileLineIterable(new File(judgingTxt))) {
         if (line.contains(MOVIE_DENOTER)) {
@@ -141,8 +133,6 @@ public final class NetflixDatasetConverter {
         }
       }
       log.info("{} ratings processed. done.", ratingsProcessed);
-    } finally {
-      Closeables.close(writer, false);
     }
   }
 

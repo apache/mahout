@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.RelevantItemsDataSplitter;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -27,6 +26,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -62,7 +62,7 @@ public final class GenericRelevantItemsDataSplitter implements RelevantItemsData
     // If we're dealing with the very user that we're evaluating for precision/recall,
     if (userID == otherUserID) {
       // then must remove all the test IDs, the "relevant" item IDs
-      List<Preference> prefs2 = Lists.newArrayListWithCapacity(prefs2Array.length());
+      List<Preference> prefs2 = new ArrayList<>(prefs2Array.length());
       for (Preference pref : prefs2Array) {
         prefs2.add(pref);
       }

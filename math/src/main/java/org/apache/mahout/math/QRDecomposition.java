@@ -27,7 +27,6 @@ import org.apache.mahout.math.function.Functions;
 
 import java.util.Locale;
 
-
 /**
  For an <tt>m x n</tt> matrix <tt>A</tt> with <tt>m >= n</tt>, the QR decomposition is an <tt>m x n</tt>
  orthogonal matrix <tt>Q</tt> and an <tt>n x n</tt> upper triangular matrix <tt>R</tt> so that

@@ -18,13 +18,13 @@
 package org.apache.mahout.math;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.list.IntArrayList;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MatrixWritable implements Writable {
@@ -139,8 +139,8 @@ public class MatrixWritable implements Writable {
     }
 
     if (hasLabels) {
-      Map<String,Integer> columnLabelBindings = Maps.newHashMap();
-      Map<String,Integer> rowLabelBindings = Maps.newHashMap();
+      Map<String,Integer> columnLabelBindings = new HashMap<>();
+      Map<String,Integer> rowLabelBindings = new HashMap<>();
       readLabels(in, columnLabelBindings, rowLabelBindings);
       if (!columnLabelBindings.isEmpty()) {
         matrix.setColumnLabelBindings(columnLabelBindings);

@@ -17,18 +17,16 @@
 
 package org.apache.mahout.utils.regex;
 
-import com.google.common.io.Closeables;
+import java.io.IOException;
+import java.io.StringReader;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.common.lucene.TokenStreamIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.StringReader;
 
 public class AnalyzerTransformer implements RegexTransformer {
 
@@ -38,7 +36,7 @@ public class AnalyzerTransformer implements RegexTransformer {
   private static final Logger log = LoggerFactory.getLogger(AnalyzerTransformer.class);
 
   public AnalyzerTransformer() {
-    this(new StandardAnalyzer(Version.LUCENE_46), "text");
+    this(new StandardAnalyzer());
   }
 
   public AnalyzerTransformer(Analyzer analyzer) {
@@ -53,9 +51,7 @@ public class AnalyzerTransformer implements RegexTransformer {
   @Override
   public String transformMatch(String match) {
     StringBuilder result = new StringBuilder();
-    TokenStream ts = null;
-    try {
-      ts = analyzer.tokenStream(fieldName, new StringReader(match));
+    try (TokenStream ts = analyzer.tokenStream(fieldName, new StringReader(match))) {
       ts.addAttribute(CharTermAttribute.class);
       ts.reset();
       TokenStreamIterator iter = new TokenStreamIterator(ts);
@@ -65,12 +61,6 @@ public class AnalyzerTransformer implements RegexTransformer {
       ts.end();
     } catch (IOException e) {
       throw new IllegalStateException(e);
-    } finally {
-      try {
-        Closeables.close(ts, true);
-      } catch (IOException e) {
-        log.error(e.getMessage(), e);
-      }
     }
     return result.toString();
   }

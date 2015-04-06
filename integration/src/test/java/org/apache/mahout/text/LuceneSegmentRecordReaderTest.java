@@ -16,23 +16,24 @@
  */
 package org.apache.mahout.text;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
-import org.apache.lucene.index.*;
+import org.apache.lucene.index.SegmentCommitInfo;
+import org.apache.lucene.index.SegmentInfos;
 import org.apache.mahout.common.HadoopUtil;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-
-import static java.util.Arrays.asList;
-import static org.apache.mahout.text.doc.SingleFieldDocument.*;
+import static org.apache.mahout.text.doc.SingleFieldDocument.FIELD;
+import static org.apache.mahout.text.doc.SingleFieldDocument.ID_FIELD;
 
 public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
   private Configuration configuration;
@@ -44,7 +45,8 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
   @Before
   public void before() throws IOException, InterruptedException {
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(getConfiguration(),
-        asList(getIndexPath1()), new Path("output"), ID_FIELD, asList(FIELD));
+        Collections.singletonList(getIndexPath1()), new Path("output"), ID_FIELD,
+        Collections.singletonList(FIELD));
     configuration = lucene2SeqConf.serialize();
     recordReader = new LuceneSegmentRecordReader();
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
@@ -82,7 +84,8 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
   @Test(expected = IllegalArgumentException.class)
   public void testNonExistingIdField() throws Exception {
     configuration = new LuceneStorageConfiguration(getConfiguration(),
-        asList(getIndexPath1()), new Path("output"), "nonExistingId", asList(FIELD)).serialize();
+        Collections.singletonList(getIndexPath1()), new Path("output"), "nonExistingId",
+        Collections.singletonList(FIELD)).serialize();
     SegmentCommitInfo segmentInfo = segmentInfos.iterator().next();
     LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(),
         segmentInfo.info.name, segmentInfo.sizeInBytes());
@@ -92,8 +95,8 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testNonExistingField() throws Exception {
-    configuration = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()),
-        new Path("output"), ID_FIELD, asList("nonExistingField")).serialize();
+    configuration = new LuceneStorageConfiguration(getConfiguration(), Collections.singletonList(getIndexPath1()),
+        new Path("output"), ID_FIELD, Collections.singletonList("nonExistingField")).serialize();
     SegmentCommitInfo segmentInfo = segmentInfos.iterator().next();
     LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(),
         segmentInfo.info.name, segmentInfo.sizeInBytes());

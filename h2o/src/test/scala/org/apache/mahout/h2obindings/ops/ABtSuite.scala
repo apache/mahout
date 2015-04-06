@@ -21,8 +21,6 @@ import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 import org.scalatest.FunSuite
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.drm._
-import org.apache.mahout.h2obindings._
-import org.apache.mahout.h2obindings.drm._
 import RLikeOps._
 import RLikeDrmOps._
 import org.apache.mahout.math.drm._

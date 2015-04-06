@@ -18,23 +18,22 @@
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.hadoop.io.Writable;
 
 /**
  * Encapsulates everything we need to know about a model and how it reads and vectorizes its input.
@@ -111,11 +110,8 @@ public class LogisticModelParameters implements Writable {
    * @throws IOException If there is an error opening or closing the file.
    */
   public static LogisticModelParameters loadFrom(File in) throws IOException {
-    InputStream input = new FileInputStream(in);
-    try {
+    try (InputStream input = new FileInputStream(in)) {
       return loadFrom(input);
-    } finally {
-      Closeables.close(input, true);
     }
   }
 
@@ -150,7 +146,7 @@ public class LogisticModelParameters implements Writable {
   public void readFields(DataInput in) throws IOException {
     targetVariable = in.readUTF();
     int typeMapSize = in.readInt();
-    typeMap = Maps.newHashMapWithExpectedSize(typeMapSize);
+    typeMap = new HashMap<>(typeMapSize);
     for (int i = 0; i < typeMapSize; i++) {
       String key = in.readUTF();
       String value = in.readUTF();
@@ -160,7 +156,7 @@ public class LogisticModelParameters implements Writable {
     useBias = in.readBoolean();
     maxTargetCategories = in.readInt();
     int targetCategoriesSize = in.readInt();
-    targetCategories = Lists.newArrayListWithCapacity(targetCategoriesSize);
+    targetCategories = new ArrayList<>(targetCategoriesSize);
     for (int i = 0; i < targetCategoriesSize; i++) {
       targetCategories.add(in.readUTF());
     }
@@ -180,7 +176,7 @@ public class LogisticModelParameters implements Writable {
    */
   public void setTypeMap(Iterable<String> predictorList, List<String> typeList) {
     Preconditions.checkArgument(!typeList.isEmpty(), "Must have at least one type specifier");
-    typeMap = Maps.newHashMap();
+    typeMap = new HashMap<>();
     Iterator<String> iTypes = typeList.iterator();
     String lastType = null;
     for (Object x : predictorList) {

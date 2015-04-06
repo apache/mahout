@@ -18,7 +18,6 @@
 package org.apache.mahout.math.stats;
 
 import com.tdunning.math.stats.TDigest;
-import com.tdunning.math.stats.TreeDigest;
 
 /**
  * Computes on-line estimates of mean, variance and all five quartiles (notably including the
@@ -41,7 +40,7 @@ import com.tdunning.math.stats.TreeDigest;
  */
 public class OnlineSummarizer {
 
-  private TDigest quantiles = new TreeDigest(100);
+  private TDigest quantiles = TDigest.createDigest(100.0);
 
   // mean and variance estimates
   private double mean;

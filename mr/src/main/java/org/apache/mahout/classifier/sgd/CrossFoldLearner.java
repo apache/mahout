@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
@@ -31,6 +30,7 @@ import org.apache.mahout.math.stats.OnlineAuc;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,7 +47,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   private static final double MIN_SCORE = 1.0e-50;
   private OnlineAuc auc = new GlobalOnlineAuc();
   private double logLikelihood;
-  private final List<OnlineLogisticRegression> models = Lists.newArrayList();
+  private final List<OnlineLogisticRegression> models = new ArrayList<>();
 
   // lambda, learningRate, perTermOffset, perTermExponent
   private double[] parameters = new double[4];

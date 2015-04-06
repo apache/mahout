@@ -18,6 +18,7 @@
 package org.apache.mahout.text;
 
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -30,8 +31,6 @@ import org.apache.lucene.store.IOContext;
 
 import java.io.IOException;
 import java.util.List;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * Maps document IDs to key value pairs with ID field as the key and the concatenated stored field(s)
@@ -64,13 +63,13 @@ public class SequenceFilesFromLuceneStorageMapper extends Mapper<Text, NullWrita
     Text theValue = new Text();
     LuceneSeqFileHelper.populateValues(document, theValue, fields);
     //if they are both empty, don't write
-    if (isBlank(theKey.toString()) && isBlank(theValue.toString())) {
+    if (StringUtils.isBlank(theKey.toString()) && StringUtils.isBlank(theValue.toString())) {
       context.getCounter(DataStatus.EMPTY_BOTH).increment(1);
       return;
     }
-    if (isBlank(theKey.toString())) {
+    if (StringUtils.isBlank(theKey.toString())) {
       context.getCounter(DataStatus.EMPTY_KEY).increment(1);
-    } else if (isBlank(theValue.toString())) {
+    } else if (StringUtils.isBlank(theValue.toString())) {
       context.getCounter(DataStatus.EMPTY_VALUE).increment(1);
     }
     context.write(theKey, theValue);

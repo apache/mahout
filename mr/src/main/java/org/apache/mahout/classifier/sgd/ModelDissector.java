@@ -17,14 +17,14 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -55,7 +55,7 @@ public class ModelDissector {
   private final Map<String,Vector> weightMap;
 
   public ModelDissector() {
-    weightMap = Maps.newHashMap();
+    weightMap = new HashMap<>();
   }
 
   /**
@@ -105,14 +105,14 @@ public class ModelDissector {
    * @return       A list of the top variables.
    */
   public List<Weight> summary(int n) {
-    Queue<Weight> pq = new PriorityQueue<Weight>();
+    Queue<Weight> pq = new PriorityQueue<>();
     for (Map.Entry<String, Vector> entry : weightMap.entrySet()) {
       pq.add(new Weight(entry.getKey(), entry.getValue()));
       while (pq.size() > n) {
         pq.poll();
       }
     }
-    List<Weight> r = Lists.newArrayList(pq);
+    List<Weight> r = new ArrayList<>(pq);
     Collections.sort(r, Ordering.natural().reverse());
     return r;
   }
@@ -170,14 +170,14 @@ public class ModelDissector {
     public Weight(String feature, Vector weights, int n) {
       this.feature = feature;
       // pick out the weight with the largest abs value, but don't forget the sign
-      Queue<Category> biggest = new PriorityQueue<Category>(n + 1, Ordering.natural());
+      Queue<Category> biggest = new PriorityQueue<>(n + 1, Ordering.natural());
       for (Vector.Element element : weights.all()) {
         biggest.add(new Category(element.index(), element.get()));
         while (biggest.size() > n) {
           biggest.poll();
         }
       }
-      categories = Lists.newArrayList(biggest);
+      categories = new ArrayList<>(biggest);
       Collections.sort(categories, Ordering.natural().reverse());
       value = categories.get(0).weight;
       maxIndex = categories.get(0).index;

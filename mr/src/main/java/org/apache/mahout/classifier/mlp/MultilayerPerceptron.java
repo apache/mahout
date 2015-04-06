@@ -41,7 +41,10 @@ import java.io.IOException;
  * neurons in the MLP is updated incremented using backPropagation algorithm
  * proposed by (Rumelhart, D. E., Hinton, G. E., and Williams, R. J. (1986)
  * Learning representations by back-propagating errors. Nature, 323, 533--536.)
+ *
+ * @deprecated as of as of 0.10.0.
  */
+@Deprecated
 public class MultilayerPerceptron extends NeuralNetwork implements OnlineLearner {
 
   /**

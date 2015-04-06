@@ -18,7 +18,9 @@
 package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +30,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.TestClusterEvaluator;
+import org.apache.mahout.clustering.UncommonDistributions;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.clustering.UncommonDistributions;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
@@ -46,9 +48,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 public final class TestCDbwEvaluator extends MahoutTestCase {
   
   private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {2, 2}, {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
@@ -63,9 +62,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
   
   private FileSystem fs;
   
-  private final Collection<VectorWritable> sampleData = Lists.newArrayList();
+  private final Collection<VectorWritable> sampleData = new ArrayList<>();
   
-  private List<VectorWritable> referenceData = Lists.newArrayList();
+  private List<VectorWritable> referenceData = new ArrayList<>();
   
   private Path testdata;
   
@@ -96,14 +95,14 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
    *          the DistanceMeasure
    */
   private void initData(double dC, double dP, DistanceMeasure measure) {
-    clusters = Lists.newArrayList();
+    clusters = new ArrayList<>();
     clusters.add(new Canopy(new DenseVector(new double[] {-dC, -dC}), 1, measure));
     clusters.add(new Canopy(new DenseVector(new double[] {-dC, dC}), 3, measure));
     clusters.add(new Canopy(new DenseVector(new double[] {dC, dC}), 5, measure));
     clusters.add(new Canopy(new DenseVector(new double[] {dC, -dC}), 7, measure));
-    representativePoints = Maps.newHashMap();
+    representativePoints = new HashMap<>();
     for (Cluster cluster : clusters) {
-      List<VectorWritable> points = Lists.newArrayList();
+      List<VectorWritable> points = new ArrayList<>();
       representativePoints.put(cluster.getId(), points);
       points.add(new VectorWritable(cluster.getCenter().clone()));
       points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] {dP, dP}))));
@@ -182,7 +181,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] {10, 10}), 19, measure);
     clusters.add(cluster);
-    List<VectorWritable> points = Lists.newArrayList();
+    List<VectorWritable> points = new ArrayList<>();
     representativePoints.put(cluster.getId(), points);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     System.out.println("CDbw = " + evaluator.getCDbw());
@@ -198,7 +197,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19, measure);
     clusters.add(cluster);
-    List<VectorWritable> points = Lists.newArrayList();
+    List<VectorWritable> points = new ArrayList<>();
     points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] {1, 1}))));
     representativePoints.put(cluster.getId(), points);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
@@ -221,7 +220,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19, measure);
     clusters.add(cluster);
-    List<VectorWritable> points = Lists.newArrayList();
+    List<VectorWritable> points = new ArrayList<>();
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
@@ -246,7 +245,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19, measure);
     clusters.add(cluster);
-    List<VectorWritable> points = Lists.newArrayList();
+    List<VectorWritable> points = new ArrayList<>();
     Vector delta = new DenseVector(new double[] {0, Double.MIN_NORMAL});
     points.add(new VectorWritable(delta.clone()));
     points.add(new VectorWritable(delta.clone()));

@@ -17,17 +17,6 @@
 
 package org.apache.mahout.benchmark;
 
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -56,8 +45,18 @@ import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class VectorBenchmarks {
   private static final int MAX_TIME_MS = 5000;
@@ -93,11 +92,11 @@ public class VectorBenchmarks {
   final long maxTimeUsec;
   final long leadTimeUsec;
 
-  private final List<Vector> randomVectors = Lists.newArrayList();
-  private final List<int[]> randomVectorIndices = Lists.newArrayList();
-  private final List<double[]> randomVectorValues = Lists.newArrayList();
-  private final Map<String, Integer> implType = Maps.newHashMap();
-  private final Map<String, List<String[]>> statsMap = Maps.newHashMap();
+  private final List<Vector> randomVectors = new ArrayList<>();
+  private final List<int[]> randomVectorIndices = new ArrayList<>();
+  private final List<double[]> randomVectorValues = new ArrayList<>();
+  private final Map<String, Integer> implType = new HashMap<>();
+  private final Map<String, List<String[]>> statsMap = new HashMap<>();
   private final BenchmarkRunner runner;
   private final Random r = RandomUtils.getRandom();
 
@@ -162,7 +161,7 @@ public class VectorBenchmarks {
     }
     int implId = implType.get(implName);
     if (!statsMap.containsKey(benchmarkName)) {
-      statsMap.put(benchmarkName, Lists.<String[]>newArrayList());
+      statsMap.put(benchmarkName, new ArrayList<String[]>());
     }
     List<String[]> implStats = statsMap.get(benchmarkName);
     while (implStats.size() < implId + 1) {
@@ -224,7 +223,7 @@ public class VectorBenchmarks {
   private boolean buildVectorIncrementally(TimingStatistics stats, int randomIndex, Vector v, boolean useSetQuick) {
     int[] indexes = randomVectorIndices.get(randomIndex);
     double[] values = randomVectorValues.get(randomIndex);
-    List<Integer> randomOrder = Lists.newArrayList();
+    List<Integer> randomOrder = new ArrayList<>();
     for (int i = 0; i < indexes.length; i++) {
       randomOrder.add(i);
     }
@@ -421,9 +420,9 @@ public class VectorBenchmarks {
   }
 
   private String asCsvString() {
-    List<String> keys = Lists.newArrayList(statsMap.keySet());
+    List<String> keys = new ArrayList<>(statsMap.keySet());
     Collections.sort(keys);
-    Map<Integer,String> implMap = Maps.newHashMap();
+    Map<Integer,String> implMap = new HashMap<>();
     for (Entry<String,Integer> e : implType.entrySet()) {
       implMap.put(e.getValue(), e.getKey());
     }
@@ -459,7 +458,7 @@ public class VectorBenchmarks {
       }
     }
     sb.append('\n');
-    List<String> keys = Lists.newArrayList(statsMap.keySet());
+    List<String> keys = new ArrayList<>(statsMap.keySet());
     Collections.sort(keys);
     for (String benchmarkName : keys) {
       List<String[]> implTokenizedStats = statsMap.get(benchmarkName);

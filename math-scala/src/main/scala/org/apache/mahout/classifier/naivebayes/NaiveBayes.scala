@@ -199,13 +199,17 @@ trait NaiveBayes extends java.io.Serializable{
   }
 
   /**
-   * Test a trained model with a labeled dataset
+   * Test a trained model with a labeled dataset sequentially
    * @param model a trained NBModel
    * @param testSet a labeled testing set
    * @param testComplementary test using a complementary or a standard NB classifier
    * @param cParser a String => String function used to extract categories from
    *   Keys of the testing set DRM. The default
    *   CategoryParser will extract "Category" from: '/Category/document_id'
+   *
+   *   *Note*: this method brings the entire test set into upfront memory,
+   *           This method is optimized and parallelized in SparkNaiveBayes
+   *
    * @tparam K implicitly determined Key type of test set DRM: String
    * @return a result analyzer with confusion matrix and accuracy statistics
    */
@@ -213,7 +217,7 @@ trait NaiveBayes extends java.io.Serializable{
                         testSet: DrmLike[K],
                         testComplementary: Boolean = false,
                         cParser: CategoryParser = seq2SparseCategoryParser)
-                        (implicit ctx: DistributedContext): ResultAnalyzer = {
+                       (implicit ctx: DistributedContext): ResultAnalyzer = {
 
     val labelMap = model.labelIndex
 
@@ -234,55 +238,15 @@ trait NaiveBayes extends java.io.Serializable{
         "Complementary Label Assignment requires Complementary Training")
     }
 
-    /**  need to change the model around so that we can broadcast it?            */
-    /*   for now just classifying each sequentially.                             */
-    /*
-    val bcastWeightMatrix = drmBroadcast(model.weightsPerLabelAndFeature)
-    val bcastFeatureWeights = drmBroadcast(model.weightsPerFeature)
-    val bcastLabelWeights = drmBroadcast(model.weightsPerLabel)
-    val bcastWeightNormalizers = drmBroadcast(model.perlabelThetaNormalizer)
-    val bcastLabelIndex = labelMap
-    val alphaI = model.alphaI
-    val bcastIsComplementary = model.isComplementary
 
-    val scoredTestSet = testSet.mapBlock(ncol = numLabels){
-      case (keys, block)=>
-        val closureModel = new NBModel(bcastWeightMatrix,
-                                       bcastFeatureWeights,
-                                       bcastLabelWeights,
-                                       bcastWeightNormalizers,
-                                       bcastLabelIndex,
-                                       alphaI,
-                                       bcastIsComplementary)
-        val classifier = closureModel match {
-          case xx if model.isComplementary => new ComplementaryNBClassifier(closureModel)
-          case _ => new StandardNBClassifier(closureModel)
-        }
-        val numInstances = keys.size
-        val blockB= block.like(numInstances, numLabels)
-        for(i <- 0 until numInstances){
-          blockB(i, ::) := classifier.classifyFull(block(i, ::) )
-        }
-        keys -> blockB
-    }
-
-    // may want to strip this down if we think that numDocuments x numLabels wont fit into memory
-    val testSetLabelMap = scoredTestSet.getRowLabelBindings
-
-    // collect so that we can slice rows.
-    val inCoreScoredTestSet = scoredTestSet.collect
-
-    testSet.uncache()
-    */
-
-
-    /** Sequentially: */
+    // Sequentially assign labels to the test set:
+    // *Note* this brings the entire test set into memory upfront:
 
     // Since we cant broadcast the model as is do it sequentially up front for now
     val inCoreTestSet = testSet.collect
 
     // get the labels of the test set and extract the keys
-    val testSetLabelMap = testSet.getRowLabelBindings //.map(x => cParser(x._1) -> x._2)
+    val testSetLabelMap = testSet.getRowLabelBindings
 
     // empty Matrix in which we'll set the classification scores
     val inCoreScoredTestSet = testSet.like(numTestInstances, numLabels)
@@ -302,10 +266,9 @@ trait NaiveBayes extends java.io.Serializable{
 
     val analyzer = new ResultAnalyzer(labelMap.keys.toList.sorted, "DEFAULT")
 
-    // need to do this with out collecting
-    // val inCoreScoredTestSet = scoredTestSet.collect
+    // assign labels- winner takes all
     for (i <- 0 until numTestInstances) {
-      val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i,::))
+      val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i, ::))
       val classifierResult = new ClassifierResult(reverseLabelMap(bestIdx), bestScore)
       analyzer.addInstance(reverseTestSetLabelMap(i), classifierResult)
     }
@@ -411,5 +374,7 @@ class ComplementaryNBThetaTrainer(private val weightsPerFeature: Vector,
   def retrievePerLabelThetaNormalizer: Vector = {
     perLabelThetaNormalizer.cloned
   }
+
+
 
 }

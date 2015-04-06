@@ -368,10 +368,10 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "u2\tpurchase\tgalaxy",
       "u3\tpurchase\tsurface",
       "u4\tpurchase\tiphone",
-      "u4\tpurchase\tgalaxy",
-      "u1\tview\tiphone")
+      "u4\tpurchase\tgalaxy")
 
     val M2Lines = Array(
+      "u1\tview\tiphone",
       "u1\tview\tipad",
       "u1\tview\tnexus",
       "u1\tview\tgalaxy",

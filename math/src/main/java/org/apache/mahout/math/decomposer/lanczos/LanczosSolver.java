@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  * @see org.apache.mahout.math.ssvd.SequentialBigSvd
  */
+@Deprecated
 public class LanczosSolver {
 
   private static final Logger log = LoggerFactory.getLogger(LanczosSolver.class);

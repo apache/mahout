@@ -17,8 +17,12 @@
 
 package org.apache.mahout.vectorizer.term;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
@@ -42,11 +46,6 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.apache.mahout.vectorizer.DictionaryVectorizer;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Iterator;
-import java.util.List;
-
 /**
  * Converts a document in to a sparse vector
  */
@@ -68,7 +67,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       return;
     }
 
-    List<String> value = Lists.newArrayList();
+    List<String> value = new ArrayList<>();
 
     while (it.hasNext()) {
       value.addAll(it.next().getEntries());
@@ -77,9 +76,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     Vector vector = new RandomAccessSparseVector(dimension, value.size()); // guess at initial size
 
     if (maxNGramSize >= 2) {
-      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.iterator()), maxNGramSize);
-      sf.reset();
-      try {
+      try (ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.iterator()), maxNGramSize)){
+        sf.reset();
         do {
           String term = sf.getAttribute(CharTermAttribute.class).toString();
           if (!term.isEmpty() && dictionary.containsKey(term)) { // ngram
@@ -87,10 +85,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
             vector.setQuick(termId, vector.getQuick(termId) + 1);
           }
         } while (sf.incrementToken());
-
         sf.end();
-      } finally {
-        Closeables.close(sf, true);
       }
     } else {
       for (String term : value) {

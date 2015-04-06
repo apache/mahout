@@ -17,11 +17,9 @@
 
 package org.apache.mahout.utils;
 
-
 import java.io.IOException;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -44,10 +42,12 @@ import org.apache.mahout.math.VectorWritable;
  * Uses clever hack which requires different matrices to have a different number of columns.
  * Courtesy of Jake Mannix, https://issues.apache.org/jira/browse/MAHOUT-884
  * If vectors are same length, this will not concatenate them in the right order
- * 
+ *
+ * @deprecated as of 0.10.0
+ *
  * TODO: generalize to multiple matrices, should the teeming masses so desire
  */
-
+@Deprecated
 public class ConcatenateVectorsJob extends AbstractJob {
   
   static final String MATRIXA_DIMS = "mahout.concatenatevectors.matrixA_dims";
@@ -111,12 +111,8 @@ public class ConcatenateVectorsJob extends AbstractJob {
     Preconditions.checkArgument(paths.length > 0, path.getName() + " is a file, should be a directory");
 
     Path file = paths[0].getPath();
-    SequenceFile.Reader reader = null;
-    try {
-      reader = new SequenceFile.Reader(fs, file, fs.getConf());
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(fs, file, fs.getConf())){
       return reader.getKeyClass().asSubclass(Writable.class);
-    } finally {
-      Closeables.close(reader, true);
     }
   }
 }

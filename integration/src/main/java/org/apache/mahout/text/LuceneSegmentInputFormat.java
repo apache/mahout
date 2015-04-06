@@ -16,9 +16,11 @@ package org.apache.mahout.text;
  * limitations under the License.
  */
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -29,11 +31,9 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.lucene.index.SegmentCommitInfo;
 import org.apache.lucene.index.SegmentInfos;
+import org.apache.solr.store.hdfs.HdfsDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * {@link InputFormat} implementation which splits a Lucene index at the segment level.
@@ -48,12 +48,11 @@ public class LuceneSegmentInputFormat extends InputFormat {
 
     LuceneStorageConfiguration lucene2SeqConfiguration = new LuceneStorageConfiguration(configuration);
 
-    List<LuceneSegmentInputSplit> inputSplits = Lists.newArrayList();
+    List<LuceneSegmentInputSplit> inputSplits = new ArrayList<>();
 
     List<Path> indexPaths = lucene2SeqConfiguration.getIndexPaths();
     for (Path indexPath : indexPaths) {
-      ReadOnlyFileSystemDirectory directory = new ReadOnlyFileSystemDirectory(FileSystem.get(configuration), indexPath,
-                                                                              false, configuration);
+      HdfsDirectory directory = new HdfsDirectory(indexPath, configuration);
       SegmentInfos segmentInfos = new SegmentInfos();
       segmentInfos.read(directory);
 

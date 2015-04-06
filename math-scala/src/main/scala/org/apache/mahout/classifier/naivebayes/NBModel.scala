@@ -44,7 +44,7 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
               val weightsPerLabel: Vector = null,
               val perlabelThetaNormalizer: Vector = null,
               val labelIndex: Map[String, Integer] = null,
-              val alphaI: Float = .0f,
+              val alphaI: Float = 1.0f,
               val isComplementary: Boolean= false)  extends java.io.Serializable {
 
 
@@ -98,11 +98,15 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
   def dfsWrite(pathToModel: String)(implicit ctx: DistributedContext): Unit = {
     //todo:  write out as smaller partitions or possibly use reader and writers to
     //todo:  write something other than a DRM for label Index, is Complementary, alphaI.
-    drmParallelize(weightsPerLabelAndFeature).dfsWrite(pathToModel + "/weightsPerLabelAndFeatureDrm.drm")
-    drmParallelize(sparse(weightsPerFeature)).dfsWrite(pathToModel + "/weightsPerFeatureDrm.drm")
-    drmParallelize(sparse(weightsPerLabel)).dfsWrite(pathToModel + "/weightsPerLabelDrm.drm")
-    drmParallelize(sparse(perlabelThetaNormalizer)).dfsWrite(pathToModel + "/perlabelThetaNormalizerDrm.drm")
-    drmParallelize(sparse(svec((0,alphaI)::Nil))).dfsWrite(pathToModel + "/alphaIDrm.drm")
+
+    // add a directory to put all of the DRMs in
+    val fullPathToModel = pathToModel + NBModel.modelBaseDirectory
+
+    drmParallelize(weightsPerLabelAndFeature).dfsWrite(fullPathToModel + "/weightsPerLabelAndFeatureDrm.drm")
+    drmParallelize(sparse(weightsPerFeature)).dfsWrite(fullPathToModel + "/weightsPerFeatureDrm.drm")
+    drmParallelize(sparse(weightsPerLabel)).dfsWrite(fullPathToModel + "/weightsPerLabelDrm.drm")
+    drmParallelize(sparse(perlabelThetaNormalizer)).dfsWrite(fullPathToModel + "/perlabelThetaNormalizerDrm.drm")
+    drmParallelize(sparse(svec((0,alphaI)::Nil))).dfsWrite(fullPathToModel + "/alphaIDrm.drm")
 
     // isComplementry is true if isComplementaryDrm(0,0) == 1 else false
     val isComplementaryDrm = sparse(0 to 1, 0 to 1)
@@ -111,7 +115,7 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
     } else {
       isComplementaryDrm(0,0) = 0.0
     }
-    drmParallelize(isComplementaryDrm).dfsWrite(pathToModel + "/isComplementaryDrm.drm")
+    drmParallelize(isComplementaryDrm).dfsWrite(fullPathToModel + "/isComplementaryDrm.drm")
 
     // write the label index as a String-Keyed DRM.
     val labelIndexDummyDrm = weightsPerLabelAndFeature.like()
@@ -123,7 +127,7 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
       labelIndexDummyDrm.set(labelIndex(revMap(i)), 0, i.toDouble)
     }
 
-    drmParallelizeWithRowLabels(labelIndexDummyDrm).dfsWrite(pathToModel + "/labelIndex.drm")
+    drmParallelizeWithRowLabels(labelIndexDummyDrm).dfsWrite(fullPathToModel + "/labelIndex.drm")
   }
 
   /** Model Validation */
@@ -146,6 +150,9 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
 }
 
 object NBModel extends java.io.Serializable {
+
+  val modelBaseDirectory = "/naiveBayesModel"
+
   /**
    * Read a trained model in from from the filesystem.
    * @param pathToModel directory from which to read individual model components
@@ -154,31 +161,34 @@ object NBModel extends java.io.Serializable {
   def dfsRead(pathToModel: String)(implicit ctx: DistributedContext): NBModel = {
     //todo:  Takes forever to read we need a more practical method of writing models. Readers/Writers?
 
-    val weightsPerFeatureDrm = drmDfsRead(pathToModel + "/weightsPerFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    // read from a base directory for all drms
+    val fullPathToModel = pathToModel + modelBaseDirectory
+
+    val weightsPerFeatureDrm = drmDfsRead(fullPathToModel + "/weightsPerFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val weightsPerFeature = weightsPerFeatureDrm.collect(0, ::)
     weightsPerFeatureDrm.uncache()
 
-    val weightsPerLabelDrm = drmDfsRead(pathToModel + "/weightsPerLabelDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val weightsPerLabelDrm = drmDfsRead(fullPathToModel + "/weightsPerLabelDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val weightsPerLabel = weightsPerLabelDrm.collect(0, ::)
     weightsPerLabelDrm.uncache()
 
-    val alphaIDrm = drmDfsRead(pathToModel + "/alphaIDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val alphaIDrm = drmDfsRead(fullPathToModel + "/alphaIDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val alphaI: Float = alphaIDrm.collect(0, 0).toFloat
     alphaIDrm.uncache()
 
     // isComplementry is true if isComplementaryDrm(0,0) == 1 else false
-    val isComplementaryDrm = drmDfsRead(pathToModel + "/isComplementaryDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val isComplementaryDrm = drmDfsRead(fullPathToModel + "/isComplementaryDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val isComplementary = isComplementaryDrm.collect(0, 0).toInt == 1
     isComplementaryDrm.uncache()
 
     var perLabelThetaNormalizer= weightsPerFeature.like()
     if (isComplementary) {
-      val perLabelThetaNormalizerDrm = drm.drmDfsRead(pathToModel + "/perlabelThetaNormalizerDrm.drm")
+      val perLabelThetaNormalizerDrm = drm.drmDfsRead(fullPathToModel + "/perlabelThetaNormalizerDrm.drm")
                                              .checkpoint(CacheHint.MEMORY_ONLY)
       perLabelThetaNormalizer = perLabelThetaNormalizerDrm.collect(0, ::)
     }
 
-    val dummyLabelDrm= drmDfsRead(pathToModel + "/labelIndex.drm")
+    val dummyLabelDrm= drmDfsRead(fullPathToModel + "/labelIndex.drm")
                          .checkpoint(CacheHint.MEMORY_ONLY)
     val labelIndexMap:java.util.Map[String, Integer] = dummyLabelDrm.getRowLabelBindings
     dummyLabelDrm.uncache()
@@ -189,7 +199,7 @@ object NBModel extends java.io.Serializable {
         .toInt
         .asInstanceOf[Integer])
 
-    val weightsPerLabelAndFeatureDrm = drmDfsRead(pathToModel + "/weightsPerLabelAndFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val weightsPerLabelAndFeatureDrm = drmDfsRead(fullPathToModel + "/weightsPerLabelAndFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val weightsPerLabelAndFeature = weightsPerLabelAndFeatureDrm.collect
     weightsPerLabelAndFeatureDrm.uncache()
 

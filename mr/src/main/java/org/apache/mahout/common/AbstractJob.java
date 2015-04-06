@@ -19,13 +19,14 @@ package org.apache.mahout.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
+import com.google.common.base.Preconditions;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -50,14 +51,12 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.lucene.AnalyzerUtils;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 /**
  * <p>Superclass of many Mahout Hadoop "jobs". A job drives configuration and launch of one or
@@ -113,7 +112,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   private Group group;
 
   protected AbstractJob() {
-    options = Lists.newLinkedList();
+    options = new LinkedList<>();
   }
 
   /** Returns the input path established by a call to {@link #parseArguments(String[])}.
@@ -451,24 +450,15 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @return the cardinality of the vector
    */
   public int getDimensions(Path matrix) throws IOException {
-
-    SequenceFile.Reader reader = null;
-    try {
-      reader = new SequenceFile.Reader(FileSystem.get(getConf()), matrix, getConf());
-
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(getConf()), matrix, getConf())){
       Writable row = ClassUtils.instantiateAs(reader.getKeyClass().asSubclass(Writable.class), Writable.class);
-
       Preconditions.checkArgument(reader.getValueClass().equals(VectorWritable.class),
           "value type of sequencefile must be a VectorWritable");
 
       VectorWritable vectorWritable = new VectorWritable();
       boolean hasAtLeastOneRow = reader.next(row, vectorWritable);
       Preconditions.checkState(hasAtLeastOneRow, "matrix must have at least one row");
-
       return vectorWritable.get().size();
-
-    } finally {
-      Closeables.close(reader, true);
     }
   }
 
@@ -523,7 +513,7 @@ public abstract class AbstractJob extends Configured implements Tool {
         // nulls are ok, for cases where options are simple flags.
         List<?> vo = cmdLine.getValues(o);
         if (vo != null && !vo.isEmpty()) {
-          List<String> vals = Lists.newArrayList();
+          List<String> vals = new ArrayList<>();
           for (Object o1 : vo) {
             vals.add(o1.toString());
           }

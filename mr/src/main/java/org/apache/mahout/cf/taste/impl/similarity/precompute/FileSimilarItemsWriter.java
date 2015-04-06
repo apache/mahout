@@ -23,8 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.cf.taste.similarity.precompute.SimilarItem;
 import org.apache.mahout.cf.taste.similarity.precompute.SimilarItems;
 import org.apache.mahout.cf.taste.similarity.precompute.SimilarItemsWriter;

@@ -22,7 +22,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import org.apache.commons.csv.CSVUtils;
 import org.apache.mahout.math.Vector;
@@ -36,11 +35,14 @@ import org.apache.mahout.vectorizer.encoders.TextValueEncoder;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Converts CSV data lines to vectors.
@@ -81,7 +83,7 @@ public class CsvRecordFactory implements RecordFactory {
                   .put("t", TextValueEncoder.class)
                   .build();
 
-  private final Map<String, Set<Integer>> traceDictionary = Maps.newTreeMap();
+  private final Map<String, Set<Integer>> traceDictionary = new TreeMap<>();
 
   private int target;
   private final Dictionary targetDictionary;
@@ -113,7 +115,7 @@ public class CsvRecordFactory implements RecordFactory {
       return Arrays.asList(CSVUtils.parseLine(line));
 	   }
 	   catch (IOException e) {
-      List<String> list = Lists.newArrayList();
+      List<String> list = new ArrayList<>();
       list.add(line);
       return list;
    	}
@@ -186,7 +188,7 @@ public class CsvRecordFactory implements RecordFactory {
   @Override
   public void firstLine(String line) {
     // read variable names, build map of name -> column
-    final Map<String, Integer> vars = Maps.newHashMap();
+    final Map<String, Integer> vars = new HashMap<>();
     variableNames = parseCsvLine(line);
     int column = 0;
     for (String var : variableNames) {
@@ -202,7 +204,7 @@ public class CsvRecordFactory implements RecordFactory {
     }
 
     // create list of predictor column numbers
-    predictors = Lists.newArrayList(Collections2.transform(typeMap.keySet(), new Function<String, Integer>() {
+    predictors = new ArrayList<>(Collections2.transform(typeMap.keySet(), new Function<String, Integer>() {
       @Override
       public Integer apply(String from) {
         Integer r = vars.get(from);
@@ -217,7 +219,7 @@ public class CsvRecordFactory implements RecordFactory {
     Collections.sort(predictors);
 
     // and map from column number to type encoder for each column that is a predictor
-    predictorEncoders = Maps.newHashMap();
+    predictorEncoders = new HashMap<>();
     for (Integer predictor : predictors) {
       String name;
       Class<? extends FeatureVectorEncoder> c;

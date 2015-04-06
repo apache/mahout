@@ -151,7 +151,6 @@ if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
 
   echo "Training Naive Bayes model"
   $MAHOUT_HOME/bin/mahout trainnb -i ${WORK_DIR}/training \
-                                  -el \
                                   -o ${WORK_DIR}/model \
                                   -li ${WORK_DIR}/labelindex \
                                   -ow \

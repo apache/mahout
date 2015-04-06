@@ -23,7 +23,9 @@ import org.apache.mahout.math.function.Functions;
 
 /**
  * The functions that will be used by NeuralNetwork.
+ * @deprecated as of as of 0.10.0.
  */
+@Deprecated
 public class NeuralNetworkFunctions {
 
   /**

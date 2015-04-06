@@ -21,13 +21,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -132,7 +132,7 @@ public final class VectorDumper extends AbstractJob {
 
     Set<String> filters;
     if (hasOption("filter")) {
-      filters = Sets.newHashSet(getOptions("filter"));
+      filters = new HashSet<>(getOptions("filter"));
     } else {
       filters = null;
     }

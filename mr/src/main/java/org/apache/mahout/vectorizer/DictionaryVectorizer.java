@@ -18,8 +18,11 @@
 package org.apache.mahout.vectorizer;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -53,10 +56,6 @@ import org.apache.mahout.vectorizer.term.TermCountMapper;
 import org.apache.mahout.vectorizer.term.TermCountReducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * This class converts a set of input documents in the sequence file format to vectors. The Sequence file
@@ -192,7 +191,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     }
     
     int partialVectorIndex = 0;
-    Collection<Path> partialVectorPaths = Lists.newArrayList();
+    Collection<Path> partialVectorPaths = new ArrayList<>();
     for (Path dictionaryChunk : dictionaryChunks) {
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
@@ -217,7 +216,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
                                                    Configuration baseConf,
                                                    int chunkSizeInMegabytes,
                                                    int[] maxTermDimension) throws IOException {
-    List<Path> chunkPaths = Lists.newArrayList();
+    List<Path> chunkPaths = new ArrayList<>();
     
     Configuration conf = new Configuration(baseConf);
     
@@ -275,6 +274,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
    * @param output
    *          output directory were the partial vectors have to be created
    * @param dimension
+   *          number of features
    * @param sequentialAccess
    *          output vectors should be optimized for sequential access
    * @param namedVectors

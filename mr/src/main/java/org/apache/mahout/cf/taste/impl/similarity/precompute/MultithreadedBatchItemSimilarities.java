@@ -17,16 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.similarity.precompute;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -38,6 +28,16 @@ import org.apache.mahout.cf.taste.similarity.precompute.SimilarItems;
 import org.apache.mahout.cf.taste.similarity.precompute.SimilarItemsWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Precompute item similarities in parallel on a single machine. The recommender given to this class must use a
@@ -113,7 +113,8 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
   }
 
   private static BlockingQueue<long[]> queueItemIDsInBatches(DataModel dataModel, int batchSize,
-      int degreeOfParallelism) throws TasteException {
+                                                             int degreeOfParallelism)
+      throws TasteException {
 
     LongPrimitiveIterator itemIDs = dataModel.getItemIDs();
     int numItems = dataModel.getNumItems();
@@ -167,7 +168,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
     @Override
     public void run() {
-      while (numActiveWorkers.get() != 0) {
+      while (numActiveWorkers.get() != 0 || !results.isEmpty()) {
         try {
           List<SimilarItems> similarItemsOfABatch = results.poll(10, TimeUnit.MILLISECONDS);
           if (similarItemsOfABatch != null) {
@@ -206,10 +207,9 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
         try {
           long[] itemIDBatch = itemIDBatches.take();
 
-          List<SimilarItems> similarItemsOfBatch = Lists.newArrayListWithCapacity(itemIDBatch.length);
+          List<SimilarItems> similarItemsOfBatch = new ArrayList<>(itemIDBatch.length);
           for (long itemID : itemIDBatch) {
             List<RecommendedItem> similarItems = getRecommender().mostSimilarItems(itemID, getSimilarItemsPerItem());
-
             similarItemsOfBatch.add(new SimilarItems(itemID, similarItems));
           }
 

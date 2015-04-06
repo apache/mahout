@@ -19,9 +19,12 @@ package org.apache.mahout.classifier.mlp;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -38,16 +41,14 @@ import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
-
-/** Train a {@link MultilayerPerceptron}. */
+/** Train a {@link MultilayerPerceptron}.
+ * @deprecated as of as of 0.10.0.
+ * */
+@Deprecated
 public final class TrainMultilayerPerceptron {
 
   private static final Logger log = LoggerFactory.getLogger(TrainMultilayerPerceptron.class);
-  
+
   /**  The parameters used by MLP. */
   static class Parameters {
     double learningRate;
@@ -56,31 +57,17 @@ public final class TrainMultilayerPerceptron {
 
     String inputFilePath;
     boolean skipHeader;
-    Map<String, Integer> labelsIndex = Maps.newHashMap();
+    Map<String, Integer> labelsIndex = new HashMap<>();
 
     String modelFilePath;
     boolean updateModel;
-    List<Integer> layerSizeList = Lists.newArrayList();
+    List<Integer> layerSizeList = new ArrayList<>();
     String squashingFunctionName;
   }
 
-  /*
-  private double learningRate;
-  private double momemtumWeight;
-  private double regularizationWeight;
-
-  private String inputFilePath;
-  private boolean skipHeader;
-  private Map<String, Integer> labelsIndex = Maps.newHashMap();
-
-  private String modelFilePath;
-  private boolean updateModel;
-  private List<Integer> layerSizeList = Lists.newArrayList();
-  private String squashingFunctionName;*/
-
   public static void main(String[] args) throws Exception {
     Parameters parameters = new Parameters();
-    
+
     if (parseArgs(args, parameters)) {
       log.info("Validate model...");
       // check whether the model already exists
@@ -106,31 +93,28 @@ public final class TrainMultilayerPerceptron {
           }
           mlp.setCostFunction("Minus_Squared");
           mlp.setLearningRate(parameters.learningRate)
-             .setMomentumWeight(parameters.momemtumWeight)
-             .setRegularizationWeight(parameters.regularizationWeight);
+              .setMomentumWeight(parameters.momemtumWeight)
+              .setRegularizationWeight(parameters.regularizationWeight);
         }
         mlp.setModelPath(parameters.modelFilePath);
       }
 
       // set the parameters
       mlp.setLearningRate(parameters.learningRate)
-         .setMomentumWeight(parameters.momemtumWeight)
-         .setRegularizationWeight(parameters.regularizationWeight);
+          .setMomentumWeight(parameters.momemtumWeight)
+          .setRegularizationWeight(parameters.regularizationWeight);
 
       // train by the training data
       Path trainingDataPath = new Path(parameters.inputFilePath);
       FileSystem dataFs = trainingDataPath.getFileSystem(new Configuration());
 
       Preconditions.checkArgument(dataFs.exists(trainingDataPath), "Training dataset %s cannot be found!",
-                                  parameters.inputFilePath);
+          parameters.inputFilePath);
 
       log.info("Read data and train model...");
-      BufferedReader reader = null;
 
-      try {
-        reader = new BufferedReader(new InputStreamReader(dataFs.open(trainingDataPath)));
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(dataFs.open(trainingDataPath)))) {
         String line;
-
         // read training data line by line
         if (parameters.skipHeader) {
           reader.readLine();
@@ -160,15 +144,13 @@ public final class TrainMultilayerPerceptron {
         log.info("Write trained model to {}", parameters.modelFilePath);
         mlp.writeModelToFile();
         mlp.close();
-      } finally {
-        Closeables.close(reader, true);
       }
     }
   }
 
   /**
    * Parse the input arguments.
-   * 
+   *
    * @param args The input arguments
    * @param parameters The parameters parsed.
    * @return Whether the input arguments are valid.
@@ -193,7 +175,7 @@ public final class TrainMultilayerPerceptron {
         .withRequired(true)
         .withChildren(skipHeaderGroup)
         .withArgument(argumentBuilder.withName("path").withMinimum(1).withMaximum(1)
-                .create()).withDescription("the file path of training dataset")
+            .create()).withDescription("the file path of training dataset")
         .create();
 
     Option labelsOption = optionBuilder
@@ -292,9 +274,9 @@ public final class TrainMultilayerPerceptron {
     parameters.squashingFunctionName = getString(commandLine, squashingFunctionOption);
 
     System.out.printf("Input: %s, Model: %s, Update: %s, Layer size: %s, Squashing function: %s, Learning rate: %f," +
-        " Momemtum weight: %f, Regularization Weight: %f\n", parameters.inputFilePath, parameters.modelFilePath, 
-        parameters.updateModel, Arrays.toString(parameters.layerSizeList.toArray()), 
-        parameters.squashingFunctionName, parameters.learningRate, parameters.momemtumWeight, 
+            " Momemtum weight: %f, Regularization Weight: %f\n", parameters.inputFilePath, parameters.modelFilePath,
+        parameters.updateModel, Arrays.toString(parameters.layerSizeList.toArray()),
+        parameters.squashingFunctionName, parameters.learningRate, parameters.momemtumWeight,
         parameters.regularizationWeight);
 
     return true;
@@ -318,7 +300,7 @@ public final class TrainMultilayerPerceptron {
 
   static List<Integer> getIntegerList(CommandLine commandLine, Option option) {
     List<String> list = commandLine.getValues(option);
-    List<Integer> valList = Lists.newArrayList();
+    List<Integer> valList = new ArrayList<>();
     for (String str : list) {
       valList.add(Integer.parseInt(str));
     }

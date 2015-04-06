@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.df.ref;
 
-import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.df.Bagging;
 import org.apache.mahout.classifier.df.DecisionForest;
 import org.apache.mahout.classifier.df.builder.TreeBuilder;
@@ -26,6 +25,7 @@ import org.apache.mahout.classifier.df.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -56,7 +56,7 @@ public class SequentialBuilder {
   }
   
   public DecisionForest build(int nbTrees) {
-    List<Node> trees = Lists.newArrayList();
+    List<Node> trees = new ArrayList<>();
     
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       trees.add(bagging.build(rng));

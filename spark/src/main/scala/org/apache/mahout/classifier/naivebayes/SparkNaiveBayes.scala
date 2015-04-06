@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.naivebayes
 
+import org.apache.mahout.classifier.stats.{ClassifierResult, ResultAnalyzer}
 import org.apache.mahout.math._
 
 import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
@@ -31,7 +32,6 @@ import collection._
 import JavaConversions._
 import org.apache.spark.SparkContext._
 
-import org.apache.mahout.classifier.naivebayes._
 import org.apache.mahout.sparkbindings._
 
 /**
@@ -94,6 +94,78 @@ object SparkNaiveBayes extends NaiveBayes{
     (labelIndexMap, aggregetedObservationByLabelDrm)
   }
 
+  /**
+   * Test a trained model with a labeled dataset
+   * @param model a trained NBModel
+   * @param testSet a labeled testing set
+   * @param testComplementary test using a complementary or a standard NB classifier
+   * @param cParser a String => String function used to extract categories from
+   *   Keys of the testing set DRM. The default
+   *   CategoryParser will extract "Category" from: '/Category/document_id'
+   * @tparam K implicitly determined Key type of test set DRM: String
+   * @return a result analyzer with confusion matrix and accuracy statistics
+   */
+override def test[K: ClassTag](model: NBModel,
+                               testSet: DrmLike[K],
+                               testComplementary: Boolean = false,
+                               cParser: CategoryParser = seq2SparseCategoryParser)
+                              (implicit ctx: DistributedContext): ResultAnalyzer = {
+
+    val labelMap = model.labelIndex
+    val numLabels = model.numLabels
+
+    testSet.checkpoint()
+
+    val numTestInstances = testSet.nrow.toInt
+
+    // instantiate the correct type of classifier
+    val classifier = testComplementary match {
+      case true => new ComplementaryNBClassifier(model) with Serializable
+      case _ => new StandardNBClassifier(model) with Serializable
+    }
+
+    val bCastClassifier = ctx.broadcast(classifier)
+
+    if (testComplementary) {
+      assert(testComplementary == model.isComplementary,
+        "Complementary Label Assignment requires Complementary Training")
+    }
+
+    val scoredTestSet = testSet.mapBlock(ncol = numLabels){
+      case (keys, block)=>
+        val numInstances = keys.size
+        val blockB= block.like(numInstances, numLabels)
+        for(i <- 0 until numInstances){
+          blockB(i, ::) := bCastClassifier.value.classifyFull(block(i, ::) )
+        }
+        keys -> blockB
+    }
+
+    testSet.uncache()
+
+    // may want to strip this down if we think that numDocuments x numLabels wont fit into memory
+    val testSetLabelMap = scoredTestSet.getRowLabelBindings
+
+    // collect so that we can slice rows.
+    val inCoreScoredTestSet = scoredTestSet.collect
+
+    // reverse the label map and extract the labels
+    val reverseTestSetLabelMap = testSetLabelMap.map(x => x._2 -> cParser(x._1))
+
+    // reverse the label map from out model
+    val reverseLabelMap = labelMap.map(x => x._2 -> x._1)
+
+    val analyzer = new ResultAnalyzer(labelMap.keys.toList.sorted, "DEFAULT")
+
+    // assign labels- winner takes all
+    for (i <- 0 until numTestInstances) {
+      val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i,::))
+      val classifierResult = new ClassifierResult(reverseLabelMap(bestIdx), bestScore)
+      analyzer.addInstance(reverseTestSetLabelMap(i), classifierResult)
+    }
+
+    analyzer
+  }
 
 }
 

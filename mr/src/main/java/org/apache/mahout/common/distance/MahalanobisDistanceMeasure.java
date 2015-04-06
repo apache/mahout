@@ -17,9 +17,14 @@
 
 package org.apache.mahout.common.distance;
 
+import java.io.DataInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -36,12 +41,6 @@ import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.SingularValueDecomposition;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-
-import java.io.DataInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
 
 //See http://en.wikipedia.org/wiki/Mahalanobis_distance for details
 public class MahalanobisDistanceMeasure implements DistanceMeasure {
@@ -77,11 +76,8 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
         if (!fs.exists(inverseCovarianceFile.get())) {
           throw new FileNotFoundException(inverseCovarianceFile.get().toString());
         }
-        DataInputStream in = fs.open(inverseCovarianceFile.get());
-        try {
+        try (DataInputStream in = fs.open(inverseCovarianceFile.get())){
           inverseCovarianceMatrix.readFields(in);
-        } finally {
-          Closeables.close(in, true);
         }
         this.inverseCovarianceMatrix = inverseCovarianceMatrix.get();
         Preconditions.checkArgument(this.inverseCovarianceMatrix != null, "inverseCovarianceMatrix not initialized");
@@ -94,11 +90,8 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
         if (!fs.exists(meanVectorFile.get())) {
           throw new FileNotFoundException(meanVectorFile.get().toString());
         }
-        DataInputStream in = fs.open(meanVectorFile.get());
-        try {
+        try (DataInputStream in = fs.open(meanVectorFile.get())){
           meanVector.readFields(in);
-        } finally {
-          Closeables.close(in, true);
         }
         this.meanVector = meanVector.get();
         Preconditions.checkArgument(this.meanVector != null, "meanVector not initialized");
@@ -116,7 +109,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
 
   @Override
   public void createParameters(String prefix, Configuration jobConf) {
-    parameters = Lists.newArrayList();
+    parameters = new ArrayList<>();
     inverseCovarianceFile = new PathParameter(prefix, "inverseCovarianceFile", jobConf, null,
             "Path on DFS to a file containing the inverse covariance matrix.");
     parameters.add(inverseCovarianceFile);

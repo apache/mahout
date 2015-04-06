@@ -17,15 +17,7 @@
 
 package org.apache.mahout.math.decompositions
 
-import org.apache.mahout.math._
-import drm._
-import scalabindings._
-import RLikeOps._
-import RLikeDrmOps._
-import org.apache.mahout.h2obindings._
-import org.apache.mahout.common.RandomUtils
-import scala.math._
-import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.h2obindings.test.DistributedH2OSuite
+import org.scalatest.FunSuite
 
 class DistributedDecompositionsSuite extends FunSuite with DistributedH2OSuite with DistributedDecompositionsSuiteBase

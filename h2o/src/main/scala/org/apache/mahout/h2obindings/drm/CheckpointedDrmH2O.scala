@@ -1,10 +1,8 @@
 package org.apache.mahout.h2obindings.drm
 
-import org.apache.mahout.math.{Matrix, Vector}
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import org.apache.mahout.math.drm._
 import org.apache.mahout.h2obindings._
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.drm._
 
 import scala.reflect._
 

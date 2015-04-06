@@ -25,7 +25,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 
-import com.google.common.base.Charsets;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.util.bloom.Filter;
 import org.apache.hadoop.util.bloom.Key;
 import org.apache.lucene.analysis.TokenFilter;

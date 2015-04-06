@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ package org.apache.mahout.utils.vectors;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -58,7 +57,7 @@ public class RowIdJob extends AbstractJob {
     addInputOption();
     addOutputOption();
 
-    Map<String,List<String>> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
@@ -69,23 +68,17 @@ public class RowIdJob extends AbstractJob {
     Path outputPath = getOutputPath();
     Path indexPath = new Path(outputPath, "docIndex");
     Path matrixPath = new Path(outputPath, "matrix");
-    SequenceFile.Writer indexWriter = SequenceFile.createWriter(fs,
-                                                                conf,
-                                                                indexPath,
-                                                                IntWritable.class,
-                                                                Text.class);
-    SequenceFile.Writer matrixWriter = SequenceFile.createWriter(fs,
-                                                                 conf,
-                                                                 matrixPath,
-                                                                 IntWritable.class,
-                                                                 VectorWritable.class);
-    try {
+
+    try (SequenceFile.Writer indexWriter = SequenceFile.createWriter(fs, conf, indexPath,
+        IntWritable.class, Text.class);
+         SequenceFile.Writer matrixWriter = SequenceFile.createWriter(fs, conf, matrixPath, IntWritable.class,
+             VectorWritable.class)) {
       IntWritable docId = new IntWritable();
       int i = 0;
       int numCols = 0;
-      for (Pair<Text,VectorWritable> record
-          : new SequenceFileDirIterable<Text,VectorWritable>(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(),
-                                                             null, true, conf)) {
+      for (Pair<Text, VectorWritable> record
+          : new SequenceFileDirIterable<Text, VectorWritable>(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(),
+          null, true, conf)) {
         VectorWritable value = record.getSecond();
         docId.set(i);
         indexWriter.append(docId, record.getFirst());
@@ -96,9 +89,6 @@ public class RowIdJob extends AbstractJob {
 
       log.info("Wrote out matrix with {} rows and {} columns to {}", i, numCols, matrixPath);
       return 0;
-    } finally {
-      Closeables.close(indexWriter, false);
-      Closeables.close(matrixWriter, false);
     }
   }
 

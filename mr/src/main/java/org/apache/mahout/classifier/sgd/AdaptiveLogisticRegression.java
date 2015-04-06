@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.ep.EvolutionaryProcess;
@@ -33,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -79,7 +79,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
   private int currentStep = 1000;
   private int bufferSize = 1000;
 
-  private List<TrainingExample> buffer = Lists.newArrayList();
+  private List<TrainingExample> buffer = new ArrayList<>();
   private EvolutionaryProcess<Wrapper, CrossFoldLearner> ep;
   private State<Wrapper, CrossFoldLearner> best;
   private int threadCount = DEFAULT_THREAD_COUNT;
@@ -118,7 +118,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     this.numFeatures = numFeatures;
     this.threadCount = threadCount;
     this.poolSize = poolSize;
-    seed = new State<Wrapper, CrossFoldLearner>(new double[2], 10);
+    seed = new State<>(new double[2], 10);
     Wrapper w = new Wrapper(numCategories, numFeatures, prior);
     seed.setPayload(w);
 
@@ -284,7 +284,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
   }
 
   private void setupOptimizer(int poolSize) {
-    ep = new EvolutionaryProcess<Wrapper, CrossFoldLearner>(threadCount, poolSize, seed);
+    ep = new EvolutionaryProcess<>(threadCount, poolSize, seed);
   }
 
   /**
@@ -561,22 +561,22 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     bufferSize = in.readInt();
 
     int n = in.readInt();
-    buffer = Lists.newArrayList();
+    buffer = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       TrainingExample example = new TrainingExample();
       example.readFields(in);
       buffer.add(example);
     }
 
-    ep = new EvolutionaryProcess<Wrapper, CrossFoldLearner>();
+    ep = new EvolutionaryProcess<>();
     ep.readFields(in);
 
-    best = new State<Wrapper, CrossFoldLearner>();
+    best = new State<>();
     best.readFields(in);
 
     threadCount = in.readInt();
     poolSize = in.readInt();
-    seed = new State<Wrapper, CrossFoldLearner>();
+    seed = new State<>();
     seed.readFields(in);
 
     numFeatures = in.readInt();

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.common
 
+
 import org.apache.hadoop.io.{Writable, SequenceFile}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.conf.Configuration
@@ -29,7 +30,11 @@ import JavaConversions._
  */
 object Hadoop1HDFSUtil extends HDFSUtil {
 
-  
+  /**
+   * Read the header of a sequence file and determine the Key and Value type
+   * @param path
+   * @return
+   */
   def readDrmHeader(path: String): DrmMetadata = {
     val dfsPath = new Path(path)
     val fs = dfsPath.getFileSystem(new Configuration())
@@ -60,6 +65,19 @@ object Hadoop1HDFSUtil extends HDFSUtil {
       reader.close()
     }
 
+  }
+
+  /**
+   * Delete a path from the filesystem
+   * @param path
+   */
+  def delete(path: String) {
+    val dfsPath = new Path(path)
+    val fs = dfsPath.getFileSystem(new Configuration())
+
+    if (fs.exists(dfsPath)) {
+      fs.delete(dfsPath, true)
+    }
   }
 
 }

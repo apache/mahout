@@ -20,7 +20,6 @@ package org.apache.mahout.utils.vectors.arff;
 import java.text.DateFormat;
 import java.util.Map;
 
-
 /**
  * An interface for representing an ARFFModel.  Implementations can decide on the best approach
  * for storing the model, as some approaches will be fine for smaller files, while larger

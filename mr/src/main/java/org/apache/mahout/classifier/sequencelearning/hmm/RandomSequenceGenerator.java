@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -35,6 +33,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.common.CommandLineUtil;
 
 /**
@@ -80,26 +79,21 @@ public final class RandomSequenceGenerator {
       int length = Integer.parseInt((String) commandLine.getValue(lengthOption));
 
       //reading serialized HMM
-      DataInputStream modelStream = new DataInputStream(new FileInputStream(modelPath));
       HmmModel model;
-      try {
+      try (DataInputStream modelStream = new DataInputStream(new FileInputStream(modelPath))){
         model = LossyHmmSerializer.deserialize(modelStream);
-      } finally {
-        Closeables.close(modelStream, true);
       }
 
       //generating observations
       int[] observations = HmmEvaluator.predict(model, length, System.currentTimeMillis());
 
       //writing output
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), Charsets.UTF_8), true);
-      try {
+      try (PrintWriter writer =
+               new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), Charsets.UTF_8), true)){
         for (int observation : observations) {
           writer.print(observation);
           writer.print(' ');
         }
-      } finally {
-        Closeables.close(writer, false);
       }
     } catch (OptionException e) {
       CommandLineUtil.printHelp(optionGroup);

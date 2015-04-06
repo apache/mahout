@@ -17,16 +17,8 @@
 
 package org.apache.mahout.classifier;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -38,7 +30,14 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixWritable;
 
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Export a ConfusionMatrix in various text formats: ToString version Grayscale HTML table Summary HTML table

@@ -17,14 +17,14 @@
 
 package org.apache.mahout.utils.email;
 
-import com.google.common.base.Charsets;
-import org.apache.mahout.common.MahoutTestCase;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.Charsets;
+import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Test;
 
 public final class MailProcessorTest extends MahoutTestCase {
 

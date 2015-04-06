@@ -19,10 +19,12 @@ package org.apache.mahout.classifier.mlp;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -41,15 +43,13 @@ import org.apache.mahout.math.function.DoubleFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-
 /**
  * AbstractNeuralNetwork defines the general operations for a neural network
  * based model. Typically, all derivative models such as Multilayer Perceptron
  * and Autoencoder consist of neurons and the weights between neurons.
+ * @deprecated as of as of 0.10.0.
  */
+@Deprecated
 public abstract class NeuralNetwork {
   
   private static final Logger log = LoggerFactory.getLogger(NeuralNetwork.class);
@@ -61,7 +61,7 @@ public abstract class NeuralNetwork {
   /* The default momentum weight */
   public static final double DEFAULT_MOMENTUM_WEIGHT = 0.1;
 
-  public static enum TrainingMethod { GRADIENT_DESCENT }
+  public enum TrainingMethod { GRADIENT_DESCENT }
 
   /* The name of the model */
   protected String modelType;
@@ -111,11 +111,11 @@ public abstract class NeuralNetwork {
     costFunctionName = "Minus_Squared";
     modelType = getClass().getSimpleName();
 
-    layerSizeList = Lists.newArrayList();
-    layerSizeList = Lists.newArrayList();
-    weightMatrixList = Lists.newArrayList();
-    prevWeightUpdatesList = Lists.newArrayList();
-    squashingFunctionList = Lists.newArrayList();
+    layerSizeList = new ArrayList<>();
+    layerSizeList = new ArrayList<>();
+    weightMatrixList = new ArrayList<>();
+    prevWeightUpdatesList = new ArrayList<>();
+    squashingFunctionList = new ArrayList<>();
   }
 
   /**
@@ -348,7 +348,7 @@ public abstract class NeuralNetwork {
    *          existing matrices.
    */
   public void setWeightMatrices(Matrix[] matrices) {
-    weightMatrixList = Lists.newArrayList();
+    weightMatrixList = new ArrayList<>();
     Collections.addAll(weightMatrixList, matrices);
   }
 
@@ -409,7 +409,7 @@ public abstract class NeuralNetwork {
    * @return Cached output of each layer.
    */
   protected List<Vector> getOutputInternal(Vector instance) {
-    List<Vector> outputCache = Lists.newArrayList();
+    List<Vector> outputCache = new ArrayList<>();
     // fill with instance
     Vector intermediateOutput = instance;
     outputCache.add(intermediateOutput);
@@ -590,14 +590,10 @@ public abstract class NeuralNetwork {
   protected void readFromModel() throws IOException {
     log.info("Load model from {}", modelPath);
     Preconditions.checkArgument(modelPath != null, "Model path has not been set.");
-    FSDataInputStream is = null;
-    try {
-      Path path = new Path(modelPath);
-      FileSystem fs = path.getFileSystem(new Configuration());
-      is = new FSDataInputStream(fs.open(path));
+    Path path = new Path(modelPath);
+    FileSystem fs = path.getFileSystem(new Configuration());
+    try (FSDataInputStream is = new FSDataInputStream(fs.open(path))) {
       readFields(is);
-    } finally {
-      Closeables.close(is, true);
     }
   }
 
@@ -609,14 +605,10 @@ public abstract class NeuralNetwork {
   public void writeModelToFile() throws IOException {
     log.info("Write model to {}.", modelPath);
     Preconditions.checkArgument(modelPath != null, "Model path has not been set.");
-    FSDataOutputStream stream = null;
-    try {
-      Path path = new Path(modelPath);
-      FileSystem fs = path.getFileSystem(new Configuration());
-      stream = fs.create(path, true);
+    Path path = new Path(modelPath);
+    FileSystem fs = path.getFileSystem(new Configuration());
+    try (FSDataOutputStream stream = fs.create(path, true)) {
       write(stream);
-    } finally {
-      Closeables.close(stream, false);
     }
   }
 
@@ -715,7 +707,7 @@ public abstract class NeuralNetwork {
 
     // Read layer size list
     int numLayers = input.readInt();
-    layerSizeList = Lists.newArrayList();
+    layerSizeList = new ArrayList<>();
     for (int i = 0; i < numLayers; i++) {
       layerSizeList.add(input.readInt());
     }
@@ -724,15 +716,15 @@ public abstract class NeuralNetwork {
 
     // Read squash functions
     int squashingFunctionSize = input.readInt();
-    squashingFunctionList = Lists.newArrayList();
+    squashingFunctionList = new ArrayList<>();
     for (int i = 0; i < squashingFunctionSize; i++) {
       squashingFunctionList.add(WritableUtils.readString(input));
     }
 
     // Read weights and construct matrices of previous updates
     int numOfMatrices = input.readInt();
-    weightMatrixList = Lists.newArrayList();
-    prevWeightUpdatesList = Lists.newArrayList();
+    weightMatrixList = new ArrayList<>();
+    prevWeightUpdatesList = new ArrayList<>();
     for (int i = 0; i < numOfMatrices; i++) {
       Matrix matrix = MatrixWritable.readMatrix(input);
       weightMatrixList.add(matrix);

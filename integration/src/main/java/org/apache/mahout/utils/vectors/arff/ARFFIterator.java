@@ -19,12 +19,12 @@ package org.apache.mahout.utils.vectors.arff;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.List;
 
 import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -103,7 +103,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
    */
   public static String[] splitCSV(String line) {
     StringBuilder sb = new StringBuilder(128);
-    List<String> tokens = Lists.newArrayList();
+    List<String> tokens = new ArrayList<>();
     char escapeChar = '\0';
     for (int i = 0; i < line.length(); i++) {
       char c = line.charAt(i);

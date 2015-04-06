@@ -17,9 +17,9 @@
 
 package org.apache.mahout.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -66,7 +66,7 @@ public class TestConcatenateVectorsJob extends MahoutTestCase {
     
     for(int i = 0; i < 3; i++) {
       double[] values = DATA_A[i];
-      List<VectorWritable> vwList = Lists.newArrayList();
+      List<VectorWritable> vwList = new ArrayList<>();
       if (values.length > 0) {
         Vector v = new DenseVector(values);
         VectorWritable vw = new VectorWritable();

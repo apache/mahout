@@ -38,7 +38,7 @@ import org.apache.mahout.vectorizer.document.SequenceFileTokenizerMapper;
  * containing the unique document identifier and a
  * {@link Text} value containing the whole document. The document should be stored in UTF-8 encoding which is
  * recognizable by hadoop. It uses the given {@link Analyzer} to process the document into
- * {@link org.apache.lucene.analysis.Token}s.
+ * {@link org.apache.lucene.analysis.TokenStream}s.
  * 
  */
 public final class DocumentProcessor {

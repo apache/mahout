@@ -19,8 +19,6 @@ package org.apache.mahout.utils.vectors;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -39,11 +37,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Comparator;
 import java.util.regex.Pattern;
 
 /** Static utility methods related to vectors. */
@@ -82,7 +81,7 @@ public final class VectorHelper {
   public static List<Pair<Integer, Double>> topEntries(Vector vector, int maxEntries) {
 
     // Get the size of nonZero elements in the input vector
-    int sizeOfNonZeroElementsInVector = Iterables.size(vector.nonZeroes());
+    int sizeOfNonZeroElementsInVector = vector.getNumNonZeroElements();
 
     // If the sizeOfNonZeroElementsInVector < maxEntries then set maxEntries = sizeOfNonZeroElementsInVector
     // otherwise the call to queue.pop() returns a Pair(null, null) and the subsequent call
@@ -95,7 +94,7 @@ public final class VectorHelper {
     for (Element e : vector.nonZeroes()) {
       queue.insertWithOverflow(Pair.of(e.index(), e.get()));
     }
-    List<Pair<Integer, Double>> entries = Lists.newArrayList();
+    List<Pair<Integer, Double>> entries = new ArrayList<>();
     Pair<Integer, Double> pair;
     while ((pair = queue.pop()) != null) {
       if (pair.getFirst() > -1) {
@@ -112,7 +111,7 @@ public final class VectorHelper {
   }
 
   public static List<Pair<Integer, Double>> firstEntries(Vector vector, int maxEntries) {
-    List<Pair<Integer, Double>> entries = Lists.newArrayList();
+    List<Pair<Integer, Double>> entries = new ArrayList<>();
     Iterator<Vector.Element> it = vector.nonZeroes().iterator();
     int i = 0;
     while (it.hasNext() && i++ < maxEntries) {
@@ -125,7 +124,7 @@ public final class VectorHelper {
   public static List<Pair<String, Double>> toWeightedTerms(Collection<Pair<Integer, Double>> entries,
                                                            final String[] dictionary) {
     if (dictionary != null) {
-      return Lists.newArrayList(Collections2.transform(entries,
+      return new ArrayList<>(Collections2.transform(entries,
         new Function<Pair<Integer, Double>, Pair<String, Double>>() {
           @Override
           public Pair<String, Double> apply(Pair<Integer, Double> p) {
@@ -133,7 +132,7 @@ public final class VectorHelper {
           }
         }));
     } else {
-      return Lists.newArrayList(Collections2.transform(entries,
+      return new ArrayList<>(Collections2.transform(entries,
         new Function<Pair<Integer, Double>, Pair<String, Double>>() {
           @Override
           public Pair<String, Double> apply(Pair<Integer, Double> p) {

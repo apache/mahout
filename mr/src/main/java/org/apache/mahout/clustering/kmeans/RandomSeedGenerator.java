@@ -18,12 +18,11 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -85,12 +84,11 @@ public final class RandomSeedGenerator {
       }
       
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
-      SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class);
 
       Random random = (seed != null) ? RandomUtils.getRandom(seed) : RandomUtils.getRandom();
 
-      List<Text> chosenTexts = Lists.newArrayListWithCapacity(k);
-      List<ClusterWritable> chosenClusters = Lists.newArrayListWithCapacity(k);
+      List<Text> chosenTexts = new ArrayList<>(k);
+      List<ClusterWritable> chosenClusters = new ArrayList<>(k);
       int nextClusterId = 0;
 
       int index = 0;
@@ -123,13 +121,12 @@ public final class RandomSeedGenerator {
         }
       }
 
-      try {
+      try (SequenceFile.Writer writer =
+               SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class)){
         for (int i = 0; i < chosenTexts.size(); i++) {
           writer.append(chosenTexts.get(i), chosenClusters.get(i));
         }
         log.info("Wrote {} Klusters to {}", k, outFile);
-      } finally {
-        Closeables.close(writer, false);
       }
     }
     

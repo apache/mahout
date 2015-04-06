@@ -17,9 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -36,10 +39,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.als.AlternatingLeastSquaresSolver;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 final class ALS {
 
@@ -65,15 +64,10 @@ final class ALS {
     LocalFileSystem localFs = FileSystem.getLocal(conf);
 
     for (Path cachedFile : cachedFiles) {
-
-      SequenceFile.Reader reader = null;
-      try {
-        reader = new SequenceFile.Reader(localFs, cachedFile, conf);
+      try (SequenceFile.Reader reader = new SequenceFile.Reader(localFs, cachedFile, conf)){
         while (reader.next(rowIndex, row)) {
           featureMatrix.put(rowIndex.get(), row.get());
         }
-      } finally {
-        Closeables.close(reader, true);
       }
     }
 
@@ -96,7 +90,7 @@ final class ALS {
     double lambda, int numFeatures) {
     Vector ratings = ratingsWritable.get();
 
-    List<Vector> featureVectors = Lists.newArrayListWithCapacity(ratings.getNumNondefaultElements());
+    List<Vector> featureVectors = new ArrayList<>(ratings.getNumNondefaultElements());
     for (Vector.Element e : ratings.nonZeroes()) {
       int index = e.index();
       featureVectors.add(uOrM.get(index));

@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.iterator;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,8 +28,6 @@ import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansClusterer;
 import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
 import org.apache.mahout.math.Vector;
-
-import com.google.common.collect.Lists;
 
 /**
  * This is a probability-weighted clustering policy, suitable for fuzzy k-means
@@ -55,8 +54,8 @@ public class FuzzyKMeansClusteringPolicy extends AbstractClusteringPolicy {
   
   @Override
   public Vector classify(Vector data, ClusterClassifier prior) {
-    Collection<SoftCluster> clusters = Lists.newArrayList();
-    List<Double> distances = Lists.newArrayList();
+    Collection<SoftCluster> clusters = new ArrayList<>();
+    List<Double> distances = new ArrayList<>();
     for (Cluster model : prior.getModels()) {
       SoftCluster sc = (SoftCluster) model;
       clusters.add(sc);

@@ -42,7 +42,7 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
 fi
 
 WORK_DIR=/tmp/mahout-work-${USER}
-algorithm=( cnaivebayes-MapReduce naivebayes-MapReduce cnaivebayes-Spark naivebayes-Spark sgd-MapReduce clean)
+algorithm=( cnaivebayes-MapReduce naivebayes-MapReduce cnaivebayes-Spark naivebayes-Spark sgd clean)
 if [ -n "$1" ]; then
   choice=$1
 else
@@ -58,6 +58,18 @@ fi
 
 echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]}"
 alg=${algorithm[$choice-1]}
+
+# Spark specific check and work 
+if [ "x$alg" == "xnaivebayes-Spark" -o "x$alg" == "xcnaivebayes-Spark" ]; then
+  if [ "$MASTER" == "" ] ; then
+    echo "Plese set your MASTER env variable to point to your Spark Master URL. exiting..."
+    exit 1
+  fi
+  if [ "$MAHOUT_LOCAL" != "" ] ; then
+    echo "Options 3 and 4 can not run in MAHOUT_LOCAL mode. exiting..."
+    exit 1
+  fi
+fi
 
 if [ "x$alg" != "xclean" ]; then
   echo "creating work directory at ${WORK_DIR}"
@@ -98,7 +110,6 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
     echo "Copying 20newsgroups data to HDFS"
     set +e
     $HADOOP dfs -rmr ${WORK_DIR}/20news-all
-    $HADOOP dfs -rmr ${WORK_DIR}/spark-model
     $HADOOP dfs -mkdir ${WORK_DIR}
     set -e
     $HADOOP dfs -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
@@ -125,7 +136,7 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
 
       echo "Training Naive Bayes model"
       ./bin/mahout trainnb \
-        -i ${WORK_DIR}/20news-train-vectors -el \
+        -i ${WORK_DIR}/20news-train-vectors \
         -o ${WORK_DIR}/model \
         -li ${WORK_DIR}/labelindex \
         -ow $c
@@ -147,28 +158,24 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
         -ow -o ${WORK_DIR}/20news-testing $c
 
     elif [ "x$alg" == "xnaivebayes-Spark" -o "x$alg" == "xcnaivebayes-Spark" ]; then
-       set +e
-           $HADOOP dfs -rmr ${WORK_DIR}/spark-model
-       set -e
 
       echo "Training Naive Bayes model"
       ./bin/mahout spark-trainnb \
         -i ${WORK_DIR}/20news-train-vectors \
-        -o ${WORK_DIR}/spark-model $c -ma $MASTER
+        -o ${WORK_DIR}/spark-model $c -ow -ma $MASTER
 
       echo "Self testing on training set"
       ./bin/mahout spark-testnb \
         -i ${WORK_DIR}/20news-train-vectors\
-        -o ${WORK_DIR}\
         -m ${WORK_DIR}/spark-model $c -ma $MASTER
 
       echo "Testing on holdout set"
       ./bin/mahout spark-testnb \
         -i ${WORK_DIR}/20news-test-vectors\
-        -o ${WORK_DIR}\
         -m ${WORK_DIR}/spark-model $c -ma $MASTER
+        
     fi
-elif [ "x$alg" == "xsgd-MapReduce" ]; then
+elif [ "x$alg" == "xsgd" ]; then
   if [ ! -e "/tmp/news-group.model" ]; then
     echo "Training on ${WORK_DIR}/20news-bydate/20news-bydate-train/"
     ./bin/mahout org.apache.mahout.classifier.sgd.TrainNewsGroups ${WORK_DIR}/20news-bydate/20news-bydate-train/

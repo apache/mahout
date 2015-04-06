@@ -22,10 +22,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 import org.junit.Test;
 
@@ -36,7 +35,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
     Matrix m = new SparseMatrix(5, 5);
     m.set(1, 2, 3.0);
     m.set(3, 4, 5.0);
-    Map<String, Integer> bindings = Maps.newHashMap();
+    Map<String, Integer> bindings = new HashMap<>();
     bindings.put("A", 0);
     bindings.put("B", 1);
     bindings.put("C", 2);
@@ -52,7 +51,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
     Matrix m = new SparseRowMatrix(5, 5);
     m.set(1, 2, 3.0);
     m.set(3, 4, 5.0);
-    Map<String, Integer> bindings = Maps.newHashMap();
+    Map<String, Integer> bindings = new HashMap<>();
     bindings.put("A", 0);
     bindings.put("B", 1);
     bindings.put("C", 2);
@@ -68,7 +67,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
     Matrix m = new DenseMatrix(5,5);
     m.set(1, 2, 3.0);
     m.set(3, 4, 5.0);
-    Map<String, Integer> bindings = Maps.newHashMap();
+    Map<String, Integer> bindings = new HashMap<>();
     bindings.put("A", 0);
     bindings.put("B", 1);
     bindings.put("C", 2);
@@ -128,19 +127,13 @@ public final class MatrixWritableTest extends MahoutTestCase {
 
   private static void writeAndRead(Writable toWrite, Writable toRead) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    DataOutputStream dos = new DataOutputStream(baos);
-    try {
+    try (DataOutputStream dos = new DataOutputStream(baos)){
       toWrite.write(dos);
-    } finally {
-      Closeables.close(dos, false);
     }
 
     ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-    DataInputStream dis = new DataInputStream(bais);
-    try {
+    try (DataInputStream dis = new DataInputStream(bais)) {
       toRead.readFields(dis);
-    } finally {
-      Closeables.close(dis, true);
     }
   }
 

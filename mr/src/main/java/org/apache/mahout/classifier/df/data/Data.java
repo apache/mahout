@@ -17,11 +17,11 @@
 
 package org.apache.mahout.classifier.df.data;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.mahout.classifier.df.data.conditions.Condition;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -38,12 +38,12 @@ public class Data implements Cloneable {
 
   public Data(Dataset dataset) {
     this.dataset = dataset;
-    this.instances = Lists.newArrayList();
+    this.instances = new ArrayList<>();
   }
 
   public Data(Dataset dataset, List<Instance> instances) {
     this.dataset = dataset;
-    this.instances = Lists.newArrayList(instances);
+    this.instances = new ArrayList<>(instances);
   }
   
   /**
@@ -86,7 +86,7 @@ public class Data implements Cloneable {
    * @return the subset from this data that matches the given condition
    */
   public Data subset(Condition condition) {
-    List<Instance> subset = Lists.newArrayList();
+    List<Instance> subset = new ArrayList<>();
     
     for (Instance instance : instances) {
       if (condition.isTrueFor(instance)) {
@@ -102,7 +102,7 @@ public class Data implements Cloneable {
    */
   public Data bagging(Random rng) {
     int datasize = size();
-    List<Instance> bag = Lists.newArrayListWithCapacity(datasize);
+    List<Instance> bag = new ArrayList<>(datasize);
     
     for (int i = 0; i < datasize; i++) {
       bag.add(instances.get(rng.nextInt(datasize)));
@@ -121,7 +121,7 @@ public class Data implements Cloneable {
    */
   public Data bagging(Random rng, boolean[] sampled) {
     int datasize = size();
-    List<Instance> bag = Lists.newArrayListWithCapacity(datasize);
+    List<Instance> bag = new ArrayList<>(datasize);
     
     for (int i = 0; i < datasize; i++) {
       int index = rng.nextInt(datasize);
@@ -136,7 +136,7 @@ public class Data implements Cloneable {
    * Splits the data in two, returns one part, and this gets the rest of the data. <b>VERY SLOW!</b>
    */
   public Data rsplit(Random rng, int subsize) {
-    List<Instance> subset = Lists.newArrayListWithCapacity(subsize);
+    List<Instance> subset = new ArrayList<>(subsize);
     
     for (int i = 0; i < subsize; i++) {
       subset.add(instances.remove(rng.nextInt(instances.size())));
@@ -190,7 +190,7 @@ public class Data implements Cloneable {
    * finds all distinct values of a given attribute
    */
   public double[] values(int attr) {
-    Collection<Double> result = Sets.newHashSet();
+    Collection<Double> result = new HashSet<>();
     
     for (Instance instance : instances) {
       result.add(instance.get(attr));
@@ -208,7 +208,7 @@ public class Data implements Cloneable {
   
   @Override
   public Data clone() {
-    return new Data(dataset, Lists.newArrayList(instances));
+    return new Data(dataset, new ArrayList<>(instances));
   }
   
   @Override

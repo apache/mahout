@@ -22,12 +22,11 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -359,7 +358,7 @@ public abstract class AbstractCluster implements Cluster {
     // we assume sequential access in the output
     Vector provider = v.isSequentialAccess() ? v : new SequentialAccessSparseVector(v);
 
-    List<Object> terms = Lists.newLinkedList();
+    List<Object> terms = new LinkedList<>();
     String term = "";
 
     for (Element elem : provider.nonZeroes()) {
@@ -370,7 +369,7 @@ public abstract class AbstractCluster implements Cluster {
         term = String.valueOf(elem.index());
       }
 
-      Map<String, Object> term_entry = Maps.newHashMap();
+      Map<String, Object> term_entry = new HashMap<>();
       double roundedWeight = (double) Math.round(elem.get() * 1000) / 1000;
       if (hasBindings || isSparse) {
         term_entry.put(term, roundedWeight);

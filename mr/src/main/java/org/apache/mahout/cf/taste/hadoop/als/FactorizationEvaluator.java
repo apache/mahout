@@ -23,8 +23,7 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Closeables;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -104,17 +103,12 @@ public class FactorizationEvaluator extends AbstractJob {
       return -1;
     }
 
-    BufferedWriter writer  = null;
-    try {
-      FileSystem fs = FileSystem.get(getOutputPath().toUri(), getConf());
-      FSDataOutputStream outputStream = fs.create(getOutputPath("rmse.txt"));
+    FileSystem fs = FileSystem.get(getOutputPath().toUri(), getConf());
+    FSDataOutputStream outputStream = fs.create(getOutputPath("rmse.txt"));
+    try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8))){
       double rmse = computeRmse(errors);
-      writer = new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8));
       writer.write(String.valueOf(rmse));
-    } finally {
-      Closeables.close(writer, false);
     }
-
     return 0;
   }
 

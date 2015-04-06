@@ -17,11 +17,6 @@
 
 package org.apache.mahout.classifier.df.mapreduce;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Random;
-
-import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -50,6 +45,11 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Mapreduce implementation that classifies the Input data using a previousely built decision forest
@@ -144,7 +144,7 @@ public class Classifier {
     Path[] outfiles = DFUtils.listOutputFiles(fs, mappersOutputPath);
 
     // read all the output
-    List<double[]> resList = Lists.newArrayList();
+    List<double[]> resList = new ArrayList<>();
     for (Path path : outfiles) {
       FSDataOutputStream ofile = null;
       try {

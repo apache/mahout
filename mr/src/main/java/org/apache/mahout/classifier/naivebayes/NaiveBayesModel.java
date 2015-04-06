@@ -31,7 +31,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
 
 /** NaiveBayesModel holds the weight matrix, the feature and label sums and the weight normalizer vectors.*/
 public class NaiveBayesModel {
@@ -102,15 +101,14 @@ public class NaiveBayesModel {
   public static NaiveBayesModel materialize(Path output, Configuration conf) throws IOException {
     FileSystem fs = output.getFileSystem(conf);
 
-    Vector weightsPerLabel = null;
+    Vector weightsPerLabel;
     Vector perLabelThetaNormalizer = null;
-    Vector weightsPerFeature = null;
+    Vector weightsPerFeature;
     Matrix weightsPerLabelAndFeature;
     float alphaI;
     boolean isComplementary;
 
-    FSDataInputStream in = fs.open(new Path(output, "naiveBayesModel.bin"));
-    try {
+    try (FSDataInputStream in = fs.open(new Path(output, "naiveBayesModel.bin"))) {
       alphaI = in.readFloat();
       isComplementary = in.readBoolean();
       weightsPerFeature = VectorWritable.readVector(in);
@@ -122,9 +120,8 @@ public class NaiveBayesModel {
       for (int label = 0; label < weightsPerLabelAndFeature.numRows(); label++) {
         weightsPerLabelAndFeature.assignRow(label, VectorWritable.readVector(in));
       }
-    } finally {
-      Closeables.close(in, true);
     }
+
     NaiveBayesModel model = new NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature, weightsPerLabel,
         perLabelThetaNormalizer, alphaI, isComplementary);
     model.validate();
@@ -133,8 +130,7 @@ public class NaiveBayesModel {
 
   public void serialize(Path output, Configuration conf) throws IOException {
     FileSystem fs = output.getFileSystem(conf);
-    FSDataOutputStream out = fs.create(new Path(output, "naiveBayesModel.bin"));
-    try {
+    try (FSDataOutputStream out = fs.create(new Path(output, "naiveBayesModel.bin"))) {
       out.writeFloat(alphaI);
       out.writeBoolean(isComplementary);
       VectorWritable.writeVector(out, weightsPerFeature);
@@ -145,8 +141,6 @@ public class NaiveBayesModel {
       for (int row = 0; row < weightsPerLabelAndFeature.numRows(); row++) {
         VectorWritable.writeVector(out, weightsPerLabelAndFeature.viewRow(row));
       }
-    } finally {
-      Closeables.close(out, false);
     }
   }
   

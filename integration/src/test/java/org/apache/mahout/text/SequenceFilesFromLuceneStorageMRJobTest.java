@@ -16,7 +16,12 @@
  */
 package org.apache.mahout.text;
 
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -27,10 +32,6 @@ import org.apache.mahout.text.doc.TestDocument;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
 
@@ -45,7 +46,7 @@ public class SequenceFilesFromLuceneStorageMRJobTest extends AbstractLuceneStora
     Configuration configuration = getConfiguration();
     Path seqOutputPath = new Path(getTestTempDirPath(), "seqOutputPath");//don't make the output directory
     lucene2SeqConf = new LuceneStorageConfiguration(configuration, asList(getIndexPath1(), getIndexPath2()),
-            seqOutputPath, SingleFieldDocument.ID_FIELD, asList(SingleFieldDocument.FIELD));
+            seqOutputPath, SingleFieldDocument.ID_FIELD, Collections.singletonList(SingleFieldDocument.FIELD));
   }
 
   @After
@@ -66,7 +67,7 @@ public class SequenceFilesFromLuceneStorageMRJobTest extends AbstractLuceneStora
     lucene2seq.run(lucene2SeqConf);
 
     Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-    Map<String, Text> map = Maps.newHashMap();
+    Map<String, Text> map = new HashMap<>();
     while (iterator.hasNext()) {
       Pair<Text, Text> next = iterator.next();
       map.put(next.getFirst().toString(), next.getSecond());

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
@@ -52,7 +53,7 @@ public final class ClusteringUtils {
                                                                  DistanceMeasure distanceMeasure) {
     UpdatableSearcher searcher = new ProjectionSearch(distanceMeasure, 3, 1);
     searcher.addAll(centroids);
-    List<OnlineSummarizer> summarizers = Lists.newArrayList();
+    List<OnlineSummarizer> summarizers = new ArrayList<>();
     if (searcher.size() == 0) {
       return summarizers;
     }

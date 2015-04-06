@@ -135,8 +135,25 @@ object AtA {
 
     val m = op.A.nrow
     val n = op.A.ncol
+/* possible fix for index out of range for vector range
     val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.round.toInt max 1
     val blockHeight = (n - 1) / numParts + 1
+*/
+    val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.round.toInt max 1 min n
+
+    // Computing evenly split ranges to denote each partition size.
+
+    // Base size.
+    val baseSize = n / numParts
+
+    // How many partitions needs to be baseSize +1.
+    val slack = n - baseSize * numParts
+
+    val ranges =
+      // Start with partition offsets... total numParts + 1.
+      (0 to numParts).view.map { i => (baseSize + 1) * i - (i - slack max 0)}
+        // And convert offsets to ranges.
+        .sliding(2).map(s => s(0) until s(1)).toIndexedSeq
 
     val rddAtA = srcRdd
 
@@ -147,9 +164,13 @@ object AtA {
         .flatMap {
       v =>
         for (blockKey <- Stream.range(0, numParts)) yield {
+/* patch to fix index out of range for vector access
           val blockStart = blockKey * blockHeight
           val blockEnd = n min (blockStart + blockHeight)
           blockKey -> (v(blockStart until blockEnd) cross v)
+*/
+          val range = ranges(blockKey)
+          blockKey -> (v(range) cross v)
         }
     }
         // Combine outer blocks
@@ -158,8 +179,12 @@ object AtA {
         // Restore proper block keys
         .map {
       case (blockKey, block) =>
+/* patch to fix index out of range for vector access
         val blockStart = blockKey * blockHeight
         val rowKeys = Array.tabulate(block.nrow)(blockStart + _)
+*/
+        val range = ranges(blockKey)
+        val rowKeys = Array.tabulate(block.nrow)(range.start + _)
         rowKeys -> block
     }
 

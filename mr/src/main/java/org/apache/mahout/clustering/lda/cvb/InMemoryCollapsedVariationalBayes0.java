@@ -16,8 +16,12 @@
  */
 package org.apache.mahout.clustering.lda.cvb;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -44,16 +48,12 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.DistributedRowMatrixWriter;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.NamedVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Runs the same algorithm as {@link CVB0Driver}, but sequentially, in memory.  Memory requirements
@@ -111,7 +111,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     this.terms = terms;
     this.initialModelCorpusFraction = modelCorpusFraction;
     numTerms = terms != null ? terms.length : corpus.numCols();
-    Map<String, Integer> termIdMap = Maps.newHashMap();
+    Map<String, Integer> termIdMap = new HashMap<>();
     if (terms != null) {
       for (int t = 0; t < terms.length; t++) {
         termIdMap.put(terms[t], t);
@@ -414,35 +414,12 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     return 0;
   }
 
-  /*
-  private static Map<Integer, Map<String, Integer>> loadCorpus(String path) throws IOException {
-    List<String> lines = Resources.readLines(Resources.getResource(path), Charsets.UTF_8);
-    Map<Integer, Map<String, Integer>> corpus = Maps.newHashMap();
-    for (int i=0; i<lines.size(); i++) {
-      String line = lines.get(i);
-      Map<String, Integer> doc = Maps.newHashMap();
-      for (String s : line.split(" ")) {
-        s = s.replaceAll("\\W", "").toLowerCase().trim();
-        if (s.length() == 0) {
-          continue;
-        }
-        if (!doc.containsKey(s)) {
-          doc.put(s, 0);
-        }
-        doc.put(s, doc.get(s) + 1);
-      }
-      corpus.put(i, doc);
-    }
-    return corpus;
-  }
-   */
-
   private static String[] loadDictionary(String dictionaryPath, Configuration conf) {
     if (dictionaryPath == null) {
       return null;
     }
     Path dictionaryFile = new Path(dictionaryPath);
-    List<Pair<Integer, String>> termList = Lists.newArrayList();
+    List<Pair<Integer, String>> termList = new ArrayList<>();
     int maxTermId = 0;
      // key is word value is id
     for (Pair<Writable, IntWritable> record
@@ -467,7 +444,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     throws IOException {
     Path vectorPath = new Path(vectorPathString);
     FileSystem fs = vectorPath.getFileSystem(conf);
-    List<Path> subPaths = Lists.newArrayList();
+    List<Path> subPaths = new ArrayList<>();
     if (fs.isFile(vectorPath)) {
       subPaths.add(vectorPath);
     } else {
@@ -475,7 +452,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
         subPaths.add(fileStatus.getPath());
       }
     }
-    List<Pair<Integer, Vector>> rowList = Lists.newArrayList();
+    List<Pair<Integer, Vector>> rowList = new ArrayList<>();
     int numRows = Integer.MIN_VALUE;
     int numCols = -1;
     boolean sequentialAccess = false;

@@ -2,6 +2,24 @@ Mahout Change Log
 
 Release 0.10.0 - unreleased
 
+  MAHOUT-1676: Deprecate MLP, ConcatenateVectorsJob and ConcatenateVectorsReducer in the codebase (apalumbo)
+  
+  MAHOUT-1622: MultithreadedBatchItemSimilarities outputs incorrect number of similarities (Jesse Daniels, Anand Avati via smarthi)
+
+  MAHOUT-1605: Make VisualizerTest locale independent (Frank Rosner, Anand Avati via smarthi)
+
+  MAHOUT-1635: Getting an exception when I provide classification labels manually for Naive Bayes (apalumbo)
+
+  MAHOUT-1662: Potential Path bug in SequenceFileVaultIterator breaks DisplaySpectralKMeans (Shannon Quinn)
+
+  MAHOUT-1656: Change SNAPSHOT version from 1.0 to 0.10.0 (smarthi)
+
+  MAHOUT-1593: cluster-reuters.sh does not work complaining java.lang.IllegalStateException (smarthi via akm)
+
+  MAHOUT-1661: All Lanczos modules marked as @Deprecated and slated for removal in future releases (Shannon Quinn)
+
+  MAHOUT-1638: H2O bindings fail at drmParallelizeWithRowLabels(...) (Anand Avati via apalumbo)
+  
   MAHOUT-1667: Hadoop 1 and 2 profile in POM (sslavic)
 
   MAHOUT-1564: Naive Bayes Classifier for New Text Documents (apalumbo)

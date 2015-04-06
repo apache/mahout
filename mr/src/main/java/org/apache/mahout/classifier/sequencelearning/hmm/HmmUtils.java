@@ -17,19 +17,18 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;
-
-import com.google.common.base.Preconditions;
 
 /**
  * A collection of utilities for handling HMMModel objects.
@@ -257,7 +256,7 @@ public final class HmmUtils {
                                                  int[] sequence,
                                                  boolean observed,
                                                  String defaultValue) {
-    List<String> decoded = Lists.newArrayListWithCapacity(sequence.length);
+    List<String> decoded = new ArrayList<>(sequence.length);
     for (int position : sequence) {
       String nextState;
       if (observed) {

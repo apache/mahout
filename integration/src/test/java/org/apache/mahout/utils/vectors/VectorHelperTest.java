@@ -17,9 +17,8 @@
 
 package org.apache.mahout.utils.vectors;
 
-import com.google.common.collect.Iterables;
+import java.util.Random;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,8 +31,6 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Random;
 
 public final class VectorHelperTest extends MahoutTestCase {
 
@@ -52,28 +49,24 @@ public final class VectorHelperTest extends MahoutTestCase {
 
     inputPathOne = getTestTempFilePath("documents/docs-one.file");
     FileSystem fs = FileSystem.get(inputPathOne.toUri(), conf);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPathOne, Text.class, IntWritable.class);
-    try {
+    try (SequenceFile.Writer writer =
+             new SequenceFile.Writer(fs, conf, inputPathOne, Text.class, IntWritable.class)) {
       Random rd = RandomUtils.getRandom();
       for (int i = 0; i < NUM_DOCS; i++) {
         // Make all indices higher than dictionary size
         writer.append(new Text("Document::ID::" + i), new IntWritable(NUM_DOCS + rd.nextInt(NUM_DOCS)));
       }
-    } finally {
-      Closeables.close(writer, false);
     }
 
     inputPathTwo = getTestTempFilePath("documents/docs-two.file");
     fs = FileSystem.get(inputPathTwo.toUri(), conf);
-    writer = new SequenceFile.Writer(fs, conf, inputPathTwo, Text.class, IntWritable.class);
-    try {
+    try (SequenceFile.Writer writer =
+             new SequenceFile.Writer(fs, conf, inputPathTwo, Text.class, IntWritable.class)) {
       Random rd = RandomUtils.getRandom();
       for (int i = 0; i < NUM_DOCS; i++) {
         // Keep indices within number of documents
         writer.append(new Text("Document::ID::" + i), new IntWritable(rd.nextInt(NUM_DOCS)));
       }
-    } finally {
-      Closeables.close(writer, false);
     }
   }
 
@@ -120,7 +113,7 @@ public final class VectorHelperTest extends MahoutTestCase {
     // check if sizeOfNonZeroElementsInVector < maxEntries
     assertTrue(VectorHelper.topEntries(v, 9).size() < 9);
     // check if sizeOfNonZeroElementsInVector > maxEntries
-    assertTrue(VectorHelper.topEntries(v, 5).size() < Iterables.size(v.nonZeroes()));
+    assertTrue(VectorHelper.topEntries(v, 5).size() < v.getNumNonZeroElements());
   }
 
   @Test
