@@ -17,23 +17,6 @@
 
 package org.apache.mahout.classifier;
 
-import com.google.common.collect.ConcurrentHashMultiset;
-import com.google.common.collect.Multiset;
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
-import org.apache.commons.io.Charsets;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.util.Version;
-import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.vectorizer.encoders.ConstantValueEncoder;
-import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
-import org.apache.mahout.vectorizer.encoders.StaticWordValueEncoder;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +27,22 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
+
+import com.google.common.collect.ConcurrentHashMultiset;
+import com.google.common.collect.Multiset;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
+import org.apache.commons.io.Charsets;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.vectorizer.encoders.ConstantValueEncoder;
+import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
+import org.apache.mahout.vectorizer.encoders.StaticWordValueEncoder;
 
 public final class NewsgroupHelper {
   
@@ -60,7 +59,7 @@ public final class NewsgroupHelper {
   private static final long WEEK = 7 * 24 * 3600;
   
   private final Random rand = RandomUtils.getRandom();  
-  private final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
+  private final Analyzer analyzer = new StandardAnalyzer();
   private final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
   private final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   

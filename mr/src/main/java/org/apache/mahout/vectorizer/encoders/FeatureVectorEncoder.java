@@ -17,14 +17,14 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Sets;
-import org.apache.mahout.math.MurmurHash;
-import org.apache.mahout.math.Vector;
-
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.io.Charsets;
+import org.apache.mahout.math.MurmurHash;
+import org.apache.mahout.math.Vector;
 
 /**
  * General interface for objects that record features into a feature vector.
@@ -257,7 +257,7 @@ public abstract class FeatureVectorEncoder {
       }
       Set<Integer> trace = traceDictionary.get(key);
       if (trace == null) {
-        trace = Sets.newHashSet(n);
+        trace = new HashSet<>(n);
         traceDictionary.put(key, trace);
       } else {
         trace.add(n);

@@ -22,6 +22,7 @@ import java.util.List;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Closeables;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -39,8 +40,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * Generates a sequence file from a Lucene index with a specified id field as the key and a content field as the value.
@@ -82,7 +81,6 @@ public class SequenceFilesFromLuceneStorage {
       processedDocs = writerCollector.processedDocs;
       Closeables.close(sequenceFileWriter, false);
       directory.close();
-      //searcher.close();
       reader.close();
     }
   }
@@ -117,7 +115,7 @@ public class SequenceFilesFromLuceneStorage {
         Text theValue = new Text();
         LuceneSeqFileHelper.populateValues(doc, theValue, fields);
         //if they are both empty, don't write
-        if (isBlank(theKey.toString()) && isBlank(theValue.toString())) {
+        if (StringUtils.isBlank(theKey.toString()) && StringUtils.isBlank(theValue.toString())) {
           return;
         }
         sequenceFileWriter.append(theKey, theValue);

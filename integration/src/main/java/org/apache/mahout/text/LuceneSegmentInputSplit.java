@@ -16,18 +16,18 @@
  */
 package org.apache.mahout.text;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.lucene.index.SegmentCommitInfo;
 import org.apache.lucene.index.SegmentInfo;
 import org.apache.lucene.index.SegmentInfos;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import org.apache.solr.store.hdfs.HdfsDirectory;
 
 /**
  * {@link InputSplit} implementation that represents a Lucene segment.
@@ -88,9 +88,7 @@ public class LuceneSegmentInputSplit extends InputSplit implements Writable {
    * @throws IOException if an error occurs when accessing the directory
    */
   public SegmentCommitInfo getSegment(Configuration configuration) throws IOException {
-    ReadOnlyFileSystemDirectory directory = new ReadOnlyFileSystemDirectory(FileSystem.get(configuration), indexPath,
-                                                                            false, configuration);
-
+    HdfsDirectory directory = new HdfsDirectory(indexPath, configuration);
     SegmentInfos segmentInfos = new SegmentInfos();
     segmentInfos.read(directory);
 

@@ -40,12 +40,11 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.util.Version;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
-
-import static org.apache.lucene.util.Version.LUCENE_46;
 
 /**
  * Holds all the configuration for {@link SequenceFilesFromLuceneStorage}, which generates a sequence file
@@ -213,7 +212,7 @@ public class LuceneStorageConfiguration implements Writable {
       }
       idField = in.readUTF();
       fields = Arrays.asList(in.readUTF().split(SEPARATOR_FIELDS));
-      query = new QueryParser(LUCENE_46, "query", new StandardAnalyzer(LUCENE_46)).parse(in.readUTF());
+      query = new QueryParser(Version.LUCENE_4_10_4, "query", new StandardAnalyzer()).parse(in.readUTF());
       maxHits = in.readInt();
     } catch (ParseException e) {
       throw new RuntimeException("Could not deserialize " + this.getClass().getName(), e);

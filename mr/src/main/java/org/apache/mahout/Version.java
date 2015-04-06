@@ -17,10 +17,10 @@
 
 package org.apache.mahout;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-
 import java.io.IOException;
+
+import com.google.common.io.Resources;
+import org.apache.commons.io.Charsets;
 
 public final class Version {
 
