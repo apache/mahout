@@ -17,11 +17,11 @@
 
 package org.apache.mahout.clustering.streaming.mapreduce;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.ClusteringUtils;
@@ -61,7 +61,7 @@ public class StreamingKMeansThread implements Callable<Iterable<Centroid>> {
     Iterator<Centroid> dataPointsIterator = dataPoints.iterator();
 
     if (estimateDistanceCutoff == StreamingKMeansDriver.INVALID_DISTANCE_CUTOFF) {
-      List<Centroid> estimatePoints = Lists.newArrayListWithExpectedSize(NUM_ESTIMATE_POINTS);
+      List<Centroid> estimatePoints = new ArrayList<>(NUM_ESTIMATE_POINTS);
       while (dataPointsIterator.hasNext() && estimatePoints.size() < NUM_ESTIMATE_POINTS) {
         Centroid centroid = dataPointsIterator.next();
         estimatePoints.add(centroid);

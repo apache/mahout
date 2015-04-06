@@ -21,11 +21,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
-import com.google.common.collect.Maps;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -48,11 +52,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterab
 import org.apache.mahout.utils.vectors.VectorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
 
 public final class ClusterDumper extends AbstractJob {
 
@@ -304,9 +303,10 @@ public final class ClusterDumper extends AbstractJob {
     this.maxPointsPerCluster = maxPointsPerCluster;
   }
 
-  public static Map<Integer, List<WeightedPropertyVectorWritable>> readPoints(Path pointsPathDir, long maxPointsPerCluster,
-      Configuration conf) {
-    Map<Integer, List<WeightedPropertyVectorWritable>> result = Maps.newTreeMap();
+  public static Map<Integer, List<WeightedPropertyVectorWritable>> readPoints(Path pointsPathDir,
+                                                                              long maxPointsPerCluster,
+                                                                              Configuration conf) {
+    Map<Integer, List<WeightedPropertyVectorWritable>> result = new TreeMap<>();
     for (Pair<IntWritable, WeightedPropertyVectorWritable> record
         : new SequenceFileDirIterable<IntWritable, WeightedPropertyVectorWritable>(pointsPathDir, PathType.LIST,
             PathFilters.logsCRCFilter(), conf)) {
@@ -316,7 +316,7 @@ public final class ClusterDumper extends AbstractJob {
       int keyValue = record.getFirst().get();
       List<WeightedPropertyVectorWritable> pointList = result.get(keyValue);
       if (pointList == null) {
-        pointList = Lists.newArrayList();
+        pointList = new ArrayList<>();
         result.put(keyValue, pointList);
       }
       if (pointList.size() < maxPointsPerCluster) {

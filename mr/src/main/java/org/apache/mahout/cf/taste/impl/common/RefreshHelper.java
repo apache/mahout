@@ -17,13 +17,13 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public final class RefreshHelper implements Refreshable {
    *          encapsulates the containing object's own refresh logic
    */
   public RefreshHelper(Callable<?> refreshRunnable) {
-    this.dependencies = Lists.newArrayListWithCapacity(3);
+    this.dependencies = new ArrayList<>(3);
     this.refreshLock = new ReentrantLock();
     this.refreshRunnable = refreshRunnable;
   }
@@ -99,7 +99,7 @@ public final class RefreshHelper implements Refreshable {
    *         param.
    */
   public static Collection<Refreshable> buildRefreshed(Collection<Refreshable> currentAlreadyRefreshed) {
-    return currentAlreadyRefreshed == null ? Sets.<Refreshable>newHashSetWithExpectedSize(3) : currentAlreadyRefreshed;
+    return currentAlreadyRefreshed == null ? new HashSet<Refreshable>(3) : currentAlreadyRefreshed;
   }
   
   /**

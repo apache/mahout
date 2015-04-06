@@ -17,14 +17,11 @@
 
 package org.apache.mahout.ep;
 
-import com.google.common.collect.Lists;
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.classifier.sgd.PolymorphicWritable;
-
 import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +31,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import com.google.common.collect.Lists;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 
 /**
  * Allows evolutionary optimization where the state function can't be easily
@@ -82,7 +83,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
   private int populationSize;
 
   public EvolutionaryProcess() {
-    population = Lists.newArrayList();
+    population = new ArrayList<>();
   }
 
   /**
@@ -119,7 +120,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
     Collections.sort(population);
 
     // we copy here to avoid concurrent modification
-    List<State<T, U>> parents = Lists.newArrayList(population.subList(0, survivors));
+    List<State<T, U>> parents = new ArrayList<>(population.subList(0, survivors));
     population.subList(survivors, population.size()).clear();
 
     // fill out the population with offspring from the survivors
@@ -140,7 +141,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
    * and rethrown nested in an ExecutionException.
    */
   public State<T, U> parallelDo(final Function<Payload<U>> fn) throws InterruptedException, ExecutionException {
-    Collection<Callable<State<T, U>>> tasks = Lists.newArrayList();
+    Collection<Callable<State<T, U>>> tasks = new ArrayList<>();
     for (final State<T, U> state : population) {
       tasks.add(new Callable<State<T, U>>() {
         @Override
@@ -219,7 +220,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
   public void readFields(DataInput input) throws IOException {
     setThreadCount(input.readInt());
     int n = input.readInt();
-    population = Lists.newArrayList();
+    population = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       State<T, U> state = (State<T, U>) PolymorphicWritable.read(input, State.class);
       population.add(state);

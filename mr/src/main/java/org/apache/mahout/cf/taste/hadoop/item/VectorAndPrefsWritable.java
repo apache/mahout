@@ -20,9 +20,9 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.Varint;
 import org.apache.mahout.math.Vector;
@@ -77,8 +77,8 @@ public final class VectorAndPrefsWritable implements Writable {
     writable.readFields(in);
     vector = writable.get();
     int size = Varint.readUnsignedVarInt(in);
-    userIDs = Lists.newArrayListWithCapacity(size);
-    values = Lists.newArrayListWithCapacity(size);
+    userIDs = new ArrayList<>(size);
+    values = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {
       userIDs.add(Varint.readSignedVarLong(in));
       values.add(in.readFloat());

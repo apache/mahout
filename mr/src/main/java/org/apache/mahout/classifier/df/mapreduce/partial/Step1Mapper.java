@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.df.mapreduce.partial;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -35,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -61,7 +61,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   private int partition;
   
   /** will contain all instances if this mapper's split */
-  private final List<Instance> instances = Lists.newArrayList();
+  private final List<Instance> instances = new ArrayList<>();
   
   public int getFirstTreeId() {
     return firstTreeId;

@@ -17,27 +17,22 @@
 
 package org.apache.mahout.text;
 
-import com.google.common.collect.Iterators;
-import org.apache.commons.lang.StringUtils;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
 import org.apache.lucene.search.TermQuery;
 import org.apache.mahout.common.HadoopUtil;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.PathType;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
 import org.apache.mahout.text.doc.MultipleFieldsDocument;
 import org.apache.mahout.text.doc.SingleFieldDocument;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.List;
-
-import static java.util.Arrays.asList;
 
 public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStorageTest {
 
@@ -56,7 +51,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
     seqFilesOutputPath = new Path(getTestTempDirPath(), "seqfiles");
     idField = SingleFieldDocument.ID_FIELD;
-    fields = asList("field");
+    fields = Collections.singletonList("field");
 
     driver = new SequenceFilesFromLuceneStorageDriver() {
       @Override
@@ -76,13 +71,13 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
   @Test
   public void testNewLucene2SeqConfiguration() {
     lucene2SeqConf = driver.newLucene2SeqConfiguration(conf,
-      asList(new Path(getIndexPath1().toString())),
+      Collections.singletonList(new Path(getIndexPath1().toString())),
       seqFilesOutputPath,
       idField,
       fields);
 
     assertEquals(conf, lucene2SeqConf.getConfiguration());
-    assertEquals(asList(getIndexPath1()), lucene2SeqConf.getIndexPaths());
+    assertEquals(Collections.singletonList(getIndexPath1()), lucene2SeqConf.getIndexPaths());
     assertEquals(seqFilesOutputPath, lucene2SeqConf.getSequenceFilesOutputPath());
     assertEquals(idField, lucene2SeqConf.getIdField());
     assertEquals(fields, lucene2SeqConf.getFields());
@@ -90,7 +85,8 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
   @Test
   public void testRun() throws Exception {
-    List<MultipleFieldsDocument> docs = asList(new MultipleFieldsDocument("123", "test 1", "test 2", "test 3"));
+    List<MultipleFieldsDocument> docs =
+        Collections.singletonList(new MultipleFieldsDocument("123", "test 1", "test 2", "test 3"));
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.get(0));
 
     String queryField = "queryfield";
@@ -115,7 +111,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
     assertEquals(getIndexPath1().toUri().getPath(), lucene2SeqConf.getIndexPaths().get(0).toUri().getPath());
     assertEquals(seqFilesOutputPath, lucene2SeqConf.getSequenceFilesOutputPath());
     assertEquals(idField, lucene2SeqConf.getIdField());
-    assertEquals(asList(field1, field2), lucene2SeqConf.getFields());
+    assertEquals(Arrays.asList(field1, field2), lucene2SeqConf.getFields());
 
     assertTrue(lucene2SeqConf.getQuery() instanceof TermQuery);
     assertEquals(queryField, ((TermQuery) lucene2SeqConf.getQuery()).getTerm().field());
@@ -167,10 +163,6 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
     driver.run(args);
     assertTrue(FileSystem.get(conf).exists(seqFilesOutputPath));
     //shouldn't be any real files in the seq files out path
-    SequenceFileDirIterator<Writable, Writable> iter =
-        new SequenceFileDirIterator<Writable, Writable>(seqFilesOutputPath, PathType.LIST, PathFilters.logsCRCFilter(), null, false, conf);
-    assertFalse(Iterators.size(iter) > 0);
-
   }
 
   @Test

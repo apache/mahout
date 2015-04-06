@@ -17,12 +17,12 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class RankingGradient implements Gradient {
 
   private int window = 10;
 
-  private final List<Deque<Vector>> history = Lists.newArrayList();
+  private final List<Deque<Vector>> history = new ArrayList<>();
 
   public RankingGradient(int window) {
     this.window = window;

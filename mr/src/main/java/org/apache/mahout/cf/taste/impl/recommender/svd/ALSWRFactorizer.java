@@ -17,7 +17,13 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -31,16 +37,9 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.als.AlternatingLeastSquaresSolver;
 import org.apache.mahout.math.als.ImplicitFeedbackAlternatingLeastSquaresSolver;
+import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.mahout.math.map.OpenIntObjectHashMap;
-
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * factorizes the rating matrix using "Alternating-Least-Squares with Weighted-λ-Regularization" as described in
@@ -191,7 +190,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
           queue.execute(new Runnable() {
             @Override
             public void run() {
-              List<Vector> featureVectors = Lists.newArrayList();
+              List<Vector> featureVectors = new ArrayList<>();
               while (itemIDsFromUser.hasNext()) {
                 long itemID = itemIDsFromUser.nextLong();
                 featureVectors.add(features.getItemFeatureColumn(itemIndex(itemID)));
@@ -229,7 +228,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
           queue.execute(new Runnable() {
             @Override
             public void run() {
-              List<Vector> featureVectors = Lists.newArrayList();
+              List<Vector> featureVectors = new ArrayList<>();
               for (Preference pref : itemPrefs) {
                 long userID = pref.getUserID();
                 featureVectors.add(features.getUserFeatureColumn(userIndex(userID)));
@@ -272,7 +271,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   //TODO find a way to get rid of the object overhead here
   protected OpenIntObjectHashMap<Vector> itemFeaturesMapping(LongPrimitiveIterator itemIDs, int numItems,
       double[][] featureMatrix) {
-    OpenIntObjectHashMap<Vector> mapping = new OpenIntObjectHashMap<Vector>(numItems);
+    OpenIntObjectHashMap<Vector> mapping = new OpenIntObjectHashMap<>(numItems);
     while (itemIDs.hasNext()) {
       long itemID = itemIDs.next();
       int itemIndex = itemIndex(itemID);
@@ -284,7 +283,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
 
   protected OpenIntObjectHashMap<Vector> userFeaturesMapping(LongPrimitiveIterator userIDs, int numUsers,
       double[][] featureMatrix) {
-    OpenIntObjectHashMap<Vector> mapping = new OpenIntObjectHashMap<Vector>(numUsers);
+    OpenIntObjectHashMap<Vector> mapping = new OpenIntObjectHashMap<>(numUsers);
 
     while (userIDs.hasNext()) {
       long userID = userIDs.next();

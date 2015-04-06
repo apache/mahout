@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +22,9 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -40,8 +39,9 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
  */
 public final class DFUtils {
 
-  private DFUtils() {}
-  
+  private DFUtils() {
+  }
+
   /**
    * Writes an Node[] into a DataOutput
    * @throws java.io.IOException
@@ -52,7 +52,7 @@ public final class DFUtils {
       w.write(out);
     }
   }
-  
+
   /**
    * Reads a Node[] from a DataInput
    * @throws java.io.IOException
@@ -63,10 +63,10 @@ public final class DFUtils {
     for (int index = 0; index < length; index++) {
       nodes[index] = Node.read(in);
     }
-    
+
     return nodes;
   }
-  
+
   /**
    * Writes a double[] into a DataOutput
    * @throws java.io.IOException
@@ -77,7 +77,7 @@ public final class DFUtils {
       out.writeDouble(value);
     }
   }
-  
+
   /**
    * Reads a double[] from a DataInput
    * @throws java.io.IOException
@@ -88,10 +88,10 @@ public final class DFUtils {
     for (int index = 0; index < length; index++) {
       array[index] = in.readDouble();
     }
-    
+
     return array;
   }
-  
+
   /**
    * Writes an int[] into a DataOutput
    * @throws java.io.IOException
@@ -102,7 +102,7 @@ public final class DFUtils {
       out.writeInt(value);
     }
   }
-  
+
   /**
    * Reads an int[] from a DataInput
    * @throws java.io.IOException
@@ -113,16 +113,16 @@ public final class DFUtils {
     for (int index = 0; index < length; index++) {
       array[index] = in.readInt();
     }
-    
+
     return array;
   }
-  
+
   /**
    * Return a list of all files in the output directory
    * @throws IOException if no file is found
    */
   public static Path[] listOutputFiles(FileSystem fs, Path outputPath) throws IOException {
-    List<Path> outputFiles = Lists.newArrayList();
+    List<Path> outputFiles = new ArrayList<>();
     for (FileStatus s : fs.listStatus(outputPath, PathFilters.logsCRCFilter())) {
       if (!s.isDir() && !s.getPath().getName().startsWith("_")) {
         outputFiles.add(s.getPath());
@@ -140,27 +140,24 @@ public final class DFUtils {
   public static String elapsedTime(long milli) {
     long seconds = milli / 1000;
     milli %= 1000;
-    
+
     long minutes = seconds / 60;
     seconds %= 60;
-    
+
     long hours = minutes / 60;
     minutes %= 60;
-    
+
     return hours + "h " + minutes + "m " + seconds + "s " + milli;
   }
 
   public static void storeWritable(Configuration conf, Path path, Writable writable) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
 
-    FSDataOutputStream out = fs.create(path);
-    try {
+    try (FSDataOutputStream out = fs.create(path)) {
       writable.write(out);
-    } finally {
-      Closeables.close(out, false);
     }
   }
-  
+
   /**
    * Write a string to a path.
    * @param conf From which the file system will be picked
@@ -169,13 +166,8 @@ public final class DFUtils {
    * @throws IOException if things go poorly
    */
   public static void storeString(Configuration conf, Path path, String string) throws IOException {
-    DataOutputStream out = null;
-    try {
-      out = path.getFileSystem(conf).create(path);
+    try (DataOutputStream out = path.getFileSystem(conf).create(path)) {
       out.write(string.getBytes(Charset.defaultCharset()));
-    } finally {
-      Closeables.close(out, false);
     }
   }
-  
 }

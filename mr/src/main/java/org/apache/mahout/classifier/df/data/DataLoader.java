@@ -19,7 +19,6 @@ package org.apache.mahout.classifier.df.data;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -28,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -80,7 +81,7 @@ public final class DataLoader {
         if (attrs[attr].isCategorical() || (!regression && attrs[attr].isLabel())) {
           // update values
           if (values[attr] == null) {
-            values[attr] = Sets.newHashSet();
+            values[attr] = new HashSet<>();
           }
           values[attr].add(token);
         } else {
@@ -111,7 +112,7 @@ public final class DataLoader {
     FSDataInputStream input = fs.open(fpath);
     Scanner scanner = new Scanner(input, "UTF-8");
 
-    List<Instance> instances = Lists.newArrayList();
+    List<Instance> instances = new ArrayList<>();
 
     DataConverter converter = new DataConverter(dataset);
 
@@ -137,7 +138,7 @@ public final class DataLoader {
 
   /** Loads the data from multiple paths specified by pathes */
   public static Data loadData(Dataset dataset, FileSystem fs, Path[] pathes) throws IOException {
-    List<Instance> instances = Lists.newArrayList();
+    List<Instance> instances = new ArrayList<>();
 
     for (Path path : pathes) {
       Data loadedData = loadData(dataset, fs, path);
@@ -150,7 +151,7 @@ public final class DataLoader {
 
   /** Loads the data from a String array */
   public static Data loadData(Dataset dataset, String[] data) {
-    List<Instance> instances = Lists.newArrayList();
+    List<Instance> instances = new ArrayList<>();
 
     DataConverter converter = new DataConverter(dataset);
 

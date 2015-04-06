@@ -19,17 +19,17 @@ package org.apache.mahout.classifier;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfusionMatrix {
   private static final Logger LOG = LoggerFactory.getLogger(ConfusionMatrix.class);
-  private final Map<String,Integer> labelMap = Maps.newLinkedHashMap();
+  private final Map<String,Integer> labelMap = new LinkedHashMap<>();
   private final int[][] confusionMatrix;
   private int samples = 0;
   private String defaultLabel = "unknown";
@@ -333,7 +333,7 @@ public class ConfusionMatrix {
         m.set(r, c, confusionMatrix[r][c]);
       }
     }
-    Map<String,Integer> labels = Maps.newHashMap();
+    Map<String,Integer> labels = new HashMap<>();
     for (Map.Entry<String, Integer> entry : labelMap.entrySet()) {
       labels.put(entry.getKey(), entry.getValue());
     }

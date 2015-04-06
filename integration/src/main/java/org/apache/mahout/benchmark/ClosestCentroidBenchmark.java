@@ -27,8 +27,6 @@ import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;
 
 public class ClosestCentroidBenchmark {
-  public static final String SERIALIZE = "Serialize";
-  public static final String DESERIALIZE = "Deserialize";
   private final VectorBenchmarks mark;
 
   public ClosestCentroidBenchmark(VectorBenchmarks mark) {

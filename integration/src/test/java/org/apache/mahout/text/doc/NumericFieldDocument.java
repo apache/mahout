@@ -22,7 +22,6 @@ import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 
-
 /**
  * Document with numeric field.
  */

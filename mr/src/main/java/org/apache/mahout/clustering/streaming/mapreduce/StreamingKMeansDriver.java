@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.streaming.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -26,7 +27,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -425,13 +425,13 @@ public final class StreamingKMeansDriver extends AbstractJob {
     long start = System.currentTimeMillis();
     // Run StreamingKMeans step in parallel by spawning 1 thread per input path to process.
     ExecutorService pool = Executors.newCachedThreadPool();
-    List<Future<Iterable<Centroid>>> intermediateCentroidFutures = Lists.newArrayList();
+    List<Future<Iterable<Centroid>>> intermediateCentroidFutures = new ArrayList<>();
     for (FileStatus status : HadoopUtil.listStatus(FileSystem.get(conf), input, PathFilters.logsCRCFilter())) {
       intermediateCentroidFutures.add(pool.submit(new StreamingKMeansThread(status.getPath(), conf)));
     }
     log.info("Finished running Mappers");
     // Merge the resulting "mapper" centroids.
-    List<Centroid> intermediateCentroids = Lists.newArrayList();
+    List<Centroid> intermediateCentroids = new ArrayList<>();
     for (Future<Iterable<Centroid>> futureIterable : intermediateCentroidFutures) {
       for (Centroid centroid : futureIterable.get()) {
         intermediateCentroids.add(centroid);

@@ -17,16 +17,16 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * we use a neat little trick to explicitly filter items for some users: we inject a NaN summand into the preference
@@ -48,8 +48,8 @@ public class ItemFilterAsVectorAndPrefsReducer
     /* artificial NaN summand to exclude this item from the recommendations for all users specified in userIDs */
     vector.set(itemIDIndex, Double.NaN);
 
-    List<Long> userIDs = Lists.newArrayList();
-    List<Float> prefValues = Lists.newArrayList();
+    List<Long> userIDs = new ArrayList<>();
+    List<Float> prefValues = new ArrayList<>();
     for (VarLongWritable userID : values) {
       userIDs.add(userID.get());
       prefValues.add(1.0f);

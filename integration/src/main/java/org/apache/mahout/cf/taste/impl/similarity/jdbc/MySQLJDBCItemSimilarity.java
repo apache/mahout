@@ -70,7 +70,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
  * Note that for each row, item_id_a should be less than item_id_b. It is redundant to store it both ways,
  * so the pair is always stored as a pair with the lesser one first.
  * 
- * @see org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc.MySQLJDBCDiffStorage
  * @see org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel
  */
 public class MySQLJDBCItemSimilarity extends SQL92JDBCItemSimilarity {

@@ -17,21 +17,21 @@
 
 package org.apache.mahout.math.decomposer.hebbian;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
-import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.decomposer.AsyncEigenVerifier;
 import org.apache.mahout.math.decomposer.EigenStatus;
 import org.apache.mahout.math.decomposer.SingularVectorVerifier;
-import org.apache.mahout.math.function.TimesFunction;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.TimesFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,7 +171,7 @@ public class HebbianSolver {
                              int desiredRank) {
     int cols = corpus.numCols();
     Matrix eigens = new DenseMatrix(desiredRank, cols);
-    List<Double> eigenValues = Lists.newArrayList();
+    List<Double> eigenValues = new ArrayList<>();
     log.info("Finding {} singular vectors of matrix with {} rows, via Hebbian", desiredRank, corpus.numRows());
     /*
      * The corpusProjections matrix is a running cache of the residual projection of each corpus vector against all
@@ -278,7 +278,7 @@ public class HebbianSolver {
       currentPseudoEigen.assign(previousEigen, new PlusMult(-state.getHelperVector().get(i)));
       state.getHelperVector().set(i, 0);
     }
-    if (DEBUG && currentPseudoEigen.norm(2) > 0) {
+    if (currentPseudoEigen.norm(2) > 0) {
       for (int i = 0; i < state.getNumEigensProcessed(); i++) {
         Vector previousEigen = previousEigens.viewRow(i);
         log.info("dot with previous: {}", previousEigen.dot(currentPseudoEigen) / currentPseudoEigen.norm(2));

@@ -60,7 +60,7 @@ public final class RegexMapperTest extends MahoutTestCase {
     conf.set(RegexMapper.REGEX, "(\\d+)\\.(\\d+)\\.(\\d+)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
     conf.setStrings(RegexMapper.GROUP_MATCHERS, "1", "3");
-    DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<LongWritable, Text>();
+    DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<>();
     Mapper<LongWritable, Text, LongWritable, Text>.Context mapContext = DummyRecordWriter
             .build(mapper, conf, mapWriter);
 
@@ -83,7 +83,7 @@ public final class RegexMapperTest extends MahoutTestCase {
     conf.set(RegexMapper.REGEX, "(?<=(\\?|&)q=).*?(?=&|$)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
     conf.set(RegexMapper.FORMATTER_CLASS, FPGFormatter.class.getName());
-    DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<LongWritable, Text>();
+    DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<>();
     Mapper<LongWritable, Text, LongWritable, Text>.Context mapContext = DummyRecordWriter
             .build(mapper, conf, mapWriter);
 

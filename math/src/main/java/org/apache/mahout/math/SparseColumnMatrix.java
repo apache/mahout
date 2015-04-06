@@ -42,8 +42,8 @@ public class SparseColumnMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality
    *
-   * @param rows
-   * @param columns
+   * @param rows # of rows
+   * @param columns # of columns
    */
   public SparseColumnMatrix(int rows, int columns) {
     super(rows, columns);

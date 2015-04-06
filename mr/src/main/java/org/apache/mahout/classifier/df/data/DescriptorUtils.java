@@ -18,9 +18,9 @@
 package org.apache.mahout.classifier.df.data;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.df.data.Dataset.Attribute;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,7 +40,7 @@ public final class DescriptorUtils {
    *           if a bad token is encountered
    */
   public static Attribute[] parseDescriptor(CharSequence descriptor) throws DescriptorException {
-    List<Attribute> attributes = Lists.newArrayList();
+    List<Attribute> attributes = new ArrayList<>();
     for (String token : SPACE.split(descriptor)) {
       token = token.toUpperCase(Locale.ENGLISH);
       if ("I".equals(token)) {

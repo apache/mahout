@@ -20,11 +20,10 @@ package org.apache.mahout.common.distance;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -46,7 +45,7 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
   
   @Override
   public void createParameters(String prefix, Configuration jobConf) {
-    parameters = Lists.newArrayList();
+    parameters = new ArrayList<>();
     weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null,
         "Path on DFS to a file containing the weights.");
     parameters.add(weightsFile);
@@ -73,11 +72,8 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
         if (!fs.exists(weightsFile.get())) {
           throw new FileNotFoundException(weightsFile.get().toString());
         }
-        DataInputStream in = fs.open(weightsFile.get());
-        try {
+        try (DataInputStream in = fs.open(weightsFile.get())){
           weights.readFields(in);
-        } finally {
-          Closeables.close(in, true);
         }
         this.weights = weights.get();
       }

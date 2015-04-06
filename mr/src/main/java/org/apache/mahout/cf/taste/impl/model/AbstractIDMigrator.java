@@ -19,10 +19,9 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import java.util.Collection;
 
-import com.google.common.base.Charsets;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.model.IDMigrator;
 

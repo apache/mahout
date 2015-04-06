@@ -16,9 +16,18 @@ package org.apache.mahout.text;
  * limitations under the License.
  */
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -35,14 +44,6 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 import static org.apache.lucene.util.Version.LUCENE_46;
 
@@ -186,7 +187,7 @@ public class LuceneStorageConfiguration implements Writable {
   }
 
   public DocumentStoredFieldVisitor getStoredFieldVisitor() {
-    Set<String> fieldSet = Sets.newHashSet(idField);
+    Set<String> fieldSet = new HashSet<>(Collections.singleton(idField));
     fieldSet.addAll(fields);
     return new DocumentStoredFieldVisitor(fieldSet);
   }
@@ -205,7 +206,7 @@ public class LuceneStorageConfiguration implements Writable {
   public void readFields(DataInput in) throws IOException {
     try {
       sequenceFilesOutputPath = new Path(in.readUTF());
-      indexPaths = Lists.newArrayList();
+      indexPaths = new ArrayList<>();
       String[] indexPaths = in.readUTF().split(SEPARATOR_PATHS);
       for (String indexPath : indexPaths) {
         this.indexPaths.add(new Path(indexPath));

@@ -17,12 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import com.google.common.collect.Lists;
-import org.apache.lucene.util.PriorityQueue;
-import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.lucene.util.PriorityQueue;
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 public class TopItemsQueue extends PriorityQueue<MutableRecommendedItem> {
 
@@ -36,7 +36,7 @@ public class TopItemsQueue extends PriorityQueue<MutableRecommendedItem> {
   }
 
   public List<RecommendedItem> getTopItems() {
-    List<RecommendedItem> recommendedItems = Lists.newArrayListWithCapacity(maxSize);
+    List<RecommendedItem> recommendedItems = new ArrayList<>(maxSize);
     while (size() > 0) {
       MutableRecommendedItem topItem = pop();
       // filter out "sentinel" objects necessary for maintaining an efficient priority queue

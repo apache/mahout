@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -28,8 +29,6 @@ import java.util.List;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -326,21 +325,15 @@ public final class HadoopUtil {
 
   public static void writeInt(int value, Path path, Configuration configuration) throws IOException {
     FileSystem fs = FileSystem.get(path.toUri(), configuration);
-    FSDataOutputStream out = fs.create(path);
-    try {
+    try (FSDataOutputStream out = fs.create(path)) {
       out.writeInt(value);
-    } finally {
-      Closeables.close(out, false);
     }
   }
 
   public static int readInt(Path path, Configuration configuration) throws IOException {
     FileSystem fs = FileSystem.get(path.toUri(), configuration);
-    FSDataInputStream in = fs.open(path);
-    try {
+    try (FSDataInputStream in = fs.open(path)) {
       return in.readInt();
-    } finally {
-      Closeables.close(in, true);
     }
   }
 
@@ -353,7 +346,7 @@ public final class HadoopUtil {
    */
   public static String buildDirList(FileSystem fs, FileStatus fileStatus) throws IOException {
     boolean containsFiles = false;
-    List<String> directoriesList = Lists.newArrayList();
+    List<String> directoriesList = new ArrayList<>();
     for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath())) {
       if (childFileStatus.isDir()) {
         String subDirectoryList = buildDirList(fs, childFileStatus);
@@ -379,7 +372,7 @@ public final class HadoopUtil {
    */
   public static String buildDirList(FileSystem fs, FileStatus fileStatus, PathFilter pathFilter) throws IOException {
     boolean containsFiles = false;
-    List<String> directoriesList = Lists.newArrayList();
+    List<String> directoriesList = new ArrayList<>();
     for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath(), pathFilter)) {
       if (childFileStatus.isDir()) {
         String subDirectoryList = buildDirList(fs, childFileStatus);

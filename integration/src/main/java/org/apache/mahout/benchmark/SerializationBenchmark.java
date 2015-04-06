@@ -17,9 +17,6 @@
 
 package org.apache.mahout.benchmark;
 
-import java.io.IOException;
-
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,6 +26,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.TimingStatistics;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.VectorWritable;
+
+import java.io.IOException;
 
 import static org.apache.mahout.benchmark.VectorBenchmarks.DENSE_VECTOR;
 import static org.apache.mahout.benchmark.VectorBenchmarks.RAND_SPARSE_VECTOR;
@@ -51,14 +50,14 @@ public class SerializationBenchmark {
   public void serializeBenchmark() throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path("/tmp/dense-vector"), IntWritable.class,
-        VectorWritable.class);
 
     Writable one = new IntWritable(0);
     VectorWritable vec = new VectorWritable();
     TimingStatistics stats = new TimingStatistics();
 
-    try {
+    try (SequenceFile.Writer writer =
+             new SequenceFile.Writer(fs, conf, new Path("/tmp/dense-vector"),
+                 IntWritable.class, VectorWritable.class)){
       for (int i = 0; i < mark.loop; i++) {
         TimingStatistics.Call call = stats.newCall(mark.leadTimeUsec);
         vec.set(mark.vectors[0][mark.vIndex(i)]);
@@ -67,15 +66,13 @@ public class SerializationBenchmark {
           break;
         }
       }
-    } finally {
-      Closeables.close(writer, false);
     }
     mark.printStats(stats, SERIALIZE, DENSE_VECTOR);
 
-    writer = new SequenceFile.Writer(fs, conf, new Path("/tmp/randsparse-vector"), IntWritable.class,
-        VectorWritable.class);
     stats = new TimingStatistics();
-    try {
+    try (SequenceFile.Writer writer =
+             new SequenceFile.Writer(fs, conf,
+                 new Path("/tmp/randsparse-vector"), IntWritable.class, VectorWritable.class)){
       for (int i = 0; i < mark.loop; i++) {
         TimingStatistics.Call call = stats.newCall(mark.leadTimeUsec);
         vec.set(mark.vectors[1][mark.vIndex(i)]);
@@ -84,15 +81,13 @@ public class SerializationBenchmark {
           break;
         }
       }
-    } finally {
-      Closeables.close(writer, false);
     }
     mark.printStats(stats, SERIALIZE, RAND_SPARSE_VECTOR);
 
-    writer = new SequenceFile.Writer(fs, conf, new Path("/tmp/seqsparse-vector"), IntWritable.class,
-        VectorWritable.class);
     stats = new TimingStatistics();
-    try {
+    try (SequenceFile.Writer writer =
+             new SequenceFile.Writer(fs, conf,
+                 new Path("/tmp/seqsparse-vector"), IntWritable.class, VectorWritable.class)) {
       for (int i = 0; i < mark.loop; i++) {
         TimingStatistics.Call call = stats.newCall(mark.leadTimeUsec);
         vec.set(mark.vectors[2][mark.vIndex(i)]);
@@ -101,8 +96,6 @@ public class SerializationBenchmark {
           break;
         }
       }
-    } finally {
-      Closeables.close(writer, false);
     }
     mark.printStats(stats, SERIALIZE, SEQ_SPARSE_VECTOR);
 
@@ -117,7 +110,7 @@ public class SerializationBenchmark {
   private void doDeserializeBenchmark(String name, String pathString) throws IOException {
     TimingStatistics stats = new TimingStatistics();
     TimingStatistics.Call call = stats.newCall(mark.leadTimeUsec);
-    SequenceFileValueIterator<Writable> iterator = new SequenceFileValueIterator<Writable>(new Path(pathString), true,
+    SequenceFileValueIterator<Writable> iterator = new SequenceFileValueIterator<>(new Path(pathString), true,
         new Configuration());
     while (iterator.hasNext()) {
       iterator.next();

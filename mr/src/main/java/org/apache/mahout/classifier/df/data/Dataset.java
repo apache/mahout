@@ -18,8 +18,6 @@
 package org.apache.mahout.classifier.df.data;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -32,6 +30,8 @@ import org.codehaus.jackson.type.TypeReference;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -336,7 +336,7 @@ public class Dataset {
    * @return some JSON
    */
   public String toJSON() {
-    List<Map<String, Object>> toWrite = Lists.newLinkedList();
+    List<Map<String, Object>> toWrite = new LinkedList<>();
     // attributes does not include ignored columns and it does include the class label
     int ignoredCount = 0;
     for (int i = 0; i < attributes.length + ignored.length; i++) {
@@ -374,8 +374,8 @@ public class Dataset {
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
-    List<Attribute> attributes = Lists.newLinkedList();
-    List<Integer> ignored = Lists.newLinkedList();
+    List<Attribute> attributes = new LinkedList<>();
+    List<Integer> ignored = new LinkedList<>();
     String[][] nominalValues = new String[fromJSON.size()][];
     Dataset dataset = new Dataset();
     for (int i = 0; i < fromJSON.size(); i++) {
@@ -412,7 +412,7 @@ public class Dataset {
    * @return map of (AttributeTypes, Values)
    */
   private Map<String, Object> getMap(Attribute type, String[] values, boolean isLabel) {
-    Map<String, Object> attribute = Maps.newHashMap();
+    Map<String, Object> attribute = new HashMap<>();
     attribute.put(TYPE, type.toString().toLowerCase(Locale.getDefault()));
     attribute.put(VALUES, values);
     attribute.put(LABEL, isLabel);

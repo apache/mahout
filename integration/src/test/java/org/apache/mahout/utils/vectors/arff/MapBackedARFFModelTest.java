@@ -21,7 +21,6 @@ import org.junit.Test;
 
 import java.util.Map;
 
-
 public class MapBackedARFFModelTest extends MahoutTestCase {
 
   @Test

@@ -16,7 +16,11 @@
  */
 package org.apache.mahout.text;
 
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -33,11 +37,6 @@ import org.apache.mahout.text.doc.NumericFieldDocument;
 import org.apache.mahout.text.doc.SingleFieldDocument;
 import org.apache.mahout.text.doc.TestDocument;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Abstract test for working with Lucene storage.
  */
@@ -45,8 +44,8 @@ public abstract class AbstractLuceneStorageTest extends MahoutTestCase {
 
   protected Path indexPath1;
   protected Path indexPath2;
-  protected List<TestDocument> docs = Lists.newArrayList();
-  protected List<TestDocument> misshapenDocs = Lists.newArrayList();
+  protected List<TestDocument> docs = new ArrayList<>();
+  protected List<TestDocument> misshapenDocs = new ArrayList<>();
 
   @Override
   public void setUp() throws Exception {

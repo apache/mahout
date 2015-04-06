@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import com.google.common.io.Closeables;
-
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -56,25 +54,18 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     File subDir = new File(inputDir, "subdir");
     subDir.mkdir();
     File gzFile = new File(subDir, "mail-messages.gz");
-    GZIPOutputStream gzOut = null;
-    try {
-      gzOut = new GZIPOutputStream(new FileOutputStream(gzFile));
+    try (GZIPOutputStream gzOut = new GZIPOutputStream(new FileOutputStream(gzFile))) {
       gzOut.write(testMailMessages.getBytes("UTF-8"));
       gzOut.finish();
-    } finally {
-      Closeables.close(gzOut, false);
     }
     
     File subDir2 = new File(subDir, "subsubdir");
     subDir2.mkdir();
     File gzFile2 = new File(subDir2, "mail-messages-2.gz");
-    try {
-      gzOut = new GZIPOutputStream(new FileOutputStream(gzFile2));
+    try (GZIPOutputStream gzOut = new GZIPOutputStream(new FileOutputStream(gzFile2))) {
       gzOut.write(testMailMessages.getBytes("UTF-8"));
       gzOut.finish();
-    } finally {
-      Closeables.close(gzOut, false);
-    }    
+    }
   }
 
   @Test
@@ -100,7 +91,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     Assert.assertTrue("Expected chunk file " + expectedChunkPath + " not found!", expectedChunkFile.isFile());
 
     Configuration conf = getConfiguration();
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(new Path(expectedChunkPath), true, conf);
+    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<>(new Path(expectedChunkPath), true, conf);
     Assert.assertTrue("First key/value pair not found!", iterator.hasNext());
     Pair<Text, Text> record = iterator.next();
 
@@ -155,7 +146,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("part-m-00000", fileStatuses[0].getPath().getName());
     SequenceFileIterator<Text, Text> iterator =
-      new SequenceFileIterator<Text, Text>(mrOutputDir.suffix("/part-m-00000"), true, configuration);
+      new SequenceFileIterator<>(mrOutputDir.suffix("/part-m-00000"), true, configuration);
 
     Assert.assertTrue("First key/value pair not found!", iterator.hasNext());
     Pair<Text, Text> record = iterator.next();

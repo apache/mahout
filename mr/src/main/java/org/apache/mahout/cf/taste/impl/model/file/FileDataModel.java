@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +29,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -44,11 +48,6 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.iterator.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 
 /**
  * <p>
@@ -207,7 +206,7 @@ public class FileDataModel extends AbstractDataModel {
         throw new IllegalArgumentException("Did not find a delimiter(pattern) in first line");
       }
     }
-    List<String> firstLineSplit = Lists.newArrayList();
+    List<String> firstLineSplit = new ArrayList<>();
     for (String token : delimiterPattern.split(firstLine)) {
       firstLineSplit.add(token);
     }
@@ -526,7 +525,7 @@ public class FileDataModel extends AbstractDataModel {
 
         if (!exists) {
           if (prefs == null) {
-            prefs = Lists.newArrayListWithCapacity(2);
+            prefs = new ArrayList<>(2);
             ((FastByIDMap<Collection<Preference>>) data).put(userID, prefs);
           }
           prefs.add(new GenericPreference(userID, itemID, preferenceValue));

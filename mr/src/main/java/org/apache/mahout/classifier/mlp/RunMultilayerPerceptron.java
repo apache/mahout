@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,9 +42,6 @@ import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-
 /** Run {@link MultilayerPerceptron} classification.
  * @deprecated as of as of 0.10.0.
  * */
@@ -61,11 +59,11 @@ public class RunMultilayerPerceptron {
     int columnEnd;
     boolean skipHeader;
   }
-  
+
   public static void main(String[] args) throws Exception {
-    
+
     Parameters parameters = new Parameters();
-    
+
     if (parseArgs(args, parameters)) {
       log.info("Load model from {}.", parameters.modelFilePathStr);
       MultilayerPerceptron mlp = new MultilayerPerceptron(parameters.modelFilePathStr);
@@ -98,15 +96,10 @@ public class RunMultilayerPerceptron {
 
       log.info("Read from column {} to column {}.", parameters.columnStart, parameters.columnEnd);
 
-      BufferedWriter writer = null;
-      BufferedReader reader = null;
 
-      try {
-        writer = new BufferedWriter(new OutputStreamWriter(outputFS.create(outputFilePath)));
-        reader = new BufferedReader(new InputStreamReader(inputFS.open(inputFilePath)));
-        
+      try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputFS.create(outputFilePath)));
+           BufferedReader reader = new BufferedReader(new InputStreamReader(inputFS.open(inputFilePath)))) {
         String line;
-
         if (parameters.skipHeader) {
           reader.readLine();
         }
@@ -125,9 +118,6 @@ public class RunMultilayerPerceptron {
         }
         mlp.close();
         log.info("Labeling finished.");
-      } finally {
-        Closeables.close(reader, true);
-        Closeables.close(writer, true);
       }
     }
   }
@@ -154,7 +144,7 @@ public class RunMultilayerPerceptron {
         .withDescription("type of input file, currently support 'csv'")
         .create();
 
-    List<Integer> columnRangeDefault = Lists.newArrayList();
+    List<Integer> columnRangeDefault = new ArrayList<>();
     columnRangeDefault.add(0);
     columnRangeDefault.add(Integer.MAX_VALUE);
 

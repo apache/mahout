@@ -16,7 +16,18 @@
  */
 package org.apache.mahout.clustering.lda.cvb;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -38,17 +49,6 @@ import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.stats.Sampler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Thin wrapper around a {@link Matrix} of counts of occurrences of (topic, term) pairs.  Dividing
@@ -205,7 +205,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     throws IOException {
     int numTopics = -1;
     int numTerms = -1;
-    List<Pair<Integer, Vector>> rows = Lists.newArrayList();
+    List<Pair<Integer, Vector>> rows = new ArrayList<>();
     for (Path modelPath : modelPaths) {
       for (Pair<IntWritable, VectorWritable> row
           : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
@@ -414,7 +414,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public static String vectorToSortedString(Vector vector, String[] dictionary) {
-    List<Pair<String,Double>> vectorValues = Lists.newArrayListWithCapacity(vector.getNumNondefaultElements());
+    List<Pair<String,Double>> vectorValues = new ArrayList<>(vector.getNumNondefaultElements());
     for (Element e : vector.nonZeroes()) {
       vectorValues.add(Pair.of(dictionary != null ? dictionary[e.index()] : String.valueOf(e.index()),
                                e.get()));

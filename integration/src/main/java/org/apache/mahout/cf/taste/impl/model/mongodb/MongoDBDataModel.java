@@ -17,20 +17,15 @@
 
 package org.apache.mahout.cf.taste.impl.model.mongodb;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
-import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -42,19 +37,22 @@ import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
-import org.apache.mahout.cf.taste.common.NoSuchItemException;
-
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
+import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 
 /**
  * <p>A {@link DataModel} backed by a MongoDB database. This class expects a
@@ -408,8 +406,8 @@ public final class MongoDBDataModel implements DataModel {
     while (cursor.hasNext()) {
       Map<String,Object> user = (Map<String,Object>) cursor.next().toMap();
       String userID = getID(user.get(mongoUserID), true);
-      Collection<List<String>> items = Lists.newArrayList();
-      List<String> item = Lists.newArrayList();
+      Collection<List<String>> items = new ArrayList<>();
+      List<String> item = new ArrayList<>();
       item.add(getID(user.get(mongoItemID), false));
       item.add(Float.toString(getPreference(user.get(mongoPreference))));
       items.add(item);
@@ -431,8 +429,8 @@ public final class MongoDBDataModel implements DataModel {
       Map<String,Object> user = (Map<String,Object>) cursor.next().toMap();
       if (!user.containsKey("deleted_at")) {
         String userID = getID(user.get(mongoUserID), true);
-        Collection<List<String>> items = Lists.newArrayList();
-        List<String> item = Lists.newArrayList();
+        Collection<List<String>> items = new ArrayList<>();
+        List<String> item = new ArrayList<>();
         item.add(getID(user.get(mongoItemID), false));
         item.add(Float.toString(getPreference(user.get(mongoPreference))));
         items.add(item);
@@ -552,7 +550,7 @@ public final class MongoDBDataModel implements DataModel {
     Mongo mongoDDBB = new Mongo(mongoHost, mongoPort);
     DB db = mongoDDBB.getDB(mongoDB);
     mongoTimestamp = new Date(0);
-    FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<Collection<Preference>>();
+    FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<>();
     if (!mongoAuth || db.authenticate(mongoUsername, mongoPassword.toCharArray())) {
       collection = db.getCollection(mongoCollection);
       collectionMap = db.getCollection(mongoMapCollection);
@@ -572,7 +570,7 @@ public final class MongoDBDataModel implements DataModel {
           float ratingValue = getPreference(user.get(mongoPreference));
           Collection<Preference> userPrefs = userIDPrefMap.get(userID);
           if (userPrefs == null) {
-            userPrefs = Lists.newArrayListWithCapacity(2);
+            userPrefs = new ArrayList<>(2);
             userIDPrefMap.put(userID, userPrefs);
           }
           userPrefs.add(new GenericPreference(userID, itemID, ratingValue));

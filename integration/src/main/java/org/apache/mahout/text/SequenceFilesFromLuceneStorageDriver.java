@@ -17,7 +17,11 @@ package org.apache.mahout.text;
  */
 
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
@@ -29,11 +33,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-
-import java.util.List;
-import java.util.regex.Pattern;
-
-import static java.util.Arrays.asList;
 
 /**
  * Driver class for the lucene2seq program. Converts text contents of stored fields of a lucene index into a Hadoop
@@ -77,7 +76,7 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
     Configuration configuration = getConf();
 
     String[] paths = getInputPath().toString().split(",");
-    List<Path> indexPaths = Lists.newArrayList();
+    List<Path> indexPaths = new ArrayList<>();
     for (String path : paths) {
       indexPaths.add(new Path(path));
     }
@@ -91,7 +90,7 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
             indexPaths,
             sequenceFilesOutputPath,
             idField,
-            asList(fields.split(SEPARATOR_FIELDS)));
+            Arrays.asList(fields.split(SEPARATOR_FIELDS)));
 
     Query query = DEFAULT_QUERY;
     if (hasOption(OPTION_QUERY)) {

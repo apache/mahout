@@ -23,12 +23,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -37,6 +35,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
@@ -82,16 +81,14 @@ public final class ViterbiEvaluator {
       boolean computeLikelihood = commandLine.hasOption(likelihoodOption);
 
       //reading serialized HMM
-      DataInputStream modelStream = new DataInputStream(new FileInputStream(modelPath));
+      ;
       HmmModel model;
-      try {
+      try (DataInputStream modelStream = new DataInputStream(new FileInputStream(modelPath))) {
         model = LossyHmmSerializer.deserialize(modelStream);
-      } finally {
-        Closeables.close(modelStream, true);
       }
 
       //reading observations
-      List<Integer> observations = Lists.newArrayList();
+      List<Integer> observations = new ArrayList<>();
       try (Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8")) {
         while (scanner.hasNextInt()) {
           observations.add(scanner.nextInt());
@@ -107,14 +104,12 @@ public final class ViterbiEvaluator {
       int[] hiddenStates = HmmEvaluator.decode(model, observationsArray, true);
 
       //writing output
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), Charsets.UTF_8), true);
-      try {
+      try (PrintWriter writer =
+               new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), Charsets.UTF_8), true)) {
         for (int hiddenState : hiddenStates) {
           writer.print(hiddenState);
           writer.print(' ');
         }
-      } finally {
-        Closeables.close(writer, false);
       }
 
       if (computeLikelihood) {

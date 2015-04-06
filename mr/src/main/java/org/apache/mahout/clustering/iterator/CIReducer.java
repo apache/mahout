@@ -18,10 +18,10 @@
 package org.apache.mahout.clustering.iterator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -43,7 +43,7 @@ public class CIReducer extends Reducer<IntWritable,ClusterWritable,IntWritable,C
       Cluster cluster = iter.next().getValue();
       first.observe(cluster);
     }
-    List<Cluster> models = Lists.newArrayList();
+    List<Cluster> models = new ArrayList<>();
     models.add(first);
     classifier = new ClusterClassifier(models, policy);
     classifier.close();

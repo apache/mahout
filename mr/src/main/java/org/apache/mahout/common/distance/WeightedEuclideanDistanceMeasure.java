@@ -17,7 +17,6 @@
 
 package org.apache.mahout.common.distance;
 
-
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 

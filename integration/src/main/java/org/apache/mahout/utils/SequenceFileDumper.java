@@ -17,14 +17,15 @@
 
 package org.apache.mahout.utils;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -136,7 +137,7 @@ public final class SequenceFileDumper extends AbstractJob {
           }
         }
         if (facets != null) {
-          List<String> keyList = Lists.newArrayListWithCapacity(facets.size());
+          List<String> keyList = new ArrayList<>(facets.size());
 
           IntArrayList valueList = new IntArrayList(facets.size());
           facets.pairsSortedByKey(keyList, valueList);

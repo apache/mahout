@@ -17,13 +17,14 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -32,8 +33,6 @@ import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.GenericUserSimilarity;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-
-import com.google.common.base.Preconditions;
 
 /**
  * <p>
@@ -83,7 +82,7 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
-    List<RecommendedItem> result = Lists.newArrayListWithCapacity(size);
+    List<RecommendedItem> result = new ArrayList<>(size);
     result.addAll(topItems);
     Collections.sort(result, ByValueRecommendedItemComparator.getInstance());
     return result;
@@ -123,7 +122,7 @@ public final class TopItems {
     if (size == 0) {
       return NO_IDS;
     }
-    List<SimilarUser> sorted = Lists.newArrayListWithCapacity(size);
+    List<SimilarUser> sorted = new ArrayList<>(size);
     sorted.addAll(topUsers);
     Collections.sort(sorted);
     long[] result = new long[size];
@@ -168,7 +167,7 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
-    List<GenericItemSimilarity.ItemItemSimilarity> result = Lists.newArrayListWithCapacity(size);
+    List<GenericItemSimilarity.ItemItemSimilarity> result = new ArrayList<>(size);
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
@@ -199,7 +198,7 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
-    List<GenericUserSimilarity.UserUserSimilarity> result = Lists.newArrayListWithCapacity(size);
+    List<GenericUserSimilarity.UserUserSimilarity> result = new ArrayList<>(size);
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
