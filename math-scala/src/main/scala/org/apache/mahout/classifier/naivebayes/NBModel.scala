@@ -44,7 +44,7 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
               val weightsPerLabel: Vector = null,
               val perlabelThetaNormalizer: Vector = null,
               val labelIndex: Map[String, Integer] = null,
-              val alphaI: Float = .0f,
+              val alphaI: Float = 1.0f,
               val isComplementary: Boolean= false)  extends java.io.Serializable {
 
 
