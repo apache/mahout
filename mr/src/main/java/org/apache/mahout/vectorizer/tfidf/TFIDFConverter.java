@@ -17,11 +17,8 @@
 
 package org.apache.mahout.vectorizer.tfidf;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -45,6 +42,9 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 import org.apache.mahout.vectorizer.term.TermDocumentCountMapper;
 import org.apache.mahout.vectorizer.term.TermDocumentCountReducer;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * This class converts a set of input vectors with term frequencies to TfIdf vectors. The Sequence file input
@@ -118,7 +118,7 @@ public final class TFIDFConverter {
         "normPower must be > 1 and not infinite if log normalization is chosen", normPower);
 
     int partialVectorIndex = 0;
-    List<Path> partialVectorPaths = new ArrayList<>();
+    List<Path> partialVectorPaths = Lists.newArrayList();
     List<Path> dictionaryChunks = datasetFeatures.getSecond();
     for (Path dictionaryChunk : dictionaryChunks) {
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
@@ -195,7 +195,7 @@ public final class TFIDFConverter {
                                                                  Path dictionaryPathBase,
                                                                  Configuration baseConf,
                                                                  int chunkSizeInMegabytes) throws IOException {
-    List<Path> chunkPaths = new ArrayList<>();
+    List<Path> chunkPaths = Lists.newArrayList();
     Configuration conf = new Configuration(baseConf);
 
     FileSystem fs = FileSystem.get(featureCountPath.toUri(), conf);
