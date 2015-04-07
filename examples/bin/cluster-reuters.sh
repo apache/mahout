@@ -31,6 +31,10 @@ SCRIPT_PATH=${0%/*}
 if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then 
   cd $SCRIPT_PATH
 fi
+START_PATH=`pwd`
+
+# Set commands for dfs
+source ${START_PATH}/set-dfs-commands.sh
 
 MAHOUT="../../bin/mahout"
 
@@ -39,34 +43,33 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-algorithm=( kmeans fuzzykmeans lda streamingkmeans)
+algorithm=( kmeans fuzzykmeans lda streamingkmeans clean)
 if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding clustering algorithm"
   echo "1. ${algorithm[0]} clustering"
-  echo "2. ${algorithm[1]} clustering"
+  echo "2. ${algorithm[1]} clustering (may require increased heap space on yarn)"
   echo "3. ${algorithm[2]} clustering"
   echo "4. ${algorithm[3]} clustering"
+  echo "5. ${algorithm[4]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
 fi
 
 echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
-clustertype=${algorithm[$choice-1]} 
+clustertype=${algorithm[$choice-1]}
 
 WORK_DIR=/tmp/mahout-work-${USER}
-echo "creating work directory at ${WORK_DIR}"
 
-if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
-  HADOOP="$HADOOP_HOME/bin/hadoop"
-  if [ ! -e $HADOOP ]; then
-    echo "Can't find hadoop in $HADOOP, exiting"
-    exit 1
-  fi
+if [ "x$clustertype" == "xclean" ]; then
+  rm -rf $WORK_DIR
+  $DFSRM $WORK_DIR
+  exit 1
+else
+  $DFS -mkdir -p $WORK_DIR
+  mkdir -p $WORK_DIR
+  echo "Creating work directory at ${WORK_DIR}"
 fi
-
-mkdir -p ${WORK_DIR}
-
 if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
   if [ ! -e ${WORK_DIR}/reuters-out ]; then
     if [ ! -e ${WORK_DIR}/reuters-sgm ]; then
@@ -88,17 +91,19 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
       echo "Extracting..."
       tar xzf ${WORK_DIR}/reuters21578.tar.gz -C ${WORK_DIR}/reuters-sgm
     fi
-  
     echo "Extracting Reuters"
     $MAHOUT org.apache.lucene.benchmark.utils.ExtractReuters ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-out
     if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
         echo "Copying Reuters data to Hadoop"
         set +e
-        $HADOOP dfs -rmr ${WORK_DIR}/reuters-sgm
-        $HADOOP dfs -rmr ${WORK_DIR}/reuters-out
+        $DFSRM ${WORK_DIR}/reuters-sgm
+        $DFSRM ${WORK_DIR}/reuters-out
+        $DFS -mkdir ${WORK_DIR}/
+        $DFS -mkdir ${WORK_DIR}/reuters-sgm
+        $DFS -mkdir ${WORK_DIR}/reuters-out
+        $DFS -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm
+        $DFS -put ${WORK_DIR}/reuters-out ${WORK_DIR}/reuters-out
         set -e
-        $HADOOP dfs -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm
-        $HADOOP dfs -put ${WORK_DIR}/reuters-out ${WORK_DIR}/reuters-out
     fi
   fi
   echo "Converting to Sequence Files from Directory"
@@ -118,7 +123,7 @@ if [ "x$clustertype" == "xkmeans" ]; then
     -x 10 -k 20 -ow --clustering \
   && \
   $MAHOUT clusterdump \
-    -i `hadoop dfs -ls -d ${WORK_DIR}/reuters-kmeans/clusters-*-final | awk'{print $8}'` \
+    -i `$DFS -ls -d ${WORK_DIR}/reuters-kmeans/clusters-*-final | awk '{print $8}'` \
     -o ${WORK_DIR}/reuters-kmeans/clusterdump \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
     -dt sequencefile -b 100 -n 20 --evaluate -dm org.apache.mahout.common.distance.EuclideanDistanceMeasure -sp 0 \
@@ -191,6 +196,4 @@ elif [ "x$clustertype" == "xstreamingkmeans" ]; then
     -o ${WORK_DIR}/reuters-cluster-distance.csv \
     && \
   cat ${WORK_DIR}/reuters-cluster-distance.csv
-else 
-  echo "unknown cluster type: $clustertype"
-fi 
+fi

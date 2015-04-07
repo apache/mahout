@@ -33,13 +33,8 @@ if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then
 fi
 START_PATH=`pwd`
 
-if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
-  HADOOP="$HADOOP_HOME/bin/hadoop"
-  if [ ! -e $HADOOP ]; then
-    echo "Can't find hadoop in $HADOOP, exiting"
-    exit 1
-  fi
-fi
+# Set commands for dfs
+source ${START_PATH}/set-dfs-commands.sh
 
 WORK_DIR=/tmp/mahout-work-${USER}
 algorithm=( cnaivebayes-MapReduce naivebayes-MapReduce cnaivebayes-Spark naivebayes-Spark sgd clean)
@@ -109,10 +104,17 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
   if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
     echo "Copying 20newsgroups data to HDFS"
     set +e
-    $HADOOP dfs -rmr ${WORK_DIR}/20news-all
-    $HADOOP dfs -mkdir ${WORK_DIR}
+    $DFSRM ${WORK_DIR}/20news-all
+    $DFS -mkdir ${WORK_DIR}
+    $DFS -mkdir ${WORK_DIR}/20news-all
     set -e
-    $HADOOP dfs -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
+    if [ $HVERSION -eq "1" ] ; then
+      echo "Copying 20newsgroups data to Hadoop 1 HDFS"
+      $DFS -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
+    elif [ $HVERSION -eq "2" ] ; then
+      echo "Copying 20newsgroups data to Hadoop 2 HDFS"
+      $DFS -put ${WORK_DIR}/20news-all ${WORK_DIR}/
+    fi
   fi
 
   echo "Creating sequence files from 20newsgroups data"
@@ -183,8 +185,9 @@ elif [ "x$alg" == "xsgd" ]; then
   echo "Testing on ${WORK_DIR}/20news-bydate/20news-bydate-test/ with model: /tmp/news-group.model"
   ./bin/mahout org.apache.mahout.classifier.sgd.TestNewsGroups --input ${WORK_DIR}/20news-bydate/20news-bydate-test/ --model /tmp/news-group.model
 elif [ "x$alg" == "xclean" ]; then
-  rm -rf ${WORK_DIR}
+  rm -rf $WORK_DIR
   rm -rf /tmp/news-group.model
+  $DFSRM $WORK_DIR
 fi
 # Remove the work directory
 #
