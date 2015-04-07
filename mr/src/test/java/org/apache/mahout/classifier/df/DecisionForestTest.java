@@ -143,7 +143,6 @@ public final class DecisionForestTest extends MahoutTestCase {
     Data testData = DataLoader.loadData(dataset, TEST_DATA);
 
     double noValue = dataset.valueOf(4, "no");
-    double yesValue = dataset.valueOf(4, "yes");
     assertEquals(noValue, forest.classify(testData.getDataset(), rng, testData.get(0)), EPSILON);
     // This one is tie-broken -- 1 is OK too
     //assertEquals(yesValue, forest.classify(testData.getDataset(), rng, testData.get(1)), EPSILON);

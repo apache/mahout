@@ -24,6 +24,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.lucene.index.SegmentCommitInfo;
 import org.apache.lucene.index.SegmentInfo;
 import org.apache.lucene.index.SegmentInfos;
+import org.apache.solr.store.hdfs.HdfsDirectory;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -88,8 +89,7 @@ public class LuceneSegmentInputSplit extends InputSplit implements Writable {
    * @throws IOException if an error occurs when accessing the directory
    */
   public SegmentCommitInfo getSegment(Configuration configuration) throws IOException {
-    ReadOnlyFileSystemDirectory directory = new ReadOnlyFileSystemDirectory(FileSystem.get(configuration), indexPath,
-                                                                            false, configuration);
+    HdfsDirectory directory = new HdfsDirectory(indexPath, configuration);
 
     SegmentInfos segmentInfos = new SegmentInfos();
     segmentInfos.read(directory);
