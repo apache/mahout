@@ -18,9 +18,21 @@
 # To run:  change into the mahout directory and type:
 # ./examples/bin/run-item-sim.sh
 
-OUTPUT="item-sim-out" # output dir for cooccurrence and cross-cooccurrence matrices
-INPUT="examples/src/main/resources/cf-data-purchase.txt" # purchase actions
-INPUT2="examples/src/main/resources/cf-data-view.txt" # view actions
+OUT_DIR="/item-sim-out" # output dir for cooccurrence and cross-cooccurrence matrices
+INPUT="/examples/src/main/resources/cf-data-purchase.txt" # purchase actions
+INPUT2="/examples/src/main/resources/cf-data-view.txt" # view actions
+FS=file://
+PURCHASE=$FS$MAHOUT_HOME$INPUT
+VIEW=$FS$MAHOUT_HOME$INPUT2
+FS_OUPUT=$FS$MAHOUT_HOME$OUT_DIR
+OUTPUT1=$MAHOUT$OUT_DIR/similarity-matrix/part-00000
+OUTPUT2=$MAHOUT$OUT_DIR/cross-similarity-matrix/part-00000
+
+#check to see if we can run with local fie system
+if [$MAHOUT_HOME == ""]; then
+  echo "MAHOUT_HOME is not set."
+  exit
+fi
 
 #setup env
 LOCAL=$MAHOUT_LOCAL # save state
@@ -31,15 +43,29 @@ echo "The example uses fake purchases and views of products, calculating"
 echo "a cooccurrence indicator for purchase and a cross-cooccurrence indicator"
 echo "for view (product detail view). The example is tiny so it can be followed"
 echo "with a little intuition."
+echo "To run this on a Spark + Hadoop cluster:"
+echo "> hadoop fs -put examples/src/main/resources/cf-* / "
+echo "> mahout spark-itemsimilarity -i /cf-data-purchase.txt -i2 /cf-data-view.txt -o /tiny-indicators \\"
+echo "    -ma spark://Maclaurin.local:7077 -sem 4g"
 
 # Remove old files
 echo
 echo "Removing old output file if it exists"
 echo
-rm -r $OUTPUT
+rm -r $MAHOUT_HOME$OUT_DIR
 
-mahout spark-itemsimilarity -i $INPUT -i2 $INPUT2 -o $OUTPUT -ma local
+mahout spark-itemsimilarity -i $PURCHASE -i2 $VIEW -o $FS_OUPUT -ma local
 
 export MAHOUT_LOCAL=$LOCAL #restore state
 
-echo "Look in " $OUTPUT " for spark-itemsimilarity indicator data."
+echo "Look in " $FS_OUPUT " for spark-itemsimilarity indicator data."
+
+echo ""
+echo "Purchase cooccurrence indicators (itemid<tab>simliar items by purchase)"
+echo ""
+cat .$OUTPUT1
+echo ""
+echo "View cross-cooccurrence indicators (items<tab>similar items where views led to purchases)"
+echo ""
+cat .$OUTPUT2
+echo ""
