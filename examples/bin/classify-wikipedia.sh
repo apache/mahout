@@ -20,7 +20,7 @@
 # Downloads a (partial) wikipedia dump, trains and tests a classifier.
 #
 # To run:  change into the mahout directory and type:
-# examples/bin/classify-wiki.sh
+# examples/bin/classify-wikipedia.sh
 
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
   echo "This script Bayes and CBayes classifiers over the last wikipedia dump."
@@ -39,13 +39,8 @@ if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then
 fi
 START_PATH=`pwd`
 
-if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
-  HADOOP="$HADOOP_HOME/bin/hadoop"
-  if [ ! -e $HADOOP ]; then
-    echo "Can't find hadoop in $HADOOP, exiting"
-    exit 1
-  fi
-fi
+# Set commands for dfs
+source ${START_PATH}/set-dfs-commands.sh
 
 WORK_DIR=/tmp/mahout-work-wiki
 algorithm=( CBayes BinaryCBayes clean)
@@ -73,7 +68,7 @@ if [ "x$alg" != "xclean" ]; then
         #  Datasets: uncomment and run "clean" to change dataset   
         ########################################################
         ########## partial small 42.5M zipped
-        #curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2        
+        # curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
         ########## partial larger 256M zipped
         curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles10.xml-p000925001p001325000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
         ######### full wikipedia dump: 10G zipped
@@ -111,10 +106,10 @@ if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
   if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
     echo "Copying wikipedia data to HDFS"
     set +e
-    $HADOOP dfs -rmr ${WORK_DIR}/wikixml
-    $HADOOP dfs -mkdir ${WORK_DIR}
+    $DFSRM ${WORK_DIR}/wikixml
+    $DFS -mkdir ${WORK_DIR}
     set -e
-    $HADOOP dfs -put ${WORK_DIR}/wikixml ${WORK_DIR}/wikixml
+    $DFS -put ${WORK_DIR}/wikixml ${WORK_DIR}/wikixml
   fi
 
   echo "Creating sequence files from wikiXML"
@@ -188,6 +183,7 @@ if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
 fi
 
 elif [ "x$alg" == "xclean" ]; then
-  rm -rf ${WORK_DIR}
+  rm -rf $WORK_DIR
+  $DFSRM $WORK_DIR
 fi
 # Remove the work directory
