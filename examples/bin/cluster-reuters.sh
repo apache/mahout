@@ -49,7 +49,7 @@ if [ -n "$1" ]; then
 else
   echo "Please select a number to choose the corresponding clustering algorithm"
   echo "1. ${algorithm[0]} clustering"
-  echo "2. ${algorithm[1]} clustering"
+  echo "2. ${algorithm[1]} clustering (may require increased heap space on yarn)"
   echo "3. ${algorithm[2]} clustering"
   echo "4. ${algorithm[3]} clustering"
   echo "5. ${algorithm[4]} -- cleans up the work area in $WORK_DIR"
