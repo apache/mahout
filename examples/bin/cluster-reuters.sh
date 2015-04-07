@@ -99,6 +99,8 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
         $DFSRM ${WORK_DIR}/reuters-sgm
         $DFSRM ${WORK_DIR}/reuters-out
         $DFS -mkdir ${WORK_DIR}/
+        $DFS -mkdir ${WORK_DIR}/reuters-sgm
+        $DFS -mkdir ${WORK_DIR}/reuters-out
         $DFS -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm
         $DFS -put ${WORK_DIR}/reuters-out ${WORK_DIR}/reuters-out
         set -e
