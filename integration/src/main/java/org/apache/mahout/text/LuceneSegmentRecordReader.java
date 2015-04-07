@@ -62,9 +62,8 @@ public class LuceneSegmentRecordReader extends RecordReader<Text, NullWritable> 
     for (String field : lucene2SeqConfiguration.getFields()) {
         LuceneIndexHelper.fieldShouldExistInIndex(segmentReader, field);
     }
-
     Weight weight = lucene2SeqConfiguration.getQuery().createWeight(searcher);
-    scorer = weight.scorer(segmentReader.getContext(), false, false, null);
+    scorer = weight.scorer(segmentReader.getContext(), segmentReader.getLiveDocs());
     if (scorer == null) {
       throw new IllegalArgumentException("Could not create query scorer for query: "
           + lucene2SeqConfiguration.getQuery());
