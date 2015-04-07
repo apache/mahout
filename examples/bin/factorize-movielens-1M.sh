@@ -40,7 +40,8 @@ then
   exit -1
 fi
 
-MAHOUT="../../bin/mahout"
+export MAHOUT_LOCAL=true
+MAHOUT="$MAHOUT_HOME/bin/mahout"
 
 WORK_DIR=/tmp/mahout-work-${USER}
 echo "creating work directory at ${WORK_DIR}"

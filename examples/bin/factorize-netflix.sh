@@ -28,6 +28,9 @@
 # To run:
 #  ./factorize-netflix.sh /path/to/training_set/ /path/to/qualifying.txt /path/to/judging.txt
 
+echo "Note this script has been deprecated due to the lack of access to the Netflix data set."
+exit 1
+
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
   echo "This script runs the ALS Recommender on the Netflix data set."
   echo "Syntax: $0 /path/to/training_set/ /path/to/qualifying.txt /path/to/judging.txt\n"

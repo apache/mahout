@@ -43,7 +43,7 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-algorithm=( kmeans fuzzykmeans lda streamingkmeans)
+algorithm=( kmeans fuzzykmeans lda streamingkmeans clean)
 if [ -n "$1" ]; then
   choice=$1
 else
@@ -52,18 +52,24 @@ else
   echo "2. ${algorithm[1]} clustering"
   echo "3. ${algorithm[2]} clustering"
   echo "4. ${algorithm[3]} clustering"
+  echo "5. ${algorithm[4]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
 fi
 
 echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
-clustertype=${algorithm[$choice-1]} 
+clustertype=${algorithm[$choice-1]}
 
 WORK_DIR=/tmp/mahout-work-${USER}
-echo "Creating work directory at ${WORK_DIR}"
 
-$DFS -mkdir -p $WORK_DIR
-mkdir -p $WORK_DIR
-
+if [ "x$clustertype" == "xclean" ]; then
+  rm -rf $WORK_DIR
+  $DFSRM $WORK_DIR
+  exit 1
+else
+  $DFS -mkdir -p $WORK_DIR
+  mkdir -p $WORK_DIR
+  echo "Creating work directory at ${WORK_DIR}"
+fi
 if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
   if [ ! -e ${WORK_DIR}/reuters-out ]; then
     if [ ! -e ${WORK_DIR}/reuters-sgm ]; then
@@ -92,9 +98,10 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
         set +e
         $DFSRM ${WORK_DIR}/reuters-sgm
         $DFSRM ${WORK_DIR}/reuters-out
-        set -e
+        $DFS -mkdir ${WORK_DIR}/
         $DFS -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm
         $DFS -put ${WORK_DIR}/reuters-out ${WORK_DIR}/reuters-out
+        set -e
     fi
   fi
   echo "Converting to Sequence Files from Directory"
@@ -187,12 +194,4 @@ elif [ "x$clustertype" == "xstreamingkmeans" ]; then
     -o ${WORK_DIR}/reuters-cluster-distance.csv \
     && \
   cat ${WORK_DIR}/reuters-cluster-distance.csv
-else 
-  echo "unknown cluster type: $clustertype"
-fi 
-if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]
-then
-  $DFSRM $WORK_DIR
-else
-  rm -rf $WORK_DIR
 fi
