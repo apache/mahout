@@ -19,7 +19,6 @@ package org.apache.mahout.classifier.naivebayes;
 
 import java.io.File;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -65,10 +64,8 @@ public class NaiveBayesTest extends MahoutTestCase {
     outputDir.delete();
     tempDir = getTestTempDir("tmp");
 
-    SequenceFile.Writer writer = new SequenceFile.Writer(FileSystem.get(conf), conf,
-        new Path(inputFile.getAbsolutePath()), Text.class, VectorWritable.class);
-
-    try {
+    try (SequenceFile.Writer writer = new SequenceFile.Writer(FileSystem.get(conf), conf,
+        new Path(inputFile.getAbsolutePath()), Text.class, VectorWritable.class)) {
       writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
       writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
@@ -79,8 +76,6 @@ public class NaiveBayesTest extends MahoutTestCase {
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_DOMESTIC));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SUV, ORIGIN_IMPORTED));
       writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_IMPORTED));
-    } finally {
-      Closeables.close(writer, false);
     }
   }
 
@@ -88,8 +83,8 @@ public class NaiveBayesTest extends MahoutTestCase {
   public void toyData() throws Exception {
     TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
     trainNaiveBayes.setConf(conf);
-    trainNaiveBayes.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
-        "--tempDir", tempDir.getAbsolutePath() });
+    trainNaiveBayes.run(new String[]{"--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
+        "--tempDir", tempDir.getAbsolutePath()});
 
     NaiveBayesModel naiveBayesModel = NaiveBayesModel.materialize(new Path(outputDir.getAbsolutePath()), conf);
 
@@ -107,9 +102,9 @@ public class NaiveBayesTest extends MahoutTestCase {
   public void toyDataComplementary() throws Exception {
     TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
     trainNaiveBayes.setConf(conf);
-    trainNaiveBayes.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
+    trainNaiveBayes.run(new String[]{"--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
         "--trainComplementary",
-        "--tempDir", tempDir.getAbsolutePath() });
+        "--tempDir", tempDir.getAbsolutePath()});
 
     NaiveBayesModel naiveBayesModel = NaiveBayesModel.materialize(new Path(outputDir.getAbsolutePath()), conf);
 

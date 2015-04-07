@@ -23,9 +23,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -234,17 +233,12 @@ public final class Utils {
   }
 
   private static void writeDataToFile(String[] sData, Path path) throws IOException {
-    BufferedWriter output = null;
-    try {
-      output = Files.newWriter(new File(path.toString()), Charsets.UTF_8);
+    try (BufferedWriter output = Files.newWriter(new File(path.toString()), Charsets.UTF_8)){
       for (String line : sData) {
         output.write(line);
         output.write('\n');
       }
-    } finally {
-      Closeables.close(output, false);
     }
-  
   }
 
   public static Path writeDataToTestFile(String[] sData) throws IOException {
