@@ -106,8 +106,15 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
     set +e
     $DFSRM ${WORK_DIR}/20news-all
     $DFS -mkdir ${WORK_DIR}
+    $DFS -mkdir ${WORK_DIR}/20news-all
     set -e
-    $DFS -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
+    if [ $HVERSION -eq "1" ] ; then
+      echo "Copying 20newsgroups data to Hadoop 1 HDFS"
+      $DFS -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
+    elif [ $HVERSION -eq "2" ] ; then
+      echo "Copying 20newsgroups data to Hadoop 2 HDFS"
+      $DFS -put ${WORK_DIR}/20news-all ${WORK_DIR}/
+    fi
   fi
 
   echo "Creating sequence files from 20newsgroups data"

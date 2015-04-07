@@ -50,3 +50,5 @@ else
   exit 1
 fi
 echo "Setting dfs command to $DFS, dfs rm to $DFSRM."
+
+export HVERSION=$v 
