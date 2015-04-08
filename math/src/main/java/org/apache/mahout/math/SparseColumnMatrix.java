@@ -170,4 +170,14 @@ public class SparseColumnMatrix extends AbstractMatrix {
     return srm;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder s = new StringBuilder("{\n");
+    for (MatrixSlice next : this.transpose()) {
+      s.append("  ").append(next.index()).append("  =>\t").append(next.vector()).append('\n');
+    }
+    s.append("}");
+    return s.toString();
+  }
+
 }
