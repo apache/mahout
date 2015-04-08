@@ -25,6 +25,14 @@
 # To run:  change into the mahout directory and type:
 # ./examples/bin/run-rf.sh <num-rows>
 
+
+if [ $# -ne 1 ]
+then
+  echo -e "\nThis script takes one parameter, the number of rows of random data to generate.\n"
+  echo -e "Syntax: $0 <number-of-rows-of-sample-data> \n"
+  exit -1
+fi
+
 WORK_DIR=/tmp/mahout-work-${USER}
 INPUT="${WORK_DIR}/input"
 mkdir -p $INPUT
