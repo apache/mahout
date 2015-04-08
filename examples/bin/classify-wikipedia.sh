@@ -48,7 +48,7 @@ if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding task to run"
-  echo "1. ${algorithm[0]}"
+  echo "1. ${algorithm[0]} (may require increased heap space on yarn)"
   echo "2. ${algorithm[1]}"
   echo "3. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
