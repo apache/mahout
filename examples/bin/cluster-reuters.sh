@@ -48,7 +48,7 @@ if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding clustering algorithm"
-  echo "1. ${algorithm[0]} clustering"
+  echo "1. ${algorithm[0]} clustering (runs from this example script in cluster mode only)" 
   echo "2. ${algorithm[1]} clustering (may require increased heap space on yarn)"
   echo "3. ${algorithm[2]} clustering"
   echo "4. ${algorithm[3]} clustering"
