@@ -19,14 +19,11 @@ package org.apache.mahout.classifier.mlp;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.io.Files;
 import org.apache.commons.csv.CSVUtils;
-import org.apache.commons.io.Charsets;
 import org.apache.mahout.classifier.mlp.NeuralNetwork.TrainingMethod;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseMatrix;
@@ -34,6 +31,10 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 
 /** Test the functionality of {@link NeuralNetwork}. */
 public class TestNeuralNetwork extends MahoutTestCase {
@@ -217,7 +218,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
     File cancerDataset = getTestTempFile("cancer.csv");
     writeLines(cancerDataset, Datasets.CANCER);
 
-    List<Vector> records = new ArrayList<>();
+    List<Vector> records = Lists.newArrayList();
     // Returns a mutable list of the data
     List<String> cancerDataSetList = Files.readLines(cancerDataset, Charsets.UTF_8);
     // Skip the header line, hence remove the first element in the list
@@ -271,7 +272,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
     writeLines(irisDataset, Datasets.IRIS);
 
     int numOfClasses = 3;
-    List<Vector> records = new ArrayList<>();
+    List<Vector> records = Lists.newArrayList();
     // Returns a mutable list of the data
     List<String> irisDataSetList = Files.readLines(irisDataset, Charsets.UTF_8);
     // Skip the header line, hence remove the first element in the list

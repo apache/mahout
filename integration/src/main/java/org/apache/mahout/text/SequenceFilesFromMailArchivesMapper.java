@@ -17,21 +17,9 @@
 
 package org.apache.mahout.text;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
@@ -43,6 +31,17 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.utils.email.MailOptions;
 import org.apache.mahout.utils.email.MailProcessor;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.mahout.text.SequenceFilesFromMailArchives.BODY_OPTION;
 import static org.apache.mahout.text.SequenceFilesFromMailArchives.BODY_SEPARATOR_OPTION;
@@ -94,13 +93,13 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
       options.setCharset(charset);
     }
 
-    List<Pattern> patterns = new ArrayList<>(5);
+    List<Pattern> patterns = Lists.newArrayListWithCapacity(5);
     // patternOrder is used downstream so that we can know what order the
     // text is in instead
     // of encoding it in the string, which
     // would require more processing later to remove it pre feature
     // selection.
-    Map<String, Integer> patternOrder = new HashMap<>();
+    Map<String, Integer> patternOrder = Maps.newHashMap();
     int order = 0;
     if (!configuration.get(FROM_OPTION[1], "").equals("")) {
       patterns.add(MailProcessor.FROM_PREFIX);

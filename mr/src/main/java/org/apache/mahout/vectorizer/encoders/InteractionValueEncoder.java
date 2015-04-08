@@ -18,8 +18,10 @@
 package org.apache.mahout.vectorizer.encoders;
 
 import java.util.Locale;
-import org.apache.commons.io.Charsets;
+
 import org.apache.mahout.math.Vector;
+
+import com.google.common.base.Charsets;
 
 public class InteractionValueEncoder extends FeatureVectorEncoder {
   private final FeatureVectorEncoder firstEncoder;
@@ -86,7 +88,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
           int n = (k + j) % data.size();
           if (isTraceEnabled()) {
             trace(String.format("%s:%s", new String(originalForm1, Charsets.UTF_8), new String(originalForm2,
-                Charsets.UTF_8)), n);
+		Charsets.UTF_8)), n);
           }
           data.set(n, data.get(n) + w);
         }

@@ -18,24 +18,25 @@
 package org.apache.mahout.classifier.df.mapreduce.partial;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.classifier.df.builder.DefaultTreeBuilder;
 import org.apache.mahout.classifier.df.builder.TreeBuilder;
 import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Leaf;
 import org.apache.mahout.classifier.df.node.Node;
-import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
 public final class PartialBuilderTest extends MahoutTestCase {
@@ -65,10 +66,15 @@ public final class PartialBuilderTest extends MahoutTestCase {
     FileSystem fs = base.getFileSystem(conf);
 
     Path outputFile = new Path(base, "PartialBuilderTest.seq");
-    try (Writer writer = SequenceFile.createWriter(fs, conf, outputFile, TreeID.class, MapredOutput.class)){
+    Writer writer = SequenceFile.createWriter(fs, conf, outputFile,
+        TreeID.class, MapredOutput.class);
+
+    try {
       for (int index = 0; index < NUM_TREES; index++) {
         writer.append(keys[index], values[index]);
       }
+    } finally {
+      Closeables.close(writer, false);
     }
 
     // load the output and make sure its valid
@@ -110,7 +116,7 @@ public final class PartialBuilderTest extends MahoutTestCase {
   private static void randomKeyValues(Random rng, TreeID[] keys, MapredOutput[] values, int[] firstIds) {
     int index = 0;
     int firstId = 0;
-    Collection<Integer> partitions = new ArrayList<>();
+    Collection<Integer> partitions = Lists.newArrayList();
 
     for (int p = 0; p < NUM_MAPS; p++) {
       // select a random partition, not yet selected
