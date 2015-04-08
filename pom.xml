@@ -800,7 +800,7 @@
       </activation>
       <properties>
         <hadoop.classifier>hadoop2</hadoop.classifier>
-        <hadoop.version>2.6.0</hadoop.version>
+        <hadoop.version>2.4.1</hadoop.version>
       </properties>
       <dependencyManagement>
         <dependencies>
