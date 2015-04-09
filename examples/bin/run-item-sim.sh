@@ -17,6 +17,10 @@
 #
 # To run:  change into the mahout directory and type:
 # ./examples/bin/run-item-sim.sh
+#
+# This works only in Spark and Hadoop standalone mode for progress
+# making this automatically sense the user's config see:
+# https://issues.apache.org/jira/browse/MAHOUT-1679
 
 OUT_DIR="/item-sim-out" # output dir for cooccurrence and cross-cooccurrence matrices
 INPUT="/examples/src/main/resources/cf-data-purchase.txt" # purchase actions
@@ -38,15 +42,25 @@ fi
 LOCAL=$MAHOUT_LOCAL # save state
 export MAHOUT_LOCAL=true #set so the raw local file system is used
 
+echo "To run:  change into the mahout directory and type:"
+echo " ./examples/bin/run-item-sim.sh"
+echo ""
 echo "This runs spark-itemsimilarity on two user actions in two intput files"
 echo "The example uses fake purchases and views of products, calculating"
 echo "a cooccurrence indicator for purchase and a cross-cooccurrence indicator"
 echo "for view (product detail view). The example is tiny so it can be followed"
 echo "with a little intuition."
-echo "To run this on a Spark + Hadoop cluster:"
-echo "> hadoop fs -put examples/src/main/resources/cf-* / "
-echo "> mahout spark-itemsimilarity -i /cf-data-purchase.txt -i2 /cf-data-view.txt -o /tiny-indicators \\"
-echo "    -ma spark://Maclaurin.local:7077 -sem 4g"
+echo ""
+echo "Note: This script only runs on a local installation of Spark and Mahout!"
+echo "If you get 'file not found' errors you may have Spark running on Hadoop"
+echo "To run this on a Spark + Hadoop cluster or pseudo-cluster do the following:"
+echo ""
+echo "  hadoop fs -put examples/src/main/resources/cf-* / "
+echo "  mahout spark-itemsimilarity -i /cf-data-purchase.txt -i2 /cf-data-view.txt -o /item-sim-out \\"
+echo "    -ma spark://your-spark-master:7077 -sem 4g"
+echo ""
+echo "Then look in /item-sim-out for output"
+echo ""
 
 # Remove old files
 echo
