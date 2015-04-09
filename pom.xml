@@ -577,7 +577,7 @@
           <version>2.5.1</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
-            <releaseProfiles>release,apache-release</releaseProfiles>
+            <releaseProfiles>release,apache-release,hadoop2</releaseProfiles>
             <goals>deploy</goals>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <arguments>${arguments}</arguments>
