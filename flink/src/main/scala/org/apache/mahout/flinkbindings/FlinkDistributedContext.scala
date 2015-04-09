@@ -15,13 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.drm
+package org.apache.mahout.flinkbindings
 
-import java.io.Closeable
+import org.apache.mahout.math.drm.{ DistributedEngine, BCast, DistributedContext }
+import org.apache.flink.api.scala.ExecutionEnvironment
 
-/** Distributed context (a.k.a. distributed session handle) */
-trait DistributedContext extends Closeable {
+class FlinkDistributedContext(val env: ExecutionEnvironment) extends DistributedContext {
 
-  val engine: DistributedEngine
+  val engine: DistributedEngine = FlinkEngine
+
+  override def close() {
+    // TODO
+  }
 
 }
