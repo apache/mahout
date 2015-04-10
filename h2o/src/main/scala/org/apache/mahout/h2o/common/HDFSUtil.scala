@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common
+package org.apache.mahout.h2o.common
 
 /** High level Hadoop version-specific hdfs manipulations we need in context of our operations. */
 trait HDFSUtil {

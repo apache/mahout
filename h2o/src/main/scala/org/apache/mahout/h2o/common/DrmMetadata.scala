@@ -1,4 +1,4 @@
-package org.apache.mahout.common
+package org.apache.mahout.h2o.common
 
 import scala.reflect.ClassTag
 import org.apache.hadoop.io._
