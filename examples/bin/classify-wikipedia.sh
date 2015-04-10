@@ -93,13 +93,13 @@ if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
   
   if [ "x$alg" == "xCBayes" ] ; then
     # use a list of 10 countries as categories
-    cp $MAHOUT_HOME/examples/src/test/resources/country10.txt ${WORK_DIR}/country.txt
+    cp $MAHOUT_HOME/examples/bin/resources/country10.txt ${WORK_DIR}/country.txt
     chmod 666 ${WORK_DIR}/country.txt
   fi
   
   if [ "x$alg" == "xBinaryCBayes" ] ; then
     # use United States and United Kingdom as categories
-    cp $MAHOUT_HOME/examples/src/test/resources/country2.txt ${WORK_DIR}/country.txt
+    cp $MAHOUT_HOME/examples/bin/resources/country2.txt ${WORK_DIR}/country.txt
     chmod 666 ${WORK_DIR}/country.txt
   fi
 
