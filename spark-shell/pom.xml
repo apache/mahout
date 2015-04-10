@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-spark-shell_2.10</artifactId>
+  <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
   <name>Mahout Spark bindings shell</name>
   <description>
     Mahout Bindings for Apache Spark
