@@ -169,4 +169,32 @@
     </dependency>
 
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>mahout-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>generate-scaladoc</id>
+                <goals>
+                  <goal>doc</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>attach-scaladoc-jar</id>
+                <goals>
+                  <goal>doc-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

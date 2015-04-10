@@ -73,7 +73,7 @@
   </build>
   <profiles>
     <profile>
-      <id>release</id>
+      <id>mahout-release</id>
       <properties>
         <mahout.skip.distribution>false</mahout.skip.distribution>
       </properties>

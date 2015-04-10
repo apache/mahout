@@ -117,6 +117,58 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
+      <directory>${project.basedir}/../math-scala/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+        <include>mahout-*.job</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../spark/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+        <include>mahout-*.job</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../spark-shell/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+        <include>mahout-*.job</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../h2o/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+        <include>mahout-*.job</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}/../collections/target/apidocs</directory>
       <outputDirectory>docs/mahout-collections</outputDirectory>
     </fileSet>
@@ -139,6 +191,26 @@
     <fileSet>
       <directory>${project.basedir}/../examples/target/apidocs</directory>
       <outputDirectory>docs/mahout-examples</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../math-scala/target/site/scaladocs</directory>
+      <outputDirectory>docs/mahout-examples</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../spark/target/site/scaladocs</directory>
+      <outputDirectory>docs/mahout-examples</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../spark-shell/target/site/scaladocs</directory>
+      <outputDirectory>docs/mahout-spark-shell</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../h2o/target/site/scaladocs</directory>
+      <outputDirectory>docs/mahout-h2o/scaladocs</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../h2o/target/apidocs</directory>
+      <outputDirectory>docs/mahout-h2o/javadoc</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/..</directory>

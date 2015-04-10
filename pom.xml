@@ -114,6 +114,7 @@
     <mcheckstyle.version>2.10</mcheckstyle.version>
     <mfindbugs.version>2.5.2</mfindbugs.version>
     <mjavadoc.version>2.9.1</mjavadoc.version>
+    <mscala.version>3.2.0</mscala.version>
     <hbase.version>1.0.0</hbase.version>
     <lucene.version>4.6.1</lucene.version>
     <slf4j.version>1.7.10</slf4j.version>
@@ -157,9 +158,9 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>${project.groupId}</groupId>
-        <version>${project.version}</version>
         <artifactId>mahout-hdfs</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
@@ -170,9 +171,9 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <artifactId>mahout-mr</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
-        <artifactId>mahout-mr</artifactId>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
@@ -183,9 +184,9 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <artifactId>mahout-math</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
-        <artifactId>mahout-math</artifactId>
         <type>test-jar</type>
       </dependency>
 
@@ -577,7 +578,7 @@
           <version>2.5.1</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
-            <releaseProfiles>release,apache-release,hadoop2</releaseProfiles>
+            <releaseProfiles>mahout-release,apache-release,hadoop2</releaseProfiles>
             <goals>deploy</goals>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <arguments>${arguments}</arguments>
@@ -608,7 +609,7 @@
         <plugin>
           <groupId>net.alchim31.maven</groupId>
           <artifactId>scala-maven-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>${mscala.version}</version>
           <configuration>
             <jvmArgs>
               <jvmArg>-Xms64m</jvmArg>
@@ -757,6 +758,10 @@
           <excludeSubProjects>false</excludeSubProjects>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
   <modules>
@@ -852,7 +857,7 @@
       </properties>
     </profile>
     <profile>
-      <id>release</id>
+      <id>mahout-release</id>
       <properties>
         <skipTests>true</skipTests>
         <pmd.skip>true</pmd.skip>
@@ -866,7 +871,6 @@
             <executions>
               <execution>
                 <id>attach-sources</id>
-                <phase>verify</phase>
                 <goals>
                   <goal>jar-no-fork</goal>
                 </goals>
@@ -1120,6 +1124,11 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>taglist-maven-plugin</artifactId>
         <version>2.4</version>
+      </plugin>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>${mscala.version}</version>
       </plugin>
     </plugins>
   </reporting>

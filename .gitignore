@@ -8,10 +8,7 @@ output-asf-email-examples/
 .idea/
 .DS_Store
 *.iml
-target/maven-shared-archive-resources
-target/.plxarc
-target/supplemental-models.xml
-*/target/
+target/
 examples/bin/tmp
 output
 mr/build/
