@@ -27,7 +27,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.10.0</version>
+  <version>0.10.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -101,7 +101,7 @@
     <connection>scm:git:git@github.com:apache/mahout.git</connection>
     <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/mahout.git</developerConnection>
     <url>scm:git:git@github.com:apache/mahout.git</url>
-    <tag>mahout-0.10.0</tag>
+    <tag>HEAD</tag>
   </scm>
   <properties>
     <skipTests>false</skipTests>
