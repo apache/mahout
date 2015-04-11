@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common
+package org.apache.mahout.h2o.common
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path

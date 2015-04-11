@@ -26,7 +26,7 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.h2obindings.ops._
 import org.apache.mahout.h2obindings.drm._
-import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
+import org.apache.mahout.h2o.common.{Hadoop1HDFSUtil, HDFSUtil}
 
 /** H2O specific non-DRM operations */
 object H2OEngine extends DistributedEngine {
