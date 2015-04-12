@@ -109,10 +109,10 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark_${scala.compat.version}</artifactId>
     </dependency>
-    <dependency>
+  <!--  <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>

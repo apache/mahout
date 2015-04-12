@@ -774,7 +774,7 @@
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <module>spark-shell</module>
+  <!--  <module>spark-shell</module> -->
     <module>h2o</module>
   </modules>
 
