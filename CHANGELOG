@@ -1,6 +1,6 @@
 Mahout Change Log
 
-Release 0.10.0 - unreleased
+Release 0.10.0 - 2015-04-11
 
   MAHOUT-1630: Incorrect SparseColumnMatrix.numSlices() causes IndexException in toString() (Oleg Nitz, smarthi)
 
