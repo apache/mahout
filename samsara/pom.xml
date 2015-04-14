@@ -27,18 +27,15 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
-  <name>Mahout Math Scala bindings</name>
-  <description>High performance scientific and technical computing data structures and methods,
-    mostly based on CERN's
-    Colt Java API
-  </description>
+  <artifactId>mahout-samsara_${scala.compat.version}</artifactId>
+  <name>Mahout Samsara</name>
+  <description>Mahout Math Scala bindings</description>
 
   <packaging>jar</packaging>
 
   <build>
     <plugins>
-      <!-- create test jar so other modules can reuse the math-scala test utility classes. -->
+      <!-- create test jar so other modules can reuse the samsara test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>

@@ -117,7 +117,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../math-scala/target</directory>
+      <directory>${project.basedir}/../samsara/target</directory>
       <includes>
         <include>mahout-*.jar</include>
         <include>mahout-*.job</include>
@@ -193,12 +193,12 @@
       <outputDirectory>docs/mahout-examples</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../math-scala/target/site/scaladocs</directory>
-      <outputDirectory>docs/mahout-examples</outputDirectory>
+      <directory>${project.basedir}/../samsara/target/site/scaladocs</directory>
+      <outputDirectory>docs/mahout-samsara</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../spark/target/site/scaladocs</directory>
-      <outputDirectory>docs/mahout-examples</outputDirectory>
+      <outputDirectory>docs/mahout-spark</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../spark-shell/target/site/scaladocs</directory>
