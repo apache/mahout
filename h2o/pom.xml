@@ -127,7 +127,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-samsara_${scala.compat.version}</artifactId>
+      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -140,7 +140,7 @@
 
    <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-samsara_${scala.compat.version}</artifactId>
+      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
    </dependency>

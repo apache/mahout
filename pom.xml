@@ -212,12 +212,12 @@
       </dependency>
 
       <dependency>
-        <artifactId>mahout-samsara_${scala.compat.version}</artifactId>
+        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <artifactId>mahout-samsara_${scala.compat.version}</artifactId>
+        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
@@ -772,7 +772,7 @@
     <module>integration</module>
     <module>examples</module>
     <module>distribution</module>
-    <module>samsara</module>
+    <module>math-scala</module>
     <module>spark</module>
     <module>spark-shell</module>
     <module>h2o</module>
