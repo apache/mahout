@@ -1,5 +1,9 @@
 Mahout Change Log
 
+Release 0.11.0 - unreleased
+
+  MAHOUT-1680: Renamed mahout-distribution to apache-mahout-distribution
+
 Release 0.10.0 - 2015-04-11
 
   MAHOUT-1630: Incorrect SparseColumnMatrix.numSlices() causes IndexException in toString() (Oleg Nitz, smarthi)
@@ -7,7 +11,7 @@ Release 0.10.0 - 2015-04-11
   MAHOUT-1665: Update hadoop commands in example scripts (akm)
 
   MAHOUT-1676: Deprecate MLP, ConcatenateVectorsJob and ConcatenateVectorsReducer in the codebase (apalumbo)
-  
+
   MAHOUT-1622: MultithreadedBatchItemSimilarities outputs incorrect number of similarities (Jesse Daniels, Anand Avati via smarthi)
 
   MAHOUT-1605: Make VisualizerTest locale independent (Frank Rosner, Anand Avati via smarthi)
@@ -23,7 +27,7 @@ Release 0.10.0 - 2015-04-11
   MAHOUT-1661: All Lanczos modules marked as @Deprecated and slated for removal in future releases (Shannon Quinn)
 
   MAHOUT-1638: H2O bindings fail at drmParallelizeWithRowLabels(...) (Anand Avati via apalumbo)
-  
+
   MAHOUT-1667: Hadoop 1 and 2 profile in POM (sslavic)
 
   MAHOUT-1564: Naive Bayes Classifier for New Text Documents (apalumbo)
