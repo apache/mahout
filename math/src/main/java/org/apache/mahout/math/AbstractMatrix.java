@@ -780,15 +780,53 @@ public abstract class AbstractMatrix implements Matrix {
     }
   }
 
+//  @Override
+//  public String toString() {
+//    int row = 0;
+//    int col = 0;
+//    int maxRowToDisplay = 10;
+//    int maxColToDisplay = 50;
+//    StringBuilder s = new StringBuilder("{\n");
+//    Iterator<MatrixSlice> it = iterator();
+//    while ((it.hasNext()) && (row < maxRowToDisplay)) {
+//      MatrixSlice next = it.next();
+//      s.append("  ").append(next.index()).append("  =>\t");
+//        Iterator<Vector.Element> vIt = next.vector().nonZeroes().iterator();
+//        while ((col < maxColToDisplay) && (vIt.hasNext())) {
+//          s.append(vIt.next());
+//          col++;
+//        }
+//      s.append('\n');
+//      row++;
+//    }
+//    s.append("}");
+//    return s.toString();
+//  }
+
   @Override
   public String toString() {
+    int row = 0;
+    int maxRowToDisplay = 10;
+    int maxColToDisplay = 50;
+
     StringBuilder s = new StringBuilder("{\n");
     Iterator<MatrixSlice> it = iterator();
-    while (it.hasNext()) {
+    while ((it.hasNext()) && (row < maxRowToDisplay)) {
       MatrixSlice next = it.next();
-      s.append("  ").append(next.index()).append("  =>\t").append(next.vector()).append('\n');
+      s.append(" ").append(next.index())
+        .append(" =>\t")
+        .append(new VectorView(next.vector(),0, maxColToDisplay))
+        .append('\n');
+      row ++;
     }
-    s.append("}");
-    return s.toString();
+    String returnString = s.toString();
+    if(maxColToDisplay > maxRowToDisplay) {
+      returnString = returnString.replaceAll("}", "...");
+    }
+    if(maxRowToDisplay > numRows())
+      return returnString +("...");
+    else{
+      return returnString +("}");
+    }
   }
 }
