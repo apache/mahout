@@ -172,12 +172,37 @@ public class SparseColumnMatrix extends AbstractMatrix {
 
   @Override
   public String toString() {
+    int row = 0;
+    int maxRowsToDisplay = 10;
+    int maxColsToDisplay = 20;
+    int colsToDisplay = maxColsToDisplay;
+
+    if(maxColsToDisplay > columnSize()){
+      colsToDisplay = columnSize();
+    }
+
     StringBuilder s = new StringBuilder("{\n");
     for (MatrixSlice next : this.transpose()) {
-      s.append("  ").append(next.index()).append("  =>\t").append(next.vector()).append('\n');
+      if (row < maxRowsToDisplay) {
+        s.append(" ")
+          .append(next.index())
+          .append(" =>\t")
+          .append(new VectorView(next.vector(), 0, colsToDisplay))
+          .append('\n');
+        row++;
+      }
     }
-    s.append("}");
-    return s.toString();
+
+    String returnString = s.toString();
+    if (maxColsToDisplay <= columnSize()) {
+      returnString = returnString.replace("}", " ... }");
+    }
+
+    if (maxRowsToDisplay <= rowSize()) {
+      return returnString + "... }";
+    } else {
+      return returnString + "}";
+    }
   }
 
 }
