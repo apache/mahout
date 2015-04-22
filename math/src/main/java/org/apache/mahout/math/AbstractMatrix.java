@@ -798,16 +798,16 @@ public abstract class AbstractMatrix implements Matrix {
       MatrixSlice next = it.next();
       s.append(" ").append(next.index())
         .append(" =>\t")
-        .append(new VectorView(next.vector(),0 , colsToDisplay))
+        .append(new VectorView(next.vector(), 0, colsToDisplay))
         .append('\n');
       row ++;
     }
     String returnString = s.toString();
     if (maxColsToDisplay <= columnSize()) {
-      returnString = returnString.replace("}", " ... ");
+      returnString = returnString.replace("}", " ... } ");
     }
     if(maxRowsToDisplay <= rowSize())
-      return returnString + ("...");
+      return returnString + ("... }");
     else{
       return returnString + ("}");
     }
