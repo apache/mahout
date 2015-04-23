@@ -1,6 +1,6 @@
 Mahout Change Log
 
-Release 0.11.0 - unreleased
+Release 0.10.1 - unreleased
 
   MAHOUT-1690: CLONE - Some vector dumper flags are expecting arguments. (smarthi)
 
