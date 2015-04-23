@@ -17,14 +17,7 @@
 
 package org.apache.mahout.utils.vectors;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.io.Charsets;
@@ -45,6 +38,13 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link Vector}s and dump
@@ -136,7 +136,7 @@ public final class VectorDumper extends AbstractJob {
 
     Set<String> filters;
     if (hasOption("filter")) {
-      filters = new HashSet<>(getOptions("filter"));
+      filters = Sets.newHashSet(getOptions("filter"));
     } else {
       filters = null;
     }
