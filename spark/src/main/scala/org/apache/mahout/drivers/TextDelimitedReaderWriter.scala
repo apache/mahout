@@ -17,11 +17,10 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.mahout.math.indexeddataset.{Writer, Reader, Schema, IndexedDataset}
+import org.apache.mahout.math.indexeddataset._
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.apache.spark.SparkContext._
 import org.apache.mahout.math.RandomAccessSparseVector
-import com.google.common.collect.{BiMap, HashBiMap}
 import org.apache.mahout.math.drm.{DrmLike, DrmLikeOps, DistributedContext, CheckpointedDrm}
 import org.apache.mahout.sparkbindings._
 import scala.collection.JavaConversions._
@@ -45,7 +44,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create()): IndexedDatasetSpark = {
+      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create()): IndexedDatasetSpark = {
     try {
       val delimiter = readSchema("delim").asInstanceOf[String]
       val rowIDColumn = readSchema("rowIDColumn").asInstanceOf[Int]
@@ -68,7 +67,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       }
 
       // get row and column IDs
-      //val m = columns.collect
       val interactions = columns.map { tokens =>
         tokens(rowIDColumn) -> tokens(columnIDPosition)
       }
@@ -87,13 +85,13 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
-      val ncol = columnIDDictionary.size()
-      val nrow = rowIDDictionary.size()
+      val ncol = columnIDDictionary.size
+      val nrow = rowIDDictionary.size
 
       val indexedInteractions =
         interactions.map { case (rowID, columnID) =>
-          val rowIndex = rowIDDictionary_bcast.value.get(rowID).get
-          val columnIndex = columnIDDictionary_bcast.value.get(columnID).get
+          val rowIndex = rowIDDictionary_bcast.value.getOrElse(rowID, -1)
+          val columnIndex = columnIDDictionary_bcast.value.getOrElse(columnID, -1)
 
           rowIndex -> columnIndex
         }
@@ -108,7 +106,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         .asInstanceOf[DrmRdd[Int]]
 
       // wrap the DrmRdd and a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
-      //val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
       val drmInteractions = drmWrap[Int](indexedInteractions)
 
       new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
@@ -133,7 +130,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create()): IndexedDatasetSpark = {
+      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create()): IndexedDatasetSpark = {
     try {
       val rowKeyDelim = readSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = readSchema("columnIdStrengthDelim").asInstanceOf[String]
@@ -154,7 +151,8 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       }
 
       interactions.cache()
-      interactions.collect()
+      // forces into memory so only for debugging
+      // interactions.collect()
 
       // create separate collections of rowID and columnID tokens
       val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
@@ -174,18 +172,18 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
-      val ncol = columnIDDictionary.size()
-      val nrow = rowIDDictionary.size()
+      val ncol = columnIDDictionary.size
+      val nrow = rowIDDictionary.size
 
       val indexedInteractions =
         interactions.map { case (rowID, columns) =>
-          val rowIndex = rowIDDictionary_bcast.value.get(rowID).get
+          val rowIndex = rowIDDictionary_bcast.value.getOrElse(rowID, -1)
 
           val elements = columns.split(elementDelim)
           val row = new RandomAccessSparseVector(ncol)
           for (element <- elements) {
             val id = element.split(columnIdStrengthDelim)(0)
-            val columnID = columnIDDictionary_bcast.value.get(id).get
+            val columnID = columnIDDictionary_bcast.value.getOrElse(id, -1)
             val pair = element.split(columnIdStrengthDelim)
             if (pair.size == 2) // there was a strength
               row.setQuick(columnID, pair(1).toDouble)
@@ -197,7 +195,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         .asInstanceOf[DrmRdd[Int]]
 
       // wrap the DrmRdd in a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
-      //val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
       val drmInteractions = drmWrap[Int](indexedInteractions)
 
       new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
@@ -211,24 +208,22 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
   }
 
   /**
-   * Creates a BiMap from an ID collection. The ID points to an ordinal in which is used internal to Mahout
+   * Creates a BiDictionary from an ID collection. The ID points to an ordinal in which is used internal to Mahout
    * as the row or column ID
-   * todo: this is a non-distributed process in an otherwise distributed reader and the BiMap is a
+   * todo: this is a non-distributed process in an otherwise distributed reader and the BiDictionary is a
    * non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit
    * in-memory, the option is to put the dictionaries in rdds and do joins to translate IDs
    */
-  private def asOrderedDictionary(dictionary: BiMap[String, Int] = HashBiMap.create(),
+  private def asOrderedDictionary(dictionary: BiDictionary[String, Int] = BiDictionary.create(),
       entries: Array[String]):
-    BiMap[String, Int] = {
-    var index = dictionary.size() // if a dictionary is supplied then add to the end based on the Mahout id 'index'
+    BiDictionary[String, Int] = {
+    var newIDs = List[String]()
+
     for (entry <- entries) {
-      if (!dictionary.contains(entry)){
-        dictionary.put(entry, index)
-        index += 1
-      }// the dictionary should never contain an entry since they are supposed to be distinct but for some reason
-      // they do
+      if (!dictionary.contains(entry)) newIDs = entry +: newIDs
     }
-    dictionary
+
+    if(newIDs.isEmpty) dictionary else BiDictionary.append(newIDs, dictionary)
   }
 }
 
@@ -265,7 +260,11 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
 
       val matrix = indexedDataset.matrix
       val rowIDDictionary = indexedDataset.rowIDs
+      val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
+
       val columnIDDictionary = indexedDataset.columnIDs
+      val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
+
 
       matrix.rdd.map { case (rowID, itemVector) =>
 
@@ -279,17 +278,20 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
 
         // first get the external rowID token
         if (!vector.isEmpty){
-          var line: String = rowIDDictionary.inverse.get(rowID) + rowKeyDelim
+          //var line: String = rowIDDictionary.inverse.get(rowID) + rowKeyDelim
+          var line = rowIDDictionary_bcast.value.inverse.getOrElse(rowID, "INVALID_ROW_ID") + rowKeyDelim
           // for the rest of the row, construct the vector contents of elements (external column ID, strength value)
           for (item <- vector) {
-            line += columnIDDictionary.inverse.get(item._1)
+            //line += columnIDDictionary.inverse.get(item._1)
+            line += columnIDDictionary_bcast.value.inverse.getOrElse(item._1, "INVALID_COLUMN_ID")
             if (!omitScore) line += columnIdStrengthDelim + item._2
             line += elementDelim
           }
           // drop the last delimiter, not needed to end the line
           line.dropRight(1)
         } else {//no items so write a line with id but no values, no delimiters
-          rowIDDictionary.inverse.get(rowID)
+          //rowIDDictionary.inverse.get(rowID)
+          rowIDDictionary_bcast.value.inverse.getOrElse(rowID, "INVALID_ROW_ID")
         } // "if" returns a line of text so this must be last in the block
       }
       .saveAsTextFile(dest)

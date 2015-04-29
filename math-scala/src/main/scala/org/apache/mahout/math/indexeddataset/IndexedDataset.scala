@@ -17,12 +17,12 @@
 
 package org.apache.mahout.math.indexeddataset
 
-import com.google.common.collect.BiMap
 import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
 import org.apache.mahout.math.indexeddataset
+import org.apache.mahout.math.indexeddataset.BiDictionary
 
 /**
- * Wrap an  [[org.apache.mahout.math.drm.DrmLike]] with bidirectional ID mappings [[com.google.common.collect.BiMap]]
+ * Wrap an  [[org.apache.mahout.math.drm.DrmLike]] with bidirectional ID mappings [[indexeddataset.BiDictionary]]
  * so a user specified labels/IDs can be stored and mapped to and from the Mahout Int ID used internal to Mahout
  * core code.
  * @todo Often no need for both or perhaps either dictionary, so save resources by allowing to be not created
@@ -31,8 +31,8 @@ import org.apache.mahout.math.indexeddataset
 
 trait IndexedDataset {
   val matrix: CheckpointedDrm[Int]
-  val rowIDs: BiMap[String,Int]
-  val columnIDs: BiMap[String,Int]
+  val rowIDs: BiDictionary[String,Int]
+  val columnIDs: BiDictionary[String,Int]
 
   /**
    * Write a text delimited file(s) with the row and column IDs from dictionaries.
@@ -43,7 +43,7 @@ trait IndexedDataset {
   def dfsWrite(dest: String, schema: Schema)(implicit sc: DistributedContext): Unit
 
   /** Factory method, creates the extending class  and returns a new instance */
-  def create(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]):
+  def create(matrix: CheckpointedDrm[Int], rowIDs: BiDictionary[String,Int], columnIDs: BiDictionary[String,Int]):
     IndexedDataset
 
   /**

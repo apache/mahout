@@ -165,6 +165,8 @@
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
+
+
   </dependencies>
 
   <profiles>

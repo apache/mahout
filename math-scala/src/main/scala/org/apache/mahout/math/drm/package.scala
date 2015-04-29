@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math
 
-import com.google.common.collect.{HashBiMap, BiMap}
 import org.apache.mahout.math.drm.DistributedContext
 import org.apache.mahout.math.indexeddataset.{IndexedDataset, DefaultIndexedDatasetReadSchema, Schema}
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -122,13 +121,13 @@ package object indexeddataset {
   /** Load IndexedDataset from text delimited files */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
     (implicit ctx: DistributedContext):
     IndexedDataset = ctx.indexedDatasetDFSRead(src, schema, existingRowIDs)
 
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
     (implicit ctx: DistributedContext):
     IndexedDataset = ctx.indexedDatasetDFSReadElements(src, schema, existingRowIDs)
 

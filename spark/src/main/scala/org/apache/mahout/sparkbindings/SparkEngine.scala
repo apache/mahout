@@ -17,10 +17,9 @@
 
 package org.apache.mahout.sparkbindings
 
-import com.google.common.collect.{BiMap, HashBiMap}
 import org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader
 import org.apache.mahout.math._
-import org.apache.mahout.math.indexeddataset.{DefaultIndexedDatasetReadSchema, Schema, DefaultIndexedDatasetElementReadSchema}
+import org.apache.mahout.math.indexeddataset.{BiDictionary, DefaultIndexedDatasetReadSchema, Schema, DefaultIndexedDatasetElementReadSchema}
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scalabindings._
 import RLikeOps._
@@ -259,7 +258,7 @@ object SparkEngine extends DistributedEngine {
    */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
       (implicit sc: DistributedContext):
     IndexedDatasetSpark = {
     val reader = new TextDelimitedIndexedDatasetReader(schema)(sc)
@@ -275,7 +274,7 @@ object SparkEngine extends DistributedEngine {
    */
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetElementReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
       (implicit sc: DistributedContext):
     IndexedDatasetSpark = {
     val reader = new TextDelimitedIndexedDatasetReader(schema)(sc)
