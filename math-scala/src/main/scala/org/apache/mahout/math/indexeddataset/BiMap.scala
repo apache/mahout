@@ -119,7 +119,7 @@ object BiDictionary {
 
   /**
    * Create a new empty BiDictionary, for Guava HashBiMap style instantiation.
-   * todo: not really needed but requires using code to be changed--later.
+   * todo: not really needed but requires consuming code to be changed--later.
    */
   def create(): BiDictionary = {
     val hm = HashMap[String, Int]()
