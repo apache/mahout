@@ -135,8 +135,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val rowKeyDelim = readSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = readSchema("columnIdStrengthDelim").asInstanceOf[String]
       val elementDelim = readSchema("elementDelim").asInstanceOf[String]
-      // no need for omitScore since we can tell if there is a score and assume it is 1.0d if not specified
-      //val omitScore = readSchema("omitScore").asInstanceOf[Boolean]
 
       assert(!source.isEmpty, {
         println(this.getClass.toString + ": has no files to read")
@@ -294,7 +292,6 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
           // drop the last delimiter, not needed to end the line
           line.dropRight(1)
         } else {//no items so write a line with id but no values, no delimiters
-          //rowIDDictionary.inverse.get(rowID)
           rowIDDictionary_bcast.value.inverse.getOrElse(rowID, "INVALID_ROW_ID")
         } // "if" returns a line of text so this must be last in the block
       }
