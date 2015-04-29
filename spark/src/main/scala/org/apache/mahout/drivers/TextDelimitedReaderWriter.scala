@@ -280,11 +280,9 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
 
         // first get the external rowID token
         if (!vector.isEmpty){
-          //var line: String = rowIDDictionary.inverse.get(rowID) + rowKeyDelim
           var line = rowIDDictionary_bcast.value.inverse.getOrElse(rowID, "INVALID_ROW_ID") + rowKeyDelim
           // for the rest of the row, construct the vector contents of elements (external column ID, strength value)
           for (item <- vector) {
-            //line += columnIDDictionary.inverse.get(item._1)
             line += columnIDDictionary_bcast.value.inverse.getOrElse(item._1, "INVALID_COLUMN_ID")
             if (!omitScore) line += columnIdStrengthDelim + item._2
             line += elementDelim
