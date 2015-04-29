@@ -44,7 +44,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiDictionary = BiDictionary.create()): IndexedDatasetSpark = {
+      existingRowIDs: Option[BiDictionary] = None): IndexedDatasetSpark = {
     try {
       val delimiter = readSchema("delim").asInstanceOf[String]
       val rowIDColumn = readSchema("rowIDColumn").asInstanceOf[Int]
@@ -82,7 +82,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
 
-      val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
+      val columnIDDictionary = asOrderedDictionary(keys = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
       val ncol = columnIDDictionary.size
@@ -130,7 +130,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiDictionary = BiDictionary.create()): IndexedDatasetSpark = {
+      existingRowIDs: Option[BiDictionary] = None): IndexedDatasetSpark = {
     try {
       val rowKeyDelim = readSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = readSchema("columnIdStrengthDelim").asInstanceOf[String]
@@ -169,7 +169,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
 
-      val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
+      val columnIDDictionary = asOrderedDictionary(keys = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
       val ncol = columnIDDictionary.size
@@ -214,16 +214,20 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
    * non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit
    * in-memory, the option is to put the dictionaries in rdds and do joins to translate IDs
    */
-  private def asOrderedDictionary(dictionary: BiDictionary = BiDictionary.create(),
-      entries: Array[String]):
+  private def asOrderedDictionary(optionDictionary: Option[BiDictionary] = None,
+      keys: Array[String]):
     BiDictionary = {
     var newIDs = List[String]()
 
-    for (entry <- entries) {
-      if (!dictionary.contains(entry)) newIDs = entry +: newIDs
+    optionDictionary match {
+      case Some(dictionary) => dictionary
+        for (key <- keys) {
+          if (!dictionary.contains(key)) newIDs = key +: newIDs
+        }
+        if(newIDs.isEmpty) dictionary else BiDictionary.append(newIDs, dictionary)
+      case None =>
+        BiDictionary.stringInt(keys.toSet)
     }
-
-    if(newIDs.isEmpty) dictionary else BiDictionary.append(newIDs, dictionary)
   }
 }
 

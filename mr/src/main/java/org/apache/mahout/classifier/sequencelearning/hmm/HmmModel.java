@@ -20,7 +20,7 @@ package org.apache.mahout.classifier.sequencelearning.hmm;
 import java.util.Map;
 import java.util.Random;
 
-BiDictionary;
+import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;

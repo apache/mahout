@@ -27,6 +27,8 @@ import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings._
 
+import scala.collection.immutable.HashMap
+
 //todo: take out, only for temp tests
 
 import org.apache.mahout.math.scalabindings._
@@ -652,7 +654,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       (1.0, 1.0))
 
     val drmA = drmParallelize(m = a, numPartitions = 2)
-    val indexedDatasetA = new IndexedDatasetSpark(drmA, BiDictionary.create(), BiDictionary.create())
+    val emptyIDs = new BiDictionary(new HashMap[String, Int]())
+    val indexedDatasetA = new IndexedDatasetSpark(drmA, emptyIDs, emptyIDs)
     val biggerIDSA = indexedDatasetA.newRowCardinality(5)
 
     assert(biggerIDSA.matrix.nrow == 5)

@@ -126,9 +126,4 @@ object BiDictionary {
     new BiDictionary(hm)
   }
 
-  /**
-   * todo: Create a BiDictionary from an RDD of keys, which will be made distinct first. Needs to be in
-   *       Spark specific module. Or maybe a package helper function. This is so the RDD won't have to
-   *       be collected into memory.
-   */
 }

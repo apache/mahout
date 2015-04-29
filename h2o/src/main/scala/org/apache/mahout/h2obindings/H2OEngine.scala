@@ -128,7 +128,7 @@ object H2OEngine extends DistributedEngine {
    */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiDictionary = BiDictionary.create())
+      existingRowIDs: Option[BiDictionary] = None)
       (implicit sc: DistributedContext):
     IndexedDatasetH2O = {
     // should log a warning when this is built but no logger here, can an H2O contributor help with this
@@ -146,7 +146,7 @@ object H2OEngine extends DistributedEngine {
    */
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiDictionary = BiDictionary.create())
+      existingRowIDs: Option[BiDictionary] = None)
       (implicit sc: DistributedContext):
     IndexedDatasetH2O = {
     // should log a warning when this is built but no logger here, can an H2O contributor help with this
