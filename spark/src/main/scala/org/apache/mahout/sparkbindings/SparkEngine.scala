@@ -258,7 +258,7 @@ object SparkEngine extends DistributedEngine {
    */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
+      existingRowIDs: BiDictionary = BiDictionary.create())
       (implicit sc: DistributedContext):
     IndexedDatasetSpark = {
     val reader = new TextDelimitedIndexedDatasetReader(schema)(sc)
@@ -274,7 +274,7 @@ object SparkEngine extends DistributedEngine {
    */
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetElementReadSchema,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
+      existingRowIDs: BiDictionary = BiDictionary.create())
       (implicit sc: DistributedContext):
     IndexedDatasetSpark = {
     val reader = new TextDelimitedIndexedDatasetReader(schema)(sc)

@@ -94,7 +94,7 @@ trait DistributedEngine {
    */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
+      existingRowIDs: BiDictionary = BiDictionary.create())
       (implicit sc: DistributedContext):
     IndexedDataset
 
@@ -105,7 +105,7 @@ trait DistributedEngine {
    */
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetElementReadSchema,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
+      existingRowIDs: BiDictionary = BiDictionary.create())
       (implicit sc: DistributedContext):
     IndexedDataset
 

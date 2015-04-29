@@ -44,7 +44,7 @@ trait Reader[T]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiDictionary[String, Int]): T
+      existingRowIDs: BiDictionary): T
 
   /**
    * Override in extending trait to supply T and perform a parallel read of collection rows
@@ -60,7 +60,7 @@ trait Reader[T]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiDictionary[String, Int]): T
+      existingRowIDs: BiDictionary): T
 
   /**
    * Public method called to perform the element-wise read. Usually no need to override
@@ -71,7 +71,7 @@ trait Reader[T]{
    */
   def readElementsFrom(
       source: String,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create()): T =
+      existingRowIDs: BiDictionary = BiDictionary.create()): T =
     elementReader(mc, readSchema, source, existingRowIDs)
 
   /**
@@ -83,7 +83,7 @@ trait Reader[T]{
    */
   def readRowsFrom(
       source: String,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create()): T =
+      existingRowIDs: BiDictionary = BiDictionary.create()): T =
     rowReader(mc, readSchema, source, existingRowIDs)
 }
 

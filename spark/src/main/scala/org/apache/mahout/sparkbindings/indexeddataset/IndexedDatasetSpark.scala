@@ -29,8 +29,8 @@ import org.apache.mahout.math.indexeddataset._
  * @param rowIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
  * @param columnIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
  */
-class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictionary[String,Int],
-    val columnIDs: BiDictionary[String,Int])
+class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictionary,
+    val columnIDs: BiDictionary)
   extends IndexedDataset {
 
   /** Secondary constructor enabling immutability */
@@ -42,8 +42,8 @@ class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictio
    * Factory method used to create this extending class when the interface of
    * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] is all that is known.
    */
-  override def create(matrix: CheckpointedDrm[Int], rowIDs: BiDictionary[String,Int],
-      columnIDs: BiDictionary[String,Int]):
+  override def create(matrix: CheckpointedDrm[Int], rowIDs: BiDictionary,
+      columnIDs: BiDictionary):
     IndexedDatasetSpark = {
     new IndexedDatasetSpark(matrix, rowIDs, columnIDs)
   }

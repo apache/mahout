@@ -116,7 +116,7 @@ object H2OEngine extends DistributedEngine {
   implicit def cp2cph2o[K:ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmH2O[K] = drm.asInstanceOf[CheckpointedDrmH2O[K]]
 
   /** stub class not implemented in H2O */
-  abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictionary[String,Int], val columnIDs: BiDictionary[String,Int])
+  abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictionary, val columnIDs: BiDictionary)
     extends IndexedDataset {}
 
     /**
@@ -128,7 +128,7 @@ object H2OEngine extends DistributedEngine {
    */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
+      existingRowIDs: BiDictionary = BiDictionary.create())
       (implicit sc: DistributedContext):
     IndexedDatasetH2O = {
     // should log a warning when this is built but no logger here, can an H2O contributor help with this
@@ -146,7 +146,7 @@ object H2OEngine extends DistributedEngine {
    */
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
+      existingRowIDs: BiDictionary = BiDictionary.create())
       (implicit sc: DistributedContext):
     IndexedDatasetH2O = {
     // should log a warning when this is built but no logger here, can an H2O contributor help with this

@@ -44,7 +44,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create()): IndexedDatasetSpark = {
+      existingRowIDs: BiDictionary = BiDictionary.create()): IndexedDatasetSpark = {
     try {
       val delimiter = readSchema("delim").asInstanceOf[String]
       val rowIDColumn = readSchema("rowIDColumn").asInstanceOf[Int]
@@ -130,7 +130,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create()): IndexedDatasetSpark = {
+      existingRowIDs: BiDictionary = BiDictionary.create()): IndexedDatasetSpark = {
     try {
       val rowKeyDelim = readSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = readSchema("columnIdStrengthDelim").asInstanceOf[String]
@@ -214,9 +214,9 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
    * non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit
    * in-memory, the option is to put the dictionaries in rdds and do joins to translate IDs
    */
-  private def asOrderedDictionary(dictionary: BiDictionary[String, Int] = BiDictionary.create(),
+  private def asOrderedDictionary(dictionary: BiDictionary = BiDictionary.create(),
       entries: Array[String]):
-    BiDictionary[String, Int] = {
+    BiDictionary = {
     var newIDs = List[String]()
 
     for (entry <- entries) {

@@ -121,13 +121,13 @@ package object indexeddataset {
   /** Load IndexedDataset from text delimited files */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
+      existingRowIDs: BiDictionary = BiDictionary.create())
     (implicit ctx: DistributedContext):
     IndexedDataset = ctx.indexedDatasetDFSRead(src, schema, existingRowIDs)
 
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiDictionary[String, Int] = BiDictionary.create())
+      existingRowIDs: BiDictionary = BiDictionary.create())
     (implicit ctx: DistributedContext):
     IndexedDataset = ctx.indexedDatasetDFSReadElements(src, schema, existingRowIDs)
 

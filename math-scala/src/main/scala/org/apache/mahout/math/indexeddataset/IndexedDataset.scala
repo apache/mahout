@@ -31,8 +31,8 @@ import org.apache.mahout.math.indexeddataset.BiDictionary
 
 trait IndexedDataset {
   val matrix: CheckpointedDrm[Int]
-  val rowIDs: BiDictionary[String,Int]
-  val columnIDs: BiDictionary[String,Int]
+  val rowIDs: BiDictionary
+  val columnIDs: BiDictionary
 
   /**
    * Write a text delimited file(s) with the row and column IDs from dictionaries.
@@ -43,7 +43,7 @@ trait IndexedDataset {
   def dfsWrite(dest: String, schema: Schema)(implicit sc: DistributedContext): Unit
 
   /** Factory method, creates the extending class  and returns a new instance */
-  def create(matrix: CheckpointedDrm[Int], rowIDs: BiDictionary[String,Int], columnIDs: BiDictionary[String,Int]):
+  def create(matrix: CheckpointedDrm[Int], rowIDs: BiDictionary, columnIDs: BiDictionary):
     IndexedDataset
 
   /**
