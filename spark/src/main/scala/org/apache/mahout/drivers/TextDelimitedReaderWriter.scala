@@ -77,7 +77,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
       val columnIDs = interactions.map { case (_, columnID) => columnID }.distinct().collect()
 
-      // create BiMaps for bi-directional lookup of ID by either Mahout ID or external ID
+      // create BiDictionary(s) for bi-directional lookup of ID by either Mahout ID or external ID
       // broadcast them for access in distributed processes, so they are not recalculated in every task.
       val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
@@ -226,7 +226,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         }
         if(newIDs.isEmpty) dictionary else BiDictionary.append(newIDs, dictionary)
       case None =>
-        BiDictionary.stringInt(keys.toSet)
+        BiDictionary.create(keys.toSet)
     }
   }
 }

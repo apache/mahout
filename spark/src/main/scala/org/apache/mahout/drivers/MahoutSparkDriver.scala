@@ -74,11 +74,6 @@ abstract class MahoutSparkDriver extends MahoutDriver {
    */
   override protected def start() : Unit = {
     if (!_useExistingContext) {
-      /* hack around SPARK-6069 Spark 1.2.1 deserialization of HashBiMap throwing ClassNotFound--doesn't seem to work
-      sparkConf.set("spark.files.userClassPathFirst", "true")
-      sparkConf.set("spark.executor.userClassPathFirst", "true")
-      */
-
       sparkConf.set("spark.kryo.referenceTracking", "false")
         .set("spark.kryoserializer.buffer.mb", "200")// this is default for Mahout optimizer, change it with -D option
 

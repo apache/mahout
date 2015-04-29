@@ -90,6 +90,7 @@ object BiDictionary {
    * Append new keys to an existing BiDictionary and return the result. The values will start
    * at m.size and increase to create a continuous non-zero value set from 0 to size - 1
    * @param keys new keys to append
+   * @param biDi append keys to this BiDictionary and create new values buy incremeting from the highest Int value
    * @return a BiDictionary with added mappings
    */
   def append(keys: Set[String], biDi: BiDictionary): BiDictionary = {
@@ -101,6 +102,7 @@ object BiDictionary {
    * Append new keys to an existing BiDictionary and return the result. The values will start
    * at m.size and increase to create a continuous non-zero value set from 0 to size - 1
    * @param keys new keys to append
+   * @param biDi append keys to this BiDictionary and create new values buy incremeting from the highest Int value
    * @return a BiDictionary with added mappings
    */
   def append(keys: List[String], biDi: BiDictionary): BiDictionary = {
@@ -112,17 +114,8 @@ object BiDictionary {
    * Create a new BiDictionary with the keys supplied and values ranging from 0 to size -1
    * @param keys a set of String
    */
-  def stringInt(keys: Set[String]): BiDictionary = {
+  def create(keys: Set[String]): BiDictionary = {
     val hm = HashMap(keys.toSeq.view.zipWithIndex: _*)
-    new BiDictionary(hm)
-  }
-
-  /**
-   * Create a new empty BiDictionary, for Guava HashBiMap style instantiation.
-   * todo: not really needed but requires consuming code to be changed--later.
-   */
-  def create(): BiDictionary = {
-    val hm = HashMap[String, Int]()
     new BiDictionary(hm)
   }
 
