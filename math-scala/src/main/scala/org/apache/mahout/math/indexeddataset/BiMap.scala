@@ -33,6 +33,7 @@ class BiMap[K, V] (
   ) extends Serializable {
 
   // NOTE: make inverse's inverse point back to current BiDictionary
+  // if this is serialized we allow inverse to be discarded and recalculated when deserialized
   @transient lazy val inverse: BiMap[V, K] = i.getOrElse {
     val rev = m.map(_.swap)
     require((rev.size == m.size),
@@ -40,7 +41,7 @@ class BiMap[K, V] (
     new BiMap(rev, Some(this))
   }
 
-  val size_ = inverse.size
+  val size_ = inverse.size // forces inverse to be calculated when deserialized
 
   def get(k: K): Option[V] = m.get(k)
 
