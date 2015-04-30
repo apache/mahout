@@ -93,18 +93,6 @@ object BiDictionary {
    * @param biDi append keys to this BiDictionary and create new values buy incremeting from the highest Int value
    * @return a BiDictionary with added mappings
    */
-/*  def append(keys: Set[String], biDi: BiDictionary): BiDictionary = {
-    val hm = HashMap(keys.toSeq.view.zip (Stream from biDi.size): _*)
-    new BiDictionary(biDi.m ++ hm)
-  }
-*/
-  /**
-   * Append new keys to an existing BiDictionary and return the result. The values will start
-   * at m.size and increase to create a continuous non-zero value set from 0 to size - 1
-   * @param keys new keys to append
-   * @param biDi append keys to this BiDictionary and create new values buy incremeting from the highest Int value
-   * @return a BiDictionary with added mappings
-   */
   def append(keys: Seq[String], biDi: BiDictionary): BiDictionary = {
     val hm = HashMap(keys.view.zip (Stream from biDi.size): _*)
     new BiDictionary(biDi.m ++ hm)
