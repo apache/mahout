@@ -41,7 +41,9 @@ class BiMap[K, V] (
     new BiMap(rev, Some(this))
   }
 
-  val size_ = inverse.size // forces inverse to be calculated when deserialized
+  // forces inverse to be calculated in the constructor when deserialized
+  // not when first used
+  @transient val size_ = inverse.size
 
   def get(k: K): Option[V] = m.get(k)
 
