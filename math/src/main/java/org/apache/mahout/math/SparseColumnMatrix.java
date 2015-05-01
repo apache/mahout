@@ -184,9 +184,9 @@ public class SparseColumnMatrix extends AbstractMatrix {
     StringBuilder s = new StringBuilder("{\n");
     for (MatrixSlice next : this.transpose()) {
       if (row < maxRowsToDisplay) {
-        s.append("  ")
+        s.append(" ")
           .append(next.index())
-          .append("  =>\t")
+          .append(" =>\t")
           .append(new VectorView(next.vector(), 0, colsToDisplay))
           .append('\n');
         row++;

@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>0.10.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -156,11 +156,6 @@
     </dependency>
 
     <!--  3rd-party -->
-    <!-- pat removed to test new BiDictionary so we can remove guava dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>14.0.1</version>
-    </dependency-->
 
     <!-- scala stuff -->
     <dependency>
