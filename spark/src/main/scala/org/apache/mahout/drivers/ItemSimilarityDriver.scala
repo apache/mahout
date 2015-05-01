@@ -162,7 +162,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
       // be supported (and are at least on Spark) or the row cardinality adjustment will not work.
       val datasetB = if (!inFiles2.isEmpty) {
         // get cross-cooccurrence interactions from separate files
-        val datasetB = indexedDatasetDFSReadElements(inFiles2, readSchema2, existingRowIDs = datasetA.rowIDs)
+        val datasetB = indexedDatasetDFSReadElements(inFiles2, readSchema2, existingRowIDs = Some(datasetA.rowIDs))
 
         datasetB
 
@@ -170,7 +170,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
         && parser.opts("filter2").asInstanceOf[String] != null) {
 
         // get cross-cooccurrences interactions by using two filters on a single set of files
-        val datasetB = indexedDatasetDFSReadElements(inFiles, readSchema2, existingRowIDs = datasetA.rowIDs)
+        val datasetB = indexedDatasetDFSReadElements(inFiles, readSchema2, existingRowIDs = Some(datasetA.rowIDs))
 
         datasetB
 
@@ -179,7 +179,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
       }
       if (datasetB != null.asInstanceOf[IndexedDataset]) { // do AtB calc
       // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
-      val rowCardinality = datasetB.rowIDs.size() // the authoritative row cardinality
+      val rowCardinality = datasetB.rowIDs.size // the authoritative row cardinality
 
         // todo: how expensive is nrow? We could make assumptions about .rowIds that don't rely on
         // its calculation

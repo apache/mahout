@@ -17,11 +17,10 @@
 
 package org.apache.mahout.sparkbindings.indexeddataset
 
-import com.google.common.collect.BiMap
 import org.apache.mahout.drivers.TextDelimitedIndexedDatasetWriter
 import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
 import org.apache.mahout.math.indexeddataset
-import org.apache.mahout.math.indexeddataset.{DefaultIndexedDatasetWriteSchema, Reader, Schema, IndexedDataset}
+import org.apache.mahout.math.indexeddataset._
 
 /**
  * Spark implementation of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] providing the Spark specific
@@ -30,8 +29,8 @@ import org.apache.mahout.math.indexeddataset.{DefaultIndexedDatasetWriteSchema, 
  * @param rowIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
  * @param columnIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
  */
-class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[String,Int],
-    val columnIDs: BiMap[String,Int])
+class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictionary,
+    val columnIDs: BiDictionary)
   extends IndexedDataset {
 
   /** Secondary constructor enabling immutability */
@@ -43,7 +42,8 @@ class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[St
    * Factory method used to create this extending class when the interface of
    * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] is all that is known.
    */
-  override def create(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]):
+  override def create(matrix: CheckpointedDrm[Int], rowIDs: BiDictionary,
+      columnIDs: BiDictionary):
     IndexedDatasetSpark = {
     new IndexedDatasetSpark(matrix, rowIDs, columnIDs)
   }

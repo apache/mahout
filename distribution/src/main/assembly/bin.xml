@@ -194,11 +194,11 @@
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../math-scala/target/site/scaladocs</directory>
-      <outputDirectory>docs/mahout-examples</outputDirectory>
+      <outputDirectory>docs/mahout-math-scala</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../spark/target/site/scaladocs</directory>
-      <outputDirectory>docs/mahout-examples</outputDirectory>
+      <outputDirectory>docs/mahout-spark</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../spark-shell/target/site/scaladocs</directory>
