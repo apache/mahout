@@ -86,4 +86,5 @@ class FunctionalMatrixView extends AbstractMatrix {
   public Vector viewColumn(int column) {
     return new MatrixVectorView(this, 0, column, 1, 0, denseLike);
   }
+
 }

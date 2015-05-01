@@ -57,7 +57,7 @@ alg=${algorithm[$choice-1]}
 # Spark specific check and work 
 if [ "x$alg" == "xnaivebayes-Spark" -o "x$alg" == "xcnaivebayes-Spark" ]; then
   if [ "$MASTER" == "" ] ; then
-    echo "Plese set your MASTER env variable to point to your Spark Master URL. exiting..."
+    echo "Please set your MASTER env variable to point to your Spark Master URL. exiting..."
     exit 1
   fi
   if [ "$MAHOUT_LOCAL" != "" ] ; then

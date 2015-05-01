@@ -17,8 +17,8 @@
 
 package org.apache.mahout.math.indexeddataset
 
-import com.google.common.collect.{BiMap, HashBiMap}
 import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.indexeddataset
 
 /**
  * Reader trait is abstract in the sense that the elementReader and rowReader functions must be supplied by an
@@ -35,7 +35,7 @@ trait Reader[T]{
    * @param mc a [[org.apache.mahout.math.drm.DistributedContext]] to read from
    * @param readSchema map of parameters controlling formating and how the read is executed
    * @param source list of comma delimited files to read from
-   * @param existingRowIDs [[com.google.common.collect.BiMap]] containing row IDs that have already
+   * @param existingRowIDs [[indexeddataset.BiDictionary]] containing row IDs that have already
    *                       been applied to this collection--used to synchronize row IDs between several
    *                       collections
    * @return a new collection of type T
@@ -44,14 +44,14 @@ trait Reader[T]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiMap[String, Int]): T
+      existingRowIDs: Option[BiDictionary] = None): T
 
   /**
    * Override in extending trait to supply T and perform a parallel read of collection rows
    * @param mc a [[org.apache.mahout.math.drm.DistributedContext]] to read from
    * @param readSchema map of parameters controlling formating and how the read is executed
    * @param source list of comma delimited files to read from
-   * @param existingRowIDs [[com.google.common.collect.BiMap]] containing row IDs that have already
+   * @param existingRowIDs [[indexeddataset.BiDictionary]] containing row IDs that have already
    *                       been applied to this collection--used to synchronize row IDs between several
    *                       collections
    * @return a new collection of type T
@@ -60,30 +60,30 @@ trait Reader[T]{
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
-      existingRowIDs: BiMap[String, Int]): T
+      existingRowIDs: Option[BiDictionary] = None): T
 
   /**
    * Public method called to perform the element-wise read. Usually no need to override
    * @param source comma delimited URIs to read from
-   * @param existingRowIDs a [[com.google.common.collect.BiMap]] containing previously used id mappings--used
+   * @param existingRowIDs a [[indexeddataset.BiDictionary]] containing previously used id mappings--used
    *                       to synchronize all row ids is several collections
    * @return a new collection of type T
    */
   def readElementsFrom(
       source: String,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create()): T =
+      existingRowIDs: Option[BiDictionary] = None): T =
     elementReader(mc, readSchema, source, existingRowIDs)
 
   /**
    * Public method called to perform the row-wise read. Usually no need to override.
    * @param source comma delimited URIs to read from
-   * @param existingRowIDs a [[com.google.common.collect.BiMap]] containing previously used id mappings--used
+   * @param existingRowIDs a [[indexeddataset.BiDictionary]] containing previously used id mappings--used
    *                       to synchronize all row ids is several collections
    * @return  a new collection of type T
    */
   def readRowsFrom(
       source: String,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create()): T =
+      existingRowIDs: Option[BiDictionary] = None): T =
     rowReader(mc, readSchema, source, existingRowIDs)
 }
 

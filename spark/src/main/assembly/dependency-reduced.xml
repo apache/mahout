@@ -36,7 +36,6 @@
       <outputDirectory>/</outputDirectory>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <includes>
-        <include>com.google.guava:guava</include>
         <include>com.github.scopt</include>
         <include>com.tdunning:t-digest</include>
         <include>org.apache.commons:commons-math3</include>
