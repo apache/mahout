@@ -35,27 +35,26 @@
 
   <packaging>jar</packaging>
 
-  <build>
-    <plugins>
 
+
+  <build>
+
+    <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-          <archive>
-            <manifest>
-              <mainClass>water.H2O</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
         <executions>
           <execution>
+            <id>h2o-dependency-reduced</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/h2o-dependency-reduced.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
       </plugin>
