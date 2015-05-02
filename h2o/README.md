@@ -28,7 +28,7 @@ H2O is fundamentally a peer-to-peer system. H2O nodes join together to form a cl
 
 The Mahout H2O integration is fit into this model by having N-1 "worker" nodes and one driver node, all belonging to the same cloud name. The default cloud name used for the integration is "mah2out". Clouds have to be spun up per task/job.
 
-**WARNING**: Some Linux systems have default firewall rules which might block traffic required for the following tests. In order to successfully run the tests you might need to temporarily turn off firewall rules with `sh# iptables -F`
+**WARNING**: Some Linux systems have default firewall rules which might block traffic required for the following tests. In order to successfully run the tests you might need to temporarily turn off firewall rules with `sh# cdc
 
 First bring up worker nodes:
 

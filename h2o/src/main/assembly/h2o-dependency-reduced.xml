@@ -37,6 +37,8 @@
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <includes>
         <include>ai.h2o:h2o-core</include>
+        <include>org.scala-lang:scala-library</include>
+        <include>org.scala-lang:scala-reflect</include>
       </includes>
     </dependencySet>
   </dependencySets>
