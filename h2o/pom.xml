@@ -123,11 +123,6 @@
   </build>
 
   <dependencies>
-    <dependency>
-    <groupId>org.scala-lang</groupId>
-    <artifactId>scala-reflect</artifactId>
-    <version>${scala.version}</version>
-  </dependency>
   <dependency>
     <groupId>org.scala-lang</groupId>
     <artifactId>scala-library</artifactId>
