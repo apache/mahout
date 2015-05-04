@@ -36,11 +36,8 @@
       <outputDirectory>/</outputDirectory>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <includes>
-<<<<<<< HEAD
         <!-- guava only included to get Preconditions in mahout-math and mahout-hdfs -->
         <include>com.google.guava:guava</include>
-=======
->>>>>>> 5b7bc894af2ed8f67ae759a83b502d2b0d62f332
         <include>com.github.scopt</include>
         <include>com.tdunning:t-digest</include>
         <include>org.apache.commons:commons-math3</include>
