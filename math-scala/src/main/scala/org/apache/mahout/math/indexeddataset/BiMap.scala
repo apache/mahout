@@ -19,31 +19,32 @@ package org.apache.mahout.math.indexeddataset
 import scala.collection.immutable.HashMap
 
 /**
- * Immutable Bi-directional dictionary. Expected use is to create an Int or Long value that maps to and from a
- * String key though key and value types are not restricted. Helper functions create sequential Int from
- * 0 to # of Stings - 1. A Hashmap is created for forward and another for inverse mapping. To add more String
- * keys will extend the range of the Int values and append the new (key -> value) mappings.
+ * Immutable Bi-directional Map.
  * @param m Map to use for forward reference
- * @param i optional reverse map of value to key, will create one in the constructor if none is provided
+ * @param i optional reverse map of value to key, will create one in lazily if none is provided
  *          and is required to have no duplicate reverse mappings.
  */
 class BiMap[K, V] (
     private val m: Map[K, V],
-    private val i: Option[BiMap[V, K]] = None
+    // if this is serialized we allow inverse to be discarded and recalculated when deserialized
+    @transient private var i: Option[BiMap[V, K]] = None
   ) extends Serializable {
 
-  // NOTE: make inverse's inverse point back to current BiDictionary
+  // NOTE: make inverse's inverse point back to current BiMap
   // if this is serialized we allow inverse to be discarded and recalculated when deserialized
-  @transient lazy val inverse: BiMap[V, K] = i.getOrElse {
-    val rev = m.map(_.swap)
-    require((rev.size == m.size),
-      s"Failed to create reversed map. Cannot have duplicated values.")
-    new BiMap(rev, Some(this))
+  @transient lazy val inverse: BiMap[V, K] = {
+    if( i == null.asInstanceOf[Option[BiMap[V, K]]] )
+      i = None
+    i.getOrElse {
+      val rev = m.map(_.swap)
+      require((rev.size == m.size), "Failed to create reversed map. Cannot have duplicated values.")
+      new BiMap(rev, Some(this))
+    }
   }
 
   // forces inverse to be calculated in the constructor when deserialized
   // not when first used
-  @transient val size_ = inverse.size
+  //@transient val size_ = inverse.size
 
   def get(k: K): Option[V] = m.get(k)
 
@@ -82,7 +83,7 @@ object BiMap {
 /** BiDictionary is a specialized BiMap that has non-negative Ints as values for use as DRM keys */
 class BiDictionary (
     private val m: Map[String, Int],
-    private val i: Option[BiMap[Int, String]] = None )
+    @transient private val i: Option[BiMap[Int, String]] = None )
   extends BiMap[String, Int](m, i) {
 }
 

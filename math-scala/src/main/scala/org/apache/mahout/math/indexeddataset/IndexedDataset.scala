@@ -18,11 +18,9 @@
 package org.apache.mahout.math.indexeddataset
 
 import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
-import org.apache.mahout.math.indexeddataset
-import org.apache.mahout.math.indexeddataset.BiDictionary
 
 /**
- * Wrap an  [[org.apache.mahout.math.drm.DrmLike]] with bidirectional ID mappings [[indexeddataset.BiDictionary]]
+ * Wrap an  [[org.apache.mahout.math.drm.DrmLike]] with bidirectional ID mappings [[org.apache.mahout.math.indexeddataset.BiDictionary]]
  * so a user specified labels/IDs can be stored and mapped to and from the Mahout Int ID used internal to Mahout
  * core code.
  * @todo Often no need for both or perhaps either dictionary, so save resources by allowing to be not created
