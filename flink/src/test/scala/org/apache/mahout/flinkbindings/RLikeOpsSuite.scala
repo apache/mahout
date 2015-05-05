@@ -33,47 +33,6 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuit {
     assert(b == dvec(8, 11, 14))
   }
 
-  test("Power interation 1000 x 1000 matrix") {
-    val dim = 1000
-
-    // we want a symmetric matrix so we can have real eigenvalues
-    val inCoreA = symmtericMatrix(dim, max = 2000)
-
-    val A = drmParallelize(m = inCoreA, numPartitions = 2)
-
-    var x: Vector = 1 to dim map (_ => 1.0 / Math.sqrt(dim))
-    var converged = false
-
-    var iteration = 1
-
-    while (!converged) {
-      LOGGER.info(s"iteration #$iteration...")
-
-      val Ax = A %*% x
-      var x_new = Ax.collect(::, 0)
-      x_new = x_new / x_new.norm(2)
-
-      val diff = (x_new - x).norm(2)
-      LOGGER.info(s"difference norm is $diff")
-
-      converged = diff < 1e-6
-      iteration = iteration + 1
-      x = x_new
-    }
-
-    LOGGER.info("converged")
-    // TODO: add test that it's the 1st PC
-  }
-
-  def symmtericMatrix(dim: Int, max: Int, seed: Int = 0x31337) = {
-    Matrices.functionalMatrixView(dim, dim, new IntIntFunction {
-      def apply(i: Int, j: Int): Double = {
-        val arr = Array(i + j, i * j, i + j + 31, i / (j + 1) + j / (i + 1))
-        Math.abs(MurmurHash3.arrayHash(arr, seed) % max)
-      }
-    })
-  }
-
   test("A.t") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
@@ -92,5 +51,54 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuit {
     val expected = inCoreA.t %*% x 
     assert((res - expected).norm(2) < 1e-6)
   }
-  
+
+  test("A.t %*% B") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val inCoreB = dense((1, 2), (3, 4), (11, 4))
+
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
+
+    val res = A.t %*% B
+
+    val expected = inCoreA.t %*% inCoreB
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
+  test("A %*% B.t") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val inCoreB = dense((1, 2), (3, 4), (11, 4))
+
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
+
+    val res = A %*% B.t
+
+    val expected = inCoreA %*% inCoreB.t
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
+  test("A.t %*% A") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val res = A.t %*% A
+
+    val expected = inCoreA.t %*% inCoreA
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
+  test("A %*% B") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4)).t
+    val inCoreB = dense((1, 2), (3, 4), (11, 4))
+
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
+
+    val res = A %*% B
+
+    val expected = inCoreA %*% inCoreB
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
 }

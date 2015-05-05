@@ -33,6 +33,10 @@ import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.drm.logical.OpAt
 import org.apache.mahout.math.drm.logical.OpAtx
 import org.apache.mahout.math.drm.logical.OpAtx
+import org.apache.mahout.math.drm.logical.OpAtB
+import org.apache.mahout.math.drm.logical.OpABt
+import org.apache.mahout.math.drm.logical.OpAtB
+import org.apache.mahout.math.drm.logical.OpAtA
 
 object FlinkEngine extends DistributedEngine {
 
@@ -56,14 +60,40 @@ object FlinkEngine extends DistributedEngine {
     case op @ OpAx(a, x) => FlinkOpAx.blockifiedBroadcastAx(op, flinkTranslate(a)(op.classTagA))
     case op @ OpAt(a) => FlinkOpAt.sparseTrick(op, flinkTranslate(a)(op.classTagA))
     case op @ OpAtx(a, x) => {
+      // express Atx as (A.t) %*% x
+      // TODO: create specific implementation of Atx
       val opAt = OpAt(a)
       val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a)(op.classTagA))
       val atCast = new CheckpointedFlinkDrm(at.deblockify.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
       val opAx = OpAx(atCast, x)
       FlinkOpAx.blockifiedBroadcastAx(opAx, flinkTranslate(atCast)(op.classTagA))
     }
+    case op @ OpAtB(a, b) => FlinkOpAtB.notZippable(op, flinkTranslate(a)(op.classTagA), 
+        flinkTranslate(b)(op.classTagA))
+    case op @ OpABt(a, b) => {
+      // express ABt via AtB: let C=At and D=Bt, and calculate CtD
+      // TODO: create specific implementation of ABt
+      val opAt = OpAt(a.asInstanceOf[DrmLike[Int]]) // TODO: casts!
+      val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a.asInstanceOf[DrmLike[Int]]))
+      val c = new CheckpointedFlinkDrm(at.deblockify.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
+
+      val opBt = OpAt(b.asInstanceOf[DrmLike[Int]]) // TODO: casts!
+      val bt = FlinkOpAt.sparseTrick(opBt, flinkTranslate(b.asInstanceOf[DrmLike[Int]]))
+      val d = new CheckpointedFlinkDrm(bt.deblockify.ds, _nrow=opBt.nrow, _ncol=opBt.ncol)
+
+      FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d))
+                .asInstanceOf[FlinkDrm[K]]
+    }
+    case op @ OpAtA(a) => {
+      // express AtA via AtB
+      // TODO: create specific implementation of AtA
+      val aInt = a.asInstanceOf[DrmLike[Int]] // TODO: casts!
+      val opAtB = OpAtB(aInt, aInt)
+      val aTranslated = flinkTranslate(aInt)
+      FlinkOpAtB.notZippable(opAtB, aTranslated, aTranslated)
+    }
     case cp: CheckpointedFlinkDrm[K] => new RowsFlinkDrm(cp.ds, cp.ncol)
-    case _ => ???
+    case _ => throw new NotImplementedError(s"operator $oper is not implemented yet")
   }
   
 

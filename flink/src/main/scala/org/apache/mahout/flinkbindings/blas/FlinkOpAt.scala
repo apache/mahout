@@ -20,6 +20,7 @@ import org.apache.flink.api.java.functions.KeySelector
 import java.util.ArrayList
 import org.apache.flink.shaded.com.google.common.collect.Lists
 
+
 /**
  * Taken from
  */
@@ -40,7 +41,7 @@ object FlinkOpAt {
             val columnVector: Vector = new SequentialAccessSparseVector(ncol)
 
             keys.zipWithIndex.foreach { case (key, idx) =>
-                columnVector(key) = block(idx, columnIdx)
+              columnVector(key) = block(idx, columnIdx)
             }
 
             out.collect(new Tuple2(columnIdx, columnVector))
@@ -49,12 +50,10 @@ object FlinkOpAt {
       }
     })
 
-    val regrouped = sparseParts.groupBy(new KeySelector[Tuple2[Int, Vector], Integer] {
-      def getKey(tuple: Tuple2[Int, Vector]): Integer = tuple._1
-    })
+    val regrouped = sparseParts.groupBy(tuple_1[Vector])
 
-    val sparseTotal = regrouped.reduceGroup(new GroupReduceFunction[Tuple2[Int, Vector], DrmTuple[Int]] {
-      def reduce(values: Iterable[DrmTuple[Int]], out: Collector[DrmTuple[Int]]): Unit = {
+    val sparseTotal = regrouped.reduceGroup(new GroupReduceFunction[(Int, Vector), DrmTuple[Int]] {
+      def reduce(values: Iterable[(Int, Vector)], out: Collector[DrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala
         val (idx, _) = it.head
         val vector = it map { case (idx, vec) => vec } reduce (_ + _)
