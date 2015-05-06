@@ -230,10 +230,6 @@ then
     fi
   fi
 
-  # add release dependencies to CLASSPATH
-  for f in $MAHOUT_HOME/lib/*.jar; do
-    CLASSPATH=${CLASSPATH}:$f;
-  done
 else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/hdfs/target/classes

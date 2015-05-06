@@ -29,18 +29,6 @@
     <fileSet>
       <directory>${project.basedir}/../examples/target/dependency</directory>
       <includes>
-        <include>*.jar</include>
-      </includes>
-      <excludes>
-        <exclude>mahout-*</exclude>
-        <exclude>hadoop-*</exclude>
-		<exclude>junit-*</exclude>
-      </excludes>
-      <outputDirectory>lib</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>${project.basedir}/../examples/target/dependency</directory>
-      <includes>
         <include>mahout-collections*.jar</include>
       </includes>
       <outputDirectory>lib</outputDirectory>
