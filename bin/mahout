@@ -234,13 +234,6 @@ else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes
 fi
 
-# add development dependencies to CLASSPATH
-if [ "$SPARK" != "1" ]; then
-  for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
-    CLASSPATH=${CLASSPATH}:$f;
-  done
-fi
-
 
 # cygwin path translation
 if $cygwin; then
