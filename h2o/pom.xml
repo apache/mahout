@@ -45,14 +45,14 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>h2o-dependency-reduced</id>
+            <id>dependency-reduced</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>src/main/assembly/h2o-dependency-reduced.xml</descriptor>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>

@@ -29,9 +29,7 @@ trait DistributedH2OSuite extends DistributedMahoutSuite with LoggerConfiguratio
 
   override protected def beforeEach() {
     super.beforeEach()
-// replace after MAHOUT-1704
-// mahoutCtx = mahoutH2OContext("mah2out" + System.currentTimeMillis())
-    mahoutCtx = mahoutH2OContext("mah2out" )
+ mahoutCtx = mahoutH2OContext("mah2out" + System.currentTimeMillis())
   }
 
   override protected def afterEach() {
