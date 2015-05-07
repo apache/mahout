@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.10.1 - unreleased
 
+  MAHOUT-1704: Pare down dependency jar for h2o (apalumbo)
+
   MAHOUT-1697: Fixed paths to which math-scala and spark modules docs get packaged under in bin distribution archive (sslavic)
 
   MAHOUT-1696: QRDecomposition.solve(...) can return incorrect Matrix types (apalumbo)
