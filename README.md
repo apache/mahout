@@ -1,8 +1,8 @@
 Welcome to Apache Mahout!
 ===========
-The Apache Mahout™ project's goal is to build an environment for quickly creating scalable performant machine learning applications using Scala + Spark (H2O in progress) to mature Hadoop's MapReduce algorithms.
+The Apache Mahout™ project's goal is to build an environment for quickly creating scalable performant machine learning applications.
 
-For additional information about Mahout, checkout the [Mahout Home Page](http://mahout.apache.org/)
+For additional information about Mahout, visit the [Mahout Home Page](http://mahout.apache.org/)
 ####Installing Mahout
 To compile from source:
 * `mvn -DskipTests clean install`
@@ -19,11 +19,11 @@ To use Maven:
 ```
 
 ####Examples
-For examples of how to properly use Mahout, see the examples directory located in `examples/bin`
+For examples of how to use Mahout, see the examples directory located in `examples/bin`
 
 
-####For information on how to contribute see:
-  https://mahout.apache.org/developers/how-to-contribute.html
+Click [here](https://mahout.apache.org/developers/how-to-contribute.html) for information on how to contribute see
+  
 
-Legal
- Please see the `NOTICE.txt` included in this directory for more information.
+####Legal
+Please see the `NOTICE.txt` included in this directory for more information.
