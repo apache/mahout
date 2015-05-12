@@ -13,11 +13,13 @@ import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.drm.logical.OpAt
 import org.apache.mahout.math.drm.logical.OpAtB
+import org.apache.mahout.math.drm.logical.OpAewScalar
+import org.apache.mahout.math.drm.logical.OpAewB
 
 @RunWith(classOf[JUnitRunner])
 class LATestSuit extends FunSuite with DistributedFlinkSuit {
 
-  test("Ax blockified") {
+  ignore("Ax blockified") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
     val x: Vector = (0, 1, 2)
@@ -31,7 +33,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert(b == dvec(8, 11, 14))
   }
 
-  test("At sparseTrick") {
+  ignore("At sparseTrick") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
 
@@ -43,7 +45,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert((output - inCoreA.t).norm < 1e-6)
   }
 
-  test("AtB notZippable") {
+  ignore("AtB notZippable") {
     val inCoreAt = dense((1, 2), (2, 3), (3, 4))
 
     val At = drmParallelize(m = inCoreAt, numPartitions = 2)
@@ -60,6 +62,32 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     val expected = inCoreAt.t %*% inCoreB
     assert((output - expected).norm < 1e-6)
   }
-  
 
+  ignore("AewScalar opScalarNoSideEffect") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val scalar = 5.0
+
+    val op = new OpAewScalar(A, scalar, "*") 
+    val res = FlinkOpAewScalar.opScalarNoSideEffect(op, A, scalar)
+
+    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, _ncol=inCoreA.ncol)
+    val output = drm.collect
+
+    val expected = inCoreA  * scalar
+    assert((output - expected).norm < 1e-6)
+  }
+
+  test("AewB rowWiseJoinNoSideEffect") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val op = new OpAewB(A, A, "*")
+    val res = FlinkOpAewB.rowWiseJoinNoSideEffect(op, A, A)
+
+    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, _ncol=inCoreA.ncol)
+    val output = drm.collect
+
+    assert((output - (inCoreA  * inCoreA)).norm < 1e-6)
+  }
 }

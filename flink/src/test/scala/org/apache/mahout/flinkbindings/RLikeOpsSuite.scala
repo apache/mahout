@@ -101,4 +101,84 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuit {
     assert((res.collect - expected).norm < 1e-6)
   }
 
+  test("A * scalar") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val res = A * 5
+    assert((res.collect - inCoreA * 5).norm < 1e-6)
+  }
+
+  test("A / scalar") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4)).t
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val res = A / 5
+    assert((res.collect - (inCoreA / 5)).norm < 1e-6)
+  }
+
+  test("A + scalar") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val res = A + 5
+    assert((res.collect - (inCoreA + 5)).norm < 1e-6)
+  }
+
+  test("A - scalar") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val res = A - 5
+    assert((res.collect - (inCoreA - 5)).norm < 1e-6)
+  }
+
+  test("A * B") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val inCoreB = dense((1, 2), (3, 4), (11, 4))
+
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
+
+    val res = A * B
+    val expected = inCoreA * inCoreB
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
+  test("A / B") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val inCoreB = dense((1, 2), (3, 4), (11, 4))
+
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
+
+    val res = A / B
+    val expected = inCoreA / inCoreB
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
+  test("A + B") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val inCoreB = dense((1, 2), (3, 4), (11, 4))
+
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
+
+    val res = A + B
+    val expected = inCoreA + inCoreB
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
+  test("A - B") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val inCoreB = dense((1, 2), (3, 4), (11, 4))
+
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
+
+    val res = A - B
+    val expected = inCoreA - inCoreB
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
 }

@@ -37,6 +37,8 @@ import org.apache.mahout.math.drm.logical.OpAtB
 import org.apache.mahout.math.drm.logical.OpABt
 import org.apache.mahout.math.drm.logical.OpAtB
 import org.apache.mahout.math.drm.logical.OpAtA
+import org.apache.mahout.math.drm.logical.OpAewScalar
+import org.apache.mahout.math.drm.logical.OpAewB
 
 object FlinkEngine extends DistributedEngine {
 
@@ -92,6 +94,10 @@ object FlinkEngine extends DistributedEngine {
       val aTranslated = flinkTranslate(aInt)
       FlinkOpAtB.notZippable(opAtB, aTranslated, aTranslated)
     }
+    case op @ OpAewScalar(a, scalar, _) => 
+      FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a)(op.classTagA), scalar)
+    case op @ OpAewB(a, b, _) =>
+      FlinkOpAewB.rowWiseJoinNoSideEffect(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
     case cp: CheckpointedFlinkDrm[K] => new RowsFlinkDrm(cp.ds, cp.ncol)
     case _ => throw new NotImplementedError(s"operator $oper is not implemented yet")
   }
