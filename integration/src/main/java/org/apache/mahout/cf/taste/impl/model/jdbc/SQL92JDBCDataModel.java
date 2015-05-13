@@ -222,6 +222,7 @@ public class SQL92JDBCDataModel extends AbstractJDBCDataModel {
 
         log.debug("Executing SQL update: {}", updatePreferenceSQL);
         stmt2.executeUpdate();
+        conn.commit();
 
       } else {
         // we'll insert the record
@@ -232,6 +233,7 @@ public class SQL92JDBCDataModel extends AbstractJDBCDataModel {
 
         log.debug("Executing SQL update: {}", setPreferenceSQL);
         stmt3.executeUpdate();
+        conn.commit();
       }
     } catch (SQLException sqle) {
       log.warn("Exception while setting preference", sqle);

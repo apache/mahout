@@ -615,6 +615,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
       log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
+      conn.commit();
 
     } catch (SQLException sqle) {
       log.warn("Exception while setting preference", sqle);
@@ -640,6 +641,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
       log.debug("Executing SQL update: {}", removePreferenceSQL);
       stmt.executeUpdate();
+      conn.commit();
 
     } catch (SQLException sqle) {
       log.warn("Exception while removing preference", sqle);

@@ -110,6 +110,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       
       log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
+        conn.commit();
       
     } catch (SQLException sqle) {
       log.warn("Exception while setting preference", sqle);

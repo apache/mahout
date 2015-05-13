@@ -133,6 +133,7 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends SQL92BooleanPrefJDBCData
       setLongParameter(stmt, 2, itemID);
       log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
+      conn.commit();
     } catch (SQLException sqle) {
       if (!POSTGRESQL_DUPLICATE_KEY_STATE.equals(sqle.getSQLState())) {
         log.warn("Exception while setting preference", sqle);

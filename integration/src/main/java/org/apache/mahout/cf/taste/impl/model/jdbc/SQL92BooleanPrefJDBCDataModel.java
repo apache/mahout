@@ -206,6 +206,7 @@ public class SQL92BooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
 
         log.debug("Executing SQL update: {}", setPreferenceSQL);
         stmt2.executeUpdate();
+        conn.commit();
       }
     } catch (SQLException sqle) {
       log.warn("Exception while setting preference", sqle);

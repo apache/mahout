@@ -143,6 +143,7 @@ public class PostgreSQLJDBCDataModel extends SQL92JDBCDataModel {
       log.debug("Executing SQL update: {}", setPreferenceSQL);
       try {
         stmt1.executeUpdate();
+        conn.commit();
       } catch (SQLException sqle) {
         if (!POSTGRESQL_DUPLICATE_KEY_STATE.equals(sqle.getSQLState())) {
           throw sqle;
@@ -158,6 +159,7 @@ public class PostgreSQLJDBCDataModel extends SQL92JDBCDataModel {
 
       log.debug("Executing SQL update: {}", getUpdatePreferenceSQL());
       stmt2.executeUpdate();
+      conn.commit();
 
     } catch (SQLException sqle) {
       log.warn("Exception while setting preference", sqle);
