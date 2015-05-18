@@ -21,12 +21,12 @@ import scala.collection.immutable.HashMap
 /**
  * Immutable Bi-directional Map.
  * @param m Map to use for forward reference
- * @param i optional reverse map of value to key, will create one in lazily if none is provided
+ * @param i optional reverse map of value to key, will create one lazily if none is provided
  *          and is required to have no duplicate reverse mappings.
  */
 class BiMap[K, V] (
     private val m: Map[K, V],
-    // if this is serialized we allow inverse to be discarded and recalculated when deserialized
+    // if this is serialized we allow i to be discarded and recalculated when deserialized
     @transient private var i: Option[BiMap[V, K]] = None
   ) extends Serializable {
 
@@ -44,7 +44,7 @@ class BiMap[K, V] (
 
   // forces inverse to be calculated in the constructor when deserialized
   // not when first used
-  //@transient val size_ = inverse.size
+  @transient val size_ = inverse.size
 
   def get(k: K): Option[V] = m.get(k)
 

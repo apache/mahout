@@ -150,7 +150,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
       interactions.cache()
       // forces into memory so only for debugging
-      // interactions.collect()
+      interactions.collect()
 
       // create separate collections of rowID and columnID tokens
       val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
@@ -260,13 +260,12 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
         throw new IllegalArgumentException
       })
 
-      val matrix = indexedDataset.matrix
+      val matrix = indexedDataset.matrix.checkpoint()
       val rowIDDictionary = indexedDataset.rowIDs
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
 
       val columnIDDictionary = indexedDataset.columnIDs
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
-
 
       matrix.rdd.map { case (rowID, itemVector) =>
 

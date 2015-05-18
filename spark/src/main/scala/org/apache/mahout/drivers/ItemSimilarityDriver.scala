@@ -178,8 +178,8 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
         null.asInstanceOf[IndexedDatasetSpark]
       }
       if (datasetB != null.asInstanceOf[IndexedDataset]) { // do AtB calc
-      // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
-      val rowCardinality = datasetB.rowIDs.size // the authoritative row cardinality
+        // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
+        val rowCardinality = datasetB.rowIDs.size // the authoritative row cardinality
 
         // todo: how expensive is nrow? We could make assumptions about .rowIds that don't rely on
         // its calculation
