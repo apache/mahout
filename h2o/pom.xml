@@ -35,27 +35,26 @@
 
   <packaging>jar</packaging>
 
-  <build>
-    <plugins>
 
+
+  <build>
+
+    <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-          <archive>
-            <manifest>
-              <mainClass>water.H2O</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
         <executions>
           <execution>
+            <id>dependency-reduced</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -124,6 +123,11 @@
   </build>
 
   <dependencies>
+  <dependency>
+    <groupId>org.scala-lang</groupId>
+    <artifactId>scala-library</artifactId>
+    <version>${scala.version}</version>
+  </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
