@@ -19,7 +19,7 @@ package org.apache.mahout.math;
 
 import java.util.Iterator;
 
-//import com.google.common.base.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
