@@ -39,6 +39,9 @@ import org.apache.mahout.math.drm.logical.OpAtB
 import org.apache.mahout.math.drm.logical.OpAtA
 import org.apache.mahout.math.drm.logical.OpAewScalar
 import org.apache.mahout.math.drm.logical.OpAewB
+import org.apache.mahout.math.drm.logical.OpCbind
+import org.apache.mahout.math.drm.logical.OpRbind
+import org.apache.mahout.math.drm.logical.OpMapBlock
 
 object FlinkEngine extends DistributedEngine {
 
@@ -98,6 +101,12 @@ object FlinkEngine extends DistributedEngine {
       FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a)(op.classTagA), scalar)
     case op @ OpAewB(a, b, _) =>
       FlinkOpAewB.rowWiseJoinNoSideEffect(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
+    case op @ OpCbind(a, b) => 
+      FlinkOpCBind.cbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
+    case op @ OpRbind(a, b) => 
+      FlinkOpRBind.rbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
+    case op: OpMapBlock[K, _] => 
+      FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
     case cp: CheckpointedFlinkDrm[K] => new RowsFlinkDrm(cp.ds, cp.ncol)
     case _ => throw new NotImplementedError(s"operator $oper is not implemented yet")
   }

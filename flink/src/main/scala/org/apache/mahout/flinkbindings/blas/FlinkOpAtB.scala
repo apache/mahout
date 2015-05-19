@@ -20,6 +20,7 @@ import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
 import org.apache.mahout.flinkbindings.BlockifiedDrmDataSet
 import org.apache.flink.api.scala._
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.mahout.flinkbindings.DrmDataSet
 
 
 object FlinkOpAtB {
@@ -27,8 +28,8 @@ object FlinkOpAtB {
   def notZippable[K: ClassTag](op: OpAtB[K], At: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[Int] = {
     // TODO: to help Flink's type inference
     // only Int is supported now 
-    val rowsAt = At.deblockify.ds.map(new DrmTupleToDrmTupleInt())
-    val rowsB = B.deblockify.ds.map(new DrmTupleToDrmTupleInt())
+    val rowsAt = At.deblockify.ds.asInstanceOf[DrmDataSet[Int]]
+    val rowsB = B.deblockify.ds.asInstanceOf[DrmDataSet[Int]]
     val joined = rowsAt.join(rowsB).where(tuple_1[Vector]).equalTo(tuple_1[Vector])
 
     val ncol = op.ncol
@@ -70,12 +71,6 @@ object FlinkOpAtB {
     new BlockifiedFlinkDrm(res, ncol)
   }
 
-}
-
-class DrmTupleToDrmTupleInt[K: ClassTag] extends MapFunction[(K, Vector), (Int, Vector)] {
-  def map(tuple: (K, Vector)): (Int, Vector) = tuple match {
-    case (key, vec) => (key.asInstanceOf[Int], vec)
-  }
 }
 
 class DrmTupleToFlinkTupleMapper[K: ClassTag] extends MapFunction[(K, Vector), Tuple2[Int, Vector]] {

@@ -11,10 +11,7 @@ import org.scalatest.junit.JUnitRunner
 import org.apache.mahout.math.drm.logical.OpAx
 import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.mahout.math.drm.logical.OpAt
-import org.apache.mahout.math.drm.logical.OpAtB
-import org.apache.mahout.math.drm.logical.OpAewScalar
-import org.apache.mahout.math.drm.logical.OpAewB
+import org.apache.mahout.math.drm.logical._
 
 @RunWith(classOf[JUnitRunner])
 class LATestSuit extends FunSuite with DistributedFlinkSuit {
@@ -78,7 +75,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert((output - expected).norm < 1e-6)
   }
 
-  test("AewB rowWiseJoinNoSideEffect") {
+  ignore("AewB rowWiseJoinNoSideEffect") {
     val inCoreA = dense((1, 2), (2, 3), (3, 4))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
 
@@ -90,4 +87,22 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
 
     assert((output - (inCoreA  * inCoreA)).norm < 1e-6)
   }
+
+  test("Cbind") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val inCoreB = dense((4, 4), (5, 5), (6, 7))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
+
+    val op = new OpCbind(A, B)
+    val res = FlinkOpCBind.cbind(op, A, B)
+
+    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, 
+        _ncol=(inCoreA.ncol + inCoreB.ncol))
+    val output = drm.collect
+
+    val expected = dense((1, 2, 4, 4), (2, 3, 5, 5), (3, 4, 6, 7))
+    assert((output - expected).norm < 1e-6)
+  }
+
 }

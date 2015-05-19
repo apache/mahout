@@ -84,9 +84,9 @@ class UseCasesSuite extends FunSuite with DistributedFlinkSuit {
     val lambda = 1.0
     val reg = drmParallelize(diag(lambda, 2)) 
 
-    val w = solve(A.t %*% A - reg, A.t %*% x)
+    val w = solve(A.t %*% A + reg, A.t %*% x)
 
-    val expected = solve(inCoreA.t %*% inCoreA - diag(lambda, 2), inCoreA.t %*% x)
+    val expected = solve(inCoreA.t %*% inCoreA + diag(lambda, 2), inCoreA.t %*% x)
     assert((w(::, 0) - expected).norm(2) < 1e-6)
   }
 
