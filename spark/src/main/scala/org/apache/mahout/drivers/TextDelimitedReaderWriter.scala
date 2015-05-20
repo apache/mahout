@@ -56,9 +56,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       // instance vars must be put into locally scoped vals when used in closures that are executed but Spark
 
 
-      if (source.isEmpty) {
-        throw new IllegalArgumentException("No file(s) to read")
-      }
+      require (!source.isEmpty, "No file(s) to read")
 
       var columns = mc.textFile(source).map { line => line.split(delimiter) }
 
@@ -143,9 +141,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val columnIdStrengthDelim = readSchema("columnIdStrengthDelim").asInstanceOf[String]
       val elementDelim = readSchema("elementDelim").asInstanceOf[String]
 
-      if (source.isEmpty) {
-        throw new IllegalArgumentException("No file(s) to read")
-      }
+      require (!source.isEmpty, "No file(s) to read")
 
       var rows = mc.textFile(source).map { line => line.split(rowKeyDelim) }
 
@@ -248,13 +244,8 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
       //instance vars must be put into locally scoped vals when put into closures that are
       //executed but Spark
 
-      if (indexedDataset == null ) {
-        throw new IllegalArgumentException("No IndexedDataset to write")
-      }
-
-      if (dest.isEmpty) {
-        throw new IllegalArgumentException("No destination to write to")
-      }
+      require (indexedDataset != null ,"No IndexedDataset to write")
+      require (!dest.isEmpty,"No destination to write to")
 
       val matrix = indexedDataset.matrix.checkpoint()
       val rowIDDictionary = indexedDataset.rowIDs
