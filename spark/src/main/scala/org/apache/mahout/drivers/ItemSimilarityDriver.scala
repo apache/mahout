@@ -184,7 +184,6 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
         val returnedA = if (rowCardinality != datasetA.matrix.nrow) datasetA.newRowCardinality(rowCardinality)
         else datasetA // this guarantees matching cardinality
 
-        val b = datasetB.matrix.collect
         val returnedB = if (rowCardinality != datasetB.matrix.nrow) datasetB.newRowCardinality(rowCardinality)
         else datasetB // this guarantees matching cardinality
 
