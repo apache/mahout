@@ -85,6 +85,27 @@ class BiDictionary (
     private val m: Map[String, Int],
     @transient private val i: Option[BiMap[Int, String]] = None )
   extends BiMap[String, Int](m, i) {
+
+  /**
+   * Create a new BiDictionary with the keys supplied and values ranging from 0 to size -1
+   * @param keys a set of String
+   */
+  def this(keys: Seq[String]) = {
+    this(HashMap(keys.view.zipWithIndex: _*))
+  }
+
+  def merge(
+    keys: Seq[String]): BiDictionary = {
+
+    var newIDs = List[String]()
+
+    for (key <- keys) {
+      if (!m.contains(key)) newIDs = key +: newIDs
+    }
+    if(newIDs.isEmpty) this else new BiDictionary(m ++ HashMap(newIDs.view.zip (Stream from size): _*))
+
+  }
+
 }
 
 /** BiDictionary is a specialized BiMap that has non-negative Ints as values for use as DRM keys.
@@ -95,22 +116,13 @@ object BiDictionary {
   /**
    * Append new keys to an existing BiDictionary and return the result. The values will start
    * at m.size and increase to create a continuous non-zero value set from 0 to size - 1
-   * @param keys new keys to append
-   * @param biDi append keys to this BiDictionary and create new values buy incremeting from the highest Int value
+   * @param keys new keys to append, not checked for uniqueness so may be dangerous
+   * @param biDi merge keys to this BiDictionary and create new values buy incremeting from the highest Int value
    * @return a BiDictionary with added mappings
    */
-  def append(keys: Seq[String], biDi: BiDictionary): BiDictionary = {
+  /*def append(keys: Seq[String], biDi: BiDictionary): BiDictionary = {
     val hm = HashMap(keys.view.zip (Stream from biDi.size): _*)
     new BiDictionary(biDi.m ++ hm)
-  }
-
-  /**
-   * Create a new BiDictionary with the keys supplied and values ranging from 0 to size -1
-   * @param keys a set of String
-   */
-  def create(keys: Set[String]): BiDictionary = {
-    val hm = HashMap(keys.toSeq.view.zipWithIndex: _*)
-    new BiDictionary(hm)
-  }
+  }*/
 
 }

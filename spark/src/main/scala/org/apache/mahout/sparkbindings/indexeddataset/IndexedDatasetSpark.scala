@@ -75,10 +75,14 @@ object IndexedDatasetSpark {
 
     // create BiDictionary(s) for bi-directional lookup of ID by either Mahout ID or external ID
     // broadcast them for access in distributed processes, so they are not recalculated in every task.
-    val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
+    //val rowIDDictionary = BiDictionary.append(existingRowIDs, rowIDs)
+    val rowIDDictionary = existingRowIDs match {
+      case Some(d) => d.merge(rowIDs)
+      case None =>  new BiDictionary(rowIDs)
+    }
     val rowIDDictionary_bcast = sc.broadcast(rowIDDictionary)
 
-    val columnIDDictionary = BiDictionary.create(keys = columnIDs.toSet)
+    val columnIDDictionary = new BiDictionary(keys = columnIDs)
     val columnIDDictionary_bcast = sc.broadcast(columnIDDictionary)
 
     val ncol = columnIDDictionary.size
@@ -106,21 +110,5 @@ object IndexedDatasetSpark {
     new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
   }
 
-  private def asOrderedDictionary(
-    optionDictionary: Option[BiDictionary] = None,
-    keys: Array[String]): BiDictionary = {
-
-    var newIDs = List[String]()
-
-    optionDictionary match {
-      case Some(dictionary) => dictionary
-        for (key <- keys) {
-          if (!dictionary.contains(key)) newIDs = key +: newIDs
-        }
-        if(newIDs.isEmpty) dictionary else BiDictionary.append(newIDs, dictionary)
-      case None =>
-        BiDictionary.create(keys.toSet)
-    }
-  }
 }
 

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.drivers
 
+import org.apache.log4j.Logger
 import org.apache.mahout.math.indexeddataset._
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.apache.spark.SparkContext._
@@ -41,10 +42,11 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
    * @return a new [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]]
    */
   protected def elementReader(
-      mc: DistributedContext,
-      readSchema: Schema,
-      source: String,
-      existingRowIDs: Option[BiDictionary] = None): IndexedDatasetSpark = {
+    mc: DistributedContext,
+    readSchema: Schema,
+    source: String,
+    existingRowIDs: Option[BiDictionary] = None): IndexedDatasetSpark = {
+    @transient lazy val logger = Logger.getLogger(this.getClass.getCanonicalName)
     try {
       val delimiter = readSchema("delim").asInstanceOf[String]
       val rowIDColumn = readSchema("rowIDColumn").asInstanceOf[Int]
@@ -53,10 +55,10 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val filterBy = readSchema("filter").asInstanceOf[String]
       // instance vars must be put into locally scoped vals when used in closures that are executed but Spark
 
-      assert(!source.isEmpty, {
-        println(this.getClass.toString + ": has no files to read")
-        throw new IllegalArgumentException
-      })
+
+      if (source.isEmpty) {
+        throw new IllegalArgumentException("No file(s) to read")
+      }
 
       var columns = mc.textFile(source).map { line => line.split(delimiter) }
 
@@ -79,10 +81,14 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
       // create BiDictionary(s) for bi-directional lookup of ID by either Mahout ID or external ID
       // broadcast them for access in distributed processes, so they are not recalculated in every task.
-      val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
+      //val rowIDDictionary = BiDictionary.append(existingRowIDs, rowIDs)
+      val rowIDDictionary = existingRowIDs match {
+        case Some(d) => d.merge(rowIDs)
+        case None =>  new BiDictionary(rowIDs)
+      }
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
 
-      val columnIDDictionary = asOrderedDictionary(keys = columnIDs)
+      val columnIDDictionary = new BiDictionary(keys = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
       val ncol = columnIDDictionary.size
@@ -112,7 +118,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
     } catch {
       case cce: ClassCastException => {
-        println(this.getClass.toString + ": Schema has illegal values"); throw cce
+        logger.error("Schema has illegal values"); throw cce
       }
     }
   }
@@ -127,19 +133,19 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
    * @return a new [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]]
    */
   protected def rowReader(
-      mc: DistributedContext,
-      readSchema: Schema,
-      source: String,
-      existingRowIDs: Option[BiDictionary] = None): IndexedDatasetSpark = {
+    mc: DistributedContext,
+    readSchema: Schema,
+    source: String,
+    existingRowIDs: Option[BiDictionary] = None): IndexedDatasetSpark = {
+    @transient lazy val logger = Logger.getLogger(this.getClass.getCanonicalName)
     try {
       val rowKeyDelim = readSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = readSchema("columnIdStrengthDelim").asInstanceOf[String]
       val elementDelim = readSchema("elementDelim").asInstanceOf[String]
 
-      assert(!source.isEmpty, {
-        println(this.getClass.toString + ": has no files to read")
-        throw new IllegalArgumentException
-      })
+      if (source.isEmpty) {
+        throw new IllegalArgumentException("No file(s) to read")
+      }
 
       var rows = mc.textFile(source).map { line => line.split(rowKeyDelim) }
 
@@ -150,7 +156,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
       interactions.cache()
       // forces into memory so only for debugging
-      interactions.collect()
+      //interactions.collect()
 
       // create separate collections of rowID and columnID tokens
       val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
@@ -164,10 +170,14 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
       // create BiMaps for bi-directional lookup of ID by either Mahout ID or external ID
       // broadcast them for access in distributed processes, so they are not recalculated in every task.
-      val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
+      //val rowIDDictionary = BiDictionary.append(existingRowIDs, rowIDs)
+      val rowIDDictionary = existingRowIDs match {
+        case Some(d) => d.merge(rowIDs)
+        case None =>  new BiDictionary(rowIDs)
+      }
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
 
-      val columnIDDictionary = asOrderedDictionary(keys = columnIDs)
+      val columnIDDictionary = new BiDictionary(keys = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
       val ncol = columnIDDictionary.size
@@ -199,7 +209,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
     } catch {
       case cce: ClassCastException => {
-        println(this.getClass.toString + ": Schema has illegal values")
+        logger.error("Schema has illegal values")
         throw cce
       }
     }
@@ -212,25 +222,11 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
    * non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit
    * in-memory, the option is to put the dictionaries in rdds and do joins to translate IDs
    */
-  private def asOrderedDictionary(optionDictionary: Option[BiDictionary] = None,
-      keys: Array[String]):
-    BiDictionary = {
-    var newIDs = List[String]()
-
-    optionDictionary match {
-      case Some(dictionary) => dictionary
-        for (key <- keys) {
-          if (!dictionary.contains(key)) newIDs = key +: newIDs
-        }
-        if(newIDs.isEmpty) dictionary else BiDictionary.append(newIDs, dictionary)
-      case None =>
-        BiDictionary.create(keys.toSet)
-    }
-  }
 }
 
 /** Extends the Writer trait to supply the type being written and supplies the writer function */
 trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
+
   /**
    * Read in text delimited elements from all URIs in this comma delimited source String.
    * @param mc context for the Spark job
@@ -238,11 +234,12 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
    * @param dest directory to write text delimited version of [[IndexedDatasetSpark]]
    */
   protected def writer(
-      mc: DistributedContext,
-      writeSchema: Schema,
-      dest: String,
-      indexedDataset: IndexedDatasetSpark,
-      sort: Boolean = true): Unit = {
+    mc: DistributedContext,
+    writeSchema: Schema,
+    dest: String,
+    indexedDataset: IndexedDatasetSpark,
+    sort: Boolean = true): Unit = {
+    @transient lazy val logger = Logger.getLogger(this.getClass.getCanonicalName)
     try {
       val rowKeyDelim = writeSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = writeSchema("columnIdStrengthDelim").asInstanceOf[String]
@@ -251,14 +248,13 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
       //instance vars must be put into locally scoped vals when put into closures that are
       //executed but Spark
 
-      assert(indexedDataset != null, {
-        println(this.getClass.toString + ": has no indexedDataset to write")
-        throw new IllegalArgumentException
-      })
-      assert(!dest.isEmpty, {
-        println(this.getClass.toString + ": has no destination or indextedDataset to write")
-        throw new IllegalArgumentException
-      })
+      if (indexedDataset == null ) {
+        throw new IllegalArgumentException("No IndexedDataset to write")
+      }
+
+      if (dest.isEmpty) {
+        throw new IllegalArgumentException("No destination to write to")
+      }
 
       val matrix = indexedDataset.matrix.checkpoint()
       val rowIDDictionary = indexedDataset.rowIDs
@@ -295,7 +291,8 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
       .saveAsTextFile(dest)
 
     }catch{
-      case cce: ClassCastException => {println(this.getClass.toString+": Schema has illegal values"); throw cce}
+      case cce: ClassCastException => {
+        logger.error("Schema has illegal values"); throw cce}
     }
   }
 }
