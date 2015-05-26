@@ -17,8 +17,7 @@
 
 package org.apache.mahout.math.drm
 
-import com.google.common.collect.{HashBiMap, BiMap}
-import org.apache.mahout.math.indexeddataset.{DefaultIndexedDatasetElementReadSchema, DefaultIndexedDatasetReadSchema, Schema, IndexedDataset}
+import org.apache.mahout.math.indexeddataset._
 
 import scala.reflect.ClassTag
 import logical._
@@ -95,7 +94,7 @@ trait DistributedEngine {
    */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      existingRowIDs: Option[BiDictionary] = None)
       (implicit sc: DistributedContext):
     IndexedDataset
 
@@ -106,7 +105,7 @@ trait DistributedEngine {
    */
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetElementReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      existingRowIDs: Option[BiDictionary] = None)
       (implicit sc: DistributedContext):
     IndexedDataset
 

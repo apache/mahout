@@ -782,7 +782,6 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public String toString() {
-
     int row = 0;
     int maxRowsToDisplay = 10;
     int maxColsToDisplay = 20;
@@ -791,6 +790,7 @@ public abstract class AbstractMatrix implements Matrix {
     if(maxColsToDisplay > columnSize()){
       colsToDisplay = columnSize();
     }
+
 
     StringBuilder s = new StringBuilder("{\n");
     Iterator<MatrixSlice> it = iterator();

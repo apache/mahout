@@ -17,8 +17,7 @@
 
 package org.apache.mahout.h2obindings
 
-import com.google.common.collect.{HashBiMap, BiMap}
-import org.apache.mahout.math.indexeddataset.{IndexedDataset, Schema, DefaultIndexedDatasetReadSchema}
+import org.apache.mahout.math.indexeddataset.{BiDictionary, IndexedDataset, Schema, DefaultIndexedDatasetReadSchema}
 
 import scala.reflect._
 import org.apache.mahout.math._
@@ -117,7 +116,7 @@ object H2OEngine extends DistributedEngine {
   implicit def cp2cph2o[K:ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmH2O[K] = drm.asInstanceOf[CheckpointedDrmH2O[K]]
 
   /** stub class not implemented in H2O */
-  abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[String,Int], val columnIDs: BiMap[String,Int])
+  abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictionary, val columnIDs: BiDictionary)
     extends IndexedDataset {}
 
     /**
@@ -129,7 +128,7 @@ object H2OEngine extends DistributedEngine {
    */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      existingRowIDs: Option[BiDictionary] = None)
       (implicit sc: DistributedContext):
     IndexedDatasetH2O = {
     // should log a warning when this is built but no logger here, can an H2O contributor help with this
@@ -147,7 +146,7 @@ object H2OEngine extends DistributedEngine {
    */
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      existingRowIDs: Option[BiDictionary] = None)
       (implicit sc: DistributedContext):
     IndexedDatasetH2O = {
     // should log a warning when this is built but no logger here, can an H2O contributor help with this

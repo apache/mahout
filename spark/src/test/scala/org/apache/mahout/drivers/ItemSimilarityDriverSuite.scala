@@ -17,16 +17,17 @@
 
 package org.apache.mahout.drivers
 
-import com.google.common.collect.HashBiMap
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileSystem}
-import org.apache.mahout.math.indexeddataset.IndexedDataset
+import org.apache.mahout.math.indexeddataset.{BiDictionary, IndexedDataset}
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.scalatest.{ConfigMap, FunSuite}
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings._
+
+import scala.collection.immutable.HashMap
 
 //todo: take out, only for temp tests
 
@@ -653,7 +654,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       (1.0, 1.0))
 
     val drmA = drmParallelize(m = a, numPartitions = 2)
-    val indexedDatasetA = new IndexedDatasetSpark(drmA, HashBiMap.create(), HashBiMap.create())
+    val emptyIDs = new BiDictionary(new HashMap[String, Int]())
+    val indexedDatasetA = new IndexedDatasetSpark(drmA, emptyIDs, emptyIDs)
     val biggerIDSA = indexedDatasetA.newRowCardinality(5)
 
     assert(biggerIDSA.matrix.nrow == 5)
@@ -719,6 +721,95 @@ removed ==> u3	0	      0	      1	          0
     val similarityLines = mahoutCtx.textFile(OutPath + "/similarity-matrix/").collect.toIterable
     val crossSimilarityLines = mahoutCtx.textFile(OutPath + "/cross-similarity-matrix/").collect.toIterable
     tokenize(similarityLines) should contain theSameElementsAs SelfSimilairtyTokens
+    tokenize(crossSimilarityLines) should contain theSameElementsAs UnequalDimensionsCrossSimilarityLines
+  }
+
+  test("ItemSimilarityDriver cross similarity two separate items spaces, adding rows in B") {
+    /* cross-similarity with category views, same user space
+            	phones	tablets	mobile_acc	soap
+            u1	0	      1	      1	          0
+            u2	1	      1	      1	          0
+removed ==> u3	0	      0	      1	          0
+            u4	1	      1	      0	          1
+    */
+    val InFile1 = TmpDir + "in-file1.csv/" //using part files, not single file
+    val InFile2 = TmpDir + "in-file2.csv/" //using part files, not single file
+    val OutPath = TmpDir + "similarity-matrices/"
+
+    val lines = Array(
+      "u1,purchase,iphone",
+      "u1,purchase,ipad",
+      "u2,purchase,nexus",
+      "u2,purchase,galaxy",
+      "u3,purchase,surface",
+      "u4,purchase,iphone",
+      "u4,purchase,galaxy",
+      "u1,view,phones",
+      "u1,view,mobile_acc",
+      "u2,view,phones",
+      "u2,view,tablets",
+      "u2,view,mobile_acc",
+      "u3,view,mobile_acc",// if this line is removed the cross-cooccurrence should work
+      "u4,view,phones",
+      "u4,view,tablets",
+      "u4,view,soap",
+      "u5,view,soap")
+
+    val UnequalDimensionsSimilarityTokens = List(
+      "galaxy",
+      "nexus:2.231435513142097",
+      "iphone:0.13844293808390518",
+      "nexus",
+      "galaxy:2.231435513142097",
+      "ipad",
+      "iphone:2.231435513142097",
+      "surface",
+      "iphone",
+      "ipad:2.231435513142097",
+      "galaxy:0.13844293808390518")
+
+    val UnequalDimensionsCrossSimilarityLines = List(
+      "galaxy",
+      "tablets:6.730116670092563",
+      "phones:2.9110316603236868",
+      "soap:0.13844293808390518",
+      "mobile_acc:0.13844293808390518",
+      "nexus",
+      "tablets:2.231435513142097",
+      "mobile_acc:1.184939225613002",
+      "phones:1.184939225613002",
+      "ipad", "mobile_acc:1.184939225613002",
+      "phones:1.184939225613002",
+      "surface",
+      "mobile_acc:1.184939225613002",
+      "iphone",
+      "phones:2.9110316603236868",
+      "soap:0.13844293808390518",
+      "tablets:0.13844293808390518",
+      "mobile_acc:0.13844293808390518")
+
+    // this will create multiple part-xxxxx files in the InFile dir but other tests will
+    // take account of one actual file
+    val linesRdd1 = mahoutCtx.parallelize(lines).saveAsTextFile(InFile1)
+    val linesRdd2 = mahoutCtx.parallelize(lines).saveAsTextFile(InFile2)
+
+    // local multi-threaded Spark with default HDFS
+    ItemSimilarityDriver.main(Array(
+      "--input", InFile1,
+      "--input2", InFile2,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", ",",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
+      "--writeAllDatasets"))
+
+    val similarityLines = mahoutCtx.textFile(OutPath + "/similarity-matrix/").collect.toIterable
+    val crossSimilarityLines = mahoutCtx.textFile(OutPath + "/cross-similarity-matrix/").collect.toIterable
+    tokenize(similarityLines) should contain theSameElementsAs UnequalDimensionsSimilarityTokens
     tokenize(crossSimilarityLines) should contain theSameElementsAs UnequalDimensionsCrossSimilarityLines
   }
 

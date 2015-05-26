@@ -68,7 +68,7 @@ object SimilarityAnalysis extends Serializable {
     // Compute & broadcast the number of interactions per thing in A
     val bcastInteractionsPerItemA = drmBroadcast(drmA.numNonZeroElementsPerColumn)
 
-    // Compute co-occurrence matrix A'A
+    // Compute cooccurrence matrix A'A
     val drmAtA = drmA.t %*% drmA
 
     // Compute loglikelihood scores and sparsify the resulting matrix to get the similarity matrix
@@ -77,7 +77,7 @@ object SimilarityAnalysis extends Serializable {
 
     var similarityMatrices = List(drmSimilarityAtA)
 
-    // Now look at cross-co-occurrences
+    // Now look at cross cooccurrences
     for (drmBRaw <- drmBs) {
       // Down-sample and pin other interaction matrix
       val drmB = sampleDownAndBinarize(drmBRaw, randomSeed, maxNumInteractions).checkpoint()
@@ -85,7 +85,7 @@ object SimilarityAnalysis extends Serializable {
       // Compute & broadcast the number of interactions per thing in B
       val bcastInteractionsPerThingB = drmBroadcast(drmB.numNonZeroElementsPerColumn)
 
-      // Compute cross-co-occurrence matrix A'B
+      // Compute cross-cooccurrence matrix A'B
       val drmAtB = drmA.t %*% drmB
 
       val drmSimilarityAtB = computeSimilarities(drmAtB, numUsers, maxInterestingItemsPerThing,
@@ -94,10 +94,20 @@ object SimilarityAnalysis extends Serializable {
       similarityMatrices = similarityMatrices :+ drmSimilarityAtB
 
       drmB.uncache()
+
+      //debug
+      val atbRows = drmSimilarityAtB.nrow
+      val atbCols = drmSimilarityAtB.ncol
+      val i = 0
     }
 
     // Unpin downsampled interaction matrix
     drmA.uncache()
+
+    //debug
+    val ataRows = drmSimilarityAtA.nrow
+    val ataCols = drmSimilarityAtA.ncol
+    val i = 0
 
     // Return list of similarity matrices
     similarityMatrices

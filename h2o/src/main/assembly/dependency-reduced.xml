@@ -36,11 +36,8 @@
       <outputDirectory>/</outputDirectory>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <includes>
-        <!-- guava only included to get Preconditions in mahout-math and mahout-hdfs -->
-        <include>com.google.guava:guava</include>
-        <include>com.github.scopt</include>
-        <include>com.tdunning:t-digest</include>
-        <include>org.apache.commons:commons-math3</include>
+        <include>ai.h2o:h2o-core</include>
+        <include>org.scala-lang:scala-library</include>
       </includes>
     </dependencySet>
   </dependencySets>
