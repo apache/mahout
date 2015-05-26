@@ -42,6 +42,8 @@ import org.apache.mahout.math.drm.logical.OpAewB
 import org.apache.mahout.math.drm.logical.OpCbind
 import org.apache.mahout.math.drm.logical.OpRbind
 import org.apache.mahout.math.drm.logical.OpMapBlock
+import org.apache.mahout.math.drm.logical.OpRowRange
+import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
 
 object FlinkEngine extends DistributedEngine {
 
@@ -51,11 +53,9 @@ object FlinkEngine extends DistributedEngine {
     val drm = flinkTranslate(plan)
 
     val newcp = new CheckpointedFlinkDrm(
-      ds = drm.deblockify.ds, // TODO: make it lazy!
+      ds = drm.deblockify.ds,
       _nrow = plan.nrow,
       _ncol = plan.ncol
-//      _cacheStorageLevel = cacheHint2Spark(ch),
-//      partitioningTag = plan.partitioningTag
     )
 
     newcp.cache()
@@ -105,6 +105,8 @@ object FlinkEngine extends DistributedEngine {
       FlinkOpCBind.cbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
     case op @ OpRbind(a, b) => 
       FlinkOpRBind.rbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
+    case op @ OpRowRange(a, _) => 
+      FlinkOpRowRange.slice(op, flinkTranslate(a)(op.classTagA))
     case op: OpMapBlock[K, _] => 
       FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
     case cp: CheckpointedFlinkDrm[K] => new RowsFlinkDrm(cp.ds, cp.ncol)

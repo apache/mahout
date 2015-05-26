@@ -12,6 +12,7 @@ import org.apache.mahout.math.drm.logical.OpAx
 import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.drm.logical._
+import scala.collection.immutable.Range
 
 @RunWith(classOf[JUnitRunner])
 class LATestSuit extends FunSuite with DistributedFlinkSuit {
@@ -88,7 +89,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert((output - (inCoreA  * inCoreA)).norm < 1e-6)
   }
 
-  test("Cbind") {
+  ignore("Cbind") {
     val inCoreA = dense((1, 2), (2, 3), (3, 4))
     val inCoreB = dense((4, 4), (5, 5), (6, 7))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
@@ -102,6 +103,22 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     val output = drm.collect
 
     val expected = dense((1, 2, 4, 4), (2, 3, 5, 5), (3, 4, 6, 7))
+    assert((output - expected).norm < 1e-6)
+  }
+
+  test("slice") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4), (4, 4), (5, 5), (6, 7))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val range = 2 until 5
+    val op = new OpRowRange(A, range)
+    val res = FlinkOpRowRange.slice(op, A)
+
+    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=op.nrow, 
+        _ncol=inCoreA.ncol)
+    val output = drm.collect
+
+    val expected = inCoreA(2 until 5, ::)
     assert((output - expected).norm < 1e-6)
   }
 

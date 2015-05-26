@@ -192,7 +192,7 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuit {
     assert((res.collect - expected).norm < 1e-6)
   }
 
-  test("A rbind B") {
+  ignore("A rbind B") {
     val inCoreA = dense((1, 2), (2, 3), (3, 4))
     val inCoreB = dense((1, 2), (3, 4), (11, 4))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
@@ -202,4 +202,23 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuit {
     val expected = dense((1, 2), (2, 3), (3, 4), (1, 2), (3, 4), (11, 4))
     assert((res.collect - expected).norm < 1e-6)
   }
+
+  test("A row slice") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4), (4, 4), (5, 5), (6, 7))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val res = A(2 until 5, ::)
+    val expected = inCoreA(2 until 5, ::)
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
+  test("A column slice") {
+    val inCoreA = dense((1, 2, 1, 2), (2, 3, 3, 4), (3, 4, 11, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val res = A(::, 0 until 2)
+    val expected = inCoreA(::, 0 until 2)
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
 }
