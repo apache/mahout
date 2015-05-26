@@ -221,4 +221,16 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuit {
     assert((res.collect - expected).norm < 1e-6)
   }
 
+  test("A %*% inCoreB") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4)).t
+    val inCoreB = dense((1, 2), (3, 4), (11, 4))
+
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val res = A %*% inCoreB
+
+    val expected = inCoreA %*% inCoreB
+    assert((res.collect - expected).norm < 1e-6)
+  }
+
 }

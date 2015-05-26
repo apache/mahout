@@ -12,7 +12,6 @@ import org.apache.mahout.math.drm.logical.OpAx
 import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.drm.logical._
-import scala.collection.immutable.Range
 
 @RunWith(classOf[JUnitRunner])
 class LATestSuit extends FunSuite with DistributedFlinkSuit {
@@ -119,6 +118,22 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     val output = drm.collect
 
     val expected = inCoreA(2 until 5, ::)
+    assert((output - expected).norm < 1e-6)
+  }
+
+  test("A times inCoreB") {
+    val inCoreA = dense((1, 2, 3), (2, 3, 1), (3, 4, 4), (4, 4, 5), (5, 5, 7), (6, 7, 11))
+    val inCoreB = dense((2, 1), (3, 4), (5, 11))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val op = new OpTimesRightMatrix(A, inCoreB)
+    val res = FlinkOpTimesRightMatrix.drmTimesInCore(op, A, inCoreB)
+
+    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=op.nrow, 
+        _ncol=op.ncol)
+    val output = drm.collect
+
+    val expected = inCoreA %*% inCoreB
     assert((output - expected).norm < 1e-6)
   }
 

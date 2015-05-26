@@ -97,6 +97,8 @@ object FlinkEngine extends DistributedEngine {
       val aTranslated = flinkTranslate(aInt)
       FlinkOpAtB.notZippable(opAtB, aTranslated, aTranslated)
     }
+    case op @ OpTimesRightMatrix(a, b) => 
+      FlinkOpTimesRightMatrix.drmTimesInCore(op, flinkTranslate(a)(op.classTagA), b)
     case op @ OpAewScalar(a, scalar, _) => 
       FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a)(op.classTagA), scalar)
     case op @ OpAewB(a, b, _) =>
