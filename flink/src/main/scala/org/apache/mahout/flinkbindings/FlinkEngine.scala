@@ -44,6 +44,8 @@ import org.apache.mahout.math.drm.logical.OpRbind
 import org.apache.mahout.math.drm.logical.OpMapBlock
 import org.apache.mahout.math.drm.logical.OpRowRange
 import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
+import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.common.functions.ReduceFunction
 
 object FlinkEngine extends DistributedEngine {
 
@@ -119,15 +121,37 @@ object FlinkEngine extends DistributedEngine {
   def translate[K: ClassTag](oper: DrmLike[K]): DataSet[K] = ???
 
   /** Engine-specific colSums implementation based on a checkpoint. */
-  override def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector = ???
+  override def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
+    val sum = drm.ds.map(new MapFunction[(K, Vector), Vector] {
+      def map(tuple: (K, Vector)): Vector = tuple._2
+    }).reduce(new ReduceFunction[Vector] {
+      def reduce(v1: Vector, v2: Vector) = v1 + v2
+    })
+
+    val list = CheckpointedFlinkDrm.flinkCollect(sum, "FlinkEngine colSums()")
+    list.head
+  }
 
   /** Engine-specific numNonZeroElementsPerColumn implementation based on a checkpoint. */
   override def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector = ???
 
   /** Engine-specific colMeans implementation based on a checkpoint. */
-  override def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector = ???
+  override def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
+    drm.colSums() / drm.nrow
+  }
 
-  override def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double = ???
+  override def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double = {
+    val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
+      def map(tuple: (K, Vector)): Double = tuple match {
+        case (idx, vec) => vec dot vec
+      }
+    }).reduce(new ReduceFunction[Double] {
+      def reduce(v1: Double, v2: Double) = v1 + v2
+    })
+
+    val list = CheckpointedFlinkDrm.flinkCollect(sumOfSquares, "FlinkEngine norm()")
+    list.head
+  }
 
   /** Broadcast support */
   override def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector] = ???

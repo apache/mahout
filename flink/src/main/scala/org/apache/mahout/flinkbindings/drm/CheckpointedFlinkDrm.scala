@@ -5,7 +5,6 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.flinkbindings._
-
 import org.apache.mahout.math.drm.CheckpointedDrm
 import org.apache.mahout.math.Matrix
 import org.apache.mahout.flinkbindings.FlinkDistributedContext
@@ -17,8 +16,10 @@ import org.apache.mahout.math.DenseMatrix
 import org.apache.mahout.math.SparseMatrix
 import org.apache.flink.api.java.io.LocalCollectionOutputFormat
 import java.util.ArrayList
-
 import scala.collection.JavaConverters._
+import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.common.functions.ReduceFunction
+import org.apache.flink.api.java.DataSet
 
 class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   private var _nrow: Long = CheckpointedFlinkDrm.UNKNOWN,
@@ -27,20 +28,31 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   override protected[mahout] val partitioningTag: Long = Random.nextLong(),
   private var _canHaveMissingRows: Boolean = false) extends CheckpointedDrm[K] {
 
-  lazy val nrow = if (_nrow >= 0) _nrow else computeNRow
-  lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
+  lazy val nrow: Long = if (_nrow >= 0) _nrow else computeNRow
+  lazy val ncol: Int = if (_ncol >= 0) _ncol else computeNCol
 
-  protected def computeNRow = ???
-  protected def computeNCol = ??? /*{
-  TODO: find out how to get one value
+  protected def computeNRow: Long = { 
+    val count = ds.map(new MapFunction[DrmTuple[K], Long] {
+      def map(value: DrmTuple[K]): Long = 1L
+    }).reduce(new ReduceFunction[Long] {
+      def reduce(a1: Long, a2: Long) = a1 + a2
+    })
+
+    val list = CheckpointedFlinkDrm.flinkCollect(count, "CheckpointedFlinkDrm computeNRow()")
+    list.head
+  }
+
+  protected def computeNCol: Int = {
     val max = ds.map(new MapFunction[DrmTuple[K], Int] {
       def map(value: DrmTuple[K]): Int = value._2.length
     }).reduce(new ReduceFunction[Int] {
       def reduce(a1: Int, a2: Int) = Math.max(a1, a2)
     })
-    
-    max
-  }*/
+
+    val list = CheckpointedFlinkDrm.flinkCollect(max, "CheckpointedFlinkDrm computeNCol()")
+    list.head
+  }
+
   def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
 
   def cache() = {
@@ -57,12 +69,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = this
 
   def collect: Matrix = {
-    val dataJavaList = new ArrayList[DrmTuple[K]]
-    val outputFormat = new LocalCollectionOutputFormat[DrmTuple[K]](dataJavaList)
-    ds.output(outputFormat)
-    val data = dataJavaList.asScala
-    ds.getExecutionEnvironment.execute("Checkpointed Flink Drm collect()")
-
+    val data = CheckpointedFlinkDrm.flinkCollect(ds, "Checkpointed Flink Drm collect()")
     val isDense = data.forall(_._2.isDense)
 
     val m = if (isDense) {
@@ -99,5 +106,16 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
 }
 
 object CheckpointedFlinkDrm {
-  val UNKNOWN = -1;
+  val UNKNOWN = -1
+
+  // needed for backwards compatibility with flink 0.8.1
+  def flinkCollect[K](dataset: DataSet[K], jobName: String = "flinkCollect()"): List[K] = {
+    val dataJavaList = new ArrayList[K]
+    val outputFormat = new LocalCollectionOutputFormat[K](dataJavaList)
+    dataset.output(outputFormat)
+    val data = dataJavaList.asScala
+    dataset.getExecutionEnvironment.execute(jobName)
+    data.toList
+  }
+
 }
