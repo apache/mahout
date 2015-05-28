@@ -46,6 +46,7 @@ import org.apache.mahout.math.drm.logical.OpRowRange
 import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.functions.ReduceFunction
+import org.apache.mahout.math.indexeddataset.BiDictionary
 
 object FlinkEngine extends DistributedEngine {
 
@@ -196,23 +197,9 @@ object FlinkEngine extends DistributedEngine {
   override def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
                                       (implicit sc: DistributedContext): CheckpointedDrm[Long] = ???
 
-  /**
-   * Load IndexedDataset from text delimited format.
-   * @param src comma delimited URIs to read from
-   * @param schema defines format of file(s)
-   */
-  override def indexedDatasetDFSRead(src: String,
-                   schema: Schema = DefaultIndexedDatasetReadSchema, 
-                   existingRowIDs: BiMap[String, Int] = HashBiMap.create())
-            (implicit sc: DistributedContext): IndexedDataset = ???
+  override def indexedDatasetDFSRead(src: String, schema: Schema, existingRowIDs: Option[BiDictionary])
+                                    (implicit sc: DistributedContext): IndexedDataset = ???
 
-  /**
-   * Load IndexedDataset from text delimited format, one element per line
-   * @param src comma delimited URIs to read from
-   * @param schema defines format of file(s)
-   */
-  override def indexedDatasetDFSReadElements(src: String,
-                    schema: Schema = DefaultIndexedDatasetElementReadSchema,
-                    existingRowIDs: BiMap[String, Int] = HashBiMap.create())
-             (implicit sc: DistributedContext): IndexedDataset = ???
+  override def indexedDatasetDFSReadElements(src: String,schema: Schema, existingRowIDs: Option[BiDictionary])
+                                            (implicit sc: DistributedContext): IndexedDataset = ???
 }
