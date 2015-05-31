@@ -29,7 +29,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-buildtools</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
+  <version>0.10.1</version>
   <name>Mahout Build Tools</name>
 
   <packaging>jar</packaging>
@@ -121,4 +121,8 @@
       </build>
     </profile>
   </profiles>
+
+  <scm>
+    <tag>mahout-0.10.1</tag>
+  </scm>
 </project>
