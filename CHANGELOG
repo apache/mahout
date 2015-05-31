@@ -1,6 +1,6 @@
 Mahout Change Log
 
-Release 0.10.1 - unreleased
+Release 0.10.1 - 2015-05-31
 
   MAHOUT-1704: Pare down dependency jar for h2o (apalumbo)
 
