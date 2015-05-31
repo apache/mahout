@@ -19,11 +19,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>apache-mahout</artifactId>
+    <artifactId>mahout</artifactId>
     <version>0.10.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>mahout-distribution</artifactId>
+  <artifactId>apache-mahout-distribution</artifactId>
   <name>Mahout Release Package</name>
   <description>Distribution Package</description>
   <packaging>pom</packaging>
