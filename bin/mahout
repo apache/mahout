@@ -222,10 +222,6 @@ then
 
   fi
 
-  # add release dependencies to CLASSPATH
-  for f in $MAHOUT_HOME/lib/*.jar; do
-    CLASSPATH=${CLASSPATH}:$f;
-  done
 else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/hdfs/target/classes
@@ -239,13 +235,11 @@ else
 fi
 
 # add development dependencies to CLASSPATH
-if [ "$SPARK" != "1" ]; then
-  for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
-    CLASSPATH=${CLASSPATH}:$f;
-  done
+ if [ "$SPARK" != "1" ]; then
+  for f in $MAHOUT_HOME/examples/target/dependency/hadoop*.jar; do
+  CLASSPATH=${CLASSPATH}:$f;
+ done
 fi
-
-
 # cygwin path translation
 if $cygwin; then
   CLASSPATH=`cygpath -p -w "$CLASSPATH"`
