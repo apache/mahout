@@ -1,66 +1,79 @@
 package org.apache.mahout.flinkbindings
 
+import java.util.Collection
 import scala.reflect.ClassTag
-import org.apache.flink.api.scala.DataSet
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
+import scala.collection.JavaConverters._
+import com.google.common.collect._
 import org.apache.mahout.math._
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.Vector
-import org.apache.mahout.math.drm.BCast
-import org.apache.mahout.math.drm.CacheHint
-import org.apache.mahout.math.drm.CheckpointedDrm
-import org.apache.mahout.math.drm.DistributedContext
-import org.apache.mahout.math.drm.DistributedEngine
-import org.apache.mahout.math.drm.DrmLike
-import org.apache.mahout.math.indexeddataset.DefaultIndexedDatasetElementReadSchema
-import org.apache.mahout.math.indexeddataset.DefaultIndexedDatasetReadSchema
-import org.apache.mahout.math.indexeddataset.IndexedDataset
-import org.apache.mahout.math.indexeddataset.Schema
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.indexeddataset._
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import com.google.common.collect.BiMap
-import com.google.common.collect.HashBiMap
-import scala.collection.JavaConverters._
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.java.typeutils.TypeExtractor
 import org.apache.mahout.math.drm.DrmTuple
-import java.util.Collection
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.flinkbindings.blas._
-import org.apache.mahout.math.drm.logical.OpAx
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.mahout.math.drm.logical.OpAt
-import org.apache.mahout.math.drm.logical.OpAtx
-import org.apache.mahout.math.drm.logical.OpAtx
-import org.apache.mahout.math.drm.logical.OpAtB
-import org.apache.mahout.math.drm.logical.OpABt
-import org.apache.mahout.math.drm.logical.OpAtB
-import org.apache.mahout.math.drm.logical.OpAtA
-import org.apache.mahout.math.drm.logical.OpAewScalar
-import org.apache.mahout.math.drm.logical.OpAewB
-import org.apache.mahout.math.drm.logical.OpCbind
-import org.apache.mahout.math.drm.logical.OpRbind
-import org.apache.mahout.math.drm.logical.OpMapBlock
-import org.apache.mahout.math.drm.logical.OpRowRange
-import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.common.functions.ReduceFunction
+import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.math.indexeddataset.BiDictionary
+import org.apache.mahout.flinkbindings._
+import org.apache.mahout.flinkbindings.drm._
+import org.apache.mahout.flinkbindings.blas._
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.common.functions._
+import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.java.typeutils.TypeExtractor
+import org.apache.flink.api.scala.DataSet
+import org.apache.flink.api.java.io.TypeSerializerInputFormat
+import org.apache.flink.api.common.io.SerializedInputFormat
+import org.apache.hadoop.mapred.JobConf
+import org.apache.hadoop.mapred.SequenceFileInputFormat
+import org.apache.hadoop.mapred.FileInputFormat
+import org.apache.mahout.flinkbindings.io._
+import org.apache.hadoop.io.Writable
+import org.apache.flink.api.java.tuple.Tuple2
 
 object FlinkEngine extends DistributedEngine {
 
-  /** Second optimizer pass. Translate previously rewritten logical pipeline into physical engine plan. */
+  // By default, use Hadoop 1 utils
+  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+
+  /**
+   * Load DRM from hdfs (as in Mahout DRM format).
+   * 
+   * @param path The DFS path to load from
+   * @param parMin Minimum parallelism after load (equivalent to #par(min=...)).
+   */
+  override def drmDfsRead(path: String, parMin: Int = 0)
+                         (implicit dc: DistributedContext): CheckpointedDrm[_] = {
+    val metadata = hdfsUtils.readDrmHeader(path)
+    val unwrapKey = metadata.unwrapKeyFunction
+
+    val job = new JobConf
+    val hadoopInput = new SequenceFileInputFormat[Writable, VectorWritable]
+    FileInputFormat.addInputPath(job, new org.apache.hadoop.fs.Path(path))
+
+    val writables = dc.env.createHadoopInput(hadoopInput, classOf[Writable], classOf[VectorWritable], job)
+
+    val res = writables.map(new MapFunction[Tuple2[Writable, VectorWritable], (Any, Vector)] {
+      def map(tuple: Tuple2[Writable, VectorWritable]): (Any, Vector) = {
+        unwrapKey(tuple.f0) -> tuple.f1
+      }
+    })
+
+    datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+  }
+
+  override def indexedDatasetDFSRead(src: String, schema: Schema, existingRowIDs: Option[BiDictionary])
+                                    (implicit sc: DistributedContext): IndexedDataset = ???
+
+  override def indexedDatasetDFSReadElements(src: String,schema: Schema, existingRowIDs: Option[BiDictionary])
+                                            (implicit sc: DistributedContext): IndexedDataset = ???
+
+
+  /** 
+   * Translates logical plan into Flink execution plan. 
+   **/
   override def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
     // Flink-specific Physical Plan translation.
     val drm = flinkTranslate(plan)
-
-    val newcp = new CheckpointedFlinkDrm(
-      ds = drm.deblockify.ds,
-      _nrow = plan.nrow,
-      _ncol = plan.ncol
-    )
-
+    val newcp = new CheckpointedFlinkDrm(ds = drm.deblockify.ds, _nrow = plan.nrow, _ncol = plan.ncol)
     newcp.cache()
   }
 
@@ -117,11 +130,10 @@ object FlinkEngine extends DistributedEngine {
     case cp: CheckpointedFlinkDrm[K] => new RowsFlinkDrm(cp.ds, cp.ncol)
     case _ => throw new NotImplementedError(s"operator $oper is not implemented yet")
   }
-  
 
-  def translate[K: ClassTag](oper: DrmLike[K]): DataSet[K] = ???
-
-  /** Engine-specific colSums implementation based on a checkpoint. */
+  /** 
+   * returns a vector that contains a column-wise sum from DRM 
+   */
   override def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val sum = drm.ds.map(new MapFunction[(K, Vector), Vector] {
       def map(tuple: (K, Vector)): Vector = tuple._2
@@ -129,18 +141,23 @@ object FlinkEngine extends DistributedEngine {
       def reduce(v1: Vector, v2: Vector) = v1 + v2
     })
 
-    val list = CheckpointedFlinkDrm.flinkCollect(sum, "FlinkEngine colSums()")
+    val list = sum.collect.asScala.toList
     list.head
   }
 
   /** Engine-specific numNonZeroElementsPerColumn implementation based on a checkpoint. */
   override def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector = ???
 
-  /** Engine-specific colMeans implementation based on a checkpoint. */
+  /** 
+   * returns a vector that contains a column-wise mean from DRM 
+   */
   override def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
     drm.colSums() / drm.nrow
   }
 
+  /**
+   * Calculates the element-wise squared norm of a matrix
+   */
   override def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double = {
     val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
       def map(tuple: (K, Vector)): Double = tuple match {
@@ -150,7 +167,7 @@ object FlinkEngine extends DistributedEngine {
       def reduce(v1: Double, v2: Double) = v1 + v2
     })
 
-    val list = CheckpointedFlinkDrm.flinkCollect(sumOfSquares, "FlinkEngine norm()")
+    val list = sumOfSquares.collect.asScala.toList
     list.head
   }
 
@@ -160,29 +177,21 @@ object FlinkEngine extends DistributedEngine {
   /** Broadcast support */
   override def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix] = ???
 
-  /**
-   * Load DRM from hdfs (as in Mahout DRM format).
-   * <P/>
-   * @param path The DFS path to load from
-   * @param parMin Minimum parallelism after load (equivalent to #par(min=...)).
-   */
-  override def drmDfsRead(path: String, parMin: Int = 0)
-                         (implicit sc: DistributedContext): CheckpointedDrm[_] = ???
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
   override def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
-                                           (implicit sc: DistributedContext): CheckpointedDrm[Int] = {
+                                           (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
     val parallelDrm = parallelize(m, numPartitions)
     new CheckpointedFlinkDrm(ds=parallelDrm, _nrow=m.numRows(), _ncol=m.numCols())
   }
 
   private[flinkbindings] def parallelize(m: Matrix, parallelismDegree: Int)
-      (implicit sc: DistributedContext): DrmDataSet[Int] = {
+      (implicit dc: DistributedContext): DrmDataSet[Int] = {
     val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
     val rowsJava: Collection[DrmTuple[Int]]  = rows.asJava
 
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    sc.env.fromCollection(rowsJava, dataSetType).setParallelism(parallelismDegree)
+    dc.env.fromCollection(rowsJava, dataSetType).setParallelism(parallelismDegree)
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
@@ -196,10 +205,4 @@ object FlinkEngine extends DistributedEngine {
   /** Creates empty DRM with non-trivial height */
   override def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
                                       (implicit sc: DistributedContext): CheckpointedDrm[Long] = ???
-
-  override def indexedDatasetDFSRead(src: String, schema: Schema, existingRowIDs: Option[BiDictionary])
-                                    (implicit sc: DistributedContext): IndexedDataset = ???
-
-  override def indexedDatasetDFSReadElements(src: String,schema: Schema, existingRowIDs: Option[BiDictionary])
-                                            (implicit sc: DistributedContext): IndexedDataset = ???
 }

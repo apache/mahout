@@ -11,5 +11,5 @@ package object blas {
   def tuple_1[K: ClassTag] = new KeySelector[(Int, K), Integer] {
     def getKey(tuple: Tuple2[Int, K]): Integer = tuple._1
   }
-  
+
 }

@@ -20,13 +20,24 @@ import scala.collection.JavaConverters._
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.java.DataSet
+import org.apache.hadoop.io.Writable
+import org.apache.hadoop.io.IntWritable
+import org.apache.hadoop.io.Text
+import org.apache.hadoop.io.LongWritable
+import org.apache.mahout.math.VectorWritable
+import org.apache.mahout.math.Vector
+import org.apache.hadoop.mapred.SequenceFileOutputFormat
+import org.apache.hadoop.mapred.JobConf
+import org.apache.hadoop.mapred.FileOutputFormat
+import org.apache.flink.api.java.tuple.Tuple2
+import org.apache.flink.api.java.hadoop.mapred.HadoopOutputFormat
 
 class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
-  private var _nrow: Long = CheckpointedFlinkDrm.UNKNOWN,
-  private var _ncol: Int = CheckpointedFlinkDrm.UNKNOWN,
-  // private val _cacheStorageLevel: StorageLevel = StorageLevel.MEMORY_ONLY,
-  override protected[mahout] val partitioningTag: Long = Random.nextLong(),
-  private var _canHaveMissingRows: Boolean = false) extends CheckpointedDrm[K] {
+      private var _nrow: Long = CheckpointedFlinkDrm.UNKNOWN,
+      private var _ncol: Int = CheckpointedFlinkDrm.UNKNOWN,
+      override protected[mahout] val partitioningTag: Long = Random.nextLong(),
+      private var _canHaveMissingRows: Boolean = false
+  ) extends CheckpointedDrm[K] {
 
   lazy val nrow: Long = if (_nrow >= 0) _nrow else computeNRow
   lazy val ncol: Int = if (_ncol >= 0) _ncol else computeNCol
@@ -38,7 +49,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       def reduce(a1: Long, a2: Long) = a1 + a2
     })
 
-    val list = CheckpointedFlinkDrm.flinkCollect(count, "CheckpointedFlinkDrm computeNRow()")
+    val list = count.collect().asScala.toList
     list.head
   }
 
@@ -49,7 +60,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       def reduce(a1: Int, a2: Int) = Math.max(a1, a2)
     })
 
-    val list = CheckpointedFlinkDrm.flinkCollect(max, "CheckpointedFlinkDrm computeNCol()")
+    val list = max.collect().asScala.toList
     list.head
   }
 
@@ -69,7 +80,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = this
 
   def collect: Matrix = {
-    val data = CheckpointedFlinkDrm.flinkCollect(ds, "Checkpointed Flink Drm collect()")
+    val data = ds.collect().asScala.toList
     val isDense = data.forall(_._2.isDense)
 
     val m = if (isDense) {
@@ -98,7 +109,42 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     m
   }
 
-  def dfsWrite(path: String) = ???
+  def dfsWrite(path: String): Unit = {
+    val env = ds.getExecutionEnvironment
+
+    val keyTag = implicitly[ClassTag[K]]
+    val convertKey = keyToWritableFunc(keyTag)
+
+    val writableDataset = ds.map(new MapFunction[(K, Vector), Tuple2[Writable, VectorWritable]] {
+      def map(tuple: (K, Vector)): Tuple2[Writable, VectorWritable] = tuple match {
+        case (idx, vec) => new Tuple2(convertKey(idx), new VectorWritable(vec))
+      }
+    })
+
+    val job = new JobConf
+    val sequenceFormat = new SequenceFileOutputFormat[Writable, VectorWritable]
+    FileOutputFormat.setOutputPath(job, new org.apache.hadoop.fs.Path(path))
+
+    val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
+    writableDataset.output(hadoopOutput)
+
+    env.execute(s"dfsWrite($path)")
+  }
+
+  private def keyToWritableFunc[K: ClassTag](keyTag: ClassTag[K]): (K) => Writable = {
+    if (keyTag.runtimeClass == classOf[Int]) { 
+      (x: K) => new IntWritable(x.asInstanceOf[Int])
+    } else if (keyTag.runtimeClass == classOf[String]) {
+      (x: K) => new Text(x.asInstanceOf[String]) 
+    } else if (keyTag.runtimeClass == classOf[Long]) {
+      (x: K) => new LongWritable(x.asInstanceOf[Long]) 
+    } else if (classOf[Writable].isAssignableFrom(keyTag.runtimeClass)) { 
+      (x: K) => x.asInstanceOf[Writable] 
+    } else { 
+      throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(keyTag))
+    }
+  }
+
   def newRowCardinality(n: Int): CheckpointedDrm[K] = ???
 
   override val context: DistributedContext = ds.getExecutionEnvironment
@@ -107,15 +153,5 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
 
 object CheckpointedFlinkDrm {
   val UNKNOWN = -1
-
-  // needed for backwards compatibility with flink 0.8.1
-  def flinkCollect[K](dataset: DataSet[K], jobName: String = "flinkCollect()"): List[K] = {
-    val dataJavaList = new ArrayList[K]
-    val outputFormat = new LocalCollectionOutputFormat[K](dataJavaList)
-    dataset.output(outputFormat)
-    val data = dataJavaList.asScala
-    dataset.getExecutionEnvironment.execute(jobName)
-    data.toList
-  }
 
 }
