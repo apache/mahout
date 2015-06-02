@@ -18,6 +18,7 @@
 package org.apache.mahout.math.decompositions
 
 import scala.reflect.ClassTag
+import org.apache.mahout.logging._
 import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
@@ -27,7 +28,7 @@ import org.apache.log4j.Logger
 
 object DQR {
 
-  private val log = Logger.getLogger(DQR.getClass)
+  private final implicit val log = getLog(DQR.getClass)
 
   /**
    * Distributed _thin_ QR. A'A must fit in a memory, i.e. if A is m x n, then n should be pretty
@@ -41,19 +42,19 @@ object DQR {
   def dqrThin[K: ClassTag](drmA: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
 
     if (drmA.ncol > 5000)
-      log.warn("A is too fat. A'A must fit in memory and easily broadcasted.")
+      warn("A is too fat. A'A must fit in memory and easily broadcasted.")
 
     implicit val ctx = drmA.context
 
     val AtA = (drmA.t %*% drmA).checkpoint()
     val inCoreAtA = AtA.collect
 
-    if (log.isDebugEnabled) log.debug("A'A=\n%s\n".format(inCoreAtA))
+    trace("A'A=\n%s\n".format(inCoreAtA))
 
     val ch = chol(inCoreAtA)
     val inCoreR = (ch.getL cloned) t
 
-    if (log.isDebugEnabled) log.debug("R=\n%s\n".format(inCoreR))
+    trace("R=\n%s\n".format(inCoreR))
 
     if (checkRankDeficiency && !ch.isPositiveDefinite)
       throw new IllegalArgumentException("R is rank-deficient.")

@@ -114,7 +114,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filterColumn", "1"))
   */
 
-  test("ItemSimilarityDriver, non-full-spec CSV") {
+  ignore("ItemSimilarityDriver, non-full-spec CSV") {
+//  test("ItemSimilarityDriver, non-full-spec CSV") {
 
     val InFile = TmpDir + "in-file.csv/" //using part files, not single file
     val OutPath = TmpDir + "similarity-matrices/"
@@ -168,7 +169,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
 
 
-  test("ItemSimilarityDriver TSV ") {
+//  test("ItemSimilarityDriver TSV ") {
+  ignore("ItemSimilarityDriver TSV ") {
 
     val InFile = TmpDir + "in-file.tsv/"
     val OutPath = TmpDir + "similarity-matrices/"
@@ -220,7 +222,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("ItemSimilarityDriver log-ish files") {
+//  test("ItemSimilarityDriver log-ish files") {
+  ignore("ItemSimilarityDriver log-ish files") {
 
     val InFile = TmpDir + "in-file.log/"
     val OutPath = TmpDir + "similarity-matrices/"
@@ -271,7 +274,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("ItemSimilarityDriver legacy supported file format") {
+//  test("ItemSimilarityDriver legacy supported file format") {
+  ignore("ItemSimilarityDriver legacy supported file format") {
 
     val InDir = TmpDir + "in-dir/"
     val InFilename = "in-file.tsv"
@@ -314,7 +318,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("ItemSimilarityDriver write search engine output") {
+//  test("ItemSimilarityDriver write search engine output") {
+  ignore("ItemSimilarityDriver write search engine output") {
 
     val InDir = TmpDir + "in-dir/"
     val InFilename = "in-file.tsv"
@@ -358,7 +363,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("ItemSimilarityDriver recursive file discovery using filename patterns") {
+//  test("ItemSimilarityDriver recursive file discovery using filename patterns") {
+  ignore("ItemSimilarityDriver recursive file discovery using filename patterns") {
     //directory structure using the following
     // tmp/data/m1.tsv
     // tmp/data/more-data/another-dir/m2.tsv
@@ -433,7 +439,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("ItemSimilarityDriver, two input paths") {
+//  test("ItemSimilarityDriver, two input paths") {
+  ignore("ItemSimilarityDriver, two input paths") {
 
     val InFile1 = TmpDir + "in-file1.csv/" //using part files, not single file
     val InFile2 = TmpDir + "in-file2.csv/" //using part files, not single file
@@ -486,7 +493,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("ItemSimilarityDriver, two inputs of different dimensions") {
+//  test("ItemSimilarityDriver, two inputs of different dimensions") {
+  ignore("ItemSimilarityDriver, two inputs of different dimensions") {
 
     val InFile1 = TmpDir + "in-file1.csv/" //using part files, not single file
     val InFile2 = TmpDir + "in-file2.csv/" //using part files, not single file
@@ -553,7 +561,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("ItemSimilarityDriver cross similarity two separate items spaces") {
+//  test("ItemSimilarityDriver cross similarity two separate items spaces") {
+  ignore("ItemSimilarityDriver cross similarity two separate items spaces") {
     /* cross-similarity with category views, same user space
             	phones	tablets	mobile_acc	soap
           u1	0	      1	      1	          0
@@ -617,7 +626,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("A.t %*% B after changing row cardinality of A") {
+//  test("A.t %*% B after changing row cardinality of A") {
+  ignore("A.t %*% B after changing row cardinality of A") {
     // todo: move to math tests but this is Spark specific
 
     val a = dense(
@@ -648,7 +658,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
     val bp = 0
   }
 
-  test("Changing row cardinality of an IndexedDataset") {
+//  test("Changing row cardinality of an IndexedDataset") {
+  ignore("Changing row cardinality of an IndexedDataset") {
 
     val a = dense(
       (1.0, 1.0))
@@ -662,7 +673,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-  test("ItemSimilarityDriver cross similarity two separate items spaces, missing rows in B") {
+//  test("ItemSimilarityDriver cross similarity two separate items spaces, missing rows in B") {
+  ignore("ItemSimilarityDriver cross similarity two separate items spaces, missing rows in B") {
     /* cross-similarity with category views, same user space
             	phones	tablets	mobile_acc	soap
             u1	0	      1	      1	          0

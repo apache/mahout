@@ -15,28 +15,34 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.scalabindings
+package org.apache.mahout.math.flavor;
 
-import org.apache.mahout.math._
+/** STRUCTURE HINT */
+public enum TraversingStructureEnum {
 
-class DoubleScalarOps(val x:Double) extends AnyVal{
+  UNKNOWN,
 
-  import RLikeOps._
+  /**
+   * Backing vectors are directly available as row views.
+   */
+  ROWWISE,
 
-  def +(that:Matrix) = that + x
+  /**
+   * Column vectors are directly available as column views.
+   */
+  COLWISE,
 
-  def +(that:Vector) = that + x
+  /**
+   * Only some row-wise vectors are really present (can use iterateNonEmpty). Corresponds to
+   * [[org.apache.mahout.math.SparseMatrix]].
+   */
+  SPARSEROWWISE,
 
-  def *(that:Matrix) = that * x
+  SPARSECOLWISE,
 
-  def *(that:Vector) = that * x
+  SPARSEHASH,
 
-  def -(that:Matrix) = x -: that
+  VECTORBACKED,
 
-  def -(that:Vector) = x -: that
-
-  def /(that:Matrix) = x /: that
-
-  def /(that:Vector) = x /: that
-
+  BLOCKIFIED
 }

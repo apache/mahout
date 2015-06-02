@@ -23,22 +23,18 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.sparkbindings._
 
 /** Encapsulates either DrmRdd[K] or BlockifiedDrmRdd[K] */
-class DrmRddInput[K: ClassTag](
-    private val rowWiseSrc: Option[( /*ncol*/ Int, /*rdd*/ DrmRdd[K])] = None,
-    private val blockifiedSrc: Option[BlockifiedDrmRdd[K]] = None
-    ) {
+class DrmRddInput[K: ClassTag](private val input: Either[DrmRdd[K], BlockifiedDrmRdd[K]]) {
 
-  assert(rowWiseSrc.isDefined || blockifiedSrc.isDefined, "Undefined input")
+  private[sparkbindings] lazy val backingRdd = input.left.getOrElse(input.right.get)
 
-  private lazy val backingRdd = rowWiseSrc.map(_._2).getOrElse(blockifiedSrc.get)
+  def isBlockified: Boolean = input.isRight
 
-  def isBlockified:Boolean = blockifiedSrc.isDefined
+  def isRowWise: Boolean = input.isLeft
 
-  def isRowWise:Boolean = rowWiseSrc.isDefined
+  def toDrmRdd(): DrmRdd[K] = input.left.getOrElse(deblockify(rdd = input.right.get))
 
-  def toDrmRdd(): DrmRdd[K] = rowWiseSrc.map(_._2).getOrElse(deblockify(rdd = blockifiedSrc.get))
-
-  def toBlockifiedDrmRdd() = blockifiedSrc.getOrElse(blockify(rdd = rowWiseSrc.get._2, blockncol = rowWiseSrc.get._1))
+  /** Use late binding for this. It may or may not be needed, depending on current config. */
+  def toBlockifiedDrmRdd(ncol: ⇒ Int) = input.right.getOrElse(blockify(rdd = input.left.get, blockncol = ncol))
 
   def sparkContext: SparkContext = backingRdd.sparkContext
 

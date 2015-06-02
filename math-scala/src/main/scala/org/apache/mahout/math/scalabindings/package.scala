@@ -18,11 +18,14 @@
 package org.apache.mahout.math
 
 import org.apache.mahout.math.solver.EigenDecomposition
+import collection._
+import JavaConversions._
 
 /**
  * Mahout matrices and vectors' scala syntactic sugar
  */
 package object scalabindings {
+
 
   // Reserved "ALL" range
   final val `::`: Range = null
@@ -125,7 +128,6 @@ package object scalabindings {
     val data = for (r <- rows) yield {
       r match {
         case n: Number => Array(n.doubleValue())
-        case t: Product => t.productIterator.map(_.asInstanceOf[Number].doubleValue()).toArray
         case t: Vector => Array.tabulate(t.length)(t(_))
         case t: Array[Double] => t
         case t: Iterable[_] =>
@@ -138,6 +140,7 @@ package object scalabindings {
               }
               return m
           }
+        case t: Product => t.productIterator.map(_.asInstanceOf[Number].doubleValue()).toArray
         case t: Array[Array[Double]] => if (rows.size == 1)
           return new DenseMatrix(t)
         else
@@ -164,7 +167,7 @@ package object scalabindings {
    *   (0,5)::(9,3)::Nil,
    *   (2,3.5)::(7,8)::Nil
    * )
-   * 
+   *
    * }}}
    *
    * @param rows
@@ -172,11 +175,18 @@ package object scalabindings {
    */
 
   def sparse(rows: Vector*): SparseRowMatrix = {
-    import MatrixOps._
+    import RLikeOps._
     val nrow = rows.size
     val ncol = rows.map(_.size()).max
     val m = new SparseRowMatrix(nrow, ncol)
-    m := rows
+    m := rows.map { row =>
+      if (row.length < ncol) {
+        val newRow = row.like(ncol)
+        newRow(0 until row.length) := row
+        newRow
+      }
+      else row
+    }
     m
 
   }
@@ -249,23 +259,23 @@ package object scalabindings {
     (qrdec.getQ, qrdec.getR)
   }
 
- /**
-  * Solution <tt>X</tt> of <tt>A*X = B</tt> using QR-Decomposition, where <tt>A</tt> is a square, non-singular matrix.
+  /**
+   * Solution <tt>X</tt> of <tt>A*X = B</tt> using QR-Decomposition, where <tt>A</tt> is a square, non-singular matrix.
    *
    * @param a
    * @param b
    * @return (X)
    */
   def solve(a: Matrix, b: Matrix): Matrix = {
-   import MatrixOps._
-   if (a.nrow != a.ncol) {
-     throw new IllegalArgumentException("supplied matrix A is not square")
-   }
-   val qr = new QRDecomposition(a cloned)
-   if (!qr.hasFullRank) {
-     throw new IllegalArgumentException("supplied matrix A is singular")
-   }
-   qr.solve(b)
+    import MatrixOps._
+    if (a.nrow != a.ncol) {
+      throw new IllegalArgumentException("supplied matrix A is not square")
+    }
+    val qr = new QRDecomposition(a cloned)
+    if (!qr.hasFullRank) {
+      throw new IllegalArgumentException("supplied matrix A is singular")
+    }
+    qr.solve(b)
   }
 
   /**
@@ -292,6 +302,47 @@ package object scalabindings {
     val x = solve(a, b.toColMatrix)
     x(::, 0)
   }
+
+  ///////////////////////////////////////////////////////////
+  // Elementwise unary functions. Actually this requires creating clones to avoid side effects. For
+  // efficiency reasons one may want to actually do in-place exression assignments instead, e.g.
+  //
+  // m := exp _
+
+  import RLikeOps._
+  import scala.math._
+
+  def mexp(m: Matrix): Matrix = m.cloned := exp _
+
+  def vexp(v: Vector): Vector = v.cloned := exp _
+
+  def mlog(m: Matrix): Matrix = m.cloned := log _
+
+  def vlog(v: Vector): Vector = v.cloned := log _
+
+  def mabs(m: Matrix): Matrix = m.cloned ::= (abs(_: Double))
+
+  def vabs(v: Vector): Vector = v.cloned ::= (abs(_: Double))
+
+  def msqrt(m: Matrix): Matrix = m.cloned ::= sqrt _
+
+  def vsqrt(v: Vector): Vector = v.cloned ::= sqrt _
+
+  def msignum(m: Matrix): Matrix = m.cloned ::= (signum(_: Double))
+
+  def vsignum(v: Vector): Vector = v.cloned ::= (signum(_: Double))
+
+  //////////////////////////////////////////////////////////
+  // operation funcs
+
+
+  /** Matrix-matrix unary func */
+  type MMUnaryFunc = (Matrix, Option[Matrix]) => Matrix
+  /** Binary matrix-matrix operations which may save result in-place, optionally */
+  type MMBinaryFunc = (Matrix, Matrix, Option[Matrix]) => Matrix
+  type MVBinaryFunc = (Matrix, Vector, Option[Matrix]) => Matrix
+  type VMBinaryFunc = (Vector, Matrix, Option[Matrix]) => Matrix
+  type MDBinaryFunc = (Matrix, Double, Option[Matrix]) => Matrix
 
 
 }

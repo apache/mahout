@@ -16,18 +16,28 @@
  */
 package org.apache.mahout.math.scalabindings
 
+import org.apache.mahout.math.function.Functions
 import org.apache.mahout.math.{Vector, Matrix}
 import scala.collection.JavaConversions._
 import RLikeOps._
 
 class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
 
+  /** Structure-optimized mmul */
+  def %*%(that: Matrix) = MMul(m, that, None)
+
+  def :%*%(that:Matrix) = %*%(that)
+
+  def %*%:(that: Matrix) = that :%*% m
+
   /**
-   * matrix-matrix multiplication
-   * @param that
-   * @return
+   * The "legacy" matrix-matrix multiplication.
+   *
+   * @param that right hand operand
+   * @return matrix multiplication result
+   * @deprecated use %*%
    */
-  def %*%(that: Matrix) = m.times(that)
+  def %***%(that: Matrix) = m.times(that)
 
   /**
    * matrix-vector multiplication
@@ -65,13 +75,16 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
    * @param that
    */
   def *=(that: Matrix) = {
-    m.zip(that).foreach(t => t._1.vector *= t._2.vector)
+    m.assign(that, Functions.MULT)
     m
   }
 
+  /** A *=: B is equivalent to B *= A. Included for completeness. */
+  def *=:(that: Matrix) = m *= that
+
   /** Elementwise deletion */
   def /=(that: Matrix) = {
-    m.zip(that).foreach(t => t._1.vector() /= t._2.vector)
+    m.zip(that).foreach(t ⇒ t._1.vector() /= t._2.vector)
     m
   }
 
@@ -80,15 +93,55 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
     m
   }
 
+  /** 5.0 *=: A is equivalent to A *= 5.0. Included for completeness. */
+  def *=:(that: Double) = m *= that
+
   def /=(that: Double) = {
-    m.foreach(_.vector() /= that)
+    m ::= { x ⇒ x / that }
     m
   }
 
   /** 1.0 /=: A is equivalent to A = 1.0/A in R */
   def /=:(that: Double) = {
-    m.foreach(that /=: _.vector())
+    if (that != 0.0) m := { x ⇒ that / x }
     m
+  }
+
+  def ^=(that: Double) = {
+    m ::= { x ⇒ math.pow(x, that) }
+    m
+  }
+
+  def ^(that: Double) = m.cloned ^= that
+
+  def cbind(that: Matrix): Matrix = {
+    require(m.nrow == that.nrow)
+    val mx = m.like(m.nrow, m.ncol + that.ncol)
+    mx(::, 0 until m.ncol) := m
+    mx(::, m.ncol until mx.ncol) := that
+    mx
+  }
+
+  def cbind(that: Double): Matrix = {
+    val mx = m.like(m.nrow, m.ncol + 1)
+    mx(::, 0 until m.ncol) := m
+    if (that != 0.0) mx(::, m.ncol) := that
+    mx
+  }
+
+  def rbind(that: Matrix): Matrix = {
+    require(m.ncol == that.ncol)
+    val mx = m.like(m.nrow + that.nrow, m.ncol)
+    mx(0 until m.nrow, ::) := m
+    mx(m.nrow until mx.nrow, ::) := that
+    mx
+  }
+
+  def rbind(that: Double): Matrix = {
+    val mx = m.like(m.nrow + 1, m.ncol)
+    mx(0 until m.nrow, ::) := m
+    if (that != 0.0) mx(m.nrow, ::) := that
+    mx
   }
 }
 

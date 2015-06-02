@@ -12,13 +12,14 @@ class MahoutSparkILoop extends SparkILoop {
 
   private val postInitScript =
     "import org.apache.mahout.math._" ::
-        "import scalabindings._" ::
-        "import RLikeOps._" ::
-        "import drm._" ::
-        "import RLikeDrmOps._" ::
-        "import org.apache.mahout.sparkbindings._" ::
-        "import collection.JavaConversions._" ::
-        Nil
+      "import scalabindings._" ::
+      "import RLikeOps._" ::
+      "import drm._" ::
+      "import RLikeDrmOps._" ::
+      "import decompositions._" ::
+      "import org.apache.mahout.sparkbindings._" ::
+      "import collection.JavaConversions._" ::
+      Nil
 
   override protected def postInitialization() {
     super.postInitialization()

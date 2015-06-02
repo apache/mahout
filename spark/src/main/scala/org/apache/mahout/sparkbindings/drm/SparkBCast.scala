@@ -22,4 +22,6 @@ import org.apache.spark.broadcast.Broadcast
 
 class SparkBCast[T](val sbcast: Broadcast[T]) extends BCast[T] with Serializable {
   def value: T = sbcast.value
+
+  override def close(): Unit = sbcast.unpersist()
 }

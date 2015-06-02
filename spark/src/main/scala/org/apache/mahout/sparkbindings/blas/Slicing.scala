@@ -22,6 +22,6 @@ object Slicing {
 
     // TODO: we probably need to re-shuffle result or at least cut down the partitions of 0 size
 
-    new DrmRddInput(rowWiseSrc = Some(ncol -> rdd))
+    rdd
   }
 }

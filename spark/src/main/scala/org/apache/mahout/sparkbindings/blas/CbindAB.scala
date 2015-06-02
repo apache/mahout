@@ -18,18 +18,47 @@
 package org.apache.mahout.sparkbindings.blas
 
 import org.apache.log4j.Logger
-import scala.reflect.ClassTag
+import org.apache.mahout.sparkbindings.DrmRdd
+import reflect._
 import org.apache.mahout.sparkbindings.drm.DrmRddInput
 import org.apache.mahout.math._
 import scalabindings._
 import RLikeOps._
-import org.apache.mahout.math.drm.logical.OpCbind
+import org.apache.mahout.math.drm.logical.{OpCbindScalar, OpCbind}
 import org.apache.spark.SparkContext._
 
 /** Physical cbind */
 object CbindAB {
 
   private val log = Logger.getLogger(CbindAB.getClass)
+
+  def cbindAScalar[K:ClassTag](op: OpCbindScalar[K], srcA:DrmRddInput[K]) : DrmRddInput[K] = {
+    val srcRdd = srcA.toDrmRdd()
+
+    val ncol = op.A.ncol
+    val x = op.x
+
+    val fixedRdd = if (classTag[K] == ClassTag.Int && x != 0.0)
+      fixIntConsistency(op.asInstanceOf[OpCbindScalar[Int]],
+        src = srcRdd.asInstanceOf[DrmRdd[Int]]).asInstanceOf[DrmRdd[K]]
+    else srcRdd
+
+    val left = op.leftBind
+
+    val resultRdd = fixedRdd.map { case (key, vec) =>
+      val newVec = vec.like(ncol + 1)
+      if (left) {
+        newVec(1 to ncol) := vec
+        newVec(0) = x
+      } else {
+        newVec(0 until ncol) := vec
+        newVec(ncol) = x
+      }
+      key -> newVec
+    }
+
+    resultRdd
+  }
 
   def cbindAB_nograph[K: ClassTag](op: OpCbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
 
@@ -88,7 +117,7 @@ object CbindAB {
       }
     }
 
-    new DrmRddInput(rowWiseSrc = Some(op.ncol -> rdd))
+    rdd
 
   }
 

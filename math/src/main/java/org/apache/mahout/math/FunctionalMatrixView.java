@@ -17,6 +17,9 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.flavor.BackEnum;
+import org.apache.mahout.math.flavor.MatrixFlavor;
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.IntIntFunction;
 
 /**
@@ -29,6 +32,7 @@ class FunctionalMatrixView extends AbstractMatrix {
    */
   private IntIntFunction gf;
   private boolean denseLike;
+  private MatrixFlavor flavor;
 
   public FunctionalMatrixView(int rows, int columns, IntIntFunction gf) {
     this(rows, columns, gf, false);
@@ -42,6 +46,7 @@ class FunctionalMatrixView extends AbstractMatrix {
     super(rows, columns);
     this.gf = gf;
     this.denseLike = denseLike;
+    flavor = new MatrixFlavor.FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.BLOCKIFIED, denseLike);
   }
 
   @Override

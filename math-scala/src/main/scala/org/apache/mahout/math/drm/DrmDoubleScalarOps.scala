@@ -18,7 +18,11 @@
 package org.apache.mahout.math.drm
 
 import RLikeDrmOps._
-import scala.reflect.ClassTag
+import org.apache.mahout.math._
+import org.apache.mahout.math.drm.logical.OpCbindScalar
+import scalabindings._
+import RLikeOps._
+import reflect.ClassTag
 
 class DrmDoubleScalarOps(val x:Double) extends AnyVal{
 
@@ -29,5 +33,7 @@ class DrmDoubleScalarOps(val x:Double) extends AnyVal{
   def -[K:ClassTag](that:DrmLike[K]) = x -: that
 
   def /[K:ClassTag](that:DrmLike[K]) = x /: that
+
+  def cbind[K: ClassTag](that: DrmLike[K]) = OpCbindScalar(A = that, x = x, leftBind = true)
 
 }

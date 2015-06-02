@@ -65,8 +65,8 @@ public class MatricesTest extends MahoutTestCase {
     m.set(1, 1, 33.0);
     Matrix mt = Matrices.transposedView(m);
 
-    assertTrue(!mt.viewColumn(0).isDense());
-    assertTrue(!mt.viewRow(0).isDense());
+    assertTrue(mt.viewColumn(0).isDense() == m.viewRow(0).isDense());
+    assertTrue(mt.viewRow(0).isDense() == m.viewColumn(0).isDense());
 
     m = new DenseMatrix(10,10);
     m.set(1, 1, 33.0);

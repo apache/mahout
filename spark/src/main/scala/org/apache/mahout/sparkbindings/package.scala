@@ -17,27 +17,27 @@
 
 package org.apache.mahout
 
-import org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader
-import org.apache.mahout.math.indexeddataset.Schema
-import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
-import org.apache.spark.{SparkConf, SparkContext}
 import java.io._
-import scala.collection.mutable.ArrayBuffer
-import org.apache.mahout.common.IOUtils
-import org.apache.log4j.Logger
+
+import org.apache.mahout.logging._
 import org.apache.mahout.math.drm._
-import scala.reflect.ClassTag
-import org.apache.mahout.sparkbindings.drm.{DrmRddInput, SparkBCast, CheckpointedDrmSparkOps, CheckpointedDrmSpark}
-import org.apache.spark.rdd.RDD
+import org.apache.mahout.math.{MatrixWritable, VectorWritable, Matrix, Vector}
+import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, CheckpointedDrmSparkOps, SparkBCast}
+import org.apache.mahout.util.IOUtilsScala
 import org.apache.spark.broadcast.Broadcast
-import org.apache.mahout.math.{VectorWritable, Vector, MatrixWritable, Matrix}
-import org.apache.hadoop.io.Writable
-import org.apache.spark.storage.StorageLevel
+import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkConf, SparkContext}
+
+import collection._
+import collection.generic.Growable
+import scala.reflect.ClassTag
+
+
 
 /** Public api for Spark-specific operators */
 package object sparkbindings {
 
-  private[sparkbindings] val log = Logger.getLogger("org.apache.mahout.sparkbindings")
+  private final implicit val log = getLog(`package`.getClass)
 
   /** Row-wise organized DRM rdd type */
   type DrmRdd[K] = RDD[DrmTuple[K]]
@@ -55,15 +55,11 @@ package object sparkbindings {
    * @param customJars
    * @return
    */
-  def mahoutSparkContext(
-      masterUrl: String,
-      appName: String,
-      customJars: TraversableOnce[String] = Nil,
-      sparkConf: SparkConf = new SparkConf(),
-      addMahoutJars: Boolean = true
-      ): SparkDistributedContext = {
+  def mahoutSparkContext(masterUrl: String, appName: String, customJars: TraversableOnce[String] = Nil,
+                         sparkConf: SparkConf = new SparkConf(), addMahoutJars: Boolean = true):
+  SparkDistributedContext = {
 
-    val closeables = new java.util.ArrayDeque[Closeable]()
+    val closeables = mutable.ListBuffer.empty[Closeable]
 
     try {
 
@@ -84,9 +80,9 @@ package object sparkbindings {
         sparkConf.setJars(customJars.toSeq)
       }
 
-      sparkConf.setAppName(appName).setMaster(masterUrl)
-          .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-          .set("spark.kryo.registrator", "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator")
+      sparkConf.setAppName(appName).setMaster(masterUrl).set("spark.serializer",
+        "org.apache.spark.serializer.KryoSerializer").set("spark.kryo.registrator",
+          "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator")
 
       if (System.getenv("SPARK_HOME") != null) {
         sparkConf.setSparkHome(System.getenv("SPARK_HOME"))
@@ -95,7 +91,7 @@ package object sparkbindings {
       new SparkDistributedContext(new SparkContext(config = sparkConf))
 
     } finally {
-      IOUtils.close(closeables)
+      IOUtilsScala.close(closeables)
     }
   }
 
@@ -103,19 +99,19 @@ package object sparkbindings {
 
   implicit def sc2sdc(sc: SparkContext): SparkDistributedContext = new SparkDistributedContext(sc)
 
-  implicit def dc2sc(dc:DistributedContext):SparkContext = {
-    assert (dc.isInstanceOf[SparkDistributedContext],"distributed context must be Spark-specific.")
+  implicit def dc2sc(dc: DistributedContext): SparkContext = {
+    assert(dc.isInstanceOf[SparkDistributedContext], "distributed context must be Spark-specific.")
     sdc2sc(dc.asInstanceOf[SparkDistributedContext])
   }
 
   /** Broadcast transforms */
-  implicit def sb2bc[T](b:Broadcast[T]):BCast[T] = new SparkBCast(b)
+  implicit def sb2bc[T](b: Broadcast[T]): BCast[T] = new SparkBCast(b)
 
   /** Adding Spark-specific ops */
   implicit def cpDrm2cpDrmSparkOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmSparkOps[K] =
     new CheckpointedDrmSparkOps[K](drm)
 
-  implicit def drm2cpDrmSparkOps[K:ClassTag](drm:DrmLike[K]):CheckpointedDrmSparkOps[K] = drm:CheckpointedDrm[K]
+  implicit def drm2cpDrmSparkOps[K: ClassTag](drm: DrmLike[K]): CheckpointedDrmSparkOps[K] = drm: CheckpointedDrm[K]
 
   private[sparkbindings] implicit def m2w(m: Matrix): MatrixWritable = new MatrixWritable(m)
 
@@ -123,7 +119,7 @@ package object sparkbindings {
 
   private[sparkbindings] implicit def v2w(v: Vector): VectorWritable = new VectorWritable(v)
 
-  private[sparkbindings] implicit def w2v(w:VectorWritable):Vector = w.get()
+  private[sparkbindings] implicit def w2v(w: VectorWritable): Vector = w.get()
 
   /**
    * ==Wrap existing RDD into a matrix==
@@ -141,34 +137,31 @@ package object sparkbindings {
    * @tparam K row key type
    * @return wrapped DRM
    */
-  def drmWrap[K: ClassTag](
-      rdd: DrmRdd[K],
-      nrow: Int = -1,
-      ncol: Int = -1,
-      cacheHint: CacheHint.CacheHint = CacheHint.NONE,
-      canHaveMissingRows: Boolean = false
-      ): CheckpointedDrm[K] =
+  def drmWrap[K: ClassTag](rdd: DrmRdd[K], nrow: Long = -1, ncol: Int = -1, cacheHint: CacheHint.CacheHint =
+  CacheHint.NONE, canHaveMissingRows: Boolean = false): CheckpointedDrm[K] =
 
-    new CheckpointedDrmSpark[K](
-      rdd = rdd,
-      _nrow = nrow,
-      _ncol = ncol,
-      _cacheStorageLevel = SparkEngine.cacheHint2Spark(cacheHint),
-      _canHaveMissingRows = canHaveMissingRows
-    )
+    new CheckpointedDrmSpark[K](rddInput = rdd, _nrow = nrow, _ncol = ncol, _cacheStorageLevel = SparkEngine
+      .cacheHint2Spark(cacheHint), _canHaveMissingRows = canHaveMissingRows)
+
+
+  /** Another drmWrap version that takes in vertical block-partitioned input to form the matrix. */
+  def drmWrapBlockified[K: ClassTag](blockifiedDrmRdd: BlockifiedDrmRdd[K], nrow: Long = -1, ncol: Int = -1,
+                                     cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+                                     canHaveMissingRows: Boolean = false): CheckpointedDrm[K] =
+
+    drmWrap(drm.deblockify(blockifiedDrmRdd), nrow, ncol, cacheHint, canHaveMissingRows)
 
   private[sparkbindings] def getMahoutHome() = {
     var mhome = System.getenv("MAHOUT_HOME")
     if (mhome == null) mhome = System.getProperty("mahout.home")
-    require(mhome != null, "MAHOUT_HOME is required to spawn mahout-based spark jobs" )
+    require(mhome != null, "MAHOUT_HOME is required to spawn mahout-based spark jobs")
     mhome
   }
 
   /** Acquire proper Mahout jars to be added to task context based on current MAHOUT_HOME. */
-  private[sparkbindings] def findMahoutContextJars(closeables:java.util.Deque[Closeable]) = {
+  private[sparkbindings] def findMahoutContextJars(closeables: Growable[Closeable]) = {
 
     // Figure Mahout classpath using $MAHOUT_HOME/mahout classpath command.
-
     val fmhome = new File(getMahoutHome())
     val bin = new File(fmhome, "bin")
     val exec = new File(bin, "mahout")
@@ -177,26 +170,25 @@ package object sparkbindings {
 
     val p = Runtime.getRuntime.exec(Array(exec.getAbsolutePath, "-spark", "classpath"))
 
-    closeables.addFirst(new Closeable {
+    closeables += new Closeable {
       def close() {
         p.destroy()
       }
-    })
+    }
 
     val r = new BufferedReader(new InputStreamReader(p.getInputStream))
-    closeables.addFirst(r)
+    closeables += r
 
     val w = new StringWriter()
-    closeables.addFirst(w)
+    closeables += w
 
     var continue = true;
-    val jars = new ArrayBuffer[String]()
+    val jars = new mutable.ArrayBuffer[String]()
     do {
       val cp = r.readLine()
       if (cp == null)
-        throw new IllegalArgumentException(
-          "Unable to read output from \"mahout -spark classpath\". Is SPARK_HOME defined?"
-        )
+        throw new IllegalArgumentException("Unable to read output from \"mahout -spark classpath\". Is SPARK_HOME " +
+          "defined?")
 
       val j = cp.split(File.pathSeparatorChar)
       if (j.size > 10) {
@@ -206,8 +198,7 @@ package object sparkbindings {
       }
     } while (continue)
 
-//    jars.foreach(j => log.info(j))
-
+    //    jars.foreach(j => log.info(j))
     // context specific jars
     val mcjars = jars.filter(j =>
       j.matches(".*mahout-math-\\d.*\\.jar") ||
@@ -231,6 +222,15 @@ package object sparkbindings {
     log.info("\n\n\n")
     */
     mcjars
+  }
+
+  private[sparkbindings] def validateBlockifiedDrmRdd[K](rdd: BlockifiedDrmRdd[K]): Boolean = {
+    // Mostly, here each block must contain exactly one block
+    val part1Req = rdd.mapPartitions(piter => Iterator(piter.size == 1)).reduce(_ && _)
+
+    if (!part1Req) warn("blockified rdd: condition not met: exactly 1 per partition")
+
+    return part1Req
   }
 
 }

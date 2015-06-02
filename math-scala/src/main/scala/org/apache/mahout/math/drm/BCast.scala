@@ -18,6 +18,7 @@
 package org.apache.mahout.math.drm
 
 /** Broadcast variable abstraction */
-trait BCast[T] {
+trait BCast[T] extends java.io.Closeable {
   def value:T
+
 }

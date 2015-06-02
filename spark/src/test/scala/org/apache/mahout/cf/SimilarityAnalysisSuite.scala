@@ -66,7 +66,9 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
       (0.0,                0.0,                0.6795961471815897, 0.0,                4.498681156950466))
 
 
-  test("cooccurrence [A'A], [B'A] boolbean data using LLR") {
+
+//  test("cooccurrence [A'A], [B'A] boolbean data using LLR") {
+  ignore("cooccurrence [A'A], [B'A] boolbean data using LLR") {
     val a = dense(
         (1, 1, 0, 0, 0),
         (0, 0, 1, 1, 0),
@@ -97,7 +99,8 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
 
   }
 
-  test("cooccurrence [A'A], [B'A] double data using LLR") {
+//  test("cooccurrence [A'A], [B'A] double data using LLR") {
+  ignore("cooccurrence [A'A], [B'A] double data using LLR") {
     val a = dense(
         (100000.0D, 1.0D,  0.0D,  0.0D,     0.0D),
         (     0.0D, 0.0D, 10.0D,  1.0D,     0.0D),
@@ -127,7 +130,8 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
     n should be < 1E-10
   }
 
-  test("cooccurrence [A'A], [B'A] integer data using LLR") {
+//  test("cooccurrence [A'A], [B'A] integer data using LLR") {
+  ignore("cooccurrence [A'A], [B'A] integer data using LLR") {
     val a = dense(
         ( 1000,  10,       0,    0,   0),
         (    0,   0,  -10000,   10,   0),
@@ -159,7 +163,8 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
     n should be < 1E-10
   }
 
-  test("cooccurrence two matrices with different number of columns"){
+//  test("cooccurrence two matrices with different number of columns"){
+  ignore("cooccurrence two matrices with different number of columns"){
     val a = dense(
       (1, 1, 0, 0, 0),
       (0, 0, 1, 1, 0),
@@ -242,7 +247,8 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
     assert(llr == 2.6341457841558764) // value calculated by hadoop itemsimilairty
   }
 
-  test("downsampling by number per row") {
+//  test("downsampling by number per row") {
+  ignore("downsampling by number per row") {
     val a = dense(
         (1, 1, 1, 1, 0),
         (1, 1, 1, 1, 1),

@@ -24,18 +24,20 @@ import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm.logical._
-import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, DrmRddInput}
+import org.apache.mahout.sparkbindings.drm.{cpDrmGeneric2DrmRddInput, CheckpointedDrmSpark, DrmRddInput}
 import org.apache.mahout.math._
+import scala.Predef
 import scala.reflect.ClassTag
 import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.sparkbindings.blas._
 import org.apache.hadoop.io._
-import scala.Some
-import scala.collection.JavaConversions._
+import collection._
+import JavaConversions._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.spark.rdd.RDD
 import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
+
 
 /** Spark-specific non-drm-method operations */
 object SparkEngine extends DistributedEngine {
@@ -43,32 +45,37 @@ object SparkEngine extends DistributedEngine {
   // By default, use Hadoop 1 utils
   var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
 
-  def colSums[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
+  def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
 
     drm.rdd
+
       // Throw away keys
       .map(_._2)
+
       // Fold() doesn't work with kryo still. So work around it.
-      .mapPartitions(iter => {
-      val acc = ((new DenseVector(n): Vector) /: iter)((acc, v) => acc += v)
+      .mapPartitions(iter ⇒ {
+      val acc = ((new DenseVector(n): Vector) /: iter)((acc, v) ⇒  acc += v)
       Iterator(acc)
     })
+
       // Since we preallocated new accumulator vector per partition, this must not cause any side
       // effects now.
       .reduce(_ += _)
   }
 
-  def numNonZeroElementsPerColumn[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
+  def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
 
     drm.rdd
+
       // Throw away keys
       .map(_._2)
+
       // Fold() doesn't work with kryo still. So work around it.
-      .mapPartitions(iter => {
-      val acc = ((new DenseVector(n): Vector) /: iter) { (acc, v) =>
-        v.nonZeroes().foreach { elem => acc(elem.index) += 1 }
+      .mapPartitions(iter ⇒ {
+      val acc = ((new DenseVector(n): Vector) /: iter) { (acc, v) ⇒
+        v.nonZeroes().foreach { elem ⇒  acc(elem.index) += 1}
         acc
       }
       Iterator(acc)
@@ -79,17 +86,25 @@ object SparkEngine extends DistributedEngine {
   }
 
   /** Engine-specific colMeans implementation based on a checkpoint. */
-  override def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
+  override def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector =
     if (drm.nrow == 0) drm.colSums() else drm.colSums() /= drm.nrow
 
   override def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double =
     drm.rdd
-        // Compute sum of squares of each vector
-        .map {
-      case (key, v) => v dot v
+      // Compute sum of squares of each vector
+      .map {
+      case (key, v) ⇒ v dot v
     }
-        .reduce(_ + _)
+      .reduce(_ + _)
 
+
+  /** Optional engine-specific all reduce tensor operation. */
+  override def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf:
+  BlockReduceFunc): Matrix = {
+
+    import drm._
+    drm.toBlockifiedDrmRdd(ncol = drm.ncol).map(bmf(_)).reduce(rf)
+  }
 
   /**
    * Perform default expression rewrite. Return physical plan that we can pass to exec(). <P>
@@ -104,10 +119,10 @@ object SparkEngine extends DistributedEngine {
   def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
 
     // Spark-specific Physical Plan translation.
-    val rdd = tr2phys(plan)
+    val rddInput = tr2phys(plan)
 
     val newcp = new CheckpointedDrmSpark(
-      rdd = rdd,
+      rddInput = rddInput,
       _nrow = plan.nrow,
       _ncol = plan.ncol,
       _cacheStorageLevel = cacheHint2Spark(ch),
@@ -131,7 +146,13 @@ object SparkEngine extends DistributedEngine {
    *
    * @return DRM[Any] where Any is automatically translated to value type
    */
-  def drmDfsRead (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
+  def drmDfsRead(path: String, parMin: Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
+
+    // Require that context is actually Spark context.
+    require(sc.isInstanceOf[SparkDistributedContext], "Supplied context must be for the Spark backend.")
+
+    // Extract spark context -- we need it for some operations.
+    implicit val ssc = sc.asInstanceOf[SparkDistributedContext].sc
 
     val drmMetadata = hdfsUtils.readDrmHeader(path)
     val k2vFunc = drmMetadata.keyW2ValFunc
@@ -140,8 +161,8 @@ object SparkEngine extends DistributedEngine {
     // Hadoop we must do it right after read operation).
     val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
 
-        // Immediately convert keys and value writables into value types.
-        .map { case (wKey, wVec) => k2vFunc(wKey) -> wVec.get()}
+      // Immediately convert keys and value writables into value types.
+      .map { case (wKey, wVec) ⇒ k2vFunc(wKey) -> wVec.get()}
 
     // Wrap into a DRM type with correct matrix row key class tag evident.
     drmWrap(rdd = rdd, cacheHint = CacheHint.NONE)(drmMetadata.keyClassTag.asInstanceOf[ClassTag[Any]])
@@ -149,67 +170,141 @@ object SparkEngine extends DistributedEngine {
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
-      (implicit sc: DistributedContext)
+                                  (implicit sc: DistributedContext)
   : CheckpointedDrm[Int] = {
-    new CheckpointedDrmSpark(rdd = parallelizeInCore(m, numPartitions))
+    new CheckpointedDrmSpark(rddInput = parallelizeInCore(m, numPartitions), _nrow = m.nrow, _ncol = m.ncol)
   }
 
   private[sparkbindings] def parallelizeInCore(m: Matrix, numPartitions: Int = 1)
-      (implicit sc: DistributedContext): DrmRdd[Int] = {
+                                              (implicit sc: DistributedContext): DrmRdd[Int] = {
 
-    val p = (0 until m.nrow).map(i => i -> m(i, ::))
+    val p = (0 until m.nrow).map(i => i → m(i, ::))
     sc.parallelize(p, numPartitions)
 
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
-      (implicit sc: DistributedContext)
+                                 (implicit sc: DistributedContext)
   : CheckpointedDrm[String] = {
 
     val rb = m.getRowLabelBindings
-    val p = for (i: String <- rb.keySet().toIndexedSeq) yield i -> m(rb(i), ::)
+    val p = for (i: String ← rb.keySet().toIndexedSeq) yield i → m(rb(i), ::)
 
-    new CheckpointedDrmSpark(rdd = sc.parallelize(p, numPartitions))
+    new CheckpointedDrmSpark(rddInput = sc.parallelize(p, numPartitions), _nrow = m.nrow, _ncol = m.ncol)
   }
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int = 10)
-      (implicit sc: DistributedContext): CheckpointedDrm[Int] = {
-    val rdd = sc.parallelize(0 to numPartitions, numPartitions).flatMap(part => {
+                         (implicit sc: DistributedContext): CheckpointedDrm[Int] = {
+    val rdd = sc.parallelize(0 to numPartitions, numPartitions).flatMap(part ⇒ {
       val partNRow = (nrow - 1) / numPartitions + 1
       val partStart = partNRow * part
       val partEnd = Math.min(partStart + partNRow, nrow)
 
-      for (i <- partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
+      for (i ← partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
     })
     new CheckpointedDrmSpark[Int](rdd, nrow, ncol)
   }
 
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
-      (implicit sc: DistributedContext): CheckpointedDrm[Long] = {
-    val rdd = sc.parallelize(0 to numPartitions, numPartitions).flatMap(part => {
+                             (implicit sc: DistributedContext): CheckpointedDrm[Long] = {
+    val rdd = sc.parallelize(0 to numPartitions, numPartitions).flatMap(part ⇒ {
       val partNRow = (nrow - 1) / numPartitions + 1
       val partStart = partNRow * part
       val partEnd = Math.min(partStart + partNRow, nrow)
 
-      for (i <- partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
+      for (i ← partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
     })
     new CheckpointedDrmSpark[Long](rdd, nrow, ncol)
   }
 
+  /**
+   * Convert non-int-keyed matrix to an int-keyed, computing optionally mapping from old keys
+   * to row indices in the new one. The mapping, if requested, is returned as a 1-column matrix.
+   */
+  override def drm2IntKeyed[K: ClassTag](drmX: DrmLike[K], computeMap: Boolean = false): (DrmLike[Int], Option[DrmLike[K]]) = {
+    if (classTag[K] == ClassTag.Int) {
+      drmX.asInstanceOf[DrmLike[Int]] → None
+    } else {
+
+      val drmXcp = drmX.checkpoint(CacheHint.MEMORY_ONLY)
+      val ncol = drmXcp.asInstanceOf[CheckpointedDrmSpark[K]]._ncol
+      val nrow = drmXcp.asInstanceOf[CheckpointedDrmSpark[K]]._nrow
+
+      // Compute sequential int key numbering.
+      val (intRdd, keyMap) = blas.rekeySeqInts(rdd = drmXcp.rdd, computeMap = computeMap)
+
+      // Convert computed key mapping to a matrix.
+      val mxKeyMap = keyMap.map { rdd =>
+        drmWrap(rdd = rdd.map { case (key, ordinal) ⇒ key → (dvec(ordinal):Vector)}, ncol = 1, nrow = nrow)
+      }
+
+
+      drmWrap(rdd = intRdd, ncol = ncol) → mxKeyMap
+  }
+
+  }
+
+
+  /**
+   * (Optional) Sampling operation. Consistent with Spark semantics of the same.
+   * @param drmX
+   * @param fraction
+   * @param replacement
+   * @tparam K
+   * @return
+   */
+  override def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean): DrmLike[K] = {
+
+    // We do want to take ncol if already computed, if not, then we don't want to trigger computation
+    // here.
+    val ncol = drmX match {
+      case cp: CheckpointedDrmSpark[K] ⇒ cp._ncol
+      case _ ⇒ -1
+    }
+    val sample = drmX.rdd.sample(withReplacement = replacement, fraction = fraction)
+    if (classTag[K] != ClassTag.Int) return drmWrap(sample, ncol = ncol)
+
+    // K == Int: Int-keyed sample. rebase int counts.
+    drmWrap(rdd = blas.rekeySeqInts(rdd = sample, computeMap = false)._1, ncol = ncol).asInstanceOf[DrmLike[K]]
+  }
+
+
+  override def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples: Int, replacement: Boolean): Matrix = {
+
+    val ncol = drmX match {
+      case cp: CheckpointedDrmSpark[K] ⇒ cp._ncol
+      case _ ⇒ -1
+    }
+
+    // I think as of the time of this writing, takeSample() in Spark is biased. It is not a true
+    // hypergeometric sampler. But it is faster than a true hypergeometric/categorical samplers
+    // would be.
+    val sample = drmX.rdd.takeSample(withReplacement = replacement, num = numSamples)
+    val isSparse = sample.exists { case (_, vec) ⇒ !vec.isDense }
+
+    val vectors = sample.map(_._2)
+    val labels = sample.view.zipWithIndex.map { case ((key, _), idx) ⇒ key.toString → (idx:Integer) }.toMap
+
+    val mx:Matrix = if (isSparse) sparse(vectors:_*) else dense(vectors)
+    mx.setRowLabelBindings(labels)
+
+    mx
+  }
+
   private[mahout] def cacheHint2Spark(cacheHint: CacheHint.CacheHint): StorageLevel = cacheHint match {
-    case CacheHint.NONE => StorageLevel.NONE
-    case CacheHint.DISK_ONLY => StorageLevel.DISK_ONLY
-    case CacheHint.DISK_ONLY_2 => StorageLevel.DISK_ONLY_2
-    case CacheHint.MEMORY_ONLY => StorageLevel.MEMORY_ONLY
-    case CacheHint.MEMORY_ONLY_2 => StorageLevel.MEMORY_ONLY_2
-    case CacheHint.MEMORY_ONLY_SER => StorageLevel.MEMORY_ONLY_SER
-    case CacheHint.MEMORY_ONLY_SER_2 => StorageLevel.MEMORY_ONLY_SER_2
-    case CacheHint.MEMORY_AND_DISK => StorageLevel.MEMORY_AND_DISK
-    case CacheHint.MEMORY_AND_DISK_2 => StorageLevel.MEMORY_AND_DISK_2
-    case CacheHint.MEMORY_AND_DISK_SER => StorageLevel.MEMORY_AND_DISK_SER
-    case CacheHint.MEMORY_AND_DISK_SER_2 => StorageLevel.MEMORY_AND_DISK_SER_2
+    case CacheHint.NONE ⇒ StorageLevel.NONE
+    case CacheHint.DISK_ONLY ⇒ StorageLevel.DISK_ONLY
+    case CacheHint.DISK_ONLY_2 ⇒ StorageLevel.DISK_ONLY_2
+    case CacheHint.MEMORY_ONLY ⇒ StorageLevel.MEMORY_ONLY
+    case CacheHint.MEMORY_ONLY_2 ⇒ StorageLevel.MEMORY_ONLY_2
+    case CacheHint.MEMORY_ONLY_SER ⇒ StorageLevel.MEMORY_ONLY_SER
+      case CacheHint.MEMORY_ONLY_SER_2 ⇒ StorageLevel.MEMORY_ONLY_SER_2
+    case CacheHint.MEMORY_AND_DISK ⇒ StorageLevel.MEMORY_AND_DISK
+    case CacheHint.MEMORY_AND_DISK_2 ⇒ StorageLevel.MEMORY_AND_DISK_2
+    case CacheHint.MEMORY_AND_DISK_SER ⇒ StorageLevel.MEMORY_AND_DISK_SER
+    case CacheHint.MEMORY_AND_DISK_SER_2 ⇒ StorageLevel.MEMORY_AND_DISK_SER_2
   }
 
   /** Translate previously optimized physical plan */
@@ -221,31 +316,32 @@ object SparkEngine extends DistributedEngine {
       // If there are any such cases, they must go away in pass1. If they were not, then it wasn't
       // the A'A case but actual transposition intent which should be removed from consideration
       // (we cannot do actual flip for non-int-keyed arguments)
-      case OpAtAnyKey(_) =>
+      case OpAtAnyKey(_) ⇒
         throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
-      case op@OpAt(a) => At.at(op, tr2phys(a)(op.classTagA))
-      case op@OpABt(a, b) => ABt.abt(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpAtB(a, b) => AtB.atb_nograph(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB),
-        zippable = a.partitioningTag == b.partitioningTag)
-      case op@OpAtA(a) => AtA.at_a(op, tr2phys(a)(op.classTagA))
-      case op@OpAx(a, x) => Ax.ax_with_broadcast(op, tr2phys(a)(op.classTagA))
-      case op@OpAtx(a, x) => Ax.atx_with_broadcast(op, tr2phys(a)(op.classTagA))
-      case op@OpAewB(a, b, opId) => AewB.a_ew_b(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpCbind(a, b) => CbindAB.cbindAB_nograph(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpRbind(a, b) => RbindAB.rbindAB(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpAewScalar(a, s, _) => AewB.a_ew_scalar(op, tr2phys(a)(op.classTagA), s)
-      case op@OpRowRange(a, _) => Slicing.rowRange(op, tr2phys(a)(op.classTagA))
-      case op@OpTimesRightMatrix(a, _) => AinCoreB.rightMultiply(op, tr2phys(a)(op.classTagA))
+      case op@OpAt(a) ⇒ At.at(op, tr2phys(a)(op.classTagA))
+      case op@OpABt(a, b) ⇒ ABt.abt(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpAtB(a, b) ⇒ AtB.atb(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpAtA(a) ⇒ AtA.at_a(op, tr2phys(a)(op.classTagA))
+      case op@OpAx(a, x) ⇒ Ax.ax_with_broadcast(op, tr2phys(a)(op.classTagA))
+      case op@OpAtx(a, x) ⇒ Ax.atx_with_broadcast(op, tr2phys(a)(op.classTagA))
+      case op@OpAewUnaryFunc(a, _, _) ⇒ AewB.a_ew_func(op, tr2phys(a)(op.classTagA))
+      case op@OpAewUnaryFuncFusion(a, _) ⇒ AewB.a_ew_func(op, tr2phys(a)(op.classTagA))
+      case op@OpAewB(a, b, opId) ⇒ AewB.a_ew_b(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpCbind(a, b) ⇒ CbindAB.cbindAB_nograph(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpCbindScalar(a, _, _) ⇒ CbindAB.cbindAScalar(op, tr2phys(a)(op.classTagA))
+      case op@OpRbind(a, b) ⇒ RbindAB.rbindAB(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpAewScalar(a, s, _) ⇒ AewB.a_ew_scalar(op, tr2phys(a)(op.classTagA), s)
+      case op@OpRowRange(a, _) ⇒ Slicing.rowRange(op, tr2phys(a)(op.classTagA))
+      case op@OpTimesRightMatrix(a, _) ⇒ AinCoreB.rightMultiply(op, tr2phys(a)(op.classTagA))
       // Custom operators, we just execute them
-      case blockOp: OpMapBlock[K, _] => MapBlock.exec(
+      case blockOp: OpMapBlock[K, _] ⇒ MapBlock.exec(
         src = tr2phys(blockOp.A)(blockOp.classTagA),
-        ncol = blockOp.ncol,
-        bmf = blockOp.bmf
+        operator = blockOp
       )
-      case op@OpPar(a,_,_) => Par.exec(op,tr2phys(a)(op.classTagA))
-      case cp: CheckpointedDrm[K] => new DrmRddInput[K](rowWiseSrc = Some((cp.ncol, cp.rdd)))
-      case _ => throw new IllegalArgumentException("Internal:Optimizer has no exec policy for operator %s."
-          .format(oper))
+      case op@OpPar(a, _, _) ⇒ Par.exec(op, tr2phys(a)(op.classTagA))
+      case cp: CheckpointedDrm[K] ⇒ cp.rdd: DrmRddInput[K]
+      case _ ⇒ throw new IllegalArgumentException("Internal:Optimizer has no exec policy for operator %s."
+        .format(oper))
 
     }
   }
