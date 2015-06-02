@@ -92,4 +92,8 @@ class FunctionalMatrixView extends AbstractMatrix {
     return new MatrixVectorView(this, 0, column, 1, 0, denseLike);
   }
 
+  @Override
+  public MatrixFlavor getFlavor() {
+    return flavor;
+  }
 }

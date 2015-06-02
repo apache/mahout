@@ -132,89 +132,89 @@ class RLikeMatrixOpsSuite extends FunSuite with MahoutSuite {
     }
 
     // Dense matrix tests.
-//    println(s"Ad %*% Bd: ${getMmulAvgs(mxAd, mxBd, n)}")
-//    println(s"Ad' %*% Bd: ${getMmulAvgs(mxAd.t, mxBd, n)}")
-//    println(s"Ad %*% Bd': ${getMmulAvgs(mxAd, mxBd.t, n)}")
-//    println(s"Ad' %*% Bd': ${getMmulAvgs(mxAd.t, mxBd.t, n)}")
-//    println(s"Ad'' %*% Bd'': ${getMmulAvgs(mxAd.t.t, mxBd.t.t, n)}")
-//    println
-//
-//    // Sparse row matrix tests.
-//    println(s"Asr %*% Bsr: ${getMmulAvgs(mxAsr, mxBsr, n)}")
-//    println(s"Asr' %*% Bsr: ${getMmulAvgs(mxAsr.t, mxBsr, n)}")
-//    println(s"Asr %*% Bsr': ${getMmulAvgs(mxAsr, mxBsr.t, n)}")
-//    println(s"Asr' %*% Bsr': ${getMmulAvgs(mxAsr.t, mxBsr.t, n)}")
-//    println(s"Asr'' %*% Bsr'': ${getMmulAvgs(mxAsr.t.t, mxBsr.t.t, n)}")
-//    println
-//
-//    // Sparse matrix tests.
-//    println(s"Asm %*% Bsm: ${getMmulAvgs(mxAs, mxBs, n)}")
-//    println(s"Asm' %*% Bsm: ${getMmulAvgs(mxAs.t, mxBs, n)}")
-//    println(s"Asm %*% Bsm': ${getMmulAvgs(mxAs, mxBs.t, n)}")
-//    println(s"Asm' %*% Bsm': ${getMmulAvgs(mxAs.t, mxBs.t, n)}")
-//    println(s"Asm'' %*% Bsm'': ${getMmulAvgs(mxAs.t.t, mxBs.t.t, n)}")
-//    println
-//
-//    // Mixed sparse matrix tests.
-//    println(s"Asm %*% Bsr: ${getMmulAvgs(mxAs, mxBsr, n)}")
-//    println(s"Asm' %*% Bsr: ${getMmulAvgs(mxAs.t, mxBsr, n)}")
-//    println(s"Asm %*% Bsr': ${getMmulAvgs(mxAs, mxBsr.t, n)}")
-//    println(s"Asm' %*% Bsr': ${getMmulAvgs(mxAs.t, mxBsr.t, n)}")
-//    println(s"Asm'' %*% Bsr'': ${getMmulAvgs(mxAs.t.t, mxBsr.t.t, n)}")
-//    println
-//
-//    println(s"Asr %*% Bsm: ${getMmulAvgs(mxAsr, mxBs, n)}")
-//    println(s"Asr' %*% Bsm: ${getMmulAvgs(mxAsr.t, mxBs, n)}")
-//    println(s"Asr %*% Bsm': ${getMmulAvgs(mxAsr, mxBs.t, n)}")
-//    println(s"Asr' %*% Bsm': ${getMmulAvgs(mxAsr.t, mxBs.t, n)}")
-//    println(s"Asr'' %*% Bsm'': ${getMmulAvgs(mxAsr.t.t, mxBs.t.t, n)}")
-//    println
-//
-//    // Mixed dense/sparse
-//    println(s"Ad %*% Bsr: ${getMmulAvgs(mxAd, mxBsr, n)}")
-//    println(s"Ad' %*% Bsr: ${getMmulAvgs(mxAd.t, mxBsr, n)}")
-//    println(s"Ad %*% Bsr': ${getMmulAvgs(mxAd, mxBsr.t, n)}")
-//    println(s"Ad' %*% Bsr': ${getMmulAvgs(mxAd.t, mxBsr.t, n)}")
-//    println(s"Ad'' %*% Bsr'': ${getMmulAvgs(mxAd.t.t, mxBsr.t.t, n)}")
-//    println
-//
-//    println(s"Asr %*% Bd: ${getMmulAvgs(mxAsr, mxBd, n)}")
-//    println(s"Asr' %*% Bd: ${getMmulAvgs(mxAsr.t, mxBd, n)}")
-//    println(s"Asr %*% Bd': ${getMmulAvgs(mxAsr, mxBd.t, n)}")
-//    println(s"Asr' %*% Bd': ${getMmulAvgs(mxAsr.t, mxBd.t, n)}")
-//    println(s"Asr'' %*% Bd'': ${getMmulAvgs(mxAsr.t.t, mxBd.t.t, n)}")
-//    println
-//
-//    println(s"Ad %*% Bsm: ${getMmulAvgs(mxAd, mxBs, n)}")
-//    println(s"Ad' %*% Bsm: ${getMmulAvgs(mxAd.t, mxBs, n)}")
-//    println(s"Ad %*% Bsm': ${getMmulAvgs(mxAd, mxBs.t, n)}")
-//    println(s"Ad' %*% Bsm': ${getMmulAvgs(mxAd.t, mxBs.t, n)}")
-//    println(s"Ad'' %*% Bsm'': ${getMmulAvgs(mxAd.t.t, mxBs.t.t, n)}")
-//    println
-//
-//    println(s"Asm %*% Bd: ${getMmulAvgs(mxAs, mxBd, n)}")
-//    println(s"Asm' %*% Bd: ${getMmulAvgs(mxAs.t, mxBd, n)}")
-//    println(s"Asm %*% Bd': ${getMmulAvgs(mxAs, mxBd.t, n)}")
-//    println(s"Asm' %*% Bd': ${getMmulAvgs(mxAs.t, mxBd.t, n)}")
-//    println(s"Asm'' %*% Bd'': ${getMmulAvgs(mxAs.t.t, mxBd.t.t, n)}")
-//    println
-//
-//    // Diagonal cases
-//    println(s"Ad %*% D: ${getMmulAvgs(mxAd, mxD, n)}")
-//    println(s"Asr %*% D: ${getMmulAvgs(mxAsr, mxD, n)}")
-//    println(s"Asm %*% D: ${getMmulAvgs(mxAs, mxD, n)}")
-//    println(s"D %*% Ad: ${getMmulAvgs(mxD, mxAd, n)}")
-//    println(s"D %*% Asr: ${getMmulAvgs(mxD, mxAsr, n)}")
-//    println(s"D %*% Asm: ${getMmulAvgs(mxD, mxAs, n)}")
-//    println
-//
-//    println(s"Ad' %*% D: ${getMmulAvgs(mxAd.t, mxD, n)}")
-//    println(s"Asr' %*% D: ${getMmulAvgs(mxAsr.t, mxD, n)}")
-//    println(s"Asm' %*% D: ${getMmulAvgs(mxAs.t, mxD, n)}")
-//    println(s"D %*% Ad': ${getMmulAvgs(mxD, mxAd.t, n)}")
-//    println(s"D %*% Asr': ${getMmulAvgs(mxD, mxAsr.t, n)}")
-//    println(s"D %*% Asm': ${getMmulAvgs(mxD, mxAs.t, n)}")
-//    println
+    println(s"Ad %*% Bd: ${getMmulAvgs(mxAd, mxBd, n)}")
+    println(s"Ad' %*% Bd: ${getMmulAvgs(mxAd.t, mxBd, n)}")
+    println(s"Ad %*% Bd': ${getMmulAvgs(mxAd, mxBd.t, n)}")
+    println(s"Ad' %*% Bd': ${getMmulAvgs(mxAd.t, mxBd.t, n)}")
+    println(s"Ad'' %*% Bd'': ${getMmulAvgs(mxAd.t.t, mxBd.t.t, n)}")
+    println
+
+    // Sparse row matrix tests.
+    println(s"Asr %*% Bsr: ${getMmulAvgs(mxAsr, mxBsr, n)}")
+    println(s"Asr' %*% Bsr: ${getMmulAvgs(mxAsr.t, mxBsr, n)}")
+    println(s"Asr %*% Bsr': ${getMmulAvgs(mxAsr, mxBsr.t, n)}")
+    println(s"Asr' %*% Bsr': ${getMmulAvgs(mxAsr.t, mxBsr.t, n)}")
+    println(s"Asr'' %*% Bsr'': ${getMmulAvgs(mxAsr.t.t, mxBsr.t.t, n)}")
+    println
+
+    // Sparse matrix tests.
+    println(s"Asm %*% Bsm: ${getMmulAvgs(mxAs, mxBs, n)}")
+    println(s"Asm' %*% Bsm: ${getMmulAvgs(mxAs.t, mxBs, n)}")
+    println(s"Asm %*% Bsm': ${getMmulAvgs(mxAs, mxBs.t, n)}")
+    println(s"Asm' %*% Bsm': ${getMmulAvgs(mxAs.t, mxBs.t, n)}")
+    println(s"Asm'' %*% Bsm'': ${getMmulAvgs(mxAs.t.t, mxBs.t.t, n)}")
+    println
+
+    // Mixed sparse matrix tests.
+    println(s"Asm %*% Bsr: ${getMmulAvgs(mxAs, mxBsr, n)}")
+    println(s"Asm' %*% Bsr: ${getMmulAvgs(mxAs.t, mxBsr, n)}")
+    println(s"Asm %*% Bsr': ${getMmulAvgs(mxAs, mxBsr.t, n)}")
+    println(s"Asm' %*% Bsr': ${getMmulAvgs(mxAs.t, mxBsr.t, n)}")
+    println(s"Asm'' %*% Bsr'': ${getMmulAvgs(mxAs.t.t, mxBsr.t.t, n)}")
+    println
+
+    println(s"Asr %*% Bsm: ${getMmulAvgs(mxAsr, mxBs, n)}")
+    println(s"Asr' %*% Bsm: ${getMmulAvgs(mxAsr.t, mxBs, n)}")
+    println(s"Asr %*% Bsm': ${getMmulAvgs(mxAsr, mxBs.t, n)}")
+    println(s"Asr' %*% Bsm': ${getMmulAvgs(mxAsr.t, mxBs.t, n)}")
+    println(s"Asr'' %*% Bsm'': ${getMmulAvgs(mxAsr.t.t, mxBs.t.t, n)}")
+    println
+
+    // Mixed dense/sparse
+    println(s"Ad %*% Bsr: ${getMmulAvgs(mxAd, mxBsr, n)}")
+    println(s"Ad' %*% Bsr: ${getMmulAvgs(mxAd.t, mxBsr, n)}")
+    println(s"Ad %*% Bsr': ${getMmulAvgs(mxAd, mxBsr.t, n)}")
+    println(s"Ad' %*% Bsr': ${getMmulAvgs(mxAd.t, mxBsr.t, n)}")
+    println(s"Ad'' %*% Bsr'': ${getMmulAvgs(mxAd.t.t, mxBsr.t.t, n)}")
+    println
+
+    println(s"Asr %*% Bd: ${getMmulAvgs(mxAsr, mxBd, n)}")
+    println(s"Asr' %*% Bd: ${getMmulAvgs(mxAsr.t, mxBd, n)}")
+    println(s"Asr %*% Bd': ${getMmulAvgs(mxAsr, mxBd.t, n)}")
+    println(s"Asr' %*% Bd': ${getMmulAvgs(mxAsr.t, mxBd.t, n)}")
+    println(s"Asr'' %*% Bd'': ${getMmulAvgs(mxAsr.t.t, mxBd.t.t, n)}")
+    println
+
+    println(s"Ad %*% Bsm: ${getMmulAvgs(mxAd, mxBs, n)}")
+    println(s"Ad' %*% Bsm: ${getMmulAvgs(mxAd.t, mxBs, n)}")
+    println(s"Ad %*% Bsm': ${getMmulAvgs(mxAd, mxBs.t, n)}")
+    println(s"Ad' %*% Bsm': ${getMmulAvgs(mxAd.t, mxBs.t, n)}")
+    println(s"Ad'' %*% Bsm'': ${getMmulAvgs(mxAd.t.t, mxBs.t.t, n)}")
+    println
+
+    println(s"Asm %*% Bd: ${getMmulAvgs(mxAs, mxBd, n)}")
+    println(s"Asm' %*% Bd: ${getMmulAvgs(mxAs.t, mxBd, n)}")
+    println(s"Asm %*% Bd': ${getMmulAvgs(mxAs, mxBd.t, n)}")
+    println(s"Asm' %*% Bd': ${getMmulAvgs(mxAs.t, mxBd.t, n)}")
+    println(s"Asm'' %*% Bd'': ${getMmulAvgs(mxAs.t.t, mxBd.t.t, n)}")
+    println
+
+    // Diagonal cases
+    println(s"Ad %*% D: ${getMmulAvgs(mxAd, mxD, n)}")
+    println(s"Asr %*% D: ${getMmulAvgs(mxAsr, mxD, n)}")
+    println(s"Asm %*% D: ${getMmulAvgs(mxAs, mxD, n)}")
+    println(s"D %*% Ad: ${getMmulAvgs(mxD, mxAd, n)}")
+    println(s"D %*% Asr: ${getMmulAvgs(mxD, mxAsr, n)}")
+    println(s"D %*% Asm: ${getMmulAvgs(mxD, mxAs, n)}")
+    println
+
+    println(s"Ad' %*% D: ${getMmulAvgs(mxAd.t, mxD, n)}")
+    println(s"Asr' %*% D: ${getMmulAvgs(mxAsr.t, mxD, n)}")
+    println(s"Asm' %*% D: ${getMmulAvgs(mxAs.t, mxD, n)}")
+    println(s"D %*% Ad': ${getMmulAvgs(mxD, mxAd.t, n)}")
+    println(s"D %*% Asr': ${getMmulAvgs(mxD, mxAsr.t, n)}")
+    println(s"D %*% Asm': ${getMmulAvgs(mxD, mxAs.t, n)}")
+    println
 
     // Self-squared cases
     println(s"Ad %*% Ad': ${getMmulAvgs(mxAd, mxAd.t, n)}")
