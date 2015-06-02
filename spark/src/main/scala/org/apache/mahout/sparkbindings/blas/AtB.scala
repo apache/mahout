@@ -46,9 +46,8 @@ object AtB {
    * over co-grouped rows of A and B. If A and B are identically partitioned, we can just directly
    * zip all the rows. Otherwise, we need to inner-join them first.
    *
-   * @deprecated
    */
-  @deprecated
+  @deprecated("slow, will remove", since = "0.10.2")
   def atb_nograph[A: ClassTag](operator: OpAtB[A], srcA: DrmRddInput[A], srcB: DrmRddInput[A],
                                zippable: Boolean = false): DrmRddInput[Int] = {
 
@@ -190,7 +189,7 @@ object AtB {
    * @param pairwiseRdd
    * @return
    */
-  @deprecated
+  @deprecated("slow, will remove", since = "0.10.2")
   private[sparkbindings] def combineOuterProducts(pairwiseRdd: RDD[(Int, (Vector, Vector))], numPartitions: Int) = {
 
     pairwiseRdd
@@ -302,7 +301,7 @@ object AtB {
   }
 
   /** Given already zipped, joined rdd of rows of A' and B, compute their product A'B */
-  @deprecated
+  @deprecated("slow, will remove", since = "0.10.2")
   private[sparkbindings] def computeAtBZipped[A: ClassTag](zipped: RDD[(DrmTuple[A], DrmTuple[A])], nrow: Long,
                                                            ancol: Int, bncol: Int, numPartitions: Int) = {
 

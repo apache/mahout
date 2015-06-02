@@ -151,8 +151,7 @@ object H2OEngine extends DistributedEngine {
   def indexedDatasetDFSReadElements(src: String,
                                     schema: Schema = DefaultIndexedDatasetReadSchema,
                                     existingRowIDs: Option[BiDictionary] = None)
-                                   (implicit sc: DistributedContext):
-  IndexedDatasetH2O = {
+                                   (implicit sc: DistributedContext): IndexedDatasetH2O = {
 
     error("Unimplemented indexedDatasetDFSReadElements.")
 
