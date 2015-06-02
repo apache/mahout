@@ -28,6 +28,7 @@ import org.apache.mahout.sparkbindings.drm.{cpDrmGeneric2DrmRddInput, Checkpoint
 import org.apache.mahout.math._
 import scala.Predef
 import scala.reflect.ClassTag
+import scala.reflect.classTag
 import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.sparkbindings.blas._
 import org.apache.hadoop.io._

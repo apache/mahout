@@ -18,12 +18,9 @@
 package org.apache.mahout.sparkbindings.io
 
 import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.serializers.JavaSerializer
 import org.apache.mahout.math._
-import org.apache.mahout.math.indexeddataset.{BiMap, BiDictionary}
 import org.apache.spark.serializer.KryoRegistrator
-import org.apache.mahout.sparkbindings._
-import org.apache.mahout.math.Vector.Element
+import org.apache.mahout.logging._
 
 object MahoutKryoRegistrator {
 
@@ -37,11 +34,7 @@ object MahoutKryoRegistrator {
     kryo.addDefaultSerializer(classOf[Vector], new VectorKryoSerializer())
     kryo.addDefaultSerializer(classOf[Matrix], new GenericMatrixKryoSerializer)
 
-    kryo.addDefaultSerializer(classOf[Vector], new WritableKryoSerializer[Vector, VectorWritable])
-    kryo.addDefaultSerializer(classOf[DenseVector], new WritableKryoSerializer[Vector, VectorWritable])
-    kryo.addDefaultSerializer(classOf[Matrix], new WritableKryoSerializer[Matrix, MatrixWritable])
   }
-
 
 }
 

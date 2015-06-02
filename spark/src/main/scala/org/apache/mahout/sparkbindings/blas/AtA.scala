@@ -185,57 +185,86 @@ object AtA {
     // dense in reality than the source.
     val m = op.A.nrow
     val n = op.A.ncol
-/* possible fix for index out of range for vector range
-    val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.round.toInt max 1
+    val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.toInt max 1
     val blockHeight = (n - 1) / numParts + 1
-*/
-    val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.round.toInt max 1 min n
-
-    // Computing evenly split ranges to denote each partition size.
-
-    // Base size.
-    val baseSize = n / numParts
-
-    // How many partitions needs to be baseSize +1.
-    val slack = n - baseSize * numParts
-
-    val ranges =
-      // Start with partition offsets... total numParts + 1.
-      (0 to numParts).view.map { i => (baseSize + 1) * i - (i - slack max 0)}
-        // And convert offsets to ranges.
-        .sliding(2).map(s => s(0) until s(1)).toIndexedSeq
+    val offsets = (0 until numParts).map(_ * blockHeight)
+    val ranges = offsets.map(offset => offset until (offset + blockHeight min n))
 
     val rddAtA = srcRdd
 
       // Remove key, key is irrelevant
       .map(_._2)
 
-        // Form partial outer blocks for each partition
-        .flatMap {
-      v =>
-        for (blockKey <- Stream.range(0, numParts)) yield {
-/* patch to fix index out of range for vector access
-          val blockStart = blockKey * blockHeight
-          val blockEnd = n min (blockStart + blockHeight)
-          blockKey -> (v(blockStart until blockEnd) cross v)
-*/
-          val range = ranges(blockKey)
-          blockKey -> (v(range) cross v)
-        }
+      // Form partial outer blocks for each partition
+      .flatMap { v =>
+      for (blockKey <- 0 until numParts) yield {
+        blockKey ->(blockKey, v)
+      }
     }
-        // Combine outer blocks
-        .reduceByKey(_ += _)
+      // Combine outer products
+      .combineByKey(// Combiner factory
+        createCombiner = (t: (Int, Vector)) => {
+          val partNo = t._1
+          val vec = t._2
+          val range = ranges(partNo)
+          val mxC = if (vec.isDense) new DenseMatrix(range.size, n) else new SparseRowMatrix(range.size, n)
+          addOuterProduct(mxC, vec(range), vec)
+        },
 
-        // Restore proper block keys
-        .map {
-      case (blockKey, block) =>
-/* patch to fix index out of range for vector access
-        val blockStart = blockKey * blockHeight
-        val rowKeys = Array.tabulate(block.nrow)(blockStart + _)
-*/
-        val range = ranges(blockKey)
-        val rowKeys = Array.tabulate(block.nrow)(range.start + _)
-        rowKeys -> block
+        // Merge values into existing partition accumulator.
+        mergeValue = (mxC: Matrix, t: (Int, Vector)) => {
+          val partNo = t._1
+          val vec = t._2
+          addOuterProduct(mxC, vec(ranges(partNo)), vec)
+        },
+
+        // Merge combiners
+        mergeCombiners = (mxC1: Matrix, mxC2: Matrix) => mxC1 += mxC2, numPartitions = numParts)
+
+      // Restore proper block keys
+      .map { case (blockKey, block) =>
+      val blockStart = blockKey * blockHeight
+      val rowKeys = Array.tabulate(block.nrow)(blockStart + _)
+      rowKeys -> block
+    }
+
+    if (log.isDebugEnabled)
+      log.debug(s"AtA #parts: ${rddAtA.partitions.size}.")
+
+    rddAtA
+  }
+
+  /**
+   * The version of A'A that does not use GraphX. Tries to use blockwise matrix multiply. If an
+   * accelerated matrix back is available, this might be somewhat faster.
+   */
+  def at_a_nongraph_mmul(op: OpAtA[_], srcRdd: BlockifiedDrmRdd[_]): DrmRddInput[Int] = {
+
+    // Determine how many partitions the new matrix would need approximately. We base that on
+    // geometry only, but it may eventually not be that adequate. Indeed, A'A tends to be much more
+    // dense in reality than the source.
+    val m = op.A.nrow
+    val n = op.A.ncol
+    val aparts = srcRdd.partitions.size
+    val numParts = estimateProductPartitions(anrow = n, ancol = m, bncol = n, aparts = aparts, bparts = aparts)
+    val ranges = computeEvenSplits(n, numParts)
+
+    debug(s"operator mmul-A'A(Spark); #parts = $numParts, #partsA=$aparts.")
+
+    val rddAtA = srcRdd.flatMap { case (keys, block) =>
+      Iterator.tabulate(numParts) { i =>
+        i -> block(::, ranges(i)).t %*% block
+      }
+    }
+      // Reduce partial blocks.
+      .reduceByKey(_ += _, numPartitions = numParts)
+
+      // Produce keys
+      .map { case (blockKey, block) =>
+
+      val blockStart = ranges(blockKey).start
+      val rowKeys = Array.tabulate(block.nrow)(blockStart + _)
+      rowKeys -> block
     }
 
     rddAtA
