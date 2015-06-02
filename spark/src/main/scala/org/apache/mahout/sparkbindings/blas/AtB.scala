@@ -112,7 +112,7 @@ object AtB {
     // Number of partitions we want to converge to in the product. For now we simply extrapolate that
     // assuming product density and operand densities being about the same; and using the same element
     // per partition number in the product as the bigger of two operands.
-    val numProductPartitions = (prodNCol.toDouble * prodNRow / epp).ceil.toInt
+    val numProductPartitions = (prodNCol.toDouble * prodNRow / epp).ceil.toInt min prodNRow
 
     if (log.isDebugEnabled) log.debug(s"AtB mmul: #parts ${numProductPartitions} for $prodNRow x $prodNCol geometry.")
 
@@ -234,11 +234,15 @@ object AtB {
 
     val rdd = pairwiseRdd.flatMap{ case (blockA, blockB) ⇒
 
+      // Handling microscopic Pat's cases. Any slicing doesn't work well on 0-row matrix. This
+      // probably should be fixed in the in-core matrix implementations.
+      if (blockA.nrow == 0 )
+        Iterator.empty
+      else
       // Output each partial outer product with its correspondent partition #.
         Iterator.tabulate(numPartitions) {part ⇒
 
           val mBlock = blockA(::, ranges(part)).t %*% blockB
-
           part → mBlock
         }
     }
