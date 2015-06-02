@@ -16,7 +16,7 @@ import org.apache.mahout.math.drm.logical._
 @RunWith(classOf[JUnitRunner])
 class LATestSuit extends FunSuite with DistributedFlinkSuit {
 
-  ignore("Ax blockified") {
+  test("Ax blockified") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
     val x: Vector = (0, 1, 2)
@@ -30,7 +30,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert(b == dvec(8, 11, 14))
   }
 
-  ignore("At sparseTrick") {
+  test("At sparseTrick") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
 
@@ -42,7 +42,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert((output - inCoreA.t).norm < 1e-6)
   }
 
-  ignore("AtB notZippable") {
+  test("AtB notZippable") {
     val inCoreAt = dense((1, 2), (2, 3), (3, 4))
 
     val At = drmParallelize(m = inCoreAt, numPartitions = 2)
@@ -60,7 +60,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert((output - expected).norm < 1e-6)
   }
 
-  ignore("AewScalar opScalarNoSideEffect") {
+  test("AewScalar opScalarNoSideEffect") {
     val inCoreA = dense((1, 2), (2, 3), (3, 4))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
     val scalar = 5.0
@@ -75,7 +75,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert((output - expected).norm < 1e-6)
   }
 
-  ignore("AewB rowWiseJoinNoSideEffect") {
+  test("AewB rowWiseJoinNoSideEffect") {
     val inCoreA = dense((1, 2), (2, 3), (3, 4))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
 
@@ -88,7 +88,7 @@ class LATestSuit extends FunSuite with DistributedFlinkSuit {
     assert((output - (inCoreA  * inCoreA)).norm < 1e-6)
   }
 
-  ignore("Cbind") {
+  test("Cbind") {
     val inCoreA = dense((1, 2), (2, 3), (3, 4))
     val inCoreB = dense((4, 4), (5, 5), (6, 7))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)

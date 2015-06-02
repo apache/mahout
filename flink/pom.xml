@@ -85,6 +85,7 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
@@ -119,13 +120,10 @@
           </execution>
         </executions>
       </plugin>
-
-
     </plugins>
   </build>
 
   <dependencies>
-
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-core</artifactId>
@@ -176,11 +174,14 @@
       <artifactId>guava</artifactId>
     </dependency>
 
-    <!-- scala stuff -->
+    <!-- tests -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
-
   </dependencies>
 </project>
