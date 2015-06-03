@@ -42,6 +42,7 @@ object SparkEngine extends DistributedEngine {
 
   // By default, use Hadoop 1 utils
   var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+  val operations: DistributedOperations = SparkDistributedOperations
 
   def colSums[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol

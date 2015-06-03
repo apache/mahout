@@ -31,7 +31,7 @@ import org.apache.log4j.Logger
 
 /** Abstraction of optimizer/distributed engine */
 trait DistributedEngine {
-
+  val operations: DistributedOperations
   /**
    * First optimization pass. Return physical plan that we can pass to exec(). This rewrite may
    * introduce logical constructs (including engine-specific ones) that user DSL cannot even produce

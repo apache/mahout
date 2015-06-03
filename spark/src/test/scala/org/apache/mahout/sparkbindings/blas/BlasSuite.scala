@@ -150,5 +150,4 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     assert((inCoreAt - inCoreControlAt).norm < 1E-5)
 
   }
-
 }

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.drm
 
+import org.apache.mahout.math.Matrix
+
 import scala.reflect.ClassTag
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.drm.logical.{OpPar, OpMapBlock, OpRowRange}
@@ -73,6 +75,7 @@ class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
       _ncol = ncol,
       identicallyPartitioned = identicallyParitioned
     )
+
 
 
   /**
