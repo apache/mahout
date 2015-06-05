@@ -1,0 +1,4709 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{fullpage}
+\usepackage{multicol,caption}
+\usepackage{wrapfig}
+
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{problem}{Problem}
+\theoremstyle{remark}
+\newtheorem{observation}{Observation}
+
+
+\usepackage{tikz}
+\usetikzlibrary{positioning,shadings,fadings,automata,matrix,shapes,arrows,backgrounds}
+
+\tikzstyle{every picture}=[execute at end picture=
+{
+\begin{pgfonlayer}{background}
+\path[fill=red!10!green!4,rounded corners]
+(current bounding box.south west) rectangle
+(current bounding box.north east);
+\end{pgfonlayer}
+}]
+
+\definecolor{tentative}{rgb}{0.4,0.6,0.7}
+\definecolor{comment}{rgb}{0.7,0.4,0.4}
+\definecolor{Turquoise}{rgb}{0,0.81,0.85}
+\definecolor{Violet}{rgb}{0.93,0.5,0.93}
+\definecolor{hlhc}{rgb}{0.96,0.75,0.75}
+\definecolor{hllc}{rgb}{0.75,0.96,0.75}
+
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}\centering\vspace{20pt}}
+  {\endminipage\par\medskip\vspace{20pt}}
+
+\newbox\mybox
+
+% \renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\setlength{\columnseprule}{0.4pt}
+\renewcommand\columnseprulecolor{\color{black!10}}
+\setlength{\columnsep}{28.0pt}
+
+\usepackage{soul}
+\newcommand{\hlhigh}[1]{\sethlcolor{hlhc}\hl{#1}}
+\newcommand{\hlmed}[1]{\sethlcolor{yellow}\hl{#1}}
+\newcommand{\hllow}[1]{\sethlcolor{hllc}\hl{#1}}
+
+% fancy headers/footers
+\usepackage{fancyhdr}
+%\setlength{\headheight}{13.6pt}
+\pagestyle{fancy}
+%\addtolength{\headheight}{\baselineskip}
+\setlength{\headsep}{36.0pt}
+\setlength{\voffset}{-36.0pt}
+
+\fancyhead[LE,RO]{\vrule\hskip3mm\leftmark}
+%\fancyhfoffset[LE,RO]{6mm}
+\end_preamble
+\use_default_options true
+\begin_modules
+knitr
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman lmodern
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 4
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Mahout Scala Bindings 
+\begin_inset Newline newline
+\end_inset
+
+and
+\begin_inset Newline newline
+\end_inset
+
+Mahout Spark Bindings
+\begin_inset Newline newline
+\end_inset
+
+for Linear Algebra Subroutines
+\begin_inset Newline newline
+\end_inset
+
+
+\size small
+Working Notes and Manual
+\end_layout
+
+\begin_layout Author
+Dmitriy Lyubimov
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+dlyubimov at apache dot org
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Abstract
+In recent years significant effort was spent to produce semantically friendly
+ environments for linear algebra.
+ Working with vector, matrix and tensor data structures as a single data
+ type offers essential qualities necessary for rapid prototyping of algebraicall
+y defined mathematical problems.
+ The other wanted quality is the convenience of the same environment as
+ a programming language.
+ Yet another one is doing things at scale.
+ Yet another highly desirable capability of the same environment is plotting
+ and visualization.
+ Without bringing any detailed review of existing environments here, the
+ author however offers an opinion that while a lot of environments succeed
+ in one or more of these aspects, none of them however adequately addresses
+ all of them at the same time and at a reasonable cost.
+ 
+\end_layout
+
+\begin_layout Abstract
+Unlike many other environments, Mahout-math Matrix model
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+initially, an adaptation of Colt linear algebra library
+\end_layout
+
+\end_inset
+
+ was targeting both dense and sparse data structures from the very beginning
+ both in type modeling and cost-based optimized computations.
+\end_layout
+
+\begin_layout Abstract
+In this work we are trying to bring semantic explicitness to Mahout's in-core
+ and out-of-core linear algebra subroutines, while adding benefits of strong
+ programming environment of scala, and captializing on scalability benefits
+ of Spark and GraphX.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Overview
+\end_layout
+
+\begin_layout Standard
+Mahout Scala and Spark Bindings is a package aiming to provide a R-like
+ look and feel to Mahout's in-core and out-of-core Spark-backed linear algebra.
+ It is built in the image of R's base package.
+ So if you are familiar with basic R matrix primitives, you should feel
+ right at home.
+\end_layout
+
+\begin_layout Standard
+There are, at the moment, 3 major types to be operated on: in-core vectors,
+ in-core matrices (including numerous specialized types), and distributed
+ row matrices (DRM).
+ SparkBindings expressions can mix in all three types of things.
+\end_layout
+
+\begin_layout Standard
+The manual is organised by giving DSL features by example.
+ That means that capabilities are wider than those shown, and may change
+ behind the scenes as the work develops.
+ However, the authors try to facilitate and ecourage particular style given,
+ and retain behind-the-scenes compatibility with the examples given.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+S
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Mahout-in-core-algebraic"
+
+\end_inset
+
+ enumerates in-core DSL operators only.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+S
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Out-of-core-linalg-bindings"
+
+\end_inset
+
+ describes operators involving combinations of DRM, in-core vectors or matrices
+ requiring out-of-core optimization and processing, as well conceptual notes
+ about checkpointing, caching, broadcasting and behind-the-scenes optimizing.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Mahout-in-core-algebraic"
+
+\end_inset
+
+Mahout in-core algebraic Scala Bindings
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See link: 
+\begin_inset CommandInset href
+LatexCommand href
+name "original proposal."
+target "http://weatheringthrutechdays.blogspot.com/2013/07/scala-dsl-for-mahout-in-core-linear.html"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In-core DSL is hardly much more than just a syntactic sugar over 
+\family typewriter
+org.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+apa
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+che.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+ma
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+hout.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+math.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+Mat
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+rix
+\family default
+(
+\family typewriter
+Vec
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+tor
+\family default
+) trait implementations.
+ As such, all originally implemented operation signatures of Mahout are
+ also retained.
+\end_layout
+
+\begin_layout Subsection
+Imports
+\end_layout
+
+\begin_layout Standard
+The following two scala imports are typically used to enable Mahout Scala
+ DSL bindings for Linear Algebra:
+\end_layout
+
+\begin_layout LyX-Code
+import org.apache.mahout.math._
+\end_layout
+
+\begin_layout LyX-Code
+import scalabindings._
+\end_layout
+
+\begin_layout LyX-Code
+import RLikeOps._
+\end_layout
+
+\begin_layout Standard
+Another option is to use 
+\begin_inset Quotes eld
+\end_inset
+
+matlab like
+\begin_inset Quotes erd
+\end_inset
+
+ dialect by doing 
+\end_layout
+
+\begin_layout LyX-Code
+import MatlabLikeOps._
+\end_layout
+
+\begin_layout Standard
+However, Matlab-like DSL dialect adherence to original Matlab dialect is
+ far less optimal that R dialect due to the specifics of operator support
+ in scala, so we just will limit ourselves to R-like dialect here.
+\end_layout
+
+\begin_layout Subsection
+Inline initialization
+\end_layout
+
+\begin_layout Standard
+Dense vectors 
+\end_layout
+
+\begin_layout LyX-Code
+val denseVec1: Vector = (1.0, 1.1, 1.2)
+\end_layout
+
+\begin_layout LyX-Code
+val denseVec2 = dvec(1, 0, 1.1, 1.2)
+\end_layout
+
+\begin_layout Standard
+Sparse vectors
+\end_layout
+
+\begin_layout LyX-Code
+val sparseVec = svec((5 -> 1) :: (10 -> 2.0) :: Nil)
+\end_layout
+
+\begin_layout LyX-Code
+val sparseVec2: Vector = (5 -> 1.0) :: (10 -> 2.0) :: Nil
+\end_layout
+
+\begin_layout Standard
+matrix inline initialization, either dense or sparse, is always row-wise:
+\end_layout
+
+\begin_layout Standard
+dense matrices : 
+\end_layout
+
+\begin_layout LyX-Code
+val A = dense((1, 2, 3), (3, 4, 5))
+\end_layout
+
+\begin_layout Standard
+sparse matrices 
+\end_layout
+
+\begin_layout LyX-Code
+val A = sparse(
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+(1, 3) :: Nil,
+\end_layout
+
+\begin_layout LyX-Code
+(0, 2) :: (1, 2.5) :: Nil
+\end_layout
+
+\end_deeper
+\begin_layout LyX-Code
+)
+\end_layout
+
+\begin_layout Standard
+diagonal matrix with constant diagonal elements
+\end_layout
+
+\begin_layout LyX-Code
+diag(10, 3.5) 
+\end_layout
+
+\begin_layout Standard
+diagonal matrix with main diagonal backed by a vector 
+\end_layout
+
+\begin_layout LyX-Code
+diagv((1, 2, 3, 4, 5))
+\end_layout
+
+\begin_layout Standard
+Identity matrix 
+\end_layout
+
+\begin_layout LyX-Code
+eye(10)
+\end_layout
+
+\begin_layout Standard
+Obviously, direct initialization of any vector or matrix type in Mahout
+ is still available with regular oeration 
+\family typewriter
+new
+\family default
+.
+\end_layout
+
+\begin_layout Subsection
+Slicing and Assigning
+\end_layout
+
+\begin_layout Standard
+geting vector element 
+\end_layout
+
+\begin_layout LyX-Code
+val d = vec(5)
+\end_layout
+
+\begin_layout Standard
+setting vector element 
+\end_layout
+
+\begin_layout LyX-Code
+vec(5) = 3.0
+\end_layout
+
+\begin_layout Standard
+getting matrix element 
+\end_layout
+
+\begin_layout LyX-Code
+val d = m(3,5)
+\end_layout
+
+\begin_layout Standard
+setting matrix element (setQuick() behind the scenes) 
+\end_layout
+
+\begin_layout LyX-Code
+M(3,5) = 3.0
+\end_layout
+
+\begin_layout Standard
+Getting matrix row or column
+\end_layout
+
+\begin_layout LyX-Code
+val rowVec = M(3, ::) 
+\end_layout
+
+\begin_layout LyX-Code
+val colVec = M(::, 3) 
+\end_layout
+
+\begin_layout Standard
+Setting matrix row or column 
+\end_layout
+
+\begin_layout LyX-Code
+M(3, ::) = (1, 2, 3)
+\end_layout
+
+\begin_layout LyX-Code
+M(::, 3) = (1, 2, 3)
+\end_layout
+
+\begin_layout Standard
+thru vector assignment also works 
+\end_layout
+
+\begin_layout LyX-Code
+M(3, ::) := (1, 2, 3)
+\end_layout
+
+\begin_layout LyX-Code
+M(::, 3) := (1, 2, 3)
+\end_layout
+
+\begin_layout Standard
+subslices of row or vector work too 
+\end_layout
+
+\begin_layout LyX-Code
+a(0, 0 to 1) = (3, 5)
+\end_layout
+
+\begin_layout Standard
+or with vector assignment
+\end_layout
+
+\begin_layout LyX-Code
+a(0, 0 to 1) := (3, 5)
+\end_layout
+
+\begin_layout Standard
+matrix contiguous block as matrix, with assignment 
+\end_layout
+
+\begin_layout LyX-Code
+// block
+\end_layout
+
+\begin_layout LyX-Code
+val B = A(2 to 3, 3 to 4) 
+\end_layout
+
+\begin_layout LyX-Code
+// asignment to a block
+\end_layout
+
+\begin_layout LyX-Code
+A(0 to 1, 1 to 2) = dense((3, 2), (2, 3))
+\end_layout
+
+\begin_layout Standard
+or thru the matrix assignment operator 
+\end_layout
+
+\begin_layout LyX-Code
+A(0 to 1, 1 to 2) := dense((3, 2), (2, 3))
+\end_layout
+
+\begin_layout Standard
+Assignment operator by copying between vectors or matrix 
+\end_layout
+
+\begin_layout LyX-Code
+vec1 := vec2 
+\end_layout
+
+\begin_layout LyX-Code
+M1 := M2 
+\end_layout
+
+\begin_layout Standard
+also works for matrix subindexing notations as per above
+\end_layout
+
+\begin_layout Standard
+Assignment thru a function literal (matrix)
+\end_layout
+
+\begin_layout LyX-Code
+M := ((row, col, x) => if (row == col) 1 else 0)
+\end_layout
+
+\begin_layout Standard
+for a vector, the same:
+\end_layout
+
+\begin_layout LyX-Code
+vec := ((index, x) => sqrt(x))
+\end_layout
+
+\begin_layout Subsection
+BLAS-like operations
+\end_layout
+
+\begin_layout Standard
+plus/minus, either vector or matrix or numeric, with assignment or not
+\end_layout
+
+\begin_layout LyX-Code
+a + b
+\end_layout
+
+\begin_layout LyX-Code
+a - b
+\end_layout
+
+\begin_layout LyX-Code
+a + 5.0
+\end_layout
+
+\begin_layout LyX-Code
+a - 5.0
+\end_layout
+
+\begin_layout Standard
+Hadamard (elementwise) product, either vector or matrix or numeric operands
+\end_layout
+
+\begin_layout LyX-Code
+a * b
+\end_layout
+
+\begin_layout LyX-Code
+a * 5
+\end_layout
+
+\begin_layout Standard
+same things with assignment, matrix, vector or numeric operands 
+\end_layout
+
+\begin_layout LyX-Code
+a += b
+\end_layout
+
+\begin_layout LyX-Code
+a -= b
+\end_layout
+
+\begin_layout LyX-Code
+a += 5.0
+\end_layout
+
+\begin_layout LyX-Code
+a -= 5.0 
+\end_layout
+
+\begin_layout LyX-Code
+a *= b
+\end_layout
+
+\begin_layout LyX-Code
+a *= 5
+\end_layout
+
+\begin_layout Standard
+One nuance here is associativity rules in scala.
+ E.g.
+ 
+\family typewriter
+1/x
+\family default
+ in R (where x is vector or matrix) is elementwise inverse operation and
+ in scala realm would be expressed as
+\end_layout
+
+\begin_layout LyX-Code
+val xInv = 1 /: x
+\end_layout
+
+\begin_layout Standard
+and R's 
+\family typewriter
+5.0 - x
+\family default
+ would be
+\end_layout
+
+\begin_layout LyX-Code
+val x1 = 5.0 -: x
+\end_layout
+
+\begin_layout Standard
+Even trickier and really probably not so obvious stuff :
+\end_layout
+
+\begin_layout LyX-Code
+a -=: b
+\end_layout
+
+\begin_layout Standard
+assigns 
+\family typewriter
+a - b
+\family default
+ to 
+\family typewriter
+b
+\family default
+ (in-place) and returns 
+\family typewriter
+b
+\family default
+.
+ Similarly for 
+\family typewriter
+a /=: b
+\family default
+ or 
+\family typewriter
+1 /=: v
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+(all assignment operations, including :=, return the assignee argument just
+ like in C++)
+\end_layout
+
+\begin_layout Standard
+dot product (vector operands) 
+\end_layout
+
+\begin_layout LyX-Code
+a dot b 
+\end_layout
+
+\begin_layout Standard
+matrix /vector equivalency (or non-equivalency).
+ Dangerous, exact equivalence is rarely useful, better use norm comparisons
+ with admission of small errors 
+\end_layout
+
+\begin_layout LyX-Code
+a === b
+\end_layout
+
+\begin_layout LyX-Code
+a !== b
+\end_layout
+
+\begin_layout Standard
+Matrix multiplication (matrix operands)
+\end_layout
+
+\begin_layout LyX-Code
+a %*% b
+\end_layout
+
+\begin_layout Standard
+for matrices that explicitly support optimized right and left muliply (currently
+, diagonal matrices)
+\end_layout
+
+\begin_layout Standard
+right-multiply (for symmetry, in fact same as %*%) 
+\end_layout
+
+\begin_layout LyX-Code
+diag(5,5) :%*% b 
+\end_layout
+
+\begin_layout Standard
+optimized left multiply with a diagonal matrix:
+\end_layout
+
+\begin_layout LyX-Code
+A %*%: diag(5,5) # i.e.
+ same as (diag(5,5) :%*% A.t) t
+\end_layout
+
+\begin_layout Standard
+Second norm, vector or matrix argument:
+\end_layout
+
+\begin_layout LyX-Code
+a.norm
+\end_layout
+
+\begin_layout Standard
+Finally, transpose 
+\end_layout
+
+\begin_layout LyX-Code
+val Mt = M.t
+\end_layout
+
+\begin_layout Standard
+Note: Transposition currently is handled via 
+\emph on
+view
+\emph default
+, i.e.
+ updating a transposed matrix will be updating the original.
+ Also computing something like 
+\begin_inset Formula $\mathbf{X}^{\top}\mathbf{X}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout LyX-Code
+val XtX = X.t %*% X
+\end_layout
+
+\begin_layout Standard
+will not therefore incur any additional data copying.
+\end_layout
+
+\begin_layout Subsection
+Decompositions
+\end_layout
+
+\begin_layout Standard
+All arguments in the following are matrices.
+\end_layout
+
+\begin_layout Paragraph
+Cholesky decompositon
+\end_layout
+
+\begin_layout Standard
+(as an object of a CholeskyDecomposition class with all its operations)
+\end_layout
+
+\begin_layout LyX-Code
+val ch = chol(M)
+\end_layout
+
+\begin_layout Paragraph
+SVD
+\end_layout
+
+\begin_layout LyX-Code
+val (U, V, s) = svd(M)
+\end_layout
+
+\begin_layout Paragraph
+EigenDecomposition
+\end_layout
+
+\begin_layout LyX-Code
+val (V, d) = eigen(M)
+\end_layout
+
+\begin_layout Paragraph
+QR decomposition
+\end_layout
+
+\begin_layout LyX-Code
+val (Q, R) = qr(M)
+\end_layout
+
+\begin_layout Paragraph
+Rank
+\end_layout
+
+\begin_layout Standard
+Check for rank deficiency (runs rank-revealing QR)
+\end_layout
+
+\begin_layout LyX-Code
+M.isFullRank
+\end_layout
+
+\begin_layout Paragraph
+In-core SSVD
+\end_layout
+
+\begin_layout LyX-Code
+val (U, V, s) = ssvd(A, k=50, p=15, q=1)
+\end_layout
+
+\begin_layout Paragraph
+Solving linear equation systems and matrix inversion
+\end_layout
+
+\begin_layout Standard
+This is fully similar to R semantics.
+ There are three forms of invocation: 
+\end_layout
+
+\begin_layout LyX-Code
+solve(A, B) // solves 
+\begin_inset Formula $\mathbf{AX}=\mathbf{B}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+solve(A, b) // solves 
+\begin_inset Formula $\mathbf{Ax}=\mathbf{b}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+solve(A)    // computes inverse 
+\begin_inset Formula $\mathbf{A}^{-1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsection
+Misc
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Standard
+vector cardinality 
+\end_layout
+
+\begin_layout LyX-Code
+a.length
+\end_layout
+
+\begin_layout Standard
+matrix cardinality 
+\end_layout
+
+\begin_layout LyX-Code
+m.nrow
+\end_layout
+
+\begin_layout LyX-Code
+m.ncol
+\end_layout
+
+\begin_layout Standard
+means and sums
+\end_layout
+
+\begin_layout LyX-Code
+m.colSums
+\end_layout
+
+\begin_layout LyX-Code
+m.colMeans
+\end_layout
+
+\begin_layout LyX-Code
+m.rowSums
+\end_layout
+
+\begin_layout LyX-Code
+m.rowMeans
+\end_layout
+
+\begin_layout Standard
+a copy-by-value (vector or matrix ) 
+\end_layout
+
+\begin_layout LyX-Code
+val b = a cloned 
+\end_layout
+
+\begin_layout Subsection
+Random matrices
+\end_layout
+
+\begin_layout Standard
+See org.apache.mahout.math.Matrices for up-to-date information
+\end_layout
+
+\begin_layout Subsubsection
+Functional matrix views.
+ 
+\end_layout
+
+\begin_layout Standard
+On Mahout-math side (i.e.
+ java side) there is a concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+functional view
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Java side has a type, 
+\family typewriter
+Int
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+Int
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+Func
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+tion
+\family default
+.
+ An argument of that functional type could be provided to constuct a (dense)
+ matrix readonly view via 
+\family typewriter
+Mat
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+rices.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+func
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+tion
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+al
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+Mat
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+rix
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+View(m, n, gf, denseLike)
+\family default
+.
+ `gf` function is expected to be idempotent (i.e.
+ return the same matrix element for the same combination of indices.
+ Specialization of the functional views are used for a transposed matrix
+ view, as well as the following random matrices views.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset Formula $U\left(0,1\right)$
+\end_inset
+
+ random matrix view
+\end_layout
+
+\begin_layout LyX-Code
+val inCoreA = Matrices.uniformView(m, n, seed)
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset Formula $U\left(-1,1\right)$
+\end_inset
+
+ random matrix view 
+\end_layout
+
+\begin_layout LyX-Code
+val inCoreA = Matrices.symmetricUniformView(m, n, seed)
+\end_layout
+
+\begin_layout Subsubsection
+Univariate 
+\begin_inset Formula $\mathcal{N}\left(0,1\right)$
+\end_inset
+
+ matrix view
+\end_layout
+
+\begin_layout LyX-Code
+val inCoreA = Matrices.gaussianView(m, n, seed)
+\end_layout
+
+\begin_layout Subsection
+Iterators 
+\end_layout
+
+\begin_layout Standard
+Mahout-math already exposes a number of iterators.
+ Scala code just needs to import collection.JavaConversions._ to enable implicit
+ conversions to scala iterators.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+import collection._
+\end_layout
+
+\begin_layout LyX-Code
+import JavaConversions._
+\end_layout
+
+\begin_layout Subsubsection
+Iterating over rows in a matrix
+\end_layout
+
+\begin_layout LyX-Code
+for (row <- m) {
+\end_layout
+
+\begin_layout LyX-Code
+  ...
+ do something with row
+\end_layout
+
+\begin_layout LyX-Code
+}
+\end_layout
+
+\begin_layout Subsubsection
+Iterating over non-zero and all elements of a vector or matrix 
+\end_layout
+
+\begin_layout Standard
+Note that Vector.Element also has some implicit syntactic sure, e.g.
+ to add 5.0 to every non-zero element the following code may be used:
+\end_layout
+
+\begin_layout LyX-Code
+for (row <- m; el <- row.nonZero) el = 5.0 + el
+\end_layout
+
+\begin_layout LyX-Code
+...
+ or 
+\end_layout
+
+\begin_layout LyX-Code
+for (row <- m; el <- row.nonZero) el := 5.0 + el
+\end_layout
+
+\begin_layout Standard
+Similarly, 
+\family typewriter
+row.all 
+\family default
+produces iterator over all elements in a row (vector).
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsection
+Bringing it all together: in-core SSVD
+\end_layout
+
+\begin_layout Standard
+Just to illustrate semantic clarity, we will adduce a source for in-core
+ SSVD code.
+\end_layout
+
+\begin_layout LyX-Code
+  /**
+\end_layout
+
+\begin_layout LyX-Code
+   * In-core SSVD algorithm.
+\end_layout
+
+\begin_layout LyX-Code
+   *
+\end_layout
+
+\begin_layout LyX-Code
+   * @param a input matrix A
+\end_layout
+
+\begin_layout LyX-Code
+   * @param k request SSVD rank
+\end_layout
+
+\begin_layout LyX-Code
+   * @param p oversampling parameter
+\end_layout
+
+\begin_layout LyX-Code
+   * @param q number of power iterations
+\end_layout
+
+\begin_layout LyX-Code
+   * @return (U,V,s)
+\end_layout
+
+\begin_layout LyX-Code
+   */
+\end_layout
+
+\begin_layout LyX-Code
+  def ssvd(a: Matrix, k: Int, p: Int = 15, q: Int = 0) = {
+\end_layout
+
+\begin_layout LyX-Code
+    val m = a.nrow
+\end_layout
+
+\begin_layout LyX-Code
+    val n = a.ncol
+\end_layout
+
+\begin_layout LyX-Code
+    if (k > min(m, n))
+\end_layout
+
+\begin_layout LyX-Code
+      throw new IllegalArgumentException(
+\end_layout
+
+\begin_layout LyX-Code
+        "k cannot be greater than smaller of m,n")
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+    val pfxed = min(p, min(m, n) - k)
+\end_layout
+
+\begin_layout LyX-Code
+    // actual decomposition rank
+\end_layout
+
+\begin_layout LyX-Code
+    val r = k + pfxed
+\end_layout
+
+\begin_layout LyX-Code
+    val rnd = RandomUtils.getRandom
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+    val omega = Matrices.symmetricUniformView(n, r, rnd.nextInt)
+\end_layout
+
+\begin_layout LyX-Code
+    var y = a %*% omega
+\end_layout
+
+\begin_layout LyX-Code
+    var yty = y.t %*% y
+\end_layout
+
+\begin_layout LyX-Code
+    val at = a.t
+\end_layout
+
+\begin_layout LyX-Code
+    var ch = chol(yty)
+\end_layout
+
+\begin_layout LyX-Code
+    var bt = ch.solveRight(at %*% y)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+    // power iterations
+\end_layout
+
+\begin_layout LyX-Code
+    for (i <- 0 until q) {
+\end_layout
+
+\begin_layout LyX-Code
+      y = a %*% bt
+\end_layout
+
+\begin_layout LyX-Code
+      yty = y.t %*% y
+\end_layout
+
+\begin_layout LyX-Code
+      ch = chol(yty)
+\end_layout
+
+\begin_layout LyX-Code
+      bt = ch.solveRight(at %*% y)
+\end_layout
+
+\begin_layout LyX-Code
+    }
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+    val bbt = bt.t %*% bt
+\end_layout
+
+\begin_layout LyX-Code
+    val (uhat, d) = eigen(bbt)
+\end_layout
+
+\begin_layout LyX-Code
+    val s = d.sqrt
+\end_layout
+
+\begin_layout LyX-Code
+    val u = ch.solveRight(y) %*% uhat
+\end_layout
+
+\begin_layout LyX-Code
+    val v = bt %*% (uhat %*%: diagv(1 /: s))
+\end_layout
+
+\begin_layout LyX-Code
+    (u(::, 0 until k), v(::, 0 until k), s(0 until k))
+\end_layout
+
+\begin_layout LyX-Code
+  }
+\end_layout
+
+\begin_layout Subsection
+Stochastic PCA
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\size footnotesize
+ /**
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * PCA based on SSVD that runs without forming an always-dense A-(colMeans(A))
+ input for SVD.
+ This
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * follows the solution outlined in MAHOUT-817.
+ For in-core version it, for most part, is supposed
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * to save some memory for sparse inputs by removing direct mean subtraction.<P
+>
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   *
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * Hint: Usually one wants to use AV which is approsimately USigma, i.e.<code>u
+ %*%: diagv(s)</code>.
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * If retaining distances and orignal scaled variances not that important,
+ the normalized PCA space
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * is just U.
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   *
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * Important: data points are considered to be rows.
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   *
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @param a input matrix A
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @param k request SSVD rank
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @param p oversampling parameter
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @param q number of power iterations
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @return (U,V,s)
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   */
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  def spca(a:Matrix, k: Int, p: Int = 15, q: Int = 0) 
+\end_layout
+
+\begin_layout Standard
+Stochastic PCA is a re-flow of MAHOUT-817 for in-core DSL.
+ One usually needs output 
+\begin_inset Formula $\mathbf{AV}\approx\mathbf{U}\boldsymbol{\Sigma}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+val (inCoreU, _, s) = spca(a = input, k = 30, q = 1)
+\end_layout
+
+\begin_layout LyX-Code
+val uSigma = inCoreU %*%: diagv(s)
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsection
+Pitfalls 
+\end_layout
+
+\begin_layout Standard
+This one the people who are accustomed to writing R linear algebra will
+ probably find quite easy to fall into.
+ R has a nice property, a copy-on-write, so all variables actually appear
+ to act as no-side-effects scalar-like values and all assignment appear
+ to be by value.
+ Since scala always assigns by reference (except for AnyVal types which
+ are assigned by value), it is easy to fall prey to the following side effect
+ modifications
+\end_layout
+
+\begin_layout LyX-Code
+val m1 = m 
+\end_layout
+
+\begin_layout LyX-Code
+m1 += 5.0 // modifies m as well
+\end_layout
+
+\begin_layout Standard
+A fix is as follows: 
+\end_layout
+
+\begin_layout LyX-Code
+val m1 = m cloned 
+\end_layout
+
+\begin_layout LyX-Code
+m1 += 5.0 // now m is intact
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Out-of-core-linalg-bindings"
+
+\end_inset
+
+Out-of-core linalg bindings
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The subject of this section are solely operations applicable to Mahout's
+ DRM (distributed row matrix).
+ 
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\bar under
+Spark Binding's DRM persistence to HDFS is compatible with all Mahout's
+ MR algorithms using DRM such as ssvd or seq2sparse.
+ 
+\series default
+\bar default
+
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\backslash
+color{comment}
+\end_layout
+
+\end_inset
+
+This statement needs comprehensive QA throughout; but intent is true.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Once loaded into spark, DRM is represented by Spark partitions initially
+ consisting of handful of row vectors.
+\end_layout
+
+\begin_layout Standard
+Here and on, I will denote spark-backed DRM references as 
+\family typewriter
+A
+\family default
+, whereas in-core matrices as 
+\family typewriter
+inCoreA
+\family default
+.
+\end_layout
+
+\begin_layout Subsection
+Initializing Mahout/Spark context
+\end_layout
+
+\begin_layout Standard
+Many (if not all) operations will require a Spark context.
+ Spark context can be passed in two ways: (1) as an implicit value; and
+ as passed down from a parent source (DRM's backing RDD).
+ 
+\end_layout
+
+\begin_layout Standard
+To initialize Mahout/Spark session, just create an implicit value of a specifica
+lly prepped Spark context: 
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+implicit val mahoutCtx = mahoutSparkContext(
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+masterUrl = "local", 
+\end_layout
+
+\begin_layout LyX-Code
+appName = "MahoutLocalContext" 
+\end_layout
+
+\begin_layout LyX-Code
+// [,...]
+\end_layout
+
+\end_deeper
+\begin_layout LyX-Code
+)
+\end_layout
+
+\begin_layout Standard
+Parameter 
+\family typewriter
+masterUrl
+\family default
+ points to Spark's master.
+ Note that Mahout expects either MAHOUT_HOME environment or -Dmahout.home=...
+ java system variable to point to Mahout home directory in order to collect
+ relevant jars for the Spark sessions.
+\end_layout
+
+\begin_layout Standard
+From there on, as long as Mahout-initialized Spark context is exposed thru
+ implicit variable, attribute or paremeter, there's no need to specify it
+ explicitly for any of the successive operations.
+ 
+\end_layout
+
+\begin_layout Standard
+Note that as of the time of this writing Spark sessions cannot coexist in
+ the same jvm, even though a single spark session is reentrant and can handle
+ requests from more than one thread.
+\end_layout
+
+\begin_layout Subsection
+Recommended imports for Scala & Spark Bindings
+\end_layout
+
+\begin_layout Standard
+For seamless in-core & distributed algebraic DSL:
+\end_layout
+
+\begin_layout LyX-Code
+// Import matrix, vector types, etc.
+\end_layout
+
+\begin_layout LyX-Code
+
+\series bold
+import org.apache.mahout.math._
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+// Import scala bindings operations
+\end_layout
+
+\begin_layout LyX-Code
+
+\series bold
+import scalabindings._
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+// Enable R-like dialect in scala bindings
+\end_layout
+
+\begin_layout LyX-Code
+
+\series bold
+import RLikeOps._
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+// Import distributed matrix apis
+\end_layout
+
+\begin_layout LyX-Code
+
+\series bold
+import drm._
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+// Import R-like distributed dialect
+\end_layout
+
+\begin_layout LyX-Code
+
+\series bold
+import RLikeDrmOps._
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+// Those are needed for Spark-specific 
+\end_layout
+
+\begin_layout LyX-Code
+// operations such as context creation.
+\end_layout
+
+\begin_layout LyX-Code
+// 100% engine-agnostic code does not 
+\end_layout
+
+\begin_layout LyX-Code
+// require these.
+\end_layout
+
+\begin_layout LyX-Code
+
+\series bold
+import org.apache.mahout.sparkbindings._
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+// A good idea when working with mixed 
+\end_layout
+
+\begin_layout LyX-Code
+// scala/java iterators and collections
+\end_layout
+
+\begin_layout LyX-Code
+
+\series bold
+import collection._
+\end_layout
+
+\begin_layout LyX-Code
+
+\series bold
+import JavaConversions._
+\end_layout
+
+\begin_layout Standard
+All subsequent snippets assume the relevant packages are imported.
+\end_layout
+
+\begin_layout Standard
+Mahout shell does all these imports automatically.
+\end_layout
+
+\begin_layout Subsection
+DRM Persistence operators
+\end_layout
+
+\begin_layout Subsubsection
+Loading DRM off HDFS
+\end_layout
+
+\begin_layout LyX-Code
+val A = drmFromHDFS(path = hdfsPath) 
+\end_layout
+
+\begin_layout Subsubsection
+Parallelizing from an in-core matrix
+\end_layout
+
+\begin_layout LyX-Code
+val inCoreA = dense((1, 2, 3), (3, 4, 5))
+\end_layout
+
+\begin_layout LyX-Code
+val A = drmParallelize(inCoreA)
+\end_layout
+
+\begin_layout Subsubsection
+Empty DRM
+\end_layout
+
+\begin_layout LyX-Code
+val A = drmParallelizeEmpty(100, 50)
+\end_layout
+
+\begin_layout Subsubsection
+Collecting to driver's jvm in-core
+\end_layout
+
+\begin_layout LyX-Code
+val inCoreA = A.collect()
+\end_layout
+
+\begin_layout Standard
+Warning: Collection of distributed matrices is now happening implicitly
+ whenever conversion to in-core (o.a.m.math.Matrix) type is required:
+\end_layout
+
+\begin_layout LyX-Code
+val inCoreA:Matrix = ...
+\end_layout
+
+\begin_layout LyX-Code
+val drmB:DrmLike[Int] = ..
+ 
+\end_layout
+
+\begin_layout LyX-Code
+val inCoreC:Matrix = inCoreA %*% drmB 
+\end_layout
+
+\begin_layout LyX-Code
+// implied: (incoreA %*%) drmB).collect
+\end_layout
+
+\begin_layout Subsubsection
+Collecting to HDFS
+\end_layout
+
+\begin_layout Standard
+Collect Spark-backed DRM to HDFS in Mahout's DRM format files:
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+if you see an error here along the lines 
+\begin_inset Quotes eld
+\end_inset
+
+no implicit view available from A => org.apache.hadoop.io.Writable
+\begin_inset Quotes erd
+\end_inset
+
+ most likely you need just to import SparkContext._.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+A.writeDRM(path = hdfsPath)
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsection
+Logical algebraic operators on DRM matrices
+\end_layout
+
+\begin_layout Standard
+We will define a logical set of operators that are familiar to users of
+ R, which are elementwise +, -, *, / as well as matrix multiplication %*%
+ and transposition.
+ General rule is that we try to do a subset of the same things found in
+ the in-core DSL.
+ In particular, since all distributed matrices are immutable, there are
+ no assignment versions (e.g.
+ 
+\family typewriter
+A += B
+\family default
+).
+ 
+\end_layout
+
+\begin_layout Standard
+Logical operators comprised into expression do not however mean that concrete
+ physical plan is materialized until the expression is 
+\begin_inset Quotes eld
+\end_inset
+
+checkpointed
+\begin_inset Quotes erd
+\end_inset
+
+ -- directly or indirectly.
+ In terms of Spark, this is called 
+\begin_inset Quotes eld
+\end_inset
+
+action
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Unlike with Spark, we want to discern two types of 
+\begin_inset Quotes eld
+\end_inset
+
+actions
+\begin_inset Quotes erd
+\end_inset
+
+: optimizer action and computational action.
+ 
+\end_layout
+
+\begin_layout Paragraph
+Optimizer actions.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optimizer action
+\emph default
+ triggers materialization of a physical plan (concrete RDD graph with result
+ marked for Spark caching), backed by CheckpointedDRM.
+ CheckpointedDRM servies as a cut-off boundary for optmizer action.
+ Optimizer action does not trigger actual computation of result data set.
+ Right now optimizer action is triggered explicitly by DRMLike#checkpoint().
+\end_layout
+
+\begin_layout Standard
+Let consider two examples:
+\end_layout
+
+\begin_layout LyX-Code
+val A = drmParallelize (...)
+\end_layout
+
+\begin_layout LyX-Code
+val B = drmParallelize (...)
+\end_layout
+
+\begin_layout LyX-Code
+val C = A %*% B.t
+\end_layout
+
+\begin_layout LyX-Code
+val D = C.t 
+\end_layout
+
+\begin_layout LyX-Code
+val E = C.t %*% C
+\end_layout
+
+\begin_layout LyX-Code
+D.writeDRM(..path..)
+\end_layout
+
+\begin_layout LyX-Code
+E.writeDRM(..path..)
+\end_layout
+
+\begin_layout Standard
+In this example, optimizer optimizes separately 2 pipelines: 
+\begin_inset Formula $\mathbf{D}=\mathbf{B}\mathbf{A}^{\top}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{E}=\left(\mathbf{AB}^{\top}\right)^{\top}\left(\mathbf{AB}^{\top}\right)$
+\end_inset
+
+ using same matrices 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{B}$
+\end_inset
+
+ as root of both computations.
+ Now let's consider the following modified example: 
+\end_layout
+
+\begin_layout LyX-Code
+val A = drmParallelize (...)
+\end_layout
+
+\begin_layout LyX-Code
+val B = drmParallelize (...)
+\end_layout
+
+\begin_layout LyX-Code
+val C = (A %*% B.t).checkpoint
+\end_layout
+
+\begin_layout LyX-Code
+val D = C.t 
+\end_layout
+
+\begin_layout LyX-Code
+val E = C.t %*% C
+\end_layout
+
+\begin_layout LyX-Code
+D.writeDRM(..path..)
+\end_layout
+
+\begin_layout LyX-Code
+E.writeDRM(..path..)
+\end_layout
+
+\begin_layout Standard
+In this case, which is functionally equivalent to the previous one, the
+ optimizer considers 3 separate pipelines: 
+\begin_inset Formula $\mathbf{C}=\mathbf{AB}^{\top}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{D}=\mathbf{C}^{\top}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{E}=\mathbf{C}^{\top}\mathbf{C}$
+\end_inset
+
+ while caching optimized plan and intermediate result for 
+\begin_inset Formula $\mathbf{C}$
+\end_inset
+
+ into the Spark cache.
+ Introducing checkpoints may improve 
+\begin_inset Quotes eld
+\end_inset
+
+wall time
+\begin_inset Quotes erd
+\end_inset
+
+ (since matrices 
+\series bold
+D 
+\series default
+and 
+\series bold
+E
+\series default
+ will be triggered for action at different time and optimizer wouldn't be
+ able to consider computational graph that includes both at the same time).
+ But even in the first example optimizer will be able to figure to optimize
+ 
+\begin_inset Formula $\mathbf{E}=\left(\mathbf{AB}^{\top}\right)^{\top}\left(\mathbf{AB}^{\top}\right)$
+\end_inset
+
+ as 
+\begin_inset Formula $\mathrm{t\_square}\left(\mathrm{product}\left(\mathbf{A},\mathbf{B}^{\top}\right)\right)$
+\end_inset
+
+ pipeline, i.e.
+ into only two sequential physical operators.
+\end_layout
+
+\begin_layout Standard
+In either of the examples, nothing happens in the backend until a computational
+ action is triggered for either of 
+\begin_inset Formula $\mathbf{E}$
+\end_inset
+
+ or 
+\begin_inset Formula $\mathbf{D}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+It doesn't matter how many times checkpointing is called on a logical operator,
+ same logical operator will be optimized and set for caching policy only
+ once.
+\end_layout
+
+\begin_layout Paragraph
+Computational actions.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Computational action
+\emph default
+ leads to result being computed and (optionally?) placed into Spark cache.
+ Such actions will also lazily and implicitly trigger linalg optimizer checkpoin
+ting.
+ Currently, computational actions include writeDrm(), collect(), blockify()
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\backslash
+color{tentative}
+\end_layout
+
+\end_inset
+
+and sometimes could also be triggered implicitly by optimizer activity beyond
+ current checkpoint cut-off (if checkpointed but not computed and cached
+ yet) to run some cost estimates necessary for the optimizer beyond checkpointin
+g, potentially future actions associated with DRM sub-blocking
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+E.g.
+ in the second example, running 
+\end_layout
+
+\begin_layout LyX-Code
+E.writeDrm(path)
+\end_layout
+
+\begin_layout Standard
+will trigger computational actions for 
+\begin_inset Formula $\mathbf{E}$
+\end_inset
+
+ and, implicitly, for 
+\begin_inset Formula $\mathbf{C}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+All these rules follow the same patterns as for the in-core arguments.
+\end_layout
+
+\begin_layout Paragraph
+Caching in Spark's Block Manager.
+\end_layout
+
+\begin_layout Standard
+Every checkpoint can be, and by default, is, pushed into Spark's memory
+ block manager.
+ Default policy is MEMORY_ONLY, but storage level can be specified explicitly
+ as a parameter to checkpoint() call.
+ Actual push of data to memory block manager happens no sooner that actual
+ partition computation occurs for the first time (i.e.
+ at the first occurrence of a 
+\emph on
+computational action 
+\emph default
+of the pipeline involving the result in question).
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Spark manual to understand interaction with Block Manager and storage
+ levels in detail.
+\end_layout
+
+\end_inset
+
+ Checkpointed DRMs may later be explicitly uncached from block manager (asynchro
+nously) if desired, e.g.: 
+\end_layout
+
+\begin_layout LyX-Code
+val drmA = (/*..drm expression..*/).checkpoint(CacheHint.MEMORY_AND_DISK)
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+...
+ some computational actions involving drmA
+\end_layout
+
+\begin_layout LyX-Code
+...
+ drmA is not needed anymore
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+drmA.uncache()
+\end_layout
+
+\begin_layout Standard
+If argument is not cached by the time the 
+\family typewriter
+uncache()
+\family default
+ call has occurred, nothing of substance happens.
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsubsection
+Transposition
+\end_layout
+
+\begin_layout LyX-Code
+A.t
+\end_layout
+
+\begin_layout Subsubsection
+Elementwise +, -, *, /
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{M}=\mathbf{A}+\mathbf{B}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{M}=\mathbf{A}-\mathbf{B}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{M}=\mathbf{A}\circ\mathbf{B}\,\,\,\mathrm{(Hadamard)}
+\]
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{M}=\left(\begin{matrix}\frac{a_{11}}{b_{11}} & \frac{a_{12}}{b_{12}} & \cdots & \frac{a_{1n}}{b_{1n}}\\
+\vdots & \vdots & \ddots & \vdots\\
+\frac{a_{m1}}{b_{m1}} & \frac{a_{m2}}{b_{m2}} & \cdots & \frac{a_{mn}}{b_{mn}}
+\end{matrix}\right)\,\,\,\mathrm{(elementwise\, division)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+All this operations require identical geometry of operands and row keying
+ types that will be asserted at optmizer checkpointing time.
+\end_layout
+
+\begin_layout LyX-Code
+A + B
+\end_layout
+
+\begin_layout LyX-Code
+A - B
+\end_layout
+
+\begin_layout LyX-Code
+A * B
+\end_layout
+
+\begin_layout LyX-Code
+A / B
+\end_layout
+
+\begin_layout Standard
+Binary operators involving in-core argument (only on int-keyed DRMs)
+\end_layout
+
+\begin_layout LyX-Code
+A + inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+A - inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+A * inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+A / inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+A :+ inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+A :- inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+A :* inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+A :/ inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+inCoreA +: B
+\end_layout
+
+\begin_layout LyX-Code
+inCoreA -: B
+\end_layout
+
+\begin_layout LyX-Code
+inCoreA *: B
+\end_layout
+
+\begin_layout LyX-Code
+inCoreA /: B
+\end_layout
+
+\begin_layout Standard
+Note spark associativity change (e.g.
+ inCoreA +: B means B.leftMultiply(A), just like with both in-core arguments).
+ Important thing here is that whenever operator arguments include both in-core
+ and out-of-core arguments, operator can only be associated with the out-of-core
+ argument to support distributed implementation.
+\end_layout
+
+\begin_layout Subsubsection
+Matrix-matrix multiplication 
+\family typewriter
+%*%
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\mathbf{M}=\mathbf{A}\mathbf{B}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+A %*% B
+\end_layout
+
+\begin_layout LyX-Code
+A %*% inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+A %*% inCoreDiagonal (i.e.
+ things like A %*% diagv(d))
+\end_layout
+
+\begin_layout LyX-Code
+A :%*% inCoreB
+\end_layout
+
+\begin_layout LyX-Code
+inCoreA %*%: B
+\end_layout
+
+\begin_layout Standard
+Same as above, when both in-core and out-of-core argumetns used, associativity
+ of operation must follow the out-of-core (DRM) argument in the expression.
+\end_layout
+
+\begin_layout Subsubsection
+Matrix-vector multiplication 
+\family typewriter
+%*%
+\end_layout
+
+\begin_layout Standard
+Currently, we support a right-multiply product of a DRM and a in-core Vector
+ (
+\begin_inset Formula $\mathbf{Ax}$
+\end_inset
+
+), resulting in a distributed single-column DRM, which then of course could
+ be collected in front (usually that's the desired outcome):
+\end_layout
+
+\begin_layout LyX-Code
+val Ax = A %*% x
+\end_layout
+
+\begin_layout LyX-Code
+val inCoreX = Ax.collect(::,0)
+\end_layout
+
+\begin_layout Standard
+There are 2 physical operators associated with this: 
+\begin_inset Formula $\mathbf{Ax}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{A}^{\top}\mathbf{x}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Matrix-scalar +,-,*,/
+\end_layout
+
+\begin_layout Standard
+In this context, matrix-scalar operations mean element-wise operatios of
+ every matrix element and a scalar.
+\end_layout
+
+\begin_layout LyX-Code
+A + 5.0
+\end_layout
+
+\begin_layout LyX-Code
+A - 5.0
+\end_layout
+
+\begin_layout LyX-Code
+A :- 5.0
+\end_layout
+
+\begin_layout LyX-Code
+5.0 -: A  
+\end_layout
+
+\begin_layout LyX-Code
+A * 5.0
+\end_layout
+
+\begin_layout LyX-Code
+A / 5.0
+\end_layout
+
+\begin_layout LyX-Code
+5.0 /: A
+\end_layout
+
+\begin_layout Standard
+Note that 
+\family typewriter
+5.0 -: A
+\family default
+ means 
+\begin_inset Formula $m_{ij}=5-a_{ij}$
+\end_inset
+
+ and 
+\family typewriter
+5.0 /: A
+\family default
+ means 
+\begin_inset Formula $m_{ij}=\frac{5}{a_{ij}}$
+\end_inset
+
+ for all elements of the result.
+ 
+\end_layout
+
+\begin_layout Subsection
+Slicing
+\end_layout
+
+\begin_layout Standard
+Slicing (without assigning) is supported mostly identically to in-core slicing.
+ Slicing row or range is of 
+\family typewriter
+Range
+\family default
+ scala type, which typically can be inlined as 
+\family typewriter
+x to y
+\family default
+ or 
+\family typewriter
+x until y
+\family default
+.
+ All-range is given by 
+\family typewriter
+::
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+General slice 
+\end_layout
+
+\begin_layout LyX-Code
+A(100 to 200, 100 to 200)
+\end_layout
+
+\begin_layout Standard
+Horizontal block
+\end_layout
+
+\begin_layout LyX-Code
+A(::, 100 to 200)
+\end_layout
+
+\begin_layout Standard
+Vertical block
+\end_layout
+
+\begin_layout LyX-Code
+A(100 to 200, ::)
+\end_layout
+
+\begin_layout Standard
+Note: if row range is not all-range (
+\family typewriter
+::
+\family default
+) then the DRM must be 
+\family typewriter
+Int
+\family default
+-keyed.
+ Row slicing in general case is not supported for key types other than 
+\family typewriter
+Int
+\family default
+.
+\end_layout
+
+\begin_layout Subsection
+Stitching (cbind and rbind)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can stitch two matrices side by side (cbind R semantics) :
+\end_layout
+
+\begin_layout LyX-Code
+val drmAnextToB = drmA cbind drmB
+\end_layout
+
+\begin_layout Standard
+Or, which is the same in Scala, 
+\end_layout
+
+\begin_layout LyX-Code
+val drmAnextToB = drmA.cbind(drmB)
+\end_layout
+
+\begin_layout Standard
+Obviously, our variation of 
+\family typewriter
+cbind
+\family default
+ is accepting only two arguments, but we can stitch more matrices by chaining
+ the operation.
+\end_layout
+
+\begin_layout Standard
+Analogously, vertical distributed concatenation is available since MAHOUT-1596
+ via 
+\family typewriter
+rbind
+\family default
+.
+\end_layout
+
+\begin_layout Subsection
+Custom pipelines on blocks
+\end_layout
+
+\begin_layout Standard
+Pretty often there's a need to do something with the matrix expressed as
+ blocks.
+ Some physical operators are also more effective once working with matrix
+ blocks rather than individual rows.
+ Internally, Mahout's matrix pipeline (lazily) blockifies every data partition
+ into 
+\family typewriter
+BlockifiedDrmTuple
+\family default
+ blocks whenever first physical operator requiring blocking is encountered.
+ After that, any row-wise physical operators work on row vector 
+\emph on
+views
+\emph default
+ of the blocks.
+ 
+\end_layout
+
+\begin_layout Standard
+Here is definition for DRM block tuple type: 
+\end_layout
+
+\begin_layout LyX-Code
+  /** Drm block-wise tuple: 
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+Array of row keys and the matrix block.
+ */
+\end_layout
+
+\end_deeper
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+  type BlockifiedDrmTuple[K] = (Array[K], _ <: Matrix)
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Standard
+DRM operator 
+\family typewriter
+mapBlock
+\family default
+ provides transformational access to the vertical blockified tuples of the
+ matrix.
+ (Current implementation also guarantees that there's exactly one block
+ per map task).
+ 
+\end_layout
+
+\begin_layout Standard
+Here is unit test that demonstrates use of 
+\family typewriter
+mapBlock
+\family default
+ operator by producing A + 1.0:
+\end_layout
+
+\begin_layout LyX-Code
+    val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6))
+\end_layout
+
+\begin_layout LyX-Code
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+\end_layout
+
+\begin_layout LyX-Code
+    val B = A.mapBlock(/* Inherit width */) {
+\end_layout
+
+\begin_layout LyX-Code
+      case (keys, block) => keys -> (block += 1.0)
+\end_layout
+
+\begin_layout LyX-Code
+    }
+\end_layout
+
+\begin_layout LyX-Code
+    val inCoreB = B.collect
+\end_layout
+
+\begin_layout LyX-Code
+    val inCoreBControl = inCoreA + 1.0
+\end_layout
+
+\begin_layout LyX-Code
+    println(inCoreB)
+\end_layout
+
+\begin_layout LyX-Code
+    // Assert they are the same
+\end_layout
+
+\begin_layout LyX-Code
+    (inCoreB - inCoreBControl).norm should be < 1E-10
+\end_layout
+
+\begin_layout Standard
+The constrain is that operator mapBlock should not attempt to change the
+ height of the block, in order to provide correct total matrix row count
+ estimate to optimizer after application of the operator.
+ MapBlock operator may change 
+\emph on
+width
+\emph default
+ (i.e.
+ column count) of the matrix; if it does so, it needs to supply it to first
+ 
+\family typewriter
+ncol 
+\family default
+parameter of the mapBlock(newNCol) call.
+ Otherwise, it is assumed operator has inherited the width of the original
+ matrix.
+ The geometry of the block returned is asserted at run time, as geometry
+ is vitally important for the coherence of linear operators.
+\end_layout
+
+\begin_layout Standard
+Another note is that it is ok to return a reference to a modified same in-core
+ block.
+ This is actually recommended whenever possible (note the 
+\family typewriter
++=
+\family default
+ operator in the example) to avoid matrix copying.
+\end_layout
+
+\begin_layout Subsection
+Doing something completely custom
+\end_layout
+
+\begin_layout Standard
+If flexibility of Drm api is not enough, it is always possible to exit out
+ of opimizer-based algebra pipeline into pure spark RDD environment.
+ The exit is possible at optimizer checkpoints, which are presented by 
+\family typewriter
+Check
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+pointed
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+Drm
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+Base[K]
+\family default
+ trait.
+ This trait has an 
+\family typewriter
+rdd:DrmRdd[K]
+\family default
+ method, which returns a row-wise RDD of 
+\family typewriter
+Drm
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+Tuple[K]
+\family default
+ type.
+ 
+\end_layout
+
+\begin_layout Standard
+The row-wise tuple types and RDDs are defined as following:
+\end_layout
+
+\begin_layout LyX-Code
+  /** Drm row-wise tuple */
+\end_layout
+
+\begin_layout LyX-Code
+  type DrmTuple[K] = (K, Vector)
+\end_layout
+
+\begin_layout LyX-Code
+  /** Row-wise organized DRM rdd type */
+\end_layout
+
+\begin_layout LyX-Code
+  type DrmRdd[K] = RDD[DrmTuple[K]]
+\end_layout
+
+\begin_layout Standard
+(type 
+\family typewriter
+Vector
+\family default
+ here is 
+\family typewriter
+org.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+apache.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+ma
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+hout.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+math.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+Vec
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+-
+\end_layout
+
+\end_inset
+
+tor
+\family default
+).
+\end_layout
+
+\begin_layout Standard
+E.g.: 
+\end_layout
+
+\begin_layout LyX-Code
+val myRdd = (A %*% B).checkpoint().rdd
+\end_layout
+
+\begin_layout LyX-Code
+...
+\end_layout
+
+\begin_layout Standard
+Similarly, an Rdd conforming to a type of DrmRdd, can be re-wrapped into
+ optimizer checkpoint via
+\end_layout
+
+\begin_layout LyX-Code
+val rdd:DrmRdd[K] = ...
+ // 
+\end_layout
+
+\begin_layout LyX-Code
+val A = drmWrap(rdd = rdd, nrow = 50000, ncol = 100)
+\end_layout
+
+\begin_layout LyX-Code
+...
+ // use A in a DRM pipeline
+\end_layout
+
+\begin_layout Standard
+Parameters ncol and nrow (geometry) are optional.
+ If not supplied, they will be recomputed off cached dataset.
+ But if supplied, they 
+\emph on
+must
+\emph default
+ be accurate!
+\end_layout
+
+\begin_layout Standard
+A note about serialization: the Spark bindings for Mahout support serialization
+ of Vector and Matrix types (including their views and slices) via Kryo
+ serialization.
+ Hence, Spark context for Mahout is initialized with kryo serializer for
+ all objects.
+ This is something to keep in mind (Vector and Matrix objects can be broadcasted
+/collected, but there's no way to revert to java-serialized-only support
+ in spark session and use Mahout objects at the same time).
+ This generally should not be a problem in Spark 0.9 since there's a kryo
+ serialization back for practically anything of interest in the twitter/chill
+ that is used by Spark since 0.8.
+\end_layout
+
+\begin_layout Subsection
+Broadcasting vectors and matrices to closures.
+ 
+\end_layout
+
+\begin_layout Standard
+Generally, one can create and use one-way closure attributes and use them
+ at backend, e.g we can implement scalar matrix multiplication by a variable
+ 
+\emph on
+factor
+\emph default
+ the following way: 
+\end_layout
+
+\begin_layout LyX-Code
+val factor:Int = ...
+ 
+\end_layout
+
+\begin_layout LyX-Code
+val drm2 = drm1.mapBlock() {
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+case (keys, block) => block *= factor
+\end_layout
+
+\begin_layout LyX-Code
+keys -> block
+\end_layout
+
+\end_deeper
+\begin_layout LyX-Code
+}
+\end_layout
+
+\begin_layout Standard
+As we can see, even though factor is initialized in front end, it can be
+ easily used at backend closures running on every matrix vertical block
+ in parallel.
+ Very easy and elegant.
+\end_layout
+
+\begin_layout Standard
+A slight wrinkle with that is, closure attributes must be java-serializable.
+ This is, as it stands, not currently the case with in-core matrices and
+ vectors.
+ And even if they were, java serialization would be less compact on the
+ wire than a custom serialization that Mahout in-core matrices use.
+ E.g.
+ the following fragment, implementing a vector subtraction from every matrix
+ row, will fail with 
+\emph on
+NotSerializableException
+\emph default
+:
+\end_layout
+
+\begin_layout LyX-Code
+val v:Vector = ...
+ 
+\end_layout
+
+\begin_layout LyX-Code
+val drm2 = drm1.mapBlock() {
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+case (keys, block) => 
+\end_layout
+
+\begin_layout LyX-Code
+for (row <- 0 until block.nrow) block(row,::) -= v
+\end_layout
+
+\begin_layout LyX-Code
+keys -> block
+\end_layout
+
+\end_deeper
+\begin_layout LyX-Code
+}
+\end_layout
+
+\begin_layout Standard
+Spark and similar execution backends supports 
+\begin_inset Quotes eld
+\end_inset
+
+broadcast
+\begin_inset Quotes erd
+\end_inset
+
+ feature which ensures that a broadcast variable is available to all backend
+ running code.
+ We abstract that away too.
+ The fix to the previous fragment would be: 
+\end_layout
+
+\begin_layout LyX-Code
+val v:Vector = ...
+ 
+\end_layout
+
+\begin_layout LyX-Code
+val bcastV = drmBroadcast(v)
+\end_layout
+
+\begin_layout LyX-Code
+val drm2 = drm1.mapBlock() {
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+case (keys, block) => 
+\end_layout
+
+\begin_layout LyX-Code
+for (row <- 0 until block.nrow) block(row,::) -= bcastV
+\end_layout
+
+\begin_layout LyX-Code
+keys -> block
+\end_layout
+
+\end_deeper
+\begin_layout LyX-Code
+}
+\end_layout
+
+\begin_layout Subsection
+Computations providing ad-hoc summaries
+\end_layout
+
+\begin_layout Standard
+There's a number of operators that do not return a new distributed matrix.
+ As such, some of them may or will trigger computational action.
+ This is something to keep in mind.
+\end_layout
+
+\begin_layout Subsubsection
+nrow, ncol
+\end_layout
+
+\begin_layout Standard
+For example, matrix geometry properties (nrow, ncol) will trigger a summary
+ computation if the geometry is not already inferred thru optimizer.
+ If they do, they will checkpoint with storage level MEMORY_ONLY automatically.
+\end_layout
+
+\begin_layout Subsubsection
+colSums, colMeans
+\end_layout
+
+\begin_layout LyX-Code
+val acs = A.colSums
+\end_layout
+
+\begin_layout LyX-Code
+val amean = A.colMeans
+\end_layout
+
+\begin_layout Standard
+Those will 
+\emph on
+always
+\emph default
+ trigger a 
+\emph on
+computational action.
+
+\emph default
+ There's no lazy behavior for these (vector properties are considered to
+ be too bulky to be a lazy property).
+ I.e.
+ if one calls colSums() n times, then back end will actually recompute colMeans
+ n times.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\backslash
+color{tentative}
+\end_layout
+
+\end_inset
+
+rowMeans, rowSums
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Matrix norm
+\end_layout
+
+\begin_layout LyX-Code
+val rmse = (A - U %*% V.t).norm / sqrt(A.nrow * A.ncol)
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsection
+Distributed Decompositions
+\end_layout
+
+\begin_layout Subsubsection
+Imports for decompositions package
+\end_layout
+
+\begin_layout LyX-Code
+import org.apache.mahout.math._
+\end_layout
+
+\begin_layout LyX-Code
+...
+\end_layout
+
+\begin_layout LyX-Code
+import decompositions._
+\end_layout
+
+\begin_layout Subsubsection
+Distributed thin QR
+\end_layout
+
+\begin_layout Standard
+For the classic QR decomposition of the form 
+\begin_inset Formula $\mathbf{A}=\mathbf{Q}\mathbf{R}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{A}\in\mathbb{R}^{m\times n}$
+\end_inset
+
+, a distributed version is fairly easily achieved if 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ is tall and thin such that 
+\begin_inset Formula $\mathbf{A}^{\top}\mathbf{A}$
+\end_inset
+
+ fits in memory, i.e.
+ 
+\begin_inset Formula $m$
+\end_inset
+
+ is large, but 
+\begin_inset Formula $n\leq\sim5000$
+\end_inset
+
+.
+ Under such circumstances, only 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{Q}$
+\end_inset
+
+ are distributed matrices, and 
+\begin_inset Formula $\mathbf{A}^{\top}\mathbf{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{R}$
+\end_inset
+
+ are in-core products.
+ We just compute in-core version of Cholesky decomposition in the form of
+ 
+\begin_inset Formula $\mathbf{LL}^{\top}=\mathbf{A}^{\top}\mathbf{A}$
+\end_inset
+
+.
+ After that we take 
+\begin_inset Formula $\mathbf{R}=\mathbf{L}^{\top}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}.$
+\end_inset
+
+ The latter is easily achieved by multiplying each vertical block of 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ by 
+\begin_inset Formula $\left(\mathbf{L}^{\top}\right)^{-1}$
+\end_inset
+
+.
+ (There's no actual matrix inversion happening).
+\end_layout
+
+\begin_layout Standard
+Corollary to this design are two facts: (1) rows of 
+\begin_inset Formula $\mathbf{Q}$
+\end_inset
+
+ retain the same indexing type as rows of 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ (not necessarily int-keyed); and (2) 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{Q}$
+\end_inset
+
+ are identically partitioned.
+ Therefore, 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{Q}$
+\end_inset
+
+ subsequently can be trivially zipped together if join of rows is needed
+ (used in d-ssvd).
+\end_layout
+
+\begin_layout LyX-Code
+val (drmQ, inCoreR) = dqrThin(drmA)
+\end_layout
+
+\begin_layout Standard
+The source of this method as of the time of this writing is extremely simple
+ (probably too simple):
+\end_layout
+
+\begin_layout LyX-Code
+  def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean =
+ true): 
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+(DrmLike[K], Matrix) = {
+\end_layout
+
+\end_deeper
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    if (A.ncol > 5000)
+\end_layout
+
+\begin_layout LyX-Code
+      log.warn("A is too fat.
+ A'A must fit in memory and easily broadcasted.")
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    implicit val ctx = A.context
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    val AtA = (A.t %*% A).checkpoint()
+\end_layout
+
+\begin_layout LyX-Code
+    val inCoreAtA = AtA.collect
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    if (log.isDebugEnabled) log.debug("A'A=
+\backslash
+n%s
+\backslash
+n".format(inCoreAtA))
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    val ch = chol(inCoreAtA)
+\end_layout
+
+\begin_layout LyX-Code
+    val inCoreR = (ch.getL cloned) t
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    if (log.isDebugEnabled) log.debug("R=
+\backslash
+n%s
+\backslash
+n".format(inCoreR))
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    if (checkRankDeficiency && !ch.isPositiveDefinite)
+\end_layout
+
+\begin_layout LyX-Code
+      throw new IllegalArgumentException("R is rank-deficient.")
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    val bcastAtA = drmBroadcast(inCoreAtA)
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    // Unfortunately, I don't think Cholesky decomposition is serializable
+ to backend.
+ So we re-
+\end_layout
+
+\begin_layout LyX-Code
+    // decompose A'A in the backend again.
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    // Compute Q = A*inv(L') -- we can do it blockwise.
+\end_layout
+
+\begin_layout LyX-Code
+    val Q = A.mapBlock() {
+\end_layout
+
+\begin_layout LyX-Code
+      case (keys, block) => keys -> chol(bcastAtA).solveRight(block)
+\end_layout
+
+\begin_layout LyX-Code
+    }
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    Q -> inCoreR
+\end_layout
+
+\begin_layout LyX-Code
+  }
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Standard
+Since we see that is navigated twice, it is recommended that it is checkpointed
+ before calling this method to avoid recomputation.
+\end_layout
+
+\begin_layout Subsubsection
+Distributed Stochastic SVD
+\end_layout
+
+\begin_layout Standard
+Usage example:
+\end_layout
+
+\begin_layout LyX-Code
+val (drmU, drmV, s) = dssvd(drmA, k = 40, q = 1) 
+\end_layout
+
+\begin_layout Standard
+As a side effect of checkpointing, U and V values returned as logical operators
+ (i.e they are neither checkpointed nor computed).
+ Therefore, there's no physical work actually done to compute final 
+\begin_inset Formula $\mathbf{U}$
+\end_inset
+
+ or 
+\series bold
+
+\begin_inset Formula $\mathbf{V}$
+\end_inset
+
+ 
+\series default
+until they are actually used in a subsequent expression.
+ So unlike the SSVDSolver, this does not require additional parameters to
+ configure which set of product combinations is actually computed in the
+ end.
+ Neat, isn't it.
+\end_layout
+
+\begin_layout Standard
+Source (for those who likes counting lines):
+\end_layout
+
+\begin_layout LyX-Code
+  /**
+\end_layout
+
+\begin_layout LyX-Code
+   * Distributed Stochastic Singular Value decomposition algorithm.
+\end_layout
+
+\begin_layout LyX-Code
+   *
+\end_layout
+
+\begin_layout LyX-Code
+   * @param A input matrix A
+\end_layout
+
+\begin_layout LyX-Code
+   * @param k request SSVD rank
+\end_layout
+
+\begin_layout LyX-Code
+   * @param p oversampling parameter
+\end_layout
+
+\begin_layout LyX-Code
+   * @param q number of power iterations
+\end_layout
+
+\begin_layout LyX-Code
+   * @return (U,V,s).
+ Note that U, V are non-checkpointed matrices 
+\end_layout
+
+\begin_layout LyX-Code
+             (i.e.
+ one needs to actually use them
+\end_layout
+
+\begin_layout LyX-Code
+   *         e.g.
+ save them to hdfs in order to trigger their computation.
+\end_layout
+
+\begin_layout LyX-Code
+   */
+\end_layout
+
+\begin_layout LyX-Code
+  def dssvd[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+\end_layout
+
+\begin_layout LyX-Code
+  (DrmLike[K], DrmLike[Int], Vector) = {
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    val drmA = A.checkpoint()
+\end_layout
+
+\begin_layout LyX-Code
+    val m = drmA.nrow
+\end_layout
+
+\begin_layout LyX-Code
+    val n = drmA.ncol
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    assert(k <= (m min n), "k cannot be greater than smaller of m, n.")
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    val pfxed = safeToNonNegInt((m min n) - k min p)
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    // Actual decomposition rank
+\end_layout
+
+\begin_layout LyX-Code
+    val r = k + pfxed
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    // We represent Omega by its seed.
+\end_layout
+
+\begin_layout LyX-Code
+    val omegaSeed = Random.nextInt()
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    // Compute Y = A*Omega.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    var drmY = drmA.mapBlock(ncol = r) {
+\end_layout
+
+\begin_layout LyX-Code
+      case (keys, blockA) =>
+\end_layout
+
+\begin_layout LyX-Code
+        val blockY = blockA %*% Matrices.symmetricUniformView(blockA.ncol,
+ r, omegaSeed)
+\end_layout
+
+\begin_layout LyX-Code
+        keys -> blockY
+\end_layout
+
+\begin_layout LyX-Code
+    }
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    var drmQ = dqrThin(drmY.checkpoint())._1
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    // Checkpoint Q if last iteration
+\end_layout
+
+\begin_layout LyX-Code
+    if (q==0) drmQ = drmQ.checkpoint()
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    // This actually is optimized as identically 
+\end_layout
+
+\begin_layout LyX-Code
+    // partitioned map-side A'B since A and Q should
+\end_layout
+
+\begin_layout LyX-Code
+    // still be identically partitioned.
+\end_layout
+
+\begin_layout LyX-Code
+    var drmBt = drmA.t %*% drmQ
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    // Checkpoint B' if last iteration
+\end_layout
+
+\begin_layout LyX-Code
+    if (q==0) drmBt = drmBt.checkpoint()
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+    for (i <- 1 to q) {
+\end_layout
+
+\begin_layout LyX-Code
+      drmY = drmA %*% drmBt
+\end_layout
+
+\begin_layout LyX-Code
+      drmQ = dqrThin(drmY.checkpoint())._1
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+      // Checkpoint Q if last iteration
+\end_layout
+
+\begin_layout LyX-Code
+      if ( i == q) drmQ = drmQ.checkpoint()
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+      drmBt = drmA.t %*% drmQ
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\end_layout
+
+\begin_layout LyX-Code
+      // Checkpoint B' if last iteration
+\end_layout
+
+\begin_layout LyX-Code
+      if ( i == q) drmBt = drmBt.checkpoint()
+\end_layout
+
+\begin_layout LyX-Code
+    }
+\end_layout
+
+\begin_layout LyX-Code
+    val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(StorageLevel.NONE).collect
+\end_layout
+
+\begin_layout LyX-Code
+    val (inCoreUHat, d) = eigen(inCoreBBt)
+\end_layout
+
+\begin_layout LyX-Code
+    val s = d.sqrt
+\end_layout
+
+\begin_layout LyX-Code
+    val drmU = drmQ %*% inCoreUHat
+\end_layout
+
+\begin_layout LyX-Code
+    val drmV = drmBt %*% (inCoreUHat %*%: diagv(1 /: s))
+\end_layout
+
+\begin_layout LyX-Code
+    (drmU(::, 0 until k), drmV(::, 0 until k), s(0 until k))
+\end_layout
+
+\begin_layout LyX-Code
+  }
+\end_layout
+
+\begin_layout Standard
+Done!
+\end_layout
+
+\begin_layout Subsubsection
+Distributed Stochastic PCA
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  /**
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * Distributed Stochastic PCA decomposition algorithm.
+ A logical reflow of the "SSVD-PCA options.pdf"
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * document of the MAHOUT-817.
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   *
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @param A input matrix A
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @param k request SSVD rank
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @param p oversampling parameter
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @param q number of power iterations (hint: use either 0 or 1)
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   * @return (U,V,s).
+ Note that U, V are non-checkpointed matrices (i.e.
+ one needs to actually use them
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   *         e.g.
+ save them to hdfs in order to trigger their computation.
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+   */
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  def dspca[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  (DrmLike[K], DrmLike[Int], Vector) = <...>
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Standard
+Stochastic PCA is a re-flow of MAHOUT-817 for sparkbindings algebra.
+ One usually needs output 
+\begin_inset Formula $\mathbf{AV}\approx\mathbf{U}\boldsymbol{\Sigma}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+val (drmU, _, s) = dspca(a = drmA, k = 30, q = 1)
+\end_layout
+
+\begin_layout LyX-Code
+val drmUSigma = drmU %*% diagv(s)
+\end_layout
+
+\begin_layout LyX-Code
+...
+\end_layout
+
+\begin_layout Subsubsection
+Distributed regularized ALS
+\end_layout
+
+\begin_layout Standard
+It is extremely easy now to alternate regularized ALS in distributed way:
+ 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Here, note that rightmost term of the expression 
+\end_layout
+
+\begin_layout LyX-Code
+drmV.t %*% drmV -: diag(lambda, k)
+\end_layout
+
+\begin_layout Plain Layout
+is an in-core matrix, so expression 
+\family typewriter
+drmV.t %*% drmV
+\family default
+ is computed in distributed way, but matrix subtraction and solving the
+ linear system 
+\family typewriter
+solve(...)
+\family default
+ is performed in the front-end.
+ This is because matrix subtraction is associated with right hand side operand
+ 
+\family typewriter
+diag(lambda, k)
+\family default
+ which is an in-core matrix and requires an in-core left operand; so implicit
+ matrix collection kicks in before doing subtraction.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+If we used just `-` then operation of subtraction would have been associated
+ with a tiny but distributed matrix product 
+\begin_inset Formula $\mathbf{V}^{\top}\mathbf{V}$
+\end_inset
+
+ and be carried in distributed way, which, given tiny size of the operands,
+ would actually be just a waste of time communicating to machine nodes.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+for (i <- 0 until maxIterations) { 
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+  ..
+\end_layout
+
+\begin_layout LyX-Code
+  drmV = (drmAt %*% drmU %*% solve(drmU.t %*% drmU -: diag(lambda, k))).checkpoint
+()
+\end_layout
+
+\begin_layout LyX-Code
+  drmU = (drmA %*% drmV %*% solve(drmV.t %*% drmV -: diag(lambda, k))).checkpoint(
+)
+\end_layout
+
+\begin_layout LyX-Code
+  ..
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+}
+\end_layout
+
+\begin_layout Standard
+Actual implementation is doing a tad more than just alternations, of course.
+ To run convenience implementation of distributed ALS in Mahout (see scaladoc),
+ use 
+\family typewriter
+dals(...)
+\family default
+: 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Code untested for performance at this point
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+val (drmU, drmV, _) = dals(A, ...).toTuple
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsection
+Adjusting parallelism of computations 
+\end_layout
+
+\begin_layout Standard
+Sometimes there's a need to adjust parallelism of computations.
+ For most part it happens when we want to increase parallelism of computations.
+ With Spark Bindings, parallelism value is construed as the number of splits.
+\end_layout
+
+\begin_layout Standard
+First, minimum parallelism can be established by passing 
+\family typewriter
+parMin
+\family default
+ parameter to 
+\family typewriter
+drmFromHdfs()
+\family default
+ during load from DFS.
+ 
+\end_layout
+
+\begin_layout Standard
+Second, parallelism operators could be inserted into expressions.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+
+\family typewriter
+drmA.par(min = 100)
+\end_layout
+
+\begin_layout Standard
+will establish minimum parallelism for ougoing computations of 
+\family typewriter
+drmA
+\family default
+.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+drmA.par(exact = 100) 
+\end_layout
+
+\begin_layout Standard
+will establish exact parallelism; and 
+\end_layout
+
+\begin_layout LyX-Code
+drmA.par(auto = true) 
+\end_layout
+
+\begin_layout Standard
+will try to do engine-specific automatic parallelism adjustment (with Spark,
+ it is based on current default parallelism property for Spark).
+ Auto parallelism will not decrease already established parallelism though.
+\end_layout
+
+\begin_layout Subsection
+Mahout shell for Spark
+\end_layout
+
+\begin_layout Standard
+Use something like the following to run Mahout Spark shell:
+\end_layout
+
+\begin_layout LyX-Code
+MASTER=<spark-master-url> mahout/bin spark-shell
+\end_layout
+
+\begin_layout Standard
+Assuming startup has completed successfully, all necessary imports are already
+ done, and implicit instance of 
+\family typewriter
+DistributedContext
+\family default
+ is already created (sdc).
+\end_layout
+
+\begin_layout Standard
+See 
+\begin_inset CommandInset href
+LatexCommand href
+name "simple.mscala"
+target "https://github.com/apache/mahout/blob/master/spark-shell/src/test/mahout/simple.mscala"
+
+\end_inset
+
+ for an example of test script/script invocation.
+\end_layout
+
+\begin_layout Standard
+Prerequisites to run Mahout Spark shell:
+\end_layout
+
+\begin_layout Itemize
+Spark is installed, compiled and SPARK_HOME is set.
+ 
+\bar under
+Spark version should be that of what Mahout has been compiled with
+\bar default
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+as of time of this writing, spark-0.9.1
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Mahout is compiled, and MAHOUT_HOME is set.
+\end_layout
+
+\begin_layout Itemize
+Other usual Spark requirements (e.g.
+ it is not easy, if possible at all, to run Spark shell from behind NAT,
+ etc.) 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Optimizer notes
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Physical operators 
+\end_layout
+
+\begin_layout Description
+\begin_inset Formula $\mathbf{A}\mathbf{B}^{\top}$
+\end_inset
+
+ This is using cartesian combination of vertical blocks of both sides.
+\end_layout
+
+\begin_layout Description
+\begin_inset Formula $\mathbf{A}^{\top}\mathbf{B}$
+\end_inset
+
+ There are two implementations for this.
+ If 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{B}$
+\end_inset
+
+ are identically partitioned (which is tracked by optimizer throughout),
+ then this is computed by zip+combine.
+ If not, then inner join+combine is used.
+\end_layout
+
+\begin_layout Description
+\begin_inset Formula $\mathbf{A}^{\top}$
+\end_inset
+
+ This requires int-keyed input only.
+ A direct transposition operator.
+\end_layout
+
+\begin_layout Description
+\begin_inset Formula $\mathbf{A}^{\top}\mathbf{A}$
+\end_inset
+
+ This operator compiles squared matrix with arbitrary row keys.
+ Result is always int-keyed.
+ There are two different implementations here depending on whether 
+\begin_inset Formula $n\times n$
+\end_inset
+
+ upper triangular matrix fits in memory.
+\end_layout
+
+\begin_layout Description
+\begin_inset Formula $\mathbf{A}\mathbf{B}$
+\end_inset
+
+ right-multiply where 
+\begin_inset Formula $\mathbf{B}$
+\end_inset
+
+ is in-core.
+ Broadcast for B is used in this map-block implementation.
+\end_layout
+
+\begin_layout Description
+...
+ and some more less important.
+ No time to list all.
+\end_layout
+
+\begin_layout Subsection
+Tracking the partitioning
+\end_layout
+
+\begin_layout Standard
+Optimizer tracks identicity of partitioning of products.
+ E.g.
+ in SSVD for 
+\begin_inset Formula $\mathbf{B}^{\top}=\mathbf{A}^{\top}\mathbf{Q}$
+\end_inset
+
+ the optimizer figures 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{Q}$
+\end_inset
+
+ are identically partitioned in 0-th iteration, whereas in power iterations
+ they are not, so it picks different physical operators in these cases.
+ 
+\end_layout
+
+\begin_layout Subsection
+Tracking the DRM row key values and their types
+\end_layout
+
+\begin_layout Standard
+Optimizer automatically tracks non-integral row keys thoughout expression.
+ E.g.
+ dssvd's 
+\begin_inset Formula $\mathbf{U}$
+\end_inset
+
+ rows are keys identically to rows of 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ even if they are non-integers; whereas rows of 
+\begin_inset Formula $\mathbf{V}$
+\end_inset
+
+ are automatically granted with Int keys due to logical transformations
+ of expression by the optimizer.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Notations
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\backslash
+color{comment}
+\end_layout
+
+\end_inset
+
+
+\noun on
+comment
+\noun default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\backslash
+color{tentative}
+\end_layout
+
+\end_inset
+
+
+\noun on
+tentative
+\noun default
+ or 
+\noun on
+not yet implemented
+\noun default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\end_body
+\end_document
