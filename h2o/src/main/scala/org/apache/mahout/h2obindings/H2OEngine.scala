@@ -31,7 +31,7 @@ import org.apache.mahout.logging._
 /** H2O specific non-DRM operations */
 object H2OEngine extends DistributedEngine {
 
-  private implicit val log = getLog(H2OEngine.getClass)
+  private final implicit val log = getLog(H2OEngine.getClass)
 
   // By default, use Hadoop 1 utils
   var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
