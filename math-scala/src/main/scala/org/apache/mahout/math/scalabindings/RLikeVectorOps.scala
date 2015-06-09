@@ -75,11 +75,15 @@ class RLikeVectorOps(_v: Vector) extends VectorOps(_v) {
 
   def ^(that: Vector) = v.cloned ^= that
 
-  def c(that:Vector) = {
-    val cv = v.like(v.length + that.length)
-    cv(0 until v.length) := cv
-    cv(v.length until cv.length) := that
-    cv
+  def c(that: Vector) = {
+    if (v.length > 0) {
+      if (that.length > 0) {
+        val cv = v.like(v.length + that.length)
+        cv(0 until v.length) := cv
+        cv(v.length until cv.length) := that
+        cv
+      } else v
+    } else that
   }
 
   def c(that: Double) = {

@@ -17,7 +17,6 @@
 
 package org.apache.mahout.sparkbindings.io
 
-import java.util
 
 import com.esotericsoftware.kryo.io.{Output, Input}
 import com.esotericsoftware.kryo.{Kryo, Serializer}
@@ -142,10 +141,9 @@ class GenericMatrixKryoSerializer extends Serializer[Matrix] {
       case TraversingStructureEnum.COLWISE =>
         val cols = readRows(kryo, input, ncol)
 
-        if (cols.head.isDense)
+        if (!cols.isEmpty && cols.head.isDense)
           dense(cols).t
         else {
-
           debug("Deserializing as SparseRowMatrix.t (COLWISE).")
           new SparseRowMatrix(ncol, nrow, cols, true, false).t
         }
@@ -153,7 +151,7 @@ class GenericMatrixKryoSerializer extends Serializer[Matrix] {
       // transposed SparseMatrix case
       case TraversingStructureEnum.SPARSECOLWISE =>
         val cols = readSparseRows(kryo, input)
-        val javamap = new util.HashMap[Integer, Vector]((cols.size << 1) + 1)
+        val javamap = new java.util.HashMap[Integer, Vector]((cols.size << 1) + 1)
         cols.foreach { case (idx, vec) => javamap.put(idx, vec)}
 
         debug("Deserializing as SparseMatrix.t (SPARSECOLWISE).")
@@ -162,7 +160,7 @@ class GenericMatrixKryoSerializer extends Serializer[Matrix] {
       // Sparse Row-wise -- this will be created as a SparseMatrix.
       case TraversingStructureEnum.SPARSEROWWISE =>
         val rows = readSparseRows(kryo, input)
-        val javamap = new util.HashMap[Integer, Vector]((rows.size << 1) + 1)
+        val javamap = new java.util.HashMap[Integer, Vector]((rows.size << 1) + 1)
         rows.foreach { case (idx, vec) => javamap.put(idx, vec)}
 
         debug("Deserializing as SparseMatrix (SPARSEROWWISE).")
@@ -176,7 +174,7 @@ class GenericMatrixKryoSerializer extends Serializer[Matrix] {
       case _ =>
         val cols = readRows(kryo, input, nrow)
         // this still copies a lot of stuff...
-        if (cols.head.isDense) {
+        if (!cols.isEmpty && cols.head.isDense) {
 
           debug("Deserializing as DenseMatrix.")
           dense(cols)

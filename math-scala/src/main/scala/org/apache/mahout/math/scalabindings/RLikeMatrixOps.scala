@@ -116,10 +116,14 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
 
   def cbind(that: Matrix): Matrix = {
     require(m.nrow == that.nrow)
-    val mx = m.like(m.nrow, m.ncol + that.ncol)
-    mx(::, 0 until m.ncol) := m
-    mx(::, m.ncol until mx.ncol) := that
-    mx
+    if (m.ncol > 0) {
+      if (that.ncol > 0) {
+        val mx = m.like(m.nrow, m.ncol + that.ncol)
+        mx(::, 0 until m.ncol) := m
+        mx(::, m.ncol until mx.ncol) := that
+        mx
+      } else m
+    } else that
   }
 
   def cbind(that: Double): Matrix = {
@@ -131,10 +135,14 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
 
   def rbind(that: Matrix): Matrix = {
     require(m.ncol == that.ncol)
-    val mx = m.like(m.nrow + that.nrow, m.ncol)
-    mx(0 until m.nrow, ::) := m
-    mx(m.nrow until mx.nrow, ::) := that
-    mx
+    if (m.nrow > 0) {
+      if (that.nrow > 0) {
+        val mx = m.like(m.nrow + that.nrow, m.ncol)
+        mx(0 until m.nrow, ::) := m
+        mx(m.nrow until mx.nrow, ::) := that
+        mx
+      } else m
+    } else that
   }
 
   def rbind(that: Double): Matrix = {
