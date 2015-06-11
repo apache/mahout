@@ -28,7 +28,7 @@ import scala.collection.JavaConversions._
 import org.apache.spark.storage.StorageLevel
 import reflect._
 import scala.util.Random
-import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
+import org.apache.hadoop.io._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.sparkbindings._
 import org.apache.spark.SparkContext._
@@ -159,7 +159,7 @@ class CheckpointedDrmSpark[K: ClassTag](
    */
   def dfsWrite(path: String) = {
     val ktag = implicitly[ClassTag[K]]
-    val vtag = implicitly[ClassTag[Vector]]
+    //val vtag = implicitly[ClassTag[Vector]]
 
     implicit val k2wFunc: (K) => Writable =
       if (ktag.runtimeClass == classOf[Int]) (x: K) => new IntWritable(x.asInstanceOf[Int])
@@ -171,12 +171,11 @@ class CheckpointedDrmSpark[K: ClassTag](
     // rdd.saveAsSequenceFile(path)
     // this is a (working) deprecated method used as a stop-gap while we investigate the shell issues
     SparkContext.rddToSequenceFileRDDFunctions(rdd.asInstanceOf[RDD[(K, Vector)]]).saveAsSequenceFile(path)
-    // parameters to the non-depricated function are
-    // SequenceFileRDDFunctions(
-    //   self: RDD[(K, V)], // rdd.asInstanceOf[RDD[(K, Vector)] is ok here
-    //   _keyWritableClass: Class[_ <: Writable], // k2wFunc is ok here
-    //   _valueWritableClass: Class[_ <: Writable] // we need to have a factory for vector here, VectorWritable isn't
-    //                                             // acceptible as-is I think.
+    // discussion here: http://search-lucene.com/m/rcu7o1J1Z7mvnGmP1
+    // The correct function to use is here: https://github.com/apache/spark/blob/master/core/src/main/scala/org/apache/spark/rdd/RDD.scala#L1671
+    // The commit message for this change is here: https://github.com/apache/spark/tree/master/core/src/test/scala/org/apache/sparktest
+    // The key and value factories will be determined using reflection on the RDD if the right classes are set to null
+    // see this example: https://github.com/apache/spark/blob/branch-1.4/core/src/main/scala/org/apache/spark/SparkContext.scala#L2236
   }
 
   protected def computeNRow = {
