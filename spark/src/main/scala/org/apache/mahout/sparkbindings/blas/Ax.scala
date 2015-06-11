@@ -15,22 +15,22 @@ object Ax {
 
   def ax_with_broadcast[K: ClassTag](op: OpAx[K], srcA: DrmRddInput[K]): DrmRddInput[K] = {
 
-    val rddA = srcA.toBlockifiedDrmRdd()
-    implicit val sc:DistributedContext = rddA.sparkContext
+    val rddA = srcA.toBlockifiedDrmRdd(op.A.ncol)
+    implicit val sc: DistributedContext = rddA.sparkContext
 
     val bcastX = drmBroadcast(op.x)
 
-    val rdd = rddA
-        // Just multiply the blocks
-        .map({
-      case (keys, blockA) => keys -> (blockA %*% bcastX).toColMatrix
-    })
+    val rdd: BlockifiedDrmRdd[K] = rddA
 
-    new DrmRddInput(blockifiedSrc = Some(rdd))
+      // Just multiply the blocks
+      .map { case (keys, blockA) ⇒ keys → (blockA %*% bcastX).toColMatrix }
+
+    new DrmRddInput(Right(rdd))
   }
 
   def atx_with_broadcast(op: OpAtx, srcA: DrmRddInput[Int]): DrmRddInput[Int] = {
-    val rddA = srcA.toBlockifiedDrmRdd()
+
+    val rddA = srcA.toBlockifiedDrmRdd(op.A.ncol)
     implicit val dc:DistributedContext = rddA.sparkContext
 
     val bcastX = drmBroadcast(op.x)
@@ -52,10 +52,10 @@ object Ax {
     // It is ridiculous, but in this scheme we will have to re-parallelize it again in order to plug
     // it back as drm blockified rdd
 
-    val rdd = dc.parallelize(Seq(inCoreM), numSlices = 1)
-        .map(block => Array.tabulate(block.nrow)(i => i) -> block)
+    val rdd:BlockifiedDrmRdd[Int] = dc.parallelize(Seq(inCoreM), numSlices = 1)
+        .map{block ⇒ Array.tabulate(block.nrow)(i ⇒ i) -> block}
 
-    new DrmRddInput(blockifiedSrc = Some(rdd))
+    rdd
 
   }
 

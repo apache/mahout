@@ -586,6 +586,11 @@ public class GivensThinSolver {
     }
 
     @Override
+    public Vector like(int cardinality) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setQuick(int index, double value) {
       viewed.setQuick(rowNum, index, value);
 

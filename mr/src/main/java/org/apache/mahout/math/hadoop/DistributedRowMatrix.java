@@ -133,6 +133,11 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   }
 
   @Override
+  public Iterator<MatrixSlice> iterateNonEmpty() {
+    return iterator();
+  }
+
+  @Override
   public Iterator<MatrixSlice> iterateAll() {
     try {
       Path pathPattern = rowPath;

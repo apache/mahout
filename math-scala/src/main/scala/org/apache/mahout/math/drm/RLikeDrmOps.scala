@@ -18,12 +18,17 @@
 package org.apache.mahout.math.drm
 
 import scala.reflect.ClassTag
+import collection._
+import JavaConversions._
 import org.apache.mahout.math.{Vector, Matrix}
 import org.apache.mahout.math.drm.logical._
+import org.apache.mahout.math.scalabindings._
+import RLikeOps._
 
 class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   import RLikeDrmOps._
+  import org.apache.mahout.math.scalabindings._
 
   def +(that: DrmLike[K]): DrmLike[K] = OpAewB[K](A = this, B = that, op = "+")
 
@@ -33,21 +38,23 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def /(that: DrmLike[K]): DrmLike[K] = OpAewB[K](A = this, B = that, op = "/")
 
-  def +(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "+")
+  def +(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ + that, evalZeros = true)
 
-  def +:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "+")
+  def +:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that + _, evalZeros = true)
 
-  def -(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "-")
+  def -(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ - that, evalZeros = true)
 
-  def -:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "-:")
+  def -:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that - _, evalZeros = true)
 
-  def *(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "*")
+  def *(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ * that)
 
-  def *:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "*")
+  def *:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that * _)
 
-  def /(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "/")
+  def ^(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = math.pow(_, that))
 
-  def /:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "/:")
+  def /(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ / that, evalZeros = that == 0.0)
+
+  def /:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that / _, evalZeros = true)
 
   def :%*%(that: DrmLike[Int]): DrmLike[K] = OpAB[K](A = this.drm, B = that)
 
@@ -65,18 +72,36 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def t: DrmLike[Int] = OpAtAnyKey(A = drm)
 
-  def cbind(that: DrmLike[K]) = OpCbind(A = this.drm, B = that)
+  def cbind(that: DrmLike[K]): DrmLike[K] = OpCbind(A = this.drm, B = that)
 
-  def rbind(that: DrmLike[K]) = OpRbind(A = this.drm, B = that)
+  def cbind(that: Double): DrmLike[K] = OpCbindScalar(A = this.drm, x = that, leftBind = false)
+
+  def rbind(that: DrmLike[K]): DrmLike[K] = OpRbind(A = this.drm, B = that)
+
+  /**
+   * `rowSums` method for non-int keyed matrices.
+   *
+   * Slight problem here is the limitation of in-memory representation of Colt's Matrix, which can
+   * only have String row labels. Therefore, internally we do ".toString()" call on each key object,
+   * and then put it into [[Matrix]] row label bindings, at which point they are coerced to be Strings.
+   *
+   * This is obviously a suboptimal behavior, so as TODO we have here future enhancements of `collect'.
+   *
+   * @return map of row keys into row sums, front-end collected.
+   */
+  def rowSumsMap(): Map[String, Double] = {
+    val m = drm.mapBlock(ncol = 1) { case (keys, block) =>
+      keys -> dense(block.rowSums).t
+    }.collect
+    m.getRowLabelBindings.map { case (key, idx) => key -> m(idx, 0)}
+  }
 }
 
 class RLikeDrmIntOps(drm: DrmLike[Int]) extends RLikeDrmOps[Int](drm) {
 
   import org.apache.mahout.math._
   import scalabindings._
-  import RLikeOps._
   import RLikeDrmOps._
-  import scala.collection.JavaConversions._
 
   override def t: DrmLike[Int] = OpAt(A = drm)
 
@@ -108,7 +133,7 @@ class RLikeDrmIntOps(drm: DrmLike[Int]) extends RLikeDrmOps[Int](drm) {
       // Collect block-wise row means and output them as one-column matrix.
       keys -> dense(block.rowMeans).t
     }
-        .collect(::, 0)
+      .collect(::, 0)
   }
 
   /** Return diagonal vector */
@@ -117,14 +142,14 @@ class RLikeDrmIntOps(drm: DrmLike[Int]) extends RLikeDrmOps[Int](drm) {
     drm.mapBlock(ncol = 1) { case (keys, block) =>
       keys -> dense(for (r <- block.view) yield r(keys(r.index))).t
     }
-        .collect(::, 0)
+      .collect(::, 0)
   }
 
 }
 
 object RLikeDrmOps {
 
-  implicit def double2ScalarOps(x:Double) = new DrmDoubleScalarOps(x)
+  implicit def double2ScalarOps(x: Double) = new DrmDoubleScalarOps(x)
 
   implicit def drmInt2RLikeOps(drm: DrmLike[Int]): RLikeDrmIntOps = new RLikeDrmIntOps(drm)
 

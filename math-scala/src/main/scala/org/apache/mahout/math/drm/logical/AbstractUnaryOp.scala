@@ -24,7 +24,7 @@ import org.apache.mahout.math.drm.{DistributedContext, DrmLike}
 abstract class AbstractUnaryOp[A: ClassTag, K: ClassTag]
     extends CheckpointAction[K] with DrmLike[K] {
 
-  protected[drm] var A: DrmLike[A]
+  protected[mahout] var A: DrmLike[A]
 
   lazy val context: DistributedContext = A.context
 

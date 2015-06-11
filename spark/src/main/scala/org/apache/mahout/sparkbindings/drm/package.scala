@@ -37,18 +37,19 @@ package object drm {
 
   private[drm] final val log = Logger.getLogger("org.apache.mahout.sparkbindings");
 
-  private[sparkbindings] implicit def input2drmRdd[K](input: DrmRddInput[K]): DrmRdd[K] = input.toDrmRdd()
+  private[sparkbindings] implicit def cpDrm2DrmRddInput[K: ClassTag](cp: CheckpointedDrmSpark[K]): DrmRddInput[K] =
+    cp.rddInput
 
-  private[sparkbindings] implicit def input2blockifiedDrmRdd[K](input: DrmRddInput[K]): BlockifiedDrmRdd[K] = input.toBlockifiedDrmRdd()
+  private[sparkbindings] implicit def cpDrmGeneric2DrmRddInput[K: ClassTag](cp: CheckpointedDrm[K]): DrmRddInput[K] =
+    cp.asInstanceOf[CheckpointedDrmSpark[K]]
 
-  private[sparkbindings] implicit def cpDrm2DrmRddInput[K: ClassTag](cp: CheckpointedDrm[K]): DrmRddInput[K] =
-    new DrmRddInput(rowWiseSrc = Some(cp.ncol -> cp.rdd))
+  private[sparkbindings] implicit def drmRdd2drmRddInput[K: ClassTag](rdd: DrmRdd[K]) = new DrmRddInput[K](Left(rdd))
 
-//  /** Broadcast vector (Mahout vectors are not closure-friendly, use this instead. */
-//  private[sparkbindings] def drmBroadcast(x: Vector)(implicit sc: SparkContext): Broadcast[Vector] = sc.broadcast(x)
-//
-//  /** Broadcast in-core Mahout matrix. Use this instead of closure. */
-//  private[sparkbindings] def drmBroadcast(m: Matrix)(implicit sc: SparkContext): Broadcast[Matrix] = sc.broadcast(m)
+  private[sparkbindings] implicit def blockifiedRdd2drmRddInput[K: ClassTag](rdd: BlockifiedDrmRdd[K]) = new
+      DrmRddInput[K](
+    Right(rdd))
+
+
 
   /** Implicit broadcast cast for Spark physical op implementations. */
   private[sparkbindings] implicit def bcast2val[K](bcast:Broadcast[K]):K = bcast.value
@@ -74,7 +75,7 @@ package object drm {
           }
           block
         } else {
-          new SparseRowMatrix(vectors.size, blockncol, vectors)
+          new SparseRowMatrix(vectors.size, blockncol, vectors, true, false)
         }
 
         Iterator(keys -> block)
@@ -101,7 +102,7 @@ package object drm {
         blockKeys.ensuring(blockKeys.size == block.nrow)
         blockKeys.view.zipWithIndex.map {
           case (key, idx) =>
-            var v = block(idx, ::) // This is just a view!
+            val v = block(idx, ::) // This is just a view!
 
             // If a view rather than a concrete vector, clone into a concrete vector in order not to
             // attempt to serialize outer matrix when we save it (Although maybe most often this

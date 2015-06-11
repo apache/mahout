@@ -17,15 +17,19 @@
 
 package org.apache.mahout.sparkbindings.blas
 
-import org.apache.mahout.sparkbindings.drm.DrmRddInput
+import org.apache.mahout.sparkbindings.drm._
 import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.logging._
 import RLikeOps._
 import org.apache.spark.SparkContext._
 import org.apache.mahout.math.{DenseVector, Vector, SequentialAccessSparseVector}
 import org.apache.mahout.math.drm.logical.OpAt
 
+
 /** A' algorithms */
 object At {
+
+  private final implicit val log = getLog(At.getClass)
 
   def at(
       operator: OpAt,
@@ -39,9 +43,14 @@ object At {
    * groups into final rows of the transposed matrix.
    */
   private[blas] def at_nograph(operator: OpAt, srcA: DrmRddInput[Int]): DrmRddInput[Int] = {
-    val drmRdd = srcA.toBlockifiedDrmRdd()
+
+    debug("operator A'.")
+
+    val drmRdd = srcA.toBlockifiedDrmRdd(operator.A.ncol)
     val numPartitions = drmRdd.partitions.size
     val ncol = operator.ncol
+
+    debug(s"A' #parts = $numPartitions.")
 
     // Validity of this conversion must be checked at logical operator level.
     val nrow = operator.nrow.toInt
@@ -70,7 +79,7 @@ object At {
         key -> v
     }).densify()
 
-    new DrmRddInput(rowWiseSrc = Some(ncol -> atRdd))
+    atRdd
   }
 
 }

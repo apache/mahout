@@ -1,10 +1,12 @@
 package org.apache.mahout.sparkbindings
 
-import org.scalatest.FunSuite
+import java.io.{Closeable, File}
 import java.util
-import java.io.{File, Closeable}
-import org.apache.mahout.common.IOUtils
+
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
+import org.apache.mahout.util.IOUtilsScala
+import org.scalatest.FunSuite
+import collection._
 
 /**
  * @author dmitriy
@@ -16,7 +18,7 @@ class SparkBindingsSuite extends FunSuite with DistributedSparkSuite {
   // let it to be ignored.
   ignore("context jars") {
     System.setProperty("mahout.home", new File("..").getAbsolutePath/*"/home/dmitriy/projects/github/mahout-commits"*/)
-    val closeables = new util.ArrayDeque[Closeable]()
+    val closeables = new mutable.ListBuffer[Closeable]()
     try {
       val mahoutJars = findMahoutContextJars(closeables)
       mahoutJars.foreach {
@@ -26,7 +28,7 @@ class SparkBindingsSuite extends FunSuite with DistributedSparkSuite {
       mahoutJars.size should be > 0
       mahoutJars.size shouldBe 4
     } finally {
-      IOUtils.close(closeables)
+      IOUtilsScala.close(closeables)
     }
 
   }

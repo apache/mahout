@@ -17,9 +17,13 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
+
 /**
  * sparse matrix with general element values whose columns are accessible quickly. Implemented as a column array of
  * SparseVectors.
+ *
+ * @deprecated tons of inconsistences. Use transpose view of SparseRowMatrix for fast column-wise iteration.
  */
 public class SparseColumnMatrix extends AbstractMatrix {
 
@@ -31,11 +35,19 @@ public class SparseColumnMatrix extends AbstractMatrix {
    * @param columns       a RandomAccessSparseVector[] array of columns
    * @param columnVectors
    */
-  public SparseColumnMatrix(int rows, int columns, RandomAccessSparseVector[] columnVectors) {
+  public SparseColumnMatrix(int rows, int columns, Vector[] columnVectors) {
+    this(rows, columns, columnVectors, false);
+  }
+
+  public SparseColumnMatrix(int rows, int columns, Vector[] columnVectors, boolean shallow) {
     super(rows, columns);
-    this.columnVectors = columnVectors.clone();
-    for (int col = 0; col < columnSize(); col++) {
-      this.columnVectors[col] = this.columnVectors[col].clone();
+    if (shallow) {
+      this.columnVectors = columnVectors;
+    } else {
+      this.columnVectors = columnVectors.clone();
+      for (int col = 0; col < columnSize(); col++) {
+        this.columnVectors[col] = this.columnVectors[col].clone();
+      }
     }
   }
 

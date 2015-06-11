@@ -23,7 +23,7 @@ import RLikeOps._
 import org.apache.mahout.math.drm.{BlockMapFunc, DrmLike}
 import scala.util.Random
 
-class OpMapBlock[S: ClassTag, R: ClassTag](
+case class OpMapBlock[S: ClassTag, R: ClassTag](
     override var A: DrmLike[S],
     val bmf: BlockMapFunc[S, R],
     val _ncol: Int = -1,

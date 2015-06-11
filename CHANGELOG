@@ -3,6 +3,47 @@ Mahout Change Log
 Release 0.11.0 - unreleased
 
   
+  MAHOUT-1660: Hadoop1HDFSUtil.readDRMHEader should be taking Hadoop conf (dlyubimov)
+
+  MAHOUT-1713: Performance and parallelization improvements for AB', A'B, A'A spark physical operators (dlyubimov)
+
+  MAHOUT-1714: Add MAHOUT_OPTS environment when running Spark shell (dlyubimov)
+
+  MAHOUT-1715: Closeable API for broadcast tensors (dlyubimov)
+
+  MAHOUT-1716: Scala logging style (dlyubimov)
+
+  MAHOUT-1717: allreduceBlock() operator api and Spark implementation (dlyubimov)
+
+  MAHOUT-1718: Support for conversion of any type-keyed DRM into ordinally-keyed DRM (dlyubimov)
+
+  MAHOUT-1719: Unary elementwise function operator and function fusions (dlyubimov)
+
+  MAHOUT-1720: Support 1 cbind X, X cbind 1 etc. for both Matrix and DRM (dlyubimov)
+
+  MAHOUT-1721: rowSumsMap() summary for non-int-keyed DRMs (dlyubimov)
+
+  MAHOUT-1722: DRM row sampling api (dlyubimov)
+
+  MAHOUT-1723: Optional structural "flavor" abstraction for in-core matrices (dlyubimov)
+
+  MAHOUT-1724: Optimizations of matrix-matrix in-core multiplication based on structural flavors (dlyubimov)
+
+  MAHOUT-1725: elementwise power operator ^ (dlyubimov)
+
+  MAHOUT-1726: R-like vector concatenation operator (dlyubimov)
+
+  MAHOUT-1727: Elementwise analogues of scala.math functions for tensor types (dlyubimov)
+
+  MAHOUT-1728: In-core functional assignments (dlyubimov)
+
+  MAHOUT-1729: Straighten out behavior of Matrix.iterator() and iterateNonEmpty() (dlyubimov)
+
+  MAHOUT-1730: New mutable transposition view for in-core matrices (dlyubimov)
+
+  MAHOUT-1731: Deprecate SparseColumnMatrix (dlyubimov)
+
+  MAHOUT-1732: Native support for kryo serialization of tensor types (dlyubimov)
 
 Release 0.10.1 - unreleased
 

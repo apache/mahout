@@ -17,7 +17,9 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.IntIntFunction;
@@ -63,16 +65,14 @@ public final class Matrices {
    * @return transposed view of original matrix
    */
   public static final Matrix transposedView(final Matrix m) {
-    IntIntFunction tf = new IntIntFunction() {
-      @Override
-      public double apply(int row, int col) {
-        return m.getQuick(col, row);
-      }
-    };
 
-    // TODO: Matrix api does not support denseLike() interrogation.
-    // so our guess has to be rough here.
-    return functionalMatrixView(m.numCols(), m.numRows(), tf, m instanceof DenseMatrix);
+    Preconditions.checkArgument(!(m instanceof SparseColumnMatrix));
+
+    if (m instanceof TransposedMatrixView) {
+      return ((TransposedMatrixView) m).getDelegate();
+    } else {
+      return new TransposedMatrixView(m);
+    }
   }
 
   /**

@@ -20,6 +20,7 @@ package org.apache.mahout.math.drm
 import scala.reflect.ClassTag
 import org.apache.mahout.math._
 
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 /**
  * Additional experimental operations over CheckpointedDRM implementation. I will possibly move them up to
@@ -37,6 +38,12 @@ class CheckpointedOps[K: ClassTag](val drm: CheckpointedDrm[K]) {
 
   /** Column Means */
   def colMeans(): Vector = drm.context.colMeans(drm)
+
+  /** Optional engine-specific all reduce tensor operation. */
+  def allreduceBlock(bmf: BlockMapFunc2[K], rf: BlockReduceFunc = _ += _): Matrix =
+
+    drm.context.allreduceBlock(drm, bmf, rf)
+
 
   def norm():Double = drm.context.norm(drm)
 }

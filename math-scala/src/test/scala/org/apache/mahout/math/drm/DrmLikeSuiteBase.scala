@@ -68,9 +68,8 @@ trait DrmLikeSuiteBase extends DistributedMahoutSuite with Matchers {
     inCoreEmpty.nrow shouldBe 100
     inCoreEmpty.ncol shouldBe 50
 
-
-
-
   }
+
+
 
 }

@@ -177,6 +177,11 @@ public class NamedVector implements Vector {
   }
 
   @Override
+  public Vector like(int cardinality) {
+    return new NamedVector(delegate.like(cardinality), name);
+  }
+
+  @Override
   public Vector minus(Vector x) {
     return delegate.minus(x);
   }

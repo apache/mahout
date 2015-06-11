@@ -46,6 +46,26 @@ trait DrmLikeOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
   }
 
+  test("allReduceBlock") {
+
+    val mxA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6))
+    val drmA = drmParallelize(mxA, numPartitions = 2)
+
+    try {
+      val mxB = drmA.allreduceBlock { case (keys, block) ⇒
+        block(::, 0 until 2).t %*% block(::, 2 until 3)
+      }
+
+      val mxControl = mxA(::, 0 until 2).t %*% mxA(::, 2 until 3)
+
+      (mxB - mxControl).norm should be < 1e-10
+
+    } catch {
+      case e: UnsupportedOperationException ⇒ // Some engines may not support this, so ignore.
+    }
+
+  }
+
   test("col range") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)

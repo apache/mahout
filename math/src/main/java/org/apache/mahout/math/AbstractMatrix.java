@@ -19,13 +19,16 @@ package org.apache.mahout.math;
 
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Maps;
+import org.apache.mahout.math.flavor.BackEnum;
+import org.apache.mahout.math.flavor.MatrixFlavor;
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.*;
 
 import java.util.Iterator;
 import java.util.Map;
 
 /**
- * A few universal implementations of convenience functions
+ * A few universal implementations of convenience functions for a JVM-backed matrix.
  */
 public abstract class AbstractMatrix implements Matrix {
 
@@ -57,17 +60,22 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public Iterator<MatrixSlice> iterateAll() {
     return new AbstractIterator<MatrixSlice>() {
-      private int slice;
+      private int row;
 
       @Override
       protected MatrixSlice computeNext() {
-        if (slice >= numSlices()) {
+        if (row >= numRows()) {
           return endOfData();
         }
-        int i = slice++;
+        int i = row++;
         return new MatrixSlice(viewRow(i), i);
       }
     };
+  }
+
+  @Override
+  public Iterator<MatrixSlice> iterateNonEmpty() {
+    return iterator();
   }
 
   /**
@@ -812,4 +820,12 @@ public abstract class AbstractMatrix implements Matrix {
       return returnString + ("}");
     }
   }
+
+  @Override
+  public MatrixFlavor getFlavor() {
+    throw new UnsupportedOperationException("Flavor support not implemented for this matrix.");
+  }
+
+  ////////////// Matrix flavor trait ///////////////////
+
 }

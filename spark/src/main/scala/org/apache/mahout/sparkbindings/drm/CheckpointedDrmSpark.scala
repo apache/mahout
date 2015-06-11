@@ -33,7 +33,7 @@ import org.apache.spark.SparkContext._
 
 /** ==Spark-specific optimizer-checkpointed DRM.==
   *
-  * @param rdd underlying rdd to wrap over.
+  * @param rddInput underlying rdd to wrap over.
   * @param _nrow number of rows; if unspecified, we will compute with an inexpensive traversal.
   * @param _ncol number of columns; if unspecified, we will try to guess with an inexpensive traversal.
   * @param _cacheStorageLevel storage level
@@ -44,9 +44,9 @@ import org.apache.spark.SparkContext._
   * @tparam K matrix key type (e.g. the keys of sequence files once persisted)
   */
 class CheckpointedDrmSpark[K: ClassTag](
-    val rdd: DrmRdd[K],
-    private var _nrow: Long = -1L,
-    private var _ncol: Int = -1,
+    private[sparkbindings] val rddInput: DrmRddInput[K],
+    private[sparkbindings] var _nrow: Long = -1L,
+    private[sparkbindings] var _ncol: Int = -1,
     private val _cacheStorageLevel: StorageLevel = StorageLevel.MEMORY_ONLY,
     override protected[mahout] val partitioningTag: Long = Random.nextLong(),
     private var _canHaveMissingRows: Boolean = false
@@ -63,7 +63,7 @@ class CheckpointedDrmSpark[K: ClassTag](
   private[mahout] var intFixExtra: Long = 0L
 
   private var cached: Boolean = false
-  override val context: DistributedContext = rdd.context
+  override val context: DistributedContext = rddInput.backingRdd.context
 
   /** Explicit extraction of key class Tag   */
   def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
@@ -78,8 +78,8 @@ class CheckpointedDrmSpark[K: ClassTag](
   }
 
   def cache() = {
-    if (!cached) {
-      rdd.persist(_cacheStorageLevel)
+    if (!cached && _cacheStorageLevel != StorageLevel.NONE) {
+      rddInput.backingRdd.persist(_cacheStorageLevel)
       cached = true
     }
     this
@@ -92,7 +92,7 @@ class CheckpointedDrmSpark[K: ClassTag](
    */
   def uncache(): this.type = {
     if (cached) {
-      rdd.unpersist(blocking = false)
+      rddInput.backingRdd.unpersist(blocking = false)
       cached = false
     }
     this
@@ -115,7 +115,7 @@ class CheckpointedDrmSpark[K: ClassTag](
    */
   def collect: Matrix = {
 
-    val intRowIndices = implicitly[ClassTag[K]] == implicitly[ClassTag[Int]]
+    val intRowIndices = classTag[K] == ClassTag.Int
 
     val cols = ncol
     val rows = safeToNonNegInt(nrow)
@@ -124,7 +124,7 @@ class CheckpointedDrmSpark[K: ClassTag](
     // since currently spark #collect() requires Serializeable support,
     // we serialize DRM vectors into byte arrays on backend and restore Vector
     // instances on the front end:
-    val data = rdd.map(t => (t._1, t._2)).collect()
+    val data = rddInput.toDrmRdd().map(t => (t._1, t._2)).collect()
 
 
     val m = if (data.forall(_._2.isDense))
@@ -165,7 +165,7 @@ class CheckpointedDrmSpark[K: ClassTag](
       else if (classOf[Writable].isAssignableFrom(ktag.runtimeClass)) (x: K) => x.asInstanceOf[Writable]
       else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
 
-    rdd.saveAsSequenceFile(path)
+    rddInput.toDrmRdd().saveAsSequenceFile(path)
   }
 
   protected def computeNRow = {
@@ -173,7 +173,7 @@ class CheckpointedDrmSpark[K: ClassTag](
     val intRowIndex = classTag[K] == classTag[Int]
 
     if (intRowIndex) {
-      val rdd = cache().rdd.asInstanceOf[DrmRdd[Int]]
+      val rdd = cache().rddInput.toDrmRdd().asInstanceOf[DrmRdd[Int]]
 
       // I guess it is a suitable place to compute int keys consistency test here because we know
       // that nrow can be computed lazily, which always happens when rdd is already available, cached,
@@ -186,16 +186,21 @@ class CheckpointedDrmSpark[K: ClassTag](
       intFixExtra = (maxPlus1 - rowCount) max 0L
       maxPlus1
     } else
-      cache().rdd.count()
+      cache().rddInput.toDrmRdd().count()
   }
 
 
 
-  protected def computeNCol =
-    cache().rdd.map(_._2.length).fold(-1)(max(_, _))
+  protected def computeNCol = {
+    rddInput.isBlockified match {
+      case true ⇒ rddInput.toBlockifiedDrmRdd(throw new AssertionError("not reached"))
+        .map(_._2.ncol).reduce(max(_, _))
+      case false ⇒ cache().rddInput.toDrmRdd().map(_._2.length).fold(-1)(max(_, _))
+    }
+  }
 
   protected def computeNNonZero =
-    cache().rdd.map(_._2.getNumNonZeroElements.toLong).sum().toLong
+    cache().rddInput.toDrmRdd().map(_._2.getNumNonZeroElements.toLong).sum().toLong
 
   /** Changes the number of rows in the DRM without actually touching the underlying data. Used to
     * redimension a DRM after it has been created, which implies some blank, non-existent rows.
@@ -205,8 +210,8 @@ class CheckpointedDrmSpark[K: ClassTag](
   override def newRowCardinality(n: Int): CheckpointedDrm[K] = {
     assert(n > -1)
     assert( n >= nrow)
-    val newCheckpointedDrm = drmWrap[K](rdd, n, ncol)
-    newCheckpointedDrm
+    new CheckpointedDrmSpark(rddInput = rddInput, _nrow = n, _ncol = _ncol, _cacheStorageLevel = _cacheStorageLevel,
+      partitioningTag = partitioningTag, _canHaveMissingRows = _canHaveMissingRows)
   }
 
 }

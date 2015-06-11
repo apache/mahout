@@ -21,7 +21,11 @@ import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 import scala.util.Random
 
-/** Operator denoting expressions like 5.0 - A or A * 5.6 */
+/**
+ * Operator denoting expressions like 5.0 - A or A * 5.6
+ *
+ * @deprecated use [[OpAewUnaryFunc]] instead
+ */
 case class OpAewScalar[K: ClassTag](
     override var A: DrmLike[K],
     val scalar: Double,

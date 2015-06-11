@@ -204,6 +204,11 @@ public class PermutedVectorView extends AbstractVector {
     return vector.like();
   }
 
+  @Override
+  public Vector like(int cardinality) {
+    return vector.like(cardinality);
+  }
+
   /**
    * Set the value at the given index, without checking bounds
    *

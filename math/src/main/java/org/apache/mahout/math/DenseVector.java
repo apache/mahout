@@ -136,6 +136,11 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
+  public Vector like(int cardinality) {
+    return new DenseVector(cardinality);
+  }
+
+  @Override
   public void setQuick(int index, double value) {
     invalidateCachedLength();
     values[index] = value;

@@ -190,6 +190,14 @@ public interface Vector extends Cloneable {
   Vector like();
 
   /**
+   * Return a new empty vector of the same underlying class as the receiver with given cardinality
+   *
+   * @param cardinality
+   * @return
+   */
+  Vector like(int cardinality);
+
+  /**
    * Return a new vector containing the element by element difference of the recipient and the argument
    *
    * @param x a Vector
