@@ -142,6 +142,11 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   @Override
+  public Vector like(int cardinality) {
+    return new RandomAccessSparseVector(cardinality, values.size());
+  }
+
+  @Override
   public int getNumNondefaultElements() {
     return values.size();
   }

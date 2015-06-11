@@ -132,6 +132,11 @@ public class ConstantVector extends AbstractVector {
     return new DenseVector(size());
   }
 
+  @Override
+  public Vector like(int cardinality) {
+    return new DenseVector(cardinality);
+  }
+
   /**
    * Set the value at the given index, without checking bounds
    *

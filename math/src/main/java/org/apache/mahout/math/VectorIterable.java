@@ -21,7 +21,11 @@ import java.util.Iterator;
 
 public interface VectorIterable extends Iterable<MatrixSlice> {
 
+  /* Iterate all rows in order */
   Iterator<MatrixSlice> iterateAll();
+
+  /* Iterate all non empty rows in arbitrary order */
+  Iterator<MatrixSlice> iterateNonEmpty();
 
   int numSlices();
 

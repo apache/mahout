@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.flavor.MatrixFlavor;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.VectorFunction;
@@ -403,4 +404,10 @@ public interface Matrix extends Cloneable, VectorIterable {
    * @return A vector that shares storage with the original matrix.
    */
   Vector viewDiagonal();
+
+  /**
+   * Get matrix structural flavor (operations performance hints). This is optional operation, may
+   * throw {@link java.lang.UnsupportedOperationException}.
+   */
+  MatrixFlavor getFlavor();
 }

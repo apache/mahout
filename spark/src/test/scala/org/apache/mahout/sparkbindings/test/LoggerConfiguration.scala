@@ -25,6 +25,6 @@ trait LoggerConfiguration extends org.apache.mahout.test.LoggerConfiguration {
 
   override protected def beforeAll(configMap: ConfigMap) {
     super.beforeAll(configMap)
-    Logger.getLogger("org.apache.mahout.sparkbindings").setLevel(Level.INFO)
+    BasicConfigurator.resetConfiguration()
   }
 }

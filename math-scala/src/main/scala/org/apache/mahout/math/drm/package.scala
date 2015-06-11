@@ -23,6 +23,8 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 
 import scala.reflect.ClassTag
+import org.apache.mahout.math.drm.logical.OpAewUnaryFunc
+import collection._
 
 package object drm {
 
@@ -34,7 +36,11 @@ package object drm {
 
 
   /** Block-map func */
-  type BlockMapFunc[S, R] = BlockifiedDrmTuple[S] => BlockifiedDrmTuple[R]
+  type BlockMapFunc[S, R] = BlockifiedDrmTuple[S] ⇒ BlockifiedDrmTuple[R]
+
+  type BlockMapFunc2[S] = BlockifiedDrmTuple[S] ⇒ Matrix
+
+  type BlockReduceFunc = (Matrix, Matrix) ⇒ Matrix
 
   /** CacheHint type */
   //  type CacheHint = CacheHint.CacheHint
@@ -92,7 +98,7 @@ package object drm {
   implicit def drm2InCore[K: ClassTag](drm: DrmLike[K]): Matrix = drm.collect
 
   /** Do vertical concatenation of collection of blockified tuples */
-  def rbind[K: ClassTag](blocks: Iterable[BlockifiedDrmTuple[K]]): BlockifiedDrmTuple[K] = {
+  private[mahout] def rbind[K: ClassTag](blocks: Iterable[BlockifiedDrmTuple[K]]): BlockifiedDrmTuple[K] = {
     assert(blocks.nonEmpty, "rbind: 0 blocks passed in")
     if (blocks.size == 1) {
       // No coalescing required.
@@ -114,6 +120,46 @@ package object drm {
       coalescedKeys -> coalescedBlock
     }
   }
+
+  /**
+   * Convert arbitrarily-keyed matrix to int-keyed matrix. Some algebra will accept only int-numbered
+   * row matrices. So this method is to help.
+   *
+   * @param drmX input to be transcoded
+   * @param computeMap collect `old key -> int key` map to front-end?
+   * @tparam K key type
+   * @return Sequentially keyed matrix + (optionally) map from non-int key to [[Int]] key. If the
+   *         key type is actually Int, then we just return the argument with None for the map,
+   *         regardless of computeMap parameter.
+   */
+  def drm2IntKeyed[K: ClassTag](drmX: DrmLike[K], computeMap: Boolean = false): (DrmLike[Int], Option[DrmLike[K]]) =
+    drmX.context.engine.drm2IntKeyed(drmX, computeMap)
+
+  /**
+   * (Optional) Sampling operation. Consistent with Spark semantics of the same.
+   * @param drmX
+   * @param fraction
+   * @param replacement
+   * @tparam K
+   * @return samples
+   */
+  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] =
+    drmX.context.engine.drmSampleRows(drmX, fraction, replacement)
+
+  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples: Int, replacement: Boolean = false): Matrix =
+    drmX.context.engine.drmSampleKRows(drmX, numSamples, replacement)
+
+  ///////////////////////////////////////////////////////////
+  // Elementwise unary functions on distributed operands.
+  def dexp[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.exp, true)
+
+  def dlog[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.log, true)
+
+  def dabs[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.abs)
+
+  def dsqrt[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.sqrt)
+
+  def dsignum[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.signum)
 
 }
 

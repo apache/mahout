@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.scalabindings
 
-import org.apache.mahout.math.Vector
+import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.function.Functions
 import RLikeOps._
 
@@ -67,5 +67,32 @@ class RLikeVectorOps(_v: Vector) extends VectorOps(_v) {
   /** Elementwise right-associative / */
   def /:(that: Vector) = that.cloned /= v
 
+  def ^=(that: Double) = v.assign(Functions.POW, that)
+
+  def ^=(that: Vector) = v.assign(that, Functions.POW)
+
+  def ^(that: Double) = v.cloned ^= that
+
+  def ^(that: Vector) = v.cloned ^= that
+
+  def c(that: Vector) = {
+    if (v.length > 0) {
+      if (that.length > 0) {
+        val cv = v.like(v.length + that.length)
+        cv(0 until v.length) := cv
+        cv(v.length until cv.length) := that
+        cv
+      } else v
+    } else that
+  }
+
+  def c(that: Double) = {
+    val cv = v.like(v.length + 1)
+    cv(0 until v.length) := v
+    cv(v.length) = that
+    cv
+  }
+
+  def mean = sum / length
 
 }

@@ -17,10 +17,10 @@
 
 package org.apache.mahout.common
 
-
 import org.apache.hadoop.io.{Writable, SequenceFile}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.conf.Configuration
+import org.apache.spark.SparkContext
 import collection._
 import JavaConversions._
 
@@ -30,14 +30,16 @@ import JavaConversions._
  */
 object Hadoop1HDFSUtil extends HDFSUtil {
 
-  /**
-   * Read the header of a sequence file and determine the Key and Value type
-   * @param path
-   * @return
-   */
-  def readDrmHeader(path: String): DrmMetadata = {
+
+  /** Read DRM header information off (H)DFS. */
+  override def readDrmHeader(path: String)(implicit sc: SparkContext): DrmMetadata = {
+
     val dfsPath = new Path(path)
-    val fs = dfsPath.getFileSystem(new Configuration())
+
+    val fs = dfsPath.getFileSystem(sc.hadoopConfiguration)
+
+    // Apparently getFileSystem() doesn't set conf??
+    fs.setConf(sc.hadoopConfiguration)
 
     val partFilePath:Path = fs.listStatus(dfsPath)
 

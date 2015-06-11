@@ -118,4 +118,16 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
     }
     return ret;
   }
+
+  /**
+   * Stop broadcasting when called on driver side. Release any network resources.
+   *
+   */
+  @Override
+  public void close() throws IOException {
+
+    // TODO: review this. It looks like it is not really a broadcast mechanism but rather just a
+    // serialization wrapper. In which case it doesn't hold any network resources.
+
+  }
 }

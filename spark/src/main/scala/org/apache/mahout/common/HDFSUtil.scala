@@ -17,10 +17,12 @@
 
 package org.apache.mahout.common
 
+import org.apache.spark.SparkContext
+
 /** High level Hadoop version-specific hdfs manipulations we need in context of our operations. */
 trait HDFSUtil {
 
   /** Read DRM header information off (H)DFS. */
-  def readDrmHeader(path:String):DrmMetadata
+  def readDrmHeader(path:String)(implicit sc:SparkContext):DrmMetadata
 }
 

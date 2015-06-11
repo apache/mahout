@@ -69,6 +69,11 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
+  public Vector like(int cardinality) {
+    return vector.like(cardinality);
+  }
+
+  @Override
   public double getQuick(int index) {
     return vector.getQuick(offset + index);
   }
@@ -122,7 +127,7 @@ public class VectorView extends AbstractVector {
       while (it.hasNext()) {
         Element el = it.next();
         if (isInView(el.index()) && el.get() != 0) {
-          Element decorated = vector.getElement(el.index());
+          Element decorated = el; /* vector.getElement(el.index()); */
           return new DecoratorElement(decorated);
         }
       }

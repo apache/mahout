@@ -49,7 +49,7 @@ class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
    *             is applied.
    */
   def par(min: Int = -1, exact: Int = -1, auto: Boolean = false) = {
-    assert(min >= 0 || exact >= 0 || auto, "Invalid argument")
+    require(min > 0 || exact > 0 || auto, "Invalid argument")
     OpPar(drm, minSplits = min, exactSplits = exact)
   }
 
@@ -65,15 +65,14 @@ class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
    * @tparam R
    * @return
    */
-  def mapBlock[R: ClassTag](ncol: Int = -1, identicallyParitioned: Boolean = true)
+  def mapBlock[R: ClassTag](ncol: Int = -1, identicallyPartitioned: Boolean = true)
       (bmf: BlockMapFunc[K, R]): DrmLike[R] =
     new OpMapBlock[K, R](
       A = drm,
       bmf = bmf,
       _ncol = ncol,
-      identicallyPartitioned = identicallyParitioned
+      identicallyPartitioned = identicallyPartitioned
     )
-
 
   /**
    * Slicing the DRM. Should eventually work just like in-core drm (e.g. A(0 until 5, 5 until 15)).<P>

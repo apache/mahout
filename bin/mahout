@@ -254,12 +254,10 @@ fi
 # restore ordinary behaviour
 unset IFS
 
-
-
 case "$1" in
   (spark-shell)
     save_stty=$(stty -g 2>/dev/null);
-    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.sparkbindings.shell.Main" $@
+    "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" "org.apache.mahout.sparkbindings.shell.Main" $@
     stty sane; stty $save_stty
     ;;
   # Spark CLI drivers go here

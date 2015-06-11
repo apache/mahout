@@ -24,6 +24,8 @@ import org.apache.mahout.test.MahoutSuite
 import org.apache.mahout.math.{RandomAccessSparseVector, SequentialAccessSparseVector, Matrices}
 import org.apache.mahout.common.RandomUtils
 
+import scala.util.Random
+
 
 class MatrixOpsSuite extends FunSuite with MahoutSuite {
 
@@ -93,12 +95,40 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
 
     val e = eye(5)
 
-    printf("I(5)=\n%s\n", e)
+    println(s"I(5)=\n$e")
 
     a(0 to 1, 1 to 2) = dense((3, 2), (2, 3))
     a(0 to 1, 1 to 2) := dense((3, 2), (2, 3))
 
+    println(s"a=$a")
 
+    a(0 to 1, 1 to 2) := { _ => 45}
+    println(s"a=$a")
+
+//    a(0 to 1, 1 to 2) ::= { _ => 44}
+    println(s"a=$a")
+
+    // Sparse assignment to a sparse block
+    val c = sparse(0 -> 1 :: Nil, 2 -> 2 :: Nil, 1 -> 5 :: Nil)
+    val d = c.cloned
+
+    println(s"d=$d")
+    d.ncol shouldBe 3
+
+    d(::, 1 to 2) ::= { _ => 4}
+    println(s"d=$d")
+    d(::, 1 to 2).sum shouldBe 8
+
+    d ::= {_ => 5}
+    d.sum shouldBe 15
+
+    val f = c.cloned.t
+    f ::= {_ => 6}
+    f.sum shouldBe 18
+
+    val g = c.cloned
+    g(::, 1 until g.nrow) ::= { x => if (x <= 0) 0.0 else 1.0}
+    g.sum shouldBe 3
   }
 
   test("sparse") {
@@ -180,6 +210,7 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     printf("Average assignment seqSparse2seqSparse via Random Access Sparse time: %.3f ms\n", avgTime2)
 
   }
+
 
 
 }

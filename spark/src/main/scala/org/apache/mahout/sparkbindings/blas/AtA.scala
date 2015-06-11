@@ -17,6 +17,7 @@
 
 package org.apache.mahout.sparkbindings.blas
 
+import org.apache.mahout.logging._
 import org.apache.mahout.math._
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.drm._
@@ -34,25 +35,30 @@ import SparkEngine._
  */
 object AtA {
 
-  final val log = Logger.getLogger(AtA.getClass)
+  private final implicit val log = getLog(AtA.getClass)
 
   final val PROPERTY_ATA_MAXINMEMNCOL = "mahout.math.AtA.maxInMemNCol"
+  final val PROPERTY_ATA_MMUL_BLOCKHEIGHT = "mahout.math.AtA.blockHeight"
 
   /** Materialize A'A operator */
   def at_a(operator: OpAtA[_], srcRdd: DrmRddInput[_]): DrmRddInput[Int] = {
 
-    val maxInMemNCol = System.getProperty(PROPERTY_ATA_MAXINMEMNCOL, "2000").toInt
+    val maxInMemNCol = System.getProperty(PROPERTY_ATA_MAXINMEMNCOL, "200").toInt
     maxInMemNCol.ensuring(_ > 0, "Invalid A'A in-memory setting for optimizer")
 
     if (operator.ncol <= maxInMemNCol) {
+
       // If we can comfortably fit upper-triangular operator into a map memory, we will run slim
       // algorithm with upper-triangular accumulators in maps. 
-      val inCoreA = at_a_slim(srcRdd = srcRdd, operator = operator)
+      val inCoreA = at_a_slim(srcRdd = srcRdd.toDrmRdd(), operator = operator)
       val drmRdd = parallelizeInCore(inCoreA, numPartitions = 1)(sc = srcRdd.sparkContext)
-      new DrmRddInput(rowWiseSrc = Some(inCoreA.ncol, drmRdd))
+      drmRdd
+
     } else {
+
       // Otherwise, we need to run a distributed, big version
-      new DrmRddInput(rowWiseSrc = Some(operator.ncol, at_a_nongraph(srcRdd = srcRdd, op = operator)))
+      //      new DrmRddInput(rowWiseSrc = Some(operator.ncol, at_a_nongraph(srcRdd = srcRdd, op = operator)))
+      at_a_nongraph_mmul(srcRdd = srcRdd.toBlockifiedDrmRdd(operator.A.ncol), op = operator)
 
     }
   }
@@ -64,7 +70,7 @@ object AtA {
    */
   def at_a_slim(operator: OpAtA[_], srcRdd: DrmRdd[_]): Matrix = {
 
-    log.debug("Applying slim A'A.")
+    debug("operator slim A'A(Spark)")
 
     val ncol = operator.ncol
     // Compute backing vector of tiny-upper-triangular accumulator accross all the data.
@@ -73,122 +79,195 @@ object AtA {
       val ut = new UpperTriangular(ncol)
 
       // Strategy is to add to an outer product of each row to the upper triangular accumulator.
-      pIter.foreach({
-        case (k, v) =>
+      pIter.foreach({ case (k, v) =>
 
-          // Use slightly various traversal strategies over dense vs. sparse source.
-          if (v.isDense) {
+        // Use slightly various traversal strategies over dense vs. sparse source.
+        if (v.isDense) {
 
-            // Update upper-triangular pattern only (due to symmetry).
-            // Note: Scala for-comprehensions are said to be fairly inefficient this way, but this is
-            // such spectacular case they were deesigned for.. Yes I do observe some 20% difference
-            // compared to while loops with no other payload, but the other payload is usually much
-            // heavier than this overhead, so... I am keeping this as is for the time being.
+          // Update upper-triangular pattern only (due to symmetry).
+          // Note: Scala for-comprehensions are said to be fairly inefficient this way, but this is
+          // such spectacular case they were deesigned for.. Yes I do observe some 20% difference
+          // compared to while loops with no other payload, but the other payload is usually much
+          // heavier than this overhead, so... I am keeping this as is for the time being.
 
-            for (row <- 0 until v.length; col <- row until v.length)
-              ut(row, col) = ut(row, col) + v(row) * v(col)
+          for (row <- 0 until v.length; col <- row until v.length)
+            ut(row, col) = ut(row, col) + v(row) * v(col)
 
-          } else {
+        } else {
 
-            // Sparse source.
+          // Sparse source.
+          v.nonZeroes().view
+
+            // Outer iterator iterates over rows of outer product.
+            .foreach(elrow => {
+
+            // Inner loop for columns of outer product.
             v.nonZeroes().view
 
-                // Outer iterator iterates over rows of outer product.
-                .foreach(elrow => {
+              // Filter out non-upper nonzero elements from the double loop.
+              .filter(_.index >= elrow.index)
 
-              // Inner loop for columns of outer product.
-              v.nonZeroes().view
+              // Incrementally update outer product value in the uppper triangular accumulator.
+              .foreach(elcol => {
 
-                  // Filter out non-upper nonzero elements from the double loop.
-                  .filter(_.index >= elrow.index)
+              val row = elrow.index
+              val col = elcol.index
+              ut(row, col) = ut(row, col) + elrow.get() * elcol.get()
 
-                  // Incrementally update outer product value in the uppper triangular accumulator.
-                  .foreach(elcol => {
-
-                val row = elrow.index
-                val col = elcol.index
-                ut(row, col) = ut(row, col) + elrow.get() * elcol.get()
-
-              })
             })
+          })
 
-          }
+        }
       })
 
       Iterator(dvec(ddata = ut.getData): Vector)
-    })
-
-        .collect()
-        .reduce(_ += _)
+    }).collect().reduce(_ += _)
 
     new DenseSymmetricMatrix(resSym)
   }
 
-  /** The version of A'A that does not use GraphX */
-  def at_a_nongraph(op: OpAtA[_], srcRdd: DrmRdd[_]): DrmRdd[Int] = {
+  // Version that tries to use groupBy. In practice this is the slowest.
+  def at_a_group(op: OpAtA[_], srcRdd: DrmRdd[_]): DrmRddInput[Int] = {
+    debug("operator non-slim A'A(Spark-group).")
 
-    log.debug("Applying non-slim non-graph A'A.")
+    // Determine how many partitions the new matrix would need approximately. We base that on
+    // geometry only, but it may eventually not be that adequate. Indeed, A'A tends to be much more
+    // dense in reality than the source.
+    val m = op.A.nrow
+    val n = op.A.ncol
+    val srcNumParts = srcRdd.partitions.size
+    val finalNumParts = (srcNumParts * n / m).ceil.toInt max 1
+    val numParts = finalNumParts max srcNumParts
+    val ranges = computeEvenSplits(n, numParts)
+
+    var rddAtA = srcRdd
+
+      // Remove key, key is irrelevant
+      .map(_._2)
+
+      // Form partial outer blocks for each partition
+      .flatMap { v =>
+      for (blockKey <- 0 until numParts) yield {
+        blockKey -> v
+      }
+    }
+      // Sent to individual partition reducer
+      .groupByKey(numPartitions = numParts)
+
+      // Reduce individual group
+      .map { case (blockKey, iter) =>
+      val range = ranges(blockKey)
+      val mxC: Matrix = new SparseRowMatrix(range.size, n, false)
+      iter.foreach(vec => addOuterProduct(mxC, vec(range), vec))
+
+      // Fix keys
+      val blockStart = range.start
+      val rowKeys = Array.tabulate(mxC.nrow)(blockStart + _)
+      rowKeys -> mxC
+    }
+
+    if (log.isDebugEnabled)
+      log.debug(s"AtA (grouping) #parts: ${rddAtA.partitions.size}.")
+
+    if (finalNumParts < numParts) rddAtA = rddAtA.coalesce(finalNumParts, shuffle = false)
+
+    rddAtA
+  }
+
+
+  /** The version of A'A that does not use GraphX */
+  def at_a_nongraph(op: OpAtA[_], srcRdd: DrmRdd[_]): DrmRddInput[Int] = {
+
+    debug("Applying non-slim non-graph A'A.")
 
     // Determine how many partitions the new matrix would need approximately. We base that on 
     // geometry only, but it may eventually not be that adequate. Indeed, A'A tends to be much more
     // dense in reality than the source.
-
     val m = op.A.nrow
     val n = op.A.ncol
-/* possible fix for index out of range for vector range
-    val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.round.toInt max 1
+    val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.toInt max 1
     val blockHeight = (n - 1) / numParts + 1
-*/
-    val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.round.toInt max 1 min n
-
-    // Computing evenly split ranges to denote each partition size.
-
-    // Base size.
-    val baseSize = n / numParts
-
-    // How many partitions needs to be baseSize +1.
-    val slack = n - baseSize * numParts
-
-    val ranges =
-      // Start with partition offsets... total numParts + 1.
-      (0 to numParts).view.map { i => (baseSize + 1) * i - (i - slack max 0)}
-        // And convert offsets to ranges.
-        .sliding(2).map(s => s(0) until s(1)).toIndexedSeq
+    val offsets = (0 until numParts).map(_ * blockHeight)
+    val ranges = offsets.map(offset => offset until (offset + blockHeight min n))
 
     val rddAtA = srcRdd
 
-        // Remove key, key is irrelevant
-        .map(_._2)
+      // Remove key, key is irrelevant
+      .map(_._2)
 
-        // Form partial outer blocks for each partition
-        .flatMap {
-      v =>
-        for (blockKey <- Stream.range(0, numParts)) yield {
-/* patch to fix index out of range for vector access
-          val blockStart = blockKey * blockHeight
-          val blockEnd = n min (blockStart + blockHeight)
-          blockKey -> (v(blockStart until blockEnd) cross v)
-*/
-          val range = ranges(blockKey)
-          blockKey -> (v(range) cross v)
-        }
+      // Form partial outer blocks for each partition
+      .flatMap { v =>
+      for (blockKey <- 0 until numParts) yield {
+        blockKey ->(blockKey, v)
+      }
     }
-        // Combine outer blocks
-        .reduceByKey(_ += _)
+      // Combine outer products
+      .combineByKey(// Combiner factory
+        createCombiner = (t: (Int, Vector)) => {
+          val partNo = t._1
+          val vec = t._2
+          val range = ranges(partNo)
+          val mxC = if (vec.isDense) new DenseMatrix(range.size, n) else new SparseRowMatrix(range.size, n)
+          addOuterProduct(mxC, vec(range), vec)
+        },
 
-        // Restore proper block keys
-        .map {
-      case (blockKey, block) =>
-/* patch to fix index out of range for vector access
-        val blockStart = blockKey * blockHeight
-        val rowKeys = Array.tabulate(block.nrow)(blockStart + _)
-*/
-        val range = ranges(blockKey)
-        val rowKeys = Array.tabulate(block.nrow)(range.start + _)
-        rowKeys -> block
+        // Merge values into existing partition accumulator.
+        mergeValue = (mxC: Matrix, t: (Int, Vector)) => {
+          val partNo = t._1
+          val vec = t._2
+          addOuterProduct(mxC, vec(ranges(partNo)), vec)
+        },
+
+        // Merge combiners
+        mergeCombiners = (mxC1: Matrix, mxC2: Matrix) => mxC1 += mxC2, numPartitions = numParts)
+
+      // Restore proper block keys
+      .map { case (blockKey, block) =>
+      val blockStart = blockKey * blockHeight
+      val rowKeys = Array.tabulate(block.nrow)(blockStart + _)
+      rowKeys -> block
     }
 
-    new DrmRddInput[Int](blockifiedSrc = Some(rddAtA))
+    if (log.isDebugEnabled)
+      log.debug(s"AtA #parts: ${rddAtA.partitions.size}.")
+
+    rddAtA
+  }
+
+  /**
+   * The version of A'A that does not use GraphX. Tries to use blockwise matrix multiply. If an
+   * accelerated matrix back is available, this might be somewhat faster.
+   */
+  def at_a_nongraph_mmul(op: OpAtA[_], srcRdd: BlockifiedDrmRdd[_]): DrmRddInput[Int] = {
+
+    // Determine how many partitions the new matrix would need approximately. We base that on
+    // geometry only, but it may eventually not be that adequate. Indeed, A'A tends to be much more
+    // dense in reality than the source.
+    val m = op.A.nrow
+    val n = op.A.ncol
+    val aparts = srcRdd.partitions.size
+    val numParts = estimateProductPartitions(anrow = n, ancol = m, bncol = n, aparts = aparts, bparts = aparts)
+    val ranges = computeEvenSplits(n, numParts)
+
+    debug(s"operator mmul-A'A(Spark); #parts = $numParts, #partsA=$aparts.")
+
+    val rddAtA = srcRdd.flatMap { case (keys, block) =>
+      Iterator.tabulate(numParts) { i =>
+        i -> block(::, ranges(i)).t %*% block
+      }
+    }
+      // Reduce partial blocks.
+      .reduceByKey(_ += _, numPartitions = numParts)
+
+      // Produce keys
+      .map { case (blockKey, block) =>
+
+      val blockStart = ranges(blockKey).start
+      val rowKeys = Array.tabulate(block.nrow)(blockStart + _)
+      rowKeys -> block
+    }
+
+    rddAtA
   }
 
 }

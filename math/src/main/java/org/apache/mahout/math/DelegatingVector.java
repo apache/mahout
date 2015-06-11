@@ -310,6 +310,11 @@ public class DelegatingVector implements Vector, LengthCachingVector {
   }
 
   @Override
+  public Vector like(int cardinality) {
+    return new DelegatingVector(delegate.like(cardinality));
+  }
+
+  @Override
   public void setQuick(int index, double value) {
     delegate.setQuick(index, value);
   }

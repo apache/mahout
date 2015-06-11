@@ -25,9 +25,15 @@ import drm._
 import org.apache.mahout.sparkbindings._
 import RLikeDrmOps._
 import test.DistributedSparkSuite
+import org.apache.mahout.math.drm.logical.{OpAtB, OpAewUnaryFuncFusion}
+import org.apache.mahout.logging._
+
+import scala.util.Random
 
 /** ==R-like DRM DSL operation tests -- Spark== */
 class RLikeDrmOpsSuite extends FunSuite with DistributedSparkSuite with RLikeDrmOpsSuiteBase {
+
+  private final implicit val log = getLog(classOf[RLikeDrmOpsSuite])
 
   test("C = A + B missing rows") {
     val sc = mahoutCtx.asInstanceOf[SparkDistributedContext].sc
@@ -110,6 +116,63 @@ class RLikeDrmOpsSuite extends FunSuite with DistributedSparkSuite with RLikeDrm
     } + 1.0
 
     (drmC -: controlB).norm should be < 1e-10
+
+  }
+
+  test("A'B, bigger") {
+
+    val rnd = new Random()
+    val a = new SparseRowMatrix(200, 1544) := { _ => rnd.nextGaussian() }
+    val b = new SparseRowMatrix(200, 300) := { _ => rnd.nextGaussian() }
+
+    var ms = System.currentTimeMillis()
+    val atb = a.t %*% b
+    ms = System.currentTimeMillis() - ms
+
+    println(s"in-core mul ms: $ms")
+
+    val drmA = drmParallelize(a, numPartitions = 2)
+    val drmB = drmParallelize(b, numPartitions = 2)
+
+    ms = System.currentTimeMillis()
+    val drmAtB = drmA.t %*% drmB
+    val mxAtB = drmAtB.collect
+    ms = System.currentTimeMillis() - ms
+
+    println(s"a'b plan:${drmAtB.context.engine.optimizerRewrite(drmAtB)}")
+    println(s"a'b plan contains ${drmAtB.rdd.partitions.size} partitions.")
+    println(s"distributed mul ms: $ms.")
+
+    (atb - mxAtB).norm should be < 1e-5
+
+  }
+
+  test("C = At %*% B , zippable") {
+
+    val mxA = dense((1, 2), (3, 4), (-3, -5))
+
+    val A = drmParallelize(mxA, numPartitions = 2)
+      .mapBlock()({
+      case (keys, block) => keys.map(_.toString) -> block
+    })
+
+    val B = (A + 1.0)
+
+      .mapBlock() { case (keys, block) ⇒
+      val nblock = new SparseRowMatrix(block.nrow, block.ncol) := block
+      keys → nblock
+    }
+
+    B.collect
+
+    val C = A.t %*% B
+
+    mahoutCtx.optimizerRewrite(C) should equal(OpAtB[String](A, B))
+
+    val inCoreC = C.collect
+    val inCoreControlC = mxA.t %*% (mxA + 1.0)
+
+    (inCoreC - inCoreControlC).norm should be < 1E-10
 
   }
 

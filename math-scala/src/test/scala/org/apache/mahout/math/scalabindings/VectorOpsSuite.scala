@@ -18,9 +18,11 @@
 package org.apache.mahout.math.scalabindings
 
 import org.scalatest.FunSuite
-import org.apache.mahout.math.{RandomAccessSparseVector, Vector}
+import org.apache.mahout.math.{SequentialAccessSparseVector, RandomAccessSparseVector, Vector}
 import RLikeOps._
 import org.apache.mahout.test.MahoutSuite
+
+import scala.util.Random
 
 /** VectorOps Suite */
 class VectorOpsSuite extends FunSuite with MahoutSuite {
@@ -76,6 +78,21 @@ class VectorOpsSuite extends FunSuite with MahoutSuite {
     10 + a shouldBe 10 +: a
     10 - a shouldBe 10 -: a
     10 / a shouldBe 10 /: a
+
+  }
+
+  test("sparse assignment") {
+
+    val svec = new SequentialAccessSparseVector(30)
+    svec(1) = -0.5
+    svec(3) = 0.5
+    println(svec)
+
+    svec(1 until svec.length) ::= ( _ => 0)
+    println(svec)
+
+    svec.sum shouldBe 0
+
 
   }
 

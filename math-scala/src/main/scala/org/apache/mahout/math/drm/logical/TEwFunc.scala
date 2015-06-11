@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,14 +15,23 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.scalabindings
+package org.apache.mahout.math.drm.logical
 
-import org.apache.mahout.math.{Matrix, MatrixTimesOps}
+/**
+ * Trait denoting logical operators providing elementwise operations that work as unary operators
+ * on each element of a matrix.
+ */
+trait TEwFunc {
 
-class RLikeTimesOps(m: MatrixTimesOps) {
+  /** Apply to degenerate elments? */
+  def evalZeros: Boolean
 
-  def :%*%(that: Matrix) = m.timesRight(that)
+  /** the function itself */
+  def f: (Double) => Double
 
-  def %*%:(that: Matrix) = m.timesLeft(that)
-
+  /**
+   * Self assignment ok? If yes, may cause side effects if works off non-serialized cached object
+   * tree!
+   */
+  def selfAssignOk: Boolean = false
 }

@@ -18,6 +18,8 @@
 package org.apache.mahout.math;
 
 import com.google.common.collect.AbstractIterator;
+import org.apache.mahout.math.flavor.MatrixFlavor;
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.IntObjectProcedure;
@@ -40,11 +42,23 @@ public class SparseMatrix extends AbstractMatrix {
    * @param columns
    * @param rowVectors
    */
-  public SparseMatrix(int rows, int columns, Map<Integer, RandomAccessSparseVector> rowVectors) {
+  public SparseMatrix(int rows, int columns, Map<Integer, Vector> rowVectors) {
+    this(rows, columns, rowVectors, false);
+  }
+
+  public SparseMatrix(int rows, int columns, Map<Integer, Vector> rowVectors, boolean shallow) {
+
+    // Why this is passing in a map? iterating it is pretty inefficient as opposed to simple lists...
     super(rows, columns);
     this.rowVectors = new OpenIntObjectHashMap<Vector>();
-    for (Map.Entry<Integer, RandomAccessSparseVector> entry : rowVectors.entrySet()) {
-      this.rowVectors.put(entry.getKey(), entry.getValue().clone());
+    if (shallow) {
+      for (Map.Entry<Integer, Vector> entry : rowVectors.entrySet()) {
+        this.rowVectors.put(entry.getKey(), entry.getValue());
+      }
+    } else {
+      for (Map.Entry<Integer, Vector> entry : rowVectors.entrySet()) {
+        this.rowVectors.put(entry.getKey(), entry.getValue().clone());
+      }
     }
   }
   
@@ -66,7 +80,11 @@ public class SparseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public Iterator<MatrixSlice> iterator() {
+  public int numSlices() {
+    return rowVectors.size();
+  }
+
+  public Iterator<MatrixSlice> iterateNonEmpty() {
     final IntArrayList keys = new IntArrayList(rowVectors.size());
     rowVectors.keys(keys);
     return new AbstractIterator<MatrixSlice>() {
@@ -221,4 +239,8 @@ public class SparseMatrix extends AbstractMatrix {
     return rowVectors.keys();
   }
 
+  @Override
+  public MatrixFlavor getFlavor() {
+    return MatrixFlavor.SPARSEROWLIKE;
+  }
 }
