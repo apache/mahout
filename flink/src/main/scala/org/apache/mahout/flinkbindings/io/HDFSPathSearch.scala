@@ -1,20 +1,21 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.mahout.flinkbindings.io
 
 import org.apache.hadoop.conf.Configuration
@@ -40,15 +41,15 @@ case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: 
    * When pattern matching dirs are never returned, only traversed.
    */
   def uris: String = {
-    if (!filePattern.isEmpty){ // have file pattern so
-    val pathURIs = pathURI.split(",")
+    if (!filePattern.isEmpty) { // have file pattern so
+      val pathURIs = pathURI.split(",")
       var files = ""
-      for ( uri <- pathURIs ){
+      for (uri <- pathURIs) {
         files = findFiles(uri, filePattern, files)
       }
       if (files.length > 0 && files.endsWith(",")) files = files.dropRight(1) // drop the last comma
       files
-    }else{
+    } else {
       pathURI
     }
   }
@@ -75,7 +76,7 @@ case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: 
           f = findFiles(fileStatus.getPath.toString, filePattern, f)
         }
       }
-    } else { f = dir }// was a filename not dir
+    } else { f = dir } // was a filename not dir
     f
   }
 

@@ -15,6 +15,10 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.Nil
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 
+/**
+ * Implementation is inspired by Spark-binding's OpAewB
+ * (see https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AewB.scala) 
+ */
 object FlinkOpAewB {
 
   def rowWiseJoinNoSideEffect[K: ClassTag](op: OpAewB[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
