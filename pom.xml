@@ -811,6 +811,7 @@
     <module>math-scala</module>
     <module>spark</module>
     <module>spark-shell</module>
+    <module>flink</module>
     <module>h2o</module>
   </modules>
 
