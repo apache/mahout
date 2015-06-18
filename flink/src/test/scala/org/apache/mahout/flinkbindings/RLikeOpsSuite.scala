@@ -18,22 +18,18 @@
  */
 package org.apache.mahout.flinkbindings
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.FunSuite
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import org.apache.mahout.math.drm._
-import RLikeDrmOps._
 import org.apache.mahout.flinkbindings._
-import org.apache.mahout.math.function.IntIntFunction
-import scala.util.Random
-import scala.util.MurmurHash
-import scala.util.hashing.MurmurHash3
+import org.apache.mahout.math._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.scalatest.Ignore
+
 
 @RunWith(classOf[JUnitRunner])
 class RLikeOpsSuite extends FunSuite with DistributedFlinkSuit {
@@ -249,6 +245,21 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuit {
 
     val expected = inCoreA %*% inCoreB
     assert((res.collect - expected).norm < 1e-6)
+  }
+
+  test("drmBroadcast") {
+    val inCoreA = dense((1, 2), (3, 4), (11, 4))
+    val x = dvec(1, 2)
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val b = drmBroadcast(x)
+
+    val res = A.mapBlock(1) { case (idx, block) =>
+      (idx, (block %*% b).toColMatrix)
+    }
+
+    val expected = inCoreA %*% x
+    assert((res.collect(::, 0) - expected).norm(2) < 1e-6)
   }
 
 }

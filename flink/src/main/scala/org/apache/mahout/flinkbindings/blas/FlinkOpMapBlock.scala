@@ -36,6 +36,9 @@ import RLikeOps._
 object FlinkOpMapBlock {
 
   def apply[S, R: ClassTag](src: FlinkDrm[S], ncol: Int, function: BlockMapFunc[S, R]): FlinkDrm[R] = {
+    
+    
+    
     val res = src.blockify.ds.map(new MapFunction[(Array[S], Matrix), (Array[R], Matrix)] {
       def map(block: (Array[S], Matrix)): (Array[R], Matrix) =  {
         val out = function(block)

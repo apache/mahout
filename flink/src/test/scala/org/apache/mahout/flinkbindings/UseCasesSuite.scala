@@ -18,22 +18,18 @@
  */
 package org.apache.mahout.flinkbindings
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.FunSuite
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import org.apache.mahout.math.drm._
-import RLikeDrmOps._
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.math.function.IntIntFunction
-import scala.util.Random
-import scala.util.MurmurHash
 import scala.util.hashing.MurmurHash3
-import org.slf4j.Logger
+import org.apache.mahout.math.Matrices
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.function.IntIntFunction
+import org.junit.runner.RunWith
 import org.slf4j.LoggerFactory
-import org.scalatest.Ignore
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class UseCasesSuite extends FunSuite with DistributedFlinkSuit {

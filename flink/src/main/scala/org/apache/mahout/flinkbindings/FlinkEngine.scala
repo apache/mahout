@@ -94,6 +94,7 @@ object FlinkEngine extends DistributedEngine {
 
     // to Help Flink's type inference had to use just one specific type - Int 
     // see org.apache.mahout.flinkbindings.blas classes with TODO: casting inside
+    // see MAHOUT-1747 and MAHOUT-1748
     val cls = implicitly[ClassTag[K]]
     if (!cls.runtimeClass.equals(classOf[Int])) {
       throw new IllegalArgumentException(s"At the moment only Int indexes are supported. Got $cls")
@@ -108,7 +109,7 @@ object FlinkEngine extends DistributedEngine {
     case op @ OpAt(a) => FlinkOpAt.sparseTrick(op, flinkTranslate(a)(op.classTagA))
     case op @ OpAtx(a, x) => {
       // express Atx as (A.t) %*% x
-      // TODO: create specific implementation of Atx
+      // TODO: create specific implementation of Atx, see MAHOUT-1749 
       val opAt = OpAt(a)
       val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a)(op.classTagA))
       val atCast = new CheckpointedFlinkDrm(at.deblockify.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
@@ -119,7 +120,7 @@ object FlinkEngine extends DistributedEngine {
         flinkTranslate(b)(op.classTagA))
     case op @ OpABt(a, b) => {
       // express ABt via AtB: let C=At and D=Bt, and calculate CtD
-      // TODO: create specific implementation of ABt
+      // TODO: create specific implementation of ABt, see MAHOUT-1750 
       val opAt = OpAt(a.asInstanceOf[DrmLike[Int]]) // TODO: casts!
       val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a.asInstanceOf[DrmLike[Int]]))
       val c = new CheckpointedFlinkDrm(at.deblockify.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
@@ -133,7 +134,7 @@ object FlinkEngine extends DistributedEngine {
     }
     case op @ OpAtA(a) => {
       // express AtA via AtB
-      // TODO: create specific implementation of AtA
+      // TODO: create specific implementation of AtA, see MAHOUT-1751 
       val aInt = a.asInstanceOf[DrmLike[Int]] // TODO: casts!
       val opAtB = OpAtB(aInt, aInt)
       val aTranslated = flinkTranslate(aInt)
@@ -198,10 +199,13 @@ object FlinkEngine extends DistributedEngine {
   }
 
   /** Broadcast support */
-  override def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector] = ???
+  override def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector] = 
+    FlinkByteBCast.wrap(v)
+
 
   /** Broadcast support */
-  override def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix] = ???
+  override def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix] = 
+    FlinkByteBCast.wrap(m)
 
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
