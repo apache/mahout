@@ -125,34 +125,34 @@ package object scalabindings {
    */
   def dense[R](rows: R*): DenseMatrix = {
     import RLikeOps._
-    val data = for (r <- rows) yield {
+    val data = for (r ← rows) yield {
       r match {
-        case n: Number => Array(n.doubleValue())
-        case t: Vector => Array.tabulate(t.length)(t(_))
-        case t: Array[Double] => t
-        case t: Iterable[_] =>
+        case n: Number ⇒ Array(n.doubleValue())
+        case t: Vector ⇒ Array.tabulate(t.length)(t(_))
+        case t: Array[Double] ⇒ t
+        case t: Iterable[_] ⇒
           t.head match {
-            case ss: Double => t.asInstanceOf[Iterable[Double]].toArray
-            case vv: Vector =>
+            case ss: Double ⇒ t.asInstanceOf[Iterable[Double]].toArray
+            case vv: Vector ⇒
               val m = new DenseMatrix(t.size, t.head.asInstanceOf[Vector].length)
               t.asInstanceOf[Iterable[Vector]].view.zipWithIndex.foreach {
-                case (v, idx) => m(idx, ::) := v
+                case (v, idx) ⇒ m(idx, ::) := v
               }
               return m
           }
-        case t: Product => t.productIterator.map(_.asInstanceOf[Number].doubleValue()).toArray
-        case t: Array[Array[Double]] => if (rows.size == 1)
+        case t: Product ⇒ t.productIterator.map(_.asInstanceOf[Number].doubleValue()).toArray
+        case t: Array[Array[Double]] ⇒ if (rows.size == 1)
           return new DenseMatrix(t)
         else
           throw new IllegalArgumentException(
             "double[][] data parameter can be the only argument for dense()")
-        case t: Array[Vector] =>
+        case t: Array[Vector] ⇒
           val m = new DenseMatrix(t.size, t.head.length)
           t.view.zipWithIndex.foreach {
-            case (v, idx) => m(idx, ::) := v
+            case (v, idx) ⇒ m(idx, ::) := v
           }
           return m
-        case _ => throw new IllegalArgumentException("unsupported type in the inline Matrix initializer")
+        case _ ⇒ throw new IllegalArgumentException("unsupported type in the inline Matrix initializer")
       }
     }
     new DenseMatrix(data.toArray)
@@ -179,7 +179,7 @@ package object scalabindings {
     val nrow = rows.size
     val ncol = rows.map(_.size()).max
     val m = new SparseRowMatrix(nrow, ncol)
-    m := rows.map { row =>
+    m := rows.map { row ⇒
       if (row.length < ncol) {
         val newRow = row.like(ncol)
         newRow(0 until row.length) := row
@@ -200,7 +200,7 @@ package object scalabindings {
     val cardinality = if (sdata.size > 0) sdata.map(_._1).max + 1 else 0
     val initialCapacity = sdata.size
     val sv = new RandomAccessSparseVector(cardinality, initialCapacity)
-    sdata.foreach(t => sv.setQuick(t._1, t._2.asInstanceOf[Number].doubleValue()))
+    sdata.foreach(t ⇒ sv.setQuick(t._1, t._2.asInstanceOf[Number].doubleValue()))
     sv
   }
 
@@ -337,12 +337,36 @@ package object scalabindings {
 
 
   /** Matrix-matrix unary func */
-  type MMUnaryFunc = (Matrix, Option[Matrix]) => Matrix
+  type MMUnaryFunc = (Matrix, Option[Matrix]) ⇒ Matrix
   /** Binary matrix-matrix operations which may save result in-place, optionally */
-  type MMBinaryFunc = (Matrix, Matrix, Option[Matrix]) => Matrix
-  type MVBinaryFunc = (Matrix, Vector, Option[Matrix]) => Matrix
-  type VMBinaryFunc = (Vector, Matrix, Option[Matrix]) => Matrix
-  type MDBinaryFunc = (Matrix, Double, Option[Matrix]) => Matrix
+  type MMBinaryFunc = (Matrix, Matrix, Option[Matrix]) ⇒ Matrix
+  type MVBinaryFunc = (Matrix, Vector, Option[Matrix]) ⇒ Matrix
+  type VMBinaryFunc = (Vector, Matrix, Option[Matrix]) ⇒ Matrix
+  type MDBinaryFunc = (Matrix, Double, Option[Matrix]) ⇒ Matrix
 
+
+  /////////////////////////////////////
+  // Miscellaneous in-core utilities
+
+  /**
+   * Compute column-wise means and variances.
+   *
+   * @return colMeans → colVariances
+   */
+  def colMeanVars(mxA:Matrix): (Vector, Vector) = {
+    val mu = mxA.colMeans()
+    val variance = (mxA * mxA colMeans) -= mu ^ 2
+    mu → variance
+  }
+
+  /**
+   * Compute column-wise means and stdevs.
+   * @param mxA input
+   * @return colMeans → colStdevs
+   */
+  def colMeanStdevs(mxA:Matrix) = {
+    val (mu, variance) = colMeanVars(mxA)
+    mu → (variance ::= math.sqrt _)
+  }
 
 }

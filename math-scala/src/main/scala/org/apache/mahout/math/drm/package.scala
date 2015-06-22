@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math
 
-import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.drm._
 import org.apache.mahout.math.indexeddataset.{IndexedDataset, DefaultIndexedDatasetReadSchema, Schema}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
@@ -160,6 +160,83 @@ package object drm {
   def dsqrt[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.sqrt)
 
   def dsignum[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.signum)
+  
+  ///////////////////////////////////////////////////////////
+  // Misc. math utilities.
+
+  /**
+   * Compute column wise means and varieances -- Distributed version.
+   *
+   * @param drmA Note: will pin input to cache if not yet pinned.
+   * @tparam K
+   * @return colMeans → colVariances
+   */
+  private[math] def dcolMeanVars[K: ClassTag](drmA: DrmLike[K]): (Vector, Vector) = {
+
+    import RLikeDrmOps._
+
+    val drmAcp = drmA.checkpoint()
+    
+    val mu = drmAcp colMeans
+
+    // Compute variance using mean(x^2) - mean(x)^2
+    val variances = (drmAcp ^ 2 colMeans) -=: mu * mu
+
+    mu → variances
+  }
+
+  /**
+   * Thin column-wise mean and covariance matrix computation. Same as [[dcolMuCov()]] but suited for
+   * thin and tall inputs where covariance matrix can be reduced and finalized in driver memory.
+   * 
+   * @param drmA note: will pin input to cache if not yet pinned.
+   * @return mean → covariance matrix (in core)
+   */
+  private[math] def thinColMeanCov[K: ClassTag](drmA: DrmLike[K]):(Vector, Matrix) = {
+
+    import RLikeDrmOps._
+
+    val drmAcp = drmA.checkpoint()
+    val mu = drmAcp colMeans
+    val mxCov = (drmAcp.t %*% drmAcp).collect /= drmAcp.nrow -= (mu cross mu)
+    mu → mxCov
+  }
+
+  /**
+   * Compute COV(X) matrix and mean of row-wise data set. X is presented as row-wise input matrix A.
+   *
+   * This is a "wide" procedure, covariance matrix is returned as a DRM.
+   *
+   * @param drmA note: will pin input into cache if not yet pinned.
+   * @return mean → covariance DRM
+   */
+  private[math] def dcolMeanCov[K: ClassTag](drmA: DrmLike[K]): (Vector, DrmLike[Int]) = {
+
+    import RLikeDrmOps._
+
+    implicit val ctx = drmA.context
+    val drmAcp = drmA.checkpoint()
+
+    val bcastMu = drmBroadcast(drmAcp colMeans)
+
+    // We use multivaraite analogue COV(X)=E(XX')-mu*mu'. In our case E(XX') = (A'A)/A.nrow.
+    // Compute E(XX')
+    val drmSigma = (drmAcp.t %*% drmAcp / drmAcp.nrow)
+
+      // Subtract mu*mu'. In this case we assume mu*mu' may still be big enough to be treated by
+      // driver alone, so we redistribute this operation as well. Hence it may look a bit cryptic.
+      .mapBlock() { case (keys, block) ⇒
+
+      // Pin mu as vector reference to memory.
+      val mu:Vector = bcastMu
+
+      keys → (block := { (r, c, v) ⇒ v - mu(keys(r)) * mu(c) })
+    }
+
+    // return (mu, cov(X) ("bigSigma")).
+    (bcastMu: Vector) → drmSigma
+  }
+
 
 }
 
