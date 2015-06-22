@@ -22,6 +22,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.SparseMatrix;
+import org.apache.mahout.math.flavor.MatrixFlavor;
 
 import water.fvec.Chunk;
 
@@ -118,5 +119,16 @@ public class H2OBlockMatrix extends AbstractMatrix {
     cow();
     cow.assignColumn(col, v);
     return cow;
+  }
+
+  @Override
+  public MatrixFlavor getFlavor() {
+    if (cow != null) {
+      return cow.getFlavor();
+    } else if (chks[0].isSparse()) {
+      return MatrixFlavor.SPARSELIKE;
+    } else {
+      return MatrixFlavor.DENSELIKE;
+    }
   }
 }
