@@ -38,13 +38,13 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def /(that: DrmLike[K]): DrmLike[K] = OpAewB[K](A = this, B = that, op = "/")
 
-  def +(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ + that, evalZeros = true)
+  def +(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ + that)
 
-  def +:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that + _, evalZeros = true)
+  def +:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that + _)
 
-  def -(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ - that, evalZeros = true)
+  def -(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ - that)
 
-  def -:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that - _, evalZeros = true)
+  def -:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that - _)
 
   def *(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ * that)
 
@@ -52,9 +52,9 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def ^(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = math.pow(_, that))
 
-  def /(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ / that, evalZeros = that == 0.0)
+  def /(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ / that)
 
-  def /:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that / _, evalZeros = true)
+  def /:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that / _)
 
   def :%*%(that: DrmLike[Int]): DrmLike[K] = OpAB[K](A = this.drm, B = that)
 

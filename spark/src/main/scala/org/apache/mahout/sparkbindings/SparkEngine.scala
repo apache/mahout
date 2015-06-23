@@ -325,7 +325,7 @@ object SparkEngine extends DistributedEngine {
       case op@OpAtA(a) ⇒ AtA.at_a(op, tr2phys(a)(op.classTagA))
       case op@OpAx(a, x) ⇒ Ax.ax_with_broadcast(op, tr2phys(a)(op.classTagA))
       case op@OpAtx(a, x) ⇒ Ax.atx_with_broadcast(op, tr2phys(a)(op.classTagA))
-      case op@OpAewUnaryFunc(a, _, _) ⇒ AewB.a_ew_func(op, tr2phys(a)(op.classTagA))
+      case op@OpAewUnaryFunc(a, _) ⇒ AewB.a_ew_func(op, tr2phys(a)(op.classTagA))
       case op@OpAewUnaryFuncFusion(a, _) ⇒ AewB.a_ew_func(op, tr2phys(a)(op.classTagA))
       case op@OpAewB(a, b, opId) ⇒ AewB.a_ew_b(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
       case op@OpCbind(a, b) ⇒ CbindAB.cbindAB_nograph(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))

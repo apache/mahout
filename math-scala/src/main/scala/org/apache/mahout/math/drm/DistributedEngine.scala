@@ -196,13 +196,13 @@ object DistributedEngine {
       // Fusion of unary funcs into single, like 1 + x * x.
       // Since we repeating the pass over self after rewrite, we dont' need to descend into arguments
       // recursively here.
-      case op1@OpAewUnaryFunc(op2@OpAewUnaryFunc(a, _, _), _, _) ⇒
+      case op1@OpAewUnaryFunc(op2@OpAewUnaryFunc(a, _), _) ⇒
         pass2(OpAewUnaryFuncFusion(a, op1 :: op2 :: Nil))
 
       // Fusion one step further, like 1 + 2 * x * x. All should be rewritten as one UnaryFuncFusion.
       // Since we repeating the pass over self after rewrite, we dont' need to descend into arguments
       // recursively here.
-      case op@OpAewUnaryFuncFusion(op2@OpAewUnaryFunc(a, _, _), _) ⇒
+      case op@OpAewUnaryFuncFusion(op2@OpAewUnaryFunc(a, _), _) ⇒
         pass2(OpAewUnaryFuncFusion(a, op.ff :+ op2))
 
       // A.t.t => A
