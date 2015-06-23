@@ -50,7 +50,11 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def *:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that * _)
 
-  def ^(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = math.pow(_, that))
+  def ^(that: Double): DrmLike[K] = that match {
+    case 2.0 ⇒ OpAewUnaryFunc[K](A = this, f = x ⇒ x * x)
+    case 0.5 ⇒ OpAewUnaryFunc[K](A = this, f = x ⇒ math.sqrt(x))
+    case _ ⇒ OpAewUnaryFunc[K](A = this, f = math.pow(_, that))
+  }
 
   def /(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = _ / that, evalZeros = that == 0.0)
 
