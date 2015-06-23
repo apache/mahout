@@ -110,4 +110,28 @@ trait DrmLikeOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
   }
 
+  test("dsqDist(X,Y)") {
+    val m = 100
+    val n = 300
+    val d = 7
+    val mxX = Matrices.symmetricUniformView(m, d, 12345).cloned -= 5
+    val mxY = Matrices.symmetricUniformView(n, d, 1234).cloned += 10
+    val (drmX, drmY) = (drmParallelize(mxX, 3), drmParallelize(mxY, 4))
+
+    val mxDsq = dsqDist(drmX, drmY).collect
+    val mxDsqControl = new DenseMatrix(m, n) := { (r, c, _) ⇒ (mxX(r, ::) - mxY(c, ::)) ^= 2 sum }
+    (mxDsq - mxDsqControl).norm should be < 1e-7
+  }
+
+  test("dsqDist(X)") {
+    val m = 100
+    val d = 7
+    val mxX = Matrices.symmetricUniformView(m, d, 12345).cloned -= 5
+    val drmX = drmParallelize(mxX, 3)
+
+    val mxDsq = dsqDist(drmX).collect
+    val mxDsqControl = sqDist(drmX)
+    (mxDsq - mxDsqControl).norm should be < 1e-7
+  }
+
 }

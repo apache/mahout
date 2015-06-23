@@ -369,4 +369,30 @@ package object scalabindings {
     mu → (variance ::= math.sqrt _)
   }
 
+  /** Compute square distance matrix. We assume data points are row-wise, similar to R's dist(). */
+  def sqDist(mxX: Matrix): Matrix = {
+
+    val s = mxX ^ 2 rowSums
+
+    (mxX %*% mxX.t) := { (r, c, x) ⇒ s(r) + s(c) - 2 * x}
+  }
+
+  /**
+   * Pairwise squared distance computation.
+   * @param mxX X, m x d
+   * @param mxY Y, n x d
+   * @return pairwise squaired distances of row-wise data points in X and Y (m x n)
+   */
+  def sqDist(mxX: Matrix, mxY: Matrix): Matrix = {
+
+    val s = mxX ^ 2 rowSums
+
+    val t = mxY ^ 2 rowSums
+
+    // D = s*1' + 1*t' - 2XY'
+    (mxX %*% mxY.t) := { (r, c, d) ⇒ s(r) + t(c) - 2.0 * d}
+  }
+
+
+
 }
