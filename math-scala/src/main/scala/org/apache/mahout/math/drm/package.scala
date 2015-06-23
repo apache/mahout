@@ -202,7 +202,7 @@ package object drm {
    * @param drmA note: will pin input to cache if not yet pinned.
    * @return mean → covariance matrix (in core)
    */
-  private[math] def dcolMeanCovThin[K: ClassTag](drmA: DrmLike[K]):(Vector, Matrix) = {
+  def dcolMeanCovThin[K: ClassTag](drmA: DrmLike[K]):(Vector, Matrix) = {
 
     import RLikeDrmOps._
 
@@ -220,7 +220,7 @@ package object drm {
    * @param drmA note: will pin input into cache if not yet pinned.
    * @return mean → covariance DRM
    */
-  private[math] def dcolMeanCov[K: ClassTag](drmA: DrmLike[K]): (Vector, DrmLike[Int]) = {
+  def dcolMeanCov[K: ClassTag](drmA: DrmLike[K]): (Vector, DrmLike[Int]) = {
 
     import RLikeDrmOps._
 
@@ -248,7 +248,7 @@ package object drm {
   }
 
   /** Distributed Squared distance matrix computation. */
-  private[math] def dsqDist(drmX: DrmLike[Int]): DrmLike[Int] = {
+  def dsqDist(drmX: DrmLike[Int]): DrmLike[Int] = {
 
     // This is a specific case of pairwise distances of X and Y.
 
@@ -294,7 +294,7 @@ package object drm {
    * @param drmY n x d row-wise dataset. Pinned to cache if not yet pinned.
    * @return m x d pairwise squared distance matrix (between rows of X and Y)
    */
-  private[math] def dsqDist(drmX: DrmLike[Int], drmY: DrmLike[Int]): DrmLike[Int] = {
+  def dsqDist(drmX: DrmLike[Int], drmY: DrmLike[Int]): DrmLike[Int] = {
 
     import RLikeDrmOps._
 
