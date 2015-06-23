@@ -393,6 +393,8 @@ package object scalabindings {
     (mxX %*% mxY.t) := { (r, c, d) ⇒ s(r) + t(c) - 2.0 * d}
   }
 
+  def dist(mxX: Matrix): Matrix = sqDist(mxX) := sqrt _
 
+  def dist(mxX: Matrix, mxY: Matrix): Matrix = sqDist(mxX, mxY) := sqrt _
 
 }
