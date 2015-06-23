@@ -26,9 +26,10 @@ import scala.util.Random
  */
 case class OpAewUnaryFunc[K: ClassTag](
     override var A: DrmLike[K],
-    val f: (Double) => Double,
-    val evalZeros:Boolean = false
+    val f: (Double) => Double
     ) extends AbstractUnaryOp[K,K] with TEwFunc {
+
+  val evalZeros = if (f(0.0) == 0.0) false else true
 
   override protected[mahout] lazy val partitioningTag: Long =
     if (A.canHaveMissingRows)
