@@ -58,8 +58,8 @@ public class AewUnary {
       public void map(Chunk chks[], NewChunk ncs[]) {
         for (int c = 0; c < chks.length; c++) {
           Chunk chk = chks[c];
-	  Function1 f = (Function1) fn;
-	  int ChunkLen = chk.len();
+          Function1 f = (Function1) fn;
+          int ChunkLen = chk.len();
 
           if (!evalZeros && chk.isSparse()) {
             /* sparse and skip zeros */
