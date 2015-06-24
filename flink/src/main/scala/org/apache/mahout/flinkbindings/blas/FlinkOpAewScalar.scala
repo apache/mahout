@@ -18,21 +18,28 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
+import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
-import org.apache.mahout.math.drm.logical.OpAewScalar
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
+
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.drm.logical.OpAewScalar
+import org.apache.mahout.math.drm.logical.OpAewUnaryFunc
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 /**
  * Implementation is inspired by Spark-binding's OpAewScalar
- * (see https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AewB.scala) 
+ * (see https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AewB.scala)
  */
 object FlinkOpAewScalar {
 
+  final val PROPERTY_AEWB_INPLACE = "mahout.math.AewB.inplace"
+  private def isInplace = System.getProperty(PROPERTY_AEWB_INPLACE, "false").toBoolean
+
+  @Deprecated
   def opScalarNoSideEffect[K: ClassTag](op: OpAewScalar[K], A: FlinkDrm[K], scalar: Double): FlinkDrm[K] = {
     val function = EWOpsCloning.strToFunction(op.op)
 
@@ -45,8 +52,35 @@ object FlinkOpAewScalar {
     new BlockifiedFlinkDrm(res, op.ncol)
   }
 
+  def opUnaryFunction[K: ClassTag](op: OpAewUnaryFunc[K], A: FlinkDrm[K], f: (Double) => Double): FlinkDrm[K] = {
+    val inplace = isInplace
+
+    val res = if (op.evalZeros) {
+      A.blockify.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
+        def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = {
+          val (keys, block) = tuple
+          val newBlock = if (inplace) block else block.cloned
+          newBlock := ((_, _, x) => f(x))
+          (keys, newBlock)
+        }
+      })
+    } else {
+      A.blockify.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
+        def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = {
+          val (keys, block) = tuple
+          val newBlock = if (inplace) block else block.cloned
+          for (row <- newBlock; el <- row.nonZeroes) el := f(el.get)
+          (keys, newBlock)
+        }
+      })
+    }
+
+    new BlockifiedFlinkDrm(res, op.ncol)
+  }
+
 }
 
+@Deprecated
 object EWOpsCloning {
 
   type MatrixScalarFunc = (Matrix, Double) => Matrix
