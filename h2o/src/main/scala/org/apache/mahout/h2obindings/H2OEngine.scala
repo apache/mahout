@@ -107,6 +107,7 @@ object H2OEngine extends DistributedEngine {
       case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.exec(tr2phys(a)(op.classTagA), m)
       // Non arithmetic
       case op@OpCbind(a, b) => Cbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpCbindScalar(a, d, left) => CbindScalar.exec(tr2phys(a)(op.classTagA), d, left)
       case op@OpRbind(a, b) => Rbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
       case op@OpRowRange(a, r) => RowRange.exec(tr2phys(a)(op.classTagA), r)
       // Custom operators
