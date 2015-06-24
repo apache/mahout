@@ -100,6 +100,8 @@ object H2OEngine extends DistributedEngine {
       case op@OpAtA(a) => AtA.exec(tr2phys(a)(op.classTagA))
       case op@OpAx(a, v) => Ax.exec(tr2phys(a)(op.classTagA), v)
       case op@OpAtx(a, v) => Atx.exec(tr2phys(a)(op.classTagA), v)
+      case op@OpAewUnaryFunc(a, f, z) => AewUnary.exec(tr2phys(a)(op.classTagA), op.f, z)
+      case op@OpAewUnaryFuncFusion(a, f) => AewUnary.exec(tr2phys(a)(op.classTagA), op.f, op.evalZeros)
       case op@OpAewB(a, b, opId) => AewB.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB), opId)
       case op@OpAewScalar(a, s, opId) => AewScalar.exec(tr2phys(a)(op.classTagA), s, opId)
       case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.exec(tr2phys(a)(op.classTagA), m)
