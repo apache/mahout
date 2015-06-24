@@ -68,6 +68,10 @@ class RLikeVectorOps(_v: Vector) extends VectorOps(_v) {
   def /:(that: Vector) = that.cloned /= v
 
   def ^=(that: Double) = that match {
+    // Special handling of x ^2 and x ^ 0.5: we want consistent handling of x ^ 2 and x * x since
+    // pow(x,2) function return results different from x * x; but much of the code uses this
+    // interchangeably. Not having this done will create things like NaN entries on main diagonal
+    // of a distance matrix.
     case 2.0 ⇒ v.assign(Functions.SQUARE)
     case 0.5 ⇒ v.assign(Functions.SQRT)
     case _ ⇒ v.assign (Functions.POW, that)
