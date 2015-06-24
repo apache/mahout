@@ -55,6 +55,10 @@ class FlinkByteBCast[T](private val arr: Array[Byte]) extends BCast[T] with Seri
 
   override def value: T = _value
 
+  override def close: Unit = {
+    // nothing to close
+  }
+
 }
 
 object FlinkByteBCast {

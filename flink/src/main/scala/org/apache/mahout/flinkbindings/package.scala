@@ -18,24 +18,30 @@
  */
 package org.apache.mahout
 
+import scala.Array.canBuildFrom
 import scala.reflect.ClassTag
-import org.slf4j.LoggerFactory
+
+import org.apache.flink.api.common.functions.FilterFunction
+import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.java.DataSet
 import org.apache.flink.api.java.ExecutionEnvironment
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.mahout.math.Vector
+import org.apache.mahout.flinkbindings._
+import org.apache.mahout.flinkbindings.FlinkDistributedContext
+import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
+import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
+import org.apache.mahout.math._
 import org.apache.mahout.math.DenseVector
 import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.MatrixWritable
+import org.apache.mahout.math.Vector
 import org.apache.mahout.math.VectorWritable
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.flinkbindings.FlinkDistributedContext
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
-import org.apache.flink.api.common.functions.FilterFunction
+import org.apache.mahout.math.drm.BlockifiedDrmTuple
+import org.apache.mahout.math.drm.CheckpointedDrm
+import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.drm.DrmTuple
+import org.slf4j.LoggerFactory
 
 package object flinkbindings {
 

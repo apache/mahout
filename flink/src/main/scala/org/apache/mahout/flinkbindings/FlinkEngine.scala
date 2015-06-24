@@ -235,4 +235,23 @@ object FlinkEngine extends DistributedEngine {
   /** Creates empty DRM with non-trivial height */
   override def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
                                       (implicit sc: DistributedContext): CheckpointedDrm[Long] = ???
+  
+
+  /**
+   * Convert non-int-keyed matrix to an int-keyed, computing optionally mapping from old keys
+   * to row indices in the new one. The mapping, if requested, is returned as a 1-column matrix.
+   */
+  def drm2IntKeyed[K: ClassTag](drmX: DrmLike[K], computeMap: Boolean = false): 
+          (DrmLike[Int], Option[DrmLike[K]]) = ???
+
+  /**
+   * (Optional) Sampling operation. Consistent with Spark semantics of the same.
+   */
+  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = ???
+
+  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = ???
+
+  /** Optional engine-specific all reduce tensor operation. */
+  def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = ???
+ 
 }
