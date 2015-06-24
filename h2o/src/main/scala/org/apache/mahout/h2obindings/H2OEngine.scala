@@ -167,7 +167,7 @@ object H2OEngine extends DistributedEngine {
    *
    */
   override def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc)
-  : Matrix = ???
+  : Matrix = H2OHelper.allreduceBlock(drm.h2odrm, bmf, rf)
 
   /**
    * TODO: implement this please.

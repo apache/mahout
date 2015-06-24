@@ -33,13 +33,18 @@ import water.util.ArrayUtils;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.io.Serializable;
 
 import org.apache.mahout.h2obindings.drm.H2ODrm;
+import org.apache.mahout.h2obindings.drm.H2OBCast;
 
 // for makeEmptyStrVec
 import water.Key;
 import water.DKV;
 import water.fvec.CStrChunk;
+
+import scala.Function1;
+import scala.Function2;
 
 /**
  * Collection of helper methods for H2O backend.
@@ -436,5 +441,32 @@ public class H2OHelper {
    */
   public static H2ODrm emptyDrm(long nrow, int ncol, int minHint, int exactHint) {
     return new H2ODrm(emptyFrame(nrow, ncol, minHint, exactHint));
+  }
+
+  public static Matrix allreduceBlock(H2ODrm drmA, Object bmfn, Object rfn) {
+    class MRTaskMR extends MRTask<MRTaskMR> {
+      H2OBCast<Matrix> bmf_out;
+      Serializable bmf;
+      Serializable rf;
+
+      public MRTaskMR(Object _bmf, Object _rf) {
+        bmf = (Serializable) _bmf;
+        rf = (Serializable) _rf;
+      }
+
+      @Override
+      public void map(Chunk chks[]) {
+        Function1 f = (Function1) bmf;
+        bmf_out = new H2OBCast((Matrix)f.apply(new scala.Tuple2(null, new H2OBlockMatrix(chks))));
+      }
+
+      @Override
+      public void reduce(MRTaskMR that) {
+        Function2 f = (Function2) rf;
+        bmf_out = new H2OBCast((Matrix)f.apply(this.bmf_out.value(), that.bmf_out.value()));
+      }
+    }
+
+    return new MRTaskMR(bmfn, rfn).doAll(drmA.frame).bmf_out.value();
   }
 }
