@@ -18,12 +18,12 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import org.apache.mahout.math.drm.logical.OpRowRange
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.flink.api.common.functions.FilterFunction
-import org.apache.mahout.math.Vector
 import org.apache.flink.api.common.functions.MapFunction
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.drm.logical.OpRowRange
 
 /**
  * Implementation is taken from Spark's OpRowRange

@@ -19,33 +19,66 @@
 package org.apache.mahout.flinkbindings
 
 import java.util.Collection
-import scala.reflect.ClassTag
+
 import scala.collection.JavaConverters._
-import com.google.common.collect._
-import org.apache.mahout.math._
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.indexeddataset._
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.drm.DrmTuple
-import org.apache.mahout.math.drm.logical._
-import org.apache.mahout.math.indexeddataset.BiDictionary
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.flinkbindings.drm._
-import org.apache.mahout.flinkbindings.blas._
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.common.functions._
+import scala.reflect.ClassTag
+
 import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.common.functions.ReduceFunction
+import org.apache.flink.api.java.tuple.Tuple2
 import org.apache.flink.api.java.typeutils.TypeExtractor
-import org.apache.flink.api.scala.DataSet
-import org.apache.flink.api.java.io.TypeSerializerInputFormat
-import org.apache.flink.api.common.io.SerializedInputFormat
+import org.apache.hadoop.io.Writable
+import org.apache.hadoop.mapred.FileInputFormat
 import org.apache.hadoop.mapred.JobConf
 import org.apache.hadoop.mapred.SequenceFileInputFormat
-import org.apache.hadoop.mapred.FileInputFormat
-import org.apache.mahout.flinkbindings.io._
-import org.apache.hadoop.io.Writable
-import org.apache.flink.api.java.tuple.Tuple2
+import org.apache.mahout.flinkbindings.blas.FlinkOpAewB
+import org.apache.mahout.flinkbindings.blas.FlinkOpAewScalar
+import org.apache.mahout.flinkbindings.blas.FlinkOpAt
+import org.apache.mahout.flinkbindings.blas.FlinkOpAtB
+import org.apache.mahout.flinkbindings.blas.FlinkOpAx
+import org.apache.mahout.flinkbindings.blas.FlinkOpCBind
+import org.apache.mahout.flinkbindings.blas.FlinkOpMapBlock
+import org.apache.mahout.flinkbindings.blas.FlinkOpRBind
+import org.apache.mahout.flinkbindings.blas.FlinkOpRowRange
+import org.apache.mahout.flinkbindings.blas.FlinkOpTimesRightMatrix
+import org.apache.mahout.flinkbindings._
+import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
+import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
+import org.apache.mahout.flinkbindings.io.HDFSUtil
+import org.apache.mahout.flinkbindings.io.Hadoop1HDFSUtil
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.VectorWritable
+import org.apache.mahout.math.drm.BCast
+import org.apache.mahout.math.drm.BlockMapFunc2
+import org.apache.mahout.math.drm.BlockReduceFunc
+import org.apache.mahout.math.drm.CacheHint
+import org.apache.mahout.math.drm.CheckpointedDrm
+import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.drm.DistributedEngine
+import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.drm.DrmTuple
+import org.apache.mahout.math.drm.drm2drmCpOps
+import org.apache.mahout.math.drm.logical.OpABt
+import org.apache.mahout.math.drm.logical.OpAewB
+import org.apache.mahout.math.drm.logical.OpAewScalar
+import org.apache.mahout.math.drm.logical.OpAewUnaryFunc
+import org.apache.mahout.math.drm.logical.OpAt
+import org.apache.mahout.math.drm.logical.OpAtA
+import org.apache.mahout.math.drm.logical.OpAtB
+import org.apache.mahout.math.drm.logical.OpAtx
+import org.apache.mahout.math.drm.logical.OpAx
+import org.apache.mahout.math.drm.logical.OpCbind
+import org.apache.mahout.math.drm.logical.OpMapBlock
+import org.apache.mahout.math.drm.logical.OpRbind
+import org.apache.mahout.math.drm.logical.OpRowRange
+import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
+import org.apache.mahout.math.indexeddataset.BiDictionary
+import org.apache.mahout.math.indexeddataset.IndexedDataset
+import org.apache.mahout.math.indexeddataset.Schema
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 object FlinkEngine extends DistributedEngine {
 
@@ -142,6 +175,8 @@ object FlinkEngine extends DistributedEngine {
     }
     case op @ OpTimesRightMatrix(a, b) => 
       FlinkOpTimesRightMatrix.drmTimesInCore(op, flinkTranslate(a)(op.classTagA), b)
+    case op @ OpAewUnaryFunc(a, f, _) =>
+      FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA), f)
     case op @ OpAewScalar(a, scalar, _) => 
       FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a)(op.classTagA), scalar)
     case op @ OpAewB(a, b, _) =>

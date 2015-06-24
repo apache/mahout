@@ -18,37 +18,34 @@
  */
 package org.apache.mahout.flinkbindings.drm
 
-import scala.reflect.ClassTag
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.math.drm.CheckpointedDrm
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.flinkbindings.FlinkDistributedContext
-import org.apache.flink.api.scala.ExecutionEnvironment
-import org.apache.mahout.math.drm.CacheHint
-import scala.util.Random
-import org.apache.mahout.math.drm.DistributedContext
-import org.apache.mahout.math.DenseMatrix
-import org.apache.mahout.math.SparseMatrix
-import org.apache.flink.api.java.io.LocalCollectionOutputFormat
-import java.util.ArrayList
 import scala.collection.JavaConverters._
+import scala.util.Random
+import scala.reflect.ClassTag
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.functions.ReduceFunction
-import org.apache.flink.api.java.DataSet
-import org.apache.hadoop.io.Writable
-import org.apache.hadoop.io.IntWritable
-import org.apache.hadoop.io.Text
-import org.apache.hadoop.io.LongWritable
-import org.apache.mahout.math.VectorWritable
-import org.apache.mahout.math.Vector
-import org.apache.hadoop.mapred.SequenceFileOutputFormat
-import org.apache.hadoop.mapred.JobConf
-import org.apache.hadoop.mapred.FileOutputFormat
-import org.apache.flink.api.java.tuple.Tuple2
 import org.apache.flink.api.java.hadoop.mapred.HadoopOutputFormat
+import org.apache.flink.api.java.tuple.Tuple2
+import org.apache.hadoop.io.IntWritable
+import org.apache.hadoop.io.LongWritable
+import org.apache.hadoop.io.Text
+import org.apache.hadoop.io.Writable
+import org.apache.hadoop.mapred.FileOutputFormat
+import org.apache.hadoop.mapred.JobConf
+import org.apache.hadoop.mapred.SequenceFileOutputFormat
+import org.apache.mahout.flinkbindings._
+import org.apache.mahout.flinkbindings.DrmDataSet
+import org.apache.mahout.math.DenseMatrix
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.SparseMatrix
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.VectorWritable
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.CacheHint
+import org.apache.mahout.math.drm.CheckpointedDrm
+import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.drm.DrmTuple
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       private var _nrow: Long = CheckpointedFlinkDrm.UNKNOWN,

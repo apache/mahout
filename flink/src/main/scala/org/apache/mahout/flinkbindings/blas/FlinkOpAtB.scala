@@ -18,27 +18,28 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
+import java.lang.Iterable
+
+import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.reflect.ClassTag
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.math.drm.logical.OpAtB
+
+import org.apache.flink.api.common.functions.FlatMapFunction
+import org.apache.flink.api.common.functions.GroupReduceFunction
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.java.tuple.Tuple2
-import org.apache.mahout.math.Vector
-import org.apache.mahout.math.Matrix
-import org.apache.flink.api.common.functions.FlatMapFunction
 import org.apache.flink.util.Collector
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import org.apache.flink.api.common.functions.GroupReduceFunction
-import java.lang.Iterable
-import scala.collection.JavaConverters._
-import com.google.common.collect.Lists
-import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
 import org.apache.mahout.flinkbindings.BlockifiedDrmDataSet
-import org.apache.flink.api.scala._
-import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.mahout.flinkbindings.DrmDataSet
+import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.drm.BlockifiedDrmTuple
+import org.apache.mahout.math.drm.logical.OpAtB
+import org.apache.mahout.math.drm.safeToNonNegInt
+import org.apache.mahout.math.scalabindings.RLikeOps._
+
+import com.google.common.collect.Lists
 
 
 /**

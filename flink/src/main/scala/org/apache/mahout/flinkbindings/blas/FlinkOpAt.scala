@@ -18,25 +18,23 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import org.apache.mahout.math.drm.logical.OpAt
-import org.apache.mahout.flinkbindings.DrmDataSet
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.flink.api.common.functions.FlatMapFunction
-import org.apache.mahout.math.Matrix
-import scala.reflect.ClassTag
-import org.apache.flink.util.Collector
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import org.apache.flink.api.common.functions.GroupReduceFunction
-import org.apache.mahout.math.drm.DrmTuple
 import java.lang.Iterable
-import scala.collection.JavaConverters._
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.flink.api.java.functions.KeySelector
-import java.util.ArrayList
+
+import scala.Array.canBuildFrom
+import scala.collection.JavaConverters.asScalaBufferConverter
+
+import org.apache.flink.api.common.functions.FlatMapFunction
+import org.apache.flink.api.common.functions.GroupReduceFunction
 import org.apache.flink.shaded.com.google.common.collect.Lists
+import org.apache.flink.util.Collector
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
+import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.SequentialAccessSparseVector
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.drm.DrmTuple
+import org.apache.mahout.math.drm.logical.OpAt
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 /**
  * Implementation is taken from Spark's At

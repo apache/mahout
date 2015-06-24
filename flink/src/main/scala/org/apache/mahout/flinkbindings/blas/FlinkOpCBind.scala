@@ -19,20 +19,22 @@
 package org.apache.mahout.flinkbindings.blas
 
 import java.lang.Iterable
-import scala.reflect.ClassTag
+
 import scala.collection.JavaConverters._
-import org.apache.mahout.math.drm.logical.OpCbind
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.math.Vector
-import org.apache.flink.api.java.DataSet
+import scala.reflect.ClassTag
+
 import org.apache.flink.api.common.functions.CoGroupFunction
+import org.apache.flink.api.java.DataSet
 import org.apache.flink.util.Collector
-import com.google.common.collect.Lists
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
+import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.DenseVector
 import org.apache.mahout.math.SequentialAccessSparseVector
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.drm.logical.OpCbind
+import org.apache.mahout.math.scalabindings.RLikeOps._
+
+import com.google.common.collect.Lists
 
 
 /**

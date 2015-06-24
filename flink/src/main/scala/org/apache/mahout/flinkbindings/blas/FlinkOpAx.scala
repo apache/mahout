@@ -18,20 +18,18 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
+import java.util.List
+
 import scala.reflect.ClassTag
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.math.drm.drmBroadcast
-import org.apache.mahout.math.drm.logical.OpAx
-import org.apache.mahout.math.Matrix
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
+
 import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.configuration.Configuration
-import java.util.List
+import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.drm.logical.OpAx
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 
 /**

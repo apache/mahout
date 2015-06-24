@@ -19,13 +19,12 @@
 package org.apache.mahout.flinkbindings.blas
 
 import scala.reflect.ClassTag
-import org.apache.mahout.math.drm.logical.OpRbind
+
+import org.apache.flink.api.java.DataSet
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.java.DataSet
 import org.apache.mahout.math.Vector
+import org.apache.mahout.math.drm.logical.OpRbind
 
 object FlinkOpRBind {
 

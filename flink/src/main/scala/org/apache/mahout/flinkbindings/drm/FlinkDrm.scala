@@ -18,27 +18,25 @@
  */
 package org.apache.mahout.flinkbindings.drm
 
+import java.lang.Iterable
+
+import scala.collection.JavaConverters.iterableAsScalaIterableConverter
+import scala.reflect.ClassTag
+
 import org.apache.flink.api.common.functions.FlatMapFunction
-import org.apache.flink.api.java.DataSet
+import org.apache.flink.api.common.functions.MapPartitionFunction
 import org.apache.flink.api.java.ExecutionEnvironment
 import org.apache.flink.util.Collector
+import org.apache.mahout.flinkbindings.BlockifiedDrmDataSet
+import org.apache.mahout.flinkbindings.DrmDataSet
 import org.apache.mahout.flinkbindings.FlinkDistributedContext
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import org.apache.mahout.flinkbindings._
-import org.apache.flink.api.common.functions.MapPartitionFunction
-import org.apache.mahout.math.Vector
-import java.lang.Iterable
-import scala.collection.JavaConverters._
+import org.apache.mahout.flinkbindings.wrapContext
 import org.apache.mahout.math.DenseMatrix
-import scala.reflect.ClassTag
+import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.SparseRowMatrix
-import scala.reflect.ClassTag
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.scala.codegen.TypeInformationGen
-import org.apache.flink.api.java.typeutils.TypeExtractor
+import org.apache.mahout.math.drm.DrmTuple
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 trait FlinkDrm[K] {
   def executionEnvironment: ExecutionEnvironment

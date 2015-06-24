@@ -19,16 +19,14 @@
 package org.apache.mahout.flinkbindings.blas
 
 import scala.reflect.ClassTag
-import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.DiagonalMatrix
+
 import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.configuration.Configuration
 import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
+import org.apache.mahout.flinkbindings.drm.FlinkDrm
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 /**
  * Implementation is taken from Spark's OpTimesRightMatrix:
