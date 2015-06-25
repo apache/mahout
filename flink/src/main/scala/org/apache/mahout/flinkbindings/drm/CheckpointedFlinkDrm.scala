@@ -54,28 +54,24 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       private var _canHaveMissingRows: Boolean = false
   ) extends CheckpointedDrm[K] {
 
-  lazy val nrow: Long = if (_nrow >= 0) _nrow else computeNRow
-  lazy val ncol: Int = if (_ncol >= 0) _ncol else computeNCol
+  lazy val nrow: Long = if (_nrow >= 0) _nrow else dim._1
+  lazy val ncol: Int = if (_ncol >= 0) _ncol else dim._2
 
-  protected def computeNRow: Long = { 
-    val count = ds.map(new MapFunction[DrmTuple[K], Long] {
-      def map(value: DrmTuple[K]): Long = 1L
-    }).reduce(new ReduceFunction[Long] {
-      def reduce(a1: Long, a2: Long) = a1 + a2
+  private lazy val dim: (Long, Int) = {
+    // combine computation of ncol and nrow in one pass
+
+    val res = ds.map(new MapFunction[DrmTuple[K], (Long, Int)] {
+      def map(value: DrmTuple[K]): (Long, Int) = {
+        (1L, value._2.length)
+      }
+    }).reduce(new ReduceFunction[(Long, Int)] {
+      def reduce(t1: (Long, Int), t2: (Long, Int)) = {
+        val ((rowCnt1, colNum1), (rowCnt2, colNum2)) = (t1, t2)
+        (rowCnt1 + rowCnt2, Math.max(colNum1, colNum2))
+      }
     })
 
-    val list = count.collect().asScala.toList
-    list.head
-  }
-
-  protected def computeNCol: Int = {
-    val max = ds.map(new MapFunction[DrmTuple[K], Int] {
-      def map(value: DrmTuple[K]): Int = value._2.length
-    }).reduce(new ReduceFunction[Int] {
-      def reduce(a1: Int, a2: Int) = Math.max(a1, a2)
-    })
-
-    val list = max.collect().asScala.toList
+    val list = res.collect().asScala.toList
     list.head
   }
 
