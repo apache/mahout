@@ -312,7 +312,7 @@ package object drm {
       .mapBlock() { case (keys, block) =>
 
       // Cache broadcast representations in local task variable
-      val s = tBcast: Vector
+      val s = sBcast: Vector
       val t = tBcast: Vector
 
       block := { (r, c, x) => s(keys(r)) + t(c) - 2 * x}
