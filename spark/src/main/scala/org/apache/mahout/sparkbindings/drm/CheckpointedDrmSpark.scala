@@ -29,7 +29,6 @@ import scala.util.Random
 import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
 import org.apache.mahout.math.drm._
 import org.apache.mahout.sparkbindings._
-import org.apache.spark.SparkContext._
 
 /** ==Spark-specific optimizer-checkpointed DRM.==
   *
@@ -158,14 +157,18 @@ class CheckpointedDrmSpark[K: ClassTag](
   def dfsWrite(path: String) = {
     val ktag = implicitly[ClassTag[K]]
 
-    implicit val k2wFunc: (K) => Writable =
-      if (ktag.runtimeClass == classOf[Int]) (x: K) => new IntWritable(x.asInstanceOf[Int])
-      else if (ktag.runtimeClass == classOf[String]) (x: K) => new Text(x.asInstanceOf[String])
-      else if (ktag.runtimeClass == classOf[Long]) (x: K) => new LongWritable(x.asInstanceOf[Long])
-      else if (classOf[Writable].isAssignableFrom(ktag.runtimeClass)) (x: K) => x.asInstanceOf[Writable]
-      else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
+    // Map backing RDD[(K,Vector)] to RDD[(K)Writable,VectorWritable)] and save.
+    if (ktag.runtimeClass == classOf[Int]) {
+      rddInput.toDrmRdd()
+        .map( x =>(new IntWritable(x._1.asInstanceOf[Int]), new VectorWritable(x._2))).saveAsSequenceFile(path)
+    } else if (ktag.runtimeClass == classOf[String]){
+      rddInput.toDrmRdd()
+        .map( x =>(new Text(x._1.asInstanceOf[String]), new VectorWritable(x._2))).saveAsSequenceFile(path)
+    } else if (ktag.runtimeClass == classOf[Long]) {
+      rddInput.toDrmRdd()
+        .map( x =>(new LongWritable(x._1.asInstanceOf[Long]), new VectorWritable(x._2))).saveAsSequenceFile(path)
+    } else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
 
-    rddInput.toDrmRdd().saveAsSequenceFile(path)
   }
 
   protected def computeNRow = {

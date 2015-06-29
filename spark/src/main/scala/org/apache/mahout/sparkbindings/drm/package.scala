@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
 import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
 import org.apache.log4j.Logger
 import java.lang.Math
-import org.apache.spark.rdd.{FilteredRDD, RDD}
+import org.apache.spark.rdd.RDD
 import scala.reflect.ClassTag
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
