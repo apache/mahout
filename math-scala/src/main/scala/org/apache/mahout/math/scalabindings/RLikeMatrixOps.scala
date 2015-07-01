@@ -108,8 +108,15 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
   }
 
   def ^=(that: Double) = {
-    m ::= { x ⇒ math.pow(x, that) }
-    m
+    that match {
+      // Special handling of x ^2 and x ^ 0.5: we want consistent handling of x ^ 2 and x * x since
+      // pow(x,2) function return results different from x * x; but much of the code uses this
+      // interchangeably. Not having this done will create things like NaN entries on main diagonal
+      // of a distance matrix.
+      case 2.0 ⇒ m ::= { x ⇒ x * x }
+      case 0.5 ⇒ m ::= math.sqrt _
+      case _ ⇒ m ::= { x ⇒ math.pow(x, that) }
+    }
   }
 
   def ^(that: Double) = m.cloned ^= that

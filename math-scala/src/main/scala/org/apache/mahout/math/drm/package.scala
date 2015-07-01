@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math
 
-import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.drm._
 import org.apache.mahout.math.indexeddataset.{IndexedDataset, DefaultIndexedDatasetReadSchema, Schema}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
@@ -160,6 +160,165 @@ package object drm {
   def dsqrt[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.sqrt)
 
   def dsignum[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.signum)
+  
+  ///////////////////////////////////////////////////////////
+  // Misc. math utilities.
+
+  /**
+   * Compute column wise means and variances -- distributed version.
+   *
+   * @param drmA Note: will pin input to cache if not yet pinned.
+   * @tparam K
+   * @return colMeans → colVariances
+   */
+  def dcolMeanVars[K: ClassTag](drmA: DrmLike[K]): (Vector, Vector) = {
+
+    import RLikeDrmOps._
+
+    val drmAcp = drmA.checkpoint()
+    
+    val mu = drmAcp colMeans
+
+    // Compute variance using mean(x^2) - mean(x)^2
+    val variances = (drmAcp ^ 2 colMeans) -=: mu * mu
+
+    mu → variances
+  }
+
+  /**
+   * Compute column wise means and standard deviations -- distributed version.
+   * @param drmA note: input will be pinned to cache if not yet pinned
+   * @return colMeans → colStdevs
+   */
+  def dcolMeanStdevs[K: ClassTag](drmA: DrmLike[K]): (Vector, Vector) = {
+    val (mu, vars) = dcolMeanVars(drmA)
+    mu → (vars ::= math.sqrt _)
+  }
+
+  /**
+   * Thin column-wise mean and covariance matrix computation. Same as [[dcolMeanCov()]] but suited for
+   * thin and tall inputs where covariance matrix can be reduced and finalized in driver memory.
+   * 
+   * @param drmA note: will pin input to cache if not yet pinned.
+   * @return mean → covariance matrix (in core)
+   */
+  def dcolMeanCovThin[K: ClassTag](drmA: DrmLike[K]):(Vector, Matrix) = {
+
+    import RLikeDrmOps._
+
+    val drmAcp = drmA.checkpoint()
+    val mu = drmAcp colMeans
+    val mxCov = (drmAcp.t %*% drmAcp).collect /= drmAcp.nrow -= (mu cross mu)
+    mu → mxCov
+  }
+
+  /**
+   * Compute COV(X) matrix and mean of row-wise data set. X is presented as row-wise input matrix A.
+   *
+   * This is a "wide" procedure, covariance matrix is returned as a DRM.
+   *
+   * @param drmA note: will pin input into cache if not yet pinned.
+   * @return mean → covariance DRM
+   */
+  def dcolMeanCov[K: ClassTag](drmA: DrmLike[K]): (Vector, DrmLike[Int]) = {
+
+    import RLikeDrmOps._
+
+    implicit val ctx = drmA.context
+    val drmAcp = drmA.checkpoint()
+
+    val bcastMu = drmBroadcast(drmAcp colMeans)
+
+    // We use multivaraite analogue COV(X)=E(XX')-mu*mu'. In our case E(XX') = (A'A)/A.nrow.
+    // Compute E(XX')
+    val drmSigma = (drmAcp.t %*% drmAcp / drmAcp.nrow)
+
+      // Subtract mu*mu'. In this case we assume mu*mu' may still be big enough to be treated by
+      // driver alone, so we redistribute this operation as well. Hence it may look a bit cryptic.
+      .mapBlock() { case (keys, block) ⇒
+
+      // Pin mu as vector reference to memory.
+      val mu:Vector = bcastMu
+
+      keys → (block := { (r, c, v) ⇒ v - mu(keys(r)) * mu(c) })
+    }
+
+    // return (mu, cov(X) ("bigSigma")).
+    (bcastMu: Vector) → drmSigma
+  }
+
+  /** Distributed Squared distance matrix computation. */
+  def dsqDist(drmX: DrmLike[Int]): DrmLike[Int] = {
+
+    // This is a specific case of pairwise distances of X and Y.
+
+    import RLikeDrmOps._
+
+    // Context needed
+    implicit val ctx = drmX.context
+
+    // Pin to cache if hasn't been pinned yet
+    val drmXcp = drmX.checkpoint()
+
+    // Compute column sum of squares
+    val s = drmXcp ^ 2 rowSums
+
+    val sBcast = drmBroadcast(s)
+
+    (drmXcp %*% drmXcp.t)
+
+      // Apply second part of the formula as per in-core algorithm
+      .mapBlock() { case (keys, block) ⇒
+
+      // Slurp broadcast to memory
+      val s = sBcast: Vector
+
+      // Update in-place
+      block := { (r, c, x) ⇒ s(keys(r)) + s(c) - 2 * x}
+
+      keys → block
+    }
+  }
+
+
+  /**
+   * Compute fold-in distances (distributed version). Here, we use pretty much the same math as with
+   * squared distances.
+   *
+   * D_sq = s*1' + 1*t' - 2*X*Y'
+   *
+   * where s is row sums of hadamard product(X, X), and, similarly,
+   * s is row sums of Hadamard product(Y, Y).
+   *
+   * @param drmX m x d row-wise dataset. Pinned to cache if not yet pinned.
+   * @param drmY n x d row-wise dataset. Pinned to cache if not yet pinned.
+   * @return m x d pairwise squared distance matrix (between rows of X and Y)
+   */
+  def dsqDist(drmX: DrmLike[Int], drmY: DrmLike[Int]): DrmLike[Int] = {
+
+    import RLikeDrmOps._
+
+    implicit val ctx = drmX.context
+
+    val drmXcp = drmX.checkpoint()
+    val drmYcp = drmY.checkpoint()
+
+    val sBcast = drmBroadcast(drmXcp ^ 2 rowSums)
+    val tBcast = drmBroadcast(drmYcp ^ 2 rowSums)
+
+    (drmX %*% drmY.t)
+
+      // Apply the rest of the formula
+      .mapBlock() { case (keys, block) =>
+
+      // Cache broadcast representations in local task variable
+      val s = sBcast: Vector
+      val t = tBcast: Vector
+
+      block := { (r, c, x) => s(keys(r)) + t(c) - 2 * x}
+      keys → block
+    }
+  }
 
 }
 
