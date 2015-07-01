@@ -2,6 +2,16 @@ Mahout Change Log
 
 Release 0.11.0 - unreleased
 
+
+  MAHOUT-1754: Distance and squared distance matrices routines (dlyubimov)
+    
+  MAHOUT-1753: First and second moment routines (dlyubimov)
+    
+  MAHOUT-1746: mxA ^ 2, mxA ^ 0.5 to mean the same thing as mxA * mxA and mxA ::= sqrt _ (dlyubimov)
+
+  MAHOUT-1736: Implement allreduceBlock() on H2O (avati)
+    
+  MAHOUT-1752: Implement CbindScalar operator on H2O (avati)
   
   MAHOUT-1660: Hadoop1HDFSUtil.readDRMHEader should be taking Hadoop conf (dlyubimov)
 
