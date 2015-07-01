@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.scalabindings
 
+import org.apache.mahout.logging._
 import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.math._
 import scala.math._
@@ -27,6 +28,8 @@ import org.apache.mahout.test.MahoutSuite
 import org.apache.mahout.common.RandomUtils
 
 class MathSuite extends FunSuite with MahoutSuite {
+
+  private final implicit val log = getLog(classOf[MathSuite])
 
   test("chol") {
 
@@ -41,26 +44,26 @@ class MathSuite extends FunSuite with MahoutSuite {
     // make sure it is symmetric for a valid solution
     a := a.t %*% a
 
-    printf("A= \n%s\n", a)
+    trace(s"A= \n$a")
 
     val b = dense((9, 8, 7)).t
 
-    printf("b = \n%s\n", b)
+    trace(s"b = \n$b")
 
-    // fails if chol(a,true)
+    // Fails if chol(a, true)
     val ch = chol(a)
 
-    printf("L = \n%s\n", ch.getL)
+    trace(s"L = \n${ch.getL}")
 
-    printf("(L^-1)b =\n%s\n", ch.solveLeft(b))
+    trace(s"(L^-1)b =\n${ch.solveLeft(b)}\n")
 
     val x = ch.solveRight(eye(3)) %*% ch.solveLeft(b)
 
-    printf("x = \n%s\n", x.toString)
+    trace(s"x = \n$x")
 
     val axmb = (a %*% x) - b
 
-    printf("AX - B = \n%s\n", axmb.toString)
+    trace(s"AX - B = \n$axmb")
 
     axmb.norm should be < 1e-10
 
@@ -209,6 +212,28 @@ class MathSuite extends FunSuite with MahoutSuite {
     (block %*% omega1 - (a %*% omega2)(0 to 0, ::)).norm should be < 1e-7
     (block2 %*% omega1 - (a %*% omega2)(1 to 1, ::)).norm should be < 1e-7
 
+  }
+
+  test("sqDist(X,Y)") {
+    val m = 100
+    val n = 300
+    val d = 7
+    val mxX = Matrices.symmetricUniformView(m, d, 12345).cloned -= 5
+    val mxY = Matrices.symmetricUniformView(n, d, 1234).cloned += 10
+
+    val mxDsq = sqDist(mxX, mxY)
+    val mxDsqControl = new DenseMatrix(m, n) := { (r, c, _) ⇒ (mxX(r, ::) - mxY(c, ::)) ^= 2 sum }
+    (mxDsq - mxDsqControl).norm should be < 1e-7
+  }
+
+  test("sqDist(X)") {
+    val m = 100
+    val d = 7
+    val mxX = Matrices.symmetricUniformView(m, d, 12345).cloned -= 5
+
+    val mxDsq = sqDist(mxX)
+    val mxDsqControl = sqDist(mxX, mxX)
+    (mxDsq - mxDsqControl).norm should be < 1e-7
   }
 
 }
