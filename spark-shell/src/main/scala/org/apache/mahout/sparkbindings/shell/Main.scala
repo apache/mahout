@@ -17,25 +17,25 @@
 
 package org.apache.mahout.sparkbindings.shell
 
-import org.apache.mahout.sparkbindings._
 import org.apache.log4j.PropertyConfigurator
 import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.repl.{SparkIMain, SparkILoop}
-
+import org.apache.spark.repl.SparkILoop
 import scala.tools.nsc.Properties
+import org.apache.mahout.sparkbindings._
+
 
 class MahoutLoop extends SparkILoop{
   private var _interp: SparkILoop = _
 
   private val postInitImports =
-    "org.apache.mahout.math._" ::
-      "scalabindings._" ::
-      "RLikeOps._" ::
-      "drm._" ::
-      "RLikeDrmOps._" ::
-      "decompositions._" ::
-      "org.apache.mahout.sparkbindings._" ::
-      "collection.JavaConversions._" ::
+    "import org.apache.mahout.math._" ::
+      "import scalabindings._" ::
+      "import RLikeOps._" ::
+      "import drm._" ::
+      "import RLikeDrmOps._" ::
+      "import decompositions._" ::
+      "import org.apache.mahout.sparkbindings._" ::
+      "import collection.JavaConversions._" ::
       Nil
 
 
@@ -51,23 +51,9 @@ class MahoutLoop extends SparkILoop{
     // expects it
     org.apache.spark.repl.Main.interp = _interp
 
-    //    _interp.reset()
 
     _interp.setPrompt("mahout> ")
 
-
-
-    // createSparkContext()
-
-    //    implicit
-
-    // add imports
-    //  postInitImports.foreach(_interp.interpret(_))
-  //  _interp.process(args)
-
-def getClassServerUrl(iMain: SparkIMain): String = {
-  iMain.classServerUri
-}
 
    override def createSparkContext(): SparkContext = {
       val execUri = System.getenv("SPARK_EXECUTOR_URI")
@@ -79,15 +65,15 @@ def getClassServerUrl(iMain: SparkIMain): String = {
         }
       }
 
-      val iMain: SparkIMain = _interp.asInstanceOf[SparkIMain]
-     print("\n Imain: "+iMain.getClass.getName)
-     System.exit(0)
-
-     val classServerUri_ : String = iMain.classServerUri.toString
-     System.out.println("!!!!!!!"+classServerUri_)
+//      val iMain: SparkIMain = SparkILoop.loopToInterpreter(_interp)
+//     print("\n Imain: "+iMain.getClass.getName)
+//     //System.exit(0)
+//
+//     val classServerUri_ : String = iMain.classServerUri.toString
+//     System.out.println("!!!!!!!"+classServerUri_)
 
       val jars = SparkILoop.getAddedJars.map(new java.io.File(_).getAbsolutePath)
-      val conf = new SparkConf().set("spark.repl.class.uri", iMain.classServerUri)
+      val conf = new SparkConf().set("spark.repl.class.uri", _interp.classServerUri)
 
       if (execUri != null) {
         conf.set("spark.executor.uri", execUri)
@@ -102,7 +88,7 @@ def getClassServerUrl(iMain: SparkIMain): String = {
           sparkConf = conf
         )
 
-     // _interp.echo("Created spark context..")
+      echoToShell("Created spark context..")
       sparkContext
   }
 
@@ -116,16 +102,45 @@ def getClassServerUrl(iMain: SparkIMain): String = {
 
                 """)
         _interp.interpret("import org.apache.spark.SparkContext._")
-        //echo("Mahout distributed context is available as \"implicit val sdc\".")
+        echoToShell("Mahout distributed context is available as \"implicit val sdc\".")
       }
     }
 
     def sparkCleanUp() {
-      //echo("Stopping Spark context.")
+      echoToShell("Stopping Spark context.")
       _interp.beQuietDuring {
         _interp.interpret("sdc.stop()")
       }
     }
+
+  override protected def postInitialization() {
+    super.postInitialization()
+    //val intp: MahoutSparkILoop = this
+    _interp.beQuietDuring {
+      postInitImports.foreach(_interp.interpret(_))
+    }
+  }
+
+  def echoToShell(str: String): Unit = {
+    _interp.out.println(str)
+  }
+
+  override def printWelcome(): Unit = {
+    echoToShell(
+      """
+                         _                 _
+         _ __ ___   __ _| |__   ___  _   _| |_
+        | '_ ` _ \ / _` | '_ \ / _ \| | | | __|
+        | | | | | | (_| | | | | (_) | |_| | |_
+        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.11.0
+      """)
+    import Properties._
+    val welcomeMsg = "Using Scala %s (%s, Java %s)".format(
+      versionString, javaVmName, javaVersion)
+    echoToShell(welcomeMsg)
+    echoToShell("Type in expressions to have them evaluated.")
+    echoToShell("Type :help for more information.")
+  }
 
 }
 
@@ -141,7 +156,6 @@ object Main {
     // expects it
     org.apache.spark.repl.Main.interp = _interp
     _interp.process(args)
-
 
   }
 }
