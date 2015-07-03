@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.apache.mahout.sparkbindings.shell
 
@@ -9,6 +25,7 @@ import org.apache.mahout.sparkbindings._
 
 
 class MahoutSparkILoop extends SparkILoop {
+
   private var _interp: SparkILoop = _
 
   private val postInitImports =
@@ -27,14 +44,19 @@ class MahoutSparkILoop extends SparkILoop {
   PropertyConfigurator.configure(getMahoutHome() + "/conf/log4j.properties")
 
   System.setProperty("scala.usejavacp", "true")
+
   _interp = this
+
   // It looks like we need to initialize this too, since some Spark shell initilaization code
   // expects it
   org.apache.spark.repl.Main.interp = _interp
 
-
   _interp.setPrompt("mahout> ")
 
+  // sparkILoop.echo(...) is private so we create our own here.
+  def echoToShell(str: String): Unit = {
+    _interp.out.println(str)
+  }
 
   override def createSparkContext(): SparkContext = {
     val execUri = System.getenv("SPARK_EXECUTOR_URI")
@@ -46,12 +68,6 @@ class MahoutSparkILoop extends SparkILoop {
       }
     }
 
-    //     val classServverURI = if (sc.version().startsWith("1.1")) {
-    //  _interp.class
-    //     } else if (sc.version().startsWith("1.2")) {
-    //       intp.interpret("import sqlContext._");
-    //     } else if (sc.version().startsWith("1.3")) {
-
     val jars = SparkILoop.getAddedJars.map(new java.io.File(_).getAbsolutePath)
     val conf = new SparkConf().set("spark.repl.class.uri", _interp.classServerUri)
 
@@ -61,7 +77,7 @@ class MahoutSparkILoop extends SparkILoop {
 
     conf.set("spark.executor.memory", "1g")
 
-    _interp.sparkContext= mahoutSparkContext(
+    _interp.sparkContext = mahoutSparkContext(
       masterUrl = master,
       appName = "Mahout Spark Shell",
       customJars = jars,
@@ -74,6 +90,8 @@ class MahoutSparkILoop extends SparkILoop {
 
   // need to change our SparkDistributedContext name to 'sc' since  we cannot override the
   // private sparkCleanUp() method.
+  // this is technically not part of Sparks explicitly defined Developer API though
+  // nothing in the SparkILoopInit.scala file is marked as such.
   override def initializeSpark() {
     _interp.beQuietDuring {
       _interp.interpret("""
@@ -88,27 +106,17 @@ class MahoutSparkILoop extends SparkILoop {
     }
   }
 
-  // not part of the Spark REPL Developer API
-  //    def sparkCleanUp() {
-  //      echoToShell("Stopping Spark context.")
-  //      _interp.beQuietDuring {
-  //        _interp.interpret("sdc.stop()")
-  //      }
-  //    }
-
+  // this is technically not part of Sparks explicitly defined Developer API though
+  // nothing in the SparkILoopInit.scala file is marked as such.
   override protected def postInitialization() {
     super.postInitialization()
-    //val intp: MahoutSparkILoop = this
     _interp.beQuietDuring {
       postInitImports.foreach(_interp.interpret(_))
     }
   }
 
-  // sparkILoop.echo(...) is private
-  def echoToShell(str: String): Unit = {
-    _interp.out.println(str)
-  }
-
+  // this is technically not part of Sparks explicitly defined Developer API though
+  // nothing in the SparkILoopInit.scala file is marked as such.
   override def printWelcome(): Unit = {
     echoToShell(
       """
@@ -117,6 +125,7 @@ class MahoutSparkILoop extends SparkILoop {
         | '_ ` _ \ / _` | '_ \ / _ \| | | | __|
         | | | | | | (_| | | | | (_) | |_| | |_
         |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.11.0
+
       """)
     import Properties._
     val welcomeMsg = "Using Scala %s (%s, Java %s)".format(
