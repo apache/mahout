@@ -17,7 +17,7 @@
  */
 
 package org.apache.mahout.classifier.mlp;
-
+@Deprecated
 public class Datasets {
 
   public static final String[] IRIS = new String[] {

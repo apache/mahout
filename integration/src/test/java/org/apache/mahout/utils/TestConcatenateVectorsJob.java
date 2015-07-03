@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Code stolen from TestAffinityMatrixJob. Like TAMJ, it tests the Mappers/Reducers but not test the job
  */
-
+@Deprecated
 public class TestConcatenateVectorsJob extends MahoutTestCase {
   
   private static final double [][] DATA_A = {

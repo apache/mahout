@@ -28,6 +28,7 @@ import org.junit.Test;
 /**
  * Test the functionality of {@link MultilayerPerceptron}
  */
+@Deprecated
 public class TestMultilayerPerceptron extends MahoutTestCase {
 
   @Test
