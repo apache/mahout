@@ -37,6 +37,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
 /** Test the functionality of {@link NeuralNetwork}. */
+@Deprecated
 public class TestNeuralNetwork extends MahoutTestCase {
 
 

@@ -22,6 +22,7 @@ import java.io.File;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+@Deprecated
 public class RunMultilayerPerceptronTest extends MahoutTestCase {
   
   @Test
