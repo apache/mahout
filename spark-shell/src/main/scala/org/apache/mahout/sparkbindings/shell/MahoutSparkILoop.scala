@@ -88,25 +88,29 @@ class MahoutSparkILoop extends SparkILoop {
     sparkContext
   }
 
-  // need to change our SparkDistributedContext name to 'sc' since  we cannot override the
-  // private sparkCleanUp() method.
-  // this is technically not part of Sparks explicitly defined Developer API though
+  // this is technically not part of Spark's explicitly defined Developer API though
   // nothing in the SparkILoopInit.scala file is marked as such.
   override def initializeSpark() {
     _interp.beQuietDuring {
       _interp.interpret("""
 
-         @transient implicit val sc: org.apache.mahout.math.drm.DistributedContext =
+         @transient implicit val sdc: org.apache.mahout.sparkbindings.SparkDistributedContext =
             new org.apache.mahout.sparkbindings.SparkDistributedContext(
             org.apache.spark.repl.Main.interp.createSparkContext())
 
                         """)
+      echoToShell("Mahout distributed context is available as \"implicit val sdc\".")
+
       _interp.interpret("import org.apache.spark.SparkContext._")
-      echoToShell("Mahout distributed context is available as \"implicit val sc\".")
+
+      // get the spark context from the mahout distributed context
+      _interp.interpret("@transient val sc: org.apache.spark.SparkContext = sdc.sc")
+      echoToShell("Spark context is available as \"val sc\".")
+
     }
   }
 
-  // this is technically not part of Sparks explicitly defined Developer API though
+  // this is technically not part of Spark's explicitly defined Developer API though
   // nothing in the SparkILoopInit.scala file is marked as such.
   override protected def postInitialization() {
     super.postInitialization()
@@ -115,8 +119,8 @@ class MahoutSparkILoop extends SparkILoop {
     }
   }
 
-  // this is technically not part of Sparks explicitly defined Developer API though
-  // nothing in the SparkILoopInit.scala file is marked as such.
+  // this is technically not part of Spark's explicitly defined Developer API though
+  // nothing in the SparkILoopInit.scala file is marked as such..
   override def printWelcome(): Unit = {
     echoToShell(
       """
