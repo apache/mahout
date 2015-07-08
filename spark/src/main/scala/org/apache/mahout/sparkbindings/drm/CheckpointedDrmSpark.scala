@@ -160,13 +160,13 @@ class CheckpointedDrmSpark[K: ClassTag](
     // Map backing RDD[(K,Vector)] to RDD[(K)Writable,VectorWritable)] and save.
     if (ktag.runtimeClass == classOf[Int]) {
       rddInput.toDrmRdd()
-        .map( x =>(new IntWritable(x._1.asInstanceOf[Int]), new VectorWritable(x._2))).saveAsSequenceFile(path)
+        .map( x => (new IntWritable(x._1.asInstanceOf[Int]), new VectorWritable(x._2))).saveAsSequenceFile(path)
     } else if (ktag.runtimeClass == classOf[String]){
       rddInput.toDrmRdd()
-        .map( x =>(new Text(x._1.asInstanceOf[String]), new VectorWritable(x._2))).saveAsSequenceFile(path)
+        .map( x => (new Text(x._1.asInstanceOf[String]), new VectorWritable(x._2))).saveAsSequenceFile(path)
     } else if (ktag.runtimeClass == classOf[Long]) {
       rddInput.toDrmRdd()
-        .map( x =>(new LongWritable(x._1.asInstanceOf[Long]), new VectorWritable(x._2))).saveAsSequenceFile(path)
+        .map( x => (new LongWritable(x._1.asInstanceOf[Long]), new VectorWritable(x._2))).saveAsSequenceFile(path)
     } else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
 
   }

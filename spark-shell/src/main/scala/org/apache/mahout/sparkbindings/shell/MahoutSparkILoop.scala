@@ -28,6 +28,8 @@ class MahoutSparkILoop extends SparkILoop {
 
   private var _interp: SparkILoop = _
 
+  private var sdc: SparkDistributedContext = _
+
   private val postInitImports =
     "import org.apache.mahout.math._" ::
       "import scalabindings._" ::
@@ -38,6 +40,8 @@ class MahoutSparkILoop extends SparkILoop {
       "import org.apache.mahout.sparkbindings._" ::
       "import collection.JavaConversions._" ::
       Nil
+
+  def getSparkDistributedContext: SparkDistributedContext  = sdc
 
   // Hack: for some very unclear reason, log4j is not picking up log4j.properties in Spark conf/ even
   // though the latter is added to the classpath. So we force it to pick it.
@@ -58,6 +62,8 @@ class MahoutSparkILoop extends SparkILoop {
     _interp.out.println(str)
   }
 
+  // create a spark context as a mahout SparkDistributedContext.
+  // store the SparkDistributedContext for decleration in the intreperer session.
   override def createSparkContext(): SparkContext = {
     val execUri = System.getenv("SPARK_EXECUTOR_URI")
     val master = _interp.master match {
@@ -77,12 +83,14 @@ class MahoutSparkILoop extends SparkILoop {
 
     conf.set("spark.executor.memory", "1g")
 
-    _interp.sparkContext = mahoutSparkContext(
+    sdc = mahoutSparkContext(
       masterUrl = master,
       appName = "Mahout Spark Shell",
       customJars = jars,
       sparkConf = conf
     )
+
+    _interp.sparkContext = sdc
 
     echoToShell("Created spark context..")
     sparkContext
@@ -91,23 +99,26 @@ class MahoutSparkILoop extends SparkILoop {
   // this is technically not part of Spark's explicitly defined Developer API though
   // nothing in the SparkILoopInit.scala file is marked as such.
   override def initializeSpark() {
+
     _interp.beQuietDuring {
 
-      // initalize the Mahout Context as a SparkDistributedContext since so that we can access
-      // the SparkContext from it.
+      // get the spark context, at the same time create and store a mahout distributed context.
       _interp.interpret("""
+         @transient val sc = {
+           val _sc = org.apache.spark.repl.Main.interp.createSparkContext()
+           _sc
+         }
+                        """)
+      echoToShell("Spark context is available as \"val sc\".")
 
+      // retrieve the stored mahout SparkDistributedContext.
+      _interp.interpret("""
          @transient implicit val sdc: org.apache.mahout.sparkbindings.SparkDistributedContext =
-            new org.apache.mahout.sparkbindings.SparkDistributedContext(
-            org.apache.spark.repl.Main.interp.createSparkContext())
-
+            org.apache.spark.repl.Main.interp
+             .asInstanceOf[org.apache.mahout.sparkbindings.shell.MahoutSparkILoop]
+             .getSparkDistributedContext
                         """)
       echoToShell("Mahout distributed context is available as \"implicit val sdc\".")
-
-      // get the spark context from the mahout distributed context.
-      _interp.interpret("import org.apache.spark.SparkContext._")
-      _interp.interpret("@transient val sc: org.apache.spark.SparkContext = sdc.sc")
-      echoToShell("Spark context is available as \"val sc\".")
 
       // create a SQL Context.
       _interp.interpret("""
@@ -115,7 +126,8 @@ class MahoutSparkILoop extends SparkILoop {
            val _sqlContext = org.apache.spark.repl.Main.interp.createSQLContext()
            _sqlContext
          }
-              """)
+                        """)
+      _interp.interpret("import org.apache.spark.SparkContext._")
       _interp.interpret("import sqlContext.implicits._")
       _interp.interpret("import sqlContext.sql")
       _interp.interpret("import org.apache.spark.sql.functions._")
