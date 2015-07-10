@@ -2,6 +2,9 @@ Mahout Change Log
 
 Release 0.11.0 - unreleased
 
+  MAHOUT-1685: Move Mahout shell to Spark 1.3+ (dlyubimov, apalumbo)
+
+  MAHOUT-1653: Spark 1.3 (pferrel, apalumbo)
 
   MAHOUT-1754: Distance and squared distance matrices routines (dlyubimov)
     
