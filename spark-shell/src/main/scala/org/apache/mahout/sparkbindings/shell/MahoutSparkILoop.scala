@@ -46,7 +46,10 @@ class MahoutSparkILoop extends SparkILoop {
       conf.set("spark.executor.uri", execUri)
     }
 
-    conf.set("spark.executor.memory", "1g")
+    // set default value of spark.executor.memory to 1g
+    if(!conf.contains("spark.executor.memory")) {
+      conf.set("spark.executor.memory", "1g")
+    }
 
     sparkContext = mahoutSparkContext(
       masterUrl = master,
@@ -89,7 +92,7 @@ class MahoutSparkILoop extends SparkILoop {
          _ __ ___   __ _| |__   ___  _   _| |_
         | '_ ` _ \ / _` | '_ \ / _ \| | | | __|
         | | | | | | (_| | | | | (_) | |_| | |_
-        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.10.0
+        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.10.2
 
       """)
     import Properties._
