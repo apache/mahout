@@ -54,7 +54,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutSparkOptionParser(programName = "spark-rowsimilarity") {
-      head("spark-rowsimilarity", "Mahout 0.10.0")
+      head("spark-rowsimilarity", "Mahout")
 
       //Input output options, non-driver specific
       parseIOOptions()
@@ -67,14 +67,14 @@ object RowSimilarityDriver extends MahoutSparkDriver {
         options + ("maxObservations" -> x)
       } text ("Max number of observations to consider per row (optional). Default: " +
         RowSimilarityOptions("maxObservations")) validate { x =>
-          if (x > 0) success else failure("Option --maxObservations must be > 0")
+        if (x > 0) success else failure("Option --maxObservations must be > 0")
       }
 
       opt[Int]('m', "maxSimilaritiesPerRow") action { (x, options) =>
         options + ("maxSimilaritiesPerRow" -> x)
       } text ("Limit the number of similarities per item to this number (optional). Default: " +
         RowSimilarityOptions("maxSimilaritiesPerRow")) validate { x =>
-          if (x > 0) success else failure("Option --maxSimilaritiesPerRow must be > 0")
+        if (x > 0) success else failure("Option --maxSimilaritiesPerRow must be > 0")
       }
 
       // --threshold not implemented in SimilarityAnalysis.rowSimilarity
@@ -85,7 +85,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.")
 
       //Drm output schema--not driver specific, drm specific
-      parseIndexedDatasetFormatOptions()
+      parseIndexedDatasetFormatOptions("\nInput and Output text file schema options (same for both):")
 
       //How to search for input
       parseFileDiscoveryOptions()
@@ -126,7 +126,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
       null.asInstanceOf[IndexedDataset]
     } else {
 
-      val datasetA = indexedDatasetDFSRead(inFiles, readWriteSchema)
+      val datasetA = indexedDatasetDFSRead(src = inFiles, schema = readWriteSchema)
       datasetA
     }
   }
@@ -141,7 +141,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
       parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int],
       parser.opts("maxObservations").asInstanceOf[Int])
 
-    rowSimilarityIDS.dfsWrite(parser.opts("output").asInstanceOf[String], readWriteSchema)
+    rowSimilarityIDS.dfsWrite(dest = parser.opts("output").asInstanceOf[String], schema = readWriteSchema)
 
     stop()
   }
