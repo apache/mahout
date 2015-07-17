@@ -59,6 +59,9 @@ object SimilarityAnalysis extends Serializable {
 
     implicit val distributedContext = drmARaw.context
 
+    // backend allowed to optimize partitioning
+    drmARaw.par(auto = true)
+
     // Apply selective downsampling, pin resulting matrix
     val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions)
 
@@ -79,6 +82,9 @@ object SimilarityAnalysis extends Serializable {
 
     // Now look at cross cooccurrences
     for (drmBRaw <- drmBs) {
+      // backend allowed to optimize partitioning
+      drmBRaw.par(auto = true)
+
       // Down-sample and pin other interaction matrix
       val drmB = sampleDownAndBinarize(drmBRaw, randomSeed, maxNumInteractions).checkpoint()
 
