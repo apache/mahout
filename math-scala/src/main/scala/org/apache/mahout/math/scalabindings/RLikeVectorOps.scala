@@ -31,11 +31,15 @@ class RLikeVectorOps(_v: Vector) extends VectorOps(_v) {
   /** Elementwise *= */
   def *=(that: Vector) = v.assign(that, Functions.MULT)
 
+  def *=:(that:Vector) = *=(that)
+
   /** Elementwise /= */
   def /=(that: Vector) = v.assign(that, Functions.DIV)
 
   /** Elementwise *= */
   def *=(that: Double) = v.assign(Functions.MULT, that)
+
+  def *=:(that: Double) = *=(that)
 
   /** Elementwise /= */
   def /=(that: Double) = v.assign(Functions.DIV, that)
