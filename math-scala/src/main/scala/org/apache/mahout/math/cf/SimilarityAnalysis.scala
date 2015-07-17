@@ -159,6 +159,9 @@ object SimilarityAnalysis extends Serializable {
 
     implicit val distributedContext = drmARaw.context
 
+    // backend allowed to optimize partitioning
+    drmARaw.par(auto = true)
+
     // Apply selective downsampling, pin resulting matrix
     val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions)
 
