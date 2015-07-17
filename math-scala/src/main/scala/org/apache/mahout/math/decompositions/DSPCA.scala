@@ -53,7 +53,9 @@ object DSPCA {
     val r = k + pfxed
 
     // Dataset mean
-    val xi = drmAcp.colMeans
+    val mu = drmAcp.colMeans
+
+    val mtm = mu dot mu
 
     // We represent Omega by its seed.
     val omegaSeed = RandomUtils.getRandom().nextInt()
@@ -62,17 +64,17 @@ object DSPCA {
     // This done in front in a single-threaded fashion for now. Even though it doesn't require any
     // memory beyond that is required to keep xi around, it still might be parallelized to backs
     // for significantly big n and r. TODO
-    val s_o = omega.t %*% xi
+    val s_o = omega.t %*% mu
 
     val bcastS_o = drmBroadcast(s_o)
-    val bcastXi = drmBroadcast(xi)
+    val bcastMu = drmBroadcast(mu)
 
     var drmY = drmAcp.mapBlock(ncol = r) {
-      case (keys, blockA) =>
+      case (keys, blockA) ⇒
         val s_o:Vector = bcastS_o
         val blockY = blockA %*% Matrices.symmetricUniformView(n, r, omegaSeed)
-        for (row <- 0 until blockY.nrow) blockY(row, ::) -= s_o
-        keys -> blockY
+        for (row ← 0 until blockY.nrow) blockY(row, ::) -= s_o
+        keys → blockY
     }
         // Checkpoint Y
         .checkpoint()
@@ -86,39 +88,40 @@ object DSPCA {
     // still be identically partitioned.
     var drmBt = (drmAcp.t %*% drmQ).checkpoint()
 
-    var s_b = (drmBt.t %*% xi).collect(::, 0)
+    var s_b = (drmBt.t %*% mu).collect(::, 0)
     var bcastVarS_b = drmBroadcast(s_b)
 
-    for (i <- 0 until q) {
+    for (i ← 0 until q) {
 
       // These closures don't seem to live well with outside-scope vars. This doesn't record closure
       // attributes correctly. So we create additional set of vals for broadcast vars to properly 
       // create readonly closure attributes in this very scope.
       val bcastS_q = bcastVarS_q
-      val bcastS_b = bcastVarS_b
-      val bcastXib = bcastXi
+      val bcastMuInner = bcastMu
 
       // Fix Bt as B' -= xi cross s_q
       drmBt = drmBt.mapBlock() {
-        case (keys, block) =>
+        case (keys, block) ⇒
           val s_q: Vector = bcastS_q
-          val xi: Vector = bcastXib
+          val mu: Vector = bcastMuInner
           keys.zipWithIndex.foreach {
-            case (key, idx) => block(idx, ::) -= s_q * xi(key)
+            case (key, idx) ⇒ block(idx, ::) -= s_q * mu(key)
           }
-          keys -> block
+          keys → block
       }
 
       drmY.uncache()
       drmQ.uncache()
 
+      val bCastSt_b = drmBroadcast(s_b -=: mtm * s_q)
+
       drmY = (drmAcp %*% drmBt)
-          // Fix Y by subtracting s_b from each row of the AB'
+          // Fix Y by subtracting st_b from each row of the AB'
           .mapBlock() {
-        case (keys, block) =>
-          val s_b: Vector = bcastS_b
-          for (row <- 0 until block.nrow) block(row, ::) -= s_b
-          keys -> block
+        case (keys, block) ⇒
+          val st_b: Vector = bCastSt_b
+          block := { (_, c, v) ⇒ v - st_b(c) }
+          keys → block
       }
           // Checkpoint Y
           .checkpoint()
@@ -132,20 +135,20 @@ object DSPCA {
       // identically partitioned anymore.
       drmBt = (drmAcp.t %*% drmQ).checkpoint()
 
-      s_b = (drmBt.t %*% xi).collect(::, 0)
+      s_b = (drmBt.t %*% mu).collect(::, 0)
       bcastVarS_b = drmBroadcast(s_b)
     }
 
     val c = s_q cross s_b
-    val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(CacheHint.NONE).collect -
-        c - c.t + (s_q cross s_q) * (xi dot xi)
+    val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(CacheHint.NONE).collect -=:
+        c -=: c.t +=: mtm *=: (s_q cross s_q)
     val (inCoreUHat, d) = eigen(inCoreBBt)
     val s = d.sqrt
 
     // Since neither drmU nor drmV are actually computed until actually used, we don't need the flags
     // instructing compute (or not compute) either of the U,V outputs anymore. Neat, isn't it?
     val drmU = drmQ %*% inCoreUHat
-    val drmV = drmBt %*% (inCoreUHat %*%: diagv(1 /: s))
+    val drmV = drmBt %*% (inCoreUHat %*% diagv(1 / s))
 
     (drmU(::, 0 until k), drmV(::, 0 until k), s(0 until k))
   }
