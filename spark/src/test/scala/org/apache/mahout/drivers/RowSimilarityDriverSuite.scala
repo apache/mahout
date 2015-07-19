@@ -74,11 +74,12 @@ class RowSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
       "--master", masterUrl))
 
     val simLines = mahoutCtx.textFile(outPath).collect
-    for (rowNum <- 0 to 4){
-      simLines(rowNum).split("[\t ]") should contain theSameElementsAs firstFiveSimDocsTokens
-    }
-    for (rowNum <- 5 to 9){
-      simLines(rowNum).split("[\t ]") should contain theSameElementsAs lastFiveSimDocsTokens
+    simLines.foreach { line =>
+      val lineTokens = line.split("[\t ]")
+      if (lineTokens.contains("doc1") ) // docs are two flavors so if only 4 similarities it will effectively classify
+        lineTokens should contain theSameElementsAs firstFiveSimDocsTokens
+      else
+        lineTokens should contain theSameElementsAs lastFiveSimDocsTokens
     }
 
   }

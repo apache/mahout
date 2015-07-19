@@ -125,6 +125,8 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
    * Read in text delimited rows from all URIs in this comma delimited source String and return
    * the DRM of all elements updating the dictionaries for row and column dictionaries. If there is
    * no strength value in the element, assume it's presence means a strength of 1.
+   * Note: if the input file has a strength delimiter but none is seen in rows, we assume there is none
+   *   and give the strength as 1 in the input DRM.
    * @param mc context for the Spark job
    * @param readSchema describes the delimiters and positions of values in the text delimited file.
    * @param source comma delimited URIs of text files to be read into the [[IndexedDatasetSpark]]
@@ -140,10 +142,10 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val rowKeyDelim = readSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = readSchema("columnIdStrengthDelim").asInstanceOf[String]
       val elementDelim = readSchema("elementDelim").asInstanceOf[String]
+      val omitScore = readSchema("omitScore").asInstanceOf[Boolean]
 
       require (!source.isEmpty, "No file(s) to read")
-
-      var rows = mc.textFile(source).map { line => line.split(rowKeyDelim) }
+      val rows = mc.textFile(source).map { line => line.split(rowKeyDelim) }
 
       // get row and column IDs
       val interactions = rows.map { row =>
@@ -151,8 +153,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       }
 
       interactions.cache()
-      // forces into memory so only for debugging
-      //interactions.collect()
 
       // create separate collections of rowID and columnID tokens
       val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
@@ -160,7 +160,10 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       // the columns are in a TD string so separate them and get unique ones
       val columnIDs = interactions.flatMap { case (_, columns) => columns
         val elements = columns.split(elementDelim)
-        val colIDs = elements.map( elem => elem.split(columnIdStrengthDelim)(0) )
+        val colIDs = if (!omitScore)
+          elements.map( elem => elem.split(columnIdStrengthDelim)(0) )
+        else
+          elements
         colIDs
       }.distinct().collect()
 
@@ -186,13 +189,14 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
           val elements = columns.split(elementDelim)
           val row = new RandomAccessSparseVector(ncol)
           for (element <- elements) {
-            val id = element.split(columnIdStrengthDelim)(0)
+            val id = if (omitScore) element else element.split(columnIdStrengthDelim)(0)
             val columnID = columnIDDictionary_bcast.value.getOrElse(id, -1)
-            val pair = element.split(columnIdStrengthDelim)
-            if (pair.size == 2) // there was a strength
-              row.setQuick(columnID, pair(1).toDouble)
-            else // no strength so set DRM value to 1.0d, this ignores 'omitScore', which is a write param
-              row.setQuick(columnID, 1.0d)
+            val strength = if (omitScore) 1.0d else {// if the input says not to omit but there is no seperator treat
+              // as omitting and return a strength of 1
+              if (element.split(columnIdStrengthDelim).size == 1) 1.0d
+              else element.split(columnIdStrengthDelim)(1).toDouble
+            }
+            row.setQuick(columnID, strength)
           }
           rowIndex -> row
         }

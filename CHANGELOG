@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.11.0 - unreleased
 
+  NOJIRA: Clean up CLI help for spark-rowsimilarity and fixed test that intermitently failed (pferrel)
+
   MAHOUT-1685: Move Mahout shell to Spark 1.3+ (dlyubimov, apalumbo)
 
   MAHOUT-1653: Spark 1.3 (pferrel, apalumbo)

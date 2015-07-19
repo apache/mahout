@@ -151,9 +151,9 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   }
 
-  def parseIndexedDatasetFormatOptions() = {
+  def parseIndexedDatasetFormatOptions(notice: String = "\nOutput text file schema options:") = {
     opts = opts ++ MahoutOptionParser.TextDelimitedIndexedDatasetOptions
-    note("\nOutput text file schema options:")
+    note(notice)
     opt[String]("rowKeyDelim") abbr ("rd") action { (x, options) =>
       options + ("rowKeyDelim" -> x)
     } text ("Separates the rowID key from the vector values list (optional). Default: \"\\t\"")
