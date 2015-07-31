@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.10.2 - unreleased
 
+  MAHOUT-1756: Missing +=: and *=: operators on vectors (smarthi)
+
   MAHOUT-1754: Distance and squared distance matrices routines (dlyubimov)
 
   MAHOUT-1753: First and second moment routines (dlyubimov)
