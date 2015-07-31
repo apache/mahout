@@ -101,9 +101,13 @@ class VectorOps(private[scalabindings] val v: Vector) {
 
   def +=(that: Vector) = v.assign(that, Functions.PLUS)
 
+  def +=:(that: Vector) = +=(that)
+
   def -=(that: Vector) = v.assign(that, Functions.MINUS)
 
   def +=(that: Double) = v.assign(Functions.PLUS, that)
+
+  def +=:(that: Double) = +=(that)
 
   def -=(that: Double) = +=(-that)
 
