@@ -59,7 +59,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutSparkOptionParser(programName = "spark-itemsimilarity") {
-      head("spark-itemsimilarity", "Mahout 0.10.0")
+      head("spark-itemsimilarity", "Mahout 0.10.2")
 
       //Input output options, non-driver specific
       parseIOOptions(numInputs = 2)
