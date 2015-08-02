@@ -23,6 +23,7 @@ import org.apache.lucene.document.StringField;
 /**
  * Used for testing lucene2seq
  */
+@Deprecated
 public class UnstoredFieldsDocument extends SingleFieldDocument {
 
   public static final String UNSTORED_FIELD = "unstored";

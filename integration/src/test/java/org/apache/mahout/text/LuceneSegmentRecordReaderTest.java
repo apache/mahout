@@ -34,7 +34,7 @@ import org.junit.Test;
 
 import static org.apache.mahout.text.doc.SingleFieldDocument.FIELD;
 import static org.apache.mahout.text.doc.SingleFieldDocument.ID_FIELD;
-
+@Deprecated
 public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
   private Configuration configuration;
 

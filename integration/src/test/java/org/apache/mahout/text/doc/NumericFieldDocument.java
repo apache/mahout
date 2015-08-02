@@ -25,6 +25,7 @@ import org.apache.lucene.document.TextField;
 /**
  * Document with numeric field.
  */
+@Deprecated
 public class NumericFieldDocument extends SingleFieldDocument {
 
   public static final String NUMERIC_FIELD = "numeric";

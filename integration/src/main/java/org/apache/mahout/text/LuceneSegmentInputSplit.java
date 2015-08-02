@@ -32,6 +32,7 @@ import java.io.IOException;
 /**
  * {@link InputSplit} implementation that represents a Lucene segment.
  */
+@Deprecated
 public class LuceneSegmentInputSplit extends InputSplit implements Writable {
 
   private Path indexPath;

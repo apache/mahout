@@ -40,6 +40,7 @@ import org.apache.mahout.text.doc.TestDocument;
 /**
  * Abstract test for working with Lucene storage.
  */
+@Deprecated
 public abstract class AbstractLuceneStorageTest extends MahoutTestCase {
 
   protected Path indexPath1;

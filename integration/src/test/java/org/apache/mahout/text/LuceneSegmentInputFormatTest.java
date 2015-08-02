@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
-
+@Deprecated
 public class LuceneSegmentInputFormatTest extends AbstractLuceneStorageTest {
 
   private LuceneSegmentInputFormat inputFormat;

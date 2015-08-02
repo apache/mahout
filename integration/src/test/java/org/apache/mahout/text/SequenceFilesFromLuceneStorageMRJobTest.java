@@ -34,7 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static java.util.Arrays.asList;
-
+@Deprecated
 public class SequenceFilesFromLuceneStorageMRJobTest extends AbstractLuceneStorageTest {
 
   private SequenceFilesFromLuceneStorageMRJob lucene2seq;

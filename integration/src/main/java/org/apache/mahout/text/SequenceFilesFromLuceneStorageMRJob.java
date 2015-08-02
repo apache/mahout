@@ -30,6 +30,7 @@ import java.io.IOException;
  * Generates a sequence file from a Lucene index via MapReduce. Uses a specified id field as the key and a content field
  * as the value. Configure this class with a {@link LuceneStorageConfiguration} bean.
  */
+@Deprecated
 public class SequenceFilesFromLuceneStorageMRJob {
 
   public void run(LuceneStorageConfiguration lucene2seqConf) {

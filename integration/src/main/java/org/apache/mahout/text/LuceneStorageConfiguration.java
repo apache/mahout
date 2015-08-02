@@ -51,6 +51,7 @@ import static org.apache.lucene.util.Version.LUCENE_46;
  * Holds all the configuration for {@link SequenceFilesFromLuceneStorage}, which generates a sequence file
  * with id as the key and a content field as value.
  */
+@Deprecated
 public class LuceneStorageConfiguration implements Writable {
 
   private static final Query DEFAULT_QUERY = new MatchAllDocsQuery();

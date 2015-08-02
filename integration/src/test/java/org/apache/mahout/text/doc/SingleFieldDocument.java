@@ -24,6 +24,7 @@ import org.apache.lucene.document.TextField;
 /**
  * Used for testing lucene2seq
  */
+@Deprecated
 public class SingleFieldDocument implements TestDocument {
 
   public static final String ID_FIELD = "idField";

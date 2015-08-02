@@ -36,6 +36,7 @@ import java.util.List;
  * Maps document IDs to key value pairs with ID field as the key and the concatenated stored field(s)
  * as value.
  */
+@Deprecated
 public class SequenceFilesFromLuceneStorageMapper extends Mapper<Text, NullWritable, Text, Text> {
 
   public enum DataStatus { EMPTY_KEY, EMPTY_VALUE, EMPTY_BOTH }

@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * {@link InputFormat} implementation which splits a Lucene index at the segment level.
  */
+@Deprecated
 public class LuceneSegmentInputFormat extends InputFormat {
 
   private static final Logger LOG = LoggerFactory.getLogger(LuceneSegmentInputFormat.class);

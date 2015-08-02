@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-
+@Deprecated
 public class LuceneSegmentInputSplitTest extends AbstractLuceneStorageTest {
 
   private Configuration configuration;

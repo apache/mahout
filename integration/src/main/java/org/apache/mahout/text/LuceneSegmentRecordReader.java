@@ -35,6 +35,7 @@ import java.io.IOException;
  * {@link RecordReader} implementation for Lucene segments. Each {@link InputSplit} contains a separate Lucene segment.
  * Emits records consisting of a {@link Text} document ID and a null key.
  */
+@Deprecated
 public class LuceneSegmentRecordReader extends RecordReader<Text, NullWritable> {
 
   public static final int USE_TERM_INFO = 1;

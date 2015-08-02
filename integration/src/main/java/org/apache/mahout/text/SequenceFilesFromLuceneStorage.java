@@ -46,6 +46,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  * Generates a sequence file from a Lucene index with a specified id field as the key and a content field as the value.
  * Configure this class with a {@link LuceneStorageConfiguration} bean.
  */
+@Deprecated
 public class SequenceFilesFromLuceneStorage {
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromLuceneStorage.class);
 

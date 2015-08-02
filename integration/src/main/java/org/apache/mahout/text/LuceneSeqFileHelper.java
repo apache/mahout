@@ -28,6 +28,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  *
  *
  **/
+@Deprecated
 class LuceneSeqFileHelper {
 
   public static final String SEPARATOR_FIELDS = " ";

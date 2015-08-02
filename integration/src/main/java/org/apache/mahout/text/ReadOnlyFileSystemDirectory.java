@@ -46,6 +46,7 @@ import java.util.Collection;
  * <p/>
  * // TODO: Rename to FileSystemReadOnlyDirectory
  */
+@Deprecated
 public class ReadOnlyFileSystemDirectory extends BaseDirectory {
 
   private final FileSystem fs;

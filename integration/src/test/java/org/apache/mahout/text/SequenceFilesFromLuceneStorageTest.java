@@ -42,7 +42,7 @@ import org.apache.mahout.text.doc.UnstoredFieldsDocument;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
+@Deprecated
 public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTest {
 
   private SequenceFilesFromLuceneStorage lucene2Seq;

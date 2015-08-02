@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
  * A wrapper class to convert an IndexFileNameFilter which implements
  * java.io.FilenameFilter to an org.apache.hadoop.fs.PathFilter.
  */
+@Deprecated
 final class LuceneIndexFileNameFilter implements PathFilter {
 
   private static final LuceneIndexFileNameFilter LUCENE_INDEX_FILE_NAME_FILTER = new LuceneIndexFileNameFilter();
