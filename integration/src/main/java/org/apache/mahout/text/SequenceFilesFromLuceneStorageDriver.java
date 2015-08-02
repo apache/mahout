@@ -38,7 +38,11 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
  * Driver class for the lucene2seq program. Converts text contents of stored fields of a lucene index into a Hadoop
  * SequenceFile. The key of the sequence file is the document ID and the value is the concatenated text of the specified
  * stored field(s).
+ *
+ * Deprecated as of Mahout 0.11.0
  */
+
+@Deprecated
 public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
 
   static final String OPTION_ID_FIELD = "idField";
