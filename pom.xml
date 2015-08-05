@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>16</version>
+    <version>17</version>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
@@ -95,7 +95,7 @@
     </mailingList>
   </mailingLists>
   <prerequisites>
-    <maven>3.0</maven>
+    <maven>3.3.3</maven>
   </prerequisites>
   <scm>
     <connection>scm:git:git@github.com:apache/mahout.git</connection>
@@ -110,10 +110,10 @@
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <msurefire.version>2.18.1</msurefire.version>
-    <mpmd.version>3.0.1</mpmd.version>
-    <mcheckstyle.version>2.10</mcheckstyle.version>
-    <mfindbugs.version>2.5.2</mfindbugs.version>
-    <mjavadoc.version>2.9.1</mjavadoc.version>
+    <mpmd.version>3.4</mpmd.version>
+    <mcheckstyle.version>2.15</mcheckstyle.version>
+    <mfindbugs.version>3.0.1</mfindbugs.version>
+    <mjavadoc.version>2.10.3</mjavadoc.version>
     <mscala.version>3.2.0</mscala.version>
     <hbase.version>1.0.0</hbase.version>
     <lucene.version>4.6.1</lucene.version>
@@ -575,7 +575,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>2.5.2</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
             <releaseProfiles>mahout-release,apache-release,hadoop2</releaseProfiles>
@@ -587,7 +587,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.2</version>
+          <version>3.3</version>
           <configuration>
             <!-- encoding, source and target are explicitly defined until MNGECLIPSE-966 is fixed -->
             <encoding>${project.build.sourceEncoding}</encoding>
@@ -604,7 +604,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.8</version>
+          <version>1.9.1</version>
         </plugin>
         <plugin>
           <groupId>net.alchim31.maven</groupId>
@@ -638,9 +638,37 @@
             <argLine>-Xmx1024m</argLine>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[1.7, 1.8)</version>
+                </requireJavaVersion>
+                  <requireMavenVersion>
+                    <version>[3.3.3,)</version>
+                  </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -660,7 +688,7 @@
       <plugin>
         <groupId>com.atlassian.maven.plugins</groupId>
         <artifactId>maven-clover2-plugin</artifactId>
-        <version>3.1.12</version>
+        <version>4.0.4</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -758,10 +786,12 @@
           <excludeSubProjects>false</excludeSubProjects>
         </configuration>
       </plugin>
+      <!--
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
       </plugin>
+      -->
     </plugins>
   </build>
   <modules>
@@ -863,22 +893,6 @@
         <pmd.skip>true</pmd.skip>
         <checkstyle.skip>true</checkstyle.skip>
       </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
     <profile>
       <id>sourcecheck</id>
@@ -961,7 +975,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-eclipse-plugin</artifactId>
-            <version>2.9</version>
+            <version>2.10</version>
             <executions>
               <execution>
                 <id>setup.eclipse.project</id>
@@ -1108,7 +1122,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.7</version>
+        <version>2.8</version>
         <reportSets>
           <reportSet>
             <reports>

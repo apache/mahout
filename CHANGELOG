@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.10.2 - unreleased
 
+  MAHOUT-1761: Upgraded to Apache parent pom v17 (sslavic)
+
   MAHOUT-1745: Purge deprecated ConcatVectorsJob from codebase (apalumbo)
 
   MAHOUT-1757: Small fix in spca formula (smarthi)
