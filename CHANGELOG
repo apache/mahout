@@ -4,6 +4,10 @@ Release 0.11.0 - unreleased
 
   MAHOUT-1744: Deprecate lucene2seq (apalumbo)
 
+  MAHOUT-1761: Upgraded to Apache parent pom v17 (sslavic)
+
+  MAHOUT-1745: Purge deprecated ConcatVectorsJob from codebase (apalumbo)
+
   MAHOUT-1757: small fix in spca formula (smarthi)
 
   MAHOUT-1756: Missing +=: and *=: operators on vectors (smarthi)
