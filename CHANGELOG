@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.11.1 - unreleased
 
+  MAHOUT-1642: Iterator class within SimilarItems class always misses the first element (Oleg Zotov via smarthi)
+
   MAHOUT-1675: Remove MLP from codebase (ZJaffe via smarthi)
 
 Release 0.11.0 - 2015-08-07
