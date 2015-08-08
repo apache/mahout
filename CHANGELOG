@@ -1,6 +1,8 @@
 Mahout Change Log
 
-Release 0.11.0 - unreleased
+Release 0.11.1 - unreleased
+
+Release 0.11.0 - 2015-08-07
 
   MAHOUT-1744: Deprecate lucene2seq (apalumbo)
 
@@ -70,7 +72,7 @@ Release 0.11.0 - unreleased
 
   MAHOUT-1732: Native support for kryo serialization of tensor types (dlyubimov)
 
-Release 0.10.1 - unreleased
+Release 0.10.1 - 2015-05-31
 
   MAHOUT-1704: Pare down dependency jar for h2o (apalumbo)
 
