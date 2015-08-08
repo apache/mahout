@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.11.1 - unreleased
 
+  MAHOUT-1613: classifier.df.tools.Describe does not handle -D parameters (haohui mai via smarthi)
+
   MAHOUT-1642: Iterator class within SimilarItems class always misses the first element (Oleg Zotov via smarthi)
 
   MAHOUT-1675: Remove MLP from codebase (ZJaffe via smarthi)

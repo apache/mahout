@@ -33,6 +33,8 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.classifier.df.DFUtils;
 import org.apache.mahout.classifier.df.data.DataLoader;
 import org.apache.mahout.classifier.df.data.Dataset;
@@ -45,14 +47,18 @@ import org.slf4j.LoggerFactory;
 /**
  * Generates a file descriptor for a given dataset
  */
-public final class Describe {
+public final class Describe implements Tool {
 
   private static final Logger log = LoggerFactory.getLogger(Describe.class);
 
   private Describe() {}
 
-  public static void main(String[] args) throws IOException, DescriptorException {
+  public static int main(String[] args) throws Exception {
+    return ToolRunner.run(new Describe(), args);
+  }
 
+  @Override
+  public int run(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -84,7 +90,7 @@ public final class Describe {
 
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
-        return;
+        return -1;
       }
 
       String dataPath = cmdLine.getValue(pathOpt).toString();
@@ -102,9 +108,10 @@ public final class Describe {
       log.warn(e.toString());
       CommandLineUtil.printHelp(group);
     }
+    return 0;
   }
 
-  private static void runTool(String dataPath, Iterable<String> description, String filePath, boolean regression)
+  private void runTool(String dataPath, Iterable<String> description, String filePath, boolean regression)
     throws DescriptorException, IOException {
     log.info("Generating the descriptor...");
     String descriptor = DescriptorUtils.generateDescriptor(description);
@@ -116,20 +123,20 @@ public final class Describe {
 
     log.info("storing the dataset description");
     String json = dataset.toJSON();
-    DFUtils.storeString(new Configuration(), fPath, json);
+    DFUtils.storeString(conf, fPath, json);
   }
 
-  private static Dataset generateDataset(String descriptor, String dataPath, boolean regression) throws IOException,
+  private Dataset generateDataset(String descriptor, String dataPath, boolean regression) throws IOException,
       DescriptorException {
     Path path = new Path(dataPath);
-    FileSystem fs = path.getFileSystem(new Configuration());
+    FileSystem fs = path.getFileSystem(conf);
 
     return DataLoader.generateDataset(descriptor, regression, fs, path);
   }
 
-  private static Path validateOutput(String filePath) throws IOException {
+  private Path validateOutput(String filePath) throws IOException {
     Path path = new Path(filePath);
-    FileSystem fs = path.getFileSystem(new Configuration());
+    FileSystem fs = path.getFileSystem(conf);
     if (fs.exists(path)) {
       throw new IllegalStateException("Descriptor's file already exists");
     }
@@ -145,4 +152,15 @@ public final class Describe {
     return list;
   }
 
+  private Configuration conf;
+
+  @Override
+  public void setConf(Configuration entries) {
+    this.conf = entries;
+  }
+
+  @Override
+  public Configuration getConf() {
+    return conf;
+  }
 }
