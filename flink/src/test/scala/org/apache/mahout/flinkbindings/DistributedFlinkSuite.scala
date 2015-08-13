@@ -25,7 +25,7 @@ import org.apache.mahout.test.DistributedMahoutSuite
 import org.scalatest.Suite
 
 
-trait DistributedFlinkSuit extends DistributedMahoutSuite { this: Suite =>
+trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
 
   protected implicit var mahoutCtx: DistributedContext = _
   protected var env: ExecutionEnvironment = null

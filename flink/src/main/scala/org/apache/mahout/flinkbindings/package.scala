@@ -18,7 +18,7 @@
  */
 package org.apache.mahout
 
-import scala.Array.canBuildFrom
+import scala.Array._
 import scala.reflect.ClassTag
 
 import org.apache.flink.api.common.functions.FilterFunction

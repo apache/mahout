@@ -32,7 +32,7 @@ import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.drm.logical._
 
 @RunWith(classOf[JUnitRunner])
-class LATestSuit extends FunSuite with DistributedFlinkSuit {
+class LATestSuite extends FunSuite with DistributedFlinkSuite {
 
   test("Ax blockified") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
