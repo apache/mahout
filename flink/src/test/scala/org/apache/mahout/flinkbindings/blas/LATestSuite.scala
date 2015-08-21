@@ -123,6 +123,36 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     assert((output - expected).norm < 1e-6)
   }
 
+  test("CbindScalar left") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val op = new OpCbindScalar(A, 1, true)
+    val res = FlinkOpCBind.cbindScalar(op, A, 1)
+
+    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, 
+        _ncol=(inCoreA.ncol + 1))
+    val output = drm.collect
+
+    val expected = dense((1, 1, 2), (1, 2, 3), (1, 3, 4))
+    assert((output - expected).norm < 1e-6)
+  }
+
+  test("CbindScalar right") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val op = new OpCbindScalar(A, 1, false)
+    val res = FlinkOpCBind.cbindScalar(op, A, 1)
+
+    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, 
+        _ncol=(inCoreA.ncol + 1))
+    val output = drm.collect
+
+    val expected = dense((1, 2, 1), (2, 3, 1), (3, 4, 1))
+    assert((output - expected).norm < 1e-6)
+  }
+
   test("slice") {
     val inCoreA = dense((1, 2), (2, 3), (3, 4), (4, 4), (5, 5), (6, 7))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)

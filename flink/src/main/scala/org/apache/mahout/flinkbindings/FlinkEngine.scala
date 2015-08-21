@@ -78,6 +78,7 @@ import org.apache.mahout.math.indexeddataset.Schema
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.flinkbindings.blas.FlinkOpAtA
+import org.apache.mahout.math.drm.logical.OpCbindScalar
 
 object FlinkEngine extends DistributedEngine {
 
@@ -177,6 +178,8 @@ object FlinkEngine extends DistributedEngine {
       FlinkOpCBind.cbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
     case op @ OpRbind(a, b) => 
       FlinkOpRBind.rbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
+    case op @ OpCbindScalar(a, x, _) => 
+      FlinkOpCBind.cbindScalar(op, flinkTranslate(a)(op.classTagA), x)
     case op @ OpRowRange(a, _) => 
       FlinkOpRowRange.slice(op, flinkTranslate(a)(op.classTagA))
     case op: OpMapBlock[K, _] => 

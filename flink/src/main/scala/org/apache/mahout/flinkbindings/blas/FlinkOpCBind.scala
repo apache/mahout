@@ -20,18 +20,19 @@ package org.apache.mahout.flinkbindings.blas
 
 import java.lang.Iterable
 
+
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 
 import org.apache.flink.api.common.functions.CoGroupFunction
+import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.java.DataSet
 import org.apache.flink.util.Collector
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.mahout.math.DenseVector
-import org.apache.mahout.math.SequentialAccessSparseVector
-import org.apache.mahout.math.Vector
+import org.apache.mahout.flinkbindings.drm._
+import org.apache.mahout.math._
 import org.apache.mahout.math.drm.logical.OpCbind
+import org.apache.mahout.math.drm.logical.OpCbindScalar
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 import com.google.common.collect.Lists
@@ -97,6 +98,38 @@ object FlinkOpCBind {
     })
 
     new RowsFlinkDrm(res.asInstanceOf[DataSet[(K, Vector)]], ncol=op.ncol)
+  }
+
+  def cbindScalar[K: ClassTag](op: OpCbindScalar[K], A: FlinkDrm[K], x: Double): FlinkDrm[K] = {
+    val left = op.leftBind
+    val ds = A.blockify.ds
+
+    val out = A.blockify.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
+      def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = tuple match {
+        case (keys, mat) => (keys, cbind(mat, x, left))
+      }
+
+      def cbind(mat: Matrix, x: Double, left: Boolean): Matrix = {
+        val ncol = mat.ncol
+        val newMat = mat.like(mat.nrow, ncol + 1)
+
+        if (left) {
+          newMat.zip(mat).foreach { case (newVec, origVec) =>
+            newVec(0) = x
+            newVec(1 to ncol) := origVec
+          }
+        } else {
+          newMat.zip(mat).foreach { case (newVec, origVec) =>
+            newVec(ncol) = x
+            newVec(0 to (ncol - 1)) := origVec
+          }
+        }
+
+        newMat
+      }
+    })
+
+    new BlockifiedFlinkDrm(out, op.ncol)
   }
 
 }
