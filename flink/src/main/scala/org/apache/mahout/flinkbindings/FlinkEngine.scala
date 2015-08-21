@@ -19,10 +19,8 @@
 package org.apache.mahout.flinkbindings
 
 import java.util.Collection
-
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
-
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.java.tuple.Tuple2
@@ -79,6 +77,7 @@ import org.apache.mahout.math.indexeddataset.IndexedDataset
 import org.apache.mahout.math.indexeddataset.Schema
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.flinkbindings.blas.FlinkOpAtA
 
 object FlinkEngine extends DistributedEngine {
 
@@ -165,14 +164,7 @@ object FlinkEngine extends DistributedEngine {
       FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d))
                 .asInstanceOf[FlinkDrm[K]]
     }
-    case op @ OpAtA(a) => {
-      // express AtA via AtB
-      // TODO: create specific implementation of AtA, see MAHOUT-1751 
-      val aInt = a.asInstanceOf[DrmLike[Int]] // TODO: casts!
-      val opAtB = OpAtB(aInt, aInt)
-      val aTranslated = flinkTranslate(aInt)
-      FlinkOpAtB.notZippable(opAtB, aTranslated, aTranslated)
-    }
+    case op @ OpAtA(a) => FlinkOpAtA.at_a(op, flinkTranslate(a)(op.classTagA))
     case op @ OpTimesRightMatrix(a, b) => 
       FlinkOpTimesRightMatrix.drmTimesInCore(op, flinkTranslate(a)(op.classTagA), b)
     case op @ OpAewUnaryFunc(a, f, _) =>

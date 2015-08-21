@@ -42,6 +42,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import com.google.common.collect.Lists
 
 
+
 /**
  * Implementation is taken from Spark's AtB
  * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AtB.scala

@@ -94,26 +94,35 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     val data = ds.collect().asScala.toList
     val isDense = data.forall(_._2.isDense)
 
+    val cols = ncol
+    val rows = safeToNonNegInt(nrow)
+
     val m = if (isDense) {
-      val cols = data.head._2.size()
-      val rows = data.length
       new DenseMatrix(rows, cols)
     } else {
-      val cols = ncol
-      val rows = safeToNonNegInt(nrow)
       new SparseMatrix(rows, cols)
     }
 
     val intRowIndices = keyClassTag == implicitly[ClassTag[Int]]
 
-    if (intRowIndices)
-      data.foreach(t => m(t._1.asInstanceOf[Int], ::) := t._2)
-    else {
+    if (intRowIndices) {
+      data.foreach { case (t, vec) =>
+        val idx = t.asInstanceOf[Int]
+        m(idx, ::) := vec
+      }
+
+      println(m.ncol, m.nrow)
+    } else {
       // assign all rows sequentially
       val d = data.zipWithIndex
-      d.foreach(t => m(t._2, ::) := t._1._2)
+      d.foreach {
+        case ((_, vec), idx) => m(idx, ::) := vec
+      }
 
-      val rowBindings = d.map(t => (t._1._1.toString, t._2: java.lang.Integer)).toMap.asJava
+      val rowBindings = d.map {
+        case ((t, _), idx) => (t.toString, idx: java.lang.Integer) 
+      }.toMap.asJava
+
       m.setRowLabelBindings(rowBindings)
     }
 
