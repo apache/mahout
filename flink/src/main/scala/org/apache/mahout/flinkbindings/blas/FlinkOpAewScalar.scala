@@ -20,7 +20,6 @@ package org.apache.mahout.flinkbindings.blas
 
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
-
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
@@ -29,6 +28,8 @@ import org.apache.mahout.math.drm.logical.OpAewScalar
 import org.apache.mahout.math.drm.logical.OpAewUnaryFunc
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.drm.logical.AbstractUnaryOp
+import org.apache.mahout.math.drm.logical.TEwFunc
 
 /**
  * Implementation is inspired by Spark-binding's OpAewScalar
@@ -52,7 +53,8 @@ object FlinkOpAewScalar {
     new BlockifiedFlinkDrm(res, op.ncol)
   }
 
-  def opUnaryFunction[K: ClassTag](op: OpAewUnaryFunc[K], A: FlinkDrm[K], f: (Double) => Double): FlinkDrm[K] = {
+  def opUnaryFunction[K: ClassTag](op: AbstractUnaryOp[K, K] with TEwFunc, A: FlinkDrm[K]): FlinkDrm[K] = {
+    val f = op.f
     val inplace = isInplace
 
     val res = if (op.evalZeros) {

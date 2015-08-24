@@ -79,6 +79,7 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.flinkbindings.blas.FlinkOpAtA
 import org.apache.mahout.math.drm.logical.OpCbindScalar
+import org.apache.mahout.math.drm.logical.OpAewUnaryFuncFusion
 
 object FlinkEngine extends DistributedEngine {
 
@@ -168,8 +169,10 @@ object FlinkEngine extends DistributedEngine {
     case op @ OpAtA(a) => FlinkOpAtA.at_a(op, flinkTranslate(a)(op.classTagA))
     case op @ OpTimesRightMatrix(a, b) => 
       FlinkOpTimesRightMatrix.drmTimesInCore(op, flinkTranslate(a)(op.classTagA), b)
-    case op @ OpAewUnaryFunc(a, f, _) =>
-      FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA), f)
+    case op @ OpAewUnaryFunc(a, _, _) =>
+      FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA))
+    case op @ OpAewUnaryFuncFusion(a, _) => 
+      FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA))
     case op @ OpAewScalar(a, scalar, _) => 
       FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a)(op.classTagA), scalar)
     case op @ OpAewB(a, b, _) =>
@@ -282,6 +285,7 @@ object FlinkEngine extends DistributedEngine {
   def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = ???
 
   /** Optional engine-specific all reduce tensor operation. */
-  def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = ???
+  def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = 
+    throw new UnsupportedOperationException("the operation allreduceBlock is not yet supported on Flink")
  
 }
