@@ -19,8 +19,10 @@
 package org.apache.mahout.flinkbindings
 
 import java.util.Collection
+
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
+
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.java.tuple.Tuple2
@@ -29,57 +31,20 @@ import org.apache.hadoop.io.Writable
 import org.apache.hadoop.mapred.FileInputFormat
 import org.apache.hadoop.mapred.JobConf
 import org.apache.hadoop.mapred.SequenceFileInputFormat
-import org.apache.mahout.flinkbindings.blas.FlinkOpAewB
-import org.apache.mahout.flinkbindings.blas.FlinkOpAewScalar
-import org.apache.mahout.flinkbindings.blas.FlinkOpAt
-import org.apache.mahout.flinkbindings.blas.FlinkOpAtB
-import org.apache.mahout.flinkbindings.blas.FlinkOpAx
-import org.apache.mahout.flinkbindings.blas.FlinkOpCBind
-import org.apache.mahout.flinkbindings.blas.FlinkOpMapBlock
-import org.apache.mahout.flinkbindings.blas.FlinkOpRBind
-import org.apache.mahout.flinkbindings.blas.FlinkOpRowRange
-import org.apache.mahout.flinkbindings.blas.FlinkOpTimesRightMatrix
 import org.apache.mahout.flinkbindings._
-import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
+import org.apache.mahout.flinkbindings.blas._
+import org.apache.mahout.flinkbindings.drm._
 import org.apache.mahout.flinkbindings.io.HDFSUtil
 import org.apache.mahout.flinkbindings.io.Hadoop1HDFSUtil
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.Vector
-import org.apache.mahout.math.VectorWritable
-import org.apache.mahout.math.drm.BCast
-import org.apache.mahout.math.drm.BlockMapFunc2
-import org.apache.mahout.math.drm.BlockReduceFunc
-import org.apache.mahout.math.drm.CacheHint
-import org.apache.mahout.math.drm.CheckpointedDrm
-import org.apache.mahout.math.drm.DistributedContext
-import org.apache.mahout.math.drm.DistributedEngine
-import org.apache.mahout.math.drm.DrmLike
-import org.apache.mahout.math.drm.DrmTuple
-import org.apache.mahout.math.drm.drm2drmCpOps
-import org.apache.mahout.math.drm.logical.OpABt
-import org.apache.mahout.math.drm.logical.OpAewB
-import org.apache.mahout.math.drm.logical.OpAewScalar
-import org.apache.mahout.math.drm.logical.OpAewUnaryFunc
-import org.apache.mahout.math.drm.logical.OpAt
-import org.apache.mahout.math.drm.logical.OpAtA
-import org.apache.mahout.math.drm.logical.OpAtB
-import org.apache.mahout.math.drm.logical.OpAtx
-import org.apache.mahout.math.drm.logical.OpAx
-import org.apache.mahout.math.drm.logical.OpCbind
-import org.apache.mahout.math.drm.logical.OpMapBlock
-import org.apache.mahout.math.drm.logical.OpRbind
-import org.apache.mahout.math.drm.logical.OpRowRange
-import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
+import org.apache.mahout.math._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.math.indexeddataset.BiDictionary
 import org.apache.mahout.math.indexeddataset.IndexedDataset
 import org.apache.mahout.math.indexeddataset.Schema
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.flinkbindings.blas.FlinkOpAtA
-import org.apache.mahout.math.drm.logical.OpCbindScalar
-import org.apache.mahout.math.drm.logical.OpAewUnaryFuncFusion
+
 
 object FlinkEngine extends DistributedEngine {
 
@@ -259,11 +224,24 @@ object FlinkEngine extends DistributedEngine {
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
   override def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
-                                          (implicit sc: DistributedContext): CheckpointedDrm[String] = ???
+                                          (implicit dc: DistributedContext): CheckpointedDrm[String] = ???
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
   override def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int = 10)
-                                  (implicit sc: DistributedContext): CheckpointedDrm[Int] = ???
+                                  (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
+    val nonParallelResult = (0 to numPartitions).flatMap { part => 
+      val partNRow = (nrow - 1) / numPartitions + 1
+      val partStart = partNRow * part
+      val partEnd = Math.min(partStart + partNRow, nrow)
+
+      for (i <- partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
+    }
+
+    val dataSetType = TypeExtractor.getForObject(nonParallelResult.head)
+    val result = dc.env.fromCollection(nonParallelResult.asJava, dataSetType)
+
+    new CheckpointedFlinkDrm(ds=result, _nrow=nrow, _ncol=ncol)
+  }
 
   /** Creates empty DRM with non-trivial height */
   override def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
