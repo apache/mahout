@@ -70,7 +70,7 @@ object FlinkOpAtB {
 
         0.until(blockCount) map { blockKey =>
           val blockStart = blockKey * blockHeight
-          val blockEnd = Math.min(ncol, blockStart + blockHeight)
+          val blockEnd = Math.min(nrow.toInt, blockStart + blockHeight)
 
           // Create block by cross product of proper slice of aRow and qRow
           val outer = avec(blockStart until blockEnd) cross bvec
