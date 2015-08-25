@@ -62,6 +62,14 @@ class DrmLikeOpsSuite extends FunSuite with DistributedFlinkSuite {
     (inCoreA.rowMeans - A.rowMeans).norm(2) should be < 1e-6
   }
 
+  test("numNonZeroElementsPerColumn") {
+    val A = dense((0, 2), (3, 0), (0, -30))
+    val drmA = drmParallelize(A, numPartitions = 2)
+
+    drmA.numNonZeroElementsPerColumn() should equal(A.numNonZeroElementsPerColumn())
+  }
+
+
   test("drmParallelizeEmpty") {
     val emptyDrm = drmParallelizeEmpty(nrow = 2, ncol = 2, numPartitions = 2)
     val expected = dense((0, 0), (0, 0))

@@ -19,10 +19,9 @@
 package org.apache.mahout.flinkbindings
 
 import java.util.Collection
-
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
-
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.java.tuple.Tuple2
@@ -171,7 +170,27 @@ object FlinkEngine extends DistributedEngine {
   }
 
   /** Engine-specific numNonZeroElementsPerColumn implementation based on a checkpoint. */
-  override def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector = ???
+  override def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
+    val n = drm.ncol
+
+    val result = drm.blockify.ds.map(new MapFunction[(Array[K], Matrix), Vector] {
+      def map(tuple: (Array[K], Matrix)): Vector = {
+        val (_, block) = tuple
+        val acc = block(0, ::).like()
+
+        block.foreach { v =>
+          v.nonZeroes().foreach { el => acc(el.index()) = acc(el.index()) + 1 }
+        }
+
+        acc
+      }
+    }).reduce(new ReduceFunction[Vector] {
+      def reduce(v1: Vector, v2: Vector) = v1 + v2
+    })
+
+    val list = result.collect.asScala.toList
+    list.head
+  }
 
   /** 
    * returns a vector that contains a column-wise mean from DRM 
