@@ -21,12 +21,7 @@ import scala.reflect.ClassTag
 
 
 /**
- *
- * Basic spark DRM trait.
- *
- * Since we already call the package "sparkbindings", I will not use stem "spark" with classes in
- * this package. Spark backing is already implied.
- *
+ * Basic DRM trait.
  */
 trait DrmLike[K] {
 
@@ -38,7 +33,7 @@ trait DrmLike[K] {
    * Distributed context, can be implicitly converted to operations on [[org.apache.mahout.math.drm.
    * DistributedEngine]].
    */
-  val context:DistributedContext
+  val context: DistributedContext
 
   /** R-like syntax for number of rows. */
   def nrow: Long
