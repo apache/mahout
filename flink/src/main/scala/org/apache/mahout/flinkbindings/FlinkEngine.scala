@@ -89,15 +89,6 @@ object FlinkEngine extends DistributedEngine {
   override def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
     // Flink-specific Physical Plan translation.
     val drm = flinkTranslate(plan)
-
-    // to Help Flink's type inference had to use just one specific type - Int 
-    // see org.apache.mahout.flinkbindings.blas classes with TODO: casting inside
-    // see MAHOUT-1747 and MAHOUT-1748
-    val cls = implicitly[ClassTag[K]]
-    if (!cls.runtimeClass.equals(classOf[Int])) {
-      throw new IllegalArgumentException(s"At the moment only Int indexes are supported. Got $cls")
-    }
-
     val newcp = new CheckpointedFlinkDrm(ds = drm.deblockify.ds, _nrow = plan.nrow, _ncol = plan.ncol)
     newcp.cache()
   }
@@ -149,6 +140,8 @@ object FlinkEngine extends DistributedEngine {
       FlinkOpCBind.cbindScalar(op, flinkTranslate(a)(op.classTagA), x)
     case op @ OpRowRange(a, _) => 
       FlinkOpRowRange.slice(op, flinkTranslate(a)(op.classTagA))
+    case op @ OpABAnyKey(a, b) if extractRealClassTag(a) != extractRealClassTag(b) =>
+      throw new IllegalArgumentException("DRMs A and B have different indices, cannot multiply them")
     case op: OpMapBlock[K, _] => 
       FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
     case cp: CheckpointedFlinkDrm[K] => new RowsFlinkDrm(cp.ds, cp.ncol)
@@ -243,7 +236,9 @@ object FlinkEngine extends DistributedEngine {
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
   override def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
-                                          (implicit dc: DistributedContext): CheckpointedDrm[String] = ???
+                                          (implicit dc: DistributedContext): CheckpointedDrm[String] = {
+    ???
+  }
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
   override def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int = 10)

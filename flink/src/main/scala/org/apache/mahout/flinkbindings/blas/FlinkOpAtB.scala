@@ -26,17 +26,16 @@ import scala.reflect.ClassTag
 import org.apache.flink.api.common.functions.FlatMapFunction
 import org.apache.flink.api.common.functions.GroupReduceFunction
 import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.java.DataSet
 import org.apache.flink.api.java.tuple.Tuple2
 import org.apache.flink.util.Collector
-import org.apache.mahout.flinkbindings.BlockifiedDrmDataSet
-import org.apache.mahout.flinkbindings.DrmDataSet
+import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.Vector
-import org.apache.mahout.math.drm.BlockifiedDrmTuple
+import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical.OpAtB
-import org.apache.mahout.math.drm.safeToNonNegInt
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 import com.google.common.collect.Lists
@@ -50,20 +49,21 @@ import com.google.common.collect.Lists
 object FlinkOpAtB {
 
   def notZippable[K: ClassTag](op: OpAtB[K], At: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[Int] = {
-    // TODO: to help Flink's type inference
-    // only Int is supported now 
-    val rowsAt = At.deblockify.ds.asInstanceOf[DrmDataSet[Int]]
-    val rowsB = B.deblockify.ds.asInstanceOf[DrmDataSet[Int]]
-    val joined = rowsAt.join(rowsB).where(tuple_1[Vector]).equalTo(tuple_1[Vector])
+    val classTag = extractRealClassTag(op.A)
+    val joiner = selector[Vector, Any](classTag.asInstanceOf[ClassTag[Any]]) 
+
+    val rowsAt = At.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsB = B.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
+    val joined = rowsAt.join(rowsB).where(joiner).equalTo(joiner)
 
     val ncol = op.ncol
     val nrow = op.nrow
     val blockHeight = 10
     val blockCount = safeToNonNegInt((ncol - 1) / blockHeight + 1)
 
-    val preProduct = joined.flatMap(new FlatMapFunction[Tuple2[(Int, Vector), (Int, Vector)], 
+    val preProduct: DataSet[(Int, Matrix)] = joined.flatMap(new FlatMapFunction[Tuple2[(_, Vector), (_, Vector)], 
                                                         (Int, Matrix)] {
-      def flatMap(in: Tuple2[(Int, Vector), (Int, Vector)],
+      def flatMap(in: Tuple2[(_, Vector), (_, Vector)],
                   out: Collector[(Int, Matrix)]): Unit = {
         val avec = in.f0._2
         val bvec = in.f1._2
@@ -79,7 +79,7 @@ object FlinkOpAtB {
       }
     })
 
-    val res: BlockifiedDrmDataSet[Int] = preProduct.groupBy(tuple_1[Matrix]).reduceGroup(
+    val res: BlockifiedDrmDataSet[Int] = preProduct.groupBy(selector[Matrix, Int]).reduceGroup(
             new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
       def reduce(values: Iterable[(Int, Matrix)], out: Collector[BlockifiedDrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala

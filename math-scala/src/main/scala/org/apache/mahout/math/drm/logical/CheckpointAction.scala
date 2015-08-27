@@ -44,5 +44,6 @@ abstract class CheckpointAction[K: ClassTag] extends DrmLike[K] {
     case Some(cp) => cp
   }
 
+  val classTag = implicitly[ClassTag[K]]
 }
 

@@ -45,6 +45,8 @@ trait FlinkDrm[K] {
 
   def blockify: BlockifiedFlinkDrm[K]
   def deblockify: RowsFlinkDrm[K]
+
+  def classTag: ClassTag[K]
 }
 
 class RowsFlinkDrm[K: ClassTag](val ds: DrmDataSet[K], val ncol: Int) extends FlinkDrm[K] {
@@ -81,6 +83,8 @@ class RowsFlinkDrm[K: ClassTag](val ds: DrmDataSet[K], val ncol: Int) extends Fl
 
   def deblockify = this
 
+  def classTag = implicitly[ClassTag[K]]
+
 }
 
 class BlockifiedFlinkDrm[K: ClassTag](val ds: BlockifiedDrmDataSet[K], val ncol: Int) extends FlinkDrm[K] {
@@ -104,4 +108,6 @@ class BlockifiedFlinkDrm[K: ClassTag](val ds: BlockifiedDrmDataSet[K], val ncol:
     })
     new RowsFlinkDrm(out, ncol)
   }
+
+  def classTag = implicitly[ClassTag[K]]
 }

@@ -27,6 +27,7 @@ import org.apache.flink.api.common.functions.FlatMapFunction
 import org.apache.flink.api.common.functions.GroupReduceFunction
 import org.apache.flink.shaded.com.google.common.collect.Lists
 import org.apache.flink.util.Collector
+import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.Matrix
@@ -66,14 +67,14 @@ object FlinkOpAt {
       }
     })
 
-    val regrouped = sparseParts.groupBy(tuple_1[Vector])
+    val regrouped = sparseParts.groupBy(selector[Vector, Int])
 
     val sparseTotal = regrouped.reduceGroup(new GroupReduceFunction[(Int, Vector), DrmTuple[Int]] {
       def reduce(values: Iterable[(Int, Vector)], out: Collector[DrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala
         val (idx, _) = it.head
         val vector = it map { case (idx, vec) => vec } reduce (_ + _)
-        out.collect(idx -> vector)
+        out.collect((idx, vector))
       }
     })
 

@@ -20,7 +20,6 @@ package org.apache.mahout
 
 import scala.Array._
 import scala.reflect.ClassTag
-
 import org.apache.flink.api.common.functions.FilterFunction
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.java.DataSet
@@ -42,6 +41,7 @@ import org.apache.mahout.math.drm.CheckpointedDrm
 import org.apache.mahout.math.drm.DistributedContext
 import org.apache.mahout.math.drm.DrmTuple
 import org.slf4j.LoggerFactory
+import org.apache.mahout.math.drm.logical.CheckpointAction
 
 package object flinkbindings {
 
@@ -108,5 +108,11 @@ package object flinkbindings {
     new CheckpointedFlinkDrm[K](dataset)
   }
 
+  private[flinkbindings] def extractRealClassTag[K: ClassTag](drm: DrmLike[K]): ClassTag[_] = drm match {
+    case d: CheckpointAction[K] => d.classTag
+    case d: CheckpointedFlinkDrm[K] => d.keyClassTag
+    // will not always return correct result, often result in Any
+    case _ => implicitly[ClassTag[K]]
+  }
 
 }

@@ -2,16 +2,17 @@ package org.apache.mahout.flinkbindings.blas
 
 import java.lang.Iterable
 
-import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 
 import org.apache.flink.api.common.functions.CoGroupFunction
 import org.apache.flink.api.java.DataSet
 import org.apache.flink.util.Collector
+import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.Vector
-import org.apache.mahout.math.drm.logical._
+import org.apache.mahout.math.drm.logical.OpAewB
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 import com.google.common.collect.Lists
@@ -25,22 +26,24 @@ object FlinkOpAewB {
   def rowWiseJoinNoSideEffect[K: ClassTag](op: OpAewB[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
     val function = AewBOpsCloning.strToFunction(op.op)
 
-    // TODO: get rid of casts!
-    val rowsA = A.deblockify.ds.asInstanceOf[DataSet[(Int, Vector)]]
-    val rowsB = B.deblockify.ds.asInstanceOf[DataSet[(Int, Vector)]]
+    val classTag = extractRealClassTag(op.A)
+    val joiner = selector[Vector, Any](classTag.asInstanceOf[ClassTag[Any]]) 
 
-    val res: DataSet[(Int, Vector)] = 
-      rowsA.coGroup(rowsB).where(tuple_1[Vector]).equalTo(tuple_1[Vector])
-        .`with`(new CoGroupFunction[(Int, Vector), (Int, Vector), (Int, Vector)] {
-      def coGroup(it1java: Iterable[(Int, Vector)], it2java: Iterable[(Int, Vector)], 
-                  out: Collector[(Int, Vector)]): Unit = {
+    val rowsA = A.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsB = B.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
+
+    val res: DataSet[(Any, Vector)] = 
+      rowsA.coGroup(rowsB).where(joiner).equalTo(joiner)
+        .`with`(new CoGroupFunction[(_, Vector), (_, Vector), (_, Vector)] {
+      def coGroup(it1java: Iterable[(_, Vector)], it2java: Iterable[(_, Vector)], 
+                  out: Collector[(_, Vector)]): Unit = {
         val it1 = Lists.newArrayList(it1java).asScala
         val it2 = Lists.newArrayList(it2java).asScala
 
         if (!it1.isEmpty && !it2.isEmpty) {
           val (idx, a) = it1.head
           val (_, b) = it2.head
-          out.collect(idx -> function(a, b))
+          out.collect((idx, function(a, b)))
         } else if (it1.isEmpty && !it2.isEmpty) {
           out.collect(it2.head)
         } else if (!it1.isEmpty && it2.isEmpty) {

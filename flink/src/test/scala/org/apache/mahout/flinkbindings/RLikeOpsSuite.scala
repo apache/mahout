@@ -294,4 +294,24 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuite {
     assert((res.collect(::, 0) - expected).norm(2) < 1e-6)
   }
 
+  test("A.t %*% B with Long keys") {
+    val inCoreA = dense((1, 2), (3, 4), (3, 5))
+    val inCoreB = dense((3, 5), (4, 6), (0, 1))
+
+    val A = drmParallelize(inCoreA, numPartitions = 2).mapBlock()({
+      case (keys, block) => (keys.map(_.toLong), block)
+    })
+
+    val B = drmParallelize(inCoreB, numPartitions = 2).mapBlock()({
+      case (keys, block) => (keys.map(_.toLong), block)
+    })
+
+    val C = A.t %*% B
+    val inCoreC = C.collect
+    val expected = inCoreA.t %*% inCoreB
+
+    (inCoreC - expected).norm should be < 1E-10
+  }
+
+
 }
