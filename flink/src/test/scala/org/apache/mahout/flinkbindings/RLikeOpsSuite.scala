@@ -115,6 +115,16 @@ class RLikeOpsSuite extends FunSuite with DistributedFlinkSuite {
     assert((res.collect - expected).norm < 1e-6)
   }
 
+  test("A %*% B.t test 2") {
+    val mxA = Matrices.symmetricUniformView(10, 7, 80085)
+    val mxB = Matrices.symmetricUniformView(30, 7, 31337)
+    val A = drmParallelize(mxA, 3)
+    val B = drmParallelize(mxB, 4)
+
+    val ABt = (A %*% B.t).collect
+    (ABt - mxA %*% mxB.t).norm should be < 1e-7
+  }
+
   test("ABt test") {
     val mxX = dense((1, 2), (2, 3), (3, 4), (5, 6), (7, 8))
     val mxY = dense((1, 2), (2, 3), (3, 4), (5, 6), (7, 8),

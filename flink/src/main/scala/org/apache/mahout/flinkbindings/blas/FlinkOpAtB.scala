@@ -57,12 +57,12 @@ object FlinkOpAtB {
     val joined = rowsAt.join(rowsB).where(joiner).equalTo(joiner)
 
     val ncol = op.ncol
-    val nrow = op.nrow
+    val nrow = op.nrow.toInt
     val blockHeight = 10
-    val blockCount = safeToNonNegInt((ncol - 1) / blockHeight + 1)
+    val blockCount = safeToNonNegInt((nrow - 1) / blockHeight + 1)
 
-    val preProduct: DataSet[(Int, Matrix)] = joined.flatMap(new FlatMapFunction[Tuple2[(_, Vector), (_, Vector)], 
-                                                        (Int, Matrix)] {
+    val preProduct: DataSet[(Int, Matrix)] = 
+             joined.flatMap(new FlatMapFunction[Tuple2[(_, Vector), (_, Vector)], (Int, Matrix)] {
       def flatMap(in: Tuple2[(_, Vector), (_, Vector)],
                   out: Collector[(Int, Matrix)]): Unit = {
         val avec = in.f0._2
@@ -70,35 +70,29 @@ object FlinkOpAtB {
 
         0.until(blockCount) map { blockKey =>
           val blockStart = blockKey * blockHeight
-          val blockEnd = Math.min(nrow.toInt, blockStart + blockHeight)
+          val blockEnd = Math.min(nrow, blockStart + blockHeight)
 
-          // Create block by cross product of proper slice of aRow and qRow
           val outer = avec(blockStart until blockEnd) cross bvec
-          out.collect((blockKey, outer))
+          out.collect(blockKey -> outer)
         }
       }
     })
 
-    val res: BlockifiedDrmDataSet[Int] = preProduct.groupBy(selector[Matrix, Int]).reduceGroup(
-            new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
+    val res: BlockifiedDrmDataSet[Int] = 
+      preProduct.groupBy(selector[Matrix, Int])
+                .reduceGroup(new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
       def reduce(values: Iterable[(Int, Matrix)], out: Collector[BlockifiedDrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala
         val (idx, _) = it.head
 
-        val block = it.map(t => t._2).reduce((m1, m2) => m1 + m2)
+        val block = it.map { t => t._2 }.reduce { (m1, m2) => m1 + m2 }
 
         val keys = idx.until(block.nrow).toArray[Int]
-        out.collect((keys, block))
+        out.collect(keys -> block)
       }
     })
 
     new BlockifiedFlinkDrm(res, ncol)
   }
 
-}
-
-class DrmTupleToFlinkTupleMapper[K: ClassTag] extends MapFunction[(K, Vector), Tuple2[Int, Vector]] {
-  def map(tuple: (K, Vector)): Tuple2[Int, Vector] = tuple match {
-    case (key, vec) => new Tuple2[Int, Vector](key.asInstanceOf[Int], vec)
-  }
 }
