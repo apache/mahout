@@ -128,6 +128,7 @@ object FlinkEngine extends DistributedEngine {
       FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA))
     case op @ OpAewUnaryFuncFusion(a, _) => 
       FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA))
+    // deprecated
     case op @ OpAewScalar(a, scalar, _) => 
       FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a)(op.classTagA), scalar)
     case op @ OpAewB(a, b, _) =>

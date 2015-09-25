@@ -82,7 +82,10 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     this
   }
 
-  def uncache = ???
+  def uncache() = {
+    // TODO
+    this
+  }
 
   // Members declared in org.apache.mahout.math.drm.DrmLike   
 
@@ -160,7 +163,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       (x: K) => new LongWritable(x.asInstanceOf[Long]) 
     } else if (classOf[Writable].isAssignableFrom(keyTag.runtimeClass)) { 
       (x: K) => x.asInstanceOf[Writable] 
-    } else { 
+    } else {
       throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(keyTag))
     }
   }

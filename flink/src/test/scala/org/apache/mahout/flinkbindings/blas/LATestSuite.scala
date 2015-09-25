@@ -185,4 +185,31 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     assert((output - expected).norm < 1e-6)
   }
 
+  test("At A slim") {
+    val inCoreA = dense((1, 2, 3), (2, 3, 1), (3, 4, 4), (4, 4, 5), (5, 5, 7), (6, 7, 11))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val op = new OpAtA(A)
+    val output = FlinkOpAtA.slim(op, A)
+
+    val expected = inCoreA.t %*% inCoreA
+    assert((output - expected).norm < 1e-6)
+  }
+
+  test("At A fat") {
+    val inCoreA = dense((1, 2, 3, 2, 3, 1), (3, 4, 4, 4, 4, 5), (5, 5, 7, 6, 7, 11))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val Aany = A.asInstanceOf[CheckpointedDrm[Any]]
+
+    val op = new OpAtA(Aany)
+
+    val res = FlinkOpAtA.fat(op, Aany)
+    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=op.nrow, _ncol=op.ncol)
+    val output = drm.collect
+    println(output)
+
+    val expected = inCoreA.t %*% inCoreA
+    assert((output - expected).norm < 1e-6)
+  }
+
 }
