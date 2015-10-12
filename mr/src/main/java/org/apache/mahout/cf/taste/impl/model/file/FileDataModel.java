@@ -127,7 +127,7 @@ public class FileDataModel extends AbstractDataModel {
   private final File dataFile;
   private long lastModified;
   private long lastUpdateFileModified;
-  private final transient Splitter delimiterPattern;
+  private final Splitter delimiterPattern;
   private final boolean hasPrefValues;
   private DataModel delegate;
   private final ReentrantLock reloadLock;
