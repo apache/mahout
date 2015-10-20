@@ -108,11 +108,6 @@ package object flinkbindings {
     new CheckpointedFlinkDrm[K](dataset)
   }
 
-  private[flinkbindings] def extractRealClassTag[K: ClassTag](drm: DrmLike[K]): ClassTag[_] = drm match {
-    case d: CheckpointAction[K] => d.classTag
-    case d: CheckpointedFlinkDrm[K] => d.keyClassTag
-    // will not always return correct result, often result in Any
-    case _ => implicitly[ClassTag[K]]
-  }
+  private[flinkbindings] def extractRealClassTag[K: ClassTag](drm: DrmLike[K]): ClassTag[_] = drm.keyClassTag
 
 }

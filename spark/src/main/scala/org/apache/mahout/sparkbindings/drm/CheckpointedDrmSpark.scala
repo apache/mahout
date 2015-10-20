@@ -51,6 +51,9 @@ class CheckpointedDrmSpark[K: ClassTag](
     private var _canHaveMissingRows: Boolean = false
     ) extends CheckpointedDrm[K] {
 
+
+  override val keyClassTag: ClassTag[K] = classTag[K]
+
   lazy val nrow = if (_nrow >= 0) _nrow else computeNRow
   lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
   lazy val canHaveMissingRows: Boolean = {
@@ -63,9 +66,6 @@ class CheckpointedDrmSpark[K: ClassTag](
 
   private var cached: Boolean = false
   override val context: DistributedContext = rddInput.backingRdd.context
-
-  /** Explicit extraction of key class Tag   */
-  def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
 
   /**
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer

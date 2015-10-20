@@ -20,7 +20,7 @@ package org.apache.mahout.flinkbindings.drm
 
 import scala.collection.JavaConverters._
 import scala.util.Random
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag, classTag}
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.java.hadoop.mapred.HadoopOutputFormat
@@ -75,7 +75,8 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     list.head
   }
 
-  def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
+
+  override val keyClassTag: ClassTag[K] = classTag[K]
 
   def cache() = {
     // TODO

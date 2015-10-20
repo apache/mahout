@@ -25,6 +25,8 @@ import scala.reflect.ClassTag
  */
 trait DrmLike[K] {
 
+  val keyClassTag: ClassTag[K]
+
   protected[mahout] def partitioningTag: Long
 
   protected[mahout] def canHaveMissingRows: Boolean

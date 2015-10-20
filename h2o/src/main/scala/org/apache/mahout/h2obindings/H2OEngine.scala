@@ -112,7 +112,7 @@ object H2OEngine extends DistributedEngine {
       case op@OpRowRange(a, r) => RowRange.exec(tr2phys(a)(op.classTagA), r)
       // Custom operators
       case blockOp: OpMapBlock[K, _] => MapBlock.exec(tr2phys(blockOp.A)(blockOp.classTagA), blockOp.ncol, blockOp.bmf,
-        (blockOp.classTagK == implicitly[ClassTag[String]]), blockOp.classTagA, blockOp.classTagK)
+        (blockOp.keyClassTag == implicitly[ClassTag[String]]), blockOp.classTagA, blockOp.keyClassTag)
       case op@OpPar(a, m, e) => Par.exec(tr2phys(a)(op.classTagA), m, e)
       case cp: CheckpointedDrm[K] => cp.h2odrm
       case _ => throw new IllegalArgumentException("Internal:Optimizer has no exec policy for operator %s."

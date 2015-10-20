@@ -49,6 +49,4 @@ abstract class AbstractBinaryOp[A: ClassTag, B: ClassTag, K: ClassTag]
 
   def classTagB: ClassTag[B] = implicitly[ClassTag[B]]
 
-  def classTagK: ClassTag[K] = implicitly[ClassTag[K]]
-
 }

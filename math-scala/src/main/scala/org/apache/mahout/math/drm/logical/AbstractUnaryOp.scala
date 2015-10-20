@@ -30,8 +30,6 @@ abstract class AbstractUnaryOp[A: ClassTag, K: ClassTag]
 
   def classTagA: ClassTag[A] = implicitly[ClassTag[A]]
 
-  def classTagK: ClassTag[K] = implicitly[ClassTag[K]]
-
   override protected[mahout] lazy val canHaveMissingRows: Boolean = A.canHaveMissingRows
 
 }
