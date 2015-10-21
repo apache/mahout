@@ -78,9 +78,9 @@ if [ "x$alg" != "xclean" ]; then
         ########################################################
     fi
     if [ ! -e ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml ]; then
-      echo "Extracting..."
+        echo "Extracting..."
        
-      cd ${WORK_DIR}/wikixml && bunzip2 enwiki-latest-pages-articles.xml.bz2 && cd .. && cd ..
+        cd ${WORK_DIR}/wikixml && bunzip2 enwiki-latest-pages-articles.xml.bz2 && cd .. && cd ..
     fi
 
 echo $START_PATH
