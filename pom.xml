@@ -27,7 +27,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.11.1-SNAPSHOT</version>
+  <version>0.12.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -121,8 +121,7 @@
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
     <spark.version>1.3.1</spark.version>
-    <!-- TODO: Remove snapshot dependency when Flink 0.9.1 is released -->
-    <flink.version>0.9-SNAPSHOT</flink.version>
+    <flink.version>0.10-SNAPSHOT</flink.version>
     <h2o.version>0.1.25</h2o.version>
   </properties>
   <issueManagement>
@@ -666,7 +665,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[1.7, 1.8)</version>
+                  <version>[1.7,)</version>
                 </requireJavaVersion>
                   <requireMavenVersion>
                     <version>[3.3.3,)</version>
