@@ -15,19 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.io
+package org.apache.mahout.common.io
 
-import org.apache.log4j.Logger
+import com.esotericsoftware.kryo.io.{Input, Output}
+import com.esotericsoftware.kryo.{Kryo, Serializer}
 import org.apache.mahout.logging._
 import org.apache.mahout.math._
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
-import com.esotericsoftware.kryo.io.{OutputChunked, Output, Input}
-import com.esotericsoftware.kryo.{Kryo, Serializer}
-
-import collection._
-import JavaConversions._
+import scala.collection.JavaConversions._
 
 
 object VectorKryoSerializer {
@@ -160,7 +156,7 @@ class VectorKryoSerializer(val laxPrecision: Boolean = false) extends Serializer
     val vec: Vector = flags match {
 
       // Dense
-      case _: Int if ((flags & FLAG_DENSE) != 0) =>
+      case _: Int if (flags & FLAG_DENSE) != 0 =>
 
         trace(s"Deserializing dense vector.")
 
@@ -176,7 +172,7 @@ class VectorKryoSerializer(val laxPrecision: Boolean = false) extends Serializer
         flags match {
 
           // Sequential.
-          case _: Int if ((flags & FLAG_SEQUENTIAL) != 0) =>
+          case _: Int if (flags & FLAG_SEQUENTIAL) != 0 =>
 
             trace("Deserializing as sequential sparse vector.")
 
@@ -243,7 +239,7 @@ class VectorKryoSerializer(val laxPrecision: Boolean = false) extends Serializer
 
     name.map{name =>
 
-      trace(s"Recovering named vector's name ${name}.")
+      trace(s"Recovering named vector's name $name.")
 
       new NamedVector(vec, name)
     }
