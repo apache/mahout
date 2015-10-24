@@ -21,9 +21,12 @@
 # script and the ExecutorRunner in standalone cluster mode.
 
 # Figure out where Spark is installed
-FWDIR="$(cd "`dirname "$0"`"/..; pwd)"
+#FWDIR="$(cd "`dirname "$0"`"/..; pwd)"
+FWDIR="$SPARK_HOME"
 
-. "$FWDIR"/bin/load-spark-env.sh
+echo "Using FWDIR: $FWDIR"
+
+#. "$FWDIR"/bin/load-spark-env.sh # not executable by defult in $SPARK_HOME/bin
 
 function appendToClasspath(){
   if [ -n "$1" ]; then
