@@ -56,7 +56,7 @@ class RowsFlinkDrm[K: ClassTag](val ds: DrmDataSet[K], val ncol: Int) extends Fl
 
   def isBlockified = false
 
-  def asBlockified(): BlockifiedFlinkDrm[K] = {
+  def asBlockified : BlockifiedFlinkDrm[K] = {
     val ncolLocal = ncol
     val classTag = implicitly[ClassTag[K]]
 
@@ -100,9 +100,8 @@ class BlockifiedFlinkDrm[K: ClassTag](val ds: BlockifiedDrmDataSet[K], val ncol:
     val out = ds.flatMap(new FlatMapFunction[(Array[K], Matrix), DrmTuple[K]] {
       def flatMap(typle: (Array[K], Matrix), out: Collector[DrmTuple[K]]): Unit = typle match {
         case (keys, block) => keys.view.zipWithIndex.foreach {
-          case (key, idx) => {
+          case (key, idx) =>
             out.collect((key, block(idx, ::)))
-          }
         }
       }
     })
