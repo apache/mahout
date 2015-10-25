@@ -66,6 +66,7 @@ object FlinkEngine extends DistributedEngine {
     implicit val env = dc.asInstanceOf[FlinkDistributedContext].env
 
     val metadata = hdfsUtils.readDrmHeader(path)
+
     val unwrapKey = metadata.unwrapKeyFunction
 
     val dataset = env.readHadoopFile(new SequenceFileInputFormat[Writable, VectorWritable],
