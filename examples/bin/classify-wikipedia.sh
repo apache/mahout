@@ -63,6 +63,8 @@ if [ "x$alg" != "xclean" ]; then
   mkdir -p ${WORK_DIR}
     if [ ! -e ${WORK_DIR}/wikixml ]; then
         mkdir -p ${WORK_DIR}/wikixml
+    fi
+    if [ ! -e ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2 ]; then
         echo "Downloading wikipedia XML dump"
         ########################################################   
         #  Datasets: uncomment and run "clean" to change dataset   
@@ -74,10 +76,11 @@ if [ "x$alg" != "xclean" ]; then
         ######### full wikipedia dump: 10G zipped
         #curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
         ########################################################
-      
-      echo "Extracting..."
+    fi
+    if [ ! -e ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml ]; then
+        echo "Extracting..."
        
-      cd ${WORK_DIR}/wikixml && bunzip2 enwiki-latest-pages-articles.xml.bz2 && cd .. && cd ..
+        cd ${WORK_DIR}/wikixml && bunzip2 enwiki-latest-pages-articles.xml.bz2 && cd .. && cd ..
     fi
 
 echo $START_PATH
