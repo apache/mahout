@@ -29,8 +29,8 @@ object FlinkOpAewB {
     val classTag = extractRealClassTag(op.A)
     val joiner = selector[Vector, Any](classTag.asInstanceOf[ClassTag[Any]]) 
 
-    val rowsA = A.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
-    val rowsB = B.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsA = A.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
 
     val res: DataSet[(Any, Vector)] = 
       rowsA.coGroup(rowsB).where(joiner).equalTo(joiner)

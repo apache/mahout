@@ -50,8 +50,8 @@ object FlinkOpCBind {
     val classTag = extractRealClassTag(op.A)
     val joiner = selector[Vector, Any](classTag.asInstanceOf[ClassTag[Any]]) 
 
-    val rowsA = A.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
-    val rowsB = B.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsA = A.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
 
     val res: DataSet[(Any, Vector)] = 
       rowsA.coGroup(rowsB).where(joiner).equalTo(joiner)
@@ -102,9 +102,9 @@ object FlinkOpCBind {
 
   def cbindScalar[K: ClassTag](op: OpCbindScalar[K], A: FlinkDrm[K], x: Double): FlinkDrm[K] = {
     val left = op.leftBind
-    val ds = A.blockify.ds
+    val ds = A.asBlockified.ds
 
-    val out = A.blockify.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
+    val out = A.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
       def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = tuple match {
         case (keys, mat) => (keys, cbind(mat, x, left))
       }

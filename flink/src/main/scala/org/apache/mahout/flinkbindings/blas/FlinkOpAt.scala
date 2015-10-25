@@ -51,7 +51,7 @@ object FlinkOpAt {
   def sparseTrick(op: OpAt, A: FlinkDrm[Int]): FlinkDrm[Int] = {
     val ncol = op.ncol // # of rows of A, i.e. # of columns of A^T
 
-    val sparseParts = A.blockify.ds.flatMap(new FlatMapFunction[(Array[Int], Matrix), DrmTuple[Int]] {
+    val sparseParts = A.asBlockified.ds.flatMap(new FlatMapFunction[(Array[Int], Matrix), DrmTuple[Int]] {
       def flatMap(typle: (Array[Int], Matrix), out: Collector[DrmTuple[Int]]): Unit = typle match {
         case (keys, block) => {
           (0 until block.ncol).map(columnIdx => {

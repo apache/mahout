@@ -52,8 +52,8 @@ object FlinkOpAtB {
     val classTag = extractRealClassTag(op.A)
     val joiner = selector[Vector, Any](classTag.asInstanceOf[ClassTag[Any]]) 
 
-    val rowsAt = At.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
-    val rowsB = B.deblockify.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
     val joined = rowsAt.join(rowsB).where(joiner).equalTo(joiner)
 
     val ncol = op.ncol

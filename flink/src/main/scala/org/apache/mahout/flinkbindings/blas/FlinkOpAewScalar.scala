@@ -44,7 +44,7 @@ object FlinkOpAewScalar {
   def opScalarNoSideEffect[K: ClassTag](op: OpAewScalar[K], A: FlinkDrm[K], scalar: Double): FlinkDrm[K] = {
     val function = EWOpsCloning.strToFunction(op.op)
 
-    val res = A.blockify.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
+    val res = A.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
       def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = tuple match {
         case (keys, mat) => (keys, function(mat, scalar))
       }
@@ -58,7 +58,7 @@ object FlinkOpAewScalar {
     val inplace = isInplace
 
     val res = if (op.evalZeros) {
-      A.blockify.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
+      A.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
         def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = {
           val (keys, block) = tuple
           val newBlock = if (inplace) block else block.cloned
@@ -67,7 +67,7 @@ object FlinkOpAewScalar {
         }
       })
     } else {
-      A.blockify.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
+      A.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
         def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = {
           val (keys, block) = tuple
           val newBlock = if (inplace) block else block.cloned

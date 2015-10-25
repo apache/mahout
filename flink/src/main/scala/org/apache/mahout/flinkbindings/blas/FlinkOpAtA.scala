@@ -45,7 +45,7 @@ object FlinkOpAtA {
   }
 
   def slim(op: OpAtA[_], A: FlinkDrm[_]): Matrix = {
-    val ds = A.blockify.ds.asInstanceOf[DataSet[(Array[Any], Matrix)]]
+    val ds = A.asBlockified.ds.asInstanceOf[DataSet[(Array[Any], Matrix)]]
 
     val res = ds.map(new MapFunction[(Array[Any], Matrix), Matrix] {
       // TODO: optimize it: use upper-triangle matrices like in Spark
@@ -62,7 +62,7 @@ object FlinkOpAtA {
   def fat(op: OpAtA[Any], A: FlinkDrm[Any]): FlinkDrm[Int] = {
     val nrow = op.A.nrow
     val ncol = op.A.ncol
-    val ds = A.blockify.ds
+    val ds = A.asBlockified.ds
 
     val numberOfPartitions: DataSet[Int] = ds.map(new MapFunction[(Array[Any], Matrix), Int] {
       def map(a: (Array[Any], Matrix)): Int = 1

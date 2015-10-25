@@ -35,7 +35,7 @@ object FlinkOpRowRange {
     val rowRange = op.rowRange
     val firstIdx = rowRange.head
 
-    val filtered = A.deblockify.ds.filter(new FilterFunction[(Int, Vector)] {
+    val filtered = A.asRowWise.ds.filter(new FilterFunction[(Int, Vector)] {
       def filter(tuple: (Int, Vector)): Boolean = tuple match {
         case (idx, vec) => rowRange.contains(idx)
       }

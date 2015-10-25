@@ -19,6 +19,7 @@
 package org.apache.mahout.flinkbindings
 
 import java.util.Collection
+
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
@@ -30,7 +31,6 @@ import org.apache.hadoop.io.Writable
 import org.apache.hadoop.mapred.FileInputFormat
 import org.apache.hadoop.mapred.JobConf
 import org.apache.hadoop.mapred.SequenceFileInputFormat
-import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.blas._
 import org.apache.mahout.flinkbindings.drm._
 import org.apache.mahout.flinkbindings.io.HDFSUtil
@@ -58,16 +58,20 @@ object FlinkEngine extends DistributedEngine {
    */
   override def drmDfsRead(path: String, parMin: Int = 0)
                          (implicit dc: DistributedContext): CheckpointedDrm[_] = {
+
+    // Require that context is actually Flink context.
+    require(dc.isInstanceOf[FlinkDistributedContext], "Supplied context must be for the Flink backend.")
+
+    // Extract the Flink Environment variable
+    implicit val env = dc.asInstanceOf[FlinkDistributedContext].env
+
     val metadata = hdfsUtils.readDrmHeader(path)
     val unwrapKey = metadata.unwrapKeyFunction
 
-    val job = new JobConf
-    val hadoopInput = new SequenceFileInputFormat[Writable, VectorWritable]
-    FileInputFormat.addInputPath(job, new org.apache.hadoop.fs.Path(path))
+    val dataset = env.readHadoopFile(new SequenceFileInputFormat[Writable, VectorWritable],
+      classOf[Writable], classOf[VectorWritable], path)
 
-    val writables = dc.env.createHadoopInput(hadoopInput, classOf[Writable], classOf[VectorWritable], job)
-
-    val res = writables.map(new MapFunction[Tuple2[Writable, VectorWritable], (Any, Vector)] {
+    val res = dataset.map(new MapFunction[Tuple2[Writable, VectorWritable], (Any, Vector)] {
       def map(tuple: Tuple2[Writable, VectorWritable]): (Any, Vector) = {
         (unwrapKey(tuple.f0), tuple.f1)
       }
@@ -89,7 +93,7 @@ object FlinkEngine extends DistributedEngine {
   override def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
     // Flink-specific Physical Plan translation.
     val drm = flinkTranslate(plan)
-    val newcp = new CheckpointedFlinkDrm(ds = drm.deblockify.ds, _nrow = plan.nrow, _ncol = plan.ncol)
+    val newcp = new CheckpointedFlinkDrm(ds = drm.asRowWise.ds, _nrow = plan.nrow, _ncol = plan.ncol)
     newcp.cache()
   }
 
@@ -101,7 +105,7 @@ object FlinkEngine extends DistributedEngine {
       // TODO: create specific implementation of Atx, see MAHOUT-1749 
       val opAt = OpAt(a)
       val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a)(op.classTagA))
-      val atCast = new CheckpointedFlinkDrm(at.deblockify.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
+      val atCast = new CheckpointedFlinkDrm(at.asRowWise.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
       val opAx = OpAx(atCast, x)
       FlinkOpAx.blockifiedBroadcastAx(opAx, flinkTranslate(atCast)(op.classTagA))
     }
@@ -112,11 +116,11 @@ object FlinkEngine extends DistributedEngine {
       // TODO: create specific implementation of ABt, see MAHOUT-1750 
       val opAt = OpAt(a.asInstanceOf[DrmLike[Int]]) // TODO: casts!
       val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a.asInstanceOf[DrmLike[Int]]))
-      val c = new CheckpointedFlinkDrm(at.deblockify.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
+      val c = new CheckpointedFlinkDrm(at.asRowWise.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
 
       val opBt = OpAt(b.asInstanceOf[DrmLike[Int]]) // TODO: casts!
       val bt = FlinkOpAt.sparseTrick(opBt, flinkTranslate(b.asInstanceOf[DrmLike[Int]]))
-      val d = new CheckpointedFlinkDrm(bt.deblockify.ds, _nrow=opBt.nrow, _ncol=opBt.ncol)
+      val d = new CheckpointedFlinkDrm(bt.asRowWise.ds, _nrow=opBt.nrow, _ncol=opBt.ncol)
 
       FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d))
                 .asInstanceOf[FlinkDrm[K]]
@@ -167,7 +171,7 @@ object FlinkEngine extends DistributedEngine {
   override def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
 
-    val result = drm.blockify.ds.map(new MapFunction[(Array[K], Matrix), Vector] {
+    val result = drm.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), Vector] {
       def map(tuple: (Array[K], Matrix)): Vector = {
         val (_, block) = tuple
         val acc = block(0, ::).like()

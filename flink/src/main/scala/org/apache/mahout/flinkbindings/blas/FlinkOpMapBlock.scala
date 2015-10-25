@@ -34,7 +34,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 object FlinkOpMapBlock {
 
   def apply[S, R: ClassTag](src: FlinkDrm[S], ncol: Int, function: BlockMapFunc[S, R]): FlinkDrm[R] = {
-    val res = src.blockify.ds.map(new MapFunction[(Array[S], Matrix), (Array[R], Matrix)] {
+    val res = src.asBlockified.ds.map(new MapFunction[(Array[S], Matrix), (Array[R], Matrix)] {
       def map(block: (Array[S], Matrix)): (Array[R], Matrix) =  {
         val out = function(block)
         assert(out._2.nrow == block._2.nrow, "block mapping must return same number of rows.")

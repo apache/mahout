@@ -44,7 +44,7 @@ object FlinkOpAx {
 
     val singletonDataSetX = ctx.env.fromElements(op.x)
 
-    val out = A.blockify.ds.map(new RichMapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
+    val out = A.asBlockified.ds.map(new RichMapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
       var x: Vector = null
 
       override def open(params: Configuration): Unit = {

@@ -26,7 +26,6 @@ import RLikeOps._
 import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.sparkbindings.drm.{cpDrmGeneric2DrmRddInput, CheckpointedDrmSpark, DrmRddInput}
 import org.apache.mahout.math._
-import scala.Predef
 import scala.reflect.ClassTag
 import scala.reflect.classTag
 import org.apache.spark.storage.StorageLevel
@@ -35,8 +34,6 @@ import org.apache.hadoop.io._
 import collection._
 import JavaConversions._
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.spark.rdd.RDD
 import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
 
 

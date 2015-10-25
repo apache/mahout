@@ -41,7 +41,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
 
     val opAx = new OpAx(A, x)
     val res = FlinkOpAx.blockifiedBroadcastAx(opAx, A)
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds)
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds)
     val output = drm.collect
 
     val b = output(::, 0)
@@ -54,7 +54,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
 
     val opAt = new OpAt(A)
     val res = FlinkOpAt.sparseTrick(opAt, A)
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.ncol, _ncol=inCoreA.nrow)
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.ncol, _ncol=inCoreA.nrow)
     val output = drm.collect
 
     assert((output - inCoreA.t).norm < 1e-6)
@@ -71,7 +71,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val opAtB = new OpAtB(At, B)
     val res = FlinkOpAtB.notZippable(opAtB, At, B)
 
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreAt.ncol, _ncol=inCoreB.ncol)
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreAt.ncol, _ncol=inCoreB.ncol)
     val output = drm.collect
 
     val expected = inCoreAt.t %*% inCoreB
@@ -86,7 +86,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val op = new OpAewScalar(A, scalar, "*") 
     val res = FlinkOpAewScalar.opScalarNoSideEffect(op, A, scalar)
 
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, _ncol=inCoreA.ncol)
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.nrow, _ncol=inCoreA.ncol)
     val output = drm.collect
 
     val expected = inCoreA  * scalar
@@ -100,7 +100,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val op = new OpAewB(A, A, "*")
     val res = FlinkOpAewB.rowWiseJoinNoSideEffect(op, A, A)
 
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, _ncol=inCoreA.ncol)
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.nrow, _ncol=inCoreA.ncol)
     val output = drm.collect
 
     assert((output - (inCoreA  * inCoreA)).norm < 1e-6)
@@ -115,7 +115,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val op = new OpCbind(A, B)
     val res = FlinkOpCBind.cbind(op, A, B)
 
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, 
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.nrow,
         _ncol=(inCoreA.ncol + inCoreB.ncol))
     val output = drm.collect
 
@@ -130,7 +130,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val op = new OpCbindScalar(A, 1, true)
     val res = FlinkOpCBind.cbindScalar(op, A, 1)
 
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, 
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.nrow,
         _ncol=(inCoreA.ncol + 1))
     val output = drm.collect
 
@@ -145,7 +145,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val op = new OpCbindScalar(A, 1, false)
     val res = FlinkOpCBind.cbindScalar(op, A, 1)
 
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=inCoreA.nrow, 
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.nrow,
         _ncol=(inCoreA.ncol + 1))
     val output = drm.collect
 
@@ -161,7 +161,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val op = new OpRowRange(A, range)
     val res = FlinkOpRowRange.slice(op, A)
 
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=op.nrow, 
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=op.nrow,
         _ncol=inCoreA.ncol)
     val output = drm.collect
 
@@ -177,7 +177,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val op = new OpTimesRightMatrix(A, inCoreB)
     val res = FlinkOpTimesRightMatrix.drmTimesInCore(op, A, inCoreB)
 
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=op.nrow, 
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=op.nrow,
         _ncol=op.ncol)
     val output = drm.collect
 
@@ -204,7 +204,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val op = new OpAtA(Aany)
 
     val res = FlinkOpAtA.fat(op, Aany)
-    val drm = new CheckpointedFlinkDrm(res.deblockify.ds, _nrow=op.nrow, _ncol=op.ncol)
+    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=op.nrow, _ncol=op.ncol)
     val output = drm.collect
     println(output)
 
