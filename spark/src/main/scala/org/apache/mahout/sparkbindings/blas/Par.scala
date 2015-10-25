@@ -17,7 +17,7 @@ object Par {
     implicit val ktag = op.keyClassTag
     val srcBlockified = src.isBlockified
 
-    val srcRdd = if (srcBlockified) src.toBlockifiedDrmRdd(op.ncol) else src.toDrmRdd()
+    val srcRdd = if (srcBlockified) src.asBlockified(op.ncol) else src.asRowWise()
     val srcNParts = srcRdd.partitions.length
 
     // To what size?
@@ -34,16 +34,17 @@ object Par {
     if (targetParts > srcNParts) {
 
       // Expanding. Always requires deblockified stuff. May require re-shuffling.
-      val rdd = src.toDrmRdd().repartition(numPartitions = targetParts)
+      val rdd = src.asRowWise().repartition(numPartitions = targetParts)
+
       rdd
 
     } else if (targetParts < srcNParts) {
       // Shrinking.
 
       if (srcBlockified) {
-        drm.rbind(src.toBlockifiedDrmRdd(op.ncol).coalesce(numPartitions = targetParts))
+        drm.rbind(src.asBlockified(op.ncol).coalesce(numPartitions = targetParts))
       } else {
-        src.toDrmRdd().coalesce(numPartitions = targetParts)
+        src.asRowWise().coalesce(numPartitions = targetParts)
       }
     } else {
       // no adjustment required.
