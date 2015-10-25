@@ -28,6 +28,9 @@ echo "Using FWDIR: $FWDIR"
 
 #. "$FWDIR"/bin/load-spark-env.sh # not executable by defult in $SPARK_HOME/bin
 
+"$MAHOUT_HOME"/bin/mahout-load-spark-env.sh
+
+
 function appendToClasspath(){
   if [ -n "$1" ]; then
     if [ -n "$CLASSPATH" ]; then

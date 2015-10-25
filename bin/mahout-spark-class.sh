@@ -21,7 +21,7 @@
 #export SPARK_HOME="$(cd "`dirname "$0"`"/..; pwd)"
 
 #"$SPARK_HOME"/bin/load-spark-env.sh # not executable by defult in $SPARK_HOME/bin
-
+"$MAHOUT_HOME"/bin/mahout-load-spark-env.sh
 
 # Find the java binary
 if [ -n "${JAVA_HOME}" ]; then
