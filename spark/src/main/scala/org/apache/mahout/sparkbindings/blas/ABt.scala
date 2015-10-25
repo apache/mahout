@@ -73,9 +73,9 @@ object ABt {
       srcB: DrmRddInput[Int]): DrmRddInput[K] = {
 
     // Blockify everything.
-    val blocksA = srcA.toBlockifiedDrmRdd(operator.A.ncol)
+    val blocksA = srcA.asBlockified(operator.A.ncol)
 
-    val blocksB = srcB.toBlockifiedDrmRdd(operator.B.ncol)
+    val blocksB = srcB.asBlockified(operator.B.ncol)
 
     val prodNCol = operator.ncol
     val prodNRow = operator.nrow
@@ -212,7 +212,7 @@ object ABt {
       srcB: DrmRddInput[Int]): DrmRddInput[K] = {
 
     // Blockify everything.
-    val blocksA = srcA.toBlockifiedDrmRdd(operator.A.ncol)
+    val blocksA = srcA.asBlockified(operator.A.ncol)
 
         // Mark row-blocks with group id
         .mapPartitionsWithIndex((part, iter) => {
@@ -232,7 +232,7 @@ object ABt {
       }
     })
 
-    val blocksB = srcB.toBlockifiedDrmRdd(operator.B.ncol)
+    val blocksB = srcB.asBlockified(operator.B.ncol)
 
     // Final product's geometry. We want to extract that into local variables since we want to use
     // them as closure attributes.

@@ -33,7 +33,7 @@ object CbindAB {
   private val log = Logger.getLogger(CbindAB.getClass)
 
   def cbindAScalar[K:ClassTag](op: OpCbindScalar[K], srcA:DrmRddInput[K]) : DrmRddInput[K] = {
-    val srcRdd = srcA.toDrmRdd()
+    val srcRdd = srcA.asRowWise()
 
     val ncol = op.A.ncol
     val x = op.x
@@ -62,8 +62,8 @@ object CbindAB {
 
   def cbindAB_nograph[K: ClassTag](op: OpCbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
 
-    val a = srcA.toDrmRdd()
-    val b = srcB.toDrmRdd()
+    val a = srcA.asRowWise()
+    val b = srcB.asRowWise()
     val n = op.ncol
     val n1 = op.A.ncol
     val n2 = n - n1

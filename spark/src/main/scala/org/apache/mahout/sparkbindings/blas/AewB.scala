@@ -67,8 +67,8 @@ object AewB {
       case default => throw new IllegalArgumentException("Unsupported elementwise operator:%s.".format(opId))
     }
 
-    val a = srcA.toDrmRdd()
-    val b = srcB.toDrmRdd()
+    val a = srcA.asRowWise()
+    val b = srcB.asRowWise()
 
     debug(s"A${op.op}B: #partsA=${a.partitions.size},#partsB=${b.partitions.size}.")
 
@@ -120,10 +120,10 @@ object AewB {
     // Before obtaining blockified rdd, see if we have to fix int row key consistency so that missing
     // rows can get lazily pre-populated with empty vectors before proceeding with elementwise scalar.
     val aBlockRdd = if (implicitly[ClassTag[K]] == ClassTag.Int && op.A.canHaveMissingRows && evalZeros) {
-      val fixedRdd = fixIntConsistency(op.A.asInstanceOf[DrmLike[Int]], src = srcA.toDrmRdd().asInstanceOf[DrmRdd[Int]])
+      val fixedRdd = fixIntConsistency(op.A.asInstanceOf[DrmLike[Int]], src = srcA.asRowWise().asInstanceOf[DrmRdd[Int]])
       drm.blockify(fixedRdd, blockncol = op.A.ncol).asInstanceOf[BlockifiedDrmRdd[K]]
     } else {
-      srcA.toBlockifiedDrmRdd(op.A.ncol)
+      srcA.asBlockified(op.A.ncol)
     }
 
     val rdd = aBlockRdd.map {case (keys, block) =>
@@ -169,10 +169,10 @@ object AewB {
     // Before obtaining blockified rdd, see if we have to fix int row key consistency so that missing 
     // rows can get lazily pre-populated with empty vectors before proceeding with elementwise scalar.
     val aBlockRdd = if (implicitly[ClassTag[K]] == ClassTag.Int && op.A.canHaveMissingRows) {
-      val fixedRdd = fixIntConsistency(op.A.asInstanceOf[DrmLike[Int]], src = srcA.toDrmRdd().asInstanceOf[DrmRdd[Int]])
+      val fixedRdd = fixIntConsistency(op.A.asInstanceOf[DrmLike[Int]], src = srcA.asRowWise().asInstanceOf[DrmRdd[Int]])
       drm.blockify(fixedRdd, blockncol = op.A.ncol).asInstanceOf[BlockifiedDrmRdd[K]]
     } else {
-      srcA.toBlockifiedDrmRdd(op.A.ncol)
+      srcA.asBlockified(op.A.ncol)
     }
 
     debug(s"A${op.op}$scalar: #parts=${aBlockRdd.partitions.size}.")

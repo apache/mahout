@@ -104,7 +104,7 @@ object SparkEngine extends DistributedEngine {
   BlockReduceFunc): Matrix = {
 
     import drm._
-    drm.toBlockifiedDrmRdd(ncol = drm.ncol).map(bmf(_)).reduce(rf)
+    drm.asBlockified(ncol = drm.ncol).map(bmf(_)).reduce(rf)
   }
 
   /**

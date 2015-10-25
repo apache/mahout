@@ -50,7 +50,7 @@ object AtA {
 
       // If we can comfortably fit upper-triangular operator into a map memory, we will run slim
       // algorithm with upper-triangular accumulators in maps. 
-      val inCoreA = at_a_slim(srcRdd = srcRdd.toDrmRdd(), operator = operator)
+      val inCoreA = at_a_slim(srcRdd = srcRdd.asRowWise(), operator = operator)
       val drmRdd = parallelizeInCore(inCoreA, numPartitions = 1)(sc = srcRdd.sparkContext)
       drmRdd
 
@@ -58,7 +58,7 @@ object AtA {
 
       // Otherwise, we need to run a distributed, big version
       //      new DrmRddInput(rowWiseSrc = Some(operator.ncol, at_a_nongraph(srcRdd = srcRdd, op = operator)))
-      at_a_nongraph_mmul(srcRdd = srcRdd.toBlockifiedDrmRdd(operator.A.ncol), op = operator)
+      at_a_nongraph_mmul(srcRdd = srcRdd.asBlockified(operator.A.ncol), op = operator)
 
     }
   }

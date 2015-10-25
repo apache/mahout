@@ -25,7 +25,7 @@ object AinCoreB {
   }
 
   private def rightMultiply_diag[K: ClassTag](op: OpTimesRightMatrix[K], srcA: DrmRddInput[K]): DrmRddInput[K] = {
-    val rddA = srcA.toBlockifiedDrmRdd(op.A.ncol)
+    val rddA = srcA.asBlockified(op.A.ncol)
     implicit val ctx:DistributedContext = rddA.context
     val dg = drmBroadcast(op.right.viewDiagonal())
 
@@ -41,7 +41,7 @@ object AinCoreB {
 
   private def rightMultiply_common[K: ClassTag](op: OpTimesRightMatrix[K], srcA: DrmRddInput[K]): DrmRddInput[K] = {
 
-    val rddA = srcA.toBlockifiedDrmRdd(op.A.ncol)
+    val rddA = srcA.asBlockified(op.A.ncol)
     implicit val sc:DistributedContext = rddA.sparkContext
 
     debug(s"operator A %*% inCoreB. #parts=${rddA.partitions.size}.")

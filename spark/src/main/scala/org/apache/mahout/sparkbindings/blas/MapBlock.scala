@@ -31,7 +31,7 @@ object MapBlock {
     // into closure.
     val bmf = operator.bmf
     val ncol = operator.ncol
-    val rdd = src.toBlockifiedDrmRdd(operator.A.ncol).map(blockTuple => {
+    val rdd = src.asBlockified(operator.A.ncol).map(blockTuple => {
       val out = bmf(blockTuple)
 
       assert(out._2.nrow == blockTuple._2.nrow, "block mapping must return same number of rows.")
