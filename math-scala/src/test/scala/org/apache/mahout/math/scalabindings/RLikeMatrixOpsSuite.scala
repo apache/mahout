@@ -133,6 +133,7 @@ class RLikeMatrixOpsSuite extends FunSuite with MahoutSuite {
 
     // Dense matrix tests.
     println(s"Ad %*% Bd: ${getMmulAvgs(mxAd, mxBd, n)}")
+    println(s"Ad(::,::) %*% Bd: ${getMmulAvgs(mxAd(0 until mxAd.nrow,::), mxBd, n)}")
     println(s"Ad' %*% Bd: ${getMmulAvgs(mxAd.t, mxBd, n)}")
     println(s"Ad %*% Bd': ${getMmulAvgs(mxAd, mxBd.t, n)}")
     println(s"Ad' %*% Bd': ${getMmulAvgs(mxAd.t, mxBd.t, n)}")
@@ -353,4 +354,13 @@ class RLikeMatrixOpsSuite extends FunSuite with MahoutSuite {
 
   }
 
+  test("dense-view-debug") {
+    val d = 500
+    // Dense row-wise
+    val mxAd = new DenseMatrix(d, d) := Matrices.gaussianView(d, d, 134) + 1
+    val mxBd = new DenseMatrix(d, d) := Matrices.gaussianView(d, d, 134) - 1
+
+    mxAd(0 until mxAd.nrow, ::) %*% mxBd
+
+  }
 }

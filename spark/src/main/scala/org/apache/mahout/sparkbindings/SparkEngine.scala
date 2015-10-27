@@ -176,7 +176,7 @@ object SparkEngine extends DistributedEngine {
   private[sparkbindings] def parallelizeInCore(m: Matrix, numPartitions: Int = 1)
                                               (implicit sc: DistributedContext): DrmRdd[Int] = {
 
-    val p = (0 until m.nrow).map(i => i → m(i, ::))
+    val p = (0 until m.nrow).map(i ⇒ i → m(i, ::))
     sc.parallelize(p, numPartitions)
 
   }
