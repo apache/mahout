@@ -65,15 +65,17 @@ class RowsFlinkDrm[K: ClassTag](val ds: DrmDataSet[K], val ncol: Int) extends Fl
         val it = values.asScala.seq
 
         val (keys, vectors) = it.unzip
-        val isDense = vectors.head.isDense
+        if (vectors.nonEmpty) {
+          val isDense = vectors.head.isDense
 
-        if (isDense) {
-          val matrix = new DenseMatrix(vectors.size, ncolLocal)
-          vectors.zipWithIndex.foreach { case (vec, idx) => matrix(idx, ::) := vec }
-          out.collect((keys.toArray(classTag), matrix))
-        } else {
-          val matrix = new SparseRowMatrix(vectors.size, ncolLocal, vectors.toArray)
-          out.collect((keys.toArray(classTag), matrix))
+          if (isDense) {
+            val matrix = new DenseMatrix(vectors.size, ncolLocal)
+            vectors.zipWithIndex.foreach { case (vec, idx) => matrix(idx, ::) := vec }
+            out.collect((keys.toArray(classTag), matrix))
+          } else {
+            val matrix = new SparseRowMatrix(vectors.size, ncolLocal, vectors.toArray)
+            out.collect((keys.toArray(classTag), matrix))
+          }
         }
       }
     })

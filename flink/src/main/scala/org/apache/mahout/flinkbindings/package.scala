@@ -18,34 +18,19 @@
  */
 package org.apache.mahout
 
+import org.apache.flink.api.common.functions.{FilterFunction, MapFunction}
+import org.apache.flink.api.java.{DataSet, ExecutionEnvironment}
+import org.apache.mahout.flinkbindings.drm.{CheckpointedFlinkDrmOps, CheckpointedFlinkDrm, FlinkDrm, RowsFlinkDrm}
+import org.apache.mahout.math.{DenseVector, Matrix, MatrixWritable, Vector, VectorWritable}
+import org.apache.mahout.math.drm.{BlockifiedDrmTuple, CheckpointedDrm, DistributedContext, DrmTuple, _}
+import org.slf4j.LoggerFactory
+
 import scala.Array._
 import scala.reflect.ClassTag
-import org.apache.flink.api.common.functions.FilterFunction
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.java.DataSet
-import org.apache.flink.api.java.ExecutionEnvironment
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.flinkbindings.FlinkDistributedContext
-import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.mahout.math._
-import org.apache.mahout.math.DenseVector
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.MatrixWritable
-import org.apache.mahout.math.Vector
-import org.apache.mahout.math.VectorWritable
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.drm.BlockifiedDrmTuple
-import org.apache.mahout.math.drm.CheckpointedDrm
-import org.apache.mahout.math.drm.DistributedContext
-import org.apache.mahout.math.drm.DrmTuple
-import org.slf4j.LoggerFactory
-import org.apache.mahout.math.drm.logical.CheckpointAction
 
 package object flinkbindings {
 
-  private[flinkbindings] val log = LoggerFactory.getLogger("apache.org.mahout.flinkbingings")
+  private[flinkbindings] val log = LoggerFactory.getLogger("apache.org.mahout.flinkbindings")
 
   /** Row-wise organized DRM dataset type */
   type DrmDataSet[K] = DataSet[DrmTuple[K]]
@@ -64,17 +49,27 @@ package object flinkbindings {
 
   implicit def wrapContext(env: ExecutionEnvironment): FlinkDistributedContext =
     new FlinkDistributedContext(env)
+
   implicit def unwrapContext(ctx: FlinkDistributedContext): ExecutionEnvironment = ctx.env
 
-  private[flinkbindings] implicit def castCheckpointedDrm[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedFlinkDrm[K] = {
+  private[flinkbindings] implicit def castCheckpointedDrm[K: ClassTag](drm: CheckpointedDrm[K])
+    : CheckpointedFlinkDrm[K] = {
+
     assert(drm.isInstanceOf[CheckpointedFlinkDrm[K]], "it must be a Flink-backed matrix")
     drm.asInstanceOf[CheckpointedFlinkDrm[K]]
   }
 
-  implicit def checkpointeDrmToFlinkDrm[K: ClassTag](cp: CheckpointedDrm[K]): FlinkDrm[K] = {
+  implicit def checkpointedDrmToFlinkDrm[K: ClassTag](cp: CheckpointedDrm[K]): FlinkDrm[K] = {
     val flinkDrm = castCheckpointedDrm(cp)
     new RowsFlinkDrm[K](flinkDrm.ds, flinkDrm.ncol)
   }
+
+  /** Adding Spark-specific ops */
+  implicit def cpDrm2cpDrmFlinkOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedFlinkDrmOps[K] =
+    new CheckpointedFlinkDrmOps[K](drm)
+
+  implicit def drm2cpDrmFlinkOps[K: ClassTag](drm: DrmLike[K]): CheckpointedFlinkDrmOps[K] = drm: CheckpointedDrm[K]
+
 
   private[flinkbindings] implicit def wrapAsWritable(m: Matrix): MatrixWritable = new MatrixWritable(m)
   private[flinkbindings] implicit def wrapAsWritable(v: Vector): VectorWritable = new VectorWritable(v)

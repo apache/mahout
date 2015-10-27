@@ -182,7 +182,7 @@ package object sparkbindings {
     val w = new StringWriter()
     closeables += w
 
-    var continue = true;
+    var continue = true
     val jars = new mutable.ArrayBuffer[String]()
     do {
       val cp = r.readLine()
@@ -230,7 +230,7 @@ package object sparkbindings {
 
     if (!part1Req) warn("blockified rdd: condition not met: exactly 1 per partition")
 
-    return part1Req
+    part1Req
   }
 
 }

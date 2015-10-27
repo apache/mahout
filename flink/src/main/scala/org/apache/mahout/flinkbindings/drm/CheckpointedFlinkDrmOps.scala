@@ -17,19 +17,19 @@
  * under the License.
  */
 
-package org.apache.mahout.sparkbindings.drm
+package org.apache.mahout.flinkbindings.drm
 
 import org.apache.mahout.math.drm.CheckpointedDrm
+
 import scala.reflect.ClassTag
 
-/** Additional Spark-specific operations. Requires underlying DRM to be running on Spark backend. */
-class CheckpointedDrmSparkOps[K: ClassTag](drm: CheckpointedDrm[K]) {
+class CheckpointedFlinkDrmOps[K: ClassTag](drm: CheckpointedDrm[K]) {
+  assert(drm.isInstanceOf[CheckpointedFlinkDrm[K]], "must be a Flink-backed matrix")
 
-  assert(drm.isInstanceOf[CheckpointedDrmSpark[K]], "must be a Spark-backed matrix")
+  private[flinkbindings] val flinkDrm = drm.asInstanceOf[CheckpointedFlinkDrm[K]]
 
-  private[sparkbindings] val sparkDrm = drm.asInstanceOf[CheckpointedDrmSpark[K]]
+  /** Flink matrix customization exposure */
+  def dataset = flinkDrm.ds
 
-  /** Spark matrix customization exposure */
-  def rdd = sparkDrm.rddInput.asRowWise()
 
 }

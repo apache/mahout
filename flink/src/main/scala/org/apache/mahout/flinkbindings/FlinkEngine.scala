@@ -20,6 +20,8 @@ package org.apache.mahout.flinkbindings
 
 import java.util.Collection
 
+import org.apache.flink.api.java.utils.DataSetUtils
+
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
@@ -64,9 +66,10 @@ object FlinkEngine extends DistributedEngine {
     implicit val env = dc.asInstanceOf[FlinkDistributedContext].env
 
     val metadata = hdfsUtils.readDrmHeader(path)
+    println(metadata)
 
     val unwrapKey = metadata.unwrapKeyFunction
-
+    println(unwrapKey)
     val dataset = env.readHadoopFile(new SequenceFileInputFormat[Writable, VectorWritable],
       classOf[Writable], classOf[VectorWritable], path)
 
@@ -221,7 +224,9 @@ object FlinkEngine extends DistributedEngine {
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
   override def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
                                            (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
+
     val parallelDrm = parallelize(m, numPartitions)
+
     new CheckpointedFlinkDrm(ds=parallelDrm, _nrow=m.numRows(), _ncol=m.numCols())
   }
 
@@ -275,6 +280,17 @@ object FlinkEngine extends DistributedEngine {
   def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = ???
 
   def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = ???
+
+//  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = {
+//
+//    val ncol = drmX match {
+//      case cp: CheckpointedFlinkDrm[K] ⇒ cp.ncol
+//      case _ ⇒ -1
+//    }
+//
+//    val sample = DataSetUtils.sampleWithSize(drmX.dataset, replacement, numSamples)
+//
+//  }
 
   /** Optional engine-specific all reduce tensor operation. */
   def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = 
