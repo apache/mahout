@@ -20,8 +20,6 @@ package org.apache.mahout.flinkbindings
 
 import java.util.Collection
 
-import org.apache.flink.api.java.utils.DataSetUtils
-
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
