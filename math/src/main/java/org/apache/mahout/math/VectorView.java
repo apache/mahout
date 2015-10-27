@@ -24,10 +24,10 @@ import com.google.common.collect.AbstractIterator;
 /** Implements subset view of a Vector */
 public class VectorView extends AbstractVector {
 
-  private Vector vector;
+  protected Vector vector;
 
   // the offset into the Vector
-  private int offset;
+  protected int offset;
 
   /** For serialization purposes only */
   public VectorView() {
