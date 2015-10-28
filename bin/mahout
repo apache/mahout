@@ -172,7 +172,8 @@ then
 
     # add dev targets if they exist
     for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
-      CLASSPATH=${CLASSPATH}:$f;
+      #CLASSPATH=${CLASSPATH}:$f;
+      echo "ignoring example jars"
     done
   fi
 
@@ -211,7 +212,7 @@ then
        CLASSPATH=${CLASSPATH}:$f;
     done
 
-    SPARK_CP_BIN="${SPARK_HOME}/bin/compute-classpath.sh"
+    SPARK_CP_BIN="${MAHOUT_HOME}/bin/compute-classpath.sh"
     if [ -x "${SPARK_CP_BIN}" ]; then
        SPARK_CLASSPATH=$("${SPARK_CP_BIN}" 2>/dev/null)
        CLASSPATH="${CLASSPATH}:${SPARK_CLASSPATH}"
@@ -220,6 +221,14 @@ then
       exit -1
     fi
 
+    SPARK_ASSEBMLY_BIN="${MAHOUT_HOME}/bin/mahout-spark-class.sh"
+    if [ -x "${SPARK_ASSEBMLY_BIN}" ]; then
+       SPARK_ASSEMBLY_CLASSPATH=$("${SPARK_ASSEBMLY_BIN}" 2>/dev/null)
+       CLASSPATH="${CLASSPATH}:${SPARK_ASSEBMLY_BIN}"
+    else
+      echo "Cannot find Spark assembly classpath. Is 'SPARK_HOME' set?"
+      exit -1
+    fi
   fi
 
   # add release dependencies to CLASSPATH
