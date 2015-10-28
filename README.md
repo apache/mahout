@@ -21,7 +21,25 @@ To compile from source:
 * To set up your IDE, do `mvn eclipse:eclipse` or `mvn idea:idea`
 
 To use maven, add the appropriate setting to your pom.xml or build.sbt following the template below.
-If you only need the math part of Mahout:
+
+
+The use the Samsara environment you'll need to include both the engine neutral math-scala dependency:
+```
+<dependency>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout-math-scala_2.10</artifactId>
+    <version>${mahout.version}</version>
+</dependency>
+```
+and a backing engine:
+```
+<dependency>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout-spark_2.10</artifactId>
+    <version>${mahout.version}</version>
+</dependency>
+```
+To include the math part of Mahout:
 ```
 <dependency>
     <groupId>org.apache.mahout</groupId>
@@ -33,11 +51,10 @@ In case you would like to use some of our integration tooling (e.g. for generati
 ```
 <dependency>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-hdfs</artifactId>
+    <artifactId>mahout-integration</artifactId>
     <version>${mahout.version}</version>
 </dependency>
 ```
-
 ####Examples
 For examples of how to use Mahout, see the examples directory located in `examples/bin`
 
