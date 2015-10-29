@@ -157,7 +157,7 @@ class MahoutSparkILoop extends SparkILoop {
          _ __ ___   __ _| |__   ___  _   _| |_
         | '_ ` _ \ / _` | '_ \ / _ \| | | | __|
         | | | | | | (_| | | | | (_) | |_| | |_
-        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.11.1-SNAPSHOT
+        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.11.1
 
       """)
     import Properties._
