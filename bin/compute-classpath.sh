@@ -24,11 +24,30 @@
 #FWDIR="$(cd "`dirname "$0"`"/..; pwd)"
 FWDIR="$SPARK_HOME"
 
-echo "Using FWDIR: $FWDIR"
-
 #. "$FWDIR"/bin/load-spark-env.sh # not executable by defult in $SPARK_HOME/bin
 
 "$MAHOUT_HOME"/bin/mahout-load-spark-env.sh
+
+# compute the Scala version Note: though Mahout has not bee tested with Scala 2.11
+# Setting SPARK_SCALA_VERSION if not already set.
+
+if [ -z "$SPARK_SCALA_VERSION" ]; then
+
+    ASSEMBLY_DIR2="$FWDIR/assembly/target/scala-2.11"
+    ASSEMBLY_DIR1="$FWDIR/assembly/target/scala-2.10"
+
+    if [[ -d "$ASSEMBLY_DIR2" && -d "$ASSEMBLY_DIR1" ]]; then
+        echo -e "Presence of build for both scala versions(SCALA 2.10 and SCALA 2.11) detected." 1>&2
+        echo -e 'Either clean one of them or, export SPARK_SCALA_VERSION=2.11 in spark-env.sh.' 1>&2
+        exit 1
+    fi
+
+    if [ -d "$ASSEMBLY_DIR2" ]; then
+        export SPARK_SCALA_VERSION="2.11"
+    else
+        export SPARK_SCALA_VERSION="2.10"
+    fi
+fi
 
 
 function appendToClasspath(){
