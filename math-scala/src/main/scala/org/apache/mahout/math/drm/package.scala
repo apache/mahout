@@ -63,11 +63,11 @@ package object drm {
   def drmParallelize(m: Matrix, numPartitions: Int = 1)
       (implicit sc: DistributedContext): CheckpointedDrm[Int] = drmParallelizeWithRowIndices(m, numPartitions)(sc)
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
+  /** Parallelize in-core matrix as a distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
       (implicit ctx: DistributedContext): CheckpointedDrm[Int] = ctx.drmParallelizeWithRowIndices(m, numPartitions)
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
+  /** Parallelize in-core matrix as a distributed matrix, using row labels as a data set keys. */
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
       (implicit ctx: DistributedContext): CheckpointedDrm[String] = ctx.drmParallelizeWithRowLabels(m, numPartitions)
 

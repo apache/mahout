@@ -74,11 +74,11 @@ trait DistributedEngine {
    */
   def drmDfsRead(path: String, parMin: Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_]
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
+  /** Parallelize in-core matrix as the backend engine distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)(implicit sc: DistributedContext):
   CheckpointedDrm[Int]
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
+  /** Parallelize in-core matrix as the backend engine distributed matrix, using row labels as a data set keys. */
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)(implicit sc: DistributedContext):
   CheckpointedDrm[String]
 
@@ -142,7 +142,7 @@ object DistributedEngine {
     action match {
 
       // self element-wise rewrite
-      case OpAewB(a, b, op) if (a == b) => {
+      case OpAewB(a, b, op) if a == b => {
         op match {
           case "*" ⇒ OpAewUnaryFunc(pass1(a), (x) ⇒ x * x)
           case "/" ⇒ OpAewUnaryFunc(pass1(a), (x) ⇒ x / x)
