@@ -74,11 +74,11 @@ trait DistributedEngine {
    */
   def drmDfsRead(path: String, parMin: Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_]
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
+  /** Parallelize in-core matrix as distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)(implicit sc: DistributedContext):
   CheckpointedDrm[Int]
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
+  /** Parallelize in-core matrix as distributed matrix, using row labels as a data set keys. */
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)(implicit sc: DistributedContext):
   CheckpointedDrm[String]
 
@@ -159,8 +159,7 @@ object DistributedEngine {
 
       // For now, rewrite left-multiply via transpositions, i.e.
       // inCoreA %*% B = (B' %*% inCoreA')'
-      case op@OpTimesLeftMatrix(a, b) ⇒
-      OpAt(OpTimesRightMatrix(A = OpAt(pass1(b)), right = a.t))
+      case op@OpTimesLeftMatrix(a, b) ⇒ OpAt(OpTimesRightMatrix(A = OpAt(pass1(b)), right = a.t))
 
       // Add vertical row index concatenation for rbind() on DrmLike[Int] fragments
       case op@OpRbind(a, b) if (implicitly[ClassTag[K]] == ClassTag.Int) ⇒
