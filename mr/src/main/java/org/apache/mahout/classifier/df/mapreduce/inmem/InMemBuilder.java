@@ -44,6 +44,7 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
  * MapReduce implementation where each mapper loads a full copy of the data in-memory. The forest trees are
  * splitted across all the mappers
  */
+@Deprecated
 public class InMemBuilder extends Builder {
   
   public InMemBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed, Configuration conf) {

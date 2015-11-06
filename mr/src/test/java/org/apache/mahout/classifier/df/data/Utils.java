@@ -36,6 +36,7 @@ import org.apache.mahout.common.MahoutTestCase;
  * Helper methods used by the tests
  *
  */
+@Deprecated
 public final class Utils {
 
   private Utils() {}

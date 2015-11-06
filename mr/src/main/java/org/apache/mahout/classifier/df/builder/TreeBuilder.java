@@ -25,6 +25,7 @@ import java.util.Random;
 /**
  * Abstract base class for TreeBuilders
  */
+@Deprecated
 public interface TreeBuilder {
   
   /**

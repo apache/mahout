@@ -29,6 +29,7 @@ import java.util.Random;
 /**
  * Builds a tree using bagging
  */
+@Deprecated
 public class Bagging {
   
   private static final Logger log = LoggerFactory.getLogger(Bagging.class);

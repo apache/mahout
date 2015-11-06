@@ -38,7 +38,7 @@ import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Leaf;
 import org.apache.mahout.classifier.df.node.Node;
 import org.junit.Test;
-
+@Deprecated
 public final class PartialBuilderTest extends MahoutTestCase {
 
   private static final int NUM_MAPS = 5;

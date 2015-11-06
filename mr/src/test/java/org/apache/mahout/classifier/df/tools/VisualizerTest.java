@@ -37,7 +37,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Random;
 import java.util.ArrayList;
-
+@Deprecated
 public final class VisualizerTest extends MahoutTestCase {
   
   private static final char DECIMAL_SEPARATOR =

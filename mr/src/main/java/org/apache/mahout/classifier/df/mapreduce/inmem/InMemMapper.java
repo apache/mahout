@@ -42,6 +42,7 @@ import java.util.Random;
  * In-memory mapper that grows the trees using a full copy of the data loaded in-memory. The number of trees
  * to grow is determined by the current InMemInputSplit.
  */
+@Deprecated
 public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritable,MapredOutput> {
   
   private static final Logger log = LoggerFactory.getLogger(InMemMapper.class);

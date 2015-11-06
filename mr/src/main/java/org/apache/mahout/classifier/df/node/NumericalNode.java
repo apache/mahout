@@ -26,6 +26,7 @@ import java.io.IOException;
 /**
  * Represents a node that splits using a numerical attribute
  */
+@Deprecated
 public class NumericalNode extends Node {
   /** numerical attribute to split for */
   private int attr;

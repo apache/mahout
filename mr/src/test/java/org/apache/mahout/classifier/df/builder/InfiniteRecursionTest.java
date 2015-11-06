@@ -26,7 +26,7 @@ import org.apache.mahout.classifier.df.data.Utils;
 import org.junit.Test;
 
 import java.util.Random;
-
+@Deprecated
 public final class InfiniteRecursionTest extends MahoutTestCase {
 
   private static final double[][] dData = {

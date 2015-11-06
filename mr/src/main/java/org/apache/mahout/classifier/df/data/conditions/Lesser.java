@@ -22,6 +22,7 @@ import org.apache.mahout.classifier.df.data.Instance;
 /**
  * True if a given attribute has a value "lesser" than a given value
  */
+@Deprecated
 public class Lesser extends Condition {
   
   private final int attr;

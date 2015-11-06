@@ -45,6 +45,7 @@ import java.util.List;
 /**
  * Builds a random forest using partial data. Each mapper uses only the data given by its InputSplit
  */
+@Deprecated
 public class PartialBuilder extends Builder {
 
   private static final Logger log = LoggerFactory.getLogger(PartialBuilder.class);

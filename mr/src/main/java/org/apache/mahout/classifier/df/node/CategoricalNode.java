@@ -25,7 +25,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
-
+@Deprecated
 public class CategoricalNode extends Node {
 
   private int attr;

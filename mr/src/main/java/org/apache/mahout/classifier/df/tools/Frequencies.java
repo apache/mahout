@@ -42,6 +42,7 @@ import java.util.Arrays;
  * Compute the frequency distribution of the "class label"<br>
  * This class can be used when the criterion variable is the categorical attribute.
  */
+@Deprecated
 public final class Frequencies extends Configured implements Tool {
   
   private static final Logger log = LoggerFactory.getLogger(Frequencies.class);

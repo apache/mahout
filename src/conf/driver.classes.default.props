@@ -40,8 +40,6 @@ org.apache.mahout.clustering.streaming.mapreduce.StreamingKMeansDriver = streami
 #new bayes
 org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob = trainnb : Train the Vector-based Bayes classifier
 org.apache.mahout.classifier.naivebayes.test.TestNaiveBayesDriver = testnb : Test the Vector-based Bayes classifier
-org.apache.mahout.classifier.df.mapreduce.BuildForest = buildforest : Build the random forest classifier
-org.apache.mahout.classifier.df.mapreduce.TestForest = testforest : Test the random forest classifier
 
 #SGD
 org.apache.mahout.classifier.sgd.TrainLogistic = trainlogistic : Train a logistic regression using stochastic gradient descent

@@ -28,7 +28,7 @@ import org.apache.mahout.classifier.df.mapreduce.Builder;
 import org.apache.mahout.classifier.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.classifier.df.mapreduce.inmem.InMemInputFormat.InMemRecordReader;
 import org.junit.Test;
-
+@Deprecated
 public final class InMemInputFormatTest extends MahoutTestCase {
 
   @Test

@@ -22,6 +22,7 @@ import java.util.Locale;
 /**
  * Contains enough information to identify each split
  */
+@Deprecated
 public final class Split {
   
   private final int attr;

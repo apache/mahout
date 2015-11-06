@@ -32,7 +32,7 @@ import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
-
+@Deprecated
 public final class DecisionForestTest extends MahoutTestCase {
 
   private static final String[] TRAIN_DATA = {"sunny,85,85,FALSE,no",

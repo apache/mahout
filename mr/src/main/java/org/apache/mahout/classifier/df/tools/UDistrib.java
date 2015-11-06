@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * partitions.<br>
  * This class can be used when the criterion variable is the categorical attribute.
  */
+@Deprecated
 public final class UDistrib {
   
   private static final Logger log = LoggerFactory.getLogger(UDistrib.class);

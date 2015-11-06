@@ -29,6 +29,7 @@ import java.util.Comparator;
  * Regression problem implementation of IgSplit. This class can be used when the criterion variable is the numerical
  * attribute.
  */
+@Deprecated
 public class RegressionSplit extends IgSplit {
   
   /**
