@@ -23,7 +23,7 @@ To compile from source:
 To use maven, add the appropriate setting to your pom.xml or build.sbt following the template below.
 
 
-The use the Samsara environment you'll need to include both the engine neutral math-scala dependency:
+To use the Samsara environment you'll need to include both the engine neutral math-scala dependency:
 ```
 <dependency>
     <groupId>org.apache.mahout</groupId>
@@ -31,7 +31,7 @@ The use the Samsara environment you'll need to include both the engine neutral m
     <version>${mahout.version}</version>
 </dependency>
 ```
-and a backing engine:
+and a backing engine, e.g:
 ```
 <dependency>
     <groupId>org.apache.mahout</groupId>
@@ -39,22 +39,7 @@ and a backing engine:
     <version>${mahout.version}</version>
 </dependency>
 ```
-To include the math part of Mahout:
-```
-<dependency>
-    <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-math</artifactId>
-    <version>${mahout.version}</version>
-</dependency>
-```
-In case you would like to use some of our integration tooling (e.g. for generating vectors from Lucene):
-```
-<dependency>
-    <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-integration</artifactId>
-    <version>${mahout.version}</version>
-</dependency>
-```
+
 ####Examples
 For examples of how to use Mahout, see the examples directory located in `examples/bin`
 
