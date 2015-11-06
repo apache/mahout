@@ -21,11 +21,13 @@ import org.apache.mahout.math.flavor.MatrixFlavor;
 import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.Functions;
 
+import java.io.Serializable;
+
 /**
  * sparse matrix with general element values whose rows are accessible quickly. Implemented as a row
  * array of either SequentialAccessSparseVectors or RandomAccessSparseVectors.
  */
-public class SparseRowMatrix extends AbstractMatrix {
+public class SparseRowMatrix extends AbstractMatrix implements Serializable {
   private Vector[] rowVectors;
 
   private final boolean randomAccessRows;

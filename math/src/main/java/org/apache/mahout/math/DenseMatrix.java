@@ -20,10 +20,11 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.flavor.MatrixFlavor;
 import org.apache.mahout.math.flavor.TraversingStructureEnum;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /** Matrix of doubles implemented using a 2-d array */
-public class DenseMatrix extends AbstractMatrix {
+public class DenseMatrix extends AbstractMatrix implements Serializable {
 
   private double[][] values;
 

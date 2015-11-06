@@ -26,11 +26,12 @@ import org.apache.mahout.math.function.IntObjectProcedure;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 
 /** Doubly sparse matrix. Implemented as a Map of RandomAccessSparseVector rows */
-public class SparseMatrix extends AbstractMatrix {
+public class SparseMatrix extends AbstractMatrix implements Serializable {
 
   private OpenIntObjectHashMap<Vector> rowVectors;
   

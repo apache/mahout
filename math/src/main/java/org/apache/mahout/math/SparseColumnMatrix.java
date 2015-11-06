@@ -19,13 +19,15 @@ package org.apache.mahout.math;
 
 import org.apache.mahout.math.flavor.TraversingStructureEnum;
 
+import java.io.Serializable;
+
 /**
  * sparse matrix with general element values whose columns are accessible quickly. Implemented as a column array of
  * SparseVectors.
  *
  * @deprecated tons of inconsistences. Use transpose view of SparseRowMatrix for fast column-wise iteration.
  */
-public class SparseColumnMatrix extends AbstractMatrix {
+public class SparseColumnMatrix extends AbstractMatrix implements Serializable {
 
   private Vector[] columnVectors;
 

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import com.google.common.collect.AbstractIterator;
@@ -24,7 +25,7 @@ import com.google.common.collect.AbstractIterator;
 /**
  * Implements a vector with all the same values.
  */
-public class ConstantVector extends AbstractVector {
+public class ConstantVector extends AbstractVector implements Serializable {
   private final double value;
 
   public ConstantVector(double value, int size) {

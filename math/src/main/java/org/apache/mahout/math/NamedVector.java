@@ -20,7 +20,9 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
-public class NamedVector implements Vector {
+import java.io.Serializable;
+
+public class NamedVector implements Vector, Serializable {
 
   private Vector delegate;
   private String name;

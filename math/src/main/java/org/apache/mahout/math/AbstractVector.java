@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import com.google.common.base.Preconditions;
@@ -26,7 +27,7 @@ import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 
 /** Implementations of generic capabilities like sum of elements and dot products */
-public abstract class AbstractVector implements Vector, LengthCachingVector {
+public abstract class AbstractVector implements Vector, LengthCachingVector, Serializable {
 
   private int size;
   protected double lengthSquared = -1.0;

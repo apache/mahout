@@ -19,10 +19,12 @@ package org.apache.mahout.math;
 
 import com.google.common.base.Preconditions;
 
+import java.io.Serializable;
+
 /**
  * Matrix that allows transparent row and column permutation.
  */
-public class PivotedMatrix extends AbstractMatrix {
+public class PivotedMatrix extends AbstractMatrix implements Serializable {
 
   private Matrix base;
   private int[] rowPivot;

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * If the simple hash method is not satisfactory, an optional high quality mode is available
  * which uses a murmur hash of the coordinates.
  */
-public class RandomTrinaryMatrix extends AbstractMatrix {
+public class RandomTrinaryMatrix extends AbstractMatrix implements Serializable {
   private static final AtomicInteger ID = new AtomicInteger();
   private static final int PRIME1 = 104047;
   private static final int PRIME2 = 101377;

@@ -20,10 +20,11 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.flavor.MatrixFlavor;
 import org.apache.mahout.math.flavor.TraversingStructureEnum;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class DiagonalMatrix extends AbstractMatrix implements MatrixTimesOps {
+public class DiagonalMatrix extends AbstractMatrix implements MatrixTimesOps, Serializable {
   private final Vector diagonal;
 
   public DiagonalMatrix(Vector values) {

@@ -20,6 +20,8 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
+import java.io.Serializable;
+
 /**
  * A delegating vector provides an easy way to decorate vectors with weights or id's and such while
  * keeping all of the Vector functionality.
@@ -27,7 +29,7 @@ import org.apache.mahout.math.function.DoubleFunction;
  * This vector implements LengthCachingVector because almost all delegates cache the length and
  * the cost of false positives is very low.
  */
-public class DelegatingVector implements Vector, LengthCachingVector {
+public class DelegatingVector implements Vector, LengthCachingVector, Serializable {
   protected Vector delegate;
 
   public DelegatingVector(Vector v) {

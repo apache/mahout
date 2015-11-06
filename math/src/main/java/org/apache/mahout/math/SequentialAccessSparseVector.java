@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -40,7 +41,7 @@ import org.apache.mahout.math.function.Functions;
  *
  * See {@link OrderedIntDoubleMapping}
  */
-public class SequentialAccessSparseVector extends AbstractVector {
+public class SequentialAccessSparseVector extends AbstractVector implements Serializable {
 
   private OrderedIntDoubleMapping values;
 

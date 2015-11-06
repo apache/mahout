@@ -19,10 +19,12 @@ package org.apache.mahout.math;
 
 import org.apache.mahout.math.flavor.TraversingStructureEnum;
 
+import java.io.Serializable;
+
 /**
  * Economy packaging for a dense symmetric in-core matrix.
  */
-public class DenseSymmetricMatrix extends UpperTriangular {
+public class DenseSymmetricMatrix extends UpperTriangular implements Serializable {
   public DenseSymmetricMatrix(int n) {
     super(n);
   }

@@ -24,13 +24,14 @@ import org.apache.mahout.math.flavor.MatrixFlavor;
 import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.*;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
  * A few universal implementations of convenience functions for a JVM-backed matrix.
  */
-public abstract class AbstractMatrix implements Matrix {
+public abstract class AbstractMatrix implements Matrix, Serializable {
 
   protected Map<String, Integer> columnLabelBindings;
   protected Map<String, Integer> rowLabelBindings;

@@ -17,10 +17,12 @@
 
 package org.apache.mahout.math;
 
+import java.io.Serializable;
+
 /**
  * Decorates a vector with a floating point weight and an index.
  */
-public class WeightedVector extends DelegatingVector {
+public class WeightedVector extends DelegatingVector implements Serializable {
   private static final int INVALID_INDEX = -1;
   private double weight;
   private int index;
