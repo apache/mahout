@@ -31,7 +31,7 @@ To use the Samsara environment you'll need to include both the engine neutral ma
     <version>${mahout.version}</version>
 </dependency>
 ```
-and a backing engine, e.g:
+and a dependency for back end engine translation, e.g:
 ```
 <dependency>
     <groupId>org.apache.mahout</groupId>
