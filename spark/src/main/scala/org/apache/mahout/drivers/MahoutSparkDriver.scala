@@ -75,7 +75,11 @@ abstract class MahoutSparkDriver extends MahoutDriver {
   override protected def start() : Unit = {
     if (!_useExistingContext) {
       sparkConf.set("spark.kryo.referenceTracking", "false")
-        .set("spark.kryoserializer.buffer.mb", "200")// this is default for Mahout optimizer, change it with -D option
+        .set("spark.kryoserializer.buffer.mb", "200m")// this is default for Mahout optimizer, change it with -D option
+        // the previous has been marked deprecated as of Spark 1.4 by the below line,
+        // remove the above line when Spark finally retires above for below
+        .set("spark.kryoserializer.buffer", "200m")
+
 
       if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
         sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
