@@ -27,6 +27,7 @@ import java.io.IOException;
 /**
  * Represents an abstract node of a decision tree
  */
+@Deprecated
 public abstract class Node implements Writable {
   
   protected enum Type {

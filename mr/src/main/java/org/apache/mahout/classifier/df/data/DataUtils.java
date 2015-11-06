@@ -26,6 +26,7 @@ import java.util.Random;
 /**
  * Helper methods that deals with data lists and arrays of values
  */
+@Deprecated
 public final class DataUtils {
   private DataUtils() { }
   

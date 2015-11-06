@@ -26,7 +26,7 @@ import org.apache.mahout.classifier.df.data.DataLoader;
 import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Utils;
 import org.junit.Test;
-
+@Deprecated
 public final class DefaultIgSplitTest extends MahoutTestCase {
 
   private static final int NUM_ATTRIBUTES = 10;

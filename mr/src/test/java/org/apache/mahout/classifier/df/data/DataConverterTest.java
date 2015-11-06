@@ -22,7 +22,7 @@ import java.util.Random;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
-
+@Deprecated
 public final class DataConverterTest extends MahoutTestCase {
 
   private static final int ATTRIBUTE_COUNT = 10;
