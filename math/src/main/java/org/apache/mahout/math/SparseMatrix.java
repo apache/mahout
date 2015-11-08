@@ -19,7 +19,6 @@ package org.apache.mahout.math;
 
 import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.math.flavor.MatrixFlavor;
-import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.IntObjectProcedure;

@@ -116,11 +116,11 @@ class IOSuite extends FunSuite with MahoutSuite {
       mxC(i, ::) := { _ => if (rnd.nextDouble() < .3) rnd.nextDouble() else 0.0}
 
     val cnsl = mxC.numSlices()
-    println(s"Number of slices in mxC: ${cnsl}")
+    println(s"Number of slices in mxC: $cnsl")
 
     val ret = kryoClone(mxA, mxA.t, mxB, mxB.t, mxC, mxC.t, mxA)
 
-    val (mxAA, mxAAt, mxBB, mxBBt, mxCC, mxCCt, mxAAA) = (ret(0), ret(1), ret(2), ret(3), ret(4), ret(5), ret(6))
+    val (mxAA, mxAAt, mxBB, mxBBt, mxCC, mxCCt, mxAAA) = (ret.head, ret(1), ret(2), ret(3), ret(4), ret(5), ret(6))
 
     // ret.size shouldBe 7
 
@@ -163,7 +163,7 @@ class IOSuite extends FunSuite with MahoutSuite {
   test("diag matrix") {
 
     val mxD = diagv(dvec(1, 2, 3, 5))
-    val mxDD = kryoClone(mxD)(0)
+    val mxDD = kryoClone(mxD).head
     mxD === mxDD shouldBe true
     mxDD.isInstanceOf[DiagonalMatrix] shouldBe true
 

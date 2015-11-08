@@ -19,7 +19,6 @@ package org.apache.mahout.math
 
 import org.apache.mahout.math.solver.EigenDecomposition
 import collection._
-import JavaConversions._
 
 /**
  * Mahout matrices and vectors' scala syntactic sugar
@@ -197,7 +196,7 @@ package object scalabindings {
    * @return
    */
   def svec(sdata: TraversableOnce[(Int, AnyVal)]) = {
-    val cardinality = if (sdata.size > 0) sdata.map(_._1).max + 1 else 0
+    val cardinality = if (sdata.nonEmpty) sdata.map(_._1).max + 1 else 0
     val initialCapacity = sdata.size
     val sv = new RandomAccessSparseVector(cardinality, initialCapacity)
     sdata.foreach(t ⇒ sv.setQuick(t._1, t._2.asInstanceOf[Number].doubleValue()))
