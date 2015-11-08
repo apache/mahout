@@ -18,14 +18,12 @@
 package org.apache.mahout.math.scalabindings
 
 import org.apache.mahout.logging._
-import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.math._
-import scala.math._
-import RLikeOps._
-import scala._
-import scala.util.Random
+import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.test.MahoutSuite
-import org.apache.mahout.common.RandomUtils
+import org.scalatest.FunSuite
+
+import scala.math._
 
 class MathSuite extends FunSuite with MahoutSuite {
 
@@ -91,9 +89,9 @@ class MathSuite extends FunSuite with MahoutSuite {
 
 
     val b = dense(
-      (0.36378319648203084),
-      (0.3627384439613304),
-      (0.2996934112658234))
+      0.36378319648203084,
+      0.3627384439613304,
+      0.2996934112658234)
 
     printf("B=\n%s\n", b)
 
@@ -141,10 +139,10 @@ class MathSuite extends FunSuite with MahoutSuite {
 
   test("solve matrix-matrix") {
     val a = dense((1, 3), (4, 2))
-    val b = dense((11), (14))
+    val b = dense(11, 14)
     val x = solve(a, b)
 
-    val control = dense((2), (3))
+    val control = dense(2, 3)
 
     (control - x).norm should be < 1e-10
   }
