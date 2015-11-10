@@ -64,12 +64,10 @@ object FlinkEngine extends DistributedEngine {
     implicit val env = dc.asInstanceOf[FlinkDistributedContext].env
 
     val metadata = hdfsUtils.readDrmHeader(path)
-    println(metadata)
 
     val unwrapKey = metadata.unwrapKeyFunction
-    println(unwrapKey)
-    val dataset = env.readHadoopFile(new SequenceFileInputFormat[Writable, VectorWritable],
-      classOf[Writable], classOf[VectorWritable], path)
+
+    val dataset = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
 
     val res = dataset.map(new MapFunction[Tuple2[Writable, VectorWritable], (Any, Vector)] {
       def map(tuple: Tuple2[Writable, VectorWritable]): (Any, Vector) = {
