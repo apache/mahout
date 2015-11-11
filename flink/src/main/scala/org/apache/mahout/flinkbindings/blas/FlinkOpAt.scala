@@ -27,7 +27,6 @@ import org.apache.flink.api.common.functions.FlatMapFunction
 import org.apache.flink.api.common.functions.GroupReduceFunction
 import org.apache.flink.shaded.com.google.common.collect.Lists
 import org.apache.flink.util.Collector
-import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.Matrix
@@ -36,6 +35,8 @@ import org.apache.mahout.math.Vector
 import org.apache.mahout.math.drm.DrmTuple
 import org.apache.mahout.math.drm.logical.OpAt
 import org.apache.mahout.math.scalabindings.RLikeOps._
+
+import org.apache.flink.api.scala._
 
 /**
  * Implementation is taken from Spark's At
@@ -53,7 +54,7 @@ object FlinkOpAt {
 
     val sparseParts = A.asBlockified.ds.flatMap(new FlatMapFunction[(Array[Int], Matrix), DrmTuple[Int]] {
       def flatMap(typle: (Array[Int], Matrix), out: Collector[DrmTuple[Int]]): Unit = typle match {
-        case (keys, block) => {
+        case (keys, block) =>
           (0 until block.ncol).map(columnIdx => {
             val columnVector: Vector = new SequentialAccessSparseVector(ncol)
 
@@ -61,9 +62,8 @@ object FlinkOpAt {
               columnVector(key) = block(idx, columnIdx)
             }
 
-            out.collect(new Tuple2(columnIdx, columnVector))
+            out.collect((columnIdx, columnVector))
           })
-        }
       }
     })
 
@@ -73,7 +73,7 @@ object FlinkOpAt {
       def reduce(values: Iterable[(Int, Vector)], out: Collector[DrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala
         val (idx, _) = it.head
-        val vector = it map { case (idx, vec) => vec } reduce (_ + _)
+        val vector = (it map { case (idx, vec) => vec }).sum
         out.collect((idx, vector))
       }
     })

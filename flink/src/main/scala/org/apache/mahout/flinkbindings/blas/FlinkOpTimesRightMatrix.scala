@@ -28,6 +28,8 @@ import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
+import org.apache.flink.api.scala._
+
 /**
  * Implementation is taken from Spark's OpTimesRightMatrix:
  * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AinCoreB.scala
@@ -43,7 +45,7 @@ object FlinkOpTimesRightMatrix {
       var inCoreB: Matrix = null
 
       override def open(params: Configuration): Unit = {
-        val runtime = this.getRuntimeContext()
+        val runtime = this.getRuntimeContext
         val dsB: java.util.List[Matrix] = runtime.getBroadcastVariable("matrix")
         inCoreB = dsB.get(0)
       }

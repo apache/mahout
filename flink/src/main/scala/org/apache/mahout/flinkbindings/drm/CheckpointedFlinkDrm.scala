@@ -18,34 +18,21 @@
  */
 package org.apache.mahout.flinkbindings.drm
 
-import scala.collection.JavaConverters._
-import scala.util.Random
-import scala.reflect.{ClassTag, classTag}
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.common.functions.ReduceFunction
-import org.apache.flink.api.java.hadoop.mapred.HadoopOutputFormat
+import org.apache.flink.api.common.functions.{MapFunction, ReduceFunction}
 import org.apache.flink.api.java.tuple.Tuple2
-import org.apache.hadoop.io.IntWritable
-import org.apache.hadoop.io.LongWritable
-import org.apache.hadoop.io.Text
-import org.apache.hadoop.io.Writable
-import org.apache.hadoop.mapred.FileOutputFormat
-import org.apache.hadoop.mapred.JobConf
-import org.apache.hadoop.mapred.SequenceFileOutputFormat
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.flinkbindings.DrmDataSet
-import org.apache.mahout.math.DenseMatrix
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.SparseMatrix
-import org.apache.mahout.math.Vector
-import org.apache.mahout.math.VectorWritable
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.drm.CacheHint
-import org.apache.mahout.math.drm.CheckpointedDrm
-import org.apache.mahout.math.drm.DistributedContext
-import org.apache.mahout.math.drm.DrmTuple
-import org.apache.mahout.math.scalabindings._
+import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.hadoop.mapred.HadoopOutputFormat
+import org.apache.hadoop.io.{IntWritable, LongWritable, Text, Writable}
+import org.apache.hadoop.mapred.{FileOutputFormat, JobConf, SequenceFileOutputFormat}
+import org.apache.mahout.flinkbindings.{DrmDataSet, _}
+import org.apache.mahout.math.{DenseMatrix, Matrix, SparseMatrix, Vector, VectorWritable}
+import org.apache.mahout.math.drm.{CacheHint, CheckpointedDrm, DistributedContext, DrmTuple, _}
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+
+import scala.collection.JavaConverters._
+import scala.reflect.{ClassTag, classTag}
+import scala.util.Random
 
 class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       private var _nrow: Long = CheckpointedFlinkDrm.UNKNOWN,
@@ -71,7 +58,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       }
     })
 
-    val list = res.collect().asScala.toList
+    val list = res.collect()
     list.head
   }
 
@@ -95,7 +82,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = this
 
   def collect: Matrix = {
-    val data = ds.collect().asScala.toList
+    val data = ds.collect()
     val isDense = data.forall(_._2.isDense)
 
     val cols = ncol
@@ -139,7 +126,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     val keyTag = implicitly[ClassTag[K]]
     val convertKey = keyToWritableFunc(keyTag)
 
-    val writableDataset = ds.map(new MapFunction[(K, Vector), Tuple2[Writable, VectorWritable]] {
+    val writableDataset = ds.map(new MapFunction[(K, Vector), (Writable, VectorWritable)] {
       def map(tuple: (K, Vector)): Tuple2[Writable, VectorWritable] = tuple match {
         case (idx, vec) => new Tuple2(convertKey(idx), new VectorWritable(vec))
       }

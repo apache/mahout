@@ -25,9 +25,7 @@ import scala.reflect.ClassTag
 
 import org.apache.flink.api.common.functions.FlatMapFunction
 import org.apache.flink.api.common.functions.GroupReduceFunction
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.java.DataSet
-import org.apache.flink.api.java.tuple.Tuple2
+import org.apache.flink.api.scala.DataSet
 import org.apache.flink.util.Collector
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
@@ -40,7 +38,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 
 import com.google.common.collect.Lists
 
-
+import org.apache.flink.api.scala._
 
 /**
  * Implementation is taken from Spark's AtB
@@ -65,8 +63,8 @@ object FlinkOpAtB {
              joined.flatMap(new FlatMapFunction[Tuple2[(_, Vector), (_, Vector)], (Int, Matrix)] {
       def flatMap(in: Tuple2[(_, Vector), (_, Vector)],
                   out: Collector[(Int, Matrix)]): Unit = {
-        val avec = in.f0._2
-        val bvec = in.f1._2
+        val avec = in._1._2
+        val bvec = in._1._2
 
         0.until(blockCount) map { blockKey =>
           val blockStart = blockKey * blockHeight

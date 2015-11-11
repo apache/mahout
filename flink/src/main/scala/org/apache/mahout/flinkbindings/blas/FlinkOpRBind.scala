@@ -20,7 +20,7 @@ package org.apache.mahout.flinkbindings.blas
 
 import scala.reflect.ClassTag
 
-import org.apache.flink.api.java.DataSet
+import org.apache.flink.api.scala.DataSet
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.Vector

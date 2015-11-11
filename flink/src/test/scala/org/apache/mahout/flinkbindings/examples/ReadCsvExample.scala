@@ -18,7 +18,7 @@
  */
 package org.apache.mahout.flinkbindings.examples
 
-import org.apache.flink.api.java.ExecutionEnvironment
+import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.flinkbindings._

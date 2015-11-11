@@ -5,7 +5,7 @@ import java.lang.Iterable
 import scala.collection.JavaConverters._
 
 import org.apache.flink.api.common.functions._
-import org.apache.flink.api.java.DataSet
+import org.apache.flink.api.scala.DataSet
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.shaded.com.google.common.collect.Lists
 import org.apache.flink.util.Collector
@@ -56,7 +56,7 @@ object FlinkOpAtA {
       def reduce(m1: Matrix, m2: Matrix) = m1 + m2
     }).collect()
 
-    res.asScala.head
+    res.head
   }
 
   def fat(op: OpAtA[Any], A: FlinkDrm[Any]): FlinkDrm[Int] = {
@@ -155,7 +155,7 @@ object FlinkOpAtA {
     val offsets = (0 to numSplits).map(i => i * (baseSplit + 1) - (0 max i - slack))
     // And then we connect the ranges using gaps between offsets:
 
-    val ranges = offsets.sliding(2).map { offs => (offs(0) until offs(1)) }
+    val ranges = offsets.sliding(2).map { offs => offs(0) until offs(1) }
     ranges.toArray
   }
 }

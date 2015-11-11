@@ -19,18 +19,21 @@
 package org.apache.mahout
 
 import org.apache.flink.api.common.functions.{FilterFunction, MapFunction}
-import org.apache.flink.api.java.{DataSet, ExecutionEnvironment}
+import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.mahout.flinkbindings.drm.{CheckpointedFlinkDrmOps, CheckpointedFlinkDrm, FlinkDrm, RowsFlinkDrm}
 import org.apache.mahout.math.{DenseVector, Matrix, MatrixWritable, Vector, VectorWritable}
 import org.apache.mahout.math.drm.{BlockifiedDrmTuple, CheckpointedDrm, DistributedContext, DrmTuple, _}
 import org.slf4j.LoggerFactory
+
+import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.utils._
 
 import scala.Array._
 import scala.reflect.ClassTag
 
 package object flinkbindings {
 
-  private[flinkbindings] val log = LoggerFactory.getLogger("apache.org.mahout.flinkbindings")
+  private[flinkbindings] val log = LoggerFactory.getLogger("org.apache.mahout.flinkbindings")
 
   /** Row-wise organized DRM dataset type */
   type DrmDataSet[K] = DataSet[DrmTuple[K]]
@@ -78,7 +81,7 @@ package object flinkbindings {
 
 
   def readCsv(file: String, delim: String = ",", comment: String = "#")
-             (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
+             (implicit dc: DistributedContext): CheckpointedDrm[Long] = {
     val vectors = dc.env.readTextFile(file)
       .filter(new FilterFunction[String] {
         def filter(in: String): Boolean = {
@@ -94,8 +97,8 @@ package object flinkbindings {
     datasetToDrm(vectors)
   }
 
-  def datasetToDrm(ds: DataSet[Vector]): CheckpointedDrm[Int] = {
-    val zipped = new DataSetOps(ds).zipWithIndex
+  def datasetToDrm(ds: DataSet[Vector]): CheckpointedDrm[Long] = {
+    val zipped = ds.zipWithIndex
     datasetWrap(zipped)
   }
 

@@ -6,7 +6,7 @@ import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 
 import org.apache.flink.api.common.functions.CoGroupFunction
-import org.apache.flink.api.java.DataSet
+import org.apache.flink.api.scala.DataSet
 import org.apache.flink.util.Collector
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
@@ -40,13 +40,13 @@ object FlinkOpAewB {
         val it1 = Lists.newArrayList(it1java).asScala
         val it2 = Lists.newArrayList(it2java).asScala
 
-        if (!it1.isEmpty && !it2.isEmpty) {
+        if (it1.nonEmpty && it2.nonEmpty) {
           val (idx, a) = it1.head
           val (_, b) = it2.head
           out.collect((idx, function(a, b)))
-        } else if (it1.isEmpty && !it2.isEmpty) {
+        } else if (it1.isEmpty && it2.nonEmpty) {
           out.collect(it2.head)
-        } else if (!it1.isEmpty && it2.isEmpty) {
+        } else if (it1.nonEmpty && it2.isEmpty) {
           out.collect(it1.head)
         }
       }

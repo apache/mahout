@@ -18,17 +18,12 @@
  */
 package org.apache.mahout.flinkbindings
 
-import java.util.Collection
-
-import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.functions.ReduceFunction
-import org.apache.flink.api.java.tuple.Tuple2
 import org.apache.flink.api.java.typeutils.TypeExtractor
 import org.apache.hadoop.io.Writable
-import org.apache.hadoop.mapred.SequenceFileInputFormat
 import org.apache.mahout.flinkbindings.blas._
 import org.apache.mahout.flinkbindings.drm._
 import org.apache.mahout.flinkbindings.io.HDFSUtil
@@ -41,6 +36,8 @@ import org.apache.mahout.math.indexeddataset.IndexedDataset
 import org.apache.mahout.math.indexeddataset.Schema
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
+
+import org.apache.flink.api.scala._
 
 
 object FlinkEngine extends DistributedEngine {
@@ -65,13 +62,13 @@ object FlinkEngine extends DistributedEngine {
 
     val metadata = hdfsUtils.readDrmHeader(path)
 
-    val unwrapKey = metadata.unwrapKeyFunction
+    val unwrapKey  = metadata.unwrapKeyFunction
 
-    val dataset = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
+    val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
 
-    val res = dataset.map(new MapFunction[Tuple2[Writable, VectorWritable], (Any, Vector)] {
-      def map(tuple: Tuple2[Writable, VectorWritable]): (Any, Vector) = {
-        (unwrapKey(tuple.f0), tuple.f1)
+    val res = ds.map(new MapFunction[(Writable, VectorWritable), (Any, Vector)] {
+      def map(tuple: (Writable, VectorWritable)): (Any, Vector) = {
+        (unwrapKey(tuple._1), tuple._2)
       }
     })
 
@@ -159,7 +156,7 @@ object FlinkEngine extends DistributedEngine {
       def reduce(v1: Vector, v2: Vector) = v1 + v2
     })
 
-    val list = sum.collect.asScala.toList
+    val list = sum.collect
     list.head
   }
 
@@ -180,7 +177,7 @@ object FlinkEngine extends DistributedEngine {
       def reduce(v1: Vector, v2: Vector) = v1 + v2
     })
 
-    val list = result.collect.asScala.toList
+    val list = result.collect
     list.head
   }
 
@@ -203,7 +200,7 @@ object FlinkEngine extends DistributedEngine {
       def reduce(v1: Double, v2: Double) = v1 + v2
     })
 
-    val list = sumOfSquares.collect.asScala.toList
+    val list = sumOfSquares.collect
     list.head
   }
 
@@ -229,10 +226,8 @@ object FlinkEngine extends DistributedEngine {
   private[flinkbindings] def parallelize(m: Matrix, parallelismDegree: Int)
       (implicit dc: DistributedContext): DrmDataSet[Int] = {
     val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
-    val rowsJava: Collection[DrmTuple[Int]]  = rows.asJava
-
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    dc.env.fromCollection(rowsJava, dataSetType).setParallelism(parallelismDegree)
+    dc.env.fromCollection(rows).setParallelism(parallelismDegree)
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
@@ -251,10 +246,7 @@ object FlinkEngine extends DistributedEngine {
 
       for (i <- partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
     }
-
-    val dataSetType = TypeExtractor.getForObject(nonParallelResult.head)
-    val result = dc.env.fromCollection(nonParallelResult.asJava, dataSetType)
-
+    val result = dc.env.fromCollection(nonParallelResult)
     new CheckpointedFlinkDrm(ds=result, _nrow=nrow, _ncol=ncol)
   }
 

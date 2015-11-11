@@ -24,7 +24,7 @@ import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 import org.apache.flink.api.common.functions.CoGroupFunction
 import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.java.DataSet
+import org.apache.flink.api.scala.DataSet
 import org.apache.flink.util.Collector
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm._
@@ -35,6 +35,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import com.google.common.collect.Lists
 import org.apache.mahout.flinkbindings.DrmDataSet
 
+import org.apache.mahout.math.scalabindings._
 
 /**
  * Implementation is taken from Spark's cbind
@@ -61,11 +62,11 @@ object FlinkOpCBind {
         val it1 = Lists.newArrayList(it1java).asScala
         val it2 = Lists.newArrayList(it2java).asScala
 
-        if (!it1.isEmpty && !it2.isEmpty) {
+        if (it1.nonEmpty && it2.nonEmpty) {
           val (idx, a) = it1.head
           val (_, b) = it2.head
 
-          val result: Vector = if (a.isDense && b.isDense) { 
+          val result: Vector = if (a.isDense && b.isDense) {
             new DenseVector(n) 
           } else {
             new SequentialAccessSparseVector(n)
@@ -75,7 +76,7 @@ object FlinkOpCBind {
           result(n1 until n) := b
 
           out.collect((idx, result))
-        } else if (it1.isEmpty && !it2.isEmpty) {
+        } else if (it1.isEmpty && it2.nonEmpty) {
           val (idx, b) = it2.head
           val result: Vector = if (b.isDense) { 
             new DenseVector(n)
@@ -84,7 +85,7 @@ object FlinkOpCBind {
           }
           result(n1 until n) := b
           out.collect((idx, result))
-        } else if (!it1.isEmpty && it2.isEmpty) {
+        } else if (it1.nonEmpty && it2.isEmpty) {
           val (idx, a) = it1.head
           val result: Vector = if (a.isDense) {
             new DenseVector(n)

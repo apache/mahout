@@ -72,7 +72,7 @@ object FlinkByteBCast {
     dataOutput.writeInt(StreamTypeVector)
     writeable.write(dataOutput)
     val array = dataOutput.toByteArray()
-    return new FlinkByteBCast[Vector](array)
+    new FlinkByteBCast[Vector](array)
   }
 
   def wrap(m: Matrix): FlinkByteBCast[Matrix] = {
@@ -81,7 +81,7 @@ object FlinkByteBCast {
     dataOutput.writeInt(StreamTypeMatrix)
     writeable.write(dataOutput)
     val array = dataOutput.toByteArray()
-    return new FlinkByteBCast[Matrix](array)
+    new FlinkByteBCast[Matrix](array)
   }
 
 }

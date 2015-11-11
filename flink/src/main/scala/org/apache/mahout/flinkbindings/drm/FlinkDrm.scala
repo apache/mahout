@@ -20,23 +20,17 @@ package org.apache.mahout.flinkbindings.drm
 
 import java.lang.Iterable
 
+import org.apache.flink.api.common.functions.{FlatMapFunction, MapPartitionFunction}
+import org.apache.flink.api.scala._
+import org.apache.flink.util.Collector
+import org.apache.mahout.flinkbindings.{BlockifiedDrmDataSet, DrmDataSet, FlinkDistributedContext, wrapContext}
+import org.apache.mahout.math.drm.DrmTuple
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.{DenseMatrix, Matrix, SparseRowMatrix}
+
 import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 import scala.reflect.ClassTag
-
-import org.apache.flink.api.common.functions.FlatMapFunction
-import org.apache.flink.api.common.functions.MapPartitionFunction
-import org.apache.flink.api.java.ExecutionEnvironment
-import org.apache.flink.util.Collector
-import org.apache.mahout.flinkbindings.BlockifiedDrmDataSet
-import org.apache.mahout.flinkbindings.DrmDataSet
-import org.apache.mahout.flinkbindings.FlinkDistributedContext
-import org.apache.mahout.flinkbindings.wrapContext
-import org.apache.mahout.math.DenseMatrix
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.SparseRowMatrix
-import org.apache.mahout.math.drm.DrmTuple
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.scalabindings.RLikeOps._
 
 trait FlinkDrm[K] {
   def executionEnvironment: ExecutionEnvironment
@@ -100,7 +94,7 @@ class BlockifiedFlinkDrm[K: ClassTag](val ds: BlockifiedDrmDataSet[K], val ncol:
 
   def asRowWise = {
     val out = ds.flatMap(new FlatMapFunction[(Array[K], Matrix), DrmTuple[K]] {
-      def flatMap(typle: (Array[K], Matrix), out: Collector[DrmTuple[K]]): Unit = typle match {
+      def flatMap(tuple: (Array[K], Matrix), out: Collector[DrmTuple[K]]): Unit = tuple match {
         case (keys, block) => keys.view.zipWithIndex.foreach {
           case (key, idx) =>
             out.collect((key, block(idx, ::)))
