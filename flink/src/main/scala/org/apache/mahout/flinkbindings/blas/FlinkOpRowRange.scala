@@ -18,11 +18,9 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import org.apache.flink.api.common.functions.FilterFunction
-import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.scala._
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.mahout.math.Vector
 import org.apache.mahout.math.drm.logical.OpRowRange
 
 /**
@@ -35,17 +33,13 @@ object FlinkOpRowRange {
     val rowRange = op.rowRange
     val firstIdx = rowRange.head
 
-    val filtered = A.asRowWise.ds.filter(new FilterFunction[(Int, Vector)] {
-      def filter(tuple: (Int, Vector)): Boolean = tuple match {
-        case (idx, vec) => rowRange.contains(idx)
-      }
-    })
+    val filtered = A.asRowWise.ds.filter {
+      tuple => rowRange.contains(tuple._1)
+    }
 
-    val res = filtered.map(new MapFunction[(Int, Vector), (Int, Vector)] {
-      def map(tuple: (Int, Vector)): (Int, Vector) = tuple match {
-        case (idx, vec) => (idx - firstIdx, vec)
-      }
-    })
+    val res = filtered.map {
+      tuple => (tuple._1 - firstIdx, tuple._2)
+    }
 
     new RowsFlinkDrm(res, op.ncol)
   }

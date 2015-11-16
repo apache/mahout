@@ -231,7 +231,10 @@ object DistributedEngine {
 
       // AtB cases that make sense.
       case OpAB(OpAt(a), b) if (a.partitioningTag == b.partitioningTag) ⇒  OpAtB(pass3(a), pass3(b))
-      case OpABAnyKey(OpAtAnyKey(a), b) ⇒  OpAtB(pass3(a), pass3(b))
+      case op @ OpABAnyKey(OpAtAnyKey(a), b) ⇒
+        val left = pass3(a)
+        val right = pass3(b)
+        OpAtB(left, right)(left.keyClassTag)
 
       // Need some cost to choose between the following.
 

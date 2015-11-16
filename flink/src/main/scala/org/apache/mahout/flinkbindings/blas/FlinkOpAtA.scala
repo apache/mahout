@@ -5,7 +5,7 @@ import java.lang.Iterable
 import scala.collection.JavaConverters._
 
 import org.apache.flink.api.common.functions._
-import org.apache.flink.api.scala.DataSet
+import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.shaded.com.google.common.collect.Lists
 import org.apache.flink.util.Collector
@@ -47,14 +47,10 @@ object FlinkOpAtA {
   def slim(op: OpAtA[_], A: FlinkDrm[_]): Matrix = {
     val ds = A.asBlockified.ds.asInstanceOf[DataSet[(Array[Any], Matrix)]]
 
-    val res = ds.map(new MapFunction[(Array[Any], Matrix), Matrix] {
+    val res = ds.map {
       // TODO: optimize it: use upper-triangle matrices like in Spark
-      def map(block: (Array[Any], Matrix)): Matrix =  block match {
-        case (idx, m) => m.t %*% m
-      }
-    }).reduce(new ReduceFunction[Matrix] {
-      def reduce(m1: Matrix, m2: Matrix) = m1 + m2
-    }).collect()
+      block => block._2.t %*% block._2
+    }.reduce(_ + _).collect()
 
     res.head
   }
@@ -93,7 +89,7 @@ object FlinkOpAtA {
 
     }).withBroadcastSet(numberOfPartitions, "numberOfPartitions")
 
-    val res = subresults.groupBy(selector[Matrix, Int])
+    val res = subresults.groupBy(0)
                         .reduceGroup(new RichGroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
 
       var ranges: Array[Range] = null

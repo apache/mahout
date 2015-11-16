@@ -126,11 +126,9 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     val keyTag = implicitly[ClassTag[K]]
     val convertKey = keyToWritableFunc(keyTag)
 
-    val writableDataset = ds.map(new MapFunction[(K, Vector), (Writable, VectorWritable)] {
-      def map(tuple: (K, Vector)): Tuple2[Writable, VectorWritable] = tuple match {
-        case (idx, vec) => new Tuple2(convertKey(idx), new VectorWritable(vec))
-      }
-    })
+    val writableDataset = ds.map {
+      tuple => (convertKey(tuple._1), new VectorWritable(tuple._2))
+    }
 
     val job = new JobConf
     val sequenceFormat = new SequenceFileOutputFormat[Writable, VectorWritable]

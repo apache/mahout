@@ -47,12 +47,10 @@ import org.apache.flink.api.scala._
 object FlinkOpAtB {
 
   def notZippable[K: ClassTag](op: OpAtB[K], At: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[Int] = {
-    val classTag = extractRealClassTag(op.A)
-    val joiner = selector[Vector, Any](classTag.asInstanceOf[ClassTag[Any]]) 
 
     val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
     val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
-    val joined = rowsAt.join(rowsB).where(joiner).equalTo(joiner)
+    val joined = rowsAt.join(rowsB).where(0).equalTo(0)
 
     val ncol = op.ncol
     val nrow = op.nrow.toInt
@@ -77,7 +75,7 @@ object FlinkOpAtB {
     })
 
     val res: BlockifiedDrmDataSet[Int] = 
-      preProduct.groupBy(selector[Matrix, Int])
+      preProduct.groupBy(0)
                 .reduceGroup(new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
       def reduce(values: Iterable[(Int, Matrix)], out: Collector[BlockifiedDrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala
