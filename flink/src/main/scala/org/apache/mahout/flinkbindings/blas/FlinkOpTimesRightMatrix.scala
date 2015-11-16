@@ -18,6 +18,8 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
+import org.apache.flink.api.common.typeinfo.TypeInformation
+
 import scala.reflect.ClassTag
 
 import org.apache.flink.api.common.functions.RichMapFunction
@@ -36,7 +38,7 @@ import org.apache.flink.api.scala._
  */
 object FlinkOpTimesRightMatrix {
 
-  def drmTimesInCore[K: ClassTag](op: OpTimesRightMatrix[K], A: FlinkDrm[K], inCoreB: Matrix): FlinkDrm[K] = {
+  def drmTimesInCore[K: TypeInformation: ClassTag](op: OpTimesRightMatrix[K], A: FlinkDrm[K], inCoreB: Matrix): FlinkDrm[K] = {
     implicit val ctx = A.context
 
     val singletonDataSetB = ctx.env.fromElements(inCoreB)
