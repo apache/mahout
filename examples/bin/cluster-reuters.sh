@@ -43,6 +43,8 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
+WORK_DIR=/tmp/mahout-work-${USER}
+
 algorithm=( kmeans fuzzykmeans lda streamingkmeans clean)
 if [ -n "$1" ]; then
   choice=$1
@@ -58,8 +60,6 @@ fi
 
 echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
 clustertype=${algorithm[$choice-1]}
-
-WORK_DIR=/tmp/mahout-work-${USER}
 
 if [ "x$clustertype" == "xclean" ]; then
   rm -rf $WORK_DIR
