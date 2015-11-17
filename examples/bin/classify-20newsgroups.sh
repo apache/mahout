@@ -36,7 +36,11 @@ START_PATH=`pwd`
 # Set commands for dfs
 source ${START_PATH}/set-dfs-commands.sh
 
-WORK_DIR=/tmp/mahout-work-${USER}
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-${USER}
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
 algorithm=( cnaivebayes-MapReduce naivebayes-MapReduce cnaivebayes-Spark naivebayes-Spark sgd clean)
 if [ -n "$1" ]; then
   choice=$1

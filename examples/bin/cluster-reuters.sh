@@ -43,7 +43,11 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-WORK_DIR=/tmp/mahout-work-${USER}
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-${USER}
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
 
 algorithm=( kmeans fuzzykmeans lda streamingkmeans clean)
 if [ -n "$1" ]; then

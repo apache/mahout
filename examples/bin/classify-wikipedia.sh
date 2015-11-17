@@ -42,7 +42,11 @@ START_PATH=`pwd`
 # Set commands for dfs
 source ${START_PATH}/set-dfs-commands.sh
 
-WORK_DIR=/tmp/mahout-work-wiki
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-wiki
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
 algorithm=( CBayes BinaryCBayes clean)
 if [ -n "$1" ]; then
   choice=$1

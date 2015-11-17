@@ -45,7 +45,11 @@ fi
 
 MAHOUT="../../bin/mahout"
 
-WORK_DIR=/tmp/mahout-work-${USER}
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-${USER}
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
 
 START_PATH=`pwd`
 
