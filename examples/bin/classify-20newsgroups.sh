@@ -109,7 +109,7 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
     echo "Copying 20newsgroups data to HDFS"
     set +e
     $DFSRM ${WORK_DIR}/20news-all
-    $DFS -mkdir ${WORK_DIR}
+    $DFS -mkdir -p ${WORK_DIR}
     $DFS -mkdir ${WORK_DIR}/20news-all
     set -e
     if [ $HVERSION -eq "1" ] ; then

@@ -114,7 +114,7 @@ if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
     echo "Copying wikipedia data to HDFS"
     set +e
     $DFSRM ${WORK_DIR}/wikixml
-    $DFS -mkdir ${WORK_DIR}
+    $DFS -mkdir -p ${WORK_DIR}
     set -e
     $DFS -put ${WORK_DIR}/wikixml ${WORK_DIR}/wikixml
   fi
