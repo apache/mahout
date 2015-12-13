@@ -106,7 +106,7 @@ public class HMMTrainerTest extends HMMTestBase {
         {0.9943, 0.0036, 0.0021}, {0.0059, 0.9941, 0}, {0, 0, 1}};
 
     HmmModel trained = HmmTrainer.trainBaumWelch(getModel(), observed, 0.1, 10,
-        false);
+						 HmmAlgorithms.ScalingMethod.NOSCALING);
 
     Vector initialProbabilities = trained.getInitialProbabilities();
     Matrix emissionMatrix = trained.getEmissionMatrix();
@@ -140,7 +140,7 @@ public class HMMTrainerTest extends HMMTestBase {
         {0.9943, 0.0036, 0.0021}, {0.0059, 0.9941, 0}, {0, 0, 1}};
 
     HmmModel trained = HmmTrainer
-        .trainBaumWelch(getModel(), observed, 0.1, 10, true);
+        .trainBaumWelch(getModel(), observed, 0.1, 10, HmmAlgorithms.ScalingMethod.LOGSCALING);
 
     Vector initialProbabilities = trained.getInitialProbabilities();
     Matrix emissionMatrix = trained.getEmissionMatrix();
@@ -160,4 +160,37 @@ public class HMMTrainerTest extends HMMTestBase {
     }
   }
 
+    @Test
+  public void testReScaledBaumWelchTraining() {
+    // train the given network to the following output sequence
+    int[] observed = {1, 0, 2, 2, 0, 0, 1, 1, 1, 0, 2, 0, 1, 0, 0};
+
+    // expected values from Matlab HMM package / R HMM package
+    double[] initialExpected = {0, 0, 1.0, 0};
+    double[][] transitionExpected = {{0.2319, 0.0993, 0.0005, 0.6683},
+        {0.0001, 0.3345, 0.6654, 0}, {0.5975, 0, 0.4025, 0},
+        {0.0024, 0.6657, 0, 0.3319}};
+    double[][] emissionExpected = {{0.9995, 0.0004, 0.0001},
+        {0.9943, 0.0036, 0.0021}, {0.0059, 0.9941, 0}, {0, 0, 1}};
+
+    HmmModel trained = HmmTrainer
+        .trainBaumWelch(getModel(), observed, 0.1, 10, HmmAlgorithms.ScalingMethod.RESCALING);
+
+    Vector initialProbabilities = trained.getInitialProbabilities();
+    Matrix emissionMatrix = trained.getEmissionMatrix();
+    Matrix transitionMatrix = trained.getTransitionMatrix();
+
+    for (int i = 0; i < trained.getNrOfHiddenStates(); ++i) {
+      assertEquals(initialProbabilities.get(i), initialExpected[i],
+          0.0001);
+      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j) {
+        assertEquals(transitionMatrix.getQuick(i, j),
+            transitionExpected[i][j], 0.0001);
+      }
+      for (int j = 0; j < trained.getNrOfOutputStates(); ++j) {
+        assertEquals(emissionMatrix.getQuick(i, j),
+            emissionExpected[i][j], 0.0001);
+      }
+    }
+  }
 }

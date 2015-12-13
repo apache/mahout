@@ -110,7 +110,7 @@ public final class BaumWelchTrainer {
 
       //training
       HmmModel trainedModel = HmmTrainer.trainBaumWelch(model,
-        observationsArray, epsilon, maxIterations, true);
+        observationsArray, epsilon, maxIterations, HmmAlgorithms.ScalingMethod.LOGSCALING);
 
       //serializing trained model
       try (DataOutputStream stream = new DataOutputStream(new FileOutputStream(output))){

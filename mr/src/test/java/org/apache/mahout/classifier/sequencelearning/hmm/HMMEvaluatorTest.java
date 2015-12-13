@@ -30,12 +30,12 @@ public class HMMEvaluatorTest extends HMMTestBase {
   @Test
   public void testModelLikelihood() {
     // compute alpha and beta values
-    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), false);
-    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), false);
+      Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.NOSCALING, null);
+      Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.NOSCALING, null);
     // now test whether forward == backward likelihood
-    double forwardLikelihood = HmmEvaluator.modelLikelihood(alpha, false);
+      double forwardLikelihood = HmmEvaluator.modelLikelihood(alpha, HmmAlgorithms.ScalingMethod.NOSCALING, null);
     double backwardLikelihood = HmmEvaluator.modelLikelihood(getModel(), getSequence(),
-        beta, false);
+							     beta, HmmAlgorithms.ScalingMethod.NOSCALING, null);
     assertEquals(forwardLikelihood, backwardLikelihood, EPSILON);
     // also make sure that the likelihood matches the expected one
     assertEquals(1.8425e-4, forwardLikelihood, EPSILON);
@@ -49,15 +49,35 @@ public class HMMEvaluatorTest extends HMMTestBase {
   @Test
   public void testScaledModelLikelihood() {
     // compute alpha and beta values
-    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), true);
-    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), true);
+      Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.LOGSCALING, null);
+      Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.LOGSCALING, null);
     // now test whether forward == backward likelihood
-    double forwardLikelihood = HmmEvaluator.modelLikelihood(alpha, true);
+      double forwardLikelihood = HmmEvaluator.modelLikelihood(alpha, HmmAlgorithms.ScalingMethod.LOGSCALING, null);
     double backwardLikelihood = HmmEvaluator.modelLikelihood(getModel(), getSequence(),
-        beta, true);
+							     beta, HmmAlgorithms.ScalingMethod.LOGSCALING, null);
     assertEquals(forwardLikelihood, backwardLikelihood, EPSILON);
     // also make sure that the likelihood matches the expected one
     assertEquals(1.8425e-4, forwardLikelihood, EPSILON);
   }
 
+    /**
+   * Test to make sure the computed model likelihood ist valid. Included tests
+   * are: a) forwad == backward likelihood b) model likelihood for test seqeunce
+   * is the expected one from R reference
+   */
+  @Test
+  public void testReScaledModelLikelihood() {
+      double[] scalingFactors = new double[getSequence().length];
+    // compute alpha and beta values
+      Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.RESCALING, scalingFactors);
+      Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.RESCALING, scalingFactors);
+    // now test whether forward == backward likelihood
+      double forwardLikelihood = HmmEvaluator.modelLikelihood(alpha, HmmAlgorithms.ScalingMethod.RESCALING, scalingFactors);
+    double backwardLikelihood = HmmEvaluator.modelLikelihood(getModel(), getSequence(),
+							     beta, HmmAlgorithms.ScalingMethod.RESCALING, scalingFactors);
+    assertEquals(forwardLikelihood, backwardLikelihood, EPSILON);
+    // also make sure that the likelihood matches the expected one
+    assertEquals(1.8425e-4, forwardLikelihood, EPSILON);
+  }
+    
 }

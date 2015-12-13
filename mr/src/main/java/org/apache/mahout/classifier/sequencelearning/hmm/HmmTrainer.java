@@ -287,13 +287,14 @@ public final class HmmTrainer {
    * @param observedSequence The sequence of observed states
    * @param epsilon          Convergence criteria
    * @param maxIterations    The maximum number of training iterations
-   * @param scaled           Use log-scaled implementations of forward/backward algorithm. This
+   * @param scaling          Scaling Method. Use log-scaled or rescaled 
+   *                         implementations of forward/backward algorithm. This
    *                         is computationally more expensive, but offers better numerical
    *                         stability for long output sequences.
    * @return The iterated model
    */
   public static HmmModel trainBaumWelch(HmmModel initialModel,
-                                        int[] observedSequence, double epsilon, int maxIterations, boolean scaled) {
+                                        int[] observedSequence, double epsilon, int maxIterations, HmmAlgorithms.ScalingMethod scaling) {
     // allocate space for the iterations
     HmmModel lastIteration = initialModel.clone();
     HmmModel iteration = initialModel.clone();
@@ -311,15 +312,25 @@ public final class HmmTrainer {
       Matrix emissionMatrix = iteration.getEmissionMatrix();
       Matrix transitionMatrix = iteration.getTransitionMatrix();
 
-      // compute forward and backward factors
-      HmmAlgorithms.forwardAlgorithm(alpha, iteration, observedSequence, scaled);
-      HmmAlgorithms.backwardAlgorithm(beta, iteration, observedSequence, scaled);
+      double[] scalingFactors = null;
 
-      if (scaled) {
+      if (scaling == HmmAlgorithms.ScalingMethod.RESCALING) {
+	  scalingFactors = new double[observedSequence.length];
+      }
+
+      // compute forward and backward factors
+      HmmAlgorithms.forwardAlgorithm(alpha, iteration, observedSequence, scaling, scalingFactors);
+      HmmAlgorithms.backwardAlgorithm(beta, iteration, observedSequence, scaling, scalingFactors);
+
+      if (scaling == HmmAlgorithms.ScalingMethod.LOGSCALING) {
         logScaledBaumWelch(observedSequence, iteration, alpha, beta);
+      } else if (scaling == HmmAlgorithms.ScalingMethod.RESCALING) {
+	  reScaledBaumWelch(observedSequence, iteration, alpha, beta, scalingFactors);
       } else {
         unscaledBaumWelch(observedSequence, iteration, alpha, beta);
       }
+
+      if (scaling != HmmAlgorithms.ScalingMethod.RESCALING) {
       // normalize transition/emission probabilities
       // and normalize the probabilities
       double isum = 0;
@@ -349,6 +360,7 @@ public final class HmmTrainer {
         initialProbabilities.setQuick(i, initialProbabilities.getQuick(i)
             / isum);
       }
+      }
       // check for convergence
       if (checkConvergence(lastIteration, iteration, epsilon)) {
         break;
@@ -364,7 +376,7 @@ public final class HmmTrainer {
     Vector initialProbabilities = iteration.getInitialProbabilities();
     Matrix emissionMatrix = iteration.getEmissionMatrix();
     Matrix transitionMatrix = iteration.getTransitionMatrix();
-    double modelLikelihood = HmmEvaluator.modelLikelihood(alpha, false);
+    double modelLikelihood = HmmEvaluator.modelLikelihood(alpha, HmmAlgorithms.ScalingMethod.NOSCALING, null);
 
     for (int i = 0; i < iteration.getNrOfHiddenStates(); ++i) {
       initialProbabilities.setQuick(i, alpha.getQuick(0, i)
@@ -403,7 +415,7 @@ public final class HmmTrainer {
     Vector initialProbabilities = iteration.getInitialProbabilities();
     Matrix emissionMatrix = iteration.getEmissionMatrix();
     Matrix transitionMatrix = iteration.getTransitionMatrix();
-    double modelLikelihood = HmmEvaluator.modelLikelihood(alpha, true);
+    double modelLikelihood = HmmEvaluator.modelLikelihood(alpha, HmmAlgorithms.ScalingMethod.LOGSCALING, null);
 
     for (int i = 0; i < iteration.getNrOfHiddenStates(); ++i) {
       initialProbabilities.setQuick(i, Math.exp(alpha.getQuick(0, i) + beta.getQuick(0, i)));
@@ -444,6 +456,50 @@ public final class HmmTrainer {
       }
     }
   }
+
+    private static void reScaledBaumWelch(int[] observedSequence, HmmModel iteration, Matrix alpha, Matrix beta, double[] scalingFactors) {
+	Vector initialProbabilities = iteration.getInitialProbabilities();
+    Matrix emissionMatrix = iteration.getEmissionMatrix();
+    Matrix transitionMatrix = iteration.getTransitionMatrix();
+
+    for (int i = 0; i < iteration.getNrOfHiddenStates(); ++i) {
+      initialProbabilities.setQuick(i, alpha.getQuick(0, i)
+          * beta.getQuick(0, i)/scalingFactors[0]);
+    }
+
+    // recompute transition probabilities
+    for (int i = 0; i < iteration.getNrOfHiddenStates(); ++i) {
+      for (int j = 0; j < iteration.getNrOfHiddenStates(); ++j) {
+        double temp = 0;
+        double temp1 = 0;
+        for (int t = 0; t < observedSequence.length - 1; ++t) {
+          temp += alpha.getQuick(t, i)
+	      * transitionMatrix.getQuick(i, j)
+              * emissionMatrix.getQuick(j, observedSequence[t + 1])
+              * beta.getQuick(t + 1, j);
+	  temp1 += alpha.getQuick(t, i)
+	      * beta.getQuick(t, i)/scalingFactors[t];
+        }
+        transitionMatrix.setQuick(i, j, temp / temp1);
+      }
+    }
+    // recompute emission probabilities
+    for (int i = 0; i < iteration.getNrOfHiddenStates(); ++i) {
+      for (int j = 0; j < iteration.getNrOfOutputStates(); ++j) {
+        double temp = 0;
+        double temp1 = 0;
+        for (int t = 0; t < observedSequence.length; ++t) {
+          // delta tensor
+          if (observedSequence[t] == j) {
+            temp += alpha.getQuick(t, i) * beta.getQuick(t, i)/scalingFactors[t];
+          }
+	  temp1 += alpha.getQuick(t, i)
+	      * beta.getQuick(t, i)/scalingFactors[t];
+        }
+        emissionMatrix.setQuick(i, j, temp / temp1);
+      }
+    }
+ }
 
   /**
    * Check convergence of two HMM models by computing a simple distance between

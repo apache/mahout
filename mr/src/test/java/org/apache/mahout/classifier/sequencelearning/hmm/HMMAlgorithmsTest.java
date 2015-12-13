@@ -41,7 +41,7 @@ public class HMMAlgorithmsTest extends HMMTestBase {
         {0.03, 0.0000, 0.013428, 0.00951084, 0.0000000000, 0.000000e+00,
             2.428986e-05},};
     // fetch the alpha matrix using the forward algorithm
-    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), false);
+    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.NOSCALING, null);
     // first do some basic checking
     assertNotNull(alpha);
     assertEquals(4, alpha.numCols());
@@ -67,7 +67,34 @@ public class HMMAlgorithmsTest extends HMMTestBase {
         {0.03, 0.0000, 0.013428, 0.00951084, 0.0000000000, 0.000000e+00,
             2.428986e-05},};
     // fetch the alpha matrix using the forward algorithm
-    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), true);
+    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.LOGSCALING, null);
+    // first do some basic checking
+    assertNotNull(alpha);
+    assertEquals(4, alpha.numCols());
+    assertEquals(7, alpha.numRows());
+    // now compare the resulting matrices
+    for (int i = 0; i < 4; ++i) {
+      for (int j = 0; j < 7; ++j) {
+        assertEquals(Math.log(alphaExpectedA[i][j]), alpha.get(j, i), EPSILON);
+      }
+    }
+  }
+
+@Test
+  public void testReScaledForwardAlgorithm() {
+    // intialize the expected alpha values
+    double[][] alphaExpectedA = {
+        {0.02, 0.0392, 0.002438, 0.00035456, 0.0011554672, 7.158497e-04,
+            4.614927e-05},
+        {0.01, 0.0054, 0.001824, 0.00069486, 0.0007586904, 2.514137e-04,
+            1.721505e-05},
+        {0.32, 0.0262, 0.002542, 0.00038026, 0.0001360234, 3.002345e-05,
+            9.659608e-05},
+        {0.03, 0.0000, 0.013428, 0.00951084, 0.0000000000, 0.000000e+00,
+            2.428986e-05},};
+    double[] scalingFactors = new double[getSequence().length];
+    // fetch the alpha matrix using the forward algorithm
+    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.LOGSCALING, scalingFactors);
     // first do some basic checking
     assertNotNull(alpha);
     assertEquals(4, alpha.numCols());
@@ -95,7 +122,7 @@ public class HMMAlgorithmsTest extends HMMTestBase {
         {0.0003825772, 0.001238558, 0.00259464, 0.012096, 0.0664, 0.66, 1},
         {0.0004390858, 0.007076994, 0.01063512, 0.013556, 0.0304, 0.17, 1}};
     // fetch the beta matrix using the backward algorithm
-    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), false);
+    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.NOSCALING, null);
     // first do some basic checking
     assertNotNull(beta);
     assertEquals(4, beta.numCols());
@@ -117,7 +144,32 @@ public class HMMAlgorithmsTest extends HMMTestBase {
         {0.0003825772, 0.001238558, 0.00259464, 0.012096, 0.0664, 0.66, 1},
         {0.0004390858, 0.007076994, 0.01063512, 0.013556, 0.0304, 0.17, 1}};
     // fetch the beta matrix using the backward algorithm
-    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), true);
+    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.LOGSCALING, null);
+    // first do some basic checking
+    assertNotNull(beta);
+    assertEquals(4, beta.numCols());
+    assertEquals(7, beta.numRows());
+    // now compare the resulting matrices
+    for (int i = 0; i < 4; ++i) {
+      for (int j = 0; j < 7; ++j) {
+        assertEquals(Math.log(betaExpectedA[i][j]), beta.get(j, i), EPSILON);
+      }
+    }
+  }
+
+@Test
+  public void testReScaledBackwardAlgorithm() {
+    // intialize the expected beta values
+    double[][] betaExpectedA = {
+        {0.0015730559, 0.003543656, 0.00738264, 0.040692, 0.0848, 0.17, 1},
+        {0.0017191865, 0.002386795, 0.00923652, 0.052232, 0.1018, 0.17, 1},
+        {0.0003825772, 0.001238558, 0.00259464, 0.012096, 0.0664, 0.66, 1},
+        {0.0004390858, 0.007076994, 0.01063512, 0.013556, 0.0304, 0.17, 1}};
+    double[] scalingFactors = new double[getSequence().length];
+    // fetch the alpha matrix using the forward algorithm
+    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.LOGSCALING, scalingFactors);
+    // fetch the beta matrix using the backward algorithm
+    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), HmmAlgorithms.ScalingMethod.LOGSCALING, scalingFactors);
     // first do some basic checking
     assertNotNull(beta);
     assertEquals(4, beta.numCols());

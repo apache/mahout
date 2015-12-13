@@ -121,8 +121,13 @@ public final class HmmEvaluator {
    *                       long output sequences
    * @return Likelihood that the given model produced the given sequence
    */
-  public static double modelLikelihood(HmmModel model, int[] outputSequence, boolean scaled) {
-    return modelLikelihood(HmmAlgorithms.forwardAlgorithm(model, outputSequence, scaled), scaled);
+  public static double modelLikelihood(HmmModel model, int[] outputSequence, HmmAlgorithms.ScalingMethod scaling) {
+      double[] scalingFactors = null;
+
+      if (scaling == HmmAlgorithms.ScalingMethod.RESCALING) {
+	  scalingFactors = new double[outputSequence.length];
+      }
+      return modelLikelihood(HmmAlgorithms.forwardAlgorithm(model, outputSequence, scaling, scalingFactors), scaling, scalingFactors);
   }
 
   /**
@@ -133,12 +138,18 @@ public final class HmmEvaluator {
    * @param scaled Set to true if the alpha values are log-scaled.
    * @return model likelihood.
    */
-  public static double modelLikelihood(Matrix alpha, boolean scaled) {
+    public static double modelLikelihood(Matrix alpha,  HmmAlgorithms.ScalingMethod scaling, double[] scalingFactors) {
     double likelihood = 0;
-    if (scaled) {
+    if (scaling == HmmAlgorithms.ScalingMethod.LOGSCALING) {
       for (int i = 0; i < alpha.numCols(); ++i) {
         likelihood += Math.exp(alpha.getQuick(alpha.numRows() - 1, i));
       }
+    } else if (scaling == HmmAlgorithms.ScalingMethod.RESCALING) {
+	double logSum = 0.0;
+	for (int i = 0; i < scalingFactors.length; ++i) {
+	    logSum += Math.log(scalingFactors[i]);
+	}
+	likelihood = Math.exp(-1.0 * logSum);
     } else {
       for (int i = 0; i < alpha.numCols(); ++i) {
         likelihood += alpha.getQuick(alpha.numRows() - 1, i);
@@ -157,16 +168,22 @@ public final class HmmEvaluator {
    * @param scaled     set to true if betas are log-scaled.
    * @return likelihood of the outputSequence given the model.
    */
-  public static double modelLikelihood(HmmModel model, int[] outputSequence, Matrix beta, boolean scaled) {
+    public static double modelLikelihood(HmmModel model, int[] outputSequence, Matrix beta, HmmAlgorithms.ScalingMethod scaling, double[] scalingFactors) {
     double likelihood = 0;
     // fetch the emission probabilities
     Matrix e = model.getEmissionMatrix();
     Vector pi = model.getInitialProbabilities();
     int firstOutput = outputSequence[0];
-    if (scaled) {
+    if (scaling == HmmAlgorithms.ScalingMethod.LOGSCALING) {
       for (int i = 0; i < model.getNrOfHiddenStates(); ++i) {
         likelihood += pi.getQuick(i) * Math.exp(beta.getQuick(0, i)) * e.getQuick(i, firstOutput);
       }
+    } else if (scaling == HmmAlgorithms.ScalingMethod.RESCALING) {
+	double logSum = 0.0;
+	for (int i = 0; i < scalingFactors.length; ++i) {
+	    logSum += Math.log(scalingFactors[i]);
+	}
+	likelihood = Math.exp(-1.0 * logSum);
     } else {
       for (int i = 0; i < model.getNrOfHiddenStates(); ++i) {
         likelihood += pi.getQuick(i) * beta.getQuick(0, i) * e.getQuick(i, firstOutput);

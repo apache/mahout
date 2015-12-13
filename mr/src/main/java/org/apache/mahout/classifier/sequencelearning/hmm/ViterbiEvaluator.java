@@ -113,7 +113,7 @@ public final class ViterbiEvaluator {
       }
 
       if (computeLikelihood) {
-        System.out.println("Likelihood: " + HmmEvaluator.modelLikelihood(model, observationsArray, true));
+        System.out.println("Likelihood: " + HmmEvaluator.modelLikelihood(model, observationsArray, HmmAlgorithms.ScalingMethod.LOGSCALING));
       }
     } catch (OptionException e) {
       CommandLineUtil.printHelp(optionGroup);
