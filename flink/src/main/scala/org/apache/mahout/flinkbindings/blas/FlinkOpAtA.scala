@@ -18,6 +18,8 @@ import org.apache.mahout.math.drm.logical.OpAtA
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
+import scala.reflect.ClassTag
+
 
 /**
  * Inspired by Spark's implementation from 
@@ -29,7 +31,7 @@ object FlinkOpAtA {
   final val PROPERTY_ATA_MAXINMEMNCOL = "mahout.math.AtA.maxInMemNCol"
   final val PROPERTY_ATA_MAXINMEMNCOL_DEFAULT = "200"
 
-  def at_a(op: OpAtA[_], A: FlinkDrm[_]): FlinkDrm[Int] = {
+  def at_a[K: ClassTag](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
     val maxInMemStr = System.getProperty(PROPERTY_ATA_MAXINMEMNCOL, PROPERTY_ATA_MAXINMEMNCOL_DEFAULT)
     val maxInMemNCol = maxInMemStr.toInt
     maxInMemNCol.ensuring(_ > 0, "Invalid A'A in-memory setting for optimizer")
@@ -40,11 +42,11 @@ object FlinkOpAtA {
       val result = drmParallelize(inCoreAtA, numPartitions = 1)
       result
     } else {
-      fat(op.asInstanceOf[OpAtA[Any]], A.asInstanceOf[FlinkDrm[Any]])
+      fat(op.asInstanceOf[OpAtA[K]], A.asInstanceOf[FlinkDrm[K]])
     }
   }
 
-  def slim(op: OpAtA[_], A: FlinkDrm[_]): Matrix = {
+  def slim[K: ClassTag](op: OpAtA[_], A: FlinkDrm[_]): Matrix = {
     val ds = A.asBlockified.ds.asInstanceOf[DataSet[(Array[Any], Matrix)]]
 
     val res = ds.map {
@@ -55,31 +57,31 @@ object FlinkOpAtA {
     res.head
   }
 
-  def fat(op: OpAtA[Any], A: FlinkDrm[Any]): FlinkDrm[Int] = {
+  def fat[K: ClassTag](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
     val nrow = op.A.nrow
     val ncol = op.A.ncol
     val ds = A.asBlockified.ds
 
-    val numberOfPartitions: DataSet[Int] = ds.map(new MapFunction[(Array[Any], Matrix), Int] {
-      def map(a: (Array[Any], Matrix)): Int = 1
+    val numberOfPartitions: DataSet[Int] = ds.map(new MapFunction[(Array[K], Matrix), Int] {
+      def map(a: (Array[K], Matrix)): Int = 1
     }).reduce(new ReduceFunction[Int] {
       def reduce(a: Int, b: Int): Int = a + b
     })
 
-    val subresults: DataSet[(Int, Matrix)] = 
-          ds.flatMap(new RichFlatMapFunction[(Array[Any], Matrix), (Int, Matrix)] {
+    val subresults: DataSet[(Int, Matrix)] =
+          ds.flatMap(new RichFlatMapFunction[(Array[K], Matrix), (Int, Matrix)] {
 
       var ranges: Array[Range] = null
 
       override def open(params: Configuration): Unit = {
-        val runtime = this.getRuntimeContext()
+        val runtime = this.getRuntimeContext
         val dsX: java.util.List[Int] = runtime.getBroadcastVariable("numberOfPartitions")
         val parts = dsX.get(0)
         val numParts = estimatePartitions(nrow, ncol, parts)
         ranges = computeEvenSplits(ncol, numParts)
       }
 
-      def flatMap(tuple: (Array[Any], Matrix), out: Collector[(Int, Matrix)]): Unit = {
+      def flatMap(tuple: (Array[K], Matrix), out: Collector[(Int, Matrix)]): Unit = {
         val block = tuple._2
 
         ranges.zipWithIndex.foreach { case (range, idx) => 
@@ -95,7 +97,7 @@ object FlinkOpAtA {
       var ranges: Array[Range] = null
 
       override def open(params: Configuration): Unit = {
-        val runtime = this.getRuntimeContext()
+        val runtime = this.getRuntimeContext
         val dsX: java.util.List[Int] = runtime.getBroadcastVariable("numberOfPartitions")
         val parts = dsX.get(0)
         val numParts = estimatePartitions(nrow, ncol, parts)

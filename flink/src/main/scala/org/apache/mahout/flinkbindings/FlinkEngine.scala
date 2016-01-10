@@ -64,7 +64,7 @@ object FlinkEngine extends DistributedEngine {
 
     val metadata = hdfsUtils.readDrmHeader(path)
 
-    val unwrapKey  = metadata.unwrapKeyFunction
+    val unwrapKey = metadata.unwrapKeyFunction
 
     val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
 
@@ -83,6 +83,14 @@ object FlinkEngine extends DistributedEngine {
   override def indexedDatasetDFSReadElements(src: String,schema: Schema, existingRowIDs: Option[BiDictionary])
                                             (implicit sc: DistributedContext): IndexedDataset = ???
 
+
+  /**
+    * Perform default expression rewrite. Return physical plan that we can pass to exec(). <P>
+    *
+    * A particular physical engine implementation may choose to either use or not use these rewrites
+    * as a useful basic rewriting rule.<P>
+    */
+  override def optimizerRewrite[K: ClassTag](action: DrmLike[K]): DrmLike[K] = super.optimizerRewrite(action)
 
   /** 
    * Translates logical plan into Flink execution plan. 
@@ -166,11 +174,11 @@ object FlinkEngine extends DistributedEngine {
    * returns a vector that contains a column-wise sum from DRM 
    */
   override def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
-    val sum = drm.ds.map(new MapFunction[(K, Vector), Vector] {
-      def map(tuple: (K, Vector)): Vector = tuple._2
-    }).reduce(new ReduceFunction[Vector] {
-      def reduce(v1: Vector, v2: Vector) = v1 + v2
-    })
+    implicit val typeInformation = generateTypeInformation[K]
+
+    val sum = drm.ds.map {
+      tuple => tuple._2
+    }.reduce(_ + _)
 
     val list = sum.collect
     list.head
@@ -208,13 +216,21 @@ object FlinkEngine extends DistributedEngine {
    * Calculates the element-wise squared norm of a matrix
    */
   override def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double = {
-    val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
-      def map(tuple: (K, Vector)): Double = tuple match {
+    implicit val typeInformation = generateTypeInformation[K]
+
+    val sumOfSquares = drm.ds.map {
+      tuple => tuple match {
         case (idx, vec) => vec dot vec
       }
-    }).reduce(new ReduceFunction[Double] {
-      def reduce(v1: Double, v2: Double) = v1 + v2
-    })
+    }.reduce(_ + _)
+
+//    val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
+//      def map(tuple: (K, Vector)): Double = tuple match {
+//        case (idx, vec) => vec dot vec
+//      }
+//    }).reduce(new ReduceFunction[Double] {
+//      def reduce(v1: Double, v2: Double) = v1 + v2
+//    })
 
     val list = sumOfSquares.collect
     list.head
@@ -230,7 +246,7 @@ object FlinkEngine extends DistributedEngine {
     FlinkByteBCast.wrap(m)
 
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
+  /** Parallelize in-core matrix as flink distributed matrix, using row ordinal indices as data set keys. */
   override def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
                                            (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
 
@@ -241,9 +257,9 @@ object FlinkEngine extends DistributedEngine {
 
   private[flinkbindings] def parallelize(m: Matrix, parallelismDegree: Int)
       (implicit dc: DistributedContext): DrmDataSet[Int] = {
-    val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
+    val rows = (0 until m.nrow).map(i => (i, m(i, ::))).toSeq.sortWith((ii, jj) => ii._1 < jj._1)
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    dc.env.fromCollection(rows).setParallelism(parallelismDegree)
+    dc.env.fromCollection(rows).partitionByRange(0).setParallelism(parallelismDegree)
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
@@ -313,6 +329,8 @@ object FlinkEngine extends DistributedEngine {
       createTypeInformation[Long].asInstanceOf[TypeInformation[K]]
     } else if (tag.runtimeClass.equals(classOf[String])) {
       createTypeInformation[String].asInstanceOf[TypeInformation[K]]
+    } else if (tag.runtimeClass.equals(classOf[Any])) {
+      createTypeInformation[Any].asInstanceOf[TypeInformation[K]]
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
     }

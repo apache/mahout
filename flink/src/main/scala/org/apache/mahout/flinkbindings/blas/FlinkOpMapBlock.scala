@@ -43,6 +43,6 @@ object FlinkOpMapBlock {
         result
     }
 
-    new BlockifiedFlinkDrm(res, ncol)
+    new BlockifiedFlinkDrm[R](res, ncol)
   }
 }

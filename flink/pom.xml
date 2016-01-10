@@ -105,7 +105,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-core</artifactId>
+      <artifactId>flink-runtime</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>

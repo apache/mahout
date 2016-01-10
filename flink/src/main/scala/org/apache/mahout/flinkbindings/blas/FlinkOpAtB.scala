@@ -48,8 +48,8 @@ object FlinkOpAtB {
 
   def notZippable[K: ClassTag](op: OpAtB[K], At: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[Int] = {
 
-    val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
-    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
+    val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[K]]
+    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[K]]
     val joined = rowsAt.join(rowsB).where(0).equalTo(0)
 
     val ncol = op.ncol
@@ -57,12 +57,11 @@ object FlinkOpAtB {
     val blockHeight = 10
     val blockCount = safeToNonNegInt((nrow - 1) / blockHeight + 1)
 
-    val preProduct: DataSet[(Int, Matrix)] = 
-             joined.flatMap(new FlatMapFunction[Tuple2[(_, Vector), (_, Vector)], (Int, Matrix)] {
-      def flatMap(in: Tuple2[(_, Vector), (_, Vector)],
-                  out: Collector[(Int, Matrix)]): Unit = {
+    val preProduct: DataSet[(Int, Matrix)] =
+             joined.flatMap(new FlatMapFunction[((K, Vector), (K, Vector)), (Int, Matrix)] {
+      def flatMap(in: ((K, Vector), (K, Vector)), out: Collector[(Int, Matrix)]): Unit = {
         val avec = in._1._2
-        val bvec = in._1._2
+        val bvec = in._2._2
 
         0.until(blockCount) map { blockKey =>
           val blockStart = blockKey * blockHeight
@@ -70,13 +69,13 @@ object FlinkOpAtB {
 
           val outer = avec(blockStart until blockEnd) cross bvec
           out.collect(blockKey -> outer)
+          out
         }
       }
     })
 
     val res: BlockifiedDrmDataSet[Int] = 
-      preProduct.groupBy(0)
-                .reduceGroup(new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
+      preProduct.groupBy(0).reduceGroup(new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
       def reduce(values: Iterable[(Int, Matrix)], out: Collector[BlockifiedDrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala
         val (idx, _) = it.head
@@ -88,7 +87,7 @@ object FlinkOpAtB {
       }
     })
 
-    new BlockifiedFlinkDrm(res, ncol)
+    new BlockifiedFlinkDrm[Int](res, ncol)
   }
 
 }
