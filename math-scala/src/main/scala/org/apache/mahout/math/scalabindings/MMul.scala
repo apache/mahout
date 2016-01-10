@@ -24,7 +24,6 @@ import RLikeOps._
 import org.apache.mahout.logging._
 
 import scala.collection.JavaConversions._
-import scala.collection._
 
 object MMul extends MMBinaryFunc {
 
@@ -46,32 +45,32 @@ object MMul extends MMBinaryFunc {
         sd match {
 
           // Multiplication cases by a diagonal matrix.
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.COLWISE, _) if (a
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmDiagCW _
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSECOLWISE, _) if (a
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmDiagCW _
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.ROWWISE, _) if (a
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmDiagRW _
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSEROWWISE, _) if (a
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmDiagRW _
+          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.COLWISE, _)
+            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagCW
+          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSECOLWISE, _)
+            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagCW
+          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.ROWWISE, _)
+            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagRW
+          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSEROWWISE, _)
+            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagRW
 
-          case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.VECTORBACKED, _) if (b
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmCWDiag _
-          case (TraversingStructureEnum.SPARSECOLWISE, _, TraversingStructureEnum.VECTORBACKED, _) if (b
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmCWDiag _
-          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.VECTORBACKED, _) if (b
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmRWDiag _
-          case (TraversingStructureEnum.SPARSEROWWISE, _, TraversingStructureEnum.VECTORBACKED, _) if (b
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmRWDiag _
+          case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmCWDiag
+          case (TraversingStructureEnum.SPARSECOLWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmCWDiag
+          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
+          case (TraversingStructureEnum.SPARSEROWWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
 
           // Dense-dense cases
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if (a eq b.t) ⇒ jvmDRWAAt _
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if (a.t eq b) ⇒ jvmDRWAAt _
+          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ jvmDRWAAt
+          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ jvmDRWAAt
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmRWCW
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmRWRW
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmCWCW
-          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if ( a eq b.t) ⇒ jvmDCWAAt _
-          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if ( a.t eq b) ⇒ jvmDCWAAt _
+          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a eq b.t ⇒ jvmDCWAAt
+          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a.t eq b ⇒ jvmDCWAAt
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmCWRW
 
           // Sparse row matrix x sparse row matrix (array of vectors)
@@ -107,7 +106,7 @@ object MMul extends MMBinaryFunc {
           case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW2flips
 
           // Sparse methods are only effective if the first argument is sparse, so we need to do a swap.
-          case (_, _, _, false) ⇒ { (a, b, r) ⇒ apply(b.t, a.t, r.map {_.t}).t }
+          case (_, _, _, false) ⇒ (a, b, r) ⇒ apply(b.t, a.t, r.map {_.t}).t
 
           // Default jvm-jvm case.
           case _ ⇒ jvmRWCW

@@ -100,7 +100,6 @@ object SparkEngine extends DistributedEngine {
   override def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf:
   BlockReduceFunc): Matrix = {
 
-    import drm._
     drm.asBlockified(ncol = drm.ncol).map(bmf(_)).reduce(rf)
   }
 

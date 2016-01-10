@@ -23,7 +23,6 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.java.typeutils.TypeExtractor
 import org.apache.hadoop.io.Writable
 import org.apache.mahout.flinkbindings.blas._
@@ -40,6 +39,7 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.utils.DataSetUtils
 
 
 object FlinkEngine extends DistributedEngine {
@@ -129,8 +129,7 @@ object FlinkEngine extends DistributedEngine {
       val bt = FlinkOpAt.sparseTrick(opBt, flinkTranslate(b.asInstanceOf[DrmLike[Int]]))
       val d = new CheckpointedFlinkDrm(bt.asRowWise.ds, _nrow=opBt.nrow, _ncol=opBt.ncol)
 
-      FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d))
-                .asInstanceOf[FlinkDrm[K]]
+      FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d)).asInstanceOf[FlinkDrm[K]]
     case op @ OpAtA(a) => FlinkOpAtA.at_a(op, flinkTranslate(a)(op.classTagA))
     case op @ OpTimesRightMatrix(a, b) =>
       implicit val typeInformation = generateTypeInformation[K]
@@ -191,7 +190,6 @@ object FlinkEngine extends DistributedEngine {
     val result = drm.asBlockified.ds.map {
       tuple =>
         val block = tuple._2
-
         val acc = block(0, ::).like()
 
         block.foreach { v =>
@@ -295,22 +293,19 @@ object FlinkEngine extends DistributedEngine {
           (DrmLike[Int], Option[DrmLike[K]]) = ???
 
   /**
-   * (Optional) Sampling operation. Consistent with Spark semantics of the same.
+   * (Optional) Sampling operation.
    */
-  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = ???
+  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = {
+    implicit val typeInformation = generateTypeInformation[K]
+    val sample = DataSetUtils(drmX.dataset).sample(replacement, fraction)
+    new CheckpointedFlinkDrm[K](sample)
+  }
 
-  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = ???
-
-//  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = {
-//
-//    val ncol = drmX match {
-//      case cp: CheckpointedFlinkDrm[K] ⇒ cp.ncol
-//      case _ ⇒ -1
-//    }
-//
-//    val sample = DataSetUtils.sampleWithSize(drmX.dataset, replacement, numSamples)
-//
-//  }
+  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = {
+    implicit val typeInformation = generateTypeInformation[K]
+    val sample = DataSetUtils(drmX.dataset).sampleWithSize(replacement, numSamples)
+    new CheckpointedFlinkDrm[K](sample)
+  }
 
   /** Optional engine-specific all reduce tensor operation. */
   def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = 

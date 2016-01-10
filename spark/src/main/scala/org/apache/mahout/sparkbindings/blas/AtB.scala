@@ -19,7 +19,6 @@ package org.apache.mahout.sparkbindings.blas
 
 import reflect.ClassTag
 import collection._
-import JavaConversions._
 
 import org.apache.mahout.logging._
 import org.apache.mahout.math._
@@ -28,8 +27,6 @@ import org.apache.mahout.sparkbindings.drm._
 import org.apache.spark.rdd.RDD
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
-import org.apache.spark.SparkContext._
-import org.apache.log4j.Logger
 import org.apache.mahout.math.drm.logical.OpAtB
 
 import scala.collection.mutable.ArrayBuffer
@@ -70,7 +67,7 @@ object AtB {
     // per partition number in the product as the bigger of two operands.
     val numProductPartitions = (prodNCol.toDouble * prodNRow / epp).ceil.toInt
 
-    if (log.isDebugEnabled) log.debug(s"AtB: #parts ${numProductPartitions} for $prodNRow x $prodNCol geometry.")
+    if (log.isDebugEnabled) log.debug(s"AtB: #parts $numProductPartitions for $prodNRow x $prodNCol geometry.")
 
     val zipped = if (zippable) {
 
@@ -113,7 +110,7 @@ object AtB {
     // per partition number in the product as the bigger of two operands.
     val numProductPartitions = (prodNCol.toDouble * prodNRow / epp).ceil.toInt min prodNRow
 
-    if (log.isDebugEnabled) log.debug(s"AtB mmul: #parts ${numProductPartitions} for $prodNRow x $prodNCol geometry.")
+    if (log.isDebugEnabled) log.debug(s"AtB mmul: #parts $numProductPartitions for $prodNRow x $prodNCol geometry.")
 
     val zipped = if (zippable) {
 
@@ -312,7 +309,7 @@ object AtB {
 
     if (log.isDebugEnabled) {
       log.debug(s"AtBZipped:zipped #parts ${zipped.partitions.size}")
-      log.debug(s"AtBZipped:Targeted #parts ${numPartitions}")
+      log.debug(s"AtBZipped:Targeted #parts $numPartitions")
     }
 
     // Figure out appriximately block height per partition of the result.

@@ -24,7 +24,6 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
 import RLikeDrmOps._
-import org.apache.log4j.Logger
 
 object DQR {
 
