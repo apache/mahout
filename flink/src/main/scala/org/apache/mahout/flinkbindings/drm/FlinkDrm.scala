@@ -73,6 +73,7 @@ class RowsFlinkDrm[K: TypeInformation: ClassTag](val ds: DrmDataSet[K], val ncol
 
           Seq((keys.toArray(classTag), matrix))
         } else {
+          throw new IllegalStateException("Empty Partition!!!!!")
           Seq()
         }
     }

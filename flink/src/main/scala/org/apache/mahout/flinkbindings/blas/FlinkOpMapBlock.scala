@@ -40,9 +40,10 @@ object FlinkOpMapBlock {
         val result = function(block)
         assert(result._2.nrow == block._2.nrow, "block mapping must return same number of rows.")
         assert(result._2.ncol == ncol, s"block map must return $ncol number of columns.")
+        printf("Block partition: \n%s\n", block._2)
         result
     }
 
-    new BlockifiedFlinkDrm(res, ncol)
+    new BlockifiedFlinkDrm[R](res, ncol)
   }
 }
