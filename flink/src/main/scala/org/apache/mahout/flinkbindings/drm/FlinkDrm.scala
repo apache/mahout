@@ -21,6 +21,7 @@ package org.apache.mahout.flinkbindings.drm
 import java.lang.Iterable
 
 import org.apache.flink.api.common.functions.{FlatMapFunction, MapPartitionFunction}
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
 import org.apache.flink.util.Collector
 import org.apache.mahout.flinkbindings.{BlockifiedDrmDataSet, DrmDataSet, FlinkDistributedContext, wrapContext}
@@ -43,7 +44,7 @@ trait FlinkDrm[K] {
   def classTag: ClassTag[K]
 }
 
-class RowsFlinkDrm[K: ClassTag](val ds: DrmDataSet[K], val ncol: Int) extends FlinkDrm[K] {
+class RowsFlinkDrm[K: TypeInformation: ClassTag](val ds: DrmDataSet[K], val ncol: Int) extends FlinkDrm[K] {
 
   def executionEnvironment = ds.getExecutionEnvironment
   def context: FlinkDistributedContext = ds.getExecutionEnvironment
@@ -54,27 +55,30 @@ class RowsFlinkDrm[K: ClassTag](val ds: DrmDataSet[K], val ncol: Int) extends Fl
     val ncolLocal = ncol
     val classTag = implicitly[ClassTag[K]]
 
-    val parts = ds.mapPartition(new MapPartitionFunction[DrmTuple[K], (Array[K], Matrix)] {
-      def mapPartition(values: Iterable[DrmTuple[K]], out: Collector[(Array[K], Matrix)]): Unit = {
-        val it = values.asScala.seq
+    val parts = ds.mapPartition {
+      values =>
+        val (keys, vectors) = values.toIterable.unzip
 
-        val (keys, vectors) = it.unzip
         if (vectors.nonEmpty) {
-          val isDense = vectors.head.isDense
 
-          if (isDense) {
+          val vector = vectors.head
+
+          val matrix: Matrix = if (vector.isDense) {
             val matrix = new DenseMatrix(vectors.size, ncolLocal)
             vectors.zipWithIndex.foreach { case (vec, idx) => matrix(idx, ::) := vec }
-            out.collect((keys.toArray(classTag), matrix))
+            matrix
           } else {
-            val matrix = new SparseRowMatrix(vectors.size, ncolLocal, vectors.toArray)
-            out.collect((keys.toArray(classTag), matrix))
+            new SparseRowMatrix(vectors.size, ncolLocal, vectors.toArray)
           }
-        }
-      }
-    })
 
-    new BlockifiedFlinkDrm(parts, ncol)
+          Seq((keys.toArray(classTag), matrix))
+        } else {
+          throw new IllegalStateException("Empty Partition!!!!!")
+          Seq()
+        }
+    }
+
+    new BlockifiedFlinkDrm[K](parts, ncol)
   }
 
   def asRowWise = this
@@ -83,7 +87,7 @@ class RowsFlinkDrm[K: ClassTag](val ds: DrmDataSet[K], val ncol: Int) extends Fl
 
 }
 
-class BlockifiedFlinkDrm[K: ClassTag](val ds: BlockifiedDrmDataSet[K], val ncol: Int) extends FlinkDrm[K] {
+class BlockifiedFlinkDrm[K: TypeInformation: ClassTag](val ds: BlockifiedDrmDataSet[K], val ncol: Int) extends FlinkDrm[K] {
 
   def executionEnvironment = ds.getExecutionEnvironment
   def context: FlinkDistributedContext = ds.getExecutionEnvironment
@@ -93,14 +97,16 @@ class BlockifiedFlinkDrm[K: ClassTag](val ds: BlockifiedDrmDataSet[K], val ncol:
   def asBlockified = this
 
   def asRowWise = {
-    val out = ds.flatMap(new FlatMapFunction[(Array[K], Matrix), DrmTuple[K]] {
-      def flatMap(tuple: (Array[K], Matrix), out: Collector[DrmTuple[K]]): Unit = tuple match {
-        case (keys, block) => keys.view.zipWithIndex.foreach {
-          case (key, idx) =>
-            out.collect((key, block(idx, ::)))
+    val out = ds.flatMap {
+      tuple =>
+        val keys = tuple._1
+        val block = tuple._2
+
+        keys.view.zipWithIndex.map {
+          case (key, idx) => (key, block(idx, ::))
         }
-      }
-    })
+    }
+
     new RowsFlinkDrm(out, ncol)
   }
 

@@ -47,24 +47,23 @@ import org.apache.flink.api.scala._
 object FlinkOpAtB {
 
   def notZippable[K: ClassTag](op: OpAtB[K], At: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[Int] = {
-    val classTag = extractRealClassTag(op.A)
-    val joiner = selector[Vector, Any](classTag.asInstanceOf[ClassTag[Any]]) 
 
-    val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
-    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
-    val joined = rowsAt.join(rowsB).where(joiner).equalTo(joiner)
+    val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[K]]
+    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[K]]
+    val joined = rowsAt.join(rowsB).where(0).equalTo(0)
 
     val ncol = op.ncol
     val nrow = op.nrow.toInt
     val blockHeight = 10
+//    val blockHeight = B.asRowWise.ds.getParallelism
     val blockCount = safeToNonNegInt((nrow - 1) / blockHeight + 1)
 
     val preProduct: DataSet[(Int, Matrix)] = 
-             joined.flatMap(new FlatMapFunction[Tuple2[(_, Vector), (_, Vector)], (Int, Matrix)] {
-      def flatMap(in: Tuple2[(_, Vector), (_, Vector)],
+             joined.flatMap(new FlatMapFunction[Tuple2[(K, Vector), (K, Vector)], (Int, Matrix)] {
+      def flatMap(in: Tuple2[(K, Vector), (K, Vector)],
                   out: Collector[(Int, Matrix)]): Unit = {
         val avec = in._1._2
-        val bvec = in._1._2
+        val bvec = in._2._2
 
         0.until(blockCount) map { blockKey =>
           val blockStart = blockKey * blockHeight
@@ -72,12 +71,13 @@ object FlinkOpAtB {
 
           val outer = avec(blockStart until blockEnd) cross bvec
           out.collect(blockKey -> outer)
+          out
         }
       }
     })
 
     val res: BlockifiedDrmDataSet[Int] = 
-      preProduct.groupBy(selector[Matrix, Int])
+      preProduct.groupBy(0)
                 .reduceGroup(new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
       def reduce(values: Iterable[(Int, Matrix)], out: Collector[BlockifiedDrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala
@@ -87,10 +87,11 @@ object FlinkOpAtB {
 
         val keys = idx.until(block.nrow).toArray[Int]
         out.collect(keys -> block)
+        out
       }
     })
 
-    new BlockifiedFlinkDrm(res, ncol)
+    new BlockifiedFlinkDrm[Int](res, ncol)
   }
 
 }

@@ -18,6 +18,8 @@
  */
 package org.apache.mahout.flinkbindings
 
+import org.apache.flink.api.common.typeinfo.TypeInformation
+
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 import org.apache.flink.api.common.functions.MapFunction
@@ -87,13 +89,16 @@ object FlinkEngine extends DistributedEngine {
    **/
   override def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
     // Flink-specific Physical Plan translation.
+    implicit val typeInformation = generateTypeInformation[K]
     val drm = flinkTranslate(plan)
     val newcp = new CheckpointedFlinkDrm(ds = drm.asRowWise.ds, _nrow = plan.nrow, _ncol = plan.ncol)
     newcp.cache()
   }
 
   private def flinkTranslate[K: ClassTag](oper: DrmLike[K]): FlinkDrm[K] = oper match {
-    case op @ OpAx(a, x) => FlinkOpAx.blockifiedBroadcastAx(op, flinkTranslate(a)(op.classTagA))
+    case op @ OpAx(a, x) =>
+      implicit val typeInformation = generateTypeInformation[K]
+      FlinkOpAx.blockifiedBroadcastAx(op, flinkTranslate(a)(op.classTagA))
     case op @ OpAt(a) => FlinkOpAt.sparseTrick(op, flinkTranslate(a)(op.classTagA))
     case op @ OpAtx(a, x) =>
       // express Atx as (A.t) %*% x
@@ -119,30 +124,41 @@ object FlinkEngine extends DistributedEngine {
       FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d))
                 .asInstanceOf[FlinkDrm[K]]
     case op @ OpAtA(a) => FlinkOpAtA.at_a(op, flinkTranslate(a)(op.classTagA))
-    case op @ OpTimesRightMatrix(a, b) => 
+    case op @ OpTimesRightMatrix(a, b) =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpTimesRightMatrix.drmTimesInCore(op, flinkTranslate(a)(op.classTagA), b)
     case op @ OpAewUnaryFunc(a, _, _) =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA))
-    case op @ OpAewUnaryFuncFusion(a, _) => 
+    case op @ OpAewUnaryFuncFusion(a, _) =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA))
     // deprecated
-    case op @ OpAewScalar(a, scalar, _) => 
+    case op @ OpAewScalar(a, scalar, _) =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a)(op.classTagA), scalar)
     case op @ OpAewB(a, b, _) =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpAewB.rowWiseJoinNoSideEffect(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
-    case op @ OpCbind(a, b) => 
+    case op @ OpCbind(a, b) =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpCBind.cbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
-    case op @ OpRbind(a, b) => 
+    case op @ OpRbind(a, b) =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpRBind.rbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
-    case op @ OpCbindScalar(a, x, _) => 
+    case op @ OpCbindScalar(a, x, _) =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpCBind.cbindScalar(op, flinkTranslate(a)(op.classTagA), x)
-    case op @ OpRowRange(a, _) => 
+    case op @ OpRowRange(a, _) =>
       FlinkOpRowRange.slice(op, flinkTranslate(a)(op.classTagA))
     case op @ OpABAnyKey(a, b) if extractRealClassTag(a) != extractRealClassTag(b) =>
       throw new IllegalArgumentException("DRMs A and B have different indices, cannot multiply them")
-    case op: OpMapBlock[K, _] => 
+    case op: OpMapBlock[K, _] =>
+      implicit val typeInformation = generateTypeInformation[K]
       FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
-    case cp: CheckpointedFlinkDrm[K] => new RowsFlinkDrm(cp.ds, cp.ncol)
+    case cp: CheckpointedFlinkDrm[K] =>
+      implicit val typeInformation = generateTypeInformation[K]
+      new RowsFlinkDrm(cp.ds, cp.ncol)
     case _ => throw new NotImplementedError(s"operator $oper is not implemented yet")
   }
 
@@ -162,9 +178,12 @@ object FlinkEngine extends DistributedEngine {
 
   /** Engine-specific numNonZeroElementsPerColumn implementation based on a checkpoint. */
   override def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
-    val result = drm.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), Vector] {
-      def map(tuple: (Array[K], Matrix)): Vector = {
-        val (_, block) = tuple
+    implicit val typeInformation = generateTypeInformation[K]
+
+    val result = drm.asBlockified.ds.map {
+      tuple =>
+        val block = tuple._2
+
         val acc = block(0, ::).like()
 
         block.foreach { v =>
@@ -172,10 +191,7 @@ object FlinkEngine extends DistributedEngine {
         }
 
         acc
-      }
-    }).reduce(new ReduceFunction[Vector] {
-      def reduce(v1: Vector, v2: Vector) = v1 + v2
-    })
+    }.reduce(_ + _)
 
     val list = result.collect
     list.head
@@ -225,9 +241,9 @@ object FlinkEngine extends DistributedEngine {
 
   private[flinkbindings] def parallelize(m: Matrix, parallelismDegree: Int)
       (implicit dc: DistributedContext): DrmDataSet[Int] = {
-    val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
+    val rows = (0 until m.nrow).map(i => (i, m(i, ::))).toSeq.sortWith((ii, jj) => ii._1 < jj._1)
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    dc.env.fromCollection(rows).setParallelism(parallelismDegree)
+    dc.env.fromCollection(rows).partitionByRange(0).setParallelism(parallelismDegree).rebalance
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
@@ -283,5 +299,24 @@ object FlinkEngine extends DistributedEngine {
   /** Optional engine-specific all reduce tensor operation. */
   def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = 
     throw new UnsupportedOperationException("the operation allreduceBlock is not yet supported on Flink")
- 
+
+  private def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
+    val tag = implicitly[ClassTag[K]]
+
+    generateTypeInformationFromTag(tag)
+  }
+
+  private def generateTypeInformationFromTag[K](tag: ClassTag[K]): TypeInformation[K] = {
+    if (tag.runtimeClass.equals(classOf[Int])) {
+      createTypeInformation[Int].asInstanceOf[TypeInformation[K]]
+    } else if (tag.runtimeClass.equals(classOf[Long])) {
+      createTypeInformation[Long].asInstanceOf[TypeInformation[K]]
+    } else if (tag.runtimeClass.equals(classOf[String])) {
+      createTypeInformation[String].asInstanceOf[TypeInformation[K]]
+    } else if (tag.runtimeClass.equals(classOf[Any])) {
+      createTypeInformation[Int].asInstanceOf[TypeInformation[K]]
+    } else {
+      throw new IllegalArgumentException(s"index type $tag is not supported")
+    }
+  }
 }

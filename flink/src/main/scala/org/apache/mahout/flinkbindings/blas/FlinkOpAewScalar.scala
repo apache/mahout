@@ -19,6 +19,7 @@
 package org.apache.mahout.flinkbindings.blas
 
 import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.mahout.flinkbindings.drm.{BlockifiedFlinkDrm, FlinkDrm}
 import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.drm.logical.{AbstractUnaryOp, OpAewScalar, TEwFunc}
@@ -39,40 +40,36 @@ object FlinkOpAewScalar {
   private def isInplace = System.getProperty(PROPERTY_AEWB_INPLACE, "false").toBoolean
 
   @Deprecated
-  def opScalarNoSideEffect[K: ClassTag](op: OpAewScalar[K], A: FlinkDrm[K], scalar: Double): FlinkDrm[K] = {
+  def opScalarNoSideEffect[K: TypeInformation: ClassTag](op: OpAewScalar[K], A: FlinkDrm[K], scalar: Double): FlinkDrm[K] = {
     val function = EWOpsCloning.strToFunction(op.op)
 
-    val res = A.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
-      def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = tuple match {
-        case (keys, mat) => (keys, function(mat, scalar))
-      }
-    })
+    val res = A.asBlockified.ds.map{
+      tuple => (tuple._1, function(tuple._2, scalar))
+    }
 
     new BlockifiedFlinkDrm(res, op.ncol)
   }
 
-  def opUnaryFunction[K: ClassTag](op: AbstractUnaryOp[K, K] with TEwFunc, A: FlinkDrm[K]): FlinkDrm[K] = {
+  def opUnaryFunction[K: TypeInformation: ClassTag](op: AbstractUnaryOp[K, K] with TEwFunc, A: FlinkDrm[K]): FlinkDrm[K] = {
     val f = op.f
     val inplace = isInplace
 
     val res = if (op.evalZeros) {
-      A.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
-        def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = {
+      A.asBlockified.ds.map{
+        tuple =>
           val (keys, block) = tuple
           val newBlock = if (inplace) block else block.cloned
           newBlock := ((_, _, x) => f(x))
           (keys, newBlock)
-        }
-      })
+      }
     } else {
-      A.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
-        def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = {
+      A.asBlockified.ds.map{
+        tuple =>
           val (keys, block) = tuple
           val newBlock = if (inplace) block else block.cloned
           for (row <- newBlock; el <- row.nonZeroes) el := f(el.get)
           (keys, newBlock)
-        }
-      })
+      }
     }
 
     new BlockifiedFlinkDrm(res, op.ncol)
