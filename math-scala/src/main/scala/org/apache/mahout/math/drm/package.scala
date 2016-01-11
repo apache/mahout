@@ -18,7 +18,6 @@
 package org.apache.mahout.math
 
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.indexeddataset.{IndexedDataset, DefaultIndexedDatasetReadSchema, Schema}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 
@@ -46,7 +45,7 @@ package object drm {
   //  type CacheHint = CacheHint.CacheHint
 
   def safeToNonNegInt(x: Long): Int = {
-    assert(x == x << -31 >>> -31, "transformation from long to Int is losing signficant bits, or is a negative number")
+    assert(x == x << -31 >>> -31, "transformation from long to Int is losing significant bits, or is a negative number")
     x.toInt
   }
 
@@ -176,7 +175,7 @@ package object drm {
     import RLikeDrmOps._
 
     val drmAcp = drmA.checkpoint()
-    
+
     val mu = drmAcp colMeans
 
     // Compute variance using mean(x^2) - mean(x)^2

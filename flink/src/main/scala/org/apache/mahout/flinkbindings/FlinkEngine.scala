@@ -23,7 +23,6 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.java.typeutils.TypeExtractor
 import org.apache.hadoop.io.Writable
 import org.apache.mahout.flinkbindings.blas._
@@ -40,6 +39,7 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.utils.DataSetUtils
 
 
 object FlinkEngine extends DistributedEngine {
@@ -64,7 +64,7 @@ object FlinkEngine extends DistributedEngine {
 
     val metadata = hdfsUtils.readDrmHeader(path)
 
-    val unwrapKey  = metadata.unwrapKeyFunction
+    val unwrapKey = metadata.unwrapKeyFunction
 
     val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
 
@@ -83,6 +83,14 @@ object FlinkEngine extends DistributedEngine {
   override def indexedDatasetDFSReadElements(src: String,schema: Schema, existingRowIDs: Option[BiDictionary])
                                             (implicit sc: DistributedContext): IndexedDataset = ???
 
+
+  /**
+    * Perform default expression rewrite. Return physical plan that we can pass to exec(). <P>
+    *
+    * A particular physical engine implementation may choose to either use or not use these rewrites
+    * as a useful basic rewriting rule.<P>
+    */
+  override def optimizerRewrite[K: ClassTag](action: DrmLike[K]): DrmLike[K] = super.optimizerRewrite(action)
 
   /** 
    * Translates logical plan into Flink execution plan. 
@@ -121,8 +129,7 @@ object FlinkEngine extends DistributedEngine {
       val bt = FlinkOpAt.sparseTrick(opBt, flinkTranslate(b.asInstanceOf[DrmLike[Int]]))
       val d = new CheckpointedFlinkDrm(bt.asRowWise.ds, _nrow=opBt.nrow, _ncol=opBt.ncol)
 
-      FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d))
-                .asInstanceOf[FlinkDrm[K]]
+      FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d)).asInstanceOf[FlinkDrm[K]]
     case op @ OpAtA(a) => FlinkOpAtA.at_a(op, flinkTranslate(a)(op.classTagA))
     case op @ OpTimesRightMatrix(a, b) =>
       implicit val typeInformation = generateTypeInformation[K]
@@ -166,11 +173,11 @@ object FlinkEngine extends DistributedEngine {
    * returns a vector that contains a column-wise sum from DRM 
    */
   override def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
-    val sum = drm.ds.map(new MapFunction[(K, Vector), Vector] {
-      def map(tuple: (K, Vector)): Vector = tuple._2
-    }).reduce(new ReduceFunction[Vector] {
-      def reduce(v1: Vector, v2: Vector) = v1 + v2
-    })
+    implicit val typeInformation = generateTypeInformation[K]
+
+    val sum = drm.ds.map {
+      tuple => tuple._2
+    }.reduce(_ + _)
 
     val list = sum.collect
     list.head
@@ -183,7 +190,6 @@ object FlinkEngine extends DistributedEngine {
     val result = drm.asBlockified.ds.map {
       tuple =>
         val block = tuple._2
-
         val acc = block(0, ::).like()
 
         block.foreach { v =>
@@ -208,13 +214,21 @@ object FlinkEngine extends DistributedEngine {
    * Calculates the element-wise squared norm of a matrix
    */
   override def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double = {
-    val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
-      def map(tuple: (K, Vector)): Double = tuple match {
+    implicit val typeInformation = generateTypeInformation[K]
+
+    val sumOfSquares = drm.ds.map {
+      tuple => tuple match {
         case (idx, vec) => vec dot vec
       }
-    }).reduce(new ReduceFunction[Double] {
-      def reduce(v1: Double, v2: Double) = v1 + v2
-    })
+    }.reduce(_ + _)
+
+//    val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
+//      def map(tuple: (K, Vector)): Double = tuple match {
+//        case (idx, vec) => vec dot vec
+//      }
+//    }).reduce(new ReduceFunction[Double] {
+//      def reduce(v1: Double, v2: Double) = v1 + v2
+//    })
 
     val list = sumOfSquares.collect
     list.head
@@ -230,7 +244,7 @@ object FlinkEngine extends DistributedEngine {
     FlinkByteBCast.wrap(m)
 
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
+  /** Parallelize in-core matrix as flink distributed matrix, using row ordinal indices as data set keys. */
   override def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
                                            (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
 
@@ -243,7 +257,7 @@ object FlinkEngine extends DistributedEngine {
       (implicit dc: DistributedContext): DrmDataSet[Int] = {
     val rows = (0 until m.nrow).map(i => (i, m(i, ::))).toSeq.sortWith((ii, jj) => ii._1 < jj._1)
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    dc.env.fromCollection(rows).partitionByRange(0).setParallelism(parallelismDegree).rebalance
+    dc.env.fromCollection(rows).partitionByRange(0).setParallelism(parallelismDegree)
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
@@ -279,22 +293,19 @@ object FlinkEngine extends DistributedEngine {
           (DrmLike[Int], Option[DrmLike[K]]) = ???
 
   /**
-   * (Optional) Sampling operation. Consistent with Spark semantics of the same.
+   * (Optional) Sampling operation.
    */
-  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = ???
+  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = {
+    implicit val typeInformation = generateTypeInformation[K]
+    val sample = DataSetUtils(drmX.dataset).sample(replacement, fraction)
+    new CheckpointedFlinkDrm[K](sample)
+  }
 
-  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = ???
-
-//  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = {
-//
-//    val ncol = drmX match {
-//      case cp: CheckpointedFlinkDrm[K] ⇒ cp.ncol
-//      case _ ⇒ -1
-//    }
-//
-//    val sample = DataSetUtils.sampleWithSize(drmX.dataset, replacement, numSamples)
-//
-//  }
+  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = {
+    implicit val typeInformation = generateTypeInformation[K]
+    val sample = DataSetUtils(drmX.dataset).sampleWithSize(replacement, numSamples)
+    new CheckpointedFlinkDrm[K](sample)
+  }
 
   /** Optional engine-specific all reduce tensor operation. */
   def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = 
@@ -314,7 +325,7 @@ object FlinkEngine extends DistributedEngine {
     } else if (tag.runtimeClass.equals(classOf[String])) {
       createTypeInformation[String].asInstanceOf[TypeInformation[K]]
     } else if (tag.runtimeClass.equals(classOf[Any])) {
-      createTypeInformation[Int].asInstanceOf[TypeInformation[K]]
+      createTypeInformation[Any].asInstanceOf[TypeInformation[K]]
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
     }

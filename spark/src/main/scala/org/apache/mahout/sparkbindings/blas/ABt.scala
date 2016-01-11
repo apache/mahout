@@ -25,11 +25,8 @@ import org.apache.mahout.sparkbindings._
 import org.apache.mahout.math.drm.BlockifiedDrmTuple
 import org.apache.mahout.sparkbindings.drm._
 import org.apache.mahout.math.{SparseMatrix, Matrix, SparseRowMatrix}
-import org.apache.spark.SparkContext._
 import org.apache.mahout.math.drm.logical.OpABt
 import org.apache.mahout.logging._
-
-import scala.tools.nsc.io.Pickler.TildeDecorator
 
 /** Contains RDD plans for ABt operator */
 object ABt {
@@ -88,7 +85,7 @@ object ABt {
       s"A=${operator.A.nrow}x${operator.A.ncol}, B=${operator.B.nrow}x${operator.B.ncol},AB'=${prodNRow}x$prodNCol."
     )
 
-    // blockwise multimplication function
+    // blockwise multiplication function
     def mmulFunc(tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
       val (keysA, blockA) = tupleA
       val (keysB, blockB) = tupleB
@@ -96,7 +93,7 @@ object ABt {
       var ms = traceDo(System.currentTimeMillis())
 
       // We need to send keysB to the aggregator in order to know which columns are being updated.
-      val result = (keysA, keysB, (blockA %*% blockB.t))
+      val result = (keysA, keysB, blockA %*% blockB.t)
 
       ms = traceDo(System.currentTimeMillis() - ms.get)
       trace(
@@ -111,7 +108,7 @@ object ABt {
     val blockwiseMmulRdd =
 
     // Combine blocks pairwise.
-      pairwiseApply(blocksA, blocksB, mmulFunc _)
+      pairwiseApply(blocksA, blocksB, mmulFunc)
 
         // Now reduce proper product blocks.
         .combineByKey(
@@ -154,7 +151,7 @@ object ABt {
     // See if we need to rebalance away from A granularity.
     if (numPartsResult * 2 < numProductPartitions || numPartsResult / 2 > numProductPartitions) {
 
-      debug(s"Will re-coalesce from ${numPartsResult} to ${numProductPartitions}")
+      debug(s"Will re-coalesce from $numPartsResult to $numProductPartitions")
 
       val rowRdd = deblockify(blockifiedRdd).coalesce(numPartitions = numProductPartitions)
 
@@ -189,7 +186,7 @@ object ABt {
 
       val r = if (blockIter.hasNext) Some(part -> blockIter.next) else Option.empty[(Int, BlockifiedDrmTuple[K1])]
 
-      require(blockIter.hasNext == false, s"more than 1 (${blockIter.size + 1}) blocks per partition and A of AB'")
+      require(!blockIter.hasNext, s"more than 1 (${blockIter.size + 1}) blocks per partition and A of AB'")
 
       r.toIterator
     }

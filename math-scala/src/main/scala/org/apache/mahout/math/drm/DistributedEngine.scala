@@ -230,7 +230,7 @@ object DistributedEngine {
       case OpAB(a, OpAt(b)) ⇒  OpABt(pass3(a), pass3(b))
 
       // AtB cases that make sense.
-      case OpAB(OpAt(a), b) if (a.partitioningTag == b.partitioningTag) ⇒  OpAtB(pass3(a), pass3(b))
+      case OpAB(OpAt(a), b) if a.partitioningTag == b.partitioningTag ⇒  OpAtB(pass3(a), pass3(b))
       case op @ OpABAnyKey(OpAtAnyKey(a), b) ⇒
         val left = pass3(a)
         val right = pass3(b)

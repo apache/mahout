@@ -18,19 +18,13 @@
  */
 package org.apache.mahout.flinkbindings.drm
 
-import java.lang.Iterable
-
-import org.apache.flink.api.common.functions.{FlatMapFunction, MapPartitionFunction}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
-import org.apache.flink.util.Collector
 import org.apache.mahout.flinkbindings.{BlockifiedDrmDataSet, DrmDataSet, FlinkDistributedContext, wrapContext}
-import org.apache.mahout.math.drm.DrmTuple
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.{DenseMatrix, Matrix, SparseRowMatrix}
 
-import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 import scala.reflect.ClassTag
 
 trait FlinkDrm[K] {
@@ -60,9 +54,7 @@ class RowsFlinkDrm[K: TypeInformation: ClassTag](val ds: DrmDataSet[K], val ncol
         val (keys, vectors) = values.toIterable.unzip
 
         if (vectors.nonEmpty) {
-
           val vector = vectors.head
-
           val matrix: Matrix = if (vector.isDense) {
             val matrix = new DenseMatrix(vectors.size, ncolLocal)
             vectors.zipWithIndex.foreach { case (vec, idx) => matrix(idx, ::) := vec }

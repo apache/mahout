@@ -46,8 +46,8 @@ object FlinkOpAtA {
     }
   }
 
-  def slim[K: ClassTag](op: OpAtA[K], A: FlinkDrm[K]): Matrix = {
-    val ds = A.asBlockified.ds.asInstanceOf[DataSet[(Array[K], Matrix)]]
+  def slim[K: ClassTag](op: OpAtA[_], A: FlinkDrm[_]): Matrix = {
+    val ds = A.asBlockified.ds.asInstanceOf[DataSet[(Array[Any], Matrix)]]
 
     val res = ds.map {
       // TODO: optimize it: use upper-triangle matrices like in Spark
@@ -68,13 +68,13 @@ object FlinkOpAtA {
       def reduce(a: Int, b: Int): Int = a + b
     })
 
-    val subresults: DataSet[(Int, Matrix)] = 
+    val subresults: DataSet[(Int, Matrix)] =
           ds.flatMap(new RichFlatMapFunction[(Array[K], Matrix), (Int, Matrix)] {
 
       var ranges: Array[Range] = null
 
       override def open(params: Configuration): Unit = {
-        val runtime = this.getRuntimeContext()
+        val runtime = this.getRuntimeContext
         val dsX: java.util.List[Int] = runtime.getBroadcastVariable("numberOfPartitions")
         val parts = dsX.get(0)
         val numParts = estimatePartitions(nrow, ncol, parts)
@@ -97,7 +97,7 @@ object FlinkOpAtA {
       var ranges: Array[Range] = null
 
       override def open(params: Configuration): Unit = {
-        val runtime = this.getRuntimeContext()
+        val runtime = this.getRuntimeContext
         val dsX: java.util.List[Int] = runtime.getBroadcastVariable("numberOfPartitions")
         val parts = dsX.get(0)
         val numParts = estimatePartitions(nrow, ncol, parts)

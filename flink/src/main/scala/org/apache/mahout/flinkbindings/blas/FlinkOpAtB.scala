@@ -55,13 +55,11 @@ object FlinkOpAtB {
     val ncol = op.ncol
     val nrow = op.nrow.toInt
     val blockHeight = 10
-//    val blockHeight = B.asRowWise.ds.getParallelism
     val blockCount = safeToNonNegInt((nrow - 1) / blockHeight + 1)
 
-    val preProduct: DataSet[(Int, Matrix)] = 
-             joined.flatMap(new FlatMapFunction[Tuple2[(K, Vector), (K, Vector)], (Int, Matrix)] {
-      def flatMap(in: Tuple2[(K, Vector), (K, Vector)],
-                  out: Collector[(Int, Matrix)]): Unit = {
+    val preProduct: DataSet[(Int, Matrix)] =
+             joined.flatMap(new FlatMapFunction[((K, Vector), (K, Vector)), (Int, Matrix)] {
+      def flatMap(in: ((K, Vector), (K, Vector)), out: Collector[(Int, Matrix)]): Unit = {
         val avec = in._1._2
         val bvec = in._2._2
 
@@ -77,8 +75,7 @@ object FlinkOpAtB {
     })
 
     val res: BlockifiedDrmDataSet[Int] = 
-      preProduct.groupBy(0)
-                .reduceGroup(new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
+      preProduct.groupBy(0).reduceGroup(new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
       def reduce(values: Iterable[(Int, Matrix)], out: Collector[BlockifiedDrmTuple[Int]]): Unit = {
         val it = Lists.newArrayList(values).asScala
         val (idx, _) = it.head
@@ -87,7 +84,6 @@ object FlinkOpAtB {
 
         val keys = idx.until(block.nrow).toArray[Int]
         out.collect(keys -> block)
-        out
       }
     })
 
