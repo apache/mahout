@@ -164,7 +164,7 @@ object FlinkEngine extends DistributedEngine {
       implicit val typeInformation = generateTypeInformation[K]
       FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
     case cp: CheckpointedFlinkDrm[K] =>
-      implicit val typeInformation = generateTypeInformation[K]
+      implicit val typeInformation = createTypeInformation[Int].asInstanceOf[TypeInformation[K]]
       new RowsFlinkDrm(cp.ds, cp.ncol)
     case _ => throw new NotImplementedError(s"operator $oper is not implemented yet")
   }
@@ -266,7 +266,7 @@ object FlinkEngine extends DistributedEngine {
     ???
   }
 
-  /** This creates an empty DRM with specified number of partitions and cardinality. */
+  /** This creates an empty DRM with specified numb er of partitions and cardinality. */
   override def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int = 10)
                                   (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
     val nonParallelResult = (0 to numPartitions).flatMap { part => 
@@ -324,8 +324,6 @@ object FlinkEngine extends DistributedEngine {
       createTypeInformation[Long].asInstanceOf[TypeInformation[K]]
     } else if (tag.runtimeClass.equals(classOf[String])) {
       createTypeInformation[String].asInstanceOf[TypeInformation[K]]
-    } else if (tag.runtimeClass.equals(classOf[Any])) {
-      createTypeInformation[Any].asInstanceOf[TypeInformation[K]]
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
     }
