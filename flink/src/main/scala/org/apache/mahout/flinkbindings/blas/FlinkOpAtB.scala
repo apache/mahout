@@ -46,10 +46,10 @@ import org.apache.flink.api.scala._
  */
 object FlinkOpAtB {
 
-  def notZippable[K: ClassTag](op: OpAtB[K], At: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[Int] = {
+  def notZippable[A: ClassTag](op: OpAtB[A], At: FlinkDrm[A], B: FlinkDrm[A]): FlinkDrm[Int] = {
 
-    val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[K]]
-    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[K]]
+    val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[A]]
+    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[A]]
     val joined = rowsAt.join(rowsB).where(0).equalTo(0)
 
     val ncol = op.ncol
@@ -58,8 +58,8 @@ object FlinkOpAtB {
     val blockCount = safeToNonNegInt((nrow - 1) / blockHeight + 1)
 
     val preProduct: DataSet[(Int, Matrix)] =
-             joined.flatMap(new FlatMapFunction[((K, Vector), (K, Vector)), (Int, Matrix)] {
-      def flatMap(in: ((K, Vector), (K, Vector)), out: Collector[(Int, Matrix)]): Unit = {
+             joined.flatMap(new FlatMapFunction[((A, Vector), (A, Vector)), (Int, Matrix)] {
+      def flatMap(in: ((A, Vector), (A, Vector)), out: Collector[(Int, Matrix)]): Unit = {
         val avec = in._1._2
         val bvec = in._2._2
 

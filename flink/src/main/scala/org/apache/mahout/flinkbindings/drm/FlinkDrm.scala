@@ -80,6 +80,7 @@ class RowsFlinkDrm[K: TypeInformation: ClassTag](val ds: DrmDataSet[K], val ncol
 
 class BlockifiedFlinkDrm[K: TypeInformation: ClassTag](val ds: BlockifiedDrmDataSet[K], val ncol: Int) extends FlinkDrm[K] {
 
+
   def executionEnvironment = ds.getExecutionEnvironment
   def context: FlinkDistributedContext = ds.getExecutionEnvironment
 
@@ -98,8 +99,9 @@ class BlockifiedFlinkDrm[K: TypeInformation: ClassTag](val ds: BlockifiedDrmData
         }
     }
 
-    new RowsFlinkDrm(out, ncol)
+    new RowsFlinkDrm[K](out, ncol)
   }
 
   def classTag = implicitly[ClassTag[K]]
+
 }
