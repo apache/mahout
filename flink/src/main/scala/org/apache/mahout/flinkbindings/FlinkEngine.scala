@@ -157,7 +157,15 @@ object FlinkEngine extends DistributedEngine {
       case op: OpMapBlock[K, _] =>
         FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
       case cp: CheckpointedFlinkDrm[K] =>
-        new RowsFlinkDrm(cp.ds, cp.ncol)
+//        val ds2incore = cp.ds.collect()
+//        val ds2 = cp.executionEnvironment
+//          .fromCollection(ds2incore)
+//          .partitionByRange(0)
+//          .setParallelism(cp.executionEnvironment.getParallelism)
+//          .rebalance()
+        val ds2 = cp.ds.rebalance.map(x => x).rebalance()
+
+        new RowsFlinkDrm(ds2, cp.ncol)
       case _ =>
         throw new NotImplementedError(s"operator $oper is not implemented yet")
     }
