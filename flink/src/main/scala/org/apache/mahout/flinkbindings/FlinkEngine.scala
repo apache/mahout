@@ -45,7 +45,7 @@ import org.apache.flink.api.scala.utils.DataSetUtils
 
 object FlinkEngine extends DistributedEngine {
 
-  // By default, use Hadoop 1 utils
+  // By default, use Hadoop 2 utils
   var hdfsUtils: HDFSUtil = Hadoop2HDFSUtil
 
   /**
@@ -69,13 +69,15 @@ object FlinkEngine extends DistributedEngine {
 
     val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
 
-    val res = ds.map(new MapFunction[(Writable, VectorWritable), (Any, Vector)] {
-      def map(tuple: (Writable, VectorWritable)): (Any, Vector) = {
-        (unwrapKey(tuple._1), tuple._2)
+    val res = ds.map(new MapFunction[(Writable, VectorWritable), (Object, Vector)] {
+      // temporarily use java.lang.object while "Any" throwing errors
+      def map(tuple: (Writable, VectorWritable)): (Object, Vector) = {
+        // temporarily use java.lang.object while "Any" throwing errors
+        (unwrapKey(tuple._1).asInstanceOf[Object], tuple._2)
       }
     })
 
-    datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Object]])
   }
 
   override def indexedDatasetDFSRead(src: String, schema: Schema, existingRowIDs: Option[BiDictionary])
@@ -329,6 +331,7 @@ object FlinkEngine extends DistributedEngine {
     } else if (tag.runtimeClass.equals(classOf[String])) {
       createTypeInformation[String].asInstanceOf[TypeInformation[K]]
     } else if (tag.runtimeClass.equals(classOf[Any])) {
+       // temporarily use java.lang.object while "Any" throwing errors
        createTypeInformation[Object].asInstanceOf[TypeInformation[K]]
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
