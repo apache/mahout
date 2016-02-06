@@ -28,7 +28,7 @@ import org.apache.hadoop.io.Writable
 import org.apache.mahout.flinkbindings.blas._
 import org.apache.mahout.flinkbindings.drm._
 import org.apache.mahout.flinkbindings.io.HDFSUtil
-import org.apache.mahout.flinkbindings.io.Hadoop1HDFSUtil
+import org.apache.mahout.flinkbindings.io.Hadoop2HDFSUtil
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical._
@@ -42,10 +42,11 @@ import org.apache.flink.api.scala._
 import org.apache.flink.api.scala.utils.DataSetUtils
 
 
+
 object FlinkEngine extends DistributedEngine {
 
   // By default, use Hadoop 1 utils
-  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+  var hdfsUtils: HDFSUtil = Hadoop2HDFSUtil
 
   /**
    * Load DRM from hdfs (as in Mahout DRM format).
@@ -97,9 +98,11 @@ object FlinkEngine extends DistributedEngine {
    **/
   override def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
     // Flink-specific Physical Plan translation.
+
     implicit val typeInformation = generateTypeInformation[K]
     val drm = flinkTranslate(plan)
     val newcp = new CheckpointedFlinkDrm(ds = drm.asRowWise.ds, _nrow = plan.nrow, _ncol = plan.ncol)
+   // newcp.ds.getExecutionEnvironment.createProgramPlan("plan")
     newcp.cache()
   }
 
@@ -109,7 +112,7 @@ object FlinkEngine extends DistributedEngine {
       case OpAtAnyKey(_) ⇒
         throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
       case op@OpAx(a, x) =>
-        implicit val typeInformation = generateTypeInformation[K]
+        //implicit val typeInformation = generateTypeInformation[K]
         FlinkOpAx.blockifiedBroadcastAx(op, flinkTranslate(a)(op.classTagA))
       case op@OpAt(a) => FlinkOpAt.sparseTrick(op, flinkTranslate(a)(op.classTagA))
       case op@OpAtx(a, x) =>
@@ -157,15 +160,9 @@ object FlinkEngine extends DistributedEngine {
       case op: OpMapBlock[K, _] =>
         FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
       case cp: CheckpointedFlinkDrm[K] =>
-//        val ds2incore = cp.ds.collect()
-//        val ds2 = cp.executionEnvironment
-//          .fromCollection(ds2incore)
-//          .partitionByRange(0)
-//          .setParallelism(cp.executionEnvironment.getParallelism)
-//          .rebalance()
-        val ds2 = cp.ds.rebalance.map(x => x).rebalance()
-
-        new RowsFlinkDrm(ds2, cp.ncol)
+           cp
+//        cp.ds: DrmDataSet[K]
+//        new RowsFlinkDrm(cp.ds, cp.ncol)
       case _ =>
         throw new NotImplementedError(s"operator $oper is not implemented yet")
     }
@@ -332,7 +329,7 @@ object FlinkEngine extends DistributedEngine {
     } else if (tag.runtimeClass.equals(classOf[String])) {
       createTypeInformation[String].asInstanceOf[TypeInformation[K]]
     } else if (tag.runtimeClass.equals(classOf[Any])) {
-       createTypeInformation[Any].asInstanceOf[TypeInformation[K]]
+       createTypeInformation[Object].asInstanceOf[TypeInformation[K]]
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
     }

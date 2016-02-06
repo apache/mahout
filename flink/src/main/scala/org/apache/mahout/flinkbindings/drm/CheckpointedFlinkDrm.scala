@@ -18,16 +18,19 @@
  */
 package org.apache.mahout.flinkbindings.drm
 
+import org.apache.flink.api.common.Plan
 import org.apache.flink.api.common.functions.{MapFunction, ReduceFunction}
+import org.apache.flink.api.java.io.DiscardingOutputFormat
 import org.apache.flink.api.scala._
 import org.apache.flink.api.scala.hadoop.mapred.HadoopOutputFormat
 import org.apache.hadoop.io.{IntWritable, LongWritable, Text, Writable}
 import org.apache.hadoop.mapred.{FileOutputFormat, JobConf, SequenceFileOutputFormat}
+import org.apache.mahout.flinkbindings
 import org.apache.mahout.flinkbindings.{DrmDataSet, _}
 import org.apache.mahout.math.drm.{CacheHint, CheckpointedDrm, DistributedContext, DrmTuple, _}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.{DenseMatrix, Matrix, SparseMatrix, VectorWritable}
+import org.apache.mahout.math._
 
 import scala.collection.JavaConverters._
 import scala.reflect.{ClassTag, classTag}
@@ -66,6 +69,15 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
 
   def cache() = {
     // TODO
+//    val env = ds.getExecutionEnvironment
+////    ds.writeAsCsv("/dev/null/a")
+//
+//    ds.output(new DiscardingOutputFormat[(K, Vector)])
+//    // env.createProgramPlan("plan")
+////    val plan = env.getExecutionPlan()
+//    env.execute()
+  //  new CheckpointedFlinkDrm[K](ds.updat)this.ds.getExecutionEnvironment.registerCachedFile()
+    //env.execute()
     this
   }
 
@@ -78,7 +90,34 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
 
   protected[mahout] def canHaveMissingRows: Boolean = _canHaveMissingRows
 
-  def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = this
+  def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = {
+    val env = ds.getExecutionEnvironment
+    //    ds.writeAsCsv("/dev/null/a")
+
+    val dummySink = new DiscardingOutputFormat[(K, Vector)]
+
+//    ds.print()
+//    ds.output(dummySink)
+//
+//    val ds2 = dummySink
+//    val plan = env.createProgramPlan("plan")
+//    //val plan = env.getExecutionPlan()
+//
+////    val dataSet:DataSet[(K,Vector)]
+//
+//
+////    val newPlan: Plan = new Plan(dummySink, ds.getParallelism)
+//    env.execute()
+////    ds.count()
+////    env.getExecutionPlan()
+//    //  new CheckpointedFlinkDrm[K](ds.updat)this.ds.getExecutionEnvironment.registerCachedFile()
+//    env.execute()
+//    dummySink.
+   // val drm = flinkbindings.FlinkEngine.optimizerRewrite(this)
+
+    flinkbindings.FlinkEngine.toPhysical(this, CacheHint.NONE)
+
+  }
 
   def collect: Matrix = {
     val data = ds.collect()

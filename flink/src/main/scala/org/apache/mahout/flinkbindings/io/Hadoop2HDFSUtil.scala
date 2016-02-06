@@ -30,7 +30,7 @@ import JavaConversions._
  *
  * Copied from /spark/src/main/scala/org/apache/mahout/common
  */
-object Hadoop1HDFSUtil extends HDFSUtil {
+object Hadoop2HDFSUtil extends HDFSUtil {
 
   /**
    * Read the header of a sequence file and determine the Key and Value type
@@ -45,7 +45,7 @@ object Hadoop1HDFSUtil extends HDFSUtil {
 
       // Filter out anything starting with .
       .filter { s =>
-        !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDir
+        !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDirectory
       }
 
       // Take path
@@ -59,7 +59,12 @@ object Hadoop1HDFSUtil extends HDFSUtil {
         throw new IllegalArgumentException(s"No partition files found in ${dfsPath.toString}.")
       }
 
-    val reader = new SequenceFile.Reader(fs, partFilePath, fs.getConf)
+    // flink is retiring hadoop 1
+    // val reader = new SequenceFile.Reader(fs, partFilePath, fs.getConf)
+
+    // hadoop 2 reader
+    val reader: SequenceFile.Reader = new SequenceFile.Reader(fs.getConf,
+      SequenceFile.Reader.file(dfsPath));
     try {
       new DrmMetadata(
         keyTypeWritable = reader.getKeyClass.asSubclass(classOf[Writable]),
