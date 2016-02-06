@@ -103,6 +103,7 @@
   </build>
 
   <dependencies>
+
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-runtime</artifactId>
@@ -110,12 +111,17 @@
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-scala</artifactId>
+      <artifactId>flink-scala_2.10</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-java</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-core</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>
