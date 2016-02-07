@@ -135,6 +135,13 @@
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
 
+    <!-- enforce current version of kryo as of 0.10.1-->
+    <dependency>
+      <groupId>com.esotericsoftware.kryo</groupId>
+      <artifactId>kryo</artifactId>
+      <version>2.24.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>

@@ -69,15 +69,13 @@ object FlinkEngine extends DistributedEngine {
 
     val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
 
-    val res = ds.map(new MapFunction[(Writable, VectorWritable), (Object, Vector)] {
-      // temporarily use java.lang.object while "Any" throwing errors
-      def map(tuple: (Writable, VectorWritable)): (Object, Vector) = {
-        // temporarily use java.lang.object while "Any" throwing errors
-        (unwrapKey(tuple._1).asInstanceOf[Object], tuple._2)
+    val res = ds.map(new MapFunction[(Writable, VectorWritable), (Any, Vector)] {
+      def map(tuple: (Writable, VectorWritable)): (Any, Vector) = {
+        (unwrapKey(tuple._1), tuple._2)
       }
     })
 
-    datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Object]])
+    datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
   }
 
   override def indexedDatasetDFSRead(src: String, schema: Schema, existingRowIDs: Option[BiDictionary])
@@ -162,9 +160,7 @@ object FlinkEngine extends DistributedEngine {
       case op: OpMapBlock[K, _] =>
         FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
       case cp: CheckpointedFlinkDrm[K] =>
-           cp
-//        cp.ds: DrmDataSet[K]
-//        new RowsFlinkDrm(cp.ds, cp.ncol)
+        new RowsFlinkDrm(cp.ds, cp.ncol)
       case _ =>
         throw new NotImplementedError(s"operator $oper is not implemented yet")
     }
@@ -331,8 +327,7 @@ object FlinkEngine extends DistributedEngine {
     } else if (tag.runtimeClass.equals(classOf[String])) {
       createTypeInformation[String].asInstanceOf[TypeInformation[K]]
     } else if (tag.runtimeClass.equals(classOf[Any])) {
-       // temporarily use java.lang.object while "Any" throwing errors
-       createTypeInformation[Object].asInstanceOf[TypeInformation[K]]
+       createTypeInformation[Any].asInstanceOf[TypeInformation[K]]
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
     }

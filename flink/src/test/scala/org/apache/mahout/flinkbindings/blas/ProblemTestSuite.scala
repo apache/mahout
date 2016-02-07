@@ -37,58 +37,58 @@ import RLikeDrmOps._
 import decompositions._
 
 @RunWith(classOf[JUnitRunner])
-class AndyTestSuite extends FunSuite with DistributedFlinkSuite with Matchers {
+class ProblemTestSuite extends FunSuite with DistributedFlinkSuite with Matchers {
 
-//  test("Ax blockified") {
-//    val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
-//    val A = drmParallelize(m = inCoreA, numPartitions = 2)
-//    val x: Vector = (0, 1, 2)
+//  test("C = A + B, identically partitioned") {
 //
-//    val opAx = new OpAx(A, x)
-//    val res = FlinkOpAx.blockifiedBroadcastAx(opAx, A)
-//    val drm = new CheckpointedFlinkDrm(res.asRowWise.ds)
-//    val output = drm.collect
+//    val inCoreA = dense((1, 2, 3), (3, 4, 5), (5, 6, 7))
 //
-//    val b = output(::, 0)
-//    assert(b == dvec(8, 11, 14))
+//    val A = drmParallelize(inCoreA, numPartitions = 2)
+//
+//    //    printf("A.nrow=%d.\n", A.rdd.count())
+//
+//    // Create B which would be identically partitioned to A. mapBlock() by default will do the trick.
+//    val B = A.mapBlock() {
+//      case (keys, block) =>
+//        val bBlock = block.like() := { (r, c, v) => util.Random.nextDouble()}
+//        keys -> bBlock
+//    }
+//      // Prevent repeated computation non-determinism
+//      // flink problem is here... checkpoint is not doing what it should
+//      // ie. greate a physical plan w/o side effects
+//      .checkpoint()
+//
+//    val inCoreB = B.collect
+//
+//    printf("A=\n%s\n", inCoreA)
+//    printf("B=\n%s\n", inCoreB)
+//
+//    val C = A + B
+//
+//    val inCoreC = C.collect
+//
+//    printf("C=\n%s\n", inCoreC)
+//
+//    // Actual
+//    val inCoreCControl = inCoreA + inCoreB
+//
+//    (inCoreC - inCoreCControl).norm should be < 1E-10
 //  }
 
+  test("C = inCoreA %*%: B") {
 
+    val inCoreA = dense((1, 2, 3), (3, 4, 5), (4, 5, 6), (5, 6, 7))
+    val inCoreB = dense((3, 5, 7, 10), (4, 6, 9, 10), (5, 6, 7, 7))
 
-  test("C = A + B, identically partitioned") {
-
-    val inCoreA = dense((1, 2, 3), (3, 4, 5), (5, 6, 7))
-
-    val A = drmParallelize(inCoreA, numPartitions = 2)
-
-    //    printf("A.nrow=%d.\n", A.rdd.count())
-
-    // Create B which would be identically partitioned to A. mapBlock() by default will do the trick.
-    val B = A.mapBlock() {
-      case (keys, block) =>
-        val bBlock = block.like() := { (r, c, v) => util.Random.nextDouble()}
-        keys -> bBlock
-    }
-      // Prevent repeated computation non-determinism
-      // flink problem is here... checkpoint is not doing what it should
-      // ie. greate a physical plan w/o side effects
-      .checkpoint()
-
-    val inCoreB = B.collect
-
-    printf("A=\n%s\n", inCoreA)
-    printf("B=\n%s\n", inCoreB)
-
-    val C = A + B
+    val B = drmParallelize(inCoreB, numPartitions = 2)
+    val C = inCoreA %*%: B
 
     val inCoreC = C.collect
+    val inCoreCControl = inCoreA %*% inCoreB
 
-    printf("C=\n%s\n", inCoreC)
-
-    // Actual
-    val inCoreCControl = inCoreA + inCoreB
-
+    println(inCoreC)
     (inCoreC - inCoreCControl).norm should be < 1E-10
+
   }
 
 

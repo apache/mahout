@@ -91,10 +91,13 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   protected[mahout] def canHaveMissingRows: Boolean = _canHaveMissingRows
 
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = {
-    val env = ds.getExecutionEnvironment
+
+/// Test out forcing an Execution to create a physical checkpoint
+
+//    val env = ds.getExecutionEnvironment
     //    ds.writeAsCsv("/dev/null/a")
 
-    val dummySink = new DiscardingOutputFormat[(K, Vector)]
+//    val dummySink = new DiscardingOutputFormat[(K, Vector)]
 
 //    ds.print()
 //    ds.output(dummySink)
@@ -112,10 +115,6 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
 ////    env.getExecutionPlan()
 //    //  new CheckpointedFlinkDrm[K](ds.updat)this.ds.getExecutionEnvironment.registerCachedFile()
 //    env.execute()
-//    dummySink.
-   // val drm = flinkbindings.FlinkEngine.optimizerRewrite(this)
-
-    flinkbindings.FlinkEngine.toPhysical(this, CacheHint.NONE)
 
   }
 
