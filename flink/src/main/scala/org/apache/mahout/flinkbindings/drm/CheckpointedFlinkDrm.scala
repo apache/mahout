@@ -115,7 +115,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
 ////    env.getExecutionPlan()
 //    //  new CheckpointedFlinkDrm[K](ds.updat)this.ds.getExecutionEnvironment.registerCachedFile()
 //    env.execute()
-
+     this
   }
 
   def collect: Matrix = {
