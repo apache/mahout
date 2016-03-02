@@ -20,10 +20,11 @@ package org.apache.mahout.flinkbindings.drm
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
+import org.apache.mahout.common.io.{GenericMatrixKryoSerializer, VectorKryoSerializer}
 import org.apache.mahout.flinkbindings.{BlockifiedDrmDataSet, DrmDataSet, FlinkDistributedContext, wrapContext}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.{DenseMatrix, Matrix, SparseRowMatrix}
+import org.apache.mahout.math.{Vector, DenseMatrix, Matrix, SparseRowMatrix}
 
 import scala.reflect.ClassTag
 
@@ -42,6 +43,11 @@ class RowsFlinkDrm[K: TypeInformation: ClassTag](val ds: DrmDataSet[K], val ncol
 
   def executionEnvironment = ds.getExecutionEnvironment
   def context: FlinkDistributedContext = ds.getExecutionEnvironment
+  ds.getExecutionEnvironment.getConfig.registerTypeWithKryoSerializer(classOf[Vector], new VectorKryoSerializer())
+  ds.getExecutionEnvironment.getConfig.registerTypeWithKryoSerializer(classOf[Matrix], new GenericMatrixKryoSerializer())
+
+//  kryo.addDefaultSerializer(classOf[Vector], new VectorKryoSerializer())
+//  kryo.addDefaultSerializer(classOf[Matrix], new GenericMatrixKryoSerializer)
 
   def isBlockified = false
 
@@ -83,6 +89,10 @@ class BlockifiedFlinkDrm[K: TypeInformation: ClassTag](val ds: BlockifiedDrmData
 
   def executionEnvironment = ds.getExecutionEnvironment
   def context: FlinkDistributedContext = ds.getExecutionEnvironment
+
+  ds.getExecutionEnvironment.getConfig.registerTypeWithKryoSerializer(classOf[Vector], new VectorKryoSerializer())
+  ds.getExecutionEnvironment.getConfig.registerTypeWithKryoSerializer(classOf[Matrix], new GenericMatrixKryoSerializer())
+
 
   def isBlockified = true
 

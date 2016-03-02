@@ -37,7 +37,7 @@ object VectorKryoSerializer {
 
 }
 
-class VectorKryoSerializer(val laxPrecision: Boolean = false) extends Serializer[Vector] {
+class VectorKryoSerializer(val laxPrecision: Boolean = false) extends Serializer[Vector] with java.io.Serializable {
 
   import VectorKryoSerializer._
 

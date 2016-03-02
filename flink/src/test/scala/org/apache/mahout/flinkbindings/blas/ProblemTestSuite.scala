@@ -36,7 +36,7 @@ import RLikeOps._
 import RLikeDrmOps._
 import decompositions._
 
-@RunWith(classOf[JUnitRunner])
+
 class ProblemTestSuite extends FunSuite with DistributedFlinkSuite with Matchers {
 
 //  test("C = A + B, identically partitioned") {
