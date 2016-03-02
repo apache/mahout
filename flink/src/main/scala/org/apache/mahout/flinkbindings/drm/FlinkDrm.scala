@@ -43,11 +43,6 @@ class RowsFlinkDrm[K: TypeInformation: ClassTag](val ds: DrmDataSet[K], val ncol
 
   def executionEnvironment = ds.getExecutionEnvironment
   def context: FlinkDistributedContext = ds.getExecutionEnvironment
-  ds.getExecutionEnvironment.getConfig.registerTypeWithKryoSerializer(classOf[Vector], new VectorKryoSerializer())
-  ds.getExecutionEnvironment.getConfig.registerTypeWithKryoSerializer(classOf[Matrix], new GenericMatrixKryoSerializer())
-
-//  kryo.addDefaultSerializer(classOf[Vector], new VectorKryoSerializer())
-//  kryo.addDefaultSerializer(classOf[Matrix], new GenericMatrixKryoSerializer)
 
   def isBlockified = false
 
@@ -89,9 +84,6 @@ class BlockifiedFlinkDrm[K: TypeInformation: ClassTag](val ds: BlockifiedDrmData
 
   def executionEnvironment = ds.getExecutionEnvironment
   def context: FlinkDistributedContext = ds.getExecutionEnvironment
-
-  ds.getExecutionEnvironment.getConfig.registerTypeWithKryoSerializer(classOf[Vector], new VectorKryoSerializer())
-  ds.getExecutionEnvironment.getConfig.registerTypeWithKryoSerializer(classOf[Matrix], new GenericMatrixKryoSerializer())
 
 
   def isBlockified = true

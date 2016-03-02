@@ -31,7 +31,10 @@ import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.math.{DenseMatrix, MatrixWritable, Matrix}
 import org.apache.mahout.math.drm.logical.OpTimesRightMatrix
-import org.apache.mahout.math.scalabindings.RLikeOps._
+
+import org.apache.mahout.math._
+import scalabindings._
+import RLikeOps._
 
 import org.apache.flink.api.scala._
 
@@ -44,35 +47,50 @@ object FlinkOpTimesRightMatrix {
   def drmTimesInCore[K: TypeInformation: ClassTag](op: OpTimesRightMatrix[K], A: FlinkDrm[K], inCoreB: Matrix): FlinkDrm[K] = {
     implicit val ctx = A.context
 
-  //  val singletonDataSetB = ctx.env.fromElements(inCoreB)
+    /* HACK: broadcasting the matrix using Flink's .withBroadcastSet(singletonDataSetB) on a matrix causes a backend Kryo
+     * Issue resulkting in a stackOverflow error.
+     * 
+     * Quick fix is to instead break the matrix down into a list of rows and then rebuild it on the back end
+     * 
+     * TODO: this is obviously very inefficient... need to use the correct broadcast on the matrix itself.
+     */
+    
+    //  val singletonDataSetB = ctx.env.fromElements(inCoreB)
 
-    println("AT FLINK OPTIMESRIGHTMATRIX!!!!!!!!!!!!!!!")
-//    val inCoreBcastB = FlinkEngine.drmBroadcast(inCoreB)
-//    val singletonDataSetB = ctx.env.fromElements(inCoreB)
+    
+    //  val inCoreBcastB = FlinkEngine.drmBroadcast(inCoreB)
+    //  val singletonDataSetB = ctx.env.fromElements(inCoreB)
 
     val rows = (0 until inCoreB.nrow).map(i => (i, inCoreB(i, ::)))
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    //TODO: Make Sure that this is the correct partitioning scheme
     val singletonDataSetB = ctx.env.fromCollection(rows)
 
     val res = A.asBlockified.ds.map(new RichMapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
-      var inCoreBc: Matrix = null
+      var inCoreB: Matrix = null
 
       override def open(params: Configuration): Unit = {
         val runtime = this.getRuntimeContext
-        val dsB: java.util.List[Matrix] = runtime.getBroadcastVariable("matrix")
-//        inCoreBc = dsB.get(0).asInstanceOf[FlinkByteBCast[Matrix]].value
-        val inCoreBc = dsB.get(0)//.asInstanceOf[MatrixWritable].get()
+        //val dsB: java.util.List[Matrix]
+        val dsB: java.util.List[(Int, org.apache.mahout.math.Vector)] = runtime.getBroadcastVariable("matrix")
+        val m = dsB.size()
+        val n = dsB.get(0)._2.size
+        val isDense = (dsB.get(0)._2).isDense
+
+        inCoreB = isDense match {
+          case true => new DenseMatrix(m, n)
+          case false => new DenseMatrix(m, n)
+        }
+        for (i <- 0 until m) {
+          inCoreB(i, ::) := dsB.get(i)._2
+        }
 
       }
-     // inCoreBc = inCoreBcastB.value
-
+     
       override def map(tuple: (Array[K], Matrix)): (Array[K], Matrix) = tuple match {
-        case (keys, block_A) => (keys, block_A %*% inCoreBc)
+        case (keys, block_A) => (keys, block_A %*% inCoreB)
       }
 
     }).withBroadcastSet(singletonDataSetB, "matrix")
-    println("Finished FLINK OPTIMESRIGHTMATRIX!!!!!!!!!!!!!!!")
 
     new BlockifiedFlinkDrm(res, op.ncol)
   }

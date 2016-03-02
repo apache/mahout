@@ -35,7 +35,7 @@ object GenericMatrixKryoSerializer {
 }
 
 /** Serializes Sparse or Dense in-core generic matrix (row-wise or column-wise backed) */
-class GenericMatrixKryoSerializer extends Serializer[Matrix] with java.io.Serializable {
+class GenericMatrixKryoSerializer extends Serializer[Matrix] {
 
   import GenericMatrixKryoSerializer._
 

@@ -12,7 +12,6 @@ import org.scalatest.junit.JUnitRunner
 import org.apache.mahout.math.decompositions.DistributedDecompositionsSuiteBase
 
 
-@RunWith(classOf[JUnitRunner])
 class DistributedDecompositionsSuite extends FunSuite with DistributedFlinkSuite
       with DistributedDecompositionsSuiteBase {
 
