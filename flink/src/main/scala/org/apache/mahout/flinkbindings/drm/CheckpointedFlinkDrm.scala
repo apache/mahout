@@ -190,6 +190,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     // as well as the SequenceFileOutputFormat paramaters
     if (ktag.runtimeClass == classOf[Int]) {
       // explicitly map into Int keys
+      implicit val typeInformation = createTypeInformation[(IntWritable,VectorWritable)]
       val writableDataset = ds.map(new MapFunction[DrmTuple[K], (IntWritable, VectorWritable)] {
         def map(tuple: DrmTuple[K]): (IntWritable, VectorWritable) =
           (new IntWritable(tuple._1.asInstanceOf[Int]), new VectorWritable(tuple._2))
