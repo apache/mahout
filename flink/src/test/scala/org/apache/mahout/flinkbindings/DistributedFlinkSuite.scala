@@ -31,6 +31,8 @@ trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
 
   def initContext() {
     env = ExecutionEnvironment.getExecutionEnvironment
+    // set this higher so that tests like dsqDist(X,Y) have enoug available slots to pass.
+    env.setParallelism(10)
     mahoutCtx = wrapContext(env)
   }
 
