@@ -31,7 +31,6 @@ import org.apache.mahout.math.drm.logical.OpAx
 import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
 import org.apache.mahout.math.drm.logical._
 
-@RunWith(classOf[JUnitRunner])
 class LATestSuite extends FunSuite with DistributedFlinkSuite {
 
   test("Ax blockified") {

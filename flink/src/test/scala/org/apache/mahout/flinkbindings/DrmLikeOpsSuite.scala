@@ -31,7 +31,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 
-@RunWith(classOf[JUnitRunner])
 class DrmLikeOpsSuite extends FunSuite with DistributedFlinkSuite {
 
   test("norm") {
