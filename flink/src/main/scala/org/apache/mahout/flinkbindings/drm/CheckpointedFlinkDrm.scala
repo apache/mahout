@@ -186,48 +186,60 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     val job = new JobConf
     FileOutputFormat.setOutputPath(job, new org.apache.hadoop.fs.Path(path))
 
-    // explicitly define all Writable Subclasses for ds.map() keys
-    // as well as the SequenceFileOutputFormat paramaters
-    if (ktag.runtimeClass == classOf[Int]) {
-      // explicitly map into Int keys
-      implicit val typeInformation = createTypeInformation[(IntWritable,VectorWritable)]
-      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (IntWritable, VectorWritable)] {
-        def map(tuple: DrmTuple[K]): (IntWritable, VectorWritable) =
-          (new IntWritable(tuple._1.asInstanceOf[Int]), new VectorWritable(tuple._2))
-      })
+//    // explicitly define all Writable Subclasses for ds.map() keys
+//    // as well as the SequenceFileOutputFormat paramaters
+//    if (ktag.runtimeClass == classOf[Int]) {
+//      // explicitly map into Int keys
+//      implicit val typeInformation = createTypeInformation[(IntWritable,VectorWritable)]
+//      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (IntWritable, VectorWritable)] {
+//        def map(tuple: DrmTuple[K]): (IntWritable, VectorWritable) =
+//          (new IntWritable(tuple._1.asInstanceOf[Int]), new VectorWritable(tuple._2))
+//      })
+//
+//      // setup sink for IntWritable
+//      val sequenceFormat = new SequenceFileOutputFormat[IntWritable, VectorWritable]
+//      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
+//      writableDataset.output(hadoopOutput)
+//
+//     } else if (ktag.runtimeClass == classOf[String]) {
+//      // explicitly map into Text keys
+//      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (Text, VectorWritable)] {
+//        def map(tuple: DrmTuple[K]): (Text, VectorWritable) =
+//          (new Text(tuple._1.asInstanceOf[String]), new VectorWritable(tuple._2))
+//      })
+//
+//      // setup sink for Text
+//      val sequenceFormat = new SequenceFileOutputFormat[Text, VectorWritable]
+//      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
+//      writableDataset.output(hadoopOutput)
+//
+//    } else if (ktag.runtimeClass == classOf[Long]) {
+//      // explicitly map into Long keys
+//      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (LongWritable, VectorWritable)] {
+//        def map(tuple: DrmTuple[K]): (LongWritable, VectorWritable) =
+//          (new LongWritable(tuple._1.asInstanceOf[Long]), new VectorWritable(tuple._2))
+//      })
+//
+//      // setup sink for LongWritable
+//      val sequenceFormat = new SequenceFileOutputFormat[LongWritable, VectorWritable]
+//      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
+//      writableDataset.output(hadoopOutput)
+//
+//    } else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
 
-      // setup sink for IntWritable
-      val sequenceFormat = new SequenceFileOutputFormat[IntWritable, VectorWritable]
-      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
-      writableDataset.output(hadoopOutput)
-
-     } else if (ktag.runtimeClass == classOf[String]) {
-      // explicitly map into Text keys
-      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (Text, VectorWritable)] {
-        def map(tuple: DrmTuple[K]): (Text, VectorWritable) =
-          (new Text(tuple._1.asInstanceOf[String]), new VectorWritable(tuple._2))
-      })
-
-      // setup sink for Text
-      val sequenceFormat = new SequenceFileOutputFormat[Text, VectorWritable]
-      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
-      writableDataset.output(hadoopOutput)
-
-    } else if (ktag.runtimeClass == classOf[Long]) {
-      // explicitly map into Long keys
-      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (LongWritable, VectorWritable)] {
-        def map(tuple: DrmTuple[K]): (LongWritable, VectorWritable) =
-          (new LongWritable(tuple._1.asInstanceOf[Long]), new VectorWritable(tuple._2))
-      })
-
-      // setup sink for LongWritable
-      val sequenceFormat = new SequenceFileOutputFormat[LongWritable, VectorWritable]
-      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
-      writableDataset.output(hadoopOutput)
-
-    } else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
 
 
+          // explicitly map into Int keys
+//          implicit val typeInformation = createTypeInformation[(IntWritable,VectorWritable)]
+          val writableDataset = ds.map( tuple =>
+              (new IntWritable(tuple._1.asInstanceOf[Int]), new VectorWritable(tuple._2))
+          )
+
+          // setup sink for IntWritable
+          val sequenceFormat = new SequenceFileOutputFormat[IntWritable, VectorWritable]
+          val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
+          writableDataset.output(hadoopOutput)
+    //
 
    // writableDataset.output(hadoopOutput)
 
