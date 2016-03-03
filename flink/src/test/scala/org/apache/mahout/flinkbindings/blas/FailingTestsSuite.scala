@@ -19,6 +19,7 @@
 package org.apache.mahout.flinkbindings.blas
 
 import org.apache.flink.api.scala._
+import org.apache.mahout.common.RandomUtils
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
 import org.apache.mahout.math._
@@ -36,10 +37,11 @@ import RLikeOps._
 import RLikeDrmOps._
 import decompositions._
 
+import scala.math._
 import scala.reflect.ClassTag
 
 
-class ProblemTestSuite extends FunSuite with DistributedFlinkSuite with Matchers {
+class FailingTestsSuite extends FunSuite with DistributedFlinkSuite with Matchers {
 
   test("C = A + B, identically partitioned") {
 
@@ -117,6 +119,8 @@ class ProblemTestSuite extends FunSuite with DistributedFlinkSuite with Matchers
     (mxDsq - mxDsqControl).norm should be < 1e-7
   }
 
+// still failing- kicks out of the suite
+
   test("DRM DFS i/o (local)") {
 
     val uploadPath = TmpDir + "UploadedDRM"
@@ -143,22 +147,92 @@ class ProblemTestSuite extends FunSuite with DistributedFlinkSuite with Matchers
     (inCoreA - inCoreB).norm should be < 1e-7
   }
 
-  test("DRM parallelizeEmpty") {
-
-    val drmEmpty = drmParallelizeEmpty(100, 50)
-
-    // collect back into in-core
-    val inCoreEmpty = drmEmpty.collect
-
-    inCoreEmpty.sum.abs should be < 1e-7
-    drmEmpty.nrow shouldBe 100
-    drmEmpty.ncol shouldBe 50
-    inCoreEmpty.nrow shouldBe 100
-    inCoreEmpty.ncol shouldBe 50
-
-  }
 
 
-
+//  test("dspca") {
+//
+//    val rnd = RandomUtils.getRandom
+//
+//    // Number of points
+//    val m = 500
+//    // Length of actual spectrum
+//    val spectrumLen = 40
+//
+//    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
+//    printf("spectrum:%s\n", spectrum)
+//
+//    val (u, _) = qr(new SparseRowMatrix(m, spectrumLen) :=
+//      ((r, c, v) => if (rnd.nextDouble() < 0.2) 0 else rnd.nextDouble() + 5.0))
+//
+//    // PCA Rotation matrix -- should also be orthonormal.
+//    val (tr, _) = qr(Matrices.symmetricUniformView(spectrumLen, spectrumLen, rnd.nextInt) - 10.0)
+//
+//    val input = (u %*%: diagv(spectrum)) %*% tr.t
+//    val drmInput = drmParallelize(m = input, numPartitions = 2)
+//
+//    // Calculate just first 10 principal factors and reduce dimensionality.
+//    // Since we assert just validity of the s-pca, not stochastic error, we bump p parameter to
+//    // ensure to zero stochastic error and assert only functional correctness of the method's pca-
+//    // specific additions.
+//    val k = 10
+//
+//    // Calculate just first 10 principal factors and reduce dimensionality.
+//    var (drmPCA, _, s) = dspca(drmA = drmInput, k = 10, p = spectrumLen, q = 1)
+//    // Un-normalized pca data:
+//    drmPCA = drmPCA %*% diagv(s)
+//
+//    val pca = drmPCA.checkpoint(CacheHint.NONE).collect
+//
+//    // Of course, once we calculated the pca, the spectrum is going to be different since our originally
+//    // generated input was not centered. So here, we'd just brute-solve pca to verify
+//    val xi = input.colMeans()
+//    for (r <- 0 until input.nrow) input(r, ::) -= xi
+//    var (pcaControl, _, sControl) = svd(m = input)
+//    pcaControl = (pcaControl %*%: diagv(sControl))(::, 0 until k)
+//
+//    printf("pca:\n%s\n", pca(0 until 10, 0 until 10))
+//    printf("pcaControl:\n%s\n", pcaControl(0 until 10, 0 until 10))
+//
+//    (pca(0 until 10, 0 until 10).norm - pcaControl(0 until 10, 0 until 10).norm).abs should be < 1E-5
+//
+//  }
+//
+//  test("dals") {
+//
+//    val rnd = RandomUtils.getRandom
+//
+//    // Number of points
+//    val m = 500
+//    val n = 500
+//
+//    // Length of actual spectrum
+//    val spectrumLen = 40
+//
+//    // Create singluar values with decay
+//    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
+//    printf("spectrum:%s\n", spectrum)
+//
+//    // Create A as an ideal input
+//    val inCoreA = (qr(Matrices.symmetricUniformView(m, spectrumLen, 1234))._1 %*%: diagv(spectrum)) %*%
+//      qr(Matrices.symmetricUniformView(n, spectrumLen, 2345))._1.t
+//    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+//
+//    // Decompose using ALS
+//    val (drmU, drmV, rmse) = dals(drmA = drmA, k = 20).toTuple
+//    val inCoreU = drmU.collect
+//    val inCoreV = drmV.collect
+//
+//    val predict = inCoreU %*% inCoreV.t
+//
+//    printf("Control block:\n%s\n", inCoreA(0 until 3, 0 until 3))
+//    printf("ALS factorized approximation block:\n%s\n", predict(0 until 3, 0 until 3))
+//
+//    val err = (inCoreA - predict).norm
+//    printf("norm of residuals %f\n", err)
+//    printf("train iteration rmses: %s\n", rmse)
+//
+//    err should be < 15e-2
+//
+//  }
 
 }
