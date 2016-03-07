@@ -64,11 +64,9 @@ class RLikeDrmOps[K](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def /:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that / _, evalZeros = true)
 
-  def :%*%(that: DrmLike[Int]): DrmLike[K] = OpAB[K](A = this.drm, B = that)
+  def :%*%[B](that: DrmLike[B]): DrmLike[K] = OpABAnyKey[B,K](A = this.drm, B=that)
 
-  def %*%[B: ClassTag](that: DrmLike[B]): DrmLike[K] = OpABAnyKey[B, K](A = this.drm, B = that)
-
-  def %*%(that: DrmLike[Int]): DrmLike[K] = this :%*% that
+  def %*%[B](that: DrmLike[B]): DrmLike[K] = this :%*% that
 
   def :%*%(that: Matrix): DrmLike[K] = OpTimesRightMatrix[K](A = this.drm, right = that)
 

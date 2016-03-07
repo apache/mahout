@@ -110,7 +110,7 @@ trait NaiveBayes extends java.io.Serializable{
    *   aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
    *   TF or TF-IDF counts per label
    */
-  def extractLabelsAndAggregateObservations[K: ClassTag](stringKeyedObservations: DrmLike[K],
+  def extractLabelsAndAggregateObservations[K](stringKeyedObservations: DrmLike[K],
                                                          cParser: CategoryParser = seq2SparseCategoryParser)
                                                         (implicit ctx: DistributedContext):
                                                         (mutable.HashMap[String, Integer], DrmLike[Int])= {
@@ -120,13 +120,16 @@ trait NaiveBayes extends java.io.Serializable{
     val numDocs=stringKeyedObservations.nrow
     val numFeatures=stringKeyedObservations.ncol
 
+    // For mapblocks that return K.
+    implicit val ktag = stringKeyedObservations.keyClassTag
+
     // Extract categories from labels assigned by seq2sparse
     // Categories are Stored in Drm Keys as eg.: /Category/document_id
 
     // Get a new DRM with a single column so that we don't have to collect the
     // DRM into memory upfront.
-    val strippedObeservations= stringKeyedObservations.mapBlock(ncol=1){
-      case(keys, block) =>
+    val strippedObeservations = stringKeyedObservations.mapBlock(ncol = 1) {
+      case (keys, block) =>
         val blockB = block.like(keys.size, 1)
         keys -> blockB
     }

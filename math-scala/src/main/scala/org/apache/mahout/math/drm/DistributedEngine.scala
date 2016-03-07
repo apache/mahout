@@ -154,13 +154,19 @@ object DistributedEngine {
             null
         }
       }
-      case OpAB(OpAt(a), b) if (a == b) ⇒ OpAtA(pass1(a))
-      case OpABAnyKey(OpAtAnyKey(a), b) if (a == b) ⇒ OpAtA(pass1(a))
+      case OpAB(OpAt(a), b) if a == b ⇒ OpAtA(pass1(a))
+      case OpABAnyKey(OpAtAnyKey(a), b) if a == b ⇒ OpAtA(pass1(a))
+
+      // A small rule change: Now that we have removed ClassTag at the %*% operation, it doesn't
+      // match b[Int] case automatically any longer. So, we need to check and rewrite it dynamically
+      // and re-run pass1 again on the obtained tree.
+      case OpABAnyKey(a, b) if b.keyClassTag == ClassTag.Int ⇒ pass1(OpAB(a, b.asInstanceOf[DrmLike[Int]]))
+      case OpAtAnyKey(a) if a.keyClassTag == ClassTag.Int ⇒ pass1(OpAt(a.asInstanceOf[DrmLike[Int]]))
 
       // For now, rewrite left-multiply via transpositions, i.e.
       // inCoreA %*% B = (B' %*% inCoreA')'
       case op@OpTimesLeftMatrix(a, b) ⇒
-      OpAt(OpTimesRightMatrix(A = OpAt(pass1(b)), right = a.t))
+        OpAt(OpTimesRightMatrix(A = OpAt(pass1(b)), right = a.t))
 
       // Add vertical row index concatenation for rbind() on DrmLike[Int] fragments
       case op@OpRbind(a, b) if (op.keyClassTag == ClassTag.Int) ⇒
