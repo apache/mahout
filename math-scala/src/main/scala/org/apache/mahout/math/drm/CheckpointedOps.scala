@@ -27,7 +27,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
  * the DRMBase once they stabilize.
  *
  */
-class CheckpointedOps[K: ClassTag](val drm: CheckpointedDrm[K]) {
+class CheckpointedOps[K](val drm: CheckpointedDrm[K]) {
 
 
   /** Column sums. At this point this runs on checkpoint and collects in-core vector. */
