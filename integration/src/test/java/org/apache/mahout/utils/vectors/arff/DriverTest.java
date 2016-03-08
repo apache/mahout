@@ -18,9 +18,8 @@ package org.apache.mahout.utils.vectors.arff;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 

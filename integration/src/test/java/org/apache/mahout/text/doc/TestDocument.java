@@ -17,7 +17,7 @@
 package org.apache.mahout.text.doc;
 
 import org.apache.lucene.document.Document;
-
+@Deprecated
 public interface TestDocument {
 
   String getId();

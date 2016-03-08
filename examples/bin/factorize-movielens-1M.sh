@@ -22,6 +22,8 @@
 # from http://www.grouplens.org/node/73
 #
 # To run:  change into the mahout directory and type:
+#  export MAHOUT_LOCAL=true
+# Then:
 #  examples/bin/factorize-movielens-1M.sh /path/to/ratings.dat
 
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
@@ -38,7 +40,8 @@ then
   exit -1
 fi
 
-MAHOUT="../../bin/mahout"
+export MAHOUT_LOCAL=true
+MAHOUT="$MAHOUT_HOME/bin/mahout"
 
 WORK_DIR=/tmp/mahout-work-${USER}
 echo "creating work directory at ${WORK_DIR}"

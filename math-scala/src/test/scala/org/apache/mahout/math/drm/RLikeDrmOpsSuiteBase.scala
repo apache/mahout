@@ -24,7 +24,13 @@ import scalabindings._
 import RLikeOps._
 import RLikeDrmOps._
 import decompositions._
-import org.apache.mahout.math.drm.logical.{OpAtB, OpAtA, OpAtx}
+import org.apache.mahout.math.drm.logical._
+import org.apache.mahout.math.drm.logical.OpAtx
+import org.apache.mahout.math.drm.logical.OpAtB
+import org.apache.mahout.math.drm.logical.OpAtA
+import org.apache.mahout.math.drm.logical.OpAewUnaryFuncFusion
+
+import scala.util.Random
 
 /** Common engine tests for distributed R-like DRM operations */
 trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
@@ -188,10 +194,13 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
     val A = drmParallelize(inCoreA, numPartitions = 2)
         .mapBlock()({
-      case (keys, block) => keys.map(_.toString) -> block
+      case (keys, block) ⇒ keys.map(_.toString) → block
     })
 
-    val B = A + 1.0
+    // Dense-A' x sparse-B used to produce error. We sparsify B here to test this as well.
+    val B = (A + 1.0).mapBlock() { case (keys, block) ⇒
+      keys → (new SparseRowMatrix(block.nrow, block.ncol) := block)
+    }
 
     val C = A.t %*% B
 
@@ -199,6 +208,25 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
     val inCoreC = C.collect
     val inCoreControlC = inCoreA.t %*% (inCoreA + 1.0)
+
+    (inCoreC - inCoreControlC).norm should be < 1E-10
+
+  }
+
+  test ("C = A %*% B.t") {
+
+    val inCoreA = dense((1, 2), (3, 4), (-3, -5))
+
+    val A = drmParallelize(inCoreA, numPartitions = 2)
+
+    val B = A + 1.0
+
+    val C = A %*% B.t
+
+    mahoutCtx.optimizerRewrite(C) should equal(OpABt[Int](A, B))
+
+    val inCoreC = C.collect
+    val inCoreControlC = inCoreA %*% (inCoreA + 1.0).t
 
     (inCoreC - inCoreControlC).norm should be < 1E-10
 
@@ -503,6 +531,24 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
   }
 
+  test("B = 1 cbind A") {
+    val inCoreA = dense((1, 2), (3, 4))
+    val control = dense((1, 1, 2), (1, 3, 4))
+
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    (control - (1 cbind drmA) ).norm should be < 1e-10
+  }
+
+  test("B = A cbind 1") {
+    val inCoreA = dense((1, 2), (3, 4))
+    val control = dense((1, 2, 1), (3, 4, 1))
+
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    (control - (drmA cbind 1) ).norm should be < 1e-10
+  }
+
   test("B = A + 1.0") {
     val inCoreA = dense((1, 2), (2, 3), (3, 4))
     val controlB = inCoreA + 1.0
@@ -547,4 +593,46 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
     (10 * drmA - (10 *: drmA)).norm shouldBe 0
 
   }
+
+  test("A * A -> sqr(A) rewrite ") {
+    val mxA = dense(
+      (1, 2, 3),
+      (3, 4, 5),
+      (7, 8, 9)
+    )
+
+    val mxAAControl = mxA * mxA
+
+    val drmA = drmParallelize(mxA, 2)
+    val drmAA = drmA * drmA
+
+    val optimized = drmAA.context.engine.optimizerRewrite(drmAA)
+    println(s"optimized:$optimized")
+    optimized.isInstanceOf[OpAewUnaryFunc[Int]] shouldBe true
+
+    (mxAAControl -= drmAA).norm should be < 1e-10
+  }
+
+  test("B = 1 + 2 * (A * A) ew unary function fusion") {
+    val mxA = dense(
+      (1, 2, 3),
+      (3, 0, 5)
+    )
+    val controlB = mxA.cloned := { (x) => 1 + 2 * x * x}
+
+    val drmA = drmParallelize(mxA, 2)
+
+    // We need to use parenthesis, otherwise optimizer will see it as (2A) * (A) and that would not
+    // be rewritten as 2 * sqr(A). It is not that clever (yet) to try commutativity optimizations.
+    val drmB = 1 + 2 * (drmA * drmA)
+
+    val optimized = mahoutCtx.engine.optimizerRewrite(drmB)
+    println(s"optimizer rewritten:$optimized")
+    optimized.isInstanceOf[OpAewUnaryFuncFusion[Int]] shouldBe true
+
+    (controlB - drmB).norm should be < 1e-10
+
+  }
+
+
 }

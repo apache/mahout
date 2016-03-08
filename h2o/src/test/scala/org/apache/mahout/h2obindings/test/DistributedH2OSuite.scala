@@ -19,7 +19,7 @@ package org.apache.mahout.h2obindings.test
 
 import org.scalatest.Suite
 import org.apache.mahout.h2obindings._
-import org.apache.mahout.test.{DistributedMahoutSuite,MahoutSuite}
+import org.apache.mahout.test.DistributedMahoutSuite
 import org.apache.mahout.math.drm.DistributedContext
 
 trait DistributedH2OSuite extends DistributedMahoutSuite with LoggerConfiguration {
@@ -29,8 +29,7 @@ trait DistributedH2OSuite extends DistributedMahoutSuite with LoggerConfiguratio
 
   override protected def beforeEach() {
     super.beforeEach()
-
-    mahoutCtx = mahoutH2OContext("mah2out")
+    mahoutCtx = mahoutH2OContext("mah2out" + System.currentTimeMillis())
   }
 
   override protected def afterEach() {

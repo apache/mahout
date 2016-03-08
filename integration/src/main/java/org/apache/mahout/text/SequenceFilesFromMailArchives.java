@@ -16,10 +16,6 @@
  */
 package org.apache.mahout.text;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
-
 import org.apache.commons.io.DirectoryWalker;
 import org.apache.commons.io.comparator.CompositeFileComparator;
 import org.apache.commons.io.comparator.DirectoryFileComparator;
@@ -46,10 +42,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -81,9 +79,9 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
   private static final int MAX_JOB_SPLIT_LOCATIONS = 1000000;
 
   public void createSequenceFiles(MailOptions options) throws IOException {
-    ChunkedWriter writer = new ChunkedWriter(getConf(), options.getChunkSize(), new Path(options.getOutputDir()));
-    MailProcessor processor = new MailProcessor(options, options.getPrefix(), writer);
-    try {
+    try (ChunkedWriter writer =
+             new ChunkedWriter(getConf(), options.getChunkSize(), new Path(options.getOutputDir()))){
+      MailProcessor processor = new MailProcessor(options, options.getPrefix(), writer);
       if (options.getInput().isDirectory()) {
         PrefixAdditionDirectoryWalker walker = new PrefixAdditionDirectoryWalker(processor, writer);
         walker.walk(options.getInput());
@@ -94,8 +92,6 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         long finish = System.currentTimeMillis();
         log.info("Parsed {} messages from {} in time: {}", cnt, options.getInput().getAbsolutePath(), finish - start);
       }
-    } finally {
-      Closeables.close(writer, false);
     }
   }
 
@@ -105,9 +101,9 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     private static final Comparator<File> FILE_COMPARATOR = new CompositeFileComparator(
         DirectoryFileComparator.DIRECTORY_REVERSE, PathFileComparator.PATH_COMPARATOR);
 
-    private final Deque<MailProcessor> processors = new ArrayDeque<MailProcessor>();
+    private final Deque<MailProcessor> processors = new ArrayDeque<>();
     private final ChunkedWriter writer;
-    private final Deque<Long> messageCounts = new ArrayDeque<Long>();
+    private final Deque<Long> messageCounts = new ArrayDeque<>();
 
     public PrefixAdditionDirectoryWalker(MailProcessor processor, ChunkedWriter writer) {
       processors.addFirst(processor);
@@ -226,11 +222,11 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     options.setChunkSize(chunkSize);
     options.setCharset(charset);
 
-    List<Pattern> patterns = Lists.newArrayListWithCapacity(5);
+    List<Pattern> patterns = new ArrayList<>(5);
     // patternOrder is used downstream so that we can know what order the text
     // is in instead of encoding it in the string, which
     // would require more processing later to remove it pre feature selection.
-    Map<String, Integer> patternOrder = Maps.newHashMap();
+    Map<String, Integer> patternOrder = new HashMap<>();
     int order = 0;
     if (hasOption(FROM_OPTION[0])) {
       patterns.add(MailProcessor.FROM_PREFIX);

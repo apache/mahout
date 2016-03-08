@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.11.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -68,11 +68,21 @@
     <!-- own modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
+      <artifactId>mahout-hdfs</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
+      <artifactId>mahout-mr</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-hdfs</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-mr</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -107,6 +117,11 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-commons-csv</artifactId>
       <version>3.5.0</version>
@@ -122,7 +137,7 @@
       <artifactId>lucene-analyzers-common</artifactId>
       <optional>true</optional>
     </dependency>
-    
+
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>

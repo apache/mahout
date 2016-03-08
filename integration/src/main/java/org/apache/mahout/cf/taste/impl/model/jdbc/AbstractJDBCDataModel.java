@@ -17,17 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collection;
-import java.util.List;
-
-import javax.sql.DataSource;
-
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
@@ -49,7 +39,15 @@ import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.sql.DataSource;
 
 /**
  * <p>
@@ -96,7 +94,6 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   private final String getUsersSQL;
   private final String getItemsSQL;
   private final String getPrefsForItemSQL;
-  //private final String getNumPreferenceForItemSQL;
   private final String getNumPreferenceForItemsSQL;
   private final String getMaxPreferenceSQL;
   private final String getMinPreferenceSQL;
@@ -218,7 +215,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
     this.cachedNumUsers = -1;
     this.cachedNumItems = -1;
-    this.itemPrefCounts = new Cache<Long,Integer>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
+    this.itemPrefCounts = new Cache<>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
 
     this.maxPreference = Float.NaN;
     this.minPreference = Float.NaN;
@@ -283,7 +280,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
 
-      List<Preference> prefs = Lists.newArrayList();
+      List<Preference> prefs = new ArrayList<>();
       while (rs.next()) {
         prefs.add(buildPreference(rs));
       }
@@ -311,7 +308,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     Statement stmt = null;
     ResultSet rs = null;
 
-    FastByIDMap<PreferenceArray> result = new FastByIDMap<PreferenceArray>();
+    FastByIDMap<PreferenceArray> result = new FastByIDMap<>();
 
     try {
       conn = dataSource.getConnection();
@@ -323,7 +320,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       rs = stmt.executeQuery(getAllUsersSQL);
 
       Long currentUserID = null;
-      List<Preference> currentPrefs = Lists.newArrayList();
+      List<Preference> currentPrefs = new ArrayList<>();
       while (rs.next()) {
         long nextUserID = getLongColumn(rs, 1);
         if (currentUserID != null && !currentUserID.equals(nextUserID) && !currentPrefs.isEmpty()) {
@@ -356,7 +353,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     Statement stmt = null;
     ResultSet rs = null;
 
-    FastByIDMap<FastIDSet> result = new FastByIDMap<FastIDSet>();
+    FastByIDMap<FastIDSet> result = new FastByIDMap<>();
 
     try {
       conn = dataSource.getConnection();
@@ -533,7 +530,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
       log.debug("Executing SQL query: {}", getPrefsForItemSQL);
       rs = stmt.executeQuery();
-      List<Preference> prefs = Lists.newArrayList();
+      List<Preference> prefs = new ArrayList<>();
       while (rs.next()) {
         prefs.add(buildPreference(rs));
       }

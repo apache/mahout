@@ -20,10 +20,10 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.11.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>mahout-distribution</artifactId>
+  <artifactId>apache-mahout-distribution</artifactId>
   <name>Mahout Release Package</name>
   <description>Distribution Package</description>
   <packaging>pom</packaging>
@@ -73,7 +73,7 @@
   </build>
   <profiles>
     <profile>
-      <id>release</id>
+      <id>mahout-release</id>
       <properties>
         <mahout.skip.distribution>false</mahout.skip.distribution>
       </properties>
@@ -91,11 +91,31 @@
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
+      <artifactId>mahout-hdfs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-mr</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-examples</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
   </dependencies>
 </project>

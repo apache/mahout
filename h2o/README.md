@@ -4,16 +4,6 @@ This document demonstrates the integration between Mahout (http://mahout.apache.
 
 ## Setup
 
-Since the integration is still in the early stages, the demonstration will be using git and source (rather than a pre-built binary distribution.)
-
-    sh:~$ git clone git://github.com/apache/mahout
-    sh:~$ cd mahout
-    sh:~/mahout$ git checkout -b MAHOUT-1500
-    sh:~/mahout$ git pull git://github.com/avati/mahout MAHOUT-1500
-    sh:~/mahout$ mvn -DskipTests install package
-
-The last step (mvn package) is necessary only because we are working off the source repository and do not yet use binary distributions of either Mahout or H2O.
-
 The integration depends on h2o-core maven artifact. This can either be fetched automatically through sonatype, or can be installed locally from source (run 'gradle install -x test' in http://github.com/0xdata/h2o-dev)
 
 ## Test

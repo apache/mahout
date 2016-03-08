@@ -17,10 +17,6 @@
 
 package org.apache.mahout.clustering.cdbw;
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
@@ -41,8 +37,11 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This class calculates the CDbw metric as defined in
@@ -53,7 +52,7 @@ public final class CDbwEvaluator {
   private static final Logger log = LoggerFactory.getLogger(CDbwEvaluator.class);
   
   private final Map<Integer,List<VectorWritable>> representativePoints;
-  private final Map<Integer,Double> stDevs = Maps.newHashMap();
+  private final Map<Integer,Double> stDevs = new HashMap<>();
   private final List<Cluster> clusters;
   private final DistanceMeasure measure;
   private Double interClusterDensity = null;
@@ -110,7 +109,7 @@ public final class CDbwEvaluator {
    * @return a List<Cluster> of the clusters
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
-    List<Cluster> clusters = Lists.newArrayList();
+    List<Cluster> clusters = new ArrayList<>();
     for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST,
         PathFilters.logsCRCFilter(), conf)) {
       Cluster cluster = clusterWritable.getValue();
@@ -211,11 +210,11 @@ public final class CDbwEvaluator {
     if (interClusterDensities != null) {
       return interClusterDensities;
     }
-    interClusterDensities = new TreeMap<Integer,Map<Integer,Double>>();
+    interClusterDensities = new TreeMap<>();
     // find the closest representative points between the clusters
     for (int i = 0; i < clusters.size(); i++) {
       int cI = clusters.get(i).getId();
-      Map<Integer,Double> map = new TreeMap<Integer,Double>();
+      Map<Integer,Double> map = new TreeMap<>();
       interClusterDensities.put(cI, map);
       for (int j = i + 1; j < clusters.size(); j++) {
         int cJ = clusters.get(j).getId();
@@ -324,12 +323,12 @@ public final class CDbwEvaluator {
     if (minimumDistances != null) {
       return minimumDistances;
     }
-    minimumDistances = new TreeMap<Integer,Map<Integer,Double>>();
-    closestRepPointIndices = new TreeMap<Integer,Map<Integer,int[]>>();
+    minimumDistances = new TreeMap<>();
+    closestRepPointIndices = new TreeMap<>();
     for (int i = 0; i < clusters.size(); i++) {
       Integer cI = clusters.get(i).getId();
-      Map<Integer,Double> map = new TreeMap<Integer,Double>();
-      Map<Integer,int[]> treeMap = new TreeMap<Integer,int[]>();
+      Map<Integer,Double> map = new TreeMap<>();
+      Map<Integer,int[]> treeMap = new TreeMap<>();
       closestRepPointIndices.put(cI, treeMap);
       minimumDistances.put(cI, map);
       List<VectorWritable> closRepI = representativePoints.get(cI);

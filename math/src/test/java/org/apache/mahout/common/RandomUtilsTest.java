@@ -23,7 +23,7 @@ import org.junit.Test;
 import java.util.Random;
 
 /**
- * Tests {@linkRandomUtils}.
+ * Tests {@link RandomUtils}.
  */
 public final class RandomUtilsTest extends MahoutTestCase {
 

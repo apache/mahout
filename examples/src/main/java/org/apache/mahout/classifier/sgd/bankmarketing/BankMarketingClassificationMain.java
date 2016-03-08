@@ -65,7 +65,6 @@ public class BankMarketingClassificationMain {
           System.out.printf("%d, %.4f, %.4f\n", pass, lr.currentLearningRate(), eval.auc());
         }
       }
-
     }
   }
 }

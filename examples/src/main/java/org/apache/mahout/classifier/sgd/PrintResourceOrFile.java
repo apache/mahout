@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
 
 import java.io.BufferedReader;
 
@@ -33,14 +32,11 @@ public final class PrintResourceOrFile {
 
   public static void main(String[] args) throws Exception {
     Preconditions.checkArgument(args.length == 1, "Must have a single argument that names a file or resource.");
-    BufferedReader in = TrainLogistic.open(args[0]);
-    try {
+    try (BufferedReader in = TrainLogistic.open(args[0])){
       String line;
       while ((line = in.readLine()) != null) {
         System.out.println(line);
       }
-    } finally {
-      Closeables.close(in, true);
     }
   }
 }

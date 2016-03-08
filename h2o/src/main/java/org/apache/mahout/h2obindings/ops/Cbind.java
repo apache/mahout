@@ -91,7 +91,7 @@ public class Cbind {
         for (int r = 0; r < chunkSize; r++) {
           for (int c = 0; c < chks.length; c++) {
             // assert va.atStr(start+r) == vb.atStr(start+r)
-            chks[c].set0(r, vecs[c].at(start + r));
+            chks[c].set(r, vecs[c].at(start + r));
           }
         }
       }

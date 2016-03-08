@@ -17,11 +17,14 @@
 
 package org.apache.mahout.sparkbindings.test
 
-import org.scalatest.{ConfigMap, BeforeAndAfterAllConfigMap, Suite}
-import org.apache.spark.SparkConf
-import org.apache.mahout.sparkbindings._
-import org.apache.mahout.test.{DistributedMahoutSuite, MahoutSuite}
+import org.apache.log4j.{Level, Logger}
 import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.sparkbindings._
+import org.apache.mahout.test.DistributedMahoutSuite
+import org.apache.spark.SparkConf
+import org.scalatest.{ConfigMap, Suite}
+
+import scala.collection.JavaConversions._
 
 trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfiguration {
   this: Suite =>
@@ -30,16 +33,22 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
   protected var masterUrl = null.asInstanceOf[String]
 
   protected def initContext() {
-    masterUrl = "local[3]"
+    masterUrl = System.getProperties.getOrElse("test.spark.master", "local[3]")
+    val isLocal = masterUrl.startsWith("local")
     mahoutCtx = mahoutSparkContext(masterUrl = this.masterUrl,
-      appName = "MahoutLocalContext",
+      appName = "MahoutUnitTests",
       // Do not run MAHOUT_HOME jars in unit tests.
-      addMahoutJars = false,
+      addMahoutJars = !isLocal,
       sparkConf = new SparkConf()
-          .set("spark.kryoserializer.buffer.mb", "15")
+          .set("spark.kryoserializer.buffer.mb", "40m")
+          .set("spark.kryoserializer.buffer", "40m")
           .set("spark.akka.frameSize", "30")
           .set("spark.default.parallelism", "10")
+          .set("spark.executor.memory", "2G")
     )
+    // Spark reconfigures logging. Clamp down on it in tests.
+    Logger.getRootLogger.setLevel(Level.ERROR)
+    Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
   }
 
   protected def resetContext() {
@@ -57,6 +66,10 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
 //    initContext()
   }
 
+  override protected def afterAll(configMap: ConfigMap): Unit = {
+    super.afterAll(configMap)
+    resetContext()
+  }
 
   override protected def beforeAll(configMap: ConfigMap): Unit = {
     super.beforeAll(configMap)

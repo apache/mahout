@@ -17,6 +17,10 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.flavor.BackEnum;
+import org.apache.mahout.math.flavor.MatrixFlavor;
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
+
 /**
  * 
  * Quick and dirty implementation of some {@link org.apache.mahout.math.Matrix} methods
@@ -148,4 +152,9 @@ public class UpperTriangular extends AbstractMatrix {
     return values;
   }
 
+  @Override
+  public MatrixFlavor getFlavor() {
+    // We kind of consider ourselves a vector-backed but dense matrix for mmul, etc. purposes.
+    return new MatrixFlavor.FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.VECTORBACKED, true);
+  }
 }

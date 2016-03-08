@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.flavor.MatrixFlavor;
+
 /** Implements subset view of a Matrix */
 public class MatrixView extends AbstractMatrix {
 
@@ -140,7 +142,7 @@ public class MatrixView extends AbstractMatrix {
     if (column < 0 || column >= columnSize()) {
       throw new IndexException(column, columnSize());
     }
-    return new VectorView(matrix.viewColumn(column + offset[COL]), offset[ROW], rowSize());
+    return matrix.viewColumn(column + offset[COL]).viewPart(offset[ROW], rowSize());
   }
 
   @Override
@@ -148,7 +150,11 @@ public class MatrixView extends AbstractMatrix {
     if (row < 0 || row >= rowSize()) {
       throw new IndexException(row, rowSize());
     }
-    return new VectorView(matrix.viewRow(row + offset[ROW]), offset[COL], columnSize());
+    return matrix.viewRow(row + offset[ROW]).viewPart(offset[COL], columnSize());
   }
 
+  @Override
+  public MatrixFlavor getFlavor() {
+    return matrix.getFlavor();
+  }
 }

@@ -18,11 +18,13 @@
 package org.apache.mahout.math
 
 import org.apache.mahout.math.solver.EigenDecomposition
+import collection._
 
 /**
  * Mahout matrices and vectors' scala syntactic sugar
  */
 package object scalabindings {
+
 
   // Reserved "ALL" range
   final val `::`: Range = null
@@ -122,34 +124,34 @@ package object scalabindings {
    */
   def dense[R](rows: R*): DenseMatrix = {
     import RLikeOps._
-    val data = for (r <- rows) yield {
+    val data = for (r ← rows) yield {
       r match {
-        case n: Number => Array(n.doubleValue())
-        case t: Product => t.productIterator.map(_.asInstanceOf[Number].doubleValue()).toArray
-        case t: Vector => Array.tabulate(t.length)(t(_))
-        case t: Array[Double] => t
-        case t: Iterable[_] =>
+        case n: Number ⇒ Array(n.doubleValue())
+        case t: Vector ⇒ Array.tabulate(t.length)(t(_))
+        case t: Array[Double] ⇒ t
+        case t: Iterable[_] ⇒
           t.head match {
-            case ss: Double => t.asInstanceOf[Iterable[Double]].toArray
-            case vv: Vector =>
+            case ss: Double ⇒ t.asInstanceOf[Iterable[Double]].toArray
+            case vv: Vector ⇒
               val m = new DenseMatrix(t.size, t.head.asInstanceOf[Vector].length)
               t.asInstanceOf[Iterable[Vector]].view.zipWithIndex.foreach {
-                case (v, idx) => m(idx, ::) := v
+                case (v, idx) ⇒ m(idx, ::) := v
               }
               return m
           }
-        case t: Array[Array[Double]] => if (rows.size == 1)
+        case t: Product ⇒ t.productIterator.map(_.asInstanceOf[Number].doubleValue()).toArray
+        case t: Array[Array[Double]] ⇒ if (rows.size == 1)
           return new DenseMatrix(t)
         else
           throw new IllegalArgumentException(
             "double[][] data parameter can be the only argument for dense()")
-        case t: Array[Vector] =>
+        case t: Array[Vector] ⇒
           val m = new DenseMatrix(t.size, t.head.length)
           t.view.zipWithIndex.foreach {
-            case (v, idx) => m(idx, ::) := v
+            case (v, idx) ⇒ m(idx, ::) := v
           }
           return m
-        case _ => throw new IllegalArgumentException("unsupported type in the inline Matrix initializer")
+        case _ ⇒ throw new IllegalArgumentException("unsupported type in the inline Matrix initializer")
       }
     }
     new DenseMatrix(data.toArray)
@@ -164,7 +166,7 @@ package object scalabindings {
    *   (0,5)::(9,3)::Nil,
    *   (2,3.5)::(7,8)::Nil
    * )
-   * 
+   *
    * }}}
    *
    * @param rows
@@ -172,11 +174,18 @@ package object scalabindings {
    */
 
   def sparse(rows: Vector*): SparseRowMatrix = {
-    import MatrixOps._
+    import RLikeOps._
     val nrow = rows.size
     val ncol = rows.map(_.size()).max
     val m = new SparseRowMatrix(nrow, ncol)
-    m := rows
+    m := rows.map { row ⇒
+      if (row.length < ncol) {
+        val newRow = row.like(ncol)
+        newRow(0 until row.length) := row
+        newRow
+      }
+      else row
+    }
     m
 
   }
@@ -187,10 +196,10 @@ package object scalabindings {
    * @return
    */
   def svec(sdata: TraversableOnce[(Int, AnyVal)]) = {
-    val cardinality = if (sdata.size > 0) sdata.map(_._1).max + 1 else 0
+    val cardinality = if (sdata.nonEmpty) sdata.map(_._1).max + 1 else 0
     val initialCapacity = sdata.size
     val sv = new RandomAccessSparseVector(cardinality, initialCapacity)
-    sdata.foreach(t => sv.setQuick(t._1, t._2.asInstanceOf[Number].doubleValue()))
+    sdata.foreach(t ⇒ sv.setQuick(t._1, t._2.asInstanceOf[Number].doubleValue()))
     sv
   }
 
@@ -249,23 +258,23 @@ package object scalabindings {
     (qrdec.getQ, qrdec.getR)
   }
 
- /**
-  * Solution <tt>X</tt> of <tt>A*X = B</tt> using QR-Decomposition, where <tt>A</tt> is a square, non-singular matrix.
+  /**
+   * Solution <tt>X</tt> of <tt>A*X = B</tt> using QR-Decomposition, where <tt>A</tt> is a square, non-singular matrix.
    *
    * @param a
    * @param b
    * @return (X)
    */
   def solve(a: Matrix, b: Matrix): Matrix = {
-   import MatrixOps._
-   if (a.nrow != a.ncol) {
-     throw new IllegalArgumentException("supplied matrix A is not square")
-   }
-   val qr = new QRDecomposition(a cloned)
-   if (!qr.hasFullRank) {
-     throw new IllegalArgumentException("supplied matrix A is singular")
-   }
-   qr.solve(b)
+    import MatrixOps._
+    if (a.nrow != a.ncol) {
+      throw new IllegalArgumentException("supplied matrix A is not square")
+    }
+    val qr = new QRDecomposition(a cloned)
+    if (!qr.hasFullRank) {
+      throw new IllegalArgumentException("supplied matrix A is singular")
+    }
+    qr.solve(b)
   }
 
   /**
@@ -293,5 +302,98 @@ package object scalabindings {
     x(::, 0)
   }
 
+  ///////////////////////////////////////////////////////////
+  // Elementwise unary functions. Actually this requires creating clones to avoid side effects. For
+  // efficiency reasons one may want to actually do in-place exression assignments instead, e.g.
+  //
+  // m := exp _
+
+  import RLikeOps._
+  import scala.math._
+
+  def mexp(m: Matrix): Matrix = m.cloned := exp _
+
+  def vexp(v: Vector): Vector = v.cloned := exp _
+
+  def mlog(m: Matrix): Matrix = m.cloned := log _
+
+  def vlog(v: Vector): Vector = v.cloned := log _
+
+  def mabs(m: Matrix): Matrix = m.cloned ::= (abs(_: Double))
+
+  def vabs(v: Vector): Vector = v.cloned ::= (abs(_: Double))
+
+  def msqrt(m: Matrix): Matrix = m.cloned ::= sqrt _
+
+  def vsqrt(v: Vector): Vector = v.cloned ::= sqrt _
+
+  def msignum(m: Matrix): Matrix = m.cloned ::= (signum(_: Double))
+
+  def vsignum(v: Vector): Vector = v.cloned ::= (signum(_: Double))
+
+  //////////////////////////////////////////////////////////
+  // operation funcs
+
+
+  /** Matrix-matrix unary func */
+  type MMUnaryFunc = (Matrix, Option[Matrix]) ⇒ Matrix
+  /** Binary matrix-matrix operations which may save result in-place, optionally */
+  type MMBinaryFunc = (Matrix, Matrix, Option[Matrix]) ⇒ Matrix
+  type MVBinaryFunc = (Matrix, Vector, Option[Matrix]) ⇒ Matrix
+  type VMBinaryFunc = (Vector, Matrix, Option[Matrix]) ⇒ Matrix
+  type MDBinaryFunc = (Matrix, Double, Option[Matrix]) ⇒ Matrix
+
+
+  /////////////////////////////////////
+  // Miscellaneous in-core utilities
+
+  /**
+   * Compute column-wise means and variances.
+   *
+   * @return colMeans → colVariances
+   */
+  def colMeanVars(mxA:Matrix): (Vector, Vector) = {
+    val mu = mxA.colMeans()
+    val variance = (mxA * mxA colMeans) -= mu ^ 2
+    mu → variance
+  }
+
+  /**
+   * Compute column-wise means and stdevs.
+   * @param mxA input
+   * @return colMeans → colStdevs
+   */
+  def colMeanStdevs(mxA:Matrix) = {
+    val (mu, variance) = colMeanVars(mxA)
+    mu → (variance ::= math.sqrt _)
+  }
+
+  /** Compute square distance matrix. We assume data points are row-wise, similar to R's dist(). */
+  def sqDist(mxX: Matrix): Matrix = {
+
+    val s = mxX ^ 2 rowSums
+
+    (mxX %*% mxX.t) := { (r, c, x) ⇒ s(r) + s(c) - 2 * x}
+  }
+
+  /**
+   * Pairwise squared distance computation.
+   * @param mxX X, m x d
+   * @param mxY Y, n x d
+   * @return pairwise squaired distances of row-wise data points in X and Y (m x n)
+   */
+  def sqDist(mxX: Matrix, mxY: Matrix): Matrix = {
+
+    val s = mxX ^ 2 rowSums
+
+    val t = mxY ^ 2 rowSums
+
+    // D = s*1' + 1*t' - 2XY'
+    (mxX %*% mxY.t) := { (r, c, d) ⇒ s(r) + t(c) - 2.0 * d}
+  }
+
+  def dist(mxX: Matrix): Matrix = sqDist(mxX) := sqrt _
+
+  def dist(mxX: Matrix, mxY: Matrix): Matrix = sqDist(mxX, mxY) := sqrt _
 
 }

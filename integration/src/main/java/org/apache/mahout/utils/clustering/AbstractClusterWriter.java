@@ -142,7 +142,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
         log.error("Dictionary entry missing for {}", index);
         continue;
       }
-      topTerms.add(new Pair<String, Double>(dictTerm, vectorTerms.get(i).weight));
+      topTerms.add(new Pair<>(dictTerm, vectorTerms.get(i).weight));
     }
 
     return topTerms;

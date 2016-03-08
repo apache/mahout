@@ -13,8 +13,6 @@ org.apache.mahout.vectorizer.SparseVectorsFromSequenceFiles = seq2sparse: Sparse
 org.apache.mahout.vectorizer.EncodedVectorsFromSequenceFiles = seq2encoded: Encoded Sparse Vector generation from Text sequence files
 org.apache.mahout.text.WikipediaToSequenceFile = seqwiki : Wikipedia xml dump to sequence file
 org.apache.mahout.text.SequenceFilesFromMailArchives = seqmailarchives : Creates SequenceFile from a directory containing gzipped mail archives
-org.apache.mahout.text.SequenceFilesFromLuceneStorageDriver = lucene2seq : Generate Text SequenceFiles from a Lucene index
-org.apache.mahout.utils.ConcatenateVectorsJob = concatmatrices : Concatenates 2 matrices of same cardinality into a single matrix
 org.apache.mahout.clustering.streaming.tools.ResplitSequenceFiles = resplit : Splits a set of SequenceFiles into a number of equal splits
 org.apache.mahout.clustering.streaming.tools.ClusterQualitySummarizer = qualcluster : Runs clustering experiments and summarizes results in a CSV
 org.apache.mahout.classifier.df.tools.Describe = describe : Describe the fields and target variable in a data set
@@ -42,8 +40,6 @@ org.apache.mahout.clustering.streaming.mapreduce.StreamingKMeansDriver = streami
 #new bayes
 org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob = trainnb : Train the Vector-based Bayes classifier
 org.apache.mahout.classifier.naivebayes.test.TestNaiveBayesDriver = testnb : Test the Vector-based Bayes classifier
-org.apache.mahout.classifier.df.mapreduce.BuildForest = buildforest : Build the random forest classifier
-org.apache.mahout.classifier.df.mapreduce.TestForest = testforest : Test the random forest classifier
 
 #SGD
 org.apache.mahout.classifier.sgd.TrainLogistic = trainlogistic : Train a logistic regression using stochastic gradient descent

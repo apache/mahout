@@ -23,5 +23,6 @@ import drm._
 import org.apache.mahout.h2obindings._
 import test.DistributedH2OSuite
 
-/** ==R-like DRM DSL operation tests -- H2O== */
+/** ==R-like DRM DSL operation tests -- H2O==
+  * */
 class RLikeDrmOpsSuite extends FunSuite with DistributedH2OSuite with RLikeDrmOpsSuiteBase

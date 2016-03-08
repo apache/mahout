@@ -17,32 +17,36 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.mahout.math.indexeddataset.{Writer, Reader, Schema, IndexedDataset}
+import org.apache.log4j.Logger
+import org.apache.mahout.math.indexeddataset._
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.apache.spark.SparkContext._
 import org.apache.mahout.math.RandomAccessSparseVector
-import com.google.common.collect.{BiMap, HashBiMap}
-import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
+import org.apache.mahout.math.drm.{DrmLike, DrmLikeOps, DistributedContext, CheckpointedDrm}
 import org.apache.mahout.sparkbindings._
 import scala.collection.JavaConversions._
 
-/** Extends Reader trait to supply the [[IndexedDatasetSpark]] as the type read and a reader function for reading text delimited files as described in the [[Schema]]
-  */
+/**
+ * Extends Reader trait to supply the [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]] as
+ * the type read and a element and row reader functions for reading text delimited files as described in the
+ * [[org.apache.mahout.math.indexeddataset.Schema]]
+ */
 trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
-  /** Read in text delimited elements from all URIs in the comma delimited source String and return
-    * the DRM of all elements updating the dictionaries for row and column dictionaries. If there is
-    * no strength value in the element, assume it's presence means a strength of 1.
-    *
-    * @param mc context for the Spark job
-    * @param readSchema describes the delimiters and positions of values in the text delimited file.
-    * @param source comma delimited URIs of text files to be read into the [[IndexedDatasetSpark]]
-    * @return
-    */
+  /**
+   * Read in text delimited elements from all URIs in the comma delimited source String and return
+   * the DRM of all elements updating the dictionaries for row and column dictionaries. If there is
+   * no strength value in the element, assume it's presence means a strength of 1.
+   * @param mc context for the Spark job
+   * @param readSchema describes the delimiters and positions of values in the text delimited file.
+   * @param source comma delimited URIs of text files to be read from
+   * @return a new [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]]
+   */
   protected def elementReader(
-      mc: DistributedContext,
-      readSchema: Schema,
-      source: String,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create()): IndexedDatasetSpark = {
+    mc: DistributedContext,
+    readSchema: Schema,
+    source: String,
+    existingRowIDs: Option[BiDictionary] = None): IndexedDatasetSpark = {
+    @transient lazy val logger = Logger.getLogger(this.getClass.getCanonicalName)
     try {
       val delimiter = readSchema("delim").asInstanceOf[String]
       val rowIDColumn = readSchema("rowIDColumn").asInstanceOf[Int]
@@ -51,10 +55,8 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val filterBy = readSchema("filter").asInstanceOf[String]
       // instance vars must be put into locally scoped vals when used in closures that are executed but Spark
 
-      assert(!source.isEmpty, {
-        println(this.getClass.toString + ": has no files to read")
-        throw new IllegalArgumentException
-      })
+
+      require (!source.isEmpty, "No file(s) to read")
 
       var columns = mc.textFile(source).map { line => line.split(delimiter) }
 
@@ -65,7 +67,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       }
 
       // get row and column IDs
-      //val m = columns.collect
       val interactions = columns.map { tokens =>
         tokens(rowIDColumn) -> tokens(columnIDPosition)
       }
@@ -76,21 +77,25 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
       val columnIDs = interactions.map { case (_, columnID) => columnID }.distinct().collect()
 
-      // create BiMaps for bi-directional lookup of ID by either Mahout ID or external ID
+      // create BiDictionary(s) for bi-directional lookup of ID by either Mahout ID or external ID
       // broadcast them for access in distributed processes, so they are not recalculated in every task.
-      val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
+      //val rowIDDictionary = BiDictionary.append(existingRowIDs, rowIDs)
+      val rowIDDictionary = existingRowIDs match {
+        case Some(d) => d.merge(rowIDs)
+        case None =>  new BiDictionary(rowIDs)
+      }
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
 
-      val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
+      val columnIDDictionary = new BiDictionary(keys = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
-      val ncol = columnIDDictionary.size()
-      val nrow = rowIDDictionary.size()
+      val ncol = columnIDDictionary.size
+      val nrow = rowIDDictionary.size
 
       val indexedInteractions =
         interactions.map { case (rowID, columnID) =>
-          val rowIndex = rowIDDictionary_bcast.value.get(rowID).get
-          val columnIndex = columnIDDictionary_bcast.value.get(columnID).get
+          val rowIndex = rowIDDictionary_bcast.value.getOrElse(rowID, -1)
+          val columnIndex = columnIDDictionary_bcast.value.getOrElse(columnID, -1)
 
           rowIndex -> columnIndex
         }
@@ -105,44 +110,42 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         .asInstanceOf[DrmRdd[Int]]
 
       // wrap the DrmRdd and a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
-      val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
+      val drmInteractions = drmWrap[Int](indexedInteractions)
 
       new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
 
     } catch {
       case cce: ClassCastException => {
-        println(this.getClass.toString + ": Schema has illegal values"); throw cce
+        logger.error("Schema has illegal values"); throw cce
       }
     }
   }
 
-  /** Read in text delimited rows from all URIs in this comma delimited source String and return
-    * the DRM of all elements updating the dictionaries for row and column dictionaries. If there is
-    * no strength value in the element, assume it's presence means a strength of 1.
-    *
-    * @param mc context for the Spark job
-    * @param readSchema describes the delimiters and positions of values in the text delimited file.
-    * @param source comma delimited URIs of text files to be read into the [[IndexedDatasetSpark]]
-    * @return
-    */
-  protected def drmReader(
-      mc: DistributedContext,
-      readSchema: Schema,
-      source: String,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create()): IndexedDatasetSpark = {
+  /**
+   * Read in text delimited rows from all URIs in this comma delimited source String and return
+   * the DRM of all elements updating the dictionaries for row and column dictionaries. If there is
+   * no strength value in the element, assume it's presence means a strength of 1.
+   * Note: if the input file has a strength delimiter but none is seen in rows, we assume there is none
+   *   and give the strength as 1 in the input DRM.
+   * @param mc context for the Spark job
+   * @param readSchema describes the delimiters and positions of values in the text delimited file.
+   * @param source comma delimited URIs of text files to be read into the [[IndexedDatasetSpark]]
+   * @return a new [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]]
+   */
+  protected def rowReader(
+    mc: DistributedContext,
+    readSchema: Schema,
+    source: String,
+    existingRowIDs: Option[BiDictionary] = None): IndexedDatasetSpark = {
+    @transient lazy val logger = Logger.getLogger(this.getClass.getCanonicalName)
     try {
       val rowKeyDelim = readSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = readSchema("columnIdStrengthDelim").asInstanceOf[String]
       val elementDelim = readSchema("elementDelim").asInstanceOf[String]
-      // no need for omitScore since we can tell if there is a score and assume it is 1.0d if not specified
-      //val omitScore = readSchema("omitScore").asInstanceOf[Boolean]
+      val omitScore = readSchema("omitScore").asInstanceOf[Boolean]
 
-      assert(!source.isEmpty, {
-        println(this.getClass.toString + ": has no files to read")
-        throw new IllegalArgumentException
-      })
-
-      var rows = mc.textFile(source).map { line => line.split(rowKeyDelim) }
+      require (!source.isEmpty, "No file(s) to read")
+      val rows = mc.textFile(source).map { line => line.split(rowKeyDelim) }
 
       // get row and column IDs
       val interactions = rows.map { row =>
@@ -150,7 +153,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       }
 
       interactions.cache()
-      interactions.collect()
 
       // create separate collections of rowID and columnID tokens
       val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
@@ -158,86 +160,86 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       // the columns are in a TD string so separate them and get unique ones
       val columnIDs = interactions.flatMap { case (_, columns) => columns
         val elements = columns.split(elementDelim)
-        val colIDs = elements.map( elem => elem.split(columnIdStrengthDelim)(0) )
+        val colIDs = if (!omitScore)
+          elements.map( elem => elem.split(columnIdStrengthDelim)(0) )
+        else
+          elements
         colIDs
       }.distinct().collect()
 
       // create BiMaps for bi-directional lookup of ID by either Mahout ID or external ID
       // broadcast them for access in distributed processes, so they are not recalculated in every task.
-      val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
+      //val rowIDDictionary = BiDictionary.append(existingRowIDs, rowIDs)
+      val rowIDDictionary = existingRowIDs match {
+        case Some(d) => d.merge(rowIDs)
+        case None =>  new BiDictionary(rowIDs)
+      }
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
 
-      val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
+      val columnIDDictionary = new BiDictionary(keys = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
-      val ncol = columnIDDictionary.size()
-      val nrow = rowIDDictionary.size()
+      val ncol = columnIDDictionary.size
+      val nrow = rowIDDictionary.size
 
       val indexedInteractions =
         interactions.map { case (rowID, columns) =>
-          val rowIndex = rowIDDictionary_bcast.value.get(rowID).get
+          val rowIndex = rowIDDictionary_bcast.value.getOrElse(rowID, -1)
 
           val elements = columns.split(elementDelim)
           val row = new RandomAccessSparseVector(ncol)
           for (element <- elements) {
-            val id = element.split(columnIdStrengthDelim)(0)
-            val columnID = columnIDDictionary_bcast.value.get(id).get
-            val pair = element.split(columnIdStrengthDelim)
-            if (pair.size == 2)// there was a strength
-              row.setQuick(columnID,pair(1).toDouble)
-            else // no strength so set DRM value to 1.0d, this ignores 'omitScore', which is a write param
-              row.setQuick(columnID,1.0d)
+            val id = if (omitScore) element else element.split(columnIdStrengthDelim)(0)
+            val columnID = columnIDDictionary_bcast.value.getOrElse(id, -1)
+            val strength = if (omitScore) 1.0d else {// if the input says not to omit but there is no seperator treat
+              // as omitting and return a strength of 1
+              if (element.split(columnIdStrengthDelim).size == 1) 1.0d
+              else element.split(columnIdStrengthDelim)(1).toDouble
+            }
+            row.setQuick(columnID, strength)
           }
           rowIndex -> row
         }
         .asInstanceOf[DrmRdd[Int]]
 
-      // wrap the DrmRdd and a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
-      val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
+      // wrap the DrmRdd in a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
+      val drmInteractions = drmWrap[Int](indexedInteractions)
 
       new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
 
     } catch {
       case cce: ClassCastException => {
-        println(this.getClass.toString + ": Schema has illegal values")
+        logger.error("Schema has illegal values")
         throw cce
       }
     }
   }
 
-  // this creates a BiMap from an ID collection. The ID points to an ordinal int
-  // which is used internal to Mahout as the row or column ID
-  // todo: this is a non-distributed process in an otherwise distributed reader and the BiMap is a
-  // non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit
-  // in-memory, the option is to put the dictionaries in rdds and do joins to translate IDs
-  private def asOrderedDictionary(dictionary: BiMap[String, Int] = HashBiMap.create(), entries: Array[String]): BiMap[String, Int] = {
-    var index = dictionary.size() // if a dictionary is supplied then add to the end based on the Mahout id 'index'
-    for (entry <- entries) {
-      if (!dictionary.contains(entry)){
-        dictionary.put(entry, index)
-        index += 1
-      }// the dictionary should never contain an entry since they are supposed to be distinct but for some reason they do
-    }
-    dictionary
-  }
+  /**
+   * Creates a BiDictionary from an ID collection. The ID points to an ordinal in which is used internal to Mahout
+   * as the row or column ID
+   * todo: this is a non-distributed process in an otherwise distributed reader and the BiDictionary is a
+   * non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit
+   * in-memory, the option is to put the dictionaries in rdds and do joins to translate IDs
+   */
 }
 
+/** Extends the Writer trait to supply the type being written and supplies the writer function */
 trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
 
-  private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
-
-  /** Read in text delimited elements from all URIs in this comma delimited source String.
-    *
-    * @param mc context for the Spark job
-    * @param writeSchema describes the delimiters and positions of values in the output text delimited file.
-    * @param dest directory to write text delimited version of [[IndexedDatasetSpark]]
-    */
+  /**
+   * Read in text delimited elements from all URIs in this comma delimited source String.
+   * @param mc context for the Spark job
+   * @param writeSchema describes the delimiters and positions of values in the output text delimited file.
+   * @param dest directory to write text delimited version of [[IndexedDatasetSpark]]
+   */
   protected def writer(
-      mc: DistributedContext,
-      writeSchema: Schema,
-      dest: String,
-      indexedDataset: IndexedDatasetSpark,
-      sort: Boolean = true): Unit = {
+    mc: DistributedContext,
+    writeSchema: Schema,
+    dest: String,
+    indexedDataset: IndexedDatasetSpark,
+    sort: Boolean = true): Unit = {
+    @transient lazy val logger = Logger.getLogger(this.getClass.getCanonicalName)
     try {
       val rowKeyDelim = writeSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = writeSchema("columnIdStrengthDelim").asInstanceOf[String]
@@ -246,49 +248,46 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
       //instance vars must be put into locally scoped vals when put into closures that are
       //executed but Spark
 
-      assert(indexedDataset != null, {
-        println(this.getClass.toString + ": has no indexedDataset to write")
-        throw new IllegalArgumentException
-      })
-      assert(!dest.isEmpty, {
-        println(this.getClass.toString + ": has no destination or indextedDataset to write")
-        throw new IllegalArgumentException
-      })
+      require (indexedDataset != null ,"No IndexedDataset to write")
+      require (!dest.isEmpty,"No destination to write to")
 
-      val matrix = indexedDataset.matrix
+      val matrix = indexedDataset.matrix.checkpoint()
       val rowIDDictionary = indexedDataset.rowIDs
+      val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
+
       val columnIDDictionary = indexedDataset.columnIDs
+      val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
       matrix.rdd.map { case (rowID, itemVector) =>
 
         // turn non-zeros into list for sorting
-        val itemList: collection.mutable.MutableList[org.apache.mahout.common.Pair[Integer, Double]] = new collection.mutable.MutableList[org.apache.mahout.common.Pair[Integer, Double]]
+        var itemList = List[(Int, Double)]()
         for (ve <- itemVector.nonZeroes) {
-          val item: org.apache.mahout.common.Pair[Integer, Double] = new org.apache.mahout.common.Pair[Integer, Double](ve.index, ve.get)
-          itemList += item
+          itemList = itemList :+ (ve.index, ve.get)
         }
         //sort by highest value descending(-)
-        val vector = if (sort) itemList.sortBy(-_.getSecond) else itemList
+        val vector = if (sort) itemList.sortBy { elem => -elem._2 } else itemList
 
         // first get the external rowID token
         if (!vector.isEmpty){
-          var line: String = rowIDDictionary.inverse.get(rowID) + rowKeyDelim
+          var line = rowIDDictionary_bcast.value.inverse.getOrElse(rowID, "INVALID_ROW_ID") + rowKeyDelim
           // for the rest of the row, construct the vector contents of elements (external column ID, strength value)
           for (item <- vector) {
-            line += columnIDDictionary.inverse.get(item.getFirst)
-            if (!omitScore) line += columnIdStrengthDelim + item.getSecond
+            line += columnIDDictionary_bcast.value.inverse.getOrElse(item._1, "INVALID_COLUMN_ID")
+            if (!omitScore) line += columnIdStrengthDelim + item._2
             line += elementDelim
           }
           // drop the last delimiter, not needed to end the line
           line.dropRight(1)
         } else {//no items so write a line with id but no values, no delimiters
-          rowIDDictionary.inverse.get(rowID)
+          rowIDDictionary_bcast.value.inverse.getOrElse(rowID, "INVALID_ROW_ID")
         } // "if" returns a line of text so this must be last in the block
       }
       .saveAsTextFile(dest)
 
     }catch{
-      case cce: ClassCastException => {println(this.getClass.toString+": Schema has illegal values"); throw cce}
+      case cce: ClassCastException => {
+        logger.error("Schema has illegal values"); throw cce}
     }
   }
 }
@@ -296,26 +295,33 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
 /** A combined trait that reads and writes */
 trait TDIndexedDatasetReaderWriter extends TDIndexedDatasetReader with TDIndexedDatasetWriter
 
-/** Reads text delimited files into an IndexedDataset. Classes are needed to supply trait params in their constructor.
-  * @param readSchema describes the delimiters and position of values in the text delimited file to be read.
-  * @param mc Spark context for reading files
-  * @note The source is supplied to Reader#readElementsFrom .
-  * */
+/**
+ * Reads text delimited files into an IndexedDataset. Classes can be used to supply trait params in their constructor.
+ * @param readSchema describes the delimiters and position of values in the text delimited file to be read.
+ * @param mc Spark context for reading files
+ * @note The source is supplied to Reader#readElementsFrom .
+ */
 class TextDelimitedIndexedDatasetReader(val readSchema: Schema)
     (implicit val mc: DistributedContext) extends TDIndexedDatasetReader
 
-/** Writes  text delimited files into an IndexedDataset. Classes are needed to supply trait params in their constructor.
-  * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
-  * @param mc Spark context for reading files
-  * @note the destination is supplied to Writer#writeTo
-  * */
-class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema, val sort: Boolean = true)(implicit val mc: DistributedContext) extends TDIndexedDatasetWriter
+/**
+ * Writes  text delimited files into an IndexedDataset. Classes can be used to supply trait params in their
+ * constructor.
+ * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
+ * @param mc Spark context for reading files
+ * @note the destination is supplied to Writer#writeTo
+ */
+class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema, val sort: Boolean = true)
+    (implicit val mc: DistributedContext)
+  extends TDIndexedDatasetWriter
 
-/** Reads and writes text delimited files to/from an IndexedDataset. Classes are needed to supply trait params in their constructor.
-  * @param readSchema describes the delimiters and position of values in the text delimited file(s) to be read.
-  * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
-  * @param mc Spark context for reading the files, may be implicitly defined.
-  * */
+/**
+ * Reads and writes text delimited files to/from an IndexedDataset. Classes are needed to supply trait params in
+ * their constructor.
+ * @param readSchema describes the delimiters and position of values in the text delimited file(s) to be read.
+ * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
+ * @param mc Spark context for reading the files, may be implicitly defined.
+ */
 class TextDelimitedIndexedDatasetReaderWriter(val readSchema: Schema, val writeSchema: Schema, val sort: Boolean = true)
     (implicit val mc: DistributedContext)
   extends TDIndexedDatasetReaderWriter

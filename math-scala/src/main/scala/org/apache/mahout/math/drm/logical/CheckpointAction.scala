@@ -37,7 +37,8 @@ abstract class CheckpointAction[K: ClassTag] extends DrmLike[K] {
    */
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = cp match {
     case None =>
-      val physPlan = context.toPhysical(context.optimizerRewrite(this), cacheHint)
+      val plan = context.optimizerRewrite(this)
+      val physPlan = context.toPhysical(plan, cacheHint)
       cp = Some(physPlan)
       physPlan
     case Some(cp) => cp

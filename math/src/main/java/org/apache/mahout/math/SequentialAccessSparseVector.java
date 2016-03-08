@@ -180,6 +180,11 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   @Override
+  public Vector like(int cardinality) {
+    return new SequentialAccessSparseVector(cardinality);
+  }
+
+  @Override
   public int getNumNondefaultElements() {
     return values.getNumMappings();
   }
@@ -214,6 +219,8 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   @Override
   public Iterator<Element> iterateNonZero() {
+
+    // TODO: this is a bug, since nonDefaultIterator doesn't hold to non-zero contract.
     return new NonDefaultIterator();
   }
 

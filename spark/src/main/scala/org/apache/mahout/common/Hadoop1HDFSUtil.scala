@@ -20,6 +20,7 @@ package org.apache.mahout.common
 import org.apache.hadoop.io.{Writable, SequenceFile}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.conf.Configuration
+import org.apache.spark.SparkContext
 import collection._
 import JavaConversions._
 
@@ -29,10 +30,16 @@ import JavaConversions._
  */
 object Hadoop1HDFSUtil extends HDFSUtil {
 
-  
-  def readDrmHeader(path: String): DrmMetadata = {
+
+  /** Read DRM header information off (H)DFS. */
+  override def readDrmHeader(path: String)(implicit sc: SparkContext): DrmMetadata = {
+
     val dfsPath = new Path(path)
-    val fs = dfsPath.getFileSystem(new Configuration())
+
+    val fs = dfsPath.getFileSystem(sc.hadoopConfiguration)
+
+    // Apparently getFileSystem() doesn't set conf??
+    fs.setConf(sc.hadoopConfiguration)
 
     val partFilePath:Path = fs.listStatus(dfsPath)
 
@@ -60,6 +67,19 @@ object Hadoop1HDFSUtil extends HDFSUtil {
       reader.close()
     }
 
+  }
+
+  /**
+   * Delete a path from the filesystem
+   * @param path
+   */
+  def delete(path: String) {
+    val dfsPath = new Path(path)
+    val fs = dfsPath.getFileSystem(new Configuration())
+
+    if (fs.exists(dfsPath)) {
+      fs.delete(dfsPath, true)
+    }
   }
 
 }

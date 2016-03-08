@@ -23,11 +23,11 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.11.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-math-scala_2.10</artifactId>
+  <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
   <name>Mahout Math Scala bindings</name>
   <description>High performance scientific and technical computing data structures and methods,
     mostly based on CERN's
@@ -36,54 +36,9 @@
 
   <packaging>jar</packaging>
 
-  <!-- this is needed for scalatest plugin until they publish it to central -->
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype</id>
-      <url>https://oss.sonatype.org/content/groups/public</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
-    <defaultGoal>install</defaultGoal>
-
     <plugins>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-sources/mahout</source>
-              </sources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>add-test-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-test-sources/mahout</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- create test jar so other modules can reuse the math test utility classes. -->
+      <!-- create test jar so other modules can reuse the math-scala test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -106,47 +61,47 @@
       </plugin>
 
       <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-        <version>2.15.2</version>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
         <executions>
           <execution>
+            <id>add-scala-sources</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-compile</id>
+            <phase>process-resources</phase>
             <goals>
               <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
               <goal>testCompile</goal>
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <sourceDir>src/main/scala</sourceDir>
-          <jvmArgs>
-            <jvmArg>-Xms64m</jvmArg>
-            <jvmArg>-Xmx1024m</jvmArg>
-          </jvmArgs>
-        </configuration>
       </plugin>
 
       <!--this is what scalatest recommends to do to enable scala tests -->
 
       <!-- disable surefire -->
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-surefire-plugin</artifactId>-->
-        <!--<version>2.7</version>-->
-        <!--<configuration>-->
-          <!--<skipTests>true</skipTests>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <version>1.0-M2</version>
-        <configuration>
-          <reportsDirectory>${project.build.directory}/scalatest-reports</reportsDirectory>
-          <junitxml>.</junitxml>
-          <filereports>WDF TestSuite.txt</filereports>
-        </configuration>
         <executions>
           <execution>
             <id>test</id>
@@ -172,26 +127,48 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
     </dependency>
-      
+
     <dependency>
       <groupId>com.github.scopt</groupId>
-      <artifactId>scopt_2.10</artifactId>
-      <version>3.2.0</version>
+      <artifactId>scopt_${scala.compat.version}</artifactId>
+      <version>3.3.0</version>
     </dependency>
 
     <!-- scala stuff -->
     <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-library</artifactId>
-      <version>${scala.version}</version>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.major}</artifactId>
-      <version>2.0</version>
-      <scope>test</scope>
-    </dependency>
+
 
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>mahout-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>generate-scaladoc</id>
+                <goals>
+                  <goal>doc</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>attach-scaladoc-jar</id>
+                <goals>
+                  <goal>doc-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

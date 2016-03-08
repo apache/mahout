@@ -17,21 +17,20 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Ordering;
 import org.apache.mahout.classifier.NewsgroupHelper;
 import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Ordering;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Reads and trains an adaptive logistic regression model on the 20 newsgroups data.
@@ -102,7 +101,7 @@ public final class TrainNewsGroups {
     learningAlgorithm.setInterval(800);
     learningAlgorithm.setAveragingWindow(500);
 
-    List<File> files = Lists.newArrayList();
+    List<File> files = new ArrayList<>();
     for (File newsgroup : base.listFiles()) {
       if (newsgroup.isDirectory()) {
         newsGroups.intern(newsgroup.getName());
@@ -114,7 +113,6 @@ public final class TrainNewsGroups {
     SGDInfo info = new SGDInfo();
 
     int k = 0;
-
 
     for (File file : files) {
       String ng = file.getParentFile().getName();
@@ -136,7 +134,7 @@ public final class TrainNewsGroups {
     ModelSerializer.writeBinary(modelFile.getAbsolutePath(),
         learningAlgorithm.getBest().getPayload().getLearner().getModels().get(0));
 
-    List<Integer> counts = Lists.newArrayList();
+    List<Integer> counts = new ArrayList<>();
     System.out.println("Word counts");
     for (String count : overallCounts.elementSet()) {
       counts.add(overallCounts.count(count));

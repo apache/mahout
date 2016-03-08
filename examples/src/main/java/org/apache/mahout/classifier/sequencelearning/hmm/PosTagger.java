@@ -17,21 +17,20 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.io.CharStreams;
 import com.google.common.io.Resources;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.math.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * This class implements a sample program that uses a pre-tagged training data
@@ -114,15 +113,15 @@ public final class PosTagger {
    */
   private static void readFromURL(String url, boolean assignIDs) throws IOException {
     // initialize the data structure
-    hiddenSequences = Lists.newLinkedList();
-    observedSequences = Lists.newLinkedList();
+    hiddenSequences = new LinkedList<>();
+    observedSequences = new LinkedList<>();
     readLines = 0;
 
     // now read line by line of the input file
-    List<Integer> observedSequence = Lists.newLinkedList();
-    List<Integer> hiddenSequence = Lists.newLinkedList();
+    List<Integer> observedSequence = new LinkedList<>();
+    List<Integer> hiddenSequence = new LinkedList<>();
 
-    for (String line : CharStreams.readLines(Resources.newReaderSupplier(new URL(url), Charsets.UTF_8))) {
+    for (String line :Resources.readLines(new URL(url), Charsets.UTF_8)) {
       if (line.isEmpty()) {
         // new sentence starts
         int[] observedSequenceArray = new int[observedSequence.size()];
@@ -183,8 +182,8 @@ public final class PosTagger {
   }
 
   private static void trainModel(String trainingURL) throws IOException {
-    tagIDs = Maps.newHashMapWithExpectedSize(44); // we expect 44 distinct tags
-    wordIDs = Maps.newHashMapWithExpectedSize(19122); // we expect 19122
+    tagIDs = new HashMap<>(44); // we expect 44 distinct tags
+    wordIDs = new HashMap<>(19122); // we expect 19122
     // distinct words
     log.info("Reading and parsing training data file from URL: {}", trainingURL);
     long start = System.currentTimeMillis();

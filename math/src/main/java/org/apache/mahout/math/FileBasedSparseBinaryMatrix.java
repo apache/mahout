@@ -437,6 +437,11 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
       return new RandomAccessSparseVector(size());
     }
 
+    @Override
+    public Vector like(int cardinality) {
+      return new RandomAccessSparseVector(cardinality);
+    }
+
     /**
      * Copy the vector for fast operations.
      *

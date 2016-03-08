@@ -18,24 +18,28 @@
 package org.apache.mahout.sparkbindings.io
 
 import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.serializers.JavaSerializer
-import com.google.common.collect.HashBiMap
 import org.apache.mahout.math._
 import org.apache.spark.serializer.KryoRegistrator
-import org.apache.mahout.sparkbindings._
-import org.apache.mahout.common.Pair
-import org.apache.mahout.math.Vector.Element
+import org.apache.mahout.logging._
 
-import scala.collection.immutable.List
+object MahoutKryoRegistrator {
+
+  private final implicit val log = getLog(this.getClass)
+
+  def registerClasses(kryo: Kryo) = {
+
+    trace("Registering mahout classes.")
+
+    kryo.register(classOf[SparseColumnMatrix], new UnsupportedSerializer)
+    kryo.addDefaultSerializer(classOf[Vector], new VectorKryoSerializer())
+    kryo.addDefaultSerializer(classOf[Matrix], new GenericMatrixKryoSerializer)
+
+  }
+
+}
 
 /** Kryo serialization registrator for Mahout */
 class MahoutKryoRegistrator extends KryoRegistrator {
 
-  override def registerClasses(kryo: Kryo) = {
-
-    kryo.addDefaultSerializer(classOf[Vector], new WritableKryoSerializer[Vector, VectorWritable])
-    kryo.addDefaultSerializer(classOf[DenseVector], new WritableKryoSerializer[Vector, VectorWritable])
-    kryo.addDefaultSerializer(classOf[Matrix], new WritableKryoSerializer[Matrix, MatrixWritable])
-    kryo.register(classOf[com.google.common.collect.HashBiMap[String, Int]], new JavaSerializer())
-  }
+  override def registerClasses(kryo: Kryo) = MahoutKryoRegistrator.registerClasses(kryo)
 }

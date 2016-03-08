@@ -17,9 +17,13 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
+
 /**
  * sparse matrix with general element values whose columns are accessible quickly. Implemented as a column array of
  * SparseVectors.
+ *
+ * @deprecated tons of inconsistences. Use transpose view of SparseRowMatrix for fast column-wise iteration.
  */
 public class SparseColumnMatrix extends AbstractMatrix {
 
@@ -31,19 +35,27 @@ public class SparseColumnMatrix extends AbstractMatrix {
    * @param columns       a RandomAccessSparseVector[] array of columns
    * @param columnVectors
    */
-  public SparseColumnMatrix(int rows, int columns, RandomAccessSparseVector[] columnVectors) {
+  public SparseColumnMatrix(int rows, int columns, Vector[] columnVectors) {
+    this(rows, columns, columnVectors, false);
+  }
+
+  public SparseColumnMatrix(int rows, int columns, Vector[] columnVectors, boolean shallow) {
     super(rows, columns);
-    this.columnVectors = columnVectors.clone();
-    for (int col = 0; col < columnSize(); col++) {
-      this.columnVectors[col] = this.columnVectors[col].clone();
+    if (shallow) {
+      this.columnVectors = columnVectors;
+    } else {
+      this.columnVectors = columnVectors.clone();
+      for (int col = 0; col < columnSize(); col++) {
+        this.columnVectors[col] = this.columnVectors[col].clone();
+      }
     }
   }
 
   /**
    * Construct a matrix of the given cardinality
    *
-   * @param rows
-   * @param columns
+   * @param rows # of rows
+   * @param columns # of columns
    */
   public SparseColumnMatrix(int rows, int columns) {
     super(rows, columns);
@@ -168,6 +180,41 @@ public class SparseColumnMatrix extends AbstractMatrix {
         srm.assignRow(i, col);
     }
     return srm;
+  }
+
+  @Override
+  public String toString() {
+    int row = 0;
+    int maxRowsToDisplay = 10;
+    int maxColsToDisplay = 20;
+    int colsToDisplay = maxColsToDisplay;
+
+    if(maxColsToDisplay > columnSize()){
+      colsToDisplay = columnSize();
+    }
+
+    StringBuilder s = new StringBuilder("{\n");
+    for (MatrixSlice next : this.transpose()) {
+      if (row < maxRowsToDisplay) {
+        s.append(" ")
+          .append(next.index())
+          .append(" =>\t")
+          .append(new VectorView(next.vector(), 0, colsToDisplay))
+          .append('\n');
+        row++;
+      }
+    }
+
+    String returnString = s.toString();
+    if (maxColsToDisplay <= columnSize()) {
+      returnString = returnString.replace("}", " ... }");
+    }
+
+    if (maxRowsToDisplay <= rowSize()) {
+      return returnString + "... }";
+    } else {
+      return returnString + "}";
+    }
   }
 
 }

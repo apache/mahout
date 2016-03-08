@@ -136,6 +136,11 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
+  public Vector like(int cardinality) {
+    return new DenseVector(cardinality);
+  }
+
+  @Override
   public void setQuick(int index, double value) {
     invalidateCachedLength();
     values[index] = value;
@@ -198,7 +203,7 @@ public class DenseVector extends AbstractVector {
     if (offset + length > size()) {
       throw new IndexException(offset + length, size());
     }
-    return new VectorView(this, offset, length);
+    return new DenseVectorView(this, offset, length);
   }
 
   @Override
@@ -335,6 +340,103 @@ public class DenseVector extends AbstractVector {
     public void set(double value) {
       invalidateCachedLength();
       values[index] = value;
+    }
+  }
+
+  private final class DenseVectorView extends VectorView {
+
+    public DenseVectorView(Vector vector, int offset, int cardinality) {
+      super(vector, offset, cardinality);
+    }
+
+    @Override
+    public double dot(Vector x) {
+
+      // Apply custom dot kernels for pairs of dense vectors or their views to reduce
+      // view indirection.
+      if (x instanceof DenseVectorView) {
+
+        if (size() != x.size())
+          throw new IllegalArgumentException("Cardinality mismatch during dot(x,y).");
+
+        DenseVectorView xv = (DenseVectorView) x;
+        double[] thisValues = ((DenseVector) vector).values;
+        double[] thatValues = ((DenseVector) xv.vector).values;
+        int untilOffset = offset + size();
+
+        int i, j;
+        double sum = 0.0;
+
+        // Provoking SSE
+        int until4 = offset + (size() & ~3);
+        for (
+          i = offset, j = xv.offset;
+          i < until4;
+          i += 4, j += 4
+          ) {
+          sum += thisValues[i] * thatValues[j] +
+            thisValues[i + 1] * thatValues[j + 1] +
+            thisValues[i + 2] * thatValues[j + 2] +
+            thisValues[i + 3] * thatValues[j + 3];
+        }
+
+        // Picking up the slack
+        for (
+          i = offset, j = xv.offset;
+          i < untilOffset;
+          ) {
+          sum += thisValues[i++] * thatValues[j++];
+        }
+        return sum;
+
+      } else if (x instanceof DenseVector ) {
+
+        if (size() != x.size())
+          throw new IllegalArgumentException("Cardinality mismatch during dot(x,y).");
+
+        DenseVector xv = (DenseVector) x;
+        double[] thisValues = ((DenseVector) vector).values;
+        double[] thatValues = xv.values;
+        int untilOffset = offset + size();
+
+        int i, j;
+        double sum = 0.0;
+
+        // Provoking SSE
+        int until4 = offset + (size() & ~3);
+        for (
+          i = offset, j = 0;
+          i < until4;
+          i += 4, j += 4
+          ) {
+          sum += thisValues[i] * thatValues[j] +
+            thisValues[i + 1] * thatValues[j + 1] +
+            thisValues[i + 2] * thatValues[j + 2] +
+            thisValues[i + 3] * thatValues[j + 3];
+        }
+
+        // Picking up slack
+        for ( ;
+          i < untilOffset;
+          ) {
+          sum += thisValues[i++] * thatValues[j++];
+        }
+        return sum;
+
+      } else {
+        return super.dot(x);
+      }
+    }
+
+    @Override
+    public Vector viewPart(int offset, int length) {
+      if (offset < 0) {
+        throw new IndexException(offset, size());
+      }
+      if (offset + length > size()) {
+        throw new IndexException(offset + length, size());
+      }
+      return new DenseVectorView(vector, offset + this.offset, length);
     }
   }
 }

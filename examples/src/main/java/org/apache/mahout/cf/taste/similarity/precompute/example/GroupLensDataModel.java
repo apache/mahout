@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.similarity.precompute.example;
 
+import com.google.common.io.Files;
+import com.google.common.io.InputSupplier;
+import com.google.common.io.Resources;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,12 +28,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
-import com.google.common.io.Resources;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.common.iterator.FileLineIterable;
 
@@ -57,9 +55,7 @@ public final class GroupLensDataModel extends FileDataModel {
     if (resultFile.exists()) {
       resultFile.delete();
     }
-    Writer writer = null;
-    try {
-      writer = new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8);
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8)){
       for (String line : new FileLineIterable(originalFile, false)) {
         int lastDelimiterStart = line.lastIndexOf(COLON_DELIMTER);
         if (lastDelimiterStart < 0) {
@@ -73,8 +69,6 @@ public final class GroupLensDataModel extends FileDataModel {
     } catch (IOException ioe) {
       resultFile.delete();
       throw ioe;
-    } finally {
-      Closeables.close(writer, false);
     }
     return resultFile;
   }

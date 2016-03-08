@@ -22,7 +22,6 @@ import java.util.Iterator;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import com.google.common.io.Closeables;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -131,7 +130,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
 
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
-    
+
     boolean exceptionThrown;
     //0 percent tolerance
     LuceneIterable iterable = new LuceneIterable(reader, "id", "content", termInfo, weight);
@@ -143,7 +142,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
         exceptionThrown = true;
     }
     assertTrue(exceptionThrown);
-    
+
     //100 percent tolerance
     iterable = new LuceneIterable(reader, "id", "content", termInfo,weight, -1, 1.0);
     try {
@@ -154,7 +153,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
         exceptionThrown = true;
     }
     assertFalse(exceptionThrown);
-    
+
     //50 percent tolerance
     iterable = new LuceneIterable(reader, "id", "content", termInfo,weight, -1, 0.5);
     Iterator<Vector> iterator = iterable.iterator();
@@ -169,17 +168,16 @@ public final class LuceneIterableTest extends MahoutTestCase {
     }
     assertTrue(exceptionThrown);
   }
-  
+
   static RAMDirectory createTestIndex(FieldType fieldType) throws IOException {
       return createTestIndex(fieldType, new RAMDirectory(), 0);
   }
-  
+
   static RAMDirectory createTestIndex(FieldType fieldType,
                                               RAMDirectory directory,
                                               int startingId) throws IOException {
-    IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_46,new StandardAnalyzer(Version.LUCENE_46)));
 
-    try {
+    try (IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_46,new StandardAnalyzer(Version.LUCENE_46)))) {
       for (int i = 0; i < DOCS.length; i++) {
         Document doc = new Document();
         Field id = new StringField("id", "doc_" + (i + startingId), Field.Store.YES);
@@ -191,8 +189,6 @@ public final class LuceneIterableTest extends MahoutTestCase {
         doc.add(text2);
         writer.addDocument(doc);
       }
-    } finally {
-      Closeables.close(writer, false);
     }
     return directory;
   }

@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.scalabindings
 
-import org.apache.mahout.math.Vector
+import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.function.Functions
 import RLikeOps._
 
@@ -31,11 +31,15 @@ class RLikeVectorOps(_v: Vector) extends VectorOps(_v) {
   /** Elementwise *= */
   def *=(that: Vector) = v.assign(that, Functions.MULT)
 
+  def *=:(that:Vector) = *=(that)
+
   /** Elementwise /= */
   def /=(that: Vector) = v.assign(that, Functions.DIV)
 
   /** Elementwise *= */
   def *=(that: Double) = v.assign(Functions.MULT, that)
+
+  def *=:(that: Double) = *=(that)
 
   /** Elementwise /= */
   def /=(that: Double) = v.assign(Functions.DIV, that)
@@ -67,5 +71,40 @@ class RLikeVectorOps(_v: Vector) extends VectorOps(_v) {
   /** Elementwise right-associative / */
   def /:(that: Vector) = that.cloned /= v
 
+  def ^=(that: Double) = that match {
+    // Special handling of x ^2 and x ^ 0.5: we want consistent handling of x ^ 2 and x * x since
+    // pow(x,2) function return results different from x * x; but much of the code uses this
+    // interchangeably. Not having this done will create things like NaN entries on main diagonal
+    // of a distance matrix.
+    case 2.0 ⇒ v.assign(Functions.SQUARE)
+    case 0.5 ⇒ v.assign(Functions.SQRT)
+    case _ ⇒ v.assign (Functions.POW, that)
+  }
+
+  def ^=(that: Vector) = v.assign(that, Functions.POW)
+
+  def ^(that: Double) = v.cloned ^= that
+
+  def ^(that: Vector) = v.cloned ^= that
+
+  def c(that: Vector) = {
+    if (v.length > 0) {
+      if (that.length > 0) {
+        val cv = v.like(v.length + that.length)
+        cv(0 until v.length) := cv
+        cv(v.length until cv.length) := that
+        cv
+      } else v
+    } else that
+  }
+
+  def c(that: Double) = {
+    val cv = v.like(v.length + 1)
+    cv(0 until v.length) := v
+    cv(v.length) = that
+    cv
+  }
+
+  def mean = sum / length
 
 }

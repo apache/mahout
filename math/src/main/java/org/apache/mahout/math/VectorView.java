@@ -24,10 +24,10 @@ import com.google.common.collect.AbstractIterator;
 /** Implements subset view of a Vector */
 public class VectorView extends AbstractVector {
 
-  private Vector vector;
+  protected Vector vector;
 
   // the offset into the Vector
-  private int offset;
+  protected int offset;
 
   /** For serialization purposes only */
   public VectorView() {
@@ -66,6 +66,11 @@ public class VectorView extends AbstractVector {
   @Override
   public VectorView like() {
     return new VectorView(vector.like(), offset, size());
+  }
+
+  @Override
+  public Vector like(int cardinality) {
+    return vector.like(cardinality);
   }
 
   @Override
@@ -122,7 +127,7 @@ public class VectorView extends AbstractVector {
       while (it.hasNext()) {
         Element el = it.next();
         if (isInView(el.index()) && el.get() != 0) {
-          Element decorated = vector.getElement(el.index());
+          Element decorated = el; /* vector.getElement(el.index()); */
           return new DecoratorElement(decorated);
         }
       }

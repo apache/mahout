@@ -17,8 +17,7 @@
 
 package org.apache.mahout.h2obindings
 
-import com.google.common.collect.{HashBiMap, BiMap}
-import org.apache.mahout.math.indexeddataset.{IndexedDataset, Schema, DefaultIndexedDatasetReadSchema}
+import org.apache.mahout.math.indexeddataset.{BiDictionary, IndexedDataset, Schema, DefaultIndexedDatasetReadSchema}
 
 import scala.reflect._
 import org.apache.mahout.math._
@@ -26,10 +25,14 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.h2obindings.ops._
 import org.apache.mahout.h2obindings.drm._
-import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
+import org.apache.mahout.h2o.common.{Hadoop1HDFSUtil, HDFSUtil}
+import org.apache.mahout.logging._
 
 /** H2O specific non-DRM operations */
 object H2OEngine extends DistributedEngine {
+
+  private final implicit val log = getLog(H2OEngine.getClass)
+
   // By default, use Hadoop 1 utils
   var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
 
@@ -97,11 +100,14 @@ object H2OEngine extends DistributedEngine {
       case op@OpAtA(a) => AtA.exec(tr2phys(a)(op.classTagA))
       case op@OpAx(a, v) => Ax.exec(tr2phys(a)(op.classTagA), v)
       case op@OpAtx(a, v) => Atx.exec(tr2phys(a)(op.classTagA), v)
+      case op@OpAewUnaryFunc(a, f, z) => AewUnary.exec(tr2phys(a)(op.classTagA), op.f, z)
+      case op@OpAewUnaryFuncFusion(a, f) => AewUnary.exec(tr2phys(a)(op.classTagA), op.f, op.evalZeros)
       case op@OpAewB(a, b, opId) => AewB.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB), opId)
       case op@OpAewScalar(a, s, opId) => AewScalar.exec(tr2phys(a)(op.classTagA), s, opId)
       case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.exec(tr2phys(a)(op.classTagA), m)
       // Non arithmetic
       case op@OpCbind(a, b) => Cbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpCbindScalar(a, d, left) => CbindScalar.exec(tr2phys(a)(op.classTagA), d, left)
       case op@OpRbind(a, b) => Rbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
       case op@OpRowRange(a, r) => RowRange.exec(tr2phys(a)(op.classTagA), r)
       // Custom operators
@@ -117,43 +123,67 @@ object H2OEngine extends DistributedEngine {
   implicit def cp2cph2o[K:ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmH2O[K] = drm.asInstanceOf[CheckpointedDrmH2O[K]]
 
   /** stub class not implemented in H2O */
-  abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[String,Int], val columnIDs: BiMap[String,Int])
+  abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictionary, val columnIDs: BiDictionary)
     extends IndexedDataset {}
 
-    /**
-   * reads an IndexedDatasetH2O from default text delimited files
+  /**
+   * Reads an IndexedDatasetH2O from default text delimited files
    * @todo unimplemented
    * @param src a comma separated list of URIs to read from
    * @param schema how the text file is formatted
    * @return
    */
   def indexedDatasetDFSRead(src: String,
-      schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
-      (implicit sc: DistributedContext):
-    IndexedDatasetH2O = {
-    // should log a warning when this is built but no logger here, can an H2O contributor help with this
-    println("Warning: unimplemented indexedDatasetDFSReadElements." )
-    throw new UnsupportedOperationException("IndexedDatasetH2O is not implemented so can't be read.")
-    null.asInstanceOf[IndexedDatasetH2O]
+                            schema: Schema = DefaultIndexedDatasetReadSchema,
+                            existingRowIDs: Option[BiDictionary] = None)
+                           (implicit sc: DistributedContext):
+  IndexedDatasetH2O = {
+
+    error("Unimplemented indexedDatasetDFSReadElements.")
+
+    ???
   }
 
   /**
-   * reads an IndexedDatasetH2O from default text delimited files
+   * Reads an IndexedDatasetH2O from default text delimited files
    * @todo unimplemented
    * @param src a comma separated list of URIs to read from
    * @param schema how the text file is formatted
    * @return
    */
   def indexedDatasetDFSReadElements(src: String,
-      schema: Schema = DefaultIndexedDatasetReadSchema,
-      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
-      (implicit sc: DistributedContext):
-    IndexedDatasetH2O = {
-    // should log a warning when this is built but no logger here, can an H2O contributor help with this
-    println("Warning: unimplemented indexedDatasetDFSReadElements." )
-    throw new UnsupportedOperationException("IndexedDatasetH2O is not implemented so can't be read by elements.")
-    null.asInstanceOf[IndexedDatasetH2O]
+                                    schema: Schema = DefaultIndexedDatasetReadSchema,
+                                    existingRowIDs: Option[BiDictionary] = None)
+                                   (implicit sc: DistributedContext): IndexedDatasetH2O = {
+
+    error("Unimplemented indexedDatasetDFSReadElements.")
+
+    ???
   }
 
+  /**
+   * Optional engine-specific all reduce tensor operation.
+   *
+   * TODO: implement this please.
+   *
+   */
+  override def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc)
+  : Matrix = H2OHelper.allreduceBlock(drm.h2odrm, bmf, rf)
+
+  /**
+   * TODO: implement this please.
+   */
+  override def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples: Int, replacement: Boolean): Matrix = ???
+
+  /**
+   * (Optional) Sampling operation. Consistent with Spark semantics of the same.
+   * TODO: implement this please.
+   */
+  override def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean): DrmLike[K] = ???
+
+  /**
+   * TODO: implement this please.
+   */
+  override def drm2IntKeyed[K: ClassTag](drmX: DrmLike[K], computeMap: Boolean)
+  : (DrmLike[Int], Option[DrmLike[K]]) = ???
 }

@@ -23,6 +23,7 @@ import org.apache.lucene.document.TextField;
 /**
  * Used for testing lucene2seq
  */
+@Deprecated
 public class MultipleFieldsDocument extends SingleFieldDocument {
 
   public static final String FIELD1 = "field1";

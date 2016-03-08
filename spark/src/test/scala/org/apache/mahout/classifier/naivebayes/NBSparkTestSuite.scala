@@ -22,6 +22,8 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
 import org.scalatest.FunSuite
+import scala.collection.JavaConversions
+import JavaConversions._
 
 class NBSparkTestSuite extends FunSuite with MahoutSuite with DistributedSparkSuite with NBTestBase {
 
@@ -81,6 +83,77 @@ class NBSparkTestSuite extends FunSuite with MahoutSuite with DistributedSparkSu
     dslAggInCore(dslCat2, 1) - sparkAggInCore(dslCat2, 1) should be < epsilon //0.2
     dslAggInCore(dslCat2, 2) - sparkAggInCore(dslCat2, 2) should be < epsilon //0.0
     dslAggInCore(dslCat2, 3) - sparkAggInCore(dslCat2, 3) should be < epsilon //0.2
+
+  }
+
+
+  test("Spark train and test a model with the confusion matrix") {
+
+    val rowBindings = new java.util.HashMap[String,Integer]()
+    rowBindings.put("/Cat1/doc_a/", 0)
+    rowBindings.put("/Cat2/doc_b/", 1)
+    rowBindings.put("/Cat1/doc_c/", 2)
+    rowBindings.put("/Cat2/doc_d/", 3)
+    rowBindings.put("/Cat1/doc_e/", 4)
+    rowBindings.put("/Cat2/doc_f/", 5)
+    rowBindings.put("/Cat1/doc_g/", 6)
+    rowBindings.put("/Cat2/doc_h/", 7)
+    rowBindings.put("/Cat1/doc_i/", 8)
+    rowBindings.put("/Cat2/doc_j/", 9)
+
+    val seed = 1
+
+    val matrixSetup = Matrices.uniformView(10, 50 , seed)
+
+    println("TFIDF matrix")
+    println(matrixSetup)
+
+    matrixSetup.setRowLabelBindings(rowBindings)
+
+    val TFIDFDrm = drm.drmParallelizeWithRowLabels(matrixSetup)
+
+    //  println("Parallelized and Collected")
+    //  println(TFIDFDrm.collect)
+
+    val (labelIndex, aggregatedTFIDFDrm) = SparkNaiveBayes.extractLabelsAndAggregateObservations(TFIDFDrm)
+
+    println("Aggregated by key")
+    println(aggregatedTFIDFDrm.collect)
+    println(labelIndex)
+
+
+    // train a Standard NB Model- no label index here
+    val model = NaiveBayes.train(aggregatedTFIDFDrm, labelIndex, false)
+
+    // validate the model- will throw an exception if model is invalid
+    model.validate()
+
+    // save the model
+    model.dfsWrite(TmpDir)
+
+    // reload a new model which should be equal to the original
+    // this will automatically trigger a validate() call
+    val materializedModel= NBModel.dfsRead(TmpDir)
+
+    // check to se if the new model is complementary
+    materializedModel.isComplementary should be (model.isComplementary)
+
+    // check the label indexMaps
+    for(elem <- model.labelIndex){
+      model.labelIndex(elem._1) == materializedModel.labelIndex(elem._1) should be (true)
+    }
+
+    //   val testTFIDFDrm = drm.drmParallelizeWithRowLabels(m = matrixSetup, numPartitions = 2)
+
+    // self test on this model
+    val result = SparkNaiveBayes.test(materializedModel, TFIDFDrm , false)
+
+    println(result)
+
+    result.getConfusionMatrix.getMatrix.getQuick(0, 0) should be(5)
+    result.getConfusionMatrix.getMatrix.getQuick(0, 1) should be(0)
+    result.getConfusionMatrix.getMatrix.getQuick(1, 0) should be(0)
+    result.getConfusionMatrix.getMatrix.getQuick(1, 1) should be(5)
 
   }
 }

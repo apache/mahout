@@ -17,19 +17,19 @@
 
 package org.apache.mahout.clustering.conversion;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.regex.Pattern;
-
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.regex.Pattern;
 
 public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable> {
 
@@ -42,7 +42,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
 
     String[] numbers = SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
-    Collection<Double> doubles = Lists.newArrayList();
+    Collection<Double> doubles = new ArrayList<>();
     for (String value : numbers) {
       if (!value.isEmpty()) {
         doubles.add(Double.valueOf(value));
@@ -59,11 +59,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
         VectorWritable vectorWritable = new VectorWritable(result);
         context.write(new Text(String.valueOf(index)), vectorWritable);
 
-      } catch (InstantiationException e) {
-        throw new IllegalStateException(e);
-      } catch (IllegalAccessException e) {
-        throw new IllegalStateException(e);
-      } catch (InvocationTargetException e) {
+      } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
         throw new IllegalStateException(e);
       }
     }
@@ -77,9 +73,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
     try {
       Class<? extends Vector> outputClass = conf.getClassByName(vectorImplClassName).asSubclass(Vector.class);
       constructor = outputClass.getConstructor(int.class);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (ClassNotFoundException e) {
+    } catch (NoSuchMethodException | ClassNotFoundException e) {
       throw new IllegalStateException(e);
     }
   }

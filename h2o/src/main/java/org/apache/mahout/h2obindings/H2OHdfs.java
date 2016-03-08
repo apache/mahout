@@ -17,33 +17,31 @@
 
 package org.apache.mahout.h2obindings;
 
-import java.io.File;
-import java.net.URI;
-
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
+import water.Futures;
 import water.fvec.Frame;
 import water.fvec.Vec;
-import water.Futures;
 import water.parser.ValueString;
 import water.util.FrameUtils;
 
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.SequentialAccessSparseVector;
-import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.h2obindings.drm.H2ODrm;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.util.ReflectionUtils;
-
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * SequenceFile I/O class (on HDFS)
@@ -59,22 +57,17 @@ public class H2OHdfs {
    */
   public static boolean isSeqfile(String filename) {
     try {
-      String uri = filename;
       Configuration conf = new Configuration();
-      Path path = new Path(uri);
-      FileSystem fs = FileSystem.get(URI.create(uri), conf);
+      Path path = new Path(filename);
+      FileSystem fs = FileSystem.get(URI.create(filename), conf);
       FSDataInputStream fin = fs.open(path);
       byte seq[] = new byte[3];
 
       fin.read(seq);
       fin.close();
 
-      if (seq[0] == 'S' && seq[1] == 'E' && seq[2] == 'Q') {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (java.io.IOException e) {
+      return seq[0] == 'S' && seq[1] == 'E' && seq[2] == 'Q';
+    } catch (IOException e) {
       return false;
     }
   }
@@ -95,7 +88,7 @@ public class H2OHdfs {
       } else {
         return new H2ODrm(FrameUtils.parseFrame(null,new File(filename)));
       }
-    } catch (java.io.IOException e) {
+    } catch (IOException e) {
       return null;
     }
   }
@@ -111,10 +104,9 @@ public class H2OHdfs {
 
     SequenceFile.Reader reader = null;
     try {
-      String uri = filename;
       Configuration conf = new Configuration();
-      Path path = new Path(uri);
-      FileSystem fs = FileSystem.get(URI.create(uri), conf);
+      Path path = new Path(filename);
+      FileSystem fs = FileSystem.get(URI.create(filename), conf);
       Vec.Writer writers[];
       Vec.Writer labelwriter = null;
       boolean isIntKey = false, isLongKey = false, isStringKey = false;
@@ -167,7 +159,7 @@ public class H2OHdfs {
       }
 
       if (reader.getKeyClass() == Text.class) {
-        labels = frame.anyVec().makeZero();
+        labels = H2OHelper.makeEmptyStrVec(frame.anyVec());
         labelwriter = labels.open();
       }
 
@@ -184,7 +176,7 @@ public class H2OHdfs {
           writers[c].set(r, v.getQuick(c));
         }
         if (labels != null) {
-          labelwriter.set(r, ((Text)key).toString());
+          labelwriter.set(r, (key).toString());
         }
         if (isStringKey) {
           r++;
@@ -216,11 +208,10 @@ public class H2OHdfs {
   public static void drmToFile(String filename, H2ODrm drm) throws java.io.IOException {
     Frame frame = drm.frame;
     Vec labels = drm.keys;
-    String uri = filename;
     Configuration conf = new Configuration();
-    Path path = new Path(uri);
-    FileSystem fs = FileSystem.get(URI.create(uri), conf);
-    SequenceFile.Writer writer = null;
+    Path path = new Path(filename);
+    FileSystem fs = FileSystem.get(URI.create(filename), conf);
+    SequenceFile.Writer writer;
     boolean isSparse = H2OHelper.isSparse(frame);
     ValueString vstr = new ValueString();
 
@@ -231,7 +222,7 @@ public class H2OHdfs {
     }
 
     for (long r = 0; r < frame.anyVec().length(); r++) {
-      Vector v = null;
+      Vector v;
       if (isSparse) {
         v = new SequentialAccessSparseVector(frame.numCols());
       } else {

@@ -19,15 +19,22 @@ package org.apache.mahout.sparkbindings.blas
 
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
+import org.apache.spark.rdd.RDD
 import scala.reflect.ClassTag
 import org.apache.mahout.sparkbindings._
-import drm._
-import org.apache.mahout.math.{Matrix, SparseRowMatrix}
+import org.apache.mahout.math.drm.BlockifiedDrmTuple
+import org.apache.mahout.sparkbindings.drm._
+import org.apache.mahout.math.{SparseMatrix, Matrix, SparseRowMatrix}
 import org.apache.spark.SparkContext._
 import org.apache.mahout.math.drm.logical.OpABt
+import org.apache.mahout.logging._
+
+import scala.tools.nsc.io.Pickler.TildeDecorator
 
 /** Contains RDD plans for ABt operator */
 object ABt {
+
+  private final implicit val log = getLog(ABt.getClass)
 
   /**
    * General entry point for AB' operator.
@@ -40,8 +47,11 @@ object ABt {
   def abt[K: ClassTag](
       operator: OpABt[K],
       srcA: DrmRddInput[K],
-      srcB: DrmRddInput[Int]): DrmRddInput[K] =
+      srcB: DrmRddInput[Int]): DrmRddInput[K] = {
+
+    debug("operator AB'(Spark)")
     abt_nograph(operator, srcA, srcB)
+  }
 
   /**
    * Computes AB' without GraphX.
@@ -63,7 +73,146 @@ object ABt {
       srcB: DrmRddInput[Int]): DrmRddInput[K] = {
 
     // Blockify everything.
-    val blocksA = srcA.toBlockifiedDrmRdd()
+    val blocksA = srcA.toBlockifiedDrmRdd(operator.A.ncol)
+
+    val blocksB = srcB.toBlockifiedDrmRdd(operator.B.ncol)
+
+    val prodNCol = operator.ncol
+    val prodNRow = operator.nrow
+    // We are actually computing AB' here. 
+    val numProductPartitions = estimateProductPartitions(anrow = prodNRow, ancol = operator.A.ncol,
+      bncol = prodNCol, aparts = blocksA.partitions.size, bparts = blocksB.partitions.size)
+
+    debug(
+      s"AB': #parts = $numProductPartitions; A #parts=${blocksA.partitions.size}, B #parts=${blocksB.partitions.size}."+
+      s"A=${operator.A.nrow}x${operator.A.ncol}, B=${operator.B.nrow}x${operator.B.ncol},AB'=${prodNRow}x$prodNCol."
+    )
+
+    // blockwise multimplication function
+    def mmulFunc(tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
+      val (keysA, blockA) = tupleA
+      val (keysB, blockB) = tupleB
+
+      var ms = traceDo(System.currentTimeMillis())
+
+      // We need to send keysB to the aggregator in order to know which columns are being updated.
+      val result = (keysA, keysB, (blockA %*% blockB.t))
+
+      ms = traceDo(System.currentTimeMillis() - ms.get)
+      trace(
+        s"block multiplication of(${blockA.nrow}x${blockA.ncol} x ${blockB.ncol}x${blockB.nrow} is completed in $ms " +
+          "ms.")
+      trace(s"block multiplication types: blockA: ${blockA.getClass.getName}(${blockA.t.getClass.getName}); " +
+        s"blockB: ${blockB.getClass.getName}.")
+
+      result
+    }
+
+    val blockwiseMmulRdd =
+
+    // Combine blocks pairwise.
+      pairwiseApply(blocksA, blocksB, mmulFunc _)
+
+        // Now reduce proper product blocks.
+        .combineByKey(
+
+          // Empty combiner += value
+          createCombiner = (t: (Array[K], Array[Int], Matrix)) =>  {
+            val (rowKeys, colKeys, block) = t
+            val comb = new SparseMatrix(prodNCol, block.nrow).t
+
+            for ((col, i) <- colKeys.zipWithIndex) comb(::, col) := block(::, i)
+            rowKeys -> comb
+          },
+
+          // Combiner += value
+          mergeValue = (comb: (Array[K], Matrix), value: (Array[K], Array[Int], Matrix)) => {
+            val (rowKeys, c) = comb
+            val (_, colKeys, block) = value
+            for ((col, i) <- colKeys.zipWithIndex) c(::, col) := block(::, i)
+            comb
+          },
+
+          // Combiner + Combiner
+          mergeCombiners = (comb1: (Array[K], Matrix), comb2: (Array[K], Matrix)) => {
+            comb1._2 += comb2._2
+            comb1
+          },
+
+          numPartitions = blocksA.partitions.size max blocksB.partitions.size
+        )
+
+
+    // Created BlockifiedRDD-compatible structure.
+    val blockifiedRdd = blockwiseMmulRdd
+
+      // throw away A-partition #
+      .map{case (_,tuple) => tuple}
+
+    val numPartsResult = blockifiedRdd.partitions.size
+
+    // See if we need to rebalance away from A granularity.
+    if (numPartsResult * 2 < numProductPartitions || numPartsResult / 2 > numProductPartitions) {
+
+      debug(s"Will re-coalesce from ${numPartsResult} to ${numProductPartitions}")
+
+      val rowRdd = deblockify(blockifiedRdd).coalesce(numPartitions = numProductPartitions)
+
+      rowRdd
+
+    } else {
+
+      // We don't have a terribly different partition
+      blockifiedRdd
+    }
+
+  }
+
+  /**
+   * This function tries to use join instead of cartesian to group blocks together without bloating
+   * the number of partitions. Hope is that we can apply pairwise reduction of block pair right away
+   * so if the data to one of the join parts is streaming, the result is still fitting to memory,
+   * since result size is much smaller than the operands.
+   *
+   * @param blocksA blockified RDD for A
+   * @param blocksB blockified RDD for B
+   * @param blockFunc a function over (blockA, blockB). Implies `blockA %*% blockB.t` but perhaps may be
+   *                  switched to another scheme based on which of the sides, A or B, is bigger.
+   */
+  private def pairwiseApply[K1, K2, T](blocksA: BlockifiedDrmRdd[K1], blocksB: BlockifiedDrmRdd[K2], blockFunc:
+  (BlockifiedDrmTuple[K1], BlockifiedDrmTuple[K2]) => T): RDD[(Int, T)] = {
+
+    // We will be joining blocks in B to blocks in A using A-partition as a key.
+
+    // Prepare A side.
+    val blocksAKeyed = blocksA.mapPartitionsWithIndex { (part, blockIter) =>
+
+      val r = if (blockIter.hasNext) Some(part -> blockIter.next) else Option.empty[(Int, BlockifiedDrmTuple[K1])]
+
+      require(blockIter.hasNext == false, s"more than 1 (${blockIter.size + 1}) blocks per partition and A of AB'")
+
+      r.toIterator
+    }
+
+    // Prepare B-side.
+    val aParts = blocksA.partitions.size
+    val blocksBKeyed = blocksB.flatMap(bTuple => for (blockKey <- (0 until aParts).view) yield blockKey -> bTuple )
+
+    // Perform the inner join. Let's try to do a simple thing now.
+    blocksAKeyed.join(blocksBKeyed, numPartitions = aParts)
+
+    // Apply product function which should produce smaller products. Hopefully, this streams blockB's in
+    .map{case (partKey,(blockA, blockB)) => partKey -> blockFunc(blockA, blockB)}
+
+  }
+
+  private[blas] def abt_nograph_cart[K: ClassTag](
+      operator: OpABt[K],
+      srcA: DrmRddInput[K],
+      srcB: DrmRddInput[Int]): DrmRddInput[K] = {
+
+    // Blockify everything.
+    val blocksA = srcA.toBlockifiedDrmRdd(operator.A.ncol)
 
         // Mark row-blocks with group id
         .mapPartitionsWithIndex((part, iter) => {
@@ -83,28 +232,35 @@ object ABt {
       }
     })
 
-    val blocksB = srcB.toBlockifiedDrmRdd()
+    val blocksB = srcB.toBlockifiedDrmRdd(operator.B.ncol)
 
     // Final product's geometry. We want to extract that into local variables since we want to use
     // them as closure attributes.
     val prodNCol = operator.ncol
     val prodNRow = operator.nrow
-    
-    // Approximate number of final partitions.
-    val numProductPartitions =
-      if (blocksA.partitions.size > blocksB.partitions.size) {
-        ((prodNCol.toDouble / operator.A.ncol) * blocksA.partitions.size).ceil.toInt
-      } else {
-        ((prodNRow.toDouble / operator.B.ncol) * blocksB.partitions.size).ceil.toInt
-      }
+    val aNCol = operator.A.ncol
 
-    //srcA.partitions.size.max(that = srcB.partitions.size)
+    // Approximate number of final partitions. We take bigger partitions as our guide to number of
+    // elements per partition. TODO: do it better.
 
+    // Elements per partition, bigger of two operands.
+    val epp = aNCol.toDouble * prodNRow / blocksA.partitions.size max aNCol.toDouble * prodNCol /
+      blocksB.partitions.size
+
+    // Number of partitions we want to converge to in the product. For now we simply extrapolate that
+    // assuming product density and operand densities being about the same; and using the same element
+    // per partition number in the product as the bigger of two operands.
+    val numProductPartitions = (prodNCol.toDouble * prodNRow / epp).ceil.toInt
+
+    debug(
+      s"AB': #parts = $numProductPartitions; A #parts=${blocksA.partitions.size}, B #parts=${blocksB.partitions.size}.")
 
     // The plan.
-    var blockifiedRdd :BlockifiedDrmRdd[K] = blocksA
+    var blockifiedRdd: BlockifiedDrmRdd[K] = blocksA
 
-        // Build Cartesian. It may require a bit more memory there at tasks.
+        // Build Cartesian. It generates a LOT of tasks. TODO: figure how to fix performance of AB'
+        // operator. The thing is that product after map is really small one (partition fraction x
+        // partition fraction) so they can be combined into much bigger chunks.
         .cartesian(blocksB)
 
         // Multiply blocks
@@ -126,10 +282,14 @@ object ABt {
         .combineByKey[(Array[K],Matrix)](
 
           createCombiner = (t: (Array[K], Array[Int], Matrix)) => t match {
+
+            // Create combiner structure out of two products. Our combiner is sparse row matrix
+            // initialized to final product partition block dimensions.
             case (rowKeys, colKeys, blockProd) =>
 
-              // Accumulator is a row-wise block of sparse vectors.
-              val acc:Matrix = new SparseRowMatrix(rowKeys.size, prodNCol)
+              // Accumulator is a row-wise block of sparse vectors. Since we assign to columns,
+              // the most efficient is perhaps to create column-oriented block here.
+              val acc:Matrix = new SparseRowMatrix(prodNCol, rowKeys.size).t
 
               // Update accumulator using colKeys as column index indirection
               colKeys.view.zipWithIndex.foreach({
@@ -168,6 +328,8 @@ object ABt {
     // having at most one block per partition.
     blockifiedRdd = rbind(blockifiedRdd)
 
-    new DrmRddInput(blockifiedSrc = Some(blockifiedRdd))
+    blockifiedRdd
   }
+
+
 }

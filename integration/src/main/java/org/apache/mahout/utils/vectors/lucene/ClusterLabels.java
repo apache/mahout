@@ -23,15 +23,14 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
@@ -42,6 +41,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.fs.Path;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.DocsEnum;
@@ -107,13 +107,8 @@ public class ClusterLabels {
 
   public void getLabels() throws IOException {
 
-    Writer writer;
-    if (this.output == null) {
-      writer = new OutputStreamWriter(System.out, Charsets.UTF_8);
-    } else {
-      writer = Files.newWriter(new File(this.output), Charsets.UTF_8);
-    }
-    try {
+    try (Writer writer = (this.output == null) ?
+        new OutputStreamWriter(System.out, Charsets.UTF_8) : Files.newWriter(new File(this.output), Charsets.UTF_8)){
       for (Map.Entry<Integer, List<WeightedPropertyVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
         List<WeightedPropertyVectorWritable> wpvws = integerListEntry.getValue();
         List<TermInfoClusterInOut> termInfos = getClusterLabels(integerListEntry.getKey(), wpvws);
@@ -139,8 +134,6 @@ public class ClusterLabels {
           }
         }
       }
-    } finally {
-      Closeables.close(writer, false);
     }
   }
 
@@ -162,7 +155,7 @@ public class ClusterLabels {
     
     log.info("# of documents in the index {}", reader.numDocs());
 
-    Collection<String> idSet = Sets.newHashSet();
+    Collection<String> idSet = new HashSet<>();
     for (WeightedPropertyVectorWritable wpvw : wpvws) {
       Vector vector = wpvw.getVector();
       if (vector instanceof NamedVector) {
@@ -187,7 +180,7 @@ public class ClusterLabels {
      */
     Terms t = MultiFields.getTerms(reader, contentField);
     TermsEnum te = t.iterator(null);
-    Map<String, TermEntry> termEntryMap = new LinkedHashMap<String, TermEntry>();
+    Map<String, TermEntry> termEntryMap = new LinkedHashMap<>();
     Bits liveDocs = MultiFields.getLiveDocs(reader); //WARNING: returns null if there are no deletions
 
 
@@ -214,7 +207,7 @@ public class ClusterLabels {
 
     }
 
-    List<TermInfoClusterInOut> clusteredTermInfo = Lists.newLinkedList();
+    List<TermInfoClusterInOut> clusteredTermInfo = new LinkedList<>();
 
     int clusterSize = wpvws.size();
 
@@ -246,7 +239,7 @@ public class ClusterLabels {
     
     Set<String>  idFieldSelector = null;
     if (idField != null) {
-      idFieldSelector = new TreeSet<String>();
+      idFieldSelector = new TreeSet<>();
       idFieldSelector.add(idField);
     }
     

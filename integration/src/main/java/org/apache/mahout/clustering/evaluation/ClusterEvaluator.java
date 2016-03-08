@@ -17,10 +17,6 @@
 
 package org.apache.mahout.clustering.evaluation;
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
@@ -37,7 +33,10 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class ClusterEvaluator {
   
@@ -89,7 +88,7 @@ public class ClusterEvaluator {
    * @return a List<Cluster> of the clusters
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
-    List<Cluster> clusters = Lists.newArrayList();
+    List<Cluster> clusters = new ArrayList<>();
     for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST,
         PathFilters.logsCRCFilter(), conf)) {
       Cluster cluster = clusterWritable.getValue();
@@ -129,7 +128,7 @@ public class ClusterEvaluator {
    * @return a Map<Integer, Vector>
    */
   public Map<Integer,Vector> interClusterDistances() {
-    Map<Integer,Vector> distances = new TreeMap<Integer,Vector>();
+    Map<Integer,Vector> distances = new TreeMap<>();
     for (int i = 0; i < clusters.size(); i++) {
       Cluster clusterI = clusters.get(i);
       RandomAccessSparseVector row = new RandomAccessSparseVector(Integer.MAX_VALUE);

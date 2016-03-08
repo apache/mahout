@@ -19,10 +19,9 @@ package org.apache.mahout.text;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -100,9 +99,8 @@ public class SequenceFilesFromDirectory extends AbstractJob {
     Charset charset = Charset.forName(getOption(CHARSET_OPTION[0]));
     String keyPrefix = getOption(KEY_PREFIX_OPTION[0]);
     FileSystem fs = FileSystem.get(input.toUri(), conf);
-    ChunkedWriter writer = new ChunkedWriter(conf, Integer.parseInt(options.get(CHUNK_SIZE_OPTION[0])), output);
 
-    try {
+    try (ChunkedWriter writer = new ChunkedWriter(conf, Integer.parseInt(options.get(CHUNK_SIZE_OPTION[0])), output)) {
       SequenceFilesFromDirectoryFilter pathFilter;
       String fileFilterClassName = options.get(FILE_FILTER_CLASS_OPTION[0]);
       if (PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
@@ -113,8 +111,6 @@ public class SequenceFilesFromDirectory extends AbstractJob {
           new Object[] {conf, keyPrefix, options, writer, charset, fs});
       }
       fs.listStatus(input, pathFilter);
-    } finally {
-      Closeables.close(writer, false);
     }
     return 0;
   }
@@ -142,9 +138,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
     if (!StringUtils.isBlank(fileFilterClassName) && !PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
       try {
         pathFilter = (PathFilter) Class.forName(fileFilterClassName).newInstance();
-      } catch (InstantiationException e) {
-        throw new IllegalStateException(e);
-      } catch (IllegalAccessException e) {
+      } catch (InstantiationException | IllegalAccessException e) {
         throw new IllegalStateException(e);
       }
     }
@@ -211,7 +205,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
    * @return Map of options
    */
   protected Map<String, String> parseOptions() {
-    Map<String, String> options = Maps.newHashMap();
+    Map<String, String> options = new HashMap<>();
     options.put(CHUNK_SIZE_OPTION[0], getOption(CHUNK_SIZE_OPTION[0]));
     options.put(FILE_FILTER_CLASS_OPTION[0], getOption(FILE_FILTER_CLASS_OPTION[0]));
     options.put(CHARSET_OPTION[0], getOption(CHARSET_OPTION[0]));

@@ -102,10 +102,8 @@ public final class RecommenderServlet extends HttpServlet {
       } else {
         throw new ServletException("Bad format parameter: " + format);
       }
-    } catch (TasteException te) {
+    } catch (TasteException | IOException te) {
       throw new ServletException(te);
-    } catch (IOException ioe) {
-      throw new ServletException(ioe);
     }
 
   }

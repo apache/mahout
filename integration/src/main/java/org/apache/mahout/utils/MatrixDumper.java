@@ -25,7 +25,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Charsets;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
@@ -68,7 +68,7 @@ public final class MatrixDumper extends AbstractJob {
   
   private static void exportCSV(Path inputPath, String outputFile, boolean doLabels) throws IOException {
     SequenceFileValueIterator<MatrixWritable> it =
-        new SequenceFileValueIterator<MatrixWritable>(inputPath, true, new Configuration());
+        new SequenceFileValueIterator<>(inputPath, true, new Configuration());
     Matrix m = it.next().get();
     it.close();
     PrintStream ps = getPrintStream(outputFile);

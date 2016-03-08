@@ -23,12 +23,13 @@ import drm._
 import RLikeOps._
 import RLikeDrmOps._
 import org.apache.mahout.sparkbindings._
-import org.scalatest.FunSuite
+import org.scalatest.{ConfigMap, BeforeAndAfterAllConfigMap, FunSuite}
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
+
+import scala.reflect.ClassTag
 
 /** Tests for DrmLikeOps */
 class DrmLikeOpsSuite extends FunSuite with DistributedSparkSuite with DrmLikeOpsSuiteBase {
-
 
   test("exact, min and auto ||") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6))
@@ -39,18 +40,20 @@ class DrmLikeOpsSuite extends FunSuite with DistributedSparkSuite with DrmLikeOp
     (A + 1.0).par(exact = 4).rdd.partitions.size should equal(4)
     A.par(exact = 2).rdd.partitions.size should equal(2)
     A.par(exact = 1).rdd.partitions.size should equal(1)
-    A.par(exact = 0).rdd.partitions.size should equal(2) // No effect for par <= 0
+
     A.par(min = 4).rdd.partitions.size should equal(4)
     A.par(min = 2).rdd.partitions.size should equal(2)
     A.par(min = 1).rdd.partitions.size should equal(2)
     A.par(auto = true).rdd.partitions.size should equal(10)
     A.par(exact = 10).par(auto = true).rdd.partitions.size should equal(10)
     A.par(exact = 11).par(auto = true).rdd.partitions.size should equal(19)
-    A.par(exact = 20).par(auto = true).rdd.partitions.size should equal(20)
+    A.par(exact = 20).par(auto = true).rdd.partitions.size should equal(19)
 
-    intercept[AssertionError] {
-      A.par()
-    }
+    A.keyClassTag shouldBe ClassTag.Int
+    A.par(auto = true).keyClassTag shouldBe ClassTag.Int
+
+    an[IllegalArgumentException] shouldBe thrownBy {A.par(exact = 0)}
+    an[IllegalArgumentException] shouldBe thrownBy {A.par()}
   }
 
 }

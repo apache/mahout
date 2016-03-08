@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,6 @@ package org.apache.mahout.text;
 
 import java.io.IOException;
 
-import com.google.common.io.Closeables;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -55,7 +54,7 @@ public class WholeFileRecordReader extends RecordReader<IntWritable, BytesWritab
   public WholeFileRecordReader(CombineFileSplit fileSplit, TaskAttemptContext taskAttemptContext, Integer idx)
       throws IOException {
     this.fileSplit = new FileSplit(fileSplit.getPath(idx), fileSplit.getOffset(idx),
-      fileSplit.getLength(idx), fileSplit.getLocations());
+        fileSplit.getLength(idx), fileSplit.getLocations());
     this.configuration = taskAttemptContext.getConfiguration();
     this.index = new IntWritable(idx);
     this.fileFilterClassName = this.configuration.get(FILE_FILTER_CLASS_OPTION[0]);
@@ -78,15 +77,12 @@ public class WholeFileRecordReader extends RecordReader<IntWritable, BytesWritab
 
   @Override
   public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext)
-    throws IOException, InterruptedException {
-    if (!StringUtils.isBlank(fileFilterClassName) && !PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
+      throws IOException, InterruptedException {
+    if (!StringUtils.isBlank(fileFilterClassName) &&
+        !PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
       try {
         pathFilter = (PathFilter) Class.forName(fileFilterClassName).newInstance();
-      } catch (ClassNotFoundException e) {
-        throw new IllegalStateException(e);
-      } catch (InstantiationException e) {
-        throw new IllegalStateException(e);
-      } catch (IllegalAccessException e) {
+      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
         throw new IllegalStateException(e);
       }
     }
@@ -110,15 +106,11 @@ public class WholeFileRecordReader extends RecordReader<IntWritable, BytesWritab
         fileStatuses = fs.listStatus(file);
       }
 
-      FSDataInputStream in = null;
       if (fileStatuses.length == 1) {
-        try {
-          in = fs.open(fileStatuses[0].getPath());
+        try (FSDataInputStream in = fs.open(fileStatuses[0].getPath())) {
           IOUtils.readFully(in, contents, 0, contents.length);
           value.setCapacity(contents.length);
           value.set(contents, 0, contents.length);
-        } finally {
-          Closeables.close(in, false);
         }
         processed = true;
         return true;

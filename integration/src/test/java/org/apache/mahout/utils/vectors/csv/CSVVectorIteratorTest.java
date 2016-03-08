@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,8 +22,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Iterator;
 
-import com.google.common.io.Closeables;
-
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
@@ -37,19 +35,17 @@ public class CSVVectorIteratorTest extends MahoutTestCase {
   public void testCount() throws Exception {
 
     StringWriter sWriter = new StringWriter();
-    TextualVectorWriter writer = new TextualVectorWriter(sWriter) {
+    try (TextualVectorWriter writer = new TextualVectorWriter(sWriter) {
       @Override
       public void write(Vector vector) throws IOException {
         String vecStr = VectorHelper.vectorToCSVString(vector, false);
         getWriter().write(vecStr);
       }
-    };
-    try {
+    }) {
       Iterable<Vector> iter = new RandomVectorIterable(50);
       writer.write(iter);
-    } finally {
-      Closeables.close(writer, false);
     }
+
     Iterator<Vector> csvIter = new CSVVectorIterator(new StringReader(sWriter.getBuffer().toString()));
     int count = 0;
     while (csvIter.hasNext()) {

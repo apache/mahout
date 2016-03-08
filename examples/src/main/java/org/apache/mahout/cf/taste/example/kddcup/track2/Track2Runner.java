@@ -17,24 +17,23 @@
 
 package org.apache.mahout.cf.taste.example.kddcup.track2;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.example.kddcup.DataFileIterable;
 import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * <p>Runs "track 2" of the KDD Cup competition using whatever recommender is inside {@link Track2Recommender}
@@ -65,7 +64,7 @@ public final class Track2Runner {
     log.info("Loaded model in {}s", (end - start) / 1000);
     start = end;
 
-    Collection<Track2Callable> callables = Lists.newArrayList();
+    Collection<Track2Callable> callables = new ArrayList<>();
     for (Pair<PreferenceArray,long[]> tests : new DataFileIterable(KDDCupDataModel.getTestFile(dataFileDirectory))) {
       PreferenceArray userTest = tests.getFirst();
       callables.add(new Track2Callable(recommender, userTest));
@@ -81,8 +80,7 @@ public final class Track2Runner {
     log.info("Ran recommendations in {}s", (end - start) / 1000);
     start = end;
 
-    OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(args[1])));
-    try {
+    try (OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(args[1])))){
       long lastUserID = Long.MIN_VALUE;
       for (Future<UserResult> future : futures) {
         UserResult result = future.get();
@@ -93,8 +91,6 @@ public final class Track2Runner {
         lastUserID = userID;
         out.write(result.getResultBytes());
       }
-    } finally {
-      Closeables.close(out, false);
     }
 
     end = System.currentTimeMillis();

@@ -17,18 +17,17 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.11.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-spark_2.10</artifactId>
+  <artifactId>mahout-spark_${scala.compat.version}</artifactId>
   <name>Mahout Spark bindings</name>
   <description>
     Mahout Bindings for Apache Spark
@@ -36,54 +35,94 @@
 
   <packaging>jar</packaging>
 
-  <!-- this is needed for scalatest plugin until they publish it to central -->
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype</id>
-      <url>https://oss.sonatype.org/content/groups/public</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
-    <defaultGoal>install</defaultGoal>
-
     <plugins>
 
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
+            <id>add-scala-sources</id>
+            <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-sources/mahout</source>
-              </sources>
-            </configuration>
           </execution>
           <execution>
-            <id>add-test-source</id>
-            <phase>generate-sources</phase>
+            <id>scala-compile</id>
+            <phase>process-resources</phase>
             <goals>
-              <goal>add-test-source</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--this is what scalatest recommends to do to enable scala tests -->
+
+      <!-- disable surefire -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <!-- enable scalatest -->
+      <plugin>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- create an all dependencies job.jar -->
+      <!-- todo: before release we need a better way to do this MAHOUT-1636 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>dependency-reduced</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
             </goals>
             <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-test-sources/mahout</source>
-              </sources>
+              <descriptors>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+              </descriptors>
             </configuration>
           </execution>
         </executions>
       </plugin>
 
-      <!-- create test jar so other modules can reuse the math test utility classes. -->
+      <!-- create test jar so other modules can reuse the math test utility classes.
+        DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
+        Please contact @dlyubimov.
+      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -97,210 +136,26 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <sourceDir>src/main/scala</sourceDir>
-          <jvmArgs>
-            <jvmArg>-Xms64m</jvmArg>
-            <jvmArg>-Xmx1024m</jvmArg>
-          </jvmArgs>
-        </configuration>
-      </plugin>
-
-      <!--this is what scalatest recommends to do to enable scala tests -->
-
-      <!-- disable surefire -->
-      <!--<plugin>-->
-      <!--<groupId>org.apache.maven.plugins</groupId>-->
-      <!--<artifactId>maven-surefire-plugin</artifactId>-->
-      <!--<version>2.7</version>-->
-      <!--<configuration>-->
-      <!--<skipTests>true</skipTests>-->
-      <!--</configuration>-->
-      <!--</plugin>-->
-      <!-- enable scalatest -->
-      <plugin>
-        <groupId>org.scalatest</groupId>
-        <artifactId>scalatest-maven-plugin</artifactId>
-        <version>1.0-M2</version>
-        <configuration>
-          <reportsDirectory>${project.build.directory}/scalatest-reports</reportsDirectory>
-          <junitxml>.</junitxml>
-          <filereports>WDF TestSuite.txt</filereports>
-          <argLine>-Xmx1024m</argLine>
-        </configuration>
-        <executions>
-          <execution>
-            <id>test</id>
-            <goals>
-              <goal>test</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- create job jar to include CLI driver deps-->
-      <!-- leave this in even though there are no hadoop mapreduce jobs in this module -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>job</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/job.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
     </plugins>
   </build>
-<!--
-  <profiles>
-    <profile>
-      <id>2.0-CDH</id>
-      <properties>
-        <cdh.version>2.0.0-cdh4.3.0</cdh.version>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-client</artifactId>
-          <version>${cdh.version}</version>
-          <exclusions>
-            <exclusion>
-              <groupId>asm</groupId>
-              <artifactId>asm</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-mrlegacy</artifactId>
-          <exclusions>
-            <exclusion>
-              <groupId>asm</groupId>
-              <artifactId>asm</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>org.apache.hadoop</groupId>
-              <artifactId>hadoop-core</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-common</artifactId>
-          <version>${cdh.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-core</artifactId>
-          <version>${cdh.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-common</artifactId>
-          <version>${cdh.version}</version>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
-      <id>hadoop2</id>
-      <activation>
-        <property>
-          <name>hadoop2.version</name>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-client</artifactId>
-          <version>${hadoop2.version}</version>
-          <exclusions>
-            <exclusion>
-              <groupId>asm</groupId>
-              <artifactId>asm</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-mrlegacy</artifactId>
-          <exclusions>
-            <exclusion>
-              <groupId>asm</groupId>
-              <artifactId>asm</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>org.apache.hadoop</groupId>
-              <artifactId>hadoop-core</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-common</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-core</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-common</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
--->
 
   <dependencies>
 
     <!-- spark stuff - need to put this first to use spark's mahout dependencies in tests -->
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_${scala.major}</artifactId>
+      <artifactId>spark-core_${scala.compat.version}</artifactId>
       <version>${spark.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala_${scala.major}</artifactId>
+      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
+      <artifactId>mahout-hdfs</artifactId>
       <exclusions>
         <exclusion>
           <groupId>asm</groupId>
@@ -311,28 +166,46 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala_${scala.major}</artifactId>
+      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
 
-
     <!--  3rd-party -->
 
-    <dependency>
-      <groupId>com.github.scopt</groupId>
-      <artifactId>scopt_2.10</artifactId>
-      <version>3.2.0</version>
-    </dependency>
-
     <!-- scala stuff -->
-
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.major}</artifactId>
-      <version>2.0</version>
-      <scope>test</scope>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>mahout-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>generate-scaladoc</id>
+                <goals>
+                  <goal>doc</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>attach-scaladoc-jar</id>
+                <goals>
+                  <goal>doc-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

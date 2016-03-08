@@ -62,7 +62,7 @@ public class RowRange {
             }
 
             for (int c = 0; c < chks.length; c++) {
-              ncs[c].addNum(chks[c].at0(r));
+              ncs[c].addNum(chks[c].atd(r));
             }
           }
         }
@@ -85,7 +85,7 @@ public class RowRange {
               continue;
             }
 
-            nc.addStr(chk.atStr0(vstr, r));
+            nc.addStr(chk.atStr(vstr, r));
           }
         }
       }.doAll(1, keys).outputFrame(null, null).anyVec();

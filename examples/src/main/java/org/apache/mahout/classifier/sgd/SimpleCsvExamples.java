@@ -17,12 +17,12 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -83,20 +84,16 @@ public final class SimpleCsvExamples {
     long t0 = System.currentTimeMillis();
     Vector v = new DenseVector(1000);
     if ("--generate".equals(args[0])) {
-      PrintWriter out =
-          new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File(args[2])), Charsets.UTF_8));
-      try {
+      try (PrintWriter out =
+               new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File(args[2])), Charsets.UTF_8))) {
         int n = Integer.parseInt(args[1]);
         for (int i = 0; i < n; i++) {
           Line x = Line.generate();
           out.println(x);
         }
-      } finally {
-        Closeables.close(out, false);
       }
     } else if ("--parse".equals(args[0])) {
-      BufferedReader in = Files.newReader(new File(args[1]), Charsets.UTF_8);
-      try {
+      try (BufferedReader in = Files.newReader(new File(args[1]), Charsets.UTF_8)){
         String line = in.readLine();
         while (line != null) {
           v.assign(0);
@@ -107,8 +104,6 @@ public final class SimpleCsvExamples {
           }
           line = in.readLine();
         }
-      } finally {
-        Closeables.close(in, true);
       }
       String separator = "";
       for (int i = 0; i < FIELDS; i++) {
@@ -116,8 +111,7 @@ public final class SimpleCsvExamples {
         separator = ",";
       }
     } else if ("--fast".equals(args[0])) {
-      FastLineReader in = new FastLineReader(new FileInputStream(args[1]));
-      try {
+      try (FastLineReader in = new FastLineReader(new FileInputStream(args[1]))){
         FastLine line = in.read();
         while (line != null) {
           v.assign(0);
@@ -128,9 +122,8 @@ public final class SimpleCsvExamples {
           }
           line = in.read();
         }
-      } finally {
-        Closeables.close(in, true);
       }
+
       String separator = "";
       for (int i = 0; i < FIELDS; i++) {
         System.out.printf("%s%.3f", separator, s[i].getMean());
@@ -154,7 +147,7 @@ public final class SimpleCsvExamples {
     }
 
     private Line() {
-      data = Lists.newArrayList();
+      data = new ArrayList<>();
     }
 
     public double getDouble(int field) {
@@ -179,8 +172,8 @@ public final class SimpleCsvExamples {
      * Returns a random exponentially distributed integer with a particular mean value.  This is
      * just a way to create more small numbers than big numbers.
      *
-     * @param mean
-     * @return
+     * @param mean mean of the distribution
+     * @return random exponentially distributed integer with the specific mean
      */
     private static int randomValue(double mean) {
       return (int) (-mean * Math.log1p(-RAND.nextDouble()));

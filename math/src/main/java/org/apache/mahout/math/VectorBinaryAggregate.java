@@ -471,7 +471,8 @@ public abstract class VectorBinaryAggregate {
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
       double result = fc.apply(x.getQuick(0), y.getQuick(0));
-      for (int i = 1; i < x.size(); ++i) {
+      int s = x.size();
+      for (int i = 1; i < s; ++i) {
         result = fa.apply(result, fc.apply(x.getQuick(i), y.getQuick(i)));
       }
       return result;

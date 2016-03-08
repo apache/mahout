@@ -211,6 +211,11 @@ public class MatrixVectorView extends AbstractVector {
     return matrix.like(size(), 1).viewColumn(0);
   }
 
+  @Override
+  public Vector like(int cardinality) {
+    return matrix.like(cardinality, 1).viewColumn(0);
+  }
+
   /**
    * Set the value at the given index, without checking bounds
    *

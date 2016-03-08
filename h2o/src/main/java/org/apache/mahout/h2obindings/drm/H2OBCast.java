@@ -17,19 +17,19 @@
 
 package org.apache.mahout.h2obindings.drm;
 
-import org.apache.mahout.math.drm.BCast;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.MatrixWritable;
-import org.apache.mahout.math.VectorWritable;
-
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.MatrixWritable;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.drm.BCast;
 
-import java.io.Serializable;
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ObjectOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /**
  * Broadcast class wrapper around Matrix and Vector.
@@ -54,7 +54,6 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
    */
   public H2OBCast(T o) {
     obj = o;
-
     if (o instanceof Matrix) {
       buf = serialize(new MatrixWritable((Matrix)o));
       isMatrix = true;
@@ -89,7 +88,7 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
       ObjectOutputStream oos = new ObjectOutputStream(bos);
       w.write(oos);
       oos.close();
-    } catch (java.io.IOException e) {
+    } catch (IOException e) {
       return null;
     }
     return bos.toByteArray();
@@ -103,8 +102,7 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
    */
   private T deserialize(byte buf[]) {
     T ret = null;
-    ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-    try {
+    try (ByteArrayInputStream bis = new ByteArrayInputStream(buf)){
       ObjectInputStream ois = new ObjectInputStream(bis);
       if (isMatrix) {
         MatrixWritable w = new MatrixWritable();
@@ -115,9 +113,21 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
         w.readFields(ois);
         ret = (T) w.get();
       }
-    } catch (java.io.IOException e) {
-      System.out.println("Caught exception: " + e);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
     return ret;
+  }
+
+  /**
+   * Stop broadcasting when called on driver side. Release any network resources.
+   *
+   */
+  @Override
+  public void close() throws IOException {
+
+    // TODO: review this. It looks like it is not really a broadcast mechanism but rather just a
+    // serialization wrapper. In which case it doesn't hold any network resources.
+
   }
 }

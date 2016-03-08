@@ -589,7 +589,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
   }
   
   /**
-   * @parameter minSingularValue
+   * @param minSingularValue
    * minSingularValue - value below which singular values are ignored (a 0 or negative
    * value implies all singular value will be used)
    * @return Returns the n × n covariance matrix.

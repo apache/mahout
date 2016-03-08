@@ -182,19 +182,20 @@ then
   done
 
   if [ "$H2O" == "1" ]; then
-    for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar; do
+    for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar; do
        CLASSPATH=${CLASSPATH}:$f;
     done
 
-    for f in $MAHOUT_HOME/h2o/target/mahout-h2o-*.jar; do
+    for f in $MAHOUT_HOME/h2o/target/mahout-h2o*.jar; do
        CLASSPATH=${CLASSPATH}:$f;
     done
+
   fi
 
   # add jars for running from the command line if we requested shell or spark CLI driver
   if [ "$SPARK" == "1" ]; then
 
-    for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar ; do
+    for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar ; do
       CLASSPATH=${CLASSPATH}:$f;
     done
 
@@ -210,7 +211,7 @@ then
        CLASSPATH=${CLASSPATH}:$f;
     done
 
-    SPARK_CP_BIN="${SPARK_HOME}/bin/compute-classpath.sh"
+    SPARK_CP_BIN="${MAHOUT_HOME}/bin/compute-classpath.sh"
     if [ -x "${SPARK_CP_BIN}" ]; then
        SPARK_CLASSPATH=$("${SPARK_CP_BIN}" 2>/dev/null)
        CLASSPATH="${CLASSPATH}:${SPARK_CLASSPATH}"
@@ -219,6 +220,14 @@ then
       exit -1
     fi
 
+    SPARK_ASSEMBLY_BIN="${MAHOUT_HOME}/bin/mahout-spark-class.sh"
+    if [ -x "${SPARK_ASSEMBLY_BIN}" ]; then
+       SPARK_ASSEMBLY_CLASSPATH=$("${SPARK_ASSEMBLY_BIN}" 2>/dev/null)
+       CLASSPATH="${CLASSPATH}:${SPARK_ASSEMBLY_BIN}"
+    else
+      echo "Cannot find Spark assembly classpath. Is 'SPARK_HOME' set?"
+      exit -1
+    fi
   fi
 
   # add release dependencies to CLASSPATH
@@ -227,11 +236,11 @@ then
   done
 else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/hdfs/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mr/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/integration/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math-scala/target/classes
-  #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/src/main/resources
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes
@@ -253,12 +262,10 @@ fi
 # restore ordinary behaviour
 unset IFS
 
-
-
 case "$1" in
   (spark-shell)
     save_stty=$(stty -g 2>/dev/null);
-    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.sparkbindings.shell.Main" $@
+    "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" "org.apache.mahout.sparkbindings.shell.Main" $@
     stty sane; stty $save_stty
     ;;
   # Spark CLI drivers go here

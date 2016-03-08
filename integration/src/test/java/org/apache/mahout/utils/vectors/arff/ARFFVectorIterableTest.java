@@ -25,9 +25,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-
+import org.apache.commons.io.Charsets;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;

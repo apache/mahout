@@ -40,7 +40,7 @@ public class MultipleTextFileInputFormat extends CombineFileInputFormat<IntWrita
   public RecordReader<IntWritable, BytesWritable> createRecordReader(InputSplit inputSplit,
                                                                       TaskAttemptContext taskAttemptContext)
       throws IOException {
-    return new CombineFileRecordReader<IntWritable, BytesWritable>((CombineFileSplit) inputSplit,
-      taskAttemptContext, WholeFileRecordReader.class);
+    return new CombineFileRecordReader<>((CombineFileSplit) inputSplit,
+        taskAttemptContext, WholeFileRecordReader.class);
   }
 }

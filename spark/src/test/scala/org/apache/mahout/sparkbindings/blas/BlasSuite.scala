@@ -26,7 +26,7 @@ import scalabindings._
 import RLikeOps._
 import drm._
 import org.apache.mahout.sparkbindings._
-import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
+import org.apache.mahout.sparkbindings.drm._
 import org.apache.mahout.math.drm.logical.{OpAt, OpAtA, OpAewB, OpABt}
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
@@ -142,7 +142,7 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     val drmA = drmParallelize(m = inCoreA, numPartitions = 2)
 
     val op = new OpAt(drmA)
-    val drmAt = new CheckpointedDrmSpark(rdd = At.at(op, srcA = drmA), _nrow = op.nrow, _ncol = op.ncol)
+    val drmAt = new CheckpointedDrmSpark(rddInput = At.at(op, srcA = drmA), _nrow = op.nrow, _ncol = op.ncol)
     val inCoreAt = drmAt.collect
     val inCoreControlAt = inCoreA.t
 

@@ -17,10 +17,8 @@
 
 package org.apache.mahout.text.wikipedia;
 
-import java.io.IOException;
-
-import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -35,6 +33,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * Reads records that are delimited by a specific begin/end tag.

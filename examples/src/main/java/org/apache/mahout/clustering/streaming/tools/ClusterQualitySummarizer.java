@@ -99,8 +99,6 @@ public class ClusterQualitySummarizer extends AbstractJob {
 
     Configuration conf = new Configuration();
     try {
-//      Configuration.dumpConfiguration(conf, new OutputStreamWriter(System.out));
-
       fileOut = new PrintWriter(new FileOutputStream(outputFile));
       fileOut.printf("cluster,distance.mean,distance.sd,distance.q0,distance.q1,distance.q2,distance.q3,"
           + "distance.q4,count,is.train\n");
@@ -110,23 +108,23 @@ public class ClusterQualitySummarizer extends AbstractJob {
       List<Centroid> centroidsCompare = null;
       if (mahoutKMeansFormat) {
         SequenceFileDirValueIterable<ClusterWritable> clusterIterable =
-            new SequenceFileDirValueIterable<ClusterWritable>(new Path(centroidFile), PathType.GLOB, conf);
+            new SequenceFileDirValueIterable<>(new Path(centroidFile), PathType.GLOB, conf);
         centroids = Lists.newArrayList(IOUtils.getCentroidsFromClusterWritableIterable(clusterIterable));
       } else {
         SequenceFileDirValueIterable<CentroidWritable> centroidIterable =
-            new SequenceFileDirValueIterable<CentroidWritable>(new Path(centroidFile), PathType.GLOB, conf);
+            new SequenceFileDirValueIterable<>(new Path(centroidFile), PathType.GLOB, conf);
         centroids = Lists.newArrayList(IOUtils.getCentroidsFromCentroidWritableIterable(centroidIterable));
       }
 
       if (centroidCompareFile != null) {
         if (mahoutKMeansFormatCompare) {
           SequenceFileDirValueIterable<ClusterWritable> clusterCompareIterable =
-              new SequenceFileDirValueIterable<ClusterWritable>(new Path(centroidCompareFile), PathType.GLOB, conf);
+              new SequenceFileDirValueIterable<>(new Path(centroidCompareFile), PathType.GLOB, conf);
           centroidsCompare = Lists.newArrayList(
               IOUtils.getCentroidsFromClusterWritableIterable(clusterCompareIterable));
         } else {
           SequenceFileDirValueIterable<CentroidWritable> centroidCompareIterable =
-              new SequenceFileDirValueIterable<CentroidWritable>(new Path(centroidCompareFile), PathType.GLOB, conf);
+              new SequenceFileDirValueIterable<>(new Path(centroidCompareFile), PathType.GLOB, conf);
           centroidsCompare = Lists.newArrayList(
               IOUtils.getCentroidsFromCentroidWritableIterable(centroidCompareIterable));
         }
@@ -134,7 +132,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
 
       // Reading in the "training" set.
       SequenceFileDirValueIterable<VectorWritable> trainIterable =
-          new SequenceFileDirValueIterable<VectorWritable>(new Path(trainFile), PathType.GLOB, conf);
+          new SequenceFileDirValueIterable<>(new Path(trainFile), PathType.GLOB, conf);
       Iterable<Vector> trainDatapoints = IOUtils.getVectorsFromVectorWritableIterable(trainIterable);
       Iterable<Vector> datapoints = trainDatapoints;
 
@@ -144,7 +142,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
       // Also adding in the "test" set.
       if (testFile != null) {
         SequenceFileDirValueIterable<VectorWritable> testIterable =
-            new SequenceFileDirValueIterable<VectorWritable>(new Path(testFile), PathType.GLOB, conf);
+            new SequenceFileDirValueIterable<>(new Path(testFile), PathType.GLOB, conf);
         Iterable<Vector> testDatapoints = IOUtils.getVectorsFromVectorWritableIterable(testIterable);
 
         printSummaries(ClusteringUtils.summarizeClusterDistances(testDatapoints, centroids,

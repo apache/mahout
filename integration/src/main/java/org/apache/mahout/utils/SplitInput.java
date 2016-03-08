@@ -17,10 +17,17 @@
 
 package org.apache.mahout.utils;
 
-import com.google.common.base.Charsets;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.util.BitSet;
+
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
 import org.apache.commons.cli2.OptionException;
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -39,14 +46,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.jet.random.sampling.RandomSampler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.BitSet;
 
 /**
  * A utility for splitting files in the input format used by the Bayes
@@ -379,12 +378,9 @@ public class SplitInput extends AbstractJob {
     int trainCount = 0;
     int testCount = 0;
     if (!useSequence) {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
-      Writer trainingWriter = new OutputStreamWriter(fs.create(trainingOutputFile), charset);
-      Writer testWriter = new OutputStreamWriter(fs.create(testOutputFile), charset);
-
-
-      try {
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
+           Writer trainingWriter = new OutputStreamWriter(fs.create(trainingOutputFile), charset);
+           Writer testWriter = new OutputStreamWriter(fs.create(testOutputFile), charset)){
 
         String line;
         int pos = 0;
@@ -412,19 +408,14 @@ public class SplitInput extends AbstractJob {
           writer.write('\n');
         }
 
-      } finally {
-        Closeables.close(reader, true);
-        Closeables.close(trainingWriter, false);
-        Closeables.close(testWriter, false);
       }
     } else {
-      SequenceFileIterator<Writable, Writable> iterator =
-              new SequenceFileIterator<Writable, Writable>(inputFile, false, fs.getConf());
-      SequenceFile.Writer trainingWriter = SequenceFile.createWriter(fs, fs.getConf(), trainingOutputFile,
-          iterator.getKeyClass(), iterator.getValueClass());
-      SequenceFile.Writer testWriter = SequenceFile.createWriter(fs, fs.getConf(), testOutputFile,
-          iterator.getKeyClass(), iterator.getValueClass());
-      try {
+      try (SequenceFileIterator<Writable, Writable> iterator =
+               new SequenceFileIterator<>(inputFile, false, fs.getConf());
+           SequenceFile.Writer trainingWriter = SequenceFile.createWriter(fs, fs.getConf(), trainingOutputFile,
+               iterator.getKeyClass(), iterator.getValueClass());
+           SequenceFile.Writer testWriter = SequenceFile.createWriter(fs, fs.getConf(), testOutputFile,
+               iterator.getKeyClass(), iterator.getValueClass())) {
 
         int pos = 0;
         while (iterator.hasNext()) {
@@ -450,10 +441,6 @@ public class SplitInput extends AbstractJob {
           writer.append(pair.getFirst(), pair.getSecond());
         }
 
-      } finally {
-        Closeables.close(iterator, true);
-        Closeables.close(trainingWriter, false);
-        Closeables.close(testWriter, false);
       }
     }
     log.info("file: {}, input: {} train: {}, test: {} starting at {}",
@@ -668,15 +655,11 @@ public class SplitInput extends AbstractJob {
    */
   public static int countLines(FileSystem fs, Path inputFile, Charset charset) throws IOException {
     int lineCount = 0;
-    BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
-    try {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset))){
       while (reader.readLine() != null) {
         lineCount++;
       }
-    } finally {
-      Closeables.close(reader, true);
     }
-
     return lineCount;
   }
 

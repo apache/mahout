@@ -27,7 +27,6 @@ import org.apache.mahout.math.function.Functions;
 
 import java.util.Locale;
 
-
 /**
  For an <tt>m x n</tt> matrix <tt>A</tt> with <tt>m >= n</tt>, the QR decomposition is an <tt>m x n</tt>
  orthogonal matrix <tt>Q</tt> and an <tt>n x n</tt> upper triangular matrix <tt>R</tt> so that
@@ -43,6 +42,7 @@ import java.util.Locale;
 public class QRDecomposition implements QR {
   private final Matrix q;
   private final Matrix r;
+  private final Matrix mType;
   private final boolean fullRank;
   private final int rows;
   private final int columns;
@@ -60,6 +60,7 @@ public class QRDecomposition implements QR {
     rows = a.rowSize();
     int min = Math.min(a.rowSize(), a.columnSize());
     columns = a.columnSize();
+    mType = a.like(1,1);
 
     Matrix qTmp = a.clone();
 
@@ -148,7 +149,7 @@ public class QRDecomposition implements QR {
     }
 
     int cols = B.numCols();
-    Matrix x = B.like(columns, cols);
+    Matrix x = mType.like(columns, cols);
 
     // this can all be done a bit more efficiently if we don't actually
     // form explicit versions of Q^T and R but this code isn't so bad

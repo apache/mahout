@@ -23,17 +23,14 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
-
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.classifier.ClassifierData;
 import org.apache.mahout.common.MahoutTestCase;
@@ -68,7 +65,7 @@ public final class SplitInputTest extends MahoutTestCase {
 
     super.setUp();
 
-    countMap = new OpenObjectIntHashMap<String>();
+    countMap = new OpenObjectIntHashMap<>();
 
     charset = Charsets.UTF_8;
     tempSequenceDirectory = getTestTempFilePath("tmpsequence");
@@ -192,15 +189,13 @@ public final class SplitInputTest extends MahoutTestCase {
    * @param path path for test SequenceFile
    * @param testPoints number of records in test SequenceFile
    */
-  private void writeVectorSequenceFile(Path path, int testPoints)
-      throws IOException {
+  private void writeVectorSequenceFile(Path path, int testPoints) throws IOException {
     Path tempSequenceFile = new Path(path, "part-00000");
     Configuration conf = getConfiguration();
     IntWritable key = new IntWritable();
     VectorWritable value = new VectorWritable();
-    SequenceFile.Writer writer = null;
-    try {
-      writer = SequenceFile.createWriter(fs, conf, tempSequenceFile, IntWritable.class, VectorWritable.class);
+    try (SequenceFile.Writer writer =
+             SequenceFile.createWriter(fs, conf, tempSequenceFile, IntWritable.class, VectorWritable.class)) {
       for (int i = 0; i < testPoints; i++) {
         key.set(i);
         Vector v = new SequentialAccessSparseVector(4);
@@ -208,8 +203,6 @@ public final class SplitInputTest extends MahoutTestCase {
         value.set(v);
         writer.append(key, value);
       }
-    } finally {
-      IOUtils.closeStream(writer);
     }
   }
 
@@ -223,18 +216,12 @@ public final class SplitInputTest extends MahoutTestCase {
     Configuration conf = getConfiguration();
     Text key = new Text();
     Text value = new Text();
-    SequenceFile.Writer writer = null;
-    try {
-      writer =
-          SequenceFile.createWriter(fs, conf, tempSequenceFile,
-              Text.class, Text.class);
+    try (SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, tempSequenceFile, Text.class, Text.class)){
       for (int i = 0; i < testPoints; i++) {
         key.set(Integer.toString(i));
         value.set("Line " + i);
         writer.append(key, value);
       }
-    } finally {
-      IOUtils.closeStream(writer);
     }
   }
 
@@ -243,7 +230,7 @@ public final class SplitInputTest extends MahoutTestCase {
    * @param sequenceFilePath path to SequenceFile
    */
   private void displaySequenceFile(Path sequenceFilePath) throws IOException {
-    for (Pair<?,?> record : new SequenceFileIterable<Writable,Writable>(sequenceFilePath, true, getConfiguration())) {
+    for (Pair<?,?> record : new SequenceFileIterable<>(sequenceFilePath, true, getConfiguration())) {
       System.out.println(record.getFirst() + "\t" + record.getSecond());
     }
   }
@@ -255,7 +242,7 @@ public final class SplitInputTest extends MahoutTestCase {
    */
   private int getNumberRecords(Path sequenceFilePath) throws IOException {
     int numberRecords = 0;
-    for (Object value : new SequenceFileValueIterable<Writable>(sequenceFilePath, true, getConfiguration())) {
+    for (Object value : new SequenceFileValueIterable<>(sequenceFilePath, true, getConfiguration())) {
       numberRecords++;
     }
     return numberRecords;

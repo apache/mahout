@@ -20,12 +20,10 @@ package org.apache.mahout.text;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
-
+import org.apache.commons.io.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -162,13 +160,10 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
   private static void createFilesFromArrays(Configuration conf, Path inputDir, String[][] data) throws IOException {
     FileSystem fs = FileSystem.get(conf);
-    OutputStreamWriter writer;
     for (String[] aData : data) {
-      writer = new OutputStreamWriter(fs.create(new Path(inputDir, aData[0])), Charsets.UTF_8);
-      try {
+      try (OutputStreamWriter writer =
+               new OutputStreamWriter(fs.create(new Path(inputDir, aData[0])), Charsets.UTF_8)){
         writer.write(aData[1]);
-      } finally {
-        Closeables.close(writer, false);
       }
     }
   }
@@ -182,21 +177,15 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     String currentRecursiveDir = inputDir.toString();
 
     for (String[] aData : data) {
-      OutputStreamWriter writer;
-
       currentRecursiveDir += "/" + aData[0];
       File subDir = new File(currentRecursiveDir);
       subDir.mkdir();
 
       curPath = new Path(subDir.toString(), "file.txt");
-      writer = new OutputStreamWriter(fs.create(curPath), Charsets.UTF_8);
-
       logger.info("Created file: {}", curPath.toString());
 
-      try {
+      try (OutputStreamWriter writer = new OutputStreamWriter(fs.create(curPath), Charsets.UTF_8)){
         writer.write(aData[1]);
-      } finally {
-        Closeables.close(writer, false);
       }
     }
   }
@@ -212,23 +201,20 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("chunk-0", fileStatuses[0].getPath().getName());
 
-    Map<String, String> fileToData = Maps.newHashMap();
+    Map<String, String> fileToData = new HashMap<>();
     for (String[] aData : data) {
       fileToData.put(prefix + Path.SEPARATOR + aData[0], aData[1]);
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator =
-      new SequenceFileIterator<Text, Text>(fileStatuses[0].getPath(), true, configuration);
-    try {
+    try (SequenceFileIterator<Text, Text> iterator =
+             new SequenceFileIterator<>(fileStatuses[0].getPath(), true, configuration)){
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();
         String retrievedData = fileToData.get(record.getFirst().toString().trim());
         assertNotNull(retrievedData);
         assertEquals(retrievedData, record.getSecond().toString().trim());
       }
-    } finally {
-      Closeables.close(iterator, true);
     }
   }
 
@@ -246,7 +232,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     assertEquals("chunk-0", fileStatuses[0].getPath().getName());
 
 
-    Map<String, String> fileToData = Maps.newHashMap();
+    Map<String, String> fileToData = new HashMap<>();
     String currentPath = prefix;
     for (String[] aData : data) {
       currentPath += Path.SEPARATOR + aData[0];
@@ -254,8 +240,8 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(fileStatuses[0].getPath(), true, configuration);
-    try {
+    try (SequenceFileIterator<Text, Text> iterator =
+             new SequenceFileIterator<>(fileStatuses[0].getPath(), true, configuration)) {
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();
         String retrievedData = fileToData.get(record.getFirst().toString().trim());
@@ -265,8 +251,6 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
         assertEquals(retrievedData, record.getSecond().toString().trim());
         System.out.printf(">>> k: %s, v: %s\n", record.getFirst().toString(), record.getSecond().toString());
       }
-    } finally {
-      Closeables.close(iterator, true);
     }
   }
 
@@ -278,16 +262,15 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("part-m-00000", fileStatuses[0].getPath().getName());
-    Map<String, String> fileToData = Maps.newHashMap();
+    Map<String, String> fileToData = new HashMap<>();
     for (String[] aData : data) {
       System.out.printf("map.put: %s %s\n", prefix + Path.SEPARATOR + aData[0], aData[1]);
       fileToData.put(prefix + Path.SEPARATOR + aData[0], aData[1]);
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(
-      fileStatuses[0].getPath(), true, conf);
-    try {
+    try (SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<>(
+        fileStatuses[0].getPath(), true, conf)) {
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();
         String retrievedData = fileToData.get(record.getFirst().toString().trim());
@@ -296,8 +279,6 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
         assertNotNull(retrievedData);
         assertEquals(retrievedData, record.getSecond().toString().trim());
       }
-    } finally {
-      Closeables.close(iterator, true);
     }
   }
 
@@ -309,7 +290,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("part-m-00000", fileStatuses[0].getPath().getName());
-    Map<String, String> fileToData = Maps.newHashMap();
+    Map<String, String> fileToData = new HashMap<>();
     String currentPath = prefix;
 
     for (String[] aData : data) {
@@ -318,9 +299,8 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(
-      fileStatuses[0].getPath(), true, configuration);
-    try {
+    try (SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<>(
+        fileStatuses[0].getPath(), true, configuration)){
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();
         System.out.printf("MR-Recur > Trying to check: %s\n", record.getFirst().toString().trim());
@@ -328,9 +308,6 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
         assertNotNull(retrievedData);
         assertEquals(retrievedData, record.getSecond().toString().trim());
       }
-    } finally {
-      Closeables.close(iterator, true);
     }
   }
 }
-

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.flavor.MatrixFlavor;
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.Functions;
 
 /**
@@ -225,5 +227,10 @@ public class SparseRowMatrix extends AbstractMatrix {
         return result;
       }
     }
+  }
+
+  @Override
+  public MatrixFlavor getFlavor() {
+    return MatrixFlavor.SPARSELIKE;
   }
 }

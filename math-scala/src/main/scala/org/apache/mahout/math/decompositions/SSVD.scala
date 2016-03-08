@@ -59,7 +59,7 @@ private[math] object SSVD {
     var bt = ch.solveRight(at %*% y)
 
     // Power iterations
-    for (i <- 0 until q) {
+    for (i ← 0 until q) {
       y = a %*% bt
       yty = y.t %*% y
       ch = chol(yty)
@@ -71,7 +71,7 @@ private[math] object SSVD {
 
     val s = d.sqrt
     val u = ch.solveRight(y) %*% uhat
-    val v = bt %*% (uhat %*%: diagv(1 /: s))
+    val v = bt %*% (uhat %*% diagv(1 /: s))
 
     (u(::, 0 until k), v(::, 0 until k), s(0 until k))
   }
@@ -108,15 +108,16 @@ private[math] object SSVD {
     val omega = Matrices.symmetricUniformView(n, r, rnd.nextInt)
 
     // Dataset mean
-    val xi = a.colMeans()
+    val mu = a.colMeans()
+    val mtm = mu dot mu
 
-    if (log.isDebugEnabled) log.debug("xi=%s".format(xi))
+    if (log.isDebugEnabled) log.debug("xi=%s".format(mu))
 
     var y = a %*% omega
 
     // Fixing y
-    val s_o = omega.t %*% xi
-    y := ((r,c,v) => v - s_o(c))
+    val s_o = omega.t %*% mu
+    y := ((r,c,v) ⇒ v - s_o(c))
 
     var yty = y.t %*% y
     var ch = chol(yty)
@@ -126,31 +127,32 @@ private[math] object SSVD {
     var qm = ch.solveRight(y)
     var bt = a.t %*% qm
     var s_q = qm.colSums()
-    var s_b = bt.t %*% xi
+    var s_b = bt.t %*% mu
 
     // Power iterations
-    for (i <- 0 until q) {
+    for (i ← 0 until q) {
 
       // Fix bt
-      bt -= xi cross s_q
+      bt -= mu cross s_q
 
       y = a %*% bt
 
       // Fix Y again.
-      y := ((r,c,v) => v - s_b(c))
+      val st_b = s_b -=: mtm * s_q
+      y := ((r,c,v) ⇒ v - st_b(c))
 
       yty = y.t %*% y
       ch = chol(yty)
       qm = ch.solveRight(y)
       bt = a.t %*% qm
       s_q = qm.colSums()
-      s_b = bt.t %*% xi
+      s_b = bt.t %*% mu
     }
 
     val c = s_q cross s_b
 
     // BB' computation becomes
-    val bbt = bt.t %*% bt -c - c.t +  (s_q cross s_q) * (xi dot xi)
+    val bbt = bt.t %*% bt -= c -= c.t += (mtm * s_q cross s_q)
 
     val (uhat, d) = eigen(bbt)
 

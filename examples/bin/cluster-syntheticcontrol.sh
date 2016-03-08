@@ -45,6 +45,8 @@ if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then
 fi
 START_PATH=`pwd`
 
+# Set commands for dfs
+source ${START_PATH}/set-dfs-commands.sh
 
 WORK_DIR=/tmp/mahout-work-${USER}
 
@@ -64,13 +66,13 @@ if [ ! -f ${WORK_DIR}/synthetic_control.data ]; then
 fi
 if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]; then
   echo "Checking the health of DFS..."
-  $HADOOP_HOME/bin/hadoop fs -ls 
+  $DFS -ls
   if [ $? -eq 0 ];then 
     echo "DFS is healthy... "
     echo "Uploading Synthetic control data to HDFS"
-    $HADOOP_HOME/bin/hadoop fs -rmr testdata
-    $HADOOP_HOME/bin/hadoop fs -mkdir testdata
-    $HADOOP_HOME/bin/hadoop fs -put ${WORK_DIR}/synthetic_control.data testdata
+    $DFSRM testdata
+    $DFS -mkdir testdata
+    $DFS -put ${WORK_DIR}/synthetic_control.data testdata
     echo "Successfully Uploaded Synthetic control data to HDFS "
 
     ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job

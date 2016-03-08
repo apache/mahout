@@ -38,7 +38,12 @@ class VectorOps(private[scalabindings] val v: Vector) {
 
   def update(r: Range, that: Vector) = apply(r) := that
 
+  /** R-like synonyms for java methods on vectors */
   def sum = v.zSum()
+
+  def min = v.minValue()
+
+  def max = v.maxValue()
 
   def :=(that: Vector): Vector = {
 
@@ -58,8 +63,27 @@ class VectorOps(private[scalabindings] val v: Vector) {
 
   def :=(that: Double): Vector = v.assign(that)
 
+  /** Functional assigment for a function with index and x */
   def :=(f: (Int, Double) => Double): Vector = {
     for (i <- 0 until length) v(i) = f(i, v(i))
+    v
+  }
+
+  /** Functional assignment for a function with just x (e.g. v :=  math.exp _) */
+  def :=(f:(Double)=>Double):Vector = {
+    for (i <- 0 until length) v(i) = f(v(i))
+    v
+  }
+
+  /** Sparse iteration functional assignment using function receiving index and x */
+  def ::=(f: (Int, Double) => Double): Vector = {
+    for (el <- v.nonZeroes) el := f(el.index, el.get)
+    v
+  }
+
+  /** Sparse iteration functional assignment using a function recieving just x */
+  def ::=(f: (Double) => Double): Vector = {
+    for (el <- v.nonZeroes) el := f(el.get)
     v
   }
 
@@ -77,9 +101,13 @@ class VectorOps(private[scalabindings] val v: Vector) {
 
   def +=(that: Vector) = v.assign(that, Functions.PLUS)
 
+  def +=:(that: Vector) = +=(that)
+
   def -=(that: Vector) = v.assign(that, Functions.MINUS)
 
   def +=(that: Double) = v.assign(Functions.PLUS, that)
+
+  def +=:(that: Double) = +=(that)
 
   def -=(that: Double) = +=(-that)
 
@@ -121,21 +149,26 @@ class VectorOps(private[scalabindings] val v: Vector) {
 }
 
 class ElementOps(private[scalabindings] val el: Vector.Element) {
+  import RLikeOps._
 
-  def apply = el.get()
+  def update(v: Double): Double = { el.set(v); v }
 
-  def update(v: Double) = el.set(v)
+  def :=(that: Double) = update(that)
 
-  def :=(v: Double) = el.set(v)
+  def *(that: Vector.Element): Double = this * that
 
-  def +(that: Double) = el.get() + that
+  def *(that: Vector): Vector = el.get * that
 
-  def -(that: Double) = el.get() - that
+  def +(that: Vector.Element): Double = this + that
 
-  def :-(that: Double) = that - el.get()
+  def +(that: Vector) :Vector = el.get + that
 
-  def /(that: Double) = el.get() / that
+  def /(that: Vector.Element): Double = this / that
 
-  def :/(that: Double) = that / el.get()
+  def /(that:Vector):Vector = el.get / that
+
+  def -(that: Vector.Element): Double = this - that
+
+  def -(that: Vector) :Vector = el.get - that
 
 }

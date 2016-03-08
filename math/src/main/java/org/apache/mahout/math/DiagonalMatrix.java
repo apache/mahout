@@ -17,6 +17,9 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.flavor.MatrixFlavor;
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -223,6 +226,11 @@ public class DiagonalMatrix extends AbstractMatrix implements MatrixTimesOps {
     }
 
     @Override
+    public Vector like(int cardinality) {
+      return new DenseVector(cardinality);
+    }
+
+    @Override
     public void setQuick(int index, double value) {
       if (index == this.index) {
         diagonal.set(this.index, value);
@@ -361,4 +369,10 @@ public class DiagonalMatrix extends AbstractMatrix implements MatrixTimesOps {
     }
     return m;
   }
+
+  @Override
+  public MatrixFlavor getFlavor() {
+    return MatrixFlavor.DIAGONALLIKE;
+  }
+
 }

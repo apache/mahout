@@ -133,12 +133,12 @@ public final class CassandraDataModel implements DataModel, Closeable {
     keyspace = HFactory.createKeyspace(keyspaceName, cluster);
     keyspace.setConsistencyLevelPolicy(new OneConsistencyLevelPolicy());
 
-    userCache = new Cache<Long,PreferenceArray>(new UserPrefArrayRetriever(), 1 << 20);
-    itemCache = new Cache<Long,PreferenceArray>(new ItemPrefArrayRetriever(), 1 << 20);
-    itemIDsFromUserCache = new Cache<Long,FastIDSet>(new ItemIDsFromUserRetriever(), 1 << 20);
-    userIDsFromItemCache = new Cache<Long,FastIDSet>(new UserIDsFromItemRetriever(), 1 << 20);
-    userCountCache = new AtomicReference<Integer>(null);
-    itemCountCache = new AtomicReference<Integer>(null);
+    userCache = new Cache<>(new UserPrefArrayRetriever(), 1 << 20);
+    itemCache = new Cache<>(new ItemPrefArrayRetriever(), 1 << 20);
+    itemIDsFromUserCache = new Cache<>(new ItemIDsFromUserRetriever(), 1 << 20);
+    userIDsFromItemCache = new Cache<>(new UserIDsFromItemRetriever(), 1 << 20);
+    userCountCache = new AtomicReference<>(null);
+    itemCountCache = new AtomicReference<>(null);
   }
 
   @Override
@@ -262,25 +262,25 @@ public final class CassandraDataModel implements DataModel, Closeable {
 
     Mutator<Long> mutator = HFactory.createMutator(keyspace, LongSerializer.get());
 
-    HColumn<Long,Float> itemForUsers = new HColumnImpl<Long,Float>(LongSerializer.get(), FloatSerializer.get());
+    HColumn<Long,Float> itemForUsers = new HColumnImpl<>(LongSerializer.get(), FloatSerializer.get());
     itemForUsers.setName(itemID);
     itemForUsers.setClock(now);
     itemForUsers.setValue(value);
     mutator.addInsertion(userID, USERS_CF, itemForUsers);
 
-    HColumn<Long,Float> userForItems = new HColumnImpl<Long,Float>(LongSerializer.get(), FloatSerializer.get());
+    HColumn<Long,Float> userForItems = new HColumnImpl<>(LongSerializer.get(), FloatSerializer.get());
     userForItems.setName(userID);
     userForItems.setClock(now);
     userForItems.setValue(value);
     mutator.addInsertion(itemID, ITEMS_CF, userForItems);
 
-    HColumn<Long,byte[]> userIDs = new HColumnImpl<Long,byte[]>(LongSerializer.get(), BytesArraySerializer.get());
+    HColumn<Long,byte[]> userIDs = new HColumnImpl<>(LongSerializer.get(), BytesArraySerializer.get());
     userIDs.setName(userID);
     userIDs.setClock(now);
     userIDs.setValue(EMPTY);
     mutator.addInsertion(ID_ROW_KEY, USER_IDS_CF, userIDs);
 
-    HColumn<Long,byte[]> itemIDs = new HColumnImpl<Long,byte[]>(LongSerializer.get(), BytesArraySerializer.get());
+    HColumn<Long,byte[]> itemIDs = new HColumnImpl<>(LongSerializer.get(), BytesArraySerializer.get());
     itemIDs.setName(itemID);
     itemIDs.setClock(now);
     itemIDs.setValue(EMPTY);

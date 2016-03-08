@@ -17,13 +17,6 @@
 
 package org.apache.mahout.cf.taste.example.email;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -53,9 +46,16 @@ import org.apache.mahout.math.VarIntWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Convert the Mail archives (see {@link org.apache.mahout.text.SequenceFilesFromMailArchives}) to a preference
- * file that can be consumed by the {@link org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob}.
+ * file that can be consumed by the {@link org.apache.mahout.cf.taste.hadoop.item.RecommenderJob}.
  * <p/>
  * This assumes the input is a Sequence File, that the key is: filename/message id and the value is a list
  * (separated by the user's choosing) containing the from email and any references
@@ -228,7 +228,7 @@ public final class MailToPrefsDriver extends AbstractJob {
                                                    Configuration baseConf,
                                                    int chunkSizeInMegabytes, int[] maxTermDimension)
     throws IOException {
-    List<Path> chunkPaths = Lists.newArrayList();
+    List<Path> chunkPaths = new ArrayList<>();
 
     Configuration conf = new Configuration(baseConf);
 
@@ -246,7 +246,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       Path filesPattern = new Path(inputPath, OUTPUT_FILES_PATTERN);
       int i = 1; //start at 1, since a miss in the OpenObjectIntHashMap returns a 0
       for (Pair<Writable, Writable> record
-              : new SequenceFileDirIterable<Writable, Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+              : new SequenceFileDirIterable<>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
           Closeables.close(dictWriter, false);
           chunkIndex++;

@@ -32,8 +32,8 @@ public final class MailToRecMapper extends Mapper<Text, Text, Text, LongWritable
 
   private static final Logger log = LoggerFactory.getLogger(MailToRecMapper.class);
 
-  private final OpenObjectIntHashMap<String> fromDictionary = new OpenObjectIntHashMap<String>();
-  private final OpenObjectIntHashMap<String> msgIdDictionary = new OpenObjectIntHashMap<String>();
+  private final OpenObjectIntHashMap<String> fromDictionary = new OpenObjectIntHashMap<>();
+  private final OpenObjectIntHashMap<String> msgIdDictionary = new OpenObjectIntHashMap<>();
   private String separator = "\n";
   private int fromIdx;
   private int refsIdx;

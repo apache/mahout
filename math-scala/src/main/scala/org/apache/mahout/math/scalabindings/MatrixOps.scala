@@ -17,8 +17,10 @@
 
 package org.apache.mahout.math.scalabindings
 
+import org.apache.mahout.math.flavor.TraversingStructureEnum
 import org.apache.mahout.math.{Matrices, QRDecomposition, Vector, Matrix}
-import scala.collection.JavaConversions._
+import collection._
+import JavaConversions._
 import org.apache.mahout.math.function.{DoubleDoubleFunction, VectorFunction, DoubleFunction, Functions}
 import scala.math._
 
@@ -40,6 +42,10 @@ class MatrixOps(val m: Matrix) {
   def unary_- = cloned.assign(Functions.NEGATE)
 
   def +=(that: Matrix) = m.assign(that, Functions.PLUS)
+
+  def +=:(that:Matrix) = m += that
+
+  def +=:(that:Double) = m += that
 
   def -=(that: Matrix) = m.assign(that, Functions.MINUS)
 
@@ -70,24 +76,30 @@ class MatrixOps(val m: Matrix) {
 
   def -:(that: Double) = that -=: cloned
 
-
-  def norm = sqrt(m.aggregate(Functions.PLUS, Functions.SQUARE))
+  def norm = math.sqrt(m.aggregate(Functions.PLUS, Functions.SQUARE))
 
   def pnorm(p: Int) = pow(m.aggregate(Functions.PLUS, Functions.chain(Functions.ABS, Functions.pow(p))), 1.0 / p)
 
   def apply(row: Int, col: Int) = m.get(row, col)
 
-  def update(row: Int, col: Int, v: Double): Matrix = {
-    m.setQuick(row, col, v);
+  def update(row: Int, col: Int, that: Double): Matrix = {
+    m.setQuick(row, col, that);
     m
   }
+
+  def update(rowRange: Range, colRange: Range, that: Double) = apply(rowRange, colRange) := that
+
+  def update(row: Int, colRange: Range, that: Double) = apply(row, colRange) := that
+
+  def update(rowRange: Range, col: Int, that: Double) = apply(rowRange, col) := that
 
   def update(rowRange: Range, colRange: Range, that: Matrix) = apply(rowRange, colRange) := that
 
   def update(row: Int, colRange: Range, that: Vector) = apply(row, colRange) := that
 
   def update(rowRange: Range, col: Int, that: Vector) = apply(rowRange, col) := that
-
+  
+  
   def apply(rowRange: Range, colRange: Range): Matrix = {
 
     if (rowRange == :: &&
@@ -140,12 +152,60 @@ class MatrixOps(val m: Matrix) {
     })
   }
 
+  def :=(that: Double) = m.assign(that)
+
   def :=(f: (Int, Int, Double) => Double): Matrix = {
-    for (r <- 0 until nrow; c <- 0 until ncol) m(r, c) = f(r, c, m(r, c))
+    import RLikeOps._
+    m.getFlavor.getStructure match {
+      case TraversingStructureEnum.COLWISE | TraversingStructureEnum.SPARSECOLWISE =>
+        for (col <- t; el <- col.all) el := f(el.index, col.index, el)
+      case default =>
+        for (row <- m; el <- row.all) el := f(row.index, el.index, el)
+    }
     m
   }
 
-  def cloned: Matrix = m.like := m
+  /** Functional assign with (Double) => Double */
+  def :=(f: (Double) => Double): Matrix = {
+    import RLikeOps._
+    m.getFlavor.getStructure match {
+      case TraversingStructureEnum.COLWISE | TraversingStructureEnum.SPARSECOLWISE =>
+        for (col <- t; el <- col.all) el := f(el)
+      case default =>
+        for (row <- m; el <- row.all) el := f(el)
+    }
+    m
+  }
+
+  /** Sparse assign: iterate and assign over non-zeros only */
+  def ::=(f: (Int, Int, Double) => Double): Matrix = {
+
+    import RLikeOps._
+
+    m.getFlavor.getStructure match {
+      case TraversingStructureEnum.COLWISE | TraversingStructureEnum.SPARSECOLWISE =>
+        for (col <- t; el <- col.nonZeroes) el := f(el.index, col.index, el)
+      case default =>
+        for (row <- m; el <- row.nonZeroes) el := f(row.index, el.index, el)
+    }
+    m
+  }
+
+  /** Sparse function assign: iterate and assign over non-zeros only */
+  def ::=(f: (Double) => Double): Matrix = {
+
+    import RLikeOps._
+
+    m.getFlavor.getStructure match {
+      case TraversingStructureEnum.COLWISE | TraversingStructureEnum.SPARSECOLWISE =>
+        for (col <- t; el <- col.nonZeroes) el := f(el)
+      case default =>
+        for (row <- m; el <- row.nonZeroes) el := f(el)
+    }
+    m
+  }
+
+    def cloned: Matrix = m.like := m
 
   /**
    * Ideally, we would probably want to override equals(). But that is not
@@ -155,11 +215,14 @@ class MatrixOps(val m: Matrix) {
    * @return
    */
   def equiv(that: Matrix) =
+
+  // Warning: TODO: This would actually create empty objects in SparseMatrix. Should really implement
+  // merge-type comparison strategy using iterateNonEmpty.
     that != null &&
-        nrow == that.nrow &&
-        m.view.zip(that).forall(t => {
-          t._1.equiv(t._2)
-        })
+      nrow == that.nrow &&
+      m.view.zip(that).forall(t => {
+        t._1.equiv(t._2)
+      })
 
   def nequiv(that: Matrix) = !equiv(that)
 

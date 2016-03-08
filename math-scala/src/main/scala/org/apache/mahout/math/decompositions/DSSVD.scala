@@ -7,8 +7,11 @@ import RLikeOps._
 import org.apache.mahout.math.drm._
 import RLikeDrmOps._
 import org.apache.mahout.common.RandomUtils
+import org.apache.mahout.logging._
 
 object DSSVD {
+
+  private final implicit val log = getLog(DSSVD.getClass)
 
   /**
    * Distributed Stochastic Singular Value decomposition algorithm.
@@ -43,17 +46,21 @@ object DSSVD {
       case (keys, blockA) =>
         val blockY = blockA %*% Matrices.symmetricUniformView(n, r, omegaSeed)
         keys -> blockY
-    }
+    }.checkpoint()
 
-    var drmQ = dqrThin(drmY.checkpoint())._1
+    var drmQ = dqrThin(drmY)._1
     // Checkpoint Q if last iteration
     if (q == 0) drmQ = drmQ.checkpoint()
+
+    trace(s"dssvd:drmQ=${drmQ.collect}.")
 
     // This actually should be optimized as identically partitioned map-side A'B since A and Q should
     // still be identically partitioned.
     var drmBt = drmAcp.t %*% drmQ
     // Checkpoint B' if last iteration
     if (q == 0) drmBt = drmBt.checkpoint()
+
+    trace(s"dssvd:drmB'=${drmBt.collect}.")
 
     for (i <- 0  until q) {
       drmY = drmAcp %*% drmBt
@@ -62,13 +69,17 @@ object DSSVD {
       if (i == q - 1) drmQ = drmQ.checkpoint()
 
       // This on the other hand should be inner-join-and-map A'B optimization since A and Q_i are not
-      // identically partitioned anymore.
+      // identically partitioned anymore.`
       drmBt = drmAcp.t %*% drmQ
       // Checkpoint B' if last iteration
       if (i == q - 1) drmBt = drmBt.checkpoint()
     }
 
-    val (inCoreUHat, d) = eigen(drmBt.t %*% drmBt)
+    val mxBBt:Matrix = drmBt.t %*% drmBt
+
+    trace(s"dssvd: BB'=$mxBBt.")
+
+    val (inCoreUHat, d) = eigen(mxBBt)
     val s = d.sqrt
 
     // Since neither drmU nor drmV are actually computed until actually used, we don't need the flags

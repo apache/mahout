@@ -112,7 +112,7 @@ public final class DataFileIterator
       ratingsLeftToRead--;
     }
 
-    return new Pair<PreferenceArray,long[]>(currentUserPrefs, timestamps);
+    return new Pair<>(currentUserPrefs, timestamps);
   }
 
   @Override

@@ -28,7 +28,5 @@ import scala.math._
 import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
-class DistributedDecompositionsSuite extends FunSuite with DistributedSparkSuite with DistributedDecompositionsSuiteBase {
-
-
-}
+class DistributedDecompositionsSuite extends FunSuite
+with DistributedSparkSuite with DistributedDecompositionsSuiteBase

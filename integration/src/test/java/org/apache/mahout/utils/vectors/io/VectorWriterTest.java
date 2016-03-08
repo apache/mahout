@@ -18,10 +18,8 @@
 package org.apache.mahout.utils.vectors.io;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collection;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -44,11 +42,8 @@ public final class VectorWriterTest extends MahoutTestCase {
     Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
-    SequenceFileVectorWriter writer = new SequenceFileVectorWriter(seqWriter);
-    try {
+    try (SequenceFileVectorWriter writer = new SequenceFileVectorWriter(seqWriter)) {
       writer.write(new RandomVectorIterable(50));
-    } finally {
-      Closeables.close(writer, false);
     }
 
     long count = HadoopUtil.countRecords(path, conf);
@@ -58,14 +53,11 @@ public final class VectorWriterTest extends MahoutTestCase {
   @Test
   public void testTextOutputSize() throws Exception {
     StringWriter strWriter = new StringWriter();
-    VectorWriter writer = new TextualVectorWriter(strWriter);
-    try {
-      Collection<Vector> vectors = Lists.newArrayList();
+    try (VectorWriter writer = new TextualVectorWriter(strWriter)) {
+      Collection<Vector> vectors = new ArrayList<>();
       vectors.add(new DenseVector(new double[]{0.3, 1.5, 4.5}));
       vectors.add(new DenseVector(new double[]{1.3, 1.5, 3.5}));
       writer.write(vectors);
-    } finally {
-      Closeables.close(writer, false);
     }
     String buffer = strWriter.toString();
     assertNotNull(buffer);

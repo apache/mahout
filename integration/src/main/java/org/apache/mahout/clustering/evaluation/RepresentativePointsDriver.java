@@ -18,12 +18,10 @@
 package org.apache.mahout.clustering.evaluation;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -98,8 +96,6 @@ public final class RepresentativePointsDriver extends AbstractJob {
    *          the Path to the directory containing representativePoints-i folders
    * @param numIterations
    *          the int number of iterations to print
-   * @throws IOException
-   *           if errors occur
    */
   public static void printRepresentativePoints(Path output, int numIterations) {
     for (int i = 0; i <= numIterations; i++) {
@@ -141,8 +137,8 @@ public final class RepresentativePointsDriver extends AbstractJob {
       for (FileStatus part : fs.listStatus(inPath, PathFilters.logsCRCFilter())) {
         Path inPart = part.getPath();
         Path path = new Path(output, inPart.getName());
-        SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-        try {
+        try (SequenceFile.Writer writer =
+                 new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class)){
           for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(inPart, true, conf)) {
             Cluster cluster = clusterWritable.getValue();
             if (log.isDebugEnabled()) {
@@ -150,8 +146,6 @@ public final class RepresentativePointsDriver extends AbstractJob {
             }
             writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
           }
-        } finally {
-          Closeables.close(writer, false);
         }
       }
     }
@@ -184,7 +178,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
       DistanceMeasure measure) throws IOException {
     
     Map<Integer,List<VectorWritable>> repPoints = RepresentativePointsMapper.getRepresentativePoints(conf, stateIn);
-    Map<Integer,WeightedVectorWritable> mostDistantPoints = Maps.newHashMap();
+    Map<Integer,WeightedVectorWritable> mostDistantPoints = new HashMap<>();
     FileSystem fs = FileSystem.get(clusteredPointsIn.toUri(), conf);
     for (Pair<IntWritable,WeightedVectorWritable> record
         : new SequenceFileDirIterable<IntWritable,WeightedVectorWritable>(clusteredPointsIn, PathType.LIST,
@@ -192,25 +186,19 @@ public final class RepresentativePointsDriver extends AbstractJob {
       RepresentativePointsMapper.mapPoint(record.getFirst(), record.getSecond(), measure, repPoints, mostDistantPoints);
     }
     int part = 0;
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(stateOut, "part-m-" + part++),
-        IntWritable.class, VectorWritable.class);
-    try {
+    try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(stateOut, "part-m-" + part++),
+        IntWritable.class, VectorWritable.class)){
       for (Entry<Integer,List<VectorWritable>> entry : repPoints.entrySet()) {
         for (VectorWritable vw : entry.getValue()) {
           writer.append(new IntWritable(entry.getKey()), vw);
         }
       }
-    } finally {
-      Closeables.close(writer, false);
     }
-    writer = new SequenceFile.Writer(fs, conf, new Path(stateOut, "part-m-" + part++), IntWritable.class,
-        VectorWritable.class);
-    try {
+    try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(stateOut, "part-m-" + part++),
+        IntWritable.class, VectorWritable.class)){
       for (Map.Entry<Integer,WeightedVectorWritable> entry : mostDistantPoints.entrySet()) {
         writer.append(new IntWritable(entry.getKey()), new VectorWritable(entry.getValue().getVector()));
       }
-    } finally {
-      Closeables.close(writer, false);
     }
   }
   

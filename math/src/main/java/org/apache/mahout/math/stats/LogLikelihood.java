@@ -18,10 +18,10 @@
 package org.apache.mahout.math.stats;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -159,7 +159,7 @@ public final class LogLikelihood {
         return Double.compare(tScoredItem.score, tScoredItem1.score);
       }
     };
-    Queue<ScoredItem<T>> best = new PriorityQueue<ScoredItem<T>>(maxReturn + 1, byScoreAscending);
+    Queue<ScoredItem<T>> best = new PriorityQueue<>(maxReturn + 1, byScoreAscending);
 
     for (T t : a.elementSet()) {
       compareAndAdd(a, b, maxReturn, threshold, totalA, totalB, best, t);
@@ -175,7 +175,7 @@ public final class LogLikelihood {
       }
     }
 
-    List<ScoredItem<T>> r = Lists.newArrayList(best);
+    List<ScoredItem<T>> r = new ArrayList<>(best);
     Collections.sort(r, byScoreAscending.reverse());
     return r;
   }
@@ -192,7 +192,7 @@ public final class LogLikelihood {
     int kB = b.count(t);
     double score = rootLogLikelihoodRatio(kA, totalA - kA, kB, totalB - kB);
     if (score >= threshold) {
-      ScoredItem<T> x = new ScoredItem<T>(t, score);
+      ScoredItem<T> x = new ScoredItem<>(t, score);
       best.add(x);
       while (best.size() > maxReturn) {
         best.poll();
