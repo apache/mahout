@@ -42,7 +42,7 @@ private[math] object ALS {
    * @param drmV V matrix
    * @param iterationsRMSE RMSE values afeter each of iteration performed
    */
-  class Result[K](val drmU: DrmLike[K], val drmV: DrmLike[Int], val iterationsRMSE: Iterable[Double]) {
+  class Result[K: ClassTag](val drmU: DrmLike[K], val drmV: DrmLike[Int], val iterationsRMSE: Iterable[Double]) {
     def toTuple = (drmU, drmV, iterationsRMSE)
   }
 
@@ -74,7 +74,7 @@ private[math] object ALS {
    * @tparam K row key type of the input (100 is probably more than enough)
    * @return { @link org.apache.mahout.math.drm.decompositions.ALS.Result}
    */
-  def dals[K](
+  def dals[K: ClassTag](
       drmA: DrmLike[K],
       k: Int = 50,
       lambda: Double = 0.0,
@@ -84,9 +84,6 @@ private[math] object ALS {
 
     assert(convergenceThreshold < 1.0, "convergenceThreshold")
     assert(maxIterations >= 1, "maxIterations")
-
-    // Some mapblock() usage may require to know ClassTag[K] bound
-    implicit val ktag = drmA.keyClassTag
 
     val drmAt = drmA.t
 

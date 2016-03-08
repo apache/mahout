@@ -32,9 +32,7 @@ object CbindAB {
 
   private val log = Logger.getLogger(CbindAB.getClass)
 
-  def cbindAScalar[K](op: OpCbindScalar[K], srcA:DrmRddInput[K]) : DrmRddInput[K] = {
-
-    implicit val ktag = op.keyClassTag
+  def cbindAScalar[K:ClassTag](op: OpCbindScalar[K], srcA:DrmRddInput[K]) : DrmRddInput[K] = {
     val srcRdd = srcA.toDrmRdd()
 
     val ncol = op.A.ncol
@@ -62,14 +60,13 @@ object CbindAB {
     resultRdd
   }
 
-  def cbindAB_nograph[K](op: OpCbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
+  def cbindAB_nograph[K: ClassTag](op: OpCbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
 
     val a = srcA.toDrmRdd()
     val b = srcB.toDrmRdd()
     val n = op.ncol
     val n1 = op.A.ncol
     val n2 = n - n1
-    implicit val ktag = op.keyClassTag
 
     // Check if A and B are identically partitioned AND keyed. if they are, then just perform zip
     // instead of join, and apply the op map-side. Otherwise, perform join and apply the op

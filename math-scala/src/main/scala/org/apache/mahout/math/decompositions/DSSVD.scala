@@ -23,11 +23,8 @@ object DSSVD {
    * @return (U,V,s). Note that U, V are non-checkpointed matrices (i.e. one needs to actually use them
    *         e.g. save them to hdfs in order to trigger their computation.
    */
-  def dssvd[K](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+  def dssvd[K: ClassTag](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
   (DrmLike[K], DrmLike[Int], Vector) = {
-
-    // Some mapBlock() calls need it
-    implicit val ktag =  drmA.keyClassTag
 
     val drmAcp = drmA.checkpoint()
 
@@ -46,9 +43,9 @@ object DSSVD {
     // instantiate the Omega random matrix view in the backend instead. That way serialized closure
     // is much more compact.
     var drmY = drmAcp.mapBlock(ncol = r) {
-      case (keys, blockA) ⇒
+      case (keys, blockA) =>
         val blockY = blockA %*% Matrices.symmetricUniformView(n, r, omegaSeed)
-        keys → blockY
+        keys -> blockY
     }.checkpoint()
 
     var drmQ = dqrThin(drmY)._1
@@ -65,7 +62,7 @@ object DSSVD {
 
     trace(s"dssvd:drmB'=${drmBt.collect}.")
 
-    for (i ← 0  until q) {
+    for (i <- 0  until q) {
       drmY = drmAcp %*% drmBt
       drmQ = dqrThin(drmY.checkpoint())._1
       // Checkpoint Q if last iteration

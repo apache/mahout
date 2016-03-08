@@ -108,10 +108,10 @@ package object sparkbindings {
   implicit def sb2bc[T](b: Broadcast[T]): BCast[T] = new SparkBCast(b)
 
   /** Adding Spark-specific ops */
-  implicit def cpDrm2cpDrmSparkOps[K](drm: CheckpointedDrm[K]): CheckpointedDrmSparkOps[K] =
+  implicit def cpDrm2cpDrmSparkOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmSparkOps[K] =
     new CheckpointedDrmSparkOps[K](drm)
 
-  implicit def drm2cpDrmSparkOps[K](drm: DrmLike[K]): CheckpointedDrmSparkOps[K] = drm: CheckpointedDrm[K]
+  implicit def drm2cpDrmSparkOps[K: ClassTag](drm: DrmLike[K]): CheckpointedDrmSparkOps[K] = drm: CheckpointedDrm[K]
 
   private[sparkbindings] implicit def m2w(m: Matrix): MatrixWritable = new MatrixWritable(m)
 

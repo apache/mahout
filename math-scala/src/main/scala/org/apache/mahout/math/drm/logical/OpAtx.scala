@@ -22,8 +22,6 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
 
-import scala.reflect.ClassTag
-
 /** Logical A'x. */
 case class OpAtx(
     override var A: DrmLike[Int],
@@ -33,12 +31,6 @@ case class OpAtx(
   override protected[mahout] lazy val partitioningTag: Long = A.partitioningTag
 
   assert(A.nrow == x.length, "Incompatible operand geometry")
-
-  /**
-    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
-    * implementation knows it
-    */
-  override val keyClassTag = ClassTag.Int
 
   /** R-like syntax for number of rows. */
   def nrow: Long = safeToNonNegInt(A.ncol)

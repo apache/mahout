@@ -19,7 +19,7 @@ package org.apache.mahout.math.drm.logical
 import reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 
-case class OpCbindScalar[K](
+case class OpCbindScalar[K:ClassTag](
   override var A:DrmLike[K],
   var x:Double,
   val leftBind:Boolean ) extends AbstractUnaryOp[K,K] {
@@ -27,12 +27,6 @@ case class OpCbindScalar[K](
   override protected[mahout] lazy val canHaveMissingRows: Boolean = false
 
   override protected[mahout] lazy val partitioningTag: Long = A.partitioningTag
-
-  /**
-    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
-    * implementation knows it
-    */
-  override def keyClassTag = A.keyClassTag
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.nrow

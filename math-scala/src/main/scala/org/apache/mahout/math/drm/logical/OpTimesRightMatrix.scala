@@ -24,7 +24,7 @@ import RLikeOps._
 import org.apache.mahout.math.drm.DrmLike
 
 /** Logical times-right over in-core matrix operand. */
-case class OpTimesRightMatrix[K](
+case class OpTimesRightMatrix[K: ClassTag](
     override var A: DrmLike[K],
     val right: Matrix
     ) extends AbstractUnaryOp[K, K] {
@@ -32,12 +32,6 @@ case class OpTimesRightMatrix[K](
   override protected[mahout] lazy val partitioningTag: Long = A.partitioningTag
 
   assert(A.ncol == right.nrow, "Incompatible operand geometry")
-
-  /**
-    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
-    * implementation knows it
-    */
-  override lazy val keyClassTag = A.keyClassTag
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.nrow

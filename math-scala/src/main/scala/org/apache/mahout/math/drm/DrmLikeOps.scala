@@ -22,7 +22,7 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.drm.logical.{OpPar, OpMapBlock, OpRowRange}
 
 /** Common Drm ops */
-class DrmLikeOps[K](protected[drm] val drm: DrmLike[K]) {
+class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
 
   /**
    * Parallelism adjustments. <P/>
@@ -90,11 +90,9 @@ class DrmLikeOps[K](protected[drm] val drm: DrmLike[K]) {
     import RLikeDrmOps._
     import RLikeOps._
 
-    implicit val ktag = drm.keyClassTag
-
     val rowSrc: DrmLike[K] = if (rowRange != ::) {
 
-      if (ClassTag.Int == ktag) {
+      if (implicitly[ClassTag[Int]] == implicitly[ClassTag[K]]) {
 
         assert(rowRange.head >= 0 && rowRange.last < drm.nrow, "rows range out of range")
         val intKeyed = drm.asInstanceOf[DrmLike[Int]]

@@ -34,6 +34,13 @@ trait CheckpointedDrm[K] extends DrmLike[K] {
   /** If this checkpoint is already declared cached, uncache. */
   def uncache(): this.type
 
+  /**
+   * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+   * implementation knows it
+   */
+  def keyClassTag: ClassTag[K]
+
+
   /** changes the number of rows without touching the underlying data */
   def newRowCardinality(n: Int): CheckpointedDrm[K]
 

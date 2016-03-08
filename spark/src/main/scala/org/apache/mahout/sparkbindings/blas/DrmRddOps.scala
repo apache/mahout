@@ -23,7 +23,7 @@ import RLikeOps._
 import org.apache.mahout.math.{SequentialAccessSparseVector, DenseVector}
 import org.apache.mahout.sparkbindings.DrmRdd
 
-class DrmRddOps[K](private[blas] val rdd: DrmRdd[K]) {
+class DrmRddOps[K: ClassTag](private[blas] val rdd: DrmRdd[K]) {
 
   /** Turn RDD into dense row-wise vectors if density threshold is exceeded. */
   def densify(threshold: Double = 0.80): DrmRdd[K] = rdd.map({

@@ -36,16 +36,16 @@ object H2OEngine extends DistributedEngine {
   // By default, use Hadoop 1 utils
   var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
 
-  def colMeans[K](drm: CheckpointedDrm[K]): Vector =
+  def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
     H2OHelper.colMeans(drm.h2odrm.frame)
 
-  def colSums[K](drm: CheckpointedDrm[K]): Vector =
+  def colSums[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
     H2OHelper.colSums(drm.h2odrm.frame)
 
-  def norm[K](drm: CheckpointedDrm[K]): Double =
+  def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double =
     H2OHelper.sumSqr(drm.h2odrm.frame)
 
-  def numNonZeroElementsPerColumn[K](drm: CheckpointedDrm[K]): Vector =
+  def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector =
     H2OHelper.nonZeroCnt(drm.h2odrm.frame)
 
   /** Broadcast support */
@@ -94,33 +94,33 @@ object H2OEngine extends DistributedEngine {
       case OpAtAnyKey(_) =>
         throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
       // Linear algebra operators
-      case op@OpAt(a) => At.exec(tr2phys(a)(a.keyClassTag))
-      case op@OpABt(a, b) => ABt.exec(tr2phys(a)(a.keyClassTag), tr2phys(b)(b.keyClassTag))
-      case op@OpAtB(a, b) => AtB.exec(tr2phys(a)(a.keyClassTag), tr2phys(b)(b.keyClassTag))
-      case op@OpAtA(a) => AtA.exec(tr2phys(a)(a.keyClassTag))
-      case op@OpAx(a, v) => Ax.exec(tr2phys(a)(a.keyClassTag), v)
-      case op@OpAtx(a, v) => Atx.exec(tr2phys(a)(a.keyClassTag), v)
-      case op@OpAewUnaryFunc(a, f, z) => AewUnary.exec(tr2phys(a)(a.keyClassTag), op.f, z)
-      case op@OpAewUnaryFuncFusion(a, f) => AewUnary.exec(tr2phys(a)(a.keyClassTag), op.f, op.evalZeros)
-      case op@OpAewB(a, b, opId) => AewB.exec(tr2phys(a)(a.keyClassTag), tr2phys(b)(b.keyClassTag), opId)
-      case op@OpAewScalar(a, s, opId) => AewScalar.exec(tr2phys(a)(a.keyClassTag), s, opId)
-      case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.exec(tr2phys(a)(a.keyClassTag), m)
+      case op@OpAt(a) => At.exec(tr2phys(a)(op.classTagA))
+      case op@OpABt(a, b) => ABt.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpAtB(a, b) => AtB.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpAtA(a) => AtA.exec(tr2phys(a)(op.classTagA))
+      case op@OpAx(a, v) => Ax.exec(tr2phys(a)(op.classTagA), v)
+      case op@OpAtx(a, v) => Atx.exec(tr2phys(a)(op.classTagA), v)
+      case op@OpAewUnaryFunc(a, f, z) => AewUnary.exec(tr2phys(a)(op.classTagA), op.f, z)
+      case op@OpAewUnaryFuncFusion(a, f) => AewUnary.exec(tr2phys(a)(op.classTagA), op.f, op.evalZeros)
+      case op@OpAewB(a, b, opId) => AewB.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB), opId)
+      case op@OpAewScalar(a, s, opId) => AewScalar.exec(tr2phys(a)(op.classTagA), s, opId)
+      case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.exec(tr2phys(a)(op.classTagA), m)
       // Non arithmetic
-      case op@OpCbind(a, b) => Cbind.exec(tr2phys(a)(a.keyClassTag), tr2phys(b)(b.keyClassTag))
-      case op@OpCbindScalar(a, d, left) => CbindScalar.exec(tr2phys(a)(a.keyClassTag), d, left)
-      case op@OpRbind(a, b) => Rbind.exec(tr2phys(a)(a.keyClassTag), tr2phys(b)(b.keyClassTag))
-      case op@OpRowRange(a, r) => RowRange.exec(tr2phys(a)(a.keyClassTag), r)
+      case op@OpCbind(a, b) => Cbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpCbindScalar(a, d, left) => CbindScalar.exec(tr2phys(a)(op.classTagA), d, left)
+      case op@OpRbind(a, b) => Rbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpRowRange(a, r) => RowRange.exec(tr2phys(a)(op.classTagA), r)
       // Custom operators
-      case blockOp: OpMapBlock[K, _] => MapBlock.exec(tr2phys(blockOp.A)(blockOp.A.keyClassTag), blockOp.ncol, blockOp.bmf,
-        (blockOp.keyClassTag == classTag[String]), blockOp.A.keyClassTag, blockOp.keyClassTag)
-      case op@OpPar(a, m, e) => Par.exec(tr2phys(a)(a.keyClassTag), m, e)
+      case blockOp: OpMapBlock[K, _] => MapBlock.exec(tr2phys(blockOp.A)(blockOp.classTagA), blockOp.ncol, blockOp.bmf,
+        (blockOp.classTagK == implicitly[ClassTag[String]]), blockOp.classTagA, blockOp.classTagK)
+      case op@OpPar(a, m, e) => Par.exec(tr2phys(a)(op.classTagA), m, e)
       case cp: CheckpointedDrm[K] => cp.h2odrm
       case _ => throw new IllegalArgumentException("Internal:Optimizer has no exec policy for operator %s."
           .format(oper))
     }
   }
 
-  implicit def cp2cph2o[K](drm: CheckpointedDrm[K]): CheckpointedDrmH2O[K] = drm.asInstanceOf[CheckpointedDrmH2O[K]]
+  implicit def cp2cph2o[K:ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmH2O[K] = drm.asInstanceOf[CheckpointedDrmH2O[K]]
 
   /** stub class not implemented in H2O */
   abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictionary, val columnIDs: BiDictionary)
@@ -167,23 +167,23 @@ object H2OEngine extends DistributedEngine {
    * TODO: implement this please.
    *
    */
-  override def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc)
+  override def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc)
   : Matrix = H2OHelper.allreduceBlock(drm.h2odrm, bmf, rf)
 
   /**
    * TODO: implement this please.
    */
-  override def drmSampleKRows[K](drmX: DrmLike[K], numSamples: Int, replacement: Boolean): Matrix = ???
+  override def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples: Int, replacement: Boolean): Matrix = ???
 
   /**
    * (Optional) Sampling operation. Consistent with Spark semantics of the same.
    * TODO: implement this please.
    */
-  override def drmSampleRows[K](drmX: DrmLike[K], fraction: Double, replacement: Boolean): DrmLike[K] = ???
+  override def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean): DrmLike[K] = ???
 
   /**
    * TODO: implement this please.
    */
-  override def drm2IntKeyed[K](drmX: DrmLike[K], computeMap: Boolean)
+  override def drm2IntKeyed[K: ClassTag](drmX: DrmLike[K], computeMap: Boolean)
   : (DrmLike[Int], Option[DrmLike[K]]) = ???
 }

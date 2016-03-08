@@ -37,15 +37,15 @@ package object drm {
 
   private[drm] final val log = Logger.getLogger("org.apache.mahout.sparkbindings");
 
-  private[sparkbindings] implicit def cpDrm2DrmRddInput[K](cp: CheckpointedDrmSpark[K]): DrmRddInput[K] =
+  private[sparkbindings] implicit def cpDrm2DrmRddInput[K: ClassTag](cp: CheckpointedDrmSpark[K]): DrmRddInput[K] =
     cp.rddInput
 
-  private[sparkbindings] implicit def cpDrmGeneric2DrmRddInput[K](cp: CheckpointedDrm[K]): DrmRddInput[K] =
+  private[sparkbindings] implicit def cpDrmGeneric2DrmRddInput[K: ClassTag](cp: CheckpointedDrm[K]): DrmRddInput[K] =
     cp.asInstanceOf[CheckpointedDrmSpark[K]]
 
-  private[sparkbindings] implicit def drmRdd2drmRddInput[K:ClassTag](rdd: DrmRdd[K]) = new DrmRddInput[K](Left(rdd))
+  private[sparkbindings] implicit def drmRdd2drmRddInput[K: ClassTag](rdd: DrmRdd[K]) = new DrmRddInput[K](Left(rdd))
 
-  private[sparkbindings] implicit def blockifiedRdd2drmRddInput[K:ClassTag](rdd: BlockifiedDrmRdd[K]) = new
+  private[sparkbindings] implicit def blockifiedRdd2drmRddInput[K: ClassTag](rdd: BlockifiedDrmRdd[K]) = new
       DrmRddInput[K](
     Right(rdd))
 

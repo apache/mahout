@@ -39,10 +39,7 @@ object DQR {
    * It also guarantees that Q is partitioned exactly the same way (and in same key-order) as A, so
    * their RDD should be able to zip successfully.
    */
-  def dqrThin[K](drmA: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
-
-    // Some mapBlock() calls need it
-    implicit val ktag =  drmA.keyClassTag
+  def dqrThin[K: ClassTag](drmA: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
 
     if (drmA.ncol > 5000)
       warn("A is too fat. A'A must fit in memory and easily broadcasted.")

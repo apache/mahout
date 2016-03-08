@@ -17,12 +17,13 @@
 
 package org.apache.mahout.math.drm.logical
 
+import scala.reflect.ClassTag
+import org.apache.mahout.math.scalabindings._
+import RLikeOps._
 import org.apache.mahout.math.drm.{BlockMapFunc, DrmLike}
-
-import scala.reflect.{ClassTag, classTag}
 import scala.util.Random
 
-case class OpMapBlock[S, R: ClassTag](
+case class OpMapBlock[S: ClassTag, R: ClassTag](
     override var A: DrmLike[S],
     val bmf: BlockMapFunc[S, R],
     val _ncol: Int = -1,
@@ -32,12 +33,6 @@ case class OpMapBlock[S, R: ClassTag](
 
   override protected[mahout] lazy val partitioningTag: Long =
     if (identicallyPartitioned) A.partitioningTag else Random.nextLong()
-
-  /**
-    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
-    * implementation knows it
-    */
-  override def keyClassTag = classTag[R]
 
   /** R-like syntax for number of rows. */
   def nrow: Long = if (_nrow >= 0) _nrow else A.nrow

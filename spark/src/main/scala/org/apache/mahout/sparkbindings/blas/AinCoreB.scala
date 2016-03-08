@@ -17,10 +17,7 @@ object AinCoreB {
 
   private final implicit val log = getLog(AinCoreB.getClass)
 
-  def rightMultiply[K](op: OpTimesRightMatrix[K], srcA: DrmRddInput[K]): DrmRddInput[K] = {
-
-    implicit val ktag = op.keyClassTag
-
+  def rightMultiply[K: ClassTag](op: OpTimesRightMatrix[K], srcA: DrmRddInput[K]): DrmRddInput[K] = {
     if ( op.right.isInstanceOf[DiagonalMatrix])
       rightMultiply_diag(op, srcA)
     else

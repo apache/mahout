@@ -26,7 +26,7 @@ import scala.util.Random
  *
  * @deprecated use [[OpAewUnaryFunc]] instead
  */
-case class OpAewScalar[K](
+case class OpAewScalar[K: ClassTag](
     override var A: DrmLike[K],
     val scalar: Double,
     val op: String
@@ -39,12 +39,6 @@ case class OpAewScalar[K](
 
   /** Stuff like `A +1` is always supposed to fix this */
   override protected[mahout] lazy val canHaveMissingRows: Boolean = false
-
-  /**
-    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
-    * implementation knows it
-    */
-  override def keyClassTag: ClassTag[K] = A.keyClassTag
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.nrow

@@ -15,9 +15,8 @@ object Par {
 
   private final implicit val log = getLog(Par.getClass)
 
-  def exec[K](op: OpPar[K], src: DrmRddInput[K]): DrmRddInput[K] = {
+  def exec[K: ClassTag](op: OpPar[K], src: DrmRddInput[K]): DrmRddInput[K] = {
 
-    implicit val ktag = op.keyClassTag
     val srcBlockified = src.isBlockified
 
     val srcRdd = if (srcBlockified) src.toBlockifiedDrmRdd(op.ncol) else src.toDrmRdd()
