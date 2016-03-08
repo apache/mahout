@@ -44,13 +44,13 @@ object ABt {
    * @param srcB B source RDD 
    * @tparam K
    */
-  def abt[K: ClassTag](
+  def abt[K](
       operator: OpABt[K],
       srcA: DrmRddInput[K],
       srcB: DrmRddInput[Int]): DrmRddInput[K] = {
 
     debug("operator AB'(Spark)")
-    abt_nograph(operator, srcA, srcB)
+    abt_nograph(operator, srcA, srcB)(operator.keyClassTag)
   }
 
   /**

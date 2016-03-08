@@ -21,12 +21,18 @@ import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 
 /** Logical A'B */
-case class OpAtB[A: ClassTag](
+case class OpAtB[A](
     override var A: DrmLike[A],
     override var B: DrmLike[A])
     extends AbstractBinaryOp[A, A, Int] {
 
   assert(A.nrow == B.nrow, "Incompatible operand geometry")
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override def keyClassTag = ClassTag.Int
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.ncol

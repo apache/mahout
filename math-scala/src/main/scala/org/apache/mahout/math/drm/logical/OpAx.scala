@@ -24,7 +24,7 @@ import RLikeOps._
 import org.apache.mahout.math.drm.DrmLike
 
 /** Logical Ax. */
-case class OpAx[K: ClassTag](
+case class OpAx[K](
     override var A: DrmLike[K],
     val x: Vector
     ) extends AbstractUnaryOp[K, K] {
@@ -32,6 +32,12 @@ case class OpAx[K: ClassTag](
   override protected[mahout] lazy val partitioningTag: Long = A.partitioningTag
 
   assert(A.ncol == x.length, "Incompatible operand geometry")
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override def keyClassTag: ClassTag[K] = A.keyClassTag
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.nrow
