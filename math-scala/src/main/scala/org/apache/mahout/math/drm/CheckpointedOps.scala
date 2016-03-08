@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.drm
 
-import scala.reflect.ClassTag
 import org.apache.mahout.math._
 
 import org.apache.mahout.math.scalabindings.RLikeOps._
