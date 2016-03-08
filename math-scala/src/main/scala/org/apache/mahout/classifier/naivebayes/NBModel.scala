@@ -22,9 +22,7 @@ import org.apache.mahout.math.{drm, scalabindings}
 
 import scalabindings._
 import scalabindings.RLikeOps._
-import drm.RLikeDrmOps._
 import drm._
-import scala.collection.JavaConverters._
 import scala.language.asInstanceOf
 import scala.collection._
 import JavaConversions._

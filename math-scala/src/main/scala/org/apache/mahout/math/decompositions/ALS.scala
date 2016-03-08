@@ -17,13 +17,11 @@
 
 package org.apache.mahout.math.decompositions
 
-import scala.reflect.ClassTag
 import org.apache.mahout.math._
 import drm._
 import scalabindings._
 import RLikeDrmOps._
 import RLikeOps._
-import scala.util.Random
 import org.apache.log4j.Logger
 import math._
 import org.apache.mahout.common.RandomUtils

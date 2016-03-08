@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.decompositions
 
-import scala.reflect.ClassTag
 import org.apache.mahout.math.{Matrices, Vector}
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._

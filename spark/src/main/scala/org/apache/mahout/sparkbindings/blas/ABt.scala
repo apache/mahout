@@ -25,11 +25,8 @@ import org.apache.mahout.sparkbindings._
 import org.apache.mahout.math.drm.BlockifiedDrmTuple
 import org.apache.mahout.sparkbindings.drm._
 import org.apache.mahout.math.{SparseMatrix, Matrix, SparseRowMatrix}
-import org.apache.spark.SparkContext._
 import org.apache.mahout.math.drm.logical.OpABt
 import org.apache.mahout.logging._
-
-import scala.tools.nsc.io.Pickler.TildeDecorator
 
 /** Contains RDD plans for ABt operator */
 object ABt {

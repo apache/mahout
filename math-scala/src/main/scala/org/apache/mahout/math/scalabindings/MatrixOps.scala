@@ -18,10 +18,11 @@
 package org.apache.mahout.math.scalabindings
 
 import org.apache.mahout.math.flavor.TraversingStructureEnum
-import org.apache.mahout.math.{Matrices, QRDecomposition, Vector, Matrix}
-import collection._
-import JavaConversions._
-import org.apache.mahout.math.function.{DoubleDoubleFunction, VectorFunction, DoubleFunction, Functions}
+import org.apache.mahout.math.function.{DoubleFunction, Functions, VectorFunction}
+import org.apache.mahout.math.{Matrices, Matrix, QRDecomposition, Vector}
+
+import scala.collection.JavaConversions._
+import scala.collection._
 import scala.math._
 
 class MatrixOps(val m: Matrix) {
@@ -83,7 +84,7 @@ class MatrixOps(val m: Matrix) {
   def apply(row: Int, col: Int) = m.get(row, col)
 
   def update(row: Int, col: Int, that: Double): Matrix = {
-    m.setQuick(row, col, that);
+    m.setQuick(row, col, that)
     m
   }
 
@@ -105,12 +106,12 @@ class MatrixOps(val m: Matrix) {
     if (rowRange == :: &&
         colRange == ::) return m
 
-    val rr = if (rowRange == ::) (0 until m.nrow)
+    val rr = if (rowRange == ::) 0 until m.nrow
     else rowRange
-    val cr = if (colRange == ::) (0 until m.ncol)
+    val cr = if (colRange == ::) 0 until m.ncol
     else colRange
 
-    return m.viewPart(rr.start, rr.length, cr.start, cr.length)
+    m.viewPart(rr.start, rr.length, cr.start, cr.length)
 
   }
 
@@ -142,7 +143,7 @@ class MatrixOps(val m: Matrix) {
 
   /**
    * Assigning from a row-wise collection of vectors
-   * @param that
+   * @param that -
    */
   def :=(that: TraversableOnce[Vector]) = {
     var row = 0

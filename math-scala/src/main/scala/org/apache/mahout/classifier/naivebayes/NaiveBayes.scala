@@ -150,7 +150,7 @@ trait NaiveBayes extends java.io.Serializable{
     val inCoreIntKeyedObservations = new SparseMatrix(
                              stringKeyedObservations.nrow.toInt,
                              stringKeyedObservations.ncol)
-    for (i <- 0 until inCoreStringKeyedObservations.nrow.toInt) {
+    for (i <- 0 until inCoreStringKeyedObservations.nrow) {
       inCoreIntKeyedObservations(i, ::) = inCoreStringKeyedObservations(i, ::)
     }
 
@@ -165,8 +165,8 @@ trait NaiveBayes extends java.io.Serializable{
     // Encode Categories as an Integer (Double) so we can broadcast as a vector
     // where each element is an Int-encoded category whose index corresponds
     // to its row in the Drm
-    for (i <- 0 until labelVectorByRowIndex.size) {
-      if (!(labelIndexMap.contains(labelVectorByRowIndex(i)._2))) {
+    for (i <- labelVectorByRowIndex.indices) {
+      if (!labelIndexMap.contains(labelVectorByRowIndex(i)._2)) {
         encodedLabelByRowIndexVector(i) = labelIndex.toDouble
         labelIndexMap.put(labelVectorByRowIndex(i)._2, labelIndex)
         labelIndex += 1
@@ -287,7 +287,7 @@ trait NaiveBayes extends java.io.Serializable{
    */
   def argmax(v: Vector): (Int, Double) = {
     var bestIdx: Int = Integer.MIN_VALUE
-    var bestScore: Double = Integer.MIN_VALUE.asInstanceOf[Int].toDouble
+    var bestScore: Double = Integer.MIN_VALUE.toDouble
     for(i <- 0 until v.size) {
       if(v(i) > bestScore){
         bestScore = v(i)
@@ -316,7 +316,7 @@ class ComplementaryNBThetaTrainer(private val weightsPerFeature: Vector,
                                    
    private val perLabelThetaNormalizer: Vector = weightsPerLabel.like()
    private val totalWeightSum: Double = weightsPerLabel.zSum
-   private var numFeatures: Double = weightsPerFeature.getNumNondefaultElements
+   private val numFeatures: Double = weightsPerFeature.getNumNondefaultElements
 
    assert(weightsPerFeature != null, "weightsPerFeature vector can not be null")
    assert(weightsPerLabel != null, "weightsPerLabel vector can not be null")

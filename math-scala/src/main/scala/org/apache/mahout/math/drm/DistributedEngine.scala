@@ -169,7 +169,7 @@ object DistributedEngine {
         OpAt(OpTimesRightMatrix(A = OpAt(pass1(b)), right = a.t))
 
       // Add vertical row index concatenation for rbind() on DrmLike[Int] fragments
-      case op@OpRbind(a, b) if (op.keyClassTag == ClassTag.Int) ⇒
+      case op@OpRbind(a, b) if op.keyClassTag == ClassTag.Int ⇒
 
         // Make sure closure sees only local vals, not attributes. We need to do these ugly casts
         // around because compiler could not infer that K is the same as Int, based on if() above.
@@ -236,7 +236,7 @@ object DistributedEngine {
       case OpAB(a, OpAt(b)) ⇒  OpABt(pass3(a), pass3(b))
 
       // AtB cases that make sense.
-      case OpAB(OpAt(a), b) if (a.partitioningTag == b.partitioningTag) ⇒  OpAtB(pass3(a), pass3(b))
+      case OpAB(OpAt(a), b) if a.partitioningTag == b.partitioningTag ⇒  OpAtB(pass3(a), pass3(b))
       case OpABAnyKey(OpAtAnyKey(a), b) ⇒  OpAtB(pass3(a), pass3(b))
 
       // Need some cost to choose between the following.
