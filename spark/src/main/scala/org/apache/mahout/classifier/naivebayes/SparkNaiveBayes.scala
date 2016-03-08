@@ -58,7 +58,7 @@ object SparkNaiveBayes extends NaiveBayes{
    *   aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
    *   TF or TF-IDF counts per label
    */
-  override def extractLabelsAndAggregateObservations[K: ClassTag](stringKeyedObservations: DrmLike[K],
+  override def extractLabelsAndAggregateObservations[K](stringKeyedObservations: DrmLike[K],
                                                                   cParser: CategoryParser = seq2SparseCategoryParser)
                                                                  (implicit ctx: DistributedContext):
                                                                  (mutable.HashMap[String, Integer], DrmLike[Int]) = {

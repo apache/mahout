@@ -22,7 +22,7 @@ import scala.util.Random
 import org.apache.mahout.math.drm._
 
 /** Implementation of distributed expression checkpoint and optimizer. */
-abstract class CheckpointAction[K: ClassTag] extends DrmLike[K] {
+abstract class CheckpointAction[K] extends DrmLike[K] {
 
   protected[mahout] lazy val partitioningTag: Long = Random.nextLong()
 
@@ -37,6 +37,7 @@ abstract class CheckpointAction[K: ClassTag] extends DrmLike[K] {
    */
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = cp match {
     case None =>
+      implicit val cpTag = this.keyClassTag
       val plan = context.optimizerRewrite(this)
       val physPlan = context.toPhysical(plan, cacheHint)
       cp = Some(physPlan)

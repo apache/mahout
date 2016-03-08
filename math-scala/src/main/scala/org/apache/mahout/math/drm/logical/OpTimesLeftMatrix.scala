@@ -22,6 +22,8 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm.DrmLike
 
+import scala.reflect.ClassTag
+
 /** Logical Times-left over in-core matrix operand */
 case class OpTimesLeftMatrix(
     val left: Matrix,
@@ -29,6 +31,12 @@ case class OpTimesLeftMatrix(
     ) extends AbstractUnaryOp[Int, Int] {
 
   assert(left.ncol == A.nrow, "Incompatible operand geometry")
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override val keyClassTag = ClassTag.Int
 
   /** R-like syntax for number of rows. */
   def nrow: Long = left.nrow
