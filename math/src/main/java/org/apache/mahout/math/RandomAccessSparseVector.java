@@ -202,7 +202,12 @@ public class RandomAccessSparseVector extends AbstractVector {
       element.entry = fastIterator.next();
       return element;
     }
-}
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
 
   final class RandomAccessElement implements Element {
     Int2DoubleMap.Entry entry;
