@@ -17,14 +17,12 @@
 
 package org.apache.mahout.math.decompositions
 
-import scala.reflect.ClassTag
 import org.apache.mahout.logging._
 import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
 import RLikeDrmOps._
-import org.apache.log4j.Logger
 
 object DQR {
 

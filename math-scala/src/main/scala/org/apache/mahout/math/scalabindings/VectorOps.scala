@@ -140,7 +140,7 @@ class VectorOps(private[scalabindings] val v: Vector) {
     import RLikeOps._
     v match {
 
-      case vd: Vector if (vd.isDense) => dense(vd).t
+      case vd: Vector if vd.isDense => dense(vd).t
       case srsv: RandomAccessSparseVector => new SparseColumnMatrix(srsv.length, 1, Array(srsv))
       case _ => sparse(v).t
     }
