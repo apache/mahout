@@ -2,7 +2,7 @@
 The following license applies to software from the
 Apache Software Foundation.
 It also applies to software from the Uncommons Watchmaker and Math
-projects, Google Guava software, and MongoDB.org driver software
+projects, Google Guava software, MongoDB.org driver software and fastutil.
 --------------------------------------------------------------------------
 
                                  Apache License
