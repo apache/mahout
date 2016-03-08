@@ -141,6 +141,9 @@ object DistributedEngine {
 
     action match {
 
+      // Logical but previously had checkpoint attached to it already that has some caching policy to it
+      case cpa: CheckpointAction[K] if cpa.cp.exists(_.cacheHint != CacheHint.NONE) ⇒ cpa.cp.get
+
       // self element-wise rewrite
       case OpAewB(a, b, op) if a == b => {
         op match {
