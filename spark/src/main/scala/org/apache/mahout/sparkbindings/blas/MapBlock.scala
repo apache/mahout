@@ -25,13 +25,14 @@ import scala.reflect.ClassTag
 
 object MapBlock {
 
-  def exec[S, R:ClassTag](src: DrmRddInput[S], operator:OpMapBlock[S,R]): DrmRddInput[R] = {
+  def exec[S, R](src: DrmRddInput[S], operator:OpMapBlock[S,R]): DrmRddInput[R] = {
 
     // We can't use attributes directly in the closure in order to avoid putting the whole object
     // into closure.
     val bmf = operator.bmf
     val ncol = operator.ncol
-    val rdd = src.asBlockified(operator.A.ncol).map(blockTuple => {
+    implicit val rtag = operator.keyClassTag
+    src.toBlockifiedDrmRdd(operator.A.ncol).map(blockTuple => {
       val out = bmf(blockTuple)
 
       assert(out._2.nrow == blockTuple._2.nrow, "block mapping must return same number of rows.")
@@ -39,8 +40,6 @@ object MapBlock {
 
       out
     })
-
-    rdd
   }
 
 }

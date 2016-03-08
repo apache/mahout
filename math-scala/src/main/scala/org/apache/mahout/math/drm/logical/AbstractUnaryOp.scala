@@ -21,14 +21,12 @@ import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.{DistributedContext, DrmLike}
 
 /** Abstract unary operator */
-abstract class AbstractUnaryOp[A: ClassTag, K: ClassTag]
+abstract class AbstractUnaryOp[A, K]
     extends CheckpointAction[K] with DrmLike[K] {
 
   protected[mahout] var A: DrmLike[A]
 
   lazy val context: DistributedContext = A.context
-
-  def classTagA: ClassTag[A] = implicitly[ClassTag[A]]
 
   override protected[mahout] lazy val canHaveMissingRows: Boolean = A.canHaveMissingRows
 
