@@ -67,26 +67,27 @@ object H2OEngine extends DistributedEngine {
   def drmDfsRead(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] = {
     val drmMetadata = hdfsUtils.readDrmHeader(path)
 
-    new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc)(drmMetadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc, CacheHint.NONE)(drmMetadata.keyClassTag.
+      asInstanceOf[ClassTag[Any]])
   }
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
-    new CheckpointedDrmH2O[Int](H2OHelper.emptyDrm(nrow, ncol, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[Int](H2OHelper.emptyDrm(nrow, ncol, numPartitions, -1), dc, CacheHint.NONE)
 
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Long] =
-    new CheckpointedDrmH2O[Long](H2OHelper.emptyDrm(nrow, ncol, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[Long](H2OHelper.emptyDrm(nrow, ncol, numPartitions, -1), dc, CacheHint.NONE)
 
   /** Parallelize in-core matrix as H2O distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
-    new CheckpointedDrmH2O[Int](H2OHelper.drmFromMatrix(m, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[Int](H2OHelper.drmFromMatrix(m, numPartitions, -1), dc, CacheHint.NONE)
 
   /** Parallelize in-core matrix as H2O distributed matrix, using row labels as a data set keys. */
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[String] =
-    new CheckpointedDrmH2O[String](H2OHelper.drmFromMatrix(m, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[String](H2OHelper.drmFromMatrix(m, numPartitions, -1), dc, CacheHint.NONE)
 
   def toPhysical[K:ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] =
-    new CheckpointedDrmH2O[K](tr2phys(plan), plan.context)
+    new CheckpointedDrmH2O[K](tr2phys(plan), plan.context, ch)
 
   /** Eagerly evaluate operator graph into an H2O DRM */
   private def tr2phys[K: ClassTag](oper: DrmLike[K]): H2ODrm = {
