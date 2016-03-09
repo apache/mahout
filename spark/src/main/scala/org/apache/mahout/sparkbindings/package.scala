@@ -140,8 +140,8 @@ package object sparkbindings {
   def drmWrap[K: ClassTag](rdd: DrmRdd[K], nrow: Long = -1, ncol: Int = -1, cacheHint: CacheHint.CacheHint =
   CacheHint.NONE, canHaveMissingRows: Boolean = false): CheckpointedDrm[K] =
 
-    new CheckpointedDrmSpark[K](rddInput = rdd, _nrow = nrow, _ncol = ncol, _cacheStorageLevel = SparkEngine
-      .cacheHint2Spark(cacheHint), _canHaveMissingRows = canHaveMissingRows)
+    new CheckpointedDrmSpark[K](rddInput = rdd, _nrow = nrow, _ncol = ncol, cacheHint = cacheHint,
+      _canHaveMissingRows = canHaveMissingRows)
 
 
   /** Another drmWrap version that takes in vertical block-partitioned input to form the matrix. */

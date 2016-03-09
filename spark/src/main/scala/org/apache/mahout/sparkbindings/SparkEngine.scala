@@ -123,7 +123,7 @@ object SparkEngine extends DistributedEngine {
       rddInput = rddInput,
       _nrow = plan.nrow,
       _ncol = plan.ncol,
-      _cacheStorageLevel = cacheHint2Spark(ch),
+      cacheHint = ch,
       partitioningTag = plan.partitioningTag
     )
     newcp.cache()
@@ -169,7 +169,8 @@ object SparkEngine extends DistributedEngine {
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
                                   (implicit sc: DistributedContext)
   : CheckpointedDrm[Int] = {
-    new CheckpointedDrmSpark(rddInput = parallelizeInCore(m, numPartitions), _nrow = m.nrow, _ncol = m.ncol)
+    new CheckpointedDrmSpark(rddInput = parallelizeInCore(m, numPartitions), _nrow = m.nrow, _ncol = m.ncol,
+      cacheHint = CacheHint.NONE)
   }
 
   private[sparkbindings] def parallelizeInCore(m: Matrix, numPartitions: Int = 1)
@@ -188,7 +189,8 @@ object SparkEngine extends DistributedEngine {
     val rb = m.getRowLabelBindings
     val p = for (i: String ← rb.keySet().toIndexedSeq) yield i → m(rb(i), ::)
 
-    new CheckpointedDrmSpark(rddInput = sc.parallelize(p, numPartitions), _nrow = m.nrow, _ncol = m.ncol)
+    new CheckpointedDrmSpark(rddInput = sc.parallelize(p, numPartitions), _nrow = m.nrow, _ncol = m.ncol,
+      cacheHint = CacheHint.NONE)
   }
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
@@ -201,7 +203,7 @@ object SparkEngine extends DistributedEngine {
 
       for (i ← partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
     })
-    new CheckpointedDrmSpark[Int](rdd, nrow, ncol)
+    new CheckpointedDrmSpark[Int](rdd, nrow, ncol, cacheHint = CacheHint.NONE)
   }
 
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
@@ -213,7 +215,7 @@ object SparkEngine extends DistributedEngine {
 
       for (i ← partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
     })
-    new CheckpointedDrmSpark[Long](rdd, nrow, ncol)
+    new CheckpointedDrmSpark[Long](rdd, nrow, ncol, cacheHint = CacheHint.NONE)
   }
 
   /**
