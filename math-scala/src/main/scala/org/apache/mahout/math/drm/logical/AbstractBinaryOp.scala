@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.drm.logical
 
-import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.{DistributedContext, DrmLike}
 
 /**

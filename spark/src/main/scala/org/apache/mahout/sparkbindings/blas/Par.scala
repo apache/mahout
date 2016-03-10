@@ -1,14 +1,11 @@
 package org.apache.mahout.sparkbindings.blas
 
-import org.apache.mahout.sparkbindings.drm
-
-import scala.reflect.ClassTag
-import org.apache.mahout.sparkbindings.drm.DrmRddInput
-import org.apache.mahout.math.drm.logical.OpPar
-import org.apache.spark.rdd.RDD
-import scala.math._
-
 import org.apache.mahout.logging._
+import org.apache.mahout.math.drm.logical.OpPar
+import org.apache.mahout.sparkbindings.drm
+import org.apache.mahout.sparkbindings.drm.DrmRddInput
+
+import scala.math._
 
 /** Physical adjustment of parallelism */
 object Par {
@@ -20,8 +17,8 @@ object Par {
     implicit val ktag = op.keyClassTag
     val srcBlockified = src.isBlockified
 
-    val srcRdd = if (srcBlockified) src.asBlockified(op.ncol) else src.asRowWise()
-    val srcNParts = srcRdd.partitions.size
+    val srcRdd = if (srcBlockified) src.toBlockifiedDrmRdd(op.ncol) else src.toDrmRdd()
+    val srcNParts = srcRdd.partitions.length
 
     // To what size?
     val targetParts = if (op.minSplits > 0) srcNParts max op.minSplits
@@ -37,17 +34,16 @@ object Par {
     if (targetParts > srcNParts) {
 
       // Expanding. Always requires deblockified stuff. May require re-shuffling.
-      val rdd = src.asRowWise().repartition(numPartitions = targetParts)
-
+      val rdd = src.toDrmRdd().repartition(numPartitions = targetParts)
       rdd
 
     } else if (targetParts < srcNParts) {
       // Shrinking.
 
       if (srcBlockified) {
-        drm.rbind(src.asBlockified(op.ncol).coalesce(numPartitions = targetParts))
+        drm.rbind(src.toBlockifiedDrmRdd(op.ncol).coalesce(numPartitions = targetParts))
       } else {
-        src.asRowWise().coalesce(numPartitions = targetParts)
+        src.toDrmRdd().coalesce(numPartitions = targetParts)
       }
     } else {
       // no adjustment required.

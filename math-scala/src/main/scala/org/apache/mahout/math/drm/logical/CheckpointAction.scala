@@ -17,15 +17,11 @@
 
 package org.apache.mahout.math.drm.logical
 
-import scala.reflect.{ClassTag, classTag}
 import scala.util.Random
 import org.apache.mahout.math.drm._
 
 /** Implementation of distributed expression checkpoint and optimizer. */
 abstract class CheckpointAction[K] extends DrmLike[K] {
-
-
-  override val keyClassTag: ClassTag[K] = classTag[K]
 
   protected[mahout] lazy val partitioningTag: Long = Random.nextLong()
 

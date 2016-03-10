@@ -21,9 +21,6 @@ import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 import scala.util.Random
 
-/**
- * @author dmitriy
- */
 case class OpAewUnaryFunc[K](
     override var A: DrmLike[K],
     val f: (Double) => Double,

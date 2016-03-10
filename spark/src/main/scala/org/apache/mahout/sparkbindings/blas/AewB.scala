@@ -22,7 +22,6 @@ import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical.{AbstractUnaryOp, OpAewB, OpAewScalar, TEwFunc}
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.sparkbindings.blas.AewB.{ReduceFunc, ReduceFuncScalar}
 import org.apache.mahout.sparkbindings.drm.DrmRddInput
 import org.apache.mahout.sparkbindings.{BlockifiedDrmRdd, DrmRdd, drm}
@@ -70,7 +69,7 @@ object AewB {
     val a = srcA.toDrmRdd()
     val b = srcB.toDrmRdd()
 
-    debug(s"A${op.op}B: #partsA=${a.partitions.size},#partsB=${b.partitions.size}.")
+    debug(s"A${op.op}B: #partsA=${a.partitions.length},#partsB=${b.partitions.length}.")
 
     // Check if A and B are identically partitioned AND keyed. if they are, then just perform zip
     // instead of join, and apply the op map-side. Otherwise, perform join and apply the op
@@ -92,7 +91,7 @@ object AewB {
 
       a
           // Full outer-join operands row-wise
-          .cogroup(b, numPartitions = a.partitions.size max b.partitions.size)
+          .cogroup(b, numPartitions = a.partitions.length max b.partitions.length)
 
           // Reduce both sides. In case there are duplicate rows in RHS or LHS, they are summed up
           // prior to reduction.
@@ -177,7 +176,7 @@ object AewB {
       srcA.toBlockifiedDrmRdd(op.A.ncol)
     }
 
-    debug(s"A${op.op}$scalar: #parts=${aBlockRdd.partitions.size}.")
+    debug(s"A${op.op}$scalar: #parts=${aBlockRdd.partitions.length}.")
 
     val rdd = aBlockRdd
         .map {

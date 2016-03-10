@@ -17,17 +17,14 @@
 
 package org.apache.mahout.sparkbindings
 
-import org.apache.mahout.sparkbindings
-import org.apache.spark.rdd.RDD
-
-import scala.reflect.ClassTag
-import org.apache.spark.SparkContext._
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
-import scalabindings._
-import RLikeOps._
-import collection._
-import JavaConversions._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+import org.apache.spark.rdd.RDD
+
+import scala.collection.JavaConversions._
+import scala.collection._
 
 /**
  * This validation contains distributed algorithms that distributed matrix expression optimizer picks
@@ -60,7 +57,7 @@ package object blas {
       .collect()
 
     // Starting indices
-    var startInd = new Array[Int](rdd.partitions.size)
+    var startInd = new Array[Int](rdd.partitions.length)
 
     // Save counts
     for (pc <- partSizes) startInd(pc._1) = pc._2
@@ -123,7 +120,7 @@ package object blas {
       sc
 
         // Bootstrap full key set
-        .parallelize(0 until dueRows, numSlices = rdd.partitions.size max 1)
+        .parallelize(0 until dueRows, numSlices = rdd.partitions.length max 1)
 
         // Enable PairedFunctions
         .map(_ -> Unit)
@@ -137,7 +134,7 @@ package object blas {
         // Coalesce and output RHS
         .map { case (key, (seqUnit, seqVec)) =>
         val acc = seqVec.headOption.getOrElse(new SequentialAccessSparseVector(dueCols))
-        val vec = if (seqVec.size > 0) (acc /: seqVec.tail)(_ + _) else acc
+        val vec = if (seqVec.nonEmpty) (acc /: seqVec.tail)(_ + _) else acc
         key -> vec
       }
 

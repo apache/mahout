@@ -25,7 +25,6 @@ import org.apache.mahout.math._
 import scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm.logical.{OpCbindScalar, OpCbind}
-import org.apache.spark.SparkContext._
 
 /** Physical cbind */
 object CbindAB {
@@ -95,7 +94,7 @@ object CbindAB {
       log.debug("applying cbind as join")
 
       a
-          .cogroup(b, numPartitions = a.partitions.size max b.partitions.size)
+          .cogroup(b, numPartitions = a.partitions.length max b.partitions.length)
           .map {
         case (key, (vectorSeqA, vectorSeqB)) =>
 

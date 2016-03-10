@@ -18,10 +18,8 @@
 package org.apache.mahout.sparkbindings.blas
 
 import org.apache.mahout.math.drm.logical.OpMapBlock
-import org.apache.mahout.sparkbindings.drm.DrmRddInput
-import org.apache.mahout.math.drm.BlockMapFunc
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import scala.reflect.ClassTag
+import org.apache.mahout.sparkbindings.drm.DrmRddInput
 
 object MapBlock {
 

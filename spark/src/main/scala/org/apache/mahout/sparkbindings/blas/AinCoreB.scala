@@ -32,7 +32,7 @@ object AinCoreB {
     implicit val ctx:DistributedContext = rddA.context
     val dg = drmBroadcast(op.right.viewDiagonal())
 
-    debug(s"operator A %*% inCoreB-diagonal. #parts=${rddA.partitions.size}.")
+    debug(s"operator A %*% inCoreB-diagonal. #parts=${rddA.partitions.length}.")
 
     val rdd = rddA
         // Just multiply the blocks
@@ -47,7 +47,7 @@ object AinCoreB {
     val rddA = srcA.asBlockified(op.A.ncol)
     implicit val sc:DistributedContext = rddA.sparkContext
 
-    debug(s"operator A %*% inCoreB. #parts=${rddA.partitions.size}.")
+    debug(s"operator A %*% inCoreB. #parts=${rddA.partitions.length}.")
 
     val bcastB = drmBroadcast(m = op.right)
 

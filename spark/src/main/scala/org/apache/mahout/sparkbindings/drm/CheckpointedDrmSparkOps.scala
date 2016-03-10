@@ -2,7 +2,6 @@ package org.apache.mahout.sparkbindings.drm
 
 import org.apache.mahout.math.drm.CheckpointedDrm
 import org.apache.mahout.sparkbindings.DrmRdd
-import scala.reflect.ClassTag
 
 /** Additional Spark-specific operations. Requires underlying DRM to be running on Spark backend. */
 class CheckpointedDrmSparkOps[K](drm: CheckpointedDrm[K]) {
