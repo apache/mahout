@@ -17,7 +17,6 @@
 
 package org.apache.mahout.sparkbindings.blas
 
-import scala.reflect.ClassTag
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.{SequentialAccessSparseVector, DenseVector}

@@ -1,7 +1,6 @@
 package org.apache.mahout.math.drm.logical
 
 import org.apache.mahout.math.drm.DrmLike
-import scala.reflect.ClassTag
 
 /** Parallelism operator */
 case class OpPar[K](

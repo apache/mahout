@@ -16,7 +16,6 @@
  */
 package org.apache.mahout.math.drm.logical
 
-import reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 
 case class OpCbindScalar[K](

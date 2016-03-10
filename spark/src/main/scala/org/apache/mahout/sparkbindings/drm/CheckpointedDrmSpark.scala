@@ -22,12 +22,11 @@ import org.apache.mahout.math.drm.CacheHint.CacheHint
 import math._
 import scalabindings._
 import RLikeOps._
-import drm._
 import scala.collection.JavaConversions._
 import org.apache.spark.storage.StorageLevel
 import reflect._
 import scala.util.Random
-import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
+import org.apache.hadoop.io.{LongWritable, Text, IntWritable}
 import org.apache.mahout.math.drm._
 import org.apache.mahout.sparkbindings._
 
@@ -40,7 +39,6 @@ import org.apache.mahout.sparkbindings._
   * @param partitioningTag     unique partitioning tag. Used to detect identically partitioned operands.
   * @param _canHaveMissingRows true if the matrix is int-keyed, and if it also may have missing rows
   *                            (will require a lazy fix for some physical operations.
-  * @param evidence$1          class tag context bound for K.
   * @tparam K matrix key type (e.g. the keys of sequence files once persisted)
   */
 class CheckpointedDrmSpark[K: ClassTag](
@@ -187,7 +185,7 @@ class CheckpointedDrmSpark[K: ClassTag](
       // that nrow can be computed lazily, which always happens when rdd is already available, cached,
       // and it's ok to compute small summaries without triggering huge pipelines. Which usually
       // happens right after things like drmFromHDFS or drmWrap().
-      val maxPlus1 = rdd.map(_._1.asInstanceOf[Int]).fold(-1)(max(_, _)) + 1L
+      val maxPlus1 = rdd.map(_._1.asInstanceOf[Int]).fold(-1)(max) + 1L
       val rowCount = rdd.count()
       _canHaveMissingRows = maxPlus1 != rowCount ||
           rdd.map(_._1).sum().toLong != (rowCount * (rowCount - 1.0) / 2.0).toLong
@@ -202,8 +200,8 @@ class CheckpointedDrmSpark[K: ClassTag](
   protected def computeNCol = {
     rddInput.isBlockified match {
       case true ⇒ rddInput.toBlockifiedDrmRdd(throw new AssertionError("not reached"))
-        .map(_._2.ncol).reduce(max(_, _))
-      case false ⇒ cache().rddInput.toDrmRdd().map(_._2.length).fold(-1)(max(_, _))
+        .map(_._2.ncol).reduce(max)
+      case false ⇒ cache().rddInput.toDrmRdd().map(_._2.length).fold(-1)(max)
     }
   }
 

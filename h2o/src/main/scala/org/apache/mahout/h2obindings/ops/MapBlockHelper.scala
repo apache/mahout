@@ -37,7 +37,7 @@ object MapBlockHelper {
       case `s` =>
         val arr = new Array[String](in.rowSize)
         val vstr = new ValueString
-        for (i <- 0 to (in.rowSize - 1)) {
+        for (i <- 0 until in.rowSize) {
           arr(i) = labels.atStr(vstr, i + startlong).toString
         }
         arr

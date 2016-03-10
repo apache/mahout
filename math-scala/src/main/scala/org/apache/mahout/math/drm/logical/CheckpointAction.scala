@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.drm.logical
 
-import scala.reflect.ClassTag
 import scala.util.Random
 import org.apache.mahout.math.drm._
 

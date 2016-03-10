@@ -18,7 +18,6 @@
 package org.apache.mahout.math
 
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.indexeddataset.{IndexedDataset, DefaultIndexedDatasetReadSchema, Schema}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 

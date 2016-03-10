@@ -30,7 +30,6 @@ import scala.reflect.ClassTag
 import scala.language.asInstanceOf
 import collection._
 import JavaConversions._
-import org.apache.spark.SparkContext._
 
 import org.apache.mahout.sparkbindings._
 
@@ -82,7 +81,7 @@ object SparkNaiveBayes extends NaiveBayes{
 
     // todo: has to be an better way of creating this map
     val categoryArray = aggregatedRdd.keys.takeOrdered(aggregatedRdd.count.toInt)
-    for(i <- 0 until categoryArray.size){
+    for(i <- categoryArray.indices){
       labelIndexMap.put(categoryArray(i), categoryIndex)
       categoryIndex += 1
     }

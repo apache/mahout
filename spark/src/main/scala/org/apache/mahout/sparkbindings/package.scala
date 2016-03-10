@@ -32,8 +32,6 @@ import collection._
 import collection.generic.Growable
 import scala.reflect.ClassTag
 
-
-
 /** Public api for Spark-specific operators */
 package object sparkbindings {
 
@@ -182,7 +180,7 @@ package object sparkbindings {
     val w = new StringWriter()
     closeables += w
 
-    var continue = true;
+    var continue = true
     val jars = new mutable.ArrayBuffer[String]()
     do {
       val cp = r.readLine()
@@ -191,7 +189,7 @@ package object sparkbindings {
           "defined?")
 
       val j = cp.split(File.pathSeparatorChar)
-      if (j.size > 10) {
+      if (j.length > 10) {
         // assume this is a valid classpath line
         jars ++= j
         continue = false

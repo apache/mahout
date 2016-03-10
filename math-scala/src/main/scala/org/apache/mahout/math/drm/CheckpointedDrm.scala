@@ -19,7 +19,6 @@ package org.apache.mahout.math.drm
 
 import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.drm.CacheHint.CacheHint
-import scala.reflect.ClassTag
 
 /**
  * Checkpointed DRM API. This is a matrix that has optimized RDD lineage behind it and can be

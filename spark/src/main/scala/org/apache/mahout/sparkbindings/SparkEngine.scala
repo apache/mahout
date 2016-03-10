@@ -17,28 +17,23 @@
 
 package org.apache.mahout.sparkbindings
 
+import org.apache.hadoop.io._
+import org.apache.mahout.common.{HDFSUtil, Hadoop1HDFSUtil}
 import org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader
 import org.apache.mahout.math._
-import org.apache.mahout.math.indexeddataset.{BiDictionary, DefaultIndexedDatasetReadSchema, Schema, DefaultIndexedDatasetElementReadSchema}
-import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
-import scalabindings._
-import RLikeOps._
-import org.apache.mahout.math.drm.logical._
-import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSparkOps, cpDrmGeneric2DrmRddInput, CheckpointedDrmSpark, DrmRddInput}
-import org.apache.mahout.math._
-import scala.Predef
-import scala.reflect.ClassTag
-import scala.reflect.classTag
-import org.apache.spark.storage.StorageLevel
-import org.apache.mahout.sparkbindings.blas._
-import org.apache.hadoop.io._
-import collection._
-import JavaConversions._
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.spark.rdd.RDD
-import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
+import org.apache.mahout.math.drm.logical._
+import org.apache.mahout.math.indexeddataset.{BiDictionary, DefaultIndexedDatasetElementReadSchema, DefaultIndexedDatasetReadSchema, Schema}
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.sparkbindings.blas._
+import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, DrmRddInput, cpDrmGeneric2DrmRddInput}
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
+import org.apache.spark.storage.StorageLevel
 
+import scala.collection.JavaConversions._
+import scala.collection._
+import scala.reflect.ClassTag
 
 /** Spark-specific non-drm-method operations */
 object SparkEngine extends DistributedEngine {
@@ -102,8 +97,6 @@ object SparkEngine extends DistributedEngine {
   /** Optional engine-specific all reduce tensor operation. */
   override def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf:
   BlockReduceFunc): Matrix = {
-
-    import drm._
     drm.toBlockifiedDrmRdd(ncol = drm.ncol).map(bmf(_)).reduce(rf)
   }
 

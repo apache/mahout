@@ -20,7 +20,6 @@ package org.apache.mahout.math.drm.logical
 import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 import scala.util.Random
-import collection._
 
 /**
  * Composition of unary elementwise functions.
