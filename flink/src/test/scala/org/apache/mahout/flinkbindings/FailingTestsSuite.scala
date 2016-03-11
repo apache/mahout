@@ -16,32 +16,60 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.mahout.flinkbindings.blas
+package org.apache.mahout.flinkbindings
 
-import org.apache.flink.api.scala._
-import org.apache.mahout.common.RandomUtils
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
+import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.scala.DataSet
+import org.apache.flink.api.scala.hadoop.mapreduce.HadoopOutputFormat
+
+import scala.collection.immutable.List
+
+//import org.apache.flink.api.scala.hadoop.mapreduce.HadoopOutputFormat
+import org.apache.hadoop.io.IntWritable
+//import org.apache.hadoop.mapreduce.
+import org.apache.hadoop.mapreduce.Job
+import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.mahout.math._
+import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.drm.logical.{OpAx, _}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
-import org.junit.runner.RunWith
-import org.scalatest.{FunSuite,Matchers}
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.{FunSuite, Matchers}
 
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import RLikeDrmOps._
-import decompositions._
-
-import scala.math._
 import scala.reflect.ClassTag
+import org.apache.flink.api.scala._
+
 
 
 class FailingTestsSuite extends FunSuite with DistributedFlinkSuite with Matchers {
+
+
+  test("Simple DataSet to IntWritable") {
+    val path = TmpDir + "flinkOutput"
+
+    implicit val typeInfo = createTypeInformation[(Int,Int)]
+    val ds = env.fromElements[(Int,Int)]((1,2),(3,4),(5,6),(7,8))
+   // val job = new JobConf
+
+
+    val writableDataset : DataSet[(IntWritable,IntWritable)] =
+      ds.map( tuple =>
+        (new IntWritable(tuple._1.asInstanceOf[Int]), new IntWritable(tuple._2.asInstanceOf[Int]))
+    )
+
+    val job: Job = new Job()
+
+    // setup sink for IntWritable
+    val sequenceFormat = new SequenceFileOutputFormat[IntWritable, IntWritable]
+    val hadoopOutput  = new HadoopOutputFormat[IntWritable,IntWritable](sequenceFormat, job)
+    FileOutputFormat.setOutputPath(job, new org.apache.hadoop.fs.Path(path))
+
+    writableDataset.output(hadoopOutput)
+
+    env.execute(s"dfsWrite($path)")
+
+  }
+
 
   test("C = A + B, identically partitioned") {
 
