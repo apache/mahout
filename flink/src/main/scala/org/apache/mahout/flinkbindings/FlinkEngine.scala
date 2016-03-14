@@ -107,6 +107,7 @@ object FlinkEngine extends DistributedEngine {
   }
 
   private def flinkTranslate[K](oper: DrmLike[K]): FlinkDrm[K] = {
+    implicit val kTag = oper.keyClassTag
     implicit val typeInformation = generateTypeInformation[K]
     oper match {
       case OpAtAnyKey(_) ⇒
@@ -160,7 +161,7 @@ object FlinkEngine extends DistributedEngine {
       case op: OpMapBlock[K, _] ⇒
         FlinkOpMapBlock.apply(flinkTranslate(op.A), op.ncol, op).asInstanceOf[FlinkDrm[K]]
       case cp: CheckpointedFlinkDrm[K] ⇒
-        implicit val ktag=cp.keyClassTag
+        //implicit val ktag=cp.keyClassTag
         new RowsFlinkDrm[K](cp.ds, cp.ncol)
       case _ ⇒
         throw new NotImplementedError(s"operator $oper is not implemented yet")
@@ -323,15 +324,15 @@ object FlinkEngine extends DistributedEngine {
   def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix =
     throw new UnsupportedOperationException("the operation allreduceBlock is not yet supported on Flink")
 
-  private def generateTypeInformation[K]: TypeInformation[K] = {
-    val tag = implicitly[ClassTag[K]]
-    generateTypeInformationFromTag(tag)
-  }
-//  private def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
-//    val tag = implicitly[ClassTag[K]]
-//
+//  private def generateTypeInformation[K]: TypeInformation[K] = {
+//    val tag = implicitly[K].asInstanceOf[ClassTag[K]]
 //    generateTypeInformationFromTag(tag)
 //  }
+  private def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
+    val tag = implicitly[ClassTag[K]]
+
+    generateTypeInformationFromTag(tag)
+  }
 
   private def generateTypeInformationFromTag[K](tag: ClassTag[K]): TypeInformation[K] = {
     if (tag.runtimeClass.equals(classOf[Int])) {
