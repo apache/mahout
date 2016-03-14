@@ -59,6 +59,9 @@ class FailingTestsSuite extends FunSuite with DistributedFlinkSuite with Matcher
 
     val job: Job = new Job()
 
+    job.setOutputKeyClass(classOf[IntWritable])
+    job.setOutputValueClass(classOf[IntWritable])
+
     // setup sink for IntWritable
     val sequenceFormat = new SequenceFileOutputFormat[IntWritable, IntWritable]
     val hadoopOutput  = new HadoopOutputFormat[IntWritable,IntWritable](sequenceFormat, job)

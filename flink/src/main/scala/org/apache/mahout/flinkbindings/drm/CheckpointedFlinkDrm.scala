@@ -27,6 +27,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.api.scala.hadoop.mapred.HadoopOutputFormat
 import org.apache.hadoop.io.{IntWritable, LongWritable, Text, Writable}
 import org.apache.hadoop.mapred.{FileOutputFormat, JobConf, SequenceFileOutputFormat}
+import org.apache.hadoop.mapreduce.Job
 import org.apache.mahout.flinkbindings
 import org.apache.mahout.flinkbindings.{DrmDataSet, _}
 import org.apache.mahout.math.drm.{CacheHint, CheckpointedDrm, DistributedContext, DrmTuple, _}
@@ -202,6 +203,10 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
           val writableDataset = ds.map( tuple =>
               (new IntWritable(tuple._1.asInstanceOf[Int]), new VectorWritable(tuple._2))
           )
+
+
+          job.setOutputKeyClass(classOf[IntWritable])
+          job.setOutputValueClass(classOf[VectorWritable])
 
           // setup sink for IntWritable
           val sequenceFormat = new SequenceFileOutputFormat[IntWritable, VectorWritable]
