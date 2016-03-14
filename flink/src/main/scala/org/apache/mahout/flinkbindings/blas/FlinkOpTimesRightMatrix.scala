@@ -44,8 +44,11 @@ import org.apache.flink.api.scala._
  */
 object FlinkOpTimesRightMatrix {
 
-  def drmTimesInCore[K: TypeInformation: ClassTag](op: OpTimesRightMatrix[K], A: FlinkDrm[K], inCoreB: Matrix): FlinkDrm[K] = {
+  def drmTimesInCore[K: TypeInformation](op: OpTimesRightMatrix[K], A: FlinkDrm[K], inCoreB: Matrix): FlinkDrm[K] = {
     implicit val ctx = A.context
+    implicit val kTag = op.keyClassTag
+
+
 
     /* HACK: broadcasting the matrix using Flink's .withBroadcastSet(singletonDataSetB) on a matrix causes a backend Kryo
      * Issue resulkting in a stackOverflow error.

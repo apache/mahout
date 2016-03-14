@@ -46,7 +46,7 @@ import org.apache.flink.api.scala._
  */
 object FlinkOpAtB {
 
-  def notZippable[A: ClassTag](op: OpAtB[A], At: FlinkDrm[A], B: FlinkDrm[A]): FlinkDrm[Int] = {
+  def notZippable[A](op: OpAtB[A], At: FlinkDrm[A], B: FlinkDrm[A]): FlinkDrm[Int] = {
 
     val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[A]]
     val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[A]]

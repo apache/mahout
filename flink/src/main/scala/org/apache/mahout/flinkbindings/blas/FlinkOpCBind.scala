@@ -45,12 +45,12 @@ import org.apache.mahout.math.scalabindings._
  */
 object FlinkOpCBind {
 
-  def cbind[K: TypeInformation: ClassTag](op: OpCbind[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
+  def cbind[K: TypeInformation](op: OpCbind[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
     val n = op.ncol
     val n1 = op.A.ncol
     val n2 = op.B.ncol
 
-    val classTag = extractRealClassTag(op.A)
+    implicit val classTag = op.A.keyClassTag
 
     val rowsA = A.asRowWise.ds
     val rowsB = B.asRowWise.ds
@@ -96,9 +96,11 @@ object FlinkOpCBind {
     new RowsFlinkDrm(res.asInstanceOf[DataSet[(K, Vector)]], ncol=op.ncol)
   }
 
-  def cbindScalar[K: TypeInformation: ClassTag](op: OpCbindScalar[K], A: FlinkDrm[K], x: Double): FlinkDrm[K] = {
+  def cbindScalar[K: TypeInformation](op: OpCbindScalar[K], A: FlinkDrm[K], x: Double): FlinkDrm[K] = {
     val left = op.leftBind
     val ds = A.asBlockified.ds
+
+    implicit val kTag= op.keyClassTag
 
     def cbind(mat: Matrix, x: Double, left: Boolean): Matrix = {
       val ncol = mat.ncol

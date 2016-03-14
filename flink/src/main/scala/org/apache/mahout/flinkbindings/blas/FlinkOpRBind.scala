@@ -30,8 +30,9 @@ import org.apache.mahout.math.drm.logical.OpRbind
 
 object FlinkOpRBind {
 
-  def rbind[K: TypeInformation: ClassTag](op: OpRbind[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
+  def rbind[K: TypeInformation](op: OpRbind[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
     // note that indexes of B are already re-arranged prior to executing this code
+    implicit val kTag = op.keyClassTag
     val res = A.asRowWise.ds.union(B.asRowWise.ds)
     new RowsFlinkDrm(res.asInstanceOf[DataSet[(K, Vector)]], ncol = op.ncol)
   }

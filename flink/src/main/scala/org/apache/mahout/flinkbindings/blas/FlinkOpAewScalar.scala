@@ -40,8 +40,10 @@ object FlinkOpAewScalar {
   private def isInplace = System.getProperty(PROPERTY_AEWB_INPLACE, "false").toBoolean
 
   @Deprecated
-  def opScalarNoSideEffect[K: TypeInformation: ClassTag](op: OpAewScalar[K], A: FlinkDrm[K], scalar: Double): FlinkDrm[K] = {
+  def opScalarNoSideEffect[K: TypeInformation](op: OpAewScalar[K], A: FlinkDrm[K], scalar: Double): FlinkDrm[K] = {
     val function = EWOpsCloning.strToFunction(op.op)
+    implicit val kTag = op.keyClassTag
+
 
     val res = A.asBlockified.ds.map{
       tuple => (tuple._1, function(tuple._2, scalar))
@@ -50,9 +52,12 @@ object FlinkOpAewScalar {
     new BlockifiedFlinkDrm(res, op.ncol)
   }
 
-  def opUnaryFunction[K: TypeInformation: ClassTag](op: AbstractUnaryOp[K, K] with TEwFunc, A: FlinkDrm[K]): FlinkDrm[K] = {
+  def opUnaryFunction[K: TypeInformation](op: AbstractUnaryOp[K, K] with TEwFunc, A: FlinkDrm[K]): FlinkDrm[K] = {
     val f = op.f
     val inplace = isInplace
+
+
+    implicit val kTag = op.keyClassTag
 
     val res = if (op.evalZeros) {
       A.asBlockified.ds.map{
@@ -73,6 +78,7 @@ object FlinkOpAewScalar {
     }
 
     new BlockifiedFlinkDrm(res, op.ncol)
+
   }
 
 }

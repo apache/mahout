@@ -19,11 +19,12 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
  */
 object FlinkOpAewB {
 
-  def rowWiseJoinNoSideEffect[K: TypeInformation: ClassTag](op: OpAewB[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
+  def rowWiseJoinNoSideEffect[K: TypeInformation](op: OpAewB[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
     val function = AewBOpsCloning.strToFunction(op.op)
 
     val rowsA = A.asRowWise.ds
     val rowsB = B.asRowWise.ds
+    implicit val kTag = op.keyClassTag
 
     val res: DataSet[(K, Vector)] =
       rowsA
@@ -39,6 +40,7 @@ object FlinkOpAewB {
               "must be non-empty.")
           }
       }
+
 
     new RowsFlinkDrm(res.asInstanceOf[DataSet[(K, Vector)]], ncol=op.ncol)
   }

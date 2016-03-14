@@ -31,10 +31,12 @@ object FlinkOpAtA {
   final val PROPERTY_ATA_MAXINMEMNCOL = "mahout.math.AtA.maxInMemNCol"
   final val PROPERTY_ATA_MAXINMEMNCOL_DEFAULT = "200"
 
-  def at_a[K: ClassTag](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
+  def at_a[K](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
     val maxInMemStr = System.getProperty(PROPERTY_ATA_MAXINMEMNCOL, PROPERTY_ATA_MAXINMEMNCOL_DEFAULT)
     val maxInMemNCol = maxInMemStr.toInt
     maxInMemNCol.ensuring(_ > 0, "Invalid A'A in-memory setting for optimizer")
+
+    implicit val kTag = A.classTag
 
     if (op.ncol <= maxInMemNCol) {
       implicit val ctx = A.context
@@ -46,7 +48,7 @@ object FlinkOpAtA {
     }
   }
 
-  def slim[K: ClassTag](op: OpAtA[K], A: FlinkDrm[K]): Matrix = {
+  def slim[K](op: OpAtA[K], A: FlinkDrm[K]): Matrix = {
     val ds = A.asBlockified.ds.asInstanceOf[DataSet[(Array[K], Matrix)]]
 
     val res = ds.map {
@@ -57,7 +59,7 @@ object FlinkOpAtA {
     res.head
   }
 
-  def fat[K: ClassTag](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
+  def fat[K](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
     val nrow = op.A.nrow
     val ncol = op.A.ncol
     val ds = A.asBlockified.ds

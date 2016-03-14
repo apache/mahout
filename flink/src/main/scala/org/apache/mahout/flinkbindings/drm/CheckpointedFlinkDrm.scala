@@ -30,6 +30,8 @@ import org.apache.hadoop.mapred.{FileOutputFormat, JobConf, SequenceFileOutputFo
 import org.apache.hadoop.mapreduce.Job
 import org.apache.mahout.flinkbindings
 import org.apache.mahout.flinkbindings.{DrmDataSet, _}
+import org.apache.mahout.math.drm.CacheHint
+import org.apache.mahout.math.drm.CacheHint._
 import org.apache.mahout.math.drm.{CacheHint, CheckpointedDrm, DistributedContext, DrmTuple, _}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
@@ -42,6 +44,7 @@ import scala.util.Random
 class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       private var _nrow: Long = CheckpointedFlinkDrm.UNKNOWN,
       private var _ncol: Int = CheckpointedFlinkDrm.UNKNOWN,
+      override val cacheHint: CacheHint = CacheHint.NONE,
       override protected[mahout] val partitioningTag: Long = Random.nextLong(),
       private var _canHaveMissingRows: Boolean = false
   ) extends CheckpointedDrm[K] {
