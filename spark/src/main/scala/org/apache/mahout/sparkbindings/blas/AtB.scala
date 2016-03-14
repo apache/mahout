@@ -59,8 +59,8 @@ object AtB {
     // Approximate number of final partitions. We take bigger partitions as our guide to number of
     // elements per partition. TODO: do it better.
     // Elements per partition, bigger of two operands.
-    val epp = aNRow.toDouble * prodNRow / rddA.partitions.size max aNRow.toDouble * prodNCol /
-      rddB.partitions.size
+    val epp = aNRow.toDouble * prodNRow / rddA.partitions.length max aNRow.toDouble * prodNCol /
+      rddB.partitions.length
 
     // Number of partitions we want to converge to in the product. For now we simply extrapolate that
     // assuming product density and operand densities being about the same; and using the same element
@@ -102,8 +102,8 @@ object AtB {
     // Approximate number of final partitions. We take bigger partitions as our guide to number of
     // elements per partition. TODO: do it better.
     // Elements per partition, bigger of two operands.
-    val epp = aNRow.toDouble * prodNRow / rddA.partitions.size max aNRow.toDouble * prodNCol /
-      rddB.partitions.size
+    val epp = aNRow.toDouble * prodNRow / rddA.partitions.length max aNRow.toDouble * prodNCol /
+      rddB.partitions.length
 
     // Number of partitions we want to converge to in the product. For now we simply extrapolate that
     // assuming product density and operand densities being about the same; and using the same element
@@ -138,7 +138,7 @@ object AtB {
 
         // Do full join. We can't get away with partial join because it is going to lose some rows
         // in case we have missing rows on either side.
-        .cogroup(other = rddB, numPartitions = rddA.partitions.size max rddB.partitions.size )
+        .cogroup(other = rddB, numPartitions = rddA.partitions.length max rddB.partitions.length )
 
 
         // Merge groups.
@@ -249,7 +249,7 @@ object AtB {
       // Produce keys
       .map { case (blockKey, block) ⇒ ranges(blockKey).toArray → block }
 
-    debug(s"A'B mmul #parts: ${rdd.partitions.size}.")
+    debug(s"A'B mmul #parts: ${rdd.partitions.length}.")
 
     rdd
   }
@@ -308,7 +308,7 @@ object AtB {
     // this point we need to split n-range  of B' into sutiable number of partitions.
 
     if (log.isDebugEnabled) {
-      log.debug(s"AtBZipped:zipped #parts ${zipped.partitions.size}")
+      log.debug(s"AtBZipped:zipped #parts ${zipped.partitions.length}")
       log.debug(s"AtBZipped:Targeted #parts $numPartitions")
     }
 
@@ -350,7 +350,7 @@ object AtB {
       rowKeys -> block
     }
 
-    if (log.isDebugEnabled) log.debug(s"AtBZipped #parts ${rddBt.partitions.size}")
+    if (log.isDebugEnabled) log.debug(s"AtBZipped #parts ${rddBt.partitions.length}")
 
     rddBt
   }

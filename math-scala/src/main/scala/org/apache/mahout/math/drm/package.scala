@@ -84,20 +84,20 @@ package object drm {
   /** Just throw all engine operations into context as well. */
   implicit def ctx2engine(ctx: DistributedContext): DistributedEngine = ctx.engine
 
-  implicit def drm2drmCpOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedOps[K] =
+  implicit def drm2drmCpOps[K](drm: CheckpointedDrm[K]): CheckpointedOps[K] =
     new CheckpointedOps[K](drm)
 
   /**
    * We assume that whenever computational action is invoked without explicit checkpoint, the user
    * doesn't imply caching
    */
-  implicit def drm2Checkpointed[K: ClassTag](drm: DrmLike[K]): CheckpointedDrm[K] = drm.checkpoint(CacheHint.NONE)
+  implicit def drm2Checkpointed[K](drm: DrmLike[K]): CheckpointedDrm[K] = drm.checkpoint(CacheHint.NONE)
 
   /** Implicit conversion to in-core with NONE caching of the result. */
-  implicit def drm2InCore[K: ClassTag](drm: DrmLike[K]): Matrix = drm.collect
+  implicit def drm2InCore[K](drm: DrmLike[K]): Matrix = drm.collect
 
   /** Do vertical concatenation of collection of blockified tuples */
-  private[mahout] def rbind[K: ClassTag](blocks: Iterable[BlockifiedDrmTuple[K]]): BlockifiedDrmTuple[K] = {
+  private[mahout] def rbind[K:ClassTag](blocks: Iterable[BlockifiedDrmTuple[K]]): BlockifiedDrmTuple[K] = {
     assert(blocks.nonEmpty, "rbind: 0 blocks passed in")
     if (blocks.size == 1) {
       // No coalescing required.
@@ -131,7 +131,7 @@ package object drm {
    *         key type is actually Int, then we just return the argument with None for the map,
    *         regardless of computeMap parameter.
    */
-  def drm2IntKeyed[K: ClassTag](drmX: DrmLike[K], computeMap: Boolean = false): (DrmLike[Int], Option[DrmLike[K]]) =
+  def drm2IntKeyed[K](drmX: DrmLike[K], computeMap: Boolean = false): (DrmLike[Int], Option[DrmLike[K]]) =
     drmX.context.engine.drm2IntKeyed(drmX, computeMap)
 
   /**
@@ -142,23 +142,23 @@ package object drm {
    * @tparam K
    * @return samples
    */
-  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] =
+  def drmSampleRows[K](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] =
     drmX.context.engine.drmSampleRows(drmX, fraction, replacement)
 
-  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples: Int, replacement: Boolean = false): Matrix =
+  def drmSampleKRows[K](drmX: DrmLike[K], numSamples: Int, replacement: Boolean = false): Matrix =
     drmX.context.engine.drmSampleKRows(drmX, numSamples, replacement)
 
   ///////////////////////////////////////////////////////////
   // Elementwise unary functions on distributed operands.
-  def dexp[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.exp, true)
+  def dexp[K](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.exp, true)
 
-  def dlog[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.log, true)
+  def dlog[K](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.log, true)
 
-  def dabs[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.abs)
+  def dabs[K](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.abs)
 
-  def dsqrt[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.sqrt)
+  def dsqrt[K](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.sqrt)
 
-  def dsignum[K: ClassTag](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.signum)
+  def dsignum[K](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.signum)
   
   ///////////////////////////////////////////////////////////
   // Misc. math utilities.
@@ -170,7 +170,7 @@ package object drm {
    * @tparam K
    * @return colMeans → colVariances
    */
-  def dcolMeanVars[K: ClassTag](drmA: DrmLike[K]): (Vector, Vector) = {
+  def dcolMeanVars[K](drmA: DrmLike[K]): (Vector, Vector) = {
 
     import RLikeDrmOps._
 
@@ -189,7 +189,7 @@ package object drm {
    * @param drmA note: input will be pinned to cache if not yet pinned
    * @return colMeans → colStdevs
    */
-  def dcolMeanStdevs[K: ClassTag](drmA: DrmLike[K]): (Vector, Vector) = {
+  def dcolMeanStdevs[K](drmA: DrmLike[K]): (Vector, Vector) = {
     val (mu, vars) = dcolMeanVars(drmA)
     mu → (vars ::= math.sqrt _)
   }

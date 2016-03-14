@@ -18,7 +18,6 @@
 package org.apache.mahout.sparkbindings.blas
 
 import org.apache.log4j.Logger
-import scala.reflect.ClassTag
 import org.apache.mahout.sparkbindings.drm.DrmRddInput
 import org.apache.mahout.math.drm.logical.OpRbind
 
@@ -27,7 +26,9 @@ object RbindAB {
 
   private val log = Logger.getLogger(RbindAB.getClass)
 
-  def rbindAB[K: ClassTag](op: OpRbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
+  def rbindAB[K](op: OpRbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
+
+    implicit val ktag = op.keyClassTag
 
     // If any of the inputs is blockified, use blockified inputs
     if (srcA.isBlockified || srcB.isBlockified) {

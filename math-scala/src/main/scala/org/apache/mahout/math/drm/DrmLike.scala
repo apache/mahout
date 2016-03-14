@@ -19,13 +19,15 @@ package org.apache.mahout.math.drm
 
 import scala.reflect.ClassTag
 
-
 /**
+ *
  * Basic DRM trait.
+ *
+ * Since we already call the package "sparkbindings", I will not use stem "spark" with classes in
+ * this package. Spark backing is already implied.
+ *
  */
 trait DrmLike[K] {
-
-  val keyClassTag: ClassTag[K]
 
   protected[mahout] def partitioningTag: Long
 
@@ -35,13 +37,19 @@ trait DrmLike[K] {
    * Distributed context, can be implicitly converted to operations on [[org.apache.mahout.math.drm.
    * DistributedEngine]].
    */
-  val context: DistributedContext
+  val context:DistributedContext
 
   /** R-like syntax for number of rows. */
   def nrow: Long
 
   /** R-like syntax for number of columns */
   def ncol: Int
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  def keyClassTag: ClassTag[K]
 
   /**
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer

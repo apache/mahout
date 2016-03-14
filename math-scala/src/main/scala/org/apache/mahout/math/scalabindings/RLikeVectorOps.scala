@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.scalabindings
 
-import org.apache.mahout.math.{Matrix, Vector}
+import org.apache.mahout.math.Vector
 import org.apache.mahout.math.function.Functions
 import RLikeOps._
 

@@ -32,8 +32,6 @@ import collection._
 import collection.generic.Growable
 import scala.reflect.ClassTag
 
-
-
 /** Public api for Spark-specific operators */
 package object sparkbindings {
 
@@ -108,10 +106,10 @@ package object sparkbindings {
   implicit def sb2bc[T](b: Broadcast[T]): BCast[T] = new SparkBCast(b)
 
   /** Adding Spark-specific ops */
-  implicit def cpDrm2cpDrmSparkOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmSparkOps[K] =
+  implicit def cpDrm2cpDrmSparkOps[K](drm: CheckpointedDrm[K]): CheckpointedDrmSparkOps[K] =
     new CheckpointedDrmSparkOps[K](drm)
 
-  implicit def drm2cpDrmSparkOps[K: ClassTag](drm: DrmLike[K]): CheckpointedDrmSparkOps[K] = drm: CheckpointedDrm[K]
+  implicit def drm2cpDrmSparkOps[K](drm: DrmLike[K]): CheckpointedDrmSparkOps[K] = drm: CheckpointedDrm[K]
 
   private[sparkbindings] implicit def m2w(m: Matrix): MatrixWritable = new MatrixWritable(m)
 
@@ -140,8 +138,8 @@ package object sparkbindings {
   def drmWrap[K: ClassTag](rdd: DrmRdd[K], nrow: Long = -1, ncol: Int = -1, cacheHint: CacheHint.CacheHint =
   CacheHint.NONE, canHaveMissingRows: Boolean = false): CheckpointedDrm[K] =
 
-    new CheckpointedDrmSpark[K](rddInput = rdd, _nrow = nrow, _ncol = ncol, _cacheStorageLevel = SparkEngine
-      .cacheHint2Spark(cacheHint), _canHaveMissingRows = canHaveMissingRows)
+    new CheckpointedDrmSpark[K](rddInput = rdd, _nrow = nrow, _ncol = ncol, cacheHint = cacheHint,
+      _canHaveMissingRows = canHaveMissingRows)
 
 
   /** Another drmWrap version that takes in vertical block-partitioned input to form the matrix. */
@@ -191,7 +189,7 @@ package object sparkbindings {
           "defined?")
 
       val j = cp.split(File.pathSeparatorChar)
-      if (j.size > 10) {
+      if (j.length > 10) {
         // assume this is a valid classpath line
         jars ++= j
         continue = false

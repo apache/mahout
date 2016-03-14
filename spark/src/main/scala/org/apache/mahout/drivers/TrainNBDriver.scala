@@ -78,7 +78,7 @@ object TrainNBDriver extends MahoutSparkDriver {
   }
 
   /** Read the training set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
-  private def readTrainingSet: DrmLike[_]= {
+  private def readTrainingSet(): DrmLike[_]= {
     val inputPath = parser.opts("input").asInstanceOf[String]
     val trainingSet= drm.drmDfsRead(inputPath)
     trainingSet
@@ -98,7 +98,7 @@ object TrainNBDriver extends MahoutSparkDriver {
        Hadoop1HDFSUtil.delete(fullPathToModel)
     }
 
-    val trainingSet = readTrainingSet
+    val trainingSet = readTrainingSet()
     // Use Spark-Optimized Naive Bayes here to extract labels and aggregate options
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
     val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, complementary, alpha.toFloat)

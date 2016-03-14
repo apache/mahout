@@ -17,21 +17,23 @@
 
 package org.apache.mahout.math;
 
+import it.unimi.dsi.fastutil.doubles.DoubleIterator;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap.Entry;
+import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.apache.mahout.math.list.DoubleArrayList;
-import org.apache.mahout.math.map.OpenIntDoubleHashMap;
-import org.apache.mahout.math.map.OpenIntDoubleHashMap.MapElement;
 import org.apache.mahout.math.set.AbstractSet;
-
 
 /** Implements vector that only stores non-zero doubles */
 public class RandomAccessSparseVector extends AbstractVector {
 
   private static final int INITIAL_CAPACITY = 11;
 
-  private OpenIntDoubleHashMap values;
+  private Int2DoubleOpenHashMap values;
 
   /** For serialization purposes only. */
   public RandomAccessSparseVector() {
@@ -44,7 +46,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   public RandomAccessSparseVector(int cardinality, int initialCapacity) {
     super(cardinality);
-    values = new OpenIntDoubleHashMap(initialCapacity);
+    values = new Int2DoubleOpenHashMap(initialCapacity, .5f);
   }
 
   public RandomAccessSparseVector(Vector other) {
@@ -54,14 +56,14 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
   }
 
-  private RandomAccessSparseVector(int cardinality, OpenIntDoubleHashMap values) {
+  private RandomAccessSparseVector(int cardinality, Int2DoubleOpenHashMap values) {
     super(cardinality);
     this.values = values;
   }
 
   public RandomAccessSparseVector(RandomAccessSparseVector other, boolean shallowCopy) {
     super(other.size());
-    values = shallowCopy ? other.values : (OpenIntDoubleHashMap)other.values.clone();
+    values = shallowCopy ? other.values : other.values.clone();
   }
 
   @Override
@@ -71,7 +73,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   @Override
   public RandomAccessSparseVector clone() {
-    return new RandomAccessSparseVector(size(), (OpenIntDoubleHashMap) values.clone());
+    return new RandomAccessSparseVector(size(), values.clone());
   }
 
   @Override
@@ -123,7 +125,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   public void setQuick(int index, double value) {
     invalidateCachedLength();
     if (value == 0.0) {
-      values.removeKey(index);
+      values.remove(index);
     } else {
       values.put(index, value);
     }
@@ -132,7 +134,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   @Override
   public void incrementQuick(int index, double increment) {
     invalidateCachedLength();
-    values.adjustOrPutValue(index, increment, increment);
+    values.addTo( index, increment);
   }
 
 
@@ -153,14 +155,9 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   @Override
   public int getNumNonZeroElements() {
-    DoubleArrayList elementValues = values.values();
-    int numMappedElements = elementValues.size();
+    final DoubleIterator iterator = values.values().iterator();
     int numNonZeros = 0;
-    for (int index = 0; index < numMappedElements; index++) {
-      if (elementValues.getQuick(index) != 0) {
-        numNonZeros++;
-      }
-    }
+    for( int i = values.size(); i-- != 0; ) if ( iterator.nextDouble() != 0 ) numNonZeros++;
     return numNonZeros;
   }
 
@@ -190,60 +187,19 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
    */
 
-  /**
-   * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you need to preserve the
-   * instance, you need to make a copy of it
-   *
-   * @return an {@link Iterator} over the Elements.
-   * @see #getElement(int)
-   */
-  @Override
-  public Iterator<Element> iterateNonZero() {
-    return new NonDefaultIterator();
-  }
-
-  @Override
-  public Iterator<Element> iterator() {
-    return new AllIterator();
-  }
-
-  private final class NonDefaultIterator implements Iterator<Element> {
-    private final class NonDefaultElement implements Element {
-      @Override
-      public double get() {
-        return mapElement.get();
-      }
-
-      @Override
-      public int index() {
-        return mapElement.index();
-      }
-
-      @Override
-      public void set(double value) {
-        invalidateCachedLength();
-        mapElement.set(value);
-      }
-    }
-
-
-    private MapElement mapElement;
-    private final NonDefaultElement element = new NonDefaultElement();
-
-    private final Iterator<MapElement> iterator;
-
-    private NonDefaultIterator() {
-      this.iterator = values.iterator();
-    }
+  private final class NonZeroIterator implements Iterator<Element> {
+    final ObjectIterator<Int2DoubleMap.Entry> fastIterator = values.int2DoubleEntrySet().fastIterator();
+    final RandomAccessElement element = new RandomAccessElement( fastIterator );
 
     @Override
     public boolean hasNext() {
-      return iterator.hasNext();
+      return fastIterator.hasNext();
     }
 
     @Override
     public Element next() {
-      mapElement = iterator.next(); // This will throw an exception at the end of enumeration.
+      if ( ! hasNext() ) throw new NoSuchElementException();
+      element.entry = fastIterator.next();
       return element;
     }
 
@@ -253,8 +209,73 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
   }
 
+  final class RandomAccessElement implements Element {
+    Int2DoubleMap.Entry entry;
+    final ObjectIterator<Int2DoubleMap.Entry> fastIterator;
+
+    public RandomAccessElement( ObjectIterator<Entry> fastIterator ) {
+      super();
+      this.fastIterator = fastIterator;
+    }
+
+    @Override
+    public double get() {
+      return entry.getDoubleValue();
+    }
+
+    @Override
+    public int index() {
+      return entry.getIntKey();
+    }
+
+    @Override
+    public void set( double value ) {
+      invalidateCachedLength();
+      if (value == 0.0) fastIterator.remove();
+      else entry.setValue( value );
+    }
+  }
+  /**
+   * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you need to preserve the
+   * instance, you need to make a copy of it
+   *
+   * @return an {@link Iterator} over the Elements.
+   * @see #getElement(int)
+   */
+  @Override
+  public Iterator<Element> iterateNonZero() {
+    return new NonZeroIterator();
+  }
+
+  @Override
+  public Iterator<Element> iterator() {
+    return new AllIterator();
+  }
+
+  final class GeneralElement implements Element {
+    int index;
+    double value;
+
+    @Override
+    public double get() {
+      return value;
+    }
+
+    @Override
+    public int index() {
+      return index;
+    }
+
+    @Override
+    public void set( double value ) {
+      invalidateCachedLength();
+      if (value == 0.0) values.remove( index );
+      else values.put( index, value );
+    }
+}
+
   private final class AllIterator implements Iterator<Element> {
-    private final RandomAccessElement element = new RandomAccessElement();
+    private final GeneralElement element = new GeneralElement();
 
     private AllIterator() {
       element.index = -1;
@@ -270,37 +291,13 @@ public class RandomAccessSparseVector extends AbstractVector {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      element.index++;
+      element.value = values.get( ++element.index );
       return element;
     }
 
     @Override
     public void remove() {
       throw new UnsupportedOperationException();
-    }
-  }
-
-  private final class RandomAccessElement implements Element {
-    int index;
-
-    @Override
-    public double get() {
-      return values.get(index);
-    }
-
-    @Override
-    public int index() {
-      return index;
-    }
-
-    @Override
-    public void set(double value) {
-      invalidateCachedLength();
-      if (value == 0.0) {
-        values.removeKey(index);
-      } else {
-        values.put(index, value);
-      }
     }
   }
 }

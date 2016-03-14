@@ -91,7 +91,7 @@ object StandardNBClassifier extends java.io.Serializable {
   def computeWeight(featureLabelWeight: Double, labelWeight: Double, alphaI: Double, numFeatures: Double): Double = {
     val numerator: Double = featureLabelWeight + alphaI
     val denominator: Double = labelWeight + alphaI * numFeatures
-    return Math.log(numerator / denominator)
+    Math.log(numerator / denominator)
   }
 }
 
@@ -103,7 +103,7 @@ class ComplementaryNBClassifier(nbModel: NBModel) extends AbstractNBClassifier(n
   override def getScoreForLabelFeature(label: Int, feature: Int): Double = {
     val model: NBModel = getModel
     val weight: Double = ComplementaryNBClassifier.computeWeight(model.featureWeight(feature), model.weight(label, feature), model.totalWeightSum, model.labelWeight(label), model.alphaI, model.numFeatures)
-    return weight / model.thetaNormalizer(label)
+    weight / model.thetaNormalizer(label)
   }
 }
 
@@ -114,6 +114,6 @@ object ComplementaryNBClassifier extends java.io.Serializable {
   def computeWeight(featureWeight: Double, featureLabelWeight: Double, totalWeight: Double, labelWeight: Double, alphaI: Double, numFeatures: Double): Double = {
     val numerator: Double = featureWeight - featureLabelWeight + alphaI
     val denominator: Double = totalWeight - labelWeight + alphaI * numFeatures
-    return -Math.log(numerator / denominator)
+    -Math.log(numerator / denominator)
   }
 }

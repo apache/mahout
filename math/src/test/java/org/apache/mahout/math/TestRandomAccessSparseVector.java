@@ -50,7 +50,7 @@ public final class TestRandomAccessSparseVector extends AbstractVectorTest<Rando
     w.set(13, 100500.);
     w.set(19, 3.141592);
 
-    for (String token : Splitter.on(',').split(w.toString().substring(1, w.toString().length() - 2))) {
+    for (String token : Splitter.on(',').split(w.toString().substring(1, w.toString().length() - 1))) {
       String[] tokens = token.split(":");
       assertEquals(Double.parseDouble(tokens[1]), w.get(Integer.parseInt(tokens[0])), 0.0);
     }

@@ -18,6 +18,7 @@
 package org.apache.mahout.math;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -919,17 +920,23 @@ public final class VectorTest extends MahoutTestCase {
     Iterator<Element> it = vector.nonZeroes().iterator();
     Element element = null;
     int i = 0;
+    HashSet<Integer> indexes = new HashSet<Integer>();
     while (it.hasNext()) {  // hasNext is called more often than next
       if (i % 2 == 0) {
         element = it.next();
+        indexes.add(element.index());
       }
       //noinspection ConstantConditions
-      assertEquals(element.index(), 2* (i/2));
-      assertEquals(element.get(), vector.get(2* (i/2)), 0);
+      assertEquals(element.get(), vector.get(element.index()), 0);
       ++i;
     }
     assertEquals(7, i);  // Last element is print only once.
-
+	assertEquals(4, indexes.size());
+	assertTrue(indexes.contains(0));
+	assertTrue(indexes.contains(2));
+	assertTrue(indexes.contains(4));
+	assertTrue(indexes.contains(6));
+	
     // Test all iterator.
     it = vector.all().iterator();
     element = null;
