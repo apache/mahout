@@ -19,6 +19,10 @@
 package org.apache.mahout.flinkbindings
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
+import org.apache.hadoop.mapred.JobConf
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFilter
 
 import scala.collection.JavaConversions._
 import scala.reflect._
@@ -54,7 +58,7 @@ object FlinkEngine extends DistributedEngine {
    * @param path The DFS path to load from
    * @param parMin Minimum parallelism after load (equivalent to #par(min=...)).
    */
-  override def drmDfsRead(path: String, parMin: Int = 0)
+  override def drmDfsRead(path: String, parMin: Int = 1)
                          (implicit dc: DistributedContext): CheckpointedDrm[_] = {
 
     // Require that context is actually Flink context.
@@ -63,17 +67,62 @@ object FlinkEngine extends DistributedEngine {
     // Extract the Flink Environment variable
     implicit val env = dc.asInstanceOf[FlinkDistributedContext].env
 
+    // set the parallelism of the env to parMin
+    env.setParallelism(parMin)
+
+    // get the header of a SequenceFile in the path
     val metadata = hdfsUtils.readDrmHeader(path)
 
+    // from the header determine which function to use to unwrap the key
     val unwrapKey = metadata.unwrapKeyFunction
 
-    val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
+    // now loop through and read in all part-xxxxx files in the dir
+    // first get the path of all of the part-xxxxx files
+    val dfsPath = new Path(path)
+    val fs = dfsPath.getFileSystem(new Configuration())
 
-    val res = ds.map(new MapFunction[(Writable, VectorWritable), (Any, Vector)] {
-      def map(tuple: (Writable, VectorWritable)): (Any, Vector) = {
-        (unwrapKey(tuple._1), tuple._2.get())
-      }
-    })
+    // get the full set of part-xxxxx files as a sequence
+    val partFilePaths: Seq[Path] = fs.listStatus(dfsPath)
+
+      // Filter out anything starting with . or _ or directories
+      .filter { s =>
+      !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDirectory
+    }
+
+      // Take each flie path and map into a sequence
+      .map(_.getPath).toSeq
+
+      // Require there's at least one partition file found.
+     if (partFilePaths.size == 0) {
+      throw new IllegalArgumentException(s"No partition files found in ${dfsPath.toString}.")
+    }
+
+    // now read each  file into a seperate dataset
+    val allFilesAsDatasts = for (pfp <- partFilePaths) yield {
+      val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], pfp.toString)
+      ds.map(new MapFunction[(Writable, VectorWritable), (Any, Vector)] {
+        def map(tuple: (Writable, VectorWritable)): (Any, Vector) = {
+          (unwrapKey(tuple._1), tuple._2.get())
+        }
+      })
+    }
+    // now combine all elements of each dataset
+
+    val res = allFilesAsDatasts(0)
+    for (i <- 1 until allFilesAsDatasts.size){
+       res.join(allFilesAsDatasts(i))
+    }
+
+
+
+
+    //   val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
+    //
+    //    val res = ds.map(new MapFunction[(Writable, VectorWritable), (Any, Vector)] {
+    //      def map(tuple: (Writable, VectorWritable)): (Any, Vector) = {
+    //        (unwrapKey(tuple._1), tuple._2.get())
+    //      }
+    //    })
 
     datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
   }
