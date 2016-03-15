@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class UseCasesSuite extends FunSuite with DistributedFlinkSuite {
 
   val LOGGER = LoggerFactory.getLogger(getClass())

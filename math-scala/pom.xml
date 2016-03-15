@@ -125,7 +125,7 @@
     <dependency>
       <groupId>com.esotericsoftware.kryo</groupId>
       <artifactId>kryo</artifactId>
-      <version>2.21</version>
+      <version>2.24.0</version>
     </dependency>
 
     <!--  3rd-party -->

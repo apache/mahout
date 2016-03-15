@@ -23,15 +23,14 @@ import org.apache.mahout.math._
 import scalabindings._
 import RLikeOps._
 import drm._
+import org.apache.flink.api.scala._
 import org.apache.mahout.flinkbindings._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.apache.mahout.math.drm.logical.OpAx
 import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.drm.logical._
 
-@RunWith(classOf[JUnitRunner])
 class LATestSuite extends FunSuite with DistributedFlinkSuite {
 
   test("Ax blockified") {

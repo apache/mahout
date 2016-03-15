@@ -26,7 +26,7 @@ import scala.reflect.ClassTag
 
 /** Logical Times-left over in-core matrix operand */
 case class OpTimesLeftMatrix(
-    val left: Matrix,
+    left: Matrix,
     override var A: DrmLike[Int]
     ) extends AbstractUnaryOp[Int, Int] {
 

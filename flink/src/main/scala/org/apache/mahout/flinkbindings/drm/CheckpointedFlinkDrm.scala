@@ -18,17 +18,24 @@
  */
 package org.apache.mahout.flinkbindings.drm
 
+import org.apache
+import org.apache.flink.api.common.Plan
 import org.apache.flink.api.common.functions.{MapFunction, ReduceFunction}
-import org.apache.flink.api.java.tuple.Tuple2
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.java.io.DiscardingOutputFormat
 import org.apache.flink.api.scala._
 import org.apache.flink.api.scala.hadoop.mapred.HadoopOutputFormat
 import org.apache.hadoop.io.{IntWritable, LongWritable, Text, Writable}
 import org.apache.hadoop.mapred.{FileOutputFormat, JobConf, SequenceFileOutputFormat}
+import org.apache.hadoop.mapreduce.Job
+import org.apache.mahout.flinkbindings
 import org.apache.mahout.flinkbindings.{DrmDataSet, _}
-import org.apache.mahout.math.{DenseMatrix, Matrix, SparseMatrix, Vector, VectorWritable}
+import org.apache.mahout.math.drm.CacheHint
+import org.apache.mahout.math.drm.CacheHint._
 import org.apache.mahout.math.drm.{CacheHint, CheckpointedDrm, DistributedContext, DrmTuple, _}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math._
 
 import scala.collection.JavaConverters._
 import scala.reflect.{ClassTag, classTag}
@@ -37,6 +44,7 @@ import scala.util.Random
 class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       private var _nrow: Long = CheckpointedFlinkDrm.UNKNOWN,
       private var _ncol: Int = CheckpointedFlinkDrm.UNKNOWN,
+      override val cacheHint: CacheHint = CacheHint.NONE,
       override protected[mahout] val partitioningTag: Long = Random.nextLong(),
       private var _canHaveMissingRows: Boolean = false
   ) extends CheckpointedDrm[K] {
@@ -79,7 +87,10 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
 
   protected[mahout] def canHaveMissingRows: Boolean = _canHaveMissingRows
 
-  def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = this
+  def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = {
+
+     this
+  }
 
   def collect: Matrix = {
     val data = ds.collect()
@@ -123,21 +134,78 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   def dfsWrite(path: String): Unit = {
     val env = ds.getExecutionEnvironment
 
-    val keyTag = implicitly[ClassTag[K]]
-    val convertKey = keyToWritableFunc(keyTag)
+    // ds.map is not picking up the correct runtime value of tuple._1
+    // WritableType info is throwing an exception
+    // when asserting that the key is not an actual Writable
+    // rather a subclass
 
-    val writableDataset = ds.map(new MapFunction[(K, Vector), (Writable, VectorWritable)] {
-      def map(tuple: (K, Vector)): Tuple2[Writable, VectorWritable] = tuple match {
-        case (idx, vec) => new Tuple2(convertKey(idx), new VectorWritable(vec))
-      }
-    })
+//    val keyTag = implicitly[ClassTag[K]]
+//    def convertKey = keyToWritableFunc(keyTag)
+//    val writableDataset = ds.map {
+//      tuple => (convertKey(tuple._1), new VectorWritable(tuple._2))
+//    }
+
+
+      // test output with IntWritable Key.  VectorWritable is not a problem,
+//    val writableDataset = ds.map(new MapFunction[DrmTuple[K], (IntWritable, VectorWritable)] {
+//      def map(tuple: DrmTuple[K]): (IntWritable, VectorWritable) =
+//         (new IntWritable(1), new VectorWritable(tuple._2))
+//    })
+
+
+    val ktag = implicitly[ClassTag[K]]
 
     val job = new JobConf
-    val sequenceFormat = new SequenceFileOutputFormat[Writable, VectorWritable]
     FileOutputFormat.setOutputPath(job, new org.apache.hadoop.fs.Path(path))
 
-    val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
-    writableDataset.output(hadoopOutput)
+    // explicitly define all Writable Subclasses for ds.map() keys
+    // as well as the SequenceFileOutputFormat paramaters
+    if (ktag.runtimeClass == classOf[Int]) {
+      // explicitly map into Int keys
+      implicit val typeInformation = createTypeInformation[(IntWritable,VectorWritable)]
+      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (IntWritable, VectorWritable)] {
+        def map(tuple: DrmTuple[K]): (IntWritable, VectorWritable) =
+          (new IntWritable(tuple._1.asInstanceOf[Int]), new VectorWritable(tuple._2))
+      })
+
+      // setup sink for IntWritable
+      job.setOutputKeyClass(classOf[IntWritable])
+      job.setOutputValueClass(classOf[VectorWritable])
+      val sequenceFormat = new SequenceFileOutputFormat[IntWritable, VectorWritable]
+      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
+      writableDataset.output(hadoopOutput)
+
+     } else if (ktag.runtimeClass == classOf[String]) {
+      // explicitly map into Text keys
+      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (Text, VectorWritable)] {
+        def map(tuple: DrmTuple[K]): (Text, VectorWritable) =
+          (new Text(tuple._1.asInstanceOf[String]), new VectorWritable(tuple._2))
+      })
+
+      // setup sink for Text
+      job.setOutputKeyClass(classOf[Text])
+      job.setOutputValueClass(classOf[VectorWritable])
+      val sequenceFormat = new SequenceFileOutputFormat[Text, VectorWritable]
+      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
+      writableDataset.output(hadoopOutput)
+
+    } else if (ktag.runtimeClass == classOf[Long]) {
+      // explicitly map into Long keys
+      val writableDataset = ds.map(new MapFunction[DrmTuple[K], (LongWritable, VectorWritable)] {
+        def map(tuple: DrmTuple[K]): (LongWritable, VectorWritable) =
+          (new LongWritable(tuple._1.asInstanceOf[Long]), new VectorWritable(tuple._2))
+      })
+
+      // setup sink for LongWritable
+      job.setOutputKeyClass(classOf[LongWritable])
+      job.setOutputValueClass(classOf[VectorWritable])
+      val sequenceFormat = new SequenceFileOutputFormat[LongWritable, VectorWritable]
+      val hadoopOutput  = new HadoopOutputFormat(sequenceFormat, job)
+      writableDataset.output(hadoopOutput)
+
+    } else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
+
+
 
     env.execute(s"dfsWrite($path)")
   }
@@ -148,9 +216,10 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
     } else if (keyTag.runtimeClass == classOf[String]) {
       (x: K) => new Text(x.asInstanceOf[String]) 
     } else if (keyTag.runtimeClass == classOf[Long]) {
-      (x: K) => new LongWritable(x.asInstanceOf[Long]) 
-    } else if (classOf[Writable].isAssignableFrom(keyTag.runtimeClass)) { 
-      (x: K) => x.asInstanceOf[Writable] 
+      (x: K) => new LongWritable(x.asInstanceOf[Long])
+    // WritableTypeInfo will reject the base Writable class
+//          } else if (classOf[Writable].isAssignableFrom(keyTag.runtimeClass)) {
+//      (x: K) => x.asInstanceOf[Writable]
     } else {
       throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(keyTag))
     }

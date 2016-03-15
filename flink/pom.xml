@@ -103,14 +103,15 @@
   </build>
 
   <dependencies>
+
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-core</artifactId>
+      <artifactId>flink-runtime_${scala.compat.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-scala_2.10</artifactId>
+      <artifactId>flink-scala_${scala.compat.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>
@@ -120,13 +121,26 @@
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-clients_2.10</artifactId>
+      <artifactId>flink-core</artifactId>
       <version>${flink.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-clients_${scala.compat.version}</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+    </dependency>
+
+    <!-- enforce current version of kryo as of 0.10.1-->
+    <dependency>
+      <groupId>com.esotericsoftware.kryo</groupId>
+      <artifactId>kryo</artifactId>
+      <version>2.24.0</version>
     </dependency>
 
     <dependency>
