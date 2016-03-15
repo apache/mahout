@@ -38,7 +38,4 @@ class DrmRddInput[K: ClassTag](private val input: Either[DrmRdd[K], BlockifiedDr
 
   def sparkContext: SparkContext = backingRdd.sparkContext
 
-  def persist(sl: StorageLevel) = backingRdd.persist(newLevel = sl)
-
-  def unpersist(blocking: Boolean = true) = backingRdd.unpersist(blocking)
 }
