@@ -644,7 +644,7 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
     val drmA = drmParallelize(mxA)
 
     (drmA(x => x + 1).collect - (mxAControl + 1)).norm should be < 1e-7
-    (drmA(x => x * 2).collect - (2 * mxAControl )).norm should be < 1e-7
+    (drmA(x => x * 2).collect - (2 * mxAControl)).norm should be < 1e-7
 
   }
 

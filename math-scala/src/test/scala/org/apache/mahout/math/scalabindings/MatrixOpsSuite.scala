@@ -139,7 +139,7 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     val mxAControl = mxA cloned
 
     (mxA(x ⇒ x + 1) - (mxAControl + 1)).norm should be < 1e-7
-    (mxA(x ⇒ x * 2) - (2 * mxAControl )).norm should be < 1e-7
+    (mxA(x ⇒ x * 2) - (2 * mxAControl)).norm should be < 1e-7
 
   }
 
