@@ -307,7 +307,7 @@ object FlinkEngine extends DistributedEngine {
   /** This creates an empty DRM with specified number of partitions and cardinality. */
   override def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int = 10)
                                   (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
-    val nonParallelResult = (0 to numPartitions).flatMap { part =>
+    val nonParallelResult = (0 to numPartitions).flatMap { part ⇒
       val partNRow = (nrow - 1) / numPartitions + 1
       val partStart = partNRow * part
       val partEnd = Math.min(partStart + partNRow, nrow)
@@ -320,47 +320,54 @@ object FlinkEngine extends DistributedEngine {
 
   /** Creates empty DRM with non-trivial height */
   override def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
-                                      (implicit sc: DistributedContext): CheckpointedDrm[Long] = ???
+                                      (implicit dc: DistributedContext): CheckpointedDrm[Long] = {
 
+    val nonParallelResult = (0 to numPartitions).flatMap { part ⇒
+        val partNRow = (nrow - 1) / numPartitions + 1
+        val partStart = partNRow * part
+        val partEnd = Math.min(partStart + partNRow, nrow)
+
+      for (i ← partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
+    }
+
+    val result = dc.env.fromCollection(nonParallelResult)
+    new CheckpointedFlinkDrm[Long](ds = result, nrow, ncol, cacheHint = CacheHint.NONE)
+  }
 
   /**
-    * Convert non-int-keyed matrix to an int-keyed, computing optionally mapping from old keys
-    * to row indices in the new one. The mapping, if requested, is returned as a 1-column matrix.
-    */
+   * Convert non-int-keyed matrix to an int-keyed, computing optionally mapping from old keys
+   * to row indices in the new one. The mapping, if requested, is returned as a 1-column matrix.
+   */
   def drm2IntKeyed[K](drmX: DrmLike[K], computeMap: Boolean = false):
-  (DrmLike[Int], Option[DrmLike[K]]) = ???
+          (DrmLike[Int], Option[DrmLike[K]]) = ???
 
   /**
-    * (Optional) Sampling operation.
-    */
+   * (Optional) Sampling operation.
+   */
   def drmSampleRows[K](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = {
-    implicit val kTag: ClassTag[K] = drmX.keyClassTag
+    implicit val kTag: ClassTag[K] =  drmX.keyClassTag
     implicit val typeInformation = generateTypeInformation[K]
 
     val sample = DataSetUtils(drmX.dataset).sample(replacement, fraction)
     new CheckpointedFlinkDrm[K](sample)
   }
 
-  def drmSampleKRows[K](drmX: DrmLike[K], numSamples: Int, replacement: Boolean = false): Matrix = {
-    implicit val kTag: ClassTag[K] = drmX.keyClassTag
+  def drmSampleKRows[K](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = {
+    implicit val kTag: ClassTag[K] =  drmX.keyClassTag
     implicit val typeInformation = generateTypeInformation[K]
 
     val sample = DataSetUtils(drmX.dataset).sampleWithSize(replacement, numSamples)
     new CheckpointedFlinkDrm[K](sample)
   }
 
-  /** Engine-specific all reduce tensor operation. */
-  def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = {
+  /** Optional engine-specific all reduce tensor operation. */
+  def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix =
+    throw new UnsupportedOperationException("the operation allreduceBlock is not yet supported on Flink")
 
-    implicit val kTag: ClassTag[K] = drm.keyClassTag
-    implicit val typeInformation = generateTypeInformation[K]
-
-
-    val res = drm.asBlockified.ds.map(par => bmf(par)).reduce(rf)
-
-    res.collect().head
-  }
-
+//  private def generateTypeInformation[K]: TypeInformation[K] = {
+//    val tag = implicitly[K].asInstanceOf[ClassTag[K]]
+//    generateTypeInformationFromTag(tag)
+//  }
   private def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
     val tag = implicitly[ClassTag[K]]
 
