@@ -366,6 +366,13 @@ object FlinkEngine extends DistributedEngine {
     implicit val typeInformation = generateTypeInformation[K]
 
     val res = drm.asBlockified.ds.map(par => bmf(par)).reduce(rf)
+    res.collect().head
+  }
+
+  private def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
+    val tag = implicitly[ClassTag[K]]
+
+    generateTypeInformationFromTag(tag)
   }
   
   private def generateTypeInformationFromTag[K](tag: ClassTag[K]): TypeInformation[K] = {
