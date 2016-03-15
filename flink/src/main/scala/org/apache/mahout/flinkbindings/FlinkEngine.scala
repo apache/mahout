@@ -331,7 +331,7 @@ object FlinkEngine extends DistributedEngine {
     }
 
     val result = dc.env.fromCollection(nonParallelResult)
-    new CheckpointedFlinkDrm[Long](ds = result, nrow, ncol, cacheHint = CacheHint.NONE)
+    new CheckpointedFlinkDrm[Long](ds = result, _nrow = nrow, _ncol = ncol, cacheHint = CacheHint.NONE)
   }
 
   /**
