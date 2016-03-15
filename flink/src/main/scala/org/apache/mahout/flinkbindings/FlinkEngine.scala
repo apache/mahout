@@ -257,7 +257,9 @@ object FlinkEngine extends DistributedEngine {
 //    })
 
     val list = sumOfSquares.collect
-    list.head
+
+    // check on this --why is it returning a list?
+    math.sqrt(list.head)
   }
 
   /** Broadcast support */
