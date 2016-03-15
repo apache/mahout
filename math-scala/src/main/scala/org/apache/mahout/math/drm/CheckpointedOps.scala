@@ -43,7 +43,7 @@ class CheckpointedOps[K](val drm: CheckpointedDrm[K]) {
 
     drm.context.allreduceBlock(drm, bmf, rf)
 
-
+  /** Second norm */
   def norm():Double = drm.context.norm(drm)
 }
 
