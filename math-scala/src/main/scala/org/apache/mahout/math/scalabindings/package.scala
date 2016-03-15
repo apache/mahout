@@ -29,6 +29,12 @@ package object scalabindings {
   // Reserved "ALL" range
   final val `::`: Range = null
 
+  // Some enums
+  object AutoBooleanEnum extends Enumeration {
+    type T = Value
+    val TRUE, FALSE, AUTO = Value
+  }
+
   implicit def seq2Vector(s: TraversableOnce[AnyVal]) =
     new DenseVector(s.map(_.asInstanceOf[Number].doubleValue()).toArray)
 
