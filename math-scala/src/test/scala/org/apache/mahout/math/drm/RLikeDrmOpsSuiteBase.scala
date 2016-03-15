@@ -637,5 +637,19 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
   }
 
+  test("functional apply()") {
+    val mxA = sparse (
+      (1 -> 3) :: (7 -> 7) :: Nil,
+      (4 -> 5) :: (5 -> 8) :: Nil
+    )
+
+    val mxAControl = mxA cloned
+    val drmA = drmParallelize(mxA)
+
+    (drmA(x => x + 1).collect - (mxAControl + 1)).norm should be < 1e-7
+    (drmA(x => x * 2).collect - (2 * mxAControl)).norm should be < 1e-7
+
+  }
+
 
 }
