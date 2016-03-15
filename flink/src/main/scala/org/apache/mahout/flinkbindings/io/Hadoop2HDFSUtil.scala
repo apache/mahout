@@ -39,13 +39,16 @@ object Hadoop2HDFSUtil extends HDFSUtil {
    */
   def readDrmHeader(path: String): DrmMetadata = {
     val dfsPath = new Path(path)
-    val fs = dfsPath.getFileSystem(new Configuration())
+    val conf = new Configuration()
+    val fs = dfsPath.getFileSystem(conf)
+
+    fs.setConf(conf)
 
     val partFilePath: Path = fs.listStatus(dfsPath)
 
       // Filter out anything starting with .
       .filter { s =>
-        !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDirectory
+        !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDir
       }
 
       // Take path
@@ -60,11 +63,11 @@ object Hadoop2HDFSUtil extends HDFSUtil {
       }
 
     // flink is retiring hadoop 1
-    // val reader = new SequenceFile.Reader(fs, partFilePath, fs.getConf)
+     val reader = new SequenceFile.Reader(fs, partFilePath, fs.getConf)
 
     // hadoop 2 reader
-    val reader: SequenceFile.Reader = new SequenceFile.Reader(fs.getConf,
-      SequenceFile.Reader.file(dfsPath));
+//    val reader: SequenceFile.Reader = new SequenceFile.Reader(fs.getConf,
+//      SequenceFile.Reader.file(partFilePath));
     try {
       new DrmMetadata(
         keyTypeWritable = reader.getKeyClass.asSubclass(classOf[Writable]),

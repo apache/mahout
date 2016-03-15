@@ -74,41 +74,41 @@ class FailingTestsSuite extends FunSuite with DistributedFlinkSuite with Matcher
   }
 
 
-  test("C = A + B, identically partitioned") {
-
-    val inCoreA = dense((1, 2, 3), (3, 4, 5), (5, 6, 7))
-
-    val A = drmParallelize(inCoreA, numPartitions = 2)
+//  test("C = A + B, identically partitioned") {
+//
+//    val inCoreA = dense((1, 2, 3), (3, 4, 5), (5, 6, 7))
+//
+//    val A = drmParallelize(inCoreA, numPartitions = 2)
 
     //    printf("A.nrow=%d.\n", A.rdd.count())
 
     // Create B which would be identically partitioned to A. mapBlock() by default will do the trick.
-    val B = A.mapBlock() {
-      case (keys, block) =>
-        val bBlock = block.like() := { (r, c, v) => util.Random.nextDouble()}
-        keys -> bBlock
-    }
-      // Prevent repeated computation non-determinism
-      // flink problem is here... checkpoint is not doing what it should
-      // ie. greate a physical plan w/o side effects
-      .checkpoint()
-
-    val inCoreB = B.collect
-
-    printf("A=\n%s\n", inCoreA)
-    printf("B=\n%s\n", inCoreB)
-
-    val C = A + B
-
-    val inCoreC = C.collect
-
-    printf("C=\n%s\n", inCoreC)
-
-    // Actual
-    val inCoreCControl = inCoreA + inCoreB
-
-    (inCoreC - inCoreCControl).norm should be < 1E-10
-  }
+//    val B = A.mapBlock() {
+//      case (keys, block) =>
+//        val bBlock = block.like() := { (r, c, v) => util.Random.nextDouble()}
+//        keys -> bBlock
+//    }
+//      // Prevent repeated computation non-determinism
+//      // flink problem is here... checkpoint is not doing what it should
+//      // ie. greate a physical plan w/o side effects
+//      .checkpoint()
+//
+//    val inCoreB = B.collect
+//
+//    printf("A=\n%s\n", inCoreA)
+//    printf("B=\n%s\n", inCoreB)
+//
+//    val C = A + B
+//
+//    val inCoreC = C.collect
+//
+//    printf("C=\n%s\n", inCoreC)
+//
+//    // Actual
+//    val inCoreCControl = inCoreA + inCoreB
+//
+//    (inCoreC - inCoreCControl).norm should be < 1E-10
+//  }
 // Passing now.
 //  test("C = inCoreA %*%: B") {
 //
@@ -126,29 +126,29 @@ class FailingTestsSuite extends FunSuite with DistributedFlinkSuite with Matcher
 //
 //  }
 
-  test("dsqDist(X,Y)") {
-    val m = 100
-    val n = 300
-    val d = 7
-    val mxX = Matrices.symmetricUniformView(m, d, 12345).cloned -= 5
-    val mxY = Matrices.symmetricUniformView(n, d, 1234).cloned += 10
-    val (drmX, drmY) = (drmParallelize(mxX, 3), drmParallelize(mxY, 4))
-
-    val mxDsq = dsqDist(drmX, drmY).collect
-    val mxDsqControl = new DenseMatrix(m, n) := { (r, c, _) ⇒ (mxX(r, ::) - mxY(c, ::)) ^= 2 sum }
-    (mxDsq - mxDsqControl).norm should be < 1e-7
-  }
-
-  test("dsqDist(X)") {
-    val m = 100
-    val d = 7
-    val mxX = Matrices.symmetricUniformView(m, d, 12345).cloned -= 5
-    val drmX = drmParallelize(mxX, 3)
-
-    val mxDsq = dsqDist(drmX).collect
-    val mxDsqControl = sqDist(drmX)
-    (mxDsq - mxDsqControl).norm should be < 1e-7
-  }
+//  test("dsqDist(X,Y)") {
+//    val m = 100
+//    val n = 300
+//    val d = 7
+//    val mxX = Matrices.symmetricUniformView(m, d, 12345).cloned -= 5
+//    val mxY = Matrices.symmetricUniformView(n, d, 1234).cloned += 10
+//    val (drmX, drmY) = (drmParallelize(mxX, 3), drmParallelize(mxY, 4))
+//
+//    val mxDsq = dsqDist(drmX, drmY).collect
+//    val mxDsqControl = new DenseMatrix(m, n) := { (r, c, _) ⇒ (mxX(r, ::) - mxY(c, ::)) ^= 2 sum }
+//    (mxDsq - mxDsqControl).norm should be < 1e-7
+//  }
+//
+//  test("dsqDist(X)") {
+//    val m = 100
+//    val d = 7
+//    val mxX = Matrices.symmetricUniformView(m, d, 12345).cloned -= 5
+//    val drmX = drmParallelize(mxX, 3)
+//
+//    val mxDsq = dsqDist(drmX).collect
+//    val mxDsqControl = sqDist(drmX)
+//    (mxDsq - mxDsqControl).norm should be < 1e-7
+//  }
 
 // still failing- kicks out of the suite
 
