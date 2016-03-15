@@ -360,20 +360,14 @@ object FlinkEngine extends DistributedEngine {
     new CheckpointedFlinkDrm[K](sample)
   }
 
-  /** Optional engine-specific all reduce tensor operation. */
-  def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix =
-    throw new UnsupportedOperationException("the operation allreduceBlock is not yet supported on Flink")
+  /** Engine-specific all reduce tensor operation. */
+  def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = {
+    implicit val kTag: ClassTag[K] = drm.keyClassTag
+    implicit val typeInformation = generateTypeInformation[K]
 
-//  private def generateTypeInformation[K]: TypeInformation[K] = {
-//    val tag = implicitly[K].asInstanceOf[ClassTag[K]]
-//    generateTypeInformationFromTag(tag)
-//  }
-  private def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
-    val tag = implicitly[ClassTag[K]]
-
-    generateTypeInformationFromTag(tag)
+    val res = drm.asBlockified.ds.map(par => bmf(par)).reduce(rf)
   }
-
+  
   private def generateTypeInformationFromTag[K](tag: ClassTag[K]): TypeInformation[K] = {
     if (tag.runtimeClass.equals(classOf[Int])) {
       createTypeInformation[Int].asInstanceOf[TypeInformation[K]]
