@@ -248,14 +248,6 @@ object FlinkEngine extends DistributedEngine {
       }
     }.reduce(_ + _)
 
-    //    val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
-    //      def map(tuple: (K, Vector)): Double = tuple match {
-    //        case (idx, vec) => vec dot vec
-    //      }
-    //    }).reduce(new ReduceFunction[Double] {
-    //      def reduce(v1: Double, v2: Double) = v1 + v2
-    //    })
-
     val list = sumOfSquares.collect
 
     // check on this --why is it returning a list?

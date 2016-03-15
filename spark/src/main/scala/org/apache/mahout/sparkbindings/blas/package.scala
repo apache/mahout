@@ -34,9 +34,8 @@ package object blas {
 
   implicit def drmRdd2ops[K](rdd: DrmRdd[K]): DrmRddOps[K] = new DrmRddOps[K](rdd)
 
-
   /**
-   * Rekey matrix dataset keys to consequtive int keys.
+   * Rekey matrix dataset keys to consecutive int keys.
    * @param rdd incoming matrix row-wise dataset
    *
    * @param computeMap if true, also compute mapping between old and new keys

@@ -39,22 +39,13 @@ object FlinkOpTimesRightMatrix {
     implicit val ctx = A.context
     implicit val kTag = op.keyClassTag
 
-
-
     /* HACK: broadcasting the matrix using Flink's .withBroadcastSet(singletonDataSetB) on a matrix causes a backend Kryo
-     * Issue resulkting in a stackOverflow error.
+     * Issue resulting in a stackOverflow error.
      * 
      * Quick fix is to instead break the matrix down into a list of rows and then rebuild it on the back end
      * 
      * TODO: this is obviously very inefficient... need to use the correct broadcast on the matrix itself.
      */
-    
-    //  val singletonDataSetB = ctx.env.fromElements(inCoreB)
-
-    
-    //  val inCoreBcastB = FlinkEngine.drmBroadcast(inCoreB)
-    //  val singletonDataSetB = ctx.env.fromElements(inCoreB)
-
     val rows = (0 until inCoreB.nrow).map(i => (i, inCoreB(i, ::)))
     val dataSetType = TypeExtractor.getForObject(rows.head)
     val singletonDataSetB = ctx.env.fromCollection(rows)
