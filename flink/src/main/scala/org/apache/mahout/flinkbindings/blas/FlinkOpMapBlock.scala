@@ -18,13 +18,10 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import scala.reflect.ClassTag
-
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.drm.BlockMapFunc
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.scala._
+import org.apache.mahout.flinkbindings.drm.{BlockifiedFlinkDrm, FlinkDrm}
+import org.apache.mahout.math.drm.logical.OpMapBlock
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 /**
@@ -33,16 +30,19 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
  */
 object FlinkOpMapBlock {
 
-  def apply[S, R: ClassTag](src: FlinkDrm[S], ncol: Int, function: BlockMapFunc[S, R]): FlinkDrm[R] = {
-    val res = src.asBlockified.ds.map(new MapFunction[(Array[S], Matrix), (Array[R], Matrix)] {
-      def map(block: (Array[S], Matrix)): (Array[R], Matrix) =  {
-        val out = function(block)
-        assert(out._2.nrow == block._2.nrow, "block mapping must return same number of rows.")
-        assert(out._2.ncol == ncol, s"block map must return $ncol number of columns.")
-        out
-      }
-    })
+  def apply[S, R: TypeInformation](src: FlinkDrm[S], ncol: Int, operator: OpMapBlock[S,R]): FlinkDrm[R] = {
+    implicit val rtag = operator.keyClassTag
+    val bmf = operator.bmf
+    val ncol = operator.ncol
+    val res = src.asBlockified.ds.map {
+      block =>
+        val result = bmf(block)
+        assert(result._2.nrow == block._2.nrow, "block mapping must return same number of rows.")
+        assert(result._2.ncol == ncol, s"block map must return $ncol number of columns.")
+       // printf("Block partition: \n%s\n", block._2)
+        result
+    }
 
-    new BlockifiedFlinkDrm(res, ncol)
+    new BlockifiedFlinkDrm[R](res, ncol)
   }
 }

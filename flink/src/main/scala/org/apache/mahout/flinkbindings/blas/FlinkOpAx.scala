@@ -21,6 +21,7 @@ package org.apache.mahout.flinkbindings.blas
 import java.util.List
 
 import org.apache.flink.api.common.functions.RichMapFunction
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.mahout.flinkbindings.drm.{BlockifiedFlinkDrm, FlinkDrm}
 import org.apache.mahout.math.{Matrix, Vector}
@@ -38,8 +39,9 @@ import org.apache.flink.api.scala._
  */
 object FlinkOpAx {
 
-  def blockifiedBroadcastAx[K: ClassTag](op: OpAx[K], A: FlinkDrm[K]): FlinkDrm[K] = {
+  def blockifiedBroadcastAx[K: TypeInformation](op: OpAx[K], A: FlinkDrm[K]): FlinkDrm[K] = {
     implicit val ctx = A.context
+    implicit val kTag = op.keyClassTag
 
     val singletonDataSetX = ctx.env.fromElements(op.x)
 

@@ -1,21 +1,13 @@
 package org.apache.mahout.flinkbindings.blas
 
-import java.lang.Iterable
 
-import scala.collection.JavaConverters._
-import scala.reflect.ClassTag
-
-import org.apache.flink.api.common.functions.CoGroupFunction
-import org.apache.flink.api.scala.DataSet
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.scala._
 import org.apache.flink.util.Collector
-import org.apache.mahout.flinkbindings._
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
+import org.apache.mahout.flinkbindings.drm.{FlinkDrm, RowsFlinkDrm}
 import org.apache.mahout.math.Vector
 import org.apache.mahout.math.drm.logical.OpAewB
 import org.apache.mahout.math.scalabindings.RLikeOps._
-
-import com.google.common.collect.Lists
 
 /**
  * Implementation is inspired by Spark-binding's OpAewB
@@ -23,34 +15,28 @@ import com.google.common.collect.Lists
  */
 object FlinkOpAewB {
 
-  def rowWiseJoinNoSideEffect[K: ClassTag](op: OpAewB[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
+  def rowWiseJoinNoSideEffect[K: TypeInformation](op: OpAewB[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {
     val function = AewBOpsCloning.strToFunction(op.op)
 
-    val classTag = extractRealClassTag(op.A)
-    val joiner = selector[Vector, Any](classTag.asInstanceOf[ClassTag[Any]]) 
+    val rowsA = A.asRowWise.ds
+    val rowsB = B.asRowWise.ds
+    implicit val kTag = op.keyClassTag
 
-    val rowsA = A.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
-    val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[Any]]
-
-    val res: DataSet[(Any, Vector)] = 
-      rowsA.coGroup(rowsB).where(joiner).equalTo(joiner)
-        .`with`(new CoGroupFunction[(_, Vector), (_, Vector), (_, Vector)] {
-      def coGroup(it1java: Iterable[(_, Vector)], it2java: Iterable[(_, Vector)], 
-                  out: Collector[(_, Vector)]): Unit = {
-        val it1 = Lists.newArrayList(it1java).asScala
-        val it2 = Lists.newArrayList(it2java).asScala
-
-        if (it1.nonEmpty && it2.nonEmpty) {
-          val (idx, a) = it1.head
-          val (_, b) = it2.head
-          out.collect((idx, function(a, b)))
-        } else if (it1.isEmpty && it2.nonEmpty) {
-          out.collect(it2.head)
-        } else if (it1.nonEmpty && it2.isEmpty) {
-          out.collect(it1.head)
-        }
+    val res: DataSet[(K, Vector)] =
+      rowsA
+        .coGroup(rowsB)
+        .where(0)
+        .equalTo(0) {
+        (left, right, out: Collector[(K, Vector)]) =>
+          (left.toIterable.headOption, right.toIterable.headOption) match {
+            case (Some((idx, a)), Some((_, b))) => out.collect((idx, function(a, b)))
+            case (None, Some(b)) => out.collect(b)
+            case (Some(a), None) => out.collect(a)
+            case (None, None) => throw new RuntimeException("At least one side of the co group " +
+              "must be non-empty.")
+          }
       }
-    })
+
 
     new RowsFlinkDrm(res.asInstanceOf[DataSet[(K, Vector)]], ncol=op.ncol)
   }

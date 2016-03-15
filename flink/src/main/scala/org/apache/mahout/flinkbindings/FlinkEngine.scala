@@ -18,32 +18,29 @@
  */
 package org.apache.mahout.flinkbindings
 
-import scala.collection.JavaConversions._
-import scala.reflect.ClassTag
 import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.common.functions.ReduceFunction
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor
-import org.apache.hadoop.io.Writable
+import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.utils.DataSetUtils
+import org.apache.hadoop.io.{IntWritable, LongWritable, Text}
 import org.apache.mahout.flinkbindings.blas._
 import org.apache.mahout.flinkbindings.drm._
-import org.apache.mahout.flinkbindings.io.HDFSUtil
-import org.apache.mahout.flinkbindings.io.Hadoop1HDFSUtil
+import org.apache.mahout.flinkbindings.io.{HDFSUtil, Hadoop2HDFSUtil}
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical._
-import org.apache.mahout.math.indexeddataset.BiDictionary
-import org.apache.mahout.math.indexeddataset.IndexedDataset
-import org.apache.mahout.math.indexeddataset.Schema
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.indexeddataset.{BiDictionary, IndexedDataset, Schema}
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 
-import org.apache.flink.api.scala._
-
+import scala.collection.JavaConversions._
+import scala.reflect._
 
 object FlinkEngine extends DistributedEngine {
 
-  // By default, use Hadoop 1 utils
-  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+  // By default, use Hadoop 2 utils
+  var hdfsUtils: HDFSUtil = Hadoop2HDFSUtil
 
   /**
    * Load DRM from hdfs (as in Mahout DRM format).
@@ -51,7 +48,7 @@ object FlinkEngine extends DistributedEngine {
    * @param path The DFS path to load from
    * @param parMin Minimum parallelism after load (equivalent to #par(min=...)).
    */
-  override def drmDfsRead(path: String, parMin: Int = 0)
+  override def drmDfsRead(path: String, parMin: Int = 1)
                          (implicit dc: DistributedContext): CheckpointedDrm[_] = {
 
     // Require that context is actually Flink context.
@@ -60,19 +57,47 @@ object FlinkEngine extends DistributedEngine {
     // Extract the Flink Environment variable
     implicit val env = dc.asInstanceOf[FlinkDistributedContext].env
 
-    val metadata = hdfsUtils.readDrmHeader(path)
+    // set the parallelism of the env to parMin
+    env.setParallelism(parMin)
 
-    val unwrapKey  = metadata.unwrapKeyFunction
+    // get the header of a SequenceFile in the path
+    val metadata = hdfsUtils.readDrmHeader(path + "//")
 
-    val ds = env.readSequenceFile(classOf[Writable], classOf[VectorWritable], path)
+    val keyClass: Class[_] = metadata.keyTypeWritable
 
-    val res = ds.map(new MapFunction[(Writable, VectorWritable), (Any, Vector)] {
-      def map(tuple: (Writable, VectorWritable)): (Any, Vector) = {
-        (unwrapKey(tuple._1), tuple._2)
-      }
-    })
+    // from the header determine which function to use to unwrap the key
+    val unwrapKey = metadata.unwrapKeyFunction
 
-    datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    // Map to the correct DrmLike based on the metadata information
+    if (metadata.keyClassTag == ClassTag.Int) {
+      val ds = env.readSequenceFile(classOf[IntWritable], classOf[VectorWritable], path)
+
+      val res = ds.map(new MapFunction[(IntWritable, VectorWritable), (Any, Vector)] {
+        def map(tuple: (IntWritable, VectorWritable)): (Any, Vector) = {
+          (unwrapKey(tuple._1), tuple._2.get())
+        }
+      })
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    } else if (metadata.keyClassTag == ClassTag.Long) {
+      val ds = env.readSequenceFile(classOf[LongWritable], classOf[VectorWritable], path)
+
+      val res = ds.map(new MapFunction[(LongWritable, VectorWritable), (Any, Vector)] {
+        def map(tuple: (LongWritable, VectorWritable)): (Any, Vector) = {
+          (unwrapKey(tuple._1), tuple._2.get())
+        }
+      })
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    } else if (metadata.keyClassTag == ClassTag(classOf[String])) {
+      val ds = env.readSequenceFile(classOf[Text], classOf[VectorWritable], path)
+
+      val res = ds.map(new MapFunction[(Text, VectorWritable), (Any, Vector)] {
+        def map(tuple: (Text, VectorWritable)): (Any, Vector) = {
+          (unwrapKey(tuple._1), tuple._2.get())
+        }
+      })
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    } else throw new IllegalArgumentException(s"Unsupported DRM key type:${keyClass.getName}")
+
   }
 
   override def indexedDatasetDFSRead(src: String, schema: Schema, existingRowIDs: Option[BiDictionary])
@@ -82,89 +107,114 @@ object FlinkEngine extends DistributedEngine {
                                             (implicit sc: DistributedContext): IndexedDataset = ???
 
 
+  /**
+    * Perform default expression rewrite. Return physical plan that we can pass to exec(). <P>
+    *
+    * A particular physical engine implementation may choose to either use or not use these rewrites
+    * as a useful basic rewriting rule.<P>
+    */
+  override def optimizerRewrite[K: ClassTag](action: DrmLike[K]): DrmLike[K] = super.optimizerRewrite(action)
+
   /** 
    * Translates logical plan into Flink execution plan. 
    **/
   override def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
     // Flink-specific Physical Plan translation.
+
+    implicit val typeInformation = generateTypeInformation[K]
     val drm = flinkTranslate(plan)
     val newcp = new CheckpointedFlinkDrm(ds = drm.asRowWise.ds, _nrow = plan.nrow, _ncol = plan.ncol)
+   // newcp.ds.getExecutionEnvironment.createProgramPlan("plan")
     newcp.cache()
   }
 
-  private def flinkTranslate[K: ClassTag](oper: DrmLike[K]): FlinkDrm[K] = oper match {
-    case op @ OpAx(a, x) => FlinkOpAx.blockifiedBroadcastAx(op, flinkTranslate(a)(op.classTagA))
-    case op @ OpAt(a) => FlinkOpAt.sparseTrick(op, flinkTranslate(a)(op.classTagA))
-    case op @ OpAtx(a, x) =>
-      // express Atx as (A.t) %*% x
-      // TODO: create specific implementation of Atx, see MAHOUT-1749
-      val opAt = OpAt(a)
-      val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a)(op.classTagA))
-      val atCast = new CheckpointedFlinkDrm(at.asRowWise.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
-      val opAx = OpAx(atCast, x)
-      FlinkOpAx.blockifiedBroadcastAx(opAx, flinkTranslate(atCast)(op.classTagA))
-    case op @ OpAtB(a, b) => FlinkOpAtB.notZippable(op, flinkTranslate(a)(op.classTagA), 
-        flinkTranslate(b)(op.classTagA))
-    case op @ OpABt(a, b) =>
-      // express ABt via AtB: let C=At and D=Bt, and calculate CtD
-      // TODO: create specific implementation of ABt, see MAHOUT-1750
-      val opAt = OpAt(a.asInstanceOf[DrmLike[Int]]) // TODO: casts!
-      val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a.asInstanceOf[DrmLike[Int]]))
-      val c = new CheckpointedFlinkDrm(at.asRowWise.ds, _nrow=opAt.nrow, _ncol=opAt.ncol)
-
-      val opBt = OpAt(b.asInstanceOf[DrmLike[Int]]) // TODO: casts!
-      val bt = FlinkOpAt.sparseTrick(opBt, flinkTranslate(b.asInstanceOf[DrmLike[Int]]))
-      val d = new CheckpointedFlinkDrm(bt.asRowWise.ds, _nrow=opBt.nrow, _ncol=opBt.ncol)
-
-      FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d))
-                .asInstanceOf[FlinkDrm[K]]
-    case op @ OpAtA(a) => FlinkOpAtA.at_a(op, flinkTranslate(a)(op.classTagA))
-    case op @ OpTimesRightMatrix(a, b) => 
-      FlinkOpTimesRightMatrix.drmTimesInCore(op, flinkTranslate(a)(op.classTagA), b)
-    case op @ OpAewUnaryFunc(a, _, _) =>
-      FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA))
-    case op @ OpAewUnaryFuncFusion(a, _) => 
-      FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a)(op.classTagA))
-    // deprecated
-    case op @ OpAewScalar(a, scalar, _) => 
-      FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a)(op.classTagA), scalar)
-    case op @ OpAewB(a, b, _) =>
-      FlinkOpAewB.rowWiseJoinNoSideEffect(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
-    case op @ OpCbind(a, b) => 
-      FlinkOpCBind.cbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
-    case op @ OpRbind(a, b) => 
-      FlinkOpRBind.rbind(op, flinkTranslate(a)(op.classTagA), flinkTranslate(b)(op.classTagA))
-    case op @ OpCbindScalar(a, x, _) => 
-      FlinkOpCBind.cbindScalar(op, flinkTranslate(a)(op.classTagA), x)
-    case op @ OpRowRange(a, _) => 
-      FlinkOpRowRange.slice(op, flinkTranslate(a)(op.classTagA))
-    case op @ OpABAnyKey(a, b) if extractRealClassTag(a) != extractRealClassTag(b) =>
-      throw new IllegalArgumentException("DRMs A and B have different indices, cannot multiply them")
-    case op: OpMapBlock[K, _] => 
-      FlinkOpMapBlock.apply(flinkTranslate(op.A)(op.classTagA), op.ncol, op.bmf)
-    case cp: CheckpointedFlinkDrm[K] => new RowsFlinkDrm(cp.ds, cp.ncol)
-    case _ => throw new NotImplementedError(s"operator $oper is not implemented yet")
+  private def flinkTranslate[K](oper: DrmLike[K]): FlinkDrm[K] = {
+    implicit val kTag = oper.keyClassTag
+    implicit val typeInformation = generateTypeInformation[K]
+    oper match {
+      case OpAtAnyKey(_) ⇒
+        throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
+      case op@OpAx(a, x) ⇒
+        //implicit val typeInformation = generateTypeInformation[K]
+        FlinkOpAx.blockifiedBroadcastAx(op, flinkTranslate(a))
+      case op@OpAt(a) if op.keyClassTag == ClassTag.Int ⇒ FlinkOpAt.sparseTrick(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
+      case op@OpAtx(a, x) if op.keyClassTag == ClassTag.Int ⇒
+        // express Atx as (A.t) %*% x
+        // TODO: create specific implementation of Atx, see MAHOUT-1749
+        val opAt = OpAt(a)
+        val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a))
+        val atCast = new CheckpointedFlinkDrm(at.asRowWise.ds, _nrow = opAt.nrow, _ncol = opAt.ncol)
+        val opAx = OpAx(atCast, x)
+        FlinkOpAx.blockifiedBroadcastAx(opAx, flinkTranslate(atCast)).asInstanceOf[FlinkDrm[K]]
+      case op@OpAtB(a, b) ⇒ FlinkOpAtB.notZippable(op, flinkTranslate(a),
+        flinkTranslate(b)).asInstanceOf[FlinkDrm[K]]
+      case op@OpABt(a, b) ⇒
+        // express ABt via AtB: let C=At and D=Bt, and calculate CtD
+        // TODO: create specific implementation of ABt, see MAHOUT-1750
+        val opAt = OpAt(a.asInstanceOf[DrmLike[Int]]) // TODO: casts!
+        val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a.asInstanceOf[DrmLike[Int]]))
+        val c = new CheckpointedFlinkDrm(at.asRowWise.ds, _nrow = opAt.nrow, _ncol = opAt.ncol)
+        val opBt = OpAt(b.asInstanceOf[DrmLike[Int]]) // TODO: casts!
+        val bt = FlinkOpAt.sparseTrick(opBt, flinkTranslate(b.asInstanceOf[DrmLike[Int]]))
+        val d = new CheckpointedFlinkDrm(bt.asRowWise.ds, _nrow = opBt.nrow, _ncol = opBt.ncol)
+        FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d)).asInstanceOf[FlinkDrm[K]]
+      case op@OpAtA(a) if op.keyClassTag == ClassTag.Int ⇒ FlinkOpAtA.at_a(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
+      case op@OpTimesRightMatrix(a, b) ⇒
+        FlinkOpTimesRightMatrix.drmTimesInCore(op, flinkTranslate(a), b)
+      case op@OpAewUnaryFunc(a, _, _) ⇒
+        FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a))
+      case op@OpAewUnaryFuncFusion(a, _) ⇒
+        FlinkOpAewScalar.opUnaryFunction(op, flinkTranslate(a))
+      // deprecated
+      case op@OpAewScalar(a, scalar, _) ⇒
+        FlinkOpAewScalar.opScalarNoSideEffect(op, flinkTranslate(a), scalar)
+      case op@OpAewB(a, b, _) ⇒
+        FlinkOpAewB.rowWiseJoinNoSideEffect(op, flinkTranslate(a), flinkTranslate(b))
+      case op@OpCbind(a, b) ⇒
+        FlinkOpCBind.cbind(op, flinkTranslate(a), flinkTranslate(b))
+      case op@OpRbind(a, b) ⇒
+        FlinkOpRBind.rbind(op, flinkTranslate(a), flinkTranslate(b))
+      case op@OpCbindScalar(a, x, _) ⇒
+        FlinkOpCBind.cbindScalar(op, flinkTranslate(a), x)
+      case op@OpRowRange(a, _) ⇒
+        FlinkOpRowRange.slice(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
+      case op@OpABAnyKey(a, b) if a.keyClassTag != b.keyClassTag ⇒
+        throw new IllegalArgumentException("DRMs A and B have different indices, cannot multiply them")
+      case op: OpMapBlock[K, _] ⇒
+        FlinkOpMapBlock.apply(flinkTranslate(op.A), op.ncol, op).asInstanceOf[FlinkDrm[K]]
+      case cp: CheckpointedFlinkDrm[K] ⇒
+        //implicit val ktag=cp.keyClassTag
+        new RowsFlinkDrm[K](cp.ds, cp.ncol)
+      case _ ⇒
+        throw new NotImplementedError(s"operator $oper is not implemented yet")
+    }
   }
 
   /** 
    * returns a vector that contains a column-wise sum from DRM 
    */
-  override def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
-    val sum = drm.ds.map(new MapFunction[(K, Vector), Vector] {
-      def map(tuple: (K, Vector)): Vector = tuple._2
-    }).reduce(new ReduceFunction[Vector] {
-      def reduce(v1: Vector, v2: Vector) = v1 + v2
-    })
+  override def colSums[K](drm: CheckpointedDrm[K]): Vector = {
+    implicit val kTag: ClassTag[K] =  drm.keyClassTag
+    implicit val typeInformation = generateTypeInformation[K]
+
+
+    val sum = drm.ds.map {
+      tuple => tuple._2
+    }.reduce(_ + _)
 
     val list = sum.collect
     list.head
   }
 
   /** Engine-specific numNonZeroElementsPerColumn implementation based on a checkpoint. */
-  override def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
-    val result = drm.asBlockified.ds.map(new MapFunction[(Array[K], Matrix), Vector] {
-      def map(tuple: (Array[K], Matrix)): Vector = {
-        val (_, block) = tuple
+  override def numNonZeroElementsPerColumn[K](drm: CheckpointedDrm[K]): Vector = {
+    implicit val kTag: ClassTag[K] =  drm.keyClassTag
+    implicit val typeInformation = generateTypeInformation[K]
+
+
+    val result = drm.asBlockified.ds.map {
+      tuple =>
+        val block = tuple._2
         val acc = block(0, ::).like()
 
         block.foreach { v =>
@@ -172,10 +222,7 @@ object FlinkEngine extends DistributedEngine {
         }
 
         acc
-      }
-    }).reduce(new ReduceFunction[Vector] {
-      def reduce(v1: Vector, v2: Vector) = v1 + v2
-    })
+    }.reduce(_ + _)
 
     val list = result.collect
     list.head
@@ -184,21 +231,30 @@ object FlinkEngine extends DistributedEngine {
   /** 
    * returns a vector that contains a column-wise mean from DRM 
    */
-  override def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector = {
+  override def colMeans[K](drm: CheckpointedDrm[K]): Vector = {
     drm.colSums() / drm.nrow
   }
 
   /**
    * Calculates the element-wise squared norm of a matrix
    */
-  override def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double = {
-    val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
-      def map(tuple: (K, Vector)): Double = tuple match {
+  override def norm[K](drm: CheckpointedDrm[K]): Double = {
+    implicit val kTag: ClassTag[K] =  drm.keyClassTag
+    implicit val typeInformation = generateTypeInformation[K]
+
+    val sumOfSquares = drm.ds.map {
+      tuple => tuple match {
         case (idx, vec) => vec dot vec
       }
-    }).reduce(new ReduceFunction[Double] {
-      def reduce(v1: Double, v2: Double) = v1 + v2
-    })
+    }.reduce(_ + _)
+
+//    val sumOfSquares = drm.ds.map(new MapFunction[(K, Vector), Double] {
+//      def map(tuple: (K, Vector)): Double = tuple match {
+//        case (idx, vec) => vec dot vec
+//      }
+//    }).reduce(new ReduceFunction[Double] {
+//      def reduce(v1: Double, v2: Double) = v1 + v2
+//    })
 
     val list = sumOfSquares.collect
     list.head
@@ -214,7 +270,7 @@ object FlinkEngine extends DistributedEngine {
     FlinkByteBCast.wrap(m)
 
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
+  /** Parallelize in-core matrix as flink distributed matrix, using row ordinal indices as data set keys. */
   override def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
                                            (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
 
@@ -223,14 +279,19 @@ object FlinkEngine extends DistributedEngine {
     new CheckpointedFlinkDrm(ds=parallelDrm, _nrow=m.numRows(), _ncol=m.numCols())
   }
 
+
   private[flinkbindings] def parallelize(m: Matrix, parallelismDegree: Int)
       (implicit dc: DistributedContext): DrmDataSet[Int] = {
-    val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
+    val rows = (0 until m.nrow).map(i => (i, m(i, ::)))//.toSeq.sortWith((ii, jj) => ii._1 < jj._1)
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    dc.env.fromCollection(rows).setParallelism(parallelismDegree)
+    //TODO: Make Sure that this is the correct partitioning scheme
+    dc.env.fromCollection(rows)
+            .partitionByRange(0)
+            .setParallelism(parallelismDegree)
+            .rebalance()
   }
 
-  /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
+  /** Parallelize in-core matrix as flink distributed matrix, using row labels as a data set keys. */
   override def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
                                           (implicit dc: DistributedContext): CheckpointedDrm[String] = {
     ???
@@ -247,7 +308,7 @@ object FlinkEngine extends DistributedEngine {
       for (i <- partStart until partEnd) yield (i, new RandomAccessSparseVector(ncol): Vector)
     }
     val result = dc.env.fromCollection(nonParallelResult)
-    new CheckpointedFlinkDrm(ds=result, _nrow=nrow, _ncol=ncol)
+    new CheckpointedFlinkDrm[Int](ds=result, _nrow=nrow, _ncol=ncol)
   }
 
   /** Creates empty DRM with non-trivial height */
@@ -259,29 +320,53 @@ object FlinkEngine extends DistributedEngine {
    * Convert non-int-keyed matrix to an int-keyed, computing optionally mapping from old keys
    * to row indices in the new one. The mapping, if requested, is returned as a 1-column matrix.
    */
-  def drm2IntKeyed[K: ClassTag](drmX: DrmLike[K], computeMap: Boolean = false): 
+  def drm2IntKeyed[K](drmX: DrmLike[K], computeMap: Boolean = false):
           (DrmLike[Int], Option[DrmLike[K]]) = ???
 
   /**
-   * (Optional) Sampling operation. Consistent with Spark semantics of the same.
+   * (Optional) Sampling operation.
    */
-  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = ???
+  def drmSampleRows[K](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K] = {
+    implicit val kTag: ClassTag[K] =  drmX.keyClassTag
+    implicit val typeInformation = generateTypeInformation[K]
 
-  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = ???
+    val sample = DataSetUtils(drmX.dataset).sample(replacement, fraction)
+    new CheckpointedFlinkDrm[K](sample)
+  }
 
-//  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = {
-//
-//    val ncol = drmX match {
-//      case cp: CheckpointedFlinkDrm[K] ⇒ cp.ncol
-//      case _ ⇒ -1
-//    }
-//
-//    val sample = DataSetUtils.sampleWithSize(drmX.dataset, replacement, numSamples)
-//
-//  }
+  def drmSampleKRows[K](drmX: DrmLike[K], numSamples:Int, replacement: Boolean = false): Matrix = {
+    implicit val kTag: ClassTag[K] =  drmX.keyClassTag
+    implicit val typeInformation = generateTypeInformation[K]
+
+    val sample = DataSetUtils(drmX.dataset).sampleWithSize(replacement, numSamples)
+    new CheckpointedFlinkDrm[K](sample)
+  }
 
   /** Optional engine-specific all reduce tensor operation. */
-  def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix = 
+  def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix =
     throw new UnsupportedOperationException("the operation allreduceBlock is not yet supported on Flink")
- 
+
+//  private def generateTypeInformation[K]: TypeInformation[K] = {
+//    val tag = implicitly[K].asInstanceOf[ClassTag[K]]
+//    generateTypeInformationFromTag(tag)
+//  }
+  private def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
+    val tag = implicitly[ClassTag[K]]
+
+    generateTypeInformationFromTag(tag)
+  }
+
+  private def generateTypeInformationFromTag[K](tag: ClassTag[K]): TypeInformation[K] = {
+    if (tag.runtimeClass.equals(classOf[Int])) {
+      createTypeInformation[Int].asInstanceOf[TypeInformation[K]]
+    } else if (tag.runtimeClass.equals(classOf[Long])) {
+      createTypeInformation[Long].asInstanceOf[TypeInformation[K]]
+    } else if (tag.runtimeClass.equals(classOf[String])) {
+      createTypeInformation[String].asInstanceOf[TypeInformation[K]]
+//    } else if (tag.runtimeClass.equals(classOf[Any])) {
+//       createTypeInformation[Any].asInstanceOf[TypeInformation[K]]
+    } else {
+      throw new IllegalArgumentException(s"index type $tag is not supported")
+    }
+  }
 }

@@ -31,7 +31,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 
-@RunWith(classOf[JUnitRunner])
 class RLikeOpsSuite extends FunSuite with DistributedFlinkSuite {
 
   val LOGGER = LoggerFactory.getLogger(getClass())

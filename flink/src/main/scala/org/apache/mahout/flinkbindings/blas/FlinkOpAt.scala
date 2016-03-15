@@ -18,25 +18,13 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import java.lang.Iterable
-
-import scala.Array.canBuildFrom
-import scala.collection.JavaConverters.asScalaBufferConverter
-
-import org.apache.flink.api.common.functions.FlatMapFunction
-import org.apache.flink.api.common.functions.GroupReduceFunction
-import org.apache.flink.shaded.com.google.common.collect.Lists
-import org.apache.flink.util.Collector
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.SequentialAccessSparseVector
-import org.apache.mahout.math.Vector
-import org.apache.mahout.math.drm.DrmTuple
+import org.apache.flink.api.scala._
+import org.apache.mahout.flinkbindings.drm.{FlinkDrm, RowsFlinkDrm}
+import org.apache.mahout.math.{SequentialAccessSparseVector, Vector}
 import org.apache.mahout.math.drm.logical.OpAt
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
-import org.apache.flink.api.scala._
+import scala.Array.canBuildFrom
 
 /**
  * Implementation is taken from Spark's At
@@ -52,34 +40,34 @@ object FlinkOpAt {
   def sparseTrick(op: OpAt, A: FlinkDrm[Int]): FlinkDrm[Int] = {
     val ncol = op.ncol // # of rows of A, i.e. # of columns of A^T
 
-    val sparseParts = A.asBlockified.ds.flatMap(new FlatMapFunction[(Array[Int], Matrix), DrmTuple[Int]] {
-      def flatMap(typle: (Array[Int], Matrix), out: Collector[DrmTuple[Int]]): Unit = typle match {
-        case (keys, block) =>
-          (0 until block.ncol).map(columnIdx => {
+    val sparseParts = A.asBlockified.ds.flatMap {
+      blockifiedTuple =>
+        val keys = blockifiedTuple._1
+        val block = blockifiedTuple._2
+
+        (0 until block.ncol).map {
+          columnIndex =>
             val columnVector: Vector = new SequentialAccessSparseVector(ncol)
 
-            keys.zipWithIndex.foreach { case (key, idx) =>
-              columnVector(key) = block(idx, columnIdx)
+            keys.zipWithIndex.foreach {
+              case (key, idx) => columnVector(key) = block(idx, columnIndex)
             }
 
-            out.collect((columnIdx, columnVector))
-          })
-      }
-    })
+            (columnIndex, columnVector)
+        }
+    }
 
-    val regrouped = sparseParts.groupBy(selector[Vector, Int])
+    val regrouped = sparseParts.groupBy(0)
 
-    val sparseTotal = regrouped.reduceGroup(new GroupReduceFunction[(Int, Vector), DrmTuple[Int]] {
-      def reduce(values: Iterable[(Int, Vector)], out: Collector[DrmTuple[Int]]): Unit = {
-        val it = Lists.newArrayList(values).asScala
-        val (idx, _) = it.head
-        val vector = (it map { case (idx, vec) => vec }).sum
-        out.collect((idx, vector))
-      }
-    })
+    val sparseTotal = regrouped.reduce{
+      (left, right) =>
+        (left._1, left._2 + right._2)
+    }
 
     // TODO: densify or not?
     new RowsFlinkDrm(sparseTotal, ncol)
   }
+
+
 
 }

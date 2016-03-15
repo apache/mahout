@@ -31,5 +31,4 @@ class CheckpointedFlinkDrmOps[K: ClassTag](drm: CheckpointedDrm[K]) {
   /** Flink matrix customization exposure */
   def dataset = flinkDrm.ds
 
-
 }

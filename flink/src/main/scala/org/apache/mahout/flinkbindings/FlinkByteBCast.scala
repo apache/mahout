@@ -43,14 +43,17 @@ class FlinkByteBCast[T](private val arr: Array[Byte]) extends BCast[T] with Seri
     if (streamType == FlinkByteBCast.StreamTypeVector) {
       val writeable = new VectorWritable()
       writeable.readFields(stream)
+    //  printf("broadcastValue: \n%s\n",writeable.get.asInstanceOf[T])
       writeable.get.asInstanceOf[T]
     } else if (streamType == FlinkByteBCast.StreamTypeMatrix) {
       val writeable = new MatrixWritable()
       writeable.readFields(stream)
+     // printf("broadcastValue: \n%s\n",writeable.get.asInstanceOf[T])
       writeable.get.asInstanceOf[T]
     } else {
       throw new IllegalArgumentException(s"unexpected type tag $streamType")
     }
+
   }
 
   override def value: T = _value

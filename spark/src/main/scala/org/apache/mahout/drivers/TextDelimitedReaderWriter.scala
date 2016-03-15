@@ -18,12 +18,12 @@
 package org.apache.mahout.drivers
 
 import org.apache.log4j.Logger
-import org.apache.mahout.math.indexeddataset._
-import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
-import org.apache.spark.SparkContext._
 import org.apache.mahout.math.RandomAccessSparseVector
-import org.apache.mahout.math.drm.{DrmLike, DrmLikeOps, DistributedContext, CheckpointedDrm}
+import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.indexeddataset._
 import org.apache.mahout.sparkbindings._
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
+
 import scala.collection.JavaConversions._
 
 /**
@@ -269,7 +269,7 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
         val vector = if (sort) itemList.sortBy { elem => -elem._2 } else itemList
 
         // first get the external rowID token
-        if (!vector.isEmpty){
+        if (vector.nonEmpty){
           var line = rowIDDictionary_bcast.value.inverse.getOrElse(rowID, "INVALID_ROW_ID") + rowKeyDelim
           // for the rest of the row, construct the vector contents of elements (external column ID, strength value)
           for (item <- vector) {

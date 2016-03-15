@@ -18,15 +18,14 @@
  */
 package org.apache.mahout
 
-import org.apache.flink.api.common.functions.{FilterFunction, MapFunction}
-import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
-import org.apache.mahout.flinkbindings.drm.{CheckpointedFlinkDrmOps, CheckpointedFlinkDrm, FlinkDrm, RowsFlinkDrm}
-import org.apache.mahout.math.{DenseVector, Matrix, MatrixWritable, Vector, VectorWritable}
-import org.apache.mahout.math.drm.{BlockifiedDrmTuple, CheckpointedDrm, DistributedContext, DrmTuple, _}
-import org.slf4j.LoggerFactory
-
-import org.apache.flink.api.scala._
+import org.apache.flink.api.common.functions.MapFunction
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.utils._
+import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, _}
+import org.apache.mahout.flinkbindings.drm.{CheckpointedFlinkDrm, CheckpointedFlinkDrmOps, FlinkDrm, RowsFlinkDrm}
+import org.apache.mahout.math.drm.{BlockifiedDrmTuple, CheckpointedDrm, DistributedContext, DrmTuple, _}
+import org.apache.mahout.math.{DenseVector, Matrix, MatrixWritable, Vector, VectorWritable}
+import org.slf4j.LoggerFactory
 
 import scala.Array._
 import scala.reflect.ClassTag
@@ -44,7 +43,6 @@ package object flinkbindings {
    */
   type BlockifiedDrmDataSet[K] = DataSet[BlockifiedDrmTuple[K]]
 
-  
   implicit def wrapMahoutContext(context: DistributedContext): FlinkDistributedContext = {
     assert(context.isInstanceOf[FlinkDistributedContext], "it must be FlinkDistributedContext")
     context.asInstanceOf[FlinkDistributedContext]
@@ -62,7 +60,7 @@ package object flinkbindings {
     drm.asInstanceOf[CheckpointedFlinkDrm[K]]
   }
 
-  implicit def checkpointedDrmToFlinkDrm[K: ClassTag](cp: CheckpointedDrm[K]): FlinkDrm[K] = {
+  implicit def checkpointedDrmToFlinkDrm[K: TypeInformation: ClassTag](cp: CheckpointedDrm[K]): FlinkDrm[K] = {
     val flinkDrm = castCheckpointedDrm(cp)
     new RowsFlinkDrm[K](flinkDrm.ds, flinkDrm.ncol)
   }
@@ -83,10 +81,8 @@ package object flinkbindings {
   def readCsv(file: String, delim: String = ",", comment: String = "#")
              (implicit dc: DistributedContext): CheckpointedDrm[Long] = {
     val vectors = dc.env.readTextFile(file)
-      .filter(new FilterFunction[String] {
-        def filter(in: String): Boolean = {
-          !in.startsWith(comment)
-        }
+      .filter((in: String) => {
+        !in.startsWith(comment)
       })
       .map(new MapFunction[String, Vector] {
         def map(in: String): Vector = {
