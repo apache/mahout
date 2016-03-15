@@ -55,7 +55,7 @@ object TrainNBDriver extends MahoutSparkDriver {
       opts = opts + ("alphaI" -> 1.0)
       opt[Double]("alphaI") abbr "a" action { (x, options) =>
         options + ("alphaI" -> x)
-      } text "Laplace soothing factor default is 1.0" validate { x =>
+      } text "Laplace smothing factor default is 1.0" validate { x =>
         if (x > 0) success else failure("Option --alphaI must be > 0")
       }
 
