@@ -86,12 +86,12 @@ object SparkEngine extends DistributedEngine {
     if (drm.nrow == 0) drm.colSums() else drm.colSums() /= drm.nrow
 
   override def norm[K](drm: CheckpointedDrm[K]): Double =
-    drm.rdd
+    math.sqrt(drm.rdd
       // Compute sum of squares of each vector
       .map {
       case (key, v) ⇒ v dot v
     }
-      .reduce(_ + _)
+      .reduce(_ + _))
 
 
   /** Optional engine-specific all reduce tensor operation. */
