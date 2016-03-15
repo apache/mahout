@@ -294,7 +294,12 @@ object FlinkEngine extends DistributedEngine {
   /** Parallelize in-core matrix as flink distributed matrix, using row labels as a data set keys. */
   override def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
                                           (implicit dc: DistributedContext): CheckpointedDrm[String] = {
-    ???
+
+    val rb = m.getRowLabelBindings
+    val p = for (i: String ← rb.keySet().toIndexedSeq) yield i → m(rb(i), ::)
+
+    new CheckpointedFlinkDrm[String](dc.env.fromCollection(p).setParallelism(numPartitions),
+      _nrow = m.nrow, _ncol = m.ncol, cacheHint = CacheHint.NONE)
   }
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
