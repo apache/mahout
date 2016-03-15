@@ -28,7 +28,7 @@ import scala.collection.JavaConversions._
 import scala.reflect._
 import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.java.typeutils.TypeExtractor
-import org.apache.hadoop.io.{IntWritable, Writable}
+import org.apache.hadoop.io.{LongWritable, IntWritable, Writable, Text}
 import org.apache.mahout.flinkbindings.blas._
 import org.apache.mahout.flinkbindings.drm._
 import org.apache.mahout.flinkbindings.io.HDFSUtil
@@ -73,19 +73,41 @@ object FlinkEngine extends DistributedEngine {
     // get the header of a SequenceFile in the path
     val metadata = hdfsUtils.readDrmHeader(path + "//")
 
+    val keyClass: Class[_] = metadata.keyTypeWritable
+
     // from the header determine which function to use to unwrap the key
     val unwrapKey = metadata.unwrapKeyFunction
 
-    // currently only working for Int-Keys
-    val ds = env.readSequenceFile(classOf[IntWritable], classOf[VectorWritable], path)
+    // Map to the correct DrmLike based on the metadata information
+    if (metadata.keyClassTag == ClassTag.Int) {
+      val ds = env.readSequenceFile(classOf[IntWritable], classOf[VectorWritable], path)
 
-    val res = ds.map(new MapFunction[(IntWritable, VectorWritable), (Any, Vector)] {
-      def map(tuple: (IntWritable, VectorWritable)): (Any, Vector) = {
-        (unwrapKey(tuple._1), tuple._2.get())
-      }
-    })
+      val res = ds.map(new MapFunction[(IntWritable, VectorWritable), (Any, Vector)] {
+        def map(tuple: (IntWritable, VectorWritable)): (Any, Vector) = {
+          (unwrapKey(tuple._1), tuple._2.get())
+        }
+      })
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    } else if (metadata.keyClassTag == ClassTag.Long) {
+      val ds = env.readSequenceFile(classOf[LongWritable], classOf[VectorWritable], path)
 
-    datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+      val res = ds.map(new MapFunction[(LongWritable, VectorWritable), (Any, Vector)] {
+        def map(tuple: (LongWritable, VectorWritable)): (Any, Vector) = {
+          (unwrapKey(tuple._1), tuple._2.get())
+        }
+      })
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    } else if (metadata.keyClassTag == ClassTag(classOf[String])) {
+      val ds = env.readSequenceFile(classOf[Text], classOf[VectorWritable], path)
+
+      val res = ds.map(new MapFunction[(Text, VectorWritable), (Any, Vector)] {
+        def map(tuple: (Text, VectorWritable)): (Any, Vector) = {
+          (unwrapKey(tuple._1), tuple._2.get())
+        }
+      })
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    } else throw new IllegalArgumentException(s"Unsupported DRM key type:${keyClass.getName}")
+
   }
 
   override def indexedDatasetDFSRead(src: String, schema: Schema, existingRowIDs: Option[BiDictionary])
