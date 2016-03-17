@@ -144,7 +144,7 @@ class MahoutSparkILoop extends SparkILoop {
   override protected def postInitialization() {
     super.postInitialization()
     _interp.beQuietDuring {
-      postInitImports.foreach(_interp.interpret(_))
+      postInitImports.foreach(_interp.interpret)
     }
   }
 
@@ -157,7 +157,7 @@ class MahoutSparkILoop extends SparkILoop {
          _ __ ___   __ _| |__   ___  _   _| |_
         | '_ ` _ \ / _` | '_ \ / _ \| | | | __|
         | | | | | | (_| | | | | (_) | |_| | |_
-        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.11.2
+        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.12.0
 
       """)
     import Properties._
