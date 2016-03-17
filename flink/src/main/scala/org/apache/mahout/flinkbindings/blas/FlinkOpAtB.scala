@@ -82,10 +82,15 @@ object FlinkOpAtB {
 
         val block = it.map { t => t._2 }.reduce { (m1, m2) => m1 + m2 }
 
-        val keys = idx.until(block.nrow).toArray[Int]
+//        val keys = idx.until(block.nrow).toArray[Int]
+
+        val blockStart = idx * blockHeight
+        val keys = Array.tabulate(block.nrow)(blockStart + _)
+
         out.collect(keys -> block)
       }
     })
+
 
     new BlockifiedFlinkDrm[Int](res, ncol)
   }
