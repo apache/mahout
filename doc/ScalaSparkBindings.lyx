@@ -1,5 +1,5 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
 \begin_document
 \begin_header
 \textclass article
@@ -65,9 +65,6 @@
 %\fancyhfoffset[LE,RO]{6mm}
 \end_preamble
 \use_default_options true
-\begin_modules
-knitr
-\end_modules
 \maintain_unincluded_children false
 \language english
 \language_package default
@@ -76,13 +73,13 @@ knitr
 \font_roman lmodern
 \font_sans default
 \font_typewriter default
+\font_math auto
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
-
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -102,15 +99,24 @@ knitr
 \pdf_pdfusetitle true
 \papersize default
 \use_geometry false
-\use_amsmath 1
-\use_esint 1
-\use_mhchem 1
-\use_mathdots 1
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date true
+\justification true
 \use_refstyle 1
 \index Index
 \shortcut idx
@@ -164,51 +170,6 @@ status collapsed
 dlyubimov at apache dot org
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Abstract
-In recent years significant effort was spent to produce semantically friendly
- environments for linear algebra.
- Working with vector, matrix and tensor data structures as a single data
- type offers essential qualities necessary for rapid prototyping of algebraicall
-y defined mathematical problems.
- The other wanted quality is the convenience of the same environment as
- a programming language.
- Yet another one is doing things at scale.
- Yet another highly desirable capability of the same environment is plotting
- and visualization.
- Without bringing any detailed review of existing environments here, the
- author however offers an opinion that while a lot of environments succeed
- in one or more of these aspects, none of them however adequately addresses
- all of them at the same time and at a reasonable cost.
- 
-\end_layout
-
-\begin_layout Abstract
-Unlike many other environments, Mahout-math Matrix model
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-initially, an adaptation of Colt linear algebra library
-\end_layout
-
-\end_inset
-
- was targeting both dense and sparse data structures from the very beginning
- both in type modeling and cost-based optimized computations.
-\end_layout
-
-\begin_layout Abstract
-In this work we are trying to bring semantic explicitness to Mahout's in-core
- and out-of-core linear algebra subroutines, while adding benefits of strong
- programming environment of scala, and captializing on scalability benefits
- of Spark and GraphX.
- 
-\begin_inset Newline newline
 \end_inset
 
 
@@ -2155,7 +2116,7 @@ no implicit view available from A => org.apache.hadoop.io.Writable
 \end_layout
 
 \begin_layout LyX-Code
-A.writeDRM(path = hdfsPath)
+A.dfsWrite(path = hdfsPath)
 \end_layout
 
 \begin_layout LyX-Code
@@ -2259,11 +2220,11 @@ val E = C.t %*% C
 \end_layout
 
 \begin_layout LyX-Code
-D.writeDRM(..path..)
+D.dfsWrite(..path..)
 \end_layout
 
 \begin_layout LyX-Code
-E.writeDRM(..path..)
+E.dfsWrite(..path..)
 \end_layout
 
 \begin_layout Standard
@@ -2308,11 +2269,11 @@ val E = C.t %*% C
 \end_layout
 
 \begin_layout LyX-Code
-D.writeDRM(..path..)
+D.dfsWrite(..path..)
 \end_layout
 
 \begin_layout LyX-Code
-E.writeDRM(..path..)
+E.dfsWrite(..path..)
 \end_layout
 
 \begin_layout Standard
@@ -2396,7 +2357,7 @@ Computational action
  leads to result being computed and (optionally?) placed into Spark cache.
  Such actions will also lazily and implicitly trigger linalg optimizer checkpoin
 ting.
- Currently, computational actions include writeDrm(), collect(), blockify()
+ Currently, computational actions include dfsWrite(), collect(), blockify()
  
 \begin_inset ERT
 status open
@@ -2434,7 +2395,7 @@ E.g.
 \end_layout
 
 \begin_layout LyX-Code
-E.writeDrm(path)
+E.dfsWrite(path)
 \end_layout
 
 \begin_layout Standard
@@ -2572,7 +2533,7 @@ Elementwise +, -, *, /
 \mathbf{M}=\left(\begin{matrix}\frac{a_{11}}{b_{11}} & \frac{a_{12}}{b_{12}} & \cdots & \frac{a_{1n}}{b_{1n}}\\
 \vdots & \vdots & \ddots & \vdots\\
 \frac{a_{m1}}{b_{m1}} & \frac{a_{m2}}{b_{m2}} & \cdots & \frac{a_{mn}}{b_{mn}}
-\end{matrix}\right)\,\,\,\mathrm{(elementwise\, division)}
+\end{matrix}\right)\,\,\,\mathrm{(elementwise\,division)}
 \]
 
 \end_inset
