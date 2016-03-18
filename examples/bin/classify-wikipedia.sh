@@ -42,7 +42,11 @@ START_PATH=`pwd`
 # Set commands for dfs
 source ${START_PATH}/set-dfs-commands.sh
 
-WORK_DIR=/tmp/mahout-work-wiki
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-wiki
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
 algorithm=( CBayes BinaryCBayes clean)
 if [ -n "$1" ]; then
   choice=$1
@@ -110,7 +114,7 @@ if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
     echo "Copying wikipedia data to HDFS"
     set +e
     $DFSRM ${WORK_DIR}/wikixml
-    $DFS -mkdir ${WORK_DIR}
+    $DFS -mkdir -p ${WORK_DIR}
     set -e
     $DFS -put ${WORK_DIR}/wikixml ${WORK_DIR}/wikixml
   fi
