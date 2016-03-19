@@ -537,7 +537,7 @@ diagonal matrix with constant diagonal elements
 \end_layout
 
 \begin_layout LyX-Code
-diag(10, 3.5) 
+diag(3.5, 10) 
 \end_layout
 
 \begin_layout Standard
