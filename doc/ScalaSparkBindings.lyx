@@ -2036,7 +2036,7 @@ Loading DRM off HDFS
 \end_layout
 
 \begin_layout LyX-Code
-val A = drmFromHDFS(path = hdfsPath) 
+val A = drmDfsRead(path = hdfsPath) 
 \end_layout
 
 \begin_layout Subsubsection
@@ -4329,7 +4329,7 @@ parMin
 \family default
  parameter to 
 \family typewriter
-drmFromHdfs()
+drmDfsRead()
 \family default
  during load from DFS.
  
