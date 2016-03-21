@@ -72,30 +72,30 @@ object FlinkEngine extends DistributedEngine {
     if (metadata.keyClassTag == ClassTag.Int) {
       val ds = env.readSequenceFile(classOf[IntWritable], classOf[VectorWritable], path)
 
-      val res = ds.map(new MapFunction[(IntWritable, VectorWritable), (Any, Vector)] {
-        def map(tuple: (IntWritable, VectorWritable)): (Any, Vector) = {
-          (unwrapKey(tuple._1), tuple._2.get())
+      val res = ds.map(new MapFunction[(IntWritable, VectorWritable), (Int, Vector)] {
+        def map(tuple: (IntWritable, VectorWritable)): (Int, Vector) = {
+          (unwrapKey(tuple._1).asInstanceOf[Int], tuple._2.get())
         }
       })
-      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Int]])
     } else if (metadata.keyClassTag == ClassTag.Long) {
       val ds = env.readSequenceFile(classOf[LongWritable], classOf[VectorWritable], path)
 
-      val res = ds.map(new MapFunction[(LongWritable, VectorWritable), (Any, Vector)] {
-        def map(tuple: (LongWritable, VectorWritable)): (Any, Vector) = {
-          (unwrapKey(tuple._1), tuple._2.get())
+      val res = ds.map(new MapFunction[(LongWritable, VectorWritable), (Long, Vector)] {
+        def map(tuple: (LongWritable, VectorWritable)): (Long, Vector) = {
+          (unwrapKey(tuple._1).asInstanceOf[Long], tuple._2.get())
         }
       })
-      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Long]])
     } else if (metadata.keyClassTag == ClassTag(classOf[String])) {
       val ds = env.readSequenceFile(classOf[Text], classOf[VectorWritable], path)
 
-      val res = ds.map(new MapFunction[(Text, VectorWritable), (Any, Vector)] {
-        def map(tuple: (Text, VectorWritable)): (Any, Vector) = {
-          (unwrapKey(tuple._1), tuple._2.get())
+      val res = ds.map(new MapFunction[(Text, VectorWritable), (String, Vector)] {
+        def map(tuple: (Text, VectorWritable)): (String, Vector) = {
+          (unwrapKey(tuple._1).asInstanceOf[String], tuple._2.get())
         }
       })
-      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+      datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[String]])
     } else throw new IllegalArgumentException(s"Unsupported DRM key type:${keyClass.getName}")
 
   }
@@ -124,7 +124,6 @@ object FlinkEngine extends DistributedEngine {
     implicit val typeInformation = generateTypeInformation[K]
     val drm = flinkTranslate(plan)
     val newcp = new CheckpointedFlinkDrm(ds = drm.asRowWise.ds, _nrow = plan.nrow, _ncol = plan.ncol)
-    // newcp.ds.getExecutionEnvironment.createProgramPlan("plan")
     newcp.cache()
   }
 
@@ -135,7 +134,6 @@ object FlinkEngine extends DistributedEngine {
       case OpAtAnyKey(_) ⇒
         throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
       case op@OpAx(a, x) ⇒
-        //implicit val typeInformation = generateTypeInformation[K]
         FlinkOpAx.blockifiedBroadcastAx(op, flinkTranslate(a))
       case op@OpAt(a) if op.keyClassTag == ClassTag.Int ⇒ FlinkOpAt.sparseTrick(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
       case op@OpAtx(a, x) if op.keyClassTag == ClassTag.Int ⇒
@@ -180,11 +178,9 @@ object FlinkEngine extends DistributedEngine {
         FlinkOpRowRange.slice(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
       case op@OpABAnyKey(a, b) if a.keyClassTag != b.keyClassTag ⇒
         throw new IllegalArgumentException("DRMs A and B have different indices, cannot multiply them")
-      case op: OpMapBlock[K, _] ⇒
-        FlinkOpMapBlock.apply(flinkTranslate(op.A), op.ncol, op).asInstanceOf[FlinkDrm[K]]
-      case cp: CheckpointedFlinkDrm[K] ⇒
-        //implicit val ktag=cp.keyClassTag
-        new RowsFlinkDrm[K](cp.ds, cp.ncol)
+      case op: OpMapBlock[_, K] ⇒
+        FlinkOpMapBlock.apply(flinkTranslate(op.A), op.ncol, op)
+      case cp: CheckpointedDrm[K] ⇒ cp
       case _ ⇒
         throw new NotImplementedError(s"operator $oper is not implemented yet")
     }

@@ -45,6 +45,8 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   lazy val nrow: Long = if (_nrow >= 0) _nrow else dim._1
   lazy val ncol: Int = if (_ncol >= 0) _ncol else dim._2
 
+  var cacheFileName:String = "/tmp/a"
+
   private lazy val dim: (Long, Int) = {
     // combine computation of ncol and nrow in one pass
 
@@ -67,8 +69,10 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   override val keyClassTag: ClassTag[K] = classTag[K]
 
   def cache() = {
-    // TODO
-    this
+    cacheFileName = System.nanoTime().toString
+    implicit val context = new FlinkDistributedContext(ds.getExecutionEnvironment)
+    dfsWrite("/tmp/" + cacheFileName)
+    drmDfsRead("/tmp/" + cacheFileName).asInstanceOf[CheckpointedDrm[K]]
   }
 
   def uncache() = {
@@ -81,8 +85,7 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   protected[mahout] def canHaveMissingRows: Boolean = _canHaveMissingRows
 
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = {
-
-     this
+    this
   }
 
   def collect: Matrix = {
@@ -126,25 +129,6 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
 
   def dfsWrite(path: String): Unit = {
     val env = ds.getExecutionEnvironment
-
-    // ds.map is not picking up the correct runtime value of tuple._1
-    // WritableType info is throwing an exception
-    // when asserting that the key is not an actual Writable
-    // rather a subclass
-
-//    val keyTag = implicitly[ClassTag[K]]
-//    def convertKey = keyToWritableFunc(keyTag)
-//    val writableDataset = ds.map {
-//      tuple => (convertKey(tuple._1), new VectorWritable(tuple._2))
-//    }
-
-
-      // test output with IntWritable Key.  VectorWritable is not a problem,
-//    val writableDataset = ds.map(new MapFunction[DrmTuple[K], (IntWritable, VectorWritable)] {
-//      def map(tuple: DrmTuple[K]): (IntWritable, VectorWritable) =
-//         (new IntWritable(1), new VectorWritable(tuple._2))
-//    })
-
 
     val keyTag = implicitly[ClassTag[K]]
 

@@ -31,6 +31,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 object FlinkOpMapBlock {
 
   def apply[S, R: TypeInformation](src: FlinkDrm[S], ncol: Int, operator: OpMapBlock[S,R]): FlinkDrm[R] = {
+
     implicit val rtag = operator.keyClassTag
     val bmf = operator.bmf
     val ncol = operator.ncol
@@ -39,7 +40,6 @@ object FlinkOpMapBlock {
         val result = bmf(block)
         assert(result._2.nrow == block._2.nrow, "block mapping must return same number of rows.")
         assert(result._2.ncol == ncol, s"block map must return $ncol number of columns.")
-       // printf("Block partition: \n%s\n", block._2)
         result
     }
 
