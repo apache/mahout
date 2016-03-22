@@ -99,6 +99,7 @@ package object flinkbindings {
   }
 
   def datasetWrap[K: ClassTag](dataset: DataSet[(K, Vector)]): CheckpointedDrm[K] = {
+    implicit val typeInformation = FlinkEngine.generateTypeInformation[K]
     new CheckpointedFlinkDrm[K](dataset)
   }
 
