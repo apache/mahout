@@ -19,7 +19,11 @@
 package org.apache.mahout.flinkbindings.drm
 
 import org.apache.flink.api.common.functions.{MapFunction, ReduceFunction}
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.java.io.{TypeSerializerInputFormat, TypeSerializerOutputFormat}
 import org.apache.flink.api.scala._
+import org.apache.flink.core.fs.FileSystem.WriteMode
+import org.apache.flink.core.fs.Path
 import org.apache.flink.api.scala.hadoop.mapred.HadoopOutputFormat
 import org.apache.hadoop.io.{IntWritable, LongWritable, Text, Writable}
 import org.apache.hadoop.mapred.{FileOutputFormat, JobConf, SequenceFileOutputFormat}
@@ -34,7 +38,7 @@ import scala.collection.JavaConverters._
 import scala.reflect.{ClassTag, classTag}
 import scala.util.Random
 
-class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
+class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
       private var _nrow: Long = CheckpointedFlinkDrm.UNKNOWN,
       private var _ncol: Int = CheckpointedFlinkDrm.UNKNOWN,
       override val cacheHint: CacheHint = CacheHint.NONE,
@@ -45,7 +49,11 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   lazy val nrow: Long = if (_nrow >= 0) _nrow else dim._1
   lazy val ncol: Int = if (_ncol >= 0) _ncol else dim._2
 
-  var cacheFileName:String = "/tmp/a"
+  // persistance values
+  var cacheFileName: String = "/a"
+  var isCached: Boolean = false
+  var parallelismDeg: Int = -1
+  val persistanceRootDir = "/tmp/"
 
   private lazy val dim: (Long, Int) = {
     // combine computation of ncol and nrow in one pass
@@ -69,15 +77,46 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
   override val keyClassTag: ClassTag[K] = classTag[K]
 
   def cache() = {
-    cacheFileName = System.nanoTime().toString
-    implicit val context = new FlinkDistributedContext(ds.getExecutionEnvironment)
-    dfsWrite("/tmp/" + cacheFileName)
-    drmDfsRead("/tmp/" + cacheFileName).asInstanceOf[CheckpointedDrm[K]]
+    if (!isCached) {
+      cacheFileName = System.nanoTime().toString
+      parallelismDeg = ds.getParallelism
+      isCached = true
+    }
+    implicit val typeInformation = createTypeInformation[(K,Vector)]
+
+    val _ds = persist(ds, persistanceRootDir + cacheFileName)
+    datasetWrap(_ds)
   }
 
   def uncache() = {
     // TODO
     this
+  }
+
+  /** Writes a [[DataSet]] to the specified path and returns it as a DataSource for subsequent
+    * operations.
+    *
+    * @param dataset [[DataSet]] to write to disk
+    * @param path File path to write dataset to
+    * @tparam T Type of the [[DataSet]] elements
+    * @return [[DataSet]] reading the just written file
+    */
+  def persist[T: ClassTag: TypeInformation](dataset: DataSet[T], path: String): DataSet[T] = {
+    val env = dataset.getExecutionEnvironment
+    val outputFormat = new TypeSerializerOutputFormat[T]
+
+    val filePath = new Path(path)
+
+    outputFormat.setOutputFilePath(filePath)
+    outputFormat.setWriteMode(WriteMode.OVERWRITE)
+
+    dataset.output(outputFormat)
+    env.execute("FlinkTools persist")
+
+    val inputFormat = new TypeSerializerInputFormat[T](dataset.getType)
+    inputFormat.setFilePath(filePath)
+
+    env.createInput(inputFormat)
   }
 
   // Members declared in org.apache.mahout.math.drm.DrmLike   

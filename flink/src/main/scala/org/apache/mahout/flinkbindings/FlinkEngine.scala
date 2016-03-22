@@ -357,12 +357,12 @@ object FlinkEngine extends DistributedEngine {
     res.collect().head
   }
 
-  private def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
+  def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
     val tag = implicitly[ClassTag[K]]
 
     generateTypeInformationFromTag(tag)
   }
-  
+
   private def generateTypeInformationFromTag[K](tag: ClassTag[K]): TypeInformation[K] = {
     if (tag.runtimeClass.equals(classOf[Int])) {
       createTypeInformation[Int].asInstanceOf[TypeInformation[K]]
@@ -375,5 +375,8 @@ object FlinkEngine extends DistributedEngine {
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
     }
+  }
+  object FlinkEngine {
+
   }
 }
