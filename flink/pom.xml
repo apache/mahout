@@ -98,6 +98,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <argLine>-Xmx4g</argLine>
+        </configuration>
       </plugin>
     </plugins>
   </build>
