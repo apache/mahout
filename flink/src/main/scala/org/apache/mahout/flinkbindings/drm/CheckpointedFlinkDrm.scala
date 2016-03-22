@@ -192,15 +192,17 @@ class CheckpointedFlinkDrm[K: ClassTag](val ds: DrmDataSet[K],
       (x: K) => new Text(x.asInstanceOf[String]) 
     } else if (keyTag.runtimeClass == classOf[Long]) {
       (x: K) => new LongWritable(x.asInstanceOf[Long])
-    // WritableTypeInfo will reject the base Writable class
-//          } else if (classOf[Writable].isAssignableFrom(keyTag.runtimeClass)) {
-//      (x: K) => x.asInstanceOf[Writable]
     } else {
       throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(keyTag))
     }
   }
 
-  def newRowCardinality(n: Int): CheckpointedDrm[K] = ???
+  def newRowCardinality(n: Int): CheckpointedDrm[K] = {
+    assert(n > -1)
+    assert(n >= nrow)
+    new CheckpointedFlinkDrm(ds = ds, _nrow = n, _ncol = _ncol, cacheHint = cacheHint,
+      partitioningTag = partitioningTag, _canHaveMissingRows = _canHaveMissingRows)
+  }
 
   override val context: DistributedContext = ds.getExecutionEnvironment
 
