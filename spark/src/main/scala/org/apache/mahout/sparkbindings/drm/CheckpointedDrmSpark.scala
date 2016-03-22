@@ -155,7 +155,7 @@ class CheckpointedDrmSpark[K: ClassTag](
   /**
    * Dump matrix as computed Mahout's DRM into specified (HD)FS path
     *
-    * @param path
+    * @param path output path to dump Matrix to
    */
   def dfsWrite(path: String) = {
     val ktag = implicitly[ClassTag[K]]
@@ -201,7 +201,7 @@ class CheckpointedDrmSpark[K: ClassTag](
     rddInput.isBlockified match {
       case true ⇒ rddInput.asBlockified(throw new AssertionError("not reached"))
         .map(_._2.ncol).reduce(max)
-      case false ⇒ cache().rddInput.asRowWise().map(_._2.length).fold(-1)(max(_, _))
+      case false ⇒ cache().rddInput.asRowWise().map(_._2.length).fold(-1)(max)
     }
   }
 
