@@ -27,6 +27,7 @@ import org.apache.flink.core.fs.Path
 import org.apache.flink.api.scala.hadoop.mapred.HadoopOutputFormat
 import org.apache.hadoop.io.{IntWritable, LongWritable, Text, Writable}
 import org.apache.hadoop.mapred.{FileOutputFormat, JobConf, SequenceFileOutputFormat}
+import org.apache.mahout.flinkbindings.io.Hadoop2HDFSUtil
 import org.apache.mahout.flinkbindings.{DrmDataSet, _}
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm.CacheHint._
@@ -92,7 +93,10 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   }
 
   def uncache() = {
-    // TODO
+    if (isCached) {
+      Hadoop2HDFSUtil.delete(cacheFileName)
+      isCached = false
+    }
     this
   }
 
