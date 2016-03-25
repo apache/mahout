@@ -18,19 +18,16 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import java.util.List
+import java.util
 
 import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.mahout.flinkbindings.drm.{BlockifiedFlinkDrm, FlinkDrm}
-import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.drm.logical.OpAx
 import org.apache.mahout.math.scalabindings.RLikeOps._
-
-import scala.reflect.ClassTag
-
-import org.apache.flink.api.scala._
+import org.apache.mahout.math.{Matrix, Vector}
 
 
 /**
@@ -50,7 +47,7 @@ object FlinkOpAx {
 
       override def open(params: Configuration): Unit = {
         val runtime = this.getRuntimeContext
-        val dsX: List[Vector] = runtime.getBroadcastVariable("vector")
+        val dsX: util.List[Vector] = runtime.getBroadcastVariable("vector")
         x = dsX.get(0)
       }
 

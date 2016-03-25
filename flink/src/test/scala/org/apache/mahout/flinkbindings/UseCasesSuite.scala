@@ -18,18 +18,16 @@
  */
 package org.apache.mahout.flinkbindings
 
-import scala.util.hashing.MurmurHash3
-import org.apache.mahout.math.Matrices
-import org.apache.mahout.math.Vector
-import org.apache.mahout.math.drm._
+import org.apache.mahout.math.{Matrices, Vector}
 import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.drm._
 import org.apache.mahout.math.function.IntIntFunction
-import org.junit.runner.RunWith
-import org.slf4j.LoggerFactory
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.slf4j.LoggerFactory
+
+import scala.util.hashing.MurmurHash3
 
 class UseCasesSuite extends FunSuite with DistributedFlinkSuite {
 

@@ -18,18 +18,15 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import org.scalatest.FunSuite
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import drm._
 import org.apache.flink.api.scala._
 import org.apache.mahout.flinkbindings._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.apache.mahout.math.drm.logical.OpAx
 import org.apache.mahout.flinkbindings.drm.CheckpointedFlinkDrm
-import org.apache.mahout.math.drm.logical._
+import org.apache.mahout.math._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.logical.{OpAx, _}
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+import org.scalatest.FunSuite
 
 class LATestSuite extends FunSuite with DistributedFlinkSuite {
 
@@ -115,7 +112,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val res = FlinkOpCBind.cbind(op, A, B)
 
     val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.nrow,
-        _ncol=(inCoreA.ncol + inCoreB.ncol))
+        _ncol= inCoreA.ncol + inCoreB.ncol)
     val output = drm.collect
 
     val expected = dense((1, 2, 4, 4), (2, 3, 5, 5), (3, 4, 6, 7))
@@ -130,7 +127,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val res = FlinkOpCBind.cbindScalar(op, A, 1)
 
     val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.nrow,
-        _ncol=(inCoreA.ncol + 1))
+        _ncol= inCoreA.ncol + 1)
     val output = drm.collect
 
     val expected = dense((1, 1, 2), (1, 2, 3), (1, 3, 4))
@@ -145,7 +142,7 @@ class LATestSuite extends FunSuite with DistributedFlinkSuite {
     val res = FlinkOpCBind.cbindScalar(op, A, 1)
 
     val drm = new CheckpointedFlinkDrm(res.asRowWise.ds, _nrow=inCoreA.nrow,
-        _ncol=(inCoreA.ncol + 1))
+        _ncol= inCoreA.ncol + 1)
     val output = drm.collect
 
     val expected = dense((1, 2, 1), (2, 3, 1), (3, 4, 1))

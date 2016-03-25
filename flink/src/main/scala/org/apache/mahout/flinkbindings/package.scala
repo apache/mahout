@@ -38,7 +38,7 @@ package object flinkbindings {
   type DrmDataSet[K] = DataSet[DrmTuple[K]]
 
   /**
-   * Blockifed DRM dataset (keys of original DRM are grouped into array corresponding to rows of Matrix
+   * Blockified DRM dataset (keys of original DRM are grouped into array corresponding to rows of Matrix
    * object value
    */
   type BlockifiedDrmDataSet[K] = DataSet[BlockifiedDrmTuple[K]]
