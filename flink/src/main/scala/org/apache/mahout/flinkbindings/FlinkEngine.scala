@@ -127,6 +127,7 @@ object FlinkEngine extends DistributedEngine {
     newcp.cache()
   }
 
+
   private def flinkTranslate[K](oper: DrmLike[K]): FlinkDrm[K] = {
     implicit val kTag = oper.keyClassTag
     implicit val typeInformation = generateTypeInformation[K]
@@ -358,7 +359,7 @@ object FlinkEngine extends DistributedEngine {
   }
 
   def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
-    val tag = implicitly[ClassTag[K]]
+    implicit val tag = ClassTag[K]
 
     generateTypeInformationFromTag(tag)
   }
@@ -373,8 +374,5 @@ object FlinkEngine extends DistributedEngine {
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
     }
-  }
-  object FlinkEngine {
-
   }
 }
