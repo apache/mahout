@@ -359,9 +359,9 @@ object FlinkEngine extends DistributedEngine {
   }
 
   def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
-    implicit val tag = ClassTag[K]
+    implicit val ktag = classTag[K]
 
-    generateTypeInformationFromTag(tag)
+    generateTypeInformationFromTag(ktag)
   }
 
   private def generateTypeInformationFromTag[K](tag: ClassTag[K]): TypeInformation[K] = {

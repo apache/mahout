@@ -77,14 +77,17 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   override val keyClassTag: ClassTag[K] = classTag[K]
 
   def cache() = {
+    implicit val typeInformation = createTypeInformation[(K,Vector)]
+    implicit val inputFormat = (ds.getType)
     if (!isCached) {
-      cacheFileName = System.nanoTime().toString
+      cacheFileName = persistanceRootDir + System.nanoTime().toString
       parallelismDeg = ds.getParallelism
       isCached = true
+      persist(ds, cacheFileName)
     }
-    implicit val typeInformation = createTypeInformation[(K,Vector)]
 
-    val _ds = persist(ds, persistanceRootDir + cacheFileName)
+    val _ds = readPersistedDataSet(cacheFileName, ds)
+
     datasetWrap(_ds)
   }
 
@@ -99,12 +102,10 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
     * @param dataset [[DataSet]] to write to disk
     * @param path File path to write dataset to
     * @tparam T Type of the [[DataSet]] elements
-    * @return [[DataSet]] reading the just written file
     */
-  def persist[T: ClassTag: TypeInformation](dataset: DataSet[T], path: String): DataSet[T] = {
+  def persist[T: ClassTag: TypeInformation](dataset: DataSet[T], path: String): Unit = {
     val env = dataset.getExecutionEnvironment
     val outputFormat = new TypeSerializerOutputFormat[T]
-
     val filePath = new Path(path)
 
     outputFormat.setOutputFilePath(filePath)
@@ -112,14 +113,29 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
 
     dataset.output(outputFormat)
     env.execute("FlinkTools persist")
+  }
 
-    val inputFormat = new TypeSerializerInputFormat[T](dataset.getType)
+  /** Read a [[DataSet]] from specified path and returns it as a DataSource for subsequent
+    * operations.
+    *
+    * @param path File path to read dataset from
+    * @param ds persisted ds to retrieve type information and environment forom
+    * @tparam T key Type of the [[DataSet]] elements
+    * @return [[DataSet]] reading the just written file
+    */
+  def readPersistedDataSet[T: ClassTag : TypeInformation]
+       (path: String, ds: DataSet[T]): DataSet[T] = {
+
+    val env = ds.getExecutionEnvironment
+    val inputFormat = new TypeSerializerInputFormat[T](ds.getType())
+    val filePath = new Path(path)
     inputFormat.setFilePath(filePath)
 
     env.createInput(inputFormat)
   }
 
-  // Members declared in org.apache.mahout.math.drm.DrmLike   
+
+  // Members declared in org.apache.mahout.math.drm.DrmLike
 
   protected[mahout] def canHaveMissingRows: Boolean = _canHaveMissingRows
 
