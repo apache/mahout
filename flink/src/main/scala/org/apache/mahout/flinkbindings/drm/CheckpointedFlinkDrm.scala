@@ -51,10 +51,13 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   lazy val ncol: Int = if (_ncol >= 0) _ncol else dim._2
 
   // persistance values
-  var cacheFileName: String = "/a"
+  var cacheFileName: String = "undefinedCacheName"
   var isCached: Boolean = false
   var parallelismDeg: Int = -1
-  val persistanceRootDir = "/tmp/"
+
+  // need to make sure that this is actually getting the correct propertirs for {{taskmanager.tmp.dirs}}
+  val persistanceRootDir = ds.getExecutionEnvironment.
+    getConfig.getGlobalJobParameters.toMap.getOrDefault("taskmanager.tmp.dirs", "/tmp/")
 
   private lazy val dim: (Long, Int) = {
     // combine computation of ncol and nrow in one pass
@@ -92,7 +95,7 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
     datasetWrap(_ds)
   }
 
-  def uncache() = {
+  def uncache():this.type = {
     if (isCached) {
       Hadoop2HDFSUtil.delete(cacheFileName)
       isCached = false
