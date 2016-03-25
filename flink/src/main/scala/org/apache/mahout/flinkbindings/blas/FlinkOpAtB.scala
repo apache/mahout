@@ -20,25 +20,18 @@ package org.apache.mahout.flinkbindings.blas
 
 import java.lang.Iterable
 
-import scala.collection.JavaConverters.asScalaBufferConverter
-import scala.reflect.ClassTag
-
-import org.apache.flink.api.common.functions.FlatMapFunction
-import org.apache.flink.api.common.functions.GroupReduceFunction
-import org.apache.flink.api.scala.DataSet
+import com.google.common.collect.Lists
+import org.apache.flink.api.common.functions.{FlatMapFunction, GroupReduceFunction}
+import org.apache.flink.api.scala._
 import org.apache.flink.util.Collector
 import org.apache.mahout.flinkbindings._
-import org.apache.mahout.flinkbindings.drm.BlockifiedFlinkDrm
-import org.apache.mahout.flinkbindings.drm.FlinkDrm
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.Vector
+import org.apache.mahout.flinkbindings.drm.{BlockifiedFlinkDrm, FlinkDrm}
+import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical.OpAtB
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
-import com.google.common.collect.Lists
-
-import org.apache.flink.api.scala._
+import scala.collection.JavaConverters.asScalaBufferConverter
 
 /**
  * Implementation is taken from Spark's AtB
@@ -47,7 +40,6 @@ import org.apache.flink.api.scala._
 object FlinkOpAtB {
 
   def notZippable[A](op: OpAtB[A], At: FlinkDrm[A], B: FlinkDrm[A]): FlinkDrm[Int] = {
-
     val rowsAt = At.asRowWise.ds.asInstanceOf[DrmDataSet[A]]
     val rowsB = B.asRowWise.ds.asInstanceOf[DrmDataSet[A]]
     val joined = rowsAt.join(rowsB).where(0).equalTo(0)
@@ -75,20 +67,21 @@ object FlinkOpAtB {
     })
 
     val res: BlockifiedDrmDataSet[Int] = 
-      preProduct.groupBy(0).reduceGroup(new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
-      def reduce(values: Iterable[(Int, Matrix)], out: Collector[BlockifiedDrmTuple[Int]]): Unit = {
-        val it = Lists.newArrayList(values).asScala
-        val (idx, _) = it.head
+      preProduct.groupBy(0).reduceGroup(
+        new GroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
+          def reduce(values: Iterable[(Int, Matrix)], out: Collector[BlockifiedDrmTuple[Int]]): Unit = {
+            val it = Lists.newArrayList(values).asScala
+            val (idx, _) = it.head
 
-        val block = it.map { t => t._2 }.reduce { (m1, m2) => m1 + m2 }
-        
-        val blockStart = idx * blockHeight
-        val keys = Array.tabulate(block.nrow)(blockStart + _)
+            val block = it.map { t => t._2 }.reduce { (m1, m2) => m1 + m2 }
 
-        out.collect(keys -> block)
-      }
-    })
+            val blockStart = idx * blockHeight
+            val keys = Array.tabulate(block.nrow)(blockStart + _)
 
+            out.collect(keys -> block)
+          }
+        }
+      )
 
     new BlockifiedFlinkDrm[Int](res, ncol)
   }
