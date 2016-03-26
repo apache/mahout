@@ -105,4 +105,10 @@ package object flinkbindings {
 
   private[flinkbindings] def extractRealClassTag[K: ClassTag](drm: DrmLike[K]): ClassTag[_] = drm.keyClassTag
 
+  private[flinkbindings] def getMahoutHome() = {
+    var mhome = System.getenv("MAHOUT_HOME")
+    if (mhome == null) mhome = System.getProperty("mahout.home")
+    require(mhome != null, "MAHOUT_HOME is required to spawn mahout-based flink jobs")
+    mhome
+  }
 }

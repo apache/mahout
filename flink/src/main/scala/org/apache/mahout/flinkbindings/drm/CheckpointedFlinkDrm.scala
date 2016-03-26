@@ -18,7 +18,7 @@
  */
 package org.apache.mahout.flinkbindings.drm
 
-import org.apache.flink.api.common.functions.{MapFunction, ReduceFunction}
+import org.apache.flink.api.common.functions.{MapFunction, ReduceFunction, RichFunction, RichMapFunction}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.io.{TypeSerializerInputFormat, TypeSerializerOutputFormat}
 import org.apache.flink.api.scala._
@@ -58,7 +58,7 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   var persistanceRootDir: String = _
 
   // need to make sure that this is actually getting the correct propertirs for {{taskmanager.tmp.dirs}}
-  val mahoutHome = System.getProperty("MAHOUT_HOME")
+  val mahoutHome = getMahoutHome()
 
   GlobalConfiguration.loadConfiguration(mahoutHome + "/conf/flink-config.yaml")
 
