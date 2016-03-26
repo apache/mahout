@@ -55,6 +55,7 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   var cacheFileName: String = "undefinedCacheName"
   var isCached: Boolean = false
   var parallelismDeg: Int = -1
+  var persistanceRootDir: String = _
 
   // need to make sure that this is actually getting the correct propertirs for {{taskmanager.tmp.dirs}}
   val mahoutHome = System.getProperty("MAHOUT_HOME")
@@ -64,9 +65,9 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   val conf = GlobalConfiguration.getConfiguration()
 
   if (!(conf == null )) {
-    val persistanceRootDir = conf.getString("taskmanager.tmp.dirs", "/tmp/")
+     persistanceRootDir = conf.getString("taskmanager.tmp.dirs", "/tmp/")
   } else {
-    val persistanceRootDir = "/tmp/"
+     persistanceRootDir = "/tmp/"
   }
 
 
