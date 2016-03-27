@@ -105,16 +105,23 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
     }
     val _ds = readPersistedDataSet(cacheFileName, ds)
 
-    // We may want to look more closely at this:
-    // since we've cached a drm, triggering a computation
-    // it may not make sense to keep the same parallelism degree
-    if (!(parallelismDeg == _ds.getParallelism)) {
-      _ds.setParallelism(parallelismDeg).rebalance()
-    }
+    /** Leave the parallelism degree to be set the operators
+      * TODO: find out a way to set the parallelism degree based on the
+      * final drm after computation is actually triggered
+      *
+      *  // We may want to look more closely at this:
+      *  // since we've cached a drm, triggering a computation
+      *  // it may not make sense to keep the same parallelism degree
+      *  if (!(parallelismDeg == _ds.getParallelism)) {
+      *    _ds.setParallelism(parallelismDeg).rebalance()
+      *  }
+      *
+      */
+
     datasetWrap(_ds)
   }
 
-  def uncache():this.type = {
+  def uncache(): this.type = {
     if (isCached) {
       Hadoop2HDFSUtil.delete(cacheFileName)
       isCached = false
