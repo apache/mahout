@@ -67,38 +67,29 @@ object FlinkOpAx {
     implicit val ctx = srcA.context
 
     val dataSetA = srcA.asBlockified.ds
-//    implicit val dc = new FlinkDistributedContext(srcA.asBlockified.ds.getExecutionEnvironment)
 
+    // broadcast the vector x to the back end
     val bcastX = drmBroadcast(op.x)
-    val singletonDataSetX = ctx.env.fromElements(op.x)
 
     implicit val typeInformation = createTypeInformation[(Array[Int],Matrix)]
     val inCoreM = dataSetA.map {
-        tuple =>
+      tuple =>
         tuple._1.zipWithIndex.map {
-          case (key, idx) => {
-            tuple._2(idx, ::) * bcastX.value(key)
-          }
+          case (key, idx) => tuple._2(idx, ::) * bcastX.value(key)
         }
           .reduce(_ += _)
-    }//.withBroadcastSet(singletonDataSetX, "vector")
+    }
       // All-reduce
       .reduce(_ += _)
 
       // collect result
       .collect()(0)
 
-      //cast
-      .asInstanceOf[Vector]
-
       // Convert back to mtx
       .toColMatrix
 
     // It is ridiculous, but in this scheme we will have to re-parallelize it again in order to plug
     // it back as a Flink drm
-
-//    val res = ctx.env.fromCollection(Seq(inCoreM))
-//      .map{block ⇒ Array.tabulate(block.nrow)(i ⇒ i) -> block}
     val res = FlinkEngine.parallelize(inCoreM, parallelismDegree = 1)
 
     new RowsFlinkDrm[Int](res, 1)
