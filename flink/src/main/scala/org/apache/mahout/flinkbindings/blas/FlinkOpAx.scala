@@ -24,9 +24,12 @@ import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
-import org.apache.mahout.flinkbindings.drm.{BlockifiedFlinkDrm, FlinkDrm}
-import org.apache.mahout.math.drm.logical.OpAx
+import org.apache.mahout.flinkbindings.FlinkEngine
+import org.apache.mahout.flinkbindings.drm.{BlockifiedFlinkDrm, FlinkDrm, RowsFlinkDrm}
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.logical.{OpAtx, OpAx}
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.{Matrix, Vector}
 
 
@@ -58,4 +61,48 @@ object FlinkOpAx {
 
     new BlockifiedFlinkDrm(out, op.nrow.toInt)
   }
+
+
+  def atx_with_broadcast(op: OpAtx, srcA: FlinkDrm[Int]): FlinkDrm[Int] = {
+    implicit val ctx = srcA.context
+
+    val dataSetA = srcA.asBlockified.ds
+//    implicit val dc = new FlinkDistributedContext(srcA.asBlockified.ds.getExecutionEnvironment)
+
+    val bcastX = drmBroadcast(op.x)
+    val singletonDataSetX = ctx.env.fromElements(op.x)
+
+    implicit val typeInformation = createTypeInformation[(Array[Int],Matrix)]
+    val inCoreM = dataSetA.map {
+        tuple =>
+        tuple._1.zipWithIndex.map {
+          case (key, idx) => {
+            tuple._2(idx, ::) * bcastX.value(key)
+          }
+        }
+          .reduce(_ += _)
+    }//.withBroadcastSet(singletonDataSetX, "vector")
+      // All-reduce
+      .reduce(_ += _)
+
+      // collect result
+      .collect()(0)
+
+      //cast
+      .asInstanceOf[Vector]
+
+      // Convert back to mtx
+      .toColMatrix
+
+    // It is ridiculous, but in this scheme we will have to re-parallelize it again in order to plug
+    // it back as a Flink drm
+
+//    val res = ctx.env.fromCollection(Seq(inCoreM))
+//      .map{block ⇒ Array.tabulate(block.nrow)(i ⇒ i) -> block}
+    val res = FlinkEngine.parallelize(inCoreM, parallelismDegree = 1)
+
+    new RowsFlinkDrm[Int](res, 1)
+
+  }
+
 }
