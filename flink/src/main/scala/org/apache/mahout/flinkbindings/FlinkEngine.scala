@@ -127,6 +127,7 @@ object FlinkEngine extends DistributedEngine {
     newcp.cache()
   }
 
+
   private def flinkTranslate[K](oper: DrmLike[K]): FlinkDrm[K] = {
     implicit val kTag = oper.keyClassTag
     implicit val typeInformation = generateTypeInformation[K]
@@ -137,13 +138,7 @@ object FlinkEngine extends DistributedEngine {
         FlinkOpAx.blockifiedBroadcastAx(op, flinkTranslate(a))
       case op@OpAt(a) if op.keyClassTag == ClassTag.Int ⇒ FlinkOpAt.sparseTrick(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
       case op@OpAtx(a, x) if op.keyClassTag == ClassTag.Int ⇒
-        // express Atx as (A.t) %*% x
-        // TODO: create specific implementation of Atx, see MAHOUT-1749
-        val opAt = OpAt(a)
-        val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a))
-        val atCast = new CheckpointedFlinkDrm(at.asRowWise.ds, _nrow = opAt.nrow, _ncol = opAt.ncol)
-        val opAx = OpAx(atCast, x)
-        FlinkOpAx.blockifiedBroadcastAx(opAx, flinkTranslate(atCast)).asInstanceOf[FlinkDrm[K]]
+        FlinkOpAx.atx_with_broadcast(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
       case op@OpAtB(a, b) ⇒ FlinkOpAtB.notZippable(op, flinkTranslate(a),
         flinkTranslate(b)).asInstanceOf[FlinkDrm[K]]
       case op@OpABt(a, b) ⇒
@@ -272,7 +267,7 @@ object FlinkEngine extends DistributedEngine {
 
   private[flinkbindings] def parallelize(m: Matrix, parallelismDegree: Int)
                                         (implicit dc: DistributedContext): DrmDataSet[Int] = {
-    val rows = (0 until m.nrow).map(i => (i, m(i, ::))) //.toSeq.sortWith((ii, jj) => ii._1 < jj._1)
+    val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
     val dataSetType = TypeExtractor.getForObject(rows.head)
     //TODO: Make Sure that this is the correct partitioning scheme
     dc.env.fromCollection(rows)
@@ -358,9 +353,9 @@ object FlinkEngine extends DistributedEngine {
   }
 
   def generateTypeInformation[K: ClassTag]: TypeInformation[K] = {
-    val tag = implicitly[ClassTag[K]]
+    implicit val ktag = classTag[K]
 
-    generateTypeInformationFromTag(tag)
+    generateTypeInformationFromTag(ktag)
   }
 
   private def generateTypeInformationFromTag[K](tag: ClassTag[K]): TypeInformation[K] = {
@@ -373,8 +368,5 @@ object FlinkEngine extends DistributedEngine {
     } else {
       throw new IllegalArgumentException(s"index type $tag is not supported")
     }
-  }
-  object FlinkEngine {
-
   }
 }
