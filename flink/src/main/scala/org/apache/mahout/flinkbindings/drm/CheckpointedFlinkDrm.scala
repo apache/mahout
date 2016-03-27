@@ -25,10 +25,8 @@ import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem.WriteMode
 import org.apache.flink.core.fs.Path
 import org.apache.flink.api.scala.hadoop.mapred.HadoopOutputFormat
-import org.apache.flink.configuration.GlobalConfiguration
 import org.apache.hadoop.io.{IntWritable, LongWritable, Text, Writable}
 import org.apache.hadoop.mapred.{FileOutputFormat, JobConf, SequenceFileOutputFormat}
-import org.apache.mahout.flinkbindings.io.Hadoop2HDFSUtil
 import org.apache.mahout.flinkbindings.{DrmDataSet, _}
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm.CacheHint._
@@ -52,26 +50,10 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   lazy val ncol: Int = if (_ncol >= 0) _ncol else dim._2
 
   // persistance values
-  var cacheFileName: String = "undefinedCacheName"
+  var cacheFileName: String = "/a"
   var isCached: Boolean = false
   var parallelismDeg: Int = -1
-  var persistanceRootDir: String = _
-
-  // need to make sure that this is actually getting the correct propertirs for {{taskmanager.tmp.dirs}}
-  val mahoutHome = getMahoutHome()
-
-  // this is extra I/O for each cache call.  this needs to be moved somewhere where it is called
-  // only once.  Possibly FlinkDistributedEngine.
-  GlobalConfiguration.loadConfiguration(mahoutHome + "/conf/flink-config.yaml")
-
-  val conf = GlobalConfiguration.getConfiguration()
-
-  if (!(conf == null )) {
-     persistanceRootDir = conf.getString("taskmanager.tmp.dirs", "/tmp/")
-  } else {
-     persistanceRootDir = "/tmp/"
-  }
-
+  val persistanceRootDir = "/tmp/"
 
   private lazy val dim: (Long, Int) = {
     // combine computation of ncol and nrow in one pass
@@ -94,38 +76,20 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
 
   override val keyClassTag: ClassTag[K] = classTag[K]
 
-  /** Note as of Flink 1.0.0, no direct flink caching exists so we save
-    * the dataset to the filesystem and read it back when cache is called */
   def cache() = {
     if (!isCached) {
-      cacheFileName = persistanceRootDir + System.nanoTime().toString
+      cacheFileName = System.nanoTime().toString
       parallelismDeg = ds.getParallelism
       isCached = true
-      persist(ds, cacheFileName)
     }
-    val _ds = readPersistedDataSet(cacheFileName, ds)
+    implicit val typeInformation = createTypeInformation[(K,Vector)]
 
-    /** Leave the parallelism degree to be set the operators
-      * TODO: find out a way to set the parallelism degree based on the
-      * final drm after computation is actually triggered
-      *
-      *  // We may want to look more closely at this:
-      *  // since we've cached a drm, triggering a computation
-      *  // it may not make sense to keep the same parallelism degree
-      *  if (!(parallelismDeg == _ds.getParallelism)) {
-      *    _ds.setParallelism(parallelismDeg).rebalance()
-      *  }
-      *
-      */
-
+    val _ds = persist(ds, persistanceRootDir + cacheFileName)
     datasetWrap(_ds)
   }
 
-  def uncache(): this.type = {
-    if (isCached) {
-      Hadoop2HDFSUtil.delete(cacheFileName)
-      isCached = false
-    }
+  def uncache() = {
+    // TODO
     this
   }
 
@@ -135,10 +99,12 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
     * @param dataset [[DataSet]] to write to disk
     * @param path File path to write dataset to
     * @tparam T Type of the [[DataSet]] elements
+    * @return [[DataSet]] reading the just written file
     */
-  def persist[T: ClassTag: TypeInformation](dataset: DataSet[T], path: String): Unit = {
+  def persist[T: ClassTag: TypeInformation](dataset: DataSet[T], path: String): DataSet[T] = {
     val env = dataset.getExecutionEnvironment
     val outputFormat = new TypeSerializerOutputFormat[T]
+
     val filePath = new Path(path)
 
     outputFormat.setOutputFilePath(filePath)
@@ -146,29 +112,14 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
 
     dataset.output(outputFormat)
     env.execute("FlinkTools persist")
-  }
 
-  /** Read a [[DataSet]] from specified path and returns it as a DataSource for subsequent
-    * operations.
-    *
-    * @param path File path to read dataset from
-    * @param ds persisted ds to retrieve type information and environment forom
-    * @tparam T key Type of the [[DataSet]] elements
-    * @return [[DataSet]] the persisted dataset
-    */
-  def readPersistedDataSet[T: ClassTag : TypeInformation]
-       (path: String, ds: DataSet[T]): DataSet[T] = {
-
-    val env = ds.getExecutionEnvironment
-    val inputFormat = new TypeSerializerInputFormat[T](ds.getType())
-    val filePath = new Path(path)
+    val inputFormat = new TypeSerializerInputFormat[T](dataset.getType)
     inputFormat.setFilePath(filePath)
 
     env.createInput(inputFormat)
   }
 
-
-  // Members declared in org.apache.mahout.math.drm.DrmLike
+  // Members declared in org.apache.mahout.math.drm.DrmLike   
 
   protected[mahout] def canHaveMissingRows: Boolean = _canHaveMissingRows
 
