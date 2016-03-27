@@ -18,7 +18,7 @@
  */
 package org.apache.mahout.flinkbindings.drm
 
-import org.apache.flink.api.common.functions.{MapFunction, ReduceFunction, RichFunction, RichMapFunction}
+import org.apache.flink.api.common.functions.{MapFunction, ReduceFunction}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.io.{TypeSerializerInputFormat, TypeSerializerOutputFormat}
 import org.apache.flink.api.scala._
@@ -60,6 +60,8 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   // need to make sure that this is actually getting the correct propertirs for {{taskmanager.tmp.dirs}}
   val mahoutHome = getMahoutHome()
 
+  // this is extra I/O for each cache call.  this needs to be moved somewhere where it is called
+  // only once.  Possibly FlinkDistributedEngine.
   GlobalConfiguration.loadConfiguration(mahoutHome + "/conf/flink-config.yaml")
 
   val conf = GlobalConfiguration.getConfiguration()
@@ -92,16 +94,20 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
 
   override val keyClassTag: ClassTag[K] = classTag[K]
 
+  /** Note as of Flink 1.0.0, no direct flink caching exists so we save
+    * the dataset to the filesystem and read it back when cache is called */
   def cache() = {
-//    implicit val typeInformation = createTypeInformation[(K,Vector)]
     if (!isCached) {
       cacheFileName = persistanceRootDir + System.nanoTime().toString
       parallelismDeg = ds.getParallelism
       isCached = true
       persist(ds, cacheFileName)
     }
-
     val _ds = readPersistedDataSet(cacheFileName, ds)
+
+    // We may want to look more closely at this:
+    // since we've cached a drm, triggering a computation
+    // it may not make sense to keep the same parallelism degree
     if (!(parallelismDeg == _ds.getParallelism)) {
       _ds.setParallelism(parallelismDeg).rebalance()
     }
@@ -141,7 +147,7 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
     * @param path File path to read dataset from
     * @param ds persisted ds to retrieve type information and environment forom
     * @tparam T key Type of the [[DataSet]] elements
-    * @return [[DataSet]] reading the just written file
+    * @return [[DataSet]] the persisted dataset
     */
   def readPersistedDataSet[T: ClassTag : TypeInformation]
        (path: String, ds: DataSet[T]): DataSet[T] = {
