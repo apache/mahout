@@ -57,14 +57,14 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   var parallelismDeg: Int = -1
   var persistanceRootDir: String = _
 
-  // need to make sure that this is actually getting the correct propertirs for {{taskmanager.tmp.dirs}}
+  // need to make sure that this is actually getting the correct properties for {{taskmanager.tmp.dirs}}
   val mahoutHome = getMahoutHome()
 
   // this is extra I/O for each cache call.  this needs to be moved somewhere where it is called
   // only once.  Possibly FlinkDistributedEngine.
   GlobalConfiguration.loadConfiguration(mahoutHome + "/conf/flink-config.yaml")
 
-  val conf = GlobalConfiguration.getConfiguration()
+  val conf = GlobalConfiguration.getConfiguration
 
   if (!(conf == null )) {
      persistanceRootDir = conf.getString("taskmanager.tmp.dirs", "/tmp/")

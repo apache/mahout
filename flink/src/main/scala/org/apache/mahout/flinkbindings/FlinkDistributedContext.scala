@@ -19,12 +19,28 @@
 package org.apache.mahout.flinkbindings
 
 import org.apache.flink.api.scala.ExecutionEnvironment
+import org.apache.flink.configuration.GlobalConfiguration
 import org.apache.mahout.math.drm.DistributedContext
 import org.apache.mahout.math.drm.DistributedEngine
 
 class FlinkDistributedContext(val env: ExecutionEnvironment) extends DistributedContext {
 
-  env.setParallelism(Runtime.getRuntime.availableProcessors())
+  val mahoutHome = getMahoutHome()
+
+  GlobalConfiguration.loadConfiguration(mahoutHome + "/conf/flink-config.yaml")
+
+  val conf = GlobalConfiguration.getConfiguration
+
+  var degreeOfParallelism: Int = 0
+
+  if (conf != null) {
+    degreeOfParallelism = conf.getInteger("parallelism.default", Runtime.getRuntime.availableProcessors)
+  } else {
+    degreeOfParallelism = Runtime.getRuntime.availableProcessors
+  }
+
+  env.setParallelism(degreeOfParallelism)
+  
   val engine: DistributedEngine = FlinkEngine
 
 

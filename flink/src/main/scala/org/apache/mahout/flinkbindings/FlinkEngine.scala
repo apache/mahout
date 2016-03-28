@@ -254,6 +254,8 @@ object FlinkEngine extends DistributedEngine {
     FlinkByteBCast.wrap(m)
 
   /** Parallelize in-core matrix as flink distributed matrix, using row ordinal indices as data set keys. */
+  // The 'numPartitions' parameter is not honored in this call,
+  // as Flink sets a global parallelism in ExecutionEnvironment
   override def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
                                            (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
 
@@ -262,7 +264,8 @@ object FlinkEngine extends DistributedEngine {
     new CheckpointedFlinkDrm(ds = parallelDrm, _nrow = m.numRows(), _ncol = m.numCols())
   }
 
-
+  // The 'parallelismDegree' parameter is not honored in this call,
+  // as Flink sets a global parallelism in ExecutionEnvironment
   private[flinkbindings] def parallelize(m: Matrix, parallelismDegree: Int)
                                         (implicit dc: DistributedContext): DrmDataSet[Int] = {
     val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
@@ -271,6 +274,8 @@ object FlinkEngine extends DistributedEngine {
   }
 
   /** Parallelize in-core matrix as flink distributed matrix, using row labels as a data set keys. */
+  // The 'numPartitions' parameter is not honored in this call,
+  // as Flink sets a global parallelism in ExecutionEnvironment
   override def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
                                           (implicit dc: DistributedContext): CheckpointedDrm[String] = {
 
