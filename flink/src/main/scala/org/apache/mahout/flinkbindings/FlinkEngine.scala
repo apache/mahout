@@ -240,13 +240,13 @@ object FlinkEngine extends DistributedEngine {
   override def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector] =
     FlinkByteBCast.wrap(v)
 
-
   /** Broadcast support */
   override def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix] =
     FlinkByteBCast.wrap(m)
 
-
   /** Parallelize in-core matrix as flink distributed matrix, using row ordinal indices as data set keys. */
+  // The 'numPartitions' parameter is not honored in this call,
+  // as Flink sets a global parallelism in ExecutionEnvironment
   override def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
                                            (implicit dc: DistributedContext): CheckpointedDrm[Int] = {
 
@@ -255,26 +255,25 @@ object FlinkEngine extends DistributedEngine {
     new CheckpointedFlinkDrm(ds = parallelDrm, _nrow = m.numRows(), _ncol = m.numCols())
   }
 
-
+  // The 'parallelismDegree' parameter is not honored in this call,
+  // as Flink sets a global parallelism in ExecutionEnvironment
   private[flinkbindings] def parallelize(m: Matrix, parallelismDegree: Int)
                                         (implicit dc: DistributedContext): DrmDataSet[Int] = {
     val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    //TODO: Make Sure that this is the correct partitioning scheme
-    dc.env.fromCollection(rows)
-      .partitionByRange(0)
-      .setParallelism(parallelismDegree)
-      .rebalance()
+    dc.env.fromCollection(rows).partitionByRange(0)
   }
 
   /** Parallelize in-core matrix as flink distributed matrix, using row labels as a data set keys. */
+  // The 'numPartitions' parameter is not honored in this call,
+  // as Flink sets a global parallelism in ExecutionEnvironment
   override def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
                                           (implicit dc: DistributedContext): CheckpointedDrm[String] = {
 
     val rb = m.getRowLabelBindings
     val p = for (i: String ← rb.keySet().toIndexedSeq) yield i → m(rb(i), ::)
 
-    new CheckpointedFlinkDrm[String](dc.env.fromCollection(p).setParallelism(numPartitions),
+    new CheckpointedFlinkDrm[String](dc.env.fromCollection(p),
       _nrow = m.nrow, _ncol = m.ncol, cacheHint = CacheHint.NONE)
   }
 

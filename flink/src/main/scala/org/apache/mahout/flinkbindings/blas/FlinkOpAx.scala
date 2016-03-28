@@ -32,7 +32,6 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.{Matrix, Vector}
 
-
 /**
  * Implementation is taken from Spark's Ax
  * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/Ax.scala
@@ -83,13 +82,12 @@ object FlinkOpAx {
       .reduce(_ += _)
 
       // collect result
-      .collect()(0)
+      .collect().head
 
       // Convert back to mtx
       .toColMatrix
 
-    // It is ridiculous, but in this scheme we will have to re-parallelize it again in order to plug
-    // it back as a Flink drm
+    // This doesn't do anything now
     val res = FlinkEngine.parallelize(inCoreM, parallelismDegree = 1)
 
     new RowsFlinkDrm[Int](res, 1)
