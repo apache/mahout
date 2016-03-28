@@ -116,6 +116,12 @@ object FlinkOpABt {
       pairwiseApply(blocksA, blocksB, mmulFunc)
 
         // Now reduce proper product blocks.
+
+        // group by the partition key
+        .groupBy(0)
+
+          .reduceGroup(()
+
         .combineByKey(
 
           // Empty combiner += value
@@ -181,13 +187,13 @@ object FlinkOpABt {
    * @param blockFunc a function over (blockA, blockB). Implies `blockA %*% blockB.t` but perhaps may be
    *                  switched to another scheme based on which of the sides, A or B, is bigger.
    */
-  private def pairwiseApply[K1, K2, T](blocksA: BlockifiedDrmDataSet[K1], blocksB: BlockifiedDrmDataSet[K2], blockFunc:
+  private def pairwiseApply[K1, K2, T](blocksA: FlinkDrm[K1], blocksB: FlinkDrm[K2], blockFunc:
   (BlockifiedDrmTuple[K1], BlockifiedDrmTuple[K2]) => T): DataSet[(Int, T)] = {
 
     // We will be joining blocks in B to blocks in A using A-partition as a key.
 
     // Prepare A side.
-    val blocksAKeyed = blocksA.mapPartition { new RichMapPartitionFunction[BlockifiedDrmTuple[K1],
+    val blocksAKeyed = blocksA.asBlockified.ds.mapPartition { new RichMapPartitionFunction[BlockifiedDrmTuple[K1],
                                                         (Int, Array[K1], Matrix)] {
       override def mapPartition(blockIter: Iterator[BlockifiedDrmTuple[K1]],
                                 collector: Collector[(Int, BlockifiedDrmTuple[K1])]) = {
@@ -203,20 +209,21 @@ object FlinkOpABt {
       }
     }
 
-
     // Prepare B-side.
-    val aParts = blocksA.getParallelism
-    val blocksBKeyed = blocksB.flatMap(bTuple => for (blockKey <- (0 until aParts).view) yield blockKey -> bTuple )
+    val aParts = blocksAKeyed.getParallelism
+    val blocksBKeyed = blocksB.asBlockified.ds.flatMap(bTuple => for (blockKey <- (0 until aParts).view) yield blockKey -> bTuple )
 
     // Perform the inner join. Let's try to do a simple thing now.
     //blocksAKeyed.join(blocksBKeyed, numPartitions = aParts)
     blocksAKeyed.join(blocksBKeyed).where(0).equalTo(0){ (l, r) =>
-      (l._1 , (l._1, ((l._2, l._3), (r._1,r._2,))))
-         }//.setParallelism(aParts)
+      (l._1 , ((l._2, l._3), (r._1, r._2,))
+         }
+      // set the parallelism to A parallelism
+      .setParallelism(aParts)
 
     // Apply product function which should produce smaller products. Hopefully, this streams blockB's in
 //    .map{case (partKey,(blockA, blockB)) => partKey -> blockFunc(blockA, blockB)}
-      .map{tuple => tuple._1 -> blockFunc(tuple._2._1, tuple._2._2)}
+      .map{tuple => tuple._1 -> blockFunc((tuple._2._1), (tuple._2._2._1, tuple._2._._2)}
 
   }
 
