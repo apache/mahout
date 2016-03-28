@@ -249,11 +249,9 @@ object FlinkEngine extends DistributedEngine {
   override def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector] =
     FlinkByteBCast.wrap(v)
 
-
   /** Broadcast support */
   override def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix] =
     FlinkByteBCast.wrap(m)
-
 
   /** Parallelize in-core matrix as flink distributed matrix, using row ordinal indices as data set keys. */
   override def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
@@ -269,11 +267,7 @@ object FlinkEngine extends DistributedEngine {
                                         (implicit dc: DistributedContext): DrmDataSet[Int] = {
     val rows = (0 until m.nrow).map(i => (i, m(i, ::)))
     val dataSetType = TypeExtractor.getForObject(rows.head)
-    //TODO: Make Sure that this is the correct partitioning scheme
-    dc.env.fromCollection(rows)
-      .partitionByRange(0)
-      .setParallelism(parallelismDegree)
-      .rebalance()
+    dc.env.fromCollection(rows).partitionByRange(0)
   }
 
   /** Parallelize in-core matrix as flink distributed matrix, using row labels as a data set keys. */
@@ -283,7 +277,7 @@ object FlinkEngine extends DistributedEngine {
     val rb = m.getRowLabelBindings
     val p = for (i: String ← rb.keySet().toIndexedSeq) yield i → m(rb(i), ::)
 
-    new CheckpointedFlinkDrm[String](dc.env.fromCollection(p).setParallelism(numPartitions),
+    new CheckpointedFlinkDrm[String](dc.env.fromCollection(p),
       _nrow = m.nrow, _ncol = m.ncol, cacheHint = CacheHint.NONE)
   }
 

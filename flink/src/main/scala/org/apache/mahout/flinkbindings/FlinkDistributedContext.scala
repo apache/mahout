@@ -24,6 +24,7 @@ import org.apache.mahout.math.drm.DistributedEngine
 
 class FlinkDistributedContext(val env: ExecutionEnvironment) extends DistributedContext {
 
+  env.setParallelism(Runtime.getRuntime.availableProcessors())
   val engine: DistributedEngine = FlinkEngine
 
 

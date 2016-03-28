@@ -87,8 +87,7 @@ object FlinkOpAx {
       // Convert back to mtx
       .toColMatrix
 
-    // It is ridiculous, but in this scheme we will have to re-parallelize it again in order to plug
-    // it back as a Flink drm
+    // This doesn't do anything now
     val res = FlinkEngine.parallelize(inCoreM, parallelismDegree = 1)
 
     new RowsFlinkDrm[Int](res, 1)
