@@ -19,6 +19,7 @@ package org.apache.mahout.flinkbindings.blas
 
 import org.apache.flink.api.common.functions.{GroupCombineFunction, RichMapPartitionFunction}
 import org.apache.flink.api.common.functions.util.ListCollector
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.util.Collector
 import org.apache.mahout.logging._
@@ -45,13 +46,13 @@ object FlinkOpABt {
    * @param srcB B source DataSet 
    * @tparam K
    */
-  def abt[K](
+  def abt[K: ClassTag: TypeInformation](
       operator: OpABt[K],
       srcA: FlinkDrm[K],
       srcB: FlinkDrm[Int]): FlinkDrm[K] = {
 
     debug("operator AB'(Flink)")
-    abt_nograph(operator, srcA, srcB)(operator.keyClassTag)
+    abt_nograph(operator, srcA, srcB)
   }
 
   /**
@@ -68,7 +69,7 @@ object FlinkOpABt {
    * This logic is complicated a little by the fact that we have to keep block row and column keys
    * so that the stitching of AB'-blocks happens according to integer row indices of the B input.
    */
-  private[flinkbindings] def abt_nograph[K: ClassTag](
+  private[flinkbindings] def abt_nograph[K: ClassTag: TypeInformation](
       operator: OpABt[K],
       srcA: FlinkDrm[K],
       srcB: FlinkDrm[Int]): FlinkDrm[K] = {
@@ -92,7 +93,7 @@ object FlinkOpABt {
     //    )
     //
     // blockwise multiplication function
-    def mmulFunc(tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
+    def mmulFunc[K:ClassTag :TypeInformation](tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
       val (keysA, blockA) = tupleA
       val (keysB, blockB) = tupleB
 
@@ -112,11 +113,12 @@ object FlinkOpABt {
     }
 
 
+    implicit val typeInformation = FlinkEngine.generateTypeInformation[(Array[K], Matrix)]
 
         val blockwiseMmulDataSet =
 
         // Combine blocks pairwise.
-          pairwiseApply(blocksA.asBlockified.ds, blocksB.asBlockified.ds, mmulFunc)
+          pairwiseApply(blocksA.asBlockified.ds, blocksB.asBlockified.ds, mmulFunc[K])
 
             // Now reduce proper product blocks.
 
@@ -219,10 +221,13 @@ object FlinkOpABt {
       * @param blockFunc a function over (blockA, blockB). Implies `blockA %*% blockB.t` but perhaps may be
       *                  switched to another scheme based on which of the sides, A or B, is bigger.
       */
-      private def pairwiseApply[K1, K2, T](blocksA: BlockifiedDrmDataSet[K1], blocksB: BlockifiedDrmDataSet[K2], blockFunc:
+      private def pairwiseApply[K1: ClassTag : TypeInformation, K2, T](blocksA: BlockifiedDrmDataSet[K1], blocksB: BlockifiedDrmDataSet[K2], blockFunc:
       (BlockifiedDrmTuple[K1], BlockifiedDrmTuple[K2]) => T): DataSet[(Int, T)] = {
 
-        // We will be joining blocks in B to blocks in A using A-partition as a key.
+
+      implicit val typeInformationA = FlinkEngine.generateTypeInformation[(Int, Array[K1], Matrix)]
+
+      // We will be joining blocks in B to blocks in A using A-partition as a key.
 
         // Prepare A side.
         val blocksAKeyed = blocksA.mapPartition { new RichMapPartitionFunction[BlockifiedDrmTuple[K1],
@@ -241,11 +246,16 @@ object FlinkOpABt {
           }
         }
 
-        // Prepare B-side.
+       implicit val typeInformationB = FlinkEngine.generateTypeInformation[(Int, (Array[K2], Matrix))]
+
+      // Prepare B-side.
         val aParts = blocksAKeyed.getParallelism
         val blocksBKeyed = blocksB.flatMap(bTuple => for (blockKey <- (0 until aParts).view) yield blockKey -> bTuple )
 
-        // Perform the inner join. Let's try to do a simple thing now.
+        implicit val typeInformationJ = FlinkEngine.generateTypeInformation[(Int, ((Array[K1], Matrix),(Int, (Array[K2], Matrix))))]
+        implicit val typeInformationJprod = FlinkEngine.generateTypeInformation[(Int, T)]
+
+      // Perform the inner join. Let's try to do a simple thing now.
         //blocksAKeyed.join(blocksBKeyed, numPartitions = aParts)
         blocksAKeyed.join(blocksBKeyed).where(0).equalTo(0){ (l, r) =>
           (l._1 , ((l._2, l._3), (r._1, r._2)))
