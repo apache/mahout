@@ -17,8 +17,7 @@
 
 package org.apache.mahout.flinkbindings.blas
 
-import org.apache.flink.api.common.functions.{GroupCombineFunction, RichMapPartitionFunction}
-import org.apache.flink.api.common.functions.util.ListCollector
+import org.apache.flink.api.common.functions.{GroupCombineFunction, RichGroupCombineFunction, RichMapPartitionFunction}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.util.Collector
@@ -30,6 +29,9 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.{Matrix, SparseMatrix, SparseRowMatrix}
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm._
+
+import scala.collection.JavaConverters._
+
 
 import scala.reflect.ClassTag
 
@@ -52,7 +54,7 @@ object FlinkOpABt {
       srcB: FlinkDrm[Int]): FlinkDrm[K] = {
 
     debug("operator AB'(Flink)")
-    abt_nograph(operator, srcA, srcB)
+    abt_nograph[K](operator, srcA, srcB)
   }
 
   /**
@@ -69,14 +71,13 @@ object FlinkOpABt {
    * This logic is complicated a little by the fact that we have to keep block row and column keys
    * so that the stitching of AB'-blocks happens according to integer row indices of the B input.
    */
-  private[flinkbindings] def abt_nograph[K: ClassTag: TypeInformation](
+  private[flinkbindings] def abt_nograph[K](
       operator: OpABt[K],
       srcA: FlinkDrm[K],
       srcB: FlinkDrm[Int]): FlinkDrm[K] = {
 
     // Blockify everything.
     val blocksA = srcA.asBlockified
-
     val blocksB = srcB.asBlockified
 
     val prodNCol = operator.ncol
@@ -93,7 +94,7 @@ object FlinkOpABt {
     //    )
     //
     // blockwise multiplication function
-    def mmulFunc[K:ClassTag :TypeInformation](tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
+    def mmulFunc[K](tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
       val (keysA, blockA) = tupleA
       val (keysB, blockB) = tupleB
 
@@ -114,6 +115,7 @@ object FlinkOpABt {
 
 
     implicit val typeInformation = FlinkEngine.generateTypeInformation[(Array[K], Matrix)]
+    implicit val typeInformation2 = FlinkEngine.generateTypeInformation[(Int, (Array[K], Array[Int], Matrix))]
 
         val blockwiseMmulDataSet =
 
@@ -124,29 +126,26 @@ object FlinkOpABt {
 
             // group by the partition key
             .groupBy(0)
-    //
-    ////          .reduceGroup(iter: (Iterator[(Int, (Array[K], Array[Int], Matrix))] => BlockifiedDrmDataSet[K] )): BlockifiedDrmDataSet[K] ={
-    ////       .combineByKey(
-    ////        .combineGroup(func: ((it: Iterator[(Int, (Array[K], Array[Int], Matrix))] => Unit), comb: Collector))= {
-            .combineGroup{
-              new GroupCombineFunction[(Int, (Array[K], Array[Int], Matrix)), BlockifiedDrmTuple[K]] {
-                override def combine(values: Iterator[(Int, (Array[K], Array[Int], Matrix))],
-                          collector: Collector[BlockifiedDrmTuple[K]]) = {
-                  val tuple = values.next()
-                  val rowKeys = tuple._2._1
-                  val colKeys = tuple._2._2
-                  val block = tuple._2._3
 
-                  val comb = new SparseMatrix(prodNCol, block.nrow).t
+            .combineGroup(new GroupCombineFunction[(Int, (Array[K], Array[Int], Matrix)), BlockifiedDrmTuple[K]] {
 
-                  for ((col, i) <- colKeys.zipWithIndex) comb(::, col) := block(::, i)
+              def combine(values: Iterable[(Int, (Array[K], Array[Int], Matrix))],
+                           out: Collector[BlockifiedDrmTuple[K]]): Unit = {
 
-                  val res = rowKeys -> comb
+                val tuple = values.head
+                val rowKeys = tuple._2._1
+                val colKeys = tuple._2._2
+                val block = tuple._2._3
 
-                 collector.collect(res)
+                val comb = new SparseMatrix(prodNCol, block.nrow).t
+
+                for ((col, i) <- colKeys.zipWithIndex) comb(::, col) := block(::, i)
+
+                val res = rowKeys -> comb
+
+                out.collect(res.asInstanceOf[BlockifiedDrmTuple[K]])
               }
-            }
-          }
+            })
 
     //
     //
@@ -221,7 +220,7 @@ object FlinkOpABt {
       * @param blockFunc a function over (blockA, blockB). Implies `blockA %*% blockB.t` but perhaps may be
       *                  switched to another scheme based on which of the sides, A or B, is bigger.
       */
-      private def pairwiseApply[K1: ClassTag : TypeInformation, K2, T](blocksA: BlockifiedDrmDataSet[K1], blocksB: BlockifiedDrmDataSet[K2], blockFunc:
+      private def pairwiseApply[K1, K2, T](blocksA: BlockifiedDrmDataSet[K1], blocksB: BlockifiedDrmDataSet[K2], blockFunc:
       (BlockifiedDrmTuple[K1], BlockifiedDrmTuple[K2]) => T): DataSet[(Int, T)] = {
 
 
@@ -229,22 +228,23 @@ object FlinkOpABt {
 
       // We will be joining blocks in B to blocks in A using A-partition as a key.
 
-        // Prepare A side.
-        val blocksAKeyed = blocksA.mapPartition { new RichMapPartitionFunction[BlockifiedDrmTuple[K1],
+       // Prepare A side.
+        val blocksAKeyed = blocksA.mapPartition ({ new RichMapPartitionFunction[BlockifiedDrmTuple[K1],
                                                             (Int, Array[K1], Matrix)] {
-          override def mapPartition(blockIter: Iterator[BlockifiedDrmTuple[K1]],
+          override def mapPartition(blockIter: Iterable[BlockifiedDrmTuple[K1]],
                                     collector: Collector[(Int, BlockifiedDrmTuple[K1])]) = {
+
             val part = getIterationRuntimeContext.getIndexOfThisSubtask
 
     //        val r = if (blockIter.hasNext) part -> blockIter.next()) else Option.empty[(Int, BlockifiedDrmTuple[K1])]
-             val r =  part -> blockIter.next()
+             val r =  part -> blockIter.head
 
-            require(!blockIter.hasNext, s"more than 1 (${blockIter.size + 1}) blocks per partition and A of AB'")
+//            require(!blockIter.tail, s"more than 1 (${blockIter.size + 1}) blocks per partition and A of AB'")
 
             collector.collect(r)
             }
           }
-        }
+        })
 
        implicit val typeInformationB = FlinkEngine.generateTypeInformation[(Int, (Array[K2], Matrix))]
 
