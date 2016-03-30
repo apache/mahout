@@ -134,16 +134,16 @@ object FlinkOpABt {
             // group by the partition key
             .groupBy(0)
 
-            .combineGroup[(Array[K], Matrix)](new RichGroupCombineFunction[ (Int, (Array[K], Array[Int], Matrix)), (Array[K], Matrix) ] {
+            .combineGroup(new RichGroupCombineFunction[(Int, (Array[K], Array[Int], Matrix)), (Array[K], Matrix)] {
 
-//              override def open(params: Configuration): Unit = {
-//
-//              }
+              override def open(params: Configuration): Unit = {
+
+              }
 
               def combine(values: Iterable[(Int, (Array[K], Array[Int], Matrix))],
                            out: Collector[(Array[K], Matrix)]): Unit = {
 
-                val tuple = values.toIterator.size //next
+                val tuple = values.toIterator.next
                 val rowKeys = tuple._2._1
                 val colKeys = tuple._2._2
                 val block = tuple._2._3
@@ -231,11 +231,13 @@ object FlinkOpABt {
       * @param blockFunc a function over (blockA, blockB). Implies `blockA %*% blockB.t` but perhaps may be
       *                  switched to another scheme based on which of the sides, A or B, is bigger.
       */
-      private def pairwiseApply[K1, K2, T](blocksA: BlockifiedDrmDataSet[K1], blocksB: BlockifiedDrmDataSet[K2], blockFunc:
-      (BlockifiedDrmTuple[K1], BlockifiedDrmTuple[K2]) => (Array[K1], Array[Int], Matrix)): DataSet[(Int, (Array[K1], Array[Int], Matrix))] = {
+      private def pairwiseApply[K1, K2, T]( blocksA: BlockifiedDrmDataSet[K1], blocksB: BlockifiedDrmDataSet[K2], blockFunc:
+      (BlockifiedDrmTuple[K1], BlockifiedDrmTuple[K2]) =>
+        (Array[K1], Array[Int], Matrix) ): DataSet[(Int, (Array[K1], Array[Int], Matrix))] = {
 
 
       implicit val typeInformationA = FlinkEngine.generateTypeInformation[(Int, Array[K1], Matrix)]
+      implicit val typeInformationProd = FlinkEngine.generateTypeInformation[(Int, (Array[K1], Array[Int], Matrix))]
 
       // We will be joining blocks in B to blocks in A using A-partition as a key.
 
@@ -292,17 +294,6 @@ object FlinkOpABt {
       }
 
 
-//      def countsPerPartition[K](drmDataSet: DataSet[K]): DataSet[(Int, Int)] = {
-//        drmDataSet.mapPartition {
-//          new RichMapPartitionFunction[K, (Int, Int)] {
-//            override def mapPartition(iterable: Iterable[K], collector: Collector[(Int, Int)]) = {
-//              val count: Int = Iterator(iterable).size
-//              val index: Int = getRuntimeContext.getIndexOfThisSubtask
-//              collector.collect((index, count))
-//            }
-//          }
-//        }
-//      }
 
 
 
