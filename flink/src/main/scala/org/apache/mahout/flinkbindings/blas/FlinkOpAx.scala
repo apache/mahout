@@ -87,7 +87,8 @@ object FlinkOpAx {
       // Convert back to mtx
       .toColMatrix
 
-    // This doesn't do anything now
+    // Convert the in corer esult back to a DatSset so that we can wrap it
+    // back into a RowsFlinkDrm.
     val res = FlinkEngine.parallelize(inCoreM, parallelismDegree = 1)
 
     new RowsFlinkDrm[Int](res, 1)
