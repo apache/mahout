@@ -18,10 +18,15 @@
  */
 package org.apache.mahout.flinkbindings
 
+import java.util.concurrent.TimeUnit
+
 import org.apache.flink.api.scala.ExecutionEnvironment
+import org.apache.flink.test.util.{ForkableFlinkMiniCluster, TestBaseUtils}
 import org.apache.mahout.math.drm.DistributedContext
 import org.apache.mahout.test.DistributedMahoutSuite
-import org.scalatest.Suite
+import org.scalatest.{ConfigMap, Suite}
+
+import scala.concurrent.duration.FiniteDuration
 
 
 trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
@@ -29,10 +34,12 @@ trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
   protected implicit var mahoutCtx: DistributedContext = _
   protected var env: ExecutionEnvironment = null
 
+  var cluster: Option[ForkableFlinkMiniCluster] = None
+  val parallelism = 4
+  protected val DEFAULT_AKKA_ASK_TIMEOUT: Long = 1000
+  protected var DEFAULT_TIMEOUT: FiniteDuration = new FiniteDuration(DEFAULT_AKKA_ASK_TIMEOUT, TimeUnit.SECONDS)
+
   def initContext() {
-    env = ExecutionEnvironment.getExecutionEnvironment
-    // set this higher so that tests like dsqDist(X,Y) have enough available slots to pass on a single machine.
-    env.setParallelism(10)
     mahoutCtx = wrapContext(env)
   }
 
@@ -43,6 +50,28 @@ trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
   override def afterEach() {
     super.afterEach()
 //    env.execute("Mahout Flink Binding Test Suite")
+  }
+
+  override protected def afterAll(configMap: ConfigMap): Unit = {
+    super.afterAll(configMap)
+//    resetContext()
+    cluster.foreach(c => TestBaseUtils.stopCluster(c, DEFAULT_TIMEOUT))
+  }
+
+  override protected def beforeAll(configMap: ConfigMap): Unit = {
+    super.beforeAll(configMap)
+
+    val cl = TestBaseUtils.startCluster(
+      1,
+      parallelism,
+      false,
+      false,
+      true)
+
+    env = ExecutionEnvironment.createLocalEnvironment(parallelism)
+
+    cluster = Some(cl)
+    initContext()
   }
 
 }
