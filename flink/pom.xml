@@ -132,7 +132,16 @@
       <artifactId>flink-clients_${scala.compat.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-test-utils_2.10</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-tests_2.10</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
