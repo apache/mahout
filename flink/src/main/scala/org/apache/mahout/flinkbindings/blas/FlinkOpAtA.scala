@@ -3,19 +3,27 @@ package org.apache.mahout.flinkbindings.blas
 import java.lang.Iterable
 
 import org.apache.flink.api.common.functions._
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.shaded.com.google.common.collect.Lists
 import org.apache.flink.util.Collector
+
+import org.apache.mahout.math.{Matrix, UpperTriangular}
+import org.apache.mahout.math.drm.{BlockifiedDrmTuple, _}
+
+import org.apache.mahout.math._
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm._
-import org.apache.mahout.math.Matrix
-import org.apache.mahout.math.drm.{BlockifiedDrmTuple, _}
-import org.apache.mahout.math.drm.logical.OpAtA
-import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
+import RLikeOps._
+import collection._
+import JavaConversions._
+import org.apache.mahout.math.drm.logical.OpAtA
+
 
 import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
 
 /**
  * Inspired by Spark's implementation from 
@@ -45,14 +53,60 @@ object FlinkOpAtA {
   }
 
   def slim[K](op: OpAtA[K], A: FlinkDrm[K]): Matrix = {
-    val ds = A.asBlockified.ds.asInstanceOf[DataSet[(Array[K], Matrix)]]
+    val ds = A.asRowWise.ds
+    val ncol = op.ncol
 
-    val res = ds.map {
-      // TODO: optimize it: use upper-triangle matrices like in Spark
-      block => block._2.t %*% block._2
-    }.reduce(_ + _).collect()
+    // Compute backing vector of tiny-upper-triangular accumulator across all the data.
+    val res = ds.mapPartition(pIter => {
 
-    res.head
+      val ut = new UpperTriangular(ncol)
+
+      // Strategy is to add to an outer product of each row to the upper triangular accumulator.
+      pIter.foreach({ case (k, v) =>
+
+        // Use slightly various traversal strategies over dense vs. sparse source.
+        if (v.isDense) {
+
+          // Update upper-triangular pattern only (due to symmetry).
+          // Note: Scala for-comprehensions are said to be fairly inefficient this way, but this is
+          // such spectacular case they were designed for.. Yes I do observe some 20% difference
+          // compared to while loops with no other payload, but the other paylxcoad is usually much
+          // heavier than this overhead, so... I am keeping this as is for the time being.
+
+          for (row <- 0 until v.length; col <- row until v.length)
+            ut(row, col) = ut(row, col) + v(row) * v(col)
+
+        } else {
+
+          // Sparse source.
+          v.nonZeroes().view
+
+            // Outer iterator iterates over rows of outer product.
+            .foreach(elrow => {
+
+            // Inner loop for columns of outer product.
+            v.nonZeroes().view
+
+              // Filter out non-upper nonzero elements from the double loop.
+              .filter(_.index >= elrow.index)
+
+              // Incrementally update outer product value in the uppper triangular accumulator.
+              .foreach(elcol => {
+
+              val row = elrow.index
+              val col = elcol.index
+              ut(row, col) = ut(row, col) + elrow.get() * elcol.get()
+
+            })
+          })
+
+        }
+      })
+
+      Iterator(dvec(ddata = ut.getData).asInstanceOf[Vector]: Vector)
+    }).reduce(_ + _).collect()
+
+    new DenseSymmetricMatrix(res.head)
   }
 
   def fat[K](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {

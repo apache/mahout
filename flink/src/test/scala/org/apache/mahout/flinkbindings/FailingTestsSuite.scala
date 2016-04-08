@@ -78,41 +78,41 @@ class FailingTestsSuite extends FunSuite with DistributedFlinkSuite with Matcher
 //  }
 
 
-  test("C = A + B, identically partitioned") {
-
-    val inCoreA = dense((1, 2, 3), (3, 4, 5), (5, 6, 7))
-
-    val A = drmParallelize(inCoreA, numPartitions = 2)
-
-     //   printf("A.nrow=%d.\n", A.rdd.count())
-
-    // Create B which would be identically partitioned to A. mapBlock() by default will do the trick.
-    val B = A.mapBlock() {
-      case (keys, block) =>
-        val bBlock = block.like() := { (r, c, v) => util.Random.nextDouble()}
-        keys -> bBlock
-    }
-      // Prevent repeated computation non-determinism
-      // flink problem is here... checkpoint is not doing what it should
-      // ie. greate a physical plan w/o side effects
-      .checkpoint()
-
-    val inCoreB = B.collect
-
-    printf("A=\n%s\n", inCoreA)
-    printf("B=\n%s\n", inCoreB)
-
-    val C = A + B
-
-    val inCoreC = C.collect
-
-    printf("C=\n%s\n", inCoreC)
-
-    // Actual
-    val inCoreCControl = inCoreA + inCoreB
-
-    (inCoreC - inCoreCControl).norm should be < 1E-10
-  }
+//  test("C = A + B, identically partitioned") {
+//
+//    val inCoreA = dense((1, 2, 3), (3, 4, 5), (5, 6, 7))
+//
+//    val A = drmParallelize(inCoreA, numPartitions = 2)
+//
+//     //   printf("A.nrow=%d.\n", A.rdd.count())
+//
+//    // Create B which would be identically partitioned to A. mapBlock() by default will do the trick.
+//    val B = A.mapBlock() {
+//      case (keys, block) =>
+//        val bBlock = block.like() := { (r, c, v) => util.Random.nextDouble()}
+//        keys -> bBlock
+//    }
+//      // Prevent repeated computation non-determinism
+//      // flink problem is here... checkpoint is not doing what it should
+//      // ie. greate a physical plan w/o side effects
+//      .checkpoint()
+//
+//    val inCoreB = B.collect
+//
+//    printf("A=\n%s\n", inCoreA)
+//    printf("B=\n%s\n", inCoreB)
+//
+//    val C = A + B
+//
+//    val inCoreC = C.collect
+//
+//    printf("C=\n%s\n", inCoreC)
+//
+//    // Actual
+//    val inCoreCControl = inCoreA + inCoreB
+//
+//    (inCoreC - inCoreCControl).norm should be < 1E-10
+//  }
 //// Passing now.
 //  test("C = inCoreA %*%: B") {
 //
@@ -183,53 +183,53 @@ class FailingTestsSuite extends FunSuite with DistributedFlinkSuite with Matcher
 
 
 
-  test("dspca") {
-
-    val rnd = RandomUtils.getRandom
-
-    // Number of points
-    val m = 500
-    // Length of actual spectrum
-    val spectrumLen = 40
-
-    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
-    printf("spectrum:%s\n", spectrum)
-
-    val (u, _) = qr(new SparseRowMatrix(m, spectrumLen) :=
-      ((r, c, v) => if (rnd.nextDouble() < 0.2) 0 else rnd.nextDouble() + 5.0))
-
-    // PCA Rotation matrix -- should also be orthonormal.
-    val (tr, _) = qr(Matrices.symmetricUniformView(spectrumLen, spectrumLen, rnd.nextInt) - 10.0)
-
-    val input = (u %*%: diagv(spectrum)) %*% tr.t
-    val drmInput = drmParallelize(m = input, numPartitions = 2)
-
-    // Calculate just first 10 principal factors and reduce dimensionality.
-    // Since we assert just validity of the s-pca, not stochastic error, we bump p parameter to
-    // ensure to zero stochastic error and assert only functional correctness of the method's pca-
-    // specific additions.
-    val k = 10
-
-    // Calculate just first 10 principal factors and reduce dimensionality.
-    var (drmPCA, _, s) = dspca(drmA = drmInput, k = 10, p = spectrumLen, q = 1)
-    // Un-normalized pca data:
-    drmPCA = drmPCA %*% diagv(s)
-
-    val pca = drmPCA.checkpoint(CacheHint.NONE).collect
-
-    // Of course, once we calculated the pca, the spectrum is going to be different since our originally
-    // generated input was not centered. So here, we'd just brute-solve pca to verify
-    val xi = input.colMeans()
-    for (r <- 0 until input.nrow) input(r, ::) -= xi
-    var (pcaControl, _, sControl) = svd(m = input)
-    pcaControl = (pcaControl %*%: diagv(sControl))(::, 0 until k)
-
-    printf("pca:\n%s\n", pca(0 until 10, 0 until 10))
-    printf("pcaControl:\n%s\n", pcaControl(0 until 10, 0 until 10))
-
-    (pca(0 until 10, 0 until 10).norm - pcaControl(0 until 10, 0 until 10).norm).abs should be < 1E-5
-
-  }
+//  test("dspca") {
+//
+//    val rnd = RandomUtils.getRandom
+//
+//    // Number of points
+//    val m = 500
+//    // Length of actual spectrum
+//    val spectrumLen = 40
+//
+//    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
+//    printf("spectrum:%s\n", spectrum)
+//
+//    val (u, _) = qr(new SparseRowMatrix(m, spectrumLen) :=
+//      ((r, c, v) => if (rnd.nextDouble() < 0.2) 0 else rnd.nextDouble() + 5.0))
+//
+//    // PCA Rotation matrix -- should also be orthonormal.
+//    val (tr, _) = qr(Matrices.symmetricUniformView(spectrumLen, spectrumLen, rnd.nextInt) - 10.0)
+//
+//    val input = (u %*%: diagv(spectrum)) %*% tr.t
+//    val drmInput = drmParallelize(m = input, numPartitions = 2)
+//
+//    // Calculate just first 10 principal factors and reduce dimensionality.
+//    // Since we assert just validity of the s-pca, not stochastic error, we bump p parameter to
+//    // ensure to zero stochastic error and assert only functional correctness of the method's pca-
+//    // specific additions.
+//    val k = 10
+//
+//    // Calculate just first 10 principal factors and reduce dimensionality.
+//    var (drmPCA, _, s) = dspca(drmA = drmInput, k = 10, p = spectrumLen, q = 1)
+//    // Un-normalized pca data:
+//    drmPCA = drmPCA %*% diagv(s)
+//
+//    val pca = drmPCA.checkpoint(CacheHint.NONE).collect
+//
+//    // Of course, once we calculated the pca, the spectrum is going to be different since our originally
+//    // generated input was not centered. So here, we'd just brute-solve pca to verify
+//    val xi = input.colMeans()
+//    for (r <- 0 until input.nrow) input(r, ::) -= xi
+//    var (pcaControl, _, sControl) = svd(m = input)
+//    pcaControl = (pcaControl %*%: diagv(sControl))(::, 0 until k)
+//
+//    printf("pca:\n%s\n", pca(0 until 10, 0 until 10))
+//    printf("pcaControl:\n%s\n", pcaControl(0 until 10, 0 until 10))
+//
+//    (pca(0 until 10, 0 until 10).norm - pcaControl(0 until 10, 0 until 10).norm).abs should be < 1E-5
+//
+//  }
 
   test("dals") {
 
