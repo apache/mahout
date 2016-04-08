@@ -101,7 +101,7 @@ object FlinkOpABt {
     //    )
     //
     // blockwise multiplication function
-    def mmulFunc[K](tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
+    def mmulFunc(tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
       val (keysA, blockA) = tupleA
       val (keysB, blockB) = tupleB
 
@@ -127,21 +127,15 @@ object FlinkOpABt {
         val blockwiseMmulDataSet =
 
         // Combine blocks pairwise.
-          pairwiseApply(blocksA.asBlockified.ds, blocksB.asBlockified.ds, mmulFunc[K])
+          pairwiseApply(blocksA.asBlockified.ds, blocksB.asBlockified.ds, mmulFunc)
 
             // Now reduce proper product blocks.
 
             // group by the partition key
             .groupBy(0)
 
-            .combineGroup(new RichGroupCombineFunction[(Int, (Array[K], Array[Int], Matrix)), (Array[K], Matrix)] {
+            .combineGroup((values:Iterator[(Int, (Array[K], Array[Int], Matrix))], out: Collector[(Array[K], Matrix)]){
 
-              override def open(params: Configuration): Unit = {
-
-              }
-
-              def combine(values: Iterable[(Int, (Array[K], Array[Int], Matrix))],
-                           out: Collector[(Array[K], Matrix)]): Unit = {
 
                 val tuple = values.toIterator.next
                 val rowKeys = tuple._2._1
@@ -155,7 +149,7 @@ object FlinkOpABt {
                 val res = rowKeys -> comb
 
                 out.collect(res)
-              }
+
             })
 
     //
@@ -250,11 +244,11 @@ object FlinkOpABt {
            val runtime = this.getIterationRuntimeContext
            //part = runtime.getIndexOfThisSubtask
          }
+//
+         def mapPartition(values: Iterator[BlockifiedDrmTuple[K1]], out: Collector[(Int, Array[K1], Matrix)]): Unit  = {
 
-         def mapPartition(values: Iterable[BlockifiedDrmTuple[K1]], out: Collector[(Int, Array[K1], Matrix)]): Unit  = {
 
-
-         //           def mapPartition(value: Iterable[BlockifiedDrmTuple[K1]],
+//                    def mapPartition(value: Iterable[BlockifiedDrmTuple[K1]],
 //                            out: Collector[(Int, BlockifiedDrmTuple[K1])]): Unit = {
 //
              val part = getIterationRuntimeContext.getIndexOfThisSubtask
