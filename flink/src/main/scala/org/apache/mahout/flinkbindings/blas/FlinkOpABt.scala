@@ -170,8 +170,9 @@ object FlinkOpABt {
 
                .reduce(new ReduceFunction[(Array[K], Matrix)] {
 
-                  def reduce(mx1: (Array[K], Matrix), mx2: (Array[K], Matrix)) {
+                  def reduce(mx1: (Array[K], Matrix), mx2: (Array[K], Matrix)): (Array[K], Matrix) = {
                     mx1._2 += mx2._2
+                    mx1
                   }
                })
 
