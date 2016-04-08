@@ -36,7 +36,7 @@ trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
 
   var cluster: Option[ForkableFlinkMiniCluster] = None
   val parallelism = 4
-  protected val DEFAULT_AKKA_ASK_TIMEOUT: Long = 1000
+  protected val DEFAULT_AKKA_ASK_TIMEOUT: Long = 100000
   protected var DEFAULT_TIMEOUT: FiniteDuration = new FiniteDuration(DEFAULT_AKKA_ASK_TIMEOUT, TimeUnit.SECONDS)
 
   def initContext() {

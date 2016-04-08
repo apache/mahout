@@ -31,6 +31,10 @@ class FlinkDistributedContext(val env: ExecutionEnvironment) extends Distributed
 
   val conf = GlobalConfiguration.getConfiguration
 
+  conf.setLong("akka.framesize",100000000L)
+  conf.setInteger("akka.ask.timeout", 30)
+
+
   var degreeOfParallelism: Int = 0
 
   if (conf != null) {
@@ -40,6 +44,7 @@ class FlinkDistributedContext(val env: ExecutionEnvironment) extends Distributed
   }
 
   env.setParallelism(degreeOfParallelism)
+
   
   val engine: DistributedEngine = FlinkEngine
 
