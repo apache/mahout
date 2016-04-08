@@ -77,7 +77,7 @@ object FlinkOpABt {
    * This logic is complicated a little by the fact that we have to keep block row and column keys
    * so that the stitching of AB'-blocks happens according to integer row indices of the B input.
    */
-  private[flinkbindings] def abt_nograph[K:ClassTag:TypeInformation](
+  private[flinkbindings] def abt_nograph[K](
       operator: OpABt[K],
       srcA: FlinkDrm[K],
       srcB: FlinkDrm[Int]): FlinkDrm[K] = {
@@ -89,7 +89,7 @@ object FlinkOpABt {
     val prodNCol = operator.ncol
     val prodNRow = operator.nrow
 
-//    implicit val ktag = srcA.classTag
+    implicit val ktag = srcA.classTag
 
     // We are actually computing AB' here. 
     //    val numProductPartitions = estimateProductPartitions(anrow = prodNRow, ancol = operator.A.ncol,
@@ -102,7 +102,7 @@ object FlinkOpABt {
     //    )
     //
     // blockwise multiplication function
-    def mmulFunc[K](tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
+    def mmulFunc(tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
       val (keysA, blockA) = tupleA
       val (keysB, blockB) = tupleB
 
@@ -129,7 +129,7 @@ object FlinkOpABt {
         val blockwiseMmulDataSet =
 
         // Combine blocks pairwise.
-          pairwiseApply(blocksA.asBlockified.ds, blocksB.asBlockified.ds, mmulFunc[K])
+          pairwiseApply(blocksA.asBlockified.ds, blocksB.asBlockified.ds, mmulFunc)
 
             // Now reduce proper product blocks.
 
@@ -137,10 +137,6 @@ object FlinkOpABt {
             .groupBy(0)
 
             .combineGroup(new RichGroupCombineFunction[(Int, (Array[K], Array[Int], Matrix)), (Array[K], Array[Int], Matrix)] {
-
-              override def open(params: Configuration): Unit = {
-
-              }
 
                def combine(values: java.lang.Iterable[(Int, (Array[K], Array[Int], Matrix))],
                            out: Collector[(Array[K], Array[Int], Matrix)]): Unit = {
@@ -151,9 +147,7 @@ object FlinkOpABt {
                 val block = tuple._2._3
 
                 val comb = new SparseMatrix(prodNCol, block.nrow).t
-
                 for ((col, i) <- colKeys.zipWithIndex) comb(::, col) := block(::, i)
-
                 val res = (rowKeys,colKeys, comb)
 
                 out.collect(res)
@@ -167,24 +161,19 @@ object FlinkOpABt {
 
                    val vals = values.iterator().next()
 
-
                    val (rowKeys, c) = (vals._1, vals._3)
                    val (_, colKeys, block) = (vals._1, vals._2, vals._3)
                    for ((col, i) <- colKeys.zipWithIndex) c(::, col) := block(::, i)
-                   out.collect(rowKeys,c)
+                   out.collect(rowKeys, c)
                  }
                })
 
                .reduce(new ReduceFunction[(Array[K], Matrix)] {
 
-                  def reduce(mx1: (Array[K], Matrix), mx2:(Array[K], Matrix)){
-
+                  def reduce(mx1: (Array[K], Matrix), mx2: (Array[K], Matrix)) {
                     mx1._2 += mx2._2
-
                   }
                })
-
-
 
                 // Created BlockifiedDataSet-compatible structure.
                 val blockifiedDataSet = blockwiseMmulDataSet
@@ -213,6 +202,7 @@ object FlinkOpABt {
     //
     //  }
 
+    implicit val typeInformationDrm = FlinkEngine.generateTypeInformation[K]
     new BlockifiedFlinkDrm(ds = blockifiedDataSet, ncol = prodNCol)
 //    null.asInstanceOf[FlinkDrm[K]]
 
