@@ -12,7 +12,6 @@ import org.apache.flink.util.Collector
 import org.apache.mahout.math.{Matrix, UpperTriangular}
 import org.apache.mahout.math.drm.{BlockifiedDrmTuple, _}
 
-import org.apache.mahout.logging._
 import org.apache.mahout.math._
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm._
@@ -20,7 +19,6 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import collection._
 import JavaConversions._
-import org.apache.log4j.Logger
 import org.apache.mahout.math.drm.logical.OpAtA
 
 
@@ -37,7 +35,7 @@ object FlinkOpAtA {
   final val PROPERTY_ATA_MAXINMEMNCOL = "mahout.math.AtA.maxInMemNCol"
   final val PROPERTY_ATA_MAXINMEMNCOL_DEFAULT = "200"
 
-  def at_a[K:ClassTag: TypeInformation](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
+  def at_a[K](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
     val maxInMemStr = System.getProperty(PROPERTY_ATA_MAXINMEMNCOL, PROPERTY_ATA_MAXINMEMNCOL_DEFAULT)
     val maxInMemNCol = maxInMemStr.toInt
     maxInMemNCol.ensuring(_ > 0, "Invalid A'A in-memory setting for optimizer")
@@ -60,7 +58,6 @@ object FlinkOpAtA {
 
     // Compute backing vector of tiny-upper-triangular accumulator across all the data.
     val res = ds.mapPartition(pIter => {
-
 
       val ut = new UpperTriangular(ncol)
 

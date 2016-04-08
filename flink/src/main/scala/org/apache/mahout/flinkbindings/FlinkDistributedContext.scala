@@ -36,7 +36,7 @@ class FlinkDistributedContext(val env: ExecutionEnvironment) extends Distributed
   if (conf != null) {
     degreeOfParallelism = conf.getInteger("parallelism.default", Runtime.getRuntime.availableProcessors)
   } else {
-    degreeOfParallelism = 2
+    degreeOfParallelism = Runtime.getRuntime.availableProcessors
   }
 
   env.setParallelism(degreeOfParallelism)
