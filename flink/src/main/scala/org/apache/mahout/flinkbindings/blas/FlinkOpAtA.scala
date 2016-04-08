@@ -108,6 +108,8 @@ object FlinkOpAtA {
 
       Iterator(dvec(ddata = ut.getData).asInstanceOf[Vector]: Vector)
     }).reduce(_ + _).collect()
+
+    new DenseSymmetricMatrix(res.head)
   }
 
   def fat[K](op: OpAtA[K], A: FlinkDrm[K]): FlinkDrm[Int] = {
