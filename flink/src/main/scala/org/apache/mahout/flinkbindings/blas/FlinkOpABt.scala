@@ -140,10 +140,10 @@ object FlinkOpABt {
 
               }
 
-              def combine(values: Iterable[(Int, (Array[K], Array[Int], Matrix))],
+               def combine(values: java.lang.Iterable[(Int, (Array[K], Array[Int], Matrix))],
                            out: Collector[(Array[K], Matrix)]): Unit = {
 
-                val tuple = values.toIterator.next
+                val tuple = values.iterator().next
                 val rowKeys = tuple._2._1
                 val colKeys = tuple._2._2
                 val block = tuple._2._3
@@ -251,16 +251,16 @@ object FlinkOpABt {
            //part = runtime.getIndexOfThisSubtask
          }
 
-         def mapPartition(values: Iterable[BlockifiedDrmTuple[K1]], out: Collector[(Int, Array[K1], Matrix)]): Unit  = {
+         def mapPartition(values: java.lang.Iterable[BlockifiedDrmTuple[K1]], out: Collector[(Int, Array[K1], Matrix)]): Unit  = {
 
 
-         //           def mapPartition(value: Iterable[BlockifiedDrmTuple[K1]],
+//                    def mapPartition(value: Iterable[BlockifiedDrmTuple[K1]],
 //                            out: Collector[(Int, BlockifiedDrmTuple[K1])]): Unit = {
 //
              val part = getIterationRuntimeContext.getIndexOfThisSubtask
 
     //        val r = if (blockIter.hasNext) part -> blockIter.next()) else Option.empty[(Int, BlockifiedDrmTuple[K1])]
-              val r =  part -> values.toIterator.next
+              val r =  part -> values.iterator().next
 
 //            require(!blockIter.tail, s"more than 1 (${blockIter.size + 1}) blocks per partition and A of AB'")
 
