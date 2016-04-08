@@ -20,8 +20,11 @@ package org.apache.mahout.flinkbindings.standard
 
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.math.decompositions.DistributedDecompositionsSuiteBase
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class DistributedDecompositionsSuite extends FunSuite with DistributedFlinkSuite
       with DistributedDecompositionsSuiteBase {
 

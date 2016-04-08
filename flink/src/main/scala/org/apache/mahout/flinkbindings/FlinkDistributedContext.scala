@@ -43,7 +43,6 @@ class FlinkDistributedContext(val env: ExecutionEnvironment) extends Distributed
   
   val engine: DistributedEngine = FlinkEngine
 
-
   override def close() {
     // TODO
   }
