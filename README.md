@@ -13,6 +13,11 @@ export MAHOUT_LOCAL=true # for running standalone on your dev machine,
 ```
 You will need a `$JAVA_HOME`, and if you are running on Spark, you will also need `$SPARK_HOME`
 
+Note when running the spark-shell job it can help to set some JVM options so you don't run out of memory:
+```
+$MAHOUT_OPTS="-Xmx6g -XX:MaxPermSize=512m" mahout spark-shell
+```
+
 ####Using Mahout as a Library
 Running any application that uses Mahout will require installing a binary or source version and setting the environment.
 To compile from source:
