@@ -158,7 +158,7 @@ object FlinkOpABt {
               }
             })
 
-               // merge into  blockwise Matrices
+               // merge into  blockwise Matrices ////!!!!! NEED TO MERGE HERE 
                .combineGroup( new GroupCombineFunction[(Array[K], Array[Int], Matrix), (Array[K], Matrix)]{
 
                  def combine(values: java.lang.Iterable[(Array[K], Array[Int], Matrix)],
@@ -167,9 +167,17 @@ object FlinkOpABt {
 
                      val vals = values.iterator().next()
 
-                     val (rowKeys, c) = (vals._1, vals._3)
-                     val (_, colKeys, block) = (vals._1, vals._2, vals._3)
-                     for ((col, i) <- colKeys.zipWithIndex) c(::, col) := block(::, i)
+                     val (_, acc) = vals
+                     val (_, colKeys, blockProd) = v
+
+                     // Note the assignment rather than +=. We really assume that B' operand matrix is keyed
+                     // uniquely!
+                     colKeys.view.zipWithIndex.foreach({
+                       case (col, srcCol) => acc(::, col) := blockProd(::, srcCol)
+                     })
+                     a
+
+
                      out.collect(rowKeys, c)
                    }
                  }
