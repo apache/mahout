@@ -88,7 +88,11 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
     })
 
     val list = res.collect()
-    list.head
+    if (list.size == 0) {
+      (0L,0)
+    } else {
+      list.head
+    }
   }
 
 
