@@ -21,27 +21,21 @@ package org.apache.mahout.flinkbindings.blas
 import java.lang.Iterable
 
 import org.apache.flink.api.common.functions._
-import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.shaded.com.google.common.collect.Lists
 import org.apache.flink.util.Collector
-
-import org.apache.mahout.math.{Matrix, UpperTriangular}
-import org.apache.mahout.math.drm.{BlockifiedDrmTuple, _}
-
-import org.apache.mahout.math._
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm._
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import collection._
-import JavaConversions._
 import org.apache.mahout.math.drm.logical.OpAtA
+import org.apache.mahout.math.drm.{BlockifiedDrmTuple, _}
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.{Matrix, UpperTriangular, _}
 
-
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.reflect.ClassTag
+import scala.collection._
 
 /**
  * Inspired by Spark's implementation from 
