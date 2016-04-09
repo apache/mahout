@@ -28,7 +28,6 @@ import org.scalatest.{ConfigMap, Suite}
 
 import scala.concurrent.duration.FiniteDuration
 
-
 trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
 
   protected implicit var mahoutCtx: DistributedContext = _
@@ -49,12 +48,10 @@ trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
 
   override def afterEach() {
     super.afterEach()
-//    env.execute("Mahout Flink Binding Test Suite")
   }
 
   override protected def afterAll(configMap: ConfigMap): Unit = {
     super.afterAll(configMap)
-//    resetContext()
     cluster.foreach(c => TestBaseUtils.stopCluster(c, DEFAULT_TIMEOUT))
   }
 
