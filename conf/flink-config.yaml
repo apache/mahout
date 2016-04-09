@@ -21,49 +21,13 @@
 # Common
 #==============================================================================
 
-# The host on which the JobManager runs. Only used in non-high-availability mode.
-# The JobManager process will use this hostname to bind the listening servers to.
-# The TaskManagers will try to connect to the JobManager on that host.
-
-jobmanager.rpc.address: localhost
-
-
-# The port where the JobManager's main actor system listens for messages.
-
-jobmanager.rpc.port: 6123
-
-
-# The heap size for the JobManager JVM
-
-jobmanager.heap.mb: 256
-
-
-# The heap size for the TaskManager JVM
-
-taskmanager.heap.mb: 512
-
-
 # The number of task slots that each TaskManager offers. Each slot runs one parallel pipeline.
 
 taskmanager.numberOfTaskSlots: 1
 
-# Specify whether TaskManager memory should be allocated when starting up (true) or when
-# memory is required in the memory manager (false)
-
-taskmanager.memory.preallocate: false
-
 # The parallelism used for programs that did not specify and other parallelism.
 
 parallelism.default: 4
-
-#==============================================================================
-# Web Frontend
-#==============================================================================
-
-# The port under which the web-based runtime monitor listens.
-# A value of -1 deactivates the web server.
-
-jobmanager.web.port: 8081
 
 #==============================================================================
 # Advanced
