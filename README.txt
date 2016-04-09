@@ -16,3 +16,7 @@ Legal
 
 Documentation
   See http://mahout.apache.org/
+
+Note when running the spark-shell job it can help to set some JVM options so 
+you don't run out of memory:
+  `$MAHOUT_OPTS="-Xmx6g -XX:MaxPermSize=512m" mahout spark-shell`
