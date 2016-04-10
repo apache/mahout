@@ -99,7 +99,7 @@ object FlinkOpABt {
       var ms = traceDo(System.currentTimeMillis())
 
       // We need to send keysB to the aggregator in order to know which columns are being updated.
-      val result = (keysA, keysB, blockA %*% blockB.t)
+      val result = (keysA, keysB, blockA %*% ((blockB.t).cloned))
 
       ms = traceDo(System.currentTimeMillis() - ms.get)
             trace(
@@ -237,7 +237,7 @@ object FlinkOpABt {
       val joined = blocksAKeyed.join(blocksBKeyed).where(0).equalTo(0)
 
         // Apply product function which should produce smaller products. Hopefully, this streams blockB's in
-      val mapped = joined.rebalance().map{tuple => tuple._1._1 ->
+      val mapped = joined.map{tuple => tuple._1._1 ->
           blockFunc(((tuple._1._2), (tuple._1._3)), (tuple._2._2, tuple._2._3)) }
 
       mapped

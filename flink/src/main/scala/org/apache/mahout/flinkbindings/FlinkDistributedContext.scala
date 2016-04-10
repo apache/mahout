@@ -20,6 +20,8 @@ package org.apache.mahout.flinkbindings
 
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.configuration.GlobalConfiguration
+import org.apache.mahout.common.io.{GenericMatrixKryoSerializer, VectorKryoSerializer}
+import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.drm.DistributedContext
 import org.apache.mahout.math.drm.DistributedEngine
 
@@ -40,7 +42,10 @@ class FlinkDistributedContext(val env: ExecutionEnvironment) extends Distributed
   }
 
   env.setParallelism(degreeOfParallelism)
-  
+  env.registerTypeWithKryoSerializer(classOf[org.apache.mahout.math.Matrix],classOf[GenericMatrixKryoSerializer])
+  //env.registerTypeWithKryoSerializer(classOf[org.apache.mahout.math.Vector],classOf[VectorKryoSerializer])
+
+
   val engine: DistributedEngine = FlinkEngine
 
   override def close() {
