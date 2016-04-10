@@ -90,34 +90,22 @@ object FlinkOpABt {
     val prodNCol = operator.ncol
     val prodNRow = operator.nrow
 
-//    implicit val ktag = srcA.classTag
-
-    // We are actually computing AB' here. 
-    //    val numProductPartitions = estimateProductPartitions(anrow = prodNRow, ancol = operator.A.ncol,
-    //      bncol = prodNCol, aparts = blocksA.executionEnvironment.getParallelism,
-    //      bparts = blocksB.executionEnvironment.getParallelism)
-    //
-    //    debug(
-    //      s"AB': #parts = $numProductPartitions; A #parts=${blocksA.executionEnvironment.getParallelism}, B #parts=${blocksB.executionEnvironment.getParallelism}."+
-    //      s"A=${operator.A.nrow}x${operator.A.ncol}, B=${operator.B.nrow}x${operator.B.ncol},AB'=${prodNRow}x$prodNCol."
-    //    )
-    //
 
     // blockwise multiplication function
     def mmulFunc(tupleA: (Array[K], Matrix), tupleB: (Array[Int], Matrix)): (Array[K], Array[Int], Matrix) = {
       val (keysA, blockA) = tupleA
       val (keysB, blockB) = tupleB
 
-            var ms = traceDo(System.currentTimeMillis())
+      var ms = traceDo(System.currentTimeMillis())
 
       // We need to send keysB to the aggregator in order to know which columns are being updated.
       val result = (keysA, keysB, blockA %*% blockB.t)
 
-            ms = traceDo(System.currentTimeMillis() - ms.get)
+      ms = traceDo(System.currentTimeMillis() - ms.get)
             trace(
               s"block multiplication of(${blockA.nrow}x${blockA.ncol} x ${blockB.ncol}x${blockB.nrow} is completed in $ms " +
                 "ms.")
-            trace(s"block multiplication types: blockA: ${blockA.getClass.getName}(${blockA.t.getClass.getName}); " +
+      trace(s"block multiplication types: blockA: ${blockA.getClass.getName}(${blockA.t.getClass.getName}); " +
               s"blockB: ${blockB.getClass.getName}.")
 
       result.asInstanceOf[(Array[K], Array[Int], Matrix)]
@@ -133,11 +121,8 @@ object FlinkOpABt {
         // Combine blocks pairwise.
           pairwiseApply(blocksA.asBlockified.ds, blocksB.asBlockified.ds, mmulFunc)
 
-            println("blockwiseMmulDataSet size:" + blockwiseMmulDataSet.collect().size)
-   // System.exit(0)
             // Now reduce proper product blocks.
-   val  blockwiseMmulDataSet2 = blockwiseMmulDataSet
-            // group by the partitio n key
+            // group by the partition key
             .groupBy(0)
 
             // combine as transpose
@@ -145,7 +130,6 @@ object FlinkOpABt {
 
                def combine(values: java.lang.Iterable[(Int, (Array[K], Array[Int], Matrix))],
                            out: Collector[(Array[K],  Matrix)]): Unit = {
-                 if (values.iterator().hasNext()) {
                    val tuple = values.iterator().next
                    val rowKeys = tuple._2._1
                    val colKeys = tuple._2._2
@@ -156,47 +140,20 @@ object FlinkOpABt {
                    val res = (rowKeys, comb)
 
                    out.collect(res)
-                 }
               }
             })
 
-//               // merge into  blockwise Matrices ////!!!!! NEED TO MERGE HERE
-//               .combineGroup( new GroupCombineFunction[(Array[K], Array[Int], Matrix), (Array[K], Matrix)]{
-//
-//                 def combine(values: java.lang.Iterable[(Array[K], Array[Int], Matrix)],
-//                             out: Collector[(Array[K], Matrix)]): Unit = {
-//                   if (values.iterator().hasNext) {
-//
-//                     val vals = values.iterator().next()
-//
-////                      Combiner += value
-////                     mergeValue = (comb: (Array[K], Matrix), value: (Array[K], Array[Int], Matrix)) => {
-//                       val (rowKeys, c) = vals._3
-//                       val (_, colKeys, block) = value
-//                       for ((col, i) <- colKeys.zipWithIndex) c(::, col) := block(::, i)
-////                       comb
-//                     out.collect(rowKeys, c)
-//                   }
-//                 }
-//               })
+             // reduce into a final Blockified matrix
+             .reduce(new ReduceFunction[(Array[K], Matrix)] {
 
-               // reduce into a final Blockified matrix
-               .reduce(new ReduceFunction[(Array[K], Matrix)] {
-
-                  def reduce(mx1: (Array[K], Matrix), mx2: (Array[K], Matrix)): (Array[K], Matrix) = {
-                    mx1._2 += mx2._2
-                    mx1
-                  }
-               })
-
-                // Created BlockifiedDataSet-compatible structure.
-                val blockifiedDataSet = blockwiseMmulDataSet2
-                  // throw away A-partition #  this is done in flink.
-//                  .map{tuple => tuple._2}
+                def reduce(mx1: (Array[K], Matrix), mx2: (Array[K], Matrix)): (Array[K], Matrix) = {
+                  mx1._2 += mx2._2
+                  mx1
+                }
+             })
 
 
-    val tmpRes = new BlockifiedFlinkDrm(ds = blockifiedDataSet, ncol = prodNCol)
-    new CheckpointedFlinkDrm[K](ds = tmpRes.asRowWise.ds, _nrow = prodNRow, _ncol = prodNCol)
+     new BlockifiedFlinkDrm(ds = blockwiseMmulDataSet, ncol = prodNCol)
 
   }
     /**
@@ -247,9 +204,6 @@ object FlinkOpABt {
       implicit val typeInformationB = createTypeInformation[(Int, (Array[K2], Matrix))]
 
       // Prepare B-side.
-//      val aParts = blocksAKeyed.getParallelism
-//
-//
 //      val blocksBKeyed = blocksB.flatMap(bTuple => for (blockKey <- (0 until aParts).view) yield blockKey -> bTuple )
 
       val blocksBKeyed = blocksB.mapPartition( new RichMapPartitionFunction[(Array[K2], Matrix),
@@ -275,35 +229,18 @@ object FlinkOpABt {
       })
 
 
-
       implicit val typeInformationJ = createTypeInformation[(Int, ((Array[K1], Matrix),(Int, (Array[K2], Matrix))))]
       implicit val typeInformationJprod = createTypeInformation[(Int, T)]
 
 
-
       // Perform the inner join.
-      //blocksAKeyed.join(blocksBKeyed, numPartitions = aParts)
-//      blocksAKeyed.join(blocksBKeyed).where(0).equalTo(0){ (l, r) =>
-//          (l._1 , ((l._2, l._3), (r._1, r._2)))
-//      }
-//        println( "\n\n\nblocksa :" +blocksAKeyed.collect().length)
-//        println( "\n\n\nblocksb :" +blocksBKeyed.collect().length)
-//        //  System.exit(0)
-     val joined = blocksAKeyed.join(blocksBKeyed).where(0).equalTo(0)//{ (l, r) =>
-        //(l._1 , ((l._2, l._3), (r._2, r._3)))
-      //}
-      println( "\n\n\njoined :" +joined.collect().length)
-         //       System.exit(0)
+      val joined = blocksAKeyed.join(blocksBKeyed).where(0).equalTo(0)
 
         // Apply product function which should produce smaller products. Hopefully, this streams blockB's in
-    //    .map{case (partKey,(blockA, blockB)) => partKey -> blockFunc(blockA, blockB)}
-      val mapped=  joined.map{tuple => tuple._1._1 ->
-          blockFunc(((tuple._1._2),(tuple._1._3)), (tuple._2._2,tuple._2._3)) }
+      val mapped = joined.rebalance().map{tuple => tuple._1._1 ->
+          blockFunc(((tuple._1._2), (tuple._1._3)), (tuple._2._2, tuple._2._3)) }
 
-      println( "\n\n\nmapped :" +mapped.collect().foreach{println(_)})
-      mapped.collect().foreach{println(_)}
-      System.exit(0)
-      mapped    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      mapped
       }
 
   }
