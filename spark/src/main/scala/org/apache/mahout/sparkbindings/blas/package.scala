@@ -42,7 +42,7 @@ package object blas {
    * @tparam K existing key parameter
    * @return
    */
-  private[mahout] def rekeySeqInts[K](rdd: DrmRdd[K], computeMap: Boolean = true): (DrmRdd[Int],
+  private[sparkbindings] def rekeySeqInts[K](rdd: DrmRdd[K], computeMap: Boolean = true): (DrmRdd[Int],
     Option[RDD[(K, Int)]]) = {
 
     // Spark context please.
