@@ -34,8 +34,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 /**
- * Implementation is taken from Spark's AtB
- * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AtB.scala
+ * Implementation of Flink A' * B
  */
 object FlinkOpAtB {
 

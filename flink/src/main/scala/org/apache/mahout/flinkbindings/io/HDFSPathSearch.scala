@@ -24,12 +24,11 @@ import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 /**
  * Returns a [[java.lang.String]], which is comma delimited list of URIs discovered based on parameters
  * in the constructor.
- * The String is formatted to be input into [[org.apache.spark.SparkContext#textFile()]]
+ * The String is formatted to be input into [[org.apache.flink.api.scala.ExecutionEnvironment#textFile()]]
  * @param pathURI Where to start looking for inFiles, may be a list of comma delimited URIs
  * @param filePattern regex that must match the entire filename to have the file returned
  * @param recursive true traverses the filesystem recursively, default = false
  * 
- * Copied from /spark/src/main/scala/org/apache/mahout/common
  */
 case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: Boolean = false) {
 

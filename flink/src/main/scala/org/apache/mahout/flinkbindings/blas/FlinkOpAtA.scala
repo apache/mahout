@@ -38,9 +38,8 @@ import scala.collection.JavaConverters._
 import scala.collection._
 
 /**
- * Inspired by Spark's implementation from 
- * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AtA.scala
- * 
+ * Implementation of Flink A' * A
+ *
  */
 object FlinkOpAtA {
 

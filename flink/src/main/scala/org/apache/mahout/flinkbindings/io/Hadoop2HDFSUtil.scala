@@ -18,17 +18,12 @@
  */
 package org.apache.mahout.flinkbindings.io
 
-import org.apache.hadoop.io.{ Writable, SequenceFile }
-import org.apache.hadoop.fs.{ FileSystem, Path }
 import org.apache.hadoop.conf.Configuration
-import collection._
-import JavaConversions._
+import org.apache.hadoop.fs.Path
+import org.apache.hadoop.io.{SequenceFile, Writable}
 
 /**
- * Deprecated Hadoop 1 api which we currently explicitly import via Mahout dependencies. May not work
- * with Hadoop 2.0
- *
- * Copied from /spark/src/main/scala/org/apache/mahout/common
+ * Deprecated Hadoop 1 api which we currently explicitly import via Mahout dependencies.
  */
 object Hadoop2HDFSUtil extends HDFSUtil {
 

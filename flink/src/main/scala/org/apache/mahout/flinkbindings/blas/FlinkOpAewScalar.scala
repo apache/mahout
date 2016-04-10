@@ -18,7 +18,6 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.mahout.flinkbindings.drm.{BlockifiedFlinkDrm, FlinkDrm}
 import org.apache.mahout.math.Matrix
@@ -31,8 +30,7 @@ import scala.reflect.ClassTag
 import org.apache.flink.api.scala._
 
 /**
- * Implementation is inspired by Spark-binding's OpAewScalar
- * (see https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AewB.scala)
+ * Implementation if Flink OpAewScalar
  */
 object FlinkOpAewScalar {
 
