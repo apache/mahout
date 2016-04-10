@@ -46,7 +46,7 @@ package object blas {
     */
   //TODO: Remove this when FLINK-3657 is merged into Flink codebase and
   // replace by call to DataSetUtils.countElementsPerPartition(DataSet[K])
-  private[mahout] def countsPerPartition[K](drmDataSet: DataSet[K]): DataSet[(Int, Int)] = {
+  private[flinkbindings] def countsPerPartition[K](drmDataSet: DataSet[K]): DataSet[(Int, Int)] = {
     drmDataSet.mapPartition {
       new RichMapPartitionFunction[K, (Int, Int)] {
         override def mapPartition(iterable: Iterable[K], collector: Collector[(Int, Int)]) = {
@@ -65,7 +65,7 @@ package object blas {
     * @tparam K existing key parameter
     * @return
     */
-  private[mahout] def rekeySeqInts[K: ClassTag: TypeInformation](drmDataSet: FlinkDrm[K],
+  private[flinkbindings] def rekeySeqInts[K: ClassTag: TypeInformation](drmDataSet: FlinkDrm[K],
                                                                  computeMap: Boolean = true): (DrmLike[Int],
     Option[DataSet[(K, Int)]]) = {
 
