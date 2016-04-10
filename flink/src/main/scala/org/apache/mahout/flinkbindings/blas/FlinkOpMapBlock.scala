@@ -25,8 +25,7 @@ import org.apache.mahout.math.drm.logical.OpMapBlock
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 /**
- * Implementation is taken from Spark's MapBlock
- * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/MapBlock.scala
+ * Implementation of Flink's MapBlock
  */
 object FlinkOpMapBlock {
 

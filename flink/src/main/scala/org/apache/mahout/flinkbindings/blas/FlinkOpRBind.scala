@@ -20,14 +20,15 @@ package org.apache.mahout.flinkbindings.blas
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
-import scala.reflect.ClassTag
-
 import org.apache.flink.api.scala.DataSet
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.Vector
 import org.apache.mahout.math.drm.logical.OpRbind
 
+/**
+  * Implementation of RBind
+  */
 object FlinkOpRBind {
 
   def rbind[K: TypeInformation](op: OpRbind[K], A: FlinkDrm[K], B: FlinkDrm[K]): FlinkDrm[K] = {

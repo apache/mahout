@@ -10,8 +10,7 @@ import org.apache.mahout.math.drm.logical.OpAewB
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 /**
- * Implementation is inspired by Spark-binding's OpAewB
- * (see https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AewB.scala) 
+ * Implementation of Flink OpAewB
  */
 object FlinkOpAewB {
 

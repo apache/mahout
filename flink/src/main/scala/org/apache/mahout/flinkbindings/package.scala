@@ -65,7 +65,7 @@ package object flinkbindings {
     new RowsFlinkDrm[K](flinkDrm.ds, flinkDrm.ncol)
   }
 
-  /** Adding Spark-specific ops */
+  /** Adding Flink-specific ops */
   implicit def cpDrm2cpDrmFlinkOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedFlinkDrmOps[K] =
     new CheckpointedFlinkDrmOps[K](drm)
 
