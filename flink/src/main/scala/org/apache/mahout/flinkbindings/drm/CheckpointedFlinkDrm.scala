@@ -67,9 +67,9 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
   val conf = GlobalConfiguration.getConfiguration
 
   if (!(conf == null )) {
-     persistanceRootDir = conf.getString("taskmanager.tmp.dirs", "/tmp/")
+     persistanceRootDir = conf.getString("taskmanager.tmp.dirs", "/tmp")
   } else {
-     persistanceRootDir = "/tmp/"
+     persistanceRootDir = "/tmp"
   }
 
 
@@ -98,7 +98,7 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
     * the dataset to the filesystem and read it back when cache is called */
   def cache() = {
     if (!isCached) {
-      cacheFileName = persistanceRootDir + System.nanoTime().toString
+      cacheFileName = persistanceRootDir + "/" + System.nanoTime().toString
       parallelismDeg = ds.getParallelism
       isCached = true
       persist(ds, cacheFileName)
