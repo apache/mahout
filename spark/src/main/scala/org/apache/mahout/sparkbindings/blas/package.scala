@@ -34,16 +34,15 @@ package object blas {
 
   implicit def drmRdd2ops[K](rdd: DrmRdd[K]): DrmRddOps[K] = new DrmRddOps[K](rdd)
 
-
   /**
-   * Rekey matrix dataset keys to consequtive int keys.
+   * Rekey matrix dataset keys to consecutive int keys.
    * @param rdd incoming matrix row-wise dataset
    *
    * @param computeMap if true, also compute mapping between old and new keys
    * @tparam K existing key parameter
    * @return
    */
-  private[mahout] def rekeySeqInts[K](rdd: DrmRdd[K], computeMap: Boolean = true): (DrmRdd[Int],
+  private[sparkbindings] def rekeySeqInts[K](rdd: DrmRdd[K], computeMap: Boolean = true): (DrmRdd[Int],
     Option[RDD[(K, Int)]]) = {
 
     // Spark context please.
