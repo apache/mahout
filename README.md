@@ -44,6 +44,13 @@ and a dependency for back end engine translation, e.g:
     <version>${mahout.version}</version>
 </dependency>
 ```
+```
+<dependency>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout-flink_2.10</artifactId>
+    <version>${mahout.version}</version>
+</dependency>
+```
 
 ####Examples
 For examples of how to use Mahout, see the examples directory located in `examples/bin`
