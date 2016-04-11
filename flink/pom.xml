@@ -82,7 +82,6 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <mahout.test.directory>${project.build.directory}</mahout.test.directory>
             <mahout.home>${project.build.directory}</mahout.home>
           </systemPropertyVariables>
           <skipTests>true</skipTests>
