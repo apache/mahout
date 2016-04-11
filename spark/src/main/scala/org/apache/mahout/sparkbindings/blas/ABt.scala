@@ -70,9 +70,9 @@ object ABt {
       srcB: DrmRddInput[Int]): DrmRddInput[K] = {
 
     // Blockify everything.
-    val blocksA = srcA.toBlockifiedDrmRdd(operator.A.ncol)
+    val blocksA = srcA.asBlockified(operator.A.ncol)
 
-    val blocksB = srcB.toBlockifiedDrmRdd(operator.B.ncol)
+    val blocksB = srcB.asBlockified(operator.B.ncol)
 
     val prodNCol = operator.ncol
     val prodNRow = operator.nrow
@@ -85,7 +85,7 @@ object ABt {
       s"A=${operator.A.nrow}x${operator.A.ncol}, B=${operator.B.nrow}x${operator.B.ncol},AB'=${prodNRow}x$prodNCol."
     )
 
-    // blockwise multimplication function
+    // blockwise multiplication function
     def mmulFunc(tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
       val (keysA, blockA) = tupleA
       val (keysB, blockB) = tupleB
@@ -209,7 +209,7 @@ object ABt {
       srcB: DrmRddInput[Int]): DrmRddInput[K] = {
 
     // Blockify everything.
-    val blocksA = srcA.toBlockifiedDrmRdd(operator.A.ncol)
+    val blocksA = srcA.asBlockified(operator.A.ncol)
 
         // Mark row-blocks with group id
         .mapPartitionsWithIndex((part, iter) => {
@@ -229,7 +229,7 @@ object ABt {
       }
     })
 
-    val blocksB = srcB.toBlockifiedDrmRdd(operator.B.ncol)
+    val blocksB = srcB.asBlockified(operator.B.ncol)
 
     // Final product's geometry. We want to extract that into local variables since we want to use
     // them as closure attributes.

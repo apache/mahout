@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.11.3-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>apache-mahout-distribution</artifactId>
@@ -108,6 +108,10 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-flink_${scala.compat.version}</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>

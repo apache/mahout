@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.scalabindings
 
-import org.apache.mahout.math.{Vector, MatrixTimesOps, Matrix}
+import org.apache.mahout.math.{Vector, Matrix}
 
 /**
  * R-like operators. Declare <code>import RLikeOps._</code> to enable.

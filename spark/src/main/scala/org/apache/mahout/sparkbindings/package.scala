@@ -228,7 +228,7 @@ package object sparkbindings {
 
     if (!part1Req) warn("blockified rdd: condition not met: exactly 1 per partition")
 
-    return part1Req
+    part1Req
   }
 
 }

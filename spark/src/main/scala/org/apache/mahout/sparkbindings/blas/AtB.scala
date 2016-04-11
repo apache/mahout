@@ -48,8 +48,8 @@ object AtB {
   def atb_nograph[A: ClassTag](operator: OpAtB[A], srcA: DrmRddInput[A], srcB: DrmRddInput[A],
                                zippable: Boolean = false): DrmRddInput[Int] = {
 
-    val rddA = srcA.toDrmRdd()
-    val rddB = srcB.toDrmRdd()
+    val rddA = srcA.asRowWise()
+    val rddB = srcB.asRowWise()
 
 
     val prodNCol = operator.ncol
@@ -96,8 +96,8 @@ object AtB {
     val prodNRow = safeToNonNegInt(operator.nrow)
     val aNRow = safeToNonNegInt(operator.A.nrow)
 
-    val rddA = srcA.toDrmRdd()
-    val rddB = srcB.toDrmRdd()
+    val rddA = srcA.asRowWise()
+    val rddB = srcB.asRowWise()
 
     // Approximate number of final partitions. We take bigger partitions as our guide to number of
     // elements per partition. TODO: do it better.
@@ -116,8 +116,8 @@ object AtB {
 
       debug("mmul-A'B - zip: are identically distributed, performing row-wise zip.")
 
-      val blockdRddA = srcA.toBlockifiedDrmRdd(operator.A.ncol)
-      val blockdRddB = srcB.toBlockifiedDrmRdd(operator.B.ncol)
+      val blockdRddA = srcA.asBlockified(operator.A.ncol)
+      val blockdRddB = srcB.asBlockified(operator.B.ncol)
 
       blockdRddA
 

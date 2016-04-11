@@ -46,7 +46,7 @@ object At {
 
     debug("operator A'.")
 
-    val drmRdd = srcA.toBlockifiedDrmRdd(operator.A.ncol)
+    val drmRdd = srcA.asBlockified(operator.A.ncol)
     val numPartitions = drmRdd.partitions.size
     val ncol = operator.ncol
 

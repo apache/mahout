@@ -8,7 +8,7 @@ object Slicing {
   def rowRange(op: OpRowRange, srcA: DrmRddInput[Int]): DrmRddInput[Int] = {
     val rowRange = op.rowRange
     val ncol = op.ncol
-    val rdd = srcA.toDrmRdd()
+    val rdd = srcA.asRowWise()
 
         // Filter the rows in the range only
         .filter({

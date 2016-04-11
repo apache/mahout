@@ -347,6 +347,9 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
         keys -> bBlock
     }
         // Prevent repeated computation non-determinism
+        // removing this checkpoint() will cause the same error in spark Tests
+        // as we're seeing in Flink with this test.  ie  util.Random.nextDouble()
+        // is being called more than once (note that it is not seeded in the closure)
         .checkpoint()
 
     val inCoreB = B.collect

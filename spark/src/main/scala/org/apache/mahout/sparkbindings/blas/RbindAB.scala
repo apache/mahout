@@ -32,8 +32,8 @@ object RbindAB {
 
     // If any of the inputs is blockified, use blockified inputs
     if (srcA.isBlockified || srcB.isBlockified) {
-      val a = srcA.toBlockifiedDrmRdd(op.A.ncol)
-      val b = srcB.toBlockifiedDrmRdd(op.B.ncol)
+      val a = srcA.asBlockified(op.A.ncol)
+      val b = srcB.asBlockified(op.B.ncol)
 
       // Union seems to be fine, it is indeed just do partition-level unionization, no shuffles
       a ++ b
@@ -41,8 +41,8 @@ object RbindAB {
     } else {
 
       // Otherwise, use row-wise inputs -- no reason to blockify here.
-      val a = srcA.toDrmRdd()
-      val b = srcB.toDrmRdd()
+      val a = srcA.asRowWise()
+      val b = srcB.asRowWise()
 
       a ++ b
     }
