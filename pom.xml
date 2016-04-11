@@ -118,18 +118,11 @@
     <mscala.version>3.2.0</mscala.version>
     <hbase.version>1.0.0</hbase.version>
     <lucene.version>4.6.1</lucene.version>
-<<<<<<< Temporary merge branch 1
-    <slf4j.version>1.7.12</slf4j.version>
-    <scala.compat.version>2.10</scala.compat.version>
-    <scala.version>2.10.4</scala.version>
-    <spark.version>1.5.2</spark.version>
-=======
     <slf4j.version>1.7.19</slf4j.version>
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
     <spark.version>1.5.2</spark.version>
     <flink.version>1.0.1</flink.version>
->>>>>>> Temporary merge branch 2
     <h2o.version>0.1.25</h2o.version>
   </properties>
   <issueManagement>
