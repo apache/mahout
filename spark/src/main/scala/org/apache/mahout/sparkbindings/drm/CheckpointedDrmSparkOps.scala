@@ -11,6 +11,6 @@ class CheckpointedDrmSparkOps[K](drm: CheckpointedDrm[K]) {
   private[sparkbindings] val sparkDrm = drm.asInstanceOf[CheckpointedDrmSpark[K]]
 
   /** Spark matrix customization exposure */
-  def rdd:DrmRdd[K] = sparkDrm.rddInput.toDrmRdd()
+  def rdd = sparkDrm.rddInput.asRowWise()
 
 }

@@ -125,7 +125,7 @@ class CheckpointedDrmSpark[K: ClassTag](
     // since currently spark #collect() requires Serializeable support,
     // we serialize DRM vectors into byte arrays on backend and restore Vector
     // instances on the front end:
-    val data = rddInput.toDrmRdd().map(t => (t._1, t._2)).collect()
+    val data = rddInput.asRowWise().map(t => (t._1, t._2)).collect()
 
 
     val m = if (data.forall(_._2.isDense))
@@ -155,20 +155,20 @@ class CheckpointedDrmSpark[K: ClassTag](
   /**
    * Dump matrix as computed Mahout's DRM into specified (HD)FS path
     *
-    * @param path
+    * @param path output path to dump Matrix to
    */
   def dfsWrite(path: String) = {
     val ktag = implicitly[ClassTag[K]]
 
     // Map backing RDD[(K,Vector)] to RDD[(K)Writable,VectorWritable)] and save.
     if (ktag.runtimeClass == classOf[Int]) {
-      rddInput.toDrmRdd()
+      rddInput.asRowWise()
         .map( x => (new IntWritable(x._1.asInstanceOf[Int]), new VectorWritable(x._2))).saveAsSequenceFile(path)
     } else if (ktag.runtimeClass == classOf[String]){
-      rddInput.toDrmRdd()
+      rddInput.asRowWise()
         .map( x => (new Text(x._1.asInstanceOf[String]), new VectorWritable(x._2))).saveAsSequenceFile(path)
     } else if (ktag.runtimeClass == classOf[Long]) {
-      rddInput.toDrmRdd()
+      rddInput.asRowWise()
         .map( x => (new LongWritable(x._1.asInstanceOf[Long]), new VectorWritable(x._2))).saveAsSequenceFile(path)
     } else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
 
@@ -179,7 +179,7 @@ class CheckpointedDrmSpark[K: ClassTag](
     val intRowIndex = classTag[K] == classTag[Int]
 
     if (intRowIndex) {
-      val rdd = cache().rddInput.toDrmRdd().asInstanceOf[DrmRdd[Int]]
+      val rdd = cache().rddInput.asRowWise().asInstanceOf[DrmRdd[Int]]
 
       // I guess it is a suitable place to compute int keys consistency test here because we know
       // that nrow can be computed lazily, which always happens when rdd is already available, cached,
@@ -192,21 +192,21 @@ class CheckpointedDrmSpark[K: ClassTag](
       intFixExtra = (maxPlus1 - rowCount) max 0L
       maxPlus1
     } else
-      cache().rddInput.toDrmRdd().count()
+      cache().rddInput.asRowWise().count()
   }
 
 
 
   protected def computeNCol = {
     rddInput.isBlockified match {
-      case true ⇒ rddInput.toBlockifiedDrmRdd(throw new AssertionError("not reached"))
+      case true ⇒ rddInput.asBlockified(throw new AssertionError("not reached"))
         .map(_._2.ncol).reduce(max)
-      case false ⇒ cache().rddInput.toDrmRdd().map(_._2.length).fold(-1)(max)
+      case false ⇒ cache().rddInput.asRowWise().map(_._2.length).fold(-1)(max)
     }
   }
 
   protected def computeNNonZero =
-    cache().rddInput.toDrmRdd().map(_._2.getNumNonZeroElements.toLong).sum().toLong
+    cache().rddInput.asRowWise().map(_._2.getNumNonZeroElements.toLong).sum().toLong
 
   /** Changes the number of rows in the DRM without actually touching the underlying data. Used to
     * redimension a DRM after it has been created, which implies some blank, non-existent rows.

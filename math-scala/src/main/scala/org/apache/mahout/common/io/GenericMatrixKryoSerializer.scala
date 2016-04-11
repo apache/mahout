@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.io
+package org.apache.mahout.common.io
 
-
-import com.esotericsoftware.kryo.io.{Output, Input}
+import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, Serializer}
 import org.apache.log4j.Logger
 import org.apache.mahout.logging._
 import org.apache.mahout.math._
 import org.apache.mahout.math.flavor.TraversingStructureEnum
-import scalabindings._
-import RLikeOps._
-import collection._
-import JavaConversions._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+
+import scala.collection.JavaConversions._
 
 object GenericMatrixKryoSerializer {
 
@@ -113,7 +112,7 @@ class GenericMatrixKryoSerializer extends Serializer[Matrix] {
 
     output.writeInt(nslices, true)
 
-    var actualNSlices = 0;
+    var actualNSlices = 0
     for (row <- mx.iterateNonEmpty()) {
       output.writeInt(row.index(), true)
       kryo.writeObject(output, row.vector())

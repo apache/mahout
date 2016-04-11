@@ -97,7 +97,7 @@ object SparkEngine extends DistributedEngine {
   /** Optional engine-specific all reduce tensor operation. */
   override def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf:
   BlockReduceFunc): Matrix = {
-    drm.toBlockifiedDrmRdd(ncol = drm.ncol).map(bmf(_)).reduce(rf)
+    drm.asBlockified(ncol = drm.ncol).map(bmf(_)).reduce(rf)
   }
 
   /**

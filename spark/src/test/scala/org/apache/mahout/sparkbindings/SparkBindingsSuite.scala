@@ -1,12 +1,12 @@
 package org.apache.mahout.sparkbindings
 
 import java.io.{Closeable, File}
-import java.util
 
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.util.IOUtilsScala
 import org.scalatest.FunSuite
-import collection._
+
+import scala.collection._
 
 /**
  * @author dmitriy
@@ -14,7 +14,7 @@ import collection._
 class SparkBindingsSuite extends FunSuite with DistributedSparkSuite {
 
   // This test will succeed only when MAHOUT_HOME is set in the environment. So we keep it for
-  // diagnorstic purposes around, but we probably don't want it to run in the Jenkins, so we'd
+  // diagnostic purposes around, but we probably don't want it to run in the Jenkins, so we'd
   // let it to be ignored.
   ignore("context jars") {
     System.setProperty("mahout.home", new File("..").getAbsolutePath/*"/home/dmitriy/projects/github/mahout-commits"*/)

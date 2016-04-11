@@ -20,7 +20,6 @@ package org.apache.mahout.drivers
 import org.apache.mahout.common.HDFSPathSearch
 import org.apache.mahout.math.cf.SimilarityAnalysis
 import org.apache.mahout.math.indexeddataset.{Schema, IndexedDataset, indexedDatasetDFSRead}
-import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scala.collection.immutable.HashMap
 
 /**
@@ -63,7 +62,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
       opts = opts ++ RowSimilarityOptions
 
       note("\nAlgorithm control options:")
-      opt[Int]("maxObservations") abbr ("mo") action { (x, options) =>
+      opt[Int]("maxObservations") abbr "mo" action { (x, options) =>
         options + ("maxObservations" -> x)
       } text ("Max number of observations to consider per row (optional). Default: " +
         RowSimilarityOptions("maxObservations")) validate { x =>
@@ -96,7 +95,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
       //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
       parseGenericOptions()
 
-      help("help") abbr ("h") text ("prints this usage text\n")
+      help("help") abbr "h" text "prints this usage text\n"
 
     }
     parser.parse(args, parser.opts) map { opts =>

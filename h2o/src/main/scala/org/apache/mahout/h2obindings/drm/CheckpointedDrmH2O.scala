@@ -20,6 +20,8 @@ class CheckpointedDrmH2O[K: ClassTag](
   override val cacheHint: CacheHint
 ) extends CheckpointedDrm[K] {
 
+  override val keyClassTag: ClassTag[K] = classTag[K]
+
   /**
     * Collecting DRM to in-core Matrix
     *
@@ -28,9 +30,6 @@ class CheckpointedDrmH2O[K: ClassTag](
     * as rowLabelBindings of the in-core matrix.
     */
   def collect: Matrix = H2OHelper.matrixFromDrm(h2odrm)
-
-  /** Explicit extraction of key class Tag   */
-  def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
 
   /* XXX: call frame.remove */
   def uncache(): this.type = this
