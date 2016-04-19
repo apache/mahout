@@ -4,7 +4,7 @@ cache:
   directories:
   - $HOME/.m2
 
-install: true
+install: travis_wait mvn -B clean install 
 
 language: java
 
@@ -26,7 +26,7 @@ notifications:
 
 env:
   global:
-    MAVEN_OPTS="-Xmx32g -Xms256m -XX:MaxPermSize=512m"
+    MAVEN_OPTS="-Xmx6g -Xms256m -XX:MaxPermSize=512m"
 
 before_install:
   - wget https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip
@@ -34,6 +34,6 @@ before_install:
   - export M2_HOME=$PWD/apache-maven-3.3.9
   - export PATH=$M2_HOME/bin:$PATH
 
-install: travis_wait mvn -B clean install test
+
 
 
