@@ -15,7 +15,7 @@ You will need a `$JAVA_HOME`, and if you are running on Spark, you will also nee
 
 Note when running the spark-shell job it can help to set some JVM options so you don't run out of memory:
 ```
-$MAHOUT_OPTS="-Xmx6g -XX:MaxPermSize=512m" mahout spark-shell
+$ MAHOUT_OPTS="-Xmx6g -XX:MaxPermSize=512m" mahout spark-shell
 ```
 
 ####Using Mahout as a Library
