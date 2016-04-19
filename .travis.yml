@@ -1,0 +1,34 @@
+sudo: false
+
+cache:
+  directories:
+  - $HOME/.m2
+
+install: true
+
+language: java
+
+branches:
+  only:
+   - master
+
+# The file assumes a certain build order for the maven / nightly build deployments.
+matrix:
+  include:
+    - jdk: "oraclejdk7"
+      env: PROFILE="-Dhadoop.version=2.4.1 -Dscala-2.10 -Dflink.version=1.0.1 -Dspark.version=1.5.2"
+
+git:
+  depth: 10
+
+notifications:
+  email:
+    - dev@mahout.apache.org
+  slack: mahout:7vlbihiCBKuhEZK2610jkeeT
+
+env:
+  global:
+    JAVA_OPTS=-Xmx2g
+
+
+
