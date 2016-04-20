@@ -21,12 +21,12 @@ matrix:
 git:
   depth: 10
 
-notifications:
-  slack: mahout:7vlbihiCBKuhEZK2610jkeeT
+#notifications:
+#  slack: mahout:7vlbihiCBKuhEZK2610jkeeT
 
 env:
   global:
-    JAVA_OPTS=-Xmx2g
+    JAVA_OPTS=-Xmx3g
 
 before_install:
   - wget https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip

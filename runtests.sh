@@ -28,8 +28,13 @@ PING_LOOP_PID=$!
 
 # Build and test using maven.
 
-mvn clean -Ptravis -DskipTests=true -Dmaven.javadoc.skip=true -B -V install >> $BUILD_OUTPUT 2>&1 
-mvn test >> $BUILD_OUTPUT 2>&1
+mvn clean -DskipTests=true -Dmaven.javadoc.skip=true -B -V install >> $BUILD_OUTPUT 2>&1 
+cd hdfs && mvn test >> $BUILD_OUTPUT 2>&1
+cd ../math && mvn test >> $BUILD_OUTPUT 2>&1
+cd ../math-scala && mvn test >> $BUILD_OUTPUT 2>&1
+cd ../spark && mvn test >> $BUILD_OUTPUT 2>&1
+#cd ../flink && mvn test >> $BUILD_OUTPUT 2>&1
+#cd ../h2o && mvn test >> $BUILD_OUTPUT 2>&1
 
 # The build finished without returning an error so dump a tail of the output
 dump_output
