@@ -16,7 +16,7 @@ branches:
 matrix:
   include:
     - jdk: "oraclejdk7"
-      env: PROFILE="-Dhadoop.version=2.4.1 -Dscala-2.10 -Dflink.version=1.0.1 -Dspark.version=1.5.2"
+      env: PROFILE="-Dhadoop.version=2.4.1 -Dflink.version=1.0.1 -Dspark.version=1.5.2"
 
 git:
   depth: 10
@@ -26,7 +26,7 @@ notifications:
 
 env:
   global:
-    JAVA_OPTS=-Xmx6g
+    JAVA_OPTS=-Xmx2g
 
 before_install:
   - wget https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip
@@ -34,5 +34,5 @@ before_install:
   - export M2_HOME=$PWD/apache-maven-3.3.9
   - export PATH=$M2_HOME/bin:$PATH
 
-
+script: ./run-tests.sh
 
