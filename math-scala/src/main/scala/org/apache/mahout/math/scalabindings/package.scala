@@ -211,7 +211,6 @@ package object scalabindings {
     } else {
       tmp = cardinality
     }
-    println(tmp)
     val initialCapacity = sdata.size
     val sv = new RandomAccessSparseVector(tmp, initialCapacity)
     sdata.foreach(t ⇒ sv.setQuick(t._1, t._2.asInstanceOf[Number].doubleValue()))
