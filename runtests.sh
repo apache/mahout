@@ -26,10 +26,9 @@ bash -c "while true; do echo \$(date) - building ...; sleep $PING_SLEEP; done" &
 PING_LOOP_PID=$!
 
 
-# My build is using maven, but you could build anything with this, E.g.
-# your_build_command_1 >> $BUILD_OUTPUT 2>&1
-# your_build_command_2 >> $BUILD_OUTPUT 2>&1
-mvn clean install -DskipTests >> $BUILD_OUTPUT 2>&1 
+# Build and test using maven.
+
+mvn clean -Ptravis -DskipTests=true -Dmaven.javadoc.skip=true -B -V install >> $BUILD_OUTPUT 2>&1 
 mvn test >> $BUILD_OUTPUT 2>&1
 
 # The build finished without returning an error so dump a tail of the output
