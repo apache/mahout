@@ -1,12 +1,11 @@
-sudo: false
+sudo: true
 
 cache:
   directories:
   - $HOME/.m2
 
-install: travis_wait mvn -B clean install 
-
-language: java
+script:
+ language: java
 
 branches:
   only:
@@ -16,7 +15,7 @@ branches:
 matrix:
   include:
     - jdk: "oraclejdk7"
-      env: PROFILE="-Dhadoop.version=2.4.1 -Dscala-2.10 -Dflink.version=1.0.1 -Dspark.version=1.5.2"
+      env: PROFILE="-Dhadoop.version=2.4.1 -Dflink.version=1.0.1 -Dspark.version=1.5.2"
 
 git:
   depth: 10
@@ -26,13 +25,17 @@ notifications:
 
 env:
   global:
-    MAVEN_OPTS="-Xmx6g -Xms256m -XX:MaxPermSize=512m"
+    MAVEN_OPTS="-Xmx2g -Xms256m -XX:MaxPermSize=512m"
 
 before_install:
   - wget https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip
   - unzip -qq apache-maven-3.3.9-bin.zip
   - export M2_HOME=$PWD/apache-maven-3.3.9
   - export PATH=$M2_HOME/bin:$PATH
+
+ script:
+  - cd /home/travis/build/mahout/ && chmod +x ./runtests.sh && ./runtests.sh
+
 
 
 
