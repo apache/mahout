@@ -33,8 +33,7 @@ before_install:
   - unzip -qq apache-maven-3.3.9-bin.zip
   - export M2_HOME=$PWD/apache-maven-3.3.9
   - export PATH=$M2_HOME/bin:$PATH
-  - pwd
-  - ls
+ 
 
-script: /home/travis/apache/mahout/run-tests.sh
+script: ./runtests.sh
 
