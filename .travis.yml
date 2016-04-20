@@ -16,7 +16,7 @@ branches:
 matrix:
   include:
     - jdk: "oraclejdk7"
-      env: PROFILE="-Dhadoop.version=2.4.1 -Dflink.version=1.0.1 -Dspark.version=1.5.2"
+      env: PROFILE="-Dhadoop.version=2.4.1 -Dflink.version=1.0.1 -Dspark.version=1.5.2 -Ptravis"
 
 git:
   depth: 10
