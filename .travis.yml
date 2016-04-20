@@ -34,5 +34,5 @@ before_install:
   - export M2_HOME=$PWD/apache-maven-3.3.9
   - export PATH=$M2_HOME/bin:$PATH
 
-script: ./run-tests.sh
+script: /home/travis/mahout/run-tests.sh
 
