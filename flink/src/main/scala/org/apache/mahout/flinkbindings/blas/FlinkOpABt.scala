@@ -108,7 +108,7 @@ object FlinkOpABt {
       trace(s"block multiplication types: blockA: ${blockA.getClass.getName}(${blockA.t.getClass.getName}); " +
               s"blockB: ${blockB.getClass.getName}.")
 
-      result.asInstanceOf[(Array[K], Array[Int], Matrix)]
+      result
     }
 
 
@@ -125,7 +125,9 @@ object FlinkOpABt {
             // group by the partition key
             .groupBy(0)
 
-            // initalize the combiner as transpose
+            // Initalize the combiner as an empty transposed matrix:
+            // (Op.A.ncol x partitionBlock.nrow).t
+            // for each group (block partition)
             .combineGroup(new GroupCombineFunction[(Int, (Array[K], Array[Int], Matrix)),
                 ((Array[K],  Matrix),(Array[K], Array[Int], Matrix))] {
 
@@ -137,13 +139,14 @@ object FlinkOpABt {
                    val block = tuple._2._3
 
                    // initalize the combiner as a sparse matrix.
+                   // set each row of the transposed combiner to the column
+                   // of the already block wise multiplied Matrix
                    val comb = new SparseMatrix(prodNCol, block.nrow).t
                    for ((col, i) <- colKeys.zipWithIndex) comb(::, col) := block(::, i)
-                   val res = (rowKeys, comb)
-
-                   out.collect(res, (rowKeys, colKeys, block))
+                   out.collect((rowKeys, comb), (rowKeys, colKeys, block))
               }
             })
+
     // Combiner += value
 //    mergeValue = (comb: (Array[K], Matrix), value: (Array[K], Array[Int], Matrix)) => {
 //      val (rowKeys, c) = comb
@@ -153,7 +156,7 @@ object FlinkOpABt {
 //    },
 
 
-             // reduce into a final Blockified matrix
+             // combine all members of each group into the above defined combiner
              .combineGroup(new GroupCombineFunction[((Array[K], Matrix),(Array[K], Array[Int], Matrix)),
                  (Array[K], Matrix)] {
 
@@ -162,23 +165,26 @@ object FlinkOpABt {
                     val tuple = values.iterator().next()
 
                   // the combiner
-                  val (rowKeys, c) = (tuple._1)
+                  val (rowKeys, c) = tuple._1
 
                   // the matrix
                   val (_, colKeys, block) = tuple._2
-                  for ((col, i) <- colKeys.zipWithIndex) c(::, col) += block(::, i)
+                  for ((col, i) <- colKeys.zipWithIndex) c(::, col) := block(::, i)
 
                   out.collect(rowKeys -> c)
+//                  out.collect(tuple._1)
+
                 }
              })
 
 
+            // now finally reduce the block
             .reduce( new ReduceFunction[(Array[K],Matrix)]{
-                def reduce(mx1:(Array[K], Matrix), mx2:(Array[K], Matrix)): (Array[K], Matrix) = {
+                def reduce(mx1: (Array[K], Matrix), mx2: (Array[K], Matrix)): (Array[K], Matrix) = {
 
                    mx1._2 += mx2._2
 
-                  //println(mx1._2)
+                  println("/n/n/n"+mx1._2+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
                    mx1._1 -> mx1._2
                 }
@@ -263,15 +269,19 @@ object FlinkOpABt {
         }
       })
 
+      println("\n\n BlocksA.numPartitions:" +blocksAKeyed.collect().size)
+      println("\n\n BlocksB.numPartitions:" +blocksBKeyed.collect().size)
 
-      implicit val typeInformationJ = createTypeInformation[(Int, ((Array[K1], Matrix),(Int, (Array[K2], Matrix))))]
+
+      implicit val typeInformationJ = createTypeInformation[((Int,(Array[K1], Matrix), (Int, (Array[K2], Matrix))))]
       implicit val typeInformationJprod = createTypeInformation[(Int, T)]
 
 
       // Perform the inner join.
       val joined = blocksAKeyed.join(blocksBKeyed).where(0).equalTo(0)
 
-        // Apply product function which should produce smaller products. Hopefully, this streams blockB's in
+        // Apply product function which should produce smaller products.
+        // Hopefully, this streams blockB's in
       val mapped = joined.map{tuple => tuple._1._1 ->
           blockFunc(((tuple._1._2), (tuple._1._3)), (tuple._2._2, tuple._2._3)) }
 
