@@ -22,6 +22,7 @@ import org.apache.mahout.math.Vector;
 /**
  * Represents one data instance.
  */
+@Deprecated
 public class Instance {
   
   /** attributes, except LABEL and IGNORED */

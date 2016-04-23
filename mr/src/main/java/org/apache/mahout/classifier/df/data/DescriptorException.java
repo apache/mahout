@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.df.data;
 /**
  * Exception thrown when parsing a descriptor
  */
+@Deprecated
 public class DescriptorException extends Exception {
   public DescriptorException(String msg) {
     super(msg);

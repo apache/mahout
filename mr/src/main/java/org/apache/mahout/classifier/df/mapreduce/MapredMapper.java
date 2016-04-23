@@ -28,6 +28,7 @@ import java.io.IOException;
 /**
  * Base class for Mapred mappers. Loads common parameters from the job
  */
+@Deprecated
 public class MapredMapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends Mapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> {
   
   private boolean noOutput;

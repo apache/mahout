@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 /**
  * Various methods to compute from the output of a random forest
  */
+@Deprecated
 public final class ErrorEstimate {
 
   private ErrorEstimate() {

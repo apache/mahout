@@ -27,7 +27,8 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.12.0-SNAPSHOT</version>
+
+  <version>0.12.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -121,8 +122,9 @@
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.6</scala.version>
     <spark.version>1.5.2</spark.version>
-    <flink.version>1.0.1</flink.version>
+    <flink.version>1.0.2</flink.version>
     <h2o.version>0.1.25</h2o.version>
+    <jackson.version>2.7.2</jackson.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
@@ -366,15 +368,11 @@
       </dependency>
 
       <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-core-asl</artifactId>
-        <version>1.9.12</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.12</version>
-      </dependency>
+
       <dependency>
         <groupId>commons-cli</groupId>
         <artifactId>commons-cli</artifactId>

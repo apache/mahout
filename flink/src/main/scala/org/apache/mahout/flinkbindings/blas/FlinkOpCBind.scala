@@ -18,30 +18,17 @@
  */
 package org.apache.mahout.flinkbindings.blas
 
-import java.lang.Iterable
 import org.apache.flink.api.common.typeinfo.TypeInformation
-
-import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
-import scala.reflect.ClassTag
-import org.apache.flink.api.common.functions.CoGroupFunction
-import org.apache.flink.api.common.functions.MapFunction
 import org.apache.flink.api.scala._
-import org.apache.flink.util.Collector
-import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm._
 import org.apache.mahout.math._
-import org.apache.mahout.math.drm.logical.OpCbind
-import org.apache.mahout.math.drm.logical.OpCbindScalar
+import org.apache.mahout.math.drm.logical.{OpCbind, OpCbindScalar}
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import com.google.common.collect.Lists
-import org.apache.mahout.flinkbindings.DrmDataSet
 
-import org.apache.mahout.math.scalabindings._
+import scala.collection.JavaConversions._
 
 /**
- * Implementation is taken from Spark's cbind
- * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/CbindAB.scala
+ * Implementation of Flink's cbind
  */
 object FlinkOpCBind {
 

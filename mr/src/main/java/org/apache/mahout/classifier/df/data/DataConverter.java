@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 /**
  * Converts String to Instance using a Dataset
  */
+@Deprecated
 public class DataConverter {
 
   private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");

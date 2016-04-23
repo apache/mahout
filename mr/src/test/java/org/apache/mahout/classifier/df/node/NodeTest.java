@@ -30,7 +30,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
-
+@Deprecated
 public final class NodeTest extends MahoutTestCase {
 
   private Random rng;

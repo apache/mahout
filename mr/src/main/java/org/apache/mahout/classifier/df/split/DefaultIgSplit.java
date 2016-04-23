@@ -25,6 +25,7 @@ import java.util.Arrays;
 /**
  * Default, not optimized, implementation of IgSplit
  */
+@Deprecated
 public class DefaultIgSplit extends IgSplit {
   
   /** used by entropy() */

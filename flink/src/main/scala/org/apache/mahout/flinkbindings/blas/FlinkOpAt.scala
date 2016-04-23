@@ -27,8 +27,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import scala.Array.canBuildFrom
 
 /**
- * Implementation is taken from Spark's At
- * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/At.scala
+ * Implementation of Flink At
  */
 object FlinkOpAt {
 

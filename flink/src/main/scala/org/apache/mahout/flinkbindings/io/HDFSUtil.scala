@@ -21,7 +21,6 @@ package org.apache.mahout.flinkbindings.io
 /**
  * High level Hadoop version-specific hdfs manipulations we need in context of our operations.
  *
- * Copied from /spark/src/main/scala/org/apache/mahout/common
  */
 trait HDFSUtil {
 

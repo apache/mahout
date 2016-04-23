@@ -30,8 +30,7 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.{DenseMatrix, Matrix}
 
 /**
- * Implementation is taken from Spark's OpTimesRightMatrix:
- * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/AinCoreB.scala
+ * Implementation of OpTimesRightMatrix:
  */
 object FlinkOpTimesRightMatrix {
 
@@ -55,7 +54,6 @@ object FlinkOpTimesRightMatrix {
 
       override def open(params: Configuration): Unit = {
         val runtime = this.getRuntimeContext
-        //val dsB: java.util.List[Matrix]
         val dsB: java.util.List[(Int, org.apache.mahout.math.Vector)] = runtime.getBroadcastVariable("matrix")
         val m = dsB.size()
         val n = dsB.get(0)._2.size

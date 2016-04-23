@@ -34,6 +34,7 @@ import org.apache.mahout.classifier.df.node.NumericalNode;
 /**
  * This tool is to visualize the Decision tree
  */
+@Deprecated
 public final class TreeVisualizer {
   
   private TreeVisualizer() {}

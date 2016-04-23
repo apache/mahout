@@ -53,6 +53,7 @@ import java.util.Arrays;
  * Temporary class used to compute the frequency distribution of the "class attribute".<br>
  * This class can be used when the criterion variable is the categorical attribute.
  */
+@Deprecated
 public class FrequenciesJob {
   
   private static final Logger log = LoggerFactory.getLogger(FrequenciesJob.class);

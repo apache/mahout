@@ -27,6 +27,7 @@ import java.util.Locale;
 /**
  * Contains various methods that deal with descriptor strings
  */
+@Deprecated
 public final class DescriptorUtils {
 
   private static final Splitter SPACE = Splitter.on(' ').omitEmptyStrings();

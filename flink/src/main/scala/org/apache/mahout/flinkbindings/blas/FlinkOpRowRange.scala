@@ -24,8 +24,7 @@ import org.apache.mahout.flinkbindings.drm.RowsFlinkDrm
 import org.apache.mahout.math.drm.logical.OpRowRange
 
 /**
- * Implementation is taken from Spark's OpRowRange
- * https://github.com/apache/mahout/blob/master/spark/src/main/scala/org/apache/mahout/sparkbindings/blas/Slicing.scala
+ * Implementation of Flink OpRowRange
  */
 object FlinkOpRowRange {
 
