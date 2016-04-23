@@ -43,7 +43,7 @@ class FlinkDistributedContext(val env: ExecutionEnvironment) extends Distributed
 
   env.setParallelism(degreeOfParallelism)
   env.registerTypeWithKryoSerializer(classOf[org.apache.mahout.math.Matrix],classOf[GenericMatrixKryoSerializer])
-  //env.registerTypeWithKryoSerializer(classOf[org.apache.mahout.math.Vector],classOf[VectorKryoSerializer])
+  env.registerTypeWithKryoSerializer(classOf[org.apache.mahout.math.Vector],classOf[VectorKryoSerializer])
 
 
   val engine: DistributedEngine = FlinkEngine

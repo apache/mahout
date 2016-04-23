@@ -99,7 +99,7 @@ object FlinkOpABt {
       var ms = traceDo(System.currentTimeMillis())
 
       // We need to send keysB to the aggregator in order to know which columns are being updated.
-      val result = (keysA, keysB, blockA %*% ((blockB.t).cloned))
+      val result = (keysA, keysB, blockA %*% blockB.t)
 
       ms = traceDo(System.currentTimeMillis() - ms.get)
             trace(
@@ -125,35 +125,70 @@ object FlinkOpABt {
             // group by the partition key
             .groupBy(0)
 
-            // combine as transpose
-            .combineGroup(new GroupCombineFunction[(Int, (Array[K], Array[Int], Matrix)), (Array[K], Matrix)] {
+            // initalize the combiner as transpose
+            .combineGroup(new GroupCombineFunction[(Int, (Array[K], Array[Int], Matrix)),
+                ((Array[K],  Matrix),(Array[K], Array[Int], Matrix))] {
 
                def combine(values: java.lang.Iterable[(Int, (Array[K], Array[Int], Matrix))],
-                           out: Collector[(Array[K],  Matrix)]): Unit = {
+                           out: Collector[((Array[K],  Matrix), (Array[K], Array[Int], Matrix))]): Unit = {
                    val tuple = values.iterator().next
                    val rowKeys = tuple._2._1
                    val colKeys = tuple._2._2
                    val block = tuple._2._3
 
+                   // initalize the combiner as a sparse matrix.
                    val comb = new SparseMatrix(prodNCol, block.nrow).t
                    for ((col, i) <- colKeys.zipWithIndex) comb(::, col) := block(::, i)
                    val res = (rowKeys, comb)
 
-                   out.collect(res)
+                   out.collect(res, (rowKeys, colKeys, block))
               }
             })
+    // Combiner += value
+//    mergeValue = (comb: (Array[K], Matrix), value: (Array[K], Array[Int], Matrix)) => {
+//      val (rowKeys, c) = comb
+//      val (_, colKeys, block) = value
+//      for ((col, i) <- colKeys.zipWithIndex) c(::, col) := block(::, i)
+//      comb
+//    },
+
 
              // reduce into a final Blockified matrix
-             .reduce(new ReduceFunction[(Array[K], Matrix)] {
+             .combineGroup(new GroupCombineFunction[((Array[K], Matrix),(Array[K], Array[Int], Matrix)),
+                 (Array[K], Matrix)] {
 
-                def reduce(mx1: (Array[K], Matrix), mx2: (Array[K], Matrix)): (Array[K], Matrix) = {
-                  mx1._2 += mx2._2
-                  mx1
+                def combine(values: java.lang.Iterable[((Array[K], Matrix),(Array[K], Array[Int], Matrix))],
+                  out: Collector[(Array[K], Matrix)]): Unit = {
+                    val tuple = values.iterator().next()
+
+                  // the combiner
+                  val (rowKeys, c) = (tuple._1)
+
+                  // the matrix
+                  val (_, colKeys, block) = tuple._2
+                  for ((col, i) <- colKeys.zipWithIndex) c(::, col) += block(::, i)
+
+                  out.collect(rowKeys -> c)
                 }
              })
 
 
-     new BlockifiedFlinkDrm(ds = blockwiseMmulDataSet, ncol = prodNCol)
+            .reduce( new ReduceFunction[(Array[K],Matrix)]{
+                def reduce(mx1:(Array[K], Matrix), mx2:(Array[K], Matrix)): (Array[K], Matrix) = {
+
+                   mx1._2 += mx2._2
+
+                  //println(mx1._2)
+
+                   mx1._1 -> mx1._2
+                }
+            })
+
+
+
+    val res = new BlockifiedFlinkDrm(ds = blockwiseMmulDataSet, ncol = prodNCol)
+//    println(datasetWrap(res.asRowWise.ds).collect)
+    res
 
   }
     /**
