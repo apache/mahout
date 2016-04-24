@@ -17,6 +17,7 @@
 
 package org.apache.mahout.flinkbindings.blas
 
+import org.apache.flink.api.scala._
 import org.apache.flink.api.common.functions._
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.DataSet
@@ -60,6 +61,7 @@ object FlinkOpABt {
       srcA: FlinkDrm[K],
       srcB: FlinkDrm[Int]): FlinkDrm[K] = {
 
+
     debug("operator AB'(Flink)")
     abt_nograph[K](operator, srcA, srcB)
   }
@@ -89,7 +91,8 @@ object FlinkOpABt {
 
     val prodNCol = operator.ncol
     val prodNRow = operator.nrow
-
+    println("A:"+ operator.A.collect)
+    println("B:"+ operator.B.collect)
 
     // blockwise multiplication function
     def mmulFunc(tupleA: (Array[K], Matrix), tupleB: (Array[Int], Matrix)): (Array[K], Array[Int], Matrix) = {
@@ -242,35 +245,42 @@ object FlinkOpABt {
          }
       })
 
+      // calcuate actual number of partitions used by blocksA
+      // we'll need this to key blocksB with the correct partition numbers
+      // to join upon.  blocksA may use partitions 0,1 and blocksB may use partitions 2,3.
+      val aParts = blocksA.map(new MapFunction[(Array[K1], Matrix), Int] {
+        def map(a: (Array[K1], Matrix)): Int = 1
+      }).reduce(new ReduceFunction[Int] {
+        def reduce(a: Int, b: Int): Int = a + b
+      }).collect().head
+
+      // key the B blocks with the blocks of a assuming that they begin with 0 and are continuous
+      // not sure if this assumption holds.
+
       implicit val typeInformationB = createTypeInformation[(Int, (Array[K2], Matrix))]
 
-      // Prepare B-side.
-//      val blocksBKeyed = blocksB.flatMap(bTuple => for (blockKey <- (0 until aParts).view) yield blockKey -> bTuple )
+      val blocksBKeyed =
+            blocksB.flatMap(new FlatMapFunction[(Array[K2], Matrix), (Int, Array[K2], Matrix)] {
+              def flatMap(in: (Array[K2], Matrix), out: Collector[(Int, Array[K2], Matrix)]): Unit = {
 
-      val blocksBKeyed = blocksB.mapPartition( new RichMapPartitionFunction[(Array[K2], Matrix),
-        (Int, Array[K2], Matrix)] {
-        // partition number
-        var part: Int = 0
+                for (blockKey <- (0 until aParts).view) {
+                  out.collect((blockKey, in._1, in._2))
+                }
 
-        // get the index of the partition
-        override def open(params: Configuration): Unit = {
-          part = getRuntimeContext.getIndexOfThisSubtask
-        }
+              }
+            })
 
-        // bind the partition number to each keySet/block
-        def mapPartition(values: java.lang.Iterable[(Array[K2], Matrix)], out: Collector[(Int, Array[K2], Matrix)]): Unit  = {
 
-          val blockIter = values.iterator()
-          if (blockIter.hasNext()) {
-            val r = part -> blockIter.next
-            require(!blockIter.hasNext, s"more than 1 (${blockIter.asScala.size + 1}) blocks per partition and A of AB'")
-            out.collect((r._1, r._2._1, r._2._2))
-          }
-        }
-      })
+      // problem is above here.
 
-      println("\n\n BlocksA.numPartitions:" +blocksAKeyed.collect().size)
+      println("\n\n\n")
+      blocksAKeyed.collect().foreach{x => println(x._1 + " -> " + x._3)}
+      println("--------------")
+      blocksBKeyed.collect().foreach{x => println(x._1 + " -> " + x._3)}
+      println("Blocks after partition index mapping!!! \n\n\n")
+
       println("\n\n BlocksB.numPartitions:" +blocksBKeyed.collect().size)
+
 
 
       implicit val typeInformationJ = createTypeInformation[((Int,(Array[K1], Matrix), (Int, (Array[K2], Matrix))))]
@@ -282,8 +292,18 @@ object FlinkOpABt {
 
         // Apply product function which should produce smaller products.
         // Hopefully, this streams blockB's in
-      val mapped = joined.map{tuple => tuple._1._1 ->
-          blockFunc(((tuple._1._2), (tuple._1._3)), (tuple._2._2, tuple._2._3)) }
+      val mapped = joined.map { tuple => tuple._1._1 ->
+          blockFunc(((tuple._1._2), (tuple._1._3)), (tuple._2._2, tuple._2._3))
+        }
+
+
+
+      println("\n\n\n\nJOINED---------")
+      joined.collect().foreach{ x => println(x._1._1+ "->" + x._1._3)}
+      println("JOIN---------")
+      joined.collect().foreach{ x => println(x._2._1+ "->" + x._2._3)}
+
+      System.exit(1)
 
       mapped
       }
