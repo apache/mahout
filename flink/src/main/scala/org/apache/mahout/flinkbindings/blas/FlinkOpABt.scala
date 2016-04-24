@@ -245,14 +245,22 @@ object FlinkOpABt {
          }
       })
 
-      // calcuate actual number of partitions used by blocksA
+      // calcuate actual number of non empty partitions used by blocksA
       // we'll need this to key blocksB with the correct partition numbers
       // to join upon.  blocksA may use partitions 0,1 and blocksB may use partitions 2,3.
-      val aParts = blocksA.map(new MapFunction[(Array[K1], Matrix), Int] {
-        def map(a: (Array[K1], Matrix)): Int = 1
+      val aNonEmptyParts = blocksA.map(new MapFunction[(Array[K1], Matrix), Int] {
+        def map(a: (Array[K1], Matrix)): Int = {
+          if (a._1.length > 0) {
+            1
+          } else {
+            0
+          }
+        }
       }).reduce(new ReduceFunction[Int] {
         def reduce(a: Int, b: Int): Int = a + b
       }).collect().head
+
+      println("\n\n\naNonEmptyPArts:"+aNonEmptyParts+"\n\n\n")
 
       // key the B blocks with the blocks of a assuming that they begin with 0 and are continuous
       // not sure if this assumption holds.
@@ -263,19 +271,23 @@ object FlinkOpABt {
             blocksB.flatMap(new FlatMapFunction[(Array[K2], Matrix), (Int, Array[K2], Matrix)] {
               def flatMap(in: (Array[K2], Matrix), out: Collector[(Int, Array[K2], Matrix)]): Unit = {
 
-                for (blockKey <- (0 until aParts).view) {
-                  out.collect((blockKey, in._1, in._2))
+                var partsB = 0
+                for (blockKey <- (0 until aNonEmptyParts).view) {
+                  if(partsB < aNonEmptyParts) {
+                    out.collect((blockKey, in._1, in._2))
+                  }
+                  partsB += 1
                 }
 
               }
             })
 
 
-      // problem is above here.
 
-      println("\n\n\n")
+      println("\n\n\nBlocksA:")
       blocksAKeyed.collect().foreach{x => println(x._1 + " -> " + x._3)}
       println("--------------")
+      println("\n\n\nBlocksB:")
       blocksBKeyed.collect().foreach{x => println(x._1 + " -> " + x._3)}
       println("Blocks after partition index mapping!!! \n\n\n")
 
@@ -296,15 +308,16 @@ object FlinkOpABt {
           blockFunc(((tuple._1._2), (tuple._1._3)), (tuple._2._2, tuple._2._3))
         }
 
+      println("\n\n\njoined---------")
+      joined.collect().foreach{ x => println(x._1._1 + "->" + x._1._3)}
+      joined.collect().foreach{ x => println(x._2._1 + "->" + x._2._3)}
 
+      println("\n\n\nmapped---------")
+      mapped.collect().foreach{ x => println(x._1+ "->" + x._2._3)}
+      println("matrix---------")
+     // mapped.collect().foreach{ x => println(x._1+ "->" + x._2._3)}
 
-      println("\n\n\n\nJOINED---------")
-      joined.collect().foreach{ x => println(x._1._1+ "->" + x._1._3)}
-      println("JOIN---------")
-      joined.collect().foreach{ x => println(x._2._1+ "->" + x._2._3)}
-
-      System.exit(1)
-
+     // System.exit(1)
       mapped
       }
 
