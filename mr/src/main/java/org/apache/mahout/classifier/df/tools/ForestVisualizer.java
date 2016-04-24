@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This tool is to visualize the Decision Forest
  */
+@Deprecated
 public final class ForestVisualizer {
 
   private static final Logger log = LoggerFactory.getLogger(ForestVisualizer.class);

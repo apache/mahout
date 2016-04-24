@@ -23,40 +23,17 @@ import java.lang.Iterable
 import org.apache.flink.api.common.functions.RichMapPartitionFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.utils._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.mahout.flinkbindings.drm.FlinkDrm
 import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.{RandomAccessSparseVector, Vector}
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
 
-import scala.collection._
 import scala.reflect.ClassTag
 
 package object blas {
-
-  /**
-    * To compute tuples (PartitionIndex, PartitionElementCount)
-    *
-    * @param drmDataSet - DRM Dataset
-    * @tparam K - Key type
-    * @return (PartitionIndex, PartitionElementCount)
-    */
-  //TODO: Remove this when FLINK-3657 is merged into Flink codebase and
-  // replace by call to DataSetUtils.countElementsPerPartition(DataSet[K])
-  private[flinkbindings] def countsPerPartition[K](drmDataSet: DataSet[K]): DataSet[(Int, Int)] = {
-    drmDataSet.mapPartition {
-      new RichMapPartitionFunction[K, (Int, Int)] {
-        override def mapPartition(iterable: Iterable[K], collector: Collector[(Int, Int)]) = {
-          val count: Int = Iterator(iterable).size
-          val index: Int = getRuntimeContext.getIndexOfThisSubtask
-          collector.collect((index, count))
-        }
-      }
-    }
-  }
 
   /**
     * Rekey matrix dataset keys to consecutive int keys.
@@ -79,13 +56,13 @@ package object blas {
     val env = datasetA.getExecutionEnvironment
 
     // First, compute partition sizes.
-    val partSizes = countsPerPartition(datasetA).collect().toList
+    val partSizes = DataSetUtils(datasetA).countElementsPerPartition.collect().toList
 
     // Starting indices
     var startInd = new Array[Int](datasetA.getParallelism)
 
     // Save counts
-    for (pc <- partSizes) startInd(pc._1) = pc._2
+    for (pc <- partSizes) startInd(pc._1) = pc._2.toInt
 
     // compute cumulative sum
     val cumulativeSum = startInd.scanLeft(0)(_ + _).init

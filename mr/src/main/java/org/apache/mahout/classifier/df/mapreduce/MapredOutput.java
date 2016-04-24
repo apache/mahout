@@ -30,6 +30,7 @@ import java.util.Arrays;
  * Used by various implementation to return the results of a build.<br>
  * Contains a grown tree and and its oob predictions.
  */
+@Deprecated
 public class MapredOutput implements Writable, Cloneable {
 
   private Node tree;

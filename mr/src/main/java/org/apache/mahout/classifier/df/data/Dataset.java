@@ -39,6 +39,7 @@ import java.util.Map;
 /**
  * Contains information about the attributes.
  */
+@Deprecated
 public class Dataset {
 
   /**

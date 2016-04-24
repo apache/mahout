@@ -22,6 +22,7 @@ import org.apache.mahout.classifier.df.data.Data;
 /**
  * Computes the best split using the Information Gain measure
  */
+@Deprecated
 public abstract class IgSplit {
   
   static final double LOG2 = Math.log(2.0);

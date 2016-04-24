@@ -22,6 +22,7 @@ import org.apache.mahout.classifier.df.data.Instance;
 /**
  * Condition on Instance
  */
+@Deprecated
 public abstract class Condition {
   
   /**

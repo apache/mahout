@@ -26,6 +26,7 @@ import java.io.IOException;
 /**
  * Represents a Leaf node
  */
+@Deprecated
 public class Leaf extends Node {
   private static final double EPSILON = 1.0e-6;
 

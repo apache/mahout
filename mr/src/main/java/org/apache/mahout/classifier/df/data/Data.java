@@ -30,6 +30,7 @@ import java.util.Random;
  * vectors (subset, count,...)
  * 
  */
+@Deprecated
 public class Data implements Cloneable {
   
   private final List<Instance> instances;

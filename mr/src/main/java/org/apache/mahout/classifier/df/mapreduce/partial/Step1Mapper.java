@@ -42,6 +42,7 @@ import java.util.Random;
  * First step of the Partial Data Builder. Builds the trees using the data available in the InputSplit.
  * Predict the oob classes for each tree in its growing partition (input split).
  */
+@Deprecated
 public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOutput> {
   
   private static final Logger log = LoggerFactory.getLogger(Step1Mapper.class);

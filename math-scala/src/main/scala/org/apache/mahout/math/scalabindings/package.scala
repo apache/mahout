@@ -198,13 +198,21 @@ package object scalabindings {
 
   /**
    * create a sparse vector out of list of tuple2's
-   * @param sdata
+   * @param sdata cardinality
    * @return
    */
-  def svec(sdata: TraversableOnce[(Int, AnyVal)]) = {
-    val cardinality = if (sdata.nonEmpty) sdata.map(_._1).max + 1 else 0
+  def svec(sdata: TraversableOnce[(Int, AnyVal)], cardinality: Int = -1) = {
+    val required = if (sdata.nonEmpty) sdata.map(_._1).max + 1 else 0
+    var tmp = -1
+    if (cardinality < 0) {
+      tmp = required
+    } else if (cardinality < required) {
+      throw new IllegalArgumentException(s"Required cardinality %required but got %cardinality")
+    } else {
+      tmp = cardinality
+    }
     val initialCapacity = sdata.size
-    val sv = new RandomAccessSparseVector(cardinality, initialCapacity)
+    val sv = new RandomAccessSparseVector(tmp, initialCapacity)
     sdata.foreach(t ⇒ sv.setQuick(t._1, t._2.asInstanceOf[Number].doubleValue()))
     sv
   }

@@ -1,0 +1,39 @@
+sudo: false
+
+cache:
+  directories:
+  - $HOME/.m2
+
+install: true
+
+language: java
+
+branches:
+  only:
+   - master
+
+# The file assumes a certain build order for the maven / nightly build deployments.
+matrix:
+  include:
+    - jdk: "oraclejdk7"
+      env: PROFILE="-Dhadoop.version=2.4.1 -Dflink.version=1.0.1 -Dspark.version=1.5.2 -Ptravis"
+
+git:
+  depth: 10
+
+#notifications:
+#  slack: mahout:7vlbihiCBKuhEZK2610jkeeT
+
+env:
+  global:
+    JAVA_OPTS=-Xmx3g
+
+before_install:
+  - wget https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip
+  - unzip -qq apache-maven-3.3.9-bin.zip
+  - export M2_HOME=$PWD/apache-maven-3.3.9
+  - export PATH=$M2_HOME/bin:$PATH
+ 
+
+script: ./runtests.sh
+

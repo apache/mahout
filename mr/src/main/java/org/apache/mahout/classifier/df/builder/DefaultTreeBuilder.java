@@ -41,6 +41,7 @@ import java.util.Random;
  * <br><br>
  * This class can be used when the criterion variable is the categorical attribute.
  */
+@Deprecated
 public class DefaultTreeBuilder implements TreeBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(DefaultTreeBuilder.class);

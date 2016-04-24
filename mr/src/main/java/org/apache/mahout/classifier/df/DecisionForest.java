@@ -39,6 +39,7 @@ import java.util.Random;
 /**
  * Represents a forest of decision trees.
  */
+@Deprecated
 public class DecisionForest implements Writable {
   
   private final List<Node> trees;

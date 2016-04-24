@@ -141,16 +141,7 @@ object FlinkEngine extends DistributedEngine {
         FlinkOpAx.atx_with_broadcast(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
       case op@OpAtB(a, b) ⇒ FlinkOpAtB.notZippable(op, flinkTranslate(a),
         flinkTranslate(b)).asInstanceOf[FlinkDrm[K]]
-      case op@OpABt(a, b) ⇒
-        // express ABt via AtB: let C=At and D=Bt, and calculate CtD
-        // TODO: create specific implementation of ABt, see MAHOUT-1750
-        val opAt = OpAt(a.asInstanceOf[DrmLike[Int]]) // TODO: casts!
-        val at = FlinkOpAt.sparseTrick(opAt, flinkTranslate(a.asInstanceOf[DrmLike[Int]]))
-        val c = new CheckpointedFlinkDrm(at.asRowWise.ds, _nrow = opAt.nrow, _ncol = opAt.ncol)
-        val opBt = OpAt(b.asInstanceOf[DrmLike[Int]]) // TODO: casts!
-        val bt = FlinkOpAt.sparseTrick(opBt, flinkTranslate(b.asInstanceOf[DrmLike[Int]]))
-        val d = new CheckpointedFlinkDrm(bt.asRowWise.ds, _nrow = opBt.nrow, _ncol = opBt.ncol)
-        FlinkOpAtB.notZippable(OpAtB(c, d), flinkTranslate(c), flinkTranslate(d)).asInstanceOf[FlinkDrm[K]]
+      case op@OpABt(a, b) ⇒ FlinkOpABt.abt(op, flinkTranslate(a), flinkTranslate(b))
       case op@OpAtA(a) if op.keyClassTag == ClassTag.Int ⇒ FlinkOpAtA.at_a(op, flinkTranslate(a)).asInstanceOf[FlinkDrm[K]]
       case op@OpTimesRightMatrix(a, b) ⇒
         FlinkOpTimesRightMatrix.drmTimesInCore(op, flinkTranslate(a), b)

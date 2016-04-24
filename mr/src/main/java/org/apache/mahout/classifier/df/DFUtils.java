@@ -37,6 +37,7 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 /**
  * Utility class that contains various helper methods
  */
+@Deprecated
 public final class DFUtils {
 
   private DFUtils() {

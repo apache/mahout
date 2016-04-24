@@ -35,7 +35,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.easymock.Capture;
 import org.easymock.CaptureType;
 import org.junit.Test;
-
+@Deprecated
 public final class Step1MapperTest extends MahoutTestCase {
 
   /**

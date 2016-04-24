@@ -41,6 +41,7 @@ import java.util.Random;
  * A classification tree is built when the criterion variable is the categorical attribute.<br>
  * A regression tree is built when the criterion variable is the numerical attribute.
  */
+@Deprecated
 public class DecisionTreeBuilder implements TreeBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(DecisionTreeBuilder.class);

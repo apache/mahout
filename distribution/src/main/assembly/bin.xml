@@ -246,9 +246,6 @@
     <fileSet>
       <directory>${project.basedir}/../bin</directory>
       <outputDirectory>bin</outputDirectory>
-      <includes>
-        <include>mahout</include>
-      </includes>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
     </fileSet>

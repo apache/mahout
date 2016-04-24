@@ -32,11 +32,22 @@ class VectorOpsSuite extends FunSuite with MahoutSuite {
     val sparseVec = svec((5 -> 1) :: (10 -> 2.0) :: Nil)
     println(sparseVec)
 
+    assert(sparseVec.size() == 11)
+
     val sparseVec2: Vector = (5 -> 1.0) :: (10 -> 2.0) :: Nil
     println(sparseVec2)
 
     val sparseVec3: Vector = new RandomAccessSparseVector(100) := (5 -> 1.0) :: Nil
     println(sparseVec3)
+
+    val sparseVec4 = svec((5 -> 1) :: (10 -> 2.0) :: Nil, 100)
+    println(sparseVec4)
+
+    assert(sparseVec4.size() == 100)
+
+    intercept[IllegalArgumentException] {
+      val sparseVec5 = svec((5 -> 1) :: (10 -> 2.0) :: Nil, 10)  
+    }
 
     val denseVec1: Vector = (1.0, 1.1, 1.2)
     println(denseVec1)
