@@ -20,13 +20,15 @@ package org.apache.mahout.sparkbindings.blas
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.spark.rdd.RDD
+
 import scala.reflect.ClassTag
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.math.drm.BlockifiedDrmTuple
 import org.apache.mahout.sparkbindings.drm._
-import org.apache.mahout.math.{SparseMatrix, Matrix, SparseRowMatrix}
+import org.apache.mahout.math.{DenseMatrix, Matrix, SparseMatrix, SparseRowMatrix}
 import org.apache.mahout.math.drm.logical.OpABt
 import org.apache.mahout.logging._
+import org.apache.mahout.math.flavor.MatrixFlavor
 
 /** Contains RDD plans for ABt operator */
 object ABt {
@@ -116,7 +118,12 @@ object ABt {
           // Empty combiner += value
           createCombiner = (t: (Array[K], Array[Int], Matrix)) =>  {
             val (rowKeys, colKeys, block) = t
-            val comb = new SparseMatrix(prodNCol, block.nrow).t
+
+            val comb = if (block.getFlavor == MatrixFlavor.SPARSELIKE) {
+              new SparseMatrix(prodNCol, block.nrow).t
+            } else {
+              new DenseMatrix(prodNCol, block.nrow).t
+            }
 
             for ((col, i) <- colKeys.zipWithIndex) comb(::, col) := block(::, i)
             rowKeys -> comb
