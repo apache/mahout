@@ -176,6 +176,11 @@
       <artifactId>smile-core</artifactId>
       <version>1.1.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.github.haifengl</groupId>
+      <artifactId>smile-math</artifactId>
+      <version>1.1.0</version>
+    </dependency>
 
     <dependency>
       <groupId>com.github.haifengl</groupId>
@@ -183,7 +188,20 @@
       <version>1.1.0</version>
     </dependency>
 
-    <!--  3rd-party -->
+    <dependency>
+      <groupId>org.swinglabs</groupId>
+      <artifactId>swingx</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+
+    <!--<dependency>-->
+    <!--<groupId>org.swinglabs.swingx</groupId>-->
+     <!--<artifactId>swingx-all</artifactId>-->
+    <!--<version>1.6.4</version>-->
+    <!--</dependency>-->
+
+
+  <!--  3rd-party -->
 
     <!-- scala stuff -->
     <dependency>

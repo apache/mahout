@@ -18,7 +18,7 @@ import scala.collection.JavaConversions._
 class mplot2d[K](drmXY: DrmLike[K], samplePercent: Int = 10)  {
      val drmSize = drmXY.nrow
      val numSamples = (drmSize * (samplePercent/100)).toInt
-     val mPlotMatrix: Matrix = drmSampleKRows(drmXY, numSamples, false)
+     val mPlotMatrix: Matrix = drmSampleKRows(drmXY, 5000, false)
      val arrays: Array[Array[Double]]  = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
      for (i <- 0 until mPlotMatrix.numRows()) {
           arrays(i)(0) = mPlotMatrix(i,0)
@@ -26,7 +26,7 @@ class mplot2d[K](drmXY: DrmLike[K], samplePercent: Int = 10)  {
      }
 
      val canvas: PlotCanvas = ScatterPlot.plot(arrays,Color.BLUE)
-     canvas.setTitle("2d Plot: " + samplePercent + " sample of " + drmSize+" points")
+     canvas.setTitle("2d Plot: " + samplePercent + " % sample of " + drmSize +" points")
      canvas.setAxisLabels("X", "f(x)")
 
      val plotPanel :PlotPanel = new PlotPanel(canvas)
