@@ -39,12 +39,12 @@ import scala.collection.JavaConversions._
   * @tparam K
   */
 class mplot2d[K](drmXY: DrmLike[K], samplePercent: Int = 10, setVisible: Boolean = true)  {
-     val drmSize = drmXY.numRows()
+     val drmSize = drmXY.checkpoint().numRows()
      val numSamples: Int = (drmSize * (samplePercent / 100))
 
      println("SampleSize: " + numSamples +"of drm size: "+ drmSize)
 
-     val mPlotMatrix: Matrix = drmSampleKRows(drmXY, 5000, false)
+     val mPlotMatrix: Matrix = drmSampleKRows(drmXY, numSamples, false)
      val arrays: Array[Array[Double]]  = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
      for (i <- 0 until mPlotMatrix.numRows()) {
           arrays(i)(0) = mPlotMatrix(i, 0)

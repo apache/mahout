@@ -1,5 +1,3 @@
-
-
 import org.apache.mahout.visualization.mplot2d
 
 val mxRnd = Matrices.symmetricUniformView(5000000, 2, 1234)
