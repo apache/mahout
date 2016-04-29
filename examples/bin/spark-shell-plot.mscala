@@ -1,0 +1,21 @@
+
+
+import org.apache.mahout.visiualization.mplot2d
+
+val mxRnd = Matrices.symmetricUniformView(5000000, 2, 1234)
+val drmRand = drmParallelize(mxRnd)
+
+val drmSin = drmRand.mapBlock() {case (keys, block) =>  
+      val blockB = block.like()
+      for (i <- 0 until block.nrow) {
+      	blockB(i, 0) = block(i, 0) 
+	blockB(i, 1) = Math.sin((block(i, 0) * 4))
+      }
+      keys -> blockB
+    }
+
+new mplot2d(drmRand, samplePercent = 10)
+new mplot2d(drmSin, samplePercent = 10)
+
+
+
