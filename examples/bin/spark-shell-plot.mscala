@@ -12,8 +12,8 @@ val drmSin = drmRand.mapBlock() {case (keys, block) =>
   keys -> blockB
 }
 
-new mplot2d(drmRand, samplePercent = 10)
-new mplot2d(drmSin, samplePercent = 10)
+new mplot2d(drmRand, samplePercent = 1)
+new mplot2d(drmSin, samplePercent = 1)
 
 
 
