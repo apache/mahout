@@ -85,6 +85,9 @@ class MahoutSparkILoop extends SparkILoop {
     if(!conf.contains("spark.executor.memory")) {
       conf.set("spark.executor.memory", "1g")
     }
+    if(!conf.contains("spark.executor.memory")) {
+      conf.set("spark.executor.memory", "1g")
+    }
 
     sdc = mahoutSparkContext(
       masterUrl = master,

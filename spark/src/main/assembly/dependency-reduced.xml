@@ -43,9 +43,6 @@
         <include>org.apache.commons:commons-math3</include>
         <include>it.unimi.dsi:fastutil</include>
         <include>com.github.haifengl:smile-plot</include>
-        <include>com.github.haifengl:smile-core</include>
-        <include>com.github.haifengl:smile-math</include>
-        <include>org.swinglabs:swingx</include>
       </includes>
     </dependencySet>
   </dependencySets>
