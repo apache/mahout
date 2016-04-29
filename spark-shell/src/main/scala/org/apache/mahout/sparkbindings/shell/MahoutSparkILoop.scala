@@ -86,6 +86,11 @@ class MahoutSparkILoop extends SparkILoop {
       conf.set("spark.executor.memory", "1g")
     }
 
+    // set default if not already set- this is useful in local mode
+    if(!conf.contains("spark.kryoserializer.buffer.max")) {
+      conf.set("spark.kryoserializer.buffer.max", "1g")
+    }
+
     sdc = mahoutSparkContext(
       masterUrl = master,
       appName = "Mahout Spark Shell",
