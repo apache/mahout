@@ -31,14 +31,14 @@ import scala.collection.JavaConversions._
 
 
 /**
-  * Create a s scatter plot of a DRM by sampling a given percentage
+  * Create a s surface plot of a DRM by sampling a given percentage
   * and plotting corresponding points of (drmXYZ(::,0), drmXYZ(::,1), drmXYZ(::,2))
   *
   * @param drmXYZ an m x 3 Drm drm to plot
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class mplot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true)  {
+class msurf3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true)  {
   val drmSize = drmXYZ.checkpoint().numRows()
   val sampleDec: Double = (samplePercent / 100.toDouble)
 
@@ -52,12 +52,12 @@ class mplot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Bool
     arrays(i)(2) = mPlotMatrix(i, 2)
   }
 
-  val canvas3d: PlotCanvas = ScatterPlot.plot(arrays, Color.RED)
-  canvas3d.setTitle("3d scatter Plot: " + samplePercent + " % sample of " + drmSize +" points")
+  val canvas: PlotCanvas = Surface.plot(arrays, Palette.jet(256, 1.0f))
+  canvas.setTitle("Surface Plot: " + samplePercent + " % sample of " + drmSize +" points")
 
-  val plotPanel: PlotPanel = new PlotPanel(canvas3d)
+  val plotPanel: PlotPanel = new PlotPanel(canvas)
 
-  val plotFrame: JFrame = new JFrame("3d scatter Plot")
+  val plotFrame: JFrame = new JFrame("Surface Plot")
   plotFrame.setLayout(new BorderLayout())
   plotFrame.add(plotPanel)
   plotFrame.setSize(300,300)
@@ -66,3 +66,4 @@ class mplot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Bool
     plotFrame.show()
   }
 
+}

@@ -32,18 +32,21 @@ import scala.collection.JavaConversions._
 
 /**
   * Create a s scatter plot of a DRM by sampling a given percentage
-  * and plotting corresponding points of (drmXY(::,0),drmXY(::,2))
+  * and plotting corresponding points of (drmXY(::,0),drmXY(::,1))
   *
   * @param drmXY an m x 2 Drm drm to plot
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class mplot2d[K](drmXY: DrmLike[K], samplePercent: Int = 1, setVisible: Boolean = true)  {
+class mplot2d[K](drmXY: DrmLike[K], samplePercent: Double, setVisible: Boolean = true)  {
      val drmSize = drmXY.checkpoint().numRows()
-     val sampleDec: Double = (samplePercent.toDouble / 100.toDouble)
+     val sampleDec: Double = (samplePercent / 100.toDouble)
+
+     println("Sampldec = " + sampleDec+ " * " + drmSize )
 
      val numSamples: Int = (drmSize * sampleDec).toInt
-     
+
+     println("Sampldec = " +numSamples)
      val mPlotMatrix: Matrix = drmSampleKRows(drmXY, numSamples, false)
      val arrays: Array[Array[Double]]  = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
      for (i <- 0 until mPlotMatrix.numRows()) {
@@ -52,7 +55,7 @@ class mplot2d[K](drmXY: DrmLike[K], samplePercent: Int = 1, setVisible: Boolean 
      }
 
      val canvas: PlotCanvas = ScatterPlot.plot(arrays,Color.BLUE)
-     canvas.setTitle("2d Plot: " + samplePercent + " % sample of " + drmSize +" points")
+     canvas.setTitle("2d scatter Plot: " + samplePercent + " % sample of " + drmSize +" points")
      canvas.setAxisLabels("x_0", "x_1")
 
      val plotPanel: PlotPanel = new PlotPanel(canvas)
