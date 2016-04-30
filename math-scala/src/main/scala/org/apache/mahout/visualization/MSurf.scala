@@ -18,7 +18,6 @@
 package org.apache.mahout.visualization
 
 import java.awt.{BorderLayout, Color}
-import java.io.File
 import javax.swing.JFrame
 
 import org.apache.mahout.math._
@@ -27,7 +26,6 @@ import RLikeOps._
 import drm._
 import smile.plot._
 
-import scala.collection.JavaConversions._
 
 
 /**
@@ -38,13 +36,14 @@ import scala.collection.JavaConversions._
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class msurf[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true)  {
+class MSurf[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot {
   val drmSize = drmXYZ.checkpoint().numRows()
   val sampleDec: Double = (samplePercent / 100.toDouble)
 
   val numSamples: Int = (drmSize * sampleDec).toInt
 
-  val mPlotMatrix: Matrix = drmSampleKRows(drmXYZ, numSamples, false)
+  mPlotMatrix = drmSampleKRows(drmXYZ, numSamples, false)
+
   val arrays: Array[Array[Double]]  = Array.ofDim[Double](mPlotMatrix.numRows(), 3)
   for (i <- 0 until mPlotMatrix.numRows()) {
     arrays(i)(0) = mPlotMatrix(i, 0)
@@ -52,18 +51,17 @@ class msurf[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolea
     arrays(i)(2) = mPlotMatrix(i, 2)
   }
 
-  val canvas: PlotCanvas = Surface.plot(arrays, Palette.jet(256, 1.0f))
+  canvas = Surface.plot(arrays, Palette.jet(256, 1.0f))
   canvas.setTitle("Surface Plot: " + samplePercent + " % sample of " + drmSize +" points")
 
-  val plotPanel: PlotPanel = new PlotPanel(canvas)
+  plotPanel = new PlotPanel(canvas)
 
-  val plotFrame: JFrame = new JFrame("Surface Plot")
+  plotFrame = new JFrame("Surface Plot")
   plotFrame.setLayout(new BorderLayout())
   plotFrame.add(plotPanel)
   plotFrame.setSize(300,300)
   if (setVisible) {
     plotFrame.setVisible(true)
-    plotFrame.show()
   }
 
 }

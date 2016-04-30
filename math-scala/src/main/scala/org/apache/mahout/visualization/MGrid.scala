@@ -18,52 +18,48 @@
 package org.apache.mahout.visualization
 
 import java.awt.{BorderLayout, Color}
-import java.io.File
 import javax.swing.JFrame
 
 import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import drm._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import smile.plot._
-
-import scala.collection.JavaConversions._
 
 
 /**
-  * Create a s scatter plot of a DRM by sampling a given percentage
+  * Create a grid plot of a DRM by sampling a given percentage
   * and plotting corresponding points of (drmXYZ(::,0), drmXYZ(::,1), drmXYZ(::,2))
   *
   * @param drmXYZ an m x 3 Drm drm to plot
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class mplot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true) {
+class MGrid[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot{
+
   val drmSize = drmXYZ.checkpoint().numRows()
   val sampleDec: Double = (samplePercent / 100.toDouble)
-
   val numSamples: Int = (drmSize * sampleDec).toInt
 
-  val mPlotMatrix: Matrix = drmSampleKRows(drmXYZ, numSamples, false)
-  val arrays: Array[Array[Double]] = Array.ofDim[Double](mPlotMatrix.numRows(), 3)
-  for (i <- 0 until mPlotMatrix.numRows()) {
-    arrays(i)(0) = mPlotMatrix(i, 0)
-    arrays(i)(1) = mPlotMatrix(i, 1)
-    arrays(i)(2) = mPlotMatrix(i, 2)
-  }
+   mPlotMatrix = drmSampleKRows(drmXYZ, numSamples, false)
 
-  val canvas3d: PlotCanvas = ScatterPlot.plot(arrays, Color.RED)
-  canvas3d.setTitle("3d scatter Plot: " + samplePercent + " % sample of " + drmSize + " points")
+  // matrix rows
+  val m = mPlotMatrix.numRows()
 
-  val plotPanel: PlotPanel = new PlotPanel(canvas3d)
+  // roll a set of 3d points in an m x 3 drm  into a m x m x 3 matrix.
+  val array3d: Array[Array[Array[Double]]] = mxXYZ2array3d(mPlotMatrix)
 
-  val plotFrame: JFrame = new JFrame("3d scatter Plot")
+  canvas = Grid.plot(array3d)
+  canvas.setTitle("3d Grid Plot: " + samplePercent + " % sample of " + drmSize + " points")
+
+  plotPanel = new PlotPanel(canvas)
+
+  plotFrame = new JFrame("Grid Plot")
   plotFrame.setLayout(new BorderLayout())
   plotFrame.add(plotPanel)
   plotFrame.setSize(300, 300)
   if (setVisible) {
     plotFrame.setVisible(true)
-    plotFrame.show()
   }
 }
 

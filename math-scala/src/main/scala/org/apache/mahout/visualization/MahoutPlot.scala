@@ -18,7 +18,17 @@
 
 package org.apache.mahout.visualization
 
+import javax.swing.JFrame
 
-trait mlpot  {
+import org.apache.mahout.math.Matrix
+import smile.plot.{PlotCanvas, PlotPanel}
+
+
+trait MahoutPlot  {
+
+  var canvas : PlotCanvas = _
+  var plotPanel: PlotPanel =_
+  var plotFrame: JFrame = _
+  var mPlotMatrix: Matrix = _
 
 }

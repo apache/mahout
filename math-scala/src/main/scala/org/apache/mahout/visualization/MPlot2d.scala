@@ -18,7 +18,6 @@
 package org.apache.mahout.visualization
 
 import java.awt.{BorderLayout, Color}
-import java.io.File
 import javax.swing.JFrame
 
 import org.apache.mahout.math._
@@ -26,8 +25,6 @@ import scalabindings._
 import RLikeOps._
 import drm._
 import smile.plot._
-
-import scala.collection.JavaConversions._
 
 
 /**
@@ -38,35 +35,31 @@ import scala.collection.JavaConversions._
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class mplot2d[K](drmXY: DrmLike[K], samplePercent: Double, setVisible: Boolean = true)  {
-     val drmSize = drmXY.checkpoint().numRows()
-     val sampleDec: Double = (samplePercent / 100.toDouble)
+class MPlot2d[K](drmXY: DrmLike[K], samplePercent: Double, setVisible: Boolean = true)  extends MahoutPlot {
+   val drmSize = drmXY.checkpoint().numRows()
+   val sampleDec: Double = (samplePercent / 100.toDouble)
 
-     println("Sampldec = " + sampleDec+ " * " + drmSize )
+   val numSamples: Int = (drmSize * sampleDec).toInt
 
-     val numSamples: Int = (drmSize * sampleDec).toInt
+   mPlotMatrix = drmSampleKRows(drmXY, numSamples, false)
+   val arrays: Array[Array[Double]]  = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
+   for (i <- 0 until mPlotMatrix.numRows()) {
+        arrays(i)(0) = mPlotMatrix(i, 0)
+        arrays(i)(1) = mPlotMatrix(i, 1)
+   }
 
-     println("Sampldec = " +numSamples)
-     val mPlotMatrix: Matrix = drmSampleKRows(drmXY, numSamples, false)
-     val arrays: Array[Array[Double]]  = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
-     for (i <- 0 until mPlotMatrix.numRows()) {
-          arrays(i)(0) = mPlotMatrix(i, 0)
-          arrays(i)(1) = mPlotMatrix(i, 1)
-     }
+   canvas = ScatterPlot.plot(arrays, Color.BLUE)
+   canvas.setTitle("2d scatter Plot: " + samplePercent + " % sample of " + drmSize +" points")
+   canvas.setAxisLabels("x_0", "x_1")
 
-     val canvas: PlotCanvas = ScatterPlot.plot(arrays,Color.BLUE)
-     canvas.setTitle("2d scatter Plot: " + samplePercent + " % sample of " + drmSize +" points")
-     canvas.setAxisLabels("x_0", "x_1")
+   plotPanel = new PlotPanel(canvas)
 
-     val plotPanel: PlotPanel = new PlotPanel(canvas)
-
-     val plotFrame: JFrame = new JFrame("2d Plot")
-     plotFrame.setLayout(new BorderLayout())
-     plotFrame.add(plotPanel)
-     plotFrame.setSize(300,300)
-     if (setVisible) {
-          plotFrame.setVisible(true)
-          plotFrame.show()
-     }
+   plotFrame = new JFrame("2d scatter Plot")
+   plotFrame.setLayout(new BorderLayout())
+   plotFrame.add(plotPanel)
+   plotFrame.setSize(300,300)
+   if (setVisible) {
+        plotFrame.setVisible(true)
+   }
 
 }
