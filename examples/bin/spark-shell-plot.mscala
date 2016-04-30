@@ -14,64 +14,31 @@ val drmSin = drmRand.mapBlock() {case (keys, block) =>
 new mplot2d(drmRand, samplePercent = .1)
 new mplot2d(drmSin, samplePercent = .1)
 
-
-// surface plot
-import org.apache.mahout.visualization.msurf3d
-
-val mxRnd3d = Matrices.symmetricUniformView(5000, 3, 1234)
-val drmRand3d = drmParallelize(mxRnd3d)
-
-// gaussian
-val drmGauss = drmRand3d.mapBlock() {case (keys, block) =>  
-  val blockB = block.like()
-  val m = block.nrow
-  val n = block.nrow
-  val sigma = 1.0    
-
-  for (i <- 0 until m) {
-       
-        val t =  Math.exp(-(blockB(i, 0) * blockB(i, 0) + blockB(i, 1) * blockB(i, 1)) / 2) / Math.sqrt(2*Math.PI)
-
-        blockB(i, 2) = t * (-1 / (Math.PI *math.pow(sigma,4) * (1 -((blockB(i, 0)*(blockB(i, 0)) + ((blockB(i, 1)*(blockB(i, 1)) )/ 2 *(Math.pow(sigma,2))
-     // }
-  }
-  keys -> blockB
-}
-
-new msurf3d(drmGauss, samplePercent = 1)
-
-val drmHat = drmRand3d.mapBlock() {case (keys, block) =>  
-  val blockB = block.like()
-  val m = block.nrow
-  val n = block.nrow
-  for (i <- 0 until m) {
-      for (j <- 0 until i) {
-        blockB(i, 0) = 6.0 * (i - m/2) / m
-        blockB(j, 1) = 6.0 * (j - m/2) / m 
-        blockB(i, 2) =  Math.exp((blockB(i, 0) * blockB(j, 0) + blockB(i, 1) * blockB(j, 1)) / -2) / Math.sqrt(2*Math.PI)
-      }
-  }
-  keys -> blockB
-}
-new msurf3d(drmHat, samplePercent = 10)
-
-
-val mxRnd3d = Matrices.symmetricUniformView(5000, 3, 1234)
+// 3d scatter
+import org.apache.mahout.visualization.mplot3d
+val mxRnd3d = Matrices.symmetricUniformView(50000, 3, 1234)
 val drmRand3d = drmParallelize(mxRnd3d)
 
 val drmGauss = drmRand3d.mapBlock() {case (keys, block) =>
   val blockB = block.like()
-  val m = block.nrow
-  val n = block.nrow
-  val sigma = 1.0
-  for (i <- 0 until m) {
-    val x = blockB(0, 0)
-    val y = blockB(0, 1)
-    blockB(0, 2) = Math.exp(-((Math.pow(x, 2)) + (Math.pow(y, 2)))/2)
+  for (i <- 0 until block.nrow) {
+    val x:Double = block(i, 0)
+    val y:Double = block(i, 1)
+    val z:Double = block(i, 2)
+
+    blockB(i, 0) = x
+    blockB(i, 1) = y
+    blockB(i, 2) = Math.exp(-((Math.pow(x, 2)) + (Math.pow(y, 2)))/2)
   }
   keys -> blockB
 }
-new msurf3d(drmGauss, samplePercent = 1)
+
+new mplot3d(drmGauss, samplePercent = 50)
+
+
+// 3d Surface needs to be ordered.
+import org.apache.mahout.visualization.msurf
+new msurf3d(drmGauss, samplePercent = 10)
 
 
 

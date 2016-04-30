@@ -38,14 +38,14 @@ import scala.collection.JavaConversions._
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class mplot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true)  {
+class mplot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true) {
   val drmSize = drmXYZ.checkpoint().numRows()
   val sampleDec: Double = (samplePercent / 100.toDouble)
 
   val numSamples: Int = (drmSize * sampleDec).toInt
 
   val mPlotMatrix: Matrix = drmSampleKRows(drmXYZ, numSamples, false)
-  val arrays: Array[Array[Double]]  = Array.ofDim[Double](mPlotMatrix.numRows(), 3)
+  val arrays: Array[Array[Double]] = Array.ofDim[Double](mPlotMatrix.numRows(), 3)
   for (i <- 0 until mPlotMatrix.numRows()) {
     arrays(i)(0) = mPlotMatrix(i, 0)
     arrays(i)(1) = mPlotMatrix(i, 1)
@@ -53,16 +53,17 @@ class mplot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Bool
   }
 
   val canvas3d: PlotCanvas = ScatterPlot.plot(arrays, Color.RED)
-  canvas3d.setTitle("3d scatter Plot: " + samplePercent + " % sample of " + drmSize +" points")
+  canvas3d.setTitle("3d scatter Plot: " + samplePercent + " % sample of " + drmSize + " points")
 
   val plotPanel: PlotPanel = new PlotPanel(canvas3d)
 
   val plotFrame: JFrame = new JFrame("3d scatter Plot")
   plotFrame.setLayout(new BorderLayout())
   plotFrame.add(plotPanel)
-  plotFrame.setSize(300,300)
+  plotFrame.setSize(300, 300)
   if (setVisible) {
     plotFrame.setVisible(true)
     plotFrame.show()
   }
+}
 

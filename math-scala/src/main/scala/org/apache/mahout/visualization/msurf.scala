@@ -38,7 +38,7 @@ import scala.collection.JavaConversions._
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class msurf3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true)  {
+class msurf[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true)  {
   val drmSize = drmXYZ.checkpoint().numRows()
   val sampleDec: Double = (samplePercent / 100.toDouble)
 
