@@ -38,8 +38,8 @@ package object visualization {
 
     // 3d array to return
     val array3d: Array[Array[Array[Double]]] =  Array.ofDim[Double](m, m, 3)
-
     // roll a set of 3d points in an m x 3 matrix into a m x m x 3 Array.
+    //TODO: FIX this:
     for (i <- 0 until m) {
       for (j <- 0 until m) {
         for (k <- 0 until 3) {
