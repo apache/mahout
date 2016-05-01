@@ -53,13 +53,12 @@ val drmGauss = drmRand3d.mapBlock() {case (keys, block) =>
 
 new MPlot3d(drmGauss, samplePercent = 50)
 
-
-// 3d Surface needs to be ordered.
+// 3d Surface needs to be ordered. --notworking
 import org.apache.mahout.visualization.MSurf
 new MSurf(drmGauss, samplePercent = 10)
 
 
-// 3d grid
+// 3d grid --not working
 import org.apache.mahout.visualization.MGrid
 val mxRnd3d = Matrices.symmetricUniformView(50000, 3, 1234)
 val drmRand3d = drmParallelize(mxRnd3d)
@@ -80,5 +79,17 @@ val drmGauss = drmRand3d.mapBlock() {case (keys, block) =>
 
 new MGrid(drmGauss, samplePercent = 10)
 
+
+// 2 and 3d histograms of gaussian data
+import org.apache.mahout.visualization.MHisto3d
+import org.apache.mahout.visualization.MHisto
+val mxRnd3d = Matrices.gaussianView(50000, 3, 1234)
+val drmRand3d = drmParallelize(mxRnd3d)
+
+// check out freguencies of the first column across 10 bins of original data.
+new MHisto(drmRand3d(0,::), 10, samplePercent = 10)
+
+// look at 3d-Histogram
+new MHisto3d(drmGauss, 10, samplePercent = 10)
 
 

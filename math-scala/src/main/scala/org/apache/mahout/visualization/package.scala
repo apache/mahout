@@ -94,4 +94,29 @@ package object visualization {
   def mgrid[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
     new MGrid[K](drmXYZ: DrmLike[K], samplePercent, setVisible)
 
+  /**
+    *
+    * @param drmXYZ
+    * @param numBins
+    * @param samplePercent
+    * @param setVisible
+    * @tparam K
+    * @return
+    */
+  def mhisto[K](drmXYZ: DrmLike[K], numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
+    new MHisto[K](drmXYZ: DrmLike[K], numBins, samplePercent, setVisible)
+
+  /**
+    *
+     * @param drmXYZ
+    * @param numBins
+    * @param samplePercent
+    * @param setVisible
+    * @tparam K
+    * @return
+    */
+  def mhisto3d[K](drmXYZ: DrmLike[K], numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
+    new MHisto3d[K](drmXYZ: DrmLike[K],numBins, samplePercent, setVisible)
+
+
 }

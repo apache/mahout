@@ -18,27 +18,25 @@
 package org.apache.mahout.visualization
 
 import java.awt.{BorderLayout, Color}
-import java.io.File
 import javax.swing.JFrame
 
 import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import drm._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import smile.plot._
-
-import scala.collection.JavaConversions._
 
 
 /**
-  * Create a scatter plot of a DRM by sampling a given percentage
+  * Create 3d Histogram of a DRM by sampling a given percentage
   * and plotting corresponding points of (drmXYZ(::,0), drmXYZ(::,1), drmXYZ(::,2))
   *
   * @param drmXYZ an m x 3 Drm drm to plot
+  * @param numBins num bins to define histogram on
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class MPlot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot {
+class MHisto3d[K](drmXYZ: DrmLike[K],numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot {
   val drmSize = drmXYZ.checkpoint().numRows()
   val sampleDec: Double = (samplePercent / 100.toDouble)
 
@@ -52,12 +50,12 @@ class MPlot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Bool
     arrays(i)(2) = mPlotMatrix(i, 2)
   }
 
-  canvas = ScatterPlot.plot(arrays, Color.RED)
-  canvas.setTitle("3d scatter Plot: " + samplePercent + " % sample of " + drmSize + " points")
+  canvas = Histogram3D.plot(arrays, Palette.jet(256, 1.0f))
+  canvas.setTitle("3d Histogram: " + samplePercent + " % sample of " + drmSize + " points")
 
   plotPanel = new PlotPanel(canvas)
 
-  plotFrame = new JFrame("3d scatter Plot")
+  plotFrame = new JFrame("3d Histogram")
   plotFrame.setLayout(new BorderLayout())
   plotFrame.add(plotPanel)
   plotFrame.setSize(300, 300)

@@ -18,51 +18,49 @@
 package org.apache.mahout.visualization
 
 import java.awt.{BorderLayout, Color}
-import java.io.File
 import javax.swing.JFrame
 
 import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import drm._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import smile.plot._
-
-import scala.collection.JavaConversions._
 
 
 /**
-  * Create a scatter plot of a DRM by sampling a given percentage
-  * and plotting corresponding points of (drmXYZ(::,0), drmXYZ(::,1), drmXYZ(::,2))
+  * Create a Histogram of bims of a DRM by sampling a given percentage
+  * and plotting corresponding points of (drmXY(::,0),drmXY(::,1))
   *
-  * @param drmXYZ an m x 3 Drm drm to plot
-  * @param samplePercent the percentage the drm to sample
+  * @param drmXY an m x 1 Drm Column, drm to plot
+  * @param numBins: number of bins
+  * @param samplePercent the percentage the drm to sample. Default =1
   * @tparam K
   */
-class MPlot3d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot {
-  val drmSize = drmXYZ.checkpoint().numRows()
+class MHisto[K](drmXY: DrmLike[K], numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true)  extends MahoutPlot {
+  val drmSize = drmXY.checkpoint().numRows()
   val sampleDec: Double = (samplePercent / 100.toDouble)
 
   val numSamples: Int = (drmSize * sampleDec).toInt
 
-  mPlotMatrix = drmSampleKRows(drmXYZ, numSamples, false)
-  val arrays: Array[Array[Double]] = Array.ofDim[Double](mPlotMatrix.numRows(), 3)
+  mPlotMatrix = drmSampleKRows(drmXY, numSamples, false)
+  val arrays = Array.ofDim[Double](mPlotMatrix.numRows())
   for (i <- 0 until mPlotMatrix.numRows()) {
-    arrays(i)(0) = mPlotMatrix(i, 0)
-    arrays(i)(1) = mPlotMatrix(i, 1)
-    arrays(i)(2) = mPlotMatrix(i, 2)
+       arrays(i) = mPlotMatrix(i, 0)
   }
 
-  canvas = ScatterPlot.plot(arrays, Color.RED)
-  canvas.setTitle("3d scatter Plot: " + samplePercent + " % sample of " + drmSize + " points")
+  // just use bins during development, can define ranges etc later
+  canvas = Histogram.plot(arrays, numBins)
+  canvas.setTitle("2d Histogram: " + samplePercent + " % sample of " + drmSize +" points")
+  canvas.setAxisLabels("x_0", "frequency")
 
   plotPanel = new PlotPanel(canvas)
 
-  plotFrame = new JFrame("3d scatter Plot")
+  plotFrame = new JFrame("2d Histogram")
   plotFrame.setLayout(new BorderLayout())
   plotFrame.add(plotPanel)
-  plotFrame.setSize(300, 300)
+  plotFrame.setSize(300,300)
   if (setVisible) {
-    plotFrame.setVisible(true)
+     plotFrame.setVisible(true)
   }
-}
 
+}

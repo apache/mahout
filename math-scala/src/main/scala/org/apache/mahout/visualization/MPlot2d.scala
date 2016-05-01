@@ -28,14 +28,14 @@ import smile.plot._
 
 
 /**
-  * Create a s scatter plot of a DRM by sampling a given percentage
+  * Create a scatter plot of a DRM by sampling a given percentage
   * and plotting corresponding points of (drmXY(::,0),drmXY(::,1))
   *
   * @param drmXY an m x 2 Drm drm to plot
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class MPlot2d[K](drmXY: DrmLike[K], samplePercent: Double, setVisible: Boolean = true)  extends MahoutPlot {
+class MPlot2d[K](drmXY: DrmLike[K], samplePercent: Double  = 1, setVisible: Boolean = true)  extends MahoutPlot {
    val drmSize = drmXY.checkpoint().numRows()
    val sampleDec: Double = (samplePercent / 100.toDouble)
 
