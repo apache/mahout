@@ -31,7 +31,7 @@ package object visualization {
     * @param mxXYZ Matrix of data points x_0 = mx(i,0), x_1 = mx(i,1), x_2 = mx(i,2)
     * @return an Array[Array[Array[Double]]] 3d Array
     */
-  def mxXYZ2array3d(mxXYZ: Matrix ): Array[Array[Array[Double]]] = {
+  def mxXYZ2array3d(mxXYZ: Matrix): Array[Array[Array[Double]]] = {
 
     // number of datapoints
     val m = mxXYZ.numRows()
@@ -40,10 +40,10 @@ package object visualization {
     val array3d: Array[Array[Array[Double]]] =  Array.ofDim[Double](m, m, 3)
 
     // roll a set of 3d points in an m x 3 matrix into a m x m x 3 Array.
-    for (i <- 0 until (m/2)) {
-      for (j <- 0 until (m/2)) {
+    for (i <- 0 until m) {
+      for (j <- 0 until m) {
         for (k <- 0 until 3) {
-          array3d(i)(j)(k) = mxXYZ(i + j, k)
+          array3d(i)(j)(k) = mxXYZ(i, k)
         }
       }
     }
@@ -51,7 +51,7 @@ package object visualization {
   }
 
   /**
-    * Syntatic sugar for Msurf class
+    * Syntatic sugar for MSurf class
     * @param drmXYZ
     * @param samplePercent
     * @param setVisible

@@ -66,9 +66,9 @@ val drmRand3d = drmParallelize(mxRnd3d)
 val drmGauss = drmRand3d.mapBlock() {case (keys, block) =>
   val blockB = block.like()
   for (i <- 0 until block.nrow) {
-    val x:Double = block(i, 0)
-    val y:Double = block(i, 1)
-    val z:Double = block(i, 2)
+    val x: Double = block(i, 0)
+    val y: Double = block(i, 1)
+    val z: Double = block(i, 2)
 
     blockB(i, 0) = x
     blockB(i, 1) = y
@@ -86,10 +86,11 @@ import org.apache.mahout.visualization.MHisto
 val mxRnd3d = Matrices.gaussianView(50000, 3, 1234)
 val drmRand3d = drmParallelize(mxRnd3d)
 
-// check out freguencies of the first column across 10 bins of original data.
+// check out frequencies of the first column across 10 bins of original data.
 new MHisto(drmRand3d, 20, samplePercent = 50)
 
 // look at 3d-Histogram
-new MHisto3d(drmRand3d, 10, samplePercent = 10)
+val h3d = new MHisto3d(drmRand3d, 10, samplePercent = 10)
 
+h3d.exportPNG("/tmp/histo3d.png")
 

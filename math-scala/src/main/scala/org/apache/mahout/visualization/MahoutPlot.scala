@@ -31,14 +31,16 @@ import smile.plot.{PlotCanvas, PlotPanel}
 trait MahoutPlot  {
 
   var canvas : PlotCanvas = _
-  var plotPanel: PlotPanel =_
+  var plotPanel: PlotPanel = _
   var plotFrame: JFrame = _
   var mPlotMatrix: Matrix = _
-  def contentPane = plotPanel
+  def contentPane = canvas
 
   // export a PNG of the plot to /tmp/test.png
   def exportPNG(path: String ="/tmp/test.png") = {
-    val bi: BufferedImage = new BufferedImage(contentPane.getWidth, contentPane.getHeight, BufferedImage.TYPE_INT_ARGB)
+    val bi: BufferedImage =
+      new BufferedImage(contentPane.getWidth, contentPane.getHeight, BufferedImage.TYPE_INT_ARGB)
+
     val g2d: Graphics2D = bi.createGraphics
 
     contentPane.printAll(g2d)
