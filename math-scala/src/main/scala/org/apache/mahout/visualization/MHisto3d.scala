@@ -43,11 +43,11 @@ class MHisto3d[K](drmXYZ: DrmLike[K],numBins: Int, samplePercent: Double = 1, se
   val numSamples: Int = (drmSize * sampleDec).toInt
 
   mPlotMatrix = drmSampleKRows(drmXYZ, numSamples, false)
-  val arrays: Array[Array[Double]] = Array.ofDim[Double](mPlotMatrix.numRows(), 3)
+  val arrays: Array[Array[Double]] = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
   for (i <- 0 until mPlotMatrix.numRows()) {
     arrays(i)(0) = mPlotMatrix(i, 0)
     arrays(i)(1) = mPlotMatrix(i, 1)
-    arrays(i)(2) = mPlotMatrix(i, 2)
+   // arrays(i)(2) = mPlotMatrix(i, 2)
   }
 
   canvas = Histogram3D.plot(arrays, Palette.jet(256, 1.0f))
