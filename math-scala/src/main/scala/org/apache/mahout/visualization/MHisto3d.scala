@@ -17,13 +17,11 @@
 
 package org.apache.mahout.visualization
 
-import java.awt.{BorderLayout, Color}
+import java.awt.BorderLayout
 import javax.swing.JFrame
 
-import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.scalabindings._
 import smile.plot._
 
 
@@ -38,11 +36,11 @@ import smile.plot._
   */
 class MHisto3d[K](drmXY: DrmLike[K],numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot {
   val drmSize = drmXY.checkpoint().numRows()
-  val sampleDec: Double = (samplePercent / 100.toDouble)
+  val sampleDec: Double = samplePercent / 100.toDouble
 
   val numSamples: Int = (drmSize * sampleDec).toInt
 
-  mPlotMatrix = drmSampleKRows(drmXY, numSamples, false)
+  mPlotMatrix = drmSampleKRows(drmXY, numSamples, replacement = false)
   val arrays: Array[Array[Double]] = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
   for (i <- 0 until mPlotMatrix.numRows()) {
     arrays(i)(0) = mPlotMatrix(i, 0)

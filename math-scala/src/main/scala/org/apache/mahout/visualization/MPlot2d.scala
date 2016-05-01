@@ -37,11 +37,11 @@ import smile.plot._
   */
 class MPlot2d[K](drmXY: DrmLike[K], samplePercent: Double  = 1, setVisible: Boolean = true)  extends MahoutPlot {
    val drmSize = drmXY.checkpoint().numRows()
-   val sampleDec: Double = (samplePercent / 100.toDouble)
+   val sampleDec: Double = samplePercent / 100.toDouble
 
    val numSamples: Int = (drmSize * sampleDec).toInt
 
-   mPlotMatrix = drmSampleKRows(drmXY, numSamples, false)
+   mPlotMatrix = drmSampleKRows(drmXY, numSamples, replacement = false)
    val arrays: Array[Array[Double]]  = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
    for (i <- 0 until mPlotMatrix.numRows()) {
         arrays(i)(0) = mPlotMatrix(i, 0)

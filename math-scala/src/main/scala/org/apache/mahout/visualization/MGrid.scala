@@ -17,13 +17,10 @@
 
 package org.apache.mahout.visualization
 
-import java.awt.{BorderLayout, Color}
+import java.awt.BorderLayout
 import javax.swing.JFrame
 
-import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.scalabindings._
 import smile.plot._
 
 
@@ -38,10 +35,10 @@ import smile.plot._
 class MGrid[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot{
 
   val drmSize = drmXYZ.checkpoint().numRows()
-  val sampleDec: Double = (samplePercent / 100.toDouble)
+  val sampleDec: Double = samplePercent / 100.toDouble
   val numSamples: Int = (drmSize * sampleDec).toInt
 
-   mPlotMatrix = drmSampleKRows(drmXYZ, numSamples, false)
+   mPlotMatrix = drmSampleKRows(drmXYZ, numSamples, replacement = false)
 
   // matrix rows
   val m = mPlotMatrix.numRows()
