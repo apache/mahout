@@ -31,23 +31,22 @@ import smile.plot._
   * Create 3d Histogram of a DRM by sampling a given percentage
   * and plotting corresponding points of (drmXYZ(::,0), drmXYZ(::,1), drmXYZ(::,2))
   *
-  * @param drmXYZ an m x 3 Drm drm to plot
+  * @param drmXY an m x 3 Drm drm to plot
   * @param numBins num bins to define histogram on
   * @param samplePercent the percentage the drm to sample
   * @tparam K
   */
-class MHisto3d[K](drmXYZ: DrmLike[K],numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot {
-  val drmSize = drmXYZ.checkpoint().numRows()
+class MHisto3d[K](drmXY: DrmLike[K],numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot {
+  val drmSize = drmXY.checkpoint().numRows()
   val sampleDec: Double = (samplePercent / 100.toDouble)
 
   val numSamples: Int = (drmSize * sampleDec).toInt
 
-  mPlotMatrix = drmSampleKRows(drmXYZ, numSamples, false)
+  mPlotMatrix = drmSampleKRows(drmXY, numSamples, false)
   val arrays: Array[Array[Double]] = Array.ofDim[Double](mPlotMatrix.numRows(), 2)
   for (i <- 0 until mPlotMatrix.numRows()) {
     arrays(i)(0) = mPlotMatrix(i, 0)
     arrays(i)(1) = mPlotMatrix(i, 1)
-   // arrays(i)(2) = mPlotMatrix(i, 2)
   }
 
   canvas = Histogram3D.plot(arrays, Palette.jet(256, 1.0f))

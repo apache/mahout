@@ -59,7 +59,7 @@ class MSurf[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolea
   plotFrame = new JFrame("Surface Plot")
   plotFrame.setLayout(new BorderLayout())
   plotFrame.add(plotPanel)
-  plotFrame.setSize(300,300)
+  plotFrame.setSize(300, 300)
   if (setVisible) {
     plotFrame.setVisible(true)
   }

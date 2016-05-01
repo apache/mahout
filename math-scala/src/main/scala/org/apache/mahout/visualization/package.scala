@@ -63,14 +63,14 @@ package object visualization {
 
   /**
     * Syntatic sugar for MPlot2d class
-    * @param drmXYZ
+    * @param drmXY
     * @param samplePercent
     * @param setVisible
     * @tparam K
     * @return
     */
-  def mpot2d[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
-    new MPlot2d[K](drmXYZ: DrmLike[K], samplePercent, setVisible)
+  def mpot2d[K](drmXY: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
+    new MPlot2d[K](drmXY: DrmLike[K], samplePercent, setVisible)
 
   /**
     * Syntatic sugar for MPlot3d class
@@ -96,27 +96,27 @@ package object visualization {
 
   /**
     *
-    * @param drmXYZ
+    * @param drmX
     * @param numBins
     * @param samplePercent
     * @param setVisible
     * @tparam K
     * @return
     */
-  def mhisto[K](drmXYZ: DrmLike[K], numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
-    new MHisto[K](drmXYZ: DrmLike[K], numBins, samplePercent, setVisible)
+  def mhisto[K](drmX: DrmLike[K], numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
+    new MHisto[K](drmX: DrmLike[K], numBins, samplePercent, setVisible)
 
   /**
     *
-     * @param drmXYZ
+    * @param drmXY
     * @param numBins
     * @param samplePercent
     * @param setVisible
     * @tparam K
     * @return
     */
-  def mhisto3d[K](drmXYZ: DrmLike[K], numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
-    new MHisto3d[K](drmXYZ: DrmLike[K],numBins, samplePercent, setVisible)
+  def mhisto3d[K](drmXY: DrmLike[K], numBins: Int, samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
+    new MHisto3d[K](drmXY: DrmLike[K], numBins, samplePercent, setVisible)
 
 
 }
