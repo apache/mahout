@@ -19,6 +19,7 @@ package org.apache.mahout.math;
 
 import com.google.common.base.Preconditions;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.IntIntFunction;
@@ -40,7 +41,7 @@ public final class Matrices {
    * @param denseLike type of matrix returne dby {@link org.apache.mahout.math.Matrix#like()}.
    * @return new matrix view.
    */
-  public static Matrix functionalMatrixView(final int rows,
+  public static final Matrix functionalMatrixView(final int rows,
                                                   final int columns,
                                                   final IntIntFunction gf,
                                                   final boolean denseLike) {
@@ -51,7 +52,7 @@ public final class Matrices {
    * Shorter form of {@link Matrices#functionalMatrixView(int, int,
    * org.apache.mahout.math.function.IntIntFunction, boolean)}.
    */
-  public static Matrix functionalMatrixView(final int rows,
+  public static final Matrix functionalMatrixView(final int rows,
                                                   final int columns,
                                                   final IntIntFunction gf) {
     return new FunctionalMatrixView(rows, columns, gf);
@@ -63,7 +64,7 @@ public final class Matrices {
    * @param m original matrix
    * @return transposed view of original matrix
    */
-  public static Matrix transposedView(final Matrix m) {
+  public static final Matrix transposedView(final Matrix m) {
 
     Preconditions.checkArgument(!(m instanceof SparseColumnMatrix));
 
@@ -79,7 +80,7 @@ public final class Matrices {
    *
    * @param seed generator seed
    */
-  public static Matrix gaussianView(final int rows,
+  public static final Matrix gaussianView(final int rows,
                                           final int columns,
                                           long seed) {
     return functionalMatrixView(rows, columns, gaussianGenerator(seed), true);
@@ -91,7 +92,7 @@ public final class Matrices {
    *
    * @param seed generator seed
    */
-  public static Matrix symmetricUniformView(final int rows,
+  public static final Matrix symmetricUniformView(final int rows,
                                                   final int columns,
                                                   int seed) {
     return functionalMatrixView(rows, columns, uniformSymmetricGenerator(seed), true);
@@ -102,7 +103,7 @@ public final class Matrices {
    *
    * @param seed generator seed
    */
-  public static Matrix uniformView(final int rows,
+  public static final Matrix uniformView(final int rows,
                                          final int columns,
                                          int seed) {
     return functionalMatrixView(rows, columns, uniformGenerator(seed), true);
@@ -114,18 +115,19 @@ public final class Matrices {
    * @param seed The seed for the matrix.
    * @return Gaussian {@link IntIntFunction} generating matrix view with normal values
    */
-  public static IntIntFunction gaussianGenerator(final long seed) {
+  public static final IntIntFunction gaussianGenerator(final long seed) {
     final Random rnd = RandomUtils.getRandom(seed);
-    return new IntIntFunction() {
+    IntIntFunction gaussianGF = new IntIntFunction() {
       @Override
       public double apply(int first, int second) {
-        rnd.setSeed(seed ^ (((long) first << 32) | (second & 0xffffffffL)));
+        rnd.setSeed(seed ^ (((long) first << 32) | (second & 0xffffffffl)));
         return rnd.nextGaussian();
       }
     };
+    return gaussianGF;
   }
 
-  private static final double UNIFORM_DIVISOR = Math.pow(2.0, 63);
+  private static final double UNIFORM_DIVISOR = Math.pow(2.0, 64);
 
   /**
    * Uniform [-1,1) matrix generator function.
@@ -136,14 +138,14 @@ public final class Matrices {
    * @param seed
    * @return Uniform {@link IntIntFunction} generator
    */
-  public static IntIntFunction uniformSymmetricGenerator(final int seed) {
+  public static final IntIntFunction uniformSymmetricGenerator(final int seed) {
     return new IntIntFunction() {
       private byte[] data = new byte[8];
 
       @Override
       public double apply(int row, int column) {
-        long d = ((long) row << Integer.SIZE) | (column & 0xffffffffL);
-        for (int i = 0; i < 8; i++, d >>>= 4) data[i] = (byte) d;
+        long d = ((long) row << Integer.SIZE) | (column & 0xffffffffl);
+        for (int i = 0; i < 8; i++, d >>>= 8) data[i] = (byte) d;
         long hash = MurmurHash.hash64A(data, seed);
         return hash / UNIFORM_DIVISOR;
       }
@@ -155,7 +157,7 @@ public final class Matrices {
    *
    * @param seed generator seed
    */
-  public static IntIntFunction uniformGenerator(final int seed) {
+  public static final IntIntFunction uniformGenerator(final int seed) {
     return Functions.chain(new DoubleFunction() {
       @Override
       public double apply(double x) {
