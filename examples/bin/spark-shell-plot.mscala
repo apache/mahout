@@ -18,7 +18,6 @@
 
 // this is the only import needed
 import org.apache.mahout.visualization._
-//import org.apache.mahout.visualization.MPlot2d
 
 val mxRnd = Matrices.symmetricUniformView(5000000, 2, 1234)
 val drmRand = drmParallelize(mxRnd)
@@ -35,7 +34,7 @@ mplot2d(drmRand, samplePercent = .1)
 mplot2d(drmSin, samplePercent = .1)
 
 // 3d scatter
-//import org.apache.mahout.visualization.MPlot3d
+import org.apache.mahout.visualization._
 val mxRnd3d = Matrices.symmetricUniformView(50000, 3, 1234)
 val drmRand3d = drmParallelize(mxRnd3d)
 
@@ -58,6 +57,32 @@ mplot3d(drmGauss, samplePercent = 50)
 // 3d Surface needs to be ordered. --not working correctly as is
 //import org.apache.mahout.visualization.MSurf
 msurf(drmGauss, samplePercent = 10)
+
+// 3d "Matlab peaks"
+import org.apache.mahout.visualization._
+val mxRnd3d = Matrices.symmetricUniformView(500000, 3, 1234)
+val drmRand3d = drmParallelize(mxRnd3d)
+
+val drmPeaks = drmRand3d.mapBlock() {case (keys, block) =>
+  val blockB = block.like()
+  for (i <- 0 until block.nrow) {
+    val x: Double = block(i, 0)
+    val y: Double = block(i, 1)
+    val z: Double = block(i, 2)
+
+    blockB(i, 0) = x * 6
+    blockB(i, 1) = y * 6
+    blockB(i, 2) = 3 * Math.pow((1 - x), 2) * Math.exp(-Math.pow( (y + 1), 2)) - 10 * (.2 * x -Math.pow(x,3) - Math.pow(y, 5)) * Math.exp(- (Math.pow(x, 2) - Math.pow(y, 2))) - (1/3) * Math.exp(-(Math.pow((x+1),2) - Math.pow(y, 2)))
+  }
+  keys -> blockB
+}
+
+mplot3d(drmPeaks, samplePercent = 10)
+
+// 3d Surface needs to be ordered. --not working correctly as is
+import org.apache.mahout.visualization._
+msurf(drmPeaks, samplePercent = 10)
+
 
 
 // 3d grid --not still not rendering -needs fix
@@ -83,8 +108,7 @@ mgrid(drmGauss, samplePercent = 10)
 
 
 // 2 and 3d histograms of gaussian data
-//import org.apache.mahout.visualization.MHisto3d
-//import org.apache.mahout.visualization.MHisto
+import org.apache.mahout.visualization._
 val mxRnd3d = Matrices.gaussianView(50000, 3, 1234)
 val drmRand3d = drmParallelize(mxRnd3d)
 
