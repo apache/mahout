@@ -365,7 +365,15 @@ object FlinkEngine extends DistributedEngine {
     implicit val typeInformation = generateTypeInformation[K]
 
     val sample = DataSetUtils(drmX.dataset).sampleWithSize(replacement, numSamples)
-    new CheckpointedFlinkDrm[K](sample)
+
+    val res = if (kTag != ClassTag.Int) {
+      new CheckpointedFlinkDrm[K](sample)
+    }
+    else {
+      blas.rekeySeqInts(new RowsFlinkDrm[K](sample, ncol = drmX.ncol), computeMap = false)._1
+    }
+
+    res.collect
   }
 
   /** Engine-specific all reduce tensor operation. */
