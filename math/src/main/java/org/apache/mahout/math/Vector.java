@@ -93,15 +93,19 @@ public interface Vector extends Cloneable {
   int size();
 
   /**
-   * @return true iff this implementation should be considered dense -- that it explicitly
+   * true if this implementation should be considered dense -- that it explicitly
    *  represents every value
+   *
+   * @return true or false
    */
   boolean isDense();
 
   /**
+   * true if this implementation should be considered to be iterable in index order in an efficient way.
+   * In particular this implies that {@link #all()} and {@link #nonZeroes()} ()} return elements
+   * in ascending order by index.
+   *
    * @return true iff this implementation should be considered to be iterable in index order in an efficient way.
-   *  In particular this implies that {@link #all()} and {@link #nonZeroes()} ()} return elements
-   *  in ascending order by index.
    */
   boolean isSequentialAccess();
 
@@ -192,8 +196,8 @@ public interface Vector extends Cloneable {
   /**
    * Return a new empty vector of the same underlying class as the receiver with given cardinality
    *
-   * @param cardinality
-   * @return
+   * @param cardinality - size of vector
+   * @return {@link Vector}
    */
   Vector like(int cardinality);
 

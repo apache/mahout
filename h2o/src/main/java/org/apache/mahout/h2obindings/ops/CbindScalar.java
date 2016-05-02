@@ -17,12 +17,9 @@
 
 package org.apache.mahout.h2obindings.ops;
 
-import water.MRTask;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 import water.fvec.Frame;
 import water.fvec.Vec;
-import water.fvec.Chunk;
-
-import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 /**
  * R-like cbind like operator, on a DRM and a new column containing
@@ -34,7 +31,8 @@ public class CbindScalar {
    * the given scalar.
    *
    * @param drmA DRM representing matrix A.
-   * @param d value to be filled in new column.
+   * @param scalar value to be filled in new column.
+   * @param leftbind true if binding to the left
    * @return new DRM containing columns of A and d.
    */
   public static H2ODrm exec(H2ODrm drmA, double scalar, boolean leftbind) {
