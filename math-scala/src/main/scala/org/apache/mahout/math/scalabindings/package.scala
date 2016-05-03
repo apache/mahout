@@ -17,7 +17,9 @@
 
 package org.apache.mahout.math
 
+import org.apache.mahout.common.RandomUtils
 import org.apache.mahout.math.solver.EigenDecomposition
+
 import collection._
 
 /**
@@ -409,5 +411,35 @@ package object scalabindings {
   def dist(mxX: Matrix): Matrix = sqDist(mxX) := sqrt _
 
   def dist(mxX: Matrix, mxY: Matrix): Matrix = sqDist(mxX, mxY) := sqrt _
+
+  /**
+    * Check the density of an in-core matrix based on supplied criteria.
+    *
+    * @param mxX  The matrix to check density of.
+    * @param rowSparsityThreshold the proportion of the rows which must be dense.
+    * @param elementSparsityThreshold the prpoportion of the rows in the random sample of the  matrix which must be dense.
+    * @param sample how moch of the matrix to sample.
+    */
+  def isMatrixDense(mxX: Matrix, rowSparsityThreshold: Double = .30, elementSparsityThreshold: Double = .30, sample: Double = .25): Boolean = {
+    val rand = RandomUtils.getRandom
+    val m = mxX.numRows()
+    val numRowToTest: Int = (sample * m).toInt
+
+    var numDenseRows: Int = 0
+
+    for (i <- 0 until numRowToTest) {
+      // select a row at random
+      val row: Vector = mxX(rand.nextInt(m), ::)
+      // check the sparsity of that rosw if it is greater than the set sparsity threshold count this row as dense
+      if (row.getNumNonZeroElements / row.size().toDouble > elementSparsityThreshold) {
+        numDenseRows = numDenseRows + 1
+      }
+    }
+
+    // return the number of denserows/tested rows > rowSparsityThreshold
+    numDenseRows/numRowToTest > rowSparsityThreshold
+  }
+
+
 
 }
