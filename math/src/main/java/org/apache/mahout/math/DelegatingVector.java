@@ -223,6 +223,9 @@ public class DelegatingVector implements Vector, LengthCachingVector {
   }
 
   @Override
+  public double mean() { return delegate.zSum() / delegate.size(); }
+
+  @Override
   public Vector assign(double value) {
     delegate.assign(value);
     return this;

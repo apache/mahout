@@ -109,7 +109,7 @@ mgrid(drmGauss, samplePercent = 10)
 
 // 2 and 3d histograms of gaussian data
 import org.apache.mahout.visualization._
-val mxRnd3d = Matrices.gaussianView(50000, 3, 1234)
+val mxRnd3d = Matrices.gaussianView(5000000, 3, 1234)
 val drmRand3d = drmParallelize(mxRnd3d)
 
 // check out frequencies of the first column across 10 bins of original data.

@@ -287,6 +287,9 @@ public class NamedVector implements Vector {
   }
 
   @Override
+  public double mean() { return delegate.zSum() / delegate.size(); }
+
+  @Override
   public Matrix cross(Vector other) {
     return delegate.cross(other);
   }
