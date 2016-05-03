@@ -17,12 +17,14 @@
 
 package org.apache.mahout.math
 
+import org.apache.mahout.common.RandomUtils
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.logical.OpAewUnaryFunc
+
 import collection._
 
 package object drm {
@@ -136,7 +138,8 @@ package object drm {
 
   /**
    * (Optional) Sampling operation. Consistent with Spark semantics of the same.
-   * @param drmX
+    *
+    * @param drmX
    * @param fraction
    * @param replacement
    * @tparam K
@@ -186,7 +189,8 @@ package object drm {
 
   /**
    * Compute column wise means and standard deviations -- distributed version.
-   * @param drmA note: input will be pinned to cache if not yet pinned
+    *
+    * @param drmA note: input will be pinned to cache if not yet pinned
    * @return colMeans → colStdevs
    */
   def dcolMeanStdevs[K](drmA: DrmLike[K]): (Vector, Vector) = {
@@ -317,6 +321,30 @@ package object drm {
       block := { (r, c, x) => s(keys(r)) + t(c) - 2 * x}
       keys → block
     }
+  }
+
+  def isMatrixDense(mxX: Matrix, rowSparsityThreshold: Double = .30, elementSparsityThreshold: Double = .30, sample: Double = .25): Boolean = {
+    val rand = RandomUtils.getRandom
+    val m = mxX.numRows()
+    val numRowToTest: Int = (sample * m).toInt
+
+    var numDenseRows: Int = 0
+
+    for (i <- 0 until numRowToTest) {
+      // select a row at random
+      val row: Vector = mxX(rand.nextInt(m), ::)
+      // check the sparsity of that rosw if it is greater than the set sparsity threshold count this row as dense
+      if (row.getNumNonZeroElements / row.size().toDouble > elementSparsityThreshold) {
+        numDenseRows = numDenseRows + 1
+      }
+    }
+
+    // return the number of denserows/tested rows > rowSparsityThreshold
+    numDenseRows/numRowToTest > rowSparsityThreshold
+    }
+
+
+
   }
 
 }
