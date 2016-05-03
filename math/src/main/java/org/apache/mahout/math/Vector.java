@@ -360,6 +360,14 @@ public interface Vector extends Cloneable {
   double zSum();
 
   /**
+   * Return the mean of all elements of this vector
+   *
+   * @return a double, the mean ot the vector
+   */
+
+  double mean();
+
+  /**
    * Return the cross product of the receiver and the other vector
    *
    * @param other another Vector

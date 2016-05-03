@@ -449,6 +449,11 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
   }
 
   @Override
+  public double mean() {
+    return zSum() / this.size;
+  }
+
+  @Override
   public int getNumNonZeroElements() {
     int count = 0;
     Iterator<Element> it = iterateNonZero();
