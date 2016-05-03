@@ -323,6 +323,14 @@ package object drm {
     }
   }
 
+  /**
+    * Check the density of an in-core matrix based on supplied criteria.
+    *
+    * @param mxX  The matrix to check density of.
+    * @param rowSparsityThreshold the proportion of the rows which must be dense.
+    * @param elementSparsityThreshold the prpoportion of the rows in the random sample of the  matrix which must be dense.
+    * @param sample how moch of the matrix to sample.
+    */
   def isMatrixDense(mxX: Matrix, rowSparsityThreshold: Double = .30, elementSparsityThreshold: Double = .30, sample: Double = .25): Boolean = {
     val rand = RandomUtils.getRandom
     val m = mxX.numRows()
