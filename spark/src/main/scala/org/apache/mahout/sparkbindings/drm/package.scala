@@ -60,11 +60,11 @@ package object drm {
         val keys = data.map(t => t._1).toArray[K]
         val vectors = data.map(t => t._2).toArray
 
-        // create the block by default as sparse.
+        // create the block by default as dense.
         // would probably be better to sample a subset of these
         // vectors first before creating the entire matrix.
         // so that we don't have the overhead of creating a full second matrix in
-        // the case that the matrix is not Spars
+        // the case that the matrix is not dense.
         val block = new DenseMatrix(vectors.length, blockncol)
         var row = 0
         while (row < vectors.length) {
@@ -73,7 +73,7 @@ package object drm {
         }
 
         // Test the density of the data. If the matrix does not meet the
-        // requirements for sparsity, convert the Vectors to a dense Matrix.
+        // requirements for density, convert the Vectors to a sparse Matrix.
         val resBlock = if (isMatrixDense(block)) {
           block
         } else {
