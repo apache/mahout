@@ -379,7 +379,7 @@ package object scalabindings {
    * @param mxA input
    * @return colMeans → colStdevs
    */
-  def colMeanStdevs(mxA:Matrix) = {
+  def colMeanStdevs(mxA: Matrix) = {
     val (mu, variance) = colMeanVars(mxA)
     mu → (variance ::= math.sqrt _)
   }
