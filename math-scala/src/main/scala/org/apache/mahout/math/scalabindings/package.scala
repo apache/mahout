@@ -126,7 +126,8 @@ package object scalabindings {
   /**
    * Create dense matrix out of inline arguments -- rows -- which can be tuples,
    * iterables of Double, or just single Number (for columnar vectors)
-   * @param rows
+    *
+    * @param rows
    * @tparam R
    * @return
    */
@@ -200,7 +201,8 @@ package object scalabindings {
 
   /**
    * create a sparse vector out of list of tuple2's
-   * @param sdata cardinality
+    *
+    * @param sdata cardinality
    * @return
    */
   def svec(sdata: TraversableOnce[(Int, AnyVal)], cardinality: Int = -1) = {
@@ -229,7 +231,8 @@ package object scalabindings {
 
   /**
    * computes SVD
-   * @param m svd input
+    *
+    * @param m svd input
    * @return (U,V, singular-values-vector)
    */
   def svd(m: Matrix) = {
@@ -239,7 +242,8 @@ package object scalabindings {
 
   /**
    * Computes Eigendecomposition of a symmetric matrix
-   * @param m symmetric input matrix
+    *
+    * @param m symmetric input matrix
    * @return (V, eigen-values-vector)
    */
   def eigen(m: Matrix) = {
@@ -250,7 +254,8 @@ package object scalabindings {
 
   /**
    * More general version of eigen decomposition
-   * @param m
+    *
+    * @param m
    * @param symmetric
    * @return (V, eigenvalues-real-vector, eigenvalues-imaginary-vector)
    */
@@ -265,7 +270,8 @@ package object scalabindings {
    * Right now Mahout's QR seems to be using argument for in-place transformations,
    * so the matrix context gets messed after this. Hence we force cloning of the
    * argument before passing it to Mahout's QR so to keep expected semantics.
-   * @param m
+    *
+    * @param m
    * @return (Q,R)
    */
   def qr(m: Matrix) = {
@@ -299,7 +305,7 @@ package object scalabindings {
    *
    * @param a
    * @return (A^{-1})
-   */
+    **/
   def solve(a: Matrix): Matrix = {
     import MatrixOps._
     solve(a, eye(a.nrow))
@@ -376,7 +382,8 @@ package object scalabindings {
 
   /**
    * Compute column-wise means and stdevs.
-   * @param mxA input
+    *
+    * @param mxA input
    * @return colMeans → colStdevs
    */
   def colMeanStdevs(mxA: Matrix) = {
@@ -394,7 +401,8 @@ package object scalabindings {
 
   /**
    * Pairwise squared distance computation.
-   * @param mxX X, m x d
+    *
+    * @param mxX X, m x d
    * @param mxY Y, n x d
    * @return pairwise squaired distances of row-wise data points in X and Y (m x n)
    */
@@ -420,24 +428,36 @@ package object scalabindings {
     * @param elementSparsityThreshold the prpoportion of the rows in the random sample of the  matrix which must be dense.
     * @param sample how moch of the matrix to sample.
     */
-  def isMatrixDense(mxX: Matrix, rowSparsityThreshold: Double = .30, elementSparsityThreshold: Double = .30, sample: Double = .25): Boolean = {
+  def isMatrixDense(mxX: Matrix, rowSparsityThreshold: Double = .30,
+                    elementSparsityThreshold: Double = .30,
+                    sample: Double = .25): Boolean = {
+
     val rand = RandomUtils.getRandom
     val m = mxX.numRows()
-    val numRowToTest: Int = (sample * m).toInt
 
-    var numDenseRows: Int = 0
+    // round to the ceiling so that we end up with 1 row at least
+    val numRowToTest: Int = (sample * m).ceil.toInt
 
-    for (i <- 0 until numRowToTest) {
-      // select a row at random
-      val row: Vector = mxX(rand.nextInt(m), ::)
-      // check the sparsity of that rosw if it is greater than the set sparsity threshold count this row as dense
-      if (row.getNumNonZeroElements / row.size().toDouble > elementSparsityThreshold) {
-        numDenseRows = numDenseRows + 1
+    // ensure we don't end up with division by zero
+    if (numRowToTest > 0) {
+
+      var numDenseRows: Int = 0
+
+      for (i <- 0 until numRowToTest) {
+        // select a row at random
+        val row: Vector = mxX(rand.nextInt(m), ::)
+        // check the sparsity of that row if it is greater than the set sparsity threshold count this row as dense
+        if (row.getNumNonZeroElements / row.size().toDouble > elementSparsityThreshold) {
+          numDenseRows = numDenseRows + 1
+        }
       }
-    }
 
-    // return the number of denserows/tested rows > rowSparsityThreshold
-    numDenseRows/numRowToTest > rowSparsityThreshold
+      // return the number of denserows/tested rows > rowSparsityThreshold
+      numDenseRows / numRowToTest > rowSparsityThreshold
+    } else {
+      // default to sparse if this matrix is empty
+      false
+    }
   }
 
 
