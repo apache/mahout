@@ -60,19 +60,21 @@ package object drm {
         val keys = data.map(t => t._1).toArray[K]
         val vectors = data.map(t => t._2).toArray
 
-        val block = if (vectors(0).isDense) {
-          val block = new DenseMatrix(vectors.length, blockncol)
+        val block = new SparseRowMatrix(vectors.length, blockncol, vectors, true, false)
+
+        val resBlock = if (!isMatrixDense(block)) {
+          block }
+        else {
+          val dBlock = new DenseMatrix(vectors.length, blockncol)
           var row = 0
           while (row < vectors.length) {
             block(row, ::) := vectors(row)
             row += 1
           }
-          block
-        } else {
-          new SparseRowMatrix(vectors.length, blockncol, vectors, true, false)
+          dBlock
         }
 
-        Iterator(keys -> block)
+        Iterator(keys -> resBlock)
       }
     })
   }
