@@ -17,10 +17,10 @@
 
 package org.apache.mahout.math
 
-import org.apache.mahout.common.RandomUtils
 import org.apache.mahout.math.solver.EigenDecomposition
 
 import collection._
+import scala.util.Random
 
 /**
  * Mahout matrices and vectors' scala syntactic sugar
@@ -126,8 +126,7 @@ package object scalabindings {
   /**
    * Create dense matrix out of inline arguments -- rows -- which can be tuples,
    * iterables of Double, or just single Number (for columnar vectors)
-    *
-    * @param rows
+   * @param rows
    * @tparam R
    * @return
    */
@@ -201,8 +200,7 @@ package object scalabindings {
 
   /**
    * create a sparse vector out of list of tuple2's
-    *
-    * @param sdata cardinality
+   * @param sdata cardinality
    * @return
    */
   def svec(sdata: TraversableOnce[(Int, AnyVal)], cardinality: Int = -1) = {
@@ -231,8 +229,7 @@ package object scalabindings {
 
   /**
    * computes SVD
-    *
-    * @param m svd input
+   * @param m svd input
    * @return (U,V, singular-values-vector)
    */
   def svd(m: Matrix) = {
@@ -242,8 +239,7 @@ package object scalabindings {
 
   /**
    * Computes Eigendecomposition of a symmetric matrix
-    *
-    * @param m symmetric input matrix
+   * @param m symmetric input matrix
    * @return (V, eigen-values-vector)
    */
   def eigen(m: Matrix) = {
@@ -254,8 +250,7 @@ package object scalabindings {
 
   /**
    * More general version of eigen decomposition
-    *
-    * @param m
+   * @param m
    * @param symmetric
    * @return (V, eigenvalues-real-vector, eigenvalues-imaginary-vector)
    */
@@ -270,8 +265,7 @@ package object scalabindings {
    * Right now Mahout's QR seems to be using argument for in-place transformations,
    * so the matrix context gets messed after this. Hence we force cloning of the
    * argument before passing it to Mahout's QR so to keep expected semantics.
-    *
-    * @param m
+   * @param m
    * @return (Q,R)
    */
   def qr(m: Matrix) = {
@@ -305,7 +299,7 @@ package object scalabindings {
    *
    * @param a
    * @return (A^{-1})
-    **/
+   */
   def solve(a: Matrix): Matrix = {
     import MatrixOps._
     solve(a, eye(a.nrow))
@@ -382,11 +376,10 @@ package object scalabindings {
 
   /**
    * Compute column-wise means and stdevs.
-    *
-    * @param mxA input
+   * @param mxA input
    * @return colMeans → colStdevs
    */
-  def colMeanStdevs(mxA: Matrix) = {
+  def colMeanStdevs(mxA:Matrix) = {
     val (mu, variance) = colMeanVars(mxA)
     mu → (variance ::= math.sqrt _)
   }
@@ -401,8 +394,7 @@ package object scalabindings {
 
   /**
    * Pairwise squared distance computation.
-    *
-    * @param mxX X, m x d
+   * @param mxX X, m x d
    * @param mxY Y, n x d
    * @return pairwise squaired distances of row-wise data points in X and Y (m x n)
    */
@@ -432,7 +424,7 @@ package object scalabindings {
                     elementSparsityThreshold: Double = .30,
                     sample: Double = .25): Boolean = {
 
-    val rand = RandomUtils.getRandom
+    val rand = new Random()
     val m = mxX.numRows()
 
     // round to the ceiling so that we end up with 1 row at least

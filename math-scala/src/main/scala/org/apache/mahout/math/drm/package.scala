@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math
 
-import org.apache.mahout.common.RandomUtils
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
@@ -138,8 +137,7 @@ package object drm {
 
   /**
    * (Optional) Sampling operation. Consistent with Spark semantics of the same.
-    *
-    * @param drmX
+   * @param drmX
    * @param fraction
    * @param replacement
    * @tparam K
@@ -189,8 +187,7 @@ package object drm {
 
   /**
    * Compute column wise means and standard deviations -- distributed version.
-    *
-    * @param drmA note: input will be pinned to cache if not yet pinned
+   * @param drmA note: input will be pinned to cache if not yet pinned
    * @return colMeans → colStdevs
    */
   def dcolMeanStdevs[K](drmA: DrmLike[K]): (Vector, Vector) = {
