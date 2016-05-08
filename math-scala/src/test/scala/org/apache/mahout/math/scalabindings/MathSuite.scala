@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.scalabindings
 
+import org.apache.log4j.Level
+
 import org.apache.mahout.logging._
 import org.apache.mahout.math._
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -232,6 +234,34 @@ class MathSuite extends FunSuite with MahoutSuite {
     val mxDsq = sqDist(mxX)
     val mxDsqControl = sqDist(mxX, mxX)
     (mxDsq - mxDsqControl).norm should be < 1e-7
+  }
+
+  test("sparsity analysis") {
+    setLogLevel(Level.DEBUG)
+
+    val m = 500
+    val n = 800
+    val mxA = new DenseMatrix(m, n)
+
+    sparsityAnalysis(mxA) shouldBe false
+    sparsityAnalysis(mxA, .5) shouldBe false
+    sparsityAnalysis(mxA + 1) shouldBe true
+    sparsityAnalysis(mxA + 1, .95) shouldBe true
+
+    for (i ← 0 until m by 5) mxA(i, ::) := 1
+    info(s"20% detected as dense?:${sparsityAnalysis(mxA)}")
+    mxA := 0
+
+    for (i ← 0 until m by 3) mxA(i, ::) := 1
+    info(s"33% detected as dense?:${sparsityAnalysis(mxA)}")
+    mxA := 0
+
+    for (i ← 0 until m by 4) mxA(i, ::) := 1
+    info(s"25% detected as dense?:${sparsityAnalysis(mxA)}")
+
+    for (i ← 0 until m by 2) mxA(i, ::) := 1
+    info(s"50% detected as dense?:${sparsityAnalysis(mxA)}")
+
   }
 
 }

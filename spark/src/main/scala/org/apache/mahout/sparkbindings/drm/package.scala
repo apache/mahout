@@ -74,7 +74,7 @@ package object drm {
 
         // Test the density of the data. If the matrix does not meet the
         // requirements for density, convert the Vectors to a sparse Matrix.
-        val resBlock = if (isMatrixDense(block)) {
+        val resBlock = if (sparsityAnalysis(block)) {
           block
         } else {
           new SparseRowMatrix(vectors.length, blockncol, vectors, true, false)

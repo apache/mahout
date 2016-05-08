@@ -35,7 +35,7 @@ object MMul extends MMBinaryFunc {
 
     val (af, bf) = (a.getFlavor, b.getFlavor)
     val backs = (af.getBacking, bf.getBacking)
-    val sd = (af.getStructure, isMatrixDense(a), bf.getStructure, isMatrixDense(b))
+    val sd = (af.getStructure, sparsityAnalysis(a), bf.getStructure, sparsityAnalysis(b))
 
     val alg: MMulAlg = backs match {
 
@@ -124,7 +124,7 @@ object MMul extends MMBinaryFunc {
     require(r.forall(mxR ⇒ mxR.nrow == a.nrow && mxR.ncol == b.ncol))
     val (m, n) = (a.nrow, b.ncol)
 
-    val mxR = r.getOrElse(if (isMatrixDense(a)) a.like(m, n) else b.like(m, n))
+    val mxR = r.getOrElse(if (sparsityAnalysis(a)) a.like(m, n) else b.like(m, n))
 
     for (row ← 0 until mxR.nrow; col ← 0 until mxR.ncol) {
       // this vector-vector should be sort of optimized, right?
@@ -269,10 +269,10 @@ object MMul extends MMBinaryFunc {
     val (m, n) = (a.nrow, b.ncol)
 
     // Prefer col-wise result iff a is dense and b is sparse. In all other cases default to row-wise.
-    val preferColWiseR = isMatrixDense(a) && !isMatrixDense(b)
+    val preferColWiseR = sparsityAnalysis(a) && !sparsityAnalysis(b)
 
     val mxR = r.getOrElse {
-      (isMatrixDense(a), preferColWiseR) match {
+      (sparsityAnalysis(a), preferColWiseR) match {
         case (false, false) ⇒ b.like(m, n)
         case (false, true) ⇒ b.like(n, m).t
         case (true, false) ⇒ a.like(m, n)

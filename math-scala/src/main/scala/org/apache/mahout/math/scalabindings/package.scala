@@ -31,6 +31,12 @@ package object scalabindings {
   // Reserved "ALL" range
   final val `::`: Range = null
 
+  // values for stochastic sparsityAnalysis
+  final val z95 = 1.959964
+  final val z80 = 1.281552
+  final val maxSamples = 500
+  final val minSamples = 15
+
   // Some enums
   object AutoBooleanEnum extends Enumeration {
     type T = Value
@@ -414,42 +420,53 @@ package object scalabindings {
 
   /**
     * Check the density of an in-core matrix based on supplied criteria.
+    * Returns true if we think mx is densier than threshold with at least 80% confidence.
     *
-    * @param mxX  The matrix to check density of.
-    * @param rowSparsityThreshold the proportion of the rows which must be dense.
-    * @param elementSparsityThreshold the prpoportion of the rows in the random sample of the  matrix which must be dense.
-    * @param sample how moch of the matrix to sample.
+    * @param mx  The matrix to check density of.
+    * @param threshold the threshold of non-zero elements above which we consider a Matrix Dense
     */
-  def isMatrixDense(mxX: Matrix, rowSparsityThreshold: Double = .30,
-                    elementSparsityThreshold: Double = .30,
-                    sample: Double = .25): Boolean = {
+  def sparsityAnalysis(mx: Matrix, threshold: Double = 0.25): Boolean = {
 
-    val rand = new Random()
-    val m = mxX.numRows()
+    require(threshold >= 0.0 && threshold <= 1.0)
+    var n = minSamples
+    var mean = 0.0
+    val rnd = new Random()
+    val dimm = mx.nrow
+    val dimn = mx.ncol
+    val pq = threshold * (1 - threshold)
 
-    // round to the ceiling so that we end up with 1 row at least
-    val numRowToTest: Int = (sample * m).ceil.toInt
-
-    // ensure we don't end up with division by zero
-    if (numRowToTest > 0) {
-
-      var numDenseRows: Int = 0
-
-      for (i <- 0 until numRowToTest) {
-        // select a row at random
-        val row: Vector = mxX(rand.nextInt(m), ::)
-        // check the sparsity of that row if it is greater than the set sparsity threshold count this row as dense
-        if (row.getNumNonZeroElements / row.size().toDouble > elementSparsityThreshold) {
-          numDenseRows = numDenseRows + 1
-        }
-      }
-
-      // return the number of denserows/tested rows > rowSparsityThreshold
-      numDenseRows / numRowToTest > rowSparsityThreshold
-    } else {
-      // default to sparse if this matrix is empty
-      false
+    for (s ← 0 until minSamples) {
+      if (mx(rnd.nextInt(dimm), rnd.nextInt(dimn)) != 0.0) mean += 1
     }
+    mean /= minSamples
+    val iv = z80 * math.sqrt(pq / n)
+
+    if (mean < threshold - iv) return false // sparse
+    else if (mean > threshold + iv) return true // dense
+
+    while (n < maxSamples) {
+      // Determine upper bound we may need for n to likely relinquish the uncertainty. Here, we use
+      // confidence interval formula but solved for n.
+      val ivNeeded = math.abs(threshold - mean) max 1e-11
+
+      val stderr = ivNeeded / z80
+      val nNeeded = (math.ceil(pq / (stderr * stderr)).toInt max n min maxSamples) - n
+
+      var meanNext = 0.0
+      for (s ← 0 until nNeeded) {
+        if (mx(rnd.nextInt(dimm), rnd.nextInt(dimn)) != 0.0) meanNext += 1
+      }
+      mean = (n * mean + meanNext) / (n + nNeeded)
+      n += nNeeded
+
+      // Are we good now?
+      val iv = z80 * math.sqrt(pq / n)
+      if (mean < threshold - iv) return false // sparse
+      else if (mean > threshold + iv) return true // dense
+    }
+
+    return mean <= threshold
+
   }
 
 
