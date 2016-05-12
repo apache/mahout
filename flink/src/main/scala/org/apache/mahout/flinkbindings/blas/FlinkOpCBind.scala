@@ -101,7 +101,7 @@ object FlinkOpCBind {
       } else {
         newMat.zip(mat).foreach { case (newVec, origVec) =>
           newVec(ncol) = x
-          newVec(0 to (ncol - 1)) := origVec
+          newVec(0 until ncol) := origVec
         }
       }
 

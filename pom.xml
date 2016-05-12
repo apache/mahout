@@ -122,7 +122,7 @@
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
     <spark.version>1.5.2</spark.version>
-    <flink.version>1.0.2</flink.version>
+    <flink.version>1.0.3</flink.version>
     <h2o.version>0.1.25</h2o.version>
     <jackson.version>2.7.2</jackson.version>
   </properties>
