@@ -35,6 +35,9 @@ import smile.plot._
   * @tparam K
   */
 class MSurf[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true) extends MahoutPlot {
+  throw new NotImplementedError("This Class is not yet fully implemented.")
+
+
   val drmSize = drmXYZ.checkpoint().numRows()
   val sampleDec: Double = samplePercent / 100.toDouble
 

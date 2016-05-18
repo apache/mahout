@@ -51,6 +51,7 @@ package object visualization {
   }
 
   /**
+    * Not enabled in Mahout 0.12.1 Will be finished in Mahout 0.13.0
     * Syntatic sugar for MSurf class
     * @param drmXYZ
     * @param samplePercent
@@ -58,8 +59,9 @@ package object visualization {
     * @tparam K
     * @return
     */
-  def msurf[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
-    new MSurf[K](drmXYZ: DrmLike[K], samplePercent, setVisible)
+  // Disable for Mahout 0.12.1 finish in Mahout 0.13.0
+  //  def msurf[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
+  //    new MSurf[K](drmXYZ: DrmLike[K], samplePercent, setVisible)
 
   /**
     * Syntatic sugar for MPlot2d class
@@ -84,6 +86,7 @@ package object visualization {
     new MPlot3d[K](drmXYZ: DrmLike[K], samplePercent, setVisible)
 
   /**
+    * Not enabled in Mahout 0.12.1 Will be finished in Mahout 0.13.0
     * Syntatic sugar for MGrid class
     * @param drmXYZ
     * @param samplePercent
@@ -91,8 +94,9 @@ package object visualization {
     * @tparam K
     * @return
     */
-  def mgrid[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
-    new MGrid[K](drmXYZ: DrmLike[K], samplePercent, setVisible)
+  // Disable for Mahout 0.12.1 finish in Mahout 0.13.0
+  //  def mgrid[K](drmXYZ: DrmLike[K], samplePercent: Double = 1, setVisible: Boolean = true): MahoutPlot =
+  //    new MGrid[K](drmXYZ: DrmLike[K], samplePercent, setVisible)
 
   /**
     *

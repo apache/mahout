@@ -55,8 +55,8 @@ val drmGauss = drmRand3d.mapBlock() {case (keys, block) =>
 mplot3d(drmGauss, samplePercent = 50)
 
 // 3d Surface needs to be ordered. --not working correctly as is
-//import org.apache.mahout.visualization.MSurf
-msurf(drmGauss, samplePercent = 10)
+//import org.apache.mahout.visualization.MSurf`
+// msurf(drmGauss, samplePercent = 10)
 
 // 3d "Matlab peaks"
 import org.apache.mahout.visualization._
@@ -81,7 +81,7 @@ mplot3d(drmPeaks, samplePercent = 10)
 
 // 3d Surface needs to be ordered. --not working correctly as is
 import org.apache.mahout.visualization._
-msurf(drmPeaks, samplePercent = 10)
+// msurf(drmPeaks, samplePercent = 10)
 
 
 
@@ -104,7 +104,7 @@ val drmGauss = drmRand3d.mapBlock() {case (keys, block) =>
   keys -> blockB
 }
 
-mgrid(drmGauss, samplePercent = 10)
+// mgrid(drmGauss, samplePercent = 10)
 
 
 // 2 and 3d histograms of gaussian data
