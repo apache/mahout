@@ -73,7 +73,8 @@ final object DefaultIndexedDatasetWriteSchema extends Schema(
 final object DefaultIndexedDatasetReadSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
-  "elementDelim" -> " ")
+  "elementDelim" -> " ",
+  "omitScore" -> false)
 
 /**
  * Default Schema for reading a text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file  where
