@@ -75,7 +75,7 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]; then
     echo "DFS is healthy... "
     echo "Uploading Synthetic control data to HDFS"
     $DFSRM ${WORK_DIR}/testdata
-    $DFS -mkdir ${WORK_DIR}/testdata
+    $DFS -mkdir -p ${WORK_DIR}/testdata
     $DFS -put ${WORK_DIR}/synthetic_control.data ${WORK_DIR}/testdata
     echo "Successfully Uploaded Synthetic control data to HDFS "
 
