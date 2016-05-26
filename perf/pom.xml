@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.mahout</groupId>
+  <artifactId>mahout</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>war</packaging>
+
+  <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+  <name>Mahout Math Scala bindings</name>
+  <properties>
+    <scala.major.version>2.10</scala.major.version>
+    <scala.version>${scala.major.version}.3</scala.version>
+    <spray.version>1.2.0</spray.version>
+    <spray.json.version>1.2.5</spray.json.version>
+    <akka.version>2.2.3</akka.version>
+
+    <junit.version>4.11</junit.version>
+    <scalatest.artifactid>scalatest_${scala.major.version}</scalatest.artifactid>
+    <scalatest.version>2.0</scalatest.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.scala-tools</groupId>
+        <artifactId>maven-scala-plugin</artifactId>
+        <version>2.15.2</version>
+        <executions>
+          <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>add-source</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.1</version>
+          <configuration>
+            <source>1.7</source>
+            <target>1.7</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.tomcat.maven</groupId>
+          <artifactId>tomcat7-maven-plugin</artifactId>
+          <version>2.1</version>
+          <configuration>
+            <port>9090</port>
+            <path>/</path>
+            <useTestClasspath>false</useTestClasspath>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <dependencies>
+
+    <!-- Scala -->
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+
+    <!-- Akka -->
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-actor_${scala.major.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+
+    <!-- Spray start -->
+    <dependency>
+      <groupId>io.spray</groupId>
+      <artifactId>spray-servlet</artifactId>
+      <version>${spray.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.spray</groupId>
+      <artifactId>spray-http</artifactId>
+      <version>${spray.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.spray</groupId>
+      <artifactId>spray-json_${scala.major.version}</artifactId>
+      <version>${spray.json.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.spray</groupId>
+      <artifactId>spray-routing</artifactId>
+      <version>${spray.version}</version>
+    </dependency>
+    <!-- Spray end -->
+
+    <!-- Tests start -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>${scalatest.artifactid}</artifactId>
+      <version>${scalatest.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Tests end -->
+
+    <dependency>
+      <groupId>org.eclipse.jetty.orbit</groupId>
+      <artifactId>javax.servlet</artifactId>
+      <version>3.0.0.v201112011016</version>
+    </dependency>
+  </dependencies>
+  <repositories>
+    <repository>
+      <id>sprayrepo</id>
+      <name>spray repos</name>
+      <url>http://repo.spray.io/</url>
+      <layout>default</layout>
+    </repository>
+
+    <repository>
+      <id>SonatypeOSSSnapshots</id>
+      <name>Sonatype OSS Snapshots</name>
+      <url>http://oss.sonatype.org/content/repositories/snapshots/</url>
+      <layout>default</layout>
+    </repository>
+    <repository>
+      <id>AkkaRepo</id>
+      <name>Akka Repo</name>
+      <url>http://repo.akka.io/repository/</url>
+      <layout>default</layout>
+    </repository>
+  </repositories>
+</project>

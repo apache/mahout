@@ -1,0 +1,23 @@
+<configuration>
+
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+        <!-- See http://logback.qos.ch/manual/layouts.html -->
+        <pattern>%date{HH:mm:ss} %-5level[%.15thread] [%-25logger{15}] - %msg%n</pattern>
+      </encoder>
+  </appender>
+
+  <logger name="com.mlh.spraysample" level="info" additivity="false">
+    <appender-ref ref="console" />
+  </logger>
+
+  <logger name="akka" level="info" additivity="false">
+    <appender-ref ref="console" />
+  </logger>
+
+  <root level="info">
+    <appender-ref ref="console"/>
+  </root>
+
+</configuration>
+
