@@ -75,11 +75,21 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]; then
     echo "DFS is healthy... "
     echo "Uploading Synthetic control data to HDFS"
     $DFSRM ${WORK_DIR}/testdata
-    $DFS -mkdir ${WORK_DIR}/testdata
+    $DFS -mkdir -p ${WORK_DIR}/testdata
     $DFS -put ${WORK_DIR}/synthetic_control.data ${WORK_DIR}/testdata
     echo "Successfully Uploaded Synthetic control data to HDFS "
 
-    ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job
+    options="--input ${WORK_DIR}/testdata --output ${WORK_DIR}/output --maxIter 10 --convergenceDelta 0.5"
+
+    if [ "${clustertype}" == "kmeans" ]; then
+      options="${options} --numClusters 6"
+      # t1 & t2 not used if --numClusters specified, but parser requires input
+      options="${options} --t1 1 --t2 2"
+      ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job ${options}
+    else
+      options="${options} --m 2.0f --t1 80 --t2 55"
+      ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job ${options}
+    fi
   else
     echo " HADOOP is not running. Please make sure you hadoop is running. "
   fi
