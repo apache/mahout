@@ -148,6 +148,42 @@ package object drm {
   def drmSampleKRows[K](drmX: DrmLike[K], numSamples: Int, replacement: Boolean = false): Matrix =
     drmX.context.engine.drmSampleKRows(drmX, numSamples, replacement)
 
+  /**
+    * Convert a DRM sample into a Tab Separated Vector (TSV) to be loaded into an R-DataFrame
+    * for plotting and sketching
+    * @param drmX - DRM
+    * @param samplePercent - Percentage of Sample elements from the DRM to be fished out for plotting
+    * @tparam K
+    * @return TSV String
+    */
+  def drmSampleToTSV[K](drmX: DrmLike[K], samplePercent: Double = 1): String = {
+
+    val drmSize = drmX.checkpoint().numRows()
+    val sampleRatio: Double = 1.0 * samplePercent / 100
+    val numSamples: Int = (drmSize * sampleRatio).toInt
+
+    val plotMatrix = drmSampleKRows(drmX, numSamples, replacement = false)
+
+    // Plot Matrix rows
+    val matrixRows = plotMatrix.numRows()
+    val matrixCols = plotMatrix.numCols()
+
+    // Convert the Plot Matrix Rows to TSV
+    var str = ""
+
+    for (i <- 0 until matrixRows) {
+      for (j <- 0 until matrixCols) {
+        str += plotMatrix(i, j)
+        if (j <= matrixCols - 2) {
+          str += '\t'
+        }
+      }
+      str += '\n'
+    }
+
+    str
+  }
+
   ///////////////////////////////////////////////////////////
   // Elementwise unary functions on distributed operands.
   def dexp[K](drmA: DrmLike[K]): DrmLike[K] = new OpAewUnaryFunc[K](drmA, math.exp, true)
