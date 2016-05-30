@@ -124,7 +124,7 @@
     <spark.version>1.5.2</spark.version>
     <flink.version>1.0.3</flink.version>
     <h2o.version>0.1.25</h2o.version>
-    <jackson.version>2.7.2</jackson.version>
+    <jackson.version>2.7.4</jackson.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
