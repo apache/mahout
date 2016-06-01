@@ -171,11 +171,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.github.haifengl</groupId>
-      <artifactId>smile-plot</artifactId>
-      <version>1.1.0</version>
-    </dependency>
 
 
   <!--  3rd-party -->
