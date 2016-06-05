@@ -9,7 +9,7 @@ import spray.can.server.Stats
 import spray.http.StatusCodes._
 import org.json4s._
 
-class MainSpec extends FreeSpec with Matchers with ScalatestRouteTest with SpraySampleService {
+class MainSpec extends FreeSpec with Matchers with ScalatestRouteTest with MahoutRuntimePerformanceService {
   def actorRefFactory = system
 
   "The spraysample Route" - {

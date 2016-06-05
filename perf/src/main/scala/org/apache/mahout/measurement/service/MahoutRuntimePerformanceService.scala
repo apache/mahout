@@ -1,15 +1,15 @@
-package com.mlh.spraysample
-package basic
+package org.apache.mahout.measurement.service
 
 import scala.concurrent.duration._
-
-import akka.actor.{ Actor, ActorLogging, ActorSystem, Props }
+import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
+import com.mlh.spraysample.basic.WorkerActor.{Create, Ok}
+import com.mlh.spraysample.basic.{Foo, WorkerActor}
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import org.json4s.native.Serialization.{ read, write }
+import org.json4s.native.Serialization.{read, write}
 import spray.can.Http
 import spray.httpx.Json4sSupport
 import spray.routing._
@@ -72,15 +72,16 @@ trait SpraySampleService extends HttpService {
 
   def doCreate[T](foo: Foo) = {
     complete {
-    //We use the Ask pattern to return
-    //a future from our worker Actor,
-    //which then gets passed to the complete
-    //directive to finish the request.
-    (worker ? Create(foo))
-      .mapTo[Ok]
-      .map(result => s"I got a response: ${result}")
-      .recover { case _ => "error" }
+      //We use the Ask pattern to return
+      //a future from our worker Actor,
+      //which then gets passed to the complete
+      //directive to finish the request.
+      (worker ? Create(foo))
+        .mapTo[Ok]
+        .map(result => s"I got a response: ${result}")
+        .recover { case _ => "error" }
     }
   }
 
 }
+
