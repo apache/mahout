@@ -2,34 +2,27 @@ package org.apache.mahout.javaCppTest
 
 import org.bytedeco.javacpp._
 import org.bytedeco.javacpp.annotation._
-//
-//@Platform(include="NativeLibrary.h")
-//@Namespace("NativeLibrary")
 
-class HelloNative {
-//  class HelloNative extends Pointer {
-//
-//    Loader.load()
-//
-//    allocate()
-//
-//    native void allocate();
-//
-//    // to call the getter and setter functions
-//    native @StdString String get_property(); public native void set_property(String property);
-//
-//    // to access the member variable directly
-//    native @StdString String property();     public native void property(String property);
-//  }
-//
-////  public static void main( args) {
-////    // Pointer objects allocated in Java get deallocated once they become unreachable,
-////    // but C++ destructors can still be called in a timely fashion with Pointer.deallocate()
-////    NativeClass l = new NativeClass();
-////    l.set_property("Hello World!");
-////    System.out.println(l.property());
-////  }
+
+@Platform(include=Array(HelloNative.PLATFORM_HEADER_FILE_ONE))
+@Namespace("HelloNative")
+class HelloNative extends Pointer {
+
+  Loader.load()
+
+  allocate()
+
+  @native def allocate(): Unit
+
+  @native @StdString def get_property(): String
+  @native def set_property(property: String ): Unit
+
+  // to access the member variable directly
+  @native @StdString def property(): String
+  @native def property(property: String): Unit
+
 }
+
 object HelloNative {
-//  def {  }
+  final val PLATFORM_HEADER_FILE_ONE = "HelloNative.h"
 }
