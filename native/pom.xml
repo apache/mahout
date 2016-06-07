@@ -100,18 +100,6 @@
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <configuration>
-          <argLine>-Djava.library.path=${project.build.directory}/native/linux-x86_64/lib/:${project.build.directory}/native/maxosx/</argLine>
-          <environmentVariables>
-            <LD_LIBRARY_PATH>${project.build.directory}/target/classes/linux-x86_64</LD_LIBRARY_PATH>
-          </environmentVariables>
-          <systemProperties>
-            <property>
-              <name>java.library.tmpdir</name>
-              <value>${project.build.directory}/native/target/classes/linux-x86_64</value>
-            </property>
-          </systemProperties>
-        </configuration>
         <executions>
           <execution>
             <id>test</id>
@@ -125,125 +113,34 @@
 
 
 
-       <!--JavaCPP native build plugin-->
-      <!--<plugin>-->
-        <!--<groupId>org.bytedeco</groupId>-->
-        <!--<artifactId>javacpp</artifactId>-->
-        <!--&lt;!&ndash;<version>${project.parent.version}</version>&ndash;&gt;-->
-        <!--<version>1.2.1</version>-->
-        <!--<configuration>-->
-          <!--&lt;!&ndash;<properties>${javacpp.platform}</properties>&ndash;&gt;-->
-          <!--<properties>x86_64</properties>-->
-
-
-          <!--<propertyKeysAndValues>-->
-            <!--<property>-->
-              <!--<name>javacpp.platform</name>-->
-              <!--&lt;!&ndash;<value>${javacpp.platform.root}</value>&ndash;&gt;-->
-              <!--<value>x86_64</value>-->
-            <!--</property>-->
-
-            <!--<property>-->
-              <!--<name>platform.root</name>-->
-              <!--&lt;!&ndash;<value>${javacpp.platform.root}</value>&ndash;&gt;-->
-              <!--<value>${basedir}</value>-->
-            <!--</property>-->
-            <!--<property>-->
-              <!--<name>platform.compiler</name>-->
-              <!--&lt;!&ndash;<value>${javacpp.platform.compiler}</value>&ndash;&gt;-->
-              <!--<value>g++</value>-->
-            <!--</property>-->
-          <!--</propertyKeysAndValues>-->
-          <!--<classPath>${project.build.outputDirectory}</classPath>-->
-          <!--&lt;!&ndash;fix this hard coded stuff&ndash;&gt;-->
-          <!--&lt;!&ndash;<includePath>${basedir}/cppbuild/${javacpp.platform}/include/</includePath>&ndash;&gt;-->
-          <!--&lt;!&ndash;<linkPath>${basedir}/cppbuild/${javacpp.platform}/lib/</linkPath>&ndash;&gt;-->
-          <!--&lt;!&ndash;<preloadPath>${basedir}/cppbuild/${javacpp.platform}/bin/</preloadPath>&ndash;&gt;-->
-
-          <!--<includePath>${basedir}/native/linux-x86_64/include/</includePath>-->
-          <!--<linkPath>${basedir}/native/linux-x86_64/lib/</linkPath>-->
-          <!--<preloadPath>${basedir}/native/linux-x86_64/bin/</preloadPath>-->
-        <!--</configuration>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<id>javacpp.parser</id>-->
-            <!--<phase>generate-sources</phase>-->
-            <!--<goals>-->
-              <!--<goal>build</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--<skip>${javacpp.parser.skip}</skip>-->
-              <!--<outputDirectory>${project.build.sourceDirectory}</outputDirectory>-->
-              <!--<classOrPackageName>org.bytedeco.javacpp.presets.*</classOrPackageName>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-          <!--<execution>-->
-            <!--<id>javacpp.compiler</id>-->
-            <!--<phase>process-classes</phase>-->
-            <!--<goals>-->
-              <!--<goal>build</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--<skip>${javacpp.compiler.skip}</skip>-->
-              <!--<classOrPackageName>org.bytedeco.javacpp.*</classOrPackageName>-->
-              <!--<copyLibs>true</copyLibs>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-        <!--</executions>-->
-
-      <!--</plugin>-->
-
-      <!--<plugin>-->
-        <!--<groupId>org.codehaus.mojo</groupId>-->
-          <!--<artifactId>exec-maven-plugin</artifactId>-->
-          <!--<version>1.2.1</version>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<id>javacpp</id>-->
-            <!--<phase>process-classes</phase>-->
-            <!--<goals>-->
-              <!--<goal>exec</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--<executable>java</executable>-->
-              <!--<arguments>-->
-                <!--<argument>-jar</argument>-->
-                <!--<argument>${org.bytedeco:javacpp:jar}</argument>-->
-                <!--<argument>-classpath</argument>-->
-                <!--<argument>${project.build.outputDirectory}</argument>-->
-                <!--<argument>-o</argument>-->
-              <!--</arguments>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-        <!--</executions>-->
-      <!--</plugin>-->
-      <!-- Alternative / old-style way to get it to compile. -->
-            <!--based on https://github.com/bytedeco/javacpp/wiki/Maven-->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <id>javacpp</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-jar</argument>
-                                <argument>${org.bytedeco:javacpp:jar}</argument>
-                                <argument>-classpath</argument>
-                                <argument>${project.build.outputDirectory}</argument>
-                                <argument>-Xcompiler</argument>
-                                <argument>-I${basedir}/src/main/java</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+      <!--JavaCPP native build plugin-->
+      <!--  old-style way to get it to compile. -->
+      <!--based on https://github.com/bytedeco/javacpp/wiki/Maven-->
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.2.1</version>
+          <executions>
+              <execution>
+                  <id>javacpp</id>
+                  <phase>process-classes</phase>
+                  <goals>
+                      <goal>exec</goal>
+                  </goals>
+                  <configuration>
+                      <executable>java</executable>
+                      <arguments>
+                          <argument>-jar</argument>
+                          <argument>${org.bytedeco:javacpp:jar}</argument>
+                          <argument>-classpath</argument>
+                          <argument>${project.build.outputDirectory}</argument>
+                          <argument>-Xcompiler</argument>
+                          <argument>-I${basedir}/src/main/cpp</argument>
+                      </arguments>
+                  </configuration>
+              </execution>
+          </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -289,13 +186,6 @@
     </dependency>
 
   </dependencies>
-
-  <properties>
-    <java.library.path>${basedir}/native/x86_64/lib/</java.library.path>
-    <javacpp.cppbuild.skip>false</javacpp.cppbuild.skip> <!-- To skip execution of cppbuild.sh: -Djavacpp.cppbuild.skip=true -->
-    <javacpp.parser.skip>false</javacpp.parser.skip>     <!-- To skip header file parsing phase: -Djavacpp.parser.skip=true  -->
-    <javacpp.compiler.skip>false</javacpp.compiler.skip> <!-- To skip native compilation phase: -Djavacpp.compiler.skip=true -->
-  </properties>
 
 
   <profiles>
