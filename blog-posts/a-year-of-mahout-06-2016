@@ -1,0 +1,62 @@
+
+insert introduction that makes sense here lorem ipsum lorem ipsum lorem ipsum
+lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem
+ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+lorem ipsum llorem ipsum orem ipsum lorem ipsum 
+
+
+
+Backend Integrations with Spark, Flink, H2O
+===========================================
+
+lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem
+ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+lorem ipsum llorem ipsum orem ipsum lorem ipsum 
+
+
+Apache Samsara
+==============
+
+lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem
+ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+lorem ipsum llorem ipsum orem ipsum lorem ipsum 
+
+
+Remember to mention Multi-Modal Recommender based on Mahout-Samsara in PredictionIO
+
+
+Major Linear Algebra performance enhancements
+==============================================
+
+lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem
+ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+lorem ipsum llorem ipsum orem ipsum lorem ipsum 
+
+
+Shiny new graphs: Visualization and plotting with Apache Zeppelin
+=================================================================
+
+lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem
+ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+lorem ipsum llorem ipsum orem ipsum lorem ipsum 
+
+
+Learn more: Books and conferences
+=================================
+
+If you want to know more about Apache Samsara without having to dig through the
+codebase alone check out the new Apache Mahout: Beyond MapReduce book here:
+http://www.weatheringthroughtechdays.com/2016/02/mahout-samsara-book-is-out.html
+
+If you prefer learning more through a video check out the Apache Big Data talks
+as recorded here: TODO TODO TODO TODO
+
+
+Apache Mahout is an Apache Software Foundation project that provides a
+comprehensive toolkit for machine learning at scale: Running on top of Apache
+Spark, H2O, Apache Flink, and Scala it ships with a wide variety of ready to
+use machine learning algorithms. For those that need implementations to fit
+their custom needs it provides an extensible programming environment as well as
+Samsara - a vector math rapid prototyping environment with R-like syntax.
+
+
