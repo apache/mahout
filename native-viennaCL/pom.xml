@@ -27,8 +27,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-native_${scala.compat.version}</artifactId>
-  <name>Mahout Native Components</name>
+  <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
+  <artifactId>mahout-native-viennacl_2.10</artifactId>
+
+  <name>Mahout Native VienniaCL Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 
@@ -136,10 +138,10 @@
                           <argument>${project.build.outputDirectory}</argument>
                           <argument>-Xcompiler</argument>
                           <argument>-I${basedir}/src/main/cpp</argument>
-                          <argument>-I${basedir}/src/main/cpp/viennacl</argument>
-                          <argument>-I${basedir}/src/main/cpp/viennacl/linalg</argument>
-                          <argument>-I${basedir}/src/main/cpp/libviennacl/include</argument>
-                          <argument>-I${basedir}/src/main/cpp/libviennacl/include/src</argument>
+                          <!--<argument>-I${basedir}/src/main/cpp/viennacl</argument>-->
+                          <!--<argument>-I${basedir}/src/main/cpp/viennacl/linalg</argument>-->
+                          <!--<argument>-I${basedir}/src/main/cpp/libviennacl/include</argument>-->
+                          <!--<argument>-I${basedir}/src/main/cpp/libviennacl/include/src</argument>-->
                       </arguments>
                   </configuration>
               </execution>

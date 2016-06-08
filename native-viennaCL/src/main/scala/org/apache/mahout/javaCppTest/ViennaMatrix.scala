@@ -6,15 +6,17 @@ import org.bytedeco.javacpp.annotation.{Namespace, Platform, StdString}
 /**
   * Created by andy on 6/7/16.
   */
-@Platform(include=Array(HelloNative.PLATFORM_HEADER_FILE_ONE))
-@Namespace("HelloNative")
+//@Platform(include=Array(HelloNative.PLATFORM_HEADER_FILE_ONE))
+//@Namespace("viennacl")
 class VieannaMatrix extends Pointer {
 
-  Loader.load()
+//  Loader.load()
+//
+//  allocate()
+//
+//  @native def allocate(): Unit
 
-  allocate()
 
-  @native def allocate(): Unit
 //
 //  @native @StdString def get_property(): String
 //  @native def set_property(property: String ): Unit
@@ -28,5 +30,5 @@ class VieannaMatrix extends Pointer {
 }
 
 object VieannaMatrix {
-  final val PLATFORM_HEADER_FILE_ONE = "Matrix.h"
+  final val PLATFORM_HEADER_FILE_ONE = "Matrix.hpp"
 }
