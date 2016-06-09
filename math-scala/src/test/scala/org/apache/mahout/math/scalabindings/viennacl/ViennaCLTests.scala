@@ -22,7 +22,7 @@ import org.apache.mahout.math._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.test.MahoutSuite
 import org.scalatest.FunSuite
-//import org.apache.mahout.javaCppTest._
+import org.apache.mahout.javaCppTest._
 
 import scala.math._
 
@@ -30,11 +30,11 @@ class ViennaCLTests extends FunSuite with MahoutSuite {
 
   private final implicit val log = getLog(classOf[ViennaCLTests])
 
-//  test("HelloNative"){
-//    val nTest = new HelloNative
-//
-//    nTest.set_property("Hello Native")
-//    assert(nTest.get_property() == "Hello Native")
-//  }
+  test("HelloVienna"){
+    val nTest = new HelloNative
+
+    nTest.set_property("Hello Vienna")
+    assert(nTest.get_property() == "Hello Vienna")
+  }
 
 }

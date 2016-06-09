@@ -28,7 +28,7 @@
   </parent>
 
   <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
-  <artifactId>mahout-native-viennacl_2.10</artifactId>
+  <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
 
   <name>Mahout Native VienniaCL Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
