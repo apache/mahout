@@ -1,37 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.mahout</groupId>
-  <artifactId>mahout</artifactId>
-  <version>0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
 
-  <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
-  <name>Mahout Math Scala bindings</name>
-  <properties>
-    <scala.major.version>2.10</scala.major.version>
-    <scala.version>${scala.major.version}.3</scala.version>
-    <spray.version>1.2.0</spray.version>
-    <spray.json.version>1.2.5</spray.json.version>
-    <akka.version>2.2.3</akka.version>
+  <parent>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout</artifactId>
+    <version>0.12.2-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
 
-    <junit.version>4.11</junit.version>
-    <scalatest.artifactid>scalatest_${scala.major.version}</scalatest.artifactid>
-    <scalatest.version>2.0</scalatest.version>
-  </properties>
+  <artifactId>mahout-perf_${scala.compat.version}</artifactId>
+  <name>Mahout Runtime perf measurement framework</name>
+  <description>Runtime perf measurement framework to measure algorithm speed</description>
+
+  <packaging>jar</packaging>
 
   <build>
     <plugins>
+      <!-- create test jar so other modules can reuse the math-scala test utility classes. -->
       <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-        <version>2.15.2</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
         <executions>
           <execution>
-            <id>scala-compile-first</id>
-            <phase>process-resources</phase>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-scala-sources</id>
+            <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-compile</id>
+            <phase>process-resources</phase>
+            <goals>
               <goal>compile</goal>
             </goals>
           </execution>
@@ -45,131 +85,123 @@
         </executions>
       </plugin>
 
+      <!--this is what scalatest recommends to do to enable scala tests -->
+
+      <!-- disable surefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <!-- enable scalatest -->
+      <plugin>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>attach-sources</id>
+            <id>test</id>
             <goals>
-              <goal>jar</goal>
+              <goal>test</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
+
     </plugins>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
-          <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.tomcat.maven</groupId>
-          <artifactId>tomcat7-maven-plugin</artifactId>
-          <version>2.1</version>
-          <configuration>
-            <port>9090</port>
-            <path>/</path>
-            <useTestClasspath>false</useTestClasspath>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
   <dependencies>
 
-    <!-- Scala -->
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-library</artifactId>
-      <version>${scala.version}</version>
-    </dependency>
-
-    <!-- Akka -->
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-actor_${scala.major.version}</artifactId>
-      <version>${akka.version}</version>
-    </dependency>
-
-    <!-- Spray start -->
-    <dependency>
-      <groupId>io.spray</groupId>
-      <artifactId>spray-servlet</artifactId>
-      <version>${spray.version}</version>
+   <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>io.spray</groupId>
-      <artifactId>spray-http</artifactId>
-      <version>${spray.version}</version>
+      <groupId>com.esotericsoftware.kryo</groupId>
+      <artifactId>kryo</artifactId>
+      <version>2.24.0</version>
+    </dependency>
+
+    <!--  3rd-party -->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>io.spray</groupId>
-      <artifactId>spray-json_${scala.major.version}</artifactId>
-      <version>${spray.json.version}</version>
+      <groupId>com.github.scopt</groupId>
+      <artifactId>scopt_${scala.compat.version}</artifactId>
+      <version>3.3.0</version>
     </dependency>
 
-    <dependency>
-      <groupId>io.spray</groupId>
-      <artifactId>spray-routing</artifactId>
-      <version>${spray.version}</version>
-    </dependency>
-    <!-- Spray end -->
 
-    <!-- Tests start -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
+      <groupId>com.github.haifengl</groupId>
+      <artifactId>smile-plot</artifactId>
+      <version>1.1.0</version>
     </dependency>
+
+    <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>${scalatest.artifactid}</artifactId>
-      <version>${scalatest.version}</version>
-      <scope>test</scope>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
-    <!-- Tests end -->
 
-    <dependency>
-      <groupId>org.eclipse.jetty.orbit</groupId>
-      <artifactId>javax.servlet</artifactId>
-      <version>3.0.0.v201112011016</version>
-    </dependency>
+
+
   </dependencies>
-  <repositories>
-    <repository>
-      <id>sprayrepo</id>
-      <name>spray repos</name>
-      <url>http://repo.spray.io/</url>
-      <layout>default</layout>
-    </repository>
 
-    <repository>
-      <id>SonatypeOSSSnapshots</id>
-      <name>Sonatype OSS Snapshots</name>
-      <url>http://oss.sonatype.org/content/repositories/snapshots/</url>
-      <layout>default</layout>
-    </repository>
-    <repository>
-      <id>AkkaRepo</id>
-      <name>Akka Repo</name>
-      <url>http://repo.akka.io/repository/</url>
-      <layout>default</layout>
-    </repository>
-  </repositories>
+  <profiles>
+    <profile>
+      <id>mahout-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>generate-scaladoc</id>
+                <goals>
+                  <goal>doc</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>attach-scaladoc-jar</id>
+                <goals>
+                  <goal>doc-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>travis</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- Limit memory for unit tests in Travis -->
+              <argLine>-Xmx3g</argLine>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <!-- Limit memory for integration tests in Travis -->
+              <argLine>-Xmx3g</argLine>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

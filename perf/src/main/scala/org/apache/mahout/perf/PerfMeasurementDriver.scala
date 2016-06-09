@@ -2,10 +2,11 @@
   * Created by saikat on 6/6/16.
   */
 package org.apache.mahout.perf
-import scala.concurrent.duration._
 import org.apache.mahout.classifier.naivebayes.NaiveBayes
-import org.apache.mahout.math.drm
+import org.apache.mahout.math._
 import org.apache.mahout.math.scalabindings._
+
+import collection._
 
 trait PerfMeasurementDriver  {
   val rowBindings = new java.util.HashMap[String,Integer]()
@@ -30,14 +31,6 @@ trait PerfMeasurementDriver  {
   val TFIDFDrm = drm.drmParallelizeWithRowLabels(m = matrixSetup, numPartitions = 2)
 
   val (labelIndex, aggregatedTFIDFDrm) = NaiveBayes.extractLabelsAndAggregateObservations(TFIDFDrm)
-
-  labelIndex.size should be (2)
-
-  val cat1=labelIndex("Cat1")
-  val cat2=labelIndex("Cat2")
-
-  cat1 should be (0)
-  cat2 should be (1)
 
   val aggregatedTFIDFInCore = aggregatedTFIDFDrm.collect
 
