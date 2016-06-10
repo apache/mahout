@@ -33,7 +33,6 @@ cd hdfs && mvn test >> $BUILD_OUTPUT 2>&1
 cd ../math && mvn test >> $BUILD_OUTPUT 2>&1
 cd ../math-scala && mvn test >> $BUILD_OUTPUT 2>&1
 cd ../spark && mvn test >> $BUILD_OUTPUT 2>&1
-cd ../native-viennaCL && mvn test >> $BUILD_OUTPUT 2>&1
 #cd ../flink && mvn test >> $BUILD_OUTPUT 2>&1
 #cd ../h2o && mvn test >> $BUILD_OUTPUT 2>&1
 

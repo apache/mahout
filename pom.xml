@@ -812,7 +812,6 @@
     <module>spark-shell</module>
     <module>flink</module>
     <module>h2o</module>
-    <module>native-viennaCL</module>
   </modules>
 
   <profiles>

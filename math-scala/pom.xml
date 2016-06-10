@@ -122,11 +122,6 @@
       <artifactId>mahout-math</artifactId>
     </dependency>
 
-    <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--<artifactId>mahout-native-viennacl_2.10</artifactId>-->
-    <!--</dependency>-->
-
     <dependency>
       <groupId>com.esotericsoftware.kryo</groupId>
       <artifactId>kryo</artifactId>
