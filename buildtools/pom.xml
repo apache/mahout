@@ -144,8 +144,4 @@
       </build>
     </profile>
   </profiles>
-
-  <scm>
-    <tag>mahout-0.12.2</tag>
-  </scm>
 </project>
