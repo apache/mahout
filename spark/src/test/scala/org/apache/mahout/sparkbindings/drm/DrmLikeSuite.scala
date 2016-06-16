@@ -49,7 +49,7 @@ class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuite
     }).norm should be < 1e-4
   }
 
-  test("DRM blockify sparse -> SRM") {
+  test("DRM blockify sparse -> DRM") {
 
     val inCoreA = sparse(
       (1, 2, 3),
@@ -59,7 +59,7 @@ class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuite
 
     (inCoreA - drmA.mapBlock() {
       case (keys, block) =>
-        if (!block.isInstanceOf[SparseRowMatrix])
+        if (block.isInstanceOf[SparseRowMatrix])
           throw new AssertionError("Block must be dense.")
         keys -> block
     }).norm should be < 1e-4

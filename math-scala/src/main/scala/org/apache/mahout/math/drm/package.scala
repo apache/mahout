@@ -23,6 +23,7 @@ import org.apache.mahout.math.scalabindings._
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.logical.OpAewUnaryFunc
+
 import collection._
 
 package object drm {
@@ -354,7 +355,6 @@ package object drm {
       keys → block
     }
   }
-
 }
 
 package object indexeddataset {
