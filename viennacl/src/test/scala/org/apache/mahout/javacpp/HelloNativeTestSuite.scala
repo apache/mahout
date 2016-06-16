@@ -14,31 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.javaCppTest
 
-import org.bytedeco.javacpp._
-import org.bytedeco.javacpp.annotation._
+package org.apache.mahout.javacpp
+
+import org.apache.mahout.javacpp.viennacl
+import org.scalatest.{FunSuite, Matchers}
 
 
-@Platform(include=Array(HelloNative.PLATFORM_HEADER_FILE_ONE))
-@Namespace("HelloNative")
-class HelloNative extends Pointer {
+class HelloNativeTestSuite extends FunSuite with Matchers {
 
-  Loader.load()
+  test("HelloViennaVector"){
+    val vcl = new viennacl()
+    val nDVec = new vcl.DoubleVector()
 
-  allocate()
+    nDVec.resize(10)
 
-  @native def allocate(): Unit
+    assert(nDVec.size == 10)
+  }
 
-  @native @StdString def get_property(): String
-  @native def set_property(property: String ): Unit
-
-  // to access the member variable directly
-  @native @StdString def property(): String
-  @native def property(property: String): Unit
-
-}
-
-object HelloNative {
-  final val PLATFORM_HEADER_FILE_ONE = "viennacl/HelloNative.h"
 }

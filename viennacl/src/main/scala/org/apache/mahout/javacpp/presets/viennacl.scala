@@ -14,19 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.mahout.javacpp.presets
 
-package org.apache.mahout.javaCppTest
+import org.bytedeco.javacpp.{Loader, Pointer}
+import org.bytedeco.javacpp.annotation.{Namespace, Platform, _}
+import org.bytedeco.javacpp.tools.{Info, InfoMap, InfoMapper}
 
-import org.scalatest.{FunSuite, Matchers}
+@Platform(include=Array(viennacl.PLATFORM_HEADER_FILE_ONE,viennacl.PLATFORM_HEADER_FILE_TWO))
+//@Namespace("viennacl")
+class viennacl extends Pointer with InfoMapper {
+    def map(infoMap: InfoMap ) {
+      infoMap.put(new
+          Info("viennacl::matrix<double,row_major,8>").pointerTypes("DoubleRowmajorMatrixClass8"))
+      infoMap.put(new
+          Info("viennacl::vector<double>").pointerTypes("DoubleVector"))
+
+    }
 
 
-class HelloNativeTestSuite extends FunSuite with Matchers {
 
-  test("HelloNative"){
-    val nTest = new HelloNative
+}
 
-    nTest.set_property("Hello Native")
-    assert(nTest.get_property() == "Hello Native")
-  }
-
+object viennacl {
+  final val PLATFORM_HEADER_FILE_ONE = "matrix.hpp"
+  final val PLATFORM_HEADER_FILE_TWO = "vector.hpp"
 }

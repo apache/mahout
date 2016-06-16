@@ -14,23 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.javaCppTest
+package org.apache.mahout.javacpp
 
-import org.bytedeco.javacpp.{Loader, Pointer}
-import org.bytedeco.javacpp.annotation.{Namespace, Platform, StdString}
+import org.bytedeco.javacpp._
+import org.bytedeco.javacpp.annotation._
 
+class viennacl extends org.apache.mahout.javacpp.presets.viennacl {
 
-@Platform(include=Array(VieannaVector.PLATFORM_HEADER_FILE_ONE))
-@Namespace("viennacl")
-class ViennaVector {
-  //  Loader.load()
-  //
-  //  allocate()
-  //
-  //  @native def allocate(): Unit
+//  @Name(Array("viennacl::vector<double>")) object DoubleVector {
+//
+//    try {
+//      Loader.load
+//    }
+//  }
+
+  @Name(Array("vector<double>")) class DoubleVector extends Pointer {
+
+    Loader.load
+    allocate
+
+//    def this(p: Pointer) {
+//      this()
+////      super (p)
+//    }
+
+    @native def allocate(): Unit
+
+    @native def size: Long
+
+    @native def resize(size: Int)
+
+  }
 
 
 }
-object VieannaVector {
-  final val PLATFORM_HEADER_FILE_ONE = "viennacl/vector.hpp"
-}
+
+

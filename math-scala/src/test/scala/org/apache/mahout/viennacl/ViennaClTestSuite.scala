@@ -1,3 +1,4 @@
+package org.apache.mahout.viennacl
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,17 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.javaCppTest
 
-import org.bytedeco.javacpp.annotation.{Namespace, Platform}
 
-@Platform(include=Array(ViennaSvd.PLATFORM_HEADER_FILE_ONE))
-@Namespace("viennacl")
-class ViennaSvd {
+import org.apache.mahout.javacpp.viennacl
+import org.scalatest.{FunSuite, Matchers}
+
+
+class HelloNativeTestSuite extends FunSuite with Matchers {
+
+  test("HelloViennaVector"){
+    val vcl = new viennacl()
+    val nDVec = new vcl.DoubleVector()
+
+    nDVec.resize(10)
+
+    assert(nDVec.size == 10)
+  }
 
 }
 
-object ViennaSvd {
-  final val PLATFORM_HEADER_FILE_ONE = "viennacl/tools/tools.hpp"
-
-}

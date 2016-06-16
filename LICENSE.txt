@@ -801,7 +801,7 @@ The following license applies to the H2O package
    Copyright 2012 0xdata, Inc
 
 ================================================================
-The following applies to the ViennaCL library and files in the native-ViennaCL module
+The following applies to the ViennaCL library and files in the mahout-native-viennacl module
 ================================================================
 
    Copyright (c) 2010-2016 Institute for Microelectronics,
