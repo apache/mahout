@@ -21,7 +21,7 @@ import org.apache.mahout.javacpp.viennacl
 import org.scalatest.{FunSuite, Matchers}
 
 
-class HelloNativeTestSuite extends FunSuite with Matchers {
+class HelloViennaTestSuite extends FunSuite with Matchers {
 
   test("HelloViennaVector"){
     val vcl = new viennacl()
