@@ -140,7 +140,7 @@
                           <!--use the include directory of the .hpp files after running -->
                           <!--sudo apt-get install libviennacl-dev-->
                           <!-- this must be changed if the headers are in a different directory -->
-                          <argument>-I/usr/include/viennacl</argument>
+                          <argument>-I/usr/include</argument>
                         <!--TODO: set an e.g viennacl.install property that can be overridded from maven-->
                         <!--<argument>-I${viennacl.install}</argument>-->
                       </arguments>

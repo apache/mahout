@@ -253,6 +253,13 @@ public class DenseVector extends AbstractVector {
     }
   }
 
+  /*
+   * return thr backing double array.
+   */
+  public double[] getBackingDataStructure(){
+    return values;
+  }
+
   private final class NonDefaultIterator implements Iterator<Element> {
     private final DenseElement element = new DenseElement();
     private int index = -1;

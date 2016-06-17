@@ -41,7 +41,7 @@ class HelloNativeTestSuite extends FunSuite with Matchers {
 
   test("HelloVCLVector_float"){
 
-    // create a new viennacl class based on CAFFE templata
+    // create a new viennacl class based on CAFFE template
     val vcl = new viennacl()
 
     // create a new vienna::vector<float>
@@ -55,4 +55,21 @@ class HelloNativeTestSuite extends FunSuite with Matchers {
     // vienna::vector<NumericT>::size()
     assert(nDVec.size == 10)
   }
+//  test("VCLMatrix_double_row_major_8"){
+//
+//    // create a new viennacl class based on CAFFE templata
+//    val vcl = new viennacl()
+//
+//    // create a new vienna::vector<float>
+//    val vclnDMxa = new vcl.VCLMatrix_double_row_major_8(10,10)
+//
+//    // resize to 10 elements
+//    // vienna::vector<NumericT>::resize(int size)
+////    vclnDMxa(10,10)
+////
+////    // ensure that the sies is 10 elements
+////    // vienna::vector<NumericT>::size()
+////    assert(vclnDMxa.size == 10)
+//  }
+
 }
