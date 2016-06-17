@@ -27,8 +27,10 @@ class viennacl extends org.apache.mahout.javacpp.presets.viennacl {
 //      Loader.load
 //    }
 //  }
+ //  MAHOUT_HOME/viennacl/target/classes/org/apache/mahout/javacpp/linux-x86_64/libjniviennacl.so
 
-  @Name(Array("vector<double>")) class DoubleVector extends Pointer {
+  // viennacl::vector<double>
+  @Name(Array("vector<double>")) class VCLVector_double extends Pointer {
 
     Loader.load
     allocate
@@ -37,6 +39,24 @@ class viennacl extends org.apache.mahout.javacpp.presets.viennacl {
 //      this()
 ////      super (p)
 //    }
+
+    @native def allocate(): Unit
+
+    @native def size: Long
+
+    @native def resize(size: Int)
+
+  }
+  // viennacl::vector<float>
+  @Name(Array("vector<float>")) class VCLVector_float extends Pointer {
+
+    Loader.load
+    allocate
+
+    //    def this(p: Pointer) {
+    //      this()
+    ////      super (p)
+    //    }
 
     @native def allocate(): Unit
 

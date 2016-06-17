@@ -23,13 +23,36 @@ import org.scalatest.{FunSuite, Matchers}
 
 class HelloNativeTestSuite extends FunSuite with Matchers {
 
-  test("HelloViennaVector"){
+  test("HelloVCLVector_double"){
+    // create a new viennacl class based on CAFFE templata
     val vcl = new viennacl()
-    val nDVec = new vcl.DoubleVector()
 
+    // create a new vienna::vector<double>
+    val nDVec = new vcl.VCLVector_double()
+
+    // resize to 10 elements
+    // vienna::vector<NumericT>::resize(int size)
     nDVec.resize(10)
 
+    // ensure that the sies is 10 elements
+    // vienna::vector<NumericT>::size()
     assert(nDVec.size == 10)
   }
 
+  test("HelloVCLVector_float"){
+
+    // create a new viennacl class based on CAFFE templata
+    val vcl = new viennacl()
+
+    // create a new vienna::vector<float>
+    val nDVec = new vcl.VCLVector_float()
+
+    // resize to 10 elements
+    // vienna::vector<NumericT>::resize(int size)
+    nDVec.resize(10)
+
+    // ensure that the sies is 10 elements
+    // vienna::vector<NumericT>::size()
+    assert(nDVec.size == 10)
+  }
 }

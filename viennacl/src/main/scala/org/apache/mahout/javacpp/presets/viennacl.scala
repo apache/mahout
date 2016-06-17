@@ -27,7 +27,9 @@ class viennacl extends Pointer with InfoMapper {
       infoMap.put(new
           Info("viennacl::matrix<double,row_major,8>").pointerTypes("DoubleRowmajorMatrixClass8"))
       infoMap.put(new
-          Info("viennacl::vector<double>").pointerTypes("DoubleVector"))
+          Info("viennacl::vector<double>").pointerTypes("VCLVector_double"))
+      infoMap.put(new
+          Info("viennacl::vector<float>").pointerTypes("VCLVector_float"))
 
     }
 
