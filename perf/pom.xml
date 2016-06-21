@@ -85,7 +85,30 @@
         </executions>
       </plugin>
 
-      <!--this is what scalatest recommends to do to enable scala tests -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>org.apache.mahout.perf.PerfMeasurementDriver</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- bind to the packaging phase -->
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
       <!-- disable surefire -->
       <plugin>
@@ -200,6 +223,7 @@
               <argLine>-Xmx3g</argLine>
             </configuration>
           </plugin>
+
         </plugins>
       </build>
     </profile>
