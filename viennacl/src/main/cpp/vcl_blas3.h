@@ -27,7 +27,7 @@ namespace mmul {
 
     // CSR sparse matrices BLAS-3
     // dense %*% dense
-     void dense_dense_mmul(double* lhs, long lhs_rows, long lhs_cols, double* rhs, long rhs_rows, long rhs_cols, double* result)
+     void dense_dense_mmul(double* lhs, long lhs_rows, long lhs_cols, double* rhs, long rhs_rows, long rhs_cols, double* result);
 
     // dense %*% sparse (CSR)/ with matrix from memory/std matrix preperation
 //    void dense_sparse_mmul(double* lhs, long lhs_rows, long lhs_cols, std::vector<std::vector<double> > rhs);

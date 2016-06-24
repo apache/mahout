@@ -32,7 +32,7 @@ using namespace mmul;
 
     // dense matrices BLAS-3
     // dense %*% dense
-    void dense_dense_mmul(double* lhs, long lhs_rows, long lhs_cols, double* rhs, long rhs_rows, long rhs_cols, double* result) {
+    void mmul::dense_dense_mmul(double* lhs, long lhs_rows, long lhs_cols, double* rhs, long rhs_rows, long rhs_cols, double* result) {
        viennacl::matrix<double> mx_a(lhs, viennacl::memory_types::main_memory, lhs_rows, lhs_cols);
        viennacl::matrix<double> mx_b(rhs, viennacl::memory_types::main_memory, rhs_rows, rhs_cols);
 
