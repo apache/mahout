@@ -425,7 +425,7 @@ package object scalabindings {
     * @param mx  The matrix to check density of.
     * @param threshold the threshold of non-zero elements above which we consider a Matrix Dense
     */
-  def sparsityAnalysis(mx: Matrix, threshold: Double = 0.25): Boolean = {
+  def densityAnalysis(mx: Matrix, threshold: Double = 0.25): Boolean = {
 
     require(threshold >= 0.0 && threshold <= 1.0)
     var n = minSamples
@@ -465,7 +465,7 @@ package object scalabindings {
       else if (mean > threshold + iv) return true // dense
     }
 
-    return mean <= threshold
+    return mean > threshold // if (mean > threshold) dense
 
   }
 

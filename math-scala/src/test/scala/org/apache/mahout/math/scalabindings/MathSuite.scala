@@ -243,24 +243,24 @@ class MathSuite extends FunSuite with MahoutSuite {
     val n = 800
     val mxA = new DenseMatrix(m, n)
 
-    sparsityAnalysis(mxA) shouldBe false
-    sparsityAnalysis(mxA, .5) shouldBe false
-    sparsityAnalysis(mxA + 1) shouldBe true
-    sparsityAnalysis(mxA + 1, .95) shouldBe true
+    densityAnalysis(mxA) shouldBe false
+    densityAnalysis(mxA, .5) shouldBe false
+    densityAnalysis(mxA + 1) shouldBe true
+    densityAnalysis(mxA + 1, .95) shouldBe true
 
     for (i ← 0 until m by 5) mxA(i, ::) := 1
-    info(s"20% detected as dense?:${sparsityAnalysis(mxA)}")
+    info(s"20% detected as dense?:${densityAnalysis(mxA)}")
     mxA := 0
 
     for (i ← 0 until m by 3) mxA(i, ::) := 1
-    info(s"33% detected as dense?:${sparsityAnalysis(mxA)}")
+    info(s"33% detected as dense?:${densityAnalysis(mxA)}")
     mxA := 0
 
     for (i ← 0 until m by 4) mxA(i, ::) := 1
-    info(s"25% detected as dense?:${sparsityAnalysis(mxA)}")
+    info(s"25% detected as dense?:${densityAnalysis(mxA)}")
 
     for (i ← 0 until m by 2) mxA(i, ::) := 1
-    info(s"50% detected as dense?:${sparsityAnalysis(mxA)}")
+    info(s"50% detected as dense?:${densityAnalysis(mxA)}")
 
   }
 
