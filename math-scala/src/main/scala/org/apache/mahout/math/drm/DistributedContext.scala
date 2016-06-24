@@ -31,7 +31,7 @@ trait DistributedContext extends Closeable {
 //    require(mHome != null, "MAHOUT_HOME is required to to run Mahout with VCL")
 
     // path to the compiled VCL bindings
-    val vclLibrary = new File(mHome,"/viennacl/target/classes/org/apache/mahout/javacpp/linux-x86_64/libjniviennacl.so")
+    val vclLibrary = new File(mHome,"/viennacl/target/classes/org/apache/mahout/javacpp/linux-x86_64/libjnivcl_blas3.so")
 
     // set the value of useVCL to the existance of the compiled librariy on the above hardcoded path.
     vclLibrary.exists()

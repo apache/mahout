@@ -11,5 +11,5 @@ public class vcl_blas3 {
     @Name("dense_dense_mmul")
     public static native void dense_dense_mmul(DoublePointer mxA, long mxANrow, long mxANcol,
                                                DoublePointer mxB, long mxBNrow, long mxBNcol,
-                                               @ByRef DoublePointer mxRes);
+                                               DoublePointer mxRes);
 }

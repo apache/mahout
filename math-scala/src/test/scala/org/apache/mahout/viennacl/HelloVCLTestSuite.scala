@@ -18,13 +18,11 @@ package org.apache.mahout.viennacl
 
 
 import java.nio.{ByteBuffer, DoubleBuffer}
+import java.util.Random
 
-//import org.apache.mahout.javacpp.presets.viennacl
-import org.apache.mahout.javacpp.viennacl
-import org.apache.mahout.math.DenseVector
+import org.apache.mahout.javacpp.linalg.vcl_blas3._
 import org.bytedeco.javacpp.DoublePointer
 import org.scalatest.{FunSuite, Matchers}
-
 import org.apache.mahout.math._
 import drm._
 import scalabindings._
@@ -43,82 +41,27 @@ class HelloVCLTestSuite extends FunSuite with Matchers {
   val vclCtx = new VclCtx()
 
 
-  test("HelloVCLVector_double"){
+
+  test("Simple dense %*% dense native mmul"){
 
     // probe to see if VCL libraries are installed
     if (vclCtx.useVCL) {
 
-      // create a new viennacl class based on CAFFE templata
-      val vcl = new viennacl()
+      val r1 = new Random(1234)
 
-      // create a new vienna::vector<double>
-      val nDVec = new vcl.VCLVector_double()
+      val mxA:DenseMatrix = dense(1000,1000)
+      val mxB:DenseMatrix = dense(1000,1000)
+      // add some data
+      mxA ::= {(_,_,v) => r1.nextDouble()}
+      mxB ::= {(_,_,v) => r1.nextDouble()}
 
-      // resize to 10 elements
-      // vienna::vector<NumericT>::resize(int size)
-      nDVec.resize(10)
+      val mxC = mxB.like()
 
-      // ensure that the sies is 10 elements
-      // vienna::vector<NumericT>::size()
-      assert(nDVec.size == 10)
-    } else {
-      printf("No Native VCL library found... Skipping test")
-    }
-  }
-
-  test("HelloVCLVector_float") {
-    // probe to see if VCL libraries are installed
-    if (vclCtx.useVCL) {
-
-      // create a new viennacl class based on CAFFE templata
-      val vcl = new viennacl()
-
-      // create a new vienna::vector<float>
-      val nDVec = new vcl.VCLVector_float()
-
-      // resize to 10 elements
-      // vienna::vector<NumericT>::resize(int size)
-      nDVec.resize(10)
-
-      // ensure that the sies is 10 elements
-      // vienna::vector<NumericT>::size()
-      assert(nDVec.size == 10)
-    } else {
-      printf("No Native VCL library found... Skipping test")
-    }
-  }
-  test("Simple dense native vector from colt vector"){
-
-    // probe to see if VCL libraries are installed
-    if (vclCtx.useVCL) {
-
-      // create a new viennacl class based on CAFFE templata
-      val vcl = new viennacl()
-
-      // create a JVM-backed vector
-      val coltVec = new DenseVector(5)
-
-      // add a few values
-      coltVec(1)=1.0
-      coltVec(2)=2.0
-      coltVec(3)=3.0
-      coltVec(4)=4.0
-      coltVec(5)=5.0
+      val mmulControl = mxA %*% mxB
 
 
-      // get the pointer to the Backing Array
-      val coltVecArray = coltVec.getBackingDataStructure
+      dense_dense_mmul(new DoublePointer(DoubleBuffer.wrap(mxA.getBackingArray)) )
 
-
-      // create a new vienna::vector<double,1>
-      val vclVec = new vcl.VCLVector_double_1(new DoublePointer(DoubleBuffer.wrap(coltVecArray)),0 , 20, 0 ,1 )
-
-      // ensure that both vclVec and coltVec are the same size
-      // vienna::vector<NumericT>::size()
-      assert(vclVec.size == coltVec.size())
-
-      // check the L2 norms of each vector
-      assert(vcl.VCLNorm_2_double(vclVec) == coltVec.norm(2))
 
     } else {
       printf("No Native VCL library found... Skipping test")

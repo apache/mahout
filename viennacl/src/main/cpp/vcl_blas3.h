@@ -21,7 +21,7 @@
 #include "viennacl/compressed_matrix.hpp"
 #include "viennacl/coordinate_matrix.hpp"
 
-namespace mmul {
+//namespace mmul {
 
      // bridge to JNI functions
 
@@ -37,4 +37,4 @@ namespace mmul {
 
      // sparse (CSR) %*% sparse (CSR)
 //     void  sparse_sparse_mmul(std::vector<std::vector<double> >* lhs, std::vector<std::vector<double> >* rhs, std::vector<std::vector<double> >* res);
-}
+//}
