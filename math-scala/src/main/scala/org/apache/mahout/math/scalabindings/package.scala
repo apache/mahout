@@ -465,7 +465,7 @@ package object scalabindings {
       else if (mean > threshold + iv) return true // dense
     }
 
-    return mean <= threshold
+    return mean > threshold // if mean > threshold dense
 
   }
 
