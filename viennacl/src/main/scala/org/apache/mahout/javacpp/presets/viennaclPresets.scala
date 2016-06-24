@@ -21,11 +21,11 @@ import org.bytedeco.javacpp.annotation.{Namespace, Platform, _}
 import org.bytedeco.javacpp.tools.{Info, InfoMap, InfoMapper}
 
 @Platform(includepath=Array("/usr/include/","/usr/include/CL/","/usr/include/viennacl/"),
-  include=Array(viennacl.PLATFORM_HEADER_FILE_ONE,viennacl.PLATFORM_HEADER_FILE_TWO,viennacl.PLATFORM_HEADER_FILE_THREE,
-    viennacl.PLATFORM_HEADER_FILE_FOUR, viennacl.PLATFORM_HEADER_FILE_FIVE, viennacl.PLATFORM_HEADER_FILE_SIX,
-    viennacl.PLATFORM_HEADER_FILE_SEVEN))
+  include=Array(viennaclPresets.PLATFORM_HEADER_FILE_ONE,viennaclPresets.PLATFORM_HEADER_FILE_TWO,viennaclPresets.PLATFORM_HEADER_FILE_THREE,
+    viennaclPresets.PLATFORM_HEADER_FILE_FOUR, viennaclPresets.PLATFORM_HEADER_FILE_FIVE, viennaclPresets.PLATFORM_HEADER_FILE_SIX,
+    viennaclPresets.PLATFORM_HEADER_FILE_SEVEN))
 //@Namespace("viennacl")
-class viennacl extends Pointer with InfoMapper {
+class viennaclPresets extends Pointer with InfoMapper {
     def map(infoMap: InfoMap ) {
       infoMap.put(new
           Info("viennacl::matrix<double,viennacl::row_majorr,8>").pointerTypes("VCLMatrix_double_row_major_8"))
@@ -46,7 +46,7 @@ class viennacl extends Pointer with InfoMapper {
 
 }
 
-object viennacl {
+object viennaclPresets {
   final val PLATFORM_HEADER_FILE_ONE = "viennacl/matrix.hpp"
   final val PLATFORM_HEADER_FILE_TWO = "viennacl/vector.hpp"
   final val PLATFORM_HEADER_FILE_THREE = "CL/cl.h"

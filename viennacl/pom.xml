@@ -185,6 +185,13 @@
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
+    <!-- scala-library for annotations at compile time-->
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+
 
     <dependency>
       <groupId>org.bytedeco</groupId>

@@ -16,15 +16,16 @@
  */
 package org.apache.mahout.javacpp
 
-import org.apache.mahout.javacpp.presets.viennacl
+import org.apache.mahout.javacpp.presets.viennaclPresets
 import org.bytedeco.javacpp
 import org.bytedeco.javacpp._
 import org.bytedeco.javacpp.annotation._
 
-class viennacl extends org.apache.mahout.javacpp.presets.viennacl {
+class viennacl extends org.apache.mahout.javacpp.presets.viennaclPresets {
   Loader.load
-//  allocate
-//  @native def allocate(): Unit
+
+  //  allocate
+  //  @native def allocate(): Unit
   // MAHOUT_HOME/viennacl/target/classes/org/apache/mahout/javacpp/linux-x86_64/libjniviennacl.so
 
   // viennacl::vector<double>
@@ -32,20 +33,24 @@ class viennacl extends org.apache.mahout.javacpp.presets.viennacl {
 
     Loader.load
     allocate
+
     @native def allocate(): Unit
+
     //@native def allocate(p: Pointer): Unit
     @native def size: Long
+
     @native def resize(size: Int)
 
-    }
-//    vector.hpp:971
-//    @native def VCLVector_double(@Cast("NumericT *") ptr_to_mem, @Cast ("viennacl::memory_types") mem_type, size_type vec_size, vcl_size_t start, size_type stride)
+  }
 
-  @Name(Array("vector<double,1>")) class VCLVector_double_1 (@Cast(Array("NumericT *")) val ptr_to_mem:  DoublePointer,
-                                                             @Cast(Array("viennacl::memory_types")) val mem_ype: Int = viennacl.MAIN_MEMORY,
-                                                             @Cast(Array("size_type")) val vec_size: Long,
-                                                             @Cast(Array("size_type")) val start:  Long = 0,
-                                                             @Cast(Array("size_type")) val stride: Long = 1 )  extends Pointer {
+  //    vector.hpp:971
+  //    @native def VCLVector_double(@Cast("NumericT *") ptr_to_mem, @Cast ("viennacl::memory_types") mem_type, size_type vec_size, vcl_size_t start, size_type stride)
+
+  @Name(Array("vector<double,1>")) class VCLVector_double_1(@Cast(Array("NumericT *")) val ptr_to_mem: DoublePointer,
+                                                            @Cast(Array("viennacl::memory_types")) val mem_ype: Int = viennaclPresets.MAIN_MEMORY,
+                                                            @Cast(Array("size_type")) val vec_size: Long,
+                                                            @Cast(Array("size_type")) val start: Long = 0,
+                                                            @Cast(Array("size_type")) val stride: Long = 1) extends Pointer {
 
     allocate()
     allocate(vec_size)
@@ -53,21 +58,25 @@ class viennacl extends org.apache.mahout.javacpp.presets.viennacl {
     Loader.load
 
     @native def allocate(): Unit
+
     @native def allocate(size: Long): Unit
-   // @native def allocate(p: Pointer): Unit
+
+    // @native def allocate(p: Pointer): Unit
     @native def size: Long
+
     @native def resize(size: Int)
   }
 
-//   // skip info map here
-//  @Namespace("viennacl::linalg")
-//   @native @Cast(Array("viennacl::scalar_expression<const viennacl::vector_base<double>"+
-//    ",const viennacl::vector_base<double>,viennacl::op_norm_2> "+
-//    "norm_2(viennacl::vector_base<double> const & v)")) def VCLNorm_2_double(@ByRef @Cast(Array("vector<double,1>")) vec: VCLVector_double_1) : Double
+  //   // skip info map here
+  //  @Namespace("viennacl::linalg")
+  //   @native @Cast(Array("viennacl::scalar_expression<const viennacl::vector_base<double>"+
+  //    ",const viennacl::vector_base<double>,viennacl::op_norm_2> "+
+  //    "norm_2(viennacl::vector_base<double> const & v)")) def VCLNorm_2_double(@ByRef @Cast(Array("vector<double,1>")) vec: VCLVector_double_1) : Double
 
-  @native @Cast(Array("viennacl::scalar_expression < const viennacl::vector_base<double>," +
-    " const viennacl::vector_base<double>, viennacl::op_norm_2 > 	viennacl::linalg::norm_2")) def VCLNorm_2_double
-                                                  (@ByRef @Cast(Array("vector<double,1>")) vec: VCLVector_double_1): Double
+//  @Name(Array("viennacl::scalar_expression < const viennacl::vector_base<double>," +
+//    " const viennacl::vector_base<double>, viennacl::op_norm_2 > 	viennacl::linalg::norm_2"))
+//  @native def VCLNorm_2_double
+//  (@ByRef @Cast(Array("vector<double,1>")) vec: VCLVector_double_1): Double
 
 
   // viennacl::vector<float>
@@ -77,10 +86,28 @@ class viennacl extends org.apache.mahout.javacpp.presets.viennacl {
     allocate
 
     @native def allocate(): Unit
+
     @native def size: Long
+
     @native def resize(size: Int)
 
   }
+
+//  @Namespace("linalg")
+//  @Name(Array("scalar_expression < const viennacl::vector_base<double>," +
+//      " const viennacl::vector_base<double>, viennacl::op_norm_2 > 	viennacl::linalg::norm_2<double>"))
+//  class norm_2 extends Pointer{
+//    Loader.load
+//    allocate
+//
+//    @native def allocate(): Unit
+//
+//  @Name(Array("scalar_expression < const viennacl::vector_base<double>," +
+//    " const viennacl::vector_base<double>, viennacl::op_norm_2 > 	viennacl::linalg::norm_2")) @native def VCLNorm_2_double(@ByRef @Cast(Array("viennacl::vector_base<double>")) vec: VCLVector_double_1): Double
+//
+//    //(@ByRef @Cast(Array("vector<double,1>")) vec: VCLVector_double_1): Double
+//  }
+}
 
 
 
@@ -127,6 +154,6 @@ class viennacl extends org.apache.mahout.javacpp.presets.viennacl {
 //    }
 //  }
 
-}
+//}
 
 
