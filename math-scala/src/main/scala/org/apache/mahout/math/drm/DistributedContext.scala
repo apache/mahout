@@ -17,11 +17,24 @@
 
 package org.apache.mahout.math.drm
 
-import java.io.Closeable
+import java.io.{Closeable, File}
 
 /** Distributed context (a.k.a. distributed session handle) */
 trait DistributedContext extends Closeable {
 
   val engine: DistributedEngine
+
+  // crude probing for VCL capabilities
+  val useVCL: Boolean = {
+    var mHome = System.getenv("MAHOUT_HOME")
+    if (mHome == null) mHome = System.getProperty("mahout.home")
+//    require(mHome != null, "MAHOUT_HOME is required to to run Mahout with VCL")
+
+    // path to the compiled VCL bindings
+    val vclLibrary = new File(mHome,"/viennacl/target/classes/org/apache/mahout/javacpp/linux-x86_64/libjnivcl_blas3.so")
+
+    // set the value of useVCL to the existance of the compiled librariy on the above hardcoded path.
+    vclLibrary.exists()
+  }
 
 }
