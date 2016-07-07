@@ -6,13 +6,27 @@ import org.apache.mahout.common.RandomUtils
 import org.apache.mahout.math.{Matrices, SparseRowMatrix, scalabindings}
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.decompositions._
+import java.io.{BufferedWriter, FileWriter}
+import com.github.tototoshi.csv.CSVWriter
 import RLikeOps._
 
 
 
 object PerfMeasurementDriver extends App {
-  time{doSSVD}
-  time{doSPCA}
+
+
+
+  val out = new BufferedWriter(new FileWriter("mahoutRuntimePerf.csv"));
+  val writer = new CSVWriter(out);
+  val t1=time{doSSVD}
+  //println("t1="+t1)
+  val t2=time{doSPCA}
+  //println("t2="+t2)
+  var listOfRecords= Array(t1.toString,t2.toString)
+  writer.writeRow(listOfRecords)
+  out.close()
+
+
   def doSSVD() {
     // Very naive, a full-rank only here.
     val a = dense(
@@ -27,12 +41,12 @@ object PerfMeasurementDriver extends App {
 
     val (uControl, vControl, sControl) = svd(a)
 
-    printf("U:\n%s\n", u)
+    /*printf("U:\n%s\n", u)
     printf("U-control:\n%s\n", uControl)
     printf("V:\n%s\n", v)
     printf("V-control:\n%s\n", vControl)
     printf("Sigma:\n%s\n", s)
-    printf("Sigma-control:\n%s\n", sControl)
+    printf("Sigma-control:\n%s\n", sControl)*/
 
   }
 
@@ -73,23 +87,24 @@ object PerfMeasurementDriver extends App {
     for (r <- 0 until input.nrow) input(r, ::) -= xi
     var (pcaControl, _, sControl) = svd(m = input)
 
-    printf("Svs-control:%s\n", sControl)
+    //printf("Svs-control:%s\n", sControl)
     pcaControl = (pcaControl %*%: diagv(sControl))(::, 0 until k)
 
-    printf("pca:\n%s\n", pca(0 until 10, 0 until 10))
-    printf("pcaControl:\n%s\n", pcaControl(0 until 10, 0 until 10))
+    //printf("pca:\n%s\n", pca(0 until 10, 0 until 10))
+    //printf("pcaControl:\n%s\n", pcaControl(0 until 10, 0 until 10))
   }
 
 
 
 
 
-  def time[R](block: => R): R = {
+  def time[R](block: => R): Long = {
     val t0 = System.nanoTime()
     val result = block    // call-by-name
     val t1 = System.nanoTime()
-    println("Elapsed time: " + (t1 - t0) + "ns")
-    result
+    //println("Elapsed time: " + (t1 - t0) + "ns")
+    //println("The result returned="+result)
+    t1-t0
   }
 
 }
