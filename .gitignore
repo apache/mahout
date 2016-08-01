@@ -20,3 +20,6 @@ mr/temp
 temp
 foo
 math-tests/
+derby.log
+bin/*
+metastore_db/*
