@@ -18,7 +18,7 @@ package org.apache.mahout.text.doc;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.IntField;
+import org.apache.lucene.document.LegacyIntField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 
@@ -43,7 +43,7 @@ public class NumericFieldDocument extends SingleFieldDocument {
 
     document.add(new StringField(ID_FIELD, getId(), Field.Store.YES));
     document.add(new TextField(FIELD, getField(), Field.Store.YES));
-    document.add(new IntField(NUMERIC_FIELD, numericField, Field.Store.YES));
+    document.add(new LegacyIntField(NUMERIC_FIELD, numericField, Field.Store.YES));
 
     return document;
   }
