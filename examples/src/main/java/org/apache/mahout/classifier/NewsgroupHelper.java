@@ -26,7 +26,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -60,7 +59,7 @@ public final class NewsgroupHelper {
   private static final long WEEK = 7 * 24 * 3600;
   
   private final Random rand = RandomUtils.getRandom();  
-  private final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
+  private final Analyzer analyzer = new StandardAnalyzer();
   private final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
   private final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   
