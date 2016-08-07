@@ -63,3 +63,4 @@ For information on how to contribute, visit the [How to Contribute Page](https:/
 Please see the `NOTICE.txt` included in this directory for more information.
 
 [![Build Status](https://api.travis-ci.org/apache/mahout.svg?branch=master)](https://travis-ci.org/apache/mahout)
+[![Coverage Status](https://coveralls.io/repos/github/apache/mahout/badge.svg?branch=master)](https://coveralls.io/github/apache/mahout?branch=master)
