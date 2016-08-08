@@ -19,7 +19,6 @@ package org.apache.mahout.vectorizer.encoders;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
