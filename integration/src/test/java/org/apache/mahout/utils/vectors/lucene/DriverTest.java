@@ -31,6 +31,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.index.FieldInfo;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
@@ -42,6 +43,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Set;
 
 public class DriverTest extends MahoutTestCase {
@@ -73,9 +75,8 @@ public class DriverTest extends MahoutTestCase {
     public static final FieldType TYPE = new FieldType();
 
     static {
-      TYPE.setIndexed(true);
       TYPE.setOmitNorms(true);
-      TYPE.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS);
+      TYPE.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
       TYPE.setStored(true);
       TYPE.setTokenized(true);
       TYPE.setStoreTermVectors(true);
@@ -90,9 +91,10 @@ public class DriverTest extends MahoutTestCase {
   @Test
   public void sequenceFileDictionary() throws IOException {
 
-    Directory index = new SimpleFSDirectory(indexDir);
-    Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
-    IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_46, analyzer);
+    Directory index = new SimpleFSDirectory(Paths.get(indexDir.getAbsolutePath()));
+    Analyzer analyzer = new StandardAnalyzer();
+    IndexWriterConfig config = new IndexWriterConfig(analyzer);
+    config.setCommitOnClose(true);
     final IndexWriter writer = new IndexWriter(index, config);
 
     try {
@@ -100,9 +102,8 @@ public class DriverTest extends MahoutTestCase {
       writer.addDocument(asDocument("One Ring to find them,"));
       writer.addDocument(asDocument("One Ring to bring them all"));
       writer.addDocument(asDocument("and in the darkness bind them"));
-
     } finally {
-      writer.close(true);
+      writer.close();
     }
 
     File seqDict = new File(outputDir, "dict.seq");
