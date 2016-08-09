@@ -21,6 +21,7 @@ package org.apache.mahout.flinkbindings.io
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 
+
 /**
  * Returns a [[java.lang.String]], which is comma delimited list of URIs discovered based on parameters
  * in the constructor.
@@ -61,17 +62,17 @@ case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: 
     val seed = fs.getFileStatus(new Path(dir))
     var f: String = files
 
-    if (seed.isDirectory) {
+    if (seed.isDir) {
       val fileStatuses: Array[FileStatus] = fs.listStatus(new Path(dir))
       for (fileStatus <- fileStatuses) {
         if (fileStatus.getPath().getName().matches(filePattern)
-          && !fileStatus.isDirectory) {
+          && !fileStatus.isDir) {
           // found a file
           if (fileStatus.getLen() != 0) {
             // file is not empty
             f = f + fileStatus.getPath.toUri.toString + ","
           }
-        } else if (fileStatus.isDirectory && recursive) {
+        } else if (fileStatus.isDir && recursive) {
           f = findFiles(fileStatus.getPath.toString, filePattern, f)
         }
       }
