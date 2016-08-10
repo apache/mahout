@@ -17,28 +17,29 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>0.12.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
-  <name>Mahout Math Scala bindings</name>
-  <description>High performance scientific and technical computing data structures and methods,
-    mostly based on CERN's
-    Colt Java API
+  <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
+  <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+
+  <name>Mahout Native VienniaCL Bindings</name>
+  <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 
   <packaging>jar</packaging>
 
   <build>
     <plugins>
-      <!-- create test jar so other modules can reuse the math-scala test utility classes. -->
+      <!-- create test jar so other modules can reuse the native test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -102,9 +103,6 @@
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <configuration>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
         <executions>
           <execution>
             <id>test</id>
@@ -112,23 +110,84 @@
               <goal>test</goal>
             </goals>
           </execution>
+
         </executions>
       </plugin>
 
+
+      <!--JavaCPP native build plugin-->
+      <!--  old-style way to get it to compile. -->
+      <!--based on https://github.com/bytedeco/javacpp/wiki/Maven-->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>javacpp</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <environmentVariables>
+                <LD_LIBRARY_PATH>{project.basedir}/target/classes/org/apache/mahout/javacpp/linalg/linux-x86_64/
+                </LD_LIBRARY_PATH>
+              </environmentVariables>
+              <executable>java</executable>
+              <arguments>
+                <argument>-jar</argument>
+                <argument>${org.bytedeco:javacpp:jar}</argument>
+                <argument>-propertyfile</argument>
+                <argument>linux-x86_64-viennacl.properties</argument>
+                <argument>-classpath</argument>
+                <argument>${project.build.outputDirectory}:${org.scala-lang:scala-library:jar}</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.CompressedMatrix</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.Context</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.MatrixBase</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.DenseRowMatrix</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.DenseColumnMatrix</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.MatMatProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.ProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.MatrixTransExpression</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.LinalgFunctions</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.Functions</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.VectorBase</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.VCLVector</argument>
+                <argument>org.apache.mahout.viennacl.javacpp.VecMultExpression</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+      </plugin>
+
     </plugins>
+
   </build>
 
   <dependencies>
 
     <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.esotericsoftware.kryo</groupId>
-      <artifactId>kryo</artifactId>
-      <version>2.24.0</version>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
 
     <!--  3rd-party -->
@@ -137,22 +196,28 @@
       <artifactId>log4j</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>com.github.scopt</groupId>
-      <artifactId>scopt_${scala.compat.version}</artifactId>
-      <version>3.3.0</version>
-    </dependency>
-
-
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
+    <!-- scala-library for annotations at compile time-->
+    <!--<dependency>-->
+    <!--<groupId>org.scala-lang</groupId>-->
+    <!--<artifactId>scala-library</artifactId>-->
+    <!--<version>${scala.version}</version>-->
+    <!--</dependency>-->
 
+
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>javacpp</artifactId>
+      <version>1.2.2</version>
+    </dependency>
 
   </dependencies>
+
 
   <profiles>
     <profile>
@@ -190,6 +255,7 @@
             <configuration>
               <!-- Limit memory for unit tests in Travis -->
               <argLine>-Xmx3g</argLine>
+              <!--<argLine>-Djava.library.path=${project.build.directory}/libs/natives/linux-x86_64:${project.build.directory}/libs/natives/linux:${project.build.directory}/libs/natives/maxosx</argLine>-->
             </configuration>
           </plugin>
           <plugin>
@@ -198,6 +264,7 @@
             <configuration>
               <!-- Limit memory for integration tests in Travis -->
               <argLine>-Xmx3g</argLine>
+              <!--<argLine>-Djava.library.path=${project.build.directory}/libs/natives/linux-x86_64:${project.build.directory}/libs/natives/linux:${project.build.directory}/libs/natives/maxosx</argLine>-->
             </configuration>
           </plugin>
         </plugins>
