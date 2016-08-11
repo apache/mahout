@@ -31,11 +31,11 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
@@ -94,7 +94,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     sampleData = new ArrayList<>();
     RAMDirectory directory = new RAMDirectory();
     try (IndexWriter writer = new IndexWriter(directory,
-        new IndexWriterConfig(Version.LUCENE_46, new StandardAnalyzer(Version.LUCENE_46)))){
+        new IndexWriterConfig(new StandardAnalyzer()))){
       for (int i = 0; i < docs2.length; i++) {
         Document doc = new Document();
         Field id = new StringField("id", "doc_" + i, Field.Store.YES);
@@ -102,7 +102,7 @@ public final class TestClusterDumper extends MahoutTestCase {
         // Store both position and offset information
         FieldType fieldType = new FieldType();
         fieldType.setStored(false);
-        fieldType.setIndexed(true);
+        fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
         fieldType.setTokenized(true);
         fieldType.setStoreTermVectors(true);
         fieldType.setStoreTermVectorPositions(true);
