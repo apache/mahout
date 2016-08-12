@@ -653,7 +653,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.7.5.201505241946</version>
+          <version>0.7.7.201606060606</version>
           <executions>
             <execution>
               <goals>
@@ -666,7 +666,7 @@
             </execution>
             <execution>
               <id>report</id>
-              <phase>prepare-package</phase>
+              <phase>verify</phase>
               <goals>
                 <goal>report</goal>
               </goals>
@@ -678,7 +678,7 @@
         <plugin>
           <groupId>org.eluder.coveralls</groupId>
           <artifactId>coveralls-maven-plugin</artifactId>
-          <version>4.1.0</version>
+          <version>4.2.0</version>
         </plugin>
 
       </plugins>
