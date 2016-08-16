@@ -5,7 +5,6 @@ import org.bytedeco.javacpp.annotation.*;
 
 @Properties(inherit = Context.class,
         value = @Platform(
-                include={"matrix.hpp", "linalg/prod.hpp","compressed_matrix.hpp"},
                 library = "jniViennaCL"
         )
 )
@@ -19,7 +18,6 @@ public final class LinalgFunctions {
         Context.loadLib();
     }
 
-//    public static native BaseMatrix prod(@Const DenseColumnMatrix a, @Const DenseColumnMatrix b);
 
     @ByVal
     public static native MatMatProdExpression prod(@Const @ByRef MatrixBase a,
@@ -32,10 +30,23 @@ public final class LinalgFunctions {
     @ByVal
     public static native MatVecProdExpression prod(@Const @ByRef MatrixBase a,
                                                    @Const @ByRef VectorBase b);
-//    @Name("linalg::prod")
+
     @ByVal
     public static native SrMatDnMatProdExpression prod(@Const @ByRef CompressedMatrix spMx,
                                                        @Const @ByRef MatrixBase dMx);
+    @ByVal
+    @Name("prod")
+    public static native DenseColumnMatrix prodCm(@Const @ByRef MatrixBase a,
+                                                  @Const @ByRef MatrixBase b);
+    @ByVal
+    @Name("prod")
+    public static native DenseRowMatrix prodRm(@Const @ByRef MatrixBase a,
+                                               @Const @ByRef MatrixBase b);
+
+    @ByVal
+    @Name("prod")
+    public static native DenseRowMatrix prodRm(@Const @ByRef CompressedMatrix spMx,
+                                               @Const @ByRef MatrixBase dMx);
 
 
 //    @ByVal

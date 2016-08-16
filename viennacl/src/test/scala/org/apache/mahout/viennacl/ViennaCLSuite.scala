@@ -332,10 +332,7 @@ class ViennaCLSuite extends FunSuite with Matchers {
 
   }
 
-/* This test is currently not not working due to (possible JNI passing?) Issues with with the
-   vienniacl::matrix_base(matrix_expression<compressed_matrix, matrix_base, op_prod>)
-   constructor.
- */
+
   test("Sparse %*% Dense mmul microbenchmark") {
     val oclCtx = new Context(Context.OPENCL_MEMORY)
     val memCtx = new Context(Context.MAIN_MEMORY)
@@ -360,22 +357,22 @@ class ViennaCLSuite extends FunSuite with Matchers {
     info(s"Mahout multiplication time: $ms ms.")
 
     import LinalgFunctions._
-//    import Functions._
-//    // For now, since our dense matrix is fully dense lets just assume that our result is dense.
-//    // openCL time, including copying:
-//    {
-//      ms = System.currentTimeMillis()
-//      val oclA = toVclCmpMatrixAlt(mxSr, oclCtx)
-//      val oclB = toVclDenseRM(mxDn, oclCtx)
-//      val oclC = new DenseRowMatrix(prod(oclA, oclB))
-//      val mxC = fromVclDenseRM(oclC)
-//      ms = System.currentTimeMillis() - ms
-//      info(s"ViennaCL/OpenCL multiplication time: $ms ms.")
-//
-//      oclA.close()
-//      oclB.close()
-//      oclC.close()
-//    }
+
+    // For now, since our dense matrix is fully dense lets just assume that our result is dense.
+    // openCL time, including copying:
+    {
+      ms = System.currentTimeMillis()
+      val oclA = toVclCmpMatrixAlt(mxSr, oclCtx)
+      val oclB = toVclDenseRM(mxDn, oclCtx)
+      val oclC = new DenseRowMatrix(prod(oclA, oclB))
+      val mxC = fromVclDenseRM(oclC)
+      ms = System.currentTimeMillis() - ms
+      info(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+
+      oclA.close()
+      oclB.close()
+      oclC.close()
+    }
 
     // openMP/cpu time, including copying:
     {
