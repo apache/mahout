@@ -8,7 +8,6 @@ import scala.collection.mutable.ArrayBuffer
 
 @Properties(inherit = Array(classOf[Context]),
   value = Array(new Platform(
-    include = Array("matrix.hpp", "detail/matrix_def.hpp"),
     library = "jniViennaCL"
   )))
 @Name(Array("viennacl::matrix_base<double>"))

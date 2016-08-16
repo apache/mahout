@@ -11,7 +11,6 @@ import scala.collection.mutable.ArrayBuffer
   */
 @Properties(inherit = Array(classOf[Context]),
   value = Array(new Platform(
-    include = Array("matrix.hpp", "detail/matrix_def.hpp"),
     library = "jniViennaCL"
   )))
 @Name(Array("viennacl::matrix<double,viennacl::row_major>"))
@@ -40,10 +39,10 @@ class DenseRowMatrix(initDefault: Boolean = true) extends MatrixBase {
   }
 
   // TODO: getting compilation errors here
-//  def this(sd: SrMatDnMatProdExpression) {
-//    this(false)
-//    allocate(sd)
-//  }
+  def this(sd: SrMatDnMatProdExpression) {
+    this(false)
+    allocate(sd)
+  }
 
   if (initDefault) allocate()
 
@@ -63,7 +62,7 @@ class DenseRowMatrix(initDefault: Boolean = true) extends MatrixBase {
   @native protected def allocate(@Const @ByRef me: MatrixTransExpression)
 
   // TODO: Compilation errors here
-//  @native protected def allocate(@Const @ByRef me: SrMatDnMatProdExpression)
+  @native protected def allocate(@Const @ByRef me: SrMatDnMatProdExpression)
 
 }
 

@@ -15,7 +15,7 @@ import org.bytedeco.javacpp.annotation._
 @Properties(Array(
   new Platform(
     includepath = Array("/usr/include/viennacl"),
-    include = Array("context.hpp"),
+    include = Array("matrix.hpp", "compressed_matrix.hpp"),
     define = Array("VIENNACL_WITH_OPENCL", "VIENNACL_WITH_OPENMP"),
     compiler = Array("fastfpu","viennacl"),
     link = Array("OpenCL"),
