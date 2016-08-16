@@ -6,7 +6,6 @@ import org.bytedeco.javacpp.annotation._
 
 @Properties(inherit = Array(classOf[Context]),
   value = Array(new Platform(
-    include = Array("viennacl/backend/mem_handle.hpp"),
     library = "jniViennaCL")
   ))
 @Namespace("viennacl::backend")

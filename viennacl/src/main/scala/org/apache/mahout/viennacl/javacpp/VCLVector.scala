@@ -8,7 +8,6 @@ import scala.collection.mutable.ArrayBuffer
 
 @Properties(inherit = Array(classOf[Context]),
   value = Array(new Platform(
-    include = Array("vector.hpp"),
     library="jniViennaCL"
   )))
 @Name(Array("viennacl::vector<double>"))

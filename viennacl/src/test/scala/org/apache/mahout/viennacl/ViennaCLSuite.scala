@@ -336,63 +336,63 @@ class ViennaCLSuite extends FunSuite with Matchers {
    vienniacl::matrix_base(matrix_expression<compressed_matrix, matrix_base, op_prod>)
    constructor.
  */
-//  test("Sparse %*% Dense mmul microbenchmark") {
-//    val oclCtx = new Context(Context.OPENCL_MEMORY)
-//    val memCtx = new Context(Context.MAIN_MEMORY)
-//
-//    val m = 3000
-//    val n = 3000
-//    val s = 1000
-//
-//    val r = new Random(1234)
-//
-//    // Dense row-wise
-//    val mxSr = new SparseMatrix(m, s)
-//    val mxDn = new DenseMatrix(s, n)
-//
-//    // add some data
-//    mxSr := { (_, _, v) => if (r.nextDouble() < .20) r.nextDouble() else v }
-//    mxDn := { (_, _, _) => r.nextDouble() }
-//
-//    var ms = System.currentTimeMillis()
-//    mxSr %*% mxDn
-//    ms = System.currentTimeMillis() - ms
-//    info(s"Mahout multiplication time: $ms ms.")
-//
-//    import LinalgFunctions._
-////    import Functions._
-////    // For now, since our dense matrix is fully dense lets just assume that our result is dense.
-////    // openCL time, including copying:
-////    {
-////      ms = System.currentTimeMillis()
-////      val oclA = toVclCmpMatrixAlt(mxSr, oclCtx)
-////      val oclB = toVclDenseRM(mxDn, oclCtx)
-////      val oclC = new DenseRowMatrix(prod(oclA, oclB))
-////      val mxC = fromVclDenseRM(oclC)
-////      ms = System.currentTimeMillis() - ms
-////      info(s"ViennaCL/OpenCL multiplication time: $ms ms.")
-////
-////      oclA.close()
-////      oclB.close()
-////      oclC.close()
-////    }
-//
-//    // openMP/cpu time, including copying:
+  test("Sparse %*% Dense mmul microbenchmark") {
+    val oclCtx = new Context(Context.OPENCL_MEMORY)
+    val memCtx = new Context(Context.MAIN_MEMORY)
+
+    val m = 3000
+    val n = 3000
+    val s = 1000
+
+    val r = new Random(1234)
+
+    // Dense row-wise
+    val mxSr = new SparseMatrix(m, s)
+    val mxDn = new DenseMatrix(s, n)
+
+    // add some data
+    mxSr := { (_, _, v) => if (r.nextDouble() < .20) r.nextDouble() else v }
+    mxDn := { (_, _, _) => r.nextDouble() }
+
+    var ms = System.currentTimeMillis()
+    mxSr %*% mxDn
+    ms = System.currentTimeMillis() - ms
+    info(s"Mahout multiplication time: $ms ms.")
+
+    import LinalgFunctions._
+//    import Functions._
+//    // For now, since our dense matrix is fully dense lets just assume that our result is dense.
+//    // openCL time, including copying:
 //    {
 //      ms = System.currentTimeMillis()
-//      val ompA = toVclCmpMatrixAlt(mxSr, memCtx)
-//      val ompB = toVclDenseRM(mxDn, memCtx)
-//      val ompC = new DenseRowMatrix(prod(ompA, ompB))
-//      val mxC = fromVclDenseRM(ompC)
+//      val oclA = toVclCmpMatrixAlt(mxSr, oclCtx)
+//      val oclB = toVclDenseRM(mxDn, oclCtx)
+//      val oclC = new DenseRowMatrix(prod(oclA, oclB))
+//      val mxC = fromVclDenseRM(oclC)
 //      ms = System.currentTimeMillis() - ms
-//      info(s"ViennaCL/cpu/OpenMP multiplication time: $ms ms.")
+//      info(s"ViennaCL/OpenCL multiplication time: $ms ms.")
 //
-//      ompA.close()
-//      ompB.close()
-//      ompC.close()
+//      oclA.close()
+//      oclB.close()
+//      oclC.close()
 //    }
-//
-//  }
+
+    // openMP/cpu time, including copying:
+    {
+      ms = System.currentTimeMillis()
+      val ompA = toVclCmpMatrixAlt(mxSr, memCtx)
+      val ompB = toVclDenseRM(mxDn, memCtx)
+      val ompC = new DenseRowMatrix(prod(ompA, ompB))
+      val mxC = fromVclDenseRM(ompC)
+      ms = System.currentTimeMillis() - ms
+      info(s"ViennaCL/cpu/OpenMP multiplication time: $ms ms.")
+
+      ompA.close()
+      ompB.close()
+      ompC.close()
+    }
+
+  }
 
 
 
