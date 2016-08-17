@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * each input split contains a subset of the trees.<br>
  * The number of splits is equal to the number of requested splits
  */
+@Deprecated
 public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(InMemInputSplit.class);

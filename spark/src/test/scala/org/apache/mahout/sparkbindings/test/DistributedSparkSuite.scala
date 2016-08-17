@@ -18,12 +18,13 @@
 package org.apache.mahout.sparkbindings.test
 
 import org.apache.log4j.{Level, Logger}
-import org.scalatest.{ConfigMap, BeforeAndAfterAllConfigMap, Suite}
-import org.apache.spark.SparkConf
-import org.apache.mahout.sparkbindings._
-import org.apache.mahout.test.{DistributedMahoutSuite, MahoutSuite}
 import org.apache.mahout.math.drm.DistributedContext
-import collection.JavaConversions._
+import org.apache.mahout.sparkbindings._
+import org.apache.mahout.test.DistributedMahoutSuite
+import org.apache.spark.SparkConf
+import org.scalatest.{ConfigMap, Suite}
+
+import scala.collection.JavaConversions._
 
 trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfiguration {
   this: Suite =>
@@ -40,6 +41,7 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
       addMahoutJars = !isLocal,
       sparkConf = new SparkConf()
           .set("spark.kryoserializer.buffer.mb", "40")
+          .set("spark.kryoserializer.buffer", "40")
           .set("spark.akka.frameSize", "30")
           .set("spark.default.parallelism", "10")
           .set("spark.executor.memory", "2G")

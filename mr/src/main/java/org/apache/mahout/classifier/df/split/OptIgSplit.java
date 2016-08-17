@@ -50,6 +50,7 @@ import java.util.TreeSet;
  *   pw.close()
  * }
  */
+@Deprecated
 public class OptIgSplit extends IgSplit {
 
   private static final int MAX_NUMERIC_SPLITS = 16;

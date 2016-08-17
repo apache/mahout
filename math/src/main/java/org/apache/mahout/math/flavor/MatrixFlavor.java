@@ -35,24 +35,24 @@ public interface MatrixFlavor {
   /**
    * This default for {@link org.apache.mahout.math.DenseMatrix}-like structures
    */
-  static final MatrixFlavor DENSELIKE = new FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.ROWWISE, true);
+  MatrixFlavor DENSELIKE = new FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.ROWWISE, true);
   /**
    * This is default flavor for {@link org.apache.mahout.math.SparseRowMatrix}-like.
    */
-  static final MatrixFlavor SPARSELIKE = new FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.ROWWISE, false);
+  MatrixFlavor SPARSELIKE = new FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.ROWWISE, false);
 
   /**
    * This is default flavor for {@link org.apache.mahout.math.SparseMatrix}-like structures, i.e. sparse matrix blocks,
    * where few, perhaps most, rows may be missing entirely.
    */
-  static final MatrixFlavor SPARSEROWLIKE = new FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.SPARSEROWWISE, false);
+  MatrixFlavor SPARSEROWLIKE = new FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.SPARSEROWWISE, false);
 
   /**
    * This is default flavor for {@link org.apache.mahout.math.DiagonalMatrix} and the likes.
    */
-  static final MatrixFlavor DIAGONALLIKE = new FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.VECTORBACKED, false);
+  MatrixFlavor DIAGONALLIKE = new FlavorImpl(BackEnum.JVMMEM, TraversingStructureEnum.VECTORBACKED, false);
 
-  static final class FlavorImpl implements MatrixFlavor {
+  final class FlavorImpl implements MatrixFlavor {
     private BackEnum pBacking;
     private TraversingStructureEnum pStructure;
     private boolean pDense;

@@ -1,6 +1,10 @@
 Mahout Change Log
 
-Release 0.11.1 - unreleased
+Release 0.12.0 - unreleased
+
+  MAHOUT-1775: FileNotFoundException caused by aborting the process of downloading Wikipedia dataset (Bowei Zhang via smarthi)
+
+  MAHOUT-1771: Cluster dumper omits indices and 0 elements for dense vector or sparse containing 0s (srowen)
 
   MAHOUT-1613: classifier.df.tools.Describe does not handle -D parameters (haohui mai via smarthi)
 

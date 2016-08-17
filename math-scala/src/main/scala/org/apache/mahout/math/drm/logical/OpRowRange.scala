@@ -19,6 +19,8 @@ package org.apache.mahout.math.drm.logical
 
 import org.apache.mahout.math.drm.DrmLike
 
+import scala.reflect.ClassTag
+
 /** Logical row-range slicing */
 case class OpRowRange(
     override var A: DrmLike[Int],
@@ -26,6 +28,12 @@ case class OpRowRange(
     ) extends AbstractUnaryOp[Int, Int] {
 
   assert(rowRange.head >= 0 && rowRange.last < A.nrow, "row range out of range")
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override val keyClassTag = ClassTag.Int
 
   /** R-like syntax for number of rows. */
   def nrow: Long = rowRange.length

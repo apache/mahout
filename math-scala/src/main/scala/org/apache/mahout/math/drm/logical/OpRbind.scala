@@ -17,19 +17,25 @@
 
 package org.apache.mahout.math.drm.logical
 
-import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 import scala.util.Random
 
 /** rbind() logical operator */
-case class OpRbind[K: ClassTag](
+case class OpRbind[K](
     override var A: DrmLike[K],
     override var B: DrmLike[K]
     ) extends AbstractBinaryOp[K, K, K] {
 
   assert(A.ncol == B.ncol, "arguments must have same number of columns")
+  require(A.keyClassTag == B.keyClassTag, "arguments of rbind() must have the same row key type")
 
   override protected[mahout] lazy val partitioningTag: Long = Random.nextLong()
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override def keyClassTag = A.keyClassTag
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.nrow + B.nrow

@@ -54,6 +54,7 @@ import java.util.Random;
 /**
  * Mapreduce implementation that classifies the Input data using a previousely built decision forest
  */
+@Deprecated
 public class Classifier {
 
   private static final Logger log = LoggerFactory.getLogger(Classifier.class);

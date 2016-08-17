@@ -18,20 +18,19 @@
 package org.apache.mahout.sparkbindings.blas
 
 import org.apache.mahout.math.drm.logical.OpMapBlock
-import org.apache.mahout.sparkbindings.drm.DrmRddInput
-import org.apache.mahout.math.drm.BlockMapFunc
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import scala.reflect.ClassTag
+import org.apache.mahout.sparkbindings.drm.DrmRddInput
 
 object MapBlock {
 
-  def exec[S, R:ClassTag](src: DrmRddInput[S], operator:OpMapBlock[S,R]): DrmRddInput[R] = {
+  def exec[S, R](src: DrmRddInput[S], operator:OpMapBlock[S,R]): DrmRddInput[R] = {
 
     // We can't use attributes directly in the closure in order to avoid putting the whole object
     // into closure.
     val bmf = operator.bmf
     val ncol = operator.ncol
-    val rdd = src.toBlockifiedDrmRdd(operator.A.ncol).map(blockTuple => {
+    implicit val rtag = operator.keyClassTag
+    src.asBlockified(operator.A.ncol).map(blockTuple => {
       val out = bmf(blockTuple)
 
       assert(out._2.nrow == blockTuple._2.nrow, "block mapping must return same number of rows.")
@@ -39,8 +38,6 @@ object MapBlock {
 
       out
     })
-
-    rdd
   }
 
 }

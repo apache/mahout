@@ -31,14 +31,11 @@ class DrmRddInput[K: ClassTag](private val input: Either[DrmRdd[K], BlockifiedDr
 
   def isRowWise: Boolean = input.isLeft
 
-  def toDrmRdd(): DrmRdd[K] = input.left.getOrElse(deblockify(rdd = input.right.get))
+  def asRowWise(): DrmRdd[K] = input.left.getOrElse(deblockify(rdd = input.right.get))
 
   /** Use late binding for this. It may or may not be needed, depending on current config. */
-  def toBlockifiedDrmRdd(ncol: ⇒ Int) = input.right.getOrElse(blockify(rdd = input.left.get, blockncol = ncol))
+  def asBlockified(ncol: ⇒ Int) = input.right.getOrElse(blockify(rdd = input.left.get, blockncol = ncol))
 
   def sparkContext: SparkContext = backingRdd.sparkContext
 
-  def persist(sl: StorageLevel) = backingRdd.persist(newLevel = sl)
-
-  def unpersist(blocking: Boolean = true) = backingRdd.unpersist(blocking)
 }

@@ -18,6 +18,7 @@
 package org.apache.mahout.sparkbindings.io
 
 import com.esotericsoftware.kryo.Kryo
+import org.apache.mahout.common.io.{VectorKryoSerializer, GenericMatrixKryoSerializer}
 import org.apache.mahout.math._
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.mahout.logging._

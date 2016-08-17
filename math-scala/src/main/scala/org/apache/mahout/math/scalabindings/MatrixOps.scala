@@ -18,10 +18,11 @@
 package org.apache.mahout.math.scalabindings
 
 import org.apache.mahout.math.flavor.TraversingStructureEnum
-import org.apache.mahout.math.{Matrices, QRDecomposition, Vector, Matrix}
-import collection._
-import JavaConversions._
-import org.apache.mahout.math.function.{DoubleDoubleFunction, VectorFunction, DoubleFunction, Functions}
+import org.apache.mahout.math.function.{DoubleFunction, Functions, VectorFunction}
+import org.apache.mahout.math.{Matrices, Matrix, QRDecomposition, Vector}
+
+import scala.collection.JavaConversions._
+import scala.collection._
 import scala.math._
 
 class MatrixOps(val m: Matrix) {
@@ -83,7 +84,7 @@ class MatrixOps(val m: Matrix) {
   def apply(row: Int, col: Int) = m.get(row, col)
 
   def update(row: Int, col: Int, that: Double): Matrix = {
-    m.setQuick(row, col, that);
+    m.setQuick(row, col, that)
     m
   }
 
@@ -105,12 +106,12 @@ class MatrixOps(val m: Matrix) {
     if (rowRange == :: &&
         colRange == ::) return m
 
-    val rr = if (rowRange == ::) (0 until m.nrow)
+    val rr = if (rowRange == ::) 0 until m.nrow
     else rowRange
-    val cr = if (colRange == ::) (0 until m.ncol)
+    val cr = if (colRange == ::) 0 until m.ncol
     else colRange
 
-    return m.viewPart(rr.start, rr.length, cr.start, cr.length)
+    m.viewPart(rr.start, rr.length, cr.start, cr.length)
 
   }
 
@@ -127,10 +128,60 @@ class MatrixOps(val m: Matrix) {
   }
 
   /**
-   * Warning: This provides read-only view only.
+    * Apply a function element-wise without side-effects to the argument (creates a new matrix).
+    *
+    * @param f         element-wise function "value" ⇒ "new value"
+    * @param evalZeros Do we have to process zero elements? true, false, auto: if auto, we will test
+    *                  the supplied function for `f(0) != 0`, and depending on the result, will
+    *                  decide if we want evaluation for zero elements. WARNING: the AUTO setting
+    *                  may not always work correctly for functions that are meant to run in a specific
+    *                  backend context, or non-deterministic functions, such as {-1,0,1} random
+    *                  generators.
+    * @return new DRM with the element-wise function applied.
+    */
+  def apply(f: Double ⇒ Double, evalZeros: AutoBooleanEnum.T): Matrix = {
+    val ezeros = evalZeros match {
+      case AutoBooleanEnum.TRUE ⇒ true
+      case AutoBooleanEnum.FALSE ⇒ false
+      case AutoBooleanEnum.AUTO ⇒ f(0) != 0
+    }
+    if (ezeros) m.cloned := f else m.cloned ::= f
+  }
+
+  /**
+    * Apply a function element-wise without side-effects to the argument (creates a new matrix).
+    *
+    * @param f         element-wise function (row, column, value) ⇒ "new value"
+    * @param evalZeros Do we have to process zero elements? true, false, auto: if auto, we will test
+    *                  the supplied function for `f(0) != 0`, and depending on the result, will
+    *                  decide if we want evaluation for zero elements. WARNING: the AUTO setting
+    *                  may not always work correctly for functions that are meant to run in a specific
+    *                  backend context, or non-deterministic functions, such as {-1,0,1} random
+    *                  generators.
+    * @return new DRM with the element-wise function applied.
+    */
+  def apply(f: (Int, Int, Double) ⇒ Double, evalZeros: AutoBooleanEnum.T): Matrix = {
+    val ezeros = evalZeros match {
+      case AutoBooleanEnum.TRUE ⇒ true
+      case AutoBooleanEnum.FALSE ⇒ false
+      case AutoBooleanEnum.AUTO ⇒ f(0,0,0) != 0
+    }
+    if (ezeros) m.cloned := f else m.cloned ::= f
+  }
+
+  /** A version of function apply with default AUTO treatment of `evalZeros`. */
+  def apply(f: Double ⇒ Double): Matrix = apply(f, AutoBooleanEnum.AUTO)
+
+  /** A version of function apply with default AUTO treatment of `evalZeros`. */
+  def apply(f: (Int, Int, Double) ⇒ Double): Matrix = apply(f, AutoBooleanEnum.AUTO)
+
+
+  /**
+    * Warning: This provides read-only view only.
    * In most cases that's what one wants. To get a copy,
    * use <code>m.t cloned</code>
-   * @return transposed view
+    *
+    * @return transposed view
    */
   def t = Matrices.transposedView(m)
 
@@ -142,7 +193,8 @@ class MatrixOps(val m: Matrix) {
 
   /**
    * Assigning from a row-wise collection of vectors
-   * @param that
+    *
+    * @param that -
    */
   def :=(that: TraversableOnce[Vector]) = {
     var row = 0
@@ -211,7 +263,8 @@ class MatrixOps(val m: Matrix) {
    * Ideally, we would probably want to override equals(). But that is not
    * possible without modifying AbstractMatrix implementation in Mahout
    * which would require discussion at Mahout team.
-   * @param that
+    *
+    * @param that
    * @return
    */
   def equiv(that: Matrix) =
@@ -232,7 +285,8 @@ class MatrixOps(val m: Matrix) {
 
   /**
    * test if rank == min(nrow,ncol).
-   * @return
+    *
+    * @return
    */
   def isFullRank: Boolean =
     new QRDecomposition(if (nrow < ncol) m t else m cloned).hasFullRank

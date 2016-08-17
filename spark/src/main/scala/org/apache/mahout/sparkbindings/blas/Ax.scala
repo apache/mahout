@@ -13,10 +13,11 @@ import org.apache.mahout.math.drm.logical.{OpAx, OpAtx}
 /** Matrix product with one of operands an in-core matrix */
 object Ax {
 
-  def ax_with_broadcast[K: ClassTag](op: OpAx[K], srcA: DrmRddInput[K]): DrmRddInput[K] = {
+  def ax_with_broadcast[K](op: OpAx[K], srcA: DrmRddInput[K]): DrmRddInput[K] = {
 
-    val rddA = srcA.toBlockifiedDrmRdd(op.A.ncol)
+    val rddA = srcA.asBlockified(op.A.ncol)
     implicit val sc: DistributedContext = rddA.sparkContext
+    implicit val ktag = op.keyClassTag
 
     val bcastX = drmBroadcast(op.x)
 
@@ -30,7 +31,7 @@ object Ax {
 
   def atx_with_broadcast(op: OpAtx, srcA: DrmRddInput[Int]): DrmRddInput[Int] = {
 
-    val rddA = srcA.toBlockifiedDrmRdd(op.A.ncol)
+    val rddA = srcA.asBlockified(op.A.ncol)
     implicit val dc:DistributedContext = rddA.sparkContext
 
     val bcastX = drmBroadcast(op.x)

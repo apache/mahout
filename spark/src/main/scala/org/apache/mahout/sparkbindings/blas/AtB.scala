@@ -19,7 +19,6 @@ package org.apache.mahout.sparkbindings.blas
 
 import reflect.ClassTag
 import collection._
-import JavaConversions._
 
 import org.apache.mahout.logging._
 import org.apache.mahout.math._
@@ -28,8 +27,6 @@ import org.apache.mahout.sparkbindings.drm._
 import org.apache.spark.rdd.RDD
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
-import org.apache.spark.SparkContext._
-import org.apache.log4j.Logger
 import org.apache.mahout.math.drm.logical.OpAtB
 
 import scala.collection.mutable.ArrayBuffer
@@ -51,8 +48,8 @@ object AtB {
   def atb_nograph[A: ClassTag](operator: OpAtB[A], srcA: DrmRddInput[A], srcB: DrmRddInput[A],
                                zippable: Boolean = false): DrmRddInput[Int] = {
 
-    val rddA = srcA.toDrmRdd()
-    val rddB = srcB.toDrmRdd()
+    val rddA = srcA.asRowWise()
+    val rddB = srcB.asRowWise()
 
 
     val prodNCol = operator.ncol
@@ -62,15 +59,15 @@ object AtB {
     // Approximate number of final partitions. We take bigger partitions as our guide to number of
     // elements per partition. TODO: do it better.
     // Elements per partition, bigger of two operands.
-    val epp = aNRow.toDouble * prodNRow / rddA.partitions.size max aNRow.toDouble * prodNCol /
-      rddB.partitions.size
+    val epp = aNRow.toDouble * prodNRow / rddA.partitions.length max aNRow.toDouble * prodNCol /
+      rddB.partitions.length
 
     // Number of partitions we want to converge to in the product. For now we simply extrapolate that
     // assuming product density and operand densities being about the same; and using the same element
     // per partition number in the product as the bigger of two operands.
     val numProductPartitions = (prodNCol.toDouble * prodNRow / epp).ceil.toInt
 
-    if (log.isDebugEnabled) log.debug(s"AtB: #parts ${numProductPartitions} for $prodNRow x $prodNCol geometry.")
+    if (log.isDebugEnabled) log.debug(s"AtB: #parts $numProductPartitions for $prodNRow x $prodNCol geometry.")
 
     val zipped = if (zippable) {
 
@@ -99,28 +96,28 @@ object AtB {
     val prodNRow = safeToNonNegInt(operator.nrow)
     val aNRow = safeToNonNegInt(operator.A.nrow)
 
-    val rddA = srcA.toDrmRdd()
-    val rddB = srcB.toDrmRdd()
+    val rddA = srcA.asRowWise()
+    val rddB = srcB.asRowWise()
 
     // Approximate number of final partitions. We take bigger partitions as our guide to number of
     // elements per partition. TODO: do it better.
     // Elements per partition, bigger of two operands.
-    val epp = aNRow.toDouble * prodNRow / rddA.partitions.size max aNRow.toDouble * prodNCol /
-      rddB.partitions.size
+    val epp = aNRow.toDouble * prodNRow / rddA.partitions.length max aNRow.toDouble * prodNCol /
+      rddB.partitions.length
 
     // Number of partitions we want to converge to in the product. For now we simply extrapolate that
     // assuming product density and operand densities being about the same; and using the same element
     // per partition number in the product as the bigger of two operands.
     val numProductPartitions = (prodNCol.toDouble * prodNRow / epp).ceil.toInt min prodNRow
 
-    if (log.isDebugEnabled) log.debug(s"AtB mmul: #parts ${numProductPartitions} for $prodNRow x $prodNCol geometry.")
+    if (log.isDebugEnabled) log.debug(s"AtB mmul: #parts $numProductPartitions for $prodNRow x $prodNCol geometry.")
 
     val zipped = if (zippable) {
 
       debug("mmul-A'B - zip: are identically distributed, performing row-wise zip.")
 
-      val blockdRddA = srcA.toBlockifiedDrmRdd(operator.A.ncol)
-      val blockdRddB = srcB.toBlockifiedDrmRdd(operator.B.ncol)
+      val blockdRddA = srcA.asBlockified(operator.A.ncol)
+      val blockdRddB = srcB.asBlockified(operator.B.ncol)
 
       blockdRddA
 
@@ -141,7 +138,7 @@ object AtB {
 
         // Do full join. We can't get away with partial join because it is going to lose some rows
         // in case we have missing rows on either side.
-        .cogroup(other = rddB, numPartitions = rddA.partitions.size max rddB.partitions.size )
+        .cogroup(other = rddB, numPartitions = rddA.partitions.length max rddB.partitions.length )
 
 
         // Merge groups.
@@ -252,7 +249,7 @@ object AtB {
       // Produce keys
       .map { case (blockKey, block) ⇒ ranges(blockKey).toArray → block }
 
-    debug(s"A'B mmul #parts: ${rdd.partitions.size}.")
+    debug(s"A'B mmul #parts: ${rdd.partitions.length}.")
 
     rdd
   }
@@ -311,8 +308,8 @@ object AtB {
     // this point we need to split n-range  of B' into sutiable number of partitions.
 
     if (log.isDebugEnabled) {
-      log.debug(s"AtBZipped:zipped #parts ${zipped.partitions.size}")
-      log.debug(s"AtBZipped:Targeted #parts ${numPartitions}")
+      log.debug(s"AtBZipped:zipped #parts ${zipped.partitions.length}")
+      log.debug(s"AtBZipped:Targeted #parts $numPartitions")
     }
 
     // Figure out appriximately block height per partition of the result.
@@ -353,7 +350,7 @@ object AtB {
       rowKeys -> block
     }
 
-    if (log.isDebugEnabled) log.debug(s"AtBZipped #parts ${rddBt.partitions.size}")
+    if (log.isDebugEnabled) log.debug(s"AtBZipped #parts ${rddBt.partitions.length}")
 
     rddBt
   }

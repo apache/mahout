@@ -47,6 +47,7 @@ import java.util.Comparator;
  * </ul>
  * 
  */
+@Deprecated
 public abstract class Builder {
   
   private static final Logger log = LoggerFactory.getLogger(Builder.class);

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,9 +45,9 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.io.Charsets;
 import org.apache.hadoop.fs.Path;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiFields;
+import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
@@ -55,7 +56,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.OpenBitSet;
+import org.apache.lucene.util.FixedBitSet;
 import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -149,7 +150,7 @@ public class ClusterLabels {
     }
 
     log.info("Processing Cluster {} with {} documents", integer, wpvws.size());
-    Directory dir = FSDirectory.open(new File(this.indexDir));
+    Directory dir = FSDirectory.open(Paths.get(this.indexDir));
     IndexReader reader = DirectoryReader.open(dir);
     
     
@@ -165,7 +166,7 @@ public class ClusterLabels {
 
     int numDocs = reader.numDocs();
 
-    OpenBitSet clusterDocBitset = getClusterDocBitset(reader, idSet, this.idField);
+    FixedBitSet clusterDocBitset = getClusterDocBitset(reader, idSet, this.idField);
 
     log.info("Populating term infos from the index");
 
@@ -179,7 +180,7 @@ public class ClusterLabels {
      * frequency.
      */
     Terms t = MultiFields.getTerms(reader, contentField);
-    TermsEnum te = t.iterator(null);
+    TermsEnum te = t.iterator();
     Map<String, TermEntry> termEntryMap = new LinkedHashMap<>();
     Bits liveDocs = MultiFields.getLiveDocs(reader); //WARNING: returns null if there are no deletions
 
@@ -187,8 +188,8 @@ public class ClusterLabels {
     int count = 0;
     BytesRef term;
     while ((term = te.next()) != null) {
-      OpenBitSet termBitset = new OpenBitSet(reader.maxDoc());
-      DocsEnum docsEnum = MultiFields.getTermDocsEnum(reader, null, contentField, term);
+      FixedBitSet termBitset = new FixedBitSet(reader.maxDoc());
+      PostingsEnum docsEnum = MultiFields.getTermDocsEnum(reader, contentField, term);
       int docID;
       while ((docID = docsEnum.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS) {
         //check to see if we don't have an deletions (null) or if document is live
@@ -230,12 +231,12 @@ public class ClusterLabels {
     return clusteredTermInfo.subList(0, Math.min(clusteredTermInfo.size(), maxLabels));
   }
 
-  private static OpenBitSet getClusterDocBitset(IndexReader reader,
+  private static FixedBitSet getClusterDocBitset(IndexReader reader,
                                                 Collection<String> idSet,
                                                 String idField) throws IOException {
     int numDocs = reader.numDocs();
 
-    OpenBitSet bitset = new OpenBitSet(numDocs);
+    FixedBitSet bitset = new FixedBitSet(numDocs);
     
     Set<String>  idFieldSelector = null;
     if (idField != null) {

@@ -48,7 +48,11 @@ START_PATH=`pwd`
 # Set commands for dfs
 source ${START_PATH}/set-dfs-commands.sh
 
-WORK_DIR=/tmp/mahout-work-${USER}
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-${USER}
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
 
 echo "creating work directory at ${WORK_DIR}"
 mkdir -p ${WORK_DIR}
@@ -66,16 +70,26 @@ if [ ! -f ${WORK_DIR}/synthetic_control.data ]; then
 fi
 if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]; then
   echo "Checking the health of DFS..."
-  $DFS -ls
+  $DFS -ls /
   if [ $? -eq 0 ];then 
     echo "DFS is healthy... "
     echo "Uploading Synthetic control data to HDFS"
-    $DFSRM testdata
-    $DFS -mkdir testdata
-    $DFS -put ${WORK_DIR}/synthetic_control.data testdata
+    $DFSRM ${WORK_DIR}/testdata
+    $DFS -mkdir -p ${WORK_DIR}/testdata
+    $DFS -put ${WORK_DIR}/synthetic_control.data ${WORK_DIR}/testdata
     echo "Successfully Uploaded Synthetic control data to HDFS "
 
-    ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job
+    options="--input ${WORK_DIR}/testdata --output ${WORK_DIR}/output --maxIter 10 --convergenceDelta 0.5"
+
+    if [ "${clustertype}" == "kmeans" ]; then
+      options="${options} --numClusters 6"
+      # t1 & t2 not used if --numClusters specified, but parser requires input
+      options="${options} --t1 1 --t2 2"
+      ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job ${options}
+    else
+      options="${options} --m 2.0f --t1 80 --t2 55"
+      ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job ${options}
+    fi
   else
     echo " HADOOP is not running. Please make sure you hadoop is running. "
   fi

@@ -17,12 +17,10 @@
 
 package org.apache.mahout.math.drm
 
-import RLikeDrmOps._
-import org.apache.mahout.math._
+import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.drm.logical.OpCbindScalar
-import scalabindings._
-import RLikeOps._
-import reflect.ClassTag
+
+import scala.reflect.ClassTag
 
 class DrmDoubleScalarOps(val x:Double) extends AnyVal{
 

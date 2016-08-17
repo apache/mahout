@@ -2,6 +2,7 @@ package org.apache.mahout.h2obindings.drm
 
 import org.apache.mahout.h2obindings._
 import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.drm.CacheHint.CacheHint
 import org.apache.mahout.math.drm._
 
 import scala.reflect._
@@ -15,8 +16,11 @@ import scala.reflect._
   */
 class CheckpointedDrmH2O[K: ClassTag](
   val h2odrm: H2ODrm,
-  val context: DistributedContext
+  val context: DistributedContext,
+  override val cacheHint: CacheHint
 ) extends CheckpointedDrm[K] {
+
+  override val keyClassTag: ClassTag[K] = classTag[K]
 
   /**
     * Collecting DRM to in-core Matrix
@@ -26,9 +30,6 @@ class CheckpointedDrmH2O[K: ClassTag](
     * as rowLabelBindings of the in-core matrix.
     */
   def collect: Matrix = H2OHelper.matrixFromDrm(h2odrm)
-
-  /** Explicit extraction of key class Tag   */
-  def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
 
   /* XXX: call frame.remove */
   def uncache(): this.type = this

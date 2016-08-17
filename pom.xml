@@ -27,7 +27,8 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.11.1-SNAPSHOT</version>
+
+  <version>0.12.3-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -116,12 +117,14 @@
     <mjavadoc.version>2.10.3</mjavadoc.version>
     <mscala.version>3.2.0</mscala.version>
     <hbase.version>1.0.0</hbase.version>
-    <lucene.version>4.6.1</lucene.version>
-    <slf4j.version>1.7.10</slf4j.version>
+    <lucene.version>5.5.2</lucene.version>
+    <slf4j.version>1.7.19</slf4j.version>
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
-    <spark.version>1.3.1</spark.version>
+    <spark.version>1.5.2</spark.version>
+    <flink.version>1.1.1</flink.version>
     <h2o.version>0.1.25</h2o.version>
+    <jackson.version>2.7.4</jackson.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
@@ -236,6 +239,12 @@
       </dependency>
 
       <dependency>
+        <artifactId>mahout-flink_${scala.compat.version}</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
         <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
@@ -324,7 +333,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.11</version>
+        <version>4.12</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -359,15 +368,11 @@
       </dependency>
 
       <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-core-asl</artifactId>
-        <version>1.9.12</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.12</version>
-      </dependency>
+
       <dependency>
         <groupId>commons-cli</groupId>
         <artifactId>commons-cli</artifactId>
@@ -643,6 +648,39 @@
           <artifactId>versions-maven-plugin</artifactId>
           <version>2.2</version>
         </plugin>
+
+        <!-- Coverage analysis for tests -->
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.7.7.201606060606</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+              <configuration>
+                <output>file</output>
+                <dumpOnExit>true</dumpOnExit>
+              </configuration>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Report jacoco coverage to coveralls.io -->
+        <plugin>
+          <groupId>org.eluder.coveralls</groupId>
+          <artifactId>coveralls-maven-plugin</artifactId>
+          <version>4.2.0</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
     <plugins>
@@ -659,7 +697,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[1.7, 1.8)</version>
+                  <version>[1.7,)</version>
                 </requireJavaVersion>
                   <requireMavenVersion>
                     <version>[3.3.3,)</version>
@@ -805,6 +843,7 @@
     <module>math-scala</module>
     <module>spark</module>
     <module>spark-shell</module>
+    <module>flink</module>
     <module>h2o</module>
   </modules>
 

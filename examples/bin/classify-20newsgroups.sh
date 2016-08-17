@@ -36,7 +36,11 @@ START_PATH=`pwd`
 # Set commands for dfs
 source ${START_PATH}/set-dfs-commands.sh
 
-WORK_DIR=/tmp/mahout-work-${USER}
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-${USER}
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
 algorithm=( cnaivebayes-MapReduce naivebayes-MapReduce cnaivebayes-Spark naivebayes-Spark sgd clean)
 if [ -n "$1" ]; then
   choice=$1
@@ -105,7 +109,7 @@ if  ( [ "x$alg" == "xnaivebayes-MapReduce" ] ||  [ "x$alg" == "xcnaivebayes-MapR
     echo "Copying 20newsgroups data to HDFS"
     set +e
     $DFSRM ${WORK_DIR}/20news-all
-    $DFS -mkdir ${WORK_DIR}
+    $DFS -mkdir -p ${WORK_DIR}
     $DFS -mkdir ${WORK_DIR}/20news-all
     set -e
     if [ $HVERSION -eq "1" ] ; then

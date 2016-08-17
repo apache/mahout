@@ -25,7 +25,7 @@ import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 
-class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
+class RLikeDrmOps[K](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   import RLikeDrmOps._
   import org.apache.mahout.math.scalabindings._
@@ -64,11 +64,9 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def /:(that: Double): DrmLike[K] = OpAewUnaryFunc[K](A = this, f = that / _, evalZeros = true)
 
-  def :%*%(that: DrmLike[Int]): DrmLike[K] = OpAB[K](A = this.drm, B = that)
+  def :%*%[B](that: DrmLike[B]): DrmLike[K] = OpABAnyKey[B,K](A = this.drm, B=that)
 
-  def %*%[B: ClassTag](that: DrmLike[B]): DrmLike[K] = OpABAnyKey[B, K](A = this.drm, B = that)
-
-  def %*%(that: DrmLike[Int]): DrmLike[K] = this :%*% that
+  def %*%[B](that: DrmLike[B]): DrmLike[K] = this :%*% that
 
   def :%*%(that: Matrix): DrmLike[K] = OpTimesRightMatrix[K](A = this.drm, right = that)
 
@@ -98,6 +96,9 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
    * @return map of row keys into row sums, front-end collected.
    */
   def rowSumsMap(): Map[String, Double] = {
+
+    implicit val ktag = drm.keyClassTag
+
     val m = drm.mapBlock(ncol = 1) { case (keys, block) =>
       keys -> dense(block.rowSums).t
     }.collect
@@ -161,19 +162,11 @@ object RLikeDrmOps {
 
   implicit def drmInt2RLikeOps(drm: DrmLike[Int]): RLikeDrmIntOps = new RLikeDrmIntOps(drm)
 
-  implicit def drm2RLikeOps[K: ClassTag](drm: DrmLike[K]): RLikeDrmOps[K] = new RLikeDrmOps[K](drm)
+  implicit def drm2RLikeOps[K](drm: DrmLike[K]): RLikeDrmOps[K] = new RLikeDrmOps[K](drm)
 
-  implicit def rlikeOps2Drm[K: ClassTag](ops: RLikeDrmOps[K]): DrmLike[K] = ops.drm
+  implicit def rlikeOps2Drm[K](ops: RLikeDrmOps[K]): DrmLike[K] = ops.drm
 
-  implicit def ops2Drm[K: ClassTag](ops: DrmLikeOps[K]): DrmLike[K] = ops.drm
+  implicit def ops2Drm[K](ops: DrmLikeOps[K]): DrmLike[K] = ops.drm
 
-  // Removed in move to 1.2.1 PR #74 https://github.com/apache/mahout/pull/74/files
-  // Not sure why.
-  // implicit def cp2cpops[K: ClassTag](cp: CheckpointedDrm[K]): CheckpointedOps[K] = new CheckpointedOps(cp)
-
-  /**
-   * This is probably dangerous since it triggers implicit checkpointing with default storage level
-   * setting.
-   */
-  implicit def drm2cpops[K: ClassTag](drm: DrmLike[K]): CheckpointedOps[K] = new CheckpointedOps(drm.checkpoint())
+  implicit def drm2cpops[K](drm: DrmLike[K]): CheckpointedOps[K] = new CheckpointedOps(drm)
 }

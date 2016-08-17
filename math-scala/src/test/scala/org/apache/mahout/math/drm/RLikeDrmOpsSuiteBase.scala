@@ -347,6 +347,9 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
         keys -> bBlock
     }
         // Prevent repeated computation non-determinism
+        // removing this checkpoint() will cause the same error in spark Tests
+        // as we're seeing in Flink with this test.  ie  util.Random.nextDouble()
+        // is being called more than once (note that it is not seeded in the closure)
         .checkpoint()
 
     val inCoreB = B.collect
@@ -631,6 +634,20 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
     optimized.isInstanceOf[OpAewUnaryFuncFusion[Int]] shouldBe true
 
     (controlB - drmB).norm should be < 1e-10
+
+  }
+
+  test("functional apply()") {
+    val mxA = sparse (
+      (1 -> 3) :: (7 -> 7) :: Nil,
+      (4 -> 5) :: (5 -> 8) :: Nil
+    )
+
+    val mxAControl = mxA cloned
+    val drmA = drmParallelize(mxA)
+
+    (drmA(x => x + 1).collect - (mxAControl + 1)).norm should be < 1e-7
+    (drmA(x => x * 2).collect - (2 * mxAControl)).norm should be < 1e-7
 
   }
 

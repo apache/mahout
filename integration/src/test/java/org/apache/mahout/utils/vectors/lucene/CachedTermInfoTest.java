@@ -28,11 +28,11 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +65,7 @@ public class CachedTermInfoTest extends MahoutTestCase {
 
     FieldType fieldType = new FieldType();
     fieldType.setStored(false);
-    fieldType.setIndexed(true);
+    fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
     fieldType.setTokenized(true);
     fieldType.setStoreTermVectors(false);
     fieldType.setStoreTermVectorPositions(false);
@@ -100,7 +100,7 @@ public class CachedTermInfoTest extends MahoutTestCase {
   static RAMDirectory createTestIndex(FieldType fieldType,
                                       RAMDirectory directory,
                                       int startingId) throws IOException {
-    IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_46, new WhitespaceAnalyzer(Version.LUCENE_46)));
+    IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(new WhitespaceAnalyzer()));
 
     try {
       for (int i = 0; i < DOCS.length; i++) {

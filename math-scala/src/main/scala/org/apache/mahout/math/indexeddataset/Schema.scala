@@ -46,7 +46,7 @@ class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
  * This tells the reader to input elements of the default (rowID<comma, tab, or space>columnID
  * <comma, tab, or space>here may be other ignored text...)
  */
-final object DefaultIndexedDatasetElementReadSchema extends Schema(
+object DefaultIndexedDatasetElementReadSchema extends Schema(
   "delim" -> "[,\t ]", //comma, tab or space
   "filter" -> "",
   "rowIDColumn" -> 0,
@@ -59,7 +59,7 @@ final object DefaultIndexedDatasetElementReadSchema extends Schema(
  * The default form:
  * (rowID<tab>columnID1:score1<space>columnID2:score2...)
  */
-final object DefaultIndexedDatasetWriteSchema extends Schema(
+object DefaultIndexedDatasetWriteSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",
@@ -70,10 +70,11 @@ final object DefaultIndexedDatasetWriteSchema extends Schema(
  * row-wise input. This tells the reader to input text lines of the form:
  * (rowID<tab>columnID1:score1,columnID2:score2,...)
  */
-final object DefaultIndexedDatasetReadSchema extends Schema(
+object DefaultIndexedDatasetReadSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
-  "elementDelim" -> " ")
+  "elementDelim" -> " ",
+  "omitScore" -> false)
 
 /**
  * Default Schema for reading a text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file  where
@@ -84,7 +85,7 @@ final object DefaultIndexedDatasetReadSchema extends Schema(
  * (rowID<tab>columnID1<space>columnID2 ...) where presence indicates a score of 1. This is the default
  * output format for [[IndexedDatasetWriteBooleanSchema]]
  */
-final object IndexedDatasetReadBooleanSchema extends Schema(
+object IndexedDatasetReadBooleanSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",
@@ -96,7 +97,7 @@ final object IndexedDatasetReadBooleanSchema extends Schema(
  * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] row of the form
  * (rowID<tab>columnID1<space>columnID2...)
  */
-final object IndexedDatasetWriteBooleanSchema extends Schema(
+object IndexedDatasetWriteBooleanSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",

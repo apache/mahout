@@ -86,6 +86,11 @@ class MahoutSparkILoop extends SparkILoop {
       conf.set("spark.executor.memory", "1g")
     }
 
+    // set default if not already set- this is useful in local mode
+    if(!conf.contains("spark.kryoserializer.buffer.max")) {
+      conf.set("spark.kryoserializer.buffer.max", "1g")
+    }
+
     sdc = mahoutSparkContext(
       masterUrl = master,
       appName = "Mahout Spark Shell",
@@ -144,7 +149,7 @@ class MahoutSparkILoop extends SparkILoop {
   override protected def postInitialization() {
     super.postInitialization()
     _interp.beQuietDuring {
-      postInitImports.foreach(_interp.interpret(_))
+      postInitImports.foreach(_interp.interpret)
     }
   }
 
@@ -157,7 +162,7 @@ class MahoutSparkILoop extends SparkILoop {
          _ __ ___   __ _| |__   ___  _   _| |_
         | '_ ` _ \ / _` | '_ \ / _ \| | | | __|
         | | | | | | (_| | | | | (_) | |_| | |_
-        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.11.0
+        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.12.2
 
       """)
     import Properties._

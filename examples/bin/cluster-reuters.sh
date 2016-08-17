@@ -43,6 +43,12 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-${USER}
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
+
 algorithm=( kmeans fuzzykmeans lda streamingkmeans clean)
 if [ -n "$1" ]; then
   choice=$1
@@ -58,8 +64,6 @@ fi
 
 echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
 clustertype=${algorithm[$choice-1]}
-
-WORK_DIR=/tmp/mahout-work-${USER}
 
 if [ "x$clustertype" == "xclean" ]; then
   rm -rf $WORK_DIR
@@ -98,7 +102,7 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
         set +e
         $DFSRM ${WORK_DIR}/reuters-sgm
         $DFSRM ${WORK_DIR}/reuters-out
-        $DFS -mkdir ${WORK_DIR}/
+        $DFS -mkdir -p ${WORK_DIR}/
         $DFS -mkdir ${WORK_DIR}/reuters-sgm
         $DFS -mkdir ${WORK_DIR}/reuters-out
         $DFS -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm

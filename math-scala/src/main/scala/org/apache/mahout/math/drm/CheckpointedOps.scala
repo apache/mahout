@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.drm
 
-import scala.reflect.ClassTag
 import org.apache.mahout.math._
 
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -27,7 +26,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
  * the DRMBase once they stabilize.
  *
  */
-class CheckpointedOps[K: ClassTag](val drm: CheckpointedDrm[K]) {
+class CheckpointedOps[K](val drm: CheckpointedDrm[K]) {
 
 
   /** Column sums. At this point this runs on checkpoint and collects in-core vector. */
@@ -44,7 +43,7 @@ class CheckpointedOps[K: ClassTag](val drm: CheckpointedDrm[K]) {
 
     drm.context.allreduceBlock(drm, bmf, rf)
 
-
+  /** Second norm */
   def norm():Double = drm.context.norm(drm)
 }
 

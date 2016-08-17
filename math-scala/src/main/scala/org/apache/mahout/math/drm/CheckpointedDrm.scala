@@ -18,11 +18,12 @@
 package org.apache.mahout.math.drm
 
 import org.apache.mahout.math.Matrix
-import scala.reflect.ClassTag
+import org.apache.mahout.math.drm.CacheHint.CacheHint
 
 /**
  * Checkpointed DRM API. This is a matrix that has optimized RDD lineage behind it and can be
  * therefore collected or saved.
+ *
  * @tparam K matrix key type (e.g. the keys of sequence files once persisted)
  */
 trait CheckpointedDrm[K] extends DrmLike[K] {
@@ -31,15 +32,10 @@ trait CheckpointedDrm[K] extends DrmLike[K] {
 
   def dfsWrite(path: String)
 
+  val cacheHint: CacheHint
+
   /** If this checkpoint is already declared cached, uncache. */
   def uncache(): this.type
-
-  /**
-   * Explicit extraction of key class Tag since traits don't support context bound access; but actual
-   * implementation knows it
-   */
-  def keyClassTag: ClassTag[K]
-
 
   /** changes the number of rows without touching the underlying data */
   def newRowCardinality(n: Int): CheckpointedDrm[K]

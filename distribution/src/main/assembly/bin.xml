@@ -143,6 +143,19 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
+      <directory>${project.basedir}/../flink/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+        <include>mahout-*.job</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}/../spark-shell/target</directory>
       <includes>
         <include>mahout-*.jar</include>
@@ -201,6 +214,10 @@
       <outputDirectory>docs/mahout-spark</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>${project.basedir}/../flink/target/site/scaladocs</directory>
+      <outputDirectory>docs/mahout-flink</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}/../spark-shell/target/site/scaladocs</directory>
       <outputDirectory>docs/mahout-spark-shell</outputDirectory>
     </fileSet>
@@ -229,9 +246,6 @@
     <fileSet>
       <directory>${project.basedir}/../bin</directory>
       <outputDirectory>bin</outputDirectory>
-      <includes>
-        <include>mahout</include>
-      </includes>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
     </fileSet>

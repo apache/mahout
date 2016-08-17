@@ -17,15 +17,15 @@
 
 package org.apache.mahout.math.scalabindings
 
+import org.apache.log4j.Level
+
 import org.apache.mahout.logging._
-import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.math._
-import scala.math._
-import RLikeOps._
-import scala._
-import scala.util.Random
+import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.test.MahoutSuite
-import org.apache.mahout.common.RandomUtils
+import org.scalatest.FunSuite
+
+import scala.math._
 
 class MathSuite extends FunSuite with MahoutSuite {
 
@@ -91,9 +91,9 @@ class MathSuite extends FunSuite with MahoutSuite {
 
 
     val b = dense(
-      (0.36378319648203084),
-      (0.3627384439613304),
-      (0.2996934112658234))
+      0.36378319648203084,
+      0.3627384439613304,
+      0.2996934112658234)
 
     printf("B=\n%s\n", b)
 
@@ -141,10 +141,10 @@ class MathSuite extends FunSuite with MahoutSuite {
 
   test("solve matrix-matrix") {
     val a = dense((1, 3), (4, 2))
-    val b = dense((11), (14))
+    val b = dense(11, 14)
     val x = solve(a, b)
 
-    val control = dense((2), (3))
+    val control = dense(2, 3)
 
     (control - x).norm should be < 1e-10
   }
@@ -234,6 +234,34 @@ class MathSuite extends FunSuite with MahoutSuite {
     val mxDsq = sqDist(mxX)
     val mxDsqControl = sqDist(mxX, mxX)
     (mxDsq - mxDsqControl).norm should be < 1e-7
+  }
+
+  test("sparsity analysis") {
+    setLogLevel(Level.DEBUG)
+
+    val m = 500
+    val n = 800
+    val mxA = new DenseMatrix(m, n)
+
+    densityAnalysis(mxA) shouldBe false
+    densityAnalysis(mxA, .5) shouldBe false
+    densityAnalysis(mxA + 1) shouldBe true
+    densityAnalysis(mxA + 1, .95) shouldBe true
+
+    for (i ← 0 until m by 5) mxA(i, ::) := 1
+    info(s"20% detected as dense?:${densityAnalysis(mxA)}")
+    mxA := 0
+
+    for (i ← 0 until m by 3) mxA(i, ::) := 1
+    info(s"33% detected as dense?:${densityAnalysis(mxA)}")
+    mxA := 0
+
+    for (i ← 0 until m by 4) mxA(i, ::) := 1
+    info(s"25% detected as dense?:${densityAnalysis(mxA)}")
+
+    for (i ← 0 until m by 2) mxA(i, ::) := 1
+    info(s"50% detected as dense?:${densityAnalysis(mxA)}")
+
   }
 
 }

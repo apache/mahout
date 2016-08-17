@@ -43,7 +43,12 @@ fi
 export MAHOUT_LOCAL=true
 MAHOUT="$MAHOUT_HOME/bin/mahout"
 
-WORK_DIR=/tmp/mahout-work-${USER}
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-${USER}
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
+
 echo "creating work directory at ${WORK_DIR}"
 mkdir -p ${WORK_DIR}/movielens
 

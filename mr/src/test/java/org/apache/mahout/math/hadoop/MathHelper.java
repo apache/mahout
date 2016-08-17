@@ -17,11 +17,6 @@
 
 package org.apache.mahout.math.hadoop;
 
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
-
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -42,6 +37,11 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.junit.Assert;
+
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 /**
  * a collection of small helper methods useful for unit-testing mathematical operations
@@ -157,7 +157,7 @@ public final class MathHelper {
    */
   public static OpenIntObjectHashMap<Vector> readMatrixRows(Configuration conf, Path path) {
     boolean readOneRow = false;
-    OpenIntObjectHashMap<Vector> rows = new OpenIntObjectHashMap<Vector>();
+    OpenIntObjectHashMap<Vector> rows = new OpenIntObjectHashMap<>();
     for (Pair<IntWritable,VectorWritable> record :
         new SequenceFileIterable<IntWritable,VectorWritable>(path, true, conf)) {
       IntWritable key = record.getFirst();

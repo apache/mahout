@@ -29,11 +29,11 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
@@ -62,14 +62,14 @@ public final class LuceneIterableTest extends MahoutTestCase {
   @Before
   public void before() throws IOException {
 
-    TYPE_NO_TERM_VECTORS.setIndexed(true);
+    TYPE_NO_TERM_VECTORS.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
     TYPE_NO_TERM_VECTORS.setTokenized(true);
     TYPE_NO_TERM_VECTORS.setStoreTermVectors(false);
     TYPE_NO_TERM_VECTORS.setStoreTermVectorPositions(false);
     TYPE_NO_TERM_VECTORS.setStoreTermVectorOffsets(false);
     TYPE_NO_TERM_VECTORS.freeze();
 
-    TYPE_TERM_VECTORS.setIndexed(true);
+    TYPE_TERM_VECTORS.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
     TYPE_TERM_VECTORS.setTokenized(true);
     TYPE_TERM_VECTORS.setStored(true);
     TYPE_TERM_VECTORS.setStoreTermVectors(true);
@@ -177,7 +177,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
                                               RAMDirectory directory,
                                               int startingId) throws IOException {
 
-    try (IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_46,new StandardAnalyzer(Version.LUCENE_46)))) {
+    try (IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(new StandardAnalyzer()))) {
       for (int i = 0; i < DOCS.length; i++) {
         Document doc = new Document();
         Field id = new StringField("id", "doc_" + (i + startingId), Field.Store.YES);

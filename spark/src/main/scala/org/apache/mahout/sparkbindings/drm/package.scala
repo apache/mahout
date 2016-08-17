@@ -17,35 +17,29 @@
 
 package org.apache.mahout.sparkbindings
 
-import org.apache.mahout.math._
-import org.apache.spark.SparkContext
-import scala.collection.JavaConversions._
-import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
 import org.apache.log4j.Logger
-import java.lang.Math
-import org.apache.spark.rdd.RDD
-import scala.reflect.ClassTag
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import org.apache.spark.broadcast.Broadcast
-import org.apache.mahout.math.drm._
-import SparkContext._
 import org.apache.mahout.math
+import org.apache.mahout.math._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+import org.apache.spark.broadcast.Broadcast
 
+import scala.reflect.ClassTag
 
 package object drm {
 
-  private[drm] final val log = Logger.getLogger("org.apache.mahout.sparkbindings");
+  private[drm] final val log = Logger.getLogger("org.apache.mahout.sparkbindings")
 
-  private[sparkbindings] implicit def cpDrm2DrmRddInput[K: ClassTag](cp: CheckpointedDrmSpark[K]): DrmRddInput[K] =
+  private[sparkbindings] implicit def cpDrm2DrmRddInput[K](cp: CheckpointedDrmSpark[K]): DrmRddInput[K] =
     cp.rddInput
 
-  private[sparkbindings] implicit def cpDrmGeneric2DrmRddInput[K: ClassTag](cp: CheckpointedDrm[K]): DrmRddInput[K] =
+  private[sparkbindings] implicit def cpDrmGeneric2DrmRddInput[K](cp: CheckpointedDrm[K]): DrmRddInput[K] =
     cp.asInstanceOf[CheckpointedDrmSpark[K]]
 
-  private[sparkbindings] implicit def drmRdd2drmRddInput[K: ClassTag](rdd: DrmRdd[K]) = new DrmRddInput[K](Left(rdd))
+  private[sparkbindings] implicit def drmRdd2drmRddInput[K:ClassTag](rdd: DrmRdd[K]) = new DrmRddInput[K](Left(rdd))
 
-  private[sparkbindings] implicit def blockifiedRdd2drmRddInput[K: ClassTag](rdd: BlockifiedDrmRdd[K]) = new
+  private[sparkbindings] implicit def blockifiedRdd2drmRddInput[K:ClassTag](rdd: BlockifiedDrmRdd[K]) = new
       DrmRddInput[K](
     Right(rdd))
 
@@ -66,19 +60,27 @@ package object drm {
         val keys = data.map(t => t._1).toArray[K]
         val vectors = data.map(t => t._2).toArray
 
-        val block = if (vectors(0).isDense) {
-          val block = new DenseMatrix(vectors.size, blockncol)
-          var row = 0
-          while (row < vectors.size) {
-            block(row, ::) := vectors(row)
-            row += 1
-          }
-          block
-        } else {
-          new SparseRowMatrix(vectors.size, blockncol, vectors, true, false)
+        // create the block by default as dense.
+        // would probably be better to sample a subset of these
+        // vectors first before creating the entire matrix.
+        // so that we don't have the overhead of creating a full second matrix in
+        // the case that the matrix is not dense.
+        val block = new DenseMatrix(vectors.length, blockncol)
+        var row = 0
+        while (row < vectors.length) {
+          block(row, ::) := vectors(row)
+          row += 1
         }
 
-        Iterator(keys -> block)
+        // Test the density of the data. If the matrix does not meet the
+        // requirements for density, convert the Vectors to a sparse Matrix.
+        val resBlock = if (densityAnalysis(block)) {
+          block
+        } else {
+          new SparseRowMatrix(vectors.length, blockncol, vectors, true, false)
+        }
+
+        Iterator(keys -> resBlock)
       }
     })
   }
@@ -99,7 +101,7 @@ package object drm {
     rdd.flatMap {
       case (blockKeys: Array[K], block: Matrix) =>
 
-        blockKeys.ensuring(blockKeys.size == block.nrow)
+        blockKeys.ensuring(blockKeys.length == block.nrow)
         blockKeys.view.zipWithIndex.map {
           case (key, idx) =>
             val v = block(idx, ::) // This is just a view!

@@ -19,10 +19,9 @@ package org.apache.mahout.math.drm
 
 import scala.reflect.ClassTag
 
-
 /**
  *
- * Basic spark DRM trait.
+ * Basic DRM trait.
  *
  * Since we already call the package "sparkbindings", I will not use stem "spark" with classes in
  * this package. Spark backing is already implied.
@@ -45,6 +44,12 @@ trait DrmLike[K] {
 
   /** R-like syntax for number of columns */
   def ncol: Int
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  def keyClassTag: ClassTag[K]
 
   /**
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer

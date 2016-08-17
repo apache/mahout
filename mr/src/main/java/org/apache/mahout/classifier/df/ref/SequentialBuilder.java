@@ -32,6 +32,7 @@ import java.util.Random;
 /**
  * Builds a Random Decision Forest using a given TreeBuilder to grow the trees
  */
+@Deprecated
 public class SequentialBuilder {
   
   private static final Logger log = LoggerFactory.getLogger(SequentialBuilder.class);
