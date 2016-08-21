@@ -201,7 +201,7 @@ object SimilarityAnalysis extends Serializable {
     implicit val distributedContext = primaryDataset.iD.matrix.context
 
     // backend partitioning defaults to 'auto', which is often better decided by calling funciton
-    // todo: should this ideally be different per drm?
+    // todo: this should ideally be different per drm
     drmARaw.par(min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
 
     // Apply selective downsampling, pin resulting matrix
