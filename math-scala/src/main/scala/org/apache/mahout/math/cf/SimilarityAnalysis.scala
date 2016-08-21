@@ -286,8 +286,8 @@ object SimilarityAnalysis extends Serializable {
   /**
    * Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a drm of rows and similar rows.
    * Uses IndexedDatasets, which handle external ID dictionaries properly
-    *
-    * @param indexedDataset compare each row to every other
+   *
+   * @param indexedDataset compare each row to every other
    * @param randomSeed  use default to make repeatable, otherwise pass in system time or some randomizing seed
    * @param maxInterestingSimilaritiesPerRow max elements returned in each row
    * @param maxObservationsPerRow max number of input elements to use
@@ -383,8 +383,8 @@ object SimilarityAnalysis extends Serializable {
    * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
    *
    * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not
-    *
-    * @param drmM matrix to downsample
+   *
+   * @param drmM matrix to downsample
    * @param seed random number generator seed, keep to a constant if repeatability is neccessary
    * @param maxNumInteractions number of elements in a row of the returned matrix
    * @return the downsampled DRM
