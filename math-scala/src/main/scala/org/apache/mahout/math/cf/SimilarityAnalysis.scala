@@ -101,7 +101,7 @@ object SimilarityAnalysis extends Serializable {
       // backend partitioning defaults to 'auto', which is often better decided by calling funciton
       // todo:  this should ideally be different per drm
       drmARaw.par( min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
-      
+
       // Down-sample and pin other interaction matrix
       val drmB = sampleDownAndBinarize(drmBRaw, randomSeed, maxNumInteractions).checkpoint()
 
@@ -130,8 +130,8 @@ object SimilarityAnalysis extends Serializable {
    * Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ... and returns
    * a list of similarity and cross-similarity matrices. Somewhat easier to use method, which handles the ID
    * dictionaries correctly
-    *
-    * @param indexedDatasets first in array is primary/A matrix all others are treated as secondary
+   *
+   * @param indexedDatasets first in array is primary/A matrix all others are treated as secondary
    * @param randomSeed use default to make repeatable, otherwise pass in system time or some randomizing seed
    * @param maxInterestingItemsPerThing max similarities per items
    * @param maxNumInteractions max number of input items per item
@@ -244,11 +244,12 @@ object SimilarityAnalysis extends Serializable {
 
   /**
    * Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a DRM of rows and similar rows
-    *
-    * @param drmARaw Primary interaction matrix
+   *
+   * @param drmARaw Primary interaction matrix
    * @param randomSeed when kept to a constant will make repeatable downsampling
    * @param maxInterestingSimilaritiesPerRow number of similar items to return per item, default: 50
    * @param maxNumInteractions max number of interactions after downsampling, default: 500
+   * @param parOpts partitioning options used for drm.par(...)
    */
   def rowSimilarity(
     drmARaw: DrmLike[Int],
