@@ -99,11 +99,9 @@ object SimilarityAnalysis extends Serializable {
     // Now look at cross cooccurrences
     for (drmBRaw <- drmBs) {
       // backend partitioning defaults to 'auto', which is often better decided by calling funciton
-      drmBRaw.par(
-        min = parOpts.minPar,
-        exact = parOpts.exactPar,
-        auto = parOpts.autoPar)
-
+      // todo:  this should ideally be different per drm
+      drmARaw.par( min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
+      
       // Down-sample and pin other interaction matrix
       val drmB = sampleDownAndBinarize(drmBRaw, randomSeed, maxNumInteractions).checkpoint()
 
