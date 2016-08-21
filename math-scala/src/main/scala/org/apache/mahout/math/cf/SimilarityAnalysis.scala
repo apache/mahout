@@ -97,7 +97,7 @@ object SimilarityAnalysis extends Serializable {
     val drmSimilarityAtA = computeSimilarities(drmAtA, numUsers, maxInterestingItemsPerThing,
       bcastInteractionsPerItemA, bcastInteractionsPerItemA, crossCooccurrence = false)
 
-    var similarityMatrices = List(drmSimilarityAtA.asInstanceOf[DrmLike[Int]])
+    var similarityMatrices = List(drmSimilarityAtA)
 
     // Now look at cross cooccurrences
     for (drmBRaw <- drmBs) {
@@ -119,23 +119,13 @@ object SimilarityAnalysis extends Serializable {
       val drmSimilarityAtB = computeSimilarities(drmAtB, numUsers, maxInterestingItemsPerThing,
         bcastInteractionsPerItemA, bcastInteractionsPerThingB)
 
-      similarityMatrices = similarityMatrices :+ drmSimilarityAtB.asInstanceOf[DrmLike[Int]]
+      similarityMatrices = similarityMatrices :+ drmSimilarityAtB
 
       drmB.uncache()
-
-      //debug
-      val atbRows = drmSimilarityAtB.nrow
-      val atbCols = drmSimilarityAtB.ncol
-      val i = 0
     }
 
     // Unpin downsampled interaction matrix
     drmA.uncache()
-
-    //debug
-    val ataRows = drmSimilarityAtA.nrow
-    val ataCols = drmSimilarityAtA.ncol
-    val i = 0
 
     // Return list of similarity matrices
     similarityMatrices
@@ -243,20 +233,10 @@ object SimilarityAnalysis extends Serializable {
       similarityMatrices = similarityMatrices :+ drmSimilarityAtB
 
       drmB.uncache()
-
-      //debug
-      val atbRows = drmSimilarityAtB.nrow
-      val atbCols = drmSimilarityAtB.ncol
-      val i = 0
     }
 
     // Unpin downsampled interaction matrix
     drmA.uncache()
-
-    //debug
-    val ataRows = drmSimilarityAtA.nrow
-    val ataCols = drmSimilarityAtA.ncol
-    val i = 0
 
     // Return list of datasets
     val retIDSs = similarityMatrices.iterator.zipWithIndex.map {
