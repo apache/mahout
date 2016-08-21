@@ -75,11 +75,8 @@ object SimilarityAnalysis extends Serializable {
     implicit val distributedContext = drmARaw.context
 
     // backend partitioning defaults to 'auto', which is often better decided by calling funciton
-    // todo: should this ideally be different per drm?
-    drmARaw.par(
-      min = parOpts.minPar,
-      exact = parOpts.exactPar,
-      auto = parOpts.autoPar)
+    // todo:  this should ideally be different per drm
+    drmARaw.par( min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
 
     // Apply selective downsampling, pin resulting matrix
     val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions)
@@ -191,8 +188,8 @@ object SimilarityAnalysis extends Serializable {
     implicit val distributedContext = primaryDataset.iD.matrix.context
 
     // backend partitioning defaults to 'auto', which is often better decided by calling funciton
-    // todo: this should ideally be different per drm
-    drmARaw.par(min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
+    // todo:  this should ideally be different per drm
+    drmARaw.par( min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
 
     // Apply selective downsampling, pin resulting matrix
     val drmA = sampleDownAndBinarize(drmARaw, randomSeed, primaryDataset.maxElementsPerRow)
@@ -218,7 +215,7 @@ object SimilarityAnalysis extends Serializable {
       // backend partitioning defaults to 'auto', which is often better decided by calling funciton
       dataset.iD.matrix.par(min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
 
-      // Down-sample and pin other interaction matrix
+      // Downsample and pin other interaction matrix
       val drmB = sampleDownAndBinarize(dataset.iD.matrix, randomSeed, dataset.maxElementsPerRow).checkpoint()
 
       // Compute & broadcast the number of interactions per thing in B
