@@ -161,6 +161,15 @@
     </dependency>
 
 
+    <!-- https://mvnrepository.com/artifact/org.apache.zeppelin/zeppelin-interpreter -->
+    <dependency>
+      <groupId>org.apache.zeppelin</groupId>
+      <artifactId>zeppelin-interpreter</artifactId>
+      <version>0.5.0-incubating</version>
+    </dependency>
+
+
+
     <dependency>
       <groupId>com.github.scopt</groupId>
       <artifactId>scopt_${scala.compat.version}</artifactId>
