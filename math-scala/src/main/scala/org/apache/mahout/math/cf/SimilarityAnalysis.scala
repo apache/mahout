@@ -44,11 +44,6 @@ object SimilarityAnalysis extends Serializable {
   /** Compares (Int,Double) pairs by the second value */
   private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
 
-  case class ParOpts( // this will contain the default `par` params except for auto = true
-    minPar: Int = -1,
-    exactPar: Int = -1,
-    autoPar: Boolean = true)
-
   lazy val defaultParOpts = ParOpts()
 
   /**
@@ -172,10 +167,9 @@ object SimilarityAnalysis extends Serializable {
     * @return a list of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] containing downsampled
     *         IndexedDatasets for cooccurrence and cross-cooccurrence
     */
-  def crossOccurrencesIDSsWithThresholds(
+  def crossOccurrenceDownsampled(
     datasets: List[DownsamplableCrossOccurrenceDataset],
-    randomSeed: Int = 0xdeadbeef,
-    parOpts: ParOpts = defaultParOpts):
+    randomSeed: Int = 0xdeadbeef):
     List[IndexedDataset] = {
 
 
@@ -186,8 +180,8 @@ object SimilarityAnalysis extends Serializable {
     implicit val distributedContext = primaryDataset.iD.matrix.context
 
     // backend partitioning defaults to 'auto', which is often better decided by calling funciton
-    // todo:  this should ideally be different per drm
-    drmARaw.par( min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
+    val parOptsA = primaryDataset.parOpts.getOrElse(defaultParOpts)
+    drmARaw.par( min = parOptsA.minPar, exact = parOptsA.exactPar, auto = parOptsA.autoPar)
 
     // Apply selective downsampling, pin resulting matrix
     val drmA = sampleDownAndBinarize(drmARaw, randomSeed, primaryDataset.maxElementsPerRow)
@@ -211,7 +205,8 @@ object SimilarityAnalysis extends Serializable {
     // Now look at cross cooccurrences
     for (dataset <- crossDatasets) {
       // backend partitioning defaults to 'auto', which is often better decided by calling funciton
-      dataset.iD.matrix.par(min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
+      val parOptsB = dataset.parOpts.getOrElse(defaultParOpts)
+      dataset.iD.matrix.par(min = parOptsB.minPar, exact = parOptsB.exactPar, auto = parOptsB.autoPar)
 
       // Downsample and pin other interaction matrix
       val drmB = sampleDownAndBinarize(dataset.iD.matrix, randomSeed, dataset.maxElementsPerRow).checkpoint()
@@ -440,10 +435,17 @@ object SimilarityAnalysis extends Serializable {
   }
 }
 
+case class ParOpts( // this will contain the default `par` params except for auto = true
+  minPar: Int = -1,
+  exactPar: Int = -1,
+  autoPar: Boolean = true)
+
 /* Used to pass in data and params for downsampling the input data as well as output A'A, A'B, etc. */
 case class DownsamplableCrossOccurrenceDataset(
   iD: IndexedDataset,
   maxElementsPerRow: Int = 500, // usually items per user in the input dataset, used to ramdomly downsample
   maxInterestingElements: Int = 50, // number of items/columns to keep in the A'A, A'B etc. where iD == A, B, C ...
-  minLLROpt: Option[Double] = None) // absolute threshold, takes precedence over maxInterestingElements if present
+  minLLROpt: Option[Double] = None, // absolute threshold, takes precedence over maxInterestingElements if present
+  parOpts: Option[ParOpts] = None) // these can be set per dataset and are applied to each of the drms
+                                // in crossOccurrenceDownsampled
 

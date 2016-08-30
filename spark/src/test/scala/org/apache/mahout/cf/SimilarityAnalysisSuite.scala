@@ -238,7 +238,7 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
     val bD = DownsamplableCrossOccurrenceDataset(bID, maxInterestingElements = 2)
 
     //self similarity
-    val drmCooc = SimilarityAnalysis.crossOccurrencesIDSsWithThresholds(List(aD, bD))
+    val drmCooc = SimilarityAnalysis.crossOccurrenceDownsampled(List(aD, bD))
     val matrixSelfCooc = drmCooc(0).matrix.checkpoint().collect
     val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
     var n = (new MatrixOps(m = diffMatrix)).norm
@@ -289,7 +289,7 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
     val bD = DownsamplableCrossOccurrenceDataset(bID, minLLROpt = Some(1.7), maxInterestingElements = 2)
 
     //self similarity
-    val drmCooc = SimilarityAnalysis.crossOccurrencesIDSsWithThresholds(List(aD, bD))
+    val drmCooc = SimilarityAnalysis.crossOccurrenceDownsampled(List(aD, bD))
     val matrixSelfCooc = drmCooc(0).matrix.checkpoint().collect
     val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
     var n = (new MatrixOps(m = diffMatrix)).norm
