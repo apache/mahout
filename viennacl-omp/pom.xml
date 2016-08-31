@@ -28,10 +28,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
-  <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+  <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
 
-  <name>Mahout Native VienniaCL OpenCL Bindings</name>
+  <name>Mahout Native VienniaCL OpenMP Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 
@@ -142,19 +141,19 @@
                 <argument>linux-x86_64-viennacl.properties</argument>
                 <argument>-classpath</argument>
                 <argument>${project.build.outputDirectory}:${org.scala-lang:scala-library:jar}</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.CompressedMatrix</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.Context</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.MatrixBase</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.DenseRowMatrix</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.DenseColumnMatrix</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.MatMatProdExpression</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.ProdExpression</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.MatrixTransExpression</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.Functions</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.VectorBase</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.VCLVector</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.VecMultExpression</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.CompressedMatrix</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.Context</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.MatrixBase</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.DenseRowMatrix</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.DenseColumnMatrix</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.MatMatProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.ProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.MatrixTransExpression</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.LinalgFunctions</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.Functions</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.VectorBase</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.VCLVector</argument>
+                <argument>org.apache.mahout.viennacl.omp.javacpp.VecMultExpression</argument>
               </arguments>
             </configuration>
           </execution>
