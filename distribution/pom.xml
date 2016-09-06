@@ -103,10 +103,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark_${scala.compat.version}</artifactId>
     </dependency>
     <dependency>
