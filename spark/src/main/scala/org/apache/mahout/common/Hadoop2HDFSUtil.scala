@@ -15,27 +15,34 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.h2o.common
+package org.apache.mahout.common
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.{SequenceFile, Writable}
+import org.apache.spark.SparkContext
 
 /**
  * Deprecated Hadoop 1 api which we currently explicitly import via Mahout dependencies. May not work
  * with Hadoop 2.0
  */
-object Hadoop1HDFSUtil extends HDFSUtil {
+object Hadoop2HDFSUtil extends HDFSUtil {
 
-  
-  def readDrmHeader(path: String): DrmMetadata = {
+
+  /** Read DRM header information off (H)DFS. */
+  override def readDrmHeader(path: String)(implicit sc: SparkContext): DrmMetadata = {
+
     val dfsPath = new Path(path)
-    val fs = dfsPath.getFileSystem(new Configuration())
+
+    val fs = dfsPath.getFileSystem(sc.hadoopConfiguration)
+
+    // Apparently getFileSystem() doesn't set conf??
+    fs.setConf(sc.hadoopConfiguration)
 
     val partFilePath:Path = fs.listStatus(dfsPath)
 
         // Filter out anything starting with .
-        .filter { s => !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDir }
+        .filter { s => !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDirectory }
 
         // Take path
         .map(_.getPath)
@@ -48,7 +55,7 @@ object Hadoop1HDFSUtil extends HDFSUtil {
       throw new IllegalArgumentException(s"No partition files found in ${dfsPath.toString}.")
     }
 
-    val reader = new SequenceFile.Reader(fs, partFilePath, fs.getConf)
+    val reader = new SequenceFile.Reader(fs.getConf, SequenceFile.Reader.file(partFilePath))
     try {
       new DrmMetadata(
         keyTypeWritable = reader.getKeyClass.asSubclass(classOf[Writable]),
@@ -58,6 +65,19 @@ object Hadoop1HDFSUtil extends HDFSUtil {
       reader.close()
     }
 
+  }
+
+  /**
+   * Delete a path from the filesystem
+   * @param path - hdfs path
+   */
+  def delete(path: String) {
+    val dfsPath = new Path(path)
+    val fs = dfsPath.getFileSystem(new Configuration())
+
+    if (fs.exists(dfsPath)) {
+      fs.delete(dfsPath, true)
+    }
   }
 
 }

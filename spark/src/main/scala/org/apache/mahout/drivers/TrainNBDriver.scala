@@ -18,7 +18,7 @@
 package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes.{SparkNaiveBayes, _}
-import org.apache.mahout.common.Hadoop1HDFSUtil
+import org.apache.mahout.common.Hadoop2HDFSUtil
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
 
@@ -95,7 +95,7 @@ object TrainNBDriver extends MahoutSparkDriver {
     val fullPathToModel = outputPath + NBModel.modelBaseDirectory
 
     if (overwrite) {
-       Hadoop1HDFSUtil.delete(fullPathToModel)
+       Hadoop2HDFSUtil.delete(fullPathToModel)
     }
 
     val trainingSet = readTrainingSet()
