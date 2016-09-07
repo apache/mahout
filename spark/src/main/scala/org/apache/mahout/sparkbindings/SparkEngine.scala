@@ -18,7 +18,7 @@
 package org.apache.mahout.sparkbindings
 
 import org.apache.hadoop.io._
-import org.apache.mahout.common.{HDFSUtil, Hadoop1HDFSUtil}
+import org.apache.mahout.common.{HDFSUtil, Hadoop2HDFSUtil}
 import org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
@@ -39,7 +39,7 @@ import scala.reflect.ClassTag
 object SparkEngine extends DistributedEngine {
 
   // By default, use Hadoop 1 utils
-  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+  var hdfsUtils: HDFSUtil = Hadoop2HDFSUtil
 
   def colSums[K](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
