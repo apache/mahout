@@ -365,6 +365,9 @@ package object scalabindings {
   type VMBinaryFunc = (Vector, Matrix, Option[Matrix]) ⇒ Matrix
   type MDBinaryFunc = (Matrix, Double, Option[Matrix]) ⇒ Matrix
 
+  trait opMMulSolver extends MMBinaryFunc {
+
+  }
 
   /////////////////////////////////////
   // Miscellaneous in-core utilities

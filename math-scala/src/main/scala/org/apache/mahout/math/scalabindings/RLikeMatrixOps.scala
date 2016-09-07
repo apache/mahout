@@ -17,14 +17,23 @@
 package org.apache.mahout.math.scalabindings
 
 import org.apache.mahout.math.function.Functions
-import org.apache.mahout.math.{Vector, Matrix}
+import org.apache.mahout.math.{Matrix, Vector}
+
 import scala.collection.JavaConversions._
 import RLikeOps._
+import org.apache.mahout.math.scalabindings._
+
 
 class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
 
   /** Structure-optimized mmul */
-  def %*%(that: Matrix) = MMul(m, that, None)
+
+  implicit var solverOperator: opMMulSolver =_
+//  val sFactory = new SolverFactory
+  def mmulSolver = SolverFactory.getOperator
+
+
+  def %*%(that: Matrix) = mmulSolver(m, that, None)
 
   def :%*%(that:Matrix) = %*%(that)
 

@@ -150,6 +150,11 @@
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
+   <dependency>
+    <groupId>org.scala-lang</groupId>
+    <artifactId>scala-reflect</artifactId>
+    <version>${scala.version}</version>
+  </dependency>
 
 
   </dependencies>
