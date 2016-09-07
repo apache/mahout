@@ -17,12 +17,11 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -64,7 +63,7 @@ final class ALS {
     LocalFileSystem localFs = FileSystem.getLocal(conf);
 
     for (Path cachedFile : cachedFiles) {
-      try (SequenceFile.Reader reader = new SequenceFile.Reader(localFs, cachedFile, conf)){
+      try (SequenceFile.Reader reader = new SequenceFile.Reader(localFs.getConf(), SequenceFile.Reader.file(cachedFile))) {
         while (reader.next(rowIndex, row)) {
           featureMatrix.put(rowIndex.get(), row.get());
         }

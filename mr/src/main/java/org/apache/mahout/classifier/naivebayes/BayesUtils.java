@@ -17,14 +17,13 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -102,7 +101,9 @@ public final class BayesUtils {
     throws IOException {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
     int i = 0;
-    try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class)) {
+    try (SequenceFile.Writer writer =
+           SequenceFile.createWriter(fs.getConf(), SequenceFile.Writer.file(indexPath),
+             SequenceFile.Writer.keyClass(Text.class), SequenceFile.Writer.valueClass(IntWritable.class))) {
       for (String label : labels) {
         writer.append(new Text(label), new IntWritable(i++));
       }
@@ -115,7 +116,9 @@ public final class BayesUtils {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
     Collection<String> seen = new HashSet<>();
     int i = 0;
-    try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class)){
+    try (SequenceFile.Writer writer =
+           SequenceFile.createWriter(fs.getConf(), SequenceFile.Writer.file(indexPath),
+             SequenceFile.Writer.keyClass(Text.class), SequenceFile.Writer.valueClass(IntWritable.class))){
       for (Object label : labels) {
         String theLabel = SLASH.split(((Pair<?, ?>) label).getFirst().toString())[1];
         if (!seen.contains(theLabel)) {
