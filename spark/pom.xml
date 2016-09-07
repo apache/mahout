@@ -159,6 +159,18 @@
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
 
+    <!-- FOR EXPIREMENT PURPOSES ONLY -->
+    <!--<dependency>-->
+      <!--<groupId>org.apache.mahout</groupId>-->
+      <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>org.apache.mahout</groupId>-->
+      <!--<artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>-->
+    <!--</dependency>-->
+    <!-- ***************************** -->
+
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>

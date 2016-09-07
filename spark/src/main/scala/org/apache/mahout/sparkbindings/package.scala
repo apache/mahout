@@ -64,23 +64,27 @@ package object sparkbindings {
 
     try {
 
-      if (addMahoutJars) {
+        // when not including the artifact, rg for viennacl , we always need
+        // tp load all mahout jars
+
+//      if (addMahoutJars) {
 
         // context specific jars
         val mcjars = findMahoutContextJars(closeables)
 
-        if (log.isDebugEnabled) {
+       // if (log.isDebugEnabled) {
           log.debug("Mahout jars:")
           mcjars.foreach(j => log.debug(j))
-        }
+       // }
 
         sparkConf.setJars(jars = mcjars.toSeq ++ customJars)
         if (!(customJars.size > 0)) sparkConf.setJars(customJars.toSeq)
 
-      } else {
+      //} else {
         // In local mode we don't care about jars, do we?
-        sparkConf.setJars(customJars.toSeq)
-      }
+        // yes adding jars always now since we are not including the artifacts
+        // sparkConf.setJars(customJars.toSeq)
+//      }
 
       sparkConf.setAppName(appName).setMaster(masterUrl).set("spark.serializer",
         "org.apache.spark.serializer.KryoSerializer").set("spark.kryo.registrator",
@@ -254,7 +258,11 @@ package object sparkbindings {
       j.matches(".*mahout-hdfs-\\d.*\\.jar") ||
       // no need for mapreduce jar in Spark
       // j.matches(".*mahout-mr-\\d.*\\.jar") ||
-      j.matches(".*mahout-spark_\\d.*\\.jar")
+      j.matches(".*mahout-spark_\\d.*\\.jar") ||
+      // vcl jars: mahout-native-viennacl_2.10.jar,
+      //           mahout-native-viennacl-omp_2.10.jar
+      j.matches(".*mahout-native-viennacl_2.10-0.12.3-SNAPSHOT.jar") //||
+//      j.matches(".*mahout-native-viennacl-omp_\\d.*\\.jar")
     )
         // Tune out "bad" classifiers
         .filter(n =>
@@ -264,11 +272,11 @@ package object sparkbindings {
           // During maven tests, the maven classpath also creeps in for some reason
           !n.matches(".*/.m2/.*")
         )
-    /* verify jar passed to context
-    log.info("\n\n\n")
-    mcjars.foreach(j => log.info(j))
-    log.info("\n\n\n")
-    */
+    /* verify jar passed to context */
+    println("\n\n\n")
+    mcjars.foreach(j => println(j))
+    println("\n\n\n")
+    /**/
     mcjars
   }
 

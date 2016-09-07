@@ -1,12 +1,11 @@
 package org.apache.mahout.viennacl.vcl
 
 import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions._
-import org.apache.mahout.viennacl.vcl.javacpp._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.viennacl.vcl.javacpp.Functions._
-import org.apache.mahout.viennacl.vcl.javacpp.{Context, Functions, LinalgFunctions, VCLVector}
+import org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions._
+import org.apache.mahout.viennacl.vcl.javacpp.{Context, LinalgFunctions, VCLVector, _}
 import org.bytedeco.javacpp.DoublePointer
 import org.scalatest.{FunSuite, Matchers}
 
