@@ -50,7 +50,7 @@ object FlinkOpTimesRightMatrix {
     val singletonDataSetB = ctx.env.fromCollection(rows)
 
     val res = A.asBlockified.ds.map(new RichMapFunction[(Array[K], Matrix), (Array[K], Matrix)] {
-      var inCoreB: Matrix = null
+      var inCoreB: Matrix = _
 
       override def open(params: Configuration): Unit = {
         val runtime = this.getRuntimeContext
