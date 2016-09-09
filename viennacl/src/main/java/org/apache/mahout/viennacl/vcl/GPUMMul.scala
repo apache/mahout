@@ -25,6 +25,8 @@ import org.apache.mahout.math.function.Functions
 import org.apache.mahout.math.scalabindings._
 import math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions._
+import org.apache.mahout.viennacl.vcl.javacpp.{Context, DenseRowMatrix}
 
 import scala.collection.JavaConversions._
 
@@ -70,7 +72,7 @@ object GPUMMul extends MMBinaryFunc {
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ jvmDRWAAt
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ jvmDRWAAt
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmRWCW
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmRWRW
+          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ gpuRWRW
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmCWCW
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a eq b.t ⇒ jvmDCWAAt
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a.t eq b ⇒ jvmDCWAAt
@@ -84,7 +86,7 @@ object GPUMMul extends MMBinaryFunc {
 
           // Sparse matrix x sparse matrix (hashtable of vectors)
           case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.SPARSEROWWISE, false) ⇒
-            jvmSparseRowRWRW
+            gpuSparseRowRWRW
           case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.SPARSECOLWISE, false) ⇒
             jvmSparseRowRWCW
           case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.SPARSEROWWISE, false) ⇒
@@ -93,7 +95,7 @@ object GPUMMul extends MMBinaryFunc {
             jvmSparseRowCWCW
 
           // Sparse matrix x non-like
-          case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseRowRWRW
+          case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ gpuSparseRowRWRW
           case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseRowRWCW
           case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseRowCWRW
           case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW
@@ -137,21 +139,27 @@ object GPUMMul extends MMBinaryFunc {
   }
 
 
+  // dense %*% dense rw
   @inline
-  private def jvmRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+  private def gpuRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
 
-    // A bit hackish: currently, this relies a bit on the fact that like produces RW(?)
-    val bclone = b.like(b.ncol, b.nrow).t
-    for (brow ← b) bclone(brow.index(), ::) := brow
+    val oclCtx = new Context(Context.OPENCL_MEMORY)
+    var ms = System.currentTimeMillis()
+    val oclA = toVclDenseRM(b, oclCtx)
+    val oclB = toVclDenseRM(a, oclCtx)
+    val oclC = new DenseRowMatrix(prod(oclA, oclB))
+    val mxC = fromVclDenseRM(oclC)
+    ms = System.currentTimeMillis() - ms
+    info(s"ViennaCL/OpenCL multiplication time: $ms ms.")
 
-    require(bclone.getFlavor.getStructure == TraversingStructureEnum.COLWISE || bclone.getFlavor.getStructure ==
-      TraversingStructureEnum.SPARSECOLWISE, "COL wise conversion assumption of RHS is wrong, do over this code.")
-
-    jvmRWCW(a, bclone, r)
+    oclA.close()
+    oclB.close()
+    oclC.close()
+    mxC
   }
 
   private def jvmCWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
-    jvmRWRW(b.t, a.t, r.map(_.t)).t
+    gpuRWRW(b.t, a.t, r.map(_.t)).t
   }
 
   private def jvmCWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
@@ -163,7 +171,7 @@ object GPUMMul extends MMBinaryFunc {
     require(aclone.getFlavor.getStructure == TraversingStructureEnum.ROWWISE || aclone.getFlavor.getStructure ==
       TraversingStructureEnum.SPARSEROWWISE, "Row wise conversion assumption of RHS is wrong, do over this code.")
 
-    jvmRWRW(aclone, b, r)
+    gpuRWRW(aclone, b, r)
   }
 
   private def jvmSparseRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
@@ -176,26 +184,37 @@ object GPUMMul extends MMBinaryFunc {
     mxR
   }
 
-  private def jvmSparseRowRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
-    val mxR = r.getOrElse(b.like(a.nrow, b.ncol))
-    for (arow ← a.iterateNonEmpty(); ael ← arow.vector.nonZeroes)
-      mxR(arow.index(), ::).assign(b(ael.index, ::), Functions.plusMult(ael))
+  // sparse %*% dense row-wise
+  private def gpuSparseRowRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
 
-    mxR
+    var ms = System.currentTimeMillis()
+    val oclCtx = new Context(Context.OPENCL_MEMORY)
+    val oclA = toVclCmpMatrixAlt(a, oclCtx)
+    val oclB = toVclDenseRM(b, oclCtx)
+    val oclC = new DenseRowMatrix(prod(oclA, oclB))
+    val mxC = fromVclDenseRM(oclC)
+    ms = System.currentTimeMillis() - ms
+    info(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+
+    oclA.close()
+    oclB.close()
+    oclC.close()
+
+    mxC
   }
 
   private def jvmSparseRowCWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None) =
-    jvmSparseRowRWRW(b.t, a.t, r.map(_.t)).t
+    gpuSparseRowRWRW(b.t, a.t, r.map(_.t)).t
 
   private def jvmSparseRowCWCW2flips(a: Matrix, b: Matrix, r: Option[Matrix] = None) =
-    jvmSparseRowRWRW(a cloned, b cloned, r)
+    gpuSparseRowRWRW(a cloned, b cloned, r)
 
   private def jvmSparseRowRWCW(a: Matrix, b: Matrix, r: Option[Matrix]) =
-    jvmSparseRowRWRW(a, b cloned, r)
+    gpuSparseRowRWRW(a, b cloned, r)
 
 
   private def jvmSparseRowCWRW(a: Matrix, b: Matrix, r: Option[Matrix]) =
-    jvmSparseRowRWRW(a cloned, b, r)
+    gpuSparseRowRWRW(a cloned, b, r)
 
   private def jvmSparseRWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None) =
     jvmSparseRWRW(a, b.cloned, r)
