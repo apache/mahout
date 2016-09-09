@@ -64,18 +64,19 @@ package object sparkbindings {
 
     try {
 
-        // when not including the artifact, rg for viennacl , we always need
-        // tp load all mahout jars
+        // when not including the artifact, eg. for viennacl , we always need
+        // to load all mahout jars
+        // will need to handle this somehow.
 
 //      if (addMahoutJars) {
 
         // context specific jars
         val mcjars = findMahoutContextJars(closeables)
 
-       // if (log.isDebugEnabled) {
+        if (log.isDebugEnabled) {
           log.debug("Mahout jars:")
           mcjars.foreach(j => log.debug(j))
-       // }
+        }
 
         sparkConf.setJars(jars = mcjars.toSeq ++ customJars)
         if (!(customJars.size > 0)) sparkConf.setJars(customJars.toSeq)
