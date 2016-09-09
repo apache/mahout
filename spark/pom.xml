@@ -160,15 +160,12 @@
     </dependency>
 
     <!-- FOR EXPIREMENT PURPOSES ONLY -->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
-    <!--</dependency>-->
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>javacpp</artifactId>
+      <version>1.2.2</version>
+    </dependency>
 
-    <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--<artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>-->
-    <!--</dependency>-->
     <!-- ***************************** -->
 
     <dependency>

@@ -155,6 +155,7 @@
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.VectorBase</argument>
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.VCLVector</argument>
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.VecMultExpression</argument>
+                <argument>org.apache.mahout.viennacl.vcl.javacpp.MemHandle</argument>
                 <argument>org.apache.mahout.viennacl.vcl.GPUMMul</argument>
                 <argument>org.apache.mahout.viennacl.vcl.GPUMMul$</argument>
               </arguments>

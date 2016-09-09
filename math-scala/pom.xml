@@ -156,6 +156,15 @@
     <version>${scala.version}</version>
   </dependency>
 
+    <!-- FOR EXPIREMENT PURPOSES ONLY -->
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>javacpp</artifactId>
+      <version>1.2.2</version>
+    </dependency>
+
+    <!-- ***************************** -->
+
 
   </dependencies>
 
