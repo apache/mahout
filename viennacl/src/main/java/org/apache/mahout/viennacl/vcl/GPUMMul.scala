@@ -72,7 +72,7 @@ object GPUMMul extends MMBinaryFunc {
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ jvmDRWAAt
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ jvmDRWAAt
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmRWCW
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ gpuRWRW
+          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmRWRW
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmCWCW
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a eq b.t ⇒ jvmDCWAAt
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a.t eq b ⇒ jvmDCWAAt
@@ -139,27 +139,21 @@ object GPUMMul extends MMBinaryFunc {
   }
 
 
-  // dense %*% dense rw
   @inline
-  private def gpuRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+  private def jvmRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
 
-    val oclCtx = new Context(Context.OPENCL_MEMORY)
-    var ms = System.currentTimeMillis()
-    val oclA = toVclDenseRM(b, oclCtx)
-    val oclB = toVclDenseRM(a, oclCtx)
-    val oclC = new DenseRowMatrix(prod(oclA, oclB))
-    val mxC = fromVclDenseRM(oclC)
-    ms = System.currentTimeMillis() - ms
-    info(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+    // A bit hackish: currently, this relies a bit on the fact that like produces RW(?)
+    val bclone = b.like(b.ncol, b.nrow).t
+    for (brow ← b) bclone(brow.index(), ::) := brow
 
-    oclA.close()
-    oclB.close()
-    oclC.close()
-    mxC
+    require(bclone.getFlavor.getStructure == TraversingStructureEnum.COLWISE || bclone.getFlavor.getStructure ==
+      TraversingStructureEnum.SPARSECOLWISE, "COL wise conversion assumption of RHS is wrong, do over this code.")
+
+    jvmRWCW(a, bclone, r)
   }
 
   private def jvmCWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
-    gpuRWRW(b.t, a.t, r.map(_.t)).t
+    jvmRWRW(b.t, a.t, r.map(_.t)).t
   }
 
   private def jvmCWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
@@ -171,7 +165,7 @@ object GPUMMul extends MMBinaryFunc {
     require(aclone.getFlavor.getStructure == TraversingStructureEnum.ROWWISE || aclone.getFlavor.getStructure ==
       TraversingStructureEnum.SPARSEROWWISE, "Row wise conversion assumption of RHS is wrong, do over this code.")
 
-    gpuRWRW(aclone, b, r)
+    jvmRWRW(aclone, b, r)
   }
 
   private def jvmSparseRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
@@ -184,7 +178,7 @@ object GPUMMul extends MMBinaryFunc {
     mxR
   }
 
-  // sparse %*% dense row-wise
+  //sparse %*% sparse
   private def gpuSparseRowRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
 
     var ms = System.currentTimeMillis()
