@@ -27,7 +27,7 @@ object SolverFactory extends SolverFactory {
     // eventually match on implicit Classtag . for now.  just take as is.
     def getOperator[C: ClassTag]: MMBinaryFunc = {
 
-      try {
+      //try {
         info("creating: "+classMap("GPUMMul"))
 
         // returning $MAHOUT_HOME/null/
@@ -37,13 +37,16 @@ object SolverFactory extends SolverFactory {
             Array(new File( mahoutHome + "/viennacl/target/" +
               "mahout-native-viennacl_2.10-0.12.3-SNAPSHOT.jar").toURI.toURL),
               this.getClass.getClassLoader)
-        System.out.println("\n\n\n")
-        (classLoader.getURLs).foreach{x => println(x).toString}
-        System.out.println("\n\n\n")
+
+//        System.out.println("\n\n\n")
+//        (classLoader.getURLs).foreach{x => println(x).toString}
+//        System.out.println("\n\n\n")
 
         val clazzMod = classLoader.loadClass("org.apache.mahout.viennacl.vcl.GPUMMul$")
 
         val clazz = clazzMod.getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+
+//        println("class: "+clazz.getClass.getSimpleName+"\n\n\n")
 
 
        // val clazz = Class.forName("org.apache.mahout.viennacl.vcl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
@@ -51,23 +54,23 @@ object SolverFactory extends SolverFactory {
 
         info("successfully created org.apache.mahout.viennacl.vcl.GPUMMul solver")
 
-      } catch {
-        case x:Exception =>
-          error(s" Error creating class: $classMap(GPUMMul) attempting OpenMP version")
-          x.printStackTrace()
-        try {
-          // attempt to instantiate the OpenMP version, assuming we’ve
-          // created a separate OpenMP-only module
-          val clazz = Class.forName(classMap("OMPMMul")).newInstance().asInstanceOf[MMBinaryFunc]
-          info("successfully created org.apache.mahout.viennacl.ocl.OMPMMul solver")
-
-        } catch {
-          case _:Exception =>
-            error(s" Error creating class: $classMap(OMPMMul).. Exiting")
-            System.exit(1)
-         val clazz = org.apache.mahout.math.scalabindings.MMul
-        }
-      }
+//      } catch {
+//        case x:Exception =>
+//          error(s" Error creating class: $classMap(GPUMMul) attempting OpenMP version")
+//          x.printStackTrace()
+//        try {
+//          // attempt to instantiate the OpenMP version, assuming we’ve
+//          // created a separate OpenMP-only module
+//          val clazz = Class.forName(classMap("OMPMMul")).newInstance().asInstanceOf[MMBinaryFunc]
+//          info("successfully created org.apache.mahout.viennacl.ocl.OMPMMul solver")
+//
+//        } catch {
+//          case x:Exception =>
+//            error(s" Error creating class: $classMap(OMPMMul).. Exiting")
+//            System.exit(1)
+//         val clazz = org.apache.mahout.math.scalabindings.MMul
+//        }
+//      }
       clazz
     }
 }
