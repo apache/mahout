@@ -73,10 +73,10 @@ package object sparkbindings {
         // context specific jars
         val mcjars = findMahoutContextJars(closeables)
 
-        if (log.isDebugEnabled) {
-          log.debug("Mahout jars:")
-          mcjars.foreach(j => log.debug(j))
-        }
+//        if (log.isDebugEnabled) {
+//          log.debug("Mahout jars:")
+//          mcjars.foreach(j => log.debug(j))
+//        }
 
         sparkConf.setJars(jars = mcjars.toSeq ++ customJars)
         if (!(customJars.size > 0)) sparkConf.setJars(customJars.toSeq)
@@ -274,9 +274,9 @@ package object sparkbindings {
           !n.matches(".*/.m2/.*")
         )
     /* verify jar passed to context */
-    println("\n\n\n")
-    mcjars.foreach(j => println(j))
-    println("\n\n\n")
+//    info("\n\n\n")
+//    mcjars.foreach(j => info(j))
+//    info("\n\n\n")
     /**/
     mcjars
   }

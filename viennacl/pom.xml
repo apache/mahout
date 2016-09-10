@@ -149,6 +149,7 @@
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.DenseColumnMatrix</argument>
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.MatMatProdExpression</argument>
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.ProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.vcl.javacpp.SrMatDnMatProdExpression</argument>
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.MatrixTransExpression</argument>
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions</argument>
                 <argument>org.apache.mahout.viennacl.vcl.javacpp.Functions</argument>

@@ -25,8 +25,9 @@ import org.apache.mahout.math.function.Functions
 import org.apache.mahout.math.scalabindings._
 import math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.viennacl.vcl.javacpp.Functions._
 import org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions._
-import org.apache.mahout.viennacl.vcl.javacpp.{Context, DenseRowMatrix}
+import org.apache.mahout.viennacl.vcl.javacpp.{CompressedMatrix, Context, DenseRowMatrix}
 
 import scala.collection.JavaConversions._
 
@@ -79,7 +80,7 @@ object GPUMMul extends MMBinaryFunc {
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmCWRW
 
           // Sparse row matrix x sparse row matrix (array of vectors)
-          case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.ROWWISE, false) ⇒ jvmSparseRWRW
+          case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.ROWWISE, false) ⇒ gpuSparseRWRW
           case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.COLWISE, false) ⇒ jvmSparseRWCW
           case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.ROWWISE, false) ⇒ jvmSparseCWRW
           case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.COLWISE, false) ⇒ jvmSparseCWCW
@@ -99,13 +100,13 @@ object GPUMMul extends MMBinaryFunc {
           case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseRowRWCW
           case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseRowCWRW
           case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW
-          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.SPARSEROWWISE, false) ⇒ jvmSparseRWRW
+          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.SPARSEROWWISE, false) ⇒ gpuSparseRWRW
           case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.SPARSECOLWISE, false) ⇒ jvmSparseRWCW
           case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.SPARSEROWWISE, false) ⇒ jvmSparseCWRW
           case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.SPARSECOLWISE, false) ⇒ jvmSparseRowCWCW
 
           // Everything else including at least one sparse LHS or RHS argument
-          case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseRWRW
+          case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ gpuSparseRWRW
           case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseRWCW
           case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseCWRW
           case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW2flips
@@ -168,14 +169,48 @@ object GPUMMul extends MMBinaryFunc {
     jvmRWRW(aclone, b, r)
   }
 
-  private def jvmSparseRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+  // left is Sparse right ie any
+  private def gpuSparseRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
     val mxR = r.getOrElse(b.like(a.nrow, b.ncol))
 
-    // This is basically almost the algorithm from SparseMatrix.times
-    for (arow ← a; ael ← arow.nonZeroes)
-      mxR(arow.index(), ::).assign(b(ael.index, ::), Functions.plusMult(ael))
+//    // This is basically almost the algorithm from SparseMatrix.times
+//    for (arow ← a; ael ← arow.nonZeroes)
+//      mxR(arow.index(), ::).assign(b(ael.index, ::), Functions.plusMult(ael))
+//
+//    mxR
+    // CSR matrices are efficient up to 50% non-zero
+    if(densityAnalysis(b, .50)) {
+      var ms = System.currentTimeMillis()
+      val oclCtx = new Context(Context.OPENCL_MEMORY)
+      val oclA = toVclCmpMatrixAlt(a, oclCtx)
+      val oclB = toVclDenseRM(b, oclCtx)
+      val oclC = new DenseRowMatrix(prod(oclA, oclB))
+      val mxC = fromVclDenseRM(oclC)
+      ms = System.currentTimeMillis() - ms
+      debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
 
-    mxR
+      oclA.close()
+      oclB.close()
+      oclC.close()
+
+      mxC
+    } else {
+      var ms = System.currentTimeMillis()
+      val oclCtx = new Context(Context.OPENCL_MEMORY)
+      val oclA = toVclCmpMatrixAlt(a, oclCtx)
+      val oclB = toVclCmpMatrixAlt(b, oclCtx)
+      val oclC = new CompressedMatrix(prod(oclA, oclB))
+      val mxC = fromVclCompressedMatrix(oclC)
+      ms = System.currentTimeMillis() - ms
+      debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+
+      oclA.close()
+      oclB.close()
+      oclC.close()
+
+      mxC
+    }
+
   }
 
   //sparse %*% sparse
@@ -188,7 +223,7 @@ object GPUMMul extends MMBinaryFunc {
     val oclC = new DenseRowMatrix(prod(oclA, oclB))
     val mxC = fromVclDenseRM(oclC)
     ms = System.currentTimeMillis() - ms
-    info(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+    debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
 
     oclA.close()
     oclB.close()
@@ -211,16 +246,16 @@ object GPUMMul extends MMBinaryFunc {
     gpuSparseRowRWRW(a cloned, b, r)
 
   private def jvmSparseRWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None) =
-    jvmSparseRWRW(a, b.cloned, r)
+    gpuSparseRWRW(a, b.cloned, r)
 
   private def jvmSparseCWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None) =
-    jvmSparseRWRW(a cloned, b, r)
+    gpuSparseRWRW(a cloned, b, r)
 
   private def jvmSparseCWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None) =
-    jvmSparseRWRW(b.t, a.t, r.map(_.t)).t
+    gpuSparseRWRW(b.t, a.t, r.map(_.t)).t
 
   private def jvmSparseCWCW2flips(a: Matrix, b: Matrix, r: Option[Matrix] = None) =
-    jvmSparseRWRW(a cloned, b cloned, r)
+    gpuSparseRWRW(a cloned, b cloned, r)
 
   private def jvmDiagRW(diagm:Matrix, b:Matrix, r:Option[Matrix] = None):Matrix = {
     val mxR = r.getOrElse(b.like(diagm.nrow, b.ncol))
@@ -251,16 +286,39 @@ object GPUMMul extends MMBinaryFunc {
   }
 
   /** Dense Row-wise AA' */
+  // we probably will not want to use this for the actual release unless A is cached already
+  // but adding for testing purposes.
   private def jvmDRWAAt(a:Matrix, b:Matrix, r:Option[Matrix] = None) = {
     // a.t must be equiv to b.
 
-    debug("AAt computation detected.")
+    debug("AAt computation detected; passing off to GPU")
 
     // Check dimensions if result is supplied.
     require(r.forall(mxR ⇒ mxR.nrow == a.nrow && mxR.ncol == a.nrow))
 
     val mxR = r.getOrElse(a.like(a.nrow, a.nrow))
 
+
+//    var ms = System.currentTimeMillis()
+//    val oclCtx = new Context(Context.OPENCL_MEMORY)
+//    val oclA = toVclDenseRM(src = mxR, oclCtx)
+//    // TODO: BADHACK A' getting memory errors using A twice
+//    val oclApr = toVclDenseRM(src = mxR, oclCtx)
+//
+//    val oclAt = new DenseRowMatrix(trans(oclApr))
+//
+//    val oclC = new DenseRowMatrix(prod(oclA, oclAt))
+//
+//    val mxC = fromVclDenseRM(oclC)
+//    ms = System.currentTimeMillis() - ms
+//    debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+//
+//    oclA.close()
+//    oclA.close()
+//    oclAt.close()
+//    oclC.close()
+//
+//    mxC
     // This is symmetric computation. Compile upper triangular first.
     for (row ← 0 until mxR.nrow) {
       // diagonal value
