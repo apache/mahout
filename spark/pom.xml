@@ -160,6 +160,11 @@
       <version>1.2.2</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-native-viennacl_2.10</artifactId>
+    </dependency>
+
     <!-- ***************************** -->
 
     <dependency>
