@@ -31,6 +31,9 @@ PING_LOOP_PID=$!
 mvn clean -DskipTests=true -Dmaven.javadoc.skip=true -B -V install >> $BUILD_OUTPUT 2>&1 
 cd hdfs && mvn test >> $BUILD_OUTPUT 2>&1
 cd ../math && mvn test >> $BUILD_OUTPUT 2>&1
+cd ../mr && mvn test >> $BUILD_OUTPUT 2>&1
+cd ../integration && mvn test >> $BUILD_OUTPUT 2>&1
+cd ../examples && mvn test >> $BUILD_OUTPUT 2>&1
 cd ../math-scala && mvn test >> $BUILD_OUTPUT 2>&1
 cd ../spark && mvn test >> $BUILD_OUTPUT 2>&1
 #cd ../flink && mvn test >> $BUILD_OUTPUT 2>&1
