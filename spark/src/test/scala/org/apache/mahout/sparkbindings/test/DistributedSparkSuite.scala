@@ -33,7 +33,7 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
   protected var masterUrl = null.asInstanceOf[String]
 
   protected def initContext() {
-    masterUrl = System.getProperties.getOrElse("test.spark.master", "local[3]")
+    masterUrl = System.getProperties.getOrElse("test.spark.master", "local[1]")
     val isLocal = masterUrl.startsWith("local")
     mahoutCtx = mahoutSparkContext(masterUrl = this.masterUrl,
       appName = "MahoutUnitTests",

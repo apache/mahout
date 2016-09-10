@@ -32,24 +32,24 @@ object SolverFactory extends SolverFactory {
 
         // returning $MAHOUT_HOME/null/
         // val mahoutHome = System.getProperty("mahout.home")
-        val mahoutHome = "/home/andrew/sandbox/mahout"
-        var classLoader = new java.net.URLClassLoader(
-            Array(new File( mahoutHome + "/viennacl/target/" +
-              "mahout-native-viennacl_2.10-0.12.3-SNAPSHOT.jar").toURI.toURL),
-              this.getClass.getClassLoader)
+//        val mahoutHome = "/home/andrew/sandbox/mahout"
+//        var classLoader = new java.net.URLClassLoader(
+//            Array(new File( mahoutHome + "/viennacl/target/" +
+//              "mahout-native-viennacl_2.10-0.12.3-SNAPSHOT.jar").toURI.toURL),
+//              this.getClass.getClassLoader)
+//
+////        System.out.println("\n\n\n")
+////        (classLoader.getURLs).foreach{x => println(x).toString}
+////        System.out.println("\n\n\n")
+//
+//        val clazzMod = classLoader.loadClass("org.apache.mahout.viennacl.vcl.GPUMMul$")
 
-//        System.out.println("\n\n\n")
-//        (classLoader.getURLs).foreach{x => println(x).toString}
-//        System.out.println("\n\n\n")
-
-        val clazzMod = classLoader.loadClass("org.apache.mahout.viennacl.vcl.GPUMMul$")
-
-        val clazz = clazzMod.getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+//        val clazz = clazzMod.getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
 
 //        println("class: "+clazz.getClass.getSimpleName+"\n\n\n")
 
 
-       // val clazz = Class.forName("org.apache.mahout.viennacl.vcl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+        val clazz = Class.forName("org.apache.mahout.viennacl.vcl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
        // clazz = Class.forName(classMap("GPUMMul")).newInstance().asInstanceOf[MMBinaryFunc]
 
         info("successfully created org.apache.mahout.viennacl.vcl.GPUMMul solver")
