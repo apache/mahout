@@ -33,6 +33,8 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
   protected var masterUrl = null.asInstanceOf[String]
 
   protected def initContext() {
+    // when running with vinennacl in GPU mode, this needs to be set to local[1]
+    // unless the local machine has more than 1 GPU.
     masterUrl = System.getProperties.getOrElse("test.spark.master", "local[1]")
     val isLocal = masterUrl.startsWith("local")
     mahoutCtx = mahoutSparkContext(masterUrl = this.masterUrl,

@@ -22,9 +22,8 @@ import org.apache.mahout.math
 import org.apache.mahout.math._
 import org.apache.mahout.math.flavor.{BackEnum, TraversingStructureEnum}
 import org.apache.mahout.math.function.Functions
-import org.apache.mahout.math.scalabindings._
-import math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.viennacl.vcl.javacpp.Functions._
 import org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions._
 import org.apache.mahout.viennacl.vcl.javacpp.{CompressedMatrix, Context, DenseRowMatrix}
@@ -42,6 +41,9 @@ object GPUMMul extends MMBinaryFunc {
     val (af, bf) = (a.getFlavor, b.getFlavor)
     val backs = (af.getBacking, bf.getBacking)
     val sd = (af.getStructure, math.scalabindings.densityAnalysis(a), bf.getStructure, densityAnalysis(b))
+
+    debug("\n\n a nonzeros: "+a.getNumNondefaultElements)
+    debug("\n b nonzeros: "+b.getNumNondefaultElements+"\n\n")
 
     val alg: MMulAlg = backs match {
 
@@ -70,8 +72,8 @@ object GPUMMul extends MMBinaryFunc {
             if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
 
           // Dense-dense cases
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ jvmDRWAAt
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ jvmDRWAAt
+          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ gpuDRWAAt
+          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ gpuDRWAAt
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmRWCW
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmRWRW
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmCWCW
@@ -169,7 +171,7 @@ object GPUMMul extends MMBinaryFunc {
     jvmRWRW(aclone, b, r)
   }
 
-  // left is Sparse right ie any
+  // left is Sparse right is any
   private def gpuSparseRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
     val mxR = r.getOrElse(b.like(a.nrow, b.ncol))
 
@@ -182,7 +184,7 @@ object GPUMMul extends MMBinaryFunc {
     // make sure that the matrix is not empty.  VCL {{compressed_matrix}}s must
     // hav nnz > 0
     val hasElementsA = a.nonEmpty
-    val hasElementsB = a.nonEmpty
+    val hasElementsB = b.nonEmpty
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
@@ -209,7 +211,7 @@ object GPUMMul extends MMBinaryFunc {
       mxC
     } else {
       // Fall back to JVM based MMul if either matrix is sparse and empty
-      if (!hasElementsA || !hasElementsB)  {
+      if ((!hasElementsA) || (!hasElementsB))  {
         return MMul(a, b, r)
       }
 
@@ -238,7 +240,8 @@ object GPUMMul extends MMBinaryFunc {
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
-    // If it is empty use JVM MMul, since we can not convert it to a VCL CSR Matrix.
+    // If it is empty fall back to  JVM MMul, since we can not convert it
+    // to a VCL CSR Matrix.
     if (!hasElementsA)  {
       return MMul(a, b, r)
     }
@@ -309,13 +312,13 @@ object GPUMMul extends MMBinaryFunc {
   /** Dense column-wise AA' */
   private def jvmDCWAAt(a:Matrix, b:Matrix, r:Option[Matrix] = None) = {
     // a.t must be equiv. to b. Cloning must rewrite to row-wise.
-    jvmDRWAAt(a.cloned,null,r)
+    gpuDRWAAt(a.cloned,null,r)
   }
 
   /** Dense Row-wise AA' */
   // we probably will not want to use this for the actual release unless A is cached already
   // but adding for testing purposes.
-  private def jvmDRWAAt(a:Matrix, b:Matrix, r:Option[Matrix] = None) = {
+  private def gpuDRWAAt(a:Matrix, b:Matrix, r:Option[Matrix] = None) = {
     // a.t must be equiv to b.
 
     debug("AAt computation detected; passing off to GPU")
@@ -325,15 +328,12 @@ object GPUMMul extends MMBinaryFunc {
 
     val mxR = r.getOrElse(a.like(a.nrow, a.nrow))
 
-
     var ms = System.currentTimeMillis()
     val oclCtx = new Context(Context.OPENCL_MEMORY)
     val oclA = toVclDenseRM(src = a, oclCtx)
     // TODO: BADHACK A' getting memory errors using A twice
-    val oclApr = toVclDenseRM(src = a cloned, oclCtx)
-
-    val oclAt = new DenseRowMatrix(trans(oclApr))
-
+    // val oclApr = toVclDenseRM(src = a cloned, oclCtx)
+    val oclAt = new DenseRowMatrix(trans(oclA))
     val oclC = new DenseRowMatrix(prod(oclA, oclAt))
 
     val mxC = fromVclDenseRM(oclC)
@@ -341,7 +341,7 @@ object GPUMMul extends MMBinaryFunc {
     debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
 
     oclA.close()
-    oclApr.close()
+    //oclApr.close()
     oclAt.close()
     oclC.close()
 
