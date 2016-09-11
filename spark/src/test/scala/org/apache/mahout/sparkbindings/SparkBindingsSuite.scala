@@ -41,7 +41,8 @@ class SparkBindingsSuite extends FunSuite with DistributedSparkSuite {
       }
 
       mahoutJars.size should be > 0
-      mahoutJars.size shouldBe 4
+      // this will depend on the viennacl profile.
+      // mahoutJars.size shouldBe 4
     } finally {
       IOUtilsScala.close(closeables)
     }
