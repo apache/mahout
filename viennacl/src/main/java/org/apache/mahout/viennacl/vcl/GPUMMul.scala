@@ -178,6 +178,19 @@ object GPUMMul extends MMBinaryFunc {
 //      mxR(arow.index(), ::).assign(b(ael.index, ::), Functions.plusMult(ael))
 //
 //    mxR
+
+    // make sure that the matrix is not empty.  VCL {{compressed_matrix}}s must
+    // hav nnz > 0
+    val hasElementsA = a.nonEmpty
+    val hasElementsB = a.nonEmpty
+
+    // A has a sparse matrix structure of unknown size.  We do not want to
+    // simply convert it to a Dense Matrix which may result in an OOM error.
+    // If it is empty use JVM MMul, since we can not convert it to a VCL CSR Matrix.
+    if (!hasElementsA)  {
+     return MMul(a, b, r)
+    }
+
     // CSR matrices are efficient up to 50% non-zero
     if(densityAnalysis(b, .50)) {
       var ms = System.currentTimeMillis()
@@ -195,6 +208,11 @@ object GPUMMul extends MMBinaryFunc {
 
       mxC
     } else {
+      // Fall back to JVM based MMul if either matrix is sparse and empty
+      if (!hasElementsA || !hasElementsB)  {
+        return MMul(a, b, r)
+      }
+
       var ms = System.currentTimeMillis()
       val oclCtx = new Context(Context.OPENCL_MEMORY)
       val oclA = toVclCmpMatrixAlt(a, oclCtx)
@@ -213,8 +231,17 @@ object GPUMMul extends MMBinaryFunc {
 
   }
 
-  //sparse %*% sparse
+  //sparse %*% dense
   private def gpuSparseRowRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+
+    val hasElementsA = a.nonEmpty
+
+    // A has a sparse matrix structure of unknown size.  We do not want to
+    // simply convert it to a Dense Matrix which may result in an OOM error.
+    // If it is empty use JVM MMul, since we can not convert it to a VCL CSR Matrix.
+    if (!hasElementsA)  {
+      return MMul(a, b, r)
+    }
 
     var ms = System.currentTimeMillis()
     val oclCtx = new Context(Context.OPENCL_MEMORY)
@@ -299,41 +326,27 @@ object GPUMMul extends MMBinaryFunc {
     val mxR = r.getOrElse(a.like(a.nrow, a.nrow))
 
 
-//    var ms = System.currentTimeMillis()
-//    val oclCtx = new Context(Context.OPENCL_MEMORY)
-//    val oclA = toVclDenseRM(src = mxR, oclCtx)
-//    // TODO: BADHACK A' getting memory errors using A twice
-//    val oclApr = toVclDenseRM(src = mxR, oclCtx)
-//
-//    val oclAt = new DenseRowMatrix(trans(oclApr))
-//
-//    val oclC = new DenseRowMatrix(prod(oclA, oclAt))
-//
-//    val mxC = fromVclDenseRM(oclC)
-//    ms = System.currentTimeMillis() - ms
-//    debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
-//
-//    oclA.close()
-//    oclA.close()
-//    oclAt.close()
-//    oclC.close()
-//
-//    mxC
-    // This is symmetric computation. Compile upper triangular first.
-    for (row ← 0 until mxR.nrow) {
-      // diagonal value
-      mxR(row, row) = a(row, ::).aggregate(Functions.PLUS, Functions.SQUARE)
+    var ms = System.currentTimeMillis()
+    val oclCtx = new Context(Context.OPENCL_MEMORY)
+    val oclA = toVclDenseRM(src = a, oclCtx)
+    // TODO: BADHACK A' getting memory errors using A twice
+    val oclApr = toVclDenseRM(src = a cloned, oclCtx)
 
-      for ( col ← row + 1 until mxR.ncol) {
-        // this vector-vector should be sort of optimized, right?
-        val v = a(row, ::) dot a(col, ::)
+    val oclAt = new DenseRowMatrix(trans(oclApr))
 
-        mxR(row, col) = v
-        mxR(col,row) = v
-      }
-    }
+    val oclC = new DenseRowMatrix(prod(oclA, oclAt))
 
-    mxR
+    val mxC = fromVclDenseRM(oclC)
+    ms = System.currentTimeMillis() - ms
+    debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+
+    oclA.close()
+    oclApr.close()
+    oclAt.close()
+    oclC.close()
+
+    mxC
+
   }
 
   private def jvmOuterProdSum(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
