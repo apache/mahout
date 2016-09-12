@@ -194,7 +194,7 @@ object GPUMMul extends MMBinaryFunc {
     }
 
     // CSR matrices are efficient up to 50% non-zero
-    if(densityAnalysis(b, .50)) {
+    if(b.getFlavor.isDense) {
       var ms = System.currentTimeMillis()
       val oclCtx = new Context(Context.OPENCL_MEMORY)
       val oclA = toVclCmpMatrixAlt(a, oclCtx)
@@ -211,7 +211,7 @@ object GPUMMul extends MMBinaryFunc {
       mxC
     } else {
       // Fall back to JVM based MMul if either matrix is sparse and empty
-      if ((!hasElementsA) || (!hasElementsB))  {
+      if ((!(a.nonEmpty)) || ((!(b.nonEmpty))))  {
         return MMul(a, b, r)
       }
 

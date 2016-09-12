@@ -153,6 +153,21 @@
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
 
+
+    <!-- ***************************** -->
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>javacpp</artifactId>
+      <version>1.2.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-native-viennacl_2.10</artifactId>
+    </dependency>
+
+    <!-- ***************************** -->
+
     <!-- enforce current version of kryo as of 0.10.1-->
     <dependency>
       <groupId>com.esotericsoftware.kryo</groupId>
