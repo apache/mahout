@@ -27,7 +27,7 @@ object SolverFactory extends SolverFactory {
     // eventually match on implicit Classtag . for now.  just take as is.
     def getOperator[C: ClassTag]: MMBinaryFunc = {
 
-      //try {
+      try {
         info("creating: "+classMap("GPUMMul"))
 
         // returning $MAHOUT_HOME/null/
@@ -50,27 +50,28 @@ object SolverFactory extends SolverFactory {
 
 
         val clazz = Class.forName("org.apache.mahout.viennacl.vcl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-       // clazz = Class.forName(classMap("GPUMMul")).newInstance().asInstanceOf[MMBinaryFunc]
+       // info("successfully created org.apache.mahout.viennacl.vcl.GPUMMul solver")
 
-        info("successfully created org.apache.mahout.viennacl.vcl.GPUMMul solver")
+      } catch {
+        case x: Exception =>
+          error(s" Error creating class: $classMap(GPUMMul) attempting OpenMP version")
+         // x.printStackTrace()
+          try {
+            // attempt to instantiate the OpenMP version, assuming we’ve
+            // created a separate OpenMP-only module (none exist yet)
+            val clazz = Class.forName("org.apache.mahout.viennacl.vcl.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+          //  info("successfully created org.apache.mahout.viennacl.ocl.OMPMMul solver")
 
-//      } catch {
-//        case x:Exception =>
-//          error(s" Error creating class: $classMap(GPUMMul) attempting OpenMP version")
-//          x.printStackTrace()
-//        try {
-//          // attempt to instantiate the OpenMP version, assuming we’ve
-//          // created a separate OpenMP-only module
-//          val clazz = Class.forName(classMap("OMPMMul")).newInstance().asInstanceOf[MMBinaryFunc]
-//          info("successfully created org.apache.mahout.viennacl.ocl.OMPMMul solver")
-//
-//        } catch {
-//          case x:Exception =>
-//            error(s" Error creating class: $classMap(OMPMMul).. Exiting")
-//            System.exit(1)
-//         val clazz = org.apache.mahout.math.scalabindings.MMul
-//        }
-//      }
+          } catch {
+            case x:Exception =>
+              // fall back to JVM Dont need to Dynamically assign MMul is in the same package.
+            //  error(s" Error creating class: $classMap(OMPMMul).. returning JVM MMul")
+//              val clazz = Class.forName("org.apache.mahout.math.scalabindings.MMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+//              x.printStackTrace()
+              clazz = MMul
+//             x.printStackTrace()
+          }
+        }
       clazz
     }
 }
