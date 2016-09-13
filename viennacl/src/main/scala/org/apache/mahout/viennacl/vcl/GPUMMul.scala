@@ -183,8 +183,8 @@ object GPUMMul extends MMBinaryFunc {
 
     // make sure that the matrix is not empty.  VCL {{compressed_matrix}}s must
     // hav nnz > 0
-    val hasElementsA = a.nonEmpty
-    val hasElementsB = b.nonEmpty
+    val hasElementsA = a.getNumNondefaultElements.sum - a.numRows() * a.numCols() == 0
+    val hasElementsB = b.getNumNondefaultElements.sum - b.numRows() * b.numCols() == 0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
@@ -211,7 +211,7 @@ object GPUMMul extends MMBinaryFunc {
       mxC
     } else {
       // Fall back to JVM based MMul if either matrix is sparse and empty
-      if ((!(a.nonEmpty)) || ((!(b.nonEmpty))))  {
+      if ((!(hasElementsA)) || ((!(hasElementsB))))  {
         return MMul(a, b, r)
       }
 
@@ -236,7 +236,7 @@ object GPUMMul extends MMBinaryFunc {
   //sparse %*% dense
   private def gpuSparseRowRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
 
-    val hasElementsA = a.nonEmpty
+    val hasElementsA = a.getNumNondefaultElements.sum - a.numRows() * a.numCols() == 0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
@@ -356,10 +356,10 @@ object GPUMMul extends MMBinaryFunc {
     val (m, n) = (a.nrow, b.ncol)
 
     // Prefer col-wise result iff a is dense and b is sparse. In all other cases default to row-wise.
-    val preferColWiseR = densityAnalysis(a) && !densityAnalysis(b)
+    val preferColWiseR = a.getFlavor.isDense && !b.getFlavor.isDense
 
     val mxR = r.getOrElse {
-      (densityAnalysis(a), preferColWiseR) match {
+      (a.getFlavor.isDense, preferColWiseR) match {
         case (false, false) ⇒ b.like(m, n)
         case (false, true) ⇒ b.like(n, m).t
         case (true, false) ⇒ a.like(m, n)
