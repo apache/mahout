@@ -42,86 +42,99 @@ object GPUMMul extends MMBinaryFunc {
     val backs = (af.getBacking, bf.getBacking)
     val sd = (af.getStructure, math.scalabindings.densityAnalysis(a), bf.getStructure, densityAnalysis(b))
 
-    debug("\n\n a nonzeros: "+a.getNumNondefaultElements)
-    debug("\n b nonzeros: "+b.getNumNondefaultElements+"\n\n")
+    println("\n\n a nonzeros: " + a.getNumNondefaultElements.sum)
+    println("\n b nonzeros: " + b.getNumNondefaultElements.sum + "\n\n")
 
-    val alg: MMulAlg = backs match {
+    try {
 
-      // Both operands are jvm memory backs.
-      case (BackEnum.JVMMEM, BackEnum.JVMMEM) ⇒
+      val alg: MMulAlg = backs match {
 
-        sd match {
+        // Both operands are jvm memory backs.
+        case (BackEnum.JVMMEM, BackEnum.JVMMEM) ⇒
 
-          // Multiplication cases by a diagonal matrix.
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.COLWISE, _)
-            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagCW
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSECOLWISE, _)
-            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagCW
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.ROWWISE, _)
-            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagRW
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSEROWWISE, _)
-            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagRW
+          sd match {
 
-          case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.VECTORBACKED, _)
-            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmCWDiag
-          case (TraversingStructureEnum.SPARSECOLWISE, _, TraversingStructureEnum.VECTORBACKED, _)
-            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmCWDiag
-          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.VECTORBACKED, _)
-            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
-          case (TraversingStructureEnum.SPARSEROWWISE, _, TraversingStructureEnum.VECTORBACKED, _)
-            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
+            // Multiplication cases by a diagonal matrix.
+            case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.COLWISE, _)
+              if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagCW
+            case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSECOLWISE, _)
+              if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagCW
+            case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.ROWWISE, _)
+              if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagRW
+            case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSEROWWISE, _)
+              if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagRW
 
-          // Dense-dense cases
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ gpuDRWAAt
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ gpuDRWAAt
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmRWCW
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmRWRW
-          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmCWCW
-          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a eq b.t ⇒ jvmDCWAAt
-          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a.t eq b ⇒ jvmDCWAAt
-          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmCWRW
+            case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+              if b.isInstanceOf[DiagonalMatrix] ⇒ jvmCWDiag
+            case (TraversingStructureEnum.SPARSECOLWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+              if b.isInstanceOf[DiagonalMatrix] ⇒ jvmCWDiag
+            case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+              if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
+            case (TraversingStructureEnum.SPARSEROWWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+              if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
 
-          // Sparse row matrix x sparse row matrix (array of vectors)
-          case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.ROWWISE, false) ⇒ gpuSparseRWRW
-          case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.COLWISE, false) ⇒ jvmSparseRWCW
-          case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.ROWWISE, false) ⇒ jvmSparseCWRW
-          case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.COLWISE, false) ⇒ jvmSparseCWCW
+            // Dense-dense cases
+            case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ gpuDRWAAt
+            case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ gpuDRWAAt
+            case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmRWCW
+            case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmRWRW
+            case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmCWCW
+            case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a eq b.t ⇒ jvmDCWAAt
+            case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a.t eq b ⇒ jvmDCWAAt
+            case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmCWRW
 
-          // Sparse matrix x sparse matrix (hashtable of vectors)
-          case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.SPARSEROWWISE, false) ⇒
-            gpuSparseRowRWRW
-          case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.SPARSECOLWISE, false) ⇒
-            jvmSparseRowRWCW
-          case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.SPARSEROWWISE, false) ⇒
-            jvmSparseRowCWRW
-          case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.SPARSECOLWISE, false) ⇒
-            jvmSparseRowCWCW
+            // Sparse row matrix x sparse row matrix (array of vectors)
+            case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.ROWWISE, false) ⇒ gpuSparseRWRW
+            case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.COLWISE, false) ⇒ jvmSparseRWCW
+            case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.ROWWISE, false) ⇒ jvmSparseCWRW
+            case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.COLWISE, false) ⇒ jvmSparseCWCW
 
-          // Sparse matrix x non-like
-          case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ gpuSparseRowRWRW
-          case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseRowRWCW
-          case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseRowCWRW
-          case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW
-          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.SPARSEROWWISE, false) ⇒ gpuSparseRWRW
-          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.SPARSECOLWISE, false) ⇒ jvmSparseRWCW
-          case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.SPARSEROWWISE, false) ⇒ jvmSparseCWRW
-          case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.SPARSECOLWISE, false) ⇒ jvmSparseRowCWCW
+            // Sparse matrix x sparse matrix (hashtable of vectors)
+            case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.SPARSEROWWISE, false) ⇒
+              gpuSparseRowRWRW
+            case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.SPARSECOLWISE, false) ⇒
+              jvmSparseRowRWCW
+            case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.SPARSEROWWISE, false) ⇒
+              jvmSparseRowCWRW
+            case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.SPARSECOLWISE, false) ⇒
+              jvmSparseRowCWCW
 
-          // Everything else including at least one sparse LHS or RHS argument
-          case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ gpuSparseRWRW
-          case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseRWCW
-          case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseCWRW
-          case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW2flips
+            // Sparse matrix x non-like
+            case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ gpuSparseRowRWRW
+            case (TraversingStructureEnum.SPARSEROWWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseRowRWCW
+            case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseRowCWRW
+            case (TraversingStructureEnum.SPARSECOLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW
+            case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.SPARSEROWWISE, false) ⇒ gpuSparseRWRW
+            case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.SPARSECOLWISE, false) ⇒ jvmSparseRWCW
+            case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.SPARSEROWWISE, false) ⇒ jvmSparseCWRW
+            case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.SPARSECOLWISE, false) ⇒ jvmSparseRowCWCW
 
-          // Sparse methods are only effective if the first argument is sparse, so we need to do a swap.
-          case (_, _, _, false) ⇒ (a, b, r) ⇒ apply(b.t, a.t, r.map {_.t}).t
+            // Everything else including at least one sparse LHS or RHS argument
+            case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ gpuSparseRWRW
+            case (TraversingStructureEnum.ROWWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseRWCW
+            case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.ROWWISE, _) ⇒ jvmSparseCWRW
+            case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW2flips
 
-          // Default jvm-jvm case.
-          case _ ⇒ jvmRWCW
-        }
+            // Sparse methods are only effective if the first argument is sparse, so we need to do a swap.
+            case (_, _, _, false) ⇒ (a, b, r) ⇒ apply(b.t, a.t, r.map {
+              _.t
+            }).t
+
+            // Default jvm-jvm case.
+            case _ ⇒ jvmRWCW
+          }
+      }
+
+      alg(a, b, r)
+    } catch {
+      // TODO FASTHACK:  just revert to JVM if there is an exceotion..
+      //  eg. java.lang.nullPointerException if more openCL contexts
+      //  have been created than number of GPU cards.
+      //  better option wuold be to fall back to OpenCl First.
+      case ex: Exception =>
+        println(ex.getMessage + "falling back to JVM MMUL")
+        return MMul(a, b, r)
     }
-
-    alg(a, b, r)
   }
 
   type MMulAlg = MMBinaryFunc
@@ -183,13 +196,14 @@ object GPUMMul extends MMBinaryFunc {
 
     // make sure that the matrix is not empty.  VCL {{compressed_matrix}}s must
     // hav nnz > 0
-    val hasElementsA = a.getNumNondefaultElements.sum - a.numRows() * a.numCols() == 0
-    val hasElementsB = b.getNumNondefaultElements.sum - b.numRows() * b.numCols() == 0
+    val hasElementsA = a.getNumNondefaultElements.sum >  0
+    val hasElementsB = b.getNumNondefaultElements.sum >  0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
     // If it is empty use JVM MMul, since we can not convert it to a VCL CSR Matrix.
     if (!hasElementsA)  {
+     println("Matrix a has zero elements can not convert to CSR")
      return MMul(a, b, r)
     }
 
@@ -211,7 +225,8 @@ object GPUMMul extends MMBinaryFunc {
       mxC
     } else {
       // Fall back to JVM based MMul if either matrix is sparse and empty
-      if ((!(hasElementsA)) || ((!(hasElementsB))))  {
+      if (!hasElementsA || !hasElementsB)  {
+        println("Matrix a or b has zero elements can not convert to CSR")
         return MMul(a, b, r)
       }
 
@@ -236,13 +251,14 @@ object GPUMMul extends MMBinaryFunc {
   //sparse %*% dense
   private def gpuSparseRowRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
 
-    val hasElementsA = a.getNumNondefaultElements.sum - a.numRows() * a.numCols() == 0
+    val hasElementsA = a.getNumNondefaultElements.sum >  0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
     // If it is empty fall back to  JVM MMul, since we can not convert it
     // to a VCL CSR Matrix.
     if (!hasElementsA)  {
+      println("Matrix a has zero elements can not convert to CSR")
       return MMul(a, b, r)
     }
 
