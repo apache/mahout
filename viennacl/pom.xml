@@ -109,8 +109,10 @@
               <goal>test</goal>
             </goals>
           </execution>
-
         </executions>
+        <configuration>
+            <argLine>-Xmx4g</argLine>
+        </configuration>
       </plugin>
 
 
@@ -257,7 +259,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <!-- Limit memory for unit tests in Travis -->
-              <argLine>-Xmx3g</argLine>
+              <argLine>-Xmx4g</argLine>
               <!--<argLine>-Djava.library.path=${project.build.directory}/libs/natives/linux-x86_64:${project.build.directory}/libs/natives/linux:${project.build.directory}/libs/natives/maxosx</argLine>-->
             </configuration>
           </plugin>
@@ -266,7 +268,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <!-- Limit memory for integration tests in Travis -->
-              <argLine>-Xmx3g</argLine>
+              <argLine>-Xmx4g</argLine>
               <!--<argLine>-Djava.library.path=${project.build.directory}/libs/natives/linux-x86_64:${project.build.directory}/libs/natives/linux:${project.build.directory}/libs/natives/maxosx</argLine>-->
             </configuration>
           </plugin>
