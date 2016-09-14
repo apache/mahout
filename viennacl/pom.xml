@@ -28,7 +28,6 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
   <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
 
   <name>Mahout Native VienniaCL OpenCL Bindings</name>

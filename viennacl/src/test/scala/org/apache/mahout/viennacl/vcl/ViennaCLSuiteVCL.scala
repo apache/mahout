@@ -1,8 +1,8 @@
 package org.apache.mahout.viennacl.vcl
 
 import org.apache.mahout.math._
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.scalabindings._
+import scalabindings._
+import RLikeOps._
 import org.apache.mahout.viennacl.vcl.javacpp.Functions._
 import org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions._
 import org.apache.mahout.viennacl.vcl.javacpp.{Context, LinalgFunctions, VCLVector, _}
