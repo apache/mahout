@@ -20,7 +20,8 @@ class SolverFactory {
 }
 object SolverFactory extends SolverFactory {
 
-    var clazz: MMBinaryFunc = _
+    // default is JVM
+    var clazz: MMBinaryFunc = MMul
 
     // eventually match on implicit Classtag . for now.  just take as is.
     def getOperator[C: ClassTag]: MMBinaryFunc = {
@@ -32,19 +33,19 @@ object SolverFactory extends SolverFactory {
 
       } catch {
         case x: Exception =>
-          println(s" Error creating class: $classMap(GPUMMul) attempting OpenMP version")
-          x.printStackTrace()
+          println(s" Error creating class: GPUMMul attempting OpenMP version")
+          println(x.getMessage)
           try {
             // attempt to instantiate the OpenMP version, assuming we’ve
             // created a separate OpenMP-only module (none exist yet)
-            println("creating org.apache.mahout.viennacl.vcl.GPUMMul solver")
+            println("creating org.apache.mahout.viennacl.vcl.OMPMMul solver")
             val clazz = Class.forName("org.apache.mahout.viennacl.vcl.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
             println("successfully created org.apache.mahout.viennacl.ocl.OMPMMul solver")
 
           } catch {
             case x: Exception =>
               // fall back to JVM Dont need to Dynamicly assign MMul is in the same package.
-              println(s" Error creating class: $classMap(OMPMMul).. returning JVM MMul")
+              println(s" Error creating class: OMPMMul.. returning JVM MMul")
               clazz = org.apache.mahout.math.scalabindings.MMul
           }
         }
