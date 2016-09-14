@@ -1,0 +1,37 @@
+
+
+def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20): Long = {
+
+ 
+
+  val drmA = drmParallelizeEmpty(m , s, para).mapBlock(){
+       case (keys,block:Matrix) =>
+         val R =  scala.util.Random
+         R.setSeed(1234L)
+         val blockB = new SparseRowMatrix(block.nrow, block.ncol) 
+         blockB := {x => if (R.nextDouble > pctDense) R.nextDouble else x }
+       (keys -> blockB)
+  }
+  val drmB = drmParallelizeEmpty(s , n, para).mapBlock(){
+       case (keys,block:Matrix) =>
+         val R =  scala.util.Random
+         R.setSeed(1234L)
+         val blockB = new SparseRowMatrix(block.nrow, block.ncol) 
+         blockB := {x => if (R.nextDouble > pctDense) R.nextDouble else x }
+       (keys -> blockB)
+  }
+
+  var time = System.currentTimeMillis()
+
+  val drmC = drmA %*% drmB
+  
+  // trigger computation
+  drmC.numRows()
+
+  time = System.currentTimeMillis() - time
+
+  time  
+ 
+}
+
+
