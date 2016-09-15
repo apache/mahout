@@ -155,8 +155,8 @@ object GPUMMul extends MMBinaryFunc {
 //    }
 //    mxR
 
-    val hasElementsA = a.getNumNondefaultElements.sum >  0
-    val hasElementsB = b.getNumNondefaultElements.sum >  0
+    val hasElementsA = a.zSum() >  0.0
+    val hasElementsB = b.zSum() >  0.0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
@@ -253,8 +253,11 @@ object GPUMMul extends MMBinaryFunc {
 
     // make sure that the matrix is not empty.  VCL {{compressed_matrix}}s must
     // hav nnz > 0
-    val hasElementsA = a.getNumNondefaultElements.sum >  0
-    val hasElementsB = b.getNumNondefaultElements.sum >  0
+    // this method is horribly inefficent.  however there is a difference between
+    // getNumNonDefaultElements() and getNumNonZeroElements() which we do not always
+    // have access to  created MAHOUT-1882 for this
+    val hasElementsA = a.zSum() >  0.0
+    val hasElementsB = b.zSum() >  0.0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
@@ -308,7 +311,7 @@ object GPUMMul extends MMBinaryFunc {
   //sparse %*% dense
   private def gpuSparseRowRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
     println("gpuSparseRowRWRW")
-    val hasElementsA = a.getNumNondefaultElements.sum >  0
+    val hasElementsA = a.zSum() >  0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
@@ -406,8 +409,6 @@ object GPUMMul extends MMBinaryFunc {
     var ms = System.currentTimeMillis()
     val oclCtx = new Context(Context.OPENCL_MEMORY)
     val oclA = toVclDenseRM(src = a, oclCtx)
-    // TODO: BADHACK A' getting memory errors using A twice
-    // val oclApr = toVclDenseRM(src = a cloned, oclCtx)
     val oclAt = new DenseRowMatrix(trans(oclA))
     val oclC = new DenseRowMatrix(prod(oclA, oclAt))
 
