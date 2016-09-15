@@ -88,6 +88,9 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
     // So did we compute it correctly?
     (mxC - mxA %*% mxB).norm / m / n should be < 1e-16
 
+    vclCtx.deallocate()
+    vclCtx.close()
+
   }
 
   test("mmul microbenchmark") {
@@ -144,6 +147,9 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
       ompB.close()
       ompC.close()
     }
+    oclCtx.deallocate()
+    oclCtx.close()
+
 
   }
 
@@ -187,6 +193,9 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
 
       (mxAt - mxA.t).norm / m / n should be < 1e-16
     }
+    oclCtx.deallocate()
+    oclCtx.close()
+
 
   }
 
@@ -257,17 +266,19 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
       ompC.close()
 
     }
+    oclCtx.deallocate()
+    oclCtx.close()
 
   }
 
-  test("VCL Dense Matrix %*% Dense vector - no OpenCl") {
+  test("VCL Dense Matrix %*% Dense vector") {
 
     val oclCtx = new Context(Context.OPENCL_MEMORY)
     val ompCtx = new Context(Context.MAIN_MEMORY)
 
 
-    val m = 3000
-    val s = 1000
+    val m = 30
+    val s = 10
 
     val r = new Random(1234)
 
@@ -290,20 +301,20 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
     //Test multiplication in OpenCL
       {
 
-//        ms = System.currentTimeMillis()
-//        val oclA = toVclDenseRM(mxA, oclCtx)
-//        val oclVecB = toVclVec(dvecB, oclCtx)
-//
-//        val oclVecC = new VCLVector(prod(oclA, oclVecB))
-//        val oclDvecC = fromVClVec(oclVecC)
+        ms = System.currentTimeMillis()
+        val oclA = toVclDenseRM(mxA, oclCtx)
+        val oclVecB = toVclVec(dvecB, oclCtx)
+
+        val oclVecC = new VCLVector(prod(oclA, oclVecB))
+        val oclDvecC = fromVClVec(oclVecC)
 //
 //        ms = System.currentTimeMillis() - ms
 //        info(s"ViennaCL/OpenCL dense matrix %*% dense vector multiplication time: $ms ms.")
 //        (oclDvecC.toColMatrix - mDvecC.toColMatrix).norm / s  should be < 1e-16
-//
-//        oclA.close()
-//        oclVecB.close()
-//        oclVecC.close()
+
+        oclA.close()
+        oclVecB.close()
+        oclVecC.close()
       }
 
     //Test multiplication in OpenMP
@@ -324,6 +335,10 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
         ompVecB.close()
         ompVecC.close()
       }
+
+      oclCtx.deallocate()
+      oclCtx.close()
+
 
   }
 
@@ -383,6 +398,10 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
       ompB.close()
       ompC.close()
     }
+
+    oclCtx.deallocate()
+    oclCtx.close()
+
 
   }
 

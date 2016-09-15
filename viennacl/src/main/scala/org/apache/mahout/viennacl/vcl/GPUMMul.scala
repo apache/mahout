@@ -76,7 +76,7 @@ object GPUMMul extends MMBinaryFunc {
             // Dense-dense cases
             case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ gpuDRWAAt
             case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ gpuDRWAAt
-            case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmRWCW
+            case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ gpuRWCW
             case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmRWRW
             case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmCWCW
             case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a eq b.t ⇒ jvmDCWAAt
@@ -121,13 +121,14 @@ object GPUMMul extends MMBinaryFunc {
             }).t
 
             // Default jvm-jvm case.
-            case _ ⇒ jvmRWCW
+            // for some reason a Sparse DRM % SPARSE DRM was dumping of to here
+            case _ ⇒ gpuRWCW
           }
       }
 
       alg(a, b, r)
     } catch {
-      // TODO FASTHACK:  just revert to JVM if there is an exceotion..
+      // TODO FASTHACK:  just revert to JVM if there is an exception..
       //  eg. java.lang.nullPointerException if more openCL contexts
       //  have been created than number of GPU cards.
       //  better option wuold be to fall back to OpenCl First.
@@ -140,24 +141,76 @@ object GPUMMul extends MMBinaryFunc {
   type MMulAlg = MMBinaryFunc
 
   @inline
-  private def jvmRWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+  private def gpuRWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+    println("gpuRWCW")
+//
+//    require(r.forall(mxR ⇒ mxR.nrow == a.nrow && mxR.ncol == b.ncol))
+//    val (m, n) = (a.nrow, b.ncol)
+//
+//    val mxR = r.getOrElse(if (densityAnalysis(a)) a.like(m, n) else b.like(m, n))
+//
+//    for (row ← 0 until mxR.nrow; col ← 0 until mxR.ncol) {
+//      // this vector-vector should be sort of optimized, right?
+//      mxR(row, col) = a(row, ::) dot b(::, col)
+//    }
+//    mxR
 
-    require(r.forall(mxR ⇒ mxR.nrow == a.nrow && mxR.ncol == b.ncol))
-    val (m, n) = (a.nrow, b.ncol)
+    val hasElementsA = a.getNumNondefaultElements.sum >  0
+    val hasElementsB = b.getNumNondefaultElements.sum >  0
 
-    val mxR = r.getOrElse(if (densityAnalysis(a)) a.like(m, n) else b.like(m, n))
+    // A has a sparse matrix structure of unknown size.  We do not want to
+    // simply convert it to a Dense Matrix which may result in an OOM error.
 
-    for (row ← 0 until mxR.nrow; col ← 0 until mxR.ncol) {
-      // this vector-vector should be sort of optimized, right?
-      mxR(row, col) = a(row, ::) dot b(::, col)
+    // If it is empty use JVM MMul, since we can not convert it to a VCL CSR Matrix.
+    if (!hasElementsA)  {
+      println("Matrix a has zero elements can not convert to CSR")
+      return MMul(a, b, r)
     }
-    mxR
+
+    // CSR matrices are efficient up to 50% non-zero
+    if(b.getFlavor.isDense) {
+      var ms = System.currentTimeMillis()
+      val oclCtx = new Context(Context.OPENCL_MEMORY)
+      val oclA = toVclCmpMatrixAlt(a, oclCtx)
+      val oclB = toVclDenseRM(b, oclCtx)
+      val oclC = new DenseRowMatrix(prod(oclA, oclB))
+      val mxC = fromVclDenseRM(oclC)
+      ms = System.currentTimeMillis() - ms
+      debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+
+      oclA.close()
+      oclB.close()
+      oclC.close()
+
+      mxC
+    } else {
+      // Fall back to JVM based MMul if either matrix is sparse and empty
+      if (!hasElementsA || !hasElementsB)  {
+        println("Matrix a or b has zero elements can not convert to CSR")
+        return MMul(a, b, r)
+      }
+
+      var ms = System.currentTimeMillis()
+      val oclCtx = new Context(Context.OPENCL_MEMORY)
+      val oclA = toVclCmpMatrixAlt(a, oclCtx)
+      val oclB = toVclCmpMatrixAlt(b, oclCtx)
+      val oclC = new CompressedMatrix(prod(oclA, oclB))
+      val mxC = fromVclCompressedMatrix(oclC)
+      ms = System.currentTimeMillis() - ms
+      debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+
+      oclA.close()
+      oclB.close()
+      oclC.close()
+
+      mxC
+    }
   }
 
 
   @inline
   private def jvmRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
-
+    println("jvmRWRW")
     // A bit hackish: currently, this relies a bit on the fact that like produces RW(?)
     val bclone = b.like(b.ncol, b.nrow).t
     for (brow ← b) bclone(brow.index(), ::) := brow
@@ -165,14 +218,16 @@ object GPUMMul extends MMBinaryFunc {
     require(bclone.getFlavor.getStructure == TraversingStructureEnum.COLWISE || bclone.getFlavor.getStructure ==
       TraversingStructureEnum.SPARSECOLWISE, "COL wise conversion assumption of RHS is wrong, do over this code.")
 
-    jvmRWCW(a, bclone, r)
+    gpuRWCW(a, bclone, r)
   }
 
   private def jvmCWCW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+    println("jvmCWCW")
     jvmRWRW(b.t, a.t, r.map(_.t)).t
   }
 
   private def jvmCWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+    println("jvmCWRW")
     // This is a primary contender with Outer Prod sum algo.
     // Here, we force-reorient both matrices and run RWCW.
     // A bit hackish: currently, this relies a bit on the fact that clone always produces RW(?)
@@ -186,7 +241,9 @@ object GPUMMul extends MMBinaryFunc {
 
   // left is Sparse right is any
   private def gpuSparseRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+    println("gpuSparseRWRW")
     val mxR = r.getOrElse(b.like(a.nrow, b.ncol))
+
 
 //    // This is basically almost the algorithm from SparseMatrix.times
 //    for (arow ← a; ael ← arow.nonZeroes)
@@ -250,7 +307,7 @@ object GPUMMul extends MMBinaryFunc {
 
   //sparse %*% dense
   private def gpuSparseRowRWRW(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
-
+    println("gpuSparseRowRWRW")
     val hasElementsA = a.getNumNondefaultElements.sum >  0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
@@ -304,6 +361,7 @@ object GPUMMul extends MMBinaryFunc {
     gpuSparseRWRW(a cloned, b cloned, r)
 
   private def jvmDiagRW(diagm:Matrix, b:Matrix, r:Option[Matrix] = None):Matrix = {
+    println("jvmDiagRW")
     val mxR = r.getOrElse(b.like(diagm.nrow, b.ncol))
 
     for (del ← diagm.diagv.nonZeroes())
@@ -313,6 +371,7 @@ object GPUMMul extends MMBinaryFunc {
   }
 
   private def jvmDiagCW(diagm: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
+    println("jvmDiagCW")
     val mxR = r.getOrElse(b.like(diagm.nrow, b.ncol))
     for (bcol ← b.t) mxR(::, bcol.index()) := bcol * diagm.diagv
     mxR
@@ -336,7 +395,7 @@ object GPUMMul extends MMBinaryFunc {
   // but adding for testing purposes.
   private def gpuDRWAAt(a:Matrix, b:Matrix, r:Option[Matrix] = None) = {
     // a.t must be equiv to b.
-
+    println("executing on gpu")
     debug("AAt computation detected; passing off to GPU")
 
     // Check dimensions if result is supplied.
@@ -366,7 +425,7 @@ object GPUMMul extends MMBinaryFunc {
   }
 
   private def jvmOuterProdSum(a: Matrix, b: Matrix, r: Option[Matrix] = None): Matrix = {
-
+    println("jvmOuterProdSum")
     // This may be already laid out for outer product computation, which may be faster than reorienting
     // both matrices? need to check.
     val (m, n) = (a.nrow, b.ncol)

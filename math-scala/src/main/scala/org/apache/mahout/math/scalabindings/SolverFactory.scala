@@ -28,7 +28,7 @@ object SolverFactory extends SolverFactory {
 
       try {
         println("creating org.apache.mahout.viennacl.vcl.GPUMMul solver")
-        val clazz = Class.forName("org.apache.mahout.viennacl.vcl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+        clazz = Class.forName("org.apache.mahout.viennacl.vcl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
         println("successfully created org.apache.mahout.viennacl.vcl.GPUMMul solver")
 
       } catch {
@@ -39,14 +39,14 @@ object SolverFactory extends SolverFactory {
             // attempt to instantiate the OpenMP version, assuming we’ve
             // created a separate OpenMP-only module (none exist yet)
             println("creating org.apache.mahout.viennacl.vcl.OMPMMul solver")
-            val clazz = Class.forName("org.apache.mahout.viennacl.vcl.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+            clazz = Class.forName("org.apache.mahout.viennacl.vcl.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
             println("successfully created org.apache.mahout.viennacl.ocl.OMPMMul solver")
 
           } catch {
             case x: Exception =>
               // fall back to JVM Dont need to Dynamicly assign MMul is in the same package.
               println(s" Error creating class: OMPMMul.. returning JVM MMul")
-              clazz = org.apache.mahout.math.scalabindings.MMul
+              clazz = MMul
           }
         }
       clazz

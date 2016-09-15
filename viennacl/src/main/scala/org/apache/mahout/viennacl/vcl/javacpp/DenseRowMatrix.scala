@@ -60,7 +60,6 @@ class DenseRowMatrix(initDefault: Boolean = true) extends MatrixBase {
 
   @native protected def allocate(@Const @ByRef me: MatrixTransExpression)
 
-  // TODO: Compilation errors here
   @native protected def allocate(@Const @ByRef me: SrMatDnMatProdExpression)
 
 }
