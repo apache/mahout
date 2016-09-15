@@ -121,7 +121,7 @@ object GPUMMul extends MMBinaryFunc {
             }).t
 
             // Default jvm-jvm case.
-            // for some reason a Sparse DRM % SPARSE DRM was dumping of to here
+            // for some reason a SrarseRowMatrix DRM %*% SrarseRowMatrix DRM was dumping off to here
             case _ ⇒ gpuRWCW
           }
       }
