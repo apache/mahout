@@ -119,7 +119,7 @@ object ABt {
           createCombiner = (t: (Array[K], Array[Int], Matrix)) =>  {
             val (rowKeys, colKeys, block) = t
 
-            val comb = if (block.getFlavor == MatrixFlavor.SPARSELIKE) {
+            val comb = if (!densityAnalysis(block)) {
               new SparseMatrix(prodNCol, block.nrow).t
             } else {
               new DenseMatrix(prodNCol, block.nrow).t
