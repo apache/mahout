@@ -42,9 +42,7 @@ object GPUMMul extends MMBinaryFunc {
     val backs = (af.getBacking, bf.getBacking)
     val sd = (af.getStructure, math.scalabindings.densityAnalysis(a), bf.getStructure, densityAnalysis(b))
 
-    println("\n\n a nonzeros: " + a.getNumNondefaultElements.sum)
-    println("\n b nonzeros: " + b.getNumNondefaultElements.sum + "\n\n")
-
+    
     try {
 
       val alg: MMulAlg = backs match {
