@@ -21,9 +21,13 @@ import org.apache.mahout.math.cf.{DownsamplableCrossOccurrenceDataset, Similarit
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.indexeddataset.BiDictionary
 import org.apache.mahout.math.scalabindings.{MatrixOps, _}
+import org.apache.mahout.sparkbindings.SparkDistributedContext
+import org.apache.mahout.sparkbindings.dc2sc
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 import org.scalatest.FunSuite
 
 /* values 
@@ -249,6 +253,57 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
     val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocAtBNonSymmetric)
     n = (new MatrixOps(m = diff2Matrix)).norm
     n should be < 1E-10
+  }
+
+  test("Cross-occurrence two IndexedDatasets different row ranks"){
+
+    val sc = dc2sc(mahoutCtx)
+
+
+    /*
+    val a = dense(
+      "u1"(1, 1, 0, 0, 0),
+      "u2"(0, 0, 1, 1, 0),
+      "u3"(0, 0, 0, 0, 1),
+      "u4"(1, 0, 0, 1, 0))
+
+    val b = dense(
+      "u1"(0, 1, 1, 0),
+      "u2"(1, 1, 1, 0),
+      "u3"(0, 0, 1, 0),
+      "u4"(1, 1, 0, 1)
+      "u5"(1, 1, 1, 1))
+*/
+    val pairsA = Seq(
+      ("u1","a1"), ("u1","a2"),
+      ("u2","a3"), ("u2","a4"),
+      ("u3","a5"),
+      ("u4","a1"), ("u4","a4"))
+
+    val pairsB = Seq(
+      ("u1","b2"), ("u1","b3"),
+      ("u2","b1"), ("u2","b2"), ("u2","b3"),
+      ("u3","b2"),
+      ("u4","b1"), ("u4","b2"), ("u4","b4"),
+      ("u5","b1"), ("u5", "b25"))
+
+
+
+    val pairRDDA = sc.parallelize(pairsA, 4)
+    val pairRDDB = sc.parallelize(pairsB, 4)
+
+    val aID = IndexedDatasetSpark(pairRDDA)(sc)
+    val bID = IndexedDatasetSpark(pairRDDB, Some(aID.rowIDs))(sc)
+
+    assert(aID.rowIDs.size == 4)
+    assert(bID.rowIDs.size == 4)
+
+    assert(aID.matrix.nrow == 4)
+    assert(bID.matrix.nrow == 4)
+
+    assert(!bID.rowIDs.contains("u5"))// this row id should be filtered out of the drm and dictionary
+    assert(!bID.columnIDs.contains("b25"))// this row id should be filtered out of the drm and dictionary
+
   }
 
   test("Cross-occurrence two IndexedDatasets LLR threshold"){
