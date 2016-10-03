@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.hadoop.als;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
@@ -60,7 +61,7 @@ final class ALS {
     OpenIntObjectHashMap<Vector> featureMatrix = numEntities > 0
         ? new OpenIntObjectHashMap<Vector>(numEntities) : new OpenIntObjectHashMap<Vector>();
 
-    Path[] cachedFiles = HadoopUtil.getCachedFiles(conf);
+    Path[] cachedFiles = getOnlyAlsCachedFiles(HadoopUtil.getCachedFiles(conf));
     LocalFileSystem localFs = FileSystem.getLocal(conf);
 
     for (Path cachedFile : cachedFiles) {
@@ -75,7 +76,25 @@ final class ALS {
     return featureMatrix;
   }
 
-  public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
+  /**
+   * Method to fetch only the dependencies used by ALS algorithm from Distributed Cache
+   * @param cachedFiles - path of files in Distributed Cache
+   * @return array of {@link Path} for newly added dependencies in Distributed Cache
+   */
+  private static Path[] getOnlyAlsCachedFiles(Path[] cachedFiles) {
+    List<Path> alsFiles = new LinkedList<>();
+
+    for (Path path: cachedFiles) {
+      if (!path.toString().matches("^.*/.*.jar$")) {
+        alsFiles.add(path);
+      }
+    }
+
+    Path[] paths = new Path[alsFiles.size()];
+    return alsFiles.toArray(paths);
+  }
+
+ public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
     OpenIntObjectHashMap<Vector> matrix = new OpenIntObjectHashMap<>();
     for (Pair<IntWritable,VectorWritable> pair
         : new SequenceFileDirIterable<IntWritable,VectorWritable>(dir, PathType.LIST, PathFilters.partFilter(), conf)) {
