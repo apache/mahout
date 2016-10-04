@@ -41,7 +41,7 @@ public class Ax {
   public static H2ODrm exec(H2ODrm drmA, Vector x) {
     Frame A = drmA.frame;
     Vec keys = drmA.keys;
-    final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
+    final H2OBCast<Vector> bx = new H2OBCast<>(x);
 
     // Ax is written into nc (single element, not array) with an MRTask on A,
     // and therefore will be similarly partitioned as A.

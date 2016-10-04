@@ -79,7 +79,7 @@ public final class TestEigenSeedGenerator extends MahoutTestCase {
     EigenSeedGenerator.buildFromEigens(conf, input, output, 3, new ManhattanDistanceMeasure());
 
     int clusterCount = 0;
-    Collection<Integer> set = new HashSet<Integer>();
+    Collection<Integer> set = new HashSet<>();
     Vector v[] = new Vector[3];
     for (ClusterWritable clusterWritable :
          new SequenceFileValueIterable<ClusterWritable>(

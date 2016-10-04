@@ -553,7 +553,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
    */
   @Override
   public Set<java.util.Map.Entry<K,V>> entrySet() {
-    final Set<Entry<K, V>> entries = new OpenHashSet<Map.Entry<K,V>>();
+    final Set<Entry<K, V>> entries = new OpenHashSet<>();
     forEachPair(new ObjectObjectProcedure<K,V>() {
       @Override
       public boolean apply(K key, V value) {
@@ -570,7 +570,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
    */
   @Override
   public Set<K> keySet() {
-    final Set<K> keys = new OpenHashSet<K>();
+    final Set<K> keys = new OpenHashSet<>();
     forEachKey(new ObjectProcedure<K>() {
       @Override
       public boolean apply(K element) {
@@ -594,7 +594,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
    */
   @Override
   public Collection<V> values() {
-    final List<V> valueList = new ArrayList<V>();
+    final List<V> valueList = new ArrayList<>();
     forEachPair(new ObjectObjectProcedure<K,V>() {
       @Override
       public boolean apply(K key, V value) {

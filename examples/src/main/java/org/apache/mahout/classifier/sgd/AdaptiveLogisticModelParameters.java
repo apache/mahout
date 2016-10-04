@@ -143,7 +143,7 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
   public void readFields(DataInput in) throws IOException {
     setTargetVariable(in.readUTF());
     int typeMapSize = in.readInt();
-    Map<String, String> typeMap = new HashMap<String, String>(typeMapSize);
+    Map<String, String> typeMap = new HashMap<>(typeMapSize);
     for (int i = 0; i < typeMapSize; i++) {
       String key = in.readUTF();
       String value = in.readUTF();

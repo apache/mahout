@@ -51,7 +51,7 @@ public class TestVectorCache extends MahoutTestCase {
     
     // can we read it from here?
     SequenceFileValueIterator<VectorWritable> iterator =
-        new SequenceFileValueIterator<VectorWritable>(path, true, conf);
+        new SequenceFileValueIterator<>(path, true, conf);
     try {
       VectorWritable old = iterator.next();
       // test if the values are identical

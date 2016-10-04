@@ -160,7 +160,7 @@ public final class WikipediaDatasetCreatorDriver {
     }
     
     Stringifier<Set<String>> setStringifier =
-        new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
+        new DefaultStringifier<>(conf, GenericsUtil.getClass(categories));
     
     String categoriesStr = setStringifier.toString(categories);
     

@@ -201,7 +201,7 @@ public final class HadoopUtil {
 
   public static long countRecords(Path path, Configuration conf) throws IOException {
     long count = 0;
-    Iterator<?> iterator = new SequenceFileValueIterator<Writable>(path, true, conf);
+    Iterator<?> iterator = new SequenceFileValueIterator<>(path, true, conf);
     while (iterator.hasNext()) {
       iterator.next();
       count++;
@@ -222,7 +222,7 @@ public final class HadoopUtil {
    */
   public static long countRecords(Path path, PathType pt, PathFilter filter, Configuration conf) throws IOException {
     long count = 0;
-    Iterator<?> iterator = new SequenceFileDirValueIterator<Writable>(path, pt, filter, null, true, conf);
+    Iterator<?> iterator = new SequenceFileDirValueIterator<>(path, pt, filter, null, true, conf);
     while (iterator.hasNext()) {
       iterator.next();
       count++;

@@ -28,7 +28,7 @@ import org.apache.mahout.common.LongPair;
  */
 public final class NullRescorer<T> implements Rescorer<T>, IDRescorer {
   
-  private static final IDRescorer USER_OR_ITEM_INSTANCE = new NullRescorer<Long>();
+  private static final IDRescorer USER_OR_ITEM_INSTANCE = new NullRescorer<>();
   private static final Rescorer<LongPair> ITEM_ITEM_PAIR_INSTANCE = new NullRescorer<>();
   private static final Rescorer<LongPair> USER_USER_PAIR_INSTANCE = new NullRescorer<>();
 
