@@ -230,8 +230,12 @@ public final class Arithmetic {
 
   /**
    * Efficiently returns the binomial coefficient, often also referred to as "n over k" or "n choose k". The binomial
-   * coefficient is defined as <ul> <li>k<0<tt>: <tt>0</tt>. <li>k==0 || k==n<tt>: <tt>1</tt>. <li>k==1 || k==n-1<tt>:
-   * <tt>n</tt>. <li>else: <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>. </ul>
+   * coefficient is defined as <ul>
+   * <li><tt>k&lt;0</tt>: <tt>0</tt>.</li>
+   * <li><tt>k==0 || k==n</tt>: <tt>1</tt>.</li>
+   * <li><tt>k==1 || k==n-1</tt>: <tt>n</tt>.</li>
+   * <li>else: <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>.</li>
+   * </ul>
    *
    * @return the binomial coefficient.
    */
@@ -299,8 +303,9 @@ public final class Arithmetic {
   }
 
   /**
-   * Returns <tt>log(k!)</tt>. Tries to avoid overflows. For <tt>k<30</tt> simply looks up a table in O(1). For
-   * <tt>k>=30</tt> uses stirlings approximation.
+   * Returns <tt>log(k!)</tt>. Tries to avoid overflows. For {@code k<30} simply
+   * looks up a table in <tt>O(1)</tt>. For {@code k>=30} uses stirlings
+   * approximation.
    *
    * @param k must hold <tt>k &gt;= 0</tt>.
    */

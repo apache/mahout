@@ -77,7 +77,7 @@ import java.util.Date;
  * &nbsp;&nbsp;&nbsp;public final double apply(double a, double b) { return Math.sin(a) + Math.pow(Math.cos(b),2); }
  * }
  * </pre>
- * <p> For aliasing see functions. Try this <table> <td class="PRE">
+ * <p> For aliasing see functions. Try this <table> <tr><td class="PRE">
  * <pre>
  * // should yield 1.4399560356056456 in all cases
  * double a = 0.5;
@@ -92,7 +92,7 @@ import java.util.Date;
  * };
  * log.info(g.apply(a,b));
  * </pre>
- * </td> </table>
+ * </td></tr></table>
  *
  * <p> <H3>Performance</H3>
  *
@@ -100,18 +100,22 @@ import java.util.Date;
  * performance penalty in using function objects in a loop over traditional code in a loop. For complex nested function
  * objects (e.g. <tt>F.chain(F.abs,F.chain(F.plus,F.sin,F.chain(F.square,F.cos)))</tt>) the penalty is zero, for trivial
  * functions (e.g. <tt>F.plus</tt>) the penalty is often acceptable. <center> <table border cellpadding="3"
- * cellspacing="0" align="center"> <tr valign="middle" bgcolor="#33CC66" nowrap align="center"> <td nowrap colspan="7">
+ * cellspacing="0" align="center">
+ * <tr valign="middle" bgcolor="#33CC66" align="center"> <td nowrap colspan="7">
  * <font size="+2">Iteration Performance [million function evaluations per second]</font><br> <font size="-1">Pentium
- * Pro 200 Mhz, SunJDK 1.2.2, NT, java -classic, </font></td> </tr> <tr valign="middle" bgcolor="#66CCFF" nowrap
- * align="center"> <td nowrap bgcolor="#FF9966" rowspan="2">&nbsp;</td> <td bgcolor="#FF9966" colspan="2"> <p> 30000000
+ * Pro 200 Mhz, SunJDK 1.2.2, NT, java -classic, </font></td> </tr>
+ * <tr valign="middle" bgcolor="#66CCFF" align="center"> <td nowrap bgcolor="#FF9966" rowspan="2">&nbsp;</td> <td bgcolor="#FF9966" colspan="2"> <p> 30000000
  * iterations</p> </td> <td bgcolor="#FF9966" colspan="2"> 3000000 iterations (10 times less)</td> <td bgcolor="#FF9966"
- * colspan="2">&nbsp;</td> </tr> <tr valign="middle" bgcolor="#66CCFF" nowrap align="center"> <td bgcolor="#FF9966">
+ * colspan="2">&nbsp;</td> </tr>
+ * <tr valign="middle" bgcolor="#66CCFF" align="center"> <td nowrap bgcolor="#FF9966">
  * <tt>F.plus</tt></td> <td bgcolor="#FF9966"><tt>a+b</tt></td> <td bgcolor="#FF9966">
  * <tt>F.chain(F.abs,F.chain(F.plus,F.sin,F.chain(F.square,F.cos)))</tt></td> <td bgcolor="#FF9966">
  * <tt>Math.abs(Math.sin(a) + Math.pow(Math.cos(b),2))</tt></td> <td bgcolor="#FF9966">&nbsp;</td> <td
- * bgcolor="#FF9966">&nbsp;</td> </tr> <tr valign="middle" bgcolor="#66CCFF" nowrap align="center"> <td nowrap
+ * bgcolor="#FF9966">&nbsp;</td> </tr>
+ * <tr valign="middle" bgcolor="#66CCFF" align="center"> <td nowrap
  * bgcolor="#FF9966">&nbsp;</td> <td nowrap>10.8</td> <td nowrap>29.6</td> <td nowrap>0.43</td> <td nowrap>0.35</td> <td
- * nowrap>&nbsp;</td> <td nowrap>&nbsp;</td> </tr> </table></center>
+ * nowrap>&nbsp;</td> <td nowrap>&nbsp;</td> </tr>
+ * </table></center>
  */
 public final class Functions {
 
@@ -240,7 +244,9 @@ public final class Functions {
     }
   };
 
-  /** Function that returns <tt>a < 0 ? -1 : a > 0 ? 1 : 0</tt>. */
+  /**
+   * Function that returns {@code a < 0 ? -1 : a > 0 ? 1 : 0}.
+   */
   public static final DoubleFunction SIGN = new DoubleFunction() {
 
     @Override
@@ -314,7 +320,9 @@ public final class Functions {
     }
   };
 
-  /** Function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. */
+  /**
+   * Function that returns <tt>a &lt; b ? -1 : a &gt; b ? 1 : 0</tt>.
+   */
   public static final DoubleDoubleFunction COMPARE = new DoubleDoubleFunction() {
 
     @Override
@@ -397,7 +405,9 @@ public final class Functions {
     }
   };
 
-  /** Function that returns <tt>a > b ? 1 : 0</tt>. */
+  /**
+   * Function that returns <tt>a &gt; b ? 1 : 0</tt>.
+   */
   public static final DoubleDoubleFunction GREATER = new DoubleDoubleFunction() {
 
     @Override
@@ -424,7 +434,9 @@ public final class Functions {
     }
   };
 
-  /** Function that returns <tt>a < b</tt>. */
+  /**
+   * Function that returns {@code a < b}.
+   */
   public static final DoubleDoubleProcedure IS_LESS = new DoubleDoubleProcedure() {
 
     @Override
@@ -433,7 +445,9 @@ public final class Functions {
     }
   };
 
-  /** Function that returns <tt>a > b</tt>. */
+  /**
+   * Function that returns {@code a > b}.
+   */
   public static final DoubleDoubleProcedure IS_GREATER = new DoubleDoubleProcedure() {
 
     @Override
@@ -442,7 +456,9 @@ public final class Functions {
     }
   };
 
-  /** Function that returns <tt>a < b ? 1 : 0</tt>. */
+  /**
+   * Function that returns <tt>a &lt; b ? 1 : 0</tt>.
+   */
   public static final DoubleDoubleFunction LESS = new DoubleDoubleFunction() {
 
     @Override
@@ -1132,8 +1148,8 @@ public final class Functions {
   }
 
   /**
-   * Constructs a function that returns <tt>(from<=a && a<=to) ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>from</tt> and
-   * <tt>to</tt> are fixed.
+   * Constructs a function that returns {@code (from<=a && a<=to) ? 1 : 0}.
+   * <tt>a</tt> is a variable, <tt>from</tt> and <tt>to</tt> are fixed.
    */
   public static DoubleFunction between(final double from, final double to) {
     return new DoubleFunction() {
@@ -1352,7 +1368,7 @@ public final class Functions {
 
 
   /**
-   * Constructs a function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is
+   * Constructs a function that returns {@code a < b ? -1 : a > b ? 1 : 0}. <tt>a</tt> is a variable, <tt>b</tt> is
    * fixed.
    */
   public static DoubleFunction compare(final double b) {
@@ -1404,7 +1420,10 @@ public final class Functions {
     };
   }
 
-  /** Constructs a function that returns <tt>a > b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
+  /**
+   * Constructs a function that returns <tt>a &gt; b ? 1 : 0</tt>. <tt>a</tt>
+   * is a variable, <tt>b</tt> is fixed.
+   */
   public static DoubleFunction greater(final double b) {
     return new DoubleFunction() {
 
@@ -1430,7 +1449,8 @@ public final class Functions {
   }
 
   /**
-   * Constructs a function that returns <tt>from<=a && a<=to</tt>. <tt>a</tt> is a variable, <tt>from</tt> and
+   * Constructs a function that returns {@code from<=a && a<=to}. <tt>a</tt>
+   * is a variable, <tt>from</tt> and
    * <tt>to</tt> are fixed.
    *
    * Note that DoubleProcedure is generated code and thus looks like an invalid reference unless you can see
@@ -1446,7 +1466,10 @@ public final class Functions {
     };
   }
 
-  /** Constructs a function that returns <tt>a == b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
+  /**
+   * Constructs a function that returns <tt>a == b</tt>. <tt>a</tt> is a
+   * variable, <tt>b</tt> is fixed.
+   */
   public static DoubleProcedure isEqual(final double b) {
     return new DoubleProcedure() {
 
@@ -1457,7 +1480,10 @@ public final class Functions {
     };
   }
 
-  /** Constructs a function that returns <tt>a > b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
+  /**
+   * Constructs a function that returns <tt>a &gt; b</tt>. <tt>a</tt> is a
+   * variable, <tt>b</tt> is fixed.
+   */
   public static DoubleProcedure isGreater(final double b) {
     return new DoubleProcedure() {
 
@@ -1468,7 +1494,10 @@ public final class Functions {
     };
   }
 
-  /** Constructs a function that returns <tt>a < b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
+  /**
+   * Constructs a function that returns {@code a < b}. <tt>a</tt> is a
+   * variable, <tt>b</tt> is fixed.
+   */
   public static DoubleProcedure isLess(final double b) {
     return new DoubleProcedure() {
 
@@ -1479,7 +1508,10 @@ public final class Functions {
     };
   }
 
-  /** Constructs a function that returns <tt>a < b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
+  /**
+   * Constructs a function that returns <tt>a &lt; b ? 1 : 0</tt>. <tt>a</tt> is a
+   * variable, <tt>b</tt> is fixed.
+   */
   public static DoubleFunction less(final double b) {
     return new DoubleFunction() {
 
@@ -1491,8 +1523,8 @@ public final class Functions {
   }
 
   /**
-   * Constructs a function that returns <tt><tt>Math.log(a) / Math.log(b)</tt></tt>. <tt>a</tt> is a variable,
-   * <tt>b</tt> is fixed.
+   * Constructs a function that returns <tt>Math.log(a) / Math.log(b)</tt>.
+   * <tt>a</tt> is a variable, <tt>b</tt> is fixed.
    */
   public static DoubleFunction lg(final double b) {
     return new DoubleFunction() {
@@ -1612,10 +1644,10 @@ public final class Functions {
   /**
    * Constructs a function that returns the number rounded to the given precision;
    * <tt>Math.rint(a/precision)*precision</tt>. Examples:
-   * <pre>
+   * {@code
    * precision = 0.01 rounds 0.012 --> 0.01, 0.018 --> 0.02
    * precision = 10   rounds 123   --> 120 , 127   --> 130
-   * </pre>
+   * }
    */
   public static DoubleFunction round(final double precision) {
     return new DoubleFunction() {

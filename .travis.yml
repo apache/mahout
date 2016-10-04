@@ -35,5 +35,6 @@ before_install:
   - export PATH=$M2_HOME/bin:$PATH
  
 
-script: ./runtests.sh
-
+script:
+- ./runtests.sh
+- mvn javadoc:javadoc

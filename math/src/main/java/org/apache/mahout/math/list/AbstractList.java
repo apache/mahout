@@ -61,7 +61,7 @@ public abstract class AbstractList extends PersistentObject {
   /**
    * Inserts <tt>length</tt> dummy elements before the specified position into the receiver. Shifts the element
    * currently at that position (if any) and any subsequent elements to the right. <b>This method must set the new size
-   * to be <tt>size()+length</tt>.
+   * to be <tt>size()+length</tt></b>.
    *
    * @param index  index before which to insert dummy elements (must be in [0,size])..
    * @param length number of dummy elements to be inserted.

@@ -22,9 +22,9 @@ import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
 /**
- * The basic interface including numerous convenience functions <p/> NOTE: All implementing classes must have a
+ * The basic interface including numerous convenience functions <p> NOTE: All implementing classes must have a
  * constructor that takes an int for cardinality and a no-arg constructor that can be used for marshalling the Writable
- * instance <p/> NOTE: Implementations may choose to reuse the Vector.Element in the Iterable methods
+ * instance <p> NOTE: Implementations may choose to reuse the Vector.Element in the Iterable methods
  */
 public interface Vector extends Cloneable {
 
@@ -137,7 +137,8 @@ public interface Vector extends Cloneable {
   void mergeUpdates(OrderedIntDoubleMapping updates);
 
   /**
-   * A holder for information about a specific item in the Vector. <p/> When using with an Iterator, the implementation
+   * A holder for information about a specific item in the Vector. <p>
+   * When using with an Iterator, the implementation
    * may choose to reuse this element, so you may need to make a copy if you want to keep it
    */
   interface Element {
@@ -218,9 +219,12 @@ public interface Vector extends Cloneable {
   Vector normalize();
 
   /**
-   * Return a new Vector containing the normalized (L_power norm) values of the recipient. <p/> See
-   * http://en.wikipedia.org/wiki/Lp_space <p/> Technically, when 0 < power < 1, we don't have a norm, just a metric,
-   * but we'll overload this here. <p/> Also supports power == 0 (number of non-zero elements) and power = {@link
+   * Return a new Vector containing the normalized (L_power norm) values of the recipient. <p>
+   * See
+   * http://en.wikipedia.org/wiki/Lp_space <p>
+   * Technically, when {@code 0 < power < 1}, we don't have a norm, just a metric,
+   * but we'll overload this here. <p>
+   * Also supports {@code power == 0} (number of non-zero elements) and power = {@link
    * Double#POSITIVE_INFINITY} (max element). Again, see the Wikipedia page for more info
    *
    * @param power The power to use. Must be >= 0. May also be {@link Double#POSITIVE_INFINITY}. See the Wikipedia link
@@ -237,7 +241,7 @@ public interface Vector extends Cloneable {
   Vector logNormalize();
 
   /**
-   * Return a new Vector with a normalized value calculated as log_power(1 + entry)/ L_power norm. <p/>
+   * Return a new Vector with a normalized value calculated as log_power(1 + entry)/ L_power norm. <p>
    *
    * @param power The power to use. Must be > 1. Cannot be {@link Double#POSITIVE_INFINITY}.
    * @return a new Vector
@@ -245,8 +249,8 @@ public interface Vector extends Cloneable {
   Vector logNormalize(double power);
 
   /**
-   * Return the k-norm of the vector. <p/> See http://en.wikipedia.org/wiki/Lp_space <p/> Technically, when 0 &gt; power
-   * &lt; 1, we don't have a norm, just a metric, but we'll overload this here. Also supports power == 0 (number of
+   * Return the k-norm of the vector. <p/> See http://en.wikipedia.org/wiki/Lp_space <p>
+   * Technically, when {@code 0 > power < 1}, we don't have a norm, just a metric, but we'll overload this here. Also supports power == 0 (number of
    * non-zero elements) and power = {@link Double#POSITIVE_INFINITY} (max element). Again, see the Wikipedia page for
    * more info.
    *
@@ -396,15 +400,20 @@ public interface Vector extends Cloneable {
    * @param other a vector to aggregate in combination with
    * @param aggregator function we're aggregating with; fa
    * @param combiner function we're combining with; fc
-   * @return the final aggregation; if r0 = fc(this[0], other[0]), ri = fa(r_{i-1}, fc(this[i], other[i]))
-   * for all i > 0
+   * @return the final aggregation; {@code if r0 = fc(this[0], other[0]), ri = fa(r_{i-1}, fc(this[i], other[i]))
+   * for all i > 0}
    */
   double aggregate(Vector other, DoubleDoubleFunction aggregator, DoubleDoubleFunction combiner);
 
-  /** Return the sum of squares of all elements in the vector. Square root of this value is the length of the vector. */
+  /**
+   * Return the sum of squares of all elements in the vector. Square root of
+   * this value is the length of the vector.
+   */
   double getLengthSquared();
 
-  /** Get the square of the distance between this vector and the other vector. */
+  /**
+   * Get the square of the distance between this vector and the other vector.
+   */
   double getDistanceSquared(Vector v);
 
   /**

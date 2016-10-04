@@ -249,11 +249,17 @@ public final class Arithmetic extends Constants {
   }
 
   /**
-   * Efficiently returns the binomial coefficient, often also referred to as "n over k" or "n choose k". The binomial
-   * coefficient is defined as <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>. <ul> <li>k<0<tt>: <tt>0</tt>.
-   * <li>k==0<tt>: <tt>1</tt>. <li>k==1<tt>: <tt>n</tt>. <li>else: <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k
-   * )</tt>. </ul>
+   * Efficiently returns the binomial coefficient, often also referred to as 
+   * "n over k" or "n choose k". The binomial coefficient is defined as 
+   * <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>.
+   * <ul> <li><tt>k&lt;0</tt>: <tt>0</tt>.</li>
+   * <li><tt>k==0</tt>: <tt>1</tt>.</li>
+   * <li><tt>k==1</tt>: <tt>n</tt>.</li>
+   * <li>else: <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k)</tt>.</li>
+   * </ul>
    *
+     * @param n
+     * @param k
    * @return the binomial coefficient.
    */
   public static double binomial(double n, long k) {
@@ -279,7 +285,7 @@ public final class Arithmetic extends Constants {
 
   /**
    * Efficiently returns the binomial coefficient, often also referred to as "n over k" or "n choose k". The binomial
-   * coefficient is defined as <ul> <li>k<0<tt>: <tt>0</tt>. <li>k==0 || k==n<tt>: <tt>1</tt>. <li>k==1 || k==n-1<tt>:
+   * coefficient is defined as <ul> <li><tt>k&lt;0</tt>: <tt>0</tt>. <li><tt>k==0 || k==n</tt>: <tt>1</tt>. <li><tt>k==1 || k==n-1</tt>:
    * <tt>n</tt>. <li>else: <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>. </ul>
    *
    * @return the binomial coefficient.
@@ -325,8 +331,9 @@ public final class Arithmetic extends Constants {
   }
 
   /**
-   * Returns the smallest <code>long &gt;= value</code>. <dt>Examples: {@code 1.0 -> 1, 1.2 -> 2, 1.9 -> 2}. This
-   * method is safer than using (long) Math.ceil(value), because of possible rounding error.
+   * Returns the smallest <code>long &gt;= value</code>.
+   * <dl><dt>Examples: {@code 1.0 -> 1, 1.2 -> 2, 1.9 -> 2}. This
+   * method is safer than using (long) Math.ceil(value), because of possible rounding error.</dt></dl>
    */
   public static long ceil(double value) {
     return Math.round(Math.ceil(value));
@@ -337,15 +344,15 @@ public final class Arithmetic extends Constants {
    * <pre>
    *        N-1
    *         - '
-   *  y  =   >   coef[i] T (x/2)
+   *  y  =   &gt;   coef[i] T (x/2)
    *         -            i
    *        i=0
    * </pre>
    * Coefficients are stored in reverse order, i.e. the zero order term is last in the array.  Note N is the number of
-   * coefficients, not the order. <p> If coefficients are for the interval a to b, x must have been transformed to x ->
+   * coefficients, not the order. <p> If coefficients are for the interval a to b, x must have been transformed to x -&lt;
    * 2(2x - b - a)/(b-a) before entering the routine.  This maps x from (a, b) to (-1, 1), over which the Chebyshev
    * polynomials are defined. <p> If the coefficients are for the inverted interval, in which (a, b) is mapped to (1/b,
-   * 1/a), the transformation required is x -> 2(2ab/x - b - a)/(b-a).  If b is infinity, this becomes x -> 4a/x - 1.
+   * 1/a), the transformation required is {@code x -> 2(2ab/x - b - a)/(b-a)}.  If b is infinity, this becomes {@code x -> 4a/x - 1}.
    * <p> SPEED: <p> Taking advantage of the recurrence properties of the Chebyshev polynomials, the routine requires one
    * more addition per loop than evaluating a nested polynomial of the same degree.
    *
@@ -396,7 +403,7 @@ public final class Arithmetic extends Constants {
 
   /**
    * Returns the largest <code>long &lt;= value</code>.
-   * <dt>Examples: {@code 1.0 -> 1, 1.2 -> 1, 1.9 -> 1 <dt> 2.0 -> 2,} 2.2 -> 2, 2.9 -> 2 </code><dt>
+   * <dl><dt>Examples: {@code 1.0 -> 1, 1.2 -> 1, 1.9 -> 1 <dt> 2.0 -> 2, 2.2 -> 2, 2.9 -> 2}</dt></dl>
    * This method is safer than using (long) Math.floor(value), because of possible rounding error.
    */
   public static long floor(double value) {
@@ -421,8 +428,8 @@ public final class Arithmetic extends Constants {
   }
 
   /**
-   * Returns <tt>log(k!)</tt>. Tries to avoid overflows. For <tt>k<30</tt> simply looks up a table in O(1). For
-   * <tt>k>=30</tt> uses stirlings approximation.
+   * Returns <tt>log(k!)</tt>. Tries to avoid overflows. For <tt>k&lt;30</tt> simply looks up a table in O(1). For
+   * <tt>k&gt;=30</tt> uses stirlings approximation.
    *
    * @param k must hold <tt>k &gt;= 0</tt>.
    */
@@ -445,7 +452,7 @@ public final class Arithmetic extends Constants {
   /**
    * Instantly returns the factorial <tt>k!</tt>.
    *
-   * @param k must hold <tt>k &gt;= 0 && k &lt; 21</tt>.
+   * @param k must hold {@code k >= 0 && k < 21}
    */
   public static long longFactorial(int k) {
     if (k < 0) {
@@ -460,8 +467,8 @@ public final class Arithmetic extends Constants {
 
   /**
    * Returns the StirlingCorrection. <p> Correction term of the Stirling approximation for <tt>log(k!)</tt> (series in
-   * 1/k, or table values for small k) with int parameter k. <p> <tt> log k! = (k + 1/2)log(k + 1) - (k + 1) +
-   * (1/2)log(2Pi) + STIRLING_CORRECTION(k + 1) <p> log k! = (k + 1/2)log(k)     -  k      + (1/2)log(2Pi) +
+   * 1/k, or table values for small k) with int parameter k. </p> <tt> log k! = (k + 1/2)log(k + 1) - (k + 1) +
+   * (1/2)log(2Pi) + STIRLING_CORRECTION(k + 1) log k! = (k + 1/2)log(k)     -  k      + (1/2)log(2Pi) +
    * STIRLING_CORRECTION(k) </tt>
    */
   public static double stirlingCorrection(int k) {

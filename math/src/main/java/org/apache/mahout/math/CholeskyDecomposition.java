@@ -22,7 +22,7 @@ import org.apache.mahout.math.function.Functions;
 
 /**
  * Cholesky decomposition shamelessly ported from JAMA.
- * <p/>
+ * <p>
  * A Cholesky decomposition of a semi-positive definite matrix A is a lower triangular matrix L such
  * that L L^* = A.  If A is full rank, L is unique.  If A is real, then it must be symmetric and R
  * will also be real.
