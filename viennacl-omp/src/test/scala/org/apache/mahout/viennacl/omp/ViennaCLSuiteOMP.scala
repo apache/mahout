@@ -1,13 +1,13 @@
-package org.apache.mahout.viennacl.omp
+package org.apache.mahout.viennacl.openmp
 
 import org.apache.mahout.math._
 import scalabindings._
 import RLikeOps._
 import org.bytedeco.javacpp.DoublePointer
 import org.scalatest.{FunSuite, Matchers}
-import org.apache.mahout.viennacl.omp.javacpp._
-import org.apache.mahout.viennacl.omp.javacpp.Functions._
-import org.apache.mahout.viennacl.omp.javacpp.LinalgFunctions._
+import org.apache.mahout.viennacl.openmp.javacpp._
+import org.apache.mahout.viennacl.openmp.javacpp.Functions._
+import org.apache.mahout.viennacl.openmp.javacpp.LinalgFunctions._
 
 import scala.util.Random
 

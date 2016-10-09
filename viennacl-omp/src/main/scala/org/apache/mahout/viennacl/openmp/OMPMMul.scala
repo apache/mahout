@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.viennacl.omp
+package org.apache.mahout.viennacl.openmp
 
 import org.apache.mahout.logging._
 import org.apache.mahout.math
@@ -24,9 +24,9 @@ import org.apache.mahout.math.flavor.{BackEnum, TraversingStructureEnum}
 import org.apache.mahout.math.function.Functions
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.viennacl.vcl.javacpp.Functions._
-import org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions._
-import org.apache.mahout.viennacl.vcl.javacpp.{CompressedMatrix, Context, DenseRowMatrix}
+import org.apache.mahout.viennacl.openmp.javacpp.Functions._
+import org.apache.mahout.viennacl.openmp.javacpp.LinalgFunctions._
+import org.apache.mahout.viennacl.openmp.javacpp.{CompressedMatrix, Context, DenseRowMatrix}
 
 import scala.collection.JavaConversions._
 

@@ -1,4 +1,5 @@
-package org.apache.mahout.viennacl.omp.javacpp
+package org.apache.mahout.viennacl.openmp.javacpp
+
 
 import org.bytedeco.javacpp.annotation._
 import org.bytedeco.javacpp.{Loader, Pointer}

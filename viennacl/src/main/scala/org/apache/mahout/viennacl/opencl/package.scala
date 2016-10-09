@@ -13,7 +13,7 @@ import org.bytedeco.javacpp.{DoublePointer, IntPointer}
 
 
 
-package object vcl {
+package object opencl {
 
   type IntConvertor = Int => Int
 
