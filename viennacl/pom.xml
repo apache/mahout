@@ -143,23 +143,23 @@
                 <argument>linux-x86_64-viennacl.properties</argument>
                 <argument>-classpath</argument>
                 <argument>${project.build.outputDirectory}:${org.scala-lang:scala-library:jar}</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.CompressedMatrix</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.Context</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.MatrixBase</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.DenseRowMatrix</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.DenseColumnMatrix</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.MatMatProdExpression</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.ProdExpression</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.SrMatDnMatProdExpression</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.MatrixTransExpression</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.Functions</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.VectorBase</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.VCLVector</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.VecMultExpression</argument>
-                <argument>org.apache.mahout.viennacl.vcl.javacpp.MemHandle</argument>
-                <argument>org.apache.mahout.viennacl.vcl.GPUMMul</argument>
-                <argument>org.apache.mahout.viennacl.vcl.GPUMMul$</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.CompressedMatrix</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.Context</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.MatrixBase</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.DenseRowMatrix</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.DenseColumnMatrix</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.MatMatProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.ProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.SrMatDnMatProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.MatrixTransExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.LinalgFunctions</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.Functions</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.VectorBase</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.VCLVector</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.VecMultExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.MemHandle</argument>
+                <argument>org.apache.mahout.viennacl.opencl.GPUMMul</argument>
+                <argument>org.apache.mahout.viennacl.opencl.GPUMMul$</argument>
               </arguments>
             </configuration>
           </execution>

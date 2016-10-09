@@ -24,9 +24,9 @@ import org.apache.mahout.math.flavor.{BackEnum, TraversingStructureEnum}
 import org.apache.mahout.math.function.Functions
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.viennacl.vcl.javacpp.Functions._
-import org.apache.mahout.viennacl.vcl.javacpp.LinalgFunctions._
-import org.apache.mahout.viennacl.vcl.javacpp.{CompressedMatrix, Context, DenseRowMatrix}
+import org.apache.mahout.viennacl.opencl.javacpp.Functions._
+import org.apache.mahout.viennacl.opencl.javacpp.LinalgFunctions._
+import org.apache.mahout.viennacl.opencl.javacpp.{CompressedMatrix, Context, DenseRowMatrix}
 
 import scala.collection.JavaConversions._
 
