@@ -862,8 +862,15 @@
       <id>viennacl</id>
     <modules>
       <module>viennacl</module>
-      <!--<module>viennacl-omp</module>-->
+      <module>viennacl-omp</module>
     </modules>
+    </profile>
+
+    <profile>
+      <id>viennacl-omp</id>
+      <modules>
+        <module>viennacl-omp</module>
+      </modules>
     </profile>
 
     <profile>
