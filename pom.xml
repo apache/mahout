@@ -867,22 +867,6 @@
     </profile>
 
     <profile>
-      <id>hadoop1</id>
-      <properties>
-        <hadoop.classifier>hadoop1</hadoop.classifier>
-        <hadoop.version>1.2.1</hadoop.version>
-      </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>${hadoop.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-    <profile>
       <id>hadoop2</id>
       <activation>
         <activeByDefault>true</activeByDefault>
