@@ -42,47 +42,47 @@ class RowSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     "doc9\tThe quick brown fox jumped over the lazy wolverine",
     "doc10\tThe quick brown fox jumped over the lazy cantelope")// yes that's spelled correctly.
 
-//  test("RowSimilarityDriver text docs no strengths") {
-//
-//    val firstFiveSimDocsTokens = tokenize(Iterable(
-//      "doc1\tdoc3 doc2 doc4 doc5"))
-//
-//    val lastFiveSimDocsTokens = tokenize(Iterable(
-//      "doc6\tdoc8 doc10 doc7 doc9"))
-//
-//    val inDir = TmpDir + "in-dir/"
-//    val inFilename = "in-file.tsv"
-//    val inPath = inDir + inFilename
-//
-//    val outPath = TmpDir + "similarity-matrices/"
-//
-//
-//    // this creates one part-0000 file in the directory
-//    mahoutCtx.parallelize(TextDocs).coalesce(1, shuffle=true).saveAsTextFile(inDir)
-//
-//    // to change from using part files to a single .tsv file we'll need to use HDFS
-//    val fs = FileSystem.get(new Configuration())
-//    //rename part-00000 to something.tsv
-//    fs.rename(new Path(inDir + "part-00000"), new Path(inPath))
-//
-//    // local multi-threaded Spark with default HDFS
-//    RowSimilarityDriver.main(Array(
-//      "--input", inPath,
-//      "--output", outPath,
-//      "--omitStrength",
-//      "--maxSimilaritiesPerRow", "4", // would get all docs similar if we didn't limit them
-//      "--master", masterUrl))
-//
-//    val simLines = mahoutCtx.textFile(outPath).collect
-//    simLines.foreach { line =>
-//      val lineTokens = line.split("[\t ]")
-//      if (lineTokens.contains("doc1") ) // docs are two flavors so if only 4 similarities it will effectively classify
-//        lineTokens should contain theSameElementsAs firstFiveSimDocsTokens
-//      else
-//        lineTokens should contain theSameElementsAs lastFiveSimDocsTokens
-//    }
-//
-//  }
+  test("RowSimilarityDriver text docs no strengths") {
+
+    val firstFiveSimDocsTokens = tokenize(Iterable(
+      "doc1\tdoc3 doc2 doc4 doc5"))
+
+    val lastFiveSimDocsTokens = tokenize(Iterable(
+      "doc6\tdoc8 doc10 doc7 doc9"))
+
+    val inDir = TmpDir + "in-dir/"
+    val inFilename = "in-file.tsv"
+    val inPath = inDir + inFilename
+
+    val outPath = TmpDir + "similarity-matrices/"
+
+
+    // this creates one part-0000 file in the directory
+    mahoutCtx.parallelize(TextDocs).coalesce(1, shuffle=true).saveAsTextFile(inDir)
+
+    // to change from using part files to a single .tsv file we'll need to use HDFS
+    val fs = FileSystem.get(new Configuration())
+    //rename part-00000 to something.tsv
+    fs.rename(new Path(inDir + "part-00000"), new Path(inPath))
+
+    // local multi-threaded Spark with default HDFS
+    RowSimilarityDriver.main(Array(
+      "--input", inPath,
+      "--output", outPath,
+      "--omitStrength",
+      "--maxSimilaritiesPerRow", "4", // would get all docs similar if we didn't limit them
+      "--master", masterUrl))
+
+    val simLines = mahoutCtx.textFile(outPath).collect
+    simLines.foreach { line =>
+      val lineTokens = line.split("[\t ]")
+      if (lineTokens.contains("doc1") ) // docs are two flavors so if only 4 similarities it will effectively classify
+        lineTokens should contain theSameElementsAs firstFiveSimDocsTokens
+      else
+        lineTokens should contain theSameElementsAs lastFiveSimDocsTokens
+    }
+
+  }
 
   test("RowSimilarityDriver text docs") {
 
