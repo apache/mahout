@@ -852,11 +852,20 @@
     <module>spark-shell</module>
     <module>flink</module>
     <!--<module>h2o</module>-->
-    <module>viennacl</module>
+    <!--<module>viennacl</module>-->
     <!--<module>viennacl-omp</module>-->
   </modules>
 
   <profiles>
+
+    <profile>
+      <id>viennacl</id>
+    <modules>
+      <module>viennacl</module>
+      <!--<module>viennacl-omp</module>-->
+    </modules>
+    </profile>
+
     <profile>
       <id>hadoop1</id>
       <properties>
