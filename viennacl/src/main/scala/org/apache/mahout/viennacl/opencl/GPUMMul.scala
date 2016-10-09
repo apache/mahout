@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.viennacl.vcl
+package org.apache.mahout.viennacl.opencl
 
 import org.apache.mahout.logging._
 import org.apache.mahout.math

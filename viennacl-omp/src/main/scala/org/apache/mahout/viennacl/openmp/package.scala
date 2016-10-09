@@ -7,13 +7,13 @@ import scalabindings._
 import RLikeOps._
 
 import scala.collection.JavaConversions._
-import org.apache.mahout.viennacl.omp.javacpp.DenseRowMatrix
-import org.apache.mahout.viennacl.omp.javacpp._
+import org.apache.mahout.viennacl.openmp.javacpp.DenseRowMatrix
+import org.apache.mahout.viennacl.openmp.javacpp._
 import org.bytedeco.javacpp.{DoublePointer, IntPointer}
 
 
 
-package object omp {
+package object openmp {
 
   type IntConvertor = Int => Int
 
