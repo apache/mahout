@@ -7,8 +7,8 @@ import scalabindings._
 import RLikeOps._
 
 import scala.collection.JavaConversions._
-import org.apache.mahout.viennacl.vcl.javacpp.{CompressedMatrix, Context, DenseRowMatrix, Functions, VCLVector}
-import org.apache.mahout.viennacl.vcl.javacpp.Context
+import org.apache.mahout.viennacl.opencl.javacpp.{CompressedMatrix, Context, DenseRowMatrix, Functions, VCLVector}
+import org.apache.mahout.viennacl.opencl.javacpp.Context
 import org.bytedeco.javacpp.{DoublePointer, IntPointer}
 
 
