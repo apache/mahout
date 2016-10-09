@@ -15,8 +15,8 @@ class SolverFactory {
 
   // just temp for quick POC
   val classMap: Map[String,String] =
-    Map(("GPUMMul"->"org.apache.mahout.viennacl.vcl.GPUMMul"),
-        ("OMPMMul"->"org.apache.mahout.viennacl.omp.OMPMMul"))
+    Map(("GPUMMul"->"org.apache.mahout.viennacl.opencl.GPUMMul"),
+        ("OMPMMul"->"org.apache.mahout.viennacl.openmp.OMPMMul"))
 }
 object SolverFactory extends SolverFactory {
 
@@ -24,12 +24,13 @@ object SolverFactory extends SolverFactory {
     var clazz: MMBinaryFunc = MMul
 
     // eventually match on implicit Classtag . for now.  just take as is.
+    // this is a bit hacky, Shoud not be doing onlytry/catch here..
     def getOperator[C: ClassTag]: MMBinaryFunc = {
 
       try {
-        println("creating org.apache.mahout.viennacl.vcl.GPUMMul solver")
-        clazz = Class.forName("org.apache.mahout.viennacl.vcl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-        println("successfully created org.apache.mahout.viennacl.vcl.GPUMMul solver")
+        println("creating org.apache.mahout.viennacl.opencl.GPUMMul solver")
+        clazz = Class.forName("org.apache.mahout.viennacl.opencl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+        println("successfully created org.apache.mahout.viennacl.opencl.GPUMMul solver")
 
       } catch {
         case x: Exception =>
@@ -38,9 +39,9 @@ object SolverFactory extends SolverFactory {
           try {
             // attempt to instantiate the OpenMP version, assuming we’ve
             // created a separate OpenMP-only module (none exist yet)
-            println("creating org.apache.mahout.viennacl.vcl.OMPMMul solver")
-            clazz = Class.forName("org.apache.mahout.viennacl.vcl.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-            println("successfully created org.apache.mahout.viennacl.ocl.OMPMMul solver")
+            println("creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
+            clazz = Class.forName("org.apache.mahout.viennacl.openmp.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+            println("successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
 
           } catch {
             case x: Exception =>
