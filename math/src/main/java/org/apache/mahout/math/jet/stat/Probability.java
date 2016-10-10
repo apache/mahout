@@ -85,13 +85,13 @@ public final class Probability {
 
   /**
    * Returns the sum of the terms <tt>0</tt> through <tt>k</tt> of the Negative Binomial Distribution.
-   * <pre>
+   * {@code
    *   k
    *   --  ( n+j-1 )   n      j
    *   >   (       )  p  (1-p)
    *   --  (   j   )
    *  j=0
-   * </pre>
+   * }
    * In a sequence of Bernoulli trials, this is the probability that <tt>k</tt> or fewer failures precede the
    * <tt>n</tt>-th success. <p> The terms are not computed individually; instead the incomplete beta integral is
    * employed, according to the formula <p> <tt>y = negativeBinomial( k, n, p ) = Gamma.incompleteBeta( n, k+1, p
@@ -117,7 +117,7 @@ public final class Probability {
   /**
    * Returns the area under the Normal (Gaussian) probability density function, integrated from minus infinity to
    * <tt>x</tt> (assumes mean is zero, variance is one).
-   * <pre>
+   * {@code
    *                            x
    *                             -
    *                   1        | |          2
@@ -125,10 +125,10 @@ public final class Probability {
    *               sqrt(2pi)  | |
    *                           -
    *                          -inf.
-   * <p/>
+   *
    *             =  ( 1 + erf(z) ) / 2
    *             =  erfc(z) / 2
-   * </pre>
+   * }
    * where <tt>z = x/sqrt(2)</tt>. Computation is via the functions <tt>errorFunction</tt> and
    * <tt>errorFunctionComplement</tt>.
    * <p>
@@ -153,7 +153,7 @@ public final class Probability {
   /**
    * Returns the area under the Normal (Gaussian) probability density function, integrated from minus infinity to
    * <tt>x</tt>.
-   * <pre>
+   * {@code
    *                            x
    *                             -
    *                   1        | |                 2
@@ -162,7 +162,7 @@ public final class Probability {
    *                           -
    *                          -inf.
    *
-   * </pre>
+   * }
    * where <tt>v = variance</tt>. Computation is via the functions <tt>errorFunction</tt>.
    *
    * @param mean     the mean of the normal distribution.

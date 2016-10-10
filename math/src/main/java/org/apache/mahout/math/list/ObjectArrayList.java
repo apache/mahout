@@ -369,7 +369,7 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
    * Replaces the element at the specified position in the receiver with the specified element; <b>WARNING:</b> Does not
    * check preconditions. Provided with invalid parameters this method may access invalid indexes without throwing any
    * exception! <b>You should only use this method when you are absolutely sure that the index is within bounds.</b>
-   * Precondition (unchecked): <tt>index &gt;= 0 && index &lt; size()</tt>.
+   * Precondition (unchecked): {@code index >= 0 && index < size()}.
    *
    * @param index   index of element to replace.
    * @param element element to be stored at the specified position.
