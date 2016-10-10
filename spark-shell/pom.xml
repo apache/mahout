@@ -117,21 +117,12 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- FOR EXPIREMENT PURPOSES ONLY -->
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacpp</artifactId>
       <version>1.2.2</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-native-viennacl_2.10</artifactId>
-    </dependency>
-
-    <!-- ***************************** -->
-
-
+    
 
     <!--  3rd-party -->
     <dependency>
