@@ -41,7 +41,7 @@ import org.apache.mahout.math.Vector;
 public class GraphMLClusterWriter extends AbstractClusterWriter {
 
   private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
-  private final Map<Integer, Color> colors = new HashMap<Integer, Color>();
+  private final Map<Integer, Color> colors = new HashMap<>();
   private Color lastClusterColor;
   private float lastX;
   private float lastY;

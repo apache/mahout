@@ -48,7 +48,7 @@ public class TestVectorMatrixMultiplicationJob extends MahoutTestCase {
     // set up all the parameters for the job
     Vector toSave = new DenseVector(VECTOR);
     DummyRecordWriter<IntWritable, VectorWritable> writer = new 
-      DummyRecordWriter<IntWritable, VectorWritable>();
+      DummyRecordWriter<>();
     Mapper<IntWritable, VectorWritable, IntWritable, VectorWritable>.Context
       context = DummyRecordWriter.build(mapper, conf, writer);
     mapper.setup(toSave);

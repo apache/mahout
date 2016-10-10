@@ -35,11 +35,11 @@ public final class SamplingIterable<T> implements Iterable<T> {
   
   @Override
   public Iterator<T> iterator() {
-    return new SamplingIterator<T>(delegate.iterator(), samplingRate);
+    return new SamplingIterator<>(delegate.iterator(), samplingRate);
   }
   
   public static <T> Iterable<T> maybeWrapIterable(Iterable<T> delegate, double samplingRate) {
-    return samplingRate >= 1.0 ? delegate : new SamplingIterable<T>(delegate, samplingRate);
+    return samplingRate >= 1.0 ? delegate : new SamplingIterable<>(delegate, samplingRate);
   }
   
 }

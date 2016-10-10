@@ -74,8 +74,8 @@ public class LanczosSolver {
     ITERATE, ORTHOGANLIZE, TRIDIAG_DECOMP, FINAL_EIGEN_CREATE
   }
 
-  private final Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
-  private final Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
+  private final Map<TimingSection, Long> startTimes = new EnumMap<>(TimingSection.class);
+  private final Map<TimingSection, Long> times = new EnumMap<>(TimingSection.class);
 
   private static final class Scale extends DoubleFunction {
     private final double d;

@@ -119,7 +119,7 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
   @Override
   public Object clone() {
     // overridden for performance only.
-    return new ObjectArrayList<T>((T[]) elements.clone());
+    return new ObjectArrayList<>((T[]) elements.clone());
   }
 
   /**
@@ -325,14 +325,14 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
   @SuppressWarnings("unchecked")
   public AbstractObjectList<T> partFromTo(int from, int to) {
     if (size == 0) {
-      return new ObjectArrayList<T>(0);
+      return new ObjectArrayList<>(0);
     }
 
     checkRangeFromTo(from, to, size);
 
     Object[] part = new Object[to - from + 1];
     System.arraycopy(elements, from, part, 0, to - from + 1);
-    return new ObjectArrayList<T>((T[]) part);
+    return new ObjectArrayList<>((T[]) part);
   }
 
   /** Reverses the elements of the receiver. Last becomes first, second last becomes second first, and so on. */

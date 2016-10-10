@@ -70,7 +70,7 @@ public final class Cache<K,V> implements Retriever<K,V> {
   public Cache(Retriever<? super K,? extends V> retriever, int maxEntries) {
     Preconditions.checkArgument(retriever != null, "retriever is null");
     Preconditions.checkArgument(maxEntries >= 1, "maxEntries must be at least 1");
-    cache = new FastMap<K, V>(11, maxEntries);
+    cache = new FastMap<>(11, maxEntries);
     this.retriever = retriever;
   }
   

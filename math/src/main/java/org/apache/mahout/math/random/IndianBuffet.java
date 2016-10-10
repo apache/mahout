@@ -49,11 +49,11 @@ public final class IndianBuffet<T> implements Sampler<List<T>> {
   }
 
   public static IndianBuffet<Integer> createIntegerDocumentSampler(double alpha) {
-    return new IndianBuffet<Integer>(alpha, new IdentityConverter());
+    return new IndianBuffet<>(alpha, new IdentityConverter());
   }
 
   public static IndianBuffet<String> createTextDocumentSampler(double alpha) {
-    return new IndianBuffet<String>(alpha, new WordConverter());
+    return new IndianBuffet<>(alpha, new WordConverter());
   }
 
   @Override

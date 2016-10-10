@@ -920,7 +920,7 @@ public final class VectorTest extends MahoutTestCase {
     Iterator<Element> it = vector.nonZeroes().iterator();
     Element element = null;
     int i = 0;
-    HashSet<Integer> indexes = new HashSet<Integer>();
+    HashSet<Integer> indexes = new HashSet<>();
     while (it.hasNext()) {  // hasNext is called more often than next
       if (i % 2 == 0) {
         element = it.next();

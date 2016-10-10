@@ -53,7 +53,7 @@ public final class SamplingCandidateItemsStrategyTest extends TasteTestCase {
 
     PreferenceArray prefArrayOfUser123 = new GenericUserPreferenceArray(prefsOfUser123);
 
-    FastByIDMap<PreferenceArray> userData = new FastByIDMap<PreferenceArray>();
+    FastByIDMap<PreferenceArray> userData = new FastByIDMap<>();
     userData.put(123L, prefArrayOfUser123);
     userData.put(456L, new GenericUserPreferenceArray(prefsOfUser456));
     userData.put(789L, new GenericUserPreferenceArray(prefsOfUser789));

@@ -85,7 +85,7 @@ public final class RunAdaptiveLogistic {
       String line = in.readLine();
       csv.firstLine(line);
       line = in.readLine();
-      Map<String, Double> results = new HashMap<String, Double>();
+      Map<String, Double> results = new HashMap<>();
       while (line != null) {
         Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());
         csv.processLine(line, v, false);

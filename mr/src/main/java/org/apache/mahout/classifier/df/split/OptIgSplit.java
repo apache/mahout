@@ -194,7 +194,7 @@ public class OptIgSplit extends IgSplit {
     // There is no great reason to believe that categorical value order matters,
     // but the original code worked this way, and it's not terrible in the absence
     // of more sophisticated analysis
-    Collection<Double> uniqueOrderedCategories = new TreeSet<Double>();
+    Collection<Double> uniqueOrderedCategories = new TreeSet<>();
     for (double v : values) {
       uniqueOrderedCategories.add(v);
     }

@@ -35,7 +35,7 @@ public final class RegexMapperTest extends MahoutTestCase {
     Configuration conf = getConfiguration();
     conf.set(RegexMapper.REGEX, "(?<=(\\?|&)q=).*?(?=&|$)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
-    DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<LongWritable, Text>();
+    DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<>();
     Mapper<LongWritable, Text, LongWritable, Text>.Context mapContext = DummyRecordWriter
             .build(mapper, conf, mapWriter);
 

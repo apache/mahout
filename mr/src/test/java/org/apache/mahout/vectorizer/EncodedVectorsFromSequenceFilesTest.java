@@ -110,7 +110,7 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
 
     ToolRunner.run(getConfiguration(), new EncodedVectorsFromSequenceFiles(), args);
 
-    SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<Text, VectorWritable>(outputPath, PathType.LIST, PathFilters.partFilter(), null, true, conf);
+    SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<>(outputPath, PathType.LIST, PathFilters.partFilter(), null, true, conf);
     int seen = 0;
     while (iter.hasNext()) {
       Pair<Text, VectorWritable> next = iter.next();

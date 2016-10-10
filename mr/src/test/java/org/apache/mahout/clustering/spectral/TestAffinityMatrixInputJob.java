@@ -75,7 +75,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
     
     // set up the dummy writer and the M/R context
     DummyRecordWriter<IntWritable, MatrixEntryWritable> writer =
-      new DummyRecordWriter<IntWritable, MatrixEntryWritable>();
+      new DummyRecordWriter<>();
     Mapper<LongWritable, Text, IntWritable, MatrixEntryWritable>.Context 
       context = DummyRecordWriter.build(mapper, conf, writer);
 
@@ -102,7 +102,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
     
     // set up the dummy writer and the M/R context
     DummyRecordWriter<IntWritable, MatrixEntryWritable> mapWriter =
-      new DummyRecordWriter<IntWritable, MatrixEntryWritable>();
+      new DummyRecordWriter<>();
     Mapper<LongWritable, Text, IntWritable, MatrixEntryWritable>.Context
       mapContext = DummyRecordWriter.build(mapper, conf, mapWriter);
 
@@ -117,7 +117,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
     // now reduce the data
     AffinityMatrixInputReducer reducer = new AffinityMatrixInputReducer();
     DummyRecordWriter<IntWritable, VectorWritable> redWriter = 
-      new DummyRecordWriter<IntWritable, VectorWritable>();
+      new DummyRecordWriter<>();
     Reducer<IntWritable, MatrixEntryWritable,
       IntWritable, VectorWritable>.Context redContext = DummyRecordWriter
       .build(reducer, conf, redWriter, IntWritable.class, MatrixEntryWritable.class);
