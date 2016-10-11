@@ -39,4 +39,4 @@ before_install:
 
 script:
 - ./runtests.sh
-- mvn javadoc:javadoc
+#- mvn javadoc:javadoc
