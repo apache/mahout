@@ -301,6 +301,26 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
     assert(aID.matrix.nrow == 4)
     assert(bID.matrix.nrow == 4)
 
+    assert(aID.rowIDs.contains("u1") &&
+      aID.rowIDs.contains("u2") &&
+      aID.rowIDs.contains("u3") &&
+      aID.rowIDs.contains("u4"))
+
+    assert(aID.columnIDs.contains("a1") &&
+      aID.columnIDs.contains("a2") &&
+      aID.columnIDs.contains("a3") &&
+      aID.columnIDs.contains("a4") &&
+      aID.columnIDs.contains("a5"))
+
+    assert(bID.rowIDs.contains("u1") &&
+      bID.rowIDs.contains("u2") &&
+      bID.rowIDs.contains("u3") &&
+      bID.rowIDs.contains("u4"))
+    assert(bID.columnIDs.contains("b1") &&
+      bID.columnIDs.contains("b2") &&
+      bID.columnIDs.contains("b3") &&
+      bID.columnIDs.contains("b4"))
+
     assert(!bID.rowIDs.contains("u5"))// this row id should be filtered out of the drm and dictionary
     assert(!bID.columnIDs.contains("b25"))// this row id should be filtered out of the drm and dictionary
 
