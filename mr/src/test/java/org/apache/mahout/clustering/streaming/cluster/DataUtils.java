@@ -78,7 +78,7 @@ public final class DataUtils {
     for (int i = 0; i < numDatapoints; ++i) {
       data.add(new Centroid(i, rowSamplers.get(i % pow2N).sample(), 1));
     }
-    return new Pair<List<Centroid>, List<Centroid>>(data, mean);
+    return new Pair<>(data, mean);
   }
 
   /**

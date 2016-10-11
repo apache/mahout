@@ -49,21 +49,21 @@ import java.util.Date;
  2.5 million calls to <tt>raw()</tt> per second (Pentium Pro 200 Mhz, JDK 1.2, NT).
  Be aware, however, that there is a non-negligible amount of overhead required to initialize the data
  structures used by a MersenneTwister. Code like
- <pre>
+ {@code
  double sum = 0.0;
  for (int i=0; i<100000; ++i) {
  RandomElement twister = new MersenneTwister(new Date());
  sum += twister.raw();
  }
- </pre>
+ }
  will be wildly inefficient. Consider using
- <pre>
+ {@code
  double sum = 0.0;
  RandomElement twister = new MersenneTwister(new Date());
- for (int i=0; i<100000; ++i) {
+ for (int i=0; i&lt;100000; ++i) {
  sum += twister.raw();
  }
- </pre>
+ }
  instead.  This allows the cost of constructing the MersenneTwister object
  to be borne only once, rather than once for each iteration in the loop.
  <p>
@@ -71,17 +71,19 @@ import java.util.Date;
  "Mersenne Twister: A 623-Dimensionally Equidistributed Uniform Pseudo-Random Number Generator",
  ACM Transactions on Modeling and Computer Simulation,
  Vol. 8, No. 1, January 1998, pp 3--30.
- <dt>More info on <A HREF="http://www.math.keio.ac.jp/~matumoto/eindex.html"> Masumoto's homepage</A>.
- <dt>More info on <A HREF="http://www.ncsa.uiuc.edu/Apps/CMP/RNG/www-rng.html"> Pseudo-random number
- generators is on the Web</A>.
- <dt>Yet <A HREF="http://nhse.npac.syr.edu/random"> some more info</A>.
+ <dl>
+ <dt>More info on <a HREF="http://www.math.keio.ac.jp/~matumoto/eindex.html"> Masumoto's homepage</a>.</dt>
+ <dt>More info on <a HREF="http://www.ncsa.uiuc.edu/Apps/CMP/RNG/www-rng.html"> Pseudo-random number
+ generators is on the Web</a>.</dt>
+ <dt>Yet <a HREF="http://nhse.npac.syr.edu/random"> some more info</a>.</dt>
  <p>
  The correctness of this implementation has been verified against the published output sequence
  <a href="http://www.math.keio.ac.jp/~nisimura/random/real2/mt19937-2.out">mt19937-2.out</a> of the C-implementation
  <a href="http://www.math.keio.ac.jp/~nisimura/random/real2/mt19937-2.c">mt19937-2.c</a>.
  (Call <tt>test(1000)</tt> to print the sequence).
  <dt>
- Note that this implementation is <b>not synchronized</b>.
+ Note that this implementation is <b>not synchronized</b>.</dt>
+ </dl>
  <p>
  <b>Details:</b> MersenneTwister is designed with consideration of the flaws of various existing generators in mind.
  It is an improved version of TT800, a very successful generator.
@@ -92,42 +94,40 @@ import java.util.Date;
  period length, for each <tt>k &lt;= 623</tt> (except for the zero vector, which appears one time less).
  If one looks at only the first <tt>n &lt;= 16</tt> bits of each number, then the property holds
  for even larger <tt>k</tt>, as shown in the following table (taken from the publication cited above):
- <div align="center">
- <table width="75%" border="1" cellspacing="0" cellpadding="0">
+ <table width="75%" border="1" cellspacing="0" cellpadding="0" summary="property table">
  <tr>
- <td width="2%"> <div align="center">n</div> </td>
- <td width="6%"> <div align="center">1</div> </td>
- <td width="5%"> <div align="center">2</div> </td>
- <td width="5%"> <div align="center">3</div> </td>
- <td width="5%"> <div align="center">4</div> </td>
- <td width="5%"> <div align="center">5</div> </td>
- <td width="5%"> <div align="center">6</div> </td>
- <td width="5%"> <div align="center">7</div> </td>
- <td width="5%"> <div align="center">8</div> </td>
- <td width="5%"> <div align="center">9</div> </td>
- <td width="5%"> <div align="center">10</div> </td>
- <td width="5%"> <div align="center">11</div> </td>
- <td width="10%"> <div align="center">12 .. 16</div> </td>
- <td width="10%"> <div align="center">17 .. 32</div> </td>
+ <td width="2%" align="center"> <div>n</div> </td>
+ <td width="6%" align="center"> <div>1</div> </td>
+ <td width="5%" align="center"> <div>2</div> </td>
+ <td width="5%" align="center"> <div>3</div> </td>
+ <td width="5%" align="center"> <div>4</div> </td>
+ <td width="5%" align="center"> <div>5</div> </td>
+ <td width="5%" align="center"> <div>6</div> </td>
+ <td width="5%" align="center"> <div>7</div> </td>
+ <td width="5%" align="center"> <div>8</div> </td>
+ <td width="5%" align="center"> <div>9</div> </td>
+ <td width="5%" align="center"> <div>10</div> </td>
+ <td width="5%" align="center"> <div>11</div> </td>
+ <td width="10%" align="center"> <div>12 .. 16</div> </td>
+ <td width="10%" align="center"> <div>17 .. 32</div> </td>
  </tr>
  <tr>
- <td width="2%"> <div align="center">k</div> </td>
- <td width="6%"> <div align="center">19937</div> </td>
- <td width="5%"> <div align="center">9968</div> </td>
- <td width="5%"> <div align="center">6240</div> </td>
- <td width="5%"> <div align="center">4984</div> </td>
- <td width="5%"> <div align="center">3738</div> </td>
- <td width="5%"> <div align="center">3115</div> </td>
- <td width="5%"> <div align="center">2493</div> </td>
- <td width="5%"> <div align="center">2492</div> </td>
- <td width="5%"> <div align="center">1869</div> </td>
- <td width="5%"> <div align="center">1869</div> </td>
- <td width="5%"> <div align="center">1248</div> </td>
- <td width="10%"> <div align="center">1246</div> </td>
- <td width="10%"> <div align="center">623</div> </td>
+ <td width="2%" align="center"> <div>k</div> </td>
+ <td width="6%" align="center"> <div>19937</div> </td>
+ <td width="5%" align="center"> <div>9968</div> </td>
+ <td width="5%" align="center"> <div>6240</div> </td>
+ <td width="5%" align="center"> <div>4984</div> </td>
+ <td width="5%" align="center"> <div>3738</div> </td>
+ <td width="5%" align="center"> <div>3115</div> </td>
+ <td width="5%" align="center"> <div>2493</div> </td>
+ <td width="5%" align="center"> <div>2492</div> </td>
+ <td width="5%" align="center"> <div>1869</div> </td>
+ <td width="5%" align="center"> <div>1869</div> </td>
+ <td width="5%" align="center"> <div>1248</div> </td>
+ <td width="10%" align="center"> <div>1246</div> </td>
+ <td width="10%" align="center"> <div>623</div> </td>
  </tr>
  </table>
- </div>
  <p>
  MersenneTwister generates random numbers in batches of 624 numbers at a time, so
  the caching and pipelining of modern systems is exploited.

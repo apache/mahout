@@ -194,7 +194,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
       }
     };
 
-    Map<String, Integer> dictionary = new HashMap<String, Integer>();
+    Map<String, Integer> dictionary = new HashMap<>();
 
     for (Pair<Text, IntWritable> value :
             new SequenceFileDirIterable<Text, IntWritable>(

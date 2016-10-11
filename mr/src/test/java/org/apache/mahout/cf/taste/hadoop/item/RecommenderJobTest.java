@@ -775,12 +775,12 @@ public class RecommenderJobTest extends TasteTestCase {
     Map<Pair<Long, Long>, Double> similarities = readSimilarities(new File(similaritiesOutputDir, "part-r-00000"));
     assertEquals(6, similarities.size());
 
-    assertEquals(0.25, similarities.get(new Pair<Long, Long>(1L, 2L)), EPSILON);
-    assertEquals(0.6666666666666666, similarities.get(new Pair<Long, Long>(1L, 3L)), EPSILON);
-    assertEquals(0.5, similarities.get(new Pair<Long, Long>(1L, 4L)), EPSILON);
-    assertEquals(0.3333333333333333, similarities.get(new Pair<Long, Long>(2L, 3L)), EPSILON);
-    assertEquals(0.25, similarities.get(new Pair<Long, Long>(2L, 4L)), EPSILON);
-    assertEquals(0.25, similarities.get(new Pair<Long, Long>(3L, 4L)), EPSILON);
+    assertEquals(0.25, similarities.get(new Pair<>(1L, 2L)), EPSILON);
+    assertEquals(0.6666666666666666, similarities.get(new Pair<>(1L, 3L)), EPSILON);
+    assertEquals(0.5, similarities.get(new Pair<>(1L, 4L)), EPSILON);
+    assertEquals(0.3333333333333333, similarities.get(new Pair<>(2L, 3L)), EPSILON);
+    assertEquals(0.25, similarities.get(new Pair<>(2L, 4L)), EPSILON);
+    assertEquals(0.25, similarities.get(new Pair<>(3L, 4L)), EPSILON);
   }
 
   /**
@@ -898,7 +898,7 @@ public class RecommenderJobTest extends TasteTestCase {
     Map<Pair<Long,Long>, Double> similarities = Maps.newHashMap();
     for (String line : new FileLineIterable(file)) {
       String[] parts = line.split("\t");
-      similarities.put(new Pair<Long,Long>(Long.parseLong(parts[0]), Long.parseLong(parts[1])),
+      similarities.put(new Pair<>(Long.parseLong(parts[0]), Long.parseLong(parts[1])),
           Double.parseDouble(parts[2]));
     }
     return similarities;

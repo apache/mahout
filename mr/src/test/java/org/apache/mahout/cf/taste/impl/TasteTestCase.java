@@ -34,7 +34,7 @@ import java.util.List;
 public abstract class TasteTestCase extends MahoutTestCase {
 
   public static DataModel getDataModel(long[] userIDs, Double[][] prefValues) {
-    FastByIDMap<PreferenceArray> result = new FastByIDMap<PreferenceArray>();
+    FastByIDMap<PreferenceArray> result = new FastByIDMap<>();
     for (int i = 0; i < userIDs.length; i++) {
       List<Preference> prefsList = Lists.newArrayList();
       for (int j = 0; j < prefValues[i].length; j++) {
@@ -50,7 +50,7 @@ public abstract class TasteTestCase extends MahoutTestCase {
   }
 
   public static DataModel getBooleanDataModel(long[] userIDs, boolean[][] prefs) {
-    FastByIDMap<FastIDSet> result = new FastByIDMap<FastIDSet>();
+    FastByIDMap<FastIDSet> result = new FastByIDMap<>();
     for (int i = 0; i < userIDs.length; i++) {
       FastIDSet prefsSet = new FastIDSet();
       for (int j = 0; j < prefs[i].length; j++) {

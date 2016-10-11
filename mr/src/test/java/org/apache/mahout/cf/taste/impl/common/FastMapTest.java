@@ -34,7 +34,7 @@ public final class FastMapTest extends TasteTestCase {
 
   @Test
   public void testPutAndGet() {
-    Map<String, String> map = new FastMap<String, String>();
+    Map<String, String> map = new FastMap<>();
     assertNull(map.get("foo"));
     map.put("foo", "bar");
     assertEquals("bar", map.get("foo"));
@@ -42,7 +42,7 @@ public final class FastMapTest extends TasteTestCase {
 
   @Test
   public void testRemove() {
-    Map<String, String> map = new FastMap<String, String>();
+    Map<String, String> map = new FastMap<>();
     map.put("foo", "bar");
     map.remove("foo");
     assertEquals(0, map.size());
@@ -52,7 +52,7 @@ public final class FastMapTest extends TasteTestCase {
 
   @Test
   public void testClear() {
-    Map<String, String> map = new FastMap<String, String>();
+    Map<String, String> map = new FastMap<>();
     map.put("foo", "bar");
     map.clear();
     assertEquals(0, map.size());
@@ -62,7 +62,7 @@ public final class FastMapTest extends TasteTestCase {
 
   @Test
   public void testSizeEmpty() {
-    Map<String, String> map = new FastMap<String, String>();
+    Map<String, String> map = new FastMap<>();
     assertEquals(0, map.size());
     assertTrue(map.isEmpty());
     map.put("foo", "bar");
@@ -88,14 +88,14 @@ public final class FastMapTest extends TasteTestCase {
 
   @Test(expected = NullPointerException.class)
   public void testNull1() {
-    Map<String, String> map = new FastMap<String, String>();
+    Map<String, String> map = new FastMap<>();
     assertNull(map.get(null));
     map.put(null, "bar");
   }
 
   @Test(expected = NullPointerException.class)
   public void testNull2() {
-    Map<String, String> map = new FastMap<String, String>();
+    Map<String, String> map = new FastMap<>();
     map.put("foo", null);
   }
 
@@ -110,7 +110,7 @@ public final class FastMapTest extends TasteTestCase {
 
   @Test
   public void testGrow() {
-    Map<String, String> map = new FastMap<String, String>(1, FastMap.NO_MAX_SIZE);
+    Map<String, String> map = new FastMap<>(1, FastMap.NO_MAX_SIZE);
     map.put("foo", "bar");
     map.put("baz", "bang");
     assertEquals("bar", map.get("foo"));
@@ -184,7 +184,7 @@ public final class FastMapTest extends TasteTestCase {
 
   @Test
   public void testVersusHashMap() {
-    Map<Integer, String> actual = new FastMap<Integer, String>(1, 1000000);
+    Map<Integer, String> actual = new FastMap<>(1, 1000000);
     Map<Integer, String> expected = Maps.newHashMapWithExpectedSize(1000000);
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 1000000; i++) {
@@ -206,7 +206,7 @@ public final class FastMapTest extends TasteTestCase {
 
   @Test
   public void testMaxSize() {
-    Map<String, String> map = new FastMap<String, String>(1, 1);
+    Map<String, String> map = new FastMap<>(1, 1);
     map.put("foo", "bar");
     assertEquals(1, map.size());
     map.put("baz", "bang");
@@ -218,7 +218,7 @@ public final class FastMapTest extends TasteTestCase {
   }
 
   private static FastMap<String, String> buildTestFastMap() {
-    FastMap<String, String> map = new FastMap<String, String>();
+    FastMap<String, String> map = new FastMap<>();
     map.put("foo", "bar");
     map.put("baz", "bang");
     map.put("alpha", "beta");

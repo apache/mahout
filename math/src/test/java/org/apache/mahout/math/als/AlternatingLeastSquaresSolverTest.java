@@ -84,7 +84,7 @@ public class AlternatingLeastSquaresSolverTest extends MahoutTestCase {
   }
 
   private OpenIntObjectHashMap<Vector> asRowVectors(Matrix matrix) {
-    OpenIntObjectHashMap<Vector> rows = new OpenIntObjectHashMap<Vector>();
+    OpenIntObjectHashMap<Vector> rows = new OpenIntObjectHashMap<>();
     for (int row = 0; row < matrix.numRows(); row++) {
       rows.put(row, matrix.viewRow(row).clone());
     }

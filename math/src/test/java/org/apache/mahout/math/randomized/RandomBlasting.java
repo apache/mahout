@@ -50,8 +50,8 @@ public class RandomBlasting extends RandomizedTest {
   @Test
   @Repeat(iterations = 20)
   public void testAgainstReferenceOpenObjectIntHashMap() {
-    OpenObjectIntHashMap<Integer> base = new OpenObjectIntHashMap<Integer>();
-    Map<Integer, Integer> reference = new HashMap<Integer, Integer>();
+    OpenObjectIntHashMap<Integer> base = new OpenObjectIntHashMap<>();
+    Map<Integer, Integer> reference = new HashMap<>();
 
     List<Operation> ops = Lists.newArrayList();
     addOp(ops, Operation.ADD, 60);
@@ -101,8 +101,8 @@ public class RandomBlasting extends RandomizedTest {
   @Test
   @Repeat(iterations = 20)
   public void testAgainstReferenceOpenIntObjectHashMap() {
-    OpenIntObjectHashMap<Integer> base = new OpenIntObjectHashMap<Integer>();
-    Map<Integer, Integer> reference = new HashMap<Integer, Integer>();
+    OpenIntObjectHashMap<Integer> base = new OpenIntObjectHashMap<>();
+    Map<Integer, Integer> reference = new HashMap<>();
 
     List<Operation> ops = Lists.newArrayList();
     addOp(ops, Operation.ADD, 60);
@@ -153,7 +153,7 @@ public class RandomBlasting extends RandomizedTest {
   @Repeat(iterations = 20)
   public void testAgainstReferenceOpenIntIntHashMap() {
     OpenIntIntHashMap base = new OpenIntIntHashMap();
-    HashMap<Integer, Integer> reference = new HashMap<Integer, Integer>();
+    HashMap<Integer, Integer> reference = new HashMap<>();
 
     List<Operation> ops = Lists.newArrayList();
     addOp(ops, Operation.ADD, 60);
@@ -269,7 +269,7 @@ public class RandomBlasting extends RandomizedTest {
   @Test
   @Repeat(iterations = 20)
   public void testAgainstReferenceOpenHashSet() {
-    Set<Integer> base = new OpenHashSet<Integer>();
+    Set<Integer> base = new OpenHashSet<>();
     Set<Integer> reference = Sets.newHashSet();
 
     List<Operation> ops = Lists.newArrayList();
@@ -334,7 +334,7 @@ public class RandomBlasting extends RandomizedTest {
   /** */
   @Test
   public void testClearTable() throws Exception {
-    OpenObjectIntHashMap<Integer> m = new OpenObjectIntHashMap<Integer>();
+    OpenObjectIntHashMap<Integer> m = new OpenObjectIntHashMap<>();
     m.clear(); // rehash from the default capacity to the next prime after 1 (3).
     m.put(1, 2);
     m.clear(); // Should clear internal references.

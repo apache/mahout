@@ -27,8 +27,8 @@ public class FilePersistenceStrategyTest extends TasteTestCase {
 
   @Test
   public void persistAndLoad() throws Exception {
-    FastByIDMap<Integer> userIDMapping = new FastByIDMap<Integer>();
-    FastByIDMap<Integer> itemIDMapping = new FastByIDMap<Integer>();
+    FastByIDMap<Integer> userIDMapping = new FastByIDMap<>();
+    FastByIDMap<Integer> itemIDMapping = new FastByIDMap<>();
 
     userIDMapping.put(123, 0);
     userIDMapping.put(456, 1);

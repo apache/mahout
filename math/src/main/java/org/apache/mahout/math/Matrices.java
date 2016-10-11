@@ -29,7 +29,7 @@ public final class Matrices {
 
   /**
    * Create a matrix view based on a function generator.
-   * <p/>
+   * <p>
    * The generator needs to be idempotent, i.e. returning same value
    * for each combination of (row, column) argument sent to generator's
    * {@link IntIntFunction#apply(int, int)} call.
@@ -129,7 +129,7 @@ public final class Matrices {
 
   /**
    * Uniform [-1,1) matrix generator function.
-   * <p/>
+   * <p>
    * WARNING: to keep things performant, it is stateful and so not thread-safe.
    * You'd need to create a copy per thread (with same seed) if shared between threads.
    *

@@ -38,15 +38,16 @@ import java.util.Random;
  * already picked before, i.e. if it is not already contained in the list.
  * We then do the same thing again and again until we have eventually collected 10^6 distinct numbers.
  * Now we sort the set ascending and return it.</i>
+ * <dl>
  * <dt>It is exactly in this sense that this class returns "random" sets.
  * <b>Note, however, that the implementation of this class uses a technique orders of magnitudes
- * better (both in time and space) than the one outlined above.</b>
+ * better (both in time and space) than the one outlined above.</b></dt></dl>
  *
  * <p><b>Performance:</b> Space requirements are zero. Running time is <tt>O(n)</tt> on average,
  * <tt>O(N)</tt> in the worst case.
- * <h2 align=center>Performance (200Mhz Pentium Pro, JDK 1.2, NT)</h2>
+ * <h2>Performance (200Mhz Pentium Pro, JDK 1.2, NT)</h2>
  * <center>
- *   <table border="1">
+ *   <table border="1" summary="performance table">
  *     <tr> 
  *       <td align="center" width="20%">n</td>
  *       <td align="center" width="20%">N</td>

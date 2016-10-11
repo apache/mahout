@@ -137,7 +137,7 @@ public class ClusterClassificationMapper extends
     List<Cluster> clusters = new ArrayList<>();
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
-    Iterator<?> it = new SequenceFileDirValueIterator<Writable>(
+    Iterator<?> it = new SequenceFileDirValueIterator<>(
         clusterFiles[0].getPath(), PathType.LIST, PathFilters.partFilter(),
         null, false, conf);
     while (it.hasNext()) {

@@ -32,9 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Simple implementation of the <a href="http://en.wikipedia.org/wiki/Lanczos_algorithm">Lanczos algorithm</a> for
+ * Simple implementation of the <a href="http://en.wikipedia.org/wiki/Lanczos_algorithm">Lanczos algorithm</a> for
  * finding eigenvalues of a symmetric matrix, applied to non-symmetric matrices by applying Matrix.timesSquared(vector)
- * as the "matrix-multiplication" method.</p>
+ * as the "matrix-multiplication" method.<p>
  *
  * See the SSVD code for a better option
  * {@link org.apache.mahout.math.ssvd.SequentialBigSvd}
@@ -48,19 +48,16 @@ import org.slf4j.LoggerFactory;
  *   <li>generate a good starting seed vector by summing all the rows of the input matrix, and</li>
  *   <li>compute the trace(inputMatrix<sup>t</sup>*matrix)
  * </ul>
- * </p>
  * <p>
  * This latter value, being the sum of all of the singular values, is used to rescale the entire matrix, effectively
  * forcing the largest singular value to be strictly less than one, and transforming floating point <em>overflow</em>
  * problems into floating point <em>underflow</em> (ie, very small singular values will become invisible, as they
  * will appear to be zero and the algorithm will terminate).
- * </p>
  * <p>This implementation uses {@link EigenDecomposition} to do the
  * eigenvalue extraction from the small (desiredRank x desiredRank) tridiagonal matrix.  Numerical stability is
  * achieved via brute-force: re-orthogonalization against all previous eigenvectors is computed after every pass.
  * This can be made smarter if (when!) this proves to be a major bottleneck.  Of course, this step can be parallelized
  * as well.
- * </p>
  * @see org.apache.mahout.math.ssvd.SequentialBigSvd
  */
 @Deprecated
@@ -74,8 +71,8 @@ public class LanczosSolver {
     ITERATE, ORTHOGANLIZE, TRIDIAG_DECOMP, FINAL_EIGEN_CREATE
   }
 
-  private final Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
-  private final Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
+  private final Map<TimingSection, Long> startTimes = new EnumMap<>(TimingSection.class);
+  private final Map<TimingSection, Long> times = new EnumMap<>(TimingSection.class);
 
   private static final class Scale extends DoubleFunction {
     private final double d;

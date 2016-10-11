@@ -31,7 +31,7 @@ public final class PlusAnonymousConcurrentUserDataModelTest extends MahoutTestCa
 	 * Prepares a testable object without delegate data
 	 */
 	private static PlusAnonymousConcurrentUserDataModel getTestableWithoutDelegateData(int maxConcurrentUsers) {
-		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<PreferenceArray>();
+		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<>();
 		return new PlusAnonymousConcurrentUserDataModel(new GenericDataModel(delegatePreferences), maxConcurrentUsers);
 	}
 
@@ -162,7 +162,7 @@ public final class PlusAnonymousConcurrentUserDataModelTest extends MahoutTestCa
     long sampleItemID = 11;
     prefs.setItemID(0, sampleItemID);
 
-		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<PreferenceArray>();
+		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<>();
 		delegatePreferences.put(sampleUserID, prefs);
 
 		PlusAnonymousConcurrentUserDataModel instance = getTestableWithDelegateData(10, delegatePreferences);
@@ -220,7 +220,7 @@ public final class PlusAnonymousConcurrentUserDataModelTest extends MahoutTestCa
     long sampleItemID = 11;
     prefs.setItemID(0, sampleItemID);
 
-		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<PreferenceArray>();
+		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<>();
 		delegatePreferences.put(sampleUserID, prefs);
 
 		PlusAnonymousConcurrentUserDataModel instance = getTestableWithDelegateData(10, delegatePreferences);
@@ -249,7 +249,7 @@ public final class PlusAnonymousConcurrentUserDataModelTest extends MahoutTestCa
     long sampleItemID = 11;
     prefs.setItemID(0, sampleItemID);
 
-		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<PreferenceArray>();
+		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<>();
 		delegatePreferences.put(sampleUserID, prefs);
 
 		PlusAnonymousConcurrentUserDataModel instance = getTestableWithDelegateData(10, delegatePreferences);
@@ -284,7 +284,7 @@ public final class PlusAnonymousConcurrentUserDataModelTest extends MahoutTestCa
     long sampleItemID2 = 22;
     prefs.setItemID(1, sampleItemID2);
 
-		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<PreferenceArray>();
+		FastByIDMap<PreferenceArray> delegatePreferences = new FastByIDMap<>();
 		delegatePreferences.put(sampleUserID, prefs);
 
 		PlusAnonymousConcurrentUserDataModel instance = getTestableWithDelegateData(10, delegatePreferences);

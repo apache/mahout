@@ -174,7 +174,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       int[] expect = EXPECTED_NUM_POINTS[k];
-      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable>();
+      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<>();
       // The key is the clusterId, the value is the weighted vector
       for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(
           new Path(clusteredPointsPath, "part-m-0"), conf)) {
@@ -228,7 +228,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       int[] expect = EXPECTED_NUM_POINTS[k];
-      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable>();
+      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<>();
       // The key is the clusterId, the value is the weighted vector
       for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(
           new Path(clusteredPointsPath, "part-m-0"), conf)) {
@@ -283,7 +283,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       // assertEquals("output dir files?", 4, outFiles.length);
       int[] expect = EXPECTED_NUM_POINTS[k];
-      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable>();
+      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<>();
       // The key is the clusterId, the value is the weighted vector
       for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(
           new Path(clusteredPointsPath, "part-m-00000"), conf)) {
@@ -311,7 +311,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, 0.0, false);
     
     DummyOutputCollector<Text, ClusterWritable> collector1 =
-        new DummyOutputCollector<Text, ClusterWritable>();
+        new DummyOutputCollector<>();
 
     FileStatus[] outParts = FileSystem.get(conf).globStatus(
                     new Path(outputPath, "clusters-0-final/*-0*"));
@@ -354,7 +354,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     
     // now compare the expected clusters with actual
     Path clusteredPointsPath = new Path(kmeansOutput, "clusteredPoints");
-    DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable>();
+    DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<>();
     
     // The key is the clusterId, the value is the weighted vector
     for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(

@@ -110,7 +110,7 @@ public class ParallelSGDFactorizerTest extends TasteTestCase {
     Matrix ratings = users.times(items);
     normalize(ratings, 5);
 
-    FastByIDMap<PreferenceArray> userData = new FastByIDMap<PreferenceArray>();
+    FastByIDMap<PreferenceArray> userData = new FastByIDMap<>();
     for (int userIndex = 0; userIndex < numUsers; userIndex++) {
       List<Preference> row= Lists.newArrayList();
       for (int itemIndex = 0; itemIndex < numItems; itemIndex++) {
@@ -130,7 +130,7 @@ public class ParallelSGDFactorizerTest extends TasteTestCase {
     this.lambda = 0.01;
     this.numIterations = 1000;
 
-    FastByIDMap<PreferenceArray> userData = new FastByIDMap<PreferenceArray>();
+    FastByIDMap<PreferenceArray> userData = new FastByIDMap<>();
 
     userData.put(1L, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(1L, 1L, 5.0f),
         new GenericPreference(1L, 2L, 5.0f),
@@ -156,7 +156,7 @@ public class ParallelSGDFactorizerTest extends TasteTestCase {
     shuffler.shuffle();
     shuffler.stage();
 
-    FastByIDMap<FastByIDMap<Boolean>> checked = new FastByIDMap<FastByIDMap<Boolean>>();
+    FastByIDMap<FastByIDMap<Boolean>> checked = new FastByIDMap<>();
 
     for (int i = 0; i < shuffler.size(); i++) {
       Preference pref=shuffler.get(i);

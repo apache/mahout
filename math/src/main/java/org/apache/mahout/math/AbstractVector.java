@@ -56,7 +56,8 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
   }
 
   /**
-   * Iterates over all elements <p/> * NOTE: Implementations may choose to reuse the Element returned for performance
+   * Iterates over all elements <p>
+   * NOTE: Implementations may choose to reuse the Element returned for performance
    * reasons, so if you need a copy of it, you should call {@link #getElement(int)} for the given index
    *
    * @return An {@link Iterator} over all elements
@@ -64,7 +65,8 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
   protected abstract Iterator<Element> iterator();
 
   /**
-   * Iterates over all non-zero elements. <p/> NOTE: Implementations may choose to reuse the Element returned for
+   * Iterates over all non-zero elements. <p>
+   * NOTE: Implementations may choose to reuse the Element returned for
    * performance reasons, so if you need a copy of it, you should call {@link #getElement(int)} for the given index
    *
    * @return An {@link Iterator} over all non-zero elements

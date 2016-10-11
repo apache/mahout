@@ -223,7 +223,7 @@ public class VectorView extends AbstractVector {
   /**
    * Used internally by assign() to update multiple indices and values at once.
    * Only really useful for sparse vectors (especially SequentialAccessSparseVector).
-   * <p/>
+   * <p>
    * If someone ever adds a new type of sparse vectors, this method must merge (index, value) pairs into the vector.
    *
    * @param updates a mapping of indices to values to merge in the vector.

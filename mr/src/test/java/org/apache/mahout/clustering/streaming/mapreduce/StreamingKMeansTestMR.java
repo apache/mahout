@@ -218,8 +218,7 @@ public class StreamingKMeansTestMR extends MahoutTestCase {
   @Test
   public void testHypercubeMapReduce() throws IOException {
     MapReduceDriver<Writable, VectorWritable, IntWritable, CentroidWritable, IntWritable, CentroidWritable>
-        mapReduceDriver = new MapReduceDriver<Writable, VectorWritable, IntWritable, CentroidWritable,
-        IntWritable, CentroidWritable>(new StreamingKMeansMapper(), new StreamingKMeansReducer());
+        mapReduceDriver = new MapReduceDriver<>(new StreamingKMeansMapper(), new StreamingKMeansReducer());
     Configuration configuration = mapReduceDriver.getConfiguration();
     configure(configuration);
 
@@ -252,7 +251,7 @@ public class StreamingKMeansTestMR extends MahoutTestCase {
               @Override
               public org.apache.hadoop.mrunit.types.Pair<IntWritable, CentroidWritable> apply(
                   org.apache.mahout.common.Pair<IntWritable, CentroidWritable> input) {
-                return new org.apache.hadoop.mrunit.types.Pair<IntWritable, CentroidWritable>(
+                return new org.apache.hadoop.mrunit.types.Pair<>(
                     input.getFirst(), input.getSecond());
               }
             })));
