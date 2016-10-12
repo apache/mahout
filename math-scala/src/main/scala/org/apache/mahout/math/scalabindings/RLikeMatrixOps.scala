@@ -27,7 +27,7 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
 
   /** Structure-optimized mmul */
 
-  implicit var solverOperator: opMMulSolver =_
+  implicit var solverOperator: opMMulSolver = _
 
   // get the solver matching the implicit variable solverOperator
   def mmulSolver = SolverFactory.getOperator
