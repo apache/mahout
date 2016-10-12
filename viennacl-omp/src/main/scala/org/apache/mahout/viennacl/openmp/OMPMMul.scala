@@ -166,7 +166,7 @@ object OMPMMul extends MMBinaryFunc {
     }
 
     // CSR matrices are efficient up to 50% non-zero
-    if(b.getFlavor.isDense) {
+    if (b.getFlavor.isDense) {
       var ms = System.currentTimeMillis()
       val oclCtx = new Context(Context.OPENCL_MEMORY)
       val oclA = toVclCmpMatrixAlt(a, oclCtx)
