@@ -1,13 +1,13 @@
 
 
-def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20): Long = {
+def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20, seed: Long = 1234L): Long = {
 
  
 
   val drmA = drmParallelizeEmpty(m , s, para).mapBlock(){
        case (keys,block:Matrix) =>
          val R =  scala.util.Random
-         R.setSeed(1234L)
+         R.setSeed(seed)
          val blockB = new SparseRowMatrix(block.nrow, block.ncol) 
          blockB := {x => if (R.nextDouble > pctDense) R.nextDouble else x }
        (keys -> blockB)
@@ -15,7 +15,7 @@ def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20)
   val drmB = drmParallelizeEmpty(s , n, para).mapBlock(){
        case (keys,block:Matrix) =>
          val R =  scala.util.Random
-         R.setSeed(1234L)
+         R.setSeed(seed + 1)
          val blockB = new SparseRowMatrix(block.nrow, block.ncol) 
          blockB := {x => if (R.nextDouble > pctDense) R.nextDouble else x }
        (keys -> blockB)

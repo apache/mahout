@@ -65,12 +65,6 @@ public class DenseMatrix extends AbstractMatrix {
     super(rows, columns);
     this.values = new double[rows][columns];
   }
-  /*
-   * Getter for the backing doubleArray
-   */
-  public double[][] getBackingArray(){
-    return this.values;
-  }
 
   @Override
   public Matrix clone() {
