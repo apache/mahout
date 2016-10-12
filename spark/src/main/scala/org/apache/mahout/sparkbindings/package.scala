@@ -84,7 +84,7 @@ package object sparkbindings {
       } else {
         // In local mode we don't care about jars, do we?
         // yes adding jars always now since we are not including the artifacts
-         sparkConf.setJars(customJars.toSeq)
+        sparkConf.setJars(customJars.toSeq)
       }
 
       sparkConf.setAppName(appName).setMaster(masterUrl).set("spark.serializer",
