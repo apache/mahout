@@ -60,17 +60,17 @@ case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: 
     val seed = fs.getFileStatus(new Path(dir))
     var f: String = files
 
-    if (seed.isDir) {
+    if (seed.isDirectory) {
       val fileStatuses: Array[FileStatus] = fs.listStatus(new Path(dir))
       for (fileStatus <- fileStatuses) {
         if (fileStatus.getPath().getName().matches(filePattern)
-          && !fileStatus.isDir) {
+          && !fileStatus.isDirectory) {
           // found a file
           if (fileStatus.getLen() != 0) {
             // file is not empty
             f = f + fileStatus.getPath.toUri.toString + ","
           }
-        } else if (fileStatus.isDir && recursive) {
+        } else if (fileStatus.isDirectory && recursive) {
           f = findFiles(fileStatus.getPath.toString, filePattern, f)
         }
       }

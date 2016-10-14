@@ -17,14 +17,12 @@
 
 package org.apache.mahout.math.scalabindings
 
-import org.apache.log4j.{Level, BasicConfigurator}
-import org.scalatest.FunSuite
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import org.apache.mahout.test.MahoutSuite
-
+import org.apache.log4j.{BasicConfigurator, Level}
 import org.apache.mahout.logging._
+import org.apache.mahout.math._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.test.MahoutSuite
+import org.scalatest.FunSuite
 
 class RLikeVectorOpsSuite extends FunSuite with MahoutSuite {
 
