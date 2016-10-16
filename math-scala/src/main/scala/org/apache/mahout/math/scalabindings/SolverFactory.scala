@@ -46,25 +46,25 @@ object SolverFactory extends SolverFactory {
     def getOperator[C: ClassTag]: MMBinaryFunc = {
 
       try {
-        log.info(s"Creating org.apache.mahout.viennacl.opencl.GPUMMul solver")
+        println("[INFO] Creating org.apache.mahout.viennacl.opencl.GPUMMul solver")
         clazz = Class.forName("org.apache.mahout.viennacl.opencl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-        log.info("Successfully created org.apache.mahout.viennacl.opencl.GPUMMul solver")
+        println("[INFO] Successfully created org.apache.mahout.viennacl.opencl.GPUMMul solver")
 
       } catch {
         case x: Exception =>
-          log.warn("Unable to create class GPUMMul: attempting OpenMP version")
+          println("[WARN] Unable to create class GPUMMul: attempting OpenMP version")
          // println(x.getMessage)
           try {
             // attempt to instantiate the OpenMP version, assuming we’ve
             // created a separate OpenMP-only module (none exist yet)
-            log.info("Creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
+            println("[INFO] Creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
             clazz = Class.forName("org.apache.mahout.viennacl.openmp.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-            log.info("Successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
+            println("[INFO] Successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
 
           } catch {
             case x: Exception =>
               // fall back to JVM Dont need to Dynamicly assign MMul is in the same package.
-              log.warn(s"Unable to create class OMPMMul: falling back to java version")
+              println("[INFO] Unable to create class OMPMMul: falling back to java version")
               clazz = MMul
           }
         }
