@@ -18,6 +18,7 @@ package org.apache.mahout.math.scalabindings
 
 import java.io.File
 
+import org.apache.log4j.lf5.LogLevel
 import org.apache.mahout.logging._
 
 import scala.reflect.ClassTag
@@ -28,6 +29,7 @@ import scala.reflect._
 class SolverFactory {
 
   private final implicit val log = getLog(this.getClass)
+  log.setLevel(org.apache.log4j.Level.INFO)
 
   // just temp for quick POC
   val classMap: Map[String,String] =
@@ -44,25 +46,25 @@ object SolverFactory extends SolverFactory {
     def getOperator[C: ClassTag]: MMBinaryFunc = {
 
       try {
-        println("creating org.apache.mahout.viennacl.opencl.GPUMMul solver")
+        log.info(s"Creating org.apache.mahout.viennacl.opencl.GPUMMul solver")
         clazz = Class.forName("org.apache.mahout.viennacl.opencl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-        println("successfully created org.apache.mahout.viennacl.opencl.GPUMMul solver")
+        log.info("Successfully created org.apache.mahout.viennacl.opencl.GPUMMul solver")
 
       } catch {
         case x: Exception =>
-          println(s" Error creating class: GPUMMul attempting OpenMP version")
-          println(x.getMessage)
+          log.warn("Unable to create class GPUMMul: attempting OpenMP version")
+         // println(x.getMessage)
           try {
             // attempt to instantiate the OpenMP version, assuming we’ve
             // created a separate OpenMP-only module (none exist yet)
-            println("creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
+            log.info("Creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
             clazz = Class.forName("org.apache.mahout.viennacl.openmp.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-            println("successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
+            log.info("Successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
 
           } catch {
             case x: Exception =>
               // fall back to JVM Dont need to Dynamicly assign MMul is in the same package.
-              println(s" Error creating class: OMPMMul.. returning JVM MMul")
+              log.warn(s"Unable to create class OMPMMul: falling back to java version")
               clazz = MMul
           }
         }
