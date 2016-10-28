@@ -57,7 +57,8 @@ object MahoutKryoRegistrator {
       Class.forName(classOf[DenseVector].getName + "$DenseVectorView"),
       // This is supported by twitter.chill, but kryo still is offended by lack of registration:
       classOf[Range],
-      classOf[Unit],
+      //classOf[Unit], // this causes an error with "void not serializable" or some such on a real cluster. Not found
+      // in unit tests
       classOf[scala.collection.mutable.WrappedArray.ofRef[_]],
       classOf[Array[Int]],
       classOf[Array[String]]

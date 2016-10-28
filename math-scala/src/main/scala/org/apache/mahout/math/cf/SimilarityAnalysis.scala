@@ -320,6 +320,8 @@ object SimilarityAnalysis extends Serializable {
 
     //val minLLR = minLLROpt.getOrElse(0.0d) // accept all values if not specified
 
+    val minLLR = minLLROpt
+
     drm.mapBlock() {
       case (keys, block) =>
 
@@ -351,7 +353,7 @@ object SimilarityAnalysis extends Serializable {
               // val candidate = thingA -> normailizedLLR
 
               // Enqueue item with score, if belonging to the top-k
-              if(minLLROpt.nonEmpty && candidate._2 >= minLLROpt.get) {//llr threshold takes precedence over max per row
+              if(minLLR.isEmpty || llr >= minLLR.get) { // llr threshold takes precedence over max per row
                 if (topItemsPerThing.size < maxInterestingItemsPerThing) {
                   topItemsPerThing.enqueue(candidate)
                 } else if (orderByScore.lt(candidate, topItemsPerThing.head)) {
