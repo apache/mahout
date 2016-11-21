@@ -240,6 +240,17 @@ then
     fi
   fi
 
+   # add vcl jars at any point.
+   # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
   # add release dependencies to CLASSPATH
   for f in $MAHOUT_HOME/lib/*.jar; do
     CLASSPATH=${CLASSPATH}:$f;

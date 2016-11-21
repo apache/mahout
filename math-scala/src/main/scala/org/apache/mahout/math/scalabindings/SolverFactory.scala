@@ -53,7 +53,7 @@ object SolverFactory extends SolverFactory {
       } catch {
         case x: Exception =>
           println("[WARN] Unable to create class GPUMMul: attempting OpenMP version")
-         // println(x.getMessage)
+          x.printStackTrace
           try {
             // attempt to instantiate the OpenMP version, assuming we’ve
             // created a separate OpenMP-only module (none exist yet)
@@ -62,7 +62,8 @@ object SolverFactory extends SolverFactory {
             println("[INFO] Successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
 
           } catch {
-            case x: Exception =>
+            case y: Exception =>
+              y.printStackTrace
               // fall back to JVM Dont need to Dynamicly assign MMul is in the same package.
               println("[INFO] Unable to create class OMPMMul: falling back to java version")
               clazz = MMul
