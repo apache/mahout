@@ -78,6 +78,106 @@
         <mahout.skip.distribution>false</mahout.skip.distribution>
       </properties>
     </profile>
+    <profile>
+      <id>viennacl</id>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-math</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-integration</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-hdfs</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-mr</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-examples</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-flink_${scala.compat.version}</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+            <version>0.13.0-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
+    </profile>
+    <profile>
+      <id>viennacl-omp</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-math</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-integration</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-hdfs</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-mr</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-examples</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-flink_${scala.compat.version}</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+          <version>0.13.0-SNAPSHOT</version>
+        </dependency>
+      </dependencies>
+
+    </profile>
+
+
+
   </profiles>
 
   <dependencies>
@@ -117,6 +217,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
+    <!--Viennacl is not part of the Default build currently.-->
     <!--<dependency>-->
       <!--<groupId>org.apache.mahout</groupId>-->
       <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
