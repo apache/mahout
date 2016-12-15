@@ -21,12 +21,15 @@ import java.io._
 
 import org.apache.mahout.logging._
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.{MatrixWritable, VectorWritable, Matrix, Vector}
+import org.apache.mahout.math.{Matrix, MatrixWritable, Vector, VectorWritable}
 import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, CheckpointedDrmSparkOps, SparkBCast}
 import org.apache.mahout.util.IOUtilsScala
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.{Vector => SparkVector, SparseVector => SparseSparkVector, DenseVector => DenseSparkVector}
+import org.apache.spark.sql.DataFrame
 
 import collection._
 import collection.generic.Growable
@@ -141,6 +144,52 @@ package object sparkbindings {
     new CheckpointedDrmSpark[K](rddInput = rdd, _nrow = nrow, _ncol = ncol, cacheHint = cacheHint,
       _canHaveMissingRows = canHaveMissingRows)
 
+  /** A drmWrap version that takes an RDD[org.apache.spark.mllib.regression.LabeledPoint]
+    * returns a DRM where column the label is the last column */
+  def drmWrapMLLibLabeledPoint(rdd: RDD[LabeledPoint],
+                   nrow: Long = -1,
+                   ncol: Int = -1,
+                   cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+                   canHaveMissingRows: Boolean = false): CheckpointedDrm[Int] = {
+    val drmRDD: DrmRdd[Int] = rdd.zipWithIndex.map(lv => {
+      lv._1.features match {
+        case _: DenseSparkVector => (lv._2.toInt, new org.apache.mahout.math.DenseVector( lv._1.features.toArray ++ Array(lv._1.label) ))
+        case _: SparseSparkVector =>  (lv._2.toInt,
+          new org.apache.mahout.math.RandomAccessSparseVector(new org.apache.mahout.math.DenseVector( lv._1.features.toArray ++ Array(lv._1.label) )) )
+      }
+    })
+
+    drmWrap(drmRDD, nrow, ncol, cacheHint, canHaveMissingRows)
+  }
+
+  /** A drmWrap version that takes a DataFrame of Row[Double] */
+  def drmWrapDataFrame(df: DataFrame,
+                       nrow: Long = -1,
+                       ncol: Int = -1,
+                       cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+                       canHaveMissingRows: Boolean = false): CheckpointedDrm[Int] = {
+    val drmRDD: DrmRdd[Int] = df.rdd
+                                .zipWithIndex
+                                .map( o => (o._2.toInt, o._1.mkString(",").split(",").map(s => s.toDouble)) )
+                                .map(o => (o._1, new org.apache.mahout.math.DenseVector( o._2 )))
+
+    drmWrap(drmRDD, nrow, ncol, cacheHint, canHaveMissingRows)
+  }
+
+  /** A drmWrap Version that takes an RDD[org.apache.spark.mllib.linalg.Vector] */
+  def drmWrapMLLibVector(rdd: RDD[SparkVector],
+                     nrow: Long = -1,
+                     ncol: Int = -1,
+                     cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+                     canHaveMissingRows: Boolean = false): CheckpointedDrm[Int] = {
+    val drmRDD: DrmRdd[Int] = rdd.zipWithIndex.map( v => {
+      v._1 match {
+        case _: DenseSparkVector => (v._2.toInt, new org.apache.mahout.math.DenseVector(v._1.toArray))
+        case _: SparseSparkVector => (v._2.toInt, new org.apache.mahout.math.RandomAccessSparseVector(new org.apache.mahout.math.DenseVector(v._1.toArray)) )
+      }
+    })
+    drmWrap(drmRDD, nrow, ncol, cacheHint, canHaveMissingRows)
+  }
 
   /** Another drmWrap version that takes in vertical block-partitioned input to form the matrix. */
   def drmWrapBlockified[K: ClassTag](blockifiedDrmRdd: BlockifiedDrmRdd[K], nrow: Long = -1, ncol: Int = -1,
