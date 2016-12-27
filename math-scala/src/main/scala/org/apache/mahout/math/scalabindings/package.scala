@@ -420,7 +420,7 @@ package object scalabindings {
 
   /**
     * Check the density of an in-core matrix based on supplied criteria.
-    * Returns true if we think mx is densier than threshold with at least 80% confidence.
+    * Returns true if we think mx is denser than threshold with at least 80% confidence.
     *
     * @param mx  The matrix to check density of.
     * @param threshold the threshold of non-zero elements above which we consider a Matrix Dense
@@ -465,7 +465,7 @@ package object scalabindings {
       else if (mean > threshold + iv) return true // dense
     }
 
-    return mean > threshold // if (mean > threshold) dense
+    mean > threshold // if (mean > threshold) dense
 
   }
 
