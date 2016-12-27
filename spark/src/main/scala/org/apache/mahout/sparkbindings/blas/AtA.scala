@@ -37,6 +37,7 @@ object AtA {
 
   final val PROPERTY_ATA_MAXINMEMNCOL = "mahout.math.AtA.maxInMemNCol"
   final val PROPERTY_ATA_MMUL_BLOCKHEIGHT = "mahout.math.AtA.blockHeight"
+  final val PROPERTY_ATA_NUM_PARTS = "mahout.math.AtA.numParts"
 
   /** Materialize A'A operator */
   def at_a(operator: OpAtA[_], srcRdd: DrmRddInput[_]): DrmRddInput[Int] = {
@@ -244,7 +245,10 @@ object AtA {
     val m = op.A.nrow
     val n = op.A.ncol
     val aparts = srcRdd.partitions.length
-    val numParts = estimateProductPartitions(anrow = n, ancol = m, bncol = n, aparts = aparts, bparts = aparts)
+    val systemNumParts = System.getProperty(PROPERTY_ATA_NUM_PARTS, "-1").toInt
+    val numParts = if (systemNumParts != -1) systemNumParts else {
+      estimateProductPartitions(anrow = n, ancol = m, bncol = n, aparts = aparts, bparts = aparts)
+    }
     val ranges = computeEvenSplits(n, numParts)
 
     debug(s"operator mmul-A'A(Spark); #parts = $numParts, #partsA=$aparts.")
