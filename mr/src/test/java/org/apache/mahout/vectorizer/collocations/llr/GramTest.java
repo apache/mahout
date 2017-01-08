@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,6 +17,9 @@
 
 package org.apache.mahout.vectorizer.collocations.llr;
 
+import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -25,10 +28,6 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
-
-import com.google.common.collect.Maps;
-import org.apache.mahout.common.MahoutTestCase;
-import org.junit.Test;
 
 public final class GramTest extends MahoutTestCase {
   
@@ -113,7 +112,7 @@ public final class GramTest extends MahoutTestCase {
      new Gram("bar", Gram.Type.UNIGRAM)
     };
     
-    HashMap<Gram,Gram> map = Maps.newHashMap();
+    HashMap<Gram,Gram> map = new HashMap<>();
     for (Gram n : input) {
       Gram val = map.get(n);
       if (val != null) {

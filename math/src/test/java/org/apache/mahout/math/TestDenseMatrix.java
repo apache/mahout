@@ -17,11 +17,29 @@
 
 package org.apache.mahout.math;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 public final class TestDenseMatrix extends MatrixTest {
 
   @Override
   public Matrix matrixFactory(double[][] values) {
     return new DenseMatrix(values);
+  }
+
+  @Test
+  public void testGetValues() {
+    DenseMatrix m = new DenseMatrix(10, 10);
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        m.set(i, j, 10 * i + j);
+      }
+    }
+
+    double[][] values = m.getBackingStructure();
+    Assert.assertEquals(values.length, 10);
+    Assert.assertEquals(values[0].length, 10);
+    Assert.assertEquals(values[9][9], 99.0, 0.0);
   }
 
 }

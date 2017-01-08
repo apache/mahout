@@ -17,9 +17,8 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,7 @@ import java.util.Map;
 * Assigns integer codes to strings as they appear.
 */
 public class Dictionary {
-  private final Map<String, Integer> dict = Maps.newLinkedHashMap();
+  private final Map<String, Integer> dict = new LinkedHashMap<>();
 
   public int intern(String s) {
     if (!dict.containsKey(s)) {
@@ -38,7 +37,7 @@ public class Dictionary {
 
   public List<String> values() {
     // order of keySet is guaranteed to be insertion order
-    return Lists.newArrayList(dict.keySet());
+    return new ArrayList<>(dict.keySet());
   }
 
   public int size() {

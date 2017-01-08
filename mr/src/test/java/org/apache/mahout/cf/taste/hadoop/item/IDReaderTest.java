@@ -17,13 +17,13 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import java.util.Map;
-
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.junit.Test;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class IDReaderTest extends TasteTestCase {
 
@@ -33,7 +33,7 @@ public class IDReaderTest extends TasteTestCase {
   public void testUserItemFilter() throws Exception {
     Configuration conf = getConfiguration();
     IDReader idReader = new IDReader(conf);
-    Map<Long, FastIDSet> userItemFilter = Maps.newHashMap();
+    Map<Long, FastIDSet> userItemFilter = new HashMap<>();
 
     long user1 = 1;
     long user2 = 2;
