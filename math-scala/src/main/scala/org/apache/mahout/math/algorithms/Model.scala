@@ -30,9 +30,6 @@ abstract class Model extends Serializable {
   var fitParams = collection.mutable.Map[String, MahoutVector]()
   var isFit = false
 
-  /**
-    * Return a summary of the fit model
-    */
   def summary(): String
 
 
