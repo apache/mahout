@@ -75,6 +75,7 @@ package object sparkbindings {
         }
 
         sparkConf.setJars(jars = mcjars.toSeq ++ customJars)
+        if (!(customJars.size > 0)) sparkConf.setJars(customJars.toSeq)
 
       } else {
         // In local mode we don't care about jars, do we?

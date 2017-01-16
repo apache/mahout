@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import com.google.common.collect.Maps;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -103,7 +103,7 @@ public final class FastByIDMapTest extends TasteTestCase {
   @Test
   public void testVersusHashMap() {
     FastByIDMap<String> actual = new FastByIDMap<>();
-    Map<Long, String> expected = Maps.newHashMapWithExpectedSize(1000000);
+    Map<Long, String> expected = new HashMap<>(1000000);
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 1000000; i++) {
       double d = r.nextDouble();

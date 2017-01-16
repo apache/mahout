@@ -18,7 +18,6 @@
 package org.apache.mahout.math;
 
 import org.apache.mahout.math.flavor.MatrixFlavor;
-import org.apache.mahout.math.flavor.TraversingStructureEnum;
 
 import java.util.Arrays;
 
@@ -64,6 +63,14 @@ public class DenseMatrix extends AbstractMatrix {
   public DenseMatrix(int rows, int columns) {
     super(rows, columns);
     this.values = new double[rows][columns];
+  }
+
+  /**
+   * Returns the backing array
+   * @return double[][]
+   */
+  public double[][] getBackingStructure() {
+    return this.values;
   }
 
   @Override
