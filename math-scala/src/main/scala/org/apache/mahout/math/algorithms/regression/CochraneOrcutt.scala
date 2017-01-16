@@ -26,7 +26,7 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 class CochraneOrcutt extends Regressor {
   // https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation
 
-  var regressor : Regressor = new OLS() // type of regression to do- must have a 'beta' fit param
+  var regressor : Regressor = new OrdinaryLeastSquares() // type of regression to do- must have a 'beta' fit param
   var iterations = 3 // Number of iterations to run
 
   def fit[Int](drmY: DrmLike[Int], drmX: DrmLike[Int]) = {

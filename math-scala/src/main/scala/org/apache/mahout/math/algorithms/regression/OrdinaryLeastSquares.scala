@@ -25,7 +25,7 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
 
-class OLS extends Regressor{
+class OrdinaryLeastSquares extends Regressor{
   // https://en.wikipedia.org/wiki/Ordinary_least_squares
   def fit[Int](drmY: DrmLike[Int], drmX: DrmLike[Int]) = {
 
