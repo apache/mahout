@@ -146,24 +146,6 @@ class VectorOps(private[scalabindings] val v: Vector) {
     }
   }
 
-  /** Convert to Array[Double] */
-  def toArray: Array[Double] = {
-    var a = new Array[Double](v.length)
-    for (i <- 0 until v.length){
-      a(i) = v.get(i)
-    }
-    a
-  }
-
-  /** Convert to Map[Int, Double] */
-  def toMap: Map[Int, Double] = {
-    import collection.JavaConverters._
-    val ms = collection.mutable.Map[Int, Double]()
-    for (e <- v.nonZeroes().asScala) {
-      ms += (e.index -> e.get)
-    }
-    ms.toMap
-  }
 }
 
 class ElementOps(private[scalabindings] val el: Vector.Element) {
