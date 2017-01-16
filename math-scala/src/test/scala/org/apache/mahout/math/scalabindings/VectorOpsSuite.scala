@@ -19,7 +19,6 @@ package org.apache.mahout.math.scalabindings
 
 import org.scalatest.FunSuite
 import org.apache.mahout.math.{SequentialAccessSparseVector, RandomAccessSparseVector, Vector}
-import org.apache.mahout.math.scalabindings.MahoutCollections._
 import RLikeOps._
 import org.apache.mahout.test.MahoutSuite
 
@@ -107,19 +106,5 @@ class VectorOpsSuite extends FunSuite with MahoutSuite {
 
 
   }
-//
-//  test("toArray") {
-//    val a = Array(1.0, 2.0, 3.0)
-//    val v: Vector = new org.apache.mahout.math.DenseVector(a)
-//
-//    v.toArray.deep shouldBe a.deep
-//
-//  }
-//
-//  test("toMap") {
-//    val m = Map( (1 -> 1.0), (3 -> 3.0))
-//    val sv = svec(m)
-//
-//    sv.toMap shouldBe m
-//  }
+
 }
