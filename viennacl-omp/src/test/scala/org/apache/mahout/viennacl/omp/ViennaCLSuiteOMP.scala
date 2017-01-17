@@ -110,7 +110,6 @@ class ViennaCLSuiteOMP extends FunSuite with Matchers {
 
     val ompCtx = new Context(Context.MAIN_MEMORY)
 
-
     val m = 3000
     val n = 3000
     val s = 1000
@@ -121,7 +120,7 @@ class ViennaCLSuiteOMP extends FunSuite with Matchers {
     val mxA = new SparseRowMatrix(m, s, false)
     val mxB = new SparseRowMatrix(s, n, true)
 
-    // add some sparse data with a 20% threshold
+    // add some sparse data with 20% density
     mxA := { (_, _, v) => if (r.nextDouble() < .20) r.nextDouble() else v }
     mxB := { (_, _, v) => if (r.nextDouble() < .20) r.nextDouble() else v }
 
