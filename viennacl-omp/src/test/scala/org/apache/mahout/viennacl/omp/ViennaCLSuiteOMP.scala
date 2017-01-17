@@ -26,11 +26,8 @@ class ViennaCLSuiteOMP extends FunSuite with Matchers {
     while (buff.remaining() > 0) buff.put(Random.nextDouble())
 
     // Create row-major matrix with OpenCL
-    val openClCtx = new Context(Context.OPENCL_MEMORY)
     val hostClCtx = new Context(Context.MAIN_MEMORY)
     val cpuMx = new DenseRowMatrix(data = data, nrow = m, ncol = n, hostClCtx)
-
-
     // And free.
     cpuMx.close()
 

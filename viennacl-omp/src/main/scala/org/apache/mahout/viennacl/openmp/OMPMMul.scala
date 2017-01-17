@@ -168,13 +168,13 @@ object OMPMMul extends MMBinaryFunc {
     // CSR matrices are efficient up to 50% non-zero
     if (b.getFlavor.isDense) {
       var ms = System.currentTimeMillis()
-      val oclCtx = new Context(Context.OPENCL_MEMORY)
+      val oclCtx = new Context(Context.MAIN_MEMORY)
       val oclA = toVclCmpMatrixAlt(a, oclCtx)
       val oclB = toVclDenseRM(b, oclCtx)
       val oclC = new DenseRowMatrix(prod(oclA, oclB))
       val mxC = fromVclDenseRM(oclC)
       ms = System.currentTimeMillis() - ms
-      debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+      debug(s"ViennaCL/OpenMP multiplication time: $ms ms.")
 
       oclA.close()
       oclB.close()
@@ -189,13 +189,13 @@ object OMPMMul extends MMBinaryFunc {
       }
 
       var ms = System.currentTimeMillis()
-      val oclCtx = new Context(Context.OPENCL_MEMORY)
-      val oclA = toVclCmpMatrixAlt(a, oclCtx)
-      val oclB = toVclCmpMatrixAlt(b, oclCtx)
+      val hostClCtx = new Context(Context.MAIN_MEMORY)
+      val oclA = toVclCmpMatrixAlt(a, hostClCtx)
+      val oclB = toVclCmpMatrixAlt(b, hostClCtx)
       val oclC = new CompressedMatrix(prod(oclA, oclB))
       val mxC = fromVclCompressedMatrix(oclC)
       ms = System.currentTimeMillis() - ms
-      debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+      debug(s"ViennaCL/OpenMP multiplication time: $ms ms.")
 
       oclA.close()
       oclB.close()
@@ -261,13 +261,13 @@ object OMPMMul extends MMBinaryFunc {
     // CSR matrices are efficient up to 50% non-zero
     if(b.getFlavor.isDense) {
       var ms = System.currentTimeMillis()
-      val oclCtx = new Context(Context.OPENCL_MEMORY)
-      val oclA = toVclCmpMatrixAlt(a, oclCtx)
-      val oclB = toVclDenseRM(b, oclCtx)
+      val hostClCtx = new Context(Context.MAIN_MEMORY)
+      val oclA = toVclCmpMatrixAlt(a, hostClCtx)
+      val oclB = toVclDenseRM(b, hostClCtx)
       val oclC = new DenseRowMatrix(prod(oclA, oclB))
       val mxC = fromVclDenseRM(oclC)
       ms = System.currentTimeMillis() - ms
-      debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+      debug(s"ViennaCL/OpenMP multiplication time: $ms ms.")
 
       oclA.close()
       oclB.close()
@@ -282,13 +282,13 @@ object OMPMMul extends MMBinaryFunc {
       }
 
       var ms = System.currentTimeMillis()
-      val oclCtx = new Context(Context.OPENCL_MEMORY)
-      val oclA = toVclCmpMatrixAlt(a, oclCtx)
-      val oclB = toVclCmpMatrixAlt(b, oclCtx)
+      val hostClCtx = new Context(Context.MAIN_MEMORY)
+      val oclA = toVclCmpMatrixAlt(a, hostClCtx)
+      val oclB = toVclCmpMatrixAlt(b, hostClCtx)
       val oclC = new CompressedMatrix(prod(oclA, oclB))
       val mxC = fromVclCompressedMatrix(oclC)
       ms = System.currentTimeMillis() - ms
-      debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+      debug(s"ViennaCL/OpenMP multiplication time: $ms ms.")
 
       oclA.close()
       oclB.close()
@@ -314,13 +314,13 @@ object OMPMMul extends MMBinaryFunc {
     }
 
     var ms = System.currentTimeMillis()
-    val oclCtx = new Context(Context.OPENCL_MEMORY)
-    val oclA = toVclCmpMatrixAlt(a, oclCtx)
-    val oclB = toVclDenseRM(b, oclCtx)
+    val hostClCtx = new Context(Context.MAIN_MEMORY)
+    val oclA = toVclCmpMatrixAlt(a, hostClCtx)
+    val oclB = toVclDenseRM(b, hostClCtx)
     val oclC = new DenseRowMatrix(prod(oclA, oclB))
     val mxC = fromVclDenseRM(oclC)
     ms = System.currentTimeMillis() - ms
-    debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+    debug(s"ViennaCL/OpenMP multiplication time: $ms ms.")
 
     oclA.close()
     oclB.close()
@@ -398,14 +398,14 @@ object OMPMMul extends MMBinaryFunc {
     val mxR = r.getOrElse(a.like(a.nrow, a.nrow))
 
     var ms = System.currentTimeMillis()
-    val oclCtx = new Context(Context.OPENCL_MEMORY)
-    val oclA = toVclDenseRM(src = a, oclCtx)
+    val hostClCtx = new Context(Context.MAIN_MEMORY)
+    val oclA = toVclDenseRM(src = a, hostClCtx)
     val oclAt = new DenseRowMatrix(trans(oclA))
     val oclC = new DenseRowMatrix(prod(oclA, oclAt))
 
     val mxC = fromVclDenseRM(oclC)
     ms = System.currentTimeMillis() - ms
-    debug(s"ViennaCL/OpenCL multiplication time: $ms ms.")
+    debug(s"ViennaCL/OpenMP multiplication time: $ms ms.")
 
     oclA.close()
     //oclApr.close()

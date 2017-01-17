@@ -27,7 +27,7 @@ import scala.reflect._
 
 
 class SolverFactory {
-
+  // TODO:  remove class and keep object only.
   private final implicit val log = getLog(this.getClass)
   log.setLevel(org.apache.log4j.Level.INFO)
 
@@ -53,19 +53,19 @@ object SolverFactory extends SolverFactory {
       } catch {
         case x: Exception =>
           println("[WARN] Unable to create class GPUMMul: attempting OpenMP version")
-          x.printStackTrace
+         // x.printStackTrace
           try {
             // attempt to instantiate the OpenMP version, assuming we’ve
             // created a separate OpenMP-only module (none exist yet)
             println("[INFO] Creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
-            clazz = Class.forName("org.apache.mahout.viennacl.openmp.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+            clazz = Class.forName("org.apache.mahout.viennacl.openmp.OMPMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
             println("[INFO] Successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
 
           } catch {
             case y: Exception =>
-              y.printStackTrace
-              // fall back to JVM Dont need to Dynamicly assign MMul is in the same package.
-              println("[INFO] Unable to create class OMPMMul: falling back to java version")
+              //y.printStackTrace
+              // fall back to JVM Don't need to Dynamicly assign MMul is in this package.
+              println("[WARN] Unable to create class OMPMMul: falling back to java version")
               clazz = MMul
           }
         }
