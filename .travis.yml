@@ -33,7 +33,7 @@ before_install:
   - unzip -qq apache-maven-3.3.9-bin.zip
   - export M2_HOME=$PWD/apache-maven-3.3.9
   - export PATH=$M2_HOME/bin:$PATH
-  - export MAHOUT_HOME=$PWD/apache/mahout
+  - export MAHOUT_HOME=$PWD
   - sudo apt-get -qq update
   - sudo apt-get install -y libviennacl-dev
  
