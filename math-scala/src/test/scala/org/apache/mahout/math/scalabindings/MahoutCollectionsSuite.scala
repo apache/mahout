@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,31 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math;
+package org.apache.mahout.math.scalabindings
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.apache.mahout.math.Vector
+import org.apache.mahout.test.MahoutSuite
+import org.scalatest.FunSuite
+import org.apache.mahout.math.scalabindings.MahoutCollections._
+import org.apache.mahout.math._
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
-public final class TestDenseMatrix extends MatrixTest {
+class MahoutCollectionsSuite extends FunSuite with MahoutSuite {
+  test("toArray") {
+    val a = Array(1.0, 2.0, 3.0)
+    val v: Vector = new org.apache.mahout.math.DenseVector(a)
 
-  @Override
-  public Matrix matrixFactory(double[][] values) {
-    return new DenseMatrix(values);
+    v.toArray.deep shouldBe a.deep
+
   }
 
-  @Test
-  public void testGetValues() {
-    DenseMatrix m = new DenseMatrix(10, 10);
-    for (int i = 0; i < 10; i++) {
-      for (int j = 0; j < 10; j++) {
-        m.set(i, j, 10 * i + j);
-      }
-    }
+  test("toMap") {
+    val m = Map( (1 -> 1.0), (3 -> 3.0))
+    val sv = svec(m)
 
-    double[][] values = m.getBackingStructure();
-    Assert.assertEquals(values.length, 10);
-    Assert.assertEquals(values[0].length, 10);
-    Assert.assertEquals(values[9][9], 99.0, 0.0);
+    sv.toMap shouldBe m
   }
-
 }
