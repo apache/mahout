@@ -32,13 +32,13 @@ class CochraneOrcutt extends Regressor {
   def fit[Int](drmY: DrmLike[Int], drmX: DrmLike[Int]) = {
 
     regressor.fit(drmY, drmX)
-    fitParams("beta0") = regressor.fitParams("beta")
+    fitParams("beta_0") = regressor.fitParams("beta")
 
     val Y = drmY(1 until drmY.nrow.toInt, 0 until 1).checkpoint()
     val Y_lag = drmY(0 until drmY.nrow.toInt - 1, 0 until 1).checkpoint()
     val X = drmX(1 until drmX.nrow.toInt, 0 until 1).checkpoint()
     val X_lag = drmX(0 until drmX.nrow.toInt - 1, 0 until 1).checkpoint()
-    for (i <- 1 to iterations){
+    for (i <- 1 until iterations){
       val error = drmY - regressor.predict(drmX)
       regressor.fit(error(1 until error.nrow.toInt, 0 until 1),
                     error(0 until error.nrow.toInt - 1, 0 until 1))
@@ -62,7 +62,8 @@ class CochraneOrcutt extends Regressor {
   }
 
   def summary() = {
-    "pass"
+    (0 until iterations).map(i => s"Beta estimates on iteration " + i + ": "
+      + fitParams("beta" + i).toString + "\n").mkString("")
   }
 
 }

@@ -72,7 +72,7 @@ class AsFactor extends Transformer{
   }
 
   def summary(): String = {
-      s"""${fitParams.get("k").get(0).toInt} categories""".stripMargin
+      s"""${fitParams("k").get(0).toInt} categories""".stripMargin
   }
 
 }
