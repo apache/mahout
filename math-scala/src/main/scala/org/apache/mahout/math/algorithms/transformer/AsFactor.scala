@@ -19,7 +19,7 @@
 
 package org.apache.mahout.math.algorithms.transformer
 
-import org.apache.mahout.math.Vector
+import org.apache.mahout.math.{Vector => MahoutVector}
 
 import collection._
 import JavaConversions._
@@ -32,6 +32,9 @@ import scala.reflect.ClassTag
 
 class AsFactor extends Transformer{
 
+  var factorMap: MahoutVector = _
+  var k: MahoutVector = _
+
   def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] ={
     if (!isFit) {
       //throw an error
@@ -39,17 +42,17 @@ class AsFactor extends Transformer{
 
     implicit val ctx = input.context
 
-    val bcastK = drmBroadcast(fitParams.get("k").get)
-    val bcastFactorMap = drmBroadcast(fitParams.get("factorMap").get)
+    val bcastK = drmBroadcast(k)
+    val bcastFactorMap = drmBroadcast(factorMap)
 
-    val res = input.mapBlock(fitParams.get("k").get.get(0).toInt) {
+    val res = input.mapBlock(k.get(0).toInt) {
       case (keys, block) => {
         val k: Int = bcastK.value.get(0).toInt
-        val output = new SparseMatrix(block.nrow, k)
+        val output = new SparseMatrix(block.nrow, bcastK.get(0).toInt)
         // This is how we take a vector of mapping to a map
         val fm = bcastFactorMap.all.toSeq.map(e => e.get -> e.index).toMap
         for (i <- 0 until output.nrow){
-          output(i, ::) =  svec(fm.get(block.getQuick(i,0)).get -> 1.0 :: Nil, cardinality = k)
+          output(i, ::) =  svec(fm.get(block.getQuick(i,0)).get -> 1.0 :: Nil, cardinality = bcastK.get(0).toInt)
         }
         (keys, output)
       }
@@ -57,7 +60,7 @@ class AsFactor extends Transformer{
     res
   }
 
-  def fit[Int](input: DrmLike[Int]) = {
+  def fit[K](input: DrmLike[K]) = {
     // this should be done via allReduceBlock or something.
     val v: Vector = input.collect(::, 0)
     var a = new Array[Double](v.length)
@@ -65,14 +68,14 @@ class AsFactor extends Transformer{
       a(i) = v.getElement(i).get
     }
 
-    fitParams("factorMap") = dvec(a.distinct) //a.distinct.zipWithIndex.toMap
-    fitParams("k") = dvec(a.distinct.length)
+    factorMap = dvec(a.distinct) //a.distinct.zipWithIndex.toMap
+    k = dvec(a.distinct.length)
 
     isFit = true
   }
 
   def summary(): String = {
-      s"""${fitParams("k").get(0).toInt} categories""".stripMargin
+      s"""${k.get(0).toInt} categories""".stripMargin
   }
 
 }

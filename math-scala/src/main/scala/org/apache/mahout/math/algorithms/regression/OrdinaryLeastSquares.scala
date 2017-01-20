@@ -19,6 +19,7 @@
 
 package org.apache.mahout.math.algorithms.regression
 
+import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.scalabindings._
@@ -31,63 +32,57 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
   * model.calcStandardErrors = true
   * 
   */
-class OrdinaryLeastSquares extends Regressor{
+class OrdinaryLeastSquares extends LinearRegressor{
   // https://en.wikipedia.org/wiki/Ordinary_least_squares
 
   var calcStandardErrors = true
 
   var addIntercept = true
 
-  def fit[Int](drmY: DrmLike[Int], drmX: DrmLike[Int]) = {
+  def fit[K](drmPredictors: DrmLike[K], drmTarget: DrmLike[K]) = {
 
-    if (drmX.nrow != drmY.nrow){
+    if (drmPredictors.nrow != drmTarget.nrow){
       "throw an error here"
     }
 
-    var X = drmX
+    var X = drmPredictors
     if (addIntercept) {
       X = X cbind 1
     }
     val drmXtXinv = solve(X.t %*% X)
 
-    val drmXty = (X.t %*% drmY).collect // this fails when number of columns^2 size matrix won't fit in driver
+    val drmXty = (X.t %*% drmTarget).collect // this fails when number of columns^2 size matrix won't fit in driver
 
-    val beta = (drmXtXinv %*% drmXty)(::, 0)
+    beta = (drmXtXinv %*% drmXty)(::, 0)
 
     if (calcStandardErrors) {
       import org.apache.mahout.math.function.Functions.SQRT
       import org.apache.mahout.math.scalabindings.MahoutCollections._
 
-      val e = (drmY - X %*% beta).collect
+      val e = (drmTarget - X %*% beta).collect
       val ete = e.t %*% e
-      val n = drmY.nrow
+      val n = drmTarget.nrow
       val k = X.ncol
       val invDegFreedomKindOf = (1.0 / (n - k))
       val varCovarMatrix = invDegFreedomKindOf * ete(0,0) * drmXtXinv
-      val se = varCovarMatrix.viewDiagonal.assign(SQRT)
-      val tScore = beta / se
+      se = varCovarMatrix.viewDiagonal.assign(SQRT)
+      tScore = beta / se
       val tDist = new org.apache.commons.math3.distribution.TDistribution((n-k))
-      val pval = dvec(tScore.toArray.map(t => 2 * (1.0 - tDist.cumulativeProbability(t)) ))
-      fitParams("se") = se
-      fitParams("tScore") = tScore
-      fitParams("pval") = pval
-      fitParams("degreesFreedom") = dvec(k)
+      pval = dvec(tScore.toArray.map(t => 2 * (1.0 - tDist.cumulativeProbability(t)) ))
+      degreesFreedom = k
     }
-    fitParams("beta") = beta
+
     isFit = true
   }
 
-  def predict[Int](drmX: DrmLike[Int]): DrmLike[Int] = {
+  def predict[Int](drmPredictors: DrmLike[Int]): DrmLike[Int] = {
     // throw warning if not fit
-    drmX %*% fitParams.get("beta").get
+    drmPredictors %*% beta
   }
 
   def summary() = {
-    val beta = fitParams("beta")
-    val se = fitParams("se")
-    val tScore = fitParams("tScore")
-    val pval = fitParams("pval")
-    val k = fitParams("degreesFreedom").get(0).toInt
+
+    val k = degreesFreedom
 
     var summaryString = "Coef.\t\tEstimate\t\tStd. Error\t\tt-score\t\t\tPr(Beta=0)\n" +
       (0 until k).map(i => s"X${i}\t${beta(i)}\t${se(i)}\t${tScore(i)}\t${pval(i)}").mkString("\n")

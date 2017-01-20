@@ -31,7 +31,7 @@ class CoefficientOfDetermination extends Model {
 
   var r2 = -1.0
 
-  def fit[Int: ClassTag](residuals: DrmLike[Int], actuals: DrmLike[Int]): Unit = {
+  def fit[K: ClassTag](residuals: DrmLike[K], actuals: DrmLike[K]): Unit = {
     val sumSquareResiduals = residuals.assign(SQUARE).sum
     val mc = new MeanCenter()
     mc.fit(actuals)

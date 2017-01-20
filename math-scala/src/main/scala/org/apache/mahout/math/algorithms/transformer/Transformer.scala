@@ -24,15 +24,15 @@ import org.apache.mahout.math.drm.DrmLike
 
 import scala.reflect.ClassTag
 
-abstract class Transformer extends Model {
+trait Transformer extends Model {
 
   /**
     * Transform given Drm given the feature set
     * @param input
-    * @tparam Int
-    */
-  def transform[Int: ClassTag](input: DrmLike[Int]): DrmLike[Int]
 
-  def fit[Int](input: DrmLike[Int])
+    */
+  def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K]
+
+  def fit[K](input: DrmLike[K])
 
 }

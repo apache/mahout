@@ -70,7 +70,7 @@ trait RegressionSuite extends DistributedMahoutSuite with Matchers {
 
     val model = new OrdinaryLeastSquares()
     model.fit(drmY, drmX)
-    val estimate = model.fitParams("beta")
+    val estimate = model.beta
     val Ranswers = dvec(-1.336265, -13.157702, -4.152654, -5.679908, 163.179329)
 
     val epsilon = 1E-6

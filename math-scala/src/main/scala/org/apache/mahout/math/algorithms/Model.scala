@@ -25,12 +25,10 @@ import org.apache.mahout.math.scalabindings._
 
 import scala.reflect.ClassTag
 
-abstract class Model extends Serializable {
+trait Model extends Serializable {
 
-  var fitParams = collection.mutable.Map[String, MahoutVector]()
   var isFit = false
 
   def summary(): String
-
 
 }

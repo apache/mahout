@@ -19,15 +19,16 @@
 
 package org.apache.mahout.math.algorithms.regression
 
+import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.algorithms.Model
 import org.apache.mahout.math.drm.DrmLike
 
 /**
   * Abstract of Regressors
   */
-abstract class Regressor extends Model {
+trait Regressor extends Model {
 
-  def fit[Int](drmY: DrmLike[Int], drmX: DrmLike[Int]): Unit
+  def fit[K](drmPredictors: DrmLike[K], drmTarget: DrmLike[K]): Unit
 
-  def predict[Int](drmX: DrmLike[Int]): DrmLike[Int]
+  def predict[K](drmPredictors: DrmLike[K]): DrmLike[K]
 }

@@ -25,18 +25,21 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.{Vector => MahoutVector}
 
 import scala.reflect.ClassTag
 
 class MeanCenter extends Transformer {
+
+  var colMeansV: MahoutVector = _
 
   /**
     * Optionally set the centers of each column to some value other than Zero
     * @param centers A vector of length equal to the `input` in the fit method specifying the
     *                centers to set each column to.
     */
-  def setCenter(centers: Vector) = {
-    fitParams("colMeansV") = fitParams("colMeansV") - centers
+  def setCenter(centers: MahoutVector) = {
+    colMeansV = colMeansV - centers
   }
 
   /**
@@ -44,18 +47,17 @@ class MeanCenter extends Transformer {
     * @param input
     * @tparam Int
     */
-  def fit[Int](input: DrmLike[Int]) = {
-    fitParams("colMeansV") = input.colMeans
+  def fit[K](input: DrmLike[K]) = {
+    colMeansV = input.colMeans
   }
 
-  def transform[Int: ClassTag](input: DrmLike[Int]): DrmLike[Int] = {
+  def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] = {
 
     if (!isFit) {
       //throw an error
     }
 
     implicit val ctx = input.context
-    val colMeansV = fitParams.get("colMeansV").get
     val bcastV = drmBroadcast(colMeansV)
 
     val output = input.mapBlock(input.ncol) {
@@ -74,7 +76,6 @@ class MeanCenter extends Transformer {
     }
 
     implicit val ctx = input.context
-    val colMeansV = fitParams.get("colMeansV").get
     val bcastV = drmBroadcast(colMeansV)
 
     val output = input.mapBlock(input.ncol) {

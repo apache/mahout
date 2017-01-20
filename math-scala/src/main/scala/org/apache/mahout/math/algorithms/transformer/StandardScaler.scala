@@ -51,14 +51,15 @@ import scala.reflect.{ClassTag,classTag}
   * Scales columns to mean 0 and unit variance
   */
 class StandardScaler extends Transformer{
+  var meanVec: MahoutVector = _
+  var variance: MahoutVector = _
+  var stdev: MahoutVector = _
 
-
-
-  def fit[Int](input: DrmLike[Int]) = {
+  def fit[K](input: DrmLike[K]) = {
     val mNv = dcolMeanVars(input)
-    fitParams("meanVec") = mNv._1
-    fitParams("variance") = mNv._2
-    fitParams("stdev") = mNv._2.sqrt
+    meanVec = mNv._1
+    variance = mNv._2
+    stdev = mNv._2.sqrt
     isFit = true
   }
 
@@ -73,11 +74,8 @@ class StandardScaler extends Transformer{
     // Some mapBlock() calls need it
     //implicit val ktag =  input.keyClassTag
 
-    val meanVec = fitParams.get("meanVec").get
-    val stdevVec = fitParams.get("stdev").get
-
     val bcastMu = drmBroadcast(meanVec)
-    val bcastSigma = drmBroadcast(stdevVec)
+    val bcastSigma = drmBroadcast(stdev)
 
     val res = input.mapBlock(input.ncol) {
       case (keys, block) => {
@@ -108,11 +106,8 @@ class StandardScaler extends Transformer{
     // Some mapBlock() calls need it
     //implicit val ktag =  input.keyClassTag
 
-    val meanVec = fitParams.get("meanVec").get
-    val stdevVec = fitParams.get("stdev").get
-
     val bcastMu = drmBroadcast(meanVec)
-    val bcastSigma = drmBroadcast(stdevVec)
+    val bcastSigma = drmBroadcast(stdev)
 
     val res = input.mapBlock(input.ncol) {
       case (keys, block) => {

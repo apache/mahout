@@ -19,6 +19,7 @@
 
 package org.apache.mahout.math.algorithms.regression
 
+import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -26,44 +27,46 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 class CochraneOrcutt extends Regressor {
   // https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation
 
-  var regressor : Regressor = new OrdinaryLeastSquares() // type of regression to do- must have a 'beta' fit param
+  var regressor : LinearRegressor = new OrdinaryLeastSquares() // type of regression to do- must have a 'beta' fit param
   var iterations = 3 // Number of iterations to run
+  var betas: Array[MahoutVector] = _
 
-  def fit[Int](drmY: DrmLike[Int], drmX: DrmLike[Int]) = {
+  def fit[K](drmPredictors: DrmLike[K], drmTarget: DrmLike[K]) = {
 
-    regressor.fit(drmY, drmX)
-    fitParams("beta_0") = regressor.fitParams("beta")
+    betas = new Array[MahoutVector](iterations)
+    regressor.fit(drmTarget, drmPredictors)
+    betas(0) = regressor.beta
 
-    val Y = drmY(1 until drmY.nrow.toInt, 0 until 1).checkpoint()
-    val Y_lag = drmY(0 until drmY.nrow.toInt - 1, 0 until 1).checkpoint()
-    val X = drmX(1 until drmX.nrow.toInt, 0 until 1).checkpoint()
-    val X_lag = drmX(0 until drmX.nrow.toInt - 1, 0 until 1).checkpoint()
+    val Y = drmTarget(1 until drmTarget.nrow.toInt, 0 until 1).checkpoint()
+    val Y_lag = drmTarget(0 until drmTarget.nrow.toInt - 1, 0 until 1).checkpoint()
+    val X = drmPredictors(1 until drmPredictors.nrow.toInt, 0 until 1).checkpoint()
+    val X_lag = drmPredictors(0 until drmPredictors.nrow.toInt - 1, 0 until 1).checkpoint()
     for (i <- 1 until iterations){
-      val error = drmY - regressor.predict(drmX)
+      val error = drmTarget - regressor.predict(drmPredictors)
       regressor.fit(error(1 until error.nrow.toInt, 0 until 1),
                     error(0 until error.nrow.toInt - 1, 0 until 1))
-      val rho = regressor.fitParams("beta").get(0)
+      val rho = regressor.beta.get(0)
 
       val drmYprime = Y - Y_lag * rho
       val drmXprime = X - X_lag * rho
 
       regressor.fit(drmYprime, drmXprime)
-      var betaPrime = regressor.fitParams("beta")
+      var betaPrime = regressor.beta
       val b0 = betaPrime(0) / (1 - rho)
       betaPrime(0) = b0
-      fitParams("beta_" + i) = betaPrime
+      betas(i) = betaPrime
     }
 
     isFit = true
   }
 
-  def predict[Int](drmX: DrmLike[Int]): DrmLike[Int] = {
-    regressor.predict(drmX)
+  def predict[K](drmPredictors: DrmLike[K]): DrmLike[K] = {
+    regressor.predict(drmPredictors)
   }
 
   def summary() = {
     (0 until iterations).map(i => s"Beta estimates on iteration " + i + ": "
-      + fitParams("beta" + i).toString + "\n").mkString("")
+      + betas.toString + "\n").mkString("") + "\n\n" + "Final Model:\n\n" + regressor.summary()
   }
 
 }

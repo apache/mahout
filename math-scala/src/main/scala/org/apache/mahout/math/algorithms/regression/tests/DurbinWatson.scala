@@ -24,6 +24,7 @@ import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.function.Functions.SQUARE
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.{Vector => MahoutVector}
 
 class DurbinWatson extends Model {
   //https://en.wikipedia.org/wiki/Durbin%E2%80%93Watson_statistic
@@ -39,21 +40,20 @@ class DurbinWatson extends Model {
        d > 2 : negative auto-correlation
   */
 
-  var dStatistic : Double = -1.0
+  var dStatistic: MahoutVector = _
 
   /**
     * Compute the Durbin-Watson Test Statistic
     * @param input - Drm of Error residuals of some other model (e.g. OLS)
-    * @tparam Int
     */
-  def fit[Int](input: DrmLike[Int]): Unit = {
+  def fit[K](input: DrmLike[K]): Unit = {
 
     // need to throw a warning if more than 1 column.
     val e = input(1 until input.nrow.toInt, 0 until 1)
     val e_t_1 = input(0 until input.nrow.toInt - 1, 0 until 1)
     val numerator = (e - e_t_1).assign(SQUARE).colSums
     val denominator = input.assign(SQUARE).colSums
-    fitParams("dStatistic") = (numerator / denominator)
+    dStatistic = (numerator / denominator)
     isFit = true
   }
 
