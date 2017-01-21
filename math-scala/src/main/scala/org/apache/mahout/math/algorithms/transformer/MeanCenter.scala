@@ -45,7 +45,6 @@ class MeanCenter extends Transformer {
   /**
     * Centers Columns at zero
     * @param input
-    * @tparam Int
     */
   def fit[K](input: DrmLike[K]) = {
     colMeansV = input.colMeans

@@ -25,6 +25,8 @@ import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
+import scala.reflect.ClassTag
+
 /**
   * import org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares
   * val model = new OrdinaryLeastSquares()
@@ -32,14 +34,14 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
   * model.calcStandardErrors = true
   * 
   */
-class OrdinaryLeastSquares extends LinearRegressor{
+class OrdinaryLeastSquares[K] extends LinearRegressor[K] {
   // https://en.wikipedia.org/wiki/Ordinary_least_squares
 
   var calcStandardErrors = true
 
   var addIntercept = true
 
-  def fit[K](drmPredictors: DrmLike[K], drmTarget: DrmLike[K]) = {
+  def fit(drmPredictors: DrmLike[K], drmTarget: DrmLike[K]) = {
 
     if (drmPredictors.nrow != drmTarget.nrow){
       "throw an error here"
@@ -59,8 +61,8 @@ class OrdinaryLeastSquares extends LinearRegressor{
       import org.apache.mahout.math.function.Functions.SQRT
       import org.apache.mahout.math.scalabindings.MahoutCollections._
 
-      val e = (drmTarget - X %*% beta).collect
-      val ete = e.t %*% e
+      residuals = drmTarget - (X %*% beta)
+      val ete = (residuals.t %*% residuals).collect // 1x1
       val n = drmTarget.nrow
       val k = X.ncol
       val invDegFreedomKindOf = (1.0 / (n - k))

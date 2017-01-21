@@ -19,30 +19,34 @@
 
 package org.apache.mahout.math.algorithms.regression.tests
 
-import org.apache.mahout.math.algorithms.Model
+import org.apache.mahout.math.algorithms.regression.Regressor
+import org.apache.mahout.math.algorithms.{Model, StatisticalTest}
 import org.apache.mahout.math.algorithms.transformer.MeanCenter
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.function.Functions.SQUARE
 import org.apache.mahout.math.scalabindings.RLikeOps._
+
 import scala.reflect.ClassTag
 
-class CoefficientOfDetermination extends Model {
+
+//class CoefficientOfDetermination extends StatisticalTest {
+object FittnessTests {
+
   // https://en.wikipedia.org/wiki/Coefficient_of_determination
-
-  var r2 = -1.0
-
-  def fit[K: ClassTag](residuals: DrmLike[K], actuals: DrmLike[K]): Unit = {
-    val sumSquareResiduals = residuals.assign(SQUARE).sum
+  def CoefficientOfDetermination[K: ClassTag](model: Regressor[K],
+                                              drmTarget: DrmLike[K]): Regressor[K] = {
+    val sumSquareResiduals = model.residuals.assign(SQUARE).sum
     val mc = new MeanCenter()
-    mc.fit(actuals)
-    val totalResiduals = mc.transform(actuals)
+    mc.fit(drmTarget)
+    val totalResiduals = mc.transform(drmTarget)
     val sumSquareTotal = totalResiduals.assign(SQUARE).sum
-    r2 = 1 - (sumSquareResiduals / sumSquareTotal)
+    model.testResults("r2") = 1 - (sumSquareResiduals / sumSquareTotal)
+    model
   }
 
-  def summary() = {
-    // throw error if isFit = False
-    "Coefficient of Determination (R-squared): " + r2
+  // https://en.wikipedia.org/wiki/Mean_squared_error
+  def MeanSquareError[K](model: Regressor[K]): Regressor[K] = {
+    model.testResults("mse") = model.residuals.assign(SQUARE).sum / model.residuals.nrow
+    model
   }
-
 }

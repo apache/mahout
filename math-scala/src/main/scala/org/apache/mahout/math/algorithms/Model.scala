@@ -27,6 +27,8 @@ import scala.reflect.ClassTag
 
 trait Model extends Serializable {
 
+  var testResults: scala.collection.mutable.Map[String, Any] = _
+
   var isFit = false
 
   def summary(): String

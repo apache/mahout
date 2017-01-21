@@ -19,6 +19,7 @@
 
 package org.apache.mahout.math.algorithms.regression
 
+import org.apache.mahout.math.drm._
 import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.algorithms.Model
 import org.apache.mahout.math.drm.DrmLike
@@ -26,9 +27,11 @@ import org.apache.mahout.math.drm.DrmLike
 /**
   * Abstract of Regressors
   */
-trait Regressor extends Model {
+trait Regressor[K] extends Model {
 
-  def fit[K](drmPredictors: DrmLike[K], drmTarget: DrmLike[K]): Unit
+  var residuals: DrmLike[K] = _
+
+  def fit(drmPredictors: DrmLike[K], drmTarget: DrmLike[K]): Unit
 
   def predict[K](drmPredictors: DrmLike[K]): DrmLike[K]
 }

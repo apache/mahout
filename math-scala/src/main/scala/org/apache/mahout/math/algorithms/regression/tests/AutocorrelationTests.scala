@@ -19,14 +19,15 @@
 
 package org.apache.mahout.math.algorithms.regression.tests
 
-import org.apache.mahout.math.algorithms.Model
+import org.apache.mahout.math.algorithms.regression.Regressor
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.function.Functions.SQUARE
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.{Vector => MahoutVector}
 
-class DurbinWatson extends Model {
+
+object AutocorrelationTests {
+
   //https://en.wikipedia.org/wiki/Durbin%E2%80%93Watson_statistic
   /*
   To test for positive autocorrelation at significance α, the test statistic d is compared to lower and upper critical values (dL,α and dU,α):
@@ -39,28 +40,13 @@ class DurbinWatson extends Model {
        d = 2 : no auto-correlation
        d > 2 : negative auto-correlation
   */
-
-  var dStatistic: MahoutVector = _
-
-  /**
-    * Compute the Durbin-Watson Test Statistic
-    * @param input - Drm of Error residuals of some other model (e.g. OLS)
-    */
-  def fit[K](input: DrmLike[K]): Unit = {
-
-    // need to throw a warning if more than 1 column.
-    val e = input(1 until input.nrow.toInt, 0 until 1)
-    val e_t_1 = input(0 until input.nrow.toInt - 1, 0 until 1)
+  def DurbinWaton[K](model: Regressor[K]): Regressor[K] = {
+    val e: DrmLike[K] = model.residuals(1 until model.residuals.nrow.toInt, 0 until 1)
+    val e_t_1: DrmLike[K] = model.residuals(0 until model.residuals.nrow.toInt - 1, 0 until 1)
     val numerator = (e - e_t_1).assign(SQUARE).colSums
-    val denominator = input.assign(SQUARE).colSums
-    dStatistic = (numerator / denominator)
-    isFit = true
+    val denominator = model.residuals.assign(SQUARE).colSums
+    model.testResults("durbin-watson test statistic") = (numerator / denominator)
+    model
   }
 
-  // Future: Would be nice to (optionally compute p value and accept/reject hypotheses)
-
-  def summary() = {
-    // throw error if isFit = False
-    "Durbin Watson Test Statistic: " + dStatistic
-  }
 }

@@ -20,27 +20,30 @@
 package org.apache.mahout.math.algorithms.regression
 
 import org.apache.mahout.math.{Vector => MahoutVector}
+import org.apache.mahout.math.drm.CacheHint
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
-class CochraneOrcutt extends Regressor {
+class CochraneOrcutt[K] extends LinearRegressor[K] {
   // https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation
 
-  var regressor : LinearRegressor = new OrdinaryLeastSquares() // type of regression to do- must have a 'beta' fit param
+  var regressor : LinearRegressor[K] = new OrdinaryLeastSquares() // type of regression to do- must have a 'beta' fit param
   var iterations = 3 // Number of iterations to run
   var betas: Array[MahoutVector] = _
+  // For larger inputs, CacheHint.MEMORY_AND_DISK2 is reccomended.
+  var cacheHint = CacheHint.MEMORY_ONLY
 
-  def fit[K](drmPredictors: DrmLike[K], drmTarget: DrmLike[K]) = {
+  def fit(drmPredictors: DrmLike[K], drmTarget: DrmLike[K]) = {
 
     betas = new Array[MahoutVector](iterations)
     regressor.fit(drmTarget, drmPredictors)
     betas(0) = regressor.beta
 
-    val Y = drmTarget(1 until drmTarget.nrow.toInt, 0 until 1).checkpoint()
-    val Y_lag = drmTarget(0 until drmTarget.nrow.toInt - 1, 0 until 1).checkpoint()
-    val X = drmPredictors(1 until drmPredictors.nrow.toInt, 0 until 1).checkpoint()
-    val X_lag = drmPredictors(0 until drmPredictors.nrow.toInt - 1, 0 until 1).checkpoint()
+    val Y = drmTarget(1 until drmTarget.nrow.toInt, 0 until 1).checkpoint(cacheHint)
+    val Y_lag = drmTarget(0 until drmTarget.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
+    val X = drmPredictors(1 until drmPredictors.nrow.toInt, 0 until 1).checkpoint(cacheHint)
+    val X_lag = drmPredictors(0 until drmPredictors.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
     for (i <- 1 until iterations){
       val error = drmTarget - regressor.predict(drmPredictors)
       regressor.fit(error(1 until error.nrow.toInt, 0 until 1),
