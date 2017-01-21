@@ -34,6 +34,7 @@ class AsFactor extends Transformer{
 
   var factorMap: MahoutVector = _
   var k: MahoutVector = _
+  var summary = ""
 
   def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] ={
     if (!isFit) {
@@ -71,11 +72,8 @@ class AsFactor extends Transformer{
     factorMap = dvec(a.distinct) //a.distinct.zipWithIndex.toMap
     k = dvec(a.distinct.length)
 
+    summary =  s"""${k.get(0).toInt} categories""".stripMargin
     isFit = true
-  }
-
-  def summary(): String = {
-      s"""${k.get(0).toInt} categories""".stripMargin
   }
 
 }

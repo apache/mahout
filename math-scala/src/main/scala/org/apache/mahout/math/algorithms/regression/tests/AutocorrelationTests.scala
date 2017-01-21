@@ -45,7 +45,9 @@ object AutocorrelationTests {
     val e_t_1: DrmLike[K] = model.residuals(0 until model.residuals.nrow.toInt - 1, 0 until 1)
     val numerator = (e - e_t_1).assign(SQUARE).colSums
     val denominator = model.residuals.assign(SQUARE).colSums
-    model.testResults("durbin-watson test statistic") = (numerator / denominator)
+    val dw = (numerator / denominator)
+    model.testResults("durbin-watson test statistic") = dw
+    model.summary += s"\nDurbin Watson Test Statistic: ${dw}"
     model
   }
 

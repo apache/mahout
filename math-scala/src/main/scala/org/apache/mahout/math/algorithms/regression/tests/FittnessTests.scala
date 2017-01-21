@@ -20,7 +20,6 @@
 package org.apache.mahout.math.algorithms.regression.tests
 
 import org.apache.mahout.math.algorithms.regression.Regressor
-import org.apache.mahout.math.algorithms.{Model, StatisticalTest}
 import org.apache.mahout.math.algorithms.transformer.MeanCenter
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.function.Functions.SQUARE
@@ -28,8 +27,6 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 
 import scala.reflect.ClassTag
 
-
-//class CoefficientOfDetermination extends StatisticalTest {
 object FittnessTests {
 
   // https://en.wikipedia.org/wiki/Coefficient_of_determination
@@ -40,13 +37,17 @@ object FittnessTests {
     mc.fit(drmTarget)
     val totalResiduals = mc.transform(drmTarget)
     val sumSquareTotal = totalResiduals.assign(SQUARE).sum
-    model.testResults("r2") = 1 - (sumSquareResiduals / sumSquareTotal)
+    val r2 = 1 - (sumSquareResiduals / sumSquareTotal)
+    model.testResults("r2") = r2
+    model.summary += s"\nR^2: ${r2}"
     model
   }
 
   // https://en.wikipedia.org/wiki/Mean_squared_error
   def MeanSquareError[K](model: Regressor[K]): Regressor[K] = {
-    model.testResults("mse") = model.residuals.assign(SQUARE).sum / model.residuals.nrow
+    val mse = model.residuals.assign(SQUARE).sum / model.residuals.nrow
+    model.testResults("mse") = mse
+    model.summary += s"\nMean Squared Error: ${mse}"
     model
   }
 }

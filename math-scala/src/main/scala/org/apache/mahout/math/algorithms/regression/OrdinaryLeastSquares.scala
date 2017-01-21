@@ -34,20 +34,20 @@ import scala.reflect.ClassTag
   * model.calcStandardErrors = true
   * 
   */
-class OrdinaryLeastSquares[K] extends LinearRegressor[K] {
+class OrdinaryLeastSquares[K](hyperparameters: Map[String, Any] = Map("" -> None)) extends LinearRegressor[K] {
   // https://en.wikipedia.org/wiki/Ordinary_least_squares
 
-  var calcStandardErrors = true
+  var calcStandardErrors: Boolean = hyperparameters.asInstanceOf[Map[String, Boolean]].getOrElse("calcStandardErrors", true)
+  var addIntercept: Boolean = hyperparameters.asInstanceOf[Map[String, Boolean]].getOrElse("addIntercept", true)
 
-  var addIntercept = true
+  var summary = ""
+  def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K]): Unit = {
 
-  def fit(drmPredictors: DrmLike[K], drmTarget: DrmLike[K]) = {
-
-    if (drmPredictors.nrow != drmTarget.nrow){
+    if (drmFeatures.nrow != drmTarget.nrow){
       "throw an error here"
     }
 
-    var X = drmPredictors
+    var X = drmFeatures
     if (addIntercept) {
       X = X cbind 1
     }
@@ -56,6 +56,7 @@ class OrdinaryLeastSquares[K] extends LinearRegressor[K] {
     val drmXty = (X.t %*% drmTarget).collect // this fails when number of columns^2 size matrix won't fit in driver
 
     beta = (drmXtXinv %*% drmXty)(::, 0)
+    val k = X.ncol
 
     if (calcStandardErrors) {
       import org.apache.mahout.math.function.Functions.SQRT
@@ -64,7 +65,7 @@ class OrdinaryLeastSquares[K] extends LinearRegressor[K] {
       residuals = drmTarget - (X %*% beta)
       val ete = (residuals.t %*% residuals).collect // 1x1
       val n = drmTarget.nrow
-      val k = X.ncol
+
       val invDegFreedomKindOf = (1.0 / (n - k))
       val varCovarMatrix = invDegFreedomKindOf * ete(0,0) * drmXtXinv
       se = varCovarMatrix.viewDiagonal.assign(SQRT)
@@ -72,27 +73,24 @@ class OrdinaryLeastSquares[K] extends LinearRegressor[K] {
       val tDist = new org.apache.commons.math3.distribution.TDistribution((n-k))
       pval = dvec(tScore.toArray.map(t => 2 * (1.0 - tDist.cumulativeProbability(t)) ))
       degreesFreedom = k
+      summary = "Coef.\t\tEstimate\t\tStd. Error\t\tt-score\t\t\tPr(Beta=0)\n" +
+        (0 until k).map(i => s"X${i}\t${beta(i)}\t${se(i)}\t${tScore(i)}\t${pval(i)}").mkString("\n")
+    } else {
+      summary = "Coef.\t\tEstimate\n" +
+        (0 until k).map(i => s"X${i}\t${beta(i)}").mkString("\n")
+    }
+
+    if (addIntercept) {
+      summary = summary.replace(s"X${k-1}", "(Intercept)")
     }
 
     isFit = true
   }
 
-  def predict[Int](drmPredictors: DrmLike[Int]): DrmLike[Int] = {
+  def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
     // throw warning if not fit
     drmPredictors %*% beta
   }
 
-  def summary() = {
 
-    val k = degreesFreedom
-
-    var summaryString = "Coef.\t\tEstimate\t\tStd. Error\t\tt-score\t\t\tPr(Beta=0)\n" +
-      (0 until k).map(i => s"X${i}\t${beta(i)}\t${se(i)}\t${tScore(i)}\t${pval(i)}").mkString("\n")
-
-    if (addIntercept) {
-      summaryString = summaryString.replace(s"X${k-1}", "(Intercept)")
-    }
-
-    summaryString
-  }
 }

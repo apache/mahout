@@ -31,7 +31,7 @@ trait Regressor[K] extends Model {
 
   var residuals: DrmLike[K] = _
 
-  def fit(drmPredictors: DrmLike[K], drmTarget: DrmLike[K]): Unit
+  def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K]): Unit
 
-  def predict[K](drmPredictors: DrmLike[K]): DrmLike[K]
+  def predict(drmPredictors: DrmLike[K]): DrmLike[K]
 }

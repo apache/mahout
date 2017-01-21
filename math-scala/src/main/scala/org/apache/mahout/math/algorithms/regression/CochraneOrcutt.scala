@@ -25,29 +25,31 @@ import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
-class CochraneOrcutt[K] extends LinearRegressor[K] {
+class CochraneOrcutt[K](hyperparameters: Map[String, Any] = Map("" -> None)) extends LinearRegressor[K] {
   // https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation
 
-  var regressor : LinearRegressor[K] = new OrdinaryLeastSquares() // type of regression to do- must have a 'beta' fit param
-  var iterations = 3 // Number of iterations to run
-  var betas: Array[MahoutVector] = _
+  var regressor: LinearRegressor[K] = hyperparameters.asInstanceOf[Map[String, LinearRegressor[K]]].getOrElse("regressor", new OrdinaryLeastSquares())
+  var iterations: Int = hyperparameters.asInstanceOf[Map[String, Int]].getOrElse("iterations", 3)
+  var cacheHint: CacheHint.CacheHint = hyperparameters.asInstanceOf[Map[String, CacheHint.CacheHint]].getOrElse("cacheHint", CacheHint.MEMORY_ONLY)
   // For larger inputs, CacheHint.MEMORY_AND_DISK2 is reccomended.
-  var cacheHint = CacheHint.MEMORY_ONLY
 
-  def fit(drmPredictors: DrmLike[K], drmTarget: DrmLike[K]) = {
+  var betas: Array[MahoutVector] = _
+
+  var summary = ""
+
+  def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K]): Unit = {
 
     betas = new Array[MahoutVector](iterations)
-    regressor.fit(drmTarget, drmPredictors)
+    regressor.fit(drmTarget, drmFeatures)
     betas(0) = regressor.beta
 
     val Y = drmTarget(1 until drmTarget.nrow.toInt, 0 until 1).checkpoint(cacheHint)
     val Y_lag = drmTarget(0 until drmTarget.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
-    val X = drmPredictors(1 until drmPredictors.nrow.toInt, 0 until 1).checkpoint(cacheHint)
-    val X_lag = drmPredictors(0 until drmPredictors.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
+    val X = drmFeatures(1 until drmFeatures.nrow.toInt, 0 until 1).checkpoint(cacheHint)
+    val X_lag = drmFeatures(0 until drmFeatures.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
     for (i <- 1 until iterations){
-      val error = drmTarget - regressor.predict(drmPredictors)
-      regressor.fit(error(1 until error.nrow.toInt, 0 until 1),
-                    error(0 until error.nrow.toInt - 1, 0 until 1))
+      val error = drmTarget - regressor.predict(drmFeatures)
+      regressor.fit(error(1 until error.nrow.toInt, 0 until 1), error(0 until error.nrow.toInt - 1, 0 until 1))
       val rho = regressor.beta.get(0)
 
       val drmYprime = Y - Y_lag * rho
@@ -60,16 +62,14 @@ class CochraneOrcutt[K] extends LinearRegressor[K] {
       betas(i) = betaPrime
     }
 
+    summary = (0 until iterations).map(i => s"Beta estimates on iteration " + i + ": "
+      + betas.toString + "\n").mkString("") + "\n\n" + "Final Model:\n\n" + regressor.summary
+
     isFit = true
   }
 
-  def predict[K](drmPredictors: DrmLike[K]): DrmLike[K] = {
+  def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
     regressor.predict(drmPredictors)
-  }
-
-  def summary() = {
-    (0 until iterations).map(i => s"Beta estimates on iteration " + i + ": "
-      + betas.toString + "\n").mkString("") + "\n\n" + "Final Model:\n\n" + regressor.summary()
   }
 
 }

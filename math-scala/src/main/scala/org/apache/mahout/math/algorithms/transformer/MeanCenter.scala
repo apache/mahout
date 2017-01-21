@@ -25,12 +25,14 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings.MahoutCollections._
 import org.apache.mahout.math.{Vector => MahoutVector}
 
 import scala.reflect.ClassTag
 
 class MeanCenter extends Transformer {
 
+  var summary = ""
   var colMeansV: MahoutVector = _
 
   /**
@@ -48,6 +50,8 @@ class MeanCenter extends Transformer {
     */
   def fit[K](input: DrmLike[K]) = {
     colMeansV = input.colMeans
+    val colMeansA = colMeansV.toArray
+    //summary = (0 until colMeansA.length).map(i => s"Column ${i} mean: ${colMeansA(i)}").mkString(", ")
   }
 
   def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] = {
@@ -84,10 +88,6 @@ class MeanCenter extends Transformer {
         (keys, copy)
     }
     output
-  }
-
-  def summary(): String = {
-    "not implemented yet"
   }
 
 }

@@ -54,6 +54,7 @@ class StandardScaler extends Transformer{
   var meanVec: MahoutVector = _
   var variance: MahoutVector = _
   var stdev: MahoutVector = _
+  var summary = ""
 
   def fit[K](input: DrmLike[K]) = {
     val mNv = dcolMeanVars(input)
@@ -61,6 +62,7 @@ class StandardScaler extends Transformer{
     variance = mNv._2
     stdev = mNv._2.sqrt
     isFit = true
+
   }
 
   def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] = {
@@ -85,10 +87,6 @@ class StandardScaler extends Transformer{
       }
     }
     res
-  }
-
-  def summary(): String = {
-    "not implemented yet"
   }
 
   /**

@@ -31,6 +31,6 @@ trait Model extends Serializable {
 
   var isFit = false
 
-  def summary(): String
+  var summary: String
 
 }
