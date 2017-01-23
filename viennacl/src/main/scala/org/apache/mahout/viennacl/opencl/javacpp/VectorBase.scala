@@ -15,6 +15,7 @@
   * limitations under the License.
   */
 package org.apache.mahout.viennacl.opencl.javacpp
+
 import java.nio._
 
 import org.bytedeco.javacpp._

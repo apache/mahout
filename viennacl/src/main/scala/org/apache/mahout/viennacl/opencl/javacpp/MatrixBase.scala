@@ -15,6 +15,7 @@
   * limitations under the License.
   */
 package org.apache.mahout.viennacl.opencl.javacpp
+
 import org.bytedeco.javacpp.Pointer
 import org.bytedeco.javacpp.annotation._
 
