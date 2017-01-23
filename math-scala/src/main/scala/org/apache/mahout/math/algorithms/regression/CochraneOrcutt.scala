@@ -37,8 +37,11 @@ class CochraneOrcutt[K](hyperparameters: Map[String, Any] = Map("" -> None)) ext
 
   var summary = ""
 
-  def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K]): Unit = {
+  def fit(drmFeatures: DrmLike[K],
+          drmTarget: DrmLike[K],
+          hyperparameters: Map[String, Any] = Map("" -> None)): Unit = {
 
+    var hyperparameters: Option[Map[String,Any]] = None
     betas = new Array[MahoutVector](iterations)
     regressor.fit(drmTarget, drmFeatures)
     betas(0) = regressor.beta
@@ -69,6 +72,9 @@ class CochraneOrcutt[K](hyperparameters: Map[String, Any] = Map("" -> None)) ext
   }
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
+    if (!isFit){
+      throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
+    }
     regressor.predict(drmPredictors)
   }
 

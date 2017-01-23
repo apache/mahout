@@ -37,8 +37,8 @@ class AsFactor extends Transformer{
   var summary = ""
 
   def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] ={
-    if (!isFit) {
-      //throw an error
+    if (!isFit){
+      throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
     }
 
     implicit val ctx = input.context

@@ -37,14 +37,28 @@ import scala.reflect.ClassTag
 class OrdinaryLeastSquares[K](hyperparameters: Map[String, Any] = Map("" -> None)) extends LinearRegressor[K] {
   // https://en.wikipedia.org/wiki/Ordinary_least_squares
 
-  var calcStandardErrors: Boolean = hyperparameters.asInstanceOf[Map[String, Boolean]].getOrElse("calcStandardErrors", true)
-  var addIntercept: Boolean = hyperparameters.asInstanceOf[Map[String, Boolean]].getOrElse("addIntercept", true)
-
+  var addIntercept: Boolean = _
+  var calcStandardErrors: Boolean = _
   var summary = ""
-  def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K]): Unit = {
+
+  setHyperparameters(hyperparameters)
+
+  def setHyperparameters(hyperparameters: Map[String, Any] = Map("" -> None)): Unit = {
+    calcStandardErrors = hyperparameters.asInstanceOf[Map[String, Boolean]].getOrElse("calcStandardErrors", true)
+    addIntercept = hyperparameters.asInstanceOf[Map[String, Boolean]].getOrElse("addIntercept", true)
+  }
+
+
+  def fit(drmFeatures: DrmLike[K],
+          drmTarget: DrmLike[K],
+          hyperparameters: Map[String,Any] = Map("" -> None)): Unit = {
+
+    if (hyperparameters != Map("" -> None)) {
+      setHyperparameters(hyperparameters)
+    }
 
     if (drmFeatures.nrow != drmTarget.nrow){
-      "throw an error here"
+      throw new Exception(s"${drmFeatures.nrow} observations in features, ${drmTarget.nrow} observations in target, must be equal.")
     }
 
     var X = drmFeatures
@@ -88,7 +102,9 @@ class OrdinaryLeastSquares[K](hyperparameters: Map[String, Any] = Map("" -> None
   }
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
-    // throw warning if not fit
+    if (!isFit){
+      throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
+    }
     drmPredictors %*% beta
   }
 

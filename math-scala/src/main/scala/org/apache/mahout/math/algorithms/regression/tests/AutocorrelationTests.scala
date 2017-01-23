@@ -40,7 +40,7 @@ object AutocorrelationTests {
        d = 2 : no auto-correlation
        d > 2 : negative auto-correlation
   */
-  def DurbinWaton[K](model: Regressor[K]): Regressor[K] = {
+  def DurbinWatson[K](model: Regressor[K]): Regressor[K] = {
     val e: DrmLike[K] = model.residuals(1 until model.residuals.nrow.toInt, 0 until 1)
     val e_t_1: DrmLike[K] = model.residuals(0 until model.residuals.nrow.toInt - 1, 0 until 1)
     val numerator = (e - e_t_1).assign(SQUARE).colSums
