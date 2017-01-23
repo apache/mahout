@@ -20,6 +20,7 @@ package org.apache.mahout.viennacl.openmp
 import org.apache.mahout.logging._
 import org.apache.mahout.math
 import org.apache.mahout.math._
+import org.apache.mahout.math.backend.incore.MMulSolver
 import org.apache.mahout.math.flavor.{BackEnum, TraversingStructureEnum}
 import org.apache.mahout.math.function.Functions
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -30,7 +31,7 @@ import org.apache.mahout.viennacl.openmp.javacpp.{CompressedMatrix, Context, Den
 
 import scala.collection.JavaConversions._
 
-object OMPMMul extends MMBinaryFunc {
+object OMPMMul extends MMulSolver {
 
   private final implicit val log = getLog(OMPMMul.getClass)
 

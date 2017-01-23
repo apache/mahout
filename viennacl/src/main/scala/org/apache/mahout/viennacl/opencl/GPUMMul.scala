@@ -1,36 +1,4 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package org.apache.mahout.viennacl.opencl
-
-import org.apache.mahout.logging._
-import org.apache.mahout.math
-import org.apache.mahout.math._
-import org.apache.mahout.math.flavor.{BackEnum, TraversingStructureEnum}
-import org.apache.mahout.math.function.Functions
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.viennacl.opencl.javacpp.Functions._
-import org.apache.mahout.viennacl.opencl.javacpp.LinalgFunctions._
-import org.apache.mahout.viennacl.opencl.javacpp.{CompressedMatrix, Context, DenseRowMatrix}
-
-import scala.collection.JavaConversions._
-
-object GPUMMul extends MMBinaryFunc {
+object GPUMMul extends MMulSolver {
 
   private final implicit val log = getLog(GPUMMul.getClass)
 
@@ -42,7 +10,7 @@ object GPUMMul extends MMBinaryFunc {
     val backs = (af.getBacking, bf.getBacking)
     val sd = (af.getStructure, math.scalabindings.densityAnalysis(a), bf.getStructure, densityAnalysis(b))
 
-    
+
     try {
 
       val alg: MMulAlg = backs match {

@@ -15,6 +15,7 @@
   * limitations under the License.
   */
 package org.apache.mahout.viennacl.opencl.javacpp
+
 import org.bytedeco.javacpp.{DoublePointer, Pointer, annotation}
 import org.bytedeco.javacpp.annotation._
 

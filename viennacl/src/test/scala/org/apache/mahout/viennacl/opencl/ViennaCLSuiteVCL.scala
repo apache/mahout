@@ -14,11 +14,11 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-package org.apache.mahout.viennacl.opencl
+package org.apache.mahout.opencl.viennacl
 
 import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.viennacl.opencl.javacpp.CompressedMatrix
 import org.apache.mahout.viennacl.opencl.javacpp.Functions._
 import org.apache.mahout.viennacl.opencl.javacpp.LinalgFunctions._
 import org.apache.mahout.viennacl.opencl.javacpp.{Context, LinalgFunctions, VCLVector, _}

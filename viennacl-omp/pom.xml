@@ -157,6 +157,8 @@
                 <argument>org.apache.mahout.viennacl.openmp.javacpp.VectorBase</argument>
                 <argument>org.apache.mahout.viennacl.openmp.javacpp.VCLVector</argument>
                 <argument>org.apache.mahout.viennacl.openmp.javacpp.VecMultExpression</argument>
+                <argument>org.apache.mahout.viennacl.openmp.OMPMMul</argument>
+                <argument>org.apache.mahout.viennacl.openmp.OMPMMul$</argument>
               </arguments>
             </configuration>
           </execution>
