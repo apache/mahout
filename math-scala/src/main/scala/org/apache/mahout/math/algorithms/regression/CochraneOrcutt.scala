@@ -46,6 +46,8 @@ class CochraneOrcutt[K](hyperparameters: Map[String, Any] = Map("" -> None)) ext
     regressor.fit(drmTarget, drmFeatures)
     betas(0) = regressor.beta
 
+    drmY = drmTarget
+
     val Y = drmTarget(1 until drmTarget.nrow.toInt, 0 until 1).checkpoint(cacheHint)
     val Y_lag = drmTarget(0 until drmTarget.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
     val X = drmFeatures(1 until drmFeatures.nrow.toInt, 0 until 1).checkpoint(cacheHint)

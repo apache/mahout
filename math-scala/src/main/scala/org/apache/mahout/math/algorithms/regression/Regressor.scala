@@ -19,10 +19,13 @@
 
 package org.apache.mahout.math.algorithms.regression
 
+import org.apache.mahout.math.algorithms.regression.tests._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.algorithms.Model
 import org.apache.mahout.math.drm.DrmLike
+
+import scala.reflect.ClassTag
 
 /**
   * Abstract of Regressors
@@ -31,9 +34,16 @@ trait Regressor[K] extends Model {
 
   var residuals: DrmLike[K] = _
 
+  var drmY: DrmLike[K] = _
+
   def fit(drmFeatures: DrmLike[K],
           drmTarget: DrmLike[K],
           hyperparameters: Map[String,Any] = Map("" -> None)): Unit
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K]
+
+  // Common Applicable Tests- here only for convenience.
+  lazy val mse = FittnessTests.MeanSquareError(this)
+  lazy val r2 = FittnessTests.CoefficientOfDetermination(this, drmY)
+
 }

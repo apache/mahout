@@ -19,15 +19,15 @@ package org.apache.mahout.math.algorithms
 
 // arrange these proper
 import org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares
+import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.MahoutCollections._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.drm._
 import org.apache.mahout.test.{DistributedMahoutSuite, MahoutSuite}
 import org.scalatest.{FunSuite, Matchers}
 
-trait RegressionSuite extends DistributedMahoutSuite with Matchers {
+trait RegressionSuiteBase extends DistributedMahoutSuite with Matchers {
   this: FunSuite =>
 
   test("ordinary least squares") {
@@ -63,13 +63,13 @@ trait RegressionSuite extends DistributedMahoutSuite with Matchers {
       (3, 2, 13,   7,  40.400208),  // Clusters
       (3, 3, 13,   4,  45.811716)), numPartitions = 2)
 
-    drmData.collect(::, 0 until 4)
+    //drmData.collect(::, 0 until 4)
 
     val drmX = drmData(::, 0 until 4)
     val drmY = drmData(::, 4 until 5)
 
     val model = new OrdinaryLeastSquares[Int]()
-    model.fit(drmY, drmX)
+    model.fit(drmX, drmY)
     val estimate = model.beta
     val Ranswers = dvec(-1.336265, -13.157702, -4.152654, -5.679908, 163.179329)
 

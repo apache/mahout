@@ -51,16 +51,19 @@ class MeanCenter extends Transformer {
   def fit[K](input: DrmLike[K]) = {
     colMeansV = input.colMeans
     val colMeansA = colMeansV.toArray
-    //summary = (0 until colMeansA.length).map(i => s"Column ${i} mean: ${colMeansA(i)}").mkString(", ")
+    isFit = true
+
   }
 
-  def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] = {
+  def transform[K](input: DrmLike[K]): DrmLike[K] = {
 
     if (!isFit){
       throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
     }
 
     implicit val ctx = input.context
+    implicit val ktag =  input.keyClassTag
+
     val bcastV = drmBroadcast(colMeansV)
 
     val output = input.mapBlock(input.ncol) {

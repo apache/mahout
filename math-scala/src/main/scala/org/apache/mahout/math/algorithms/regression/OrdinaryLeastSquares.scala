@@ -57,6 +57,7 @@ class OrdinaryLeastSquares[K](hyperparameters: Map[String, Any] = Map("" -> None
       setHyperparameters(hyperparameters)
     }
 
+    drmY = drmTarget
     if (drmFeatures.nrow != drmTarget.nrow){
       throw new Exception(s"${drmFeatures.nrow} observations in features, ${drmTarget.nrow} observations in target, must be equal.")
     }
@@ -76,7 +77,8 @@ class OrdinaryLeastSquares[K](hyperparameters: Map[String, Any] = Map("" -> None
       import org.apache.mahout.math.function.Functions.SQRT
       import org.apache.mahout.math.scalabindings.MahoutCollections._
 
-      residuals = drmTarget - (X %*% beta)
+      val yhat = (X %*% beta)
+      residuals = drmTarget - yhat
       val ete = (residuals.t %*% residuals).collect // 1x1
       val n = drmTarget.nrow
 

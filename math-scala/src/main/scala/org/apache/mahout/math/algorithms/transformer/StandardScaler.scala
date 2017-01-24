@@ -65,7 +65,7 @@ class StandardScaler extends Transformer{
 
   }
 
-  def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] = {
+  def transform[K](input: DrmLike[K]): DrmLike[K] = {
 
     if (!isFit) {
       //throw an error
@@ -78,6 +78,8 @@ class StandardScaler extends Transformer{
 
     val bcastMu = drmBroadcast(meanVec)
     val bcastSigma = drmBroadcast(stdev)
+
+    implicit val ktag =  input.keyClassTag
 
     val res = input.mapBlock(input.ncol) {
       case (keys, block) => {

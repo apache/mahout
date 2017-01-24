@@ -36,7 +36,7 @@ class AsFactor extends Transformer{
   var k: MahoutVector = _
   var summary = ""
 
-  def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K] ={
+  def transform[K](input: DrmLike[K]): DrmLike[K] ={
     if (!isFit){
       throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
     }
@@ -45,6 +45,8 @@ class AsFactor extends Transformer{
 
     val bcastK = drmBroadcast(k)
     val bcastFactorMap = drmBroadcast(factorMap)
+
+    implicit val ktag =  input.keyClassTag
 
     val res = input.mapBlock(k.get(0).toInt) {
       case (keys, block) => {

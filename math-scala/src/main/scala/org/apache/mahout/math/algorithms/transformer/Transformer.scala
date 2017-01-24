@@ -31,8 +31,14 @@ trait Transformer extends Model {
     * @param input
 
     */
-  def transform[K: ClassTag](input: DrmLike[K]): DrmLike[K]
+
+  def transform[K](input: DrmLike[K]): DrmLike[K]
 
   def fit[K](input: DrmLike[K])
+
+  def fitTransform[K](input: DrmLike[K]): DrmLike[K] = {
+    this.fit(input)
+    this.transform(input)
+  }
 
 }
