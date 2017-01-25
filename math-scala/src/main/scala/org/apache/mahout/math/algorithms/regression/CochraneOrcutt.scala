@@ -20,8 +20,7 @@
 package org.apache.mahout.math.algorithms.regression
 
 import org.apache.mahout.math.{Vector => MahoutVector}
-import org.apache.mahout.math.drm.CacheHint
-import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.drm.{CacheHint, DrmLike, safeToNonNegInt}
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
@@ -53,11 +52,11 @@ class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*) extends LinearRegressor
     betas(0) = regressor.beta
 
     drmY = drmTarget
-
-    val Y = drmTarget(1 until drmTarget.nrow.toInt, 0 until 1).checkpoint(cacheHint)
-    val Y_lag = drmTarget(0 until drmTarget.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
-    val X = drmFeatures(1 until drmFeatures.nrow.toInt, 0 until 1).checkpoint(cacheHint)
-    val X_lag = drmFeatures(0 until drmFeatures.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
+    val n = safeToNonNegInt(drmTarget.nrow)
+    val Y = drmTarget(1 until n, 0 until 1).checkpoint(cacheHint)
+    val Y_lag = drmTarget(0 until n - 1, 0 until 1).checkpoint(cacheHint)
+    val X = drmFeatures(1 until n, 0 until 1).checkpoint(cacheHint)
+    val X_lag = drmFeatures(0 until n - 1, 0 until 1).checkpoint(cacheHint)
     for (i <- 1 until iterations){
       val error = drmTarget - regressor.predict(drmFeatures)
       regressor.fit(drmFeatures, drmTarget)
