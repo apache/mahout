@@ -19,6 +19,7 @@ package org.apache.mahout.opencl.viennacl
 import org.apache.mahout.math._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.viennacl.opencl.javacpp.CompressedMatrix
+import org.apache.mahout.viennacl.opencl._
 import org.apache.mahout.viennacl.opencl.javacpp.Functions._
 import org.apache.mahout.viennacl.opencl.javacpp.LinalgFunctions._
 import org.apache.mahout.viennacl.opencl.javacpp.{Context, LinalgFunctions, VCLVector, _}

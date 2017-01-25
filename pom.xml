@@ -849,9 +849,9 @@
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <module>spark-shell</module>
-    <module>flink</module>
-    <module>h2o</module>
+    <!--<module>spark-shell</module>-->
+    <!--<module>flink</module>-->
+    <!--<module>h2o</module>-->
     <!--<module>viennacl</module>-->
     <!--<module>viennacl-omp</module>-->
   </modules>

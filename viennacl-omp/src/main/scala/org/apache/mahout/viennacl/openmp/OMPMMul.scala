@@ -31,7 +31,7 @@ import org.apache.mahout.viennacl.openmp.javacpp.{CompressedMatrix, Context, Den
 
 import scala.collection.JavaConversions._
 
-object OMPMMul extends MMulSolver {
+object OMPMMul extends MMBinaryFunc {
 
   private final implicit val log = getLog(OMPMMul.getClass)
 
