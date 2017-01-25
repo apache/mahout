@@ -20,11 +20,12 @@
 package org.apache.mahout.math.algorithms.regression.tests
 
 import org.apache.mahout.math.algorithms.regression.Regressor
+import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.function.Functions.SQUARE
 import org.apache.mahout.math.scalabindings.RLikeOps._
-
+import scala.language.higherKinds
 
 object AutocorrelationTests {
 
@@ -40,14 +41,16 @@ object AutocorrelationTests {
        d = 2 : no auto-correlation
        d > 2 : negative auto-correlation
   */
-  def DurbinWatson[K](model: Regressor[K]): Regressor[K] = {
-    val e: DrmLike[K] = model.residuals(1 until model.residuals.nrow.toInt, 0 until 1)
-    val e_t_1: DrmLike[K] = model.residuals(0 until model.residuals.nrow.toInt - 1, 0 until 1)
-    val numerator = (e - e_t_1).assign(SQUARE).colSums
-    val denominator = model.residuals.assign(SQUARE).colSums
-    val dw = (numerator / denominator)
-    model.testResults += ("durbin-watson test statistic" -> dw)
-    model.summary += s"\nDurbin Watson Test Statistic: ${dw}"
+  def DurbinWatson[R[K] <: Regressor[K], K](model: R[K]): R[K] = {
+
+    val n = safeToNonNegInt(model.residuals.nrow)
+    val e: DrmLike[K] = model.residuals(1 until n , 0 until 1)
+    val e_t_1: DrmLike[K] = model.residuals(0 until n - 1, 0 until 1)
+    val numerator = (e - e_t_1).assign(SQUARE).colSums()
+    val denominator = model.residuals.assign(SQUARE).colSums()
+    val dw = numerator / denominator
+    model.testResults += ("durbin-watson test statistic" → dw.get(0))
+    model.summary += s"\nDurbin Watson Test Statistic: ${dw.toString}"
     model
   }
 

@@ -34,27 +34,26 @@ import scala.reflect.ClassTag
   * model.calcStandardErrors = true
   * 
   */
-class OrdinaryLeastSquares[K](hyperparameters: Map[String, Any] = Map("" -> None)) extends LinearRegressor[K] {
+class OrdinaryLeastSquares[K](hyperparameters: (Symbol, Any)*)
+  extends LinearRegressor[K] {
   // https://en.wikipedia.org/wiki/Ordinary_least_squares
 
   var addIntercept: Boolean = _
   var calcStandardErrors: Boolean = _
   var summary = ""
 
-  setHyperparameters(hyperparameters)
+  setHyperparameters(hyperparameters.toMap)
 
-  def setHyperparameters(hyperparameters: Map[String, Any] = Map("" -> None)): Unit = {
-    calcStandardErrors = hyperparameters.asInstanceOf[Map[String, Boolean]].getOrElse("calcStandardErrors", true)
-    addIntercept = hyperparameters.asInstanceOf[Map[String, Boolean]].getOrElse("addIntercept", true)
+  def setHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
+    calcStandardErrors = hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('calcStandardErrors, true)
+    addIntercept = hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('addIntercept, true)
   }
 
 
-  def fit(drmFeatures: DrmLike[K],
-          drmTarget: DrmLike[K],
-          hyperparameters: Map[String,Any] = Map("" -> None)): Unit = {
+  def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K], hyperparameters: (Symbol, Any)*): Unit = {
 
     if (hyperparameters != Map("" -> None)) {
-      setHyperparameters(hyperparameters)
+      setHyperparameters(hyperparameters.toMap)
     }
 
     drmY = drmTarget

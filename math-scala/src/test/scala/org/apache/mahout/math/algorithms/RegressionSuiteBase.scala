@@ -47,7 +47,7 @@ trait RegressionSuiteBase extends DistributedMahoutSuite with Matchers {
     X = dataM[, c(1,2,3,4)]
     y = dataM[, c(5)]
 
-    model <- lm(y ~ X - 1)
+    model <- lm(y ~ X )
     summary(model)
 
      */
@@ -69,7 +69,8 @@ trait RegressionSuiteBase extends DistributedMahoutSuite with Matchers {
     val drmY = drmData(::, 4 until 5)
 
     val model = new OrdinaryLeastSquares[Int]()
-    model.fit(drmX, drmY)
+    model.fit(drmX, drmY, 'calcStandardErrors → false)
+    // ^^ we dont need SE for this test, we want to make sure we CAN add hyperparameters, and subsequent tests will check SEs → 3-birds : 1-stone
     val estimate = model.beta
     val Ranswers = dvec(-1.336265, -13.157702, -4.152654, -5.679908, 163.179329)
 
@@ -77,6 +78,7 @@ trait RegressionSuiteBase extends DistributedMahoutSuite with Matchers {
     (estimate - Ranswers).sum should be < epsilon
 
   }
+
 
 
 }

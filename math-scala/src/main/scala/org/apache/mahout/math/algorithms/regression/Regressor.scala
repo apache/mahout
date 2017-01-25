@@ -36,9 +36,9 @@ trait Regressor[K] extends Model {
 
   var drmY: DrmLike[K] = _
 
-  def fit(drmFeatures: DrmLike[K],
+  def fit(drmX: DrmLike[K],
           drmTarget: DrmLike[K],
-          hyperparameters: Map[String,Any] = Map("" -> None)): Unit
+          hyperparameters: (Symbol, Any)*): Unit
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K]
 

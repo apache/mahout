@@ -30,8 +30,8 @@ import scala.reflect.ClassTag
 object FittnessTests {
 
   // https://en.wikipedia.org/wiki/Coefficient_of_determination
-  def CoefficientOfDetermination[K](model: Regressor[K],
-                                              drmTarget: DrmLike[K]): Regressor[K] = {
+  def CoefficientOfDetermination[R[K] <: Regressor[K], K](model: R[K],
+                                              drmTarget: DrmLike[K]): R[K] = {
     val sumSquareResiduals = model.residuals.assign(SQUARE).sum
     val mc = new MeanCenter()
     val totalResiduals = mc.fitTransform(drmTarget)
@@ -43,7 +43,7 @@ object FittnessTests {
   }
 
   // https://en.wikipedia.org/wiki/Mean_squared_error
-  def MeanSquareError[K](model: Regressor[K]): Regressor[K] = {
+  def MeanSquareError[R[K] <: Regressor[K], K](model: R[K]): R[K] = {
     val mse = model.residuals.assign(SQUARE).sum / model.residuals.nrow
     model.testResults += ("mse" -> mse)
     model.summary += s"\nMean Squared Error: ${mse}"

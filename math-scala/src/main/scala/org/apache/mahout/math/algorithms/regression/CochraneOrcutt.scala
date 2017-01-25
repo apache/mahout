@@ -25,25 +25,31 @@ import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 
-class CochraneOrcutt[K](hyperparameters: Map[String, Any] = Map("" -> None)) extends LinearRegressor[K] {
+class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*) extends LinearRegressor[K] {
   // https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation
 
-  var regressor: LinearRegressor[K] = hyperparameters.asInstanceOf[Map[String, LinearRegressor[K]]].getOrElse("regressor", new OrdinaryLeastSquares())
-  var iterations: Int = hyperparameters.asInstanceOf[Map[String, Int]].getOrElse("iterations", 3)
-  var cacheHint: CacheHint.CacheHint = hyperparameters.asInstanceOf[Map[String, CacheHint.CacheHint]].getOrElse("cacheHint", CacheHint.MEMORY_ONLY)
+  var regressor: LinearRegressor[K] = hyperparameters.asInstanceOf[Map[Symbol, LinearRegressor[K]]].getOrElse('regressor, new OrdinaryLeastSquares())
+  var iterations: Int = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('iterations, 3)
+  var cacheHint: CacheHint.CacheHint = hyperparameters.asInstanceOf[Map[Symbol, CacheHint.CacheHint]].getOrElse('cacheHint, CacheHint.MEMORY_ONLY)
   // For larger inputs, CacheHint.MEMORY_AND_DISK2 is reccomended.
 
   var betas: Array[MahoutVector] = _
 
   var summary = ""
 
-  def fit(drmFeatures: DrmLike[K],
-          drmTarget: DrmLike[K],
-          hyperparameters: Map[String, Any] = Map("" -> None)): Unit = {
+  setHyperparameters(hyperparameters.toMap)
+
+  def setHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
+    regressor = hyperparameters.asInstanceOf[Map[Symbol, LinearRegressor[K]]].getOrElse('regressor, new OrdinaryLeastSquares())
+    iterations = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('iterations, 3)
+    cacheHint = hyperparameters.asInstanceOf[Map[Symbol, CacheHint.CacheHint]].getOrElse('cacheHint, CacheHint.MEMORY_ONLY)
+  }
+
+  def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K], hyperparameters: (Symbol, Any)*): Unit = {
 
     var hyperparameters: Option[Map[String,Any]] = None
     betas = new Array[MahoutVector](iterations)
-    regressor.fit(drmTarget, drmFeatures)
+    regressor.fit(drmFeatures, drmTarget)
     betas(0) = regressor.beta
 
     drmY = drmTarget
@@ -54,20 +60,20 @@ class CochraneOrcutt[K](hyperparameters: Map[String, Any] = Map("" -> None)) ext
     val X_lag = drmFeatures(0 until drmFeatures.nrow.toInt - 1, 0 until 1).checkpoint(cacheHint)
     for (i <- 1 until iterations){
       val error = drmTarget - regressor.predict(drmFeatures)
-      regressor.fit(error(1 until error.nrow.toInt, 0 until 1), error(0 until error.nrow.toInt - 1, 0 until 1))
+      regressor.fit(drmFeatures, drmTarget)
       val rho = regressor.beta.get(0)
 
       val drmYprime = Y - Y_lag * rho
       val drmXprime = X - X_lag * rho
 
-      regressor.fit(drmYprime, drmXprime)
+      regressor.fit(drmFeatures, drmTarget)
       var betaPrime = regressor.beta
       val b0 = betaPrime(0) / (1 - rho)
       betaPrime(0) = b0
       betas(i) = betaPrime
     }
 
-    summary = (0 until iterations).map(i => s"Beta estimates on iteration " + i + ": "
+    summary = (0 until iterations).map(i ⇒ s"Beta estimates on iteration " + i + ": "
       + betas.toString + "\n").mkString("") + "\n\n" + "Final Model:\n\n" + regressor.summary
 
     isFit = true
