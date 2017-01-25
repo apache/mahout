@@ -30,7 +30,7 @@ import org.apache.mahout.viennacl.opencl.javacpp.LinalgFunctions._
 import org.apache.mahout.viennacl.opencl.javacpp.{CompressedMatrix, Context, DenseRowMatrix}
 
 import scala.collection.JavaConversions._
-object GPUMMul extends MMulSolver {
+object GPUMMul extends MMBinaryFunc {
 
   private final implicit val log = getLog(GPUMMul.getClass)
 
