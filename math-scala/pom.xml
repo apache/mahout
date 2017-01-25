@@ -102,6 +102,9 @@
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
+        <configuration>
+          <argLine>-Xmx4g</argLine>
+        </configuration>
         <executions>
           <execution>
             <id>test</id>
@@ -147,10 +150,13 @@
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
-
+   <dependency>
+    <groupId>org.scala-lang</groupId>
+    <artifactId>scala-reflect</artifactId>
+    <version>${scala.version}</version>
+  </dependency>
 
   </dependencies>
-
   <profiles>
     <profile>
       <id>mahout-release</id>

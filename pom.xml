@@ -250,6 +250,13 @@
         <version>${project.version}</version>
       </dependency>
 
+      <dependency>
+        <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
+
       <!-- 3rd party  -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
@@ -836,34 +843,36 @@
     <module>buildtools</module>
     <module>math</module>
     <module>hdfs</module>
-    <module>mr</module>
-    <module>integration</module>
-    <module>examples</module>
+    <!--<module>mr</module>-->
+    <!--<module>integration</module>-->
+    <!--<module>examples</module>-->
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <module>spark-shell</module>
-    <module>flink</module>
-    <module>h2o</module>
+    <!--<module>spark-shell</module>-->
+    <!--<module>flink</module>-->
+    <!--<module>h2o</module>-->
+    <!--<module>viennacl</module>-->
+    <!--<module>viennacl-omp</module>-->
   </modules>
 
   <profiles>
+
     <profile>
-      <id>hadoop1</id>
-      <properties>
-        <hadoop.classifier>hadoop1</hadoop.classifier>
-        <hadoop.version>1.2.1</hadoop.version>
-      </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>${hadoop.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
+      <id>viennacl</id>
+    <modules>
+      <module>viennacl</module>
+      <module>viennacl-omp</module>
+    </modules>
     </profile>
+
+    <profile>
+      <id>viennacl-omp</id>
+      <modules>
+        <module>viennacl-omp</module>
+      </modules>
+    </profile>
+
     <profile>
       <id>hadoop2</id>
       <activation>

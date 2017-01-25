@@ -95,7 +95,8 @@ class MahoutSparkILoop extends SparkILoop {
       masterUrl = master,
       appName = "Mahout Spark Shell",
       customJars = jars,
-      sparkConf = conf
+      sparkConf = conf,
+      addMahoutJars = true
     )
 
     _interp.sparkContext = sdc
@@ -162,7 +163,7 @@ class MahoutSparkILoop extends SparkILoop {
          _ __ ___   __ _| |__   ___  _   _| |_
         | '_ ` _ \ / _` | '_ \ / _ \| | | | __|
         | | | | | | (_| | | | | (_) | |_| | |_
-        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.12.2
+        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.13.0
 
       """)
     import Properties._

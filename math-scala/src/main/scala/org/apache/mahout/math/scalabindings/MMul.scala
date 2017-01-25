@@ -22,10 +22,11 @@ import org.apache.mahout.math.flavor.{BackEnum, TraversingStructureEnum}
 import org.apache.mahout.math.function.Functions
 import RLikeOps._
 import org.apache.mahout.logging._
+import org.apache.mahout.math.backend.incore.MMulSolver
 
 import scala.collection.JavaConversions._
 
-object MMul extends MMBinaryFunc {
+object MMul extends MMulSolver {
 
   private final implicit val log = getLog(MMul.getClass)
 

@@ -117,6 +117,12 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>javacpp</artifactId>
+      <version>1.2.2</version>
+    </dependency>
+
 
     <!--  3rd-party -->
     <dependency>
