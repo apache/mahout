@@ -71,11 +71,12 @@ final object RootSolverFactory extends SolverFactory {
           // attempt to instantiate the OpenMP version, assuming we’ve
           // created a separate OpenMP-only module (none exist yet)
           println("[INFO] Creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
-          clazz = Class.forName("org.apache.mahout.viennacl.openmp.OMPMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+          clazz = Class.forName("org.apache.mahout.viennacl.openmp.OMPMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
           println("[INFO] Successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
 
         } catch {
-          case x: Exception =>
+          case xx: Exception =>
+            println(xx.getMessage)
             // fall back to JVM Dont need to Dynamicly assign MMul is in the same package.
             println("[INFO] Unable to create class OMPMMul: falling back to java version")
             clazz = MMul
