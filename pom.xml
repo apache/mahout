@@ -843,17 +843,17 @@
     <module>buildtools</module>
     <module>math</module>
     <module>hdfs</module>
-    <!--<module>mr</module>-->
-    <!--<module>integration</module>-->
-    <!--<module>examples</module>-->
+    <module>mr</module>
+    <module>integration</module>
+    <module>examples</module>
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <!--<module>spark-shell</module>-->
-    <!--<module>flink</module>-->
-    <!--<module>h2o</module>-->
-    <!--<module>viennacl</module>-->
-    <!--<module>viennacl-omp</module>-->
+    <module>spark-shell</module>
+    <module>flink</module>
+    <module>h2o</module>
+    <module>viennacl</module>
+    <module>viennacl-omp</module>
   </modules>
 
   <profiles>
