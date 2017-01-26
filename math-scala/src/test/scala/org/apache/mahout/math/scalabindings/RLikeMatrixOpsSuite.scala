@@ -120,6 +120,9 @@ class RLikeMatrixOpsSuite extends FunSuite with MahoutSuite {
       System.currentTimeMillis() - ms
     }
 
+
+    // We're not using GPUMMul or OMPMMul in math-scala so dont need to worry about
+    // changing it in this method
     def getMmulAvgs(mxA: Matrix, mxB: Matrix, n: Int) = {
 
       var control: Matrix = null
