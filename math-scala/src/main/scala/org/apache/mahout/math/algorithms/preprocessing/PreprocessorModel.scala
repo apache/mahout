@@ -17,33 +17,38 @@
   * under the License.
   */
 
-package org.apache.mahout.math.algorithms.regression
+package org.apache.mahout.math.algorithms.preprocessing
 
-import org.apache.mahout.math.algorithms.regression.tests._
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.{Vector => MahoutVector}
-import org.apache.mahout.math.algorithms.Model
+import org.apache.mahout.math.algorithms.{Model, ModelFactory}
 import org.apache.mahout.math.drm.DrmLike
 
-import scala.reflect.ClassTag
+trait PreprocessorModel extends Model {
 
-/**
-  * Abstract of Regressors
-  */
-trait Regressor[K] extends Model {
+  /**
+    * A convenience method for returning transformed data back to original
+    * @param input
+    * @tparam K
+    * @return
+    */
+  def invTransform[K](input: DrmLike[K]): DrmLike[K]
 
-  var residuals: DrmLike[K] = _
+  /**
+    * Transform given Drm given the feature set
+    * @param input
 
-  var drmY: DrmLike[K] = _
+    */
+  def transform[K](input: DrmLike[K]): DrmLike[K]
 
-  def fit(drmX: DrmLike[K],
-          drmTarget: DrmLike[K],
-          hyperparameters: (Symbol, Any)*): Unit
+}
 
-  def predict(drmPredictors: DrmLike[K]): DrmLike[K]
+trait PreprocessorModelFactory extends ModelFactory{
+  def fit[K](input: DrmLike[K]): PreprocessorModel
 
-  // Common Applicable Tests- here only for convenience.
-  lazy val mse = FittnessTests.MeanSquareError(this)
-  lazy val r2 = FittnessTests.CoefficientOfDetermination(this, drmY)
+  def fitTransform[K](input: DrmLike[K]): DrmLike[K] = {
+    model = this.fit(input)
+    model.transform(input)
+  }
 
+  // used to store the model if `fitTransform` method called
+  var model: PreprocessorModel = _
 }

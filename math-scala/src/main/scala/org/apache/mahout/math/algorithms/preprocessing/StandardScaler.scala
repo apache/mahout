@@ -17,64 +17,52 @@
   * under the License.
   */
 
-package org.apache.mahout.math.algorithms.transformer
+package org.apache.mahout.math.algorithms.preprocessing
 
 import org.apache.mahout.math.drm
-
 import org.apache.mahout.math.scalabindings._
-
 import org.apache.mahout.math.scalabindings.RLikeVectorOps
 import org.apache.mahout.math.{Vector => MahoutVector}
-
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeVectorOps
 import org.apache.mahout.math.scalabindings.MatrixOps
-
 import org.apache.mahout.math._
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.{drmBroadcast, _}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.drm.RLikeDrmOps._
-
-
 import org.apache.mahout.math.Matrix
 
 import collection._
 import JavaConversions._
-
 import Math.sqrt
 
-import scala.reflect.{ClassTag,classTag}
+import scala.reflect.{ClassTag, classTag}
 
 /**
   * Scales columns to mean 0 and unit variance
   */
-class StandardScaler extends Transformer{
-  var meanVec: MahoutVector = _
-  var variance: MahoutVector = _
-  var stdev: MahoutVector = _
-  var summary = ""
+class StandardScaler extends PreprocessorModelFactory {
 
-  def fit[K](input: DrmLike[K]) = {
+  def fit[K](input: DrmLike[K]): StandardScalerModel = {
     val mNv = dcolMeanVars(input)
-    meanVec = mNv._1
-    variance = mNv._2
-    stdev = mNv._2.sqrt
-    isFit = true
-
+    new StandardScalerModel(mNv._1, mNv._2.sqrt)
   }
 
+}
+
+class StandardScalerModel(meanVec: MahoutVector,
+                          stdev: MahoutVector
+                         ) extends PreprocessorModel {
+
+
   def transform[K](input: DrmLike[K]): DrmLike[K] = {
-
-    if (!isFit) {
-      //throw an error
-    }
-
     implicit val ctx = input.context
 
+
     // Some mapBlock() calls need it
-    //implicit val ktag =  input.keyClassTag
+    // implicit val ktag =  input.keyClassTag
 
     val bcastMu = drmBroadcast(meanVec)
     val bcastSigma = drmBroadcast(stdev)
@@ -99,16 +87,12 @@ class StandardScaler extends Transformer{
     * @tparam K
     * @return
     */
-  def invTransform[K: ClassTag](input: DrmLike[K]): DrmLike[K] = {
-
-    if (!isFit){
-      throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
-    }
+  def invTransform[K](input: DrmLike[K]): DrmLike[K] = { // [K: ClassTag]
 
     implicit val ctx = input.context
 
     // Some mapBlock() calls need it
-    //implicit val ktag =  input.keyClassTag
+    implicit val ktag =  input.keyClassTag
 
     val bcastMu = drmBroadcast(meanVec)
     val bcastSigma = drmBroadcast(stdev)

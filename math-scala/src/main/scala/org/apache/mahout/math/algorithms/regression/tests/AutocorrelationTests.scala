@@ -19,7 +19,7 @@
 
 package org.apache.mahout.math.algorithms.regression.tests
 
-import org.apache.mahout.math.algorithms.regression.Regressor
+import org.apache.mahout.math.algorithms.regression.RegressorModel
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.RLikeDrmOps._
@@ -41,7 +41,7 @@ object AutocorrelationTests {
        d = 2 : no auto-correlation
        d > 2 : negative auto-correlation
   */
-  def DurbinWatson[R[K] <: Regressor[K], K](model: R[K]): R[K] = {
+  def DurbinWatson[R[K] <: RegressorModel[K], K](model: R[K]): R[K] = {
 
     val n = safeToNonNegInt(model.residuals.nrow)
     val e: DrmLike[K] = model.residuals(1 until n , 0 until 1)
@@ -49,7 +49,7 @@ object AutocorrelationTests {
     val numerator = (e - e_t_1).assign(SQUARE).colSums()
     val denominator = model.residuals.assign(SQUARE).colSums()
     val dw = numerator / denominator
-    model.testResults += ("durbin-watson test statistic" → dw.get(0))
+    model.testResults += ('durbinWatsonTestStatistic → dw.get(0))
     model.summary += s"\nDurbin Watson Test Statistic: ${dw.toString}"
     model
   }

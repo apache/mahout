@@ -17,11 +17,13 @@
   * under the License.
   */
 
-package org.apache.mahout.math.algorithms.transformer
+package org.apache.mahout.math.algorithms.preprocessing
+
+import org.apache.mahout.math.algorithms.{Model, ModelFactory}
 
 import collection._
 import JavaConversions._
-import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.{drmBroadcast, _}
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -30,41 +32,39 @@ import org.apache.mahout.math.{Vector => MahoutVector}
 
 import scala.reflect.ClassTag
 
-class MeanCenter extends Transformer {
-
-  var summary = ""
-  var colMeansV: MahoutVector = _
+class MeanCenter extends PreprocessorModelFactory {
 
   /**
-    * Optionally set the centers of each column to some value other than Zero
-    * @param centers A vector of length equal to the `input` in the fit method specifying the
-    *                centers to set each column to.
+    * Centers Columns at zero or centers
+    * @param input   A drm which to center on
+    *
     */
-  def setCenter(centers: MahoutVector) = {
-    colMeansV = colMeansV - centers
+  def fit[K](input: DrmLike[K]): MeanCenterModel = {
+    new MeanCenterModel(input.colMeans())
   }
 
-  /**
-    * Centers Columns at zero
-    * @param input
-    */
-  def fit[K](input: DrmLike[K]) = {
-    colMeansV = input.colMeans
-    val colMeansA = colMeansV.toArray
-    isFit = true
+}
 
-  }
+/**
+  * A model for mean centering each column of a data set at 0 or some number specified by the setCenters method.
+  * @param centers
+  */
+class MeanCenterModel(means: MahoutVector) extends PreprocessorModel {
 
-  def transform[K](input: DrmLike[K]): DrmLike[K] = {
+  var colCentersV: MahoutVector = means
 
-    if (!isFit){
-      throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
+  def setCenters(centers: MahoutVector): Unit ={
+    if (means.length != centers.length){
+      throw new Exception(s"Length of centers vector (${centers.length}) must equal length of means vector ((${means.length}) (e.g. the number of columns in the orignally fit input).")
     }
+    colCentersV = means + centers
+  }
+  def transform[K](input: DrmLike[K]): DrmLike[K] = {
 
     implicit val ctx = input.context
     implicit val ktag =  input.keyClassTag
 
-    val bcastV = drmBroadcast(colMeansV)
+    val bcastV = drmBroadcast(colCentersV)
 
     val output = input.mapBlock(input.ncol) {
       case (keys, block) =>
@@ -75,14 +75,11 @@ class MeanCenter extends Transformer {
     output
   }
 
-  def invTransform[K: ClassTag](input: DrmLike[K]): DrmLike[K] = {
-
-    if (!isFit){
-      throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
-    }
+  def invTransform[K](input: DrmLike[K]): DrmLike[K] = {
 
     implicit val ctx = input.context
-    val bcastV = drmBroadcast(colMeansV)
+    implicit val ktag =  input.keyClassTag
+    val bcastV = drmBroadcast(colCentersV)
 
     val output = input.mapBlock(input.ncol) {
       case (keys, block) =>

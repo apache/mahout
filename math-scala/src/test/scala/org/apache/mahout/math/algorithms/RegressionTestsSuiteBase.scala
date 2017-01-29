@@ -1,6 +1,6 @@
 package org.apache.mahout.math.algorithms
 
-import org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares
+import org.apache.mahout.math.algorithms.regression.{OrdinaryLeastSquares, OrdinaryLeastSquaresModel}
 import org.apache.mahout.math.algorithms.regression.tests._
 import org.apache.mahout.math.drm.drmParallelize
 import org.apache.mahout.math.drm.RLikeDrmOps._
@@ -52,22 +52,34 @@ trait RegressionTestsSuiteBase extends DistributedMahoutSuite with Matchers {
     val drmX = drmData(::, 0 until 4)
     val drmY = drmData(::, 4 until 5)
 
-    var model = new OrdinaryLeastSquares[Int]()
-    model.fit(drmX, drmY)
+    val model = new OrdinaryLeastSquares[Int]().fit(drmX, drmY)
     model.r2
     model.mse
 
+    // Answers from running similar algorithm in R
     val rR2 = 0.9425
     val rMSE = 6.457157
 
-
-    val r2: Double = model.testResults.getOrElse("r2", 0.0).asInstanceOf[Double]
-    val mse: Double = model.testResults.getOrElse("mse", 0.0).asInstanceOf[Double]
-
-    println("r2: " + r2.toString)
-    println("mse: " + mse.toString)
+    val r2 = model.testResults.get('r2).get.asInstanceOf[Double]
+    val mse = model.testResults.get('mse).get.asInstanceOf[Double]
     (rR2 - r2) should be < epsilon
     (rMSE - mse) should be < epsilon
+
+//    model.getTestResult[Double]('r2) match {
+//      case Some(r2) =>
+//      case None => throw new Exception("r2 not found in testResults")
+//    }
+//
+//    model.getTestResult[Double]('mse) match {
+//      case Some(mse) => (rMSE - mse) should be < epsilon
+//      case None => throw new Exception("mse not found in testResults")
+//    }
+//
+//    // Test that non-existent tests do as expected
+//    model.getTestResult[Double]('foo) match {
+//      case Some(foo) => throw new Exception("foo existed in testResults ??")
+//      case None => 1 should equal(1)
+//    }
 
   }
 

@@ -18,7 +18,7 @@
 package org.apache.mahout.math.algorithms
 
 // arrange these proper
-import org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares
+import org.apache.mahout.math.algorithms.regression.{OrdinaryLeastSquares, OrdinaryLeastSquaresModel}
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.MahoutCollections._
@@ -68,8 +68,8 @@ trait RegressionSuiteBase extends DistributedMahoutSuite with Matchers {
     val drmX = drmData(::, 0 until 4)
     val drmY = drmData(::, 4 until 5)
 
-    val model = new OrdinaryLeastSquares[Int]()
-    model.fit(drmX, drmY, 'calcStandardErrors → false)
+    val model = new OrdinaryLeastSquares[Int]().fit(drmX, drmY, 'calcStandardErrors → false)
+
     // ^^ we dont need SE for this test, we want to make sure we CAN add hyperparameters, and subsequent tests will check SEs → 3-birds : 1-stone
     val estimate = model.beta
     val Ranswers = dvec(-1.336265, -13.157702, -4.152654, -5.679908, 163.179329)

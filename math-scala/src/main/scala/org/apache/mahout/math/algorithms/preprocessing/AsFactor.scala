@@ -17,38 +17,58 @@
   * under the License.
   */
 
-package org.apache.mahout.math.algorithms.transformer
+package org.apache.mahout.math.algorithms.preprocessing
 
 import org.apache.mahout.math.{Vector => MahoutVector}
 
 import collection._
 import JavaConversions._
 import org.apache.mahout.math._
-import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.{drmBroadcast, _}
 import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.scalabindings.{dvec, _}
 import org.apache.mahout.math.scalabindings.RLikeOps._
+
 import scala.reflect.ClassTag
 
-class AsFactor extends Transformer{
+class AsFactor extends PreprocessorModelFactory{
 
-  var factorMap: MahoutVector = _
-  var k: MahoutVector = _
-  var summary = ""
+  def fit[K](input: DrmLike[K]) = {
+
+    import org.apache.mahout.math.function.VectorFunction
+    val factorMap = input.allreduceBlock(
+      { case (keys, block) =>
+        // someday we'll replace this with block.max: Vector
+        // or better yet- block.distinct
+        dense(block.aggregateColumns( new VectorFunction {
+            def apply(f: Vector): Double = f.max
+        }))
+      })(0, ::)
+    new AsFactorModel(factorMap.sum.toInt, factorMap)
+
+  }
+
+}
+
+class AsFactorModel(k: Int, factorMap: MahoutVector) extends PreprocessorModel {
 
   def transform[K](input: DrmLike[K]): DrmLike[K] ={
-    if (!isFit){
-      throw new Exception("Model hasn't been fit yet- please run .fit(...) method first.")
+    // fixed the 'fit' but transform still works in the old way.
+    // not working!!
+    //throw new Exception("asFactor doesn't work yet. Go home.")
+
+    if (input.ncol != 1) {
+      throw new Exception("This method is designed to work on singal columnar matrices")
     }
 
     implicit val ctx = input.context
 
-    val bcastK = drmBroadcast(k)
+    val bcastK = drmBroadcast(dvec(k))
     val bcastFactorMap = drmBroadcast(factorMap)
 
     implicit val ktag =  input.keyClassTag
 
-    val res = input.mapBlock(k.get(0).toInt) {
+    val res = input.mapBlock(k) {
       case (keys, block) => {
         val k: Int = bcastK.value.get(0).toInt
         val output = new SparseMatrix(block.nrow, bcastK.get(0).toInt)
@@ -63,19 +83,9 @@ class AsFactor extends Transformer{
     res
   }
 
-  def fit[K](input: DrmLike[K]) = {
-    // this should be done via allReduceBlock or something.
-    val v: Vector = input.collect(::, 0)
-    var a = new Array[Double](v.length)
-    for (i <- 0 until v.length){
-      a(i) = v.getElement(i).get
-    }
+  override def invTransform[K](input: DrmLike[K]) = {
+    // not yet implemented
+    input
 
-    factorMap = dvec(a.distinct) //a.distinct.zipWithIndex.toMap
-    k = dvec(a.distinct.length)
-
-    summary =  s"""${k.get(0).toInt} categories""".stripMargin
-    isFit = true
   }
-
 }

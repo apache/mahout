@@ -1,0 +1,76 @@
+/**
+  * Licensed to the Apache Software Foundation (ASF) under one
+  * or more contributor license agreements. See the NOTICE file
+  * distributed with this work for additional information
+  * regarding copyright ownership. The ASF licenses this file
+  * to you under the Apache License, Version 2.0 (the
+  * "License"); you may not use this file except in compliance
+  * with the License. You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing,
+  * software distributed under the License is distributed on an
+  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  * KIND, either express or implied. See the License for the
+  * specific language governing permissions and limitations
+  * under the License.
+  */
+
+package org.apache.mahout.math.algorithms.regression
+
+import org.apache.mahout.math.algorithms.regression.tests._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.{Vector => MahoutVector}
+import org.apache.mahout.math.algorithms.{Model, ModelFactory}
+import org.apache.mahout.math.drm.DrmLike
+
+import scala.collection.mutable
+import scala.reflect.ClassTag
+
+/**
+  * Abstract of Regressors
+  */
+trait RegressorModel[K] extends Model {
+
+  var residuals: DrmLike[K] = _
+
+  var testResults = mutable.Map[Symbol, Any]()
+
+  var drmY: DrmLike[K] = _
+
+  def predict(drmPredictors: DrmLike[K]): DrmLike[K]
+
+  // Common Applicable Tests- here only for convenience.
+  lazy val mse = FittnessTests.MeanSquareError(this)
+  lazy val r2 = FittnessTests.CoefficientOfDetermination(this, drmY)
+
+  /**
+    * Syntatictic sugar for fetching test results.  Will Return test result if it exists, otherwise None
+    * @param testSymbol - symbol of the test result to fetch, e.g. `'mse`
+    * @tparam T - The Type
+    * @return
+    */
+  def getTestResult[T](testSymbol: Symbol): Option[T] = {
+    Some(testResults.get(testSymbol).asInstanceOf[T])
+  }
+}
+
+trait RegressorModelFactory[K] extends ModelFactory {
+
+  def fit(drmX: DrmLike[K],
+          drmTarget: DrmLike[K],
+          hyperparameters: (Symbol, Any)*): RegressorModel[K]
+
+  def fitPredict(drmX: DrmLike[K],
+                 drmTarget: DrmLike[K],
+                 hyperparameters: (Symbol, Any)* ): DrmLike[K] = {
+
+    model = this.fit(drmX, drmTarget, hyperparameters: _* )
+    model.predict(drmX)
+  }
+
+  // used to store the model if `fitTransform` method called
+  var model: RegressorModel[K] = _
+
+}
