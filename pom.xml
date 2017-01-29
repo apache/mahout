@@ -852,8 +852,8 @@
     <module>spark-shell</module>
     <module>flink</module>
     <module>h2o</module>
-    <module>viennacl</module>
-    <module>viennacl-omp</module>
+    <!--<module>viennacl</module>-->
+    <!--<module>viennacl-omp</module>-->
   </modules>
 
   <profiles>
