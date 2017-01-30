@@ -44,7 +44,10 @@ class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegresso
   // For larger inputs, CacheHint.MEMORY_AND_DISK2 is reccomended.
 
   def setHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
+    setStandardHyperparameters(hyperparameters.toMap)
     regressor = hyperparameters.asInstanceOf[Map[Symbol, LinearRegressorModelFactory[K]]].getOrElse('regressor, new OrdinaryLeastSquares())
+    regressor.calcStandardErrors = false
+    regressor.calcCommonStatistics = false
     iterations = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('iterations, 3)
     cacheHint = hyperparameters.asInstanceOf[Map[Symbol, CacheHint.CacheHint]].getOrElse('cacheHint, CacheHint.MEMORY_ONLY)
   }
@@ -55,7 +58,7 @@ class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegresso
 
     var hyperparameters: Option[Map[String,Any]] = None
     val betas = new Array[MahoutVector](iterations)
-    val regressionModel: LinearRegressorModel[K] = regressor.fit(drmFeatures, drmTarget)
+    var regressionModel: LinearRegressorModel[K] = regressor.fit(drmFeatures, drmTarget)
     betas(0) = regressionModel.beta
 
     val drmY = drmTarget
@@ -66,13 +69,17 @@ class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegresso
     val X_lag = drmFeatures(0 until n - 1, 0 until 1).checkpoint(cacheHint)
     for (i <- 1 until iterations){
       val error = drmTarget - regressionModel.predict(drmFeatures)
-      regressor.fit(drmFeatures, drmTarget)
+      regressionModel = regressor.fit(drmFeatures, drmTarget)
       val rho = regressionModel.beta.get(0)
 
       val drmYprime = Y - Y_lag * rho
       val drmXprime = X - X_lag * rho
 
-      regressor.fit(drmFeatures, drmTarget)
+      if (i == iterations - 1 ){
+        regressor.calcStandardErrors = true
+        regressor.calcCommonStatistics = true
+      }
+      regressionModel = regressor.fit(drmFeatures, drmTarget)
       var betaPrime = regressionModel.beta
       val b0 = betaPrime(0) / (1 - rho)
       betaPrime(0) = b0

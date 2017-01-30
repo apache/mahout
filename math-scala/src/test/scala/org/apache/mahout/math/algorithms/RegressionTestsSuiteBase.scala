@@ -53,15 +53,16 @@ trait RegressionTestsSuiteBase extends DistributedMahoutSuite with Matchers {
     val drmY = drmData(::, 4 until 5)
 
     val model = new OrdinaryLeastSquares[Int]().fit(drmX, drmY)
-    model.r2
-    model.mse
+
 
     // Answers from running similar algorithm in R
     val rR2 = 0.9425
     val rMSE = 6.457157
 
-    val r2 = model.testResults.get('r2).get.asInstanceOf[Double]
-    val mse = model.testResults.get('mse).get.asInstanceOf[Double]
+    val r2: Double = model.r2
+    val mse: Double = model.mse
+    println("R2: " + r2)
+    println("MSE: " + mse)
     (rR2 - r2) should be < epsilon
     (rMSE - mse) should be < epsilon
 

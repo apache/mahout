@@ -32,21 +32,23 @@ object FittnessTests {
 
   // https://en.wikipedia.org/wiki/Coefficient_of_determination
   def CoefficientOfDetermination[R[K] <: RegressorModel[K], K](model: R[K],
-                                                               drmTarget: DrmLike[K]): R[K] = {
-    val sumSquareResiduals = model.residuals.assign(SQUARE).sum
+                                                               drmTarget: DrmLike[K],
+                                                               residuals: DrmLike[K]): R[K] = {
+    val sumSquareResiduals = residuals.assign(SQUARE).sum
     val mc = new MeanCenter()
     val totalResiduals = mc.fitTransform(drmTarget)
     val sumSquareTotal = totalResiduals.assign(SQUARE).sum
     val r2 = 1 - (sumSquareResiduals / sumSquareTotal)
+    model.r2
     model.testResults += ('r2 -> r2)  // need setResult and setSummary method incase you change in future, also to initialize map if non exists or update value if it does
-
     model.summary += s"\nR^2: ${r2}"
     model
   }
 
   // https://en.wikipedia.org/wiki/Mean_squared_error
-  def MeanSquareError[R[K] <: RegressorModel[K], K](model: R[K]): R[K] = {
-    val mse = model.residuals.assign(SQUARE).sum / model.residuals.nrow
+  def MeanSquareError[R[K] <: RegressorModel[K], K](model: R[K], residuals: DrmLike[K]): R[K] = {
+    val mse = residuals.assign(SQUARE).sum / residuals.nrow
+    model.mse = mse
     model.testResults += ('mse -> mse)
     model.summary += s"\nMean Squared Error: ${mse}"
     model

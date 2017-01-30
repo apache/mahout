@@ -33,17 +33,13 @@ import scala.reflect.ClassTag
   */
 trait RegressorModel[K] extends Model {
 
-  var residuals: DrmLike[K] = _
-
   var testResults = mutable.Map[Symbol, Any]()
-
-  var drmY: DrmLike[K] = _
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K]
 
   // Common Applicable Tests- here only for convenience.
-  lazy val mse = FittnessTests.MeanSquareError(this)
-  lazy val r2 = FittnessTests.CoefficientOfDetermination(this, drmY)
+  var mse: Double = _
+  var r2: Double = _
 
   /**
     * Syntatictic sugar for fetching test results.  Will Return test result if it exists, otherwise None
