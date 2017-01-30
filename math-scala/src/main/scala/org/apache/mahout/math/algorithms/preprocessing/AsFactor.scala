@@ -65,13 +65,16 @@ class AsFactorModel(cardinality: Int, factorVec: MahoutVector) extends Preproces
     implicit val ktag =  input.keyClassTag
 
     val res = input.mapBlock(cardinality) {
-      case (keys, block) => {
-        val k: Int = bcastK.value.get(0).toInt
-        val output = new SparseMatrix(block.nrow, bcastK.get(0).toInt)
+      case (keys, block: Matrix) => {
+        val cardinality: Int = bcastK.value.get(0).toInt
+        val output = new SparseMatrix(block.nrow, cardinality)
         // This is how we take a vector of mapping to a map
-        val fm = bcastFactorMap.all.toSeq.map(e => e.get -> e.index).toMap
-        for (i <- 0 until output.nrow){
-          output(i, ::) =  svec(fm.get(block.getQuick(i,0)).get -> 1.0 :: Nil, cardinality = bcastK.get(0).toInt)
+        val fm = bcastFactorMap.value
+        for (n <- 0 until output.nrow){
+          var m = 0
+          for (e <- block(n, ::).all() ){
+            output(n, fm.get(m).toInt + m) = 1.0
+          }
         }
         (keys, output)
       }
@@ -88,7 +91,7 @@ class AsFactorModel(cardinality: Int, factorVec: MahoutVector) extends Preproces
     implicit val ktag =  input.keyClassTag
 
     val res = input.mapBlock(cardinality) {
-      case (keys, block) => {
+      case (keys, block: Matrix) => {
         val k: Int = bcastK.value.get(0).toInt
         val output = new DenseMatrix(block.nrow, bcastK.value.length)
         // This is how we take a vector of mapping to a map
