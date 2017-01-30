@@ -20,7 +20,7 @@
 package org.apache.mahout.math.algorithms.regression
 
 import org.apache.mahout.math.algorithms.regression.tests.FittnessTests
-import org.apache.mahout.math.{Vector => MahoutVector}
+import org.apache.mahout.math.{Matrix, Vector => MahoutVector}
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.scalabindings.{dvec, _}
@@ -46,9 +46,8 @@ class OrdinaryLeastSquares[K] extends LinearRegressorModelFactory[K] {
           hyperparameters: (Symbol, Any)*): OrdinaryLeastSquaresModel[K] = {
 
     var model = new OrdinaryLeastSquaresModel[K]()
-    if (hyperparameters.nonEmpty) {
-      setStandardHyperparameters(hyperparameters.toMap)
-    }
+    setStandardHyperparameters(hyperparameters.toMap)
+
 
     if (drmFeatures.nrow != drmTarget.nrow){
       throw new Exception(s"${drmFeatures.nrow} observations in features, ${drmTarget.nrow} observations in target, must be equal.")
@@ -62,6 +61,7 @@ class OrdinaryLeastSquares[K] extends LinearRegressorModelFactory[K] {
     val drmXty = (X.t %*% drmTarget).collect // this fails when number of columns^2 size matrix won't fit in driver
     model.beta = (drmXtXinv %*% drmXty)(::, 0)
 
-    model
+
+    this.modelPostprocessing(model, X, drmTarget, drmXtXinv)
   }
 }

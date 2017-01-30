@@ -73,7 +73,7 @@ trait RegressionTestsSuiteBase extends DistributedMahoutSuite with Matchers {
 
     val model = new OrdinaryLeastSquares[Int]().fit(drmX, drmY)
 
-
+    println(model.summary)
     // Answers from running similar algorithm in R
     val rR2 = 0.9425
     val rMSE = 6.457157

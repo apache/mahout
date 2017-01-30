@@ -51,25 +51,20 @@ class AsFactor extends PreprocessorModelFactory {
 
 }
 
-class AsFactorModel(k: Int, factorMap: MahoutVector) extends PreprocessorModel {
+class AsFactorModel(cardinality: Int, factorVec: MahoutVector) extends PreprocessorModel {
+
+  val factorMap = factorVec
 
   def transform[K](input: DrmLike[K]): DrmLike[K] ={
-    // fixed the 'fit' but transform still works in the old way.
-    // not working!!
-    //throw new Exception("asFactor doesn't work yet. Go home.")
-
-    if (input.ncol != 1) {
-      throw new Exception("This method is designed to work on singal columnar matrices")
-    }
 
     implicit val ctx = input.context
 
-    val bcastK = drmBroadcast(dvec(k))
+    val bcastK = drmBroadcast(dvec(cardinality))
     val bcastFactorMap = drmBroadcast(factorMap)
 
     implicit val ktag =  input.keyClassTag
 
-    val res = input.mapBlock(k) {
+    val res = input.mapBlock(cardinality) {
       case (keys, block) => {
         val k: Int = bcastK.value.get(0).toInt
         val output = new SparseMatrix(block.nrow, bcastK.get(0).toInt)
@@ -84,9 +79,36 @@ class AsFactorModel(k: Int, factorMap: MahoutVector) extends PreprocessorModel {
     res
   }
 
-  override def invTransform[K](input: DrmLike[K]) = {
-    throw new NotImplementedException("invTransform doesn't exist yet")
-    input
+  override def invTransform[K](input: DrmLike[K]): DrmLike[K] = {
+    implicit val ctx = input.context
 
+    val bcastK = drmBroadcast(dvec(cardinality))
+    val bcastFactorMap = drmBroadcast(factorMap)
+
+    implicit val ktag =  input.keyClassTag
+
+    val res = input.mapBlock(cardinality) {
+      case (keys, block) => {
+        val k: Int = bcastK.value.get(0).toInt
+        val output = new DenseMatrix(block.nrow, bcastK.value.length)
+        // This is how we take a vector of mapping to a map
+        val fm = bcastFactorMap.all.toSeq.map(e => e.get -> e.index).toMap
+
+        import MahoutCollections._
+        val indexArray = Array(1.0) ++ bcastFactorMap.value.toArray.map(i => i.toInt)
+        for (n <- 0 until output.nrow){
+          val v = new DenseVector(bcastFactorMap.value.length)
+          var m = 0
+          for (e <- block(n, ::).asInstanceOf[RandomAccessSparseVector].iterateNonZero() ){
+            v.setQuick(m, e.index - m)
+            m += 1
+          }
+          output(n, ::) = v
+        }
+        (keys, output)
+      }
+    }
+    res
   }
+
 }

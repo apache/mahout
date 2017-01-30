@@ -39,7 +39,7 @@ object FittnessTests {
     val totalResiduals = mc.fitTransform(drmTarget)
     val sumSquareTotal = totalResiduals.assign(SQUARE).sum
     val r2 = 1 - (sumSquareResiduals / sumSquareTotal)
-    model.r2
+    model.r2 = r2
     model.testResults += ('r2 -> r2)  // need setResult and setSummary method incase you change in future, also to initialize map if non exists or update value if it does
     model.summary += s"\nR^2: ${r2}"
     model
