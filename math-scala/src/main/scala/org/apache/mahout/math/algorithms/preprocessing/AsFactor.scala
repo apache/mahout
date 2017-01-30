@@ -28,10 +28,11 @@ import org.apache.mahout.math.drm.{drmBroadcast, _}
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.{dvec, _}
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 import scala.reflect.ClassTag
 
-class AsFactor extends PreprocessorModelFactory{
+class AsFactor extends PreprocessorModelFactory {
 
   def fit[K](input: DrmLike[K]) = {
 
@@ -84,7 +85,7 @@ class AsFactorModel(k: Int, factorMap: MahoutVector) extends PreprocessorModel {
   }
 
   override def invTransform[K](input: DrmLike[K]) = {
-    // not yet implemented
+    throw new NotImplementedException("invTransform doesn't exist yet")
     input
 
   }

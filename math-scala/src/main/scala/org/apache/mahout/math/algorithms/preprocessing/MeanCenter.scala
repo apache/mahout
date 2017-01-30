@@ -53,7 +53,7 @@ class MeanCenterModel(means: MahoutVector) extends PreprocessorModel {
 
   var colCentersV: MahoutVector = means
 
-  def setCenters(centers: MahoutVector): Unit ={
+  def setCenters(centers: MahoutVector): Unit = {
     if (means.length != centers.length){
       throw new Exception(s"Length of centers vector (${centers.length}) must equal length of means vector ((${means.length}) (e.g. the number of columns in the orignally fit input).")
     }
