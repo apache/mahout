@@ -19,21 +19,10 @@
 
 package org.apache.mahout.math.algorithms.regression
 
-import org.apache.mahout.math.algorithms.regression.tests._
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.{Vector => MahoutVector}
-import org.apache.mahout.math.algorithms.{Model, ModelFactory}
+import org.apache.mahout.math.algorithms.{SupervisedFitter, SupervisedModel}
 import org.apache.mahout.math.drm.DrmLike
 
-import scala.collection.mutable
-import scala.reflect.ClassTag
-
-/**
-  * Abstract of Regressors
-  */
-trait RegressorModel[K] extends Model {
-
-  var testResults = mutable.Map[Symbol, Any]()
+trait RegressorModel[K] extends SupervisedModel[K] {
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K]
 
@@ -52,11 +41,8 @@ trait RegressorModel[K] extends Model {
   }
 }
 
-trait RegressorModelFactory[K] extends ModelFactory {
+trait RegressorFitter[K] extends SupervisedFitter[K, RegressorModel[K]] {
 
-  def fit(drmX: DrmLike[K],
-          drmTarget: DrmLike[K],
-          hyperparameters: (Symbol, Any)*): RegressorModel[K]
 
   def fitPredict(drmX: DrmLike[K],
                  drmTarget: DrmLike[K],

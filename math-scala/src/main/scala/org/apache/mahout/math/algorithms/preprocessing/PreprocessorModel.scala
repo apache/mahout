@@ -19,10 +19,10 @@
 
 package org.apache.mahout.math.algorithms.preprocessing
 
-import org.apache.mahout.math.algorithms.{Model, ModelFactory}
+import org.apache.mahout.math.algorithms.{UnsupervisedFitter, UnsupervisedModel}
 import org.apache.mahout.math.drm.DrmLike
 
-trait PreprocessorModel extends Model {
+trait PreprocessorModel extends UnsupervisedModel {
 
   /**
     * A convenience method for returning transformed data back to original
@@ -41,12 +41,16 @@ trait PreprocessorModel extends Model {
 
 }
 
-trait PreprocessorModelFactory extends ModelFactory{
-  def fit[K](input: DrmLike[K]): PreprocessorModel
+trait PreprocessorFitter extends UnsupervisedFitter {
 
-  def fitTransform[K](input: DrmLike[K]): DrmLike[K] = {
-    model = this.fit(input)
+  def fit[K](input: DrmLike[K],
+             hyperparameters: (Symbol, Any)*): PreprocessorModel
+
+  def fitTransform[K](input: DrmLike[K],
+                      hyperparameters: (Symbol, Any)*): DrmLike[K] = {
+    model = this.fit(input, hyperparameters:_*)
     model.transform(input)
+
   }
 
   // used to store the model if `fitTransform` method called

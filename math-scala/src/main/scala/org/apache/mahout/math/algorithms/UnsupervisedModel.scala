@@ -19,8 +19,6 @@
 
 package org.apache.mahout.math.algorithms
 
-trait Model extends Serializable {
-
-  var summary: String = ""
+trait UnsupervisedModel extends Model {
 
 }

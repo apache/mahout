@@ -19,41 +19,50 @@
 
 package org.apache.mahout.math.algorithms.preprocessing
 
-import org.apache.mahout.math.{Vector => MahoutVector}
+
 
 import collection._
 import JavaConversions._
 import org.apache.mahout.math._
-import org.apache.mahout.math.drm.{drmBroadcast, _}
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.mahout.math.scalabindings.{dvec, _}
+import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
+import MahoutCollections._
 
-import scala.reflect.ClassTag
+class AsFactor extends PreprocessorFitter {
 
-class AsFactor extends PreprocessorModelFactory {
-
-  def fit[K](input: DrmLike[K]) = {
+  def fit[K](input: DrmLike[K],
+             hyperparameters: (Symbol, Any)*): AsFactorModel = {
 
     import org.apache.mahout.math.function.VectorFunction
     val factorMap = input.allreduceBlock(
-      { case (keys, block) =>
+      { case (keys, block: Matrix) =>
         // someday we'll replace this with block.max: Vector
         // or better yet- block.distinct
         dense(block.aggregateColumns( new VectorFunction {
             def apply(f: Vector): Double = f.max
         }))
       })(0, ::)
-    new AsFactorModel(factorMap.sum.toInt, factorMap)
-
+    /*
+    val A = drmParallelize(dense(
+      (3, 2, 1),
+      (0, 0, 0),
+      (1, 1, 1))
+      -> (4,2,2),  now 4,3,2
+     */
+    new AsFactorModel(factorMap.sum.toInt,
+      dvec(factorMap.toArray.scanLeft(0.0)((l, r) => l + r ).take(factorMap.length))
+    //  factorMap
+    )
   }
 
 }
 
 class AsFactorModel(cardinality: Int, factorVec: MahoutVector) extends PreprocessorModel {
 
-  val factorMap = factorVec
+  val factorMap: MahoutVector = factorVec
 
   def transform[K](input: DrmLike[K]): DrmLike[K] ={
 
@@ -73,7 +82,8 @@ class AsFactorModel(cardinality: Int, factorVec: MahoutVector) extends Preproces
         for (n <- 0 until output.nrow){
           var m = 0
           for (e <- block(n, ::).all() ){
-            output(n, fm.get(m).toInt + m) = 1.0
+            output(n, fm.get(m).toInt + e.get().toInt ) = 1.0
+            m += 1
           }
         }
         (keys, output)

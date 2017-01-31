@@ -21,7 +21,8 @@ package org.apache.mahout.math.algorithms
 
 import org.apache.mahout.math.algorithms.preprocessing.{AsFactor, AsFactorModel}
 import org.apache.mahout.math.drm.drmParallelize
-import org.apache.mahout.math.scalabindings.{dense, svec}
+import org.apache.mahout.math.scalabindings.{dense, sparse, svec}
+import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.test.DistributedMahoutSuite
 import org.scalatest.{FunSuite, Matchers}
 
@@ -29,29 +30,30 @@ trait PreprocessorSuiteBase extends DistributedMahoutSuite with Matchers {
 
   this: FunSuite =>
 
-  test("fittness tests") {
+  test("asfactor test") {
     val A = drmParallelize(dense(
-      (2, 2, 3),
-      (1, 2, 0),
-      (1, 0, 2)), numPartitions = 2)
+      (3, 2, 1, 2),
+      (0, 0, 0, 0),
+      (1, 1, 1, 1)), numPartitions = 2)
 
     // 0 -> 2, 3 -> 5, 6 -> 9
     val factorizer: AsFactorModel = new AsFactor().fit(A)
 
     val factoredA = factorizer.transform(A)
 
-    println(A)
+    println(factoredA)
     println(factorizer.factorMap)
-    val answer = dense(
-      svec((2 → 1.0) :: (5 → 1.0) :: (9 → 1.0) :: Nil, cardinality = 10),
-      svec((1 → 1.0) :: (5 → 1.0) :: (6 → 1.0) :: Nil, cardinality = 10),
-      svec((1 → 1.0) :: (3 → 1.0) :: (8 → 1.0) :: Nil, cardinality = 10)
+    val correctAnswer = sparse(
+      svec((3 → 1.0) :: (6 → 1.0) :: (8 → 1.0) :: (11 → 1.0) :: Nil, cardinality = 12),
+      svec((0 → 1.0) :: (4 → 1.0) :: (7 → 1.0) :: ( 9 → 1.0) :: Nil, cardinality = 12),
+      svec((1 → 1.0) :: (5 → 1.0) :: (8 → 1.0) :: (10 → 1.0) :: Nil, cardinality = 12)
     )
 
+    val myAnswer = factoredA.collect
 
-    println(answer)
-    factoredA.collect should equal (answer)
-    factorizer.invTransform(factoredA).collect should equal (A)
+    val epsilon = 1E-6
+    (myAnswer.norm - correctAnswer.norm) should be <= epsilon
+    (myAnswer.norm - correctAnswer.norm) should be <= epsilon
 
   }
 }

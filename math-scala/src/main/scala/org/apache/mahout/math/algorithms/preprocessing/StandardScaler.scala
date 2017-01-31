@@ -19,33 +19,21 @@
 
 package org.apache.mahout.math.algorithms.preprocessing
 
-import org.apache.mahout.math.drm
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.scalabindings.RLikeVectorOps
-import org.apache.mahout.math.{Vector => MahoutVector}
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.scalabindings.RLikeVectorOps
-import org.apache.mahout.math.scalabindings.MatrixOps
-import org.apache.mahout.math._
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.drm.{drmBroadcast, _}
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.mahout.math.Matrix
-
 import collection._
 import JavaConversions._
-import Math.sqrt
 
-import scala.reflect.{ClassTag, classTag}
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.{Vector => MahoutVector, Matrix}
 
 /**
   * Scales columns to mean 0 and unit variance
   */
-class StandardScaler extends PreprocessorModelFactory {
+class StandardScaler extends PreprocessorFitter {
 
-  def fit[K](input: DrmLike[K]): StandardScalerModel = {
+  def fit[K](input: DrmLike[K],
+             hyperparameters: (Symbol, Any)*): StandardScalerModel = {
     val mNv = dcolMeanVars(input)
     new StandardScalerModel(mNv._1, mNv._2.sqrt)
   }
@@ -70,7 +58,7 @@ class StandardScalerModel(meanVec: MahoutVector,
     implicit val ktag =  input.keyClassTag
 
     val res = input.mapBlock(input.ncol) {
-      case (keys, block) => {
+      case (keys, block: Matrix) => {
         val copy: Matrix = block.cloned
         copy.foreach(row => row := (row - bcastMu) / bcastSigma )
         (keys, copy)
@@ -98,7 +86,7 @@ class StandardScalerModel(meanVec: MahoutVector,
     val bcastSigma = drmBroadcast(stdev)
 
     val res = input.mapBlock(input.ncol) {
-      case (keys, block) => {
+      case (keys, block: Matrix) => {
         val copy: Matrix = block.cloned
         copy.foreach(row => row := (row * bcastSigma ) + bcastMu)
         (keys, copy)

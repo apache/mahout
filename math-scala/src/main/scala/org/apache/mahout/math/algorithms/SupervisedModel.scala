@@ -19,8 +19,8 @@
 
 package org.apache.mahout.math.algorithms
 
-trait Model extends Serializable {
+import scala.collection.mutable
 
-  var summary: String = ""
-
+trait SupervisedModel[K] extends Model {
+  var testResults: mutable.Map[Symbol, Any] = mutable.Map[Symbol, Any]()
 }

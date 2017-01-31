@@ -17,8 +17,8 @@
 
 package org.apache.mahout.math.algorithms
 
-import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
+import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 import org.scalatest.FunSuite
 
 class PreprocessorSuite extends FunSuite
-  with DistributedSparkSuite with PreprocessorSuiteBase
+  with DistributedH2OSuite with PreprocessorSuiteBase

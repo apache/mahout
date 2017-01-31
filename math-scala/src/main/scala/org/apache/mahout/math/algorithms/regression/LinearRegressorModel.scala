@@ -38,7 +38,7 @@ trait LinearRegressorModel[K] extends RegressorModel[K] {
 
 }
 
-trait LinearRegressorModelFactory[K] extends RegressorModelFactory[K] {
+trait LinearRegressorFitter[K] extends RegressorFitter[K] {
 
   var addIntercept: Boolean = _
   var calcStandardErrors: Boolean = _

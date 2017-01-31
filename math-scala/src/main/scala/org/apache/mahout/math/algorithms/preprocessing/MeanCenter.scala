@@ -19,35 +19,33 @@
 
 package org.apache.mahout.math.algorithms.preprocessing
 
-import org.apache.mahout.math.algorithms.{Model, ModelFactory}
-
 import collection._
 import JavaConversions._
-import org.apache.mahout.math.drm.{drmBroadcast, _}
+import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.mahout.math.{Matrix, Vector}
+import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.scalabindings.MahoutCollections._
 import org.apache.mahout.math.{Vector => MahoutVector}
 
-import scala.reflect.ClassTag
 
-class MeanCenter extends PreprocessorModelFactory {
+
+class MeanCenter extends PreprocessorFitter {
 
   /**
     * Centers Columns at zero or centers
     * @param input   A drm which to center on
     *
     */
-  def fit[K](input: DrmLike[K]): MeanCenterModel = {
-    new MeanCenterModel(input.colMeans())
+  def fit[K](input: DrmLike[K],
+             hyperparameters: (Symbol, Any)*): MeanCenterModel = {
+    new MeanCenterModel(input.colMeans()) // could add centers here
   }
 
 }
 
 /**
   * A model for mean centering each column of a data set at 0 or some number specified by the setCenters method.
-  * @param centers
+  * @param means
   */
 class MeanCenterModel(means: MahoutVector) extends PreprocessorModel {
 
@@ -67,7 +65,7 @@ class MeanCenterModel(means: MahoutVector) extends PreprocessorModel {
     val bcastV = drmBroadcast(colCentersV)
 
     val output = input.mapBlock(input.ncol) {
-      case (keys, block) =>
+      case (keys, block: Matrix) =>
         val copy: Matrix = block.cloned
         copy.foreach(row => row -= bcastV.value)
         (keys, copy)
@@ -82,7 +80,7 @@ class MeanCenterModel(means: MahoutVector) extends PreprocessorModel {
     val bcastV = drmBroadcast(colCentersV)
 
     val output = input.mapBlock(input.ncol) {
-      case (keys, block) =>
+      case (keys, block: Matrix) =>
         val copy: Matrix = block.cloned
         copy.foreach(row => row += bcastV.value)
         (keys, copy)

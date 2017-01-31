@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.algorithms
+package org.apache.mahout.flinkbindings.standard
 
-import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
+
+import org.apache.mahout.flinkbindings.DistributedFlinkSuite
+import org.apache.mahout.math.algorithms.PreprocessorSuiteBase
 import org.scalatest.FunSuite
 
 class PreprocessorSuite extends FunSuite
-  with DistributedSparkSuite with PreprocessorSuiteBase
+  with DistributedFlinkSuite with PreprocessorSuiteBase

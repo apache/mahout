@@ -35,17 +35,17 @@ class CochraneOrcuttModel[K](regressor: LinearRegressorModel[K]) extends LinearR
 
 }
 
-class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegressorModelFactory[K] {
+class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegressorFitter[K] {
 
-  var regressor: LinearRegressorModelFactory[K] = hyperparameters.asInstanceOf[Map[Symbol,
-    LinearRegressorModelFactory[K]]].getOrElse('regressor, new OrdinaryLeastSquares[K]())
+  var regressor: LinearRegressorFitter[K] = hyperparameters.asInstanceOf[Map[Symbol,
+    LinearRegressorFitter[K]]].getOrElse('regressor, new OrdinaryLeastSquares[K]())
   var iterations: Int = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('iterations, 3)
   var cacheHint: CacheHint.CacheHint = hyperparameters.asInstanceOf[Map[Symbol, CacheHint.CacheHint]].getOrElse('cacheHint, CacheHint.MEMORY_ONLY)
   // For larger inputs, CacheHint.MEMORY_AND_DISK2 is reccomended.
 
   def setHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     setStandardHyperparameters(hyperparameters.toMap)
-    regressor = hyperparameters.asInstanceOf[Map[Symbol, LinearRegressorModelFactory[K]]].getOrElse('regressor, new OrdinaryLeastSquares())
+    regressor = hyperparameters.asInstanceOf[Map[Symbol, LinearRegressorFitter[K]]].getOrElse('regressor, new OrdinaryLeastSquares())
     regressor.calcStandardErrors = false
     regressor.calcCommonStatistics = false
     iterations = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('iterations, 3)
@@ -60,6 +60,7 @@ class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegresso
     val betas = new Array[MahoutVector](iterations)
     var regressionModel: LinearRegressorModel[K] = regressor.fit(drmFeatures, drmTarget)
     betas(0) = regressionModel.beta
+    // todo add dw test option on each iteration
 
     val drmY = drmTarget
     val n = safeToNonNegInt(drmTarget.nrow)
@@ -76,6 +77,8 @@ class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegresso
       val drmXprime = X - X_lag * rho
 
       if (i == iterations - 1 ){
+        // calculate common stats and SE on last iteration only
+        // todo make this optional- but if you don't care then why are you even bothering to do this?
         regressor.calcStandardErrors = true
         regressor.calcCommonStatistics = true
       }

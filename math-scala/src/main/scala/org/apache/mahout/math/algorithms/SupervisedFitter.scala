@@ -19,8 +19,11 @@
 
 package org.apache.mahout.math.algorithms
 
-trait Model extends Serializable {
+import org.apache.mahout.math.drm.DrmLike
 
-  var summary: String = ""
+trait SupervisedFitter[K, M <: SupervisedModel[K]] extends Fitter {
 
+  def fit(drmX  : DrmLike[K],
+          drmTarget: DrmLike[K],
+          hyperparameters: (Symbol, Any)*): M
 }

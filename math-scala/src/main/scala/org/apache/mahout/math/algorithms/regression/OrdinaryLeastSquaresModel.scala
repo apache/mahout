@@ -19,14 +19,10 @@
 
 package org.apache.mahout.math.algorithms.regression
 
-import org.apache.mahout.math.algorithms.regression.tests.FittnessTests
-import org.apache.mahout.math.{Matrix, Vector => MahoutVector}
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.drm.DrmLike
-import org.apache.mahout.math.scalabindings.{dvec, _}
+import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
-
-import scala.reflect.ClassTag
 
 class OrdinaryLeastSquaresModel[K]
   extends LinearRegressorModel[K] {
@@ -38,7 +34,7 @@ class OrdinaryLeastSquaresModel[K]
 
 }
 
-class OrdinaryLeastSquares[K] extends LinearRegressorModelFactory[K] {
+class OrdinaryLeastSquares[K] extends LinearRegressorFitter[K] {
 
 
   def fit(drmFeatures: DrmLike[K],
@@ -57,6 +53,9 @@ class OrdinaryLeastSquares[K] extends LinearRegressorModelFactory[K] {
     if (addIntercept) {
       X = X cbind 1
     }
+
+    val XtX = X.t %*% X
+    XtX.collect
     val drmXtXinv = solve(X.t %*% X)
     val drmXty = (X.t %*% drmTarget).collect // this fails when number of columns^2 size matrix won't fit in driver
     model.beta = (drmXtXinv %*% drmXty)(::, 0)
