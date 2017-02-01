@@ -20,3 +20,4 @@ mr/temp
 temp
 foo
 math-tests/
+metastore_db/*
