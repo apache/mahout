@@ -15,26 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.shell
-
-import org.apache.log4j.PropertyConfigurator
-import org.apache.spark.repl.SparkILoop
+import org.apache.mahout.math._
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.sparkbindings._
 
+implicit val sdc: org.apache.mahout.sparkbindings.SparkDistributedContext = sc2sdc(sc)
 
-object Main {
-  private var _interp: SparkILoop = _
+println("""
+                _                 _
+_ __ ___   __ _| |__   ___  _   _| |_
+ '_ ` _ \ / _` | '_ \ / _ \| | | | __|
+ | | | | | (_| | | | | (_) | |_| | |_
+_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.13.0
 
-  def main(args: Array[String]) {
-    PropertyConfigurator.configure(getMahoutHome() + "/conf/log4j.properties")
-
-    System.setProperty("scala.usejavacp", "true")
-    _interp = new MahoutSparkILoop()
-
-    // It looks like we need to initialize this too, since some Spark shell initilaization code
-    // expects it
-    org.apache.spark.repl.Main.interp = _interp
-    _interp.process(args)
-
-  }
-}
+""")
