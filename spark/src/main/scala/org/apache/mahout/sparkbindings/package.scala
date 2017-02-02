@@ -68,24 +68,24 @@ package object sparkbindings {
         // to load all mahout jars
         // will need to handle this somehow.
 
-    //  if (addMahoutJars) {
+      if (addMahoutJars) {
 
         // context specific jars
         val mcjars = findMahoutContextJars(closeables)
 
-//        if (log.isDebugEnabled) {
+        if (log.isDebugEnabled) {
           log.debug("Mahout jars:")
           mcjars.foreach(j => log.debug(j))
-//        }
+        }
 
         sparkConf.setJars(jars = mcjars.toSeq ++ customJars)
         if (!(customJars.size > 0)) sparkConf.setJars(customJars.toSeq)
 
-//      } else {
+      } else {
         // In local mode we don't care about jars, do we?
         // yes adding jars always now since we are not including the artifacts
-     //   sparkConf.setJars(customJars.toSeq)
-//      }
+        sparkConf.setJars(customJars.toSeq)
+      }
 
       sparkConf.setAppName(appName).setMaster(masterUrl).set("spark.serializer",
         "org.apache.spark.serializer.KryoSerializer").set("spark.kryo.registrator",
@@ -274,9 +274,9 @@ package object sparkbindings {
           !n.matches(".*/.m2/.*")
         )
     /* verify jar passed to context */
-//    info("\n\n\n")
-//    mcjars.foreach(j => info(j))
-//    info("\n\n\n")
+    info("\n\n\n")
+    mcjars.foreach(j => info(j))
+    info("\n\n\n")
     /**/
     mcjars
   }
