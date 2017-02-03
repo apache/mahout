@@ -262,8 +262,13 @@ package object sparkbindings {
       j.matches(".*mahout-spark_\\d.*\\.jar") ||
       // vcl jars: mahout-native-viennacl_2.10.jar,
       //           mahout-native-viennacl-omp_2.10.jar
-      j.matches(".*mahout-native-viennacl_\\d.*\\\\.jar") ||
-      j.matches(".*mahout-native-viennacl-omp_\\d.*\\.jar")
+//      j.matches(".*mahout-native-viennacl_\\d.*\\\\.jar") ||
+//      j.matches(".*mahout-native-viennacl-omp_\\d.*\\.jar")||
+        j.matches(".*mahout-native-viennacl*.jar")||
+        // while WIP on MAHOUT-1894, use single wildcard
+        // TODO: remove after 1894 is closed out
+        j.matches(".mahout-spark*-dependency-reduced.jar")
+
     )
         // Tune out "bad" classifiers
         .filter(n =>
