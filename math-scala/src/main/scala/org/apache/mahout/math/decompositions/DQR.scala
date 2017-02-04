@@ -37,7 +37,9 @@ object DQR {
    * It also guarantees that Q is partitioned exactly the same way (and in same key-order) as A, so
    * their RDD should be able to zip successfully.
    */
-  def dqrThin[K](drmA: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
+  def dqrThin[K](drmA: DrmLike[K],
+                 checkRankDeficiency: Boolean = true,
+                 cacheHint: CacheHint.CacheHint = CacheHint.MEMORY_ONLY): (DrmLike[K], Matrix) = {
 
     // Some mapBlock() calls need it
     implicit val ktag =  drmA.keyClassTag
@@ -47,7 +49,7 @@ object DQR {
 
     implicit val ctx = drmA.context
 
-    val AtA = (drmA.t %*% drmA).checkpoint()
+    val AtA = (drmA.t %*% drmA).checkpoint(cacheHint)
     val inCoreAtA = AtA.collect
 
     trace("A'A=\n%s\n".format(inCoreAtA))
