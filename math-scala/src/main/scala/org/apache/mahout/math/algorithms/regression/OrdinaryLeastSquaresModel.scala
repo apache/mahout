@@ -54,9 +54,8 @@ class OrdinaryLeastSquares[K] extends LinearRegressorFitter[K] {
       X = X cbind 1
     }
 
-    val XtX = X.t %*% X
-    XtX.collect
-    val drmXtXinv = solve(X.t %*% X)
+    val XtX = (X.t %*% X).collect
+    val drmXtXinv = solve(XtX)
     val drmXty = (X.t %*% drmTarget).collect // this fails when number of columns^2 size matrix won't fit in driver
     model.beta = (drmXtXinv %*% drmXty)(::, 0)
 
