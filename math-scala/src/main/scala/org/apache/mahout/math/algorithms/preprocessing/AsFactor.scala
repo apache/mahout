@@ -38,11 +38,13 @@ class AsFactor extends PreprocessorFitter {
 
     import org.apache.mahout.math.function.VectorFunction
     val factorMap = input.allreduceBlock(
-      { case (keys, block: Matrix) =>
+      { case (keys, block: Matrix) => block },
+      { case (oldM: Matrix, newM: Matrix) =>
         // someday we'll replace this with block.max: Vector
         // or better yet- block.distinct
-        dense(block.aggregateColumns( new VectorFunction {
-            def apply(f: Vector): Double = f.max
+
+        dense((oldM rbind newM).aggregateColumns( new VectorFunction {
+          def apply(f: Vector): Double = f.max
         }))
       })(0, ::)
     /*
