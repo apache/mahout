@@ -1,4 +1,7 @@
 
+def calcTime(functionName:String,time:Long):Unit ={
+   println("passed")
+}
 
 def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20, seed: Long = 1234L): Long = {
 
@@ -30,8 +33,8 @@ def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20,
 
   time = System.currentTimeMillis() - time
 
+  calcTime("foo",123L)
   time  
  
 }
-
 
