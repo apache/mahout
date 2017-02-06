@@ -1,8 +1,6 @@
 
 def calcTime(functionName:String,time:Long):Unit ={
-   println(functionName)
-   println(time)
-   println("passed")
+   println("The function: "+functionName+" passed with time="+time)
 }
 
 def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20, seed: Long = 1234L): Long = {
