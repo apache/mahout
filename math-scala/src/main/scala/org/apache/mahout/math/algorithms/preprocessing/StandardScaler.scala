@@ -29,6 +29,18 @@ import org.apache.mahout.math.{Vector => MahoutVector, Matrix}
 
 /**
   * Scales columns to mean 0 and unit variance
+  *
+  * An important note- The equivelent call in R would be something like
+  * ```r
+  * N <- nrow(x)
+  * scale(x, scale= apply(x, 2, sd) * sqrt(N-1/N))
+  * ```
+  *
+  * This is because R uses degrees of freedom = 1 to calculate standard deviation.
+  * Multiplying the standard deviation by sqrt(N-1/N) 'undoes' this correction.
+  *
+  * The StandardScaler of sklearn uses degrees of freedom = 0 for its calculation, so results
+  * should be similar.
   */
 class StandardScaler extends PreprocessorFitter {
 
@@ -40,14 +52,13 @@ class StandardScaler extends PreprocessorFitter {
 
 }
 
-class StandardScalerModel(meanVec: MahoutVector,
-                          stdev: MahoutVector
+class StandardScalerModel(val meanVec: MahoutVector,
+                          val stdev: MahoutVector
                          ) extends PreprocessorModel {
 
 
   def transform[K](input: DrmLike[K]): DrmLike[K] = {
     implicit val ctx = input.context
-
 
     // Some mapBlock() calls need it
     // implicit val ktag =  input.keyClassTag
