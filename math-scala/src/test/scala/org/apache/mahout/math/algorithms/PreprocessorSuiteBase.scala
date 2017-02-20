@@ -19,7 +19,7 @@
 
 package org.apache.mahout.math.algorithms
 
-import org.apache.mahout.math.algorithms.preprocessing.{AsFactor, AsFactorModel}
+import org.apache.mahout.math.algorithms.preprocessing._
 import org.apache.mahout.math.drm.drmParallelize
 import org.apache.mahout.math.scalabindings.{dense, sparse, svec}
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -53,6 +53,37 @@ trait PreprocessorSuiteBase extends DistributedMahoutSuite with Matchers {
 
     val epsilon = 1E-6
     (myAnswer.norm - correctAnswer.norm) should be <= epsilon
+    (myAnswer.norm - correctAnswer.norm) should be <= epsilon
+
+  }
+
+  test("standard scaler test") {
+    /**
+      * R Prototype
+      * x <- matrix( c(1,2,3,1,5,9,5,-15,-2), nrow=3)
+      * scale(x, scale= apply(x, 2, sd) * sqrt(2/3))
+      * # ^^ note: R uses degress of freedom = 1 for standard deviation calculations.
+      * # we don't (and neither does sklearn)
+      * # the *sqrt(N-1/N) 'undoes' the degrees of freedom = 1
+      */
+
+    val A = drmParallelize(dense(
+      (1, 1, 5),
+      (2, 5, -15),
+      (3, 9, -2)), numPartitions = 2)
+
+    val scaler: StandardScalerModel = new StandardScaler().fit(A)
+
+    val correctAnswer = dense(
+      (-1.224745, -1.224745, -1.224745),
+      (0.000000,  0.000000,  1.224745),
+      (1.224745,  1.224745,  0.000000))
+
+    val myAnswer = scaler.transform(A).collect
+    println(scaler.meanVec)
+    println(scaler.stdev)
+
+    val epsilon = 1E-6
     (myAnswer.norm - correctAnswer.norm) should be <= epsilon
 
   }
