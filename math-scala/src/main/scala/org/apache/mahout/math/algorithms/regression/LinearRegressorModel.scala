@@ -40,7 +40,6 @@ trait LinearRegressorModel[K] extends RegressorModel[K] {
 
 trait LinearRegressorFitter[K] extends RegressorFitter[K] {
 
-  var addIntercept: Boolean = _
   var calcStandardErrors: Boolean = _
   var calcCommonStatistics: Boolean = _
 
@@ -75,14 +74,13 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
     val pval = dvec(tScore.toArray.map(t => 2 * (1.0 - tDist.cumulativeProbability(t)) ))
     // ^^ TODO bug in this calculation- fix and add test
     //degreesFreedom = k
-    modelOut.summary = "Coef.\t\tEstimate\t\tStd. Error\t\tt-score\t\t\tPr(Beta=0)\n" +
-      (0 until k).map(i => s"X${i}\t${model.beta(i)}\t${se(i)}\t${tScore(i)}\t${pval(i)}").mkString("\n")
+
 
     modelOut.se = se
     modelOut.tScore = tScore
     modelOut.pval = pval
     modelOut.degreesFreedom = X.ncol
-
+    modelOut.summary = generateSummaryString(modelOut)
     if (calcCommonStatistics){
       modelOut = calculateCommonStatistics(modelOut, drmTarget, residuals)
     }
@@ -95,6 +93,7 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
     var modelOut = model
     modelOut = FittnessTests.CoefficientOfDetermination(model, drmTarget, residuals)
     modelOut = FittnessTests.MeanSquareError(model, residuals)
+    modelOut.summary += s"MSE: ${modelOut.mse}\nR2: ${modelOut.r2}\n"
     modelOut
   }
 
@@ -118,7 +117,15 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
 
     if (addIntercept) {
       model.summary.replace(s"X${X.ncol - 1}", "(Intercept)")
+      model.addIntercept = true
     }
     model
+  }
+
+  def generateSummaryString[M[K] <: LinearRegressorModel[K]](model: M[K]): String = {
+    val k = model.beta.length
+    "Coef.\t\tEstimate\t\tStd. Error\t\tt-score\t\t\tPr(Beta=0)\n" +
+      (0 until k).map(i => s"X${i}\t${model.beta(i)}\t${model.se(i)}\t${model.tScore(i)}\t${model.pval(i)}").mkString("\n")
+
   }
 }

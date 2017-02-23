@@ -29,7 +29,11 @@ class OrdinaryLeastSquaresModel[K]
   // https://en.wikipedia.org/wiki/Ordinary_least_squares
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
-    drmPredictors %*% beta
+    var X = drmPredictors
+    if (addIntercept) {
+      X = X cbind 1
+    }
+    X %*% beta
   }
 
 }
@@ -41,6 +45,7 @@ class OrdinaryLeastSquares[K] extends LinearRegressorFitter[K] {
           drmTarget: DrmLike[K],
           hyperparameters: (Symbol, Any)*): OrdinaryLeastSquaresModel[K] = {
 
+    assert(drmTarget.ncol == 1, s"drmTarget must be a single column matrix, found ${drmTarget.ncol} columns")
     var model = new OrdinaryLeastSquaresModel[K]()
     setStandardHyperparameters(hyperparameters.toMap)
 
