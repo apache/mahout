@@ -87,4 +87,32 @@ trait PreprocessorSuiteBase extends DistributedMahoutSuite with Matchers {
     (myAnswer.norm - correctAnswer.norm) should be <= epsilon
 
   }
+
+  test("mean center test") {
+    /**
+      * R Prototype
+      *
+      * x <- matrix( c(1.0,2.0,3.0,1.0,5.0,9.0,-2.0,2.0,0), nrow=3)
+      * centered.x <- scale(x, scale= FALSE)
+      * print(centered.x)
+      */
+
+
+    val A = drmParallelize(dense(
+      (1, 1, -2),
+      (2, 5, 2),
+      (3, 9, 0)), numPartitions = 2)
+
+    val scaler: MeanCenterModel = new MeanCenter().fit(A)
+
+    val myAnswer = scaler.transform(A).collect
+
+    val correctAnswer = dense(
+      (-1, -4, -2),
+      (0,  0,  2),
+      (1,  4,  0))
+
+    val epsilon = 1E-6
+    (myAnswer.norm - correctAnswer.norm) should be <= epsilon
+  }
 }
