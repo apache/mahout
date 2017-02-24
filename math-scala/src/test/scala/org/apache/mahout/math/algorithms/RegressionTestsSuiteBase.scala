@@ -20,6 +20,7 @@
 package org.apache.mahout.math.algorithms
 
 import org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares
+import org.apache.mahout.math.algorithms.regression.tests._
 import org.apache.mahout.math.drm.drmParallelize
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.{`::`, dense}
@@ -82,6 +83,27 @@ trait RegressionTestsSuiteBase extends DistributedMahoutSuite with Matchers {
     (rR2 - r2) should be < epsilon
     (rMSE - mse) should be < epsilon
 
+  }
+
+  test("durbinWatsonTest test") {
+    /**
+      * R Prototype
+      *
+      * library(car)
+      * residuals <- seq(0, 4.9, 0.1)
+      * ## perform Durbin-Watson test
+      * durbinWatsonTest(residuals)
+      */
+
+    val correctAnswer = 0.001212121
+    val err1 =  drmParallelize( dense((0.0 until 5.0 by 0.1).toArray) ).t
+    val drmX = drmParallelize( dense((0 until 50).toArray.map( t => Math.pow(-1.0, t)) ) ).t
+    val drmY = drmX + err1 + 1
+    var model = new OrdinaryLeastSquares[Int]().fit(drmX, drmY)
+    val syntheticResiduals = err1
+    model = AutocorrelationTests.DurbinWatson(model, syntheticResiduals)
+    val myAnswer: Double = model.testResults.getOrElse('durbinWatsonTestStatistic, -1.0).asInstanceOf[Double]
+    (myAnswer - correctAnswer) should be < epsilon
   }
 
 }
