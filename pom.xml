@@ -121,7 +121,7 @@
     <slf4j.version>1.7.22</slf4j.version>
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
-    <spark.version>1.6.2</spark.version>
+    <spark.version>1.6.3</spark.version> <!-- 1.6.3, 2.0.2, 2.1.0 all tested -->
     <flink.version>1.1.4</flink.version>
     <h2o.version>0.1.25</h2o.version>
     <jackson.version>2.7.4</jackson.version>
@@ -228,12 +228,6 @@
 
       <dependency>
         <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-        <groupId>${project.groupId}</groupId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
@@ -849,7 +843,6 @@
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <module>spark-shell</module>
     <module>flink</module>
     <module>h2o</module>
     <!--<module>viennacl</module>-->
