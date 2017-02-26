@@ -47,6 +47,7 @@ class VectorBase extends Pointer {
   // handle to the vec element buffer
   @native @Const @ByRef def handle: MemHandle
 
+
 //  // add this operator in for tests many more can be added
 //  @Name(Array("operator* "))
 //  @native def *(i: Int): VectorMultExpression

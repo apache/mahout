@@ -112,17 +112,19 @@ final class VCLVector(defaultCtr: Boolean = true) extends VectorBase {
   @Name(Array("viennacl::vector<double>::self_type"))
   def selfType:VectorBase = this.asInstanceOf[VectorBase]
 
+  // defining this here getting a gcc compilation error when
+  // adding this method to parent class.
+  @Name(Array("switch_memory_context"))
+  @native
+  def switchMemoryContext(@ByRef ctx: Context)
 
-  @native def switch_memory_context(@ByVal context: Context): Unit
 
-//  Swaps the handles of two vectors by swapping the OpenCL handles only, no data copy.
+  //  Swaps the handles of two vectors by swapping the OpenCL handles only, no data copy.
 //  @native def fast_swap(@ByVal other: VCLVector): VectorBase
 
 // add this operator in for tests many more can be added
 //  @Name(Array("operator*"))
 //  @native @ByPtr def *(i: Int): VectorMultExpression
-
-
 
 }
 
