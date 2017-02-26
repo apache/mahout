@@ -291,11 +291,11 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
   test("VCL Dense Matrix %*% Dense vector") {
 
     val oclCtx = new Context(Context.OPENCL_MEMORY)
-    val ompCtx = new Context(Context.MAIN_MEMORY)
+    val mainCtx = new Context(Context.MAIN_MEMORY)
 
 
-    val m = 30
-    val s = 10
+    val m = 3000
+    val s = 1000
 
     val r = new Random(1234)
 
@@ -314,32 +314,47 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
     info(s"Mahout dense matrix %*% dense vector multiplication time: $ms ms.")
 
 
-    /* TODO: CL_OUT_OF_RESOURCES error thrown when trying to read data out of OpenCl GPU Vectors  */
-    //Test multiplication in OpenCL
-//      {
-//
-//        ms = System.currentTimeMillis()
-//        val oclA = toVclDenseRM(mxA, oclCtx)
-//        val oclVecB = toVclVec(dvecB, oclCtx)
-//
-//        val oclVecC = new VCLVector(prod(oclA, oclVecB))
-//        val oclDvecC = fromVClVec(oclVecC)
-////
-////        ms = System.currentTimeMillis() - ms
-////        info(s"ViennaCL/OpenCL dense matrix %*% dense vector multiplication time: $ms ms.")
-////        (oclDvecC.toColMatrix - mDvecC.toColMatrix).norm / s  should be < 1e-16
-//
-//        oclA.close()
-//        oclVecB.close()
-//        oclVecC.close()
-//      }
-
-    //Test multiplication in OpenMP
+    // Test mx %*% vec multiplication in OpenCL
       {
 
         ms = System.currentTimeMillis()
-        val ompMxA = toVclDenseRM(mxA, ompCtx)
-        val ompVecB = toVclVec(dvecB, ompCtx)
+
+        // we must first create vectors in main memory
+        // when working with vectors at least in ViennaCl
+        // this is the preferred method
+        val oclMxA = toVclDenseRM(mxA, mainCtx)
+        val oclVecB = toVclVec(dvecB, mainCtx)
+
+        // now copy to the OpenCL device
+        oclMxA.switchMemoryContext(oclCtx)
+        oclVecB.switchMemoryContext(oclCtx)
+
+        // perform multiplication
+        val oclVecC = new VCLVector(prod(oclMxA, oclVecB))
+
+        // copy back to main memory so that we may
+        // read values out of the result. This must be
+        // copied back to main memory VCL can not read
+        // directly from an OpenCL device
+        oclVecC.switchMemoryContext(mainCtx)
+
+        val oclDvecC = fromVClVec(oclVecC)
+
+        ms = System.currentTimeMillis() - ms
+        info(s"ViennaCL/OpenCL dense matrix %*% dense vector multiplication time: $ms ms.")
+        (oclDvecC.toColMatrix - mDvecC.toColMatrix).norm / s should be < 1e-10
+
+        oclMxA.close()
+        oclVecB.close()
+        oclVecC.close()
+      }
+
+      //Test multiplication in OpenMP
+      {
+
+        ms = System.currentTimeMillis()
+        val ompMxA = toVclDenseRM(mxA, mainCtx)
+        val ompVecB = toVclVec(dvecB, mainCtx)
 
         val ompVecC = new VCLVector(prod(ompMxA, ompVecB))
         val ompDvecC = fromVClVec(ompVecC)
@@ -355,7 +370,6 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
 
       oclCtx.deallocate()
       oclCtx.close()
-
 
   }
 
