@@ -66,9 +66,9 @@ class MatrixBase extends Pointer {
   @native
   def memoryDomain: Int
 
-  @Name(Array("switch_memory_context"))
-  @native
-  def switchMemoryContext(@ByRef ctx: Context)
+   @Name(Array("switch_memory_context"))
+   @native
+   def switchMemoryContext(@ByRef ctx: Context)
 
 
 
