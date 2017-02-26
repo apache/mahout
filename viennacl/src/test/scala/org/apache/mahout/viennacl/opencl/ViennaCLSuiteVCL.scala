@@ -343,7 +343,7 @@ class ViennaCLSuiteVCL extends FunSuite with Matchers {
 
         ms = System.currentTimeMillis() - ms
         info(s"ViennaCL/OpenCL dense matrix %*% dense vector multiplication time: $ms ms.")
-        (oclDvecC.toColMatrix - mDvecC.toColMatrix).norm / s  should be < 1e-16
+        (oclDvecC.toColMatrix - mDvecC.toColMatrix).norm / s  should be < 1e-15
 
         oclMxA.close()
         oclVecB.close()
