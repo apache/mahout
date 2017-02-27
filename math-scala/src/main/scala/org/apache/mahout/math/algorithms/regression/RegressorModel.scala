@@ -26,6 +26,7 @@ trait RegressorModel[K] extends SupervisedModel[K] {
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K]
 
+  var addIntercept: Boolean = _
   // Common Applicable Tests- here only for convenience.
   var mse: Double = _
   var r2: Double = _
@@ -43,6 +44,7 @@ trait RegressorModel[K] extends SupervisedModel[K] {
 
 trait RegressorFitter[K] extends SupervisedFitter[K, RegressorModel[K]] {
 
+  var addIntercept: Boolean = _
 
   def fitPredict(drmX: DrmLike[K],
                  drmTarget: DrmLike[K],
