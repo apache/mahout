@@ -69,7 +69,7 @@ and a dependency for back end engine translation, e.g:
 </dependency>
 ```
 
-Note that due to an intermittent out-of-memory bug in a Flink test we have disabled it from the binary releases. To use Flink please uncomment the line in the `<modules>` block so it reads `<module>flink</module>`.
+Note that due to an intermittent out-of-memory bug in a Flink test we have disabled it from the binary releases. To use Flink please uncomment the line in the root pom.xml in the `<modules>` block so it reads `<module>flink</module>`.
 
 ####Examples
 For examples of how to use Mahout, see the examples directory located in `examples/bin`
