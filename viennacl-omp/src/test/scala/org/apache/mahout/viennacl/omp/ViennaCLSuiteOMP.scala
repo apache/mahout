@@ -145,7 +145,7 @@ class ViennaCLSuiteOMP extends FunSuite with Matchers {
       info(s"ViennaCL/cpu/OpenMP Sparse multiplication time: $ms ms.")
 
       val ompMxC = fromVclCompressedMatrix(ompC)
-      (mxC - ompMxC).norm / mxC.nrow / mxC.ncol should be < 1e-16
+      (mxC - ompMxC).norm / mxC.nrow / mxC.ncol should be < 1e-10
 
       ompA.close()
       ompB.close()
@@ -192,7 +192,7 @@ class ViennaCLSuiteOMP extends FunSuite with Matchers {
 
         ms = System.currentTimeMillis() - ms
         info(s"ViennaCL/cpu/OpenMP dense matrix %*% dense vector multiplication time: $ms ms.")
-        (ompDvecC.toColMatrix - mDvecC.toColMatrix).norm / s  should be < 1e-16
+        (ompDvecC.toColMatrix - mDvecC.toColMatrix).norm / s  should be < 1e-10
 
         ompMxA.close()
         ompVecB.close()
