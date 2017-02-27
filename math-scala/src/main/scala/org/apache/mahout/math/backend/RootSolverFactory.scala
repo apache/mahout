@@ -18,7 +18,7 @@ package org.apache.mahout.math.backend
 
 import org.apache.mahout.logging._
 import org.apache.mahout.math.backend.jvm.JvmBackend
-import org.apache.mahout.math.scalabindings.{MMul, _}
+import org.apache.mahout.math.scalabindings.{MMBinaryFunc, MMul, _}
 
 import scala.collection._
 import scala.reflect.{ClassTag, classTag}
@@ -28,7 +28,7 @@ final object RootSolverFactory extends SolverFactory {
 
   import org.apache.mahout.math.backend.incore._
 
-  implicit val logger = getLog(RootSolverFactory.getClass)
+  private implicit val logger = getLog(RootSolverFactory.getClass)
 
   private val solverTagsToScan =
     classTag[MMulSolver] ::
@@ -43,7 +43,8 @@ final object RootSolverFactory extends SolverFactory {
 
   }
 
-  // TODO: MAHOUT-1909: lazy initialze the map. Query backends. Build resolution rules.
+  // TODO: MAHOUT-1909: Cache Modular Backend solvers after probing
+  // That is, lazily initialize the map, query backends, and build resolution rules.
   override protected[backend] val solverMap = new mutable.HashMap[ClassTag[_], Any]()
 
   validateMap()
