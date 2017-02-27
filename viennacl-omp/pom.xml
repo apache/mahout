@@ -141,7 +141,7 @@
                 <argument>-jar</argument>
                 <argument>${org.bytedeco:javacpp:jar}</argument>
                 <argument>-propertyfile</argument>
-                <argument>linux-haswell.properties</argument>
+                <argument>linux-x86_64-viennacl.properties</argument>
                 <argument>-classpath</argument>
                 <argument>${project.build.outputDirectory}:${org.scala-lang:scala-library:jar}</argument>
                 <argument>org.apache.mahout.viennacl.openmp.javacpp.CompressedMatrix</argument>
