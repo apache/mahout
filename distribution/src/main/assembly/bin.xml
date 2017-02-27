@@ -187,10 +187,6 @@
       <outputDirectory>docs/mahout-spark</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../flink/target/site/scaladocs</directory>
-      <outputDirectory>docs/mahout-flink</outputDirectory>
-    </fileSet>
-    <fileSet>
       <directory>${project.basedir}/..</directory>
       <outputDirectory/>
       <useDefaultExcludes>true</useDefaultExcludes>
