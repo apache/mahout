@@ -843,10 +843,8 @@
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <module>flink</module>
+    <!--module>flink</module-->
     <module>h2o</module>
-    <!--<module>viennacl</module>-->
-    <!--<module>viennacl-omp</module>-->
   </modules>
 
   <profiles>
