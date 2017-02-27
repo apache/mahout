@@ -71,7 +71,7 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
     val se = varCovarMatrix.viewDiagonal.assign(SQRT)
     val tScore = model.beta / se
     val tDist = new org.apache.commons.math3.distribution.TDistribution(n-k)
-    val pval = dvec(tScore.toArray.map(t => 2 * (1.0 - tDist.cumulativeProbability(t)) ))
+    val pval = dvec(tScore.toArray.map(t => 2 * (1.0 - tDist.cumulativeProbability(Math.abs(t))) ))
     // ^^ TODO bug in this calculation- fix and add test
     //degreesFreedom = k
 
