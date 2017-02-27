@@ -242,9 +242,10 @@ object GPUMMul extends MMBinaryFunc {
        N.B. This method is horribly inefficent. However there is a difference between
        getNumNonDefaultElements() and getNumNonZeroElements() which we do not always
        have access to. We created MAHOUT-1882 for this.
-         val hasElementsA = a.zSum() >  0.0
-         val hasElementsB = b.zSum() >  0.0
     */
+
+    val hasElementsA = a.zSum() >  0.0
+    val hasElementsB = b.zSum() >  0.0
 
     // A has a sparse matrix structure of unknown size.  We do not want to
     // simply convert it to a Dense Matrix which may result in an OOM error.
