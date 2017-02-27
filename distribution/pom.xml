@@ -72,6 +72,7 @@
     </plugins>
   </build>
   <profiles>
+
     <profile>
       <id>mahout-release</id>
       <properties>
@@ -107,10 +108,6 @@
           </dependency>
           <dependency>
             <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-flink_${scala.compat.version}</artifactId>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
           </dependency>
           <dependency>
@@ -124,6 +121,7 @@
           </dependency>
         </dependencies>
     </profile>
+
     <profile>
       <id>viennacl-omp</id>
       <dependencies>
@@ -153,10 +151,6 @@
         </dependency>
         <dependency>
           <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-flink_${scala.compat.version}</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.mahout</groupId>
           <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
         </dependency>
         <dependency>
@@ -165,11 +159,7 @@
           <version>0.13.0-SNAPSHOT</version>
         </dependency>
       </dependencies>
-
     </profile>
-
-
-
   </profiles>
 
   <dependencies>
@@ -199,20 +189,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-flink_${scala.compat.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
     </dependency>
-    <!--Viennacl is not part of the Default build currently.-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--<artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--<artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>-->
-    <!--</dependency>-->
   </dependencies>
 </project>
