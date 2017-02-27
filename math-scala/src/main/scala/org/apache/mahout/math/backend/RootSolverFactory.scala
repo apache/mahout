@@ -43,42 +43,38 @@ final object RootSolverFactory extends SolverFactory {
 
   }
 
-  ////////////////////////////////////////////////////////////
-
   // TODO: MAHOUT-1909: lazy initialze the map. Query backends. Build resolution rules.
   override protected[backend] val solverMap = new mutable.HashMap[ClassTag[_], Any]()
+
   validateMap()
 
-
-  // default is JVM
+  // Default solver is JVM
   var clazz: MMBinaryFunc = MMul
 
-  // eventually match on implicit Classtag . for now.  just take as is.
-  // this is a bit hacky, Shoud not be doing onlytry/catch here..
+  // TODO: Match on implicit Classtag
+
   def getOperator[C: ClassTag]: MMBinaryFunc = {
 
     try {
-      // TODO: fix logging properties so that we're not mimicing as we are here.
-      println("[INFO] Creating org.apache.mahout.viennacl.opencl.GPUMMul solver")
+      logger.info("Creating org.apache.mahout.viennacl.opencl.GPUMMul solver")
       clazz = Class.forName("org.apache.mahout.viennacl.opencl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-      println("[INFO] Successfully created org.apache.mahout.viennacl.opencl.GPUMMul solver")
+      logger.info("Successfully created org.apache.mahout.viennacl.opencl.GPUMMul solver")
 
     } catch {
       case x: Exception =>
-        println("[WARN] Unable to create class GPUMMul: attempting OpenMP version")
-        // println(x.getMessage)
+        logger.warn("Unable to create class GPUMMul: attempting OpenMP version")
         try {
-          // attempt to instantiate the OpenMP version, assuming we’ve
+          // Attempt to instantiate the OpenMP version, assuming we’ve
           // created a separate OpenMP-only module (none exist yet)
-          println("[INFO] Creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
+          logger.info("Creating org.apache.mahout.viennacl.openmp.OMPMMul solver")
           clazz = Class.forName("org.apache.mahout.viennacl.openmp.OMPMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-          println("[INFO] Successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
+          logger.info("Successfully created org.apache.mahout.viennacl.openmp.OMPMMul solver")
 
         } catch {
           case xx: Exception =>
-            println(xx.getMessage)
-            // fall back to JVM Dont need to Dynamicly assign MMul is in the same package.
-            println("[INFO] Unable to create class OMPMMul: falling back to java version")
+            logger.error(xx.getMessage)
+            // Fall back to JVM; don't need to dynamically assign since MMul is in the same package.
+            logger.info("Unable to create class OMPMMul: falling back to java version")
             clazz = MMul
         }
     }
