@@ -63,7 +63,7 @@ final object RootSolverFactory extends SolverFactory {
 
     } catch {
       case x: Exception =>
-        logger.warn("Unable to create class GPUMMul: attempting OpenMP version")
+        logger.info("Unable to create class GPUMMul: attempting OpenMP version")
         try {
           // Attempt to instantiate the OpenMP version, assuming we’ve
           // created a separate OpenMP-only module (none exist yet)
@@ -73,7 +73,7 @@ final object RootSolverFactory extends SolverFactory {
 
         } catch {
           case xx: Exception =>
-            logger.error(xx.getMessage)
+            logger.info(xx.getMessage)
             // Fall back to JVM; don't need to dynamically assign since MMul is in the same package.
             logger.info("Unable to create class OMPMMul: falling back to java version")
             clazz = MMul

@@ -131,7 +131,7 @@ object GPUMMul extends MMBinaryFunc {
       //  have been created than number of GPU cards.
       //  Better option wuold be to fall back to OpenCL first.
       case ex: Exception =>
-        log.warn(ex.getMessage + "falling back to JVM MMUL")
+        log.info(ex.getMessage + "falling back to JVM MMUL")
         return MMul(a, b, r)
     }
   }
