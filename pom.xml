@@ -106,6 +106,7 @@
   </scm>
   <properties>
     <skipTests>false</skipTests>
+    <docker.plugin.version>0.15.0</docker.plugin.version>
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <maven.clover.multiproject>true</maven.clover.multiproject>
@@ -499,6 +500,11 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>docker-maven-plugin</artifactId>
+          <version>${docker.plugin.version}</version>
+        </plugin>
+        <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
           <version>1.0.0</version>
@@ -687,29 +693,6 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>enforce-versions</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>[1.7,)</version>
-                </requireJavaVersion>
-                  <requireMavenVersion>
-                    <version>[3.3.3,)</version>
-                  </requireMavenVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <forkCount>2</forkCount>
@@ -833,6 +816,7 @@
       -->
     </plugins>
   </build>
+
   <modules>
     <module>buildtools</module>
     <module>math</module>
@@ -850,6 +834,32 @@
   </modules>
 
   <profiles>
+    <profile>
+      <id>dockerITs</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>skipITs</name>
+          <value>false</value>
+        </property>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>io.fabric8</groupId>
+              <artifactId>docker-maven-plugin</artifactId>
+              <version>${docker.plugin.version}</version>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+        <plugins>
+
+        </plugins>
+
+      </build>
+
+    </profile>
 
     <profile>
       <id>viennacl</id>
@@ -903,6 +913,7 @@
         </dependencies>
       </dependencyManagement>
     </profile>
+
     <profile>
       <id>fastinstall</id>
       <properties>
@@ -939,6 +950,11 @@
       <id>sourcecheck</id>
       <build>
         <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>${docker.plugin.version}</version>
+          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
@@ -1014,6 +1030,11 @@
         <defaultGoal>process-test-sources</defaultGoal>
         <plugins>
           <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>${docker.plugin.version}</version>
+          </plugin>
+          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-eclipse-plugin</artifactId>
             <version>2.10</version>
@@ -1041,6 +1062,11 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>${docker.plugin.version}</version>
+          </plugin>
+          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
             <executions>
@@ -1062,6 +1088,11 @@
   </profiles>
   <reporting>
     <plugins>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker.plugin.version}</version>
+      </plugin>
       <!-- surefire runs unit tests -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
