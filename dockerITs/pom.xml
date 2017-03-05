@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>mahout</artifactId>
+        <groupId>org.apache.mahout</groupId>
+        <version>0.13.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>dockerITs</artifactId>
+
+    <properties>
+        <hadoop.version>2.4.1</hadoop.version>
+    </properties>
+    <profiles>
+        <profile>
+            <id>dockerITs</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <configuration >
+                            <watchInterval>500</watchInterval>
+                            <logDate>default</logDate>
+                            <verbose>true</verbose>
+                            <autoPull>on</autoPull>
+                            <images>
+                                <image>
+                                    <name>sequenceiq/hadoop-docker:${hadoop.version}</name>
+                                    <alias>spark-${spark.version}</alias>
+                                    <run>
+                                        <!--<memory>1073741824</memory>--> <!-- 1g , this thing wont take 1g -->
+
+                                        <env>
+                                            <MAHOUT_HOME>/opt/mahout</MAHOUT_HOME>
+                                            <HADOOP_HOME>/usr/local/hadoop-${hadoop.version}</HADOOP_HOME>
+                                            <JAVA_HOME>/usr/java/default</JAVA_HOME>
+                                        </env>
+                                        <namingStrategy>none</namingStrategy>
+                                        <ports>
+                                            <!--<port>${cassandra.tcp.host}:${cassandra.tcp.port}:9042</port>
+                                            <port>localhost:17077</port>
+                                            <port>localhost:18080</port>
+                                            <port>localhost:14040</port> -->
+                                        </ports>
+                                        <!--<portPropertyFile>cassandra.properties</portPropertyFile>-->
+                                        <log>
+                                            <enabled>true</enabled>
+                                            <date>default</date>
+                                            <color>cyan</color>
+                                        </log>
+                                        <volumes>
+                                            <bind>
+                                                <volume>${project.basedir}/../:/opt/mahout</volume>
+                                            </bind>
+                                        </volumes>
+                                    </run>
+                                    <watch>
+                                        <mode>none</mode>
+                                    </watch>
+
+                                </image>
+                            </images>
+                        </configuration>
+
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
