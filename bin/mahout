@@ -287,11 +287,11 @@ fi
 
 # restore ordinary behaviour
 unset IFS
-
+JARS=$(echo "$MAHOUT_HOME"/*.jar | tr ' ' ',')
 case "$1" in
   (spark-shell)
     save_stty=$(stty -g 2>/dev/null);
-    $SPARK_HOME/bin/spark-shell -classpath "$CLASSPATH" -i $MAHOUT_HOME/bin/load-shell.scala --conf spark.kryo.referenceTracking=false --conf spark.kryo.registrator=org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator --conf spark.kryoserializer.buffer=32k --conf spark.kryoserializer.buffer.max=600m --conf spark.serializer=org.apache.spark.serializer.KryoSerializer $@
+    $SPARK_HOME/bin/spark-shell --jars "$JARS" -i $MAHOUT_HOME/bin/load-shell.scala --conf spark.kryo.referenceTracking=false --conf spark.kryo.registrator=org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator --conf spark.kryoserializer.buffer=32k --conf spark.kryoserializer.buffer.max=600m --conf spark.serializer=org.apache.spark.serializer.KryoSerializer $@
     stty sane; stty $save_stty
     ;;
   # Spark CLI drivers go here
