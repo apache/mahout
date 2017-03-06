@@ -37,6 +37,7 @@
   <packaging>jar</packaging>
 
   <build>
+
     <plugins>
       <!-- create test jar so other modules can reuse the math-scala test utility classes. -->
       <plugin>
@@ -87,7 +88,25 @@
           </execution>
         </executions>
       </plugin>
-
+      <!-- copy jars to top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/mahout-math-scala_${scala.compat.version}-${version}.jar" tofile="../mahout-math-scala_${scala.compat.version}-${version}.jar"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!--this is what scalatest recommends to do to enable scala tests -->
 
       <!-- disable surefire -->

@@ -38,6 +38,7 @@
   <build>
     <plugins>
 
+
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
@@ -119,6 +120,26 @@
         </executions>
       </plugin>
 
+      <!-- copy jars to top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/mahout-spark_${scala.compat.version}-${version}.jar" tofile="../mahout-spark_${scala.compat.version}-${version}.jar"/>
+                <copy file="target/mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!-- create test jar so other modules can reuse the math test utility classes.
         DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
         Please contact @dlyubimov.
