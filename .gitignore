@@ -21,3 +21,4 @@ temp
 foo
 math-tests/
 metastore_db/*
+dockerITs/logs/*.out

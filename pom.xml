@@ -829,6 +829,7 @@
     <module>spark</module>
     <module>flink</module>
     <module>h2o</module>
+    <module>dockerITs</module>
     <!--<module>viennacl</module>-->
     <!--<module>viennacl-omp</module>-->
   </modules>
@@ -840,7 +841,7 @@
         <activeByDefault>false</activeByDefault>
         <property>
           <name>skipITs</name>
-          <value>false</value>
+          <value>true</value>
         </property>
       </activation>
       <build>

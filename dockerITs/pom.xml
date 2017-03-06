@@ -11,12 +11,83 @@
 
     <artifactId>dockerITs</artifactId>
 
+
     <properties>
-        <hadoop.version>2.4.1</hadoop.version>
+        <spark.compat.version>1.6.0</spark.compat.version>
+        <!--<hadoop.version>2.4.1</hadoop.version>-->
     </properties>
+
     <profiles>
         <profile>
-            <id>dockerITs</id>
+            <id>sparkDockerITs</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <configuration >
+                            <watchInterval>500</watchInterval>
+                            <logDate>default</logDate>
+                            <verbose>true</verbose>
+                            <autoPull>on</autoPull>
+                            <images>
+                                <image>
+                                    <name>mahout_its-spark-${spark.compat.version}</name>
+                                    <!--<alias>spark-${spark.compat.version}</alias>-->
+                                    <build>
+                                        <from>sequenceiq/hadoop-docker:${hadoop.version}</from>
+                                        <env>
+                                            <HADOOP_HOME>/usr/local/hadoop-${hadoop.version}</HADOOP_HOME>
+                                            <SPARK_HOME>/usr/local/spark</SPARK_HOME>
+                                            <MAHOUT_HOME>/opt/mahout</MAHOUT_HOME>
+                                        </env>
+                                        <runCmds>
+                                            <!-- download spark -->
+                                            <run>curl -s http://d3kbcqa49mib13.cloudfront.net/spark-${spark.version}-bin-hadoop2.6.tgz | tar -xz -C /usr/local/</run>
+                                            <run>cd /usr/local &amp;&amp; ln -s spark-${spark.version}-bin-hadoop2.6 spark</run>
+                                            <run>$SPARK_HOME/sbin/start-all.sh</run>
+                                            <!-- SparkItem Similarity Test Data-->
+                                            <run>echo "Downloading Movie Lens Ratings Data"</run>
+                                            <run>curl -s http://files.grouplens.org/datasets/movielens/ml-latest-small.zip -o /usr/local/ml-latest-small.zip</run>
+                                            <run>unzip /usr/local/ml-latest-small.zip -d /usr/local</run>
+                                        </runCmds>
+                                        <entryPoint>$MAHOUT_HOME/dockerITs/spark-its.sh</entryPoint>
+
+                                    </build>
+                                    <run>
+                                        <env>
+                                            <!--<JAVA_HOME>/usr/java/default</JAVA_HOME>-->
+
+                                        </env>
+                                        <namingStrategy>none</namingStrategy>
+                                        <ports>
+                                        </ports>
+                                        <log>
+                                            <enabled>true</enabled>
+                                            <date>default</date>
+                                            <color>cyan</color>
+                                        </log>
+                                        <volumes>
+                                            <bind>
+                                                <volume>${project.basedir}/../:/opt/mahout</volume>
+                                            </bind>
+                                        </volumes>
+
+                                    </run>
+
+                                    <watch>
+                                        <mode>none</mode>
+                                    </watch>
+                                </image>
+                            </images>
+                        </configuration>
+
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>hadoopDockerITs</id>
             <build>
                 <plugins>
                     <plugin>
@@ -30,7 +101,7 @@
                             <images>
                                 <image>
                                     <name>sequenceiq/hadoop-docker:${hadoop.version}</name>
-                                    <alias>spark-${spark.version}</alias>
+                                    <alias>hadoop-${spark.version}</alias>
                                     <run>
                                         <!--<memory>1073741824</memory>--> <!-- 1g , this thing wont take 1g -->
 
@@ -57,11 +128,11 @@
                                                 <volume>${project.basedir}/../:/opt/mahout</volume>
                                             </bind>
                                         </volumes>
+                                        <cmd>$MAHOUT_HOME/dockerITs/spark-its.sh</cmd>
                                     </run>
                                     <watch>
                                         <mode>none</mode>
                                     </watch>
-
                                 </image>
                             </images>
                         </configuration>

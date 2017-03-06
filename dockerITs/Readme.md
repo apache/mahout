@@ -21,7 +21,8 @@ Should get something that looks like this
 #### Start Dockers
 
 
-`mvn -PdockerITs docker:start`
+`mvn -PsparkDockerITs docker:start`
+`mvn -PhadoopDockerITs docker:start`
 
 After which run
 `docker ps`
