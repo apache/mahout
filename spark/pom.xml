@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>0.13.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -130,8 +130,8 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-spark_${scala.compat.version}-${version}.jar" tofile="../mahout-spark_${scala.compat.version}-${version}.jar"/>
-                <copy file="target/mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar"/>
+                <copy file="target/mahout-spark_${scala.compat.version}-${version}.jar" tofile="../mahout-spark_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
             <goals>

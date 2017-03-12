@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>0.13.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -48,7 +48,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-math-${version}.jar" tofile="../mahout-math-${version}.jar"/>
+                <copy file="target/mahout-math-${version}.jar" tofile="../mahout-math-${version}.jar" />
               </tasks>
             </configuration>
             <goals>
