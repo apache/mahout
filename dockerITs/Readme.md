@@ -20,8 +20,10 @@ Should get something that looks like this
 
 #### Start Dockers
 
+`mvn -PsparkDockerITs docker:build`
 
 `mvn -PsparkDockerITs docker:start`
+`mvn -PsparkDockerITs docker:start -Dmahout.local.home=/home/trevor/PycharmProjects/MahoutRCTester/orgapachemahout-1035/apache-mahout-distribution-0.13.0`
 `mvn -PhadoopDockerITs docker:start`
 
 After which run

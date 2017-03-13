@@ -14,6 +14,7 @@
 
     <properties>
         <spark.compat.version>1.6.0</spark.compat.version>
+        <mahout.local.home>${project.basedir}/../</mahout.local.home>
         <!--<hadoop.version>2.4.1</hadoop.version>-->
     </properties>
 
@@ -51,7 +52,7 @@
                                             <run>curl -s http://files.grouplens.org/datasets/movielens/ml-latest-small.zip -o /usr/local/ml-latest-small.zip</run>
                                             <run>unzip /usr/local/ml-latest-small.zip -d /usr/local</run>
                                         </runCmds>
-                                        <entryPoint>$MAHOUT_HOME/dockerITs/spark-its.sh</entryPoint>
+                                        <!--<entryPoint>/etc/bootstrap.sh</entryPoint>$MAHOUT_HOME/dockerITs/spark-its.sh</entryPoint>-->
 
                                     </build>
                                     <run>
@@ -69,7 +70,7 @@
                                         </log>
                                         <volumes>
                                             <bind>
-                                                <volume>${project.basedir}/../:/opt/mahout</volume>
+                                                <volume>${mahout.local.home}:/opt/mahout</volume>
                                             </bind>
                                         </volumes>
 
@@ -125,10 +126,10 @@
                                         </log>
                                         <volumes>
                                             <bind>
-                                                <volume>${project.basedir}/../:/opt/mahout</volume>
+                                                <volume>${mahout.local.home}:/opt/mahout</volume>
                                             </bind>
                                         </volumes>
-                                        <cmd>$MAHOUT_HOME/dockerITs/spark-its.sh</cmd>
+                                       <!-- <cmd>$MAHOUT_HOME/dockerITs/spark-its.sh</cmd>-->
                                     </run>
                                     <watch>
                                         <mode>none</mode>
