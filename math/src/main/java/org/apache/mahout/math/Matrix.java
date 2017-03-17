@@ -22,10 +22,11 @@ import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.VectorFunction;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /** The basic interface including numerous convenience functions */
-public interface Matrix extends Cloneable, VectorIterable {
+public interface Matrix extends Cloneable, VectorIterable,Serializable {
 
   /** @return a formatted String suitable for output */
   String asFormatString();

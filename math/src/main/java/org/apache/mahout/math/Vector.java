@@ -21,12 +21,14 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
+import java.io.Serializable;
+
 /**
  * The basic interface including numerous convenience functions <p/> NOTE: All implementing classes must have a
  * constructor that takes an int for cardinality and a no-arg constructor that can be used for marshalling the Writable
  * instance <p/> NOTE: Implementations may choose to reuse the Vector.Element in the Iterable methods
  */
-public interface Vector extends Cloneable {
+public interface Vector extends Cloneable,Serializable {
 
   /** @return a formatted String suitable for output */
   String asFormatString();
