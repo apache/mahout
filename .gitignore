@@ -22,3 +22,7 @@ foo
 math-tests/
 metastore_db/*
 dockerITs/logs/*.out
+*.jar
+tmp/
+bin/derby.log
+bin/metastore_db/
