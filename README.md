@@ -21,7 +21,7 @@ The Apache Mahout™ project's goal is to build an environment for quickly creat
 
 For additional information about Mahout, visit the [Mahout Home Page](http://mahout.apache.org/)
 
-####Setting up your Environment
+#### Setting up your Environment
 Whether you are using Mahout's Shell, running command line jobs or using it as a library to build your own apps you'll need to setup several environment variables. Edit your environment in `~/.bash_profile` for Mac or `~/.bashrc` for many linux distributions. Add the following
 ```
 export MAHOUT_HOME=/path/to/mahout
@@ -30,7 +30,7 @@ export MAHOUT_LOCAL=true # for running standalone on your dev machine,
 ```
 You will need a `$JAVA_HOME`, and if you are running on Spark, you will also need `$SPARK_HOME`
 
-####Using Mahout as a Library
+#### Using Mahout as a Library
 Running any application that uses Mahout will require installing a binary or source version and setting the environment.
 To compile from source:
 * `mvn -DskipTests clean install`
@@ -56,15 +56,15 @@ and a dependency for back end engine translation, e.g:
     <version>${mahout.version}</version>
 </dependency>
 ```
-####Building From Source
+#### Building From Source
 
-######Prerequisites:
+###### Prerequisites:
 
 Linux Environment (preferably Ubuntu 16.04.x) Note: Currently only the JVM-only build will work on a Mac.
 gcc > 4.x
 NVIDIA Card (installed with OpenCL drivers alongside usual GPU drivers)
 
-######Downloads
+###### Downloads
 
 Install java 1.7+ in an easily accessible directory (for this example,  ~/java/)
 http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
@@ -106,7 +106,7 @@ Clone mahout repository into `~/apache`.
 git clone https://github.com/apache/mahout.git
 ```
 
-######CONFIGURATION
+###### Configuration
 
 When building mahout for a spark backend, we need four System Environment variables set:
 ```
@@ -140,7 +140,7 @@ We then add these to the path:
 These should be added to the your ~/.bashrc file.
 
 
-######BUILDING MAHOUT WITH APACHE MAVEN
+###### Building Mahout with Apache Maven
 
 Currently Mahout has 3 builds.  From the  $MAHOUT_HOME directory we may issue the commands to build each using mvn profiles.
 
@@ -158,7 +158,7 @@ JVM with native OpenMP and OpenCL for Level 2 and level 3 matrix/vector Multipli
 mvn clean install -Pviennacl -Phadoop2 -DskipTests
 ```
 
-####TESTING THE MAHOUT ENVIRONMENT
+#### Testing the Mahout Environment
 
 Mahout provides an extension to the spark-shell, which is good for getting to know the language, testing partition loads, prototyping algorithms, etc..
 
@@ -248,19 +248,14 @@ http://mahout.apache.org/users/environment/out-of-core-reference.html
 http://mahout.apache.org/users/sparkbindings/play-with-shell.html
 http://mahout.apache.org/users/environment/classify-a-doc-from-the-shell.html
 
-
-
-
 Note that due to an intermittent out-of-memory bug in a Flink test we have disabled it from the binary releases. To use Flink please uncomment the line in the root pom.xml in the `<modules>` block so it reads `<module>flink</module>`.
 
-####EXAMPLES
+#### Examples
 For examples of how to use Mahout, see the examples directory located in `examples/bin`
 
-
 For information on how to contribute, visit the [How to Contribute Page](https://mahout.apache.org/developers/how-to-contribute.html)
-  
 
-####LEGAL
+#### Legal
 Please see the `NOTICE.txt` included in this directory for more information.
 
 [![Build Status](https://api.travis-ci.org/apache/mahout.svg?branch=master)](https://travis-ci.org/apache/mahout)
