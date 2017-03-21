@@ -1,5 +1,8 @@
 sudo: required
 
+services:
+  - docker
+
 cache:
   directories:
   - $HOME/.m2
@@ -37,10 +40,6 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libviennacl-dev
  
-sudo: required
-
-services:
-  - docker
 
 script:
 - ./runtests.sh
