@@ -102,7 +102,7 @@ class MathSuite extends FunSuite with MahoutSuite {
 
     printf("cholArg=\n%s\n", cholArg)
 
-    printf("V'DV=\n%s\n", (vblock.t %*% d %*% vblock))
+    printf("V'DV=\n%s\n", vblock.t %*% d %*% vblock)
 
     printf("V'V+V'DV=\n%s\n", vtv + (vblock.t %*% d %*% vblock))
 

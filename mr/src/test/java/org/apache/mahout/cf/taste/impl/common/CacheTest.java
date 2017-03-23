@@ -29,7 +29,7 @@ public final class CacheTest extends TasteTestCase {
   @Test
   public void testLotsOfGets() throws TasteException {
     Retriever<Object,Object> retriever = new IdentityRetriever();
-    Cache<Object,Object> cache = new Cache<Object,Object>(retriever, 1000);
+    Cache<Object,Object> cache = new Cache<>(retriever, 1000);
     for (int i = 0; i < 1000000; i++) {
       assertEquals(i, cache.get(i));
     }
@@ -39,7 +39,7 @@ public final class CacheTest extends TasteTestCase {
   public void testMixedUsage() throws TasteException {
     Random random = RandomUtils.getRandom();
     Retriever<Object,Object> retriever = new IdentityRetriever();
-    Cache<Object,Object> cache = new Cache<Object,Object>(retriever, 1000);
+    Cache<Object,Object> cache = new Cache<>(retriever, 1000);
     for (int i = 0; i < 1000000; i++) {
       double r = random.nextDouble();
       if (r < 0.01) {

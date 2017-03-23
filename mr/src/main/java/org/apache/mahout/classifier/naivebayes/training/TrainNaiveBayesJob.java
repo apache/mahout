@@ -167,7 +167,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
   private long createLabelIndex(Path labPath) throws IOException {
     long labelSize = 0;
     Iterable<Pair<Text,IntWritable>> iterable =
-      new SequenceFileDirIterable<Text, IntWritable>(getInputPath(),
+      new SequenceFileDirIterable<>(getInputPath(),
                                                      PathType.LIST,
                                                      PathFilters.logsCRCFilter(),
                                                      getConf());

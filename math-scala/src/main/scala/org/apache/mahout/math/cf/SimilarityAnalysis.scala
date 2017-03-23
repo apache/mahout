@@ -44,23 +44,34 @@ object SimilarityAnalysis extends Serializable {
   /** Compares (Int,Double) pairs by the second value */
   private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
 
+  lazy val defaultParOpts = ParOpts()
+
   /**
    * Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ...
    * and returns a list of similarity and cross-similarity matrices
-   * @param drmARaw Primary interaction matrix
+    *
+    * @param drmARaw Primary interaction matrix
    * @param randomSeed when kept to a constant will make repeatable downsampling
    * @param maxInterestingItemsPerThing number of similar items to return per item, default: 50
    * @param maxNumInteractions max number of interactions after downsampling, default: 500
+   * @param parOpts partitioning params for drm.par(...)
    * @return a list of [[org.apache.mahout.math.drm.DrmLike]] containing downsampled DRMs for cooccurrence and
    *         cross-cooccurrence
    */
-  def cooccurrences(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingItemsPerThing: Int = 50,
-                    maxNumInteractions: Int = 500, drmBs: Array[DrmLike[Int]] = Array()): List[DrmLike[Int]] = {
+  def cooccurrences(
+    drmARaw: DrmLike[Int],
+    randomSeed: Int = 0xdeadbeef,
+    maxInterestingItemsPerThing: Int = 50,
+    maxNumInteractions: Int = 500,
+    drmBs: Array[DrmLike[Int]] = Array(),
+    parOpts: ParOpts = defaultParOpts)
+    : List[DrmLike[Int]] = {
 
     implicit val distributedContext = drmARaw.context
 
-    // backend allowed to optimize partitioning
-    drmARaw.par(auto = true)
+    // backend partitioning defaults to 'auto', which is often better decided by calling funciton
+    // todo:  this should ideally be different per drm
+    drmARaw.par( min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
 
     // Apply selective downsampling, pin resulting matrix
     val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions)
@@ -82,8 +93,9 @@ object SimilarityAnalysis extends Serializable {
 
     // Now look at cross cooccurrences
     for (drmBRaw <- drmBs) {
-      // backend allowed to optimize partitioning
-      drmBRaw.par(auto = true)
+      // backend partitioning defaults to 'auto', which is often better decided by calling funciton
+      // todo:  this should ideally be different per drm
+      drmARaw.par( min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
 
       // Down-sample and pin other interaction matrix
       val drmB = sampleDownAndBinarize(drmBRaw, randomSeed, maxNumInteractions).checkpoint()
@@ -100,20 +112,10 @@ object SimilarityAnalysis extends Serializable {
       similarityMatrices = similarityMatrices :+ drmSimilarityAtB
 
       drmB.uncache()
-
-      //debug
-      val atbRows = drmSimilarityAtB.nrow
-      val atbCols = drmSimilarityAtB.ncol
-      val i = 0
     }
 
     // Unpin downsampled interaction matrix
     drmA.uncache()
-
-    //debug
-    val ataRows = drmSimilarityAtA.nrow
-    val ataCols = drmSimilarityAtA.ncol
-    val i = 0
 
     // Return list of similarity matrices
     similarityMatrices
@@ -123,23 +125,27 @@ object SimilarityAnalysis extends Serializable {
    * Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ... and returns
    * a list of similarity and cross-similarity matrices. Somewhat easier to use method, which handles the ID
    * dictionaries correctly
+   *
    * @param indexedDatasets first in array is primary/A matrix all others are treated as secondary
    * @param randomSeed use default to make repeatable, otherwise pass in system time or some randomizing seed
    * @param maxInterestingItemsPerThing max similarities per items
    * @param maxNumInteractions max number of input items per item
+   * @param parOpts partitioning params for drm.par(...)
    * @return a list of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] containing downsampled
    *         IndexedDatasets for cooccurrence and cross-cooccurrence
    */
-  def cooccurrencesIDSs(indexedDatasets: Array[IndexedDataset],
-      randomSeed: Int = 0xdeadbeef,
-      maxInterestingItemsPerThing: Int = 50,
-      maxNumInteractions: Int = 500):
+  def cooccurrencesIDSs(
+    indexedDatasets: Array[IndexedDataset],
+    randomSeed: Int = 0xdeadbeef,
+    maxInterestingItemsPerThing: Int = 50,
+    maxNumInteractions: Int = 500,
+    parOpts: ParOpts = defaultParOpts):
     List[IndexedDataset] = {
     val drms = indexedDatasets.map(_.matrix.asInstanceOf[DrmLike[Int]])
     val primaryDrm = drms(0)
     val secondaryDrms = drms.drop(1)
     val coocMatrices = cooccurrences(primaryDrm, randomSeed, maxInterestingItemsPerThing,
-      maxNumInteractions, secondaryDrms)
+      maxNumInteractions, secondaryDrms, parOpts)
     val retIDSs = coocMatrices.iterator.zipWithIndex.map {
       case( drm, i ) =>
         indexedDatasets(0).create(drm, indexedDatasets(0).columnIDs, indexedDatasets(i).columnIDs)
@@ -148,19 +154,110 @@ object SimilarityAnalysis extends Serializable {
   }
 
   /**
+    * Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ... and returns
+    * a list of similarity and cross-occurrence matrices. Somewhat easier to use method, which handles the ID
+    * dictionaries correctly and contains info about downsampling in each model calc.
+    *
+    * @param datasets first in array is primary/A matrix all others are treated as secondary, includes information
+    *                 used to downsample the input drm as well as the output llr(A'A), llr(A'B). The information
+    *                 is contained in each dataset in the array and applies to the model calculation of A' with
+    *                 the dataset. Todo: ignoring absolute threshold for now.
+    * @param randomSeed use default to make repeatable, otherwise pass in system time or some randomizing seed
+    * @param parOpts partitioning params for drm.par(...)
+    * @return a list of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] containing downsampled
+    *         IndexedDatasets for cooccurrence and cross-cooccurrence
+    */
+  def crossOccurrenceDownsampled(
+    datasets: List[DownsamplableCrossOccurrenceDataset],
+    randomSeed: Int = 0xdeadbeef):
+    List[IndexedDataset] = {
+
+
+    val crossDatasets = datasets.drop(1) // drop A
+    val primaryDataset = datasets.head // use A throughout
+    val drmARaw = primaryDataset.iD.matrix
+
+    implicit val distributedContext = primaryDataset.iD.matrix.context
+
+    // backend partitioning defaults to 'auto', which is often better decided by calling funciton
+    val parOptsA = primaryDataset.parOpts.getOrElse(defaultParOpts)
+    drmARaw.par( min = parOptsA.minPar, exact = parOptsA.exactPar, auto = parOptsA.autoPar)
+
+    // Apply selective downsampling, pin resulting matrix
+    val drmA = sampleDownAndBinarize(drmARaw, randomSeed, primaryDataset.maxElementsPerRow)
+
+    // num users, which equals the maximum number of interactions per item
+    val numUsers = drmA.nrow.toInt
+
+    // Compute & broadcast the number of interactions per thing in A
+    val bcastInteractionsPerItemA = drmBroadcast(drmA.numNonZeroElementsPerColumn)
+
+    // Compute cooccurrence matrix A'A
+    val drmAtA = drmA.t %*% drmA
+
+    // Compute loglikelihood scores and sparsify the resulting matrix to get the similarity matrix
+    val drmSimilarityAtA = computeSimilarities(drmAtA, numUsers, primaryDataset.maxInterestingElements,
+      bcastInteractionsPerItemA, bcastInteractionsPerItemA, crossCooccurrence = false,
+      minLLROpt = primaryDataset.minLLROpt)
+
+    var similarityMatrices = List(drmSimilarityAtA)
+
+    // Now look at cross cooccurrences
+    for (dataset <- crossDatasets) {
+      // backend partitioning defaults to 'auto', which is often better decided by calling funciton
+      val parOptsB = dataset.parOpts.getOrElse(defaultParOpts)
+      dataset.iD.matrix.par(min = parOptsB.minPar, exact = parOptsB.exactPar, auto = parOptsB.autoPar)
+
+      // Downsample and pin other interaction matrix
+      val drmB = sampleDownAndBinarize(dataset.iD.matrix, randomSeed, dataset.maxElementsPerRow).checkpoint()
+
+      // Compute & broadcast the number of interactions per thing in B
+      val bcastInteractionsPerThingB = drmBroadcast(drmB.numNonZeroElementsPerColumn)
+
+      // Compute cross-cooccurrence matrix A'B
+      val drmAtB = drmA.t %*% drmB
+
+      val drmSimilarityAtB = computeSimilarities(drmAtB, numUsers, dataset.maxInterestingElements,
+        bcastInteractionsPerItemA, bcastInteractionsPerThingB, minLLROpt = dataset.minLLROpt)
+
+      similarityMatrices = similarityMatrices :+ drmSimilarityAtB
+
+      drmB.uncache()
+    }
+
+    // Unpin downsampled interaction matrix
+    drmA.uncache()
+
+    // Return list of datasets
+    val retIDSs = similarityMatrices.iterator.zipWithIndex.map {
+      case( drm, i ) =>
+        datasets(0).iD.create(drm, datasets(0).iD.columnIDs, datasets(i).iD.columnIDs)
+    }
+    retIDSs.toList
+
+  }
+
+  /**
    * Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a DRM of rows and similar rows
+   *
    * @param drmARaw Primary interaction matrix
    * @param randomSeed when kept to a constant will make repeatable downsampling
    * @param maxInterestingSimilaritiesPerRow number of similar items to return per item, default: 50
    * @param maxNumInteractions max number of interactions after downsampling, default: 500
+   * @param parOpts partitioning options used for drm.par(...)
    */
-  def rowSimilarity(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingSimilaritiesPerRow: Int = 50,
-                    maxNumInteractions: Int = 500): DrmLike[Int] = {
+  def rowSimilarity(
+    drmARaw: DrmLike[Int],
+    randomSeed: Int = 0xdeadbeef,
+    maxInterestingSimilaritiesPerRow: Int = 50,
+    maxNumInteractions: Int = 500,
+    parOpts: ParOpts = defaultParOpts): DrmLike[Int] = {
 
     implicit val distributedContext = drmARaw.context
 
-    // backend allowed to optimize partitioning
-    drmARaw.par(auto = true)
+    // backend partitioning defaults to 'auto', which is often better decided by calling funciton
+    // todo: should this ideally be different per drm?
+    drmARaw.par(min = parOpts.minPar, exact = parOpts.exactPar, auto = parOpts.autoPar)
 
     // Apply selective downsampling, pin resulting matrix
     val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions)
@@ -184,6 +281,7 @@ object SimilarityAnalysis extends Serializable {
   /**
    * Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a drm of rows and similar rows.
    * Uses IndexedDatasets, which handle external ID dictionaries properly
+   *
    * @param indexedDataset compare each row to every other
    * @param randomSeed  use default to make repeatable, otherwise pass in system time or some randomizing seed
    * @param maxInterestingSimilaritiesPerRow max elements returned in each row
@@ -211,9 +309,19 @@ object SimilarityAnalysis extends Serializable {
 
   }
 
-  def computeSimilarities(drm: DrmLike[Int], numUsers: Int, maxInterestingItemsPerThing: Int,
-                        bcastNumInteractionsB: BCast[Vector], bcastNumInteractionsA: BCast[Vector],
-                        crossCooccurrence: Boolean = true) = {
+  def computeSimilarities(
+    drm: DrmLike[Int],
+    numUsers: Int,
+    maxInterestingItemsPerThing: Int,
+    bcastNumInteractionsB: BCast[Vector],
+    bcastNumInteractionsA: BCast[Vector],
+    crossCooccurrence: Boolean = true,
+    minLLROpt: Option[Double] = None) = {
+
+    //val minLLR = minLLROpt.getOrElse(0.0d) // accept all values if not specified
+
+    val minLLR = minLLROpt
+
     drm.mapBlock() {
       case (keys, block) =>
 
@@ -245,11 +353,13 @@ object SimilarityAnalysis extends Serializable {
               // val candidate = thingA -> normailizedLLR
 
               // Enqueue item with score, if belonging to the top-k
-              if (topItemsPerThing.size < maxInterestingItemsPerThing) {
-                topItemsPerThing.enqueue(candidate)
-              } else if (orderByScore.lt(candidate, topItemsPerThing.head)) {
-                topItemsPerThing.dequeue()
-                topItemsPerThing.enqueue(candidate)
+              if(minLLR.isEmpty || llr >= minLLR.get) { // llr threshold takes precedence over max per row
+                if (topItemsPerThing.size < maxInterestingItemsPerThing) {
+                  topItemsPerThing.enqueue(candidate)
+                } else if (orderByScore.lt(candidate, topItemsPerThing.head)) {
+                  topItemsPerThing.dequeue()
+                  topItemsPerThing.enqueue(candidate)
+                }
               }
             }
           }
@@ -270,6 +380,7 @@ object SimilarityAnalysis extends Serializable {
    * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
    *
    * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not
+   *
    * @param drmM matrix to downsample
    * @param seed random number generator seed, keep to a constant if repeatability is neccessary
    * @param maxNumInteractions number of elements in a row of the returned matrix
@@ -325,3 +436,18 @@ object SimilarityAnalysis extends Serializable {
     downSampledDrmI
   }
 }
+
+case class ParOpts( // this will contain the default `par` params except for auto = true
+  minPar: Int = -1,
+  exactPar: Int = -1,
+  autoPar: Boolean = true)
+
+/* Used to pass in data and params for downsampling the input data as well as output A'A, A'B, etc. */
+case class DownsamplableCrossOccurrenceDataset(
+  iD: IndexedDataset,
+  maxElementsPerRow: Int = 500, // usually items per user in the input dataset, used to ramdomly downsample
+  maxInterestingElements: Int = 50, // number of items/columns to keep in the A'A, A'B etc. where iD == A, B, C ...
+  minLLROpt: Option[Double] = None, // absolute threshold, takes precedence over maxInterestingElements if present
+  parOpts: Option[ParOpts] = None) // these can be set per dataset and are applied to each of the drms
+                                // in crossOccurrenceDownsampled
+

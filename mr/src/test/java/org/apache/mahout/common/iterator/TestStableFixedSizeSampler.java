@@ -23,7 +23,7 @@ public final class TestStableFixedSizeSampler extends SamplerCase {
   
   @Override
   protected Iterator<Integer> createSampler(int n, Iterator<Integer> source) {
-    return new StableFixedSizeSamplingIterator<Integer>(n, source);
+    return new StableFixedSizeSamplingIterator<>(n, source);
   }
 
   @Override

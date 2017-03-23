@@ -181,7 +181,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
-    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
+    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<>();
     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter
         .build(mapper, conf, writer);
     mapper.setup(context);
@@ -217,7 +217,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
-    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
+    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<>();
     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter
         .build(mapper, conf, writer);
     mapper.setup(context);
@@ -253,7 +253,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
-    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
+    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<>();
     Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
@@ -287,7 +287,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
-    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
+    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<>();
     Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context =
         DummyRecordWriter.build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
@@ -336,14 +336,14 @@ public final class TestCanopyCreation extends MahoutTestCase {
       assertEquals("1st key", "C-0", key.toString());
 
       List<Pair<Double,Double>> refCenters = Lists.newArrayList();
-      refCenters.add(new Pair<Double,Double>(1.5,1.5));
-      refCenters.add(new Pair<Double,Double>(4.333333333333334,4.333333333333334));
-      Pair<Double,Double> c = new Pair<Double,Double>(clusterWritable.getValue() .getCenter().get(0),
+      refCenters.add(new Pair<>(1.5,1.5));
+      refCenters.add(new Pair<>(4.333333333333334,4.333333333333334));
+      Pair<Double,Double> c = new Pair<>(clusterWritable.getValue() .getCenter().get(0),
       clusterWritable.getValue().getCenter().get(1));
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("2nd key", "C-1", key.toString());
-      c = new Pair<Double,Double>(clusterWritable.getValue().getCenter().get(0),
+      c = new Pair<>(clusterWritable.getValue().getCenter().get(0),
           clusterWritable.getValue().getCenter().get(1));
       assertTrue("center " + c + " not found", findAndRemove(c, refCenters, EPSILON));
       assertFalse("more to come", reader.next(key, clusterWritable));
@@ -391,14 +391,14 @@ public final class TestCanopyCreation extends MahoutTestCase {
       assertEquals("1st key", "C-0", key.toString());
 
       List<Pair<Double,Double>> refCenters = Lists.newArrayList();
-      refCenters.add(new Pair<Double,Double>(1.8,1.8));
-      refCenters.add(new Pair<Double,Double>(4.433333333333334, 4.433333333333334));
-      Pair<Double,Double> c = new Pair<Double,Double>(clusterWritable.getValue().getCenter().get(0),
+      refCenters.add(new Pair<>(1.8,1.8));
+      refCenters.add(new Pair<>(4.433333333333334, 4.433333333333334));
+      Pair<Double,Double> c = new Pair<>(clusterWritable.getValue().getCenter().get(0),
                                                       clusterWritable.getValue().getCenter().get(1));
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("2nd key", "C-1", key.toString());
-      c = new Pair<Double,Double>(clusterWritable.getValue().getCenter().get(0),
+      c = new Pair<>(clusterWritable.getValue().getCenter().get(0),
                                   clusterWritable.getValue().getCenter().get(1));
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertFalse("more to come", reader.next(key, clusterWritable));
@@ -610,7 +610,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T3_KEY, String.valueOf(1.1));
     conf.set(CanopyConfigKeys.T4_KEY, String.valueOf(0.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
-    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
+    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<>();
     Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
@@ -631,7 +631,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "3");
-    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
+    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<>();
     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter
         .build(mapper, conf, writer);
     mapper.setup(context);
@@ -661,7 +661,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "3");
-    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
+    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<>();
     Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);

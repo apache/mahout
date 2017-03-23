@@ -30,7 +30,7 @@ import java.util.TreeMap;
 public final class DummyOutputCollector<K extends WritableComparable, V extends Writable>
     implements OutputCollector<K,V> {
 
-  private final Map<K, List<V>> data = new TreeMap<K,List<V>>();
+  private final Map<K, List<V>> data = new TreeMap<>();
 
   @Override
   public void collect(K key,V values) {

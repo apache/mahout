@@ -28,7 +28,7 @@ import org.apache.mahout.math.function.Functions;
 import java.util.Locale;
 
 /**
- For an <tt>m x n</tt> matrix <tt>A</tt> with <tt>m >= n</tt>, the QR decomposition is an <tt>m x n</tt>
+ For an <tt>m x n</tt> matrix <tt>A</tt> with {@code m >= n}, the QR decomposition is an <tt>m x n</tt>
  orthogonal matrix <tt>Q</tt> and an <tt>n x n</tt> upper triangular matrix <tt>R</tt> so that
  <tt>A = Q*R</tt>.
  <P>
@@ -53,7 +53,7 @@ public class QRDecomposition implements QR {
    * object.
    *
    * @param a A rectangular matrix.
-   * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
+   * @throws IllegalArgumentException if {@code A.rows() < A.columns()}.
    */
   public QRDecomposition(Matrix a) {
 

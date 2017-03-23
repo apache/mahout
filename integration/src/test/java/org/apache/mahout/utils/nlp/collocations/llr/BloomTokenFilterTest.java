@@ -36,7 +36,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
@@ -79,7 +78,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
-    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_46);
+    Analyzer analyzer = new WhitespaceAnalyzer();
     TokenStream ts = analyzer.tokenStream(null, reader);
     ts.reset();
     validateTokens(allTokens, ts);
@@ -91,7 +90,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testNonKeepdAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
-    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_46);
+    Analyzer analyzer = new WhitespaceAnalyzer();
     TokenStream ts = analyzer.tokenStream(null, reader);
     ts.reset();
     TokenStream f = new BloomTokenFilter(getFilter(filterTokens), false /* toss matching tokens */, ts);
@@ -104,7 +103,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testKeepAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
-    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_46);
+    Analyzer analyzer = new WhitespaceAnalyzer();
     TokenStream ts = analyzer.tokenStream(null, reader);
     ts.reset();
     TokenStream f = new BloomTokenFilter(getFilter(filterTokens), true /* keep matching tokens */, ts);
@@ -117,7 +116,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testShingleFilteredAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
-    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_46);
+    Analyzer analyzer = new WhitespaceAnalyzer();
     TokenStream ts = analyzer.tokenStream(null, reader);
     ts.reset();
     ShingleFilter sf = new ShingleFilter(ts, 3);

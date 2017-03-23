@@ -475,14 +475,14 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
    */
   @Override
   public Iterator<T> iterator() {
-    List<T> keyList = new ArrayList<T>();
+    List<T> keyList = new ArrayList<>();
     keys(keyList);
     return keyList.iterator();
   }
 
   @Override
   public Object[] toArray() {
-    List<T> keyList = new ArrayList<T>();
+    List<T> keyList = new ArrayList<>();
     keys(keyList);
     return keyList.toArray();
   }
@@ -541,7 +541,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
   }
 
   public List<T> keys() {
-    List<T> keys = new ArrayList<T>();
+    List<T> keys = new ArrayList<>();
     keys(keys);
     return keys;
   }

@@ -42,7 +42,7 @@ public class CachedTermInfo implements TermInfo {
   public CachedTermInfo(IndexReader reader, String field, int minDf, int maxDfPercent) throws IOException {
     this.field = field;
     Terms t = MultiFields.getTerms(reader, field);
-    TermsEnum te = t.iterator(null);
+    TermsEnum te = t.iterator();
 
     int numDocs = reader.numDocs();
     double percent = numDocs * maxDfPercent / 100.0;

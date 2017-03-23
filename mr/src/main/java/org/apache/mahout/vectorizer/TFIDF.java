@@ -17,11 +17,11 @@
 
 package org.apache.mahout.vectorizer;
 
-import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
 //TODO: add a new class that supports arbitrary Lucene similarity implementations
 public class TFIDF implements Weight {
 
-  private final DefaultSimilarity sim = new DefaultSimilarity();
+  private final ClassicSimilarity sim = new ClassicSimilarity();
 
   @Override
   public double calculate(int tf, int df, int length, int numDocs) {

@@ -20,16 +20,14 @@ package org.apache.mahout.flinkbindings.io
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.io.{SequenceFile, Writable}
+import org.apache.hadoop.io.SequenceFile.Reader
+import org.apache.hadoop.io.Writable
 
-/**
- * Deprecated Hadoop 1 api which we currently explicitly import via Mahout dependencies.
- */
 object Hadoop2HDFSUtil extends HDFSUtil {
 
   /**
    * Read the header of a sequence file and determine the Key and Value type
-   * @param path
+   * @param path - hdfs path of Sequence File
    * @return
    */
   def readDrmHeader(path: String): DrmMetadata = {
@@ -43,7 +41,7 @@ object Hadoop2HDFSUtil extends HDFSUtil {
 
       // Filter out anything starting with .
       .filter { s =>
-        !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDir
+        !s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDirectory
       }
 
       // Take path
@@ -57,12 +55,8 @@ object Hadoop2HDFSUtil extends HDFSUtil {
         throw new IllegalArgumentException(s"No partition files found in ${dfsPath.toString}.")
       }
 
-    // flink is retiring hadoop 1
-     val reader = new SequenceFile.Reader(fs, partFilePath, fs.getConf)
+     val reader = new Reader(fs.getConf, Reader.file(partFilePath))
 
-    // hadoop 2 reader
-//    val reader: SequenceFile.Reader = new SequenceFile.Reader(fs.getConf,
-//      SequenceFile.Reader.file(partFilePath));
     try {
       new DrmMetadata(
         keyTypeWritable = reader.getKeyClass.asSubclass(classOf[Writable]),
@@ -75,7 +69,7 @@ object Hadoop2HDFSUtil extends HDFSUtil {
 
   /**
    * Delete a path from the filesystem
-   * @param path
+   * @param path - hdfs path
    */
   def delete(path: String) {
     val dfsPath = new Path(path)

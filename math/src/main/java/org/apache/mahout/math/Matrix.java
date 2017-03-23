@@ -271,28 +271,28 @@ public interface Matrix extends Cloneable, VectorIterable {
   /**
    * Return a map of the current column label bindings of the receiver
    *
-   * @return a Map<String, Integer>
+   * @return a {@code Map<String, Integer>}
    */
   Map<String, Integer> getColumnLabelBindings();
 
   /**
    * Return a map of the current row label bindings of the receiver
    *
-   * @return a Map<String, Integer>
+   * @return a {@code Map<String, Integer>}
    */
   Map<String, Integer> getRowLabelBindings();
 
   /**
    * Sets a map of column label bindings in the receiver
    *
-   * @param bindings a Map<String, Integer> of label bindings
+   * @param bindings a {@code Map<String, Integer>} of label bindings
    */
   void setColumnLabelBindings(Map<String, Integer> bindings);
 
   /**
    * Sets a map of row label bindings in the receiver
    *
-   * @param bindings a Map<String, Integer> of label bindings
+   * @param bindings a {@code Map<String, Integer>} of label bindings
    */
   void setRowLabelBindings(Map<String, Integer> bindings);
 

@@ -124,7 +124,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
     Preconditions.checkArgument(userRatings.isSequentialAccess(), "need sequential access to ratings!");
 
     /* (Cu -I) Y */
-    OpenIntObjectHashMap<Vector> CuMinusIY = new OpenIntObjectHashMap<Vector>(userRatings.getNumNondefaultElements());
+    OpenIntObjectHashMap<Vector> CuMinusIY = new OpenIntObjectHashMap<>(userRatings.getNumNondefaultElements());
     for (Element e : userRatings.nonZeroes()) {
       CuMinusIY.put(e.index(), Y.get(e.index()).times(confidence(e.get()) - 1));
     }

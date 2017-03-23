@@ -25,7 +25,7 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.h2obindings.ops._
 import org.apache.mahout.h2obindings.drm._
-import org.apache.mahout.h2o.common.{Hadoop1HDFSUtil, HDFSUtil}
+import org.apache.mahout.h2o.common.{Hadoop2HDFSUtil, HDFSUtil}
 import org.apache.mahout.logging._
 
 /** H2O specific non-DRM operations */
@@ -34,7 +34,7 @@ object H2OEngine extends DistributedEngine {
   private final implicit val log = getLog(H2OEngine.getClass)
 
   // By default, use Hadoop 1 utils
-  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+  var hdfsUtils: HDFSUtil = Hadoop2HDFSUtil
 
   def colMeans[K](drm: CheckpointedDrm[K]): Vector =
     H2OHelper.colMeans(drm.h2odrm.frame)

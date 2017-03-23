@@ -25,7 +25,7 @@ public class ObjectArrayListTest extends MahoutTestCase {
 
   @Test
   public void emptyOnCreation() {
-    ObjectArrayList<String> list = new ObjectArrayList<String>();
+    ObjectArrayList<String> list = new ObjectArrayList<>();
     assertTrue(list.isEmpty());
     assertEquals(0, list.size());
     list.add("1");
@@ -36,14 +36,14 @@ public class ObjectArrayListTest extends MahoutTestCase {
 
   @Test
   public void correctSizeAfterInstantiation() {
-    ObjectArrayList<String> list = new ObjectArrayList<String>(100);
+    ObjectArrayList<String> list = new ObjectArrayList<>(100);
     assertTrue(list.isEmpty());
     assertEquals(0, list.size());
   }
 
   @Test
   public void correctSizeAfterInstantiationWithElements() {
-    ObjectArrayList<String> list = new ObjectArrayList<String>(new String[] { "1", "2", "3" });
+    ObjectArrayList<String> list = new ObjectArrayList<>(new String[] { "1", "2", "3" });
     assertFalse(list.isEmpty());
     assertEquals(3, list.size());
   }

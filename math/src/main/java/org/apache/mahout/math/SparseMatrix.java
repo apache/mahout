@@ -41,7 +41,7 @@ public class SparseMatrix extends AbstractMatrix {
    *
    * @param rows no of rows
    * @param columns no of columns
-   * @param rowVectors a Map<Integer, RandomAccessSparseVector> of rows
+   * @param rowVectors a {@code Map<Integer, RandomAccessSparseVector>} of rows
    */
   public SparseMatrix(int rows, int columns, Map<Integer, Vector> rowVectors) {
     this(rows, columns, rowVectors, false);

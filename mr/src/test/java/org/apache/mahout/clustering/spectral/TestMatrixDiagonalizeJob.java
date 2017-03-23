@@ -59,7 +59,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
     
     // set up the dummy writers
     DummyRecordWriter<NullWritable, IntDoublePairWritable> writer =
-      new DummyRecordWriter<NullWritable, IntDoublePairWritable>();
+      new DummyRecordWriter<>();
     Mapper<IntWritable, VectorWritable, NullWritable, IntDoublePairWritable>.Context 
       context = DummyRecordWriter.build(mapper, conf, writer);
     
@@ -83,7 +83,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
     
     // set up the dummy writers
     DummyRecordWriter<NullWritable, IntDoublePairWritable> mapWriter = 
-      new DummyRecordWriter<NullWritable, IntDoublePairWritable>();
+      new DummyRecordWriter<>();
     Mapper<IntWritable, VectorWritable, NullWritable, IntDoublePairWritable>.Context 
       mapContext = DummyRecordWriter.build(mapper, conf, mapWriter);
     
@@ -97,7 +97,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
     // now perform the reduction
     MatrixDiagonalizeReducer reducer = new MatrixDiagonalizeReducer();
     DummyRecordWriter<NullWritable, VectorWritable> redWriter = new
-      DummyRecordWriter<NullWritable, VectorWritable>();
+      DummyRecordWriter<>();
     Reducer<NullWritable, IntDoublePairWritable, NullWritable, VectorWritable>.Context
       redContext = DummyRecordWriter.build(reducer, conf, redWriter, 
       NullWritable.class, IntDoublePairWritable.class);

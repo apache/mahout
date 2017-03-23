@@ -106,7 +106,7 @@ public final class ClusterCountReaderTest extends MahoutTestCase {
   
   private static void verifyThatNumberOfClustersIsCorrect(Configuration conf, Path clusteredPointsPath) {
     DummyOutputCollector<IntWritable,WeightedVectorWritable> collector =
-        new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
+        new DummyOutputCollector<>();
     
     // The key is the clusterId, the value is the weighted vector
     for (Pair<IntWritable,WeightedVectorWritable> record :

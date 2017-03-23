@@ -161,7 +161,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
   private static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf) throws IOException {
     List<Cluster> clusterModels = new ArrayList<>();
     Path finalClustersPath = finalClustersPath(conf, clusterOutputPath);
-    Iterator<?> it = new SequenceFileDirValueIterator<Writable>(finalClustersPath, PathType.LIST,
+    Iterator<?> it = new SequenceFileDirValueIterator<>(finalClustersPath, PathType.LIST,
         PathFilters.partFilter(), null, false, conf);
     while (it.hasNext()) {
       ClusterWritable next = (ClusterWritable) it.next();

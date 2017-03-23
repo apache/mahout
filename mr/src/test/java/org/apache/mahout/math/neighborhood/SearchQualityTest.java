@@ -156,7 +156,7 @@ public class SearchQualityTest {
     long start = System.currentTimeMillis();
     List<List<WeightedThing<Vector>>> results = searcher.search(queries, NUM_RESULTS);
     long end = System.currentTimeMillis();
-    return new Pair<List<List<WeightedThing<Vector>>>, Long>(results, end - start);
+    return new Pair<>(results, end - start);
   }
 
   public static Pair<List<WeightedThing<Vector>>, Long> getResultsAndRuntimeSearchFirst(
@@ -164,7 +164,7 @@ public class SearchQualityTest {
     long start = System.currentTimeMillis();
     List<WeightedThing<Vector>> results = searcher.searchFirst(queries, false);
     long end = System.currentTimeMillis();
-    return new Pair<List<WeightedThing<Vector>>, Long>(results, end - start);
+    return new Pair<>(results, end - start);
   }
 
   static class StripWeight implements Function<WeightedThing<Vector>, Vector> {

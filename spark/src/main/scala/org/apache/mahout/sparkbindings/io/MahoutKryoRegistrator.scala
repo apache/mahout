@@ -35,6 +35,36 @@ object MahoutKryoRegistrator {
     kryo.addDefaultSerializer(classOf[Vector], new VectorKryoSerializer())
     kryo.addDefaultSerializer(classOf[Matrix], new GenericMatrixKryoSerializer)
 
+    Seq(
+      classOf[Vector],
+      classOf[Matrix],
+      classOf[DiagonalMatrix],
+      classOf[DenseMatrix],
+      classOf[SparseRowMatrix],
+      classOf[SparseMatrix],
+      classOf[MatrixView],
+      classOf[MatrixSlice],
+      classOf[TransposedMatrixView],
+      classOf[DenseVector],
+      classOf[RandomAccessSparseVector],
+      classOf[SequentialAccessSparseVector],
+      classOf[MatrixVectorView],
+      classOf[VectorView],
+      classOf[PermutedVectorView],
+      classOf[Array[Vector]],
+      classOf[Array[Matrix]],
+      Class.forName(classOf[DiagonalMatrix].getName + "$SingleElementVector"),
+      Class.forName(classOf[DenseVector].getName + "$DenseVectorView"),
+      // This is supported by twitter.chill, but kryo still is offended by lack of registration:
+      classOf[Range],
+      //classOf[Unit], // this causes an error with "void not serializable" or some such on a real cluster. Not found
+      // in unit tests
+      classOf[scala.collection.mutable.WrappedArray.ofRef[_]],
+      classOf[Array[Int]],
+      classOf[Array[String]]
+
+    ) foreach kryo.register
+
   }
 
 }

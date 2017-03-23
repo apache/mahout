@@ -21,6 +21,7 @@ package org.apache.mahout.flinkbindings.io
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 
+
 /**
  * Returns a [[java.lang.String]], which is comma delimited list of URIs discovered based on parameters
  * in the constructor.

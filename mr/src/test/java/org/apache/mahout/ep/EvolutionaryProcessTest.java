@@ -28,9 +28,9 @@ public final class EvolutionaryProcessTest extends MahoutTestCase {
 
   @Test
   public void testConverges() throws Exception {
-    State<Foo, Double> s0 = new State<Foo, Double>(new double[5], 1);
+    State<Foo, Double> s0 = new State<>(new double[5], 1);
     s0.setPayload(new Foo());
-    EvolutionaryProcess<Foo, Double> ep = new EvolutionaryProcess<Foo, Double>(10, 100, s0);
+    EvolutionaryProcess<Foo, Double> ep = new EvolutionaryProcess<>(10, 100, s0);
 
     State<Foo, Double> best = null;
     for (int i = 0; i < 20; i++) {

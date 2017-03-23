@@ -20,6 +20,7 @@ package org.apache.mahout.utils.vectors.lucene;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Paths;
 import java.util.Iterator;
 
 import com.google.common.base.Preconditions;
@@ -85,7 +86,7 @@ public final class Driver {
     Preconditions.checkArgument(minDf >= 1, "minDf must be >= 1");
     Preconditions.checkArgument(maxDFPercent <= 99, "maxDFPercent must be <= 99");
 
-    Directory dir = FSDirectory.open(file);
+    Directory dir = FSDirectory.open(Paths.get(file.getAbsolutePath()));
     IndexReader reader = DirectoryReader.open(dir);
 
 

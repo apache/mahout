@@ -106,7 +106,7 @@ public final class TreeVisualizer {
   }
   
   private static Map<String,Field> getReflectMap() {
-    Map<String,Field> fields = new HashMap<String,Field>();
+    Map<String,Field> fields = new HashMap<>();
     
     try {
       Field m = CategoricalNode.class.getDeclaredField("attr");

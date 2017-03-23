@@ -56,11 +56,11 @@ public final class PoissonSampler extends AbstractSamplerFunction {
       while (u / 20 < limit) {
         double pdf = pd.probability(i);
         limit -= pdf;
-        steps.add(new WeightedThing<Integer>(i, pdf));
+        steps.add(new WeightedThing<>(i, pdf));
         i++;
       }
-      steps.add(new WeightedThing<Integer>(steps.size(), limit));
-      partial = new Multinomial<Integer>(steps);
+      steps.add(new WeightedThing<>(steps.size(), limit));
+      partial = new Multinomial<>(steps);
     }
     return partial.sample(u);
   }

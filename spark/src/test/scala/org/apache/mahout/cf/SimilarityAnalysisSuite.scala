@@ -17,11 +17,17 @@
 
 package org.apache.mahout.cf
 
-import org.apache.mahout.math.cf.SimilarityAnalysis
+import org.apache.mahout.math.cf.{DownsamplableCrossOccurrenceDataset, SimilarityAnalysis}
 import org.apache.mahout.math.drm._
+import org.apache.mahout.math.indexeddataset.BiDictionary
 import org.apache.mahout.math.scalabindings.{MatrixOps, _}
+import org.apache.mahout.sparkbindings.SparkDistributedContext
+import org.apache.mahout.sparkbindings.dc2sc
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 import org.scalatest.FunSuite
 
 /* values 
@@ -58,7 +64,7 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
     (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.0),
     (0.0,                0.0,                0.0,                0.0,                4.498681156950466))
 
-  final val matrixLLRCoocBtAControl = dense(
+  final val matrixLLRCoocAtBControl = dense(
       (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
       (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
       (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
@@ -66,7 +72,7 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
       (0.0,                0.0,                0.6795961471815897, 0.0,                4.498681156950466))
 
 
-  test("cooccurrence [A'A], [B'A] boolbean data using LLR") {
+  test("Cross-occurrence [A'A], [B'A] boolean data using LLR") {
     val a = dense(
         (1, 1, 0, 0, 0),
         (0, 0, 1, 1, 0),
@@ -91,13 +97,13 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
 
     //cross similarity
     val matrixCrossCooc = drmCooc(1).checkpoint().collect
-    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocBtAControl)
+    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocAtBControl)
     n = (new MatrixOps(m = diff2Matrix)).norm
     n should be < 1E-10
 
   }
 
-  test("cooccurrence [A'A], [B'A] double data using LLR") {
+  test("Cross-occurrence [A'A], [B'A] double data using LLR") {
     val a = dense(
         (100000.0D, 1.0D,  0.0D,  0.0D,     0.0D),
         (     0.0D, 0.0D, 10.0D,  1.0D,     0.0D),
@@ -122,12 +128,12 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
 
     //cross similarity
     val matrixCrossCooc = drmCooc(1).checkpoint().collect
-    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocBtAControl)
+    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocAtBControl)
     n = (new MatrixOps(m = diff2Matrix)).norm
     n should be < 1E-10
   }
 
-  test("cooccurrence [A'A], [B'A] integer data using LLR") {
+  test("Cross-occurrence [A'A], [B'A] integer data using LLR") {
     val a = dense(
         ( 1000,  10,       0,    0,   0),
         (    0,   0,  -10000,   10,   0),
@@ -154,12 +160,12 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
 
     //cross similarity
     val matrixCrossCooc = drmCooc(1).checkpoint().collect
-    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocBtAControl)
+    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocAtBControl)
     n = (new MatrixOps(m = diff2Matrix)).norm
     n should be < 1E-10
   }
 
-  test("cooccurrence two matrices with different number of columns"){
+  test("Cross-occurrence two matrices with different number of columns"){
     val a = dense(
       (1, 1, 0, 0, 0),
       (0, 0, 1, 1, 0),
@@ -172,7 +178,7 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
       (0, 0, 1, 0),
       (1, 1, 0, 1))
 
-    val matrixLLRCoocBtANonSymmetric = dense(
+    val matrixLLRCoocAtBNonSymmetric = dense(
       (0.0,                1.7260924347106847, 1.7260924347106847, 1.7260924347106847),
       (0.0,                0.6795961471815897, 0.6795961471815897, 0.0),
       (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 0.0),
@@ -191,12 +197,184 @@ class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with Distributed
 
     //cross similarity
     val matrixCrossCooc = drmCooc(1).checkpoint().collect
-    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocBtANonSymmetric)
+    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocAtBNonSymmetric)
     n = (new MatrixOps(m = diff2Matrix)).norm
 
     //cooccurrence without LLR is just a A'B
     //val inCoreAtB = a.transpose().times(b)
     //val bp = 0
+  }
+
+  test("Cross-occurrence two IndexedDatasets"){
+    val a = dense(
+      (1, 1, 0, 0, 0),
+      (0, 0, 1, 1, 0),
+      (0, 0, 0, 0, 1),
+      (1, 0, 0, 1, 0))
+
+    val b = dense(
+      (0, 1, 1, 0),
+      (1, 1, 1, 0),
+      (0, 0, 1, 0),
+      (1, 1, 0, 1))
+
+    val users = Seq("u1", "u2", "u3", "u4")
+    val itemsA = Seq("a1", "a2", "a3", "a4", "a5")
+    val itemsB = Seq("b1", "b2", "b3", "b4")
+    val userDict = new BiDictionary(users)
+    val itemsADict = new BiDictionary(itemsA)
+    val itemsBDict = new BiDictionary(itemsB)
+
+    // this is downsampled to the top 2 values per row to match the calc
+    val matrixLLRCoocAtBNonSymmetric = dense(
+      (0.0,                1.7260924347106847, 1.7260924347106847, 0.0),
+      (0.0,                0.6795961471815897, 0.6795961471815897, 0.0),
+      (1.7260924347106847, 0.6795961471815897, 0.0,                0.0),
+      (5.545177444479561,  1.7260924347106847, 0.0,                0.0),
+      (0.0,                0.0,                0.6795961471815897, 0.0))
+
+    val drmA = drmParallelize(m = a, numPartitions = 2)
+    val drmB = drmParallelize(m = b, numPartitions = 2)
+
+    val aID = new IndexedDatasetSpark(drmA, userDict, itemsADict)
+    val bID = new IndexedDatasetSpark(drmB, userDict, itemsBDict)
+    val aD = DownsamplableCrossOccurrenceDataset(aID)
+    val bD = DownsamplableCrossOccurrenceDataset(bID, maxInterestingElements = 2)
+
+    //self similarity
+    val drmCooc = SimilarityAnalysis.crossOccurrenceDownsampled(List(aD, bD))
+    val matrixSelfCooc = drmCooc(0).matrix.checkpoint().collect
+    val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
+    var n = (new MatrixOps(m = diffMatrix)).norm
+    n should be < 1E-10
+
+    //cross similarity
+    val matrixCrossCooc = drmCooc(1).matrix.checkpoint().collect
+    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocAtBNonSymmetric)
+    n = (new MatrixOps(m = diff2Matrix)).norm
+    n should be < 1E-10
+  }
+
+  test("Cross-occurrence two IndexedDatasets different row ranks"){
+
+    val sc = dc2sc(mahoutCtx)
+
+
+    /*
+    val a = dense(
+      "u1"(1, 1, 0, 0, 0),
+      "u2"(0, 0, 1, 1, 0),
+      "u3"(0, 0, 0, 0, 1),
+      "u4"(1, 0, 0, 1, 0))
+
+    val b = dense(
+      "u1"(0, 1, 1, 0),
+      "u2"(1, 1, 1, 0),
+      "u3"(0, 0, 1, 0),
+      "u4"(1, 1, 0, 1)
+      "u5"(1, 1, 1, 1))
+*/
+    val pairsA = Seq(
+      ("u1","a1"), ("u1","a2"),
+      ("u2","a3"), ("u2","a4"),
+      ("u3","a5"),
+      ("u4","a1"), ("u4","a4"))
+
+    val pairsB = Seq(
+      ("u1","b2"), ("u1","b3"),
+      ("u2","b1"), ("u2","b2"), ("u2","b3"),
+      ("u3","b2"),
+      ("u4","b1"), ("u4","b2"), ("u4","b4"),
+      ("u5","b1"), ("u5", "b25"))
+
+
+
+    val pairRDDA = sc.parallelize(pairsA, 4)
+    val pairRDDB = sc.parallelize(pairsB, 4)
+
+    val aID = IndexedDatasetSpark(pairRDDA)(sc)
+    val bID = IndexedDatasetSpark(pairRDDB, Some(aID.rowIDs))(sc)
+
+    assert(aID.rowIDs.size == 4)
+    assert(bID.rowIDs.size == 4)
+
+    assert(aID.matrix.nrow == 4)
+    assert(bID.matrix.nrow == 4)
+
+    assert(aID.rowIDs.contains("u1") &&
+      aID.rowIDs.contains("u2") &&
+      aID.rowIDs.contains("u3") &&
+      aID.rowIDs.contains("u4"))
+
+    assert(aID.columnIDs.contains("a1") &&
+      aID.columnIDs.contains("a2") &&
+      aID.columnIDs.contains("a3") &&
+      aID.columnIDs.contains("a4") &&
+      aID.columnIDs.contains("a5"))
+
+    assert(bID.rowIDs.contains("u1") &&
+      bID.rowIDs.contains("u2") &&
+      bID.rowIDs.contains("u3") &&
+      bID.rowIDs.contains("u4"))
+    assert(bID.columnIDs.contains("b1") &&
+      bID.columnIDs.contains("b2") &&
+      bID.columnIDs.contains("b3") &&
+      bID.columnIDs.contains("b4"))
+
+    assert(!bID.rowIDs.contains("u5"))// this row id should be filtered out of the drm and dictionary
+    assert(!bID.columnIDs.contains("b25"))// this row id should be filtered out of the drm and dictionary
+
+  }
+
+  test("Cross-occurrence two IndexedDatasets LLR threshold"){
+    val a = dense(
+      (1, 1, 0, 0, 0),
+      (0, 0, 1, 1, 0),
+      (0, 0, 0, 0, 1),
+      (1, 0, 0, 1, 0))
+
+    val b = dense(
+      (0, 1, 1, 0),
+      (1, 1, 1, 0),
+      (0, 0, 1, 0),
+      (1, 1, 0, 1))
+
+    val users = Seq("u1", "u2", "u3", "u4")
+    val itemsA = Seq("a1", "a2", "a3", "a4", "a5")
+    val itemsB = Seq("b1", "b2", "b3", "b4")
+    val userDict = new BiDictionary(users)
+    val itemsADict = new BiDictionary(itemsA)
+    val itemsBDict = new BiDictionary(itemsB)
+
+    // this is downsampled to the top 2 values per row to match the calc but also uses a min llr threshold so
+    // the # per row is still applied but nothing gets past the min llr check
+    val matrixLLRCoocAtBNonSymmetric = dense(
+      (0.0,                1.7260924347106847, 1.7260924347106847, 0.0),
+      (0.0,                0.0,                0.0,                0.0),
+      (1.7260924347106847, 0.0,                0.0,                0.0),
+      (5.545177444479561,  1.7260924347106847, 0.0,                0.0),
+      (0.0,                0.0,                0.0,                0.0))
+
+    val drmA = drmParallelize(m = a, numPartitions = 2)
+    val drmB = drmParallelize(m = b, numPartitions = 2)
+
+    val aID = new IndexedDatasetSpark(drmA, userDict, itemsADict)
+    val bID = new IndexedDatasetSpark(drmB, userDict, itemsBDict)
+    val aD = DownsamplableCrossOccurrenceDataset(aID)
+    val bD = DownsamplableCrossOccurrenceDataset(bID, minLLROpt = Some(1.7), maxInterestingElements = 2)
+
+    //self similarity
+    val drmCooc = SimilarityAnalysis.crossOccurrenceDownsampled(List(aD, bD))
+    val matrixSelfCooc = drmCooc(0).matrix.checkpoint().collect
+    val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
+    var n = (new MatrixOps(m = diffMatrix)).norm
+    n should be < 1E-10
+
+    //cross similarity
+    val matrixCrossCooc = drmCooc(1).matrix.checkpoint().collect
+    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocAtBNonSymmetric)
+    n = (new MatrixOps(m = diff2Matrix)).norm
+    n should be < 1E-10
   }
 
   test("LLR calc") {

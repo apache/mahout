@@ -32,7 +32,7 @@ public final class AnalyzerUtils {
    * @throws ClassNotFoundException - {@link ClassNotFoundException}
    */
   public static Analyzer createAnalyzer(String analyzerClassName) throws ClassNotFoundException {
-    return createAnalyzer(analyzerClassName, Version.LUCENE_46);
+    return createAnalyzer(analyzerClassName, Version.LUCENE_5_5_2);
   }
 
   public static Analyzer createAnalyzer(String analyzerClassName, Version version) throws ClassNotFoundException {
@@ -47,7 +47,7 @@ public final class AnalyzerUtils {
    * @return {@link Analyzer}
    */
   public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass) {
-    return createAnalyzer(analyzerClass, Version.LUCENE_46);
+    return createAnalyzer(analyzerClass, Version.LUCENE_5_5_2);
   }
 
   public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass, Version version) {

@@ -134,7 +134,7 @@ object FlinkOpAtA {
     val subresults: DataSet[(Int, Matrix)] =
           ds.flatMap(new RichFlatMapFunction[(Array[K], Matrix), (Int, Matrix)] {
 
-      var ranges: Array[Range] = null
+      var ranges: Array[Range] = _
 
       override def open(params: Configuration): Unit = {
         val runtime = this.getRuntimeContext
@@ -157,7 +157,7 @@ object FlinkOpAtA {
     val res = subresults.groupBy(0)
                         .reduceGroup(new RichGroupReduceFunction[(Int, Matrix), BlockifiedDrmTuple[Int]] {
 
-      var ranges: Array[Range] = null
+      var ranges: Array[Range] = _
 
       override def open(params: Configuration): Unit = {
         val runtime = this.getRuntimeContext
