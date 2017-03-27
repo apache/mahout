@@ -57,6 +57,14 @@ final object RootSolverFactory extends SolverFactory {
   def getOperator[C: ClassTag]: MMBinaryFunc = {
 
     try {
+      logger.info("Creating org.apache.mahout.cuda.GPUMMul solver")
+      clazz = Class.forName("org.apache.mahout.cuda.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+      logger.info("Successfully created org.apache.mahout.cuda.GPUMMul solver")
+
+    } catch {
+      case cudax: Exception =>
+      logger.info("Unable to create class GPUMMul with CUDA: attempting OpenCL version")
+    try {
       logger.info("Creating org.apache.mahout.viennacl.opencl.GPUMMul solver")
       clazz = Class.forName("org.apache.mahout.viennacl.opencl.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
       logger.info("Successfully created org.apache.mahout.viennacl.opencl.GPUMMul solver")
@@ -78,6 +86,7 @@ final object RootSolverFactory extends SolverFactory {
             logger.info("Unable to create class OMPMMul: falling back to java version")
             clazz = MMul
         }
+    }
     }
     clazz
   }
