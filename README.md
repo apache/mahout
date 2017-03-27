@@ -223,7 +223,7 @@ def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20,
            val R =  scala.util.Random
            R.setSeed(seed + 1)
            val blockB = new SparseRowMatrix(block.nrow, block.ncol)
-           blockB := {x => if (R.nextDouble > pctDense) R.nextDouble else x }
+           blockB := {x => if (R.nextDouble < pctDense) R.nextDouble else x }
        (keys -> blockB)
   }
 
