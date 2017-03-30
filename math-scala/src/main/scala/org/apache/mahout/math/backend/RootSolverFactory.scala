@@ -57,9 +57,9 @@ final object RootSolverFactory extends SolverFactory {
   def getOperator[C: ClassTag]: MMBinaryFunc = {
 
     try {
-      logger.info("Creating org.apache.mahout.cuda.GPUMMul solver")
-      clazz = Class.forName("org.apache.mahout.cuda.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
-      logger.info("Successfully created org.apache.mahout.cuda.GPUMMul solver")
+      logger.info("Creating scala.cuda.GPUMMul solver")
+      clazz = Class.forName("scala.cuda.GPUMMul$").getField("MODULE$").get(null).asInstanceOf[MMBinaryFunc]
+      logger.info("Successfully created scala.cuda.GPUMMul solver")
 
     } catch {
       case cudax: Exception =>
