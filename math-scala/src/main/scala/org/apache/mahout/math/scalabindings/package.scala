@@ -122,6 +122,25 @@ package object scalabindings {
   def prod2Vec(s: Product) = new DenseVector(s.productIterator.
       map(_.asInstanceOf[Number].doubleValue()).toArray)
 
+  implicit def iterable2Matrix(that: Iterable[Vector]): Matrix = {
+    val first = that.head
+    val nrow = that.size
+    val ncol = first.size
+
+    val m = if (first.isDense) {
+      new DenseMatrix(nrow, ncol)
+    } else {
+      new SparseRowMatrix(nrow, ncol)
+    }
+
+    that.zipWithIndex.foreach { case (row, idx) => 
+      m.assignRow(idx.toInt, row)
+    }
+
+    m
+  }
+
+
   def diagv(v: Vector): DiagonalMatrix = new DiagonalMatrix(v)
 
   def diag(v: Double, size: Int): DiagonalMatrix =
