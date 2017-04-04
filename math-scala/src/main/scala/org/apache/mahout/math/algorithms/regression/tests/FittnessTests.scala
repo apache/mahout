@@ -41,16 +41,22 @@ object FittnessTests {
     val r2 = 1 - (sumSquareResiduals / sumSquareTotal)
     model.r2 = r2
     model.testResults += ('r2 -> r2)  // need setResult and setSummary method incase you change in future, also to initialize map if non exists or update value if it does
-    model.summary += s"\nR^2: ${r2}"
+    // this is already being done in  -> calculateCommonStatistics
+    //model.summary += s"\nR^2: ${r2}"
     model
   }
 
   // https://en.wikipedia.org/wiki/Mean_squared_error
   def MeanSquareError[R[K] <: RegressorModel[K], K](model: R[K], residuals: DrmLike[K]): R[K] = {
+    // TODO : I think mse denom should be (row - col) ??
     val mse = residuals.assign(SQUARE).sum / residuals.nrow
     model.mse = mse
     model.testResults += ('mse -> mse)
-    model.summary += s"\nMean Squared Error: ${mse}"
+    // this is already being done in  -> calculateCommonStatistics
+    //model.summary += s"\nMean Squared Error: ${mse}"
     model
   }
+
+
+
 }
