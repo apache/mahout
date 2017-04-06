@@ -19,10 +19,10 @@ class UserSetCUDATestSuite extends FunSuite with Matchers {
   val s: Int = sys.env("SIZE_S").toInt
   val n: Int = sys.env("SIZE_N").toInt
   val density: Double = sys.env("DENSITY").toDouble
-  val seed: Double = sys.env("SEED").toLong
+  val seed: Long = sys.env("SEED").toLong
   var num_runs: Int = sys.env("NUM_RUNS").toInt
 
-  getAverageTime(1000, 1000, 1000, .02, 1234, 5)
+  getAverageTime(m, n, s, density, seed, num_runs)
 }
 
 
