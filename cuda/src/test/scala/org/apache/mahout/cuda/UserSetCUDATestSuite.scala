@@ -37,7 +37,7 @@ class UserSetCUDATestSuite extends FunSuite with Matchers {
 
    val ms =  getAverageTime(m, n, s, density, seed, num_runs)
 
-    print("User Defined sparse mmul at geometry of "
+    println("User Defined sparse mmul at geometry of "
       + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " + num_runs + " runs : "+ms +" ms")
   }
 }
