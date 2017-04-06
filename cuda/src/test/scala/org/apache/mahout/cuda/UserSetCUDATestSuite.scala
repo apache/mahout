@@ -32,15 +32,19 @@ class UserSetCUDATestSuite extends FunSuite with Matchers {
   seed = sys.env("SEED").toLong
   num_runs = sys.env("NUM_RUNS").toInt
 
-println("User Defined sparse mmul at geometry of "
-  + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " +  num_runs + " runs")
+  test("User Defined sparse mmul at geometry of "
+    + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " +  num_runs + " runs \n") {
 
-  getAverageTime(m, n, s, density, seed, num_runs)
+   val ms =  getAverageTime(m, n, s, density, seed, num_runs)
+
+    print("User Defined sparse mmul at geometry of "
+      + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " + num_runs + " runs : "+ms +" ms")
+  }
 }
 
 
 object UserSetCUDATestSuite {
- implicit def getAverageTime(m: Int = 1000,
+   def getAverageTime(m: Int = 1000,
                      s: Int = 1000,
                      n: Int = 1000,
                      density: Double = .2,

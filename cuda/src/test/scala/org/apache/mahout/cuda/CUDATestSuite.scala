@@ -52,7 +52,7 @@ object CUDATestSuite {
       mxC = mxA %*% mxB
     }
     ms = (System.currentTimeMillis() - ms) / nruns
-    print(s"Mahout JVM Sparse multiplication time: $ms ms.")
+    print(s"Mahout JVM Sparse multiplication time: $ms ms.\n")
 
 
     // run Mahout JCuda math bindings once
@@ -67,7 +67,7 @@ object CUDATestSuite {
     }
 
     ms = (System.currentTimeMillis() - ms) / nruns
-    print(s"Mahout JCuda Sparse multiplication time: $ms ms.")
+    print(s"Mahout JCuda Sparse multiplication time: $ms ms.\n")
 
     // TODO: Ensure that we've been working with the same matrices.
     // (mxC - mxCuda).norm / mxC.nrow / mxC.ncol should be < 1e-16
