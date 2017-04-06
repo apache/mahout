@@ -34,7 +34,7 @@ class CUDATestSuite extends FunSuite with Matchers {
     // run Mahout JVM - only math once
     var mxC = mxA %*% mxB
 
-    // run Mahout JVM - only math another {{runs}} times and take average
+    // run Mahout JVM - only math another {{nruns}} times and take average
     var ms = System.currentTimeMillis()
     for (i: Int  <- 1 to nruns) {
       mxC = mxA %*% mxB
@@ -48,7 +48,7 @@ class CUDATestSuite extends FunSuite with Matchers {
     val cudaB = toCudaCmpMatrix(mxB, cudaCtx)
     var mxCuda = prod(cudaA, cudaB, cudaCtx)
 
-    // run Mahout JCuda another {{runs}} times and take average
+    // run Mahout JCuda another {{nruns}} times and take average
     ms = System.currentTimeMillis()
     for (i: Int  <- 1 to nruns) {
       mxCuda = prod(cudaA, cudaB, cudaCtx)
