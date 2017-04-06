@@ -22,6 +22,7 @@ class UserSetCUDATestSuite extends FunSuite with Matchers {
   val seed: Double = sys.env("SEED").toLong
   var num_runs: Int = sys.env("NUM_RUNS").toInt
 
+  getAverageTime(1000, 1000, 1000, .02, 1234, 5)
 }
 
 
