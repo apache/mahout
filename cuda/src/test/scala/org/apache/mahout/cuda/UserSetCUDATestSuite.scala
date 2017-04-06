@@ -3,29 +3,30 @@ package org.apache.mahout.cuda
 import org.scalatest.{FunSuite, Matchers}
 import org.apache.mahout.math._
 import scalabindings.RLikeOps._
+import CUDATestSuite._
 
 import scala.util.Random
 
+
+import scala.util.Random
 /**
   * Created by andy on 3/29/17.
   */
-class CUDATestSuite extends FunSuite with Matchers {
 
+// some quickfixes as well
+class UserSetCUDATestSuite extends FunSuite with Matchers {
+  val m: Int = sys.env("SIZE_M").toInt
+  val s: Int = sys.env("SIZE_S").toInt
+  val n: Int = sys.env("SIZE_N").toInt
+  val density: Double = sys.env("DENSITY").toDouble
+  val seed: Double = sys.env("SEED").toLong
+  var num_runs: Int = sys.env("NUM_RUNS").toInt
 
-  test("sparse mmul at geometry of 1000 x 1000 %*% 1000 x 1000 density = .2.  5 runs") {
-    CUDATestSuite.getAverageTime(5000, 5000, 5000, .20, 1234L, 5)
-  }
-  test("sparse mmul at geometry of 1000 x 1000 %*% 1000 x 1000 density = .02.  5 runs") {
-    CUDATestSuite.getAverageTime(5000, 5000, 5000, .02, 1234L, 5)
-  }
-  test("sparse mmul at geometry of 1000 x 1000 %*% 1000 x 1000 density = .002.  5 runs") {
-    CUDATestSuite.getAverageTime(5000, 5000, 5000, .002, 1234L, 5)
-  }
 }
 
 
-object CUDATestSuite {
-  def getAverageTime(m: Int = 1000,
+object UserSetCUDATestSuite {
+ implicit def getAverageTime(m: Int = 1000,
                      s: Int = 1000,
                      n: Int = 1000,
                      density: Double = .2,
@@ -75,3 +76,4 @@ object CUDATestSuite {
   }
 
 }
+
