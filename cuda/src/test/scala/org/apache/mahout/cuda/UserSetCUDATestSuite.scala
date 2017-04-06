@@ -15,12 +15,25 @@ import scala.util.Random
 
 // some quickfixes as well
 class UserSetCUDATestSuite extends FunSuite with Matchers {
-  val m: Int = sys.env("SIZE_M").toInt
-  val s: Int = sys.env("SIZE_S").toInt
-  val n: Int = sys.env("SIZE_N").toInt
-  val density: Double = sys.env("DENSITY").toDouble
-  val seed: Long = sys.env("SEED").toLong
-  var num_runs: Int = sys.env("NUM_RUNS").toInt
+
+  // defaults
+  var m: Int = 1000
+  var s: Int = 1000
+  var n: Int = 1000
+  var density: Double = .2
+  var seed: Long = 1234L
+  var num_runs: Int = 5
+
+  // grab the environment variables if set.
+  m = sys.env("SIZE_M").toInt
+  s = sys.env("SIZE_S").toInt
+  n = sys.env("SIZE_N").toInt
+  density = sys.env("DENSITY").toDouble
+  seed = sys.env("SEED").toLong
+  num_runs = sys.env("NUM_RUNS").toInt
+
+println("User Defined sparse mmul at geometry of "
+  + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " +  num_runs + " runs")
 
   getAverageTime(m, n, s, density, seed, num_runs)
 }
