@@ -13,13 +13,13 @@ class CUDATestSuite extends FunSuite with Matchers {
 
 
   test("sparse mmul at geometry of 1000 x 1000 %*% 1000 x 1000 density = .2.  5 runs") {
-    CUDATestSuite.getAverageTime(5000, 5000, 5000, .20, 1234L, 5)
+    CUDATestSuite.getAverageTime(1000, 1000, 1000, .20, 1234L, 3)
   }
   test("sparse mmul at geometry of 1000 x 1000 %*% 1000 x 1000 density = .02.  5 runs") {
-    CUDATestSuite.getAverageTime(5000, 5000, 5000, .02, 1234L, 5)
+    CUDATestSuite.getAverageTime(1000, 1000, 1000, .02, 1234L, 3)
   }
   test("sparse mmul at geometry of 1000 x 1000 %*% 1000 x 1000 density = .002.  5 runs") {
-    CUDATestSuite.getAverageTime(5000, 5000, 5000, .002, 1234L, 5)
+    CUDATestSuite.getAverageTime(1000, 1000, 1000, .002, 1234L, 3)
   }
 }
 
