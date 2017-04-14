@@ -117,7 +117,6 @@
           <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
-            <version>${project.version}</version>
           </dependency>
         </dependencies>
     </profile>
@@ -156,7 +155,6 @@
         <dependency>
           <groupId>org.apache.mahout</groupId>
           <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
-          <version>${project.version}</version>
         </dependency>
       </dependencies>
     </profile>
