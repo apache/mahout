@@ -1,5 +1,8 @@
 sudo: required
 
+services:
+  - docker
+
 cache:
   directories:
   - $HOME/.m2
@@ -36,6 +39,10 @@ before_install:
   - export MAHOUT_HOME=$PWD
   - sudo apt-get -qq update
   - sudo apt-get install -y libviennacl-dev
+  - sudo groupadd docker
+  - sudo gpasswd -a ${USER} docker
+  - sudo service docker restart
+  - newgrp docker
  
 
 script:

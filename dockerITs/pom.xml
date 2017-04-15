@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>mahout</artifactId>
+        <groupId>org.apache.mahout</groupId>
+        <version>0.13.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>dockerITs</artifactId>
+
+
+    <properties>
+        <spark.compat.version>1.6.0</spark.compat.version>
+        <mahout.local.home>${project.basedir}/../</mahout.local.home>
+        <!--<hadoop.version>2.4.1</hadoop.version>-->
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration >
+                    <watchInterval>500</watchInterval>
+                    <logDate>default</logDate>
+                    <verbose>true</verbose>
+                    <autoPull>on</autoPull>
+                    <images>
+                        <image>
+                            <name>mahout_its-spark</name>
+                            <!--<alias>spark-${spark.compat.version}</alias>-->
+                            <build>
+                                <from>sequenceiq/hadoop-docker:${hadoop.version}</from>
+                                <env>
+                                    <HADOOP_HOME>/usr/local/hadoop-${hadoop.version}</HADOOP_HOME>
+                                    <SPARK_HOME>/usr/local/spark</SPARK_HOME>
+                                    <MAHOUT_HOME>/opt/mahout</MAHOUT_HOME>
+                                </env>
+                                <runCmds>
+                                    <!-- download spark -->
+                                    <run>curl -s http://d3kbcqa49mib13.cloudfront.net/spark-${spark.version}-bin-hadoop2.6.tgz | tar -xz -C /usr/local/</run>
+                                    <run>cd /usr/local &amp;&amp; ln -s spark-${spark.version}-bin-hadoop2.6 spark</run>
+                                    <run>$SPARK_HOME/sbin/start-all.sh</run>
+                                    <!-- SparkItem Similarity Test Data-->
+                                    <run>echo "Downloading Movie Lens Ratings Data"</run>
+                                    <run>curl -s http://files.grouplens.org/datasets/movielens/ml-latest-small.zip -o /usr/local/ml-latest-small.zip</run>
+                                    <run>unzip /usr/local/ml-latest-small.zip -d /usr/local</run>
+                                </runCmds>
+                                <entryPoint>$MAHOUT_HOME/dockerITs/spark-its.sh</entryPoint>
+
+                            </build>
+                            <run>
+                                <env>
+                                    <!--<JAVA_HOME>/usr/java/default</JAVA_HOME>-->
+
+                                </env>
+                                <namingStrategy>none</namingStrategy>
+                                <ports>
+                                </ports>
+                                <log>
+                                    <enabled>true</enabled>
+                                    <date>default</date>
+                                    <color>cyan</color>
+                                </log>
+                                <volumes>
+                                    <bind>
+                                        <volume>${mahout.local.home}:/opt/mahout</volume>
+                                    </bind>
+                                </volumes>
+
+                            </run>
+
+                            <watch>
+                                <mode>none</mode>
+                            </watch>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.19.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -35,6 +35,12 @@
 
   <packaging>jar</packaging>
 
+  <properties>
+    <spark.compat.version>1.6.0</spark.compat.version>
+    <mahout.local.home>${project.basedir}/../</mahout.local.home>
+    <!--<hadoop.version>2.4.1</hadoop.version>-->
+  </properties>
+
   <build>
     <plugins>
 
@@ -218,6 +224,14 @@
 
   <profiles>
     <profile>
+      <id>dockerITs</id>
+      <build>
+        <plugins>
+
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>mahout-release</id>
       <build>
         <plugins>
@@ -242,5 +256,7 @@
         </plugins>
       </build>
     </profile>
+
+
   </profiles>
 </project>
