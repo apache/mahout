@@ -17,14 +17,15 @@
 
 package org.apache.mahout.common.parameters;
 
-import java.util.Collection;
-
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+import java.util.Collection;
+
 /** Meta information and accessors for configuring a job. */
-public interface Parametered {
+public interface Parametered extends Serializable{
   
   Logger log = LoggerFactory.getLogger(Parametered.class);
   
