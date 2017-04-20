@@ -4,6 +4,7 @@ import org.scalatest.{FunSuite, Matchers}
 import org.apache.mahout.math._
 import scalabindings.RLikeOps._
 import CUDATestSuite._
+import scala.util.Properties.envOrElse
 
 import scala.util.Random
 
@@ -25,12 +26,12 @@ class UserSetCUDATestSuite extends FunSuite with Matchers {
   var num_runs: Int = 5
 
   // grab the environment variables if set.
-  m = sys.env("SIZE_M").toInt
-  s = sys.env("SIZE_S").toInt
-  n = sys.env("SIZE_N").toInt
-  density = sys.env("DENSITY").toDouble
-  seed = sys.env("SEED").toLong
-  num_runs = sys.env("NUM_RUNS").toInt
+  m = envOrElse("SIZE_M","1000").toInt
+  s = envOrElse("SIZE_S","1000").toInt
+  n = envOrElse("SIZE_N","1000").toInt
+  density = envOrElse("DENSITY",".02").toDouble
+  seed = envOrElse("SEED","1234").toLong
+  num_runs = envOrElse("NUM_RUNS","3").toInt
 
   test("User Defined sparse mmul at geometry of "
     + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " +  num_runs + " runs \n") {
@@ -81,7 +82,7 @@ object UserSetCUDATestSuite {
 
     // run Mahout JCuda another {{nruns}} times and take average
     ms = System.currentTimeMillis()
-    for (i: Int  <- 1 to nruns) {
+    for (i: Int <- 1 to nruns) {
       mxCuda = prod(cudaA, cudaB, cudaCtx)
     }
 
