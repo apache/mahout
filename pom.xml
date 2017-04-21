@@ -843,11 +843,17 @@
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <!--module>flink</module-->
     <module>h2o</module>
   </modules>
 
   <profiles>
+
+    <profile>
+      <id>flink</id>
+    <modules>
+      <module>flink</module>
+    </modules>
+    </profile>
 
     <profile>
       <id>viennacl</id>
