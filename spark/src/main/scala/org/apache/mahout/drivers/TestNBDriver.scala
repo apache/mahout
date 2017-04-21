@@ -35,7 +35,7 @@ object TestNBDriver extends MahoutSparkDriver {
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutSparkOptionParser(programName = "spark-testnb") {
-      head("spark-testnb", "Mahout 0.10.0")
+      head("spark-testnb", "Mahout", args.mkString(" "))
 
       // Input options, non-driver specific
       // we have no output except the confusion matrix to stdout so we don't need an

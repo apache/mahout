@@ -53,7 +53,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutSparkOptionParser(programName = "spark-rowsimilarity") {
-      head("spark-rowsimilarity", "Mahout")
+      head("spark-rowsimilarity", "Mahout", args.mkString(" "))
 
       //Input output options, non-driver specific
       parseIOOptions()

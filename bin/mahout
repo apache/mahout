@@ -297,19 +297,19 @@ case "$1" in
   # Spark CLI drivers go here
   (spark-itemsimilarity)
     shift
-    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.ItemSimilarityDriver" "$@"
+    $SPARK_HOME/bin/spark-submit --jars "$JARS" --driver-class-path "$CLASSPATH" --class org.apache.mahout.drivers.ItemSimilarityDriver ../mahout-spark_2.10-*dependency-reduced.jar "$@"
     ;;
   (spark-rowsimilarity)
     shift
-    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.RowSimilarityDriver" "$@"
+    $SPARK_HOME/bin/spark-submit --jars "$JARS" --driver-class-path "$CLASSPATH" --class org.apache.mahout.drivers.RowSimilarityDriver ../mahout-spark_2.10-*dependency-reduced.jar "$@"
     ;;
   (spark-trainnb)
     shift
-    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.TrainNBDriver" "$@"
+    $SPARK_HOME/bin/spark-submit --jars "$JARS" --driver-class-path "$CLASSPATH" --class org.apache.mahout.drivers.TrainNBDriver ../mahout-spark_2.10-*dependency-reduced.jar "$@"
     ;;
   (spark-testnb)
     shift
-    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.TestNBDriver" "$@"
+    $SPARK_HOME/bin/spark-submit --jars "$JARS" --driver-class-path "$CLASSPATH" --class org.apache.mahout.drivers.TestNBDriver ../mahout-spark_2.10-*dependency-reduced.jar "$@"
     ;;
 
   (h2o-node)

@@ -36,7 +36,7 @@ object TrainNBDriver extends MahoutSparkDriver {
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutSparkOptionParser(programName = "spark-trainnb") {
-      head("spark-trainnb", "Mahout 0.10.0")
+      head("spark-trainnb", "Mahout", args.mkString(" "))
 
       // Input output options, non-driver specific
       parseIOOptions(numInputs = 1)
