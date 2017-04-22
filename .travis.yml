@@ -29,6 +29,7 @@ branches:
   only:
    - master
    - develop
+   - website
 
 
 env:
