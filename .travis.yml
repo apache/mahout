@@ -29,33 +29,35 @@ branches:
   only:
    - master
 
+
 env:
   global:
     - JAVA_OPTS=-Xmx3g
-    # exclude these modules
-    - EXCLUDE_MODULES='!flink'
     - TEST_MODULES="hdfs,math,math-scala,spark"
     - STANDARD_BUILD_OPTS="-Dmaven.javadoc.skip=true -B -V"
     - PROFILES="-Phadoop2 -Ptravis"
+    - SPARK_1_6=http://d3kbcqa49mib13.cloudfront.net/spark-1.6.3-bin-hadoop2.6.tgz
+    - SPARK_2_0=http://d3kbcqa49mib13.cloudfront.net/spark-2.0.2-bin-hadoop2.7.tgz
+    - SPARK_2_1=http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
 
 # The file assumes a certain build order for the maven / nightly build deployments.
 matrix:
   include:
     # Build Spark 1.6.3 , Scala 2.10
     - jdk: "oraclejdk7"
-      env: PROFILES="${PROFILES}"
+      env: PROFILES="${PROFILES}" SPARK_BIN=$SPARK_1_6
 
     # Build Spark 2.0.2 , Scala 2.11 - replace -D... with profiles when available
     - jdk: "oraclejdk7"
-      env: PROFILES="${PROFILES} -Dspark.version=2.0.2 -Dscala.version=2.11.8 -Dscala.compat.version=2.11"
+      env: PROFILES="${PROFILES} -Dspark.version=2.0.2 -Dscala.version=2.11.8 -Dscala.compat.version=2.11" SPARK_BIN=$SPARK_2_0
 
     # Build Spark 2.1.0 , Scala 2.11 - replace -D... with profiles when available
     - jdk: "oraclejdk7"
-      env: PROFILES="${PROFILES} -Dspark.version=2.1.0 -Dscala.version=2.11.8 -Dscala.compat.version=2.11"
+      env: PROFILES="${PROFILES} -Dspark.version=2.1.0 -Dscala.version=2.11.8 -Dscala.compat.version=2.11" SPARK_BIN=$SPARK_2_1
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL
     - jdk: "oraclejdk7"
-      env: PROFILES="${PROFILES} -Pviennacl"
+      env: PROFILES="${PROFILES} -Pviennacl" SPARK_BIN=$SPARK_1_6
 
 #    # Build Spark 2.0.2 , Scala 2.11, ViennaCL - replace -D... with profiles when available
 #    - jdk: "oraclejdk7"
@@ -67,7 +69,7 @@ matrix:
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL-OMP
     - jdk: "oraclejdk7"
-      env: PROFILES="${PROFILES} -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp"
+      env: PROFILES="${PROFILES} -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_1_6
 
 #    # Build Spark 2.0.2 , Scala 2.11, ViennaCL-OMP - replace -D... with profiles when available
 #    - jdk: "oraclejdk7"
@@ -84,18 +86,34 @@ git:
 #  slack: mahout:7vlbihiCBKuhEZK2610jkeeT
 
 before_install:
+# Install Maven 3.3.x+
   - wget https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip
   - unzip -qq apache-maven-3.3.9-bin.zip
   - export M2_HOME=$PWD/apache-maven-3.3.9
   - export PATH=$M2_HOME/bin:$PATH
   - export MAHOUT_HOME=$PWD
   - sudo apt-get -qq update
+  # Install OpenCL Driver
   - sudo apt-get install ocl-icd-libopencl1
+  # Install ViennaCL Source
   - wget https://github.com/viennacl/viennacl-dev/archive/release-1.7.1.zip
   - unzip -qq release-1.7.1.zip
   - sudo cp -r viennacl-dev-release-1.7.1/viennacl /usr/include/viennacl
   - sudo cp -r viennacl-dev-release-1.7.1/CL /usr/include/CL
+  # Install SSH Host Client so Spark Pseudo-cluster can start w/out password
+  - sudo apt-get install openssh-client
+  - sudo apt-get install openssh-server
+  - ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa
+  - cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
 
 script:
-  - mvn clean -pl $EXCLUDE_MODULES package $PROFILES $STANDARD_BUILD_OPTS -DskipTests
-  - mvn test -pl $TEST_MODULES $PROFILES
+  # Build Mahout
+  - mvn clean package $PROFILES $STANDARD_BUILD_OPTS -DskipTests
+  # Start Spark
+  - echo $SPARK_BIN
+  - wget $SPARK_BIN
+  - tar -xzf *tgz
+  - spark*/sbin/start-all.sh
+  # Run Tests with Master at spark://localhost:7077
+  - mvn test -pl $TEST_MODULES $PROFILES -Dtest.spark.master=spark://localhost:7077
