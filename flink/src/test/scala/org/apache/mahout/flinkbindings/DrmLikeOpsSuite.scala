@@ -18,6 +18,8 @@
  */
 package org.apache.mahout.flinkbindings
 
+import org.apache.mahout.logging.info
+import org.apache.mahout.math.DenseMatrix
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -70,4 +72,22 @@ class DrmLikeOpsSuite extends FunSuite with DistributedFlinkSuite {
     (emptyDrm.collect - expected).norm should be < 1e-6
   }
 
+  test("Aggregating transpose") {
+
+    val mxA = new DenseMatrix(20, 10) := 1
+
+    val drmA = drmParallelize(mxA, numPartitions = 3)
+
+    val reassignedA = drmA.mapBlock() { case (keys, block) ⇒
+      keys.map(_ % 3) → block
+    }
+
+    val mxAggrA = reassignedA.t(::, 0 until 3).collect
+
+    info(mxAggrA.toString)
+
+    mxAggrA(0,0) shouldBe 7
+    mxAggrA(0,1) shouldBe 7
+    mxAggrA(0,2) shouldBe 6
+  }
 }
