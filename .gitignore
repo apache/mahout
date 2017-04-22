@@ -21,3 +21,7 @@ temp
 foo
 math-tests/
 metastore_db/*
+bin/derby.log
+bin/metastore_db
+*jar
+*log

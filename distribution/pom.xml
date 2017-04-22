@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>0.13.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>apache-mahout-distribution</artifactId>
@@ -117,7 +117,7 @@
           <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
-            <version>0.13.0-SNAPSHOT</version>
+            <version>${project.version}</version>
           </dependency>
         </dependencies>
     </profile>
@@ -156,7 +156,7 @@
         <dependency>
           <groupId>org.apache.mahout</groupId>
           <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
-          <version>0.13.0-SNAPSHOT</version>
+          <version>${project.version}</version>
         </dependency>
       </dependencies>
     </profile>

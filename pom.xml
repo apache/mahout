@@ -28,7 +28,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>0.13.0-SNAPSHOT</version>
+  <version>0.13.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -843,13 +843,17 @@
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <module>flink</module>
     <module>h2o</module>
-    <!--<module>viennacl</module>-->
-    <!--<module>viennacl-omp</module>-->
   </modules>
 
   <profiles>
+
+    <profile>
+      <id>flink</id>
+    <modules>
+      <module>flink</module>
+    </modules>
+    </profile>
 
     <profile>
       <id>viennacl</id>

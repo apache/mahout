@@ -155,6 +155,30 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
+      <directory>${project.basedir}/../viennacl/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../viennacl-omp/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}/../collections/target/apidocs</directory>
       <outputDirectory>docs/mahout-collections</outputDirectory>
     </fileSet>
