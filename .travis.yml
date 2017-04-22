@@ -11,6 +11,7 @@ language: java
 branches:
   only:
    - master
+   - develop
 
 # The file assumes a certain build order for the maven / nightly build deployments.
 matrix:
