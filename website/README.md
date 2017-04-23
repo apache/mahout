@@ -17,11 +17,15 @@ cd website
 
 To start editing the website first you need to open two terminals.  One terminal will run a continuous build of the mahout website locally, and the other will serve the website on localhost:4000
 
-
+Terminal 1
 ```
-bundle exec jekyll build --safe
+bundle exec jekyll serve
 ```
 
+Terminal 2
+```
+bundle exec jekyll build --watch
+```
 
 Browser
 ```
