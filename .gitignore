@@ -25,3 +25,5 @@ bin/derby.log
 bin/metastore_db
 *jar
 *log
+website/_site/
+website/Gemfile.lock

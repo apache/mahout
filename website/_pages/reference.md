@@ -1,8 +1,11 @@
 ---
-layout: mahout
+layout: default
 title: Reference Reading
 permalink: /reference/
 ---
+
+**note** tg: was this already in teh website and just lost or did dustin add it?
+
 # Reference Reading
 
 Here we provide references to books and courses about data analysis in general, which might also be helpful in the context of Mahout.

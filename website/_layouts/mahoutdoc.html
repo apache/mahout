@@ -1,4 +1,4 @@
-{% include header.html %}
+{% include themes/mahout/header.html %}
 <body class="{{ post.title | downcase | replace:' ','-' | replace:',','' | strip_html }}{% if page.category %} category-{{ page.category }}{% endif %}{% if page.layout-class %} layout-{{ page.layout-class }}{% endif %}">
 
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -100,23 +100,6 @@
             </li>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </ul>
         </nav><!--/.navbar-collapse -->
       </div>
@@ -132,4 +115,4 @@
         </div>
     </article>
 
-{% include footer.html %}
+{% include themes/mahout/footer.html %}

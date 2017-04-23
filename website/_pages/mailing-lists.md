@@ -1,5 +1,5 @@
 ---
-layout: mahout
+layout: default
 title: Mailing Lists, IRC and Archives
 permalink: /mailing-lists/
 ---
