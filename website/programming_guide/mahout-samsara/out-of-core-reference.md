@@ -1,5 +1,5 @@
 ---
-layout: mahoutdoc
+layout: page
 title: Mahout Samsara Out of Core
 theme:
     name: mahout2

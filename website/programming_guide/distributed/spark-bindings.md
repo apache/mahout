@@ -1,6 +1,6 @@
 ---
-layout: mahoutdoc
-title: Mahout Samsara Spark
+layout: page
+title: Mahout Samsara Spark Bindings
 theme:
     name: mahout2
 ---

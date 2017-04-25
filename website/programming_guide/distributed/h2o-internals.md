@@ -1,6 +1,6 @@
 ---
-layout: mahoutdoc
-title: Mahout Samsara H20
+layout: page
+title: Mahout Samsara H20 Bindings
 theme:
     name: mahout2
 ---

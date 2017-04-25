@@ -1,10 +1,10 @@
 ---
-layout: mahoutdoc
-title: Mahout Samsara Flink
+layout: page
+title: Mahout Samsara Flink Bindings
 theme:
     name: mahout2
 ---
-#Introduction
+# Introduction
 
 This document provides an overview of how the Mahout Samsara environment is implemented over the Apache Flink backend engine. This document gives an overview of the code layout for the Flink backend engine, the source code for which can be found under /flink directory in the Mahout codebase.
 
@@ -14,7 +14,7 @@ The Mahout Flink integration presently supports Flink’s batch processing capab
 
 The Mahout DRM, or Distributed Row Matrix, is an abstraction for storing a large matrix of numbers in-memory in a cluster by distributing logical rows among servers. Mahout's scala DSL provides an abstract API on DRMs for backend engines to provide implementations of this API. An example is the Spark backend engine. Each engine has it's own design of mapping the abstract API onto its data model and provides implementations for algebraic operators over that mapping.
 
-#Flink Overview
+# Flink Overview
 
 Apache Flink is an open source, distributed Stream and Batch Processing Framework. At it's core, Flink is a Stream Processing engine and Batch processing is an extension of Stream Processing. 
 
@@ -32,7 +32,7 @@ Flink includes several APIs for building applications with the Flink Engine:
 
 The Flink backend implements the abstract DRM as a Flink DataSet. A Flink job runs in the context of an ExecutionEnvironment (from the Flink Batch processing API).
 
-#Source Layout
+# Source Layout
 
 Within mahout.git, the top level directory, flink/ holds all the source code for the Flink backend engine. Sections of code that interface with the rest of the Mahout components are in Scala, and sections of the code that interface with Flink DataSet API and implement algebraic operators are in Java. Here is a brief overview of what functionality can be found within flink/ folder.
 
