@@ -20,19 +20,16 @@ If the topics are related, put it under as a child under the similar page.
 
 ## How to push changes to the actual website (committers only)
 
-1. `svn co (link to website repo?)`
+1. `svn co svn co https://svn.apache.org/repos/asf/mahout asf-mahout`
 
-1. Run Terminal 1
+1. Run Terminal
        ```
-       bundle exec jekyll serve
+       bundle exec jekyll build
        ```
-       
-Terminal 2
-       ```
-       bundle exec jekyll build --watch
-       ```
-(probably not needed, which ever one builds `_site/`)
 
-1. Copy `_site` to `svn_repo/.../docs/<MAHOUT-VERSION>/`
+1. Copy `mahout/website/_site` to `asf-mahout/site/docs/<MAHOUT-VERSION>/`
 
-1. `svn commit` or whatever they use.
+1. `svn commit` 
+
+... `svnpubsub` will come into play... 
+https://reference.apache.org/committer/website
