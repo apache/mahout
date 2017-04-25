@@ -21,12 +21,16 @@ package org.apache.mahout.cuda
 
 import jcuda.jcusparse.JCusparse._
 import jcuda.jcusparse._
+import jcuda.runtime.JCuda
 
 final class Context {
 
-  var handle: jcuda.jcusparse.cusparseHandle = new cusparseHandle()
+  // Enable exceptions for all CUDA libraries
+  JCuda.setExceptionsEnabled(true)
+  JCusparse.setExceptionsEnabled(true)
 
   // Initialize JCusparse library
+  var handle: jcuda.jcusparse.cusparseHandle = new cusparseHandle()
   cusparseCreate(handle)
 }
 
