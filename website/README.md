@@ -68,8 +68,8 @@ Most of the old stuff has a title like:
 
 Change this too:
 
+`---`
 ```
----
 layout: default
 title: GSoC
 theme: mahout
@@ -94,4 +94,31 @@ This will make links in say github, refer to the github links. Same with images.
 
 
 
+### Changing themes
 
+` rake theme:switch name="THEME-NAME"`
+
+Options currently are `mahout` and `mahout2`
+
+Mahout
+
+![{{ BASE_PATH }}/img/mahout_theme.png]
+
+
+Mahout2
+
+![{{ BASE_PATH }}/img/mahout2_theme.png]
+
+If you want to edit the style edit `assets/themes/<your_theme>/css/style.css` and override value.
+
+This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0/app/index.html#!/editor
+
+
+## Pressing ToDos for Reboot
+
+- [ ] Fill out todo list
+- [ ] Rename Dir to `docs`
+- [ ] copy snapshot of current site to `docs/0.13.0` in svn
+- [ ] "flatten" everything (we shouldn't have a docs folder)
+- [ ] refactor multiple navbars back into one
+ 

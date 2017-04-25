@@ -1,4 +1,8 @@
-Title: Downloads
+---
+layout: default
+title: Downloads
+theme: mahout
+---
 
 <a name="Downloads-OfficialRelease"></a>
 # Official Release

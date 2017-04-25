@@ -1,11 +1,11 @@
 ---
-layout: default
-theme: mahout
+layout: page
+theme: mahout2
 ---
 
 <div class="jumbotron">
   <div class="container">
-    <h1>Apache Mahout - DRAFT </h1>
+    <h1>Apache Mahout</h1>
     <p>A distributed linear algebra framework that runs on Spark, Flink, GPU's and more!<br/>
       Use Mahout's library of machine learning algorithms or roll your own!  Use Mahout-Samsara to write matrix
       algebra using R like syntax.  Check out our tutorials and quick start guide to get rolling.
@@ -35,12 +35,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-
-
 <div class="new">
   <div class="container">
     <h2>Latest Release</h2>
-    <span class="newZeppelin center-block">Apache Mahout 0.13.0</span>
+    <span class="newMahout center-block">Apache Mahout 0.13.0</span>
     <div class="border row">
       <div class="border col-md-4 col-sm-4">
         <h4>Simple and <br/>Extensible</h4>
@@ -57,8 +55,8 @@ limitations under the License.
         <p>
            Custom bindings for Spark, Flink, and H20 enable a write once run anywhere machine learning platform
           <a class="thumbnail text-center" href="#thumb">
-            See more in this DEMO.
-            <span><img src="./assets/themes/zeppelin/img/scope.gif" style="max-width: 55vw" /></span>
+            
+            <a href="https://github.com/apache/mahout" class="btn btn-primary btn-lg bigFingerButton" role="button">See more in this DEMO. (not working)</a>
           </a> 
         </p>
         </div>
