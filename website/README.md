@@ -119,4 +119,5 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 - [ ] Fill out todo list
 - [x] "flatten" everything (we shouldn't have a docs folder)
 - [x] Port Distributed Linear Algebra pages
-- [ ]
+- [ ] Write up pages for existing 'pre canned algos'
+- [ ] New themes require a lot less in `_imports` than dustin had initially, however- keeping his old files for now as they have lots of useful things that occastionally need to be scuttled. Eventaully need to delete though.
