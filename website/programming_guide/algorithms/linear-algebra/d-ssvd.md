@@ -1,5 +1,5 @@
 ---
-layout: mahoutdoc
+layout: page
 title: Mahout Samsara DSSVD
 theme:
     name: mahout2

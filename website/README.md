@@ -117,8 +117,6 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 ## Pressing ToDos for Reboot
 
 - [ ] Fill out todo list
-- [ ] Rename Dir to `docs`
-- [ ] copy snapshot of current site to `docs/0.13.0` in svn
-- [ ] "flatten" everything (we shouldn't have a docs folder)
-- [ ] refactor multiple navbars back into one
- 
+- [x] "flatten" everything (we shouldn't have a docs folder)
+- [x] Port Distributed Linear Algebra pages
+- [ ]

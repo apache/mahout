@@ -28,7 +28,7 @@ port:    4000
 host:    127.0.0.1
 baseurl: "" # does not include hostname
 
-MAHOUT_VERSION : 0.13.1-SNAPSHOT
+MAHOUT_VERSION : 0.13.1
 
 # The production_url is only used when full-domain names are needed
 # such as sitemap.txt

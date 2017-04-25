@@ -1,6 +1,6 @@
 ---
-layout: mahoutdoc
-title: Mahout Samsara Distributed ALS
+layout: page
+title: Mahout Samsara DQR
 theme:
     name: mahout2
 ---
@@ -9,11 +9,11 @@ theme:
 
 ## Intro
 
-Mahout has a distributed implementation of QR decomposition for tall thin matricies[1].
+Mahout has a distributed implementation of QR decomposition for tall thin matrices[1].
 
 ## Algorithm 
 
-For the classic QR decomposition of the form `\(\mathbf{A}=\mathbf{QR},\mathbf{A}\in\mathbb{R}^{m\times n}\)` a distributed version is fairly easily achieved if `\(\mathbf{A}\)` is tall and thin such that `\(\mathbf{A}^{\top}\mathbf{A}\)` fits in memory, i.e. *m* is large but *n* < ~5000 Under such circumstances, only `\(\mathbf{A}\)` and `\(\mathbf{Q}\)` are distributed matricies and `\(\mathbf{A^{\top}A}\)` and `\(\mathbf{R}\)` are in-core products. We just compute the in-core version of the Cholesky decomposition in the form of `\(\mathbf{LL}^{\top}= \mathbf{A}^{\top}\mathbf{A}\)`.  After that we take `\(\mathbf{R}= \mathbf{L}^{\top}\)` and `\(\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}\)`.  The latter is easily achieved by multiplying each verticle block of `\(\mathbf{A}\)` by `\(\left(\mathbf{L}^{\top}\right)^{-1}\)`.  (There is no actual matrix inversion happening). 
+For the classic QR decomposition of the form `\(\mathbf{A}=\mathbf{QR},\mathbf{A}\in\mathbb{R}^{m\times n}\)` a distributed version is fairly easily achieved if `\(\mathbf{A}\)` is tall and thin such that `\(\mathbf{A}^{\top}\mathbf{A}\)` fits in memory, i.e. *m* is large but *n* < ~5000 Under such circumstances, only `\(\mathbf{A}\)` and `\(\mathbf{Q}\)` are distributed matrices and `\(\mathbf{A^{\top}A}\)` and `\(\mathbf{R}\)` are in-core products. We just compute the in-core version of the Cholesky decomposition in the form of `\(\mathbf{LL}^{\top}= \mathbf{A}^{\top}\mathbf{A}\)`.  After that we take `\(\mathbf{R}= \mathbf{L}^{\top}\)` and `\(\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}\)`.  The latter is easily achieved by multiplying each vertical block of `\(\mathbf{A}\)` by `\(\left(\mathbf{L}^{\top}\right)^{-1}\)`.  (There is no actual matrix inversion happening). 
 
 
 

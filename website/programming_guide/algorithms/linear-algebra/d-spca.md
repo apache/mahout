@@ -1,6 +1,6 @@
 ---
-layout: mahoutdoc
-title: Mahout Samsara Dist Sto PCA
+layout: page
+title: Mahout-Samsara Distributed Stochastic PCA
 theme:
     name: mahout2
 ---
