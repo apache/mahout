@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: default
 title: How To Update The Website
 theme: mahout2
 ---
