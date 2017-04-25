@@ -1,7 +1,8 @@
 ---
-layout: mahoutdoc
+layout: page
 title: Mahout Samsara In Core
-permalink: /docs/0.13.0/mahout-samsara/incore/
+theme:
+    name: mahout2
 ---
 ## Mahout-Samsara's In-Core Linear Algebra DSL Reference
 

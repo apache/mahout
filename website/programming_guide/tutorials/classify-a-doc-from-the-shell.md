@@ -1,10 +1,11 @@
 ---
-layout: mahoutdoc
+layout: page
 title: Text Classification Example
-permalink: /docs/0.13.0/tutorials/text-classification
+theme:
+    name: mahout2
 ---
 
-#Building a text classifier in Mahout's Spark Shell
+# Building a text classifier in Mahout's Spark Shell
 
 This tutorial will take you through the steps used to train a Multinomial Naive Bayes model and create a text classifier based on that model using the ```mahout spark-shell```. 
 

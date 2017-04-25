@@ -20,21 +20,21 @@
 
             <!-- Quick Start -->
                 <li id="quickstart">
-                    <a href="/docs/0.13.0/quickstart" >Quick Start</a>
+                    <a href="{{ BASE_PATH}}/quickstart.html" >Quick Start</a>
                 </li>
 
                 <li id="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Mahout-Samsara<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><span><b>Reference Info</b><span></li>
-                        <li><a href="/docs/0.13.0/mahout-samsara/incore">In-core Reference</a></li>
-                        <li><a href="/docs/0.13.0/mahout-samsara/outofcore">Out-of-core Reference</a></li>
-                        <li><a href="/docs/0.13.0/mahout-samsara/faq">Samsara FAQ</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/mahout-samsara/faq.html">Samsara FAQ</a></li>
                         <li role="separator" class="divider"></li>
                         <li><span><b>Bindings</b><span></li>
-                        <li><a href="/docs/0.13.0/mahout-samsara/spark-bindings">Spark Bindings</a></li>
-                        <li><a href="/docs/0.13.0/mahout-samsara/flink-bindings">Flink Bindings</a></li>
-                        <li><a href="/docs/0.13.0/mahout-samsara/flink-bindings">H20 Bindings</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/distributed/spark-bindings.html">Spark Bindings</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/distributed/flink-bindings.html">Flink Bindings</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/distributed/flink-bindings.html">H20 Bindings</a></li>
                     </ul>
                 </li>
 
@@ -42,9 +42,9 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><span><b>Spark Examples using Samsara</b><span></li>
-                        <li><a href="/docs/0.13.1/tutorials/samsara-spark-shell">Samsara in Spark Shell</a></li>
-                        <li><a href="/docs/0.13.1/tutorials/build-app">Samsara Spark Application</a></li>
-                        <li><a href="/docs/0.13.1/tutorials/text-classification">Text Classification</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/tutorials/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/tutorials/how-to-build-an-app.html">Basic Samsara Spark Application</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/tutorials/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
                         <li role="separator" class="divider"></li>
                         <li><span><b>Fl</b><span></li>
                         <li><a href="/docs/0.13.1-SNAPSHOT">tbd1</a></li>
@@ -61,18 +61,21 @@
                 <li id="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><span><b>Samsara Code</b><span></li>
-                        <li><a href="/docs/0.13.0/algorithms/samsara/dssvd">Dist SVD</a></li>
-                        <li><a href="/docs/0.13.0/algorithms/samsara/dspca">Dist PCA</a></li>
-                        <li><a href="/docs/0.13.0/algorithms/samsara/dqr">Dist QR</a></li>
-                        <li><a href="/docs/0.13.0/algorithms/samsara/dals">Dist ALS</a></li>
+                        <li><span><b>&nbsp;Distributed Linear Algebra</b><span></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/algorithms/linear-algebra/d-ssvd.html">Distributed SVD</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/algorithms/linear-algebra/d-spca.html">Distributed PCA</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/algorithms/linear-algebra/d-qr.html">Distributed QR-Decomposition </a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/algorithms/linear-algebra/d-als.html">Distributed ALS</a></li>
                         <li role="separator" class="divider"></li>
-                        <li><span><b>Command Line</b><span></li>
-                        <li><a href="/docs/0.13.0">algo1</a></li>
-                        <li><a href="/docs/0.13.0">algo2</a></li>
+                        <li><span><b>&nbsp;Regression </b><span></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/algorithms/regression/ols.html">Ordinary Least Squares</a></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/algorithms/regression/cochrane-orcutt.html">Cochrane-Orcutt Procedure</a></li>
                         <li role="separator" class="divider"></li>
-                        <li><span><b>xxxx</b>&nbsp;(xxxxx)<span></li>
-                        <li><a href="/docs/0.13.1-SNAPSHOT">xxxxx</a></li>
+                        <li><span><b>&nbsp;Preprocessors</b><span></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/algorithms/preprocessors/AsFactor.html">AsFactor (a.k.a. "one-hot encoding")</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span><b>&nbsp;Reccomenders</b><span></li>
+                        <li><a href="{{ BASE_PATH}}/programming_guide/algorithms/reccomenders/CCO.html">CCO</a></li>
                     </ul>
                 </li>
 

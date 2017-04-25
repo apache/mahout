@@ -1,7 +1,8 @@
 ---
-layout: mahoutdoc
-title: Mahout Samsara H20
-permalink: /docs/0.13.0/mahout-samsara/h20-bindings/
+layout: page
+title: Mahout Samsara H20 Bindings
+theme:
+    name: mahout2
 ---
 # Introduction
  

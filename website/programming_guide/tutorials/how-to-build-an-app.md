@@ -1,15 +1,16 @@
 ---
-layout: mahoutdoc
+layout: page
 title: Mahout Samsara In Core
-permalink: /docs/0.13.0/tutorials/build-app
+theme:
+    name: mahout2
 ---
-#How to create and App using Mahout
+# How to create and App using Mahout
 
 This is an example of how to create a simple app using Mahout as a Library. The source is available on Github in the [3-input-cooc project](https://github.com/pferrel/3-input-cooc) with more explanation about what it does (has to do with collaborative filtering). For this tutorial we'll concentrate on the app rather than the data science.
 
 The app reads in three user-item interactions types and creats indicators for them using cooccurrence and cross-cooccurrence. The indicators will be written to text files in a format ready for search engine indexing in search engine based recommender.
 
-##Setup
+## Setup
 In order to build and run the CooccurrenceDriver you need to install the following:
 
 * Install the Java 7 JDK from Oracle. Mac users look here: [Java SE Development Kit 7u72](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html).
@@ -21,7 +22,7 @@ Why install if you are only using them as a library? Certain binaries and script
 
 Spark requires a set of jars on the classpath for the client side part of an app and another set of jars must be passed to the Spark Context for running distributed code. The example should discover all the neccessary classes automatically.
 
-##Application
+## Application
 Using Mahout as a library in an application will require a little Scala code. Scala has an App trait so we'll create an object, which inherits from ```App```
 
 
@@ -153,7 +154,7 @@ See the Github project for the full source. Now we create a build.sbt to build t
       "cooc" -> "CooccurrenceDriver")
 
 
-##Build
+## Build
 Building the examples from project's root folder:
 
     $ sbt pack
@@ -164,7 +165,7 @@ This will automatically set up some launcher scripts for the driver. To run exec
     
 The driver will execute in Spark standalone mode and put the data in /path/to/3-input-cooc/data/indicators/*indicator-type*
 
-##Using a Debugger
+## Using a Debugger
 To build and run this example in a debugger like IntelliJ IDEA. Install from the IntelliJ site and add the Scala plugin.
 
 Open IDEA and go to the menu File->New->Project from existing sources->SBT->/path/to/3-input-cooc. This will create an IDEA project from ```build.sbt``` in the root directory.

@@ -1,7 +1,8 @@
 ---
 layout: mahoutdoc
 title: Quickstart
-permalink: /docs/0.13.0/quickstart/
+theme: 
+    name: mahout2
 ---
 # Mahout Quick Start 
 # TODO : Fill this in with the bare essential basics

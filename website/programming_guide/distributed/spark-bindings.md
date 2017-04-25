@@ -1,7 +1,8 @@
 ---
-layout: mahoutdoc
-title: Mahout Samsara Spark
-permalink: /docs/0.13.0/mahout-samsara/spark-bindings/
+layout: page
+title: Mahout Samsara Spark Bindings
+theme:
+    name: mahout2
 ---
 
 # Scala & Spark Bindings:

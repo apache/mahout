@@ -1,7 +1,8 @@
 ---
-layout: mahoutdoc
-title: Mahout Samsara Dist Sto PCA
-permalink: /docs/0.13.0/algorithms/samsara/dspca
+layout: page
+title: Mahout-Samsara Distributed Stochastic PCA
+theme:
+    name: mahout2
 ---
 # Distributed Stochastic PCA
 

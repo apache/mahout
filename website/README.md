@@ -117,8 +117,7 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 ## Pressing ToDos for Reboot
 
 - [ ] Fill out todo list
-- [ ] Rename Dir to `docs`
-- [ ] copy snapshot of current site to `docs/0.13.0` in svn
-- [ ] "flatten" everything (we shouldn't have a docs folder)
-- [ ] refactor multiple navbars back into one
- 
+- [x] "flatten" everything (we shouldn't have a docs folder)
+- [x] Port Distributed Linear Algebra pages
+- [ ] Write up pages for existing 'pre canned algos'
+- [ ] New themes require a lot less in `_imports` than dustin had initially, however- keeping his old files for now as they have lots of useful things that occastionally need to be scuttled. Eventaully need to delete though.

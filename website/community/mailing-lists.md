@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Mailing Lists, IRC and Archives
-permalink: /mailing-lists/
+theme:
+    name: mahout2
 ---
 # General
 

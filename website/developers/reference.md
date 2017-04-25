@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Reference Reading
-permalink: /reference/
+theme:
+    name: mahout2
 ---
 
 **note** tg: was this already in teh website and just lost or did dustin add it?

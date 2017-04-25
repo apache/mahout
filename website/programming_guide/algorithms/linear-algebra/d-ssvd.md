@@ -1,7 +1,8 @@
 ---
-layout: mahoutdoc
+layout: page
 title: Mahout Samsara DSSVD
-permalink: /docs/0.13.0/algorithms/samsara/dssvd
+theme:
+    name: mahout2
 ---
 # Distributed Stochastic Singular Value Decomposition
 

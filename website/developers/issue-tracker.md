@@ -1,7 +1,8 @@
 ---
 layout: mahout
 title: Issue Tracker
-permalink: /issue-tracker/
+theme:
+    name: mahout2
 ---
 # Issue tracker
 
