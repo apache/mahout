@@ -1,7 +1,8 @@
 ---
-layout: default
-title: Version Control
-theme: mahout
+layout: front_page
+title: Thirdparty Dependencies
+theme: 
+    name: mahout2
 ---
 
 # Version control access

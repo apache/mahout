@@ -1,4 +1,9 @@
-Title: Books Tutorials and Talks
+---
+layout: front_page
+title: Books, Tutorials, and Talks
+theme: 
+    name: mahout2
+---
 
 # Intro
 

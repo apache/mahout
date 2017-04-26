@@ -1,4 +1,10 @@
-Title: BuildingMahout
+---
+layout: front_page
+title: Building Mahout
+theme: 
+    name: mahout2
+---
+
 
 # Building Mahout from source
 

@@ -1,3 +1,11 @@
+---
+layout: front_page
+title: How to Release Mahout
+theme: 
+    name: mahout2
+---
+
+
 Title: How To Release
 
 # How To Release Mahout

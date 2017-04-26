@@ -1,4 +1,10 @@
-Title: Mahout Wiki
+---
+layout: front_page
+title: Mahout Wiki
+theme: 
+    name: mahout2
+---
+
 Apache Mahout is a new Apache TLP project to create scalable, machine
 learning algorithms under the Apache license. 
 
@@ -6,22 +12,22 @@ learning algorithms under the Apache license.
 
 <a name="MahoutWiki-General"></a>
 ## General
-[Overview](overview.html)
+[Overview](/community/overview.html)
  -- Mahout? What's that supposed to be?
 
-[Quickstart](quickstart.html)
+[Quickstart](/community/quickstart.html)
  -- learn how to quickly setup Apache Mahout for your project.
 
-[FAQ](faq.html)
+[FAQ](/community/faq.html)
  -- Frequent questions encountered on the mailing lists.
 
-[Developer Resources](developer-resources.html)
+[Developer Resources](/developer/developer-resources.html)
  -- overview of the Mahout development infrastructure.
 
-[How To Contribute](how-to-contribute.html)
+[How To Contribute](/developer/how-to-contribute.html)
  -- get involved with the Mahout community.
 
-[How To Become A Committer](how-to-become-a-committer.html)
+[How To Become A Committer](/developer/how-to-become-a-committer.html)
  -- become a member of the Mahout development community.
 
 [Hadoop](http://hadoop.apache.org)

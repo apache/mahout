@@ -1,4 +1,9 @@
-Title: Powered By Mahout
+---
+layout: front_page
+title: Powered By Mahout
+theme: 
+    name: mahout2
+---
 
 # Powered by Mahout
 

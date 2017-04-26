@@ -1,4 +1,9 @@
-Title: Mahout Benchmarks
+---
+layout: front_page
+title: Mahout Benchmarks
+theme: 
+    name: mahout2
+---
 
 <a name="MahoutBenchmarks-Introduction"></a>
 # Introduction

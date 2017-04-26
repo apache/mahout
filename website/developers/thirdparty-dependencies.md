@@ -1,4 +1,9 @@
-Title: Thirdparty Dependencies
+---
+layout: front_page
+title: hirdparty Dependencies
+theme: 
+    name: mahout2
+---
 
 # Adding Thirdparty Dependencies in Maven
 

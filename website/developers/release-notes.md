@@ -1,4 +1,10 @@
-Title: Release Notes
+---
+layout: front_page
+title: Release notes
+theme: 
+    name: mahout2
+---
+
 
 # Release Notes
 

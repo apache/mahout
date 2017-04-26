@@ -1,4 +1,9 @@
-Title: Professional Support
+---
+layout: front_page
+title: Professional Support
+theme: 
+    name: mahout2
+---
 
 <a name="ProfessionalSupport-ProfessionalsupportforMahout"></a>
 # Professional support for Mahout

@@ -1,8 +1,10 @@
 ---
-layout: default
-title: How To Contribute
-theme: mahout
+layout: front_page
+title: How to Contribute
+theme: 
+    name: mahout2
 ---
+
 
 # How to Contribute
 

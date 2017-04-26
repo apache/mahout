@@ -1,7 +1,8 @@
 ---
-layout: default
-title: How To Update The Website
-theme: mahout2
+layout: front_page
+title: How to Update the Website
+theme: 
+    name: mahout2
 ---
 
 # How to update the Mahout Website

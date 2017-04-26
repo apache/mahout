@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: front_page
 title: Reference Reading
 theme:
     name: mahout2

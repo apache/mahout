@@ -1,4 +1,9 @@
-Title: FAQ
+---
+layout: front_page
+title: Frequently Asked Questions
+theme: 
+    name: mahout2
+---
 
 # The Official Mahout FAQ
 

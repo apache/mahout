@@ -121,3 +121,11 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 - [x] Port Distributed Linear Algebra pages
 - [ ] Write up pages for existing 'pre canned algos'
 - [ ] New themes require a lot less in `_imports` than dustin had initially, however- keeping his old files for now as they have lots of useful things that occastionally need to be scuttled. Eventaully need to delete though.
+- [x] Clean up tiles on front page
+- [ ] Add apache licenses all over the place - let dust settle first then we can go through methodically.
+- [ ] Significant clean up of `/community/mahout-wiki.md`
+- [ ] Update of `/community/powered-by-mahout.md`
+- [ ] Folks need to review their contact info in `community/professional-support.md`
+- [ ] Get rid of `developer/patch-check-list.md` and add it to the notes as a checkbox when opening a PR (see zeppelin)
+- [ ] `developer/release-notes.md` stuck on 0.12.0... bump it. 
+- [ ] refactor to 'top-site' and 'docs' as we need a different jekyll build to change base path for new docs version

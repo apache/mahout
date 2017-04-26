@@ -1,4 +1,9 @@
-Title: GSOC
+---
+layout: front_page
+title: Google Summer of Code
+theme: 
+    name: mahout2
+---
 
 # Google Summer of Code
 

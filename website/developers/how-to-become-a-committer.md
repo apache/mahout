@@ -1,7 +1,8 @@
 ---
-layout: default
-title: Developer Resources
-theme: mahout
+layout: front_page
+title: How to Become a Commmiter
+theme: 
+    name: mahout2
 ---
 
 # How to Become a Committer

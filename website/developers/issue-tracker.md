@@ -1,9 +1,10 @@
 ---
-layout: mahout
+layout: front_page
 title: Issue Tracker
-theme:
+theme: 
     name: mahout2
 ---
+
 # Issue tracker
 
 

@@ -1,4 +1,10 @@
-Title: Patch Check List
+---
+layout: front_page
+title: Pathc Check List
+theme: 
+    name: mahout2
+---
+
 
 # Patch Check List
 

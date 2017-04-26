@@ -1,8 +1,10 @@
 ---
-layout: default
-title: Developer Resources
-theme: mahout
+layout: front_page
+title: Developers
+theme: 
+    name: mahout2
 ---
+
 <a name="DeveloperResources-MakingaContribution"></a>
 ## Making a Contribution
 

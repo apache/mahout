@@ -1,4 +1,11 @@
-Title: Privacy Policy
+---
+layout: front_page
+title: Privacy Policy
+theme: 
+    name: mahout2
+---
+
+
 Information about your use of this website is collected using server access
 logs and a tracking cookie. The collected information consists of the
 following:

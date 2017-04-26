@@ -1,4 +1,10 @@
-Title: Who We Are
+---
+layout: front_page
+title: Who we are
+theme: 
+    name: mahout2
+---
+
 
 <a name="WhoWeAre-Whoweare"></a>
 # Who we are
@@ -36,6 +42,7 @@ Stevo Slavić|  sslavic@... | No | Twitter: @sslavic
 Suneel Marthi | smarthi@... | Yes | Twitter: @suneelmarthi
 Ted Dunning | tdunning@... |  Yes | 
 Tom Pierce | tcp@... | No | |
+Trevor Grant | rawkintrevo@... | Yes | Twitter: @rawkintrevo , [Blog](http://rawkintrevo.org)
 
 <a name="WhoWeAre-EmeritusCommitters"></a>
 ## Emeritus Committers
