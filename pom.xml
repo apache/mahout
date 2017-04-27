@@ -245,6 +245,12 @@
       </dependency>
 
       <dependency>
+        <artifactId>mahout-native-cuda_${scala.compat.version}</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
         <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
@@ -848,6 +854,13 @@
   </modules>
 
   <profiles>
+
+    <profile>
+      <id>cuda</id>
+      <modules>
+        <module>cuda</module>
+      </modules>
+    </profile>
 
     <profile>
       <id>viennacl</id>
