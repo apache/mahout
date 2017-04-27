@@ -2,7 +2,7 @@
   <!--
   - Dynamically set liquid variables for working with URLs/paths
   -->
-{% include JB/is_production %}
+  {% include JB/is_production %}
   {% if site.JB.setup.provider == "custom" %}
     {% include custom/setup %}
   {% else %}
@@ -22,6 +22,6 @@
       {% else %}
       {% capture ASSET_PATH %}{{ BASE_PATH }}/assets/themes/{{ page.theme.name }}{% endcapture %}
       {% endif %}
-    {% endif %}
+    {% endif %}  
   {% endif %}
 {% endcapture %}{% assign jbcache = nil %}

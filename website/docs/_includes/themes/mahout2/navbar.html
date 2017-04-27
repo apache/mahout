@@ -1,0 +1,126 @@
+{% include JB/setup %}
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">
+                <img src="{{ BASE_PATH }}/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="main-navbar">
+            <ul class="nav navbar-nav">
+
+
+                <!-- Quick Start -->
+                <li id="quickstart">
+                    <a href="{{ BASE_PATH}}/quickstart.html" >Quick Start</a>
+                </li>
+
+                <li id="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Mahout-Samsara<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><span><b>Reference Info</b><span></li>
+                        <li><a href="{{ site.JB.BASE_PATH }}/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
+                        <li><a href="{{ BASE_PATH }}/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
+                        <li><a href="{{ BASE_PATH }}/mahout-samsara/faq.html">Samsara FAQ</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span><b>Bindings</b><span></li>
+                        <li><a href="{{ BASE_PATH }}/distributed/spark-bindings.html">Spark Bindings</a></li>
+                        <li><a href="{{ BASE_PATH }}/distributed/flink-bindings.html">Flink Bindings</a></li>
+                        <li><a href="{{ BASE_PATH }}/distributed/flink-bindings.html">H20 Bindings</a></li>
+                    </ul>
+                </li>
+
+                <li id="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><span><b>Spark Examples using Samsara</b><span></li>
+                        <li><a href="{{ BASE_PATH}}/tutorials/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
+                        <li><a href="{{ BASE_PATH}}/tutorials/how-to-build-an-app.html">Basic Samsara Spark Application</a></li>
+                        <li><a href="{{ BASE_PATH}}/tutorials/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span><b>Fl</b><span></li>
+                        <li><a href="/docs/0.13.1-SNAPSHOT">tbd1</a></li>
+                        <li><a href="/docs/0.13.1-SNAPSHOT">tbd2</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span><b>MapReduce</b><span></li>
+                        <li><a href="/docs/0.13.1-SNAPSHOT">tbd1</a></li>
+                        <li><a href="/docs/0.13.1-SNAPSHOT">tbd2</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Algorithms (Samsara / MR) -->
+                <li id="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><span><b>&nbsp;Distributed Linear Algebra</b><span></li>
+                        <li><a href="{{ BASE_PATH}}/algorithms/linear-algebra/d-ssvd.html">Distributed SVD</a></li>
+                        <li><a href="{{ BASE_PATH}}/algorithms/linear-algebra/d-spca.html">Distributed PCA</a></li>
+                        <li><a href="{{ BASE_PATH}}/algorithms/linear-algebra/d-qr.html">Distributed QR-Decomposition </a></li>
+                        <li><a href="{{ BASE_PATH}}/algorithms/linear-algebra/d-als.html">Distributed ALS</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span><b>&nbsp;Regression </b><span></li>
+                        <li><a href="{{ BASE_PATH}}/algorithms/regression/ols.html">Ordinary Least Squares</a></li>
+                        <li><a href="{{ BASE_PATH}}/algorithms/regression/cochrane-orcutt.html">Cochrane-Orcutt Procedure</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span><b>&nbsp;Preprocessors</b><span></li>
+                        <li><a href="{{ BASE_PATH}}/algorithms/preprocessors/AsFactor.html">AsFactor (a.k.a. "one-hot encoding")</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span><b>&nbsp;Reccomenders</b><span></li>
+                        <li><a href="{{ BASE_PATH}}/algorithms/reccomenders/CCO.html">CCO</a></li>
+                    </ul>
+                </li>
+
+                <!-- Scala Docs -->
+                <li id="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Scala Docs<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li class="title"><span><b>TODO - Needs update per new scaladocs</b></span></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html">Mahout Math</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math-scala/index.html">Mahout Math Scala bindings</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.htmlhttp://apache.github.io/mahout/0.10.1/docs/mahout-spark/index.html">Mahout Spark bindings</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html">Mahout Spark bindings shell</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html">Mahout H2O backend Scaladoc</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html">Mahout H2O backend Javadoc</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html">Mahout HDFS</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html">Mahout Map-Reduce</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html">Mahout Examples</a></li>
+                        <li><a href="http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html">Mahout Integration</a></li>
+                    </ul>
+                </li>
+
+
+            </ul>
+            <form class="navbar-form navbar-left">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Search">
+                </div>
+                <button type="submit" class="btn btn-default">Submit</button>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="http://github.com/apache/mahout">Github</a></li>
+
+                <!-- Apache -->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
+                        <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
+                        <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+                        <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>

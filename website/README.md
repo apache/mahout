@@ -13,18 +13,27 @@ git clone https://github.com/apache/mahout.git mahout
 cd website
 ```
 
+
+## There are actually two sites!
+
+#### `website/front`
+
+This has information about the community, github, how to update website, developer resources, list of members. __*Things that when they change change forever and we don't need to keep a history of the old way (e.g. the old way of updating the website )*__
+
+#### `website/docs`
+
+This has user documentation, info on algorithms, programing guides, features. etc. 
+__*things that change between versions*__
+
+Follow the instructions below to serve either site, just know your links in community aren't going to work with the docs. Until you post it.
+
 ## Getting Started
 
 To start editing the website first you need to open two terminals.  One terminal will run a continuous build of the mahout website locally, and the other will serve the website on localhost:4000
 
-Terminal 1
+Terminal
 ```
 bundle exec jekyll serve
-```
-
-Terminal 2
-```
-bundle exec jekyll build --watch
 ```
 
 Browser
@@ -128,4 +137,4 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 - [ ] Folks need to review their contact info in `community/professional-support.md`
 - [ ] Get rid of `developer/patch-check-list.md` and add it to the notes as a checkbox when opening a PR (see zeppelin)
 - [ ] `developer/release-notes.md` stuck on 0.12.0... bump it. 
-- [ ] refactor to 'top-site' and 'docs' as we need a different jekyll build to change base path for new docs version
+- [x] refactor to 'top-site' and 'docs' as we need a different jekyll build to change base path for new docs version
