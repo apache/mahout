@@ -30,7 +30,8 @@ import scala.collection.JavaConversions._
 
 import jcuda.runtime.JCuda._
 import jcuda.runtime.cudaMemcpyKind._
-import jcuda.jcusparse.JCusparse._
+import jcuda._
+
 
 package object cuda {
 
@@ -143,6 +144,28 @@ package object cuda {
     (jumpers, colIdcs, els)
   }
 
+  def prod(a: DenseMatrix, b: DenseMatrix, ctx: Context): CompressedMatrix = {
+    val m = a.nrows
+    val n = b.ncols
+    val k = b.nrows
+
+    val c: DenseMatrix = new DenseMatrix(ctx, m, n)
+
+    cudaMalloc(c.vals, jcuda.Sizeof.DOUBLE M * N * jcuda.Sizeof.DOUBLE);
+
+    // cublasSgemm('n', 'n', N, N, N, alpha,
+      d_A, N, d_B, N, beta, d_C, N);
+
+
+
+    cudaDgemm(ctx.handle, a.trans, b.trans, m, n, k,
+      0.0d,    // alpha
+      0.0d, 0, // Alpha, lda
+      0.0d, 0, // Beta , ldb
+      0.0d,    // beta
+      0.0)
+  }
+
   def prod(a: CompressedMatrix, b: CompressedMatrix, ctx: Context): CompressedMatrix = {
     var m = a.nrows
     var n = b.ncols
@@ -154,9 +177,9 @@ package object cuda {
     var nnzC = new Array[Int](1)
     nnzC(0) = 0
     cusparseXcsrgemmNnz(ctx.handle, a.trans, b.trans, m, n, k,
-                        a.descr, a.nonz, a.row_ptr, a.col_ind,
-                        b.descr, b.nonz, b.row_ptr, b.col_ind,
-                        c.descr, c.row_ptr, jcuda.Pointer.to(nnzC))
+      a.descr, a.nonz, a.row_ptr, a.col_ind,
+      b.descr, b.nonz, b.row_ptr, b.col_ind,
+      c.descr, c.row_ptr, jcuda.Pointer.to(nnzC))
     c.nonz = nnzC(0)
     if (c.nonz == 0) {
       var baseC = new Array[Int](1)
@@ -169,14 +192,15 @@ package object cuda {
     cudaMalloc(c.col_ind, jcuda.Sizeof.INT * c.nonz);
     cudaMalloc(c.vals, jcuda.Sizeof.DOUBLE * c.nonz);
     cusparseDcsrgemm(ctx.handle, a.trans, b.trans, m, n, k,
-                     a.descr, a.nonz,
-                     a.vals, a.row_ptr, a.col_ind,
-                     b.descr, b.nonz,
-                     b.vals, b.row_ptr, b.col_ind,
-                     c.descr,
-                     c.vals, c.row_ptr, c.col_ind);
+      a.descr, a.nonz,
+      a.vals, a.row_ptr, a.col_ind,
+      b.descr, b.nonz,
+      b.vals, b.row_ptr, b.col_ind,
+      c.descr,
+      c.vals, c.row_ptr, c.col_ind);
     c
   }
+
 
   def fromCudaCmpMatrix(src: CompressedMatrix): Matrix = {
     val m = src.nrows
