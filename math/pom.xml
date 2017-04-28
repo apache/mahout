@@ -175,6 +175,22 @@
           <!--</execution>-->
         <!--</executions>-->
       <!--</plugin>-->
+      <!-- remove jars from top directory on clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../</directory>
+              <includes>
+                <include>mahout-math*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
