@@ -1,9 +1,6 @@
 ---
 layout: page
-title: CCO
+title: Native Solvers: ViennaCL
 theme:
     name: mahout2
 ---
-
-TODO: Fill this out!
-Stub

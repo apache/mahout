@@ -90,12 +90,7 @@ h1, h2, h3, h4 {
   color: #FFF; }
 
 
-.newMahout {
-  text-align: center;
-  background-color: #03c0ff;
-  padding-bottom: 28px;
-  color: #0099cc;
-}
+
 
 /** A handy link for new navbars: https://work.smarchal.com/twbscolor/css/e74c3c91d9e8ecf0f1ffbbbc0 **/
 .navbar-default{
@@ -123,3 +118,46 @@ h1, h2, h3, h4 {
   color: #5F6BAD;
 }
 
+/* Light Green Box */
+.mahoutBox1 {
+  text-align: center;
+  background-color: #DCF8E6;
+  padding: 5px;
+  margin: 4px;
+  color: #5F6BAD;
+}
+
+/* Light Purple Box */
+.mahoutBox2 {
+  text-align: center;
+  background-color: #DEE2F7;
+  padding: 5px;
+  margin: 4px;
+  color: #58B77B;
+}
+
+/* Light Blue Box */
+.mahoutBox3 {
+  text-align: center;
+  background-color: #DBEEF6;
+  padding: 5px;
+  margin: 4px;
+  color: #50889E;
+}
+body {
+    padding-top: 65px;
+}
+
+
+/* Light Blue Box */
+.mahoutMailListBox1 {
+  background-color: #DBEEF6;
+  padding: 0px;
+  margin: 0px;
+}
+
+.mahoutMailListBox2 {
+  background-color: #DCF8E6;
+  padding: 0px;
+  margin: 0px;
+}

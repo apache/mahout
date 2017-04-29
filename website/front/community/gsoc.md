@@ -38,11 +38,10 @@ paid.
 personal (most things are not).  This will likely decrease your chances of
 being selected, not increase them.
 * DO NOT BITE OFF MORE THAN YOU CAN CHEW.  Every year, there are a few
-students who propose to implement 3-5 machine learning algorithms on
-Map/Reduce, all in a two month period.	They NEVER get selected.   Be
+students who propose to implement 3-5 machine learning algorithms, all in a two month period.	They NEVER get selected.   Be
 realistic.  All successful projects to date follow, more or less, the
-following formula:  Implement algorithm on Map/Reduce.	Write Unit Tests. 
-Do some bigger scale tests.  Write 1 or 2 examples.  Write Wiki
+following formula:  Implement algorithm in Samsara (Mahout's R-Like Scala DSL).	Write Unit Tests. 
+Do some bigger scale tests.  Write 1 or 2 examples.  Write Website
 documentation.	That's it.  Trust us, it takes a summer to do these things.
 
 

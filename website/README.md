@@ -156,3 +156,6 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 - [x] `developer/release-notes.md` stuck on 0.12.0... bump it. 
 - [x] refactor to 'top-site' and 'docs' as we need a different jekyll build to change base path for new docs version
 - [x] Sign up for google analytics
+- [ ] add links to `community/blogs`
+- [ ] would like to see `community/buidingmahout.md` cleaned up a bit (just coppied new instructions from README.md)
+- [ ] writeups for native solvers in /docs/native-solvers/
