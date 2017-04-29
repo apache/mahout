@@ -21,7 +21,7 @@ If the topics are related, put it under as a child under the similar page.
 
 ## How to push changes to the actual website (committers only)
 
-1. `svn co svn co https://svn.apache.org/repos/asf/mahout asf-mahout`
+1. `svn co https://svn.apache.org/repos/asf/mahout asf-mahout`
 
 1. Run Terminal
        ```

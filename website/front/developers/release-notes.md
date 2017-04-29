@@ -8,6 +8,12 @@ theme:
 
 # Release Notes
 
+#### 17 April 2017 - Apache Mahout 0.13.0 released
+
+This release contains a big shift in the approach to computation in the project. We are including a new capability to compute matrix math directly on the GPU, resulting in significant performance improvements.
+
+Changes in 0.13 are detailed [here](http://mahout.apache.org/release-notes/Apache-Mahout-0.13.0-Release-Notes.pdf).
+
 #### 11 April 2016 - Apache Mahout 0.12.0 released
 
 This release marks a major milestone for the “Samsara” environment’s goal

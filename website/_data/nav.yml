@@ -1,5 +1,0 @@
-main:
-    - { url: '/', text: 'Blog' }
-    - { url: '/about', text: 'About' }
-    - { url: 'https://scotch.io/tutorials/getting-started-with-jekyll-plus-a-free-bootstrap-3-starter-theme', text: 'Read the Tutorial' }
-    - { url: 'https://github.com/scotch-io', text: 'Fork on GitHub' }

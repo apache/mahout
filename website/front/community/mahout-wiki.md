@@ -21,13 +21,13 @@ learning algorithms under the Apache license.
 [FAQ](/community/faq.html)
  -- Frequent questions encountered on the mailing lists.
 
-[Developer Resources](/developer/developer-resources.html)
+[Developer Resources](/developers/developer-resources.html)
  -- overview of the Mahout development infrastructure.
 
-[How To Contribute](/developer/how-to-contribute.html)
+[How To Contribute](/developers/how-to-contribute.html)
  -- get involved with the Mahout community.
 
-[How To Become A Committer](/developer/how-to-become-a-committer.html)
+[How To Become A Committer](/developers/how-to-become-a-committer.html)
  -- become a member of the Mahout development community.
 
 [Hadoop](http://hadoop.apache.org)
@@ -41,36 +41,36 @@ learning algorithms under the Apache license.
 <a name="MahoutWiki-Community"></a>
 ## Community
 
-[Who we are](who-we-are.html)
+[Who we are](/community/who-we-are.html)
  -- who are the developers behind Apache Mahout?
 
-[Books, Tutorials, Talks, Articles, News, Background Reading, etc. on Mahout](books-tutorials-and-talks.html)
+[Books, Tutorials, Talks, Articles, News, Background Reading, etc. on Mahout](/community/books-tutorials-and-talks.html)
 
-[Issue Tracker](issue-tracker.html)
+[Issue Tracker](/developers/issue-tracker.html)
  -- see what features people are working on, submit patches and file bugs.
 
 [Source Code (SVN)](https://svn.apache.org/repos/asf/mahout/)
  -- [Fisheye|http://fisheye6.atlassian.com/browse/mahout]
  -- download the Mahout source code from svn.
 
-[Mailing lists and IRC](mailing-lists,-irc-and-archives.html)
+[Mailing lists and IRC](/community/mailing-lists.html)
  -- links to our mailing lists, IRC channel and archived design and
 algorithm discussions, maybe your questions was answered there already?
 
-[Version Control](version-control.html)
+[Version Control](/developers/version-control.html)
  -- where we track our code.
 
-[Powered By Mahout](powered-by-mahout.html)
+[Powered By Mahout](/community/powered-by-mahout.html)
  -- who is using Mahout in production?
 
-[Professional Support](professional-support.html)
+[Professional Support](/community/professional-support.html)
  -- who is offering professional support for Mahout?
 
-[Mahout and Google Summer of Code](gsoc.html)
+[Mahout and Google Summer of Code](/community/gsoc.html)
   -- All you need to know about Mahout and GSoC.
 
 
-[Glossary of commonly used terms and abbreviations](glossary.html)
+[Glossary of commonly used terms and abbreviations](/community/glossary.html)
 
 <a name="MahoutWiki-Installation/Setup"></a>
 ## Installation/Setup
@@ -85,7 +85,7 @@ resources.
 [Downloads](downloads.html)
  -- a list of Mahout releases.
 
-[Download and installation](buildingmahout.html)
+[Download and installation](/community/buildingmahout.html)
  -- build Mahout from the sources.
 
 [Mahout on Amazon's EC2 Service](mahout-on-amazon-ec2.html)

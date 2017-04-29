@@ -14,7 +14,7 @@ cd website
 ```
 
 
-## There are actually two sites!
+## There are actually three sites!
 
 #### `website/front`
 
@@ -26,6 +26,14 @@ This has user documentation, info on algorithms, programing guides, features. et
 __*things that change between versions*__
 
 Follow the instructions below to serve either site, just know your links in community aren't going to work with the docs. Until you post it.
+
+#### `website/old-site`
+
+This is a full and mostly working port of the old site. It has been updated so that new themes can be applied to it, or the `mahout-retro` theme can be applied to the newer sites (thought this is somewhat messy).
+
+There is a lot of content in here, and a lot of it isn't even available from the main site. We should start going through this and dragging it over page by page, updating as we go.
+
+Eventually we'll use this to build `docs/0.13.0`
 
 ## Getting Started
 
@@ -46,18 +54,27 @@ Start coding.
 
 
 ## Organization
-website/_site   : this directory holds your static website.  don't modify anything in here directly!
-website/_pages  : this directory holds most of the website content (more documentation to come)
-website/_layouts  : this directory holds the basic layouts for page types
 
-website/assets  : this directory holds the css and images used for the website
+Within `mahout/website/docs` and `mahout/website/front` you'll find the following directories
 
+- `./_site`   : this directory holds your static website which is created with `jekyll build`. Modifying things in here directly will have no effect (they will be overwritten)
+- `./_layouts`  : this directory holds the basic layouts for page types
+- `./_includes`  : this directory holds files which can be included in layouts, such as the HTML that powers the 
+page, the navbar, etc. You will see in the html files referenced in `./_layouts` a line that says ` {{ content }}` this 
+ is where the markdown compiled into HTML is injected. 
+- `./assets`    : this directory holds the css and images used for the website
+- `./[OTHER]`   : all other directories become directory structure of the site. They maybe filled with markdown files. E.g.
+`./my-dir/myfile.md` will populate the site at `http://.../my-dir/myfile.html`
+
+**NOTE** `_includes/` and `_assets/` are actually symlinks so that if you change the theme, it will apply evenly to all sites.
 
 #### Themes
 
-With Jekyll Builder we can easily swap out themes.  Currently the theme is `mahout`
+With Jekyll Builder we can easily swap out themes.  Currently the theme is `mahout3`
 `website/_includes/themes/mahout` : This directory has HTML for things you will include in your pages, e.g. navbar
 `website/assets/themes/mahout`  : this directory holds the css and images used for the website (on the mahout theme, if we also may build new themes to try different looks and feels)
+
+
 
 ## How to port a page 
 
@@ -107,7 +124,7 @@ This will make links in say github, refer to the github links. Same with images.
 
 ` rake theme:switch name="THEME-NAME"`
 
-Options currently are `mahout` and `mahout2`
+Options currently are `mahout`, `mahout2`, `mahout3` and `mahout-retro`
 
 Mahout
 
@@ -135,6 +152,7 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 - [ ] Significant clean up of `/community/mahout-wiki.md`
 - [ ] Update of `/community/powered-by-mahout.md`
 - [ ] Folks need to review their contact info in `community/professional-support.md`
-- [ ] Get rid of `developer/patch-check-list.md` and add it to the notes as a checkbox when opening a PR (see zeppelin)
-- [ ] `developer/release-notes.md` stuck on 0.12.0... bump it. 
+- [-] Get rid of `developer/patch-check-list.md` and add it to the notes as a checkbox when opening a PR (see zeppelin)
+- [x] `developer/release-notes.md` stuck on 0.12.0... bump it. 
 - [x] refactor to 'top-site' and 'docs' as we need a different jekyll build to change base path for new docs version
+- [x] Sign up for google analytics
