@@ -1,0 +1,497 @@
+
+
+<!DOCTYPE html>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Apache Mahout: Scalable machine learning and data mining</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="Distribution" content="Global">
+  <meta name="Robots" content="index,follow">
+  <meta name="keywords" content="apache, apache hadoop, apache lucene,
+        business data mining, cluster analysis,
+        collaborative filtering, data extraction, data filtering, data framework, data integration,
+        data matching, data mining, data mining algorithms, data mining analysis, data mining data,
+        data mining introduction, data mining software,
+        data mining techniques, data representation, data set, datamining,
+        feature extraction, fuzzy k means, genetic algorithm, hadoop,
+        hierarchical clustering, high dimensional, introduction to data mining, kmeans,
+        knowledge discovery, learning approach, learning approaches, learning methods,
+        learning techniques, lucene, machine learning, machine translation, mahout apache,
+        mahout taste, map reduce hadoop, mining data, mining methods, naive bayes,
+        natural language processing,
+        supervised, text mining, time series data, unsupervised, web data mining">
+  <link rel="shortcut icon" type="image/x-icon" href="https://mahout.apache.org/images/favicon.ico">
+  <!--<script type="text/javascript" src="/js/prototype.js"></script>-->
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.7.2.0/prototype.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/effects.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/search.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/slides.js"></script>
+
+  <link href="/assets/themes/mahout-retro/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="/assets/themes/mahout-retro/css/bootstrap-responsive.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/themes/mahout-retro/css/global.css" type="text/css">
+
+  <!-- mathJax stuff -- use `\(...\)` for inline style math in markdown -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script'); 
+    mathjax.type = 'text/javascript'; 
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' : 
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+	
+	  var s = document.getElementsByTagName('script')[0]; 
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<body id="home" data-twttr-rendered="true">
+  <div id="wrap">
+   <div id="header">
+    <div id="logo"><a href="/"><img src="/assets/img/mahout-logo-brudman.png" alt="Logos for Mahout and Apache Software Foundation" /></a></div>
+  <div id="search">
+    <form id="search-form" action="http://www.google.com/search" method="get" class="navbar-search pull-right">    
+      <input value="http://mahout.apache.org" name="sitesearch" type="hidden">
+      <input class="search-query" name="q" id="query" type="text">
+      <input id="submission" type="image" src="/assets/img/mahout-lupe.png" alt="Search" />
+    </form>
+  </div>
+ 
+    <div class="navbar navbar-inverse" style="position:absolute;top:133px;padding-right:0px;padding-left:0px;">
+      <div class="navbar-inner" style="border: none; background: #999; border: none; border-radius: 0px;">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!-- <a class="brand" href="#">Apache Community Development Project</a> -->
+            <!--<div class="nav-collapse collapse">-->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+        <!-- <li><a href="/">Home</a></li> -->
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">General<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/general/downloads.html">Downloads</a>
+                <li><a href="/general/who-we-are.html">Who we are</a>
+                <li><a href="/general/mailing-lists,-irc-and-archives.html">Mailing Lists</a>
+                <li><a href="/general/release-notes.html">Release Notes</a>
+                <li><a href="/general/books-tutorials-and-talks.html">Books, Tutorials, Talks</a></li>
+                <li><a href="/general/powered-by-mahout.html">Powered By Mahout</a>
+                <li><a href="/general/professional-support.html">Professional Support</a>
+                <li class="divider"></li>
+                <li class="nav-header">Resources</li>
+                <li><a href="/general/reference-reading.html">Reference Reading</a>
+                <li><a href="/general/faq.html">FAQ</a>
+                <li class="divider"></li>
+                <li class="nav-header">Legal</li>
+                <li><a href="http://www.apache.org/licenses/">License</a></li>
+                <li><a href="http://www.apache.org/security/">Security</a></li>
+                <li><a href="/general/privacy-policy.html">Privacy Policy</a>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developers<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/developers/developer-resources.html">Developer resources</a></li>
+                <li><a href="/developers/version-control.html">Version control</a></li>
+                <li><a href="/developers/buildingmahout.html">Build from source</a></li>
+                <li><a href="/developers/issue-tracker.html">Issue tracker</a></li>
+                <li><a href="https://builds.apache.org/job/Mahout-Quality/" target="_blank">Code quality reports</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Contributions</li>
+                <li><a href="/developers/how-to-contribute.html">How to contribute</a></li>
+                <li><a href="/developers/how-to-become-a-committer.html">How to become a committer</a></li>
+                <li><a href="/developers/gsoc.html">GSoC</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">For committers</li>
+                <li><a href="/developers/how-to-update-the-website.html">How to update the website</a></li>
+                <li><a href="/developers/patch-check-list.html">Patch check list</a></li>
+                <li><a href="/developers/github.html">Handling Github PRs</a></li>
+                <li><a href="/developers/how-to-release.html">How to release</a></li>
+                <li><a href="/developers/thirdparty-dependencies.html">Third party dependencies</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout-Samsara<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/sparkbindings/home.html">Scala &amp; Spark Bindings Overview</a></li>
+                <li><a href="/users/sparkbindings/faq.html">FAQ</a></li>
+                <li><a href="/users/flinkbindings/playing-with-samsara-flink.html">Flink Bindings Overview</a></li>
+                <li class="nav-header">Engines</li>
+                <li><a href="/users/sparkbindings/home.html">Spark</a></li>
+                <li><a href="/users/environment/h2o-internals.html">H2O</a></li>
+                <li><a href="/users/flinkbindings/flink-internals.html">Flink</a></li>
+                <li class="nav-header">References</li>
+                <li><a href="/users/environment/in-core-reference.html">In-Core Algebraic DSL Reference</a></li>
+                <li><a href="/users/environment/out-of-core-reference.html">Distributed Algebraic DSL Reference</a></li>
+                <li class="nav-header">Tutorials</li>
+                <li><a href="/users/sparkbindings/play-with-shell.html">Playing with Mahout's Spark Shell</a></li>
+                <li><a href="/users/environment/how-to-build-an-app.html">How to build an app</a></li>
+                <li><a href="/users/environment/classify-a-doc-from-the-shell.html">Building a text classifier in Mahout's Spark Shell</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Algorithms<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li class="nav-header">Distributed Matrix Decomposition</li>
+                <li><a href="/users/algorithms/d-qr.html">Cholesky QR</a></li>
+                <li><a href="/users/algorithms/d-ssvd.html">SSVD</a></li>
+                <li><a href="/users/algorithms/d-als.html">Distributed ALS</a></li>
+                <li><a href="/users/algorithms/d-spca.html">SPCA</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/algorithms/recommender-overview.html">Recommender Overview</a></li>
+                <li><a href="/users/algorithms/intro-cooccurrence-spark.html">Intro to cooccurrence-based<br/> recommendations with Spark</a></li>
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/algorithms/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">MapReduce Basics<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li><a href="/users/basics/quickstart.html">Overview</a>
+                <li class="divider"></li>
+                <li class="nav-header">Working with text</li>
+                <li><a href="/users/basics/creating-vectors-from-text.html">Creating vectors from text</a>
+                <li><a href="/users/basics/collocations.html">Collocations</a>
+                <li class="divider"></li>
+                <li class="nav-header">Dimensionality reduction</li>
+                <li><a href="/users/dim-reduction/dimensional-reduction.html">Singular Value Decomposition</a></li>
+                <li><a href="/users/dim-reduction/ssvd.html">Stochastic SVD</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Topic Models</li>
+                <li><a href="/users/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout MapReduce<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/classification/bayesian.html">Naive Bayes</a></li>
+                <li><a href="/users/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li><a href="/users/classification/logistic-regression.html">Logistic Regression (Single Machine)</a></li>
+                <li><a href="/users/classification/partial-implementation.html">Random Forest</a></li>
+                <li class="nav-header">Classification Examples</li>
+                <li><a href="/users/classification/breiman-example.html">Breiman example</a></li>
+                <li><a href="/users/classification/twenty-newsgroups.html">20 newsgroups example</a></li>
+                <li><a href="/users/classification/bankmarketing-example.html">SGD classifier bank marketing</a></li>
+                <li><a href="/users/classification/wikipedia-classifier-example.html">Wikipedia XML parser and classifier</a></li>
+                <li class="nav-header">Clustering</li>
+                <li><a href="/users/clustering/k-means-clustering.html">k-Means</a></li>
+                <li><a href="/users/clustering/canopy-clustering.html">Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means.html">Fuzzy k-Means</a></li>
+                <li><a href="/users/clustering/streaming-k-means.html">Streaming KMeans</a></li>
+                <li><a href="/users/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li class="nav-header">Clustering Commandline usage</li>
+                <li><a href="/users/clustering/k-means-commandline.html">Options for k-Means</a></li>
+                <li><a href="/users/clustering/canopy-commandline.html">Options for Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means-commandline.html">Options for Fuzzy k-Means</a></li>
+                <li class="nav-header">Clustering Examples</li>
+                <li><a href="/users/clustering/clustering-of-synthetic-control-data.html">Synthetic data</a></li>
+                <li class="nav-header">Cluster Post processing</li>
+                <li><a href="/users/clustering/cluster-dumper.html">Cluster Dumper tool</a></li>
+                <li><a href="/users/clustering/visualizing-sample-clusters.html">Cluster visualisation</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/recommender/recommender-first-timer-faq.html">First Timer FAQ</a></li>
+                <li><a href="/users/recommender/userbased-5-minutes.html">A user-based recommender <br/>in 5 minutes</a></li>
+                <li><a href="/users/recommender/matrix-factorization.html">Matrix factorization-based<br/> recommenders</a></li>
+                <li><a href="/users/recommender/recommender-documentation.html">Overview</a></li>
+                <li><a href="/users/recommender/intro-itembased-hadoop.html">Intro to item-based recommendations<br/> with Hadoop</a></li>
+                <li><a href="/users/recommender/intro-als-hadoop.html">Intro to ALS recommendations<br/> with Hadoop</a></li>
+            </ul>
+        </li>
+        <!--  <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Recommendations<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+
+          </ul> -->
+        </li>
+    </ul>
+</div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+</div>
+
+ <div id="sidebar">
+  <div id="sidebar-wrap">
+    <h2>Twitter</h2>
+	<ul class="sidemenu">
+		<li>
+<a class="twitter-timeline" href="https://twitter.com/ApacheMahout" data-widget-id="422861673444028416">Tweets by @ApacheMahout</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</li>
+	</ul>
+    <h2>Apache Software Foundation</h2>
+    <ul class="sidemenu">
+      <li><a href="http://www.apache.org/foundation/how-it-works.html">How the ASF works</a></li>
+      <li><a href="http://www.apache.org/foundation/getinvolved.html">Get Involved</a></li>
+      <li><a href="http://www.apache.org/dev/">Developer Resources</a></li>
+      <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+      <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+    </ul>
+    <h2>Related Projects</h2>
+    <ul class="sidemenu">
+      <li><a href="http://lucene.apache.org/">Apache Lucene</a></li>
+      <li><a href="http://hadoop.apache.org/">Apache Hadoop</a></li>
+      <li><a href="http://bigtop.apache.org/">Apache Bigtop</a></li>
+      <li><a href="http://spark.apache.org/">Apache Spark</a></li>
+	  <li><a href="http://flink.apache.org/">Apache Flink</a></li>
+    </ul>
+  </div>
+</div>
+
+  <div id="content-wrap" class="clearfix">
+   <div id="main">
+
+    <h1 id="fuzzy-k-means">Fuzzy K-Means</h1>
+
+<p>Fuzzy K-Means (also called Fuzzy C-Means) is an extension of <a href="http://mahout.apache.org/users/clustering/k-means-clustering.html">K-Means</a>
+, the popular simple clustering technique. While K-Means discovers hard
+clusters (a point belong to only one cluster), Fuzzy K-Means is a more
+statistically formalized method and discovers soft clusters where a
+particular point can belong to more than one cluster with certain
+probability.</p>
+
+<p><a name="FuzzyK-Means-Algorithm"></a></p>
+<h4 id="algorithm">Algorithm</h4>
+
+<p>Like K-Means, Fuzzy K-Means works on those objects which can be represented
+in n-dimensional vector space and a distance measure is defined.
+The algorithm is similar to k-means.</p>
+
+<ul>
+  <li>Initialize k clusters</li>
+  <li>Until converged
+    <ul>
+      <li>Compute the probability of a point belong to a cluster for every &lt;point,cluster&gt; pair</li>
+      <li>Recompute the cluster centers using above probability membership values of points to clusters</li>
+    </ul>
+  </li>
+</ul>
+
+<p><a name="FuzzyK-Means-DesignImplementation"></a></p>
+<h4 id="design-implementation">Design Implementation</h4>
+
+<p>The design is similar to K-Means present in Mahout. It accepts an input
+file containing vector points. User can either provide the cluster centers
+as input or can allow canopy algorithm to run and create initial clusters.</p>
+
+<p>Similar to K-Means, the program doesn’t modify the input directories. And
+for every iteration, the cluster output is stored in a directory cluster-N.
+The code has set number of reduce tasks equal to number of map tasks. So,
+those many part-0</p>
+
+<p>Files are created in clusterN directory. The code uses
+driver/mapper/combiner/reducer as follows:</p>
+
+<p>FuzzyKMeansDriver - This is similar to  KMeansDriver. It iterates over
+input points and cluster points for specified number of iterations or until
+it is converged.During every iteration i, a new cluster-i directory is
+created which contains the modified cluster centers obtained during
+FuzzyKMeans iteration. This will be feeded as input clusters in the next
+iteration.  Once Fuzzy KMeans is run for specified number of
+iterations or until it is converged, a map task is run to output “the point
+and the cluster membership to each cluster” pair as final output to a
+directory named “points”.</p>
+
+<p>FuzzyKMeansMapper - reads the input cluster during its configure() method,
+then  computes cluster membership probability of a point to each
+cluster.Cluster membership is inversely propotional to the distance.
+Distance is computed using  user supplied distance measure. Output key
+is encoded clusterId. Output values are ClusterObservations containing
+observation statistics.</p>
+
+<p>FuzzyKMeansCombiner - receives all key:value pairs from the mapper and
+produces partial sums of the cluster membership probability times input
+vectors for each cluster. Output key is: encoded cluster identifier. Output
+values are ClusterObservations containing observation statistics.</p>
+
+<p>FuzzyKMeansReducer - Multiple reducers receives certain keys and all values
+associated with those keys. The reducer sums the values to produce a new
+centroid for the cluster which is output. Output key is: encoded cluster
+identifier (e.g. “C14”. Output value is: formatted cluster identifier (e.g.
+“C14”). The reducer encodes unconverged clusters with a ‘Cn’ cluster Id and
+converged clusters with ‘Vn’ clusterId.</p>
+
+<p><a name="FuzzyK-Means-RunningFuzzyk-MeansClustering"></a></p>
+<h2 id="running-fuzzy-k-means-clustering">Running Fuzzy k-Means Clustering</h2>
+
+<p>The Fuzzy k-Means clustering algorithm may be run using a command-line
+invocation on FuzzyKMeansDriver.main or by making a Java call to
+FuzzyKMeansDriver.run().</p>
+
+<p>Invocation using the command line takes the form:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>bin/mahout fkmeans \
+    -i &lt;input vectors directory&gt; \
+    -c &lt;input clusters directory&gt; \
+    -o &lt;output working directory&gt; \
+    -dm &lt;DistanceMeasure&gt; \
+    -m &lt;fuzziness argument &gt;1&gt; \
+    -x &lt;maximum number of iterations&gt; \
+    -k &lt;optional number of initial clusters to sample from input vectors&gt; \
+    -cd &lt;optional convergence delta. Default is 0.5&gt; \
+    -ow &lt;overwrite output directory if present&gt;
+    -cl &lt;run input vector clustering after computing Clusters&gt;
+    -e &lt;emit vectors to most likely cluster during clustering&gt;
+    -t &lt;threshold to use for clustering if -e is false&gt;
+    -xm &lt;execution method: sequential or mapreduce&gt;
+</code></pre>
+</div>
+
+<p><em>Note:</em> if the -k argument is supplied, any clusters in the -c directory
+will be overwritten and -k random points will be sampled from the input
+vectors to become the initial cluster centers.</p>
+
+<p>Invocation using Java involves supplying the following arguments:</p>
+
+<ol>
+  <li>input: a file path string to a directory containing the input data set a
+SequenceFile(WritableComparable, VectorWritable). The sequence file <em>key</em>
+is not used.</li>
+  <li>clustersIn: a file path string to a directory containing the initial
+clusters, a SequenceFile(key, SoftCluster | Cluster | Canopy). Fuzzy
+k-Means SoftClusters, k-Means Clusters and Canopy Canopies may be used for
+the initial clusters.</li>
+  <li>output: a file path string to an empty directory which is used for all
+output from the algorithm.</li>
+  <li>measure: the fully-qualified class name of an instance of DistanceMeasure
+which will be used for the clustering.</li>
+  <li>convergence: a double value used to determine if the algorithm has
+converged (clusters have not moved more than the value in the last
+iteration)</li>
+  <li>max-iterations: the maximum number of iterations to run, independent of
+the convergence specified</li>
+  <li>m: the “fuzzyness” argument, a double &gt; 1. For m equal to 2, this is
+equivalent to normalising the coefficient linearly to make their sum 1.
+When m is close to 1, then the cluster center closest to the point is given
+much more weight than the others, and the algorithm is similar to k-means.</li>
+  <li>runClustering: a boolean indicating, if true, that the clustering step is
+to be executed after clusters have been determined.</li>
+  <li>emitMostLikely: a boolean indicating, if true, that the clustering step
+should only emit the most likely cluster for each clustered point.</li>
+  <li>threshold: a double indicating, if emitMostLikely is false, the cluster
+probability threshold used for emitting multiple clusters for each point. A
+value of 0 will emit all clusters with their associated probabilities for
+each vector.</li>
+  <li>runSequential: a boolean indicating, if true, that the algorithm is to
+use the sequential reference implementation running in memory.</li>
+</ol>
+
+<p>After running the algorithm, the output directory will contain:</p>
+<ol>
+  <li>clusters-N: directories containing SequenceFiles(Text, SoftCluster)
+produced by the algorithm for each iteration. The Text <em>key</em> is a cluster
+identifier string.</li>
+  <li>clusteredPoints: (if runClustering enabled) a directory containing
+SequenceFile(IntWritable, WeightedVectorWritable). The IntWritable <em>key</em> is
+the clusterId. The WeightedVectorWritable <em>value</em> is a bean containing a
+double <em>weight</em> and a VectorWritable <em>vector</em> where the weights are
+computed as 1/(1+distance) where the distance is between the cluster center
+and the vector using the chosen DistanceMeasure.</li>
+</ol>
+
+<p><a name="FuzzyK-Means-Examples"></a></p>
+<h1 id="examples">Examples</h1>
+
+<p>The following images illustrate Fuzzy k-Means clustering applied to a set
+of randomly-generated 2-d data points. The points are generated using a
+normal distribution centered at a mean location and with a constant
+standard deviation. See the README file in the <a href="https://github.com/apache/mahout/blob/master/examples/src/main/java/org/apache/mahout/clustering/display/README.txt">/examples/src/main/java/org/apache/mahout/clustering/display/README.txt</a>
+ for details on running similar examples.</p>
+
+<p>The points are generated as follows:</p>
+
+<ul>
+  <li>500 samples m=[1.0, 1.0](1.0,-1.0.html)
+ sd=3.0</li>
+  <li>300 samples m=[1.0, 0.0](1.0,-0.0.html)
+ sd=0.5</li>
+  <li>300 samples m=[0.0, 2.0](0.0,-2.0.html)
+ sd=0.1</li>
+</ul>
+
+<p>In the first image, the points are plotted and the 3-sigma boundaries of
+their generator are superimposed.</p>
+
+<p><img src="../../images/SampleData.png" alt="fuzzy" /></p>
+
+<p>In the second image, the resulting clusters (k=3) are shown superimposed upon the sample data. As Fuzzy k-Means is an iterative algorithm, the centers of the clusters in each recent iteration are shown using different colors. Bold red is the final clustering and previous iterations are shown in [orange, yellow, green, blue, violet and gray](orange,-yellow,-green,-blue,-violet-and-gray.html)
+. Although it misses a lot of the points and cannot capture the original,
+superimposed cluster centers, it does a decent job of clustering this data.</p>
+
+<p><img src="../../images/FuzzyKMeans.png" alt="fuzzy" /></p>
+
+<p>The third image shows the results of running Fuzzy k-Means on a different
+data set which is generated using asymmetrical standard deviations.
+Fuzzy k-Means does a fair job handling this data set as well.</p>
+
+<p><img src="../../images/2dFuzzyKMeans.png" alt="fuzzy" /></p>
+
+<p><a name="FuzzyK-Means-References&nbsp;"></a></p>
+<h4 id="references">References </h4>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/Fuzzy_clustering">http://en.wikipedia.org/wiki/Fuzzy_clustering</a></li>
+</ul>
+
+   </div>
+  </div>     
+</div> 
+  <footer class="footer" align="center">
+    <div class="container">
+      <p>
+        Copyright &copy; 2014-2016 The Apache Software Foundation, Licensed under
+        the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.
+        <br />
+		  Apache Mahout, Mahout, Apache, the Apache feather logo, and the elephant rider logo are either registered trademarks or trademarks of <a href="http://www.apache.org/foundation/marks/">The Apache Software Foundation</a> in the United States and other countries.
+      </p>
+    </div>
+  </footer>
+  
+  <script src="/assets/themes/mahout-retro/js/jquery-1.9.1.min.js"></script>
+  <script src="/assets/themes/mahout-retro/js/bootstrap.min.js"></script>
+  <script>
+    (function() {
+      var cx = '012254517474945470291:vhsfv7eokdc';
+      var gcse = document.createElement('script');
+      gcse.type = 'text/javascript';
+      gcse.async = true;
+      gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+          '//www.google.com/cse/cse.js?cx=' + cx;
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(gcse, s);
+    })();
+  </script>
+</body>
+</html>
+
