@@ -196,4 +196,4 @@ goodness
 </pre></div>
 
 
-Liked what you saw? Checkout Mahout's overview for the [Scala and Spark bindings](https://mahout.apache.org/users/sparkbindings/home.html).
+Liked what you saw? Checkout Mahout's overview for the [Scala and Spark bindings]({{ BASE_PATH }}/distributed/spark-bindings).

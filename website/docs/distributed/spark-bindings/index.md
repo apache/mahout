@@ -1,8 +1,8 @@
 ---
-layout: page
-title: Mahout Samsara Spark Bindings
+layout: default
+title: Spark Bindings
 theme:
-    name: mahout2
+    name: retro-mahout
 ---
 
 # Scala & Spark Bindings:
@@ -41,8 +41,6 @@ picked based on matrix geometry, distributed dataset partitioning, orientation e
 If we count in DRM by in-core combinations, that would be another 4, i.e. 9 total -- all of it for just 
 simple x %*% y logical notation.
 
-
-
 Please refer to the documentation for details.
 
 ## Status
@@ -53,8 +51,9 @@ Spark, Flink and H20.
 
 ## Documentation
 
-* Scala and Spark bindings manual: [web](http://apache.github.io/mahout/doc/ScalaSparkBindings.html), [pdf](ScalaSparkBindings.pdf)
-* Overview blog on 0.10.x releases: [blog](http://www.weatheringthroughtechdays.com/2015/04/mahout-010x-first-mahout-release-as.html)
+* Scala and Spark bindings manual: [web](http://apache.github.io/mahout/doc/ScalaSparkBindings.html), [pdf](ScalaSparkBindings.pdf), [pptx](MahoutScalaAndSparkBindings.pptx)
+* [Spark Bindings FAQ](faq.html)
+<!-- dead link* Overview blog on 0.10.x releases: [blog](http://www.weatheringthroughtechdays.com/2015/04/mahout-010x-first-mahout-release-as.html) -->
 
 ## Distributed methods and solvers using Bindings
 
@@ -69,7 +68,11 @@ Spark, Flink and H20.
 [dspca]: https://github.com/apache/mahout/blob/trunk/spark/src/main/scala/org/apache/mahout/sparkbindings/decompositions/DSPCA.scala
 [dqrThin]: https://github.com/apache/mahout/blob/trunk/spark/src/main/scala/org/apache/mahout/sparkbindings/decompositions/DQR.scala
 
+## Reading RDDs and DataFrames into DRMs
+TODO
 
+
+TODO: Do we still want this? (I don't think so...)
 ## Related history of note 
 
 * CLI and Driver for Spark version of item similarity -- [MAHOUT-1541](https://issues.apache.org/jira/browse/MAHOUT-1541)

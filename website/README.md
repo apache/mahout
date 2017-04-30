@@ -128,12 +128,12 @@ Options currently are `mahout`, `mahout2`, `mahout3` and `mahout-retro`
 
 Mahout
 
-![{{ BASE_PATH }}/img/mahout_theme.png]
+![assets/img/mahout_theme.png]
 
 
 Mahout2
 
-![{{ BASE_PATH }}/img/mahout2_theme.png]
+![assets/img/mahout2_theme.png]
 
 If you want to edit the style edit `assets/themes/<your_theme>/css/style.css` and override value.
 
@@ -149,7 +149,6 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 - [ ] New themes require a lot less in `_imports` than dustin had initially, however- keeping his old files for now as they have lots of useful things that occastionally need to be scuttled. Eventaully need to delete though.
 - [x] Clean up tiles on front page
 - [ ] Add apache licenses all over the place - let dust settle first then we can go through methodically.
-- [ ] Significant clean up of `/community/mahout-wiki.md`
 - [ ] Update of `/community/powered-by-mahout.md`
 - [ ] Folks need to review their contact info in `community/professional-support.md`
 - [-] Get rid of `developer/patch-check-list.md` and add it to the notes as a checkbox when opening a PR (see zeppelin)

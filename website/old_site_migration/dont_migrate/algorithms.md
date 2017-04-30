@@ -5,7 +5,7 @@ theme:
     name: retro-mahout
 ---
 
-
+NOTE: As we move away from Mapreduce, all MRs are deprecated.  If anything maybe move this to the Mapreduce home page and drop teh spark, flink, h2o columns
 ---
 *Mahout 0.12.0 Features by Engine*   
 ---
