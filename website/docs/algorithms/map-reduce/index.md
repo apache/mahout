@@ -1,5 +1,5 @@
 ---
-layout: algorithm
+layout: mr_algorithm
 title: Deprecated Map Reduce Algorithms
 theme:
     name: mahout2
