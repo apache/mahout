@@ -31,11 +31,67 @@ import scala.collection.JavaConversions._
 import jcuda.runtime.JCuda._
 import jcuda.runtime.cudaMemcpyKind._
 import jcuda._
+import jcuda.jcublas._
 
 
 package object cuda {
 
   private implicit val log = getLog(GPUMMul.getClass)
+
+  /**
+    * Convert from Mahout DenseMatrix to matrix
+    * @param src
+    * @param cudaCtx
+    * @return
+    */
+  def toCudaDenseRM(src: Matrix): DenseRowMatrix = {
+    src.denseHandle match {
+
+      case src.ctx.denseHandle ⇒
+        val cudaMx = new DenseRowMatrix(
+          data = repackRowMajor(src, src.nrow, src.ncol),
+          nrow = src.nrow,
+          ncol = src.ncol,
+          ctx = cudaCtx
+        )
+        cudaMx
+      case _ ⇒
+        val cudaMx = new DenseRowMatrix(src.nrow, src.ncol, cudaCtx)
+        fastCopy(src, vclMx)
+        cudaMx
+    }
+  }
+
+
+  // TODO replace this with repackColumnMajor and use a different dgemm algorithm?
+  // Most Mahout in-core matrices are row-major and we're using CSR so we may need to see
+  // if JCuda is using an optimal csr/RowMajor DGEMM algortithm.
+  // TODO: check with NS on this
+  private[cuda] def repackRowMajor(mx: Matrix, nrowIntern: Int, ncolIntern: Int): DoublePointer = {
+
+    assert(mx.nrow <= nrowIntern && mx.ncol <= ncolIntern)
+
+    val dbuff = Array.ofDim[Double](nrowIntern, ncolIntern)
+
+    mx match {
+      case dm: DenseMatrix ⇒
+        val valuesF = classOf[DenseMatrix].getDeclaredField("values")
+        valuesF.setAccessible(true)
+        val values = valuesF.get(dm).asInstanceOf[Array[Array[Double]]]
+        var dstOffset = 0
+        for (irow ← 0 until mx.nrow) {
+          val rowarr = values(irow)
+          //dbuff.position(dstOffset).put(rowarr, 0, rowarr.size min ncolIntern)
+          System.arraycopy(rowarr, 0, dbuff, dstOffset, rowarr.size min ncolIntern)
+          dstOffset += ncolIntern
+        }
+      case _ ⇒
+        // Naive copying. Could be sped up for a DenseMatrix. TODO.
+        for (row ← mx) {
+          val dstOffset = row.index * ncolIntern
+          for (el ← row.nonZeroes) dbuff[dstOffset + el.index] = el
+        }
+    }
 
   /**
     *
@@ -144,28 +200,43 @@ package object cuda {
     (jumpers, colIdcs, els)
   }
 
-  def prod(a: DenseMatrix, b: DenseMatrix, ctx: Context): CompressedMatrix = {
+  /**
+    * Dense %*% Dense
+    * @param a
+    * @param b
+    * @param ctx
+    * @return
+    */
+  def prod(a: DenseRowMatrix, b: DenseRowMatrix, ctx: Context): DenseRowMatrix = {
     val m = a.nrows
     val n = b.ncols
     val k = b.nrows
 
-    val c: DenseMatrix = new DenseMatrix(ctx, m, n)
+    val c: DenseRowMatrix = new DenseRowMatrix(ctx, m, n)
+    val d_C: Pointer = new Pointer()
 
-    cudaMalloc(c.vals, jcuda.Sizeof.DOUBLE M * N * jcuda.Sizeof.DOUBLE);
+    cudaMalloc(c.vals,  M * N * jcuda.Sizeof.DOUBLE);
 
     // cublasSgemm('n', 'n', N, N, N, alpha,
-      d_A, N, d_B, N, beta, d_C, N);
+    //  d_A, N, d_B, N, beta, d_C, N);
 
+    cudaDgemm(ctx.denseHandle, a.trans, b.trans, m, n, k,
+      1.0d,    // alpha
+      1.0d, 1, // Alpha, lda
+      1.0d, 1, // Beta , ldb
+      1.0d,    // beta
+      d_C,     // pointer to results
+      m * n)    // size of a %*% b
 
-
-    cudaDgemm(ctx.handle, a.trans, b.trans, m, n, k,
-      0.0d,    // alpha
-      0.0d, 0, // Alpha, lda
-      0.0d, 0, // Beta , ldb
-      0.0d,    // beta
-      0.0)
   }
 
+  /**
+    * Sparse %*% Sparse
+    * @param a
+    * @param b
+    * @param ctx
+    * @return
+    */
   def prod(a: CompressedMatrix, b: CompressedMatrix, ctx: Context): CompressedMatrix = {
     var m = a.nrows
     var n = b.ncols
@@ -176,7 +247,7 @@ package object cuda {
     // step 1: compute nnz count
     var nnzC = new Array[Int](1)
     nnzC(0) = 0
-    cusparseXcsrgemmNnz(ctx.handle, a.trans, b.trans, m, n, k,
+    cusparseXcsrgemmNnz(ctx.sparseHandle, a.trans, b.trans, m, n, k,
       a.descr, a.nonz, a.row_ptr, a.col_ind,
       b.descr, b.nonz, b.row_ptr, b.col_ind,
       c.descr, c.row_ptr, jcuda.Pointer.to(nnzC))
@@ -191,7 +262,7 @@ package object cuda {
     // step 2: allocate and compute matrix product
     cudaMalloc(c.col_ind, jcuda.Sizeof.INT * c.nonz);
     cudaMalloc(c.vals, jcuda.Sizeof.DOUBLE * c.nonz);
-    cusparseDcsrgemm(ctx.handle, a.trans, b.trans, m, n, k,
+    cusparseDcsrgemm(ctx.sparseHandle, a.trans, b.trans, m, n, k,
       a.descr, a.nonz,
       a.vals, a.row_ptr, a.col_ind,
       b.descr, b.nonz,

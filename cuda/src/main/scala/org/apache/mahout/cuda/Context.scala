@@ -24,13 +24,18 @@ import jcuda.jcusparse._
 import jcuda.runtime.JCuda
 
 final class Context {
-
   // Enable exceptions for all CUDA libraries
   JCuda.setExceptionsEnabled(true)
   JCusparse.setExceptionsEnabled(true)
 
-  // Initialize JCusparse library
-  var handle: jcuda.jcusparse.cusparseHandle = new cusparseHandle()
-  cusparseCreate(handle)
+  // Initialize JCusparse library and create a dense handle for it.
+  var sparseHandle: jcuda.jcusparse.cusparseHandle = new cusparseHandle()
+  cusparseCreate(sparseHandle)
+
+  // Initialize JCublas library and create a dense handle for it.
+  var denseHandle = jcuda.JCublas.cublasInit()
+  cusparseCreate(denseHandle)
+
+
 }
 
