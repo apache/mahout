@@ -111,3 +111,18 @@ for (i <- 0 until 20){
     image.output(new File(s"/tmp/eigenfaces/${i}.png"))
 }
 ```
+
+### View the Eigenfaces
+
+If using Zeppelin, the following can be used to generate a fun table of the Eigenfaces:
+
+```python
+%python
+ 
+r = 4
+c = 5
+print '%html\n<table style="width:100%">' + "".join(["<tr>" + "".join([ '<td><img src="/tmp/eigenfaces/%i.png"></td>' % (i + j) for j in range(0, c) ]) + "</tr>" for i in range(0, r * c, r +1 ) ]) + '</table>'
+
+```
+
+![Eigenfaces](eigenfaces.png)
