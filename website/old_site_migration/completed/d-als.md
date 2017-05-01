@@ -5,8 +5,6 @@ theme:
     name: retro-mahout
 ---
 
-Seems like someone has jacked up this page?
-# Distributed Cholesky QR
 
 
 ## Intro

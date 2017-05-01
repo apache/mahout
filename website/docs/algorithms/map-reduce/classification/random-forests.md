@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Random Forests
 theme:
     name: retro-mahout

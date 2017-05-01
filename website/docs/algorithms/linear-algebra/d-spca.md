@@ -1,10 +1,10 @@
 ---
-layout: page
-title: Mahout-Samsara Distributed Stochastic PCA
+layout: algorithm
+
+title: Distributed Stochastic PCA
 theme:
-    name: mahout2
+    name: retro-mahout
 ---
-# Distributed Stochastic PCA
 
 
 ## Intro

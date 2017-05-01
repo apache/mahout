@@ -5,9 +5,6 @@ theme:
     name: retro-mahout
 ---
 
-# Distributed Cholesky QR
-
-
 ## Intro
 
 Mahout has a distributed implementation of QR decomposition for tall thin matrices[1].

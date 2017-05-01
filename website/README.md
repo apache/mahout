@@ -159,3 +159,6 @@ This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0
 - [ ] would like to see `community/buidingmahout.md` cleaned up a bit (just coppied new instructions from README.md)
 - [ ] writeups for native solvers in /docs/native-solvers/
 - [ ] help with triage in `mahout/website/old_site_migration`
+- [ ] Update sidebars in `mr_algo_navbar`, `mr_tutorial_navbar`, `tutorial_navbar`, to look like `docs/includes/algo_navbar.html`
+- [ ] Write ups for new algos
+- [ ] Search the directory (Ctrl+Shift+F in intellij) for "TODO" you'll find stuff.

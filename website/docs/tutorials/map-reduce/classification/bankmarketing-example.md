@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_tutorial
 title:
 theme:
     name: retro-mahout

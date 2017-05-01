@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Restricted Boltzmann Machines
 theme:
     name: retro-mahout

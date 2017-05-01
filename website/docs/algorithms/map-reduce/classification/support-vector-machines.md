@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Support Vector Machines
 theme:
     name: retro-mahout

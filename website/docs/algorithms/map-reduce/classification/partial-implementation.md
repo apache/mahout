@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Partial Implementation
 theme:
     name: retro-mahout

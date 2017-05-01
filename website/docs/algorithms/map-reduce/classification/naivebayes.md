@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: NaiveBayes
 theme:
     name: retro-mahout

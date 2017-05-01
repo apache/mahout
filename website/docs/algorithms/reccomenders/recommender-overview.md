@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: algorithm
 title: Recommender Quickstart
 theme:
     name: retro-mahout

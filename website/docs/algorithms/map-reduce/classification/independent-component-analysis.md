@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Independent Component Analysis
 theme:
     name: retro-mahout

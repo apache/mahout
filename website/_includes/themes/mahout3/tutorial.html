@@ -1,0 +1,13 @@
+
+<div class="row">
+    <div class="col-xs-3">
+        {% include tutorial_navbar.html %}
+    </div>
+
+    <div class="col-xs-8">
+        <div class="page-header">
+            <h1>{{ page.title }} {% if page.tagline %} <small>{{ page.tagline }}</small>{% endif %}</h1>
+        </div>
+        {{ content }}
+    </div>
+</div>

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_tutorial
 title: Wikipedia XML parser and Naive Bayes Example
 theme:
     name: retro-mahout

@@ -1,11 +1,9 @@
 ---
-layout: page
-title: Mahout Samsara DSSVD
+layout: algorithm
+title: Distributed Stochastic Singular Value Decomposition
 theme:
-    name: mahout2
+    name: retro-mahout
 ---
-# Distributed Stochastic Singular Value Decomposition
-
 
 ## Intro
 

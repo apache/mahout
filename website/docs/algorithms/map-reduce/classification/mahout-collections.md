@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: mahout-collections
 theme:
     name: retro-mahout

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: algorithm
 title: Intro to Cooccurrence Recommenders with Spark
 theme:
     name: retro-mahout

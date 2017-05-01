@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Hidden Markov Models
 theme:
     name: retro-mahout

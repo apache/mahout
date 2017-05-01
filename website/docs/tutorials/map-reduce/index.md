@@ -1,9 +1,11 @@
 ---
-layout: page
+layout: mr_tutorial
 title: Deprecated Map Reduce Based Examples
 theme:
     name: mahout2
 ---
+
+A note about the sunsetting of our support for Map Reduce.
 
 
 ### Classification

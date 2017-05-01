@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: algorithm
 title: Cochrane-Orcutt Procedure
 theme:
     name: mahout2

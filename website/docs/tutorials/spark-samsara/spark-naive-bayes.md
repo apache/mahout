@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: tutorial
 title: Spark Naive Bayes
 theme:
     name: retro-mahout

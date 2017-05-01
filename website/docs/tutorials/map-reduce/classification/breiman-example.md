@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_tutorial
 title: Breiman Example
 theme:
     name: retro-mahout

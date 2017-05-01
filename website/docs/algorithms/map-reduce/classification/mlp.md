@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Multilayer Perceptron
 theme:
     name: retro-mahout

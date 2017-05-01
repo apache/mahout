@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Class Discovery
 theme:
     name: retro-mahout

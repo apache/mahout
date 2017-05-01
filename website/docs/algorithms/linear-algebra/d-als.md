@@ -1,11 +1,11 @@
 ---
-layout: page
+layout: algorithm
 title: Mahout Samsara Distributed ALS
 theme:
     name: mahout2
 ---
-# Distributed Cholesky QR
-
+Seems like someone has jacked up this page? 
+TODO: Find the ALS Page
 
 ## Intro
 

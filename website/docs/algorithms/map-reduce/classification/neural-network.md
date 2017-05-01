@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: mr_algorithm
 title: Neural Network
 theme:
     name: retro-mahout

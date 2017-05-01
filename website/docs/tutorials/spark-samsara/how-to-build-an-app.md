@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: tutorial
 title: Mahout Samsara In Core
 theme:
     name: mahout2

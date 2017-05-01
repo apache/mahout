@@ -1,9 +1,20 @@
 ---
 layout: algorithm
-title: Ordinary Least Squares Regression
+title: AsFactor
 theme:
     name: mahout2
 ---
 
 TODO: Fill this out!
 Stub
+
+### About
+
+### Parameters
+
+### Example
+
+
+
+
+

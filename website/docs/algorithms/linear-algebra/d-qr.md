@@ -1,11 +1,9 @@
 ---
-layout: page
-title: Mahout Samsara DQR
+layout: algorithm
+title: Distributed Cholesky QR
 theme:
-    name: mahout2
+    name: retro-mahout
 ---
-# Distributed Cholesky QR
-
 
 ## Intro
 
