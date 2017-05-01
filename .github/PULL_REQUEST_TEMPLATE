@@ -1,0 +1,28 @@
+### Purpose of PR:
+Please give a short description of what this PR is for.
+
+
+First, make sure you are opening this PR against the `develop` branch (not master).
+Right beneath "Open PR" you will see `base fork: apache/mahout` dropdown, then `master` as a dropdown. Click that and select `develop` (or in some cases the name of the feature-branch you're working on).
+
+### Important ToDos
+Please mark each with an "x"
+- [ ] Opening PR against `develop` NOT `master` (OR `feature-name` if this is part of an ongoing feature development).
+- [ ] A JIRA ticket exists (if not, please create this first)[https://issues.apache.org/jira/browse/ZEPPELIN/]
+- [ ] Title of PR is "MAHOUT-XXXX Brief Description of Changes" where XXXX
+is the JIRA number.
+- [ ] Created unit tests where appropriate
+- [ ] Added licenses correct on newly added files
+- [ ] Assigned JIRA to self
+- [ ] Added documentation in scala docs/java docs, (and website once that
+is merged to dev)
+- [ ] Successfully built and ran all unit tests, verified that all tests
+pass locally.
+
+If all of these things aren't complete, but you still feel it is
+appropriate to open a PR, please add [WIP] after MAHOUT-XXXX before the
+descriptions- e.g. "MAHOUT-XXXX [WIP] Description of Change"
+
+Oh by the way, does this change break earlier versions?
+
+Is this the beginning of a larger project for which a feature branch should be made?
