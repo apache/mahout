@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: Cluster Dumper
 theme:
    name: retro-mahout

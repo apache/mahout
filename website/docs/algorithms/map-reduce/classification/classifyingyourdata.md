@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: ClassifyingYourData
 theme:
     name: retro-mahout

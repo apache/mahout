@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: Logistic Regression
 theme:
     name: retro-mahout

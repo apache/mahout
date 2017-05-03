@@ -1,5 +1,5 @@
 ---
-layout: mr_tutorial
+layout: tutorial
 title: Visualizing Sample Clusters
 theme:
    name: retro-mahout

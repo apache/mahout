@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: Expectation Maximization
 theme:
    name: retro-mahout

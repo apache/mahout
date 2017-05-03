@@ -1,5 +1,5 @@
 ---
-layout: mr_tutorial
+layout: tutorial
 title: k-means-commandline
 theme:
    name: retro-mahout

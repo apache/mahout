@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: Fuzzy K-Means
 theme:
    name: retro-mahout

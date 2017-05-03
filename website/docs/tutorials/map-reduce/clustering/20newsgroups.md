@@ -1,5 +1,5 @@
 ---
-layout: mr_tutorial
+layout: tutorial
 title: 20Newsgroups
 theme:
    name: retro-mahout

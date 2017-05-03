@@ -1,5 +1,5 @@
 ---
-layout: mr_tutorial
+layout: tutorial
 title: Clustering of synthetic control data
 theme:
    name: retro-mahout

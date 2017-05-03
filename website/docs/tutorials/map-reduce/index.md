@@ -1,5 +1,5 @@
 ---
-layout: mr_tutorial
+layout: tutorial
 title: Deprecated Map Reduce Based Examples
 theme:
     name: mahout2

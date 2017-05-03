@@ -1,5 +1,5 @@
 ---
-layout: mr_tutorial
+layout: tutorial
 title: canopy-commandline
 theme:
    name: retro-mahout

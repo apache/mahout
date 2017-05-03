@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: Locally Weighted Linear Regression
 theme:
     name: retro-mahout

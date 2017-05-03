@@ -1,5 +1,5 @@
 ---
-layout: mr_tutorial
+layout: tutorial
 title: fuzzy-k-means-commandline
 theme:
    name: retro-mahout

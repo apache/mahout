@@ -1,5 +1,5 @@
 ---
-layout: mr_tutorial
+layout: tutorial
 title: Viewing Results
 theme:
    name: retro-mahout

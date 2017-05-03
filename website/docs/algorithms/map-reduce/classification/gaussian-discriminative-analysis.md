@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: Gaussian Discriminative Analysis
 theme:
     name: retro-mahout

@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: LLR - Log-likelihood Ratio
 theme:
    name: retro-mahout

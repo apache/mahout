@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: Canopy Clustering
 theme:
    name: retro-mahout

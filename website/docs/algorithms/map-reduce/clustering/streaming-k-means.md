@@ -1,5 +1,5 @@
 ---
-layout: mr_algorithm
+layout: algorithm
 title: Spectral Clustering
 theme:
    name: retro-mahout
