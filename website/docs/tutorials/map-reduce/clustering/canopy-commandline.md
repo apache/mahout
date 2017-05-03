@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: canopy-commandline
+title: (Deprecated)  canopy-commandline
 theme:
    name: retro-mahout
 ---

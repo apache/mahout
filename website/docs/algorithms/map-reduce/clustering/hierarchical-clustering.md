@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Hierarchical Clustering
+title: (Deprecated)  Hierarchical Clustering
 theme:
    name: retro-mahout
 ---

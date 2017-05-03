@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Fuzzy K-Means
+title: (Deprecated)  Fuzzy K-Means
 theme:
    name: retro-mahout
 ---

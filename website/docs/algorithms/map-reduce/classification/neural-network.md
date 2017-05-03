@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Neural Network
+title: (Deprecated)  Neural Network
 theme:
     name: retro-mahout
 ---

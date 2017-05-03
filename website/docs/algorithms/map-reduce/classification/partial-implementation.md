@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Partial Implementation
+title: (Deprecated)  Partial Implementation
 theme:
     name: retro-mahout
 ---

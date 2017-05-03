@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Collocations
+title: (Deprecated)  Collocations
 theme:
     name: retro-mahout
 ---

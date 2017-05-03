@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Multilayer Perceptron
+title: (Deprecated)  Multilayer Perceptron
 theme:
     name: retro-mahout
 ---

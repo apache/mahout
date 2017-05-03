@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: Clustering of synthetic control data
+title: (Deprecated)  Clustering of synthetic control data
 theme:
    name: retro-mahout
 ---

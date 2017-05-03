@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: fuzzy-k-means-commandline
+title: (Deprecated)  fuzzy-k-means-commandline
 theme:
    name: retro-mahout
 ---

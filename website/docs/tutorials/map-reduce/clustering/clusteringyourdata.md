@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: ClusteringYourData
+title: (Deprecated)  ClusteringYourData
 theme:
    name: retro-mahout
 ---

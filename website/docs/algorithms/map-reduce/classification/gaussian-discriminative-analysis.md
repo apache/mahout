@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Gaussian Discriminative Analysis
+title: (Deprecated)  Gaussian Discriminative Analysis
 theme:
     name: retro-mahout
 ---

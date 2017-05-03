@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Parallel Frequent Pattern Mining
+title: (Deprecated)  Parallel Frequent Pattern Mining
 theme:
     name: retro-mahout
 ---

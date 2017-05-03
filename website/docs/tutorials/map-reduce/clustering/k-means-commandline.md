@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: k-means-commandline
+title: (Deprecated)  k-means-commandline
 theme:
    name: retro-mahout
 ---

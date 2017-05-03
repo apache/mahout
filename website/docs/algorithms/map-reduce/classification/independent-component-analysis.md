@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Independent Component Analysis
+title: (Deprecated)  Independent Component Analysis
 theme:
     name: retro-mahout
 ---

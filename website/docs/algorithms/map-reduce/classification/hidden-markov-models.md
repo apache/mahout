@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Hidden Markov Models
+title: (Deprecated)  Hidden Markov Models
 theme:
     name: retro-mahout
 ---

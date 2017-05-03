@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Support Vector Machines
+title: (Deprecated)  Support Vector Machines
 theme:
     name: retro-mahout
 ---

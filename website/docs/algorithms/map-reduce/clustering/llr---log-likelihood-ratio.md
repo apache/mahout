@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: LLR - Log-likelihood Ratio
+title: (Deprecated)  LLR - Log-likelihood Ratio
 theme:
    name: retro-mahout
 ---

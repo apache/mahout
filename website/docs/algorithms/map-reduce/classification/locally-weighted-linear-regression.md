@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Locally Weighted Linear Regression
+title: (Deprecated)  Locally Weighted Linear Regression
 theme:
     name: retro-mahout
 ---

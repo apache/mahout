@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Recommender Documentation
+title: (Deprecated)  Recommender Documentation
 theme:
     name: retro-mahout
 ---

@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: Viewing Result
+title: (Deprecated)  Viewing Result
 theme:
    name: retro-mahout
 ---

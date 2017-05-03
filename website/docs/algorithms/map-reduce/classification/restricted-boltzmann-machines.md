@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Restricted Boltzmann Machines
+title: (Deprecated)  Restricted Boltzmann Machines
 theme:
     name: retro-mahout
 ---

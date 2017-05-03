@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Deprecated Map Reduce Algorithms
+title: (Deprecated)  Deprecated Map Reduce Algorithms
 theme:
     name: mahout2
 ---

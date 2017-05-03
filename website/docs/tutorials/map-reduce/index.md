@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: Deprecated Map Reduce Based Examples
+title: (Deprecated)  Deprecated Map Reduce Based Examples
 theme:
     name: mahout2
 ---

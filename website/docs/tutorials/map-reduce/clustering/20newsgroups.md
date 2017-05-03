@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: 20Newsgroups
+title: (Deprecated)  20Newsgroups
 theme:
    name: retro-mahout
 ---

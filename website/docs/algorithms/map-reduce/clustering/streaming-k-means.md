@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Spectral Clustering
+title: (Deprecated)  Spectral Clustering
 theme:
    name: retro-mahout
 ---

@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Logistic Regression
+title: (Deprecated)  Logistic Regression
 theme:
     name: retro-mahout
 ---

@@ -1,6 +1,6 @@
 ---
 layout: default
-title: MR - Map Reduce
+title: (Deprecated)  MR - Map Reduce
 theme:
    name: retro-mahout
 ---

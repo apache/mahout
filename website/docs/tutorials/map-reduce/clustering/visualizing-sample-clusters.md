@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: Visualizing Sample Clusters
+title: (Deprecated)  Visualizing Sample Clusters
 theme:
    name: retro-mahout
 ---

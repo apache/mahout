@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Recommender First-Timer FAQ
+title: (Deprecated)  Recommender First-Timer FAQ
 theme:
     name: retro-mahout
 ---

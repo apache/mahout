@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: NaiveBayes
+title: (Deprecated)  NaiveBayes
 theme:
     name: retro-mahout
 ---

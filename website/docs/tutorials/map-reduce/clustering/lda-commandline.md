@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: lda-commandline
+title: (Deprecated)  lda-commandline
 theme:
    name: retro-mahout
 ---

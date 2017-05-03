@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: ClassifyingYourData
+title: (Deprecated)  ClassifyingYourData
 theme:
     name: retro-mahout
 ---

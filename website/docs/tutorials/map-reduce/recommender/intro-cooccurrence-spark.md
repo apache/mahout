@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Perceptron and Winnow
+title: (Deprecated)  Perceptron and Winnow
 theme:
     name: retro-mahout
 ---

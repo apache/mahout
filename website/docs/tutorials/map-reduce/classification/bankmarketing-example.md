@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title:
+title: (Deprecated) 
 theme:
     name: retro-mahout
 ---

@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Latent Dirichlet Allocation
+title: (Deprecated)  Latent Dirichlet Allocation
 theme:
    name: retro-mahout
 ---

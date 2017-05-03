@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Random Forests
+title: (Deprecated)  Random Forests
 theme:
     name: retro-mahout
 ---

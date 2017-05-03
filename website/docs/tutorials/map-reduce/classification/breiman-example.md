@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: Breiman Example
+title: (Deprecated)  Breiman Example
 theme:
     name: retro-mahout
 ---

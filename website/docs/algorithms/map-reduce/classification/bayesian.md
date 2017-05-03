@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title:
+title: (Deprecated) 
 theme:
     name: retro-mahout
 ---

@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: Clustering Seinfeld Episodes
+title: (Deprecated)  Clustering Seinfeld Episodes
 theme:
    name: retro-mahout
 ---

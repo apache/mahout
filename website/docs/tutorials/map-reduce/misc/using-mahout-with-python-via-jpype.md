@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Using Mahout with Python via JPype
+title: (Deprecated)  Using Mahout with Python via JPype
 theme:
     name: retro-mahout
 ---

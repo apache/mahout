@@ -1,6 +1,6 @@
 ---
 layout: default
-title: User Based Recommender in 5 Minutes
+title: (Deprecated)  User Based Recommender in 5 Minutes
 theme:
     name: retro-mahout
 ---

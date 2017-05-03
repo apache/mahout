@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Cluster Dumper
+title: (Deprecated)  Cluster Dumper
 theme:
    name: retro-mahout
 ---

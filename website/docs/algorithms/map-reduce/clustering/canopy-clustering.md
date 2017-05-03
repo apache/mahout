@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Canopy Clustering
+title: (Deprecated)  Canopy Clustering
 theme:
    name: retro-mahout
 ---

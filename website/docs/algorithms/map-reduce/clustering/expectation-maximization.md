@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Expectation Maximization
+title: (Deprecated)  Expectation Maximization
 theme:
    name: retro-mahout
 ---

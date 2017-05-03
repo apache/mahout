@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: Class Discovery
+title: (Deprecated)  Class Discovery
 theme:
     name: retro-mahout
 ---

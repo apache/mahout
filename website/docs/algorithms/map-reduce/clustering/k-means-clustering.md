@@ -1,6 +1,6 @@
 ---
 layout: algorithm
-title: K-Means Clustering
+title: (Deprecated)  K-Means Clustering
 theme:
    name: retro-mahout
 ---

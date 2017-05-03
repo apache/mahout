@@ -1,6 +1,6 @@
 ---
 layout: tutorial
-title: Wikipedia XML parser and Naive Bayes Example
+title: (Deprecated)  Wikipedia XML parser and Naive Bayes Example
 theme:
     name: retro-mahout
 ---
