@@ -1,41 +1,35 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
 
-/**
-  * Created by rawkintrevo on 4/5/17.
-  */
-
-// Only need these to intelliJ doesn't whine
-
-import org.apache.mahout.drivers.ItemSimilarityDriver.parser
-import org.apache.mahout.math._
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.mahout.sparkbindings._
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
-import org.apache.spark.SparkConf
-val conf = new SparkConf().setAppName("Simple Application")
-val sc = new SparkContext(conf)
-
-implicit val sdc: org.apache.mahout.sparkbindings.SparkDistributedContext = sc2sdc(sc)
-
-
-// </pandering to intellij>
-
-// http://files.grouplens.org/datasets/hetrec2011/hetrec2011-lastfm-2k.zip
-// start mahout shell like this: $MAHOUT_HOME/bin/mahout spark-shell
+/*
+ * Download data from: http://files.grouplens.org/datasets/hetrec2011/hetrec2011-lastfm-2k.zip
+ * then run this in the mahout shell.
+ */
 
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 
 // We need to turn our raw text files into RDD[(String, String)] 
-val userTagsRDD = sc.textFile("/home/rawkintrevo/gits/MahoutExamples/data/lastfm/user_taggedartists.dat").map(line => line.split("\t")).map(a => (a(0), a(2))).filter(_._1 != "userID")
+val userTagsRDD = sc.textFile("/path/to/lastfm/user_taggedartists.dat").map(line => line.split("\t")).map(a => (a(0), a(2))).filter(_._1 != "userID")
 val userTagsIDS = IndexedDatasetSpark.apply(userTagsRDD)(sc)
 
-val userArtistsRDD = sc.textFile("/home/rawkintrevo/gits/MahoutExamples/data/lastfm/user_artists.dat").map(line => line.split("\t")).map(a => (a(0), a(1))).filter(_._1 != "userID")
+val userArtistsRDD = sc.textFile("/path/to/lastfm/user_artists.dat").map(line => line.split("\t")).map(a => (a(0), a(1))).filter(_._1 != "userID")
 val userArtistsIDS = IndexedDatasetSpark.apply(userArtistsRDD)(sc)
 
-val userFriendsRDD = sc.textFile("/home/rawkintrevo/gits/MahoutExamples/data/lastfm/user_friends.dat").map(line => line.split("\t")).map(a => (a(0), a(1))).filter(_._1 != "userID")
+val userFriendsRDD = sc.textFile("/path/to/data/lastfm/user_friends.dat").map(line => line.split("\t")).map(a => (a(0), a(1))).filter(_._1 != "userID")
 val userFriendsIDS = IndexedDatasetSpark.apply(userFriendsRDD)(sc)
 
 import org.apache.mahout.math.cf.SimilarityAnalysis
@@ -44,8 +38,8 @@ val artistReccosLlrDrmListByArtist = SimilarityAnalysis.cooccurrencesIDSs(Array(
 
 // Anonymous User
 
-val artistMap = sc.textFile("/home/rawkintrevo/gits/MahoutExamples/data/lastfm/artists.dat").map(line => line.split("\t")).map(a => (a(1), a(0))).filter(_._1 != "name").collect.toMap
-val tagsMap = sc.textFile("/home/rawkintrevo/gits/MahoutExamples/data/lastfm/tags.dat").map(line => line.split("\t")).map(a => (a(1), a(0))).filter(_._1 != "tagValue").collect.toMap
+val artistMap = sc.textFile("/path/to/lastfm/artists.dat").map(line => line.split("\t")).map(a => (a(1), a(0))).filter(_._1 != "name").collect.toMap
+val tagsMap = sc.textFile("/path/to/lastfm/tags.dat").map(line => line.split("\t")).map(a => (a(1), a(0))).filter(_._1 != "tagValue").collect.toMap
 
 // Watch your skin- you're not wearing armour. (This will fail on misspelled artists
 // This is neccessary because the ids are integer-strings already, and for this demo I didn't want to chance them to Integer types (bc more often you'll have strings).

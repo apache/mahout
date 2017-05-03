@@ -11,6 +11,11 @@ theme:
 Description
 -->
 
+### [Precanned Algorithms in Apache Mahout](https://rawkintrevo.org/2017/05/02/introducing-pre-canned-algorithms-apache-mahout/)
+**Trevor Grant** | _05/02/2017_ | rawkintrevo.org
+
+An introduction to the new Algorithms Framework
+
 ### [Getting Started With Apache Mahout](https://datascience.ibm.com/blog/getting-started-with-apache-mahout-2/)
 **Trevor Grant** | _04/25/2017_ | datascience.ibm.com/blog
 
