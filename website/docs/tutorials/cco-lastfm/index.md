@@ -14,6 +14,8 @@ I’m going to assume you’ve unzipped them to /path/to/lastfm/*
 We’re going to use a new trick for creating our IndexedDataSets, the `apply` function.  `apply` takes an `RDD[(String, String)]` that is an RDD of tuples where both elements are strings. We load RDDs, and use Spark to manipulate the RDDs into this form.  The files from LastFM are tab seperated- but it should be noted, that this could easily be done from log files, but would just take a touch more Spark-Fu.  
 
 The second important thing to note is that the first element in each tuple is going to be the rows in the resulting matrix, the second element will be the column, and at that position there will be a one.  The BiDictionary will automatically be created from the strings. 
+For those following along at home- [the full Scala worksheet](cco-lastfm.scala) might be easier than copying and pasting 
+from this page.
 
 ```
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark

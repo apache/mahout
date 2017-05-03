@@ -213,7 +213,7 @@ Except, much much more.
 
 At the begining I mentioned a few important features of Zeppelin, that we could leverage to use Zeppelin for visualizatoins.
 
-#### Example 1: Visualizing a Matrix (Sample)
+#### Example 1: Visualizing a Matrix (Sample) with R
 
 In Mahout we can use `Matrices.symmetricUniformView` to create a Gaussian Matrix. 
 
