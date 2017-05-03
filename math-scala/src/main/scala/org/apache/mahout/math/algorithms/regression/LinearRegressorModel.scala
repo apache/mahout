@@ -38,8 +38,6 @@ trait LinearRegressorModel[K] extends RegressorModel[K] {
   var pval: MahoutVector = _
   var degreesFreedom: Int = _
   var trainingExamples :Int = _
-  var fScore: Double = _
-  var fpval: Double = _
 
 
 }
@@ -60,46 +58,30 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
     addIntercept = hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('addIntercept, true)
   }
 
+
   def calculateStandardError[M[K] <: LinearRegressorModel[K]](X: DrmLike[K],
                              drmTarget: DrmLike[K],
                              drmXtXinv: Matrix,
                              model: M[K]): M[K] = {
     import org.apache.mahout.math.function.Functions.SQRT
     import org.apache.mahout.math.scalabindings.MahoutCollections._
-    var modelOut = model
+
     val yhat = X %*% model.beta
     val residuals = drmTarget - yhat
-    val ete = (residuals.t %*% residuals).collect // 1x1
+
+    // Setting modelOut.rss
+    // Changed name from ete, to rssModel.  This is residual sum of squares for model of yhat vs y
+    var modelOut = calculateResidualSumOfSquares(model,residuals)
+
     val n = drmTarget.nrow
     val k = safeToNonNegInt(X.ncol)
     val invDegFreedomKindOf = 1.0 / (n - k)
-    val varCovarMatrix = invDegFreedomKindOf * ete(0,0) * drmXtXinv
+    val varCovarMatrix = invDegFreedomKindOf * modelOut.rss * drmXtXinv
     val se = varCovarMatrix.viewDiagonal.assign(SQRT)
     val tScore = model.beta / se
     val tDist = new TDistribution(n-k)
 
-    // This is the residual sum of squares for just the intercept
-    //println(" drmTarget.ncol) = " +  drmTarget.ncol)
-    val interceptCol = model.beta.length - 1
-    val targetMean: Double = drmTarget.colMeans().get(0)
-    val rssint: Double = ((drmTarget - targetMean  ).t %*% (drmTarget - targetMean)).zSum()
-    val rssmod: Double = ete.zSum()
-    // ete above is the RSS for the calculated model
-
-    //println(" model.beta(0) = " +  model.beta(0))
-    //println(" model.beta(interceptCol) = " +  model.beta(interceptCol))
-    //println("rssint = " + rssint)
-    //println("rssmod = " + rssmod)
-
-    val groupDof = X.ncol-1
-    val fScore = ((rssint - rssmod) / groupDof) / ( rssmod / (X.nrow - groupDof- 1 ))
-    //println("groupDof = " + groupDof)
-    //println("fScore = " + fScore)
-    val fDist = new FDistribution(groupDof,n-groupDof-1)
-
-
     val pval = dvec(tScore.toArray.map(t => 2 * (1.0 - tDist.cumulativeProbability(Math.abs(t))) ))
-    val fpval = 1.0 - fDist.cumulativeProbability(fScore)
 
     // ^^ TODO bug in this calculation- fix and add test
     //degreesFreedom = k
@@ -108,25 +90,40 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
     modelOut.pval = pval
     // for degrees of freedom, dont count the intercept term that was added
     modelOut.degreesFreedom = X.ncol - 1
-    modelOut.fScore = fScore
+
     modelOut.trainingExamples = n.toInt
-    modelOut.fpval = fpval
-    modelOut.summary = generateSummaryString(modelOut)
 
     if (calcCommonStatistics){
-      modelOut = calculateCommonStatistics(modelOut, drmTarget, residuals)
+      modelOut = calculateCommonStatistics(modelOut, X, drmTarget, residuals)
     }
+
+    // Let Statistics Get Calculated prior to assigning the summary
+    modelOut.summary = generateSummaryString(modelOut)
+
     modelOut
   }
 
+  // Since rss is needed for multiple test statistics, use this function to cache this value
+  def calculateResidualSumOfSquares[M[K] <: LinearRegressorModel[K]](model: M[K],residuals: DrmLike[K]) : M[K] ={
+    // This is a check so that model.rss isnt unnecessarily computed
+    // by default setting this value to negative, so that the first time its garaunteed to evaluate.
+    if(model.rss < 0) {
+      val ete = (residuals.t %*% residuals).collect // 1x1
+      model.rss = ete(0, 0)
+    }
+    model
+  }
+
   def calculateCommonStatistics[M[K] <: LinearRegressorModel[K]](model: M[K],
+                                                                 drmFeatures: DrmLike[K],
                                                                  drmTarget: DrmLike[K],
                                                                  residuals: DrmLike[K]): M[K] ={
     var modelOut = model
     modelOut = FittnessTests.CoefficientOfDetermination(model, drmTarget, residuals)
     modelOut = FittnessTests.MeanSquareError(model, residuals)
+    modelOut = FittnessTests.FTest(model, drmFeatures, drmTarget)
 
-    modelOut.summary += s"MSE: ${modelOut.mse}\nR2: ${modelOut.r2}\n"
+
     modelOut
   }
 
@@ -142,7 +139,9 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
         (0 until X.ncol).map(i => s"X${i}\t${modelOut.beta(i)}").mkString("\n")
       if (calcCommonStatistics) { // we do this in calcStandard errors to avoid calculating residuals twice
         val residuals = drmTarget - (X %*% modelOut.beta)
-        modelOut = calculateCommonStatistics(modelOut, drmTarget, residuals)
+        // If rss is already set, then this will drop through to calculateCommonStatistics
+        modelOut = calculateResidualSumOfSquares(modelOut,residuals)
+        modelOut = calculateCommonStatistics(modelOut, X, drmTarget, residuals)
       }
 
       modelOut
@@ -179,10 +178,12 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
     val k = model.beta.length
 
       // Using Formatted Print here to pretty print the columns
-      "\nCoef.\t\tEstimate\t\tStd. Error\t\tt-score\t\t\tPr(Beta=0)\n" +
-      (0 until k).map(i => "X%-3d\t\t%+5.5f\t\t%+5.5f\t\t%+5.5f\t\t%+5.5f".format(i,model.beta(i),model.se(i),model.tScore(i),model.pval(i))).mkString("\n") +
-      "\nF-statistic: " + model.fScore + " on " + model.degreesFreedom + " and " +
-        (model.trainingExamples - model.degreesFreedom  - 1) + " DF,  p-value: " + 0.009545 + "\n"
-
+    var summaryString  = "\nCoef.\t\tEstimate\t\tStd. Error\t\tt-score\t\t\tPr(Beta=0)\n" +
+      (0 until k).map(i => "X%-3d\t\t%+5.5f\t\t%+5.5f\t\t%+5.5f\t\t%+5.5f".format(i,model.beta(i),model.se(i),model.tScore(i),model.pval(i))).mkString("\n")
+    if(calcCommonStatistics) {
+      summaryString += "\nF-statistic: " + model.fScore + " on " + model.degreesFreedom + " and " +
+        (model.trainingExamples - model.degreesFreedom - 1) + " DF,  p-value: " + 0.009545 + "\n"
+    }
+    summaryString
   }
 }

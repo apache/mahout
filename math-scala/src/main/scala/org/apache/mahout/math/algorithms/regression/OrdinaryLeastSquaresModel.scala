@@ -55,6 +55,7 @@ class OrdinaryLeastSquares[K] extends LinearRegressorFitter[K] {
     }
 
     var X = drmFeatures
+
     // TODO : move intercept betas to the first column, not the last column ??
     if (addIntercept) {
       X = X cbind 1

@@ -19,14 +19,19 @@
 
 package org.apache.mahout.math.algorithms.regression.tests
 
+
+
+
+
+import org.apache.commons.math3.distribution.FDistribution
 import org.apache.mahout.math.algorithms.regression.RegressorModel
 import org.apache.mahout.math.algorithms.preprocessing.MeanCenter
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.function.Functions.SQUARE
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.drm.RLikeDrmOps._
 
 import scala.language.higherKinds
-import scala.reflect.ClassTag
 
 object FittnessTests {
 
@@ -41,8 +46,7 @@ object FittnessTests {
     val r2 = 1 - (sumSquareResiduals / sumSquareTotal)
     model.r2 = r2
     model.testResults += ('r2 -> r2)  // need setResult and setSummary method incase you change in future, also to initialize map if non exists or update value if it does
-    // this is already being done in  -> calculateCommonStatistics
-    //model.summary += s"\nR^2: ${r2}"
+    model.summary += s"\nR^2: ${r2}"
     model
   }
 
@@ -52,11 +56,40 @@ object FittnessTests {
     val mse = residuals.assign(SQUARE).sum / residuals.nrow
     model.mse = mse
     model.testResults += ('mse -> mse)
-    // this is already being done in  -> calculateCommonStatistics
-    //model.summary += s"\nMean Squared Error: ${mse}"
+    model.summary += s"\nMean Squared Error: ${mse}"
     model
   }
 
+  // https://en.wikipedia.org/wiki/xxxx
+  def FTest[R[K] <: RegressorModel[K], K](model: R[K],  drmFeatures: DrmLike[K], drmTarget: DrmLike[K]): R[K] = {
+
+    // This is the residual sum of squares for just the intercept
+    //println(" drmTarget.ncol) = " +  drmTarget.ncol)
+    val interceptCol = drmTarget.ncol - 1
+    //val targetMean: Double = drmTarget
+    val targetMean: Double = drmTarget.colMeans().get(0)
+
+    val rssint: Double = ((drmTarget - targetMean  ).t %*% (drmTarget - targetMean)).zSum()
+    // ete above is the RSS for the calculated model
+
+    //println(" model.beta(0) = " +  model.beta(0))
+    //println(" model.beta(interceptCol) = " +  model.beta(interceptCol))
+    //println("rssint = " + rssint)
+    //println("rssmod = " + rssmod)
+
+    val groupDof = drmFeatures.ncol-1
+    val fScore = ((rssint - model.rss) / groupDof) / ( model.rss / (drmFeatures.nrow - groupDof- 1 ))
+    //println("groupDof = " + groupDof)
+    //println("fScore = " + fScore)
+    val fDist = new FDistribution(groupDof,drmTarget.nrow-groupDof-1)
+    val fpval = 1.0 - fDist.cumulativeProbability(fScore)
+    model.fpval = fpval
+
+    model.fScore = fScore
+    model.testResults += ('fScore -> fScore)
+    model.summary += s"\nFscore : ${fScore}"
+    model
+  }
 
 
 }
