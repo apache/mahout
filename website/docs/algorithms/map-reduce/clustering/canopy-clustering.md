@@ -5,6 +5,9 @@ theme:
    name: retro-mahout
 ---
 
+
+**_This Document refers to the deprecated Map-Reduce Version of this algorithm, please see [the new implementation]({{ BASE_PATH }}/algorithms/clustering/canopy.html)_**
+
 <a name="CanopyClustering-CanopyClustering"></a>
 # Canopy Clustering
 
