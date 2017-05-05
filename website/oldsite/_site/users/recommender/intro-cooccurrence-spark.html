@@ -1,0 +1,728 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Perceptron and Winnow</title>
+  
+  <meta name="author" content="The Apache Software Foundation">
+
+  <!-- Enable responsive viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap styles -->
+  <link href="/assets/themes/mahout3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional theme -->
+  <link href="/assets/themes/mahout3/css/bootstrap-theme.min.css" rel="stylesheet">
+  <!-- Sticky Footer -->
+  <link href="/assets/themes/mahout3/css/bs-sticky-footer.css" rel="stylesheet">
+
+  <!-- Custom styles -->
+  <link href="/assets/themes/mahout3/css/style.css" rel="stylesheet" type="text/css" media="all">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+  <!-- atom & rss feed -->
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script');
+    mathjax.type = 'text/javascript';
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' :
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+
+      var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">
+        <img src="/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
+      </a>
+    </div>
+
+    <!--<div class="nav-collapse collapse">-->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+        <!-- <li><a href="/">Home</a></li> -->
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">General<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/general/downloads.html">Downloads</a>
+                <li><a href="/general/who-we-are.html">Who we are</a>
+                <li><a href="/general/mailing-lists,-irc-and-archives.html">Mailing Lists</a>
+                <li><a href="/general/release-notes.html">Release Notes</a>
+                <li><a href="/general/books-tutorials-and-talks.html">Books, Tutorials, Talks</a></li>
+                <li><a href="/general/powered-by-mahout.html">Powered By Mahout</a>
+                <li><a href="/general/professional-support.html">Professional Support</a>
+                <li class="divider"></li>
+                <li class="nav-header">Resources</li>
+                <li><a href="/general/reference-reading.html">Reference Reading</a>
+                <li><a href="/general/faq.html">FAQ</a>
+                <li class="divider"></li>
+                <li class="nav-header">Legal</li>
+                <li><a href="http://www.apache.org/licenses/">License</a></li>
+                <li><a href="http://www.apache.org/security/">Security</a></li>
+                <li><a href="/general/privacy-policy.html">Privacy Policy</a>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developers<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/developers/developer-resources.html">Developer resources</a></li>
+                <li><a href="/developers/version-control.html">Version control</a></li>
+                <li><a href="/developers/buildingmahout.html">Build from source</a></li>
+                <li><a href="/developers/issue-tracker.html">Issue tracker</a></li>
+                <li><a href="https://builds.apache.org/job/Mahout-Quality/" target="_blank">Code quality reports</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Contributions</li>
+                <li><a href="/developers/how-to-contribute.html">How to contribute</a></li>
+                <li><a href="/developers/how-to-become-a-committer.html">How to become a committer</a></li>
+                <li><a href="/developers/gsoc.html">GSoC</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">For committers</li>
+                <li><a href="/developers/how-to-update-the-website.html">How to update the website</a></li>
+                <li><a href="/developers/patch-check-list.html">Patch check list</a></li>
+                <li><a href="/developers/github.html">Handling Github PRs</a></li>
+                <li><a href="/developers/how-to-release.html">How to release</a></li>
+                <li><a href="/developers/thirdparty-dependencies.html">Third party dependencies</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout-Samsara<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/sparkbindings/home.html">Scala &amp; Spark Bindings Overview</a></li>
+                <li><a href="/users/sparkbindings/faq.html">FAQ</a></li>
+                <li><a href="/users/flinkbindings/playing-with-samsara-flink.html">Flink Bindings Overview</a></li>
+                <li class="nav-header">Engines</li>
+                <li><a href="/users/sparkbindings/home.html">Spark</a></li>
+                <li><a href="/users/environment/h2o-internals.html">H2O</a></li>
+                <li><a href="/users/flinkbindings/flink-internals.html">Flink</a></li>
+                <li class="nav-header">References</li>
+                <li><a href="/users/environment/in-core-reference.html">In-Core Algebraic DSL Reference</a></li>
+                <li><a href="/users/environment/out-of-core-reference.html">Distributed Algebraic DSL Reference</a></li>
+                <li class="nav-header">Tutorials</li>
+                <li><a href="/users/sparkbindings/play-with-shell.html">Playing with Mahout's Spark Shell</a></li>
+                <li><a href="/users/environment/how-to-build-an-app.html">How to build an app</a></li>
+                <li><a href="/users/environment/classify-a-doc-from-the-shell.html">Building a text classifier in Mahout's Spark Shell</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Algorithms<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li class="nav-header">Distributed Matrix Decomposition</li>
+                <li><a href="/users/algorithms/d-qr.html">Cholesky QR</a></li>
+                <li><a href="/users/algorithms/d-ssvd.html">SSVD</a></li>
+                <li><a href="/users/algorithms/d-als.html">Distributed ALS</a></li>
+                <li><a href="/users/algorithms/d-spca.html">SPCA</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/algorithms/recommender-overview.html">Recommender Overview</a></li>
+                <li><a href="/users/algorithms/intro-cooccurrence-spark.html">Intro to cooccurrence-based<br/> recommendations with Spark</a></li>
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/algorithms/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">MapReduce Basics<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li><a href="/users/basics/quickstart.html">Overview</a>
+                <li class="divider"></li>
+                <li class="nav-header">Working with text</li>
+                <li><a href="/users/basics/creating-vectors-from-text.html">Creating vectors from text</a>
+                <li><a href="/users/basics/collocations.html">Collocations</a>
+                <li class="divider"></li>
+                <li class="nav-header">Dimensionality reduction</li>
+                <li><a href="/users/dim-reduction/dimensional-reduction.html">Singular Value Decomposition</a></li>
+                <li><a href="/users/dim-reduction/ssvd.html">Stochastic SVD</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Topic Models</li>
+                <li><a href="/users/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout MapReduce<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/classification/bayesian.html">Naive Bayes</a></li>
+                <li><a href="/users/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li><a href="/users/classification/logistic-regression.html">Logistic Regression (Single Machine)</a></li>
+                <li><a href="/users/classification/partial-implementation.html">Random Forest</a></li>
+                <li class="nav-header">Classification Examples</li>
+                <li><a href="/users/classification/breiman-example.html">Breiman example</a></li>
+                <li><a href="/users/classification/twenty-newsgroups.html">20 newsgroups example</a></li>
+                <li><a href="/users/classification/bankmarketing-example.html">SGD classifier bank marketing</a></li>
+                <li><a href="/users/classification/wikipedia-classifier-example.html">Wikipedia XML parser and classifier</a></li>
+                <li class="nav-header">Clustering</li>
+                <li><a href="/users/clustering/k-means-clustering.html">k-Means</a></li>
+                <li><a href="/users/clustering/canopy-clustering.html">Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means.html">Fuzzy k-Means</a></li>
+                <li><a href="/users/clustering/streaming-k-means.html">Streaming KMeans</a></li>
+                <li><a href="/users/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li class="nav-header">Clustering Commandline usage</li>
+                <li><a href="/users/clustering/k-means-commandline.html">Options for k-Means</a></li>
+                <li><a href="/users/clustering/canopy-commandline.html">Options for Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means-commandline.html">Options for Fuzzy k-Means</a></li>
+                <li class="nav-header">Clustering Examples</li>
+                <li><a href="/users/clustering/clustering-of-synthetic-control-data.html">Synthetic data</a></li>
+                <li class="nav-header">Cluster Post processing</li>
+                <li><a href="/users/clustering/cluster-dumper.html">Cluster Dumper tool</a></li>
+                <li><a href="/users/clustering/visualizing-sample-clusters.html">Cluster visualisation</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/recommender/recommender-first-timer-faq.html">First Timer FAQ</a></li>
+                <li><a href="/users/recommender/userbased-5-minutes.html">A user-based recommender <br/>in 5 minutes</a></li>
+                <li><a href="/users/recommender/matrix-factorization.html">Matrix factorization-based<br/> recommenders</a></li>
+                <li><a href="/users/recommender/recommender-documentation.html">Overview</a></li>
+                <li><a href="/users/recommender/intro-itembased-hadoop.html">Intro to item-based recommendations<br/> with Hadoop</a></li>
+                <li><a href="/users/recommender/intro-als-hadoop.html">Intro to ALS recommendations<br/> with Hadoop</a></li>
+            </ul>
+        </li>
+        <!--  <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Recommendations<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+
+          </ul> -->
+        </li>
+    </ul>
+</div><!--/.nav-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+<body>
+
+<div id="wrap">
+  <body class="">
+
+  <div class="container">
+    <p>#Intro to Cooccurrence Recommenders with Spark</p>
+
+<p>Mahout provides several important building blocks for creating recommendations using Spark. <em>spark-itemsimilarity</em> can 
+be used to create “other people also liked these things” type recommendations and paired with a search engine can 
+personalize recommendations for individual users. <em>spark-rowsimilarity</em> can provide non-personalized content based 
+recommendations and when paired with a search engine can be used to personalize content based recommendations.</p>
+
+<p>##References</p>
+
+<ol>
+  <li>A free ebook, which talks about the general idea: <a href="https://www.mapr.com/practical-machine-learning">Practical Machine Learning</a></li>
+  <li>A slide deck, which talks about mixing actions or other indicators: <a href="http://occamsmachete.com/ml/2014/10/07/creating-a-unified-recommender-with-mahout-and-a-search-engine/">Creating a Unified Recommender</a></li>
+  <li>Two blog posts: <a href="http://occamsmachete.com/ml/2014/08/11/mahout-on-spark-whats-new-in-recommenders/">What’s New in Recommenders: part #1</a>
+and  <a href="http://occamsmachete.com/ml/2014/09/09/mahout-on-spark-whats-new-in-recommenders-part-2/">What’s New in Recommenders: part #2</a></li>
+  <li>A post describing the loglikelihood ratio:  <a href="http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html">Surprise and Coinsidense</a>  LLR is used to reduce noise in the data while keeping the calculations O(n) complexity.</li>
+</ol>
+
+<p>Below are the command line jobs but the drivers and associated code can also be customized and accessed from the Scala APIs.</p>
+
+<p>##1. spark-itemsimilarity
+<em>spark-itemsimilarity</em> is the Spark counterpart of the of the Mahout mapreduce job called <em>itemsimilarity</em>. It takes in elements of interactions, which have userID, itemID, and optionally a value. It will produce one of more indicator matrices created by comparing every user’s interactions with every other user. The indicator matrix is an item x item matrix where the values are log-likelihood ratio strengths. For the legacy mapreduce version, there were several possible similarity measures but these are being deprecated in favor of LLR because in practice it performs the best.</p>
+
+<p>Mahout’s mapreduce version of itemsimilarity takes a text file that is expected to have user and item IDs that conform to 
+Mahout’s ID requirements–they are non-negative integers that can be viewed as row and column numbers in a matrix.</p>
+
+<p><em>spark-itemsimilarity</em> also extends the notion of cooccurrence to cross-cooccurrence, in other words the Spark version will 
+account for multi-modal interactions and create indicator matrices allowing the use of much more data in 
+creating recommendations or similar item lists. People try to do this by mixing different actions and giving them weights. 
+For instance they might say an item-view is 0.2 of an item purchase. In practice this is often not helpful. Spark-itemsimilarity’s
+cross-cooccurrence is a more principled way to handle this case. In effect it scrubs secondary actions with the action you want
+to recommend.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>spark-itemsimilarity Mahout 1.0
+Usage: spark-itemsimilarity [options]
+
+Disconnected from the target VM, address: '127.0.0.1:64676', transport: 'socket'
+Input, output options
+  -i &lt;value&gt; | --input &lt;value&gt;
+        Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)
+  -i2 &lt;value&gt; | --input2 &lt;value&gt;
+        Secondary input path for cross-similarity calculation, same restrictions as "--input" (optional). Default: empty.
+  -o &lt;value&gt; | --output &lt;value&gt;
+        Path for output, any local or HDFS supported URI (required)
+
+Algorithm control options:
+  -mppu &lt;value&gt; | --maxPrefs &lt;value&gt;
+        Max number of preferences to consider per user (optional). Default: 500
+  -m &lt;value&gt; | --maxSimilaritiesPerItem &lt;value&gt;
+        Limit the number of similarities per item to this number (optional). Default: 100
+
+Note: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.
+
+Input text file schema options:
+  -id &lt;value&gt; | --inDelim &lt;value&gt;
+        Input delimiter character (optional). Default: "[,\t]"
+  -f1 &lt;value&gt; | --filter1 &lt;value&gt;
+        String (or regex) whose presence indicates a datum for the primary item set (optional). Default: no filter, all data is used
+  -f2 &lt;value&gt; | --filter2 &lt;value&gt;
+        String (or regex) whose presence indicates a datum for the secondary item set (optional). If not present no secondary dataset is collected
+  -rc &lt;value&gt; | --rowIDColumn &lt;value&gt;
+        Column number (0 based Int) containing the row ID string (optional). Default: 0
+  -ic &lt;value&gt; | --itemIDColumn &lt;value&gt;
+        Column number (0 based Int) containing the item ID string (optional). Default: 1
+  -fc &lt;value&gt; | --filterColumn &lt;value&gt;
+        Column number (0 based Int) containing the filter string (optional). Default: -1 for no filter
+
+Using all defaults the input is expected of the form: "userID&lt;tab&gt;itemId" or "userID&lt;tab&gt;itemID&lt;tab&gt;any-text..." and all rows will be used
+
+File discovery options:
+  -r | --recursive
+        Searched the -i path recursively for files that match --filenamePattern (optional), Default: false
+  -fp &lt;value&gt; | --filenamePattern &lt;value&gt;
+        Regex to match in determining input files (optional). Default: filename in the --input option or "^part-.*" if --input is a directory
+
+Output text file schema options:
+  -rd &lt;value&gt; | --rowKeyDelim &lt;value&gt;
+        Separates the rowID key from the vector values list (optional). Default: "\t"
+  -cd &lt;value&gt; | --columnIdStrengthDelim &lt;value&gt;
+        Separates column IDs from their values in the vector values list (optional). Default: ":"
+  -td &lt;value&gt; | --elementDelim &lt;value&gt;
+        Separates vector element values in the values list (optional). Default: " "
+  -os | --omitStrength
+        Do not write the strength to the output files (optional), Default: false.
+This option is used to output indexable data for creating a search engine recommender.
+
+Default delimiters will produce output of the form: "itemID1&lt;tab&gt;itemID2:value2&lt;space&gt;itemID10:value10..."
+
+Spark config options:
+  -ma &lt;value&gt; | --master &lt;value&gt;
+        Spark Master URL (optional). Default: "local". Note that you can specify the number of cores to get a performance improvement, for example "local[4]"
+  -sem &lt;value&gt; | --sparkExecutorMem &lt;value&gt;
+        Max Java heap available as "executor memory" on each node (optional). Default: 4g
+  -rs &lt;value&gt; | --randomSeed &lt;value&gt;
+        
+  -h | --help
+        prints this usage text
+</code></pre>
+</div>
+
+<p>This looks daunting but defaults to simple fairly sane values to take exactly the same input as legacy code and is pretty flexible. It allows the user to point to a single text file, a directory full of files, or a tree of directories to be traversed recursively. The files included can be specified with either a regex-style pattern or filename. The schema for the file is defined by column numbers, which map to the important bits of data including IDs and values. The files can even contain filters, which allow unneeded rows to be discarded or used for cross-cooccurrence calculations.</p>
+
+<p>See ItemSimilarityDriver.scala in Mahout’s spark module if you want to customize the code.</p>
+
+<p>###Defaults in the <em><strong>spark-itemsimilarity</strong></em> CLI</p>
+
+<p>If all defaults are used the input can be as simple as:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>userID1,itemID1
+userID2,itemID2
+...
+</code></pre>
+</div>
+
+<p>With the command line:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity --input in-file --output out-dir
+</code></pre>
+</div>
+
+<p>This will use the “local” Spark context and will output the standard text version of a DRM</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>itemID1&lt;tab&gt;itemID2:value2&lt;space&gt;itemID10:value10...
+</code></pre>
+</div>
+
+<p>###<a name="multiple-actions">How To Use Multiple User Actions</a></p>
+
+<p>Often we record various actions the user takes for later analytics. These can now be used to make recommendations. 
+The idea of a recommender is to recommend the action you want the user to make. For an ecom app this might be 
+a purchase action. It is usually not a good idea to just treat other actions the same as the action you want to recommend. 
+For instance a view of an item does not indicate the same intent as a purchase and if you just mixed the two together you 
+might even make worse recommendations. It is tempting though since there are so many more views than purchases. With <em>spark-itemsimilarity</em>
+we can now use both actions. Mahout will use cross-action cooccurrence analysis to limit the views to ones that do predict purchases.
+We do this by treating the primary action (purchase) as data for the indicator matrix and use the secondary action (view) 
+to calculate the cross-cooccurrence indicator matrix.</p>
+
+<p><em>spark-itemsimilarity</em> can read separate actions from separate files or from a mixed action log by filtering certain lines. For a mixed 
+action log of the form:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>u1,purchase,iphone
+u1,purchase,ipad
+u2,purchase,nexus
+u2,purchase,galaxy
+u3,purchase,surface
+u4,purchase,iphone
+u4,purchase,galaxy
+u1,view,iphone
+u1,view,ipad
+u1,view,nexus
+u1,view,galaxy
+u2,view,iphone
+u2,view,ipad
+u2,view,nexus
+u2,view,galaxy
+u3,view,surface
+u3,view,nexus
+u4,view,iphone
+u4,view,ipad
+u4,view,galaxy
+</code></pre>
+</div>
+
+<p>###Command Line</p>
+
+<p>Use the following options:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity \
+	--input in-file \     # where to look for data
+    --output out-path \   # root dir for output
+    --master masterUrl \  # URL of the Spark master server
+    --filter1 purchase \  # word that flags input for the primary action
+    --filter2 view \      # word that flags input for the secondary action
+    --itemIDPosition 2 \  # column that has the item ID
+    --rowIDPosition 0 \   # column that has the user ID
+    --filterPosition 1    # column that has the filter word
+</code></pre>
+</div>
+
+<p>###Output</p>
+
+<p>The output of the job will be the standard text version of two Mahout DRMs. This is a case where we are calculating 
+cross-cooccurrence so a primary indicator matrix and cross-cooccurrence indicator matrix will be created</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>out-path
+  |-- similarity-matrix - TDF part files
+  \-- cross-similarity-matrix - TDF part-files
+</code></pre>
+</div>
+
+<p>The indicator matrix will contain the lines:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>galaxy\tnexus:1.7260924347106847
+ipad\tiphone:1.7260924347106847
+nexus\tgalaxy:1.7260924347106847
+iphone\tipad:1.7260924347106847
+surface
+</code></pre>
+</div>
+
+<p>The cross-cooccurrence indicator matrix will contain:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847
+ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897
+nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897
+galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847
+surface\tsurface:4.498681156950466 nexus:0.6795961471815897
+</code></pre>
+</div>
+
+<p><strong>Note:</strong> You can run this multiple times to use more than two actions or you can use the underlying 
+SimilarityAnalysis.cooccurrence API, which will more efficiently calculate any number of cross-cooccurrence indicators.</p>
+
+<p>###Log File Input</p>
+
+<p>A common method of storing data is in log files. If they are written using some delimiter they can be consumed directly by spark-itemsimilarity. For instance input of the form:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tiphone
+2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tipad
+2014-06-23 14:46:53.115\tu2\tpurchase\trandom text\tnexus
+2014-06-23 14:46:53.115\tu2\tpurchase\trandom text\tgalaxy
+2014-06-23 14:46:53.115\tu3\tpurchase\trandom text\tsurface
+2014-06-23 14:46:53.115\tu4\tpurchase\trandom text\tiphone
+2014-06-23 14:46:53.115\tu4\tpurchase\trandom text\tgalaxy
+2014-06-23 14:46:53.115\tu1\tview\trandom text\tiphone
+2014-06-23 14:46:53.115\tu1\tview\trandom text\tipad
+2014-06-23 14:46:53.115\tu1\tview\trandom text\tnexus
+2014-06-23 14:46:53.115\tu1\tview\trandom text\tgalaxy
+2014-06-23 14:46:53.115\tu2\tview\trandom text\tiphone
+2014-06-23 14:46:53.115\tu2\tview\trandom text\tipad
+2014-06-23 14:46:53.115\tu2\tview\trandom text\tnexus
+2014-06-23 14:46:53.115\tu2\tview\trandom text\tgalaxy
+2014-06-23 14:46:53.115\tu3\tview\trandom text\tsurface
+2014-06-23 14:46:53.115\tu3\tview\trandom text\tnexus
+2014-06-23 14:46:53.115\tu4\tview\trandom text\tiphone
+2014-06-23 14:46:53.115\tu4\tview\trandom text\tipad
+2014-06-23 14:46:53.115\tu4\tview\trandom text\tgalaxy    
+</code></pre>
+</div>
+
+<p>Can be parsed with the following CLI and run on the cluster producing the same output as the above example.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity \
+    --input in-file \
+    --output out-path \
+    --master spark://sparkmaster:4044 \
+    --filter1 purchase \
+    --filter2 view \
+    --inDelim "\t" \
+    --itemIDPosition 4 \
+    --rowIDPosition 1 \
+    --filterPosition 2
+</code></pre>
+</div>
+
+<p>##2. spark-rowsimilarity</p>
+
+<p><em>spark-rowsimilarity</em> is the companion to <em>spark-itemsimilarity</em> the primary difference is that it takes a text file version of 
+a matrix of sparse vectors with optional application specific IDs and it finds similar rows rather than items (columns). Its use is
+not limited to collaborative filtering. The input is in text-delimited form where there are three delimiters used. By 
+default it reads (rowID&lt;tab&gt;columnID1:strength1&lt;space&gt;columnID2:strength2…) Since this job only supports LLR similarity,
+ which does not use the input strengths, they may be omitted in the input. It writes 
+(rowID&lt;tab&gt;rowID1:strength1&lt;space&gt;rowID2:strength2…) 
+The output is sorted by strength descending. The output can be interpreted as a row ID from the primary input followed 
+by a list of the most similar rows.</p>
+
+<p>The command line interface is:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>spark-rowsimilarity Mahout 1.0
+Usage: spark-rowsimilarity [options]
+
+Input, output options
+  -i &lt;value&gt; | --input &lt;value&gt;
+        Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)
+  -o &lt;value&gt; | --output &lt;value&gt;
+        Path for output, any local or HDFS supported URI (required)
+
+Algorithm control options:
+  -mo &lt;value&gt; | --maxObservations &lt;value&gt;
+        Max number of observations to consider per row (optional). Default: 500
+  -m &lt;value&gt; | --maxSimilaritiesPerRow &lt;value&gt;
+        Limit the number of similarities per item to this number (optional). Default: 100
+
+Note: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.
+Disconnected from the target VM, address: '127.0.0.1:49162', transport: 'socket'
+
+Output text file schema options:
+  -rd &lt;value&gt; | --rowKeyDelim &lt;value&gt;
+        Separates the rowID key from the vector values list (optional). Default: "\t"
+  -cd &lt;value&gt; | --columnIdStrengthDelim &lt;value&gt;
+        Separates column IDs from their values in the vector values list (optional). Default: ":"
+  -td &lt;value&gt; | --elementDelim &lt;value&gt;
+        Separates vector element values in the values list (optional). Default: " "
+  -os | --omitStrength
+        Do not write the strength to the output files (optional), Default: false.
+This option is used to output indexable data for creating a search engine recommender.
+
+Default delimiters will produce output of the form: "itemID1&lt;tab&gt;itemID2:value2&lt;space&gt;itemID10:value10..."
+
+File discovery options:
+  -r | --recursive
+        Searched the -i path recursively for files that match --filenamePattern (optional), Default: false
+  -fp &lt;value&gt; | --filenamePattern &lt;value&gt;
+        Regex to match in determining input files (optional). Default: filename in the --input option or "^part-.*" if --input is a directory
+
+Spark config options:
+  -ma &lt;value&gt; | --master &lt;value&gt;
+        Spark Master URL (optional). Default: "local". Note that you can specify the number of cores to get a performance improvement, for example "local[4]"
+  -sem &lt;value&gt; | --sparkExecutorMem &lt;value&gt;
+        Max Java heap available as "executor memory" on each node (optional). Default: 4g
+  -rs &lt;value&gt; | --randomSeed &lt;value&gt;
+        
+  -h | --help
+        prints this usage text
+</code></pre>
+</div>
+
+<p>See RowSimilarityDriver.scala in Mahout’s spark module if you want to customize the code.</p>
+
+<p>#3. Using <em>spark-rowsimilarity</em> with Text Data</p>
+
+<p>Another use case for <em>spark-rowsimilarity</em> is in finding similar textual content. For instance given the tags associated with 
+a blog post,
+ which other posts have similar tags. In this case the columns are tags and the rows are posts. Since LLR is 
+the only similarity method supported this is not the optimal way to determine general “bag-of-words” document similarity. 
+LLR is used more as a quality filter than as a similarity measure. However <em>spark-rowsimilarity</em> will produce 
+lists of similar docs for every doc if input is docs with lists of terms. The Apache <a href="http://lucene.apache.org">Lucene</a> project provides several methods of <a href="http://lucene.apache.org/core/4_9_0/core/org/apache/lucene/analysis/package-summary.html#package_description">analyzing and tokenizing</a> documents.</p>
+
+<p>#<a name="unified-recommender">4. Creating a Unified Recommender</a></p>
+
+<p>Using the output of <em>spark-itemsimilarity</em> and <em>spark-rowsimilarity</em> you can build a unified cooccurrence and content based
+ recommender that can be used in both or either mode depending on indicators available and the history available at 
+runtime for a user.</p>
+
+<p>##Requirements</p>
+
+<ol>
+  <li>Mahout 0.10.0 or later</li>
+  <li>Hadoop</li>
+  <li>Spark, the correct version for your version of Mahout and Hadoop</li>
+  <li>A search engine like Solr or Elasticsearch</li>
+</ol>
+
+<p>##Indicators</p>
+
+<p>Indicators come in 3 types</p>
+
+<ol>
+  <li><strong>Cooccurrence</strong>: calculated with <em>spark-itemsimilarity</em> from user actions</li>
+  <li><strong>Content</strong>: calculated from item metadata or content using <em>spark-rowsimilarity</em></li>
+  <li><strong>Intrinsic</strong>: assigned to items as metadata. Can be anything that describes the item.</li>
+</ol>
+
+<p>The query for recommendations will be a mix of values meant to match one of your indicators. The query can be constructed 
+from user history and values derived from context (category being viewed for instance) or special precalculated data 
+(popularity rank for instance). This blending of indicators allows for creating many flavors or recommendations to fit 
+a very wide variety of circumstances.</p>
+
+<p>With the right mix of indicators developers can construct a single query that works for completely new items and new users 
+while working well for items with lots of interactions and users with many recorded actions. In other words by adding in content and intrinsic 
+indicators developers can create a solution for the “cold-start” problem that gracefully improves with more user history
+and as items have more interactions. It is also possible to create a completely content-based recommender that personalizes 
+recommendations.</p>
+
+<p>##Example with 3 Indicators</p>
+
+<p>You will need to decide how you store user action data so they can be processed by the item and row similarity jobs and 
+this is most easily done by using text files as described above. The data that is processed by these jobs is considered the 
+training data. You will need some amount of user history in your recs query. It is typical to use the most recent user history 
+but need not be exactly what is in the training set, which may include a greater volume of historical data. Keeping the user 
+history for query purposes could be done with a database by storing it in a users table. In the example above the two 
+collaborative filtering actions are “purchase” and “view”, but let’s also add tags (taken from catalog categories or other 
+descriptive metadata).</p>
+
+<p>We will need to create 1 cooccurrence indicator from the primary action (purchase) 1 cross-action cooccurrence indicator 
+from the secondary action (view) 
+and 1 content indicator (tags). We’ll have to run <em>spark-itemsimilarity</em> once and <em>spark-rowsimilarity</em> once.</p>
+
+<p>We have described how to create the collaborative filtering indicator and cross-cooccurrence indicator for purchase and view (the <a href="#multiple-actions">How to use Multiple User 
+Actions</a> section) but tags will be a slightly different process. We want to use the fact that 
+certain items have tags similar to the ones associated with a user’s purchases. This is not a collaborative filtering indicator 
+but rather a “content” or “metadata” type indicator since you are not using other users’ history, only the 
+individual that you are making recs for. This means that this method will make recommendations for items that have 
+no collaborative filtering data, as happens with new items in a catalog. New items may have tags assigned but no one
+ has purchased or viewed them yet. In the final query we will mix all 3 indicators.</p>
+
+<p>##Content Indicator</p>
+
+<p>To create a content-indicator we’ll make use of the fact that the user has purchased items with certain tags. We want to find 
+items with the most similar tags. Notice that other users’ behavior is not considered–only other item’s tags. This defines a 
+content or metadata indicator. They are used when you want to find items that are similar to other items by using their 
+content or metadata, not by which users interacted with them.</p>
+
+<p>For this we need input of the form:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>itemID&lt;tab&gt;list-of-tags
+...
+</code></pre>
+</div>
+
+<p>The full collection will look like the tags column from a catalog DB. For our ecom example it might be:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>3459860b&lt;tab&gt;men long-sleeve chambray clothing casual
+9446577d&lt;tab&gt;women tops chambray clothing casual
+...
+</code></pre>
+</div>
+
+<p>We’ll use <em>spark-rowimilairity</em> because we are looking for similar rows, which encode items in this case. As with the 
+collaborative filtering indicator and cross-cooccurrence indicator we use the –omitStrength option. The strengths created are 
+probabilistic log-likelihood ratios and so are used to filter unimportant similarities. Once the filtering or downsampling 
+is finished we no longer need the strengths. We will get an indicator matrix of the form:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>itemID&lt;tab&gt;list-of-item IDs
+...
+</code></pre>
+</div>
+
+<p>This is a content indicator since it has found other items with similar content or metadata.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>3459860b&lt;tab&gt;3459860b 3459860b 6749860c 5959860a 3434860a 3477860a
+9446577d&lt;tab&gt;9446577d 9496577d 0943577d 8346577d 9442277d 9446577e
+...  
+</code></pre>
+</div>
+
+<p>We now have three indicators, two collaborative filtering type and one content type.</p>
+
+<p>##Unified Recommender Query</p>
+
+<p>The actual form of the query for recommendations will vary depending on your search engine but the intent is the same. 
+For a given user, map their history of an action or content to the correct indicator field and perform an OR’d query.</p>
+
+<p>We have 3 indicators, these are indexed by the search engine into 3 fields, we’ll call them “purchase”, “view”, and “tags”. 
+We take the user’s history that corresponds to each indicator and create a query of the form:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Query:
+  field: purchase; q:user's-purchase-history
+  field: view; q:user's view-history
+  field: tags; q:user's-tags-associated-with-purchases
+</code></pre>
+</div>
+
+<p>The query will result in an ordered list of items recommended for purchase but skewed towards items with similar tags to 
+the ones the user has already purchased.</p>
+
+<p>This is only an example and not necessarily the optimal way to create recs. It illustrates how business decisions can be 
+translated into recommendations. This technique can be used to skew recommendations towards intrinsic indicators also. 
+For instance you may want to put personalized popular item recs in a special place in the UI. Create a popularity indicator 
+by tagging items with some category of popularity (hot, warm, cold for instance) then
+index that as a new indicator field and include the corresponding value in a query 
+on the popularity field. If we use the ecom example but use the query to get “hot” recommendations it might look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Query:
+  field: purchase; q:user's-purchase-history
+  field: view; q:user's view-history
+  field: popularity; q:"hot"
+</code></pre>
+</div>
+
+<p>This will return recommendations favoring ones that have the intrinsic indicator “hot”.</p>
+
+<p>##Notes</p>
+<ol>
+  <li>Use as much user action history as you can gather. Choose a primary action that is closest to what you want to recommend and the others will be used to create cross-cooccurrence indicators. Using more data in this fashion will almost always produce better recommendations.</li>
+  <li>Content can be used where there is no recorded user behavior or when items change too quickly to get much interaction history. They can be used alone or mixed with other indicators.</li>
+  <li>Most search engines support “boost” factors so you can favor one or more indicators. In the example query, if you want tags to only have a small effect you could boost the CF indicators.</li>
+  <li>In the examples we have used space delimited strings for lists of IDs in indicators and in queries. It may be better to use arrays of strings if your storage system and search engine support them. For instance Solr allows multi-valued fields, which correspond to arrays.</li>
+</ol>
+
+  </div>
+
+
+</div>
+
+<div id="footer">
+  <div class="container">
+    <p>&copy; 2017 The Apache Software Foundation
+      with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+      and <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>
+    </p>
+  </div>
+</div>
+
+
+
+
+
+
+
+<!-- Latest compiled and minified JavaScript, requires jQuery 1.x (2.x not supported in IE8) -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/assets/themes/mahout3/js/bootstrap.min.js"></script>
+</body>
+</html>
+
