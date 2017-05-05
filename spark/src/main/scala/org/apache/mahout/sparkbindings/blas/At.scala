@@ -62,7 +62,7 @@ object At {
           // Compute sparse vector. This should be quick if we assign values siquentially.
           val colV: Vector = new SequentialAccessSparseVector(ncol)
           keys.view.zipWithIndex.foreach({
-            case (row, blockRow) => colV(row) = blockA(blockRow, blockCol)
+            case (row, blockRow) => colV(row) += blockA(blockRow, blockCol)
           })
 
           blockCol -> colV
