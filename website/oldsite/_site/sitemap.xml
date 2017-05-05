@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>http://localhost:4000/lessons/2011/12/29/jekyll-introduction</loc>
-<lastmod>2011-12-29T00:00:00-06:00</lastmod>
-</url>
-<url>
 <loc>http://localhost:4000/users/clustering/20newsgroups</loc>
 </url>
 <url>
@@ -233,9 +229,6 @@
 <loc>http://localhost:4000/overview</loc>
 </url>
 <url>
-<loc>http://localhost:4000/pages</loc>
-</url>
-<url>
 <loc>http://localhost:4000/users/misc/parallel-frequent-pattern-mining</loc>
 </url>
 <url>
@@ -317,9 +310,6 @@
 <loc>http://localhost:4000/users/basics/system-requirements</loc>
 </url>
 <url>
-<loc>http://localhost:4000/tags</loc>
-</url>
-<url>
 <loc>http://localhost:4000/users/misc/testing</loc>
 </url>
 <url>
@@ -357,14 +347,14 @@
 </url>
 <url>
 <loc>http://localhost:4000/release-notes/Apache-Mahout-0.10.0-Release-Notes.pdf</loc>
-<lastmod>2017-02-23T08:43:24-06:00</lastmod>
+<lastmod>2017-05-01T15:56:17-05:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/users/dim-reduction/ssvd.page/SSVD-CLI.pdf</loc>
-<lastmod>2017-02-23T08:43:23-06:00</lastmod>
+<lastmod>2017-05-01T15:56:17-05:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/users/sparkbindings/ScalaSparkBindings.pdf</loc>
-<lastmod>2017-02-23T08:43:24-06:00</lastmod>
+<lastmod>2017-05-01T15:56:17-05:00</lastmod>
 </url>
 </urlset>

@@ -140,25 +140,24 @@ If you want to edit the style edit `assets/themes/<your_theme>/css/style.css` an
 This is a helpful tool for reference http://pikock.github.io/bootstrap-magic/3.0/app/index.html#!/editor
 
 
-## Pressing ToDos for Reboot
 
-- [ ] Fill out todo list
-- [x] "flatten" everything (we shouldn't have a docs folder)
-- [x] Port Distributed Linear Algebra pages
-- [ ] Write up pages for existing 'pre canned algos'
-- [ ] New themes require a lot less in `_imports` than dustin had initially, however- keeping his old files for now as they have lots of useful things that occastionally need to be scuttled. Eventaully need to delete though.
-- [x] Clean up tiles on front page
-- [ ] Add apache licenses all over the place - let dust settle first then we can go through methodically.
-- [ ] Update of `/community/powered-by-mahout.md`
-- [ ] Folks need to review their contact info in `community/professional-support.md`
-- [-] Get rid of `developer/patch-check-list.md` and add it to the notes as a checkbox when opening a PR (see zeppelin)
-- [x] `developer/release-notes.md` stuck on 0.12.0... bump it. 
-- [x] refactor to 'top-site' and 'docs' as we need a different jekyll build to change base path for new docs version
-- [x] Sign up for google analytics
-- [ ] add links to `community/blogs`
-- [ ] would like to see `community/buidingmahout.md` cleaned up a bit (just coppied new instructions from README.md)
-- [ ] writeups for native solvers in /docs/native-solvers/
-- [ ] help with triage in `mahout/website/old_site_migration`
-- [x] Update sidebars in `mr_algo_navbar`, `mr_tutorial_navbar`, `tutorial_navbar`, to look like `docs/includes/algo_navbar.html`
-- [ ] Write ups for new algos
-- [ ] Search the directory (Ctrl+Shift+F in intellij) for "TODO" you'll find stuff.
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+

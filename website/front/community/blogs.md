@@ -21,3 +21,4 @@ An introduction to the new Algorithms Framework
 
 How to setup Apache Mahout in IBM's Datascience Experience Notebooking Environment, and run a few trivial programs. 
 
+### http://www.weatheringthroughtechdays.com/2015/04/mahout-010x-first-mahout-release-as.html
