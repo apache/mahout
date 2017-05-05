@@ -28,9 +28,6 @@ language: java
 branches:
   only:
    - master
-   - develop
-   - website
-
 
 env:
   global:
