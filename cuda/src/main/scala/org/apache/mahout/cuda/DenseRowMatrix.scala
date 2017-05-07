@@ -20,20 +20,31 @@ package org.apache.mahout.cuda
 
 import jcuda._
 import jcuda.jcublas._
-
+import jcuda.jcublas.JCublas._
+import jcuda.jcusparse.JCusparse._
+import jcuda.jcusparse._
 import jcuda.jcusparse.cusparseIndexBase.CUSPARSE_INDEX_BASE_ZERO
 import jcuda.jcusparse.cusparseMatrixType.CUSPARSE_MATRIX_TYPE_GENERAL
 import jcuda.jcusparse.cusparseOperation.CUSPARSE_OPERATION_NON_TRANSPOSE
+
+import jcuda.runtime._
+import jcuda.runtime.JCuda
+import jcuda.runtime.JCuda._
+import jcuda.runtime.cudaMemcpyKind._
+
 
 final class DenseRowMatrix {
 
   var vals = new jcuda.Pointer()
 
-  var trans = CUBLAS_OP_N
-  var descr = new CUDA_ARRAY_DESCRIPTOR()
+  // default = not transposed.
+  var trans = 'n'
+  var descr = new jcuda.driver.CUDA_ARRAY_DESCRIPTOR()
 
   var nrows = 0
   var ncols = 0
+
+  var context = new Context
 
   /**
     * Initalize empty Dense Matrix
@@ -46,24 +57,84 @@ final class DenseRowMatrix {
 
     nrows = nrow
     ncols = ncol
+    context = ctx
 
-    cublasAlloc(nrows * ncols * jcuda.Sizeof.DOUBLE, vals)
+    // allocate empty space on the GPU
+    cublasAlloc(nrows * ncols * jcuda.Sizeof.DOUBLE, jcuda.Sizeof.DOUBLE , vals)
+
+    // create and setup matrix descriptor
+    // Todo: do we want these? for dense %*% sparse?
+    //JCuda.cublasCreateMatDescr(descr)
+   // cublasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
+    //cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
+
+  }
+
+  /**
+    * Initalize a new Dense matrix with data supplied
+    * @param ctx
+    * @param nrow
+    * @param ncol
+    * @param data double[][] of Dense array elements
+    */
+  def this(ctx: Context, nrow: Int, ncol: Int, data: Array[Array[Double]]) {
+    this()
+
+    nrows = nrow
+    ncols = ncol
+    context = ctx
+
+    // allocate empty space on the GPU
+    cublasAlloc(nrows * ncols * jcuda.Sizeof.DOUBLE, jcuda.Sizeof.DOUBLE, vals)
 
     // create and setup matrix descriptor
     // Todo: do we want these? for dense %*% sparse?
     //cusblasCreateMatDescr(descr)
     //cusblasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
-    //(descr, CUSPARSE_INDEX_BASE_ZERO)
-    allocate()
+    //cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
 
+    cudaMemcpy(vals, jcuda.Pointer.to(data.toList.flatten.toArray),
+      (nrow) * (ncol) * jcuda.Sizeof.DOUBLE,
+      cudaMemcpyHostToDevice)
 
   }
 
+  /** Constructor with values on the device already.
+    *
+    * @param ctx
+    * @param nrow
+    * @param ncol
+    * @param data
+    */
+  def this(ctx: Context, nrow: Int, ncol: Int, data: Pointer) {
+    this()
 
-  cudaMemcpy(row_ptr, jcuda.Pointer.to(rowJumper), (nrow+1)*jcuda.Sizeof.INT, cudaMemcpyHostToDevice)
+    nrows = nrow
+    ncols = ncol
+    context = ctx
 
+    vals = data
 
-  def set ()
+    // create and setup matrix descriptor
+    // Todo: do we want these? for dense %*% sparse?
+    //cusblasCreateMatDescr(descr)
+    //cusblasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
+    //cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
+
+  }
+
+  def set (data: Array[Array[Double]]): Unit = {
+    // Allocate row-major
+    cublasAlloc(data.length * data(0).length * jcuda.Sizeof.DOUBLE,
+      jcuda.Sizeof.DOUBLE, vals)
+    cudaMemcpy(vals, jcuda.Pointer.to(data.toList.flatten.toArray),
+      data.length * data(0).length * jcuda.Sizeof.DOUBLE,
+      cudaMemcpyHostToDevice)
+  }
+
+  def flatten2dArray(arr2d: Array[Array[Double]]): Array[Double] = {
+    arr2d.toList.flatten.toArray
+  }
 
   def close() {
     cublasFree(vals)

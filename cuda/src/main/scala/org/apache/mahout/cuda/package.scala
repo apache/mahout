@@ -30,36 +30,57 @@ import scala.collection.JavaConversions._
 
 import jcuda.runtime.JCuda._
 import jcuda.runtime.cudaMemcpyKind._
+
 import jcuda._
 import jcuda.jcublas._
+
+
 
 
 package object cuda {
 
   private implicit val log = getLog(GPUMMul.getClass)
 
+  /** Copy cuda data back into a Mahout DenseMatrix
+    *
+    * @param src a (flattened) 2D cuda array
+    * @return A Mahout DenseMatrix
+    */
+  def fromVclDenseRM(src: DenseRowMatrix): Matrix = {
+
+
+    val nrowIntern = src.nrows
+    val ncolIntern = src.ncols
+
+
+    val dbuff = new Array.ofDim[Double](nrowIntern * ncolIntern)
+
+    //Functions.fastCopy(src, dbuff)
+    var srcOffset = 0
+    val ncol = src.ncols
+    val rows = for (irow ← 0 until src.nrow) yield {
+
+      val rowvec = new Array[Double](ncol)
+      dbuff.position(srcOffset).get(rowvec)
+
+      srcOffset += ncolIntern
+      rowvec
+    }
+  }
+
   /**
     * Convert from Mahout DenseMatrix to matrix
     * @param src
-    * @param cudaCtx
     * @return
     */
-  def toCudaDenseRM(src: Matrix): DenseRowMatrix = {
-    src.denseHandle match {
+  def toCudaDenseRM(src: Matrix, ctx: Context): cuda.DenseRowMatrix = {
 
-      case src.ctx.denseHandle ⇒
-        val cudaMx = new DenseRowMatrix(
-          data = repackRowMajor(src, src.nrow, src.ncol),
-          nrow = src.nrow,
-          ncol = src.ncol,
-          ctx = cudaCtx
-        )
+        val valuesF = classOf[DenseMatrix].getDeclaredField("values")
+        valuesF.setAccessible(true)
+        val values = valuesF.get(src).asInstanceOf[Array[Array[Double]]]
+        val cudaMx = new cuda.DenseRowMatrix(ctx, src.nrow, src.ncol, values)
+
         cudaMx
-      case _ ⇒
-        val cudaMx = new DenseRowMatrix(src.nrow, src.ncol, cudaCtx)
-        fastCopy(src, vclMx)
-        cudaMx
-    }
   }
 
 
@@ -67,31 +88,32 @@ package object cuda {
   // Most Mahout in-core matrices are row-major and we're using CSR so we may need to see
   // if JCuda is using an optimal csr/RowMajor DGEMM algortithm.
   // TODO: check with NS on this
-  private[cuda] def repackRowMajor(mx: Matrix, nrowIntern: Int, ncolIntern: Int): DoublePointer = {
-
-    assert(mx.nrow <= nrowIntern && mx.ncol <= ncolIntern)
-
-    val dbuff = Array.ofDim[Double](nrowIntern, ncolIntern)
-
-    mx match {
-      case dm: DenseMatrix ⇒
-        val valuesF = classOf[DenseMatrix].getDeclaredField("values")
-        valuesF.setAccessible(true)
-        val values = valuesF.get(dm).asInstanceOf[Array[Array[Double]]]
-        var dstOffset = 0
-        for (irow ← 0 until mx.nrow) {
-          val rowarr = values(irow)
-          //dbuff.position(dstOffset).put(rowarr, 0, rowarr.size min ncolIntern)
-          System.arraycopy(rowarr, 0, dbuff, dstOffset, rowarr.size min ncolIntern)
-          dstOffset += ncolIntern
-        }
-      case _ ⇒
-        // Naive copying. Could be sped up for a DenseMatrix. TODO.
-        for (row ← mx) {
-          val dstOffset = row.index * ncolIntern
-          for (el ← row.nonZeroes) dbuff[dstOffset + el.index] = el
-        }
-    }
+//  private[cuda] def repackRowMajor(mx: Matrix, nrowIntern: Int, ncolIntern: Int): Array[Double] = {
+//
+//    assert(mx.nrow <= nrowIntern && mx.ncol <= ncolIntern)
+//
+//    val dbuff = Array.ofDim[Double](nrowIntern * ncolIntern)
+//
+//    mx match {
+//      case dm: DenseMatrix ⇒
+//        val valuesF = classOf[DenseMatrix].getDeclaredField("values")
+//        valuesF.setAccessible(true)
+//        val values = valuesF.get(dm).asInstanceOf[Array[Array[Double]]]
+//        var dstOffset = 0
+//        for (irow ← 0 until mx.nrow) {
+//          val rowarr = values(irow)
+//          //dbuff.position(dstOffset).put(rowarr, 0, rowarr.size min ncolIntern)
+//          System.arraycopy(rowarr, 0, dbuff, dstOffset, rowarr.size min ncolIntern)
+//          dstOffset += ncolIntern
+//        }
+//      case _ ⇒
+//        // Naive copying. Could be sped up for a DenseMatrix. TODO.
+//        for (row ← mx) {
+//          val dstOffset = row.index * ncolIntern
+//          for (el ← row.nonZeroes) dbuff.update(dstOffset + el.index) = el
+//        }
+//    }
+//  }
 
   /**
     *
@@ -212,21 +234,31 @@ package object cuda {
     val n = b.ncols
     val k = b.nrows
 
+    val d_A = valuesF.get(a).asInstanceOf[Array[Array[Double]]]
+
+
     val c: DenseRowMatrix = new DenseRowMatrix(ctx, m, n)
     val d_C: Pointer = new Pointer()
-
-    cudaMalloc(c.vals,  M * N * jcuda.Sizeof.DOUBLE);
+    cudaMalloc(c.vals,  m * n * jcuda.Sizeof.DOUBLE)
 
     // cublasSgemm('n', 'n', N, N, N, alpha,
     //  d_A, N, d_B, N, beta, d_C, N);
 
-    cudaDgemm(ctx.denseHandle, a.trans, b.trans, m, n, k,
+//    JCublas.cublasSgemm('n', 'n', N, N, N, alpha,
+//      d_A, N, d_B, N, beta, d_C, N);
+
+    //C = alpha * op(A) * op(B) + beta * C,
+    //where op(X) = X or op(X) = transpose(X),
+    JCublas.cublasDgemm(a.trans, b.trans, m, n, k,
       1.0d,    // alpha
-      1.0d, 1, // Alpha, lda
-      1.0d, 1, // Beta , ldb
-      1.0d,    // beta
+      a.vals, m, // A, lda
+      b.vals, k, // B , ldb
+      0.0d,    // beta
       d_C,     // pointer to results
-      m * n)    // size of a %*% b
+      n)    // todo: check on this
+
+     //
+
 
   }
 

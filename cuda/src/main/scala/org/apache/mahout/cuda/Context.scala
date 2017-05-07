@@ -23,6 +23,10 @@ import jcuda.jcusparse.JCusparse._
 import jcuda.jcusparse._
 import jcuda.runtime.JCuda
 
+import jcuda._
+import jcublas._
+import JCublas._
+
 final class Context {
   // Enable exceptions for all CUDA libraries
   JCuda.setExceptionsEnabled(true)
@@ -33,8 +37,10 @@ final class Context {
   cusparseCreate(sparseHandle)
 
   // Initialize JCublas library and create a dense handle for it.
-  var denseHandle = jcuda.JCublas.cublasInit()
-  cusparseCreate(denseHandle)
+  // // seems that there is no `dense handle` for JCublas
+  var denseHandle = JCublas.cublasInit()
+  //TODO: is this needed somehow- via the cusparse library?
+  // cusparseCreate(denseHandle)
 
 
 }
