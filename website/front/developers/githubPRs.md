@@ -26,8 +26,8 @@ same time, it is recommended to use **squash commits**.
 
 Read [[2]] (merging locally). Merging pull requests are equivalent to merging contributor's branch:
 
-    git checkout develop      # switch to local master branch
-    git pull apache develop   # fast-forward to current remote HEAD
+    git checkout master      # switch to local master branch
+    git pull apache master   # fast-forward to current remote HEAD
     git pull --squash https://github.com/cuser/mahout cbranch  # merge to master 
 
 
@@ -50,11 +50,11 @@ Suppose everything is fine, you now can commit the squashed request
 edit message to contain "MAHOUT-YYYY description **closes #ZZ**", where ZZ is the pull request number. 
 Including "closes #ZZ" will close PR automatically. More information [[3]].
 
-   push apache develop
+   push apache master
 
 (this will require credentials).
 
-Note on `develop` branch: Minor patches, bug fixes, complete features, etc. may be merged to `develop`.  Features that 
+Note on `master` branch: Minor patches, bug fixes, complete features, etc. may be merged to `master`.  Features that 
 are still under development should be pushed to a feature branch with reasonable name or better yet `mahout-xxxx` where 
 `xxxx` is the JIRA number. 
 
