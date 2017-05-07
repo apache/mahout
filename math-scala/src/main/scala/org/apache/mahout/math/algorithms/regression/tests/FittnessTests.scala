@@ -46,48 +46,86 @@ object FittnessTests {
     val r2 = 1 - (sumSquareResiduals / sumSquareTotal)
     model.r2 = r2
     model.testResults += ('r2 -> r2)  // need setResult and setSummary method incase you change in future, also to initialize map if non exists or update value if it does
-    model.summary += s"\nR^2: ${r2}"
+    //model.summary += s"\nR^2: ${r2}"
     model
   }
 
   // https://en.wikipedia.org/wiki/Mean_squared_error
   def MeanSquareError[R[K] <: RegressorModel[K], K](model: R[K], residuals: DrmLike[K]): R[K] = {
-    // TODO : I think mse denom should be (row - col) ??
+    // TODO : I think mse denom should be (row - col) ?? <-- https://en.wikipedia.org/wiki/Mean_squared_error  see regression section
     val mse = residuals.assign(SQUARE).sum / residuals.nrow
     model.mse = mse
     model.testResults += ('mse -> mse)
-    model.summary += s"\nMean Squared Error: ${mse}"
+    //model.summary += s"\nMean Squared Error: ${mse}"
     model
   }
 
-  // https://en.wikipedia.org/wiki/xxxx
-  def FTest[R[K] <: RegressorModel[K], K](model: R[K],  drmFeatures: DrmLike[K], drmTarget: DrmLike[K]): R[K] = {
+  // Since rss is needed for multiple test statistics, use this function to cache this value
+  def calculateResidualSumOfSquares[R[K] <: RegressorModel[K], K](model: R[K],residuals: DrmLike[K]) : R[K] = {
+    // This is a check so that model.rss isnt unnecessarily computed
+    // by default setting this value to negative, so that the first time its garaunteed to evaluate.
+    if (model.rss < 0) {
+      val ete = (residuals.t %*% residuals).collect // 1x1
+      model.rss = ete(0, 0)
+    }
+    model
+  }
 
-    // This is the residual sum of squares for just the intercept
-    //println(" drmTarget.ncol) = " +  drmTarget.ncol)
-    val interceptCol = drmTarget.ncol - 1
-    //val targetMean: Double = drmTarget
+
+  // https://en.wikipedia.org/wiki/F-test
+  /*
+  # R Prototype
+  # Cereal Dataframe
+  df1 <- data.frame(
+    "X0" = c(1,1,1,1,1,1,1,1,1),
+    "a"  = c(2,1,1,2,1,2,6,3,3),
+    "b" = c( 2,2,1,1,2,1,2,2,3),
+    "c" = c( 10.5,12,12, 11,12, 16,17, 13,13),
+    "d" = c( 10,12,13,13,11,8, 1, 7, 4),
+    "target" = c( 29.509541,18.042851,22.736446,32.207582,21.871292,36.187559,50.764999,40.400208,45.811716))
+
+  # Create linear regression models adding features one by one
+  lrfit0 <- lm(data=df1, formula = target ~ 1  )
+  lrfit1 <- lm(data=df1, formula = target ~ a  )
+  lrfit2 <- lm(data=df1, formula = target ~ a + b )
+  lrfit3 <- lm(data=df1, formula = target ~ a + b + c )
+  lrfit4 <- lm(data=df1, formula = target ~ a + b + c + d)
+
+  ######################################
+  # Fscore Calculation
+  ######################################
+
+  # So in the anova report using lm ...
+  # These are the residual sum of squares for each model
+  rssint <- sum(lrfit0$residuals^2)
+  rssa <- sum(lrfit1$residuals^2)
+  rssb <- sum(lrfit2$residuals^2)
+  rssc <- sum(lrfit3$residuals^2)
+  rssd <- sum(lrfit4$residuals^2)
+
+  #Ftest in overall model
+  (rssint - rssd)/4 / (rssd/4)  # g = 4, n - g - 1  = 4
+  # Compare with R
+  summary(lrfit4)
+
+   */
+  def FTest[R[K] <: RegressorModel[K], K](model: R[K] , drmTarget: DrmLike[K]): R[K] = {
+
     val targetMean: Double = drmTarget.colMeans().get(0)
 
+    // rssint is the Residual Sum of Squares for model using only based on the intercept
     val rssint: Double = ((drmTarget - targetMean  ).t %*% (drmTarget - targetMean)).zSum()
-    // ete above is the RSS for the calculated model
+    // K-1 is model.degreesOfFreedom-1
+    // N-K is model.trainingExamples - model.degreesOfFreedom
 
-    //println(" model.beta(0) = " +  model.beta(0))
-    //println(" model.beta(interceptCol) = " +  model.beta(interceptCol))
-    //println("rssint = " + rssint)
-    //println("rssmod = " + rssmod)
-
-    val groupDof = drmFeatures.ncol-1
-    val fScore = ((rssint - model.rss) / groupDof) / ( model.rss / (drmFeatures.nrow - groupDof- 1 ))
-    //println("groupDof = " + groupDof)
-    //println("fScore = " + fScore)
-    val fDist = new FDistribution(groupDof,drmTarget.nrow-groupDof-1)
+    val fScore = ((rssint - model.rss) / (model.degreesOfFreedom-1) / ( model.rss / (model.trainingExamples - model.degreesOfFreedom)))
+    val fDist = new FDistribution(model.degreesOfFreedom-1,model.trainingExamples-model.degreesOfFreedom)
     val fpval = 1.0 - fDist.cumulativeProbability(fScore)
     model.fpval = fpval
 
     model.fScore = fScore
     model.testResults += ('fScore -> fScore)
-    model.summary += s"\nFscore : ${fScore}"
+    //model.summary += s"\nFscore : ${fScore}"
     model
   }
 
