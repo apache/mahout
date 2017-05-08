@@ -46,26 +46,35 @@ package object cuda {
     * @param src a (flattened) 2D cuda array
     * @return A Mahout DenseMatrix
     */
-  def fromVclDenseRM(src: DenseRowMatrix): Matrix = {
-
+  def fromCUDADenseRM(src: DenseRowMatrix): Matrix = {
 
     val nrowIntern = src.nrows
     val ncolIntern = src.ncols
 
+    var dbuff = new Pointer()
 
-    val dbuff = new Array.ofDim[Double](nrowIntern * ncolIntern)
+    // again will be doullbe copying.. consider copying directly from cuda memory
+    // into each row..
+    val jvmData = Array.ofDim[Double](nrowIntern,ncolIntern) //Double](nrowIntern * ncolIntern)
+    val cudaData = new Array[Double](nrowIntern * ncolIntern)
+    cudaMemcpy(jcuda.Pointer.to(cudaData), src.vals, (nrowIntern * ncolIntern)*jcuda.Sizeof.DOUBLE, cudaMemcpyDeviceToHost)
 
-    //Functions.fastCopy(src, dbuff)
+    // We could speed this up by doing a transpose here
+    // assuming that the matrix is in columnMajor format
+    // TODO: consider this getting late so make it work now.
     var srcOffset = 0
     val ncol = src.ncols
-    val rows = for (irow ← 0 until src.nrow) yield {
+    val rows = for (irow ← 0 until src.nrows) yield {
 
       val rowvec = new Array[Double](ncol)
-      dbuff.position(srcOffset).get(rowvec)
-
+      System.arraycopy(cudaData, srcOffset , rowvec , 0 , ncol)
       srcOffset += ncolIntern
       rowvec
     }
+
+    // Always! use shallow = true to avoid yet another copying.
+    // even another from viennacl :)
+    new DenseMatrix(rows.toArray, true)
   }
 
   /**
@@ -84,7 +93,7 @@ package object cuda {
   }
 
 
-  // TODO replace this with repackColumnMajor and use a different dgemm algorithm?
+  // TODO replace this with repackColumnMajor or use a different dgemm algorithm?
   // Most Mahout in-core matrices are row-major and we're using CSR so we may need to see
   // if JCuda is using an optimal csr/RowMajor DGEMM algortithm.
   // TODO: check with NS on this
@@ -234,32 +243,29 @@ package object cuda {
     val n = b.ncols
     val k = b.nrows
 
-    val d_A = valuesF.get(a).asInstanceOf[Array[Array[Double]]]
+   // val d_A = valuesF.get(a).asInstanceOf[Array[Array[Double]]]
 
 
     val c: DenseRowMatrix = new DenseRowMatrix(ctx, m, n)
     val d_C: Pointer = new Pointer()
     cudaMalloc(c.vals,  m * n * jcuda.Sizeof.DOUBLE)
 
-    // cublasSgemm('n', 'n', N, N, N, alpha,
-    //  d_A, N, d_B, N, beta, d_C, N);
-
-//    JCublas.cublasSgemm('n', 'n', N, N, N, alpha,
-//      d_A, N, d_B, N, beta, d_C, N);
-
     //C = alpha * op(A) * op(B) + beta * C,
     //where op(X) = X or op(X) = transpose(X),
-    JCublas.cublasDgemm(a.trans, b.trans, m, n, k,
+    // using transpose here because Mahout Matrices in general
+    // are row-major,  hardcoding this for now..
+    JCublas.cublasDgemm('t', 't', m, n, k,
       1.0d,    // alpha
       a.vals, m, // A, lda
       b.vals, k, // B , ldb
       0.0d,    // beta
       d_C,     // pointer to results
-      n)    // todo: check on this
+      n)    // todo: check on this are we correct here?
 
-     //
-
-
+     // set the data of c to the results
+     // may need to allocate data here or the other side.
+     c.set(d_C)
+    c
   }
 
   /**

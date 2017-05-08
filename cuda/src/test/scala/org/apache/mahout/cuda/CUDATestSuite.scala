@@ -6,9 +6,7 @@ import scalabindings.RLikeOps._
 
 import scala.util.Random
 
-/**
-  * Created by andy on 3/29/17.
-  */
+
 class CUDATestSuite extends FunSuite with Matchers {
 
 

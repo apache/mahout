@@ -64,9 +64,9 @@ final class DenseRowMatrix {
 
     // create and setup matrix descriptor
     // Todo: do we want these? for dense %*% sparse?
-    //JCuda.cublasCreateMatDescr(descr)
-   // cublasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
-    //cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
+    // JCuda.cublasCreateMatDescr(descr)
+    // cublasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
+    // cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
 
   }
 
@@ -89,14 +89,13 @@ final class DenseRowMatrix {
 
     // create and setup matrix descriptor
     // Todo: do we want these? for dense %*% sparse?
-    //cusblasCreateMatDescr(descr)
-    //cusblasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
-    //cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
+    // cusblasCreateMatDescr(descr)
+    // cusblasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
+    // cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
 
     cudaMemcpy(vals, jcuda.Pointer.to(data.toList.flatten.toArray),
       (nrow) * (ncol) * jcuda.Sizeof.DOUBLE,
       cudaMemcpyHostToDevice)
-
   }
 
   /** Constructor with values on the device already.
@@ -116,13 +115,17 @@ final class DenseRowMatrix {
     vals = data
 
     // create and setup matrix descriptor
-    // Todo: do we want these? for dense %*% sparse?
+    // Todo: do we need these? for dense %*% sparse?
     //cusblasCreateMatDescr(descr)
     //cusblasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
     //cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
 
   }
 
+  /**Set values with an 2d Array
+    *
+    * @param data
+    */
   def set (data: Array[Array[Double]]): Unit = {
     // Allocate row-major
     cublasAlloc(data.length * data(0).length * jcuda.Sizeof.DOUBLE,
@@ -132,7 +135,15 @@ final class DenseRowMatrix {
       cudaMemcpyHostToDevice)
   }
 
-  def flatten2dArray(arr2d: Array[Array[Double]]): Array[Double] = {
+  /** Set values with a pointer that is alredy created
+    *
+    * @param data
+    */
+  def set (data: Pointer): Unit = {
+    vals = data
+  }
+
+  private[cuda] def flatten2dArray(arr2d: Array[Array[Double]]): Array[Double] = {
     arr2d.toList.flatten.toArray
   }
 
