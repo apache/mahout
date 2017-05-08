@@ -214,6 +214,7 @@ http://www.sonatype.com/books/nexus-book/reference/staging-sect-deployment.html
     
 
 ### Post Release
+
 ## Versioning
 * Create the next version in JIRA (if it doesn't already exist)   
 * Mark the version as "released" in JIRA (noting the release date)
