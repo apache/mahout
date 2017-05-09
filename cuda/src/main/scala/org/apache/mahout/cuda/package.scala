@@ -34,6 +34,10 @@ import jcuda.runtime.cudaMemcpyKind._
 import jcuda._
 import jcuda.jcublas._
 
+import jcuda.jcusparse.JCusparse._
+
+
+
 
 
 
