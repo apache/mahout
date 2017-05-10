@@ -78,6 +78,7 @@ object CUDATestSuite {
     assert(((mxC - fromCudaCmpMatrix(mxCuda)).norm / mxC.nrow / mxC.ncol) < 1e-16)
     cudaA.close()
     cudaB.close()
+    mxCuda.close()
     ms
   }
 
@@ -129,6 +130,7 @@ object CUDATestSuite {
     assert(((mxC - fromCUDADenseRM(mxCuda)).norm / mxC.nrow / mxC.ncol) < 1e-16)
     cudaA.close()
     cudaB.close()
+    mxCuda.close()
     ms
   }
 

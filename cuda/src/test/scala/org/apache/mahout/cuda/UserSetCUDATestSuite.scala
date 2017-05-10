@@ -87,10 +87,13 @@ object UserSetCUDATestSuite {
     ms = (System.currentTimeMillis() - ms) / nruns
     print(s"Mahout JCuda Sparse multiplication time: $ms ms.")
 
-     cudaA.close()
-     cudaB.close()
+
 //     (mxC - fromCudaCmpMatrix(mxCuda)).norm / mxC.nrow / mxC.ncol should be < 1e-16
      //assert(((mxC - fromCudaCmpMatrix(mxCuda)).norm / mxC.nrow / mxC.ncol) < 1e-16)
+
+     mxCuda.close()
+     cudaA.close()
+     cudaB.close()
 
      ms
   }
