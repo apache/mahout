@@ -90,7 +90,8 @@ object UserSetCUDATestSuite {
     print(s"Mahout JCuda Sparse multiplication time: $ms ms.")
 
     // TODO: Ensure that we've been working with the same matrices.
-    // (mxC - mxCuda).norm / mxC.nrow / mxC.ncol should be < 1e-16
+//     (mxC - fromCudaCmpMatrix(mxCuda)).norm / mxC.nrow / mxC.ncol should be < 1e-16
+     assert(((Math.abs((mxC - fromCudaCmpMatrix(mxCuda)).norm / mxC.nrow / mxC.ncol)) - 1e-16) < 0)
     ms
   }
 

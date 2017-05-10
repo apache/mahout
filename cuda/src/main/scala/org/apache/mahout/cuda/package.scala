@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-// Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
 
 package org.apache.mahout
 
@@ -36,14 +35,10 @@ import jcuda.jcublas._
 
 import jcuda.jcusparse.JCusparse._
 
-
-
-
-
-
 package object cuda {
 
   private implicit val log = getLog(GPUMMul.getClass)
+
 
   /** Copy cuda data back into a Mahout DenseMatrix
     *
@@ -57,7 +52,7 @@ package object cuda {
 
     var dbuff = new Pointer()
 
-    // again will be doullbe copying.. consider copying directly from cuda memory
+    // again will be double copying.. consider copying directly from cuda memory
     // into each row..
     val jvmData = Array.ofDim[Double](nrowIntern,ncolIntern) //Double](nrowIntern * ncolIntern)
     val cudaData = new Array[Double](nrowIntern * ncolIntern)
