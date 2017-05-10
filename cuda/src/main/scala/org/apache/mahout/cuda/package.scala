@@ -42,7 +42,7 @@ package object cuda {
 
   /** Copy cuda data back into a Mahout DenseMatrix
     *
-    * @param src a (flattened) 2D cuda array
+    * @param src a DenseRowMatrix with a (flattened) 2D cuda array
     * @return A Mahout DenseMatrix
     */
   def fromCUDADenseRM(src: DenseRowMatrix): Matrix = {
@@ -56,7 +56,7 @@ package object cuda {
     // into each row..
     val jvmData = Array.ofDim[Double](nrowIntern,ncolIntern) //Double](nrowIntern * ncolIntern)
     val cudaData = new Array[Double](nrowIntern * ncolIntern)
-    cudaMemcpy(jcuda.Pointer.to(cudaData), src.vals, (nrowIntern * ncolIntern)*jcuda.Sizeof.DOUBLE, cudaMemcpyDeviceToHost)
+    cudaMemcpy(jcuda.Pointer.to(cudaData), src.vals, (nrowIntern * ncolIntern) * jcuda.Sizeof.DOUBLE, cudaMemcpyDeviceToHost)
 
     // We could speed this up by doing a transpose here
     // assuming that the matrix is in columnMajor format
@@ -256,10 +256,10 @@ package object cuda {
     JCublas.cublasDgemm('t', 't', m, n, k,
       1.0d,    // alpha
       a.vals, m, // A, lda
-      b.vals, k, // B , ldb
+      b.vals, n, // B , ldb
       0.0d,    // beta
       d_C,     // pointer to results
-      n)    // todo: check on this are we correct here?
+      k)    // todo: check on this are we correct here?
 
      // set the data of c to the results
      // may need to allocate data here or the other side.
