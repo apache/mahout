@@ -45,8 +45,3 @@ All bugs, improvements, [pull requests](http://mahout.apache.org/developers/gith
 
 Mahout is continuously built on an hourly basis on the [Apache Jenkins](https://builds.apache.org/job/Mahout-Quality/)  build system.
 
-## Board reports
-
-Every three months Mahout submits a report to the Apache board. All of the drafts that get sent are checked into svn. See here:
-
-<a href="https://svn.apache.org/repos/asf/mahout/pmc/board-reports/">https://svn.apache.org/repos/asf/mahout/pmc/board-reports/</a>
