@@ -125,7 +125,7 @@ public final class Matrices {
     };
   }
 
-  private static final double UNIFORM_DIVISOR = Math.pow(2.0, 64);
+  private static final double UNIFORM_DIVISOR = Math.pow(2.0, 63);
 
   /**
    * Uniform [-1,1) matrix generator function.
