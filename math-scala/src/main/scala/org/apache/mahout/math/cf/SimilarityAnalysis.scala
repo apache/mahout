@@ -301,8 +301,8 @@ object SimilarityAnalysis extends Serializable {
     numInteractionsWithAandB: Long, numInteractions: Long) = {
 
     val k11 = numInteractionsWithAandB
-    val k12 = numInteractionsWithA - numInteractionsWithAandB
-    val k21 = numInteractionsWithB - numInteractionsWithAandB
+    val k12 = numInteractionsWithB - numInteractionsWithAandB
+    val k21 = numInteractionsWithA - numInteractionsWithAandB
     val k22 = numInteractions - numInteractionsWithA - numInteractionsWithB + numInteractionsWithAandB
 
     LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22)
