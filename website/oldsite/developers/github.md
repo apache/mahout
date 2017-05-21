@@ -13,7 +13,7 @@ Apache and various policies there make backing out mistakes problematic. Therefo
 go through a PR, even for committers. To keep the commit history clean take note of the use of --squash below
 when merging into apache/master.
 
-##Git setup for Committers
+## Git setup for Committers
 
 This describes setup for one local repo and two remotes. It allows you to push the code on your machine to either your Github repo or to git-wip-us.apache.org. 
 You will want to fork github's apache/mahout to your own account on github, this will enable Pull Requests of your own. 
@@ -44,7 +44,7 @@ Now if you want to experiment with a branch everything, by default, points to yo
 
 Once you are ready to commit to the apache remote you can merge and push them directly or better yet create a PR. 
 
-##How to create a PR (committers)
+## How to create a PR (committers)
 
 Push your branch to Github:
 
@@ -141,7 +141,7 @@ that should close PR `ZZ` on github mirror without merging and any code modifica
 ## Apache/github integration features 
 
 Read \[[4]\]. Comments and PRs with Mahout issue handles should post to mailing lists and Jira.
-Mahout issue handles must in the form MAHOUT-YYYYY (all capitals). Usually it makes sense to 
+Mahout issue handles must be in the form MAHOUT-YYYYY (all capitals). Usually it makes sense to 
 file a jira issue first, and then create a PR with description 
     
     MAHOUT-YYYY: <jira-issue-description>
