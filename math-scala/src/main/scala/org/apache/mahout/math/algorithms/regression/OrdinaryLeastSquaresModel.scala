@@ -55,6 +55,7 @@ class OrdinaryLeastSquares[K] extends LinearRegressorFitter[K] {
     }
 
     var X = drmFeatures
+
     if (addIntercept) {
       X = X cbind 1
     }

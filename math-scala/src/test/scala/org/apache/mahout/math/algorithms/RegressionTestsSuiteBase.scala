@@ -21,7 +21,7 @@ package org.apache.mahout.math.algorithms
 
 import org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares
 import org.apache.mahout.math.algorithms.regression.tests._
-import org.apache.mahout.math.drm.drmParallelize
+import org.apache.mahout.math.drm.{CheckpointedDrm, drmParallelize}
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.{`::`, dense}
 import org.apache.mahout.test.DistributedMahoutSuite
@@ -78,10 +78,25 @@ trait RegressionTestsSuiteBase extends DistributedMahoutSuite with Matchers {
 
     val r2: Double = model.r2
     val mse: Double = model.mse
-    println("R2: " + r2)
-    println("MSE: " + mse)
     (rR2 - r2) should be < epsilon
     (rMSE - mse) should be < epsilon
+
+    Math.abs(model.beta.get(4) - 163.17933  ) should be < epsilon
+    Math.abs(model.beta.get(0) - (-1.33627) ) should be < epsilon
+    Math.abs(model.beta.get(1) - (-13.15770)) should be < epsilon
+    Math.abs(model.beta.get(2) - (-4.15265) ) should be < epsilon
+    Math.abs(model.beta.get(3) - (-5.679908)) should be < epsilon
+
+    Math.abs(model.tScore.get(0) - (-0.49715717)) should be < epsilon
+    Math.abs(model.tScore.get(1) - (-2.43932888)) should be < epsilon
+    Math.abs(model.tScore.get(2) - (-2.32654000)) should be < epsilon
+    Math.abs(model.tScore.get(3) - (-3.01022444)) should be < epsilon
+    Math.abs(model.tScore.get(4) -  3.143183937 ) should be < epsilon
+
+    model.degreesOfFreedom should equal(5)
+    model.trainingExamples should equal(9)
+
+    Math.abs((model.fScore - 16.38542361))  should be < 0.0000001
 
   }
 
@@ -106,4 +121,6 @@ trait RegressionTestsSuiteBase extends DistributedMahoutSuite with Matchers {
     (myAnswer - correctAnswer) should be < epsilon
   }
 
+
 }
+

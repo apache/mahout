@@ -30,6 +30,12 @@ trait RegressorModel[K] extends SupervisedModel[K] {
   // Common Applicable Tests- here only for convenience.
   var mse: Double = _
   var r2: Double = _
+  var fpval: Double = _
+  // default rss to a negative number to ensure rss gets set.
+  var rss:Double = -9999.0
+  var fScore: Double = _
+  var degreesOfFreedom: Int = _
+  var trainingExamples :Int = _
 
   /**
     * Syntatictic sugar for fetching test results.  Will Return test result if it exists, otherwise None
