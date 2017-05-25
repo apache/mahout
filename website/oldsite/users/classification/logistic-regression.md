@@ -18,7 +18,7 @@ The Mahout implementation uses Stochastic Gradient Descent (SGD) to all
 large training sets to be used.
 
 For a more detailed analysis of the approach, have a look at the [thesis of
-Paul Komarek](http://www.autonlab.org/autonweb/14709/version/4/part/5/data/komarek:lr_thesis.pdf?branch=main&language=en) [1].
+Paul Komarek](http://repository.cmu.edu/cgi/viewcontent.cgi?article=1221&context=robotics) [1].
 
 See MAHOUT-228 for the main JIRA issue for SGD.
 
@@ -117,7 +117,7 @@ the number of twiddlable knobs is pretty large.  For some examples, see the
 ## References
 
 [1] [Thesis of
-Paul Komarek](http://www.autonlab.org/autonweb/14709/version/4/part/5/data/komarek:lr_thesis.pdf?branch=main&language=en)
+Paul Komarek](http://repository.cmu.edu/cgi/viewcontent.cgi?article=1221&context=robotics)
 
 [2] [An Introduction To Mahout's Logistic Regression SGD Classifier](http://blog.trifork.com/2014/02/04/an-introduction-to-mahouts-logistic-regression-sgd-classifier/)
 
