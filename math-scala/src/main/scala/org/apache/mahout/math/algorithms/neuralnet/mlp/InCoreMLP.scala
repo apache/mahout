@@ -38,6 +38,7 @@ import org.apache.mahout.math.function.Functions._
 class InCoreMLP extends Serializable {
 
   var A: Array[Vector] = _
+  var architecture: Vector = _
   var convergenceThreshold: Double = 0.01
   var delta: Array[Vector] = _
   var gradient: Array[Matrix] = _
@@ -49,16 +50,23 @@ class InCoreMLP extends Serializable {
   var U: Array[_ <: Matrix] = _
   var Z: Array[Vector] = _
 
+  // These are must be set to full Vectors/Matrices
+  var inputStart: Int = 0
+  var inputOffset: Int = _
+  var targetStart: Int = _
+  var targetOffset: Int = _
+
   var activationFn : DoubleFunction = SIGMOID
   var activationFnDerivative : DoubleFunction = SIGMOIDGRADIENT
   /**
     *
-    * @param architecture A [[org.apache.mahout.math.Vector]] specifying the architecture of the neural network. The first number is the expected
+    * @param arch         A [[org.apache.mahout.math.Vector]] specifying the architecture of the neural network. The first number is the expected
     *                     number of input, the last number is the expected number of outputs or targets. The numbers in
     *                     between specify how many nodes on the hidden layers.
     * @return             none, initializes weights (U) for the neural network.
     */
-  def createWeightsArray(architecture: Vector): Unit = {
+  def createWeightsArray(arch: Vector): Unit = {
+    architecture = arch
     U = (0 until architecture.size()-1)
       .map(i => Matrices.gaussianView(architecture.get(i+1).toInt, architecture.get(i).toInt, 1).cloned ).toArray
 
@@ -127,6 +135,35 @@ class InCoreMLP extends Serializable {
     updateU()
   }
 
+  def forwardBackwardVector(v: Vector): Unit = {
+    val x = v.viewPart(inputStart, inputOffset)
+    val y = v.viewPart(targetStart, targetOffset).cloned
+    forwardBackward(x, y)
+  }
+
+  def forwardBackwardMatrix(m: Matrix): Unit = {
+    import collection._
+    import JavaConversions._
+
+    for (v <- m){
+      forwardBackwardVector(v)
+    }
+  }
+
+  def parameterVector(): Vector = {
+    import org.apache.mahout.math.algorithms.neuralnet.Converters
+    Converters.flattenMatrixArrayToVector(U)
+  }
+
+
+  def setParametersFromVector(v: Vector): Unit ={
+    import org.apache.mahout.math.algorithms.neuralnet.Converters
+    val sizeArray = new Array[(Int, Int)](architecture.length - 1)
+    for (i <- 0 until (architecture.length - 1)){
+      sizeArray(i) = (architecture(i + 1).toInt, architecture(i).toInt)
+    }
+    U = Converters.recomposeMatrixArrayFromVec(v, sizeArray)
+  }
 }
 
 

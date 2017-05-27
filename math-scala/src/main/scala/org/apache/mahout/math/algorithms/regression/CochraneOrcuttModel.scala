@@ -40,7 +40,7 @@ class CochraneOrcuttModel[K](regressor: LinearRegressorModel[K]) extends LinearR
 
 }
 
-class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegressorFitter[K] {
+class   CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegressorFitter[K] {
 
   var regressor: LinearRegressorFitter[K] = _
   var iterations: Int = _
