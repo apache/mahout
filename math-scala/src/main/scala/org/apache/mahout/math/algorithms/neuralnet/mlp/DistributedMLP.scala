@@ -32,20 +32,20 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 import MahoutCollections._
 
-class DistributedMLP[K](arch: Vector,
+class DistributedMLPFitter[K](arch: Vector,
                         microIters: Int = 10,
                         macroIters: Int = 50,
                         offsets: Vector) {
 
-  var finalNetwork = new InCoreMLP()
-  var pm: Matrix = _
+  var pv: Vector = createInitialWeightVector()
 
-  var microIterations = microIters
+  def createInitialWeightVector(): Vector = {
+    var initNetwork = new InCoreMLP()
+    initNetwork.createWeightsArray(arch)
+    initNetwork.parameterVector().cloned
+  }
 
-  finalNetwork.createWeightsArray(arch)
-  var pv: Vector = finalNetwork.parameterVector().cloned
-
-  def partialFit(drmData: DrmLike[K]) = {
+  def partialFit(drmData: DrmLike[K]): Unit = {
     implicit val ctx = drmData.context
     implicit val ktag =  drmData.keyClassTag
 
@@ -55,9 +55,7 @@ class DistributedMLP[K](arch: Vector,
 
     val bcU = drmBroadcast(pv)
 
-    val outputSize = finalNetwork.parameterVector().length + 1
     val paramMatrix = drmData
-      //.mapBlock(outputSize)
       .allreduceBlock(
     { case (keys, block: Matrix) => {
       val inCoreNetwork = new InCoreMLP()
@@ -80,14 +78,11 @@ class DistributedMLP[K](arch: Vector,
 
       outputM.assignRow(0, v)
 
-      //(keys, outputM)
       outputM
-      //          block
 
       }
       },
       { case (oldM: Matrix, newM: Matrix) => {
-        //          oldM
         val oldV = oldM.viewRow(0).viewPart(1, oldM.ncol -1)
         val newV = newM.viewRow(0).viewPart(1, newM.ncol -1)
         val total = oldM.get(0,0) + newM.get(0,0)
@@ -99,37 +94,27 @@ class DistributedMLP[K](arch: Vector,
 
     }})
 
-    //pm = paramMatrix
-    //finalNetwork.setParametersFromVector(paramMatrix.viewRow(0).viewPart(1, paramMatrix.ncol -1))
-    //paramMatrix
     pv = paramMatrix.viewRow(0).viewPart(1, paramMatrix.ncol -1)
 
   }
 
-  def reduceParts(drmData: DrmLike[K]) = {
-    pv = drmData.allreduceBlock(
-      { case (keys, block: Matrix) =>  block},
-      { case (oldM: Matrix, newM: Matrix) => {
-        //          oldM
-        val oldV = oldM.viewRow(0).viewPart(1, oldM.ncol -1)
-        val newV = newM.viewRow(0).viewPart(1, newM.ncol -1)
-        val total = oldM.get(0,0) + newM.get(0,0)
-        val oldW = oldM.get(0,0) / total
-        val newW = newM.get(0,0) / total
-        val outputV = (oldV * oldW) + (newV * newW)
-
-        dense(Array(total) ++ outputV.toArray)
-      }}).viewRow(0).viewPart(1, drmData.ncol -1)
-
-  }
-
-  def fit(drmData: DrmLike[K]) = {
+  def fit(drmData: DrmLike[K]): Unit = {
     for (i <- 0 until macroIters) {
       partialFit(drmData)
     }
   }
 
-  def predict(drmData: DrmLike[K]) = {
+  def createDistributedModel(): DistributedMLPModel[K] = {
+    new DistributedMLPModel[K](arch, offsets, pv)
+  }
+
+}
+
+class DistributedMLPModel[K](arch: Vector,
+                             offsets: Vector,
+                             pv: Vector) {
+
+  def predict(drmData: DrmLike[K]): DrmLike[K] = {
     implicit val ctx = drmData.context
 
     val bcArch = drmBroadcast(arch)
@@ -157,7 +142,21 @@ class DistributedMLP[K](arch: Vector,
           output.assignRow(row, inCoreNetwork.A(inCoreNetwork.A.size -1))
         }
         (keys, output)
-      }
+       }
     }
   }
+
+  def exportIncoreModel(): InCoreMLP = {
+    val inCoreNetwork = new InCoreMLP()
+
+    inCoreNetwork.inputStart = offsets.get(0).toInt
+    inCoreNetwork.inputOffset = offsets.get(1).toInt
+    inCoreNetwork.targetStart = offsets.get(2).toInt
+    inCoreNetwork.targetOffset = offsets.get(3).toInt
+
+    inCoreNetwork.createWeightsArray(arch)
+    inCoreNetwork.setParametersFromVector(pv)
+    inCoreNetwork
+  }
+
 }

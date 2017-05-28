@@ -44,7 +44,7 @@ This is in stark contrast to many "big data machine learning" frameworks which i
 
 In this example we disable the "calculate common statistics" parameters, so our summary will NOT contain the coefficient of determination (R-squared) or Mean Square Error
 ```scala
-import org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares
+import org.apache.mahout.math.algorithms.regression.linear.OrdinaryLeastSquares
 
 val drmData = drmParallelize(dense(
       (2, 2, 10.5, 10, 29.509541),  // Apple Cinnamon Cheerios

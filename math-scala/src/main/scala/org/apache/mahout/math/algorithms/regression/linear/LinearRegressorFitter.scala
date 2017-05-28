@@ -1,45 +1,11 @@
-/**
-  * Licensed to the Apache Software Foundation (ASF) under one
-  * or more contributor license agreements. See the NOTICE file
-  * distributed with this work for additional information
-  * regarding copyright ownership. The ASF licenses this file
-  * to you under the Apache License, Version 2.0 (the
-  * "License"); you may not use this file except in compliance
-  * with the License. You may obtain a copy of the License at
-  *
-  * http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing,
-  * software distributed under the License is distributed on an
-  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  * KIND, either express or implied. See the License for the
-  * specific language governing permissions and limitations
-  * under the License.
-  */
+package org.apache.mahout.math.algorithms.regression.linear
 
-package org.apache.mahout.math.algorithms.regression
-
+import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.algorithms.regression.RegressorFitter
 import org.apache.mahout.math.algorithms.regression.tests.FittnessTests
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.drm.DrmLike
-import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.mahout.math.drm.{DrmLike, safeToNonNegInt}
 import org.apache.mahout.math.scalabindings.dvec
-import org.apache.mahout.math.{Matrix, Vector => MahoutVector}
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.commons.math3.distribution._
 
-import scala.language.higherKinds
-
-trait LinearRegressorModel[K] extends RegressorModel[K] {
-
-  var beta: MahoutVector = _
-  var se: MahoutVector = _
-  var tScore: MahoutVector = _
-  var pval: MahoutVector = _
-
-
-
-}
 
 trait LinearRegressorFitter[K] extends RegressorFitter[K] {
 
@@ -63,7 +29,6 @@ trait LinearRegressorFitter[K] extends RegressorFitter[K] {
                              drmXtXinv: Matrix,
                              model: M[K]): M[K] = {
     import org.apache.mahout.math.function.Functions.SQRT
-    import org.apache.mahout.math.scalabindings.MahoutCollections._
 
     val yhat = X %*% model.beta
     val residuals = drmTarget - yhat

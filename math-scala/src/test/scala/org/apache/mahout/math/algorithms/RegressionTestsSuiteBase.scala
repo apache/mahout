@@ -19,7 +19,7 @@
 
 package org.apache.mahout.math.algorithms
 
-import org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares
+import org.apache.mahout.math.algorithms.regression.linear.OrdinaryLeastSquares
 import org.apache.mahout.math.algorithms.regression.tests._
 import org.apache.mahout.math.drm.{CheckpointedDrm, drmParallelize}
 import org.apache.mahout.math.drm.RLikeDrmOps._
