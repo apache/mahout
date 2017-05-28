@@ -16,7 +16,14 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-package org.apache.mahout.math.algorithms.regression.nonlinear
+
+package org.apache.mahout.math.algorithms.classifier
+
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.algorithms.neuralnet.mlp.DistributedMLPFitter
+import org.apache.mahout.math.algorithms.preprocessing.{AsFactor, AsFactorModel}
+import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.scalabindings.dvec
 
 import org.apache.mahout.math.algorithms.neuralnet.mlp.{DistributedMLPModel, DistributedMLPFitter, InCoreMLP}
 import org.apache.mahout.math.drm.DrmLike
@@ -33,13 +40,12 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 import MahoutCollections._
 
-
-class DistributedMLPRegression[K] extends NonlinearRegressorFitter[K] {
+class DistributedMLPClassifier[K] extends ClassifierFitter[K] {
 
   var hiddenArch: Array[Int] = _
   var microIters: Int = _
   var macroIters: Int = _
-
+  var factorizerModel: AsFactorModel = _
 
   def setStandardHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     hiddenArch = hyperparameters.asInstanceOf[Map[Symbol, Array[Int]]].getOrElse('hiddenArchitecture, Array(10))
@@ -47,34 +53,43 @@ class DistributedMLPRegression[K] extends NonlinearRegressorFitter[K] {
     macroIters = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('macroIters, 10)
   }
 
-  def fit(drmX  : DrmLike[K],
+  def fit(drmX: DrmLike[K],
           drmTarget: DrmLike[K],
-          hyperparameters: (Symbol, Any)*): DistributedMLPRegressionModel[K] = {
+          hyperparameters: (Symbol, Any)*): DistributedMLPClassifierModel[K] = {
 
 
+    factorizerModel = new AsFactor().fit(drmTarget)
+    val factoredDrm = factorizerModel.transform(drmTarget)
+    val dataDrm = drmX cbind factoredDrm
 
-    val arch: Vector = dvec( Array(drmX.ncol.toDouble) ++ hiddenArch.map(i => i.toDouble) ++Array(drmTarget.ncol.toDouble) )
-    val distributedMLP = new DistributedMLPFitter[K]( arch = arch,
-                                                microIters = microIters,
-                                                macroIters = macroIters,
-                                                offsets = dvec(0, drmX.ncol, drmX.ncol, 1))
-
-    val dataDrm = drmX cbind drmTarget
+    val arch: Vector = dvec(Array(drmX.ncol.toDouble) ++ hiddenArch.map(i => i.toDouble) ++ Array(factoredDrm.ncol.toDouble))
+    val distributedMLP = new DistributedMLPFitter[K](arch = arch,
+      microIters = microIters,
+      macroIters = macroIters,
+      offsets = dvec(0, drmX.ncol, drmX.ncol, factoredDrm.ncol))
 
     distributedMLP.fit(dataDrm)
-
-    new DistributedMLPRegressionModel[K](distributedMLP.createDistributedModel())
+    new DistributedMLPClassifierModel[K](distributedMLP.createDistributedModel(), factorizerModel)
   }
 }
 
-class DistributedMLPRegressionModel[K](model: DistributedMLPModel[K]) extends NonlinearRegressorModel[K] {
+class DistributedMLPClassifierModel[K](mlpModel: DistributedMLPModel[K],
+                                       factorizerModel: AsFactorModel) extends ClassifierModel[K] {
 
+  // todo better name- consistent with Sklearn
+  def predictRaw(drmPredictors: DrmLike[K]): DrmLike[K] = {
+    mlpModel.predict(drmPredictors)
+  }
 
-  def predict(drmPredictors: DrmLike[K]) = {
-    model.predict(drmPredictors)
+  def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
+    val rawScores = predictRaw(drmPredictors)
+    // oneHots = somefunc(rawScores) todo somefunc which converts dvec(0.001, 0.004, 2.41) to dvec(0,0,1)
+    // factorizerModel.invTransform(oneHots)
+    rawScores
   }
 
   def exportIncoreModel(): InCoreMLP = {
-    model.exportIncoreModel()
+    mlpModel.exportIncoreModel()
   }
+
 }
