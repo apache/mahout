@@ -39,12 +39,14 @@ class DistributedMLPRegression[K] extends NonlinearRegressorFitter[K] {
   var hiddenArch: Array[Int] = _
   var microIters: Int = _
   var macroIters: Int = _
+  var useBiases: Boolean = _
 
 
   def setStandardHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     hiddenArch = hyperparameters.asInstanceOf[Map[Symbol, Array[Int]]].getOrElse('hiddenArchitecture, Array(10))
     microIters = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('microIters, 10)
     macroIters = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('macroIters, 10)
+    useBiases =  hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('useBiases, true)
   }
 
   def fit(drmX  : DrmLike[K],
@@ -57,7 +59,8 @@ class DistributedMLPRegression[K] extends NonlinearRegressorFitter[K] {
     val distributedMLP = new DistributedMLPFitter[K]( arch = arch,
                                                 microIters = microIters,
                                                 macroIters = macroIters,
-                                                offsets = dvec(0, drmX.ncol, drmX.ncol, 1))
+                                                offsets = dvec(0, drmX.ncol, drmX.ncol, 1),
+                                                useBiases)
 
     val dataDrm = drmX cbind drmTarget
 

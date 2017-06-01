@@ -69,4 +69,30 @@ object Converters {
     mA
   }
 
+  def flattenArrayOfMatrixArraysToVector(aMA: Array[Array[_ <: Matrix]]): Vector = {
+    val sizes = aMA.map(aM => aM.map(m => m.nrow * m.ncol).sum)
+    val offsets = sizes.scanLeft(0)(_ + _)
+    val v = new DenseVector(sizes.sum)
+    for (ai <- aMA.indices){
+      val vPart = flattenMatrixArrayToVector(aMA(ai))
+      for (vi <- 0 until vPart.length){
+        v.setQuick(offsets(ai) + vi, vPart(vi))
+      }
+    }
+    v
+  }
+
+  def recomposeArrayOfMatrixArraysFromVec(v: Vector, sizeArray: Array[Array[(Int, Int)]]): Array[Array[Matrix]] = {
+    val sizes = sizeArray.map(aM => aM.map(m => m._1 * m._2).sum)
+    val offsets = sizes.scanLeft(0)(_ + _)
+    val cols = sizeArray.map(ma => ma.length).max
+    val aMA = Array.ofDim[Matrix](sizeArray.length, cols)
+    for (i <- 0 until sizeArray.length){
+      for (j <- 0 until sizeArray(i).length){
+        aMA(i) = recomposeMatrixArrayFromVec( v.viewPart(offsets(i), sizes(i)), sizeArray(i))
+      }
+
+    }
+    aMA
+  }
 }

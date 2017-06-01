@@ -46,11 +46,13 @@ class DistributedMLPClassifier[K] extends ClassifierFitter[K] {
   var microIters: Int = _
   var macroIters: Int = _
   var factorizerModel: AsFactorModel = _
+  var useBiases: Boolean = _
 
   def setStandardHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     hiddenArch = hyperparameters.asInstanceOf[Map[Symbol, Array[Int]]].getOrElse('hiddenArchitecture, Array(10))
     microIters = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('microIters, 10)
     macroIters = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('macroIters, 10)
+    useBiases =  hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('useBiases, true)
   }
 
   def fit(drmX: DrmLike[K],
@@ -66,7 +68,8 @@ class DistributedMLPClassifier[K] extends ClassifierFitter[K] {
     val distributedMLP = new DistributedMLPFitter[K](arch = arch,
       microIters = microIters,
       macroIters = macroIters,
-      offsets = dvec(0, drmX.ncol, drmX.ncol, factoredDrm.ncol))
+      offsets = dvec(0, drmX.ncol, drmX.ncol, factoredDrm.ncol),
+      useBiases)
 
     distributedMLP.fit(dataDrm)
     new DistributedMLPClassifierModel[K](distributedMLP.createDistributedModel(), factorizerModel)
@@ -76,13 +79,17 @@ class DistributedMLPClassifier[K] extends ClassifierFitter[K] {
 class DistributedMLPClassifierModel[K](mlpModel: DistributedMLPModel[K],
                                        factorizerModel: AsFactorModel) extends ClassifierModel[K] {
 
-  // todo better name- consistent with Sklearn
-  def predictRaw(drmPredictors: DrmLike[K]): DrmLike[K] = {
+  /**
+    * The raw predictions of the output neurons
+    * @param drmPredictors
+    * @return
+    */
+  def rawPredictions(drmPredictors: DrmLike[K]): DrmLike[K] = {
     mlpModel.predict(drmPredictors)
   }
 
   def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
-    val rawScores = predictRaw(drmPredictors)
+    val rawScores = rawPredictions(drmPredictors)
     // oneHots = somefunc(rawScores) todo somefunc which converts dvec(0.001, 0.004, 2.41) to dvec(0,0,1)
     // factorizerModel.invTransform(oneHots)
     rawScores

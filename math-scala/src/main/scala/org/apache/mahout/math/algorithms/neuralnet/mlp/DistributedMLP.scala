@@ -35,12 +35,15 @@ import MahoutCollections._
 class DistributedMLPFitter[K](arch: Vector,
                         microIters: Int = 10,
                         macroIters: Int = 50,
-                        offsets: Vector) {
+                        offsets: Vector,
+                        useBiases: Boolean) {
 
   var pv: Vector = createInitialWeightVector()
+  var useBaisesInt = 0
 
   def createInitialWeightVector(): Vector = {
     var initNetwork = new InCoreMLP()
+    initNetwork.useBiases = useBiases
     initNetwork.createWeightsArray(arch)
     initNetwork.parameterVector().cloned
   }
@@ -53,7 +56,10 @@ class DistributedMLPFitter[K](arch: Vector,
     val bcMicroIters = drmBroadcast(dvec(microIters))
     val bcOffsets = drmBroadcast(offsets)
 
-    val bcU = drmBroadcast(pv)
+    if (useBiases){ useBaisesInt = 1 }
+
+    val bcUseBiases = drmBroadcast( dvec( useBaisesInt ) )
+    val bcWeightsArray = drmBroadcast(pv)
 
     val paramMatrix = drmData
       .allreduceBlock(
@@ -66,8 +72,13 @@ class DistributedMLPFitter[K](arch: Vector,
       inCoreNetwork.targetStart = localOffsets.get(2).toInt
       inCoreNetwork.targetOffset = localOffsets.get(3).toInt
 
+      inCoreNetwork.useBiases = bcUseBiases.value.get(0) match {
+        case 1 => true
+        case 0 => false
+      }
+
       inCoreNetwork.createWeightsArray(bcArch.value)
-      inCoreNetwork.setParametersFromVector(bcU.value)
+      inCoreNetwork.setParametersFromVector(bcWeightsArray.value)
 
       for (i <- 0 until bcMicroIters.value.get(0).toInt) {
         inCoreNetwork.forwardBackwardMatrix(block)
@@ -105,21 +116,26 @@ class DistributedMLPFitter[K](arch: Vector,
   }
 
   def createDistributedModel(): DistributedMLPModel[K] = {
-    new DistributedMLPModel[K](arch, offsets, pv)
+    new DistributedMLPModel[K](arch, offsets, pv, useBaisesInt)
   }
 
 }
 
 class DistributedMLPModel[K](arch: Vector,
                              offsets: Vector,
-                             pv: Vector) {
+                             pv: Vector,
+                             useBiasesInt: Int) {
+
+
 
   def predict(drmData: DrmLike[K]): DrmLike[K] = {
     implicit val ctx = drmData.context
 
     val bcArch = drmBroadcast(arch)
     val bcOffsets = drmBroadcast(offsets)
-    val bcU = drmBroadcast(pv)
+    val bcWeightsArray = drmBroadcast(pv)
+
+    val bcUseBiases = drmBroadcast( dvec( useBiasesInt ))
 
     implicit val ktag =  drmData.keyClassTag
 
@@ -133,8 +149,13 @@ class DistributedMLPModel[K](arch: Vector,
         inCoreNetwork.targetStart = localOffsets.get(2).toInt
         inCoreNetwork.targetOffset = localOffsets.get(3).toInt
 
+        inCoreNetwork.useBiases = bcUseBiases.value.get(0) match {
+          case 1 => true
+          case 0 => false
+        }
+
         inCoreNetwork.createWeightsArray(bcArch.value)
-        inCoreNetwork.setParametersFromVector(bcU.value)
+        inCoreNetwork.setParametersFromVector(bcWeightsArray.value)
 
         val output = new DenseMatrix(block.nrow, inCoreNetwork.targetOffset)
         for (row <- 0 until block.nrow) {

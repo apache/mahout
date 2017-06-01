@@ -38,6 +38,7 @@ import org.apache.mahout.math.function.Functions._
 class InCoreMLP extends Serializable {
 
   var A: Array[Vector] = _
+  var biases: Array[Matrix] = _
   var architecture: Vector = _
   var convergenceThreshold: Double = 0.01
   var delta: Array[Vector] = _
@@ -56,6 +57,9 @@ class InCoreMLP extends Serializable {
   var targetStart: Int = _
   var targetOffset: Int = _
 
+  var useBiases: Boolean = false
+  var randomSeed: Int = 1234
+
   var activationFn : DoubleFunction = SIGMOID
   var activationFnDerivative : DoubleFunction = SIGMOIDGRADIENT
   /**
@@ -68,7 +72,13 @@ class InCoreMLP extends Serializable {
   def createWeightsArray(arch: Vector): Unit = {
     architecture = arch
     U = (0 until architecture.size()-1)
-      .map(i => Matrices.gaussianView(architecture.get(i+1).toInt, architecture.get(i).toInt, 1).cloned ).toArray
+      .map(i => Matrices.gaussianView(architecture.get(i+1).toInt, architecture.get(i).toInt, randomSeed).cloned ).toArray
+
+    if (useBiases) {
+      import scala.util.Random
+      biases = (0 until architecture.size())
+        .map(i => Matrices.gaussianView(1, architecture.get(i).toInt, randomSeed).cloned ).toArray
+    }
 
   }
 
@@ -81,7 +91,10 @@ class InCoreMLP extends Serializable {
     A = Array(x.cloned) ++ new Array[Vector](U.size)
     Z = Array(x.cloned) ++ new Array[Vector](U.size)
     for (l <- 1 until A.size){
-      A(l) = (U(l - 1) %*% A(l-1)) // + TODO: biases ...
+      A(l) = useBiases match {
+        case true => (U(l - 1) %*% A(l-1)) + biases(l)(0, ::)
+        case false => U(l - 1) %*% A(l-1)
+      }
       Z(l) = A(l).cloned.assign(activationFn)
     }
     (A, Z)
@@ -120,6 +133,11 @@ class InCoreMLP extends Serializable {
   def updateU(): Unit = {
     val learningRate = initialLearningRate // todo create learning rate function, fn of iteration
     U = (0 until U.size).map(l => U(l) - (learningRate * gradient(l))).toArray
+    if (useBiases) {
+      for (l <- 1 until biases.size){
+        biases(l)(0,::) = biases(l)(0,::) - (learningRate * delta(l))
+      }
+    }
     iteration += 1
   }
 
@@ -152,17 +170,33 @@ class InCoreMLP extends Serializable {
 
   def parameterVector(): Vector = {
     import org.apache.mahout.math.algorithms.neuralnet.Converters
-    Converters.flattenMatrixArrayToVector(U)
+
+    var ama: Array[Array[_ <: Matrix]] = Array(U)
+    if (useBiases){
+      ama = ama ++ Array(biases)
+    }
+    Converters.flattenArrayOfMatrixArraysToVector(ama)
   }
 
 
   def setParametersFromVector(v: Vector): Unit ={
     import org.apache.mahout.math.algorithms.neuralnet.Converters
-    val sizeArray = new Array[(Int, Int)](architecture.length - 1)
+    val wgtsSizeArray = new Array[(Int, Int)](architecture.length - 1)
     for (i <- 0 until (architecture.length - 1)){
-      sizeArray(i) = (architecture(i + 1).toInt, architecture(i).toInt)
+      wgtsSizeArray(i) = (architecture(i + 1).toInt, architecture(i).toInt)
     }
-    U = Converters.recomposeMatrixArrayFromVec(v, sizeArray)
+    var sizeArray : Array[Array[(Int, Int)]] = Array(wgtsSizeArray)
+    if (useBiases) {
+      val biasesSizeArray = new Array[(Int, Int)](architecture.length)
+      for (i <- 0 until (architecture.length)){
+        biasesSizeArray(i) = (1, architecture(i).toInt)
+      }
+      sizeArray = sizeArray ++ Array(biasesSizeArray)
+    }
+    val mma = Converters.recomposeArrayOfMatrixArraysFromVec(v, sizeArray)
+    U = mma(0)
+    biases = mma(1)
+
   }
 }
 
