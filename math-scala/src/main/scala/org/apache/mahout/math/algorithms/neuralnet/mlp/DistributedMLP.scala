@@ -175,6 +175,11 @@ class DistributedMLPModel[K](arch: Vector,
     inCoreNetwork.targetStart = offsets.get(2).toInt
     inCoreNetwork.targetOffset = offsets.get(3).toInt
 
+    inCoreNetwork.useBiases = useBiasesInt match {
+      case 1 => true
+      case 0 => false
+    }
+
     inCoreNetwork.createWeightsArray(arch)
     inCoreNetwork.setParametersFromVector(pv)
     inCoreNetwork

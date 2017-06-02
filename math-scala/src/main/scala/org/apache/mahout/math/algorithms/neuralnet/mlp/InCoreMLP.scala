@@ -130,7 +130,7 @@ class InCoreMLP extends Serializable {
 
   }
 
-  def updateU(): Unit = {
+  def updateParameters(): Unit = {
     val learningRate = initialLearningRate // todo create learning rate function, fn of iteration
     U = (0 until U.size).map(l => U(l) - (learningRate * gradient(l))).toArray
     if (useBiases) {
@@ -150,7 +150,7 @@ class InCoreMLP extends Serializable {
   def forwardBackward(x: Vector, target: Vector): Unit = {
     feedForward(x)
     backProp(target)
-    updateU()
+    updateParameters()
   }
 
   def forwardBackwardVector(v: Vector): Unit = {
@@ -195,8 +195,9 @@ class InCoreMLP extends Serializable {
     }
     val mma = Converters.recomposeArrayOfMatrixArraysFromVec(v, sizeArray)
     U = mma(0)
-    biases = mma(1)
-
+    if (useBiases) {
+      biases = mma(1)
+    }
   }
 }
 

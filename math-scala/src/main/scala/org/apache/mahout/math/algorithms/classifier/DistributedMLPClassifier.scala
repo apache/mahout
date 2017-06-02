@@ -91,6 +91,7 @@ class DistributedMLPClassifierModel[K](mlpModel: DistributedMLPModel[K],
   def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
     val rawScores = rawPredictions(drmPredictors)
     // oneHots = somefunc(rawScores) todo somefunc which converts dvec(0.001, 0.004, 2.41) to dvec(0,0,1)
+    // actually- this goes in DistributedMLP- otherwise we'll have to make two passes.
     // factorizerModel.invTransform(oneHots)
     rawScores
   }
