@@ -1,5 +1,8 @@
 This directory contains helpful shell scripts for working with some of Mahout's examples.  
 
+To set a non-default temporary work directory: `export MAHOUT_WORK_DIR=/path/in/hdfs/to/temp/dir`
+  Note that this requires the same path to be writable both on the local file system as well as on HDFS.
+
 Here's a description of what each does:
 
 classify-20newsgroups.sh -- Run SGD and Bayes classifiers over the classic 20 News Groups.  Downloads the data set automatically.

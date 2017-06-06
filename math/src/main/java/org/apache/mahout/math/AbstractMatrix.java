@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,11 +19,14 @@ package org.apache.mahout.math;
 
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Maps;
-import org.apache.mahout.math.flavor.BackEnum;
 import org.apache.mahout.math.flavor.MatrixFlavor;
-import org.apache.mahout.math.flavor.TraversingStructureEnum;
-import org.apache.mahout.math.function.*;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.VectorFunction;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -127,7 +130,7 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public void set(String rowLabel, int row, double[] rowData) {
     if (rowLabelBindings == null) {
-      rowLabelBindings = Maps.newHashMap();
+      rowLabelBindings = new HashMap<>();
     }
     rowLabelBindings.put(rowLabel, row);
     set(row, rowData);
@@ -149,11 +152,11 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public void set(String rowLabel, String columnLabel, int row, int column, double value) {
     if (rowLabelBindings == null) {
-      rowLabelBindings = Maps.newHashMap();
+      rowLabelBindings = new HashMap<>();
     }
     rowLabelBindings.put(rowLabel, row);
     if (columnLabelBindings == null) {
-      columnLabelBindings = Maps.newHashMap();
+      columnLabelBindings = new HashMap<>();
     }
     columnLabelBindings.put(columnLabel, column);
 
@@ -719,7 +722,7 @@ public abstract class AbstractMatrix implements Matrix {
     /**
      * Used internally by assign() to update multiple indices and values at once.
      * Only really useful for sparse vectors (especially SequentialAccessSparseVector).
-     * <p/>
+     * <p>
      * If someone ever adds a new type of sparse vectors, this method must merge (index, value) pairs into the vector.
      *
      * @param updates a mapping of indices to values to merge in the vector.

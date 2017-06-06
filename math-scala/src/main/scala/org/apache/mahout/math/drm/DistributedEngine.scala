@@ -47,18 +47,18 @@ trait DistributedEngine {
   def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K]
 
   /** Engine-specific colSums implementation based on a checkpoint. */
-  def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector
+  def colSums[K](drm: CheckpointedDrm[K]): Vector
 
   /** Optional engine-specific all reduce tensor operation. */
-  def allreduceBlock[K: ClassTag](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix
+  def allreduceBlock[K](drm: CheckpointedDrm[K], bmf: BlockMapFunc2[K], rf: BlockReduceFunc): Matrix
 
   /** Engine-specific numNonZeroElementsPerColumn implementation based on a checkpoint. */
-  def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector
+  def numNonZeroElementsPerColumn[K](drm: CheckpointedDrm[K]): Vector
 
   /** Engine-specific colMeans implementation based on a checkpoint. */
-  def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector
+  def colMeans[K](drm: CheckpointedDrm[K]): Vector
 
-  def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double
+  def norm[K](drm: CheckpointedDrm[K]): Double
 
   /** Broadcast support */
   def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector]
@@ -94,7 +94,7 @@ trait DistributedEngine {
    * Convert non-int-keyed matrix to an int-keyed, computing optionally mapping from old keys
    * to row indices in the new one. The mapping, if requested, is returned as a 1-column matrix.
    */
-  def drm2IntKeyed[K: ClassTag](drmX: DrmLike[K], computeMap: Boolean = false): (DrmLike[Int], Option[DrmLike[K]])
+  def drm2IntKeyed[K](drmX: DrmLike[K], computeMap: Boolean = false): (DrmLike[Int], Option[DrmLike[K]])
 
   /**
    * (Optional) Sampling operation. Consistent with Spark semantics of the same.
@@ -104,9 +104,9 @@ trait DistributedEngine {
    * @tparam K
    * @return
    */
-  def drmSampleRows[K: ClassTag](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K]
+  def drmSampleRows[K](drmX: DrmLike[K], fraction: Double, replacement: Boolean = false): DrmLike[K]
 
-  def drmSampleKRows[K: ClassTag](drmX: DrmLike[K], numSamples:Int, replacement:Boolean = false) : Matrix
+  def drmSampleKRows[K](drmX: DrmLike[K], numSamples:Int, replacement:Boolean = false) : Matrix
 
   /**
    * Load IndexedDataset from text delimited format.
@@ -137,9 +137,12 @@ object DistributedEngine {
   private val log = Logger.getLogger(DistributedEngine.getClass)
 
   /** This is mostly multiplication operations rewrites */
-  private def pass1[K: ClassTag](action: DrmLike[K]): DrmLike[K] = {
+  private def pass1[K](action: DrmLike[K]): DrmLike[K] = {
 
     action match {
+
+      // Logical but previously had checkpoint attached to it already that has some caching policy to it
+      case cpa: CheckpointAction[K] if cpa.cp.exists(_.cacheHint != CacheHint.NONE) ⇒ cpa.cp.get
 
       // self element-wise rewrite
       case OpAewB(a, b, op) if a == b => {
@@ -154,16 +157,22 @@ object DistributedEngine {
             null
         }
       }
-      case OpAB(OpAt(a), b) if (a == b) ⇒ OpAtA(pass1(a))
-      case OpABAnyKey(OpAtAnyKey(a), b) if (a == b) ⇒ OpAtA(pass1(a))
+      case OpAB(OpAt(a), b) if a == b ⇒ OpAtA(pass1(a))
+      case OpABAnyKey(OpAtAnyKey(a), b) if a == b ⇒ OpAtA(pass1(a))
+
+      // A small rule change: Now that we have removed ClassTag at the %*% operation, it doesn't
+      // match b[Int] case automatically any longer. So, we need to check and rewrite it dynamically
+      // and re-run pass1 again on the obtained tree.
+      case OpABAnyKey(a, b) if b.keyClassTag == ClassTag.Int ⇒ pass1(OpAB(a, b.asInstanceOf[DrmLike[Int]]))
+      case OpAtAnyKey(a) if a.keyClassTag == ClassTag.Int ⇒ pass1(OpAt(a.asInstanceOf[DrmLike[Int]]))
 
       // For now, rewrite left-multiply via transpositions, i.e.
       // inCoreA %*% B = (B' %*% inCoreA')'
       case op@OpTimesLeftMatrix(a, b) ⇒
-      OpAt(OpTimesRightMatrix(A = OpAt(pass1(b)), right = a.t))
+        OpAt(OpTimesRightMatrix(A = OpAt(pass1(b)), right = a.t))
 
       // Add vertical row index concatenation for rbind() on DrmLike[Int] fragments
-      case op@OpRbind(a, b) if (implicitly[ClassTag[K]] == ClassTag.Int) ⇒
+      case op@OpRbind(a, b) if op.keyClassTag == ClassTag.Int ⇒
 
         // Make sure closure sees only local vals, not attributes. We need to do these ugly casts
         // around because compiler could not infer that K is the same as Int, based on if() above.
@@ -179,18 +188,18 @@ object DistributedEngine {
 
       // For everything else we just pass-thru the operator arguments to optimizer
       case uop: AbstractUnaryOp[_, K] ⇒
-        uop.A = pass1(uop.A)(uop.classTagA)
+        uop.A = pass1(uop.A)
         uop
 
       case bop: AbstractBinaryOp[_, _, K] ⇒
-        bop.A = pass1(bop.A)(bop.classTagA)
-        bop.B = pass1(bop.B)(bop.classTagB)
+        bop.A = pass1(bop.A)
+        bop.B = pass1(bop.B)
         bop
     }
   }
 
   /** This would remove stuff like A.t.t that previous step may have created */
-  private def pass2[K: ClassTag](action: DrmLike[K]): DrmLike[K] = {
+  private def pass2[K](action: DrmLike[K]): DrmLike[K] = {
     action match {
 
       // Fusion of unary funcs into single, like 1 + x * x.
@@ -206,31 +215,31 @@ object DistributedEngine {
         pass2(OpAewUnaryFuncFusion(a, op.ff :+ op2))
 
       // A.t.t => A
-      case OpAt(top@OpAt(a)) ⇒  pass2(a)(top.classTagA)
+      case OpAt(top@OpAt(a)) ⇒  pass2(a)
 
       // Stop at checkpoints
       case cd: CheckpointedDrm[_] ⇒  action
 
       // For everything else we just pass-thru the operator arguments to optimizer
       case uop: AbstractUnaryOp[_, K] ⇒
-        uop.A = pass2(uop.A)(uop.classTagA)
+        uop.A = pass2(uop.A)
         uop
       case bop: AbstractBinaryOp[_, _, K] ⇒
-        bop.A = pass2(bop.A)(bop.classTagA)
-        bop.B = pass2(bop.B)(bop.classTagB)
+        bop.A = pass2(bop.A)
+        bop.B = pass2(bop.B)
         bop
     }
   }
 
   /** Some further rewrites that are conditioned on A.t.t removal */
-  private def pass3[K: ClassTag](action: DrmLike[K]): DrmLike[K] = {
+  private def pass3[K](action: DrmLike[K]): DrmLike[K] = {
     action match {
 
       // matrix products.
       case OpAB(a, OpAt(b)) ⇒  OpABt(pass3(a), pass3(b))
 
       // AtB cases that make sense.
-      case OpAB(OpAt(a), b) if (a.partitioningTag == b.partitioningTag) ⇒  OpAtB(pass3(a), pass3(b))
+      case OpAB(OpAt(a), b) if a.partitioningTag == b.partitioningTag ⇒  OpAtB(pass3(a), pass3(b))
       case OpABAnyKey(OpAtAnyKey(a), b) ⇒  OpAtB(pass3(a), pass3(b))
 
       // Need some cost to choose between the following.
@@ -240,18 +249,18 @@ object DistributedEngine {
       case OpAB(a, b) ⇒  OpABt(pass3(a), OpAt(pass3(b)))
 
       // Rewrite A'x
-      case op@OpAx(op1@OpAt(a), x) ⇒  OpAtx(pass3(a)(op1.classTagA), x)
+      case op@OpAx(op1@OpAt(a), x) ⇒  OpAtx(pass3(a), x)
 
       // Stop at checkpoints
       case cd: CheckpointedDrm[_] ⇒  action
 
       // For everything else we just pass-thru the operator arguments to optimizer
       case uop: AbstractUnaryOp[_, K] ⇒
-        uop.A = pass3(uop.A)(uop.classTagA)
+        uop.A = pass3(uop.A)
         uop
       case bop: AbstractBinaryOp[_, _, K] ⇒
-        bop.A = pass3(bop.A)(bop.classTagA)
-        bop.B = pass3(bop.B)(bop.classTagB)
+        bop.A = pass3(bop.A)
+        bop.B = pass3(bop.B)
         bop
     }
   }

@@ -113,7 +113,7 @@ public abstract class AbstractLuceneIterator extends AbstractIterator<Vector> {
 
       // The loop exits with termFreqVector and name set.
 
-      TermsEnum te = termFreqVector.iterator(null);
+      TermsEnum te = termFreqVector.iterator();
       BytesRef term;
       TFDFMapper mapper = new TFDFMapper(indexReader.numDocs(), weight, this.terminfo);
       mapper.setExpectations(field, termFreqVector.size());

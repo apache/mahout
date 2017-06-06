@@ -211,6 +211,21 @@ then
        CLASSPATH=${CLASSPATH}:$f;
     done
 
+    # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
+     # viennacl jars- may or may not be available depending on build profile
+     for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+           CLASSPATH=${CLASSPATH}:$f;
+      done
+
+    # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
     SPARK_CP_BIN="${MAHOUT_HOME}/bin/compute-classpath.sh"
     if [ -x "${SPARK_CP_BIN}" ]; then
        SPARK_CLASSPATH=$("${SPARK_CP_BIN}" 2>/dev/null)
@@ -220,15 +235,26 @@ then
       exit -1
     fi
 
-    SPARK_ASSEBMLY_BIN="${MAHOUT_HOME}/bin/mahout-spark-class.sh"
-    if [ -x "${SPARK_ASSEBMLY_BIN}" ]; then
-       SPARK_ASSEMBLY_CLASSPATH=$("${SPARK_ASSEBMLY_BIN}" 2>/dev/null)
-       CLASSPATH="${CLASSPATH}:${SPARK_ASSEBMLY_BIN}"
+    SPARK_ASSEMBLY_BIN="${MAHOUT_HOME}/bin/mahout-spark-class.sh"
+    if [ -x "${SPARK_ASSEMBLY_BIN}" ]; then
+       SPARK_ASSEMBLY_CLASSPATH=$("${SPARK_ASSEMBLY_BIN}" 2>/dev/null)
+       CLASSPATH="${CLASSPATH}:${SPARK_ASSEMBLY_BIN}"
     else
       echo "Cannot find Spark assembly classpath. Is 'SPARK_HOME' set?"
       exit -1
     fi
   fi
+
+   # add vcl jars at any point.
+   # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
 
   # add release dependencies to CLASSPATH
   for f in $MAHOUT_HOME/lib/*.jar; do
@@ -261,11 +287,11 @@ fi
 
 # restore ordinary behaviour
 unset IFS
-
+JARS=$(echo "$MAHOUT_HOME"/*.jar | tr ' ' ',')
 case "$1" in
   (spark-shell)
     save_stty=$(stty -g 2>/dev/null);
-    "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" "org.apache.mahout.sparkbindings.shell.Main" $@
+    $SPARK_HOME/bin/spark-shell --jars "$JARS" -i $MAHOUT_HOME/bin/load-shell.scala --conf spark.kryo.referenceTracking=false --conf spark.kryo.registrator=org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator --conf spark.kryoserializer.buffer=32k --conf spark.kryoserializer.buffer.max=600m --conf spark.serializer=org.apache.spark.serializer.KryoSerializer $@
     stty sane; stty $save_stty
     ;;
   # Spark CLI drivers go here

@@ -1,0 +1,91 @@
+<div id="AlgoMenu">
+    <span><b>Mahout-Samsara Algorithms</b></span>
+    <div class="list-group panel">
+        <a href="#linalg" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Linear Algebra</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="linalg">
+            <ul class="nav sidebar-nav">
+                <li> <a href="{{ BASE_PATH }}/algorithms/linear-algebra/d-qr.html">Distributed QR Decomposition</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/linear-algebra/d-spca.html">Distributed Stochastic Principal Component Analysis</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/linear-algebra/d-ssvd.html">Distributed Stochastic Singular Value Decomposition</a></li>
+            </ul>
+        </div>
+        <a href="#clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="clustering">
+            <ul class="nav sidebar-nav">
+                <li> <a href="{{ BASE_PATH }}/algorithms/clustering">Clustering Algorithms</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/clustering/distance-metrics.html">Distance Metrics</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/clustering/canopy">Canopy Clustering</a></li>
+            </ul>
+        </div>
+        <a href="#preprocessors" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Preprocessors</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="preprocessors">
+            <ul class="nav sidebar-nav">
+                <li> <a href="{{ BASE_PATH }}/algorithms/preprocessors/AsFactor.html">AsFactor (a.k.a. One-Hot-Encoding)</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/preprocessors/StandardScaler.html">StandardScaler</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/preprocessors/MeanCenter.html">MeanCenter</a></li>
+            </ul>
+        </div>
+        <a href="#regression" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Regression</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="regression">
+            <ul class="nav sidebar-nav">
+                <a href="#serial-correlation" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#regression"><b>&#8226;&nbsp;Serial Correlation</b><i class="fa fa-caret-down"></i></a>
+                <div class="collapse" id="serial-correlation">
+                    <ul class="nav sidebar-nav">
+                        <li> <a href="{{ BASE_PATH }}/algorithms/regression/serial-correlation/cochrane-orcutt.html">Cochrane-Orcutt Procedure</a></li>
+                        <li> <a href="{{ BASE_PATH }}/algorithms/regression/serial-correlation/dw-test.html">Durbin Watson Test</a></li>
+                    </ul>
+                </div>
+                <li> <a href="{{ BASE_PATH }}/algorithms/regression/ols.html">Ordinary Least Squares (Closed Form)</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/regression/fittness-tests.html">Fitness Tests</a></li>
+            </ul>
+        </div>
+        <a href="#reccomenders" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Reccomenders</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="reccomenders">
+            <ul class="nav sidebar-nav">
+                <li> <a href="{{ BASE_PATH }}/algorithms/reccomenders">Reccomender Overview</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/reccomenders/cco.html">CCO</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/reccomenders/d-als.html">Distributed Alternating Least Squares</a></li>
+            </ul>
+        </div>
+    </div>
+    <span><b>Map Reduce Algorithms</b> (deprecated)</span>
+    <div class="list-group panel">
+        <a href="#classification" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Classification</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="classification">
+            <ul class="nav sidebar-nav">
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/bayesian.html">Bayesian</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/class-discovery.html">Class Discovery</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/classifyingyourdata.html">Classifying Your Data</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/collocations.html">Collocation</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/gaussian-discriminative-analysis.html">Gaussian Discriminative Analysis</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/independent-component-analysis.html">Independent Component Analysis</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/locally-weighted-linear-regression.html">Locally Weighted Linear Regression</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/logistic-regression.html">Logistic Regression</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/mahout-collections.html">Mahout Collections</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/mlp.html">Multilayer Perceptron</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/naivebayes.html">Naive Bayes</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/neural-network.html">Neural Networks</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/partial-implementation.html">Partial Implementation</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/random-forrests.html">Random Forrests</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/restricted-boltzman-machines.html">Restricted Boltzman Machines</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/classification/support-vector-machines.html">Support Vector Machines</a></li>
+            </ul>
+        </div>
+        <a href="#mr-clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="mr-clustering">
+            <ul class="nav sidebar-nav">
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/canopy-clustering.html">Canopy Clustering</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/cluster-dumper.html">Cluster Dumper</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/expectation-maximization.html">Expectation Maximization</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/fuzzy-k-means.html">Fuzzy K-Means</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/hierarchical-clustering.html">Hierarchical Clustering</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/k-means-clustering.html">K-Means Clustering</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/llr---log-likelihood-ratio.html">Log Likelihood Ratio</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li> <a href="{{ BASE_PATH }}/algorithms/map-reduce/clustering/streaming-k-means.html">Streaming K-Means</a></li>
+            </ul>
+        </div>
+    </div>
+</div>

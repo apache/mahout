@@ -22,7 +22,6 @@ import org.scalatest.{FunSuite, Matchers}
 import org.apache.mahout.math._
 import scalabindings._
 import RLikeOps._
-import RLikeDrmOps._
 import scala.reflect.ClassTag
 
 /** Common DRM tests to be run by all distributed engines. */

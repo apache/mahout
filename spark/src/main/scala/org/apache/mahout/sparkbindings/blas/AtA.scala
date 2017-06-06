@@ -25,8 +25,6 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import collection._
 import JavaConversions._
-import org.apache.spark.SparkContext._
-import org.apache.log4j.Logger
 import org.apache.mahout.math.drm.logical.OpAtA
 import SparkEngine._
 
@@ -50,7 +48,7 @@ object AtA {
 
       // If we can comfortably fit upper-triangular operator into a map memory, we will run slim
       // algorithm with upper-triangular accumulators in maps. 
-      val inCoreA = at_a_slim(srcRdd = srcRdd.toDrmRdd(), operator = operator)
+      val inCoreA = at_a_slim(srcRdd = srcRdd.asRowWise(), operator = operator)
       val drmRdd = parallelizeInCore(inCoreA, numPartitions = 1)(sc = srcRdd.sparkContext)
       drmRdd
 
@@ -58,7 +56,7 @@ object AtA {
 
       // Otherwise, we need to run a distributed, big version
       //      new DrmRddInput(rowWiseSrc = Some(operator.ncol, at_a_nongraph(srcRdd = srcRdd, op = operator)))
-      at_a_nongraph_mmul(srcRdd = srcRdd.toBlockifiedDrmRdd(operator.A.ncol), op = operator)
+      at_a_nongraph_mmul(srcRdd = srcRdd.asBlockified(operator.A.ncol), op = operator)
 
     }
   }
@@ -135,7 +133,7 @@ object AtA {
     // dense in reality than the source.
     val m = op.A.nrow
     val n = op.A.ncol
-    val srcNumParts = srcRdd.partitions.size
+    val srcNumParts = srcRdd.partitions.length
     val finalNumParts = (srcNumParts * n / m).ceil.toInt max 1
     val numParts = finalNumParts max srcNumParts
     val ranges = computeEvenSplits(n, numParts)
@@ -185,7 +183,7 @@ object AtA {
     // dense in reality than the source.
     val m = op.A.nrow
     val n = op.A.ncol
-    val numParts = (srcRdd.partitions.size.toDouble * n / m).ceil.toInt max 1
+    val numParts = (srcRdd.partitions.length.toDouble * n / m).ceil.toInt max 1
     val blockHeight = (n - 1) / numParts + 1
     val offsets = (0 until numParts).map(_ * blockHeight)
     val ranges = offsets.map(offset => offset until (offset + blockHeight min n))
@@ -229,7 +227,7 @@ object AtA {
     }
 
     if (log.isDebugEnabled)
-      log.debug(s"AtA #parts: ${rddAtA.partitions.size}.")
+      log.debug(s"AtA #parts: ${rddAtA.partitions.length}.")
 
     rddAtA
   }
@@ -245,7 +243,7 @@ object AtA {
     // dense in reality than the source.
     val m = op.A.nrow
     val n = op.A.ncol
-    val aparts = srcRdd.partitions.size
+    val aparts = srcRdd.partitions.length
     val numParts = estimateProductPartitions(anrow = n, ancol = m, bncol = n, aparts = aparts, bparts = aparts)
     val ranges = computeEvenSplits(n, numParts)
 

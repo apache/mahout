@@ -78,7 +78,7 @@ trait DistributedDecompositionsSuiteBase extends DistributedMahoutSuite with Mat
     printf("qControl2=\n%s\n", qControl2)
     printf("rControl2=\n%s\n", rControl2)
 
-    // Housholder approach seems to be a little bit more stable
+    // Householder approach seems to be a little bit more stable
     (rControl - inCoreR).norm should be < 1E-5
     (qControl - inCoreQ).norm should be < 1E-5
 
@@ -86,7 +86,7 @@ trait DistributedDecompositionsSuiteBase extends DistributedMahoutSuite with Mat
     (rControl2 - inCoreR).norm should be < 1E-10
     (qControl2 - inCoreQ).norm should be < 1E-10
 
-    // Assert orhtogonality:
+    // Assert orthogonality:
     // (a) Q[,j] dot Q[,j] == 1.0 for all j
     // (b) Q[,i] dot Q[,j] == 0.0 for all i != j
     for (col <- 0 until inCoreQ.ncol)

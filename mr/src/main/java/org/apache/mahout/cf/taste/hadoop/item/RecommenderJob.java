@@ -219,7 +219,7 @@ public final class RecommenderJob extends AbstractJob {
 
     //start the multiplication of the co-occurrence matrix by the user vectors
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job partialMultiply = new Job(getConf(), "partialMultiply");
+      Job partialMultiply = Job.getInstance(getConf(), "partialMultiply");
       Configuration partialMultiplyConf = partialMultiply.getConfiguration();
 
       MultipleInputs.addInputPath(partialMultiply, similarityMatrixPath, SequenceFileInputFormat.class,

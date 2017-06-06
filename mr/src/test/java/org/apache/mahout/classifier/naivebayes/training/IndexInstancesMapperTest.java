@@ -43,7 +43,7 @@ public class IndexInstancesMapperTest extends MahoutTestCase {
     ctx = EasyMock.createMock(Mapper.Context.class);
     instance = new VectorWritable(new DenseVector(new double[] { 1, 0, 1, 1, 0 }));
 
-    labelIndex = new OpenObjectIntHashMap<String>();
+    labelIndex = new OpenObjectIntHashMap<>();
     labelIndex.put("bird", 0);
     labelIndex.put("cat", 1);
   }

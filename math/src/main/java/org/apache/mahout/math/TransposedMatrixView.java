@@ -26,7 +26,7 @@ import org.apache.mahout.math.function.DoubleFunction;
 /**
  * Matrix View backed by an {@link org.apache.mahout.math.function.IntIntFunction}
  */
-class TransposedMatrixView extends AbstractMatrix {
+public class TransposedMatrixView extends AbstractMatrix {
 
   private Matrix m;
 

@@ -18,15 +18,14 @@
 package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.h2obindings.drm.H2ODrm;
-
+import scala.Function1;
 import water.MRTask;
-import water.fvec.Frame;
-import water.fvec.Vec;
 import water.fvec.Chunk;
+import water.fvec.Frame;
 import water.fvec.NewChunk;
+import water.fvec.Vec;
 
 import java.io.Serializable;
-import scala.Function1;
 
 /**
  * MapBlock operator.
@@ -38,7 +37,7 @@ public class AewUnary {
    *
    * @param drmA DRM representing matrix A.
    * @param f UnaryFunc f, that accepts and Double and returns a Double.
-   * @param z Whether or not to execute function on zeroes (in case of sparse DRM).
+   * @param evalZeros Whether or not to execute function on zeroes (in case of sparse DRM).
    * @return new DRM constructed from mapped values of drmA through f.
    */
   public static H2ODrm exec(H2ODrm drmA, Object f, final boolean evalZeros) {
@@ -67,7 +66,7 @@ public class AewUnary {
             for (int r = chk.nextNZ(-1); r < ChunkLen; r = chk.nextNZ(prev_offset)) {
               if (r - prev_offset > 1)
                 ncs[c].addZeros(r - prev_offset - 1);
-              ncs[c].addNum((double)f.apply((java.lang.Double)chk.atd(r)));
+              ncs[c].addNum((double)f.apply(chk.atd(r)));
               prev_offset = r;
             }
             if (ChunkLen - prev_offset > 1)
@@ -75,7 +74,7 @@ public class AewUnary {
           } else {
             /* dense or non-skip zeros */
             for (int r = 0; r < ChunkLen; r++) {
-              ncs[c].addNum((double)f.apply((java.lang.Double)chk.atd(r)));
+              ncs[c].addNum((double)f.apply(chk.atd(r)));
             }
           }
         }

@@ -28,7 +28,7 @@ public class DummyRecordWriterTest {
   @Test
   public void testWrite() {
     DummyRecordWriter<IntWritable, VectorWritable> writer = 
-        new DummyRecordWriter<IntWritable, VectorWritable>();
+        new DummyRecordWriter<>();
     IntWritable reusableIntWritable = new IntWritable();
     VectorWritable reusableVectorWritable = new VectorWritable();
     reusableIntWritable.set(0);

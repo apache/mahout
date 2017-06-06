@@ -30,6 +30,7 @@ import org.apache.spark.SparkContext._
 /**
  * Spark implementation of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] providing the Spark specific
  * dfsWrite method
+ *
  * @param matrix a [[org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark]] to wrap
  * @param rowIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
  * @param columnIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
@@ -65,31 +66,45 @@ class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiDictio
   }
 }
 
+/**
+ * This is a companion object used to build an [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]]
+ * The most important odditiy is that it takes a BiDictionary of row-ids optionally. If provided no row with another
+ * id will be added to the dataset. This is useful for cooccurrence type calculations where all arrays must have
+ * the same rows and there is some record of which rows are important.
+ */
 object IndexedDatasetSpark {
   
   def apply(elements: RDD[(String, String)], existingRowIDs: Option[BiDictionary] = None)(implicit sc: SparkContext) = {
+    // todo: a further optimization is to return any broadcast dictionaries so they can be passed in and
+    // do not get broadcast again. At present there may be duplicate broadcasts.
 
     // create separate collections of rowID and columnID tokens
-    val rowIDs = elements.map { case (rowID, _) => rowID }.distinct().collect()
-    val columnIDs = elements.map { case (_, columnID) => columnID }.distinct().collect()
-
-    // create BiDictionary(s) for bi-directional lookup of ID by either Mahout ID or external ID
-    // broadcast them for access in distributed processes, so they are not recalculated in every task.
-    //val rowIDDictionary = BiDictionary.append(existingRowIDs, rowIDs)
-    val rowIDDictionary = existingRowIDs match {
-      case Some(d) => d.merge(rowIDs)
-      case None =>  new BiDictionary(rowIDs)
+    // use the dictionary passed in or create one from the element ids
+    // broadcast the correct row id BiDictionary
+    val (filteredElements, rowIDDictionary_bcast, rowIDDictionary) = if (existingRowIDs.isEmpty) {
+      val newRowIDDictionary = new BiDictionary(elements.map { case (rowID, _) => rowID }.distinct().collect())
+      val newRowIDDictionary_bcast = sc.broadcast(newRowIDDictionary)
+      (elements, newRowIDDictionary_bcast, newRowIDDictionary)
+    } else {
+      val existingRowIDDictionary_bcast = sc.broadcast(existingRowIDs.get)
+      val elementsRDD = elements.filter{ case (rowID, _) =>
+        existingRowIDDictionary_bcast.value.contains(rowID)
+      }
+      (elementsRDD, existingRowIDDictionary_bcast, existingRowIDs.get)
     }
-    val rowIDDictionary_bcast = sc.broadcast(rowIDDictionary)
+
+    // column ids are always taken from the RDD passed in
+    // todo: an optimization it to pass in a dictionary or column ids if it is the same as an existing one
+    val columnIDs = filteredElements.map { case (_, columnID) => columnID }.distinct().collect()
 
     val columnIDDictionary = new BiDictionary(keys = columnIDs)
     val columnIDDictionary_bcast = sc.broadcast(columnIDDictionary)
 
     val ncol = columnIDDictionary.size
-    val nrow = rowIDDictionary.size
+    //val nrow = rowIDDictionary.size
 
     val indexedInteractions =
-      elements.map { case (rowID, columnID) =>
+      filteredElements.map { case (rowID, columnID) =>
         val rowIndex = rowIDDictionary_bcast.value.getOrElse(rowID, -1)
         val columnIndex = columnIDDictionary_bcast.value.getOrElse(columnID, -1)
 

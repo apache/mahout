@@ -40,14 +40,14 @@ public class MultinomialTest extends MahoutTestCase {
     @Test(expected = IllegalArgumentException.class)
     public void testNoValues() {
         Multiset<String> emptySet = HashMultiset.create();
-        new Multinomial<String>(emptySet);
+        new Multinomial<>(emptySet);
     }
 
     @Test
     public void testSingleton() {
         Multiset<String> oneThing = HashMultiset.create();
         oneThing.add("one");
-        Multinomial<String> s = new Multinomial<String>(oneThing);
+        Multinomial<String> s = new Multinomial<>(oneThing);
         assertEquals("one", s.sample(0));
         assertEquals("one", s.sample(0.1));
         assertEquals("one", s.sample(1));
@@ -59,7 +59,7 @@ public class MultinomialTest extends MahoutTestCase {
         for (int i = 0; i < 5; i++) {
             stuff.add(String.valueOf(i));
         }
-        Multinomial<String> s = new Multinomial<String>(stuff);
+        Multinomial<String> s = new Multinomial<>(stuff);
         double EPSILON = 1.0e-15;
 
         Multiset<String> cnt = HashMultiset.create();
@@ -103,9 +103,9 @@ public class MultinomialTest extends MahoutTestCase {
             stuff.add(x);
         }
 
-        Multinomial<String> s0 = new Multinomial<String>(stuff);
-        Multinomial<String> s1 = new Multinomial<String>(stuff);
-        Multinomial<String> s2 = new Multinomial<String>(stuff);
+        Multinomial<String> s0 = new Multinomial<>(stuff);
+        Multinomial<String> s1 = new Multinomial<>(stuff);
+        Multinomial<String> s2 = new Multinomial<>(stuff);
         double EPSILON = 1.0e-15;
 
         Multiset<String> cnt = HashMultiset.create();
@@ -150,7 +150,7 @@ public class MultinomialTest extends MahoutTestCase {
     @Test
     public void testInsert() {
         Random rand = RandomUtils.getRandom();
-        Multinomial<Integer> table = new Multinomial<Integer>();
+        Multinomial<Integer> table = new Multinomial<>();
 
         double[] p = new double[10];
         for (int i = 0; i < 10; i++) {
@@ -167,7 +167,7 @@ public class MultinomialTest extends MahoutTestCase {
 
     @Test
   public void testSetZeroWhileIterating() {
-    Multinomial<Integer> table = new Multinomial<Integer>();
+    Multinomial<Integer> table = new Multinomial<>();
     for (int i = 0; i < 10000; ++i) {
       table.add(i, i);
     }
@@ -181,7 +181,7 @@ public class MultinomialTest extends MahoutTestCase {
 
   @Test(expected=NullPointerException.class)
   public void testNoNullValuesAllowed() {
-    Multinomial<Integer> table = new Multinomial<Integer>();
+    Multinomial<Integer> table = new Multinomial<>();
     // No null values should be allowed.
     table.add(null, 1);
   }
@@ -189,7 +189,7 @@ public class MultinomialTest extends MahoutTestCase {
   @Test
     public void testDeleteAndUpdate() {
         Random rand = RandomUtils.getRandom();
-        Multinomial<Integer> table = new Multinomial<Integer>();
+        Multinomial<Integer> table = new Multinomial<>();
         assertEquals(0, table.getWeight(), 1.0e-9);
 
         double total = 0;

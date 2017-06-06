@@ -22,6 +22,6 @@ import java.io.Closeable
 /** Distributed context (a.k.a. distributed session handle) */
 trait DistributedContext extends Closeable {
 
-  val engine:DistributedEngine
+  val engine: DistributedEngine
 
 }

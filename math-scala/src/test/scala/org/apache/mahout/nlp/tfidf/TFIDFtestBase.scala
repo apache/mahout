@@ -43,7 +43,7 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
     val dictMap = documents.unzip._2.mkString(" ").toLowerCase.split(" ").groupBy(identity).mapValues(_.length)
 
     // create a dictionary with an index for each term
-    val dictIndex = dictMap.zipWithIndex.map(x => x._1._1 -> x._2).toMap
+    val dictIndex = dictMap.zipWithIndex.map(x => x._1._1 -> x._2)
 
     val docFrequencyCount = new Array[Int](dictMap.size)
 

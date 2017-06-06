@@ -21,18 +21,19 @@ import java.io._
 
 import org.apache.mahout.logging._
 import org.apache.mahout.math.drm._
-import org.apache.mahout.math.{MatrixWritable, VectorWritable, Matrix, Vector}
+import org.apache.mahout.math.{Matrix, MatrixWritable, Vector, VectorWritable}
 import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, CheckpointedDrmSparkOps, SparkBCast}
 import org.apache.mahout.util.IOUtilsScala
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.{Vector => SparkVector, SparseVector => SparseSparkVector, DenseVector => DenseSparkVector}
+import org.apache.spark.sql.DataFrame
 
 import collection._
 import collection.generic.Growable
 import scala.reflect.ClassTag
-
-
 
 /** Public api for Spark-specific operators */
 package object sparkbindings {
@@ -63,6 +64,10 @@ package object sparkbindings {
 
     try {
 
+        // when not including the artifact, eg. for viennacl , we always need
+        // to load all mahout jars
+        // will need to handle this somehow.
+
       if (addMahoutJars) {
 
         // context specific jars
@@ -74,9 +79,12 @@ package object sparkbindings {
         }
 
         sparkConf.setJars(jars = mcjars.toSeq ++ customJars)
+        // seems to kill drivers
+        // if (!(customJars.size > 0)) sparkConf.setJars(customJars.toSeq)
 
       } else {
         // In local mode we don't care about jars, do we?
+        // yes adding jars always now since we are not including the artifacts
         sparkConf.setJars(customJars.toSeq)
       }
 
@@ -108,10 +116,10 @@ package object sparkbindings {
   implicit def sb2bc[T](b: Broadcast[T]): BCast[T] = new SparkBCast(b)
 
   /** Adding Spark-specific ops */
-  implicit def cpDrm2cpDrmSparkOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmSparkOps[K] =
+  implicit def cpDrm2cpDrmSparkOps[K](drm: CheckpointedDrm[K]): CheckpointedDrmSparkOps[K] =
     new CheckpointedDrmSparkOps[K](drm)
 
-  implicit def drm2cpDrmSparkOps[K: ClassTag](drm: DrmLike[K]): CheckpointedDrmSparkOps[K] = drm: CheckpointedDrm[K]
+  implicit def drm2cpDrmSparkOps[K](drm: DrmLike[K]): CheckpointedDrmSparkOps[K] = drm: CheckpointedDrm[K]
 
   private[sparkbindings] implicit def m2w(m: Matrix): MatrixWritable = new MatrixWritable(m)
 
@@ -140,9 +148,55 @@ package object sparkbindings {
   def drmWrap[K: ClassTag](rdd: DrmRdd[K], nrow: Long = -1, ncol: Int = -1, cacheHint: CacheHint.CacheHint =
   CacheHint.NONE, canHaveMissingRows: Boolean = false): CheckpointedDrm[K] =
 
-    new CheckpointedDrmSpark[K](rddInput = rdd, _nrow = nrow, _ncol = ncol, _cacheStorageLevel = SparkEngine
-      .cacheHint2Spark(cacheHint), _canHaveMissingRows = canHaveMissingRows)
+    new CheckpointedDrmSpark[K](rddInput = rdd, _nrow = nrow, _ncol = ncol, cacheHint = cacheHint,
+      _canHaveMissingRows = canHaveMissingRows)
 
+  /** A drmWrap version that takes an RDD[org.apache.spark.mllib.regression.LabeledPoint]
+    * returns a DRM where column the label is the last column */
+  def drmWrapMLLibLabeledPoint(rdd: RDD[LabeledPoint],
+                   nrow: Long = -1,
+                   ncol: Int = -1,
+                   cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+                   canHaveMissingRows: Boolean = false): CheckpointedDrm[Int] = {
+    val drmRDD: DrmRdd[Int] = rdd.zipWithIndex.map(lv => {
+      lv._1.features match {
+        case _: DenseSparkVector => (lv._2.toInt, new org.apache.mahout.math.DenseVector( lv._1.features.toArray ++ Array(lv._1.label) ))
+        case _: SparseSparkVector =>  (lv._2.toInt,
+          new org.apache.mahout.math.RandomAccessSparseVector(new org.apache.mahout.math.DenseVector( lv._1.features.toArray ++ Array(lv._1.label) )) )
+      }
+    })
+
+    drmWrap(drmRDD, nrow, ncol, cacheHint, canHaveMissingRows)
+  }
+
+  /** A drmWrap version that takes a DataFrame of Row[Double] */
+  def drmWrapDataFrame(df: DataFrame,
+                       nrow: Long = -1,
+                       ncol: Int = -1,
+                       cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+                       canHaveMissingRows: Boolean = false): CheckpointedDrm[Int] = {
+    val drmRDD: DrmRdd[Int] = df.rdd
+                                .zipWithIndex
+                                .map( o => (o._2.toInt, o._1.mkString(",").split(",").map(s => s.toDouble)) )
+                                .map(o => (o._1, new org.apache.mahout.math.DenseVector( o._2 )))
+
+    drmWrap(drmRDD, nrow, ncol, cacheHint, canHaveMissingRows)
+  }
+
+  /** A drmWrap Version that takes an RDD[org.apache.spark.mllib.linalg.Vector] */
+  def drmWrapMLLibVector(rdd: RDD[SparkVector],
+                     nrow: Long = -1,
+                     ncol: Int = -1,
+                     cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+                     canHaveMissingRows: Boolean = false): CheckpointedDrm[Int] = {
+    val drmRDD: DrmRdd[Int] = rdd.zipWithIndex.map( v => {
+      v._1 match {
+        case _: DenseSparkVector => (v._2.toInt, new org.apache.mahout.math.DenseVector(v._1.toArray))
+        case _: SparseSparkVector => (v._2.toInt, new org.apache.mahout.math.RandomAccessSparseVector(new org.apache.mahout.math.DenseVector(v._1.toArray)) )
+      }
+    })
+    drmWrap(drmRDD, nrow, ncol, cacheHint, canHaveMissingRows)
+  }
 
   /** Another drmWrap version that takes in vertical block-partitioned input to form the matrix. */
   def drmWrapBlockified[K: ClassTag](blockifiedDrmRdd: BlockifiedDrmRdd[K], nrow: Long = -1, ncol: Int = -1,
@@ -182,7 +236,7 @@ package object sparkbindings {
     val w = new StringWriter()
     closeables += w
 
-    var continue = true;
+    var continue = true
     val jars = new mutable.ArrayBuffer[String]()
     do {
       val cp = r.readLine()
@@ -191,7 +245,7 @@ package object sparkbindings {
           "defined?")
 
       val j = cp.split(File.pathSeparatorChar)
-      if (j.size > 10) {
+      if (j.length > 10) {
         // assume this is a valid classpath line
         jars ++= j
         continue = false
@@ -206,7 +260,16 @@ package object sparkbindings {
       j.matches(".*mahout-hdfs-\\d.*\\.jar") ||
       // no need for mapreduce jar in Spark
       // j.matches(".*mahout-mr-\\d.*\\.jar") ||
-      j.matches(".*mahout-spark_\\d.*\\.jar")
+      j.matches(".*mahout-spark_\\d.*\\.jar") ||
+      // vcl jars: mahout-native-viennacl_2.10.jar,
+      //           mahout-native-viennacl-omp_2.10.jar
+//      j.matches(".*mahout-native-viennacl_\\d.*\\\\.jar") ||
+//      j.matches(".*mahout-native-viennacl-omp_\\d.*\\.jar")||
+        j.matches(".*mahout-native-viennacl*.jar")||
+        // while WIP on MAHOUT-1894, use single wildcard
+        // TODO: remove after 1894 is closed out
+        j.matches(".mahout-spark*-dependency-reduced.jar")
+
     )
         // Tune out "bad" classifiers
         .filter(n =>
@@ -216,11 +279,11 @@ package object sparkbindings {
           // During maven tests, the maven classpath also creeps in for some reason
           !n.matches(".*/.m2/.*")
         )
-    /* verify jar passed to context
-    log.info("\n\n\n")
-    mcjars.foreach(j => log.info(j))
-    log.info("\n\n\n")
-    */
+    /* verify jar passed to context */
+    info("\n\n\n")
+    mcjars.foreach(j => info(j))
+    info("\n\n\n")
+    /**/
     mcjars
   }
 
@@ -230,7 +293,7 @@ package object sparkbindings {
 
     if (!part1Req) warn("blockified rdd: condition not met: exactly 1 per partition")
 
-    return part1Req
+    part1Req
   }
 
 }

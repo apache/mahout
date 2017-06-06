@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.11.2-SNAPSHOT</version>
+    <version>0.13.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -38,6 +38,25 @@
 
   <build>
     <plugins>
+      <!-- copy jars to top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/mahout-math-${version}.jar" tofile="../mahout-math-${version}.jar" />
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.mahout</groupId>
         <artifactId>mahout-collection-codegen-plugin</artifactId>
@@ -129,6 +148,49 @@
           </supplementalModels>
         </configuration>
       </plugin>
+
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-shade-plugin</artifactId>-->
+        <!--<version>3.0.0</version>-->
+        <!--<executions>-->
+          <!--<execution>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+              <!--<goal>shade</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+              <!--<artifactSet>-->
+                <!--<includes>-->
+                  <!--<include>it.unimi.dsi:fastutil</include>-->
+                <!--</includes>-->
+              <!--</artifactSet>-->
+              <!--<relocations>-->
+                <!--<relocation>-->
+                  <!--<pattern>it.unimi.dsi.fastutil</pattern>-->
+                  <!--<shadedPattern>shaded.it.unimi.dsi.fastutil</shadedPattern>-->
+                <!--</relocation>-->
+              <!--</relocations>-->
+            <!--</configuration>-->
+          <!--</execution>-->
+        <!--</executions>-->
+      <!--</plugin>-->
+      <!-- remove jars from top directory on clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../</directory>
+              <includes>
+                <include>mahout-math*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -143,6 +205,12 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+
+    <dependency>
+       <groupId>it.unimi.dsi</groupId>
+       <artifactId>fastutil</artifactId>
+       <version>7.0.12</version>
     </dependency>
 
     <dependency>

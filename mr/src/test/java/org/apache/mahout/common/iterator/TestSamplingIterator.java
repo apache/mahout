@@ -26,13 +26,13 @@ public final class TestSamplingIterator extends MahoutTestCase {
 
   @Test
   public void testEmptyCase() {
-    assertFalse(new SamplingIterator<Integer>(new CountingIterator(0), 0.9999).hasNext());
-    assertFalse(new SamplingIterator<Integer>(new CountingIterator(0), 1).hasNext());
+    assertFalse(new SamplingIterator<>(new CountingIterator(0), 0.9999).hasNext());
+    assertFalse(new SamplingIterator<>(new CountingIterator(0), 1).hasNext());
   }
 
   @Test
   public void testSmallInput() {
-    Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(1), 0.9999);
+    Iterator<Integer> t = new SamplingIterator<>(new CountingIterator(1), 0.9999);
     assertTrue(t.hasNext());
     assertEquals(0, t.next().intValue());
     assertFalse(t.hasNext());
@@ -40,17 +40,17 @@ public final class TestSamplingIterator extends MahoutTestCase {
 
   @Test(expected = IllegalArgumentException.class)
   public void testBadRate1() {
-    new SamplingIterator<Integer>(new CountingIterator(1), 0.0);
+    new SamplingIterator<>(new CountingIterator(1), 0.0);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testBadRate2() {
-    new SamplingIterator<Integer>(new CountingIterator(1), 1.1);
+    new SamplingIterator<>(new CountingIterator(1), 1.1);
   }
 
   @Test
   public void testExactSizeMatch() {
-    Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(10), 1);
+    Iterator<Integer> t = new SamplingIterator<>(new CountingIterator(10), 1);
     for (int i = 0; i < 10; i++) {
       assertTrue(t.hasNext());
       assertEquals(i, t.next().intValue());
@@ -61,7 +61,7 @@ public final class TestSamplingIterator extends MahoutTestCase {
   @Test
   public void testSample() {
     for (int i = 0; i < 1000; i++) {
-      Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(1000), 0.1);
+      Iterator<Integer> t = new SamplingIterator<>(new CountingIterator(1000), 0.1);
       int k = 0;
       while (t.hasNext()) {
         int v = t.next();

@@ -33,15 +33,15 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
   protected var masterUrl = null.asInstanceOf[String]
 
   protected def initContext() {
-    masterUrl = System.getProperties.getOrElse("test.spark.master", "local[3]")
+    masterUrl = System.getProperties.getOrElse("test.spark.master", "local[1]")
     val isLocal = masterUrl.startsWith("local")
     mahoutCtx = mahoutSparkContext(masterUrl = this.masterUrl,
       appName = "MahoutUnitTests",
       // Do not run MAHOUT_HOME jars in unit tests.
       addMahoutJars = !isLocal,
       sparkConf = new SparkConf()
-          .set("spark.kryoserializer.buffer.mb", "40m")
-          .set("spark.kryoserializer.buffer", "40m")
+          .set("spark.kryoserializer.buffer.mb", "40")
+          .set("spark.kryoserializer.buffer", "40")
           .set("spark.akka.frameSize", "30")
           .set("spark.default.parallelism", "10")
           .set("spark.executor.memory", "2G")

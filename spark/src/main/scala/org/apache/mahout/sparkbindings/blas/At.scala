@@ -46,7 +46,7 @@ object At {
 
     debug("operator A'.")
 
-    val drmRdd = srcA.toBlockifiedDrmRdd(operator.A.ncol)
+    val drmRdd = srcA.asBlockified(operator.A.ncol)
     val numPartitions = drmRdd.partitions.size
     val ncol = operator.ncol
 
@@ -62,7 +62,7 @@ object At {
           // Compute sparse vector. This should be quick if we assign values siquentially.
           val colV: Vector = new SequentialAccessSparseVector(ncol)
           keys.view.zipWithIndex.foreach({
-            case (row, blockRow) => colV(row) = blockA(blockRow, blockCol)
+            case (row, blockRow) => colV(row) += blockA(blockRow, blockCol)
           })
 
           blockCol -> colV

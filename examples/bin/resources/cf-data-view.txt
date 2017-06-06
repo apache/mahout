@@ -1,0 +1,12 @@
+u1,ipad
+u1,nexus
+u1,galaxy
+u2,iphone
+u2,ipad
+u2,nexus
+u2,galaxy
+u3,surface
+u3,nexus
+u4,iphone
+u4,ipad
+u4,galaxy

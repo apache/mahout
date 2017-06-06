@@ -22,11 +22,11 @@ import org.apache.mahout.math.flavor.{BackEnum, TraversingStructureEnum}
 import org.apache.mahout.math.function.Functions
 import RLikeOps._
 import org.apache.mahout.logging._
+import org.apache.mahout.math.backend.incore.MMulSolver
 
 import scala.collection.JavaConversions._
-import scala.collection._
 
-object MMul extends MMBinaryFunc {
+object MMul extends MMulSolver {
 
   private final implicit val log = getLog(MMul.getClass)
 
@@ -36,7 +36,7 @@ object MMul extends MMBinaryFunc {
 
     val (af, bf) = (a.getFlavor, b.getFlavor)
     val backs = (af.getBacking, bf.getBacking)
-    val sd = (af.getStructure, af.isDense, bf.getStructure, bf.isDense)
+    val sd = (af.getStructure, densityAnalysis(a), bf.getStructure, densityAnalysis(b))
 
     val alg: MMulAlg = backs match {
 
@@ -46,32 +46,32 @@ object MMul extends MMBinaryFunc {
         sd match {
 
           // Multiplication cases by a diagonal matrix.
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.COLWISE, _) if (a
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmDiagCW _
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSECOLWISE, _) if (a
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmDiagCW _
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.ROWWISE, _) if (a
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmDiagRW _
-          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSEROWWISE, _) if (a
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmDiagRW _
+          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.COLWISE, _)
+            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagCW
+          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSECOLWISE, _)
+            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagCW
+          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.ROWWISE, _)
+            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagRW
+          case (TraversingStructureEnum.VECTORBACKED, _, TraversingStructureEnum.SPARSEROWWISE, _)
+            if a.isInstanceOf[DiagonalMatrix] ⇒ jvmDiagRW
 
-          case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.VECTORBACKED, _) if (b
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmCWDiag _
-          case (TraversingStructureEnum.SPARSECOLWISE, _, TraversingStructureEnum.VECTORBACKED, _) if (b
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmCWDiag _
-          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.VECTORBACKED, _) if (b
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmRWDiag _
-          case (TraversingStructureEnum.SPARSEROWWISE, _, TraversingStructureEnum.VECTORBACKED, _) if (b
-            .isInstanceOf[DiagonalMatrix]) ⇒ jvmRWDiag _
+          case (TraversingStructureEnum.COLWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmCWDiag
+          case (TraversingStructureEnum.SPARSECOLWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmCWDiag
+          case (TraversingStructureEnum.ROWWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
+          case (TraversingStructureEnum.SPARSEROWWISE, _, TraversingStructureEnum.VECTORBACKED, _)
+            if b.isInstanceOf[DiagonalMatrix] ⇒ jvmRWDiag
 
           // Dense-dense cases
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if (a eq b.t) ⇒ jvmDRWAAt _
-          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if (a.t eq b) ⇒ jvmDRWAAt _
+          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a eq b.t ⇒ jvmDRWAAt
+          case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) if a.t eq b ⇒ jvmDRWAAt
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmRWCW
           case (TraversingStructureEnum.ROWWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmRWRW
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.COLWISE, true) ⇒ jvmCWCW
-          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if ( a eq b.t) ⇒ jvmDCWAAt _
-          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if ( a.t eq b) ⇒ jvmDCWAAt _
+          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a eq b.t ⇒ jvmDCWAAt
+          case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) if a.t eq b ⇒ jvmDCWAAt
           case (TraversingStructureEnum.COLWISE, true, TraversingStructureEnum.ROWWISE, true) ⇒ jvmCWRW
 
           // Sparse row matrix x sparse row matrix (array of vectors)
@@ -107,7 +107,7 @@ object MMul extends MMBinaryFunc {
           case (TraversingStructureEnum.COLWISE, false, TraversingStructureEnum.COLWISE, _) ⇒ jvmSparseCWCW2flips
 
           // Sparse methods are only effective if the first argument is sparse, so we need to do a swap.
-          case (_, _, _, false) ⇒ { (a, b, r) ⇒ apply(b.t, a.t, r.map {_.t}).t }
+          case (_, _, _, false) ⇒ (a, b, r) ⇒ apply(b.t, a.t, r.map {_.t}).t
 
           // Default jvm-jvm case.
           case _ ⇒ jvmRWCW
@@ -125,7 +125,7 @@ object MMul extends MMBinaryFunc {
     require(r.forall(mxR ⇒ mxR.nrow == a.nrow && mxR.ncol == b.ncol))
     val (m, n) = (a.nrow, b.ncol)
 
-    val mxR = r.getOrElse(if (a.getFlavor.isDense) a.like(m, n) else b.like(m, n))
+    val mxR = r.getOrElse(if (densityAnalysis(a)) a.like(m, n) else b.like(m, n))
 
     for (row ← 0 until mxR.nrow; col ← 0 until mxR.ncol) {
       // this vector-vector should be sort of optimized, right?
@@ -270,10 +270,10 @@ object MMul extends MMBinaryFunc {
     val (m, n) = (a.nrow, b.ncol)
 
     // Prefer col-wise result iff a is dense and b is sparse. In all other cases default to row-wise.
-    val preferColWiseR = a.getFlavor.isDense && !b.getFlavor.isDense
+    val preferColWiseR = densityAnalysis(a) && !densityAnalysis(b)
 
     val mxR = r.getOrElse {
-      (a.getFlavor.isDense, preferColWiseR) match {
+      (densityAnalysis(a), preferColWiseR) match {
         case (false, false) ⇒ b.like(m, n)
         case (false, true) ⇒ b.like(n, m).t
         case (true, false) ⇒ a.like(m, n)

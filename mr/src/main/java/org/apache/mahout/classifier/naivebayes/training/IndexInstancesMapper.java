@@ -31,7 +31,7 @@ public class IndexInstancesMapper extends Mapper<Text, VectorWritable, IntWritab
 
   private static final Pattern SLASH = Pattern.compile("/");
 
-  public enum Counter { SKIPPED_INSTANCES }
+  enum Counter { SKIPPED_INSTANCES }
 
   private OpenObjectIntHashMap<String> labelIndex;
 

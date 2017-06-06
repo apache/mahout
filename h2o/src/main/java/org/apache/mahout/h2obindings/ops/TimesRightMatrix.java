@@ -60,7 +60,7 @@ public class TimesRightMatrix {
    * A.numCols() == d.size()
    */
   private static Frame execDiagonal(final Frame A, Vector d) {
-    final H2OBCast<Vector> bd = new H2OBCast<Vector>(d);
+    final H2OBCast<Vector> bd = new H2OBCast<>(d);
 
     return new MRTask() {
       public void map(Chunk chks[], NewChunk ncs[]) {
@@ -83,7 +83,7 @@ public class TimesRightMatrix {
    * A.numCols() == b.rowSize()
    */
   private static Frame execCommon(final Frame A, Matrix b) {
-    final H2OBCast<Matrix> bb = new H2OBCast<Matrix>(b);
+    final H2OBCast<Matrix> bb = new H2OBCast<>(b);
 
     return new MRTask() {
       public void map(Chunk chks[], NewChunk ncs[]) {

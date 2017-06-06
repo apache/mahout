@@ -43,7 +43,7 @@ public class Atx {
    */
   public static H2ODrm exec(H2ODrm drmA, Vector x) {
     Frame A = drmA.frame;
-    final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
+    final H2OBCast<Vector> bx = new H2OBCast<>(x);
 
     // A'x is computed into atx[] with an MRTask on A (with
     // x available as a Broadcast

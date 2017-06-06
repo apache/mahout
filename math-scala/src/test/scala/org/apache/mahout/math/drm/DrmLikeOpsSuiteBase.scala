@@ -24,16 +24,18 @@ import scalabindings._
 import RLikeOps._
 import RLikeDrmOps._
 
+import scala.reflect.{ClassTag,classTag}
+
 /** Common tests for DrmLike operators to be executed by all distributed engines. */
 trait DrmLikeOpsSuiteBase extends DistributedMahoutSuite with Matchers {
-  this: FunSuite =>
+  this: FunSuite ⇒
 
   test("mapBlock") {
 
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
     val B = A.mapBlock(/* Inherit width */) {
-      case (keys, block) => keys -> (block += 1.0)
+      case (keys, block) ⇒ keys → (block += 1.0)
     }
 
     val inCoreB = B.collect
@@ -43,8 +45,22 @@ trait DrmLikeOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
     // Assert they are the same
     (inCoreB - inCoreBControl).norm should be < 1E-10
+    B.keyClassTag shouldBe ClassTag.Int
 
   }
+
+  test ("mapBlock implicit keying") {
+
+    val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6))
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val B = A.mapBlock(/* Inherit width */) {
+      case (keys, block) ⇒ keys.map { k ⇒ k.toString } → block
+    }
+
+    B.keyClassTag shouldBe classTag[String]
+
+  }
+
 
   test("allReduceBlock") {
 

@@ -17,21 +17,28 @@
 
 package org.apache.mahout.sparkbindings.blas
 
-import collection._
-import JavaConversions._
-import org.scalatest.FunSuite
-import org.apache.mahout.test.DistributedMahoutSuite
+import java.io.ByteArrayOutputStream
+
+import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.io.Output
+import com.twitter.chill.AllScalaRegistrar
+import org.apache.log4j.Level
+import org.apache.mahout.logging._
 import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import drm._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.logical.{OpABt, OpAewB, OpAt, OpAtA}
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.drm._
-import org.apache.mahout.math.drm.logical.{OpAt, OpAtA, OpAewB, OpABt}
+import org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
+import org.scalatest.FunSuite
 
 /** Collection of physical blas operator tests. */
 class BlasSuite extends FunSuite with DistributedSparkSuite {
+
+  private final implicit val mahoutLog = getLog(classOf[RLikeDrmOpsSuite])
 
   test("ABt") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
@@ -39,7 +46,7 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     val drmA = drmParallelize(m = inCoreA, numPartitions = 3)
     val drmB = drmParallelize(m = inCoreB, numPartitions = 2)
 
-    val op = new OpABt(drmA, drmB)
+    val op = OpABt(drmA, drmB)
 
     val drm = new CheckpointedDrmSpark(ABt.abt(op, srcA = drmA, srcB = drmB), op.nrow, op.ncol)
 
@@ -59,7 +66,7 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     val drmA = drmParallelize(m = inCoreA, numPartitions = 2)
     val drmB = drmParallelize(m = inCoreB)
 
-    val op = new OpAewB(drmA, drmB, "*")
+    val op = OpAewB(drmA, drmB, "*")
 
     val drmM = new CheckpointedDrmSpark(AewB.a_ew_b(op, srcA = drmA, srcB = drmB), op.nrow, op.ncol)
 
@@ -76,7 +83,7 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     val drmA = drmParallelize(m = inCoreA, numPartitions = 2)
     val drmB = drmParallelize(m = inCoreB)
 
-    val op = new OpAewB(drmA, drmB, "+")
+    val op = OpAewB(drmA, drmB, "+")
 
     val drmM = new CheckpointedDrmSpark(AewB.a_ew_b(op, srcA = drmA, srcB = drmB), op.nrow, op.ncol)
 
@@ -93,7 +100,7 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     val drmA = drmParallelize(m = inCoreA, numPartitions = 2)
     val drmB = drmParallelize(m = inCoreB)
 
-    val op = new OpAewB(drmA, drmB, "-")
+    val op = OpAewB(drmA, drmB, "-")
 
     val drmM = new CheckpointedDrmSpark(AewB.a_ew_b(op, srcA = drmA, srcB = drmB), op.nrow, op.ncol)
 
@@ -110,7 +117,7 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     val drmA = drmParallelize(m = inCoreA, numPartitions = 2)
     val drmB = drmParallelize(m = inCoreB)
 
-    val op = new OpAewB(drmA, drmB, "/")
+    val op = OpAewB(drmA, drmB, "/")
 
     val drmM = new CheckpointedDrmSpark(AewB.a_ew_b(op, srcA = drmA, srcB = drmB), op.nrow, op.ncol)
 
@@ -141,13 +148,60 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
     val drmA = drmParallelize(m = inCoreA, numPartitions = 2)
 
-    val op = new OpAt(drmA)
+    val op = OpAt(drmA)
     val drmAt = new CheckpointedDrmSpark(rddInput = At.at(op, srcA = drmA), _nrow = op.nrow, _ncol = op.ncol)
     val inCoreAt = drmAt.collect
     val inCoreControlAt = inCoreA.t
 
     println(inCoreAt)
     assert((inCoreAt - inCoreControlAt).norm < 1E-5)
+
+  }
+
+  test("verbosity") {
+    def testreg(o: Any*): Unit = {
+      val s = new String(kryoSet(o: _*))
+      s.contains("org.apache.mahout") shouldBe false
+    }
+
+    def kryoSet[T](obj: T*) = {
+
+      val kryo = new Kryo()
+      new AllScalaRegistrar()(kryo)
+
+      MahoutKryoRegistrator.registerClasses(kryo)
+
+      val baos = new ByteArrayOutputStream()
+      val output = new Output(baos)
+      obj.foreach(kryo.writeClassAndObject(output, _))
+      output.close
+
+      baos.toByteArray
+    }
+
+    mahoutLog.setLevel(Level.TRACE)
+
+    val mxA = dense((1, 2), (3, 4))
+    val mxB = new SparseRowMatrix(4,5)
+    val mxC = new SparseMatrix(4,5)
+    val mxD = diagv(dvec(1, 2, 3, 5))
+    val mxE = mxA (0 to 0, 0 to 0)
+    val mxF = mxA.t
+
+
+    testreg(
+      mxD, mxD(0, ::), mxD(::, 0), mxD.diagv,
+      mxA, mxA(0, ::), mxA(::, 0), mxA.diagv,
+      mxB, mxB(0, ::), mxB(::, 0), mxB.diagv,
+      mxC, mxC(0, ::), mxC(::, 0), mxC.diagv,
+      mxE, mxE(0, ::), mxE(::, 0), mxE.diagv,
+      mxF, mxF(0, ::), mxF(::, 0), mxF.diagv,
+      mxA(0,::)(0 to 0), mxE(0,::)(0 to 0),
+      new DenseVector(6), new DenseVector(6) (0 to 0),
+      new RandomAccessSparseVector(6), new RandomAccessSparseVector(6)(0 to 0),
+      new SequentialAccessSparseVector(6), new SequentialAccessSparseVector(6)(0 to 0)
+
+    )
 
   }
 

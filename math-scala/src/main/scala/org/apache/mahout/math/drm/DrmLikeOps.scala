@@ -19,10 +19,10 @@ package org.apache.mahout.math.drm
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.drm.logical.{OpPar, OpMapBlock, OpRowRange}
+import org.apache.mahout.math.drm.logical.{OpAewUnaryFunc, OpPar, OpMapBlock, OpRowRange}
 
 /** Common Drm ops */
-class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
+class DrmLikeOps[K](protected[drm] val drm: DrmLike[K]) {
 
   /**
    * Parallelism adjustments. <P/>
@@ -90,9 +90,11 @@ class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
     import RLikeDrmOps._
     import RLikeOps._
 
+    implicit val ktag = drm.keyClassTag
+
     val rowSrc: DrmLike[K] = if (rowRange != ::) {
 
-      if (implicitly[ClassTag[Int]] == implicitly[ClassTag[K]]) {
+      if (ClassTag.Int == ktag) {
 
         assert(rowRange.head >= 0 && rowRange.last < drm.nrow, "rows range out of range")
         val intKeyed = drm.asInstanceOf[DrmLike[Int]]
@@ -113,5 +115,26 @@ class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
       })
 
     } else rowSrc
+  }
+
+  /**
+    * Apply a function element-wise.
+    *
+    * @param f         element-wise function
+    * @param evalZeros Do we have to process zero elements? true, false, auto: if auto, we will test
+    *                  the supplied function for `f(0) != 0`, and depending on the result, will
+    *                  decide if we want evaluation for zero elements. WARNING: the AUTO setting
+    *                  may not always work correctly for functions that are meant to run in a specific
+    *                  backend context, or non-deterministic functions, such as {-1,0,1} random
+    *                  generators.
+    * @return new DRM with the element-wise function applied.
+    */
+  def apply(f: Double ⇒ Double, evalZeros: AutoBooleanEnum.T = AutoBooleanEnum.AUTO) = {
+    val ezeros = evalZeros match {
+      case AutoBooleanEnum.TRUE ⇒ true
+      case AutoBooleanEnum.FALSE ⇒ false
+      case AutoBooleanEnum.AUTO ⇒ f(0) != 0
+    }
+    new OpAewUnaryFunc[K](drm, f, ezeros)
   }
 }

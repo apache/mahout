@@ -122,10 +122,6 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
    *          The name of the folder in which the final output vectors will be stored
    * @param baseConf
    *          job configuration
-   * @param normPower
-   *          L_p norm to be computed
-   * @param logNormalize
-   *          whether to use log normalization         
    * @param minSupport
    *          the minimum frequency of the feature in the entire corpus to be considered for inclusion in the
    *          sparse vector
@@ -133,12 +129,22 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
    *          1 = unigram, 2 = unigram and bigram, 3 = unigram, bigram and trigram
    * @param minLLRValue
    *          minValue of log likelihood ratio to used to prune ngrams
+   * @param normPower
+   *          L_p norm to be computed
+   * @param logNormalize
+   *          whether to use log normalization         
+   * @param numReducers
+   *          
    * @param chunkSizeInMegabytes
    *          the size in MB of the feature => id chunk to be kept in memory at each node during Map/Reduce
    *          stage. Its recommended you calculated this based on the number of cores and the free memory
    *          available to you per node. Say, you have 2 cores and around 1GB extra memory to spare we
    *          recommend you use a split size of around 400-500MB so that two simultaneous reducers can create
    *          partial vectors without thrashing the system due to increased swapping
+   * @param sequentialAccess
+   *          
+   * @param namedVectors
+   *          
    */
   public static void createTermFrequencyVectors(Path input,
                                                 Path output,

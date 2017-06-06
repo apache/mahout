@@ -58,7 +58,7 @@ public class OldQRDecomposition implements QR {
    * can be retrieved via instance methods of the returned decomposition object.
    *
    * @param a A rectangular matrix.
-   * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
+   * @throws IllegalArgumentException if {@code A.rows() < A.columns()}
    */
 
   public OldQRDecomposition(Matrix a) {

@@ -18,7 +18,9 @@
 package org.apache.mahout.math
 
 import org.apache.mahout.math.solver.EigenDecomposition
+
 import collection._
+import scala.util.Random
 
 /**
  * Mahout matrices and vectors' scala syntactic sugar
@@ -28,6 +30,18 @@ package object scalabindings {
 
   // Reserved "ALL" range
   final val `::`: Range = null
+
+  // values for stochastic sparsityAnalysis
+  final val z95 = 1.959964
+  final val z80 = 1.281552
+  final val maxSamples = 500
+  final val minSamples = 15
+
+  // Some enums
+  object AutoBooleanEnum extends Enumeration {
+    type T = Value
+    val TRUE, FALSE, AUTO = Value
+  }
 
   implicit def seq2Vector(s: TraversableOnce[AnyVal]) =
     new DenseVector(s.map(_.asInstanceOf[Number].doubleValue()).toArray)
@@ -192,13 +206,21 @@ package object scalabindings {
 
   /**
    * create a sparse vector out of list of tuple2's
-   * @param sdata
+   * @param sdata cardinality
    * @return
    */
-  def svec(sdata: TraversableOnce[(Int, AnyVal)]) = {
-    val cardinality = if (sdata.nonEmpty) sdata.map(_._1).max + 1 else 0
+  def svec(sdata: TraversableOnce[(Int, AnyVal)], cardinality: Int = -1) = {
+    val required = if (sdata.nonEmpty) sdata.map(_._1).max + 1 else 0
+    var tmp = -1
+    if (cardinality < 0) {
+      tmp = required
+    } else if (cardinality < required) {
+      throw new IllegalArgumentException(s"Required cardinality %required but got %cardinality")
+    } else {
+      tmp = cardinality
+    }
     val initialCapacity = sdata.size
-    val sv = new RandomAccessSparseVector(cardinality, initialCapacity)
+    val sv = new RandomAccessSparseVector(tmp, initialCapacity)
     sdata.foreach(t ⇒ sv.setQuick(t._1, t._2.asInstanceOf[Number].doubleValue()))
     sv
   }
@@ -343,6 +365,9 @@ package object scalabindings {
   type VMBinaryFunc = (Vector, Matrix, Option[Matrix]) ⇒ Matrix
   type MDBinaryFunc = (Matrix, Double, Option[Matrix]) ⇒ Matrix
 
+  trait opMMulSolver extends MMBinaryFunc {
+
+  }
 
   /////////////////////////////////////
   // Miscellaneous in-core utilities
@@ -395,5 +420,58 @@ package object scalabindings {
   def dist(mxX: Matrix): Matrix = sqDist(mxX) := sqrt _
 
   def dist(mxX: Matrix, mxY: Matrix): Matrix = sqDist(mxX, mxY) := sqrt _
+
+  /**
+    * Check the density of an in-core matrix based on supplied criteria.
+    * Returns true if we think mx is denser than threshold with at least 80% confidence.
+    *
+    * @param mx  The matrix to check density of.
+    * @param threshold the threshold of non-zero elements above which we consider a Matrix Dense
+    */
+  def densityAnalysis(mx: Matrix, threshold: Double = 0.25): Boolean = {
+
+    require(threshold >= 0.0 && threshold <= 1.0)
+    var n = minSamples
+    var mean = 0.0
+    val rnd = new Random()
+    val dimm = mx.nrow
+    val dimn = mx.ncol
+    val pq = threshold * (1 - threshold)
+
+    for (s ← 0 until minSamples) {
+      if (mx(rnd.nextInt(dimm), rnd.nextInt(dimn)) != 0.0) mean += 1
+    }
+    mean /= minSamples
+    val iv = z80 * math.sqrt(pq / n)
+
+    if (mean < threshold - iv) return false // sparse
+    else if (mean > threshold + iv) return true // dense
+
+    while (n < maxSamples) {
+      // Determine upper bound we may need for n to likely relinquish the uncertainty. Here, we use
+      // confidence interval formula but solved for n.
+      val ivNeeded = math.abs(threshold - mean) max 1e-11
+
+      val stderr = ivNeeded / z80
+      val nNeeded = (math.ceil(pq / (stderr * stderr)).toInt max n min maxSamples) - n
+
+      var meanNext = 0.0
+      for (s ← 0 until nNeeded) {
+        if (mx(rnd.nextInt(dimm), rnd.nextInt(dimn)) != 0.0) meanNext += 1
+      }
+      mean = (n * mean + meanNext) / (n + nNeeded)
+      n += nNeeded
+
+      // Are we good now?
+      val iv = z80 * math.sqrt(pq / n)
+      if (mean < threshold - iv) return false // sparse
+      else if (mean > threshold + iv) return true // dense
+    }
+
+    mean > threshold // if (mean > threshold) dense
+
+  }
+
+
 
 }

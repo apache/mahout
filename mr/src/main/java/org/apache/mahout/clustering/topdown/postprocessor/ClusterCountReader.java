@@ -51,7 +51,7 @@ public final class ClusterCountReader {
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     int numberOfClusters = 0;
-    Iterator<?> it = new SequenceFileDirValueIterator<Writable>(clusterFiles[0].getPath(),
+    Iterator<?> it = new SequenceFileDirValueIterator<>(clusterFiles[0].getPath(),
             PathType.LIST,
             PathFilters.partFilter(),
             null,

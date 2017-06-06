@@ -19,10 +19,18 @@ package org.apache.mahout.math.drm.logical
 
 import org.apache.mahout.math.drm._
 
+import scala.reflect.ClassTag
+
 /** Logical A' */
 case class OpAt(
     override var A: DrmLike[Int])
     extends AbstractUnaryOp[Int, Int] {
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override def keyClassTag = ClassTag.Int
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.ncol

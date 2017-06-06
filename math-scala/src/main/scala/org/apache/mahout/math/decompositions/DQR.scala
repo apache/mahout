@@ -17,14 +17,12 @@
 
 package org.apache.mahout.math.decompositions
 
-import scala.reflect.ClassTag
 import org.apache.mahout.logging._
 import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
 import RLikeDrmOps._
-import org.apache.log4j.Logger
 
 object DQR {
 
@@ -39,14 +37,19 @@ object DQR {
    * It also guarantees that Q is partitioned exactly the same way (and in same key-order) as A, so
    * their RDD should be able to zip successfully.
    */
-  def dqrThin[K: ClassTag](drmA: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
+  def dqrThin[K](drmA: DrmLike[K],
+                 checkRankDeficiency: Boolean = true,
+                 cacheHint: CacheHint.CacheHint = CacheHint.MEMORY_ONLY): (DrmLike[K], Matrix) = {
+
+    // Some mapBlock() calls need it
+    implicit val ktag =  drmA.keyClassTag
 
     if (drmA.ncol > 5000)
       warn("A is too fat. A'A must fit in memory and easily broadcasted.")
 
     implicit val ctx = drmA.context
 
-    val AtA = (drmA.t %*% drmA).checkpoint()
+    val AtA = (drmA.t %*% drmA).checkpoint(cacheHint)
     val inCoreAtA = AtA.collect
 
     trace("A'A=\n%s\n".format(inCoreAtA))

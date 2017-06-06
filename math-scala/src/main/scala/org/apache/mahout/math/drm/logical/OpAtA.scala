@@ -21,9 +21,15 @@ import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 
 /** A'A */
-case class OpAtA[K: ClassTag](
+case class OpAtA[K](
     override var A: DrmLike[K]
     ) extends AbstractUnaryOp[K, Int] {
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override def keyClassTag = ClassTag.Int
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.ncol

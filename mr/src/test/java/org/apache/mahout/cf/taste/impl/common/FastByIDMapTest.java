@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import com.google.common.collect.Maps;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -30,7 +30,7 @@ public final class FastByIDMapTest extends TasteTestCase {
 
   @Test
   public void testPutAndGet() {
-    FastByIDMap<Long> map = new FastByIDMap<Long>();
+    FastByIDMap<Long> map = new FastByIDMap<>();
     assertNull(map.get(500000L));
     map.put(500000L, 2L);
     assertEquals(2L, (long) map.get(500000L));
@@ -38,7 +38,7 @@ public final class FastByIDMapTest extends TasteTestCase {
   
   @Test
   public void testRemove() {
-    FastByIDMap<Long> map = new FastByIDMap<Long>();
+    FastByIDMap<Long> map = new FastByIDMap<>();
     map.put(500000L, 2L);
     map.remove(500000L);
     assertEquals(0, map.size());
@@ -48,7 +48,7 @@ public final class FastByIDMapTest extends TasteTestCase {
   
   @Test
   public void testClear() {
-    FastByIDMap<Long> map = new FastByIDMap<Long>();
+    FastByIDMap<Long> map = new FastByIDMap<>();
     map.put(500000L, 2L);
     map.clear();
     assertEquals(0, map.size());
@@ -58,7 +58,7 @@ public final class FastByIDMapTest extends TasteTestCase {
   
   @Test
   public void testSizeEmpty() {
-    FastByIDMap<Long> map = new FastByIDMap<Long>();
+    FastByIDMap<Long> map = new FastByIDMap<>();
     assertEquals(0, map.size());
     assertTrue(map.isEmpty());
     map.put(500000L, 2L);
@@ -93,7 +93,7 @@ public final class FastByIDMapTest extends TasteTestCase {
   
   @Test
   public void testGrow() {
-    FastByIDMap<String> map = new FastByIDMap<String>(1,1);
+    FastByIDMap<String> map = new FastByIDMap<>(1,1);
     map.put(500000L, "alpha");
     map.put(47L, "bang");
     assertNull(map.get(500000L));
@@ -102,8 +102,8 @@ public final class FastByIDMapTest extends TasteTestCase {
    
   @Test
   public void testVersusHashMap() {
-    FastByIDMap<String> actual = new FastByIDMap<String>();
-    Map<Long, String> expected = Maps.newHashMapWithExpectedSize(1000000);
+    FastByIDMap<String> actual = new FastByIDMap<>();
+    Map<Long, String> expected = new HashMap<>(1000000);
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 1000000; i++) {
       double d = r.nextDouble();
@@ -124,7 +124,7 @@ public final class FastByIDMapTest extends TasteTestCase {
   
   @Test
   public void testMaxSize() {
-    FastByIDMap<String> map = new FastByIDMap<String>();
+    FastByIDMap<String> map = new FastByIDMap<>();
     map.put(4, "bang");
     assertEquals(1, map.size());
     map.put(47L, "bang");
@@ -137,7 +137,7 @@ public final class FastByIDMapTest extends TasteTestCase {
   
   
   private static FastByIDMap<String> buildTestFastMap() {
-    FastByIDMap<String> map = new FastByIDMap<String>();
+    FastByIDMap<String> map = new FastByIDMap<>();
     map.put(500000L, "alpha");
     map.put(47L, "bang");
     map.put(2L, "beta");

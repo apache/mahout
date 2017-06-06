@@ -41,13 +41,13 @@ import com.google.common.collect.Lists;
  * DoubleBuffer and we access that instead.  The interesting aspect of this is that the values in
  * the matrix are binary and sparse so we don't need to store the actual data, just the location of
  * non-zero values.
- * <p/>
+ * <p>
  * Currently file data is formatted as follows:
- * <p/>
+ * <p>
  * <ul> <li>A magic number to indicate the file format.</li> <li>The size of the matrix (max rows
  * and columns possible)</li> <li>Number of non-zeros in each row.</li> <li>A list of non-zero
  * columns for each row.  The list starts with a count and then has column numbers</li> </ul>
- * <p/>
+ * <p>
  * It would be preferable to use something like protobufs to define the format so that we can use
  * different row formats for different kinds of data.  For instance, Golay coding of column numbers
  * or compressed bit vectors might be good representations for some purposes.

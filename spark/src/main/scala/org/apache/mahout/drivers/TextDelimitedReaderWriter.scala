@@ -18,12 +18,12 @@
 package org.apache.mahout.drivers
 
 import org.apache.log4j.Logger
-import org.apache.mahout.math.indexeddataset._
-import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
-import org.apache.spark.SparkContext._
 import org.apache.mahout.math.RandomAccessSparseVector
-import org.apache.mahout.math.drm.{DrmLike, DrmLikeOps, DistributedContext, CheckpointedDrm}
+import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.indexeddataset._
 import org.apache.mahout.sparkbindings._
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
+
 import scala.collection.JavaConversions._
 
 /**
@@ -149,7 +149,8 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
       // get row and column IDs
       val interactions = rows.map { row =>
-        row(0) -> row(1)// rowID token -> string of column IDs+strengths
+        // rowID token -> string of column IDs+strengths or null if empty (all elements zero)
+        row(0) -> (if (row.length > 1) row(1) else null)
       }
 
       interactions.cache()
@@ -159,12 +160,15 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
       // the columns are in a TD string so separate them and get unique ones
       val columnIDs = interactions.flatMap { case (_, columns) => columns
-        val elements = columns.split(elementDelim)
-        val colIDs = if (!omitScore)
-          elements.map( elem => elem.split(columnIdStrengthDelim)(0) )
-        else
-          elements
-        colIDs
+        if (columns == null) None
+        else {
+          val elements = columns.split(elementDelim)
+          val colIDs = if (!omitScore)
+            elements.map(elem => elem.split(columnIdStrengthDelim)(0))
+          else
+            elements
+          colIDs
+        }
       }.distinct().collect()
 
       // create BiMaps for bi-directional lookup of ID by either Mahout ID or external ID
@@ -186,17 +190,21 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         interactions.map { case (rowID, columns) =>
           val rowIndex = rowIDDictionary_bcast.value.getOrElse(rowID, -1)
 
-          val elements = columns.split(elementDelim)
           val row = new RandomAccessSparseVector(ncol)
-          for (element <- elements) {
-            val id = if (omitScore) element else element.split(columnIdStrengthDelim)(0)
-            val columnID = columnIDDictionary_bcast.value.getOrElse(id, -1)
-            val strength = if (omitScore) 1.0d else {// if the input says not to omit but there is no seperator treat
-              // as omitting and return a strength of 1
-              if (element.split(columnIdStrengthDelim).size == 1) 1.0d
-              else element.split(columnIdStrengthDelim)(1).toDouble
+          if (columns != null) {
+            val elements = columns.split(elementDelim)
+            for (element <- elements) {
+              val id = if (omitScore) element else element.split(columnIdStrengthDelim)(0)
+              val columnID = columnIDDictionary_bcast.value.getOrElse(id, -1)
+              val strength = if (omitScore) 1.0d
+              else {
+                // if the input says not to omit but there is no seperator treat
+                // as omitting and return a strength of 1
+                if (element.split(columnIdStrengthDelim).size == 1) 1.0d
+                else element.split(columnIdStrengthDelim)(1).toDouble
+              }
+              row.setQuick(columnID, strength)
             }
-            row.setQuick(columnID, strength)
           }
           rowIndex -> row
         }
@@ -269,7 +277,7 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
         val vector = if (sort) itemList.sortBy { elem => -elem._2 } else itemList
 
         // first get the external rowID token
-        if (!vector.isEmpty){
+        if (vector.nonEmpty){
           var line = rowIDDictionary_bcast.value.inverse.getOrElse(rowID, "INVALID_ROW_ID") + rowKeyDelim
           // for the rest of the row, construct the vector contents of elements (external column ID, strength value)
           for (item <- vector) {

@@ -20,12 +20,11 @@ package org.apache.mahout.math.drm.logical
 import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 import scala.util.Random
-import collection._
 
 /**
  * Composition of unary elementwise functions.
  */
-case class OpAewUnaryFuncFusion[K: ClassTag](
+case class OpAewUnaryFuncFusion[K](
     override var A: DrmLike[K],
     var ff:List[OpAewUnaryFunc[K]] = Nil
     ) extends AbstractUnaryOp[K,K] with TEwFunc {
@@ -37,6 +36,12 @@ case class OpAewUnaryFuncFusion[K: ClassTag](
 
   /** Stuff like `A +1` is always supposed to fix this */
   override protected[mahout] lazy val canHaveMissingRows: Boolean = false
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override def keyClassTag: ClassTag[K] = A.keyClassTag
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.nrow

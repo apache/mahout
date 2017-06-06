@@ -17,17 +17,23 @@
 
 package org.apache.mahout.math.drm.logical
 
-import reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
 import scala.util.Random
 
 /** cbind() logical operator */
-case class OpCbind[K: ClassTag](
+case class OpCbind[K](
     override var A: DrmLike[K],
     override var B: DrmLike[K]
     ) extends AbstractBinaryOp[K, K, K] {
 
   assert(A.nrow == B.nrow, "arguments must have same number of rows")
+  require(A.keyClassTag == B.keyClassTag, "arguments must have same row key")
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override def keyClassTag = A.keyClassTag
 
   override protected[mahout] lazy val partitioningTag: Long =
     if (A.partitioningTag == B.partitioningTag) A.partitioningTag

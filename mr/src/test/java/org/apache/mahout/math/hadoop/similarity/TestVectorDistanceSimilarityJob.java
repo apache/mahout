@@ -213,7 +213,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
     };
     ToolRunner.run(getConfiguration(), new VectorDistanceSimilarityJob(), args);
 
-    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
+    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<>();
 
     for (Pair<Text, VectorWritable> record :  new SequenceFileIterable<Text, VectorWritable>(
         new Path(output, "part-m-00000"), conf)) {

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.scalabindings
 
+import org.apache.log4j.Level
+
 import org.apache.mahout.logging._
 import org.apache.mahout.math._
 import org.apache.mahout.math.scalabindings.RLikeOps._
@@ -100,7 +102,7 @@ class MathSuite extends FunSuite with MahoutSuite {
 
     printf("cholArg=\n%s\n", cholArg)
 
-    printf("V'DV=\n%s\n", (vblock.t %*% d %*% vblock))
+    printf("V'DV=\n%s\n", vblock.t %*% d %*% vblock)
 
     printf("V'V+V'DV=\n%s\n", vtv + (vblock.t %*% d %*% vblock))
 
@@ -232,6 +234,34 @@ class MathSuite extends FunSuite with MahoutSuite {
     val mxDsq = sqDist(mxX)
     val mxDsqControl = sqDist(mxX, mxX)
     (mxDsq - mxDsqControl).norm should be < 1e-7
+  }
+
+  test("sparsity analysis") {
+    setLogLevel(Level.DEBUG)
+
+    val m = 500
+    val n = 800
+    val mxA = new DenseMatrix(m, n)
+
+    densityAnalysis(mxA) shouldBe false
+    densityAnalysis(mxA, .5) shouldBe false
+    densityAnalysis(mxA + 1) shouldBe true
+    densityAnalysis(mxA + 1, .95) shouldBe true
+
+    for (i ← 0 until m by 5) mxA(i, ::) := 1
+    info(s"20% detected as dense?:${densityAnalysis(mxA)}")
+    mxA := 0
+
+    for (i ← 0 until m by 3) mxA(i, ::) := 1
+    info(s"33% detected as dense?:${densityAnalysis(mxA)}")
+    mxA := 0
+
+    for (i ← 0 until m by 4) mxA(i, ::) := 1
+    info(s"25% detected as dense?:${densityAnalysis(mxA)}")
+
+    for (i ← 0 until m by 2) mxA(i, ::) := 1
+    info(s"50% detected as dense?:${densityAnalysis(mxA)}")
+
   }
 
 }

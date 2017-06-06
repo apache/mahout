@@ -131,6 +131,18 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     g.sum shouldBe 3
   }
 
+  test("functional apply()") {
+    val mxA = sparse (
+      (1 -> 3) :: (7 -> 7) :: Nil,
+      (4 -> 5) :: (5 -> 8) :: Nil
+    )
+    val mxAControl = mxA cloned
+
+    (mxA(x ⇒ x + 1) - (mxAControl + 1)).norm should be < 1e-7
+    (mxA(x ⇒ x * 2) - (2 * mxAControl)).norm should be < 1e-7
+
+  }
+
   test("sparse") {
 
     val a = sparse((1, 3) :: Nil,

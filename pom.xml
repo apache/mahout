@@ -27,7 +27,8 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.11.2-SNAPSHOT</version>
+
+  <version>0.13.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -116,12 +117,14 @@
     <mjavadoc.version>2.10.3</mjavadoc.version>
     <mscala.version>3.2.0</mscala.version>
     <hbase.version>1.0.0</hbase.version>
-    <lucene.version>4.6.1</lucene.version>
-    <slf4j.version>1.7.12</slf4j.version>
+    <lucene.version>5.5.2</lucene.version>
+    <slf4j.version>1.7.22</slf4j.version>
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
-    <spark.version>1.4.1</spark.version>
+    <spark.version>1.6.3</spark.version> <!-- 1.6.3, 2.0.2, 2.1.0 all tested -->
+    <flink.version>1.1.4</flink.version>
     <h2o.version>0.1.25</h2o.version>
+    <jackson.version>2.7.4</jackson.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
@@ -230,7 +233,7 @@
       </dependency>
 
       <dependency>
-        <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
+        <artifactId>mahout-flink_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
@@ -240,6 +243,13 @@
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
+
+      <dependency>
+        <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
 
       <!-- 3rd party  -->
       <dependency>
@@ -324,7 +334,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.11</version>
+        <version>4.12</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -359,15 +369,11 @@
       </dependency>
 
       <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-core-asl</artifactId>
-        <version>1.9.12</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.12</version>
-      </dependency>
+
       <dependency>
         <groupId>commons-cli</groupId>
         <artifactId>commons-cli</artifactId>
@@ -643,6 +649,39 @@
           <artifactId>versions-maven-plugin</artifactId>
           <version>2.2</version>
         </plugin>
+
+        <!-- Coverage analysis for tests -->
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.7.7.201606060606</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+              <configuration>
+                <output>file</output>
+                <dumpOnExit>true</dumpOnExit>
+              </configuration>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Report jacoco coverage to coveralls.io -->
+        <plugin>
+          <groupId>org.eluder.coveralls</groupId>
+          <artifactId>coveralls-maven-plugin</artifactId>
+          <version>4.2.0</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
     <plugins>
@@ -804,27 +843,33 @@
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
-    <module>spark-shell</module>
     <module>h2o</module>
   </modules>
 
   <profiles>
+
     <profile>
-      <id>hadoop1</id>
-      <properties>
-        <hadoop.classifier>hadoop1</hadoop.classifier>
-        <hadoop.version>1.2.1</hadoop.version>
-      </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>${hadoop.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
+      <id>flink</id>
+    <modules>
+      <module>flink</module>
+    </modules>
     </profile>
+
+    <profile>
+      <id>viennacl</id>
+    <modules>
+      <module>viennacl</module>
+      <module>viennacl-omp</module>
+    </modules>
+    </profile>
+
+    <profile>
+      <id>viennacl-omp</id>
+      <modules>
+        <module>viennacl-omp</module>
+      </modules>
+    </profile>
+
     <profile>
       <id>hadoop2</id>
       <activation>

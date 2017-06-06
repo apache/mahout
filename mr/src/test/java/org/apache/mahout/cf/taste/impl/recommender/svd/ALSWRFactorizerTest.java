@@ -64,7 +64,7 @@ public class ALSWRFactorizerTest extends TasteTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    FastByIDMap<PreferenceArray> userData = new FastByIDMap<PreferenceArray>();
+    FastByIDMap<PreferenceArray> userData = new FastByIDMap<>();
 
     userData.put(1L, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(1L, 1L, 5.0f),
                                                                   new GenericPreference(1L, 2L, 5.0f),

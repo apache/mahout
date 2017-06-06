@@ -1,7 +1,6 @@
 package org.apache.mahout.math.decompositions
 
-import scala.reflect.ClassTag
-import org.apache.mahout.math.{Matrix, Matrices, Vector}
+import org.apache.mahout.math.{Matrices, Matrix, Vector}
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
@@ -23,10 +22,18 @@ object DSSVD {
    * @return (U,V,s). Note that U, V are non-checkpointed matrices (i.e. one needs to actually use them
    *         e.g. save them to hdfs in order to trigger their computation.
    */
-  def dssvd[K: ClassTag](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+  def dssvd[K](drmA: DrmLike[K],
+               k: Int,
+               p: Int = 15,
+               q: Int = 0,
+               cacheHint: CacheHint.CacheHint = CacheHint.MEMORY_ONLY):
+
   (DrmLike[K], DrmLike[Int], Vector) = {
 
-    val drmAcp = drmA.checkpoint()
+    // Some mapBlock() calls need it
+    implicit val ktag =  drmA.keyClassTag
+
+    val drmAcp = drmA.checkpoint(cacheHint)
 
     val m = drmAcp.nrow
     val n = drmAcp.ncol
@@ -43,14 +50,14 @@ object DSSVD {
     // instantiate the Omega random matrix view in the backend instead. That way serialized closure
     // is much more compact.
     var drmY = drmAcp.mapBlock(ncol = r) {
-      case (keys, blockA) =>
+      case (keys, blockA) ⇒
         val blockY = blockA %*% Matrices.symmetricUniformView(n, r, omegaSeed)
-        keys -> blockY
-    }.checkpoint()
+        keys → blockY
+    }.checkpoint(cacheHint)
 
     var drmQ = dqrThin(drmY)._1
     // Checkpoint Q if last iteration
-    if (q == 0) drmQ = drmQ.checkpoint()
+    if (q == 0) drmQ = drmQ.checkpoint(cacheHint)
 
     trace(s"dssvd:drmQ=${drmQ.collect}.")
 
@@ -58,21 +65,21 @@ object DSSVD {
     // still be identically partitioned.
     var drmBt = drmAcp.t %*% drmQ
     // Checkpoint B' if last iteration
-    if (q == 0) drmBt = drmBt.checkpoint()
+    if (q == 0) drmBt = drmBt.checkpoint(cacheHint)
 
     trace(s"dssvd:drmB'=${drmBt.collect}.")
 
-    for (i <- 0  until q) {
+    for (i ← 0  until q) {
       drmY = drmAcp %*% drmBt
-      drmQ = dqrThin(drmY.checkpoint())._1
+      drmQ = dqrThin(drmY.checkpoint(cacheHint))._1
       // Checkpoint Q if last iteration
-      if (i == q - 1) drmQ = drmQ.checkpoint()
+      if (i == q - 1) drmQ = drmQ.checkpoint(cacheHint)
 
       // This on the other hand should be inner-join-and-map A'B optimization since A and Q_i are not
       // identically partitioned anymore.`
       drmBt = drmAcp.t %*% drmQ
       // Checkpoint B' if last iteration
-      if (i == q - 1) drmBt = drmBt.checkpoint()
+      if (i == q - 1) drmBt = drmBt.checkpoint(cacheHint)
     }
 
     val mxBBt:Matrix = drmBt.t %*% drmBt

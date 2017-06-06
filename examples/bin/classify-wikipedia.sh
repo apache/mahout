@@ -42,7 +42,11 @@ START_PATH=`pwd`
 # Set commands for dfs
 source ${START_PATH}/set-dfs-commands.sh
 
-WORK_DIR=/tmp/mahout-work-wiki
+if [[ -z "$MAHOUT_WORK_DIR" ]]; then
+  WORK_DIR=/tmp/mahout-work-wiki
+else
+  WORK_DIR=$MAHOUT_WORK_DIR
+fi
 algorithm=( CBayes BinaryCBayes clean)
 if [ -n "$1" ]; then
   choice=$1
@@ -70,11 +74,11 @@ if [ "x$alg" != "xclean" ]; then
         #  Datasets: uncomment and run "clean" to change dataset   
         ########################################################
         ########## partial small 42.5M zipped
-        # curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
+        # curl https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000030302.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
         ########## partial larger 256M zipped
-        curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles10.xml-p000925001p001325000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
+        # curl https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles10.xml-p002336425p003046511.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
         ######### full wikipedia dump: 10G zipped
-        #curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
+        # curl https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
         ########################################################
     fi
     if [ ! -e ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml ]; then
@@ -110,7 +114,7 @@ if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
     echo "Copying wikipedia data to HDFS"
     set +e
     $DFSRM ${WORK_DIR}/wikixml
-    $DFS -mkdir ${WORK_DIR}
+    $DFS -mkdir -p ${WORK_DIR}
     set -e
     $DFS -put ${WORK_DIR}/wikixml ${WORK_DIR}/wikixml
   fi

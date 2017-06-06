@@ -17,12 +17,11 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.mahout.classifier.naivebayes._
-import org.apache.mahout.classifier.naivebayes.SparkNaiveBayes
-import org.apache.mahout.common.Hadoop1HDFSUtil
+import org.apache.mahout.classifier.naivebayes.{SparkNaiveBayes, _}
+import org.apache.mahout.common.Hadoop2HDFSUtil
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
-import org.apache.mahout.math.drm.RLikeDrmOps.drm2RLikeOps
+
 import scala.collection.immutable.HashMap
 
 
@@ -48,38 +47,38 @@ object TrainNBDriver extends MahoutSparkDriver {
 
       // default trainComplementary is false
       opts = opts + ("trainComplementary" -> false)
-      opt[Unit]("trainComplementary") abbr ("c") action { (_, options) =>
+      opt[Unit]("trainComplementary") abbr "c" action { (_, options) =>
         options + ("trainComplementary" -> true)
-      } text ("Train a complementary model, Default: false.")
+      } text "Train a complementary model, Default: false."
 
       // Laplace smoothing paramater default is 1.0
       opts = opts + ("alphaI" -> 1.0)
-      opt[Double]("alphaI") abbr ("a") action { (x, options) =>
+      opt[Double]("alphaI") abbr "a" action { (x, options) =>
         options + ("alphaI" -> x)
-      } text ("Laplace soothing factor default is 1.0") validate { x =>
+      } text "Laplace smothing factor default is 1.0" validate { x =>
         if (x > 0) success else failure("Option --alphaI must be > 0")
       }
 
       // Overwrite the output directory (with the model) if it exists?  Default: false
       opts = opts + ("overwrite" -> false)
-      opt[Unit]("overwrite") abbr ("ow") action { (_, options) =>
+      opt[Unit]("overwrite") abbr "ow" action { (_, options) =>
         options + ("overwrite" -> true)
-      } text ("Overwrite the output directory (with the model) if it exists? Default: false")
+      } text "Overwrite the output directory (with the model) if it exists? Default: false"
 
       // Spark config options--not driver specific
       parseSparkOptions()
 
-      help("help") abbr ("h") text ("prints this usage text\n")
+      help("help") abbr "h" text "prints this usage text\n"
 
     }
     parser.parse(args, parser.opts) map { opts =>
       parser.opts = opts
-      process()
+      process
     }
   }
 
   /** Read the training set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
-  private def readTrainingSet: DrmLike[_]= {
+  private def readTrainingSet(): DrmLike[_]= {
     val inputPath = parser.opts("input").asInstanceOf[String]
     val trainingSet= drm.drmDfsRead(inputPath)
     trainingSet
@@ -96,10 +95,10 @@ object TrainNBDriver extends MahoutSparkDriver {
     val fullPathToModel = outputPath + NBModel.modelBaseDirectory
 
     if (overwrite) {
-       Hadoop1HDFSUtil.delete(fullPathToModel)
+       Hadoop2HDFSUtil.delete(fullPathToModel)
     }
 
-    val trainingSet = readTrainingSet
+    val trainingSet = readTrainingSet()
     // Use Spark-Optimized Naive Bayes here to extract labels and aggregate options
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
     val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, complementary, alpha.toFloat)

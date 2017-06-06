@@ -21,9 +21,15 @@ import scala.reflect.ClassTag
 import org.apache.mahout.math.drm._
 
 /** Logical A' for any row key to support A'A optimizations */
-case class OpAtAnyKey[A: ClassTag](
+case class OpAtAnyKey[A](
     override var A: DrmLike[A])
     extends AbstractUnaryOp[A, Int] {
+
+  /**
+    * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+    * implementation knows it
+    */
+  override def keyClassTag = ClassTag.Int
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.ncol

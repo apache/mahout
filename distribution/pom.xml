@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.11.2-SNAPSHOT</version>
+    <version>0.13.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>apache-mahout-distribution</artifactId>
@@ -72,11 +72,93 @@
     </plugins>
   </build>
   <profiles>
+
     <profile>
       <id>mahout-release</id>
       <properties>
         <mahout.skip.distribution>false</mahout.skip.distribution>
       </properties>
+    </profile>
+    <profile>
+      <id>viennacl</id>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-math</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-integration</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-hdfs</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-mr</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-examples</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+    </profile>
+
+    <profile>
+      <id>viennacl-omp</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-math</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-integration</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-hdfs</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-mr</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-examples</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 
@@ -103,15 +185,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>

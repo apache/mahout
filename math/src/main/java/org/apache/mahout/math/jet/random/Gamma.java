@@ -73,9 +73,9 @@ public class Gamma extends AbstractContinousDistribution {
    ******************************************************************
    *                                                                *
    * FUNCTION:    - gds samples a random number from the standard   *
-   *                gamma distribution with parameter  a > 0.       *
-   *                Acceptance Rejection  gs  for  a < 1 ,          *
-   *                Acceptance Complement gd  for  a >= 1 .         *
+   *                gamma distribution with parameter  a &gt; 0.       *
+   *                Acceptance Rejection  gs  for  a &lt; 1 ,          *
+   *                Acceptance Complement gd  for  a &gt;= 1 .         *
    * REFERENCES:  - J.H. Ahrens, U. Dieter (1974): Computer methods *
    *                for sampling from gamma, beta, Poisson and      *
    *                binomial distributions, Computing 12, 223-246.  *

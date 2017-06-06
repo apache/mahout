@@ -41,7 +41,7 @@ public class TestUnitVectorizerJob extends MahoutTestCase {
     
     // set up the dummy writers
     DummyRecordWriter<IntWritable, VectorWritable> writer = new
-      DummyRecordWriter<IntWritable, VectorWritable>();
+      DummyRecordWriter<>();
     Mapper<IntWritable, VectorWritable, IntWritable, VectorWritable>.Context 
       context = DummyRecordWriter.build(mapper, conf, writer);
     
