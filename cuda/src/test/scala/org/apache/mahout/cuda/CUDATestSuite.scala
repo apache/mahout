@@ -9,7 +9,6 @@ import scala.util.Random
 
 class CUDATestSuite extends FunSuite with Matchers {
 
-
   test("sparse mmul at geometry of 1000 x 1000 %*% 1000 x 1000 density = .2.  5 runs") {
     CUDATestSuite.getAverageTimeSparse(1000, 1000, 1000, .20, 1234L, 3)
   }
@@ -20,9 +19,9 @@ class CUDATestSuite extends FunSuite with Matchers {
     CUDATestSuite.getAverageTimeSparse(1000, 1000, 1000, .002, 1234L, 3)
   }
 
-//  test("dense mmul at geometry of 1000 x 1000 %*% 1000 x 1000"){
-//    CUDATestSuite.getAverageTimeDense(1000, 1000, 1000, 5)
-//  }
+  test("dense mmul at geometry of 1000 x 1000 %*% 1000 x 1000"){
+    CUDATestSuite.getAverageTimeDense(1000, 1000, 1000, 5)
+  }
 
 }
 
@@ -67,7 +66,6 @@ object CUDATestSuite {
     ms = System.currentTimeMillis()
     for (i: Int  <- 1 to nruns) {
       mxCuda = prod(cudaA, cudaB, cudaCtx)
-      //mxCuda = prod(cudaA, cudaB, cudaCtx)
     }
 
     ms = (System.currentTimeMillis() - ms) / nruns
@@ -120,14 +118,13 @@ object CUDATestSuite {
     ms = System.currentTimeMillis()
     for (i: Int  <- 1 to nruns) {
       mxCuda = prod(cudaA, cudaB, cudaCtx)
-      //mxCuda = prod(cudaA, cudaB, cudaCtx)
     }
 
     ms = (System.currentTimeMillis() - ms) / nruns
     print(s"Mahout JCuda dense multiplication time: $ms ms.\n")
 
     // TODO: Ensure that we've been working with the same matrices.
-    assert(((mxC - fromCUDADenseRM(mxCuda)).norm / mxC.nrow / mxC.ncol) < 1e-16)
+    assert(((mxC - fromCudaDenseRM(mxCuda, cudaCtx)).norm / mxC.nrow / mxC.ncol) < 1e-16)
     cudaA.close()
     cudaB.close()
     mxCuda.close()

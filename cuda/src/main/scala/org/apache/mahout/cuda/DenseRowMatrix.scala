@@ -60,14 +60,7 @@ final class DenseRowMatrix {
     context = ctx
 
     // allocate empty space on the GPU
-    cublasAlloc(nrows * ncols * jcuda.Sizeof.DOUBLE, jcuda.Sizeof.DOUBLE , vals)
-
-    // create and setup matrix descriptor
-    // Todo: do we want these? for dense %*% sparse?
-    // JCuda.cublasCreateMatDescr(descr)
-    // cublasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
-    // cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
-
+    cudaMalloc(vals, nrows * ncols * jcuda.Sizeof.DOUBLE)
   }
 
   /**
@@ -85,13 +78,7 @@ final class DenseRowMatrix {
     context = ctx
 
     // allocate empty space on the GPU
-    cublasAlloc(nrows * ncols * jcuda.Sizeof.DOUBLE, jcuda.Sizeof.DOUBLE, vals)
-
-    // create and setup matrix descriptor
-    // Todo: do we want these? for dense %*% sparse?
-    // cusblasCreateMatDescr(descr)
-    // cusblasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
-    // cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
+    cudaMalloc(vals, nrows * ncols * jcuda.Sizeof.DOUBLE)
 
     cudaMemcpy(vals, jcuda.Pointer.to(data.toList.flatten.toArray),
       (nrow) * (ncol) * jcuda.Sizeof.DOUBLE,
@@ -113,13 +100,6 @@ final class DenseRowMatrix {
     context = ctx
 
     vals = data
-
-    // create and setup matrix descriptor
-    // Todo: do we need these? for dense %*% sparse?
-    //cusblasCreateMatDescr(descr)
-    //cusblasSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL)
-    //cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO)
-
   }
 
   /**Set values with an 2d Array
@@ -128,8 +108,8 @@ final class DenseRowMatrix {
     */
   def set (data: Array[Array[Double]]): Unit = {
     // Allocate row-major
-    cublasAlloc(data.length * data(0).length * jcuda.Sizeof.DOUBLE,
-      jcuda.Sizeof.DOUBLE, vals)
+    cudaMalloc(vals, data.length * data(0).length * jcuda.Sizeof.DOUBLE)
+
     cudaMemcpy(vals, jcuda.Pointer.to(data.toList.flatten.toArray),
       data.length * data(0).length * jcuda.Sizeof.DOUBLE,
       cudaMemcpyHostToDevice)
@@ -148,7 +128,7 @@ final class DenseRowMatrix {
   }
 
   def close() {
-    cublasFree(vals)
+    cudaFree(vals)
   }
 }
 

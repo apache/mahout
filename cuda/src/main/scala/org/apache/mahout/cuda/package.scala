@@ -32,7 +32,8 @@ import jcuda.runtime.cudaMemcpyKind._
 
 import jcuda._
 import jcuda.jcublas._
-
+import jcuda.jcublas.cublasOperation.CUBLAS_OP_N
+import jcuda.jcublas.cublasOperation.CUBLAS_OP_T
 import jcuda.jcusparse.JCusparse._
 
 package object cuda {
@@ -45,18 +46,30 @@ package object cuda {
     * @param src a DenseRowMatrix with a (flattened) 2D cuda array
     * @return A Mahout DenseMatrix
     */
-  def fromCUDADenseRM(src: DenseRowMatrix): Matrix = {
+  def fromCudaDenseRM(src: DenseRowMatrix, ctx: Context): Matrix = {
 
     val nrowIntern = src.nrows
     val ncolIntern = src.ncols
 
-    var dbuff = new Pointer()
+    var alpha = new Array[Double](1)
+    var beta = new Array[Double](1)
+    alpha(0) = 1.0d
+    beta(0) = 0.0d
+
+    var d_C = new Pointer()
+    cudaMalloc(d_C, nrowIntern * ncolIntern * jcuda.Sizeof.DOUBLE)
+
+    // transpose to convert to row-major
+    JCublas2.cublasDgeam(ctx.denseHandle, CUBLAS_OP_T, CUBLAS_OP_N, nrowIntern, ncolIntern,
+		         jcuda.Pointer.to(alpha), src.vals, nrowIntern,
+		         jcuda.Pointer.to(beta), src.vals, nrowIntern,
+		         d_C, nrowIntern)
 
     // again will be double copying.. consider copying directly from cuda memory
     // into each row..
     val jvmData = Array.ofDim[Double](nrowIntern,ncolIntern) //Double](nrowIntern * ncolIntern)
     val cudaData = new Array[Double](nrowIntern * ncolIntern)
-    cudaMemcpy(jcuda.Pointer.to(cudaData), src.vals, (nrowIntern * ncolIntern) * jcuda.Sizeof.DOUBLE, cudaMemcpyDeviceToHost)
+    cudaMemcpy(jcuda.Pointer.to(cudaData), d_C, (nrowIntern * ncolIntern) * jcuda.Sizeof.DOUBLE, cudaMemcpyDeviceToHost)
 
     // We could speed this up by doing a transpose here
     // assuming that the matrix is in columnMajor format
@@ -70,6 +83,8 @@ package object cuda {
       srcOffset += ncolIntern
       rowvec
     }
+
+    //println( "output = " + rows.toArray.deep.mkString(", ") )
 
     // Always! use shallow = true to avoid yet another copying.
     // even another from viennacl :)
@@ -86,6 +101,7 @@ package object cuda {
         val valuesF = classOf[DenseMatrix].getDeclaredField("values")
         valuesF.setAccessible(true)
         val values = valuesF.get(src).asInstanceOf[Array[Array[Double]]]
+        //println( "input = " + values.deep.mkString(", ") )
         val cudaMx = new cuda.DenseRowMatrix(ctx, src.nrow, src.ncol, values)
 
         cudaMx
@@ -242,28 +258,25 @@ package object cuda {
     val n = b.ncols
     val k = b.nrows
 
-   // val d_A = valuesF.get(a).asInstanceOf[Array[Array[Double]]]
-
-
     val c: DenseRowMatrix = new DenseRowMatrix(ctx, m, n)
-    val d_C: Pointer = new Pointer()
-    cudaMalloc(c.vals,  m * n * jcuda.Sizeof.DOUBLE)
 
-    //C = alpha * op(A) * op(B) + beta * C,
-    //where op(X) = X or op(X) = transpose(X),
+    var alpha = new Array[Double](1)
+    var beta = new Array[Double](1)
+    alpha(0) = 1.0d
+    beta(0) = 0.0d
+
+    // C = alpha * op(A) * op(B) + beta * C,
+    // where op(X) = X or op(X) = transpose(X),
     // using transpose here because Mahout Matrices in general
     // are row-major,  hardcoding this for now..
-    JCublas.cublasDgemm('t', 't', m, n, k,
-      1.0d,    // alpha
-      a.vals, m, // A, lda
-      b.vals, n, // B , ldb
-      0.0d,    // beta
-      d_C,     // pointer to results
-      k)    // todo: check on this are we correct here?
 
-     // set the data of c to the results
-     // may need to allocate data here or the other side.
-     c.set(d_C)
+    JCublas2.cublasDgemm(ctx.denseHandle, CUBLAS_OP_T, CUBLAS_OP_T, m, n, k,
+      jcuda.Pointer.to(alpha),    // alpha
+      a.vals, m,  		  // A, lda
+      b.vals, n,  		  // B, ldb
+      jcuda.Pointer.to(beta),     // beta
+      c.vals, k)  		  // C, ldc
+
     c
   }
 
