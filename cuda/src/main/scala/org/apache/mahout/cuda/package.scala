@@ -16,6 +16,7 @@
  */
 
 
+
 package org.apache.mahout
 
 import java.nio._
@@ -34,6 +35,7 @@ import jcuda._
 import jcuda.jcublas._
 import jcuda.jcublas.cublasOperation.CUBLAS_OP_N
 import jcuda.jcublas.cublasOperation.CUBLAS_OP_T
+
 import jcuda.jcusparse.JCusparse._
 
 package object cuda {
@@ -138,6 +140,7 @@ package object cuda {
 //        }
 //    }
 //  }
+
 
   /**
     *
@@ -301,6 +304,7 @@ package object cuda {
       a.descr, a.nonz, a.row_ptr, a.col_ind,
       b.descr, b.nonz, b.row_ptr, b.col_ind,
       c.descr, c.row_ptr, jcuda.Pointer.to(nnzC))
+
     c.nonz = nnzC(0)
     if (c.nonz == 0) {
       var baseC = new Array[Int](1)

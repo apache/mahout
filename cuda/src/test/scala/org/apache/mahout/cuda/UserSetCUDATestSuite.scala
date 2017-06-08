@@ -8,10 +8,6 @@ import scala.util.Properties.envOrElse
 
 import scala.util.Random
 
-
-import scala.util.Random
-
-
 // some quickfixes as well
 class UserSetCUDATestSuite extends FunSuite with Matchers {
 
@@ -33,10 +29,9 @@ class UserSetCUDATestSuite extends FunSuite with Matchers {
 
   test("User Defined sparse mmul at geometry of "
     + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " +  num_runs + " runs \n") {
-
+    
    val ms =  getAverageTimeSparse(m, n, s, density, seed, num_runs)
-
-    println("User Defined sparse mmul at geometry of "
+   println("User Defined sparse mmul at geometry of "
       + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " + num_runs + " runs : "+ms +" ms")
   }
 }
@@ -96,6 +91,7 @@ object UserSetCUDATestSuite {
      cudaB.close()
 
      ms
+
   }
 
 }

@@ -7,6 +7,7 @@ import scalabindings.RLikeOps._
 import scala.util.Random
 
 
+
 class CUDATestSuite extends FunSuite with Matchers {
 
   test("sparse mmul at geometry of 1000 x 1000 %*% 1000 x 1000 density = .2.  5 runs") {
@@ -22,11 +23,11 @@ class CUDATestSuite extends FunSuite with Matchers {
   test("dense mmul at geometry of 1000 x 1000 %*% 1000 x 1000"){
     CUDATestSuite.getAverageTimeDense(1000, 1000, 1000, 5)
   }
-
 }
 
 
 object CUDATestSuite {
+
   def getAverageTimeSparse(m: Int = 1000,
                            s: Int = 1000,
                            n: Int = 1000,
@@ -73,6 +74,7 @@ object CUDATestSuite {
 
     // TODO: Ensure that we've been working with the same matrices.
     // (mxC - mxCuda).norm / mxC.nrow / mxC.ncol should be < 1e-16
+
     assert(((mxC - fromCudaCmpMatrix(mxCuda)).norm / mxC.nrow / mxC.ncol) < 1e-16)
     cudaA.close()
     cudaB.close()
@@ -128,6 +130,7 @@ object CUDATestSuite {
     cudaA.close()
     cudaB.close()
     mxCuda.close()
+
     ms
   }
 

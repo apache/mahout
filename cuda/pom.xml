@@ -102,6 +102,7 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
@@ -118,9 +119,6 @@
           <argLine>-Xmx4g</argLine>
         </configuration>
       </plugin>
-
-
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -181,6 +179,12 @@
       <groupId>org.jcuda</groupId>
       <artifactId>jcuda</artifactId>
       <version>${jcuda.jcudaVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>javacpp</artifactId>
+      <version>1.2.4</version>
+
     </dependency>
 
     <dependency>
