@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
+
 
 package org.apache.mahout
 
@@ -30,11 +30,117 @@ import scala.collection.JavaConversions._
 
 import jcuda.runtime.JCuda._
 import jcuda.runtime.cudaMemcpyKind._
+
+import jcuda._
+import jcuda.jcublas._
+import jcuda.jcublas.cublasOperation.CUBLAS_OP_N
+import jcuda.jcublas.cublasOperation.CUBLAS_OP_T
+
 import jcuda.jcusparse.JCusparse._
 
 package object cuda {
 
   private implicit val log = getLog(GPUMMul.getClass)
+
+
+  /** Copy cuda data back into a Mahout DenseMatrix
+    *
+    * @param src a DenseRowMatrix with a (flattened) 2D cuda array
+    * @return A Mahout DenseMatrix
+    */
+  def fromCudaDenseRM(src: DenseRowMatrix, ctx: Context): Matrix = {
+
+    val nrowIntern = src.nrows
+    val ncolIntern = src.ncols
+
+    var alpha = new Array[Double](1)
+    var beta = new Array[Double](1)
+    alpha(0) = 1.0d
+    beta(0) = 0.0d
+
+    var d_C = new Pointer()
+    cudaMalloc(d_C, nrowIntern * ncolIntern * jcuda.Sizeof.DOUBLE)
+
+    // transpose to convert to row-major
+    JCublas2.cublasDgeam(ctx.denseHandle, CUBLAS_OP_T, CUBLAS_OP_N, nrowIntern, ncolIntern,
+		         jcuda.Pointer.to(alpha), src.vals, nrowIntern,
+		         jcuda.Pointer.to(beta), src.vals, nrowIntern,
+		         d_C, nrowIntern)
+
+    // again will be double copying.. consider copying directly from cuda memory
+    // into each row..
+    val jvmData = Array.ofDim[Double](nrowIntern,ncolIntern) //Double](nrowIntern * ncolIntern)
+    val cudaData = new Array[Double](nrowIntern * ncolIntern)
+    cudaMemcpy(jcuda.Pointer.to(cudaData), d_C, (nrowIntern * ncolIntern) * jcuda.Sizeof.DOUBLE, cudaMemcpyDeviceToHost)
+
+    // We could speed this up by doing a transpose here
+    // assuming that the matrix is in columnMajor format
+    // TODO: consider this getting late so make it work now.
+    var srcOffset = 0
+    val ncol = src.ncols
+    val rows = for (irow ← 0 until src.nrows) yield {
+
+      val rowvec = new Array[Double](ncol)
+      System.arraycopy(cudaData, srcOffset , rowvec , 0 , ncol)
+      srcOffset += ncolIntern
+      rowvec
+    }
+
+    //println( "output = " + rows.toArray.deep.mkString(", ") )
+
+    // Always! use shallow = true to avoid yet another copying.
+    // even another from viennacl :)
+    new DenseMatrix(rows.toArray, true)
+  }
+
+  /**
+    * Convert from Mahout DenseMatrix to matrix
+    * @param src
+    * @return
+    */
+  def toCudaDenseRM(src: Matrix, ctx: Context): cuda.DenseRowMatrix = {
+
+        val valuesF = classOf[DenseMatrix].getDeclaredField("values")
+        valuesF.setAccessible(true)
+        val values = valuesF.get(src).asInstanceOf[Array[Array[Double]]]
+        //println( "input = " + values.deep.mkString(", ") )
+        val cudaMx = new cuda.DenseRowMatrix(ctx, src.nrow, src.ncol, values)
+
+        cudaMx
+  }
+
+
+  // TODO replace this with repackColumnMajor or use a different dgemm algorithm?
+  // Most Mahout in-core matrices are row-major and we're using CSR so we may need to see
+  // if JCuda is using an optimal csr/RowMajor DGEMM algortithm.
+  // TODO: check with NS on this
+//  private[cuda] def repackRowMajor(mx: Matrix, nrowIntern: Int, ncolIntern: Int): Array[Double] = {
+//
+//    assert(mx.nrow <= nrowIntern && mx.ncol <= ncolIntern)
+//
+//    val dbuff = Array.ofDim[Double](nrowIntern * ncolIntern)
+//
+//    mx match {
+//      case dm: DenseMatrix ⇒
+//        val valuesF = classOf[DenseMatrix].getDeclaredField("values")
+//        valuesF.setAccessible(true)
+//        val values = valuesF.get(dm).asInstanceOf[Array[Array[Double]]]
+//        var dstOffset = 0
+//        for (irow ← 0 until mx.nrow) {
+//          val rowarr = values(irow)
+//          //dbuff.position(dstOffset).put(rowarr, 0, rowarr.size min ncolIntern)
+//          System.arraycopy(rowarr, 0, dbuff, dstOffset, rowarr.size min ncolIntern)
+//          dstOffset += ncolIntern
+//        }
+//      case _ ⇒
+//        // Naive copying. Could be sped up for a DenseMatrix. TODO.
+//        for (row ← mx) {
+//          val dstOffset = row.index * ncolIntern
+//          for (el ← row.nonZeroes) dbuff.update(dstOffset + el.index) = el
+//        }
+//    }
+//  }
+
 
   /**
     *
@@ -143,6 +249,47 @@ package object cuda {
     (jumpers, colIdcs, els)
   }
 
+  /**
+    * Dense %*% Dense
+    * @param a
+    * @param b
+    * @param ctx
+    * @return
+    */
+  def prod(a: DenseRowMatrix, b: DenseRowMatrix, ctx: Context): DenseRowMatrix = {
+    val m = a.nrows
+    val n = b.ncols
+    val k = b.nrows
+
+    val c: DenseRowMatrix = new DenseRowMatrix(ctx, m, n)
+
+    var alpha = new Array[Double](1)
+    var beta = new Array[Double](1)
+    alpha(0) = 1.0d
+    beta(0) = 0.0d
+
+    // C = alpha * op(A) * op(B) + beta * C,
+    // where op(X) = X or op(X) = transpose(X),
+    // using transpose here because Mahout Matrices in general
+    // are row-major,  hardcoding this for now..
+
+    JCublas2.cublasDgemm(ctx.denseHandle, CUBLAS_OP_T, CUBLAS_OP_T, m, n, k,
+      jcuda.Pointer.to(alpha),    // alpha
+      a.vals, m,  		  // A, lda
+      b.vals, n,  		  // B, ldb
+      jcuda.Pointer.to(beta),     // beta
+      c.vals, k)  		  // C, ldc
+
+    c
+  }
+
+  /**
+    * Sparse %*% Sparse
+    * @param a
+    * @param b
+    * @param ctx
+    * @return
+    */
   def prod(a: CompressedMatrix, b: CompressedMatrix, ctx: Context): CompressedMatrix = {
     var m = a.nrows
     var n = b.ncols
@@ -153,10 +300,11 @@ package object cuda {
     // step 1: compute nnz count
     var nnzC = new Array[Int](1)
     nnzC(0) = 0
-    cusparseXcsrgemmNnz(ctx.handle, a.trans, b.trans, m, n, k,
-                        a.descr, a.nonz, a.row_ptr, a.col_ind,
-                        b.descr, b.nonz, b.row_ptr, b.col_ind,
-                        c.descr, c.row_ptr, jcuda.Pointer.to(nnzC))
+    cusparseXcsrgemmNnz(ctx.sparseHandle, a.trans, b.trans, m, n, k,
+      a.descr, a.nonz, a.row_ptr, a.col_ind,
+      b.descr, b.nonz, b.row_ptr, b.col_ind,
+      c.descr, c.row_ptr, jcuda.Pointer.to(nnzC))
+
     c.nonz = nnzC(0)
     if (c.nonz == 0) {
       var baseC = new Array[Int](1)
@@ -168,15 +316,39 @@ package object cuda {
     // step 2: allocate and compute matrix product
     cudaMalloc(c.col_ind, jcuda.Sizeof.INT * c.nonz);
     cudaMalloc(c.vals, jcuda.Sizeof.DOUBLE * c.nonz);
-    cusparseDcsrgemm(ctx.handle, a.trans, b.trans, m, n, k,
-                     a.descr, a.nonz,
-                     a.vals, a.row_ptr, a.col_ind,
-                     b.descr, b.nonz,
-                     b.vals, b.row_ptr, b.col_ind,
-                     c.descr,
-                     c.vals, c.row_ptr, c.col_ind);
+    cusparseDcsrgemm(ctx.sparseHandle, a.trans, b.trans, m, n, k,
+      a.descr, a.nonz,
+      a.vals, a.row_ptr, a.col_ind,
+      b.descr, b.nonz,
+      b.vals, b.row_ptr, b.col_ind,
+      c.descr,
+      c.vals, c.row_ptr, c.col_ind)
     c
   }
+
+  def prod(a: CompressedMatrix, b: DenseRowMatrix, ctx: Context): DenseRowMatrix = {
+    var m = a.nrows
+    var n = b.ncols
+    var k = b.nrows
+
+    val c: DenseRowMatrix = new DenseRowMatrix(ctx, m, n)
+
+    var alpha = new Array[Double](1)
+    var beta = new Array[Double](1)
+    alpha(0) = 1.0d
+    beta(0) = 0.0d
+
+    cusparseDcsrmm(ctx.sparseHandle, a.trans, m, n, k,
+      a.nonz,
+      jcuda.Pointer.to(alpha),
+      a.descr,
+      a.vals, a.row_ptr, a.col_ind,
+      b.vals, n,
+      jcuda.Pointer.to(beta),
+      c.vals, k)
+    c
+  }
+
 
   def fromCudaCmpMatrix(src: CompressedMatrix): Matrix = {
     val m = src.nrows

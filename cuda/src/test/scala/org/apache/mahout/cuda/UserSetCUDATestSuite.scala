@@ -8,12 +8,6 @@ import scala.util.Properties.envOrElse
 
 import scala.util.Random
 
-
-import scala.util.Random
-/**
-  * Created by andy on 3/29/17.
-  */
-
 // some quickfixes as well
 class UserSetCUDATestSuite extends FunSuite with Matchers {
 
@@ -35,10 +29,9 @@ class UserSetCUDATestSuite extends FunSuite with Matchers {
 
   test("User Defined sparse mmul at geometry of "
     + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " +  num_runs + " runs \n") {
-
-   val ms =  getAverageTime(m, n, s, density, seed, num_runs)
-
-    println("User Defined sparse mmul at geometry of "
+    
+   val ms =  getAverageTimeSparse(m, n, s, density, seed, num_runs)
+   println("User Defined sparse mmul at geometry of "
       + m + " x " + s + " %*% " + s + " x " + n + " density = " + density + " " + num_runs + " runs : "+ms +" ms")
   }
 }
@@ -89,9 +82,16 @@ object UserSetCUDATestSuite {
     ms = (System.currentTimeMillis() - ms) / nruns
     print(s"Mahout JCuda Sparse multiplication time: $ms ms.")
 
-    // TODO: Ensure that we've been working with the same matrices.
-    // (mxC - mxCuda).norm / mxC.nrow / mxC.ncol should be < 1e-16
-    ms
+
+//     (mxC - fromCudaCmpMatrix(mxCuda)).norm / mxC.nrow / mxC.ncol should be < 1e-16
+     //assert(((mxC - fromCudaCmpMatrix(mxCuda)).norm / mxC.nrow / mxC.ncol) < 1e-16)
+
+     mxCuda.close()
+     cudaA.close()
+     cudaB.close()
+
+     ms
+
   }
 
 }

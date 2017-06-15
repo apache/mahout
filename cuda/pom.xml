@@ -95,13 +95,14 @@
       <!--this is what scalatest recommends to do to enable scala tests -->
 
       <!-- disable surefire -->
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-surefire-plugin</artifactId>-->
-        <!--<configuration>-->
-          <!--<skipTests>true</skipTests>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
@@ -115,10 +116,9 @@
           </execution>
         </executions>
         <configuration>
-            <argLine>-Xmx4g</argLine>
+          <argLine>-Xmx4g</argLine>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -176,14 +176,20 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jcuda</groupId>
+      <artifactId>jcuda</artifactId>
+      <version>${jcuda.jcudaVersion}</version>
+    </dependency>
+    <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacpp</artifactId>
       <version>1.2.4</version>
+
     </dependency>
 
     <dependency>
       <groupId>org.jcuda</groupId>
-      <artifactId>jcuda</artifactId>
+      <artifactId>jcublas</artifactId>
       <version>${jcuda.jcudaVersion}</version>
     </dependency>
 
