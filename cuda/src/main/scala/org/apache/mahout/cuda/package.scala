@@ -326,6 +326,40 @@ package object cuda {
     c
   }
 
+  def prod(a: CompressedMatrix, b: DenseRowMatrix, ctx: Context): CompressedMatrix = {
+    var m = a.nrows
+    var n = b.ncols
+    var k = b.nrows
+
+    val c: DenseRowMatrix = new DenseRowMatrix(ctx, m, n)
+
+    var alpha = new Array[Double](1)
+    var beta = new Array[Double](1)
+    alpha(0) = 1.0d
+    beta(0) = 0.0d
+
+//    cusparseDcsrmm(cusparseHandle_t handle,
+//      cusparseOperation_t transA, int m, int n, int k,
+//      int nnz,
+//      const double *alpha,
+//      const cusparseMatDescr_t descrA,
+//      const double *csrValA,
+//      const int *csrRowPtrA,
+//      const int *csrColIndA,
+//      const double *B,
+//      int ldb,
+//      const double *beta,
+//      double *C, int ldc)
+
+    cusparseDcsrmm(ctx.sparseHandle, a.trans, m, n, k,
+      a.nonz, jcuda.Pointer.to(alpha), a.descr,
+      a.vals, a.row_ptr, a.col_ind,
+      a.descr, a.nonz,
+      b.vals, n,
+      jcuda.Pointer.to(beta), c.vals, k);
+    c
+  }
+
 
   def fromCudaCmpMatrix(src: CompressedMatrix): Matrix = {
     val m = src.nrows
