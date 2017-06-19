@@ -88,13 +88,24 @@ class DistributedMLPClassifierModel[K](mlpModel: DistributedMLPModel[K],
     mlpModel.predict(drmPredictors)
   }
 
-  def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
-    val rawScores = rawPredictions(drmPredictors)
-    // oneHots = somefunc(rawScores) todo somefunc which converts dvec(0.001, 0.004, 2.41) to dvec(0,0,1)
-    // actually- this goes in DistributedMLP- otherwise we'll have to make two passes.
-    // factorizerModel.invTransform(oneHots)
-    rawScores
+  def softmaxPredictions(drmPredictors: DrmLike[K]): DrmLike[K] = {
+    import org.apache.mahout.math.algorithms.preprocessing.SoftMaxPostprocessor
+    val rawScores: DrmLike[K] = rawPredictions(drmPredictors)
+    (new SoftMaxPostprocessor).transform(rawScores)
   }
+
+  def classify(drmPredictors: DrmLike[K]): DrmLike[K] = {
+    import collection._
+    import JavaConversions._
+    implicit val ktag =  drmPredictors.keyClassTag
+    rawPredictions(drmPredictors).mapBlock(1){
+      case (keys, block: Matrix) =>
+        val copy: Matrix = block.cloned
+        copy.foreach(v => v := v.maxValueIndex.toDouble)
+        (keys, copy)
+    }
+  }
+
 
   def exportIncoreModel(): InCoreMLP = {
     mlpModel.exportIncoreModel()

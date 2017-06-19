@@ -19,7 +19,12 @@
 
 package org.apache.mahout.math.algorithms.classifier
 
+import org.apache.mahout.math.Vector
+import org.apache.mahout.math.function.{Functions => F}
 import org.apache.mahout.math.algorithms.{SupervisedFitter, SupervisedModel}
+
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.scalabindings.RLikeOps._
 
 trait ClassifierModel[K] extends SupervisedModel[K] {
 
