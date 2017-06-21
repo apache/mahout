@@ -31,12 +31,24 @@ import scala.collection.mutable.ArrayBuffer
 @Name(Array("viennacl::matrix<double,viennacl::row_major>"))
 class DenseRowMatrix(initDefault: Boolean = true) extends MatrixBase {
 
-  def this(nrow: Int, ncol: Int, ctx: Context = new Context()) {
+  def this(nrow: Int, ncol: Int) {
+    this(false)
+    allocate(nrow, ncol, new Context())
+  }
+
+  def this(nrow: Int, ncol: Int, ctx: Context) {
     this(false)
     allocate(nrow, ncol, ctx)
   }
 
-  def this(data: DoublePointer, nrow: Int, ncol: Int, ctx: Context = new Context(Context.MAIN_MEMORY)) {
+  def this(data: DoublePointer, nrow: Int, ncol: Int) {
+    this(false)
+    allocate(data, new Context(Context.MAIN_MEMORY).memoryType, nrow, ncol)
+    // We save it to deallocate it ad deallocation time.
+    ptrs += data
+  }
+
+  def this(data: DoublePointer, nrow: Int, ncol: Int, ctx: Context) {
     this(false)
     allocate(data, ctx.memoryType, nrow, ncol)
     // We save it to deallocate it ad deallocation time.

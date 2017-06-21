@@ -18,12 +18,12 @@ final class VCLVector(defaultCtr: Boolean = true) extends VectorBase {
     allocate()
   }
 
-  def this(i: Int){
+  def this(size: Int) {
     this(false)
-    allocate(i)
+    allocate(size, new Context(Context.MAIN_MEMORY))
   }
 
-  def this(size: Int, ctx: Context = new Context(Context.MAIN_MEMORY)) {
+  def this(size: Int, ctx: Context ) {
     this(false)
     allocate(size, ctx)
   }
@@ -48,9 +48,18 @@ final class VCLVector(defaultCtr: Boolean = true) extends VectorBase {
 
   def this(ptr_to_mem: DoublePointer,
            @Cast(Array("viennacl::memory_types"))mem_type : Int,
+           vec_size: Int) {
+
+    this(false)
+    allocate(ptr_to_mem, mem_type, vec_size, 0, 1)
+    ptrs += ptr_to_mem
+  }
+
+  def this(ptr_to_mem: DoublePointer,
+           @Cast(Array("viennacl::memory_types"))mem_type : Int,
            vec_size: Int,
-           start: Int = 0,
-           stride: Int = 1) {
+           start: Int,
+           stride: Int) {
 
     this(false)
     allocate(ptr_to_mem, mem_type, vec_size, start, stride)
