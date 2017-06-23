@@ -125,6 +125,7 @@
     <flink.version>1.1.4</flink.version>
     <h2o.version>0.1.25</h2o.version>
     <jackson.version>2.7.4</jackson.version>
+    <hadoop.version>2.4.1</hadoop.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
