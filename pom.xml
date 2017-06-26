@@ -942,6 +942,34 @@
       </properties>
     </profile>
     <profile>
+      <id>spark-1.6</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property><name>spark-1.6</name></property>
+      </activation>
+      <properties>
+        <spark.version>1.6.3</spark.version>
+      </properties>
+    </profile>
+    <profile>
+      <id>spark-2.0</id>
+      <activation>
+        <property><name>spark-2.0</name></property>
+      </activation>
+      <properties>
+        <spark.version>2.0.2</spark.version>
+      </properties>
+    </profile>
+    <profile>
+      <id>spark-2.0</id>
+      <activation>
+        <property><name>spark-2.1</name></property>
+      </activation>
+      <properties>
+        <spark.version>2.1.0</spark.version>
+      </properties>
+    </profile>
+    <profile>
       <!-- most of this profile lives in other places, like distribution -->
       <id>release.prepare</id>
       <properties>
