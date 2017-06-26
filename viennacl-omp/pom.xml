@@ -201,8 +201,22 @@
           </execution>
         </executions>
       </plugin>
-
-
+      <!-- delete jars on claen in top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../</directory>
+              <includes>
+                <include>mahout-native-viennacl-omp*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins>
 
 
