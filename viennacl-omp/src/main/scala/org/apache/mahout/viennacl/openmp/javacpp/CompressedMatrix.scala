@@ -46,12 +46,22 @@ final class CompressedMatrix(defaultCtr: Boolean = true) extends Pointer {
 
   if (defaultCtr) allocate()
 
-  def this(nrow: Int, ncol: Int, ctx: Context = new Context) {
+  def this(nrow: Int, ncol: Int) {
+    this(false)
+    allocate(nrow, ncol, new Context)
+  }
+
+  def this(nrow: Int, ncol: Int, ctx: Context) {
     this(false)
     allocate(nrow, ncol, ctx)
   }
 
-  def this(nrow: Int, ncol: Int, nonzeros: Int, ctx: Context = new Context) {
+  def this(nrow: Int, ncol: Int, nonzeros: Int) {
+    this(false)
+    allocate(nrow, ncol, nonzeros, new Context)
+  }
+
+  def this(nrow: Int, ncol: Int, nonzeros: Int, ctx: Context) {
     this(false)
     allocate(nrow, ncol, nonzeros, ctx)
   }
