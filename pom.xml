@@ -961,7 +961,7 @@
       </properties>
     </profile>
     <profile>
-      <id>spark-2.0</id>
+      <id>spark-2.1</id>
       <activation>
         <property><name>spark-2.1</name></property>
       </activation>
