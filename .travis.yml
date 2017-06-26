@@ -34,7 +34,7 @@ env:
     - JAVA_OPTS=-Xmx3g
     - TEST_MODULES="hdfs,math,math-scala,spark"
     - STANDARD_BUILD_OPTS="-Dmaven.javadoc.skip=true -B -V"
-    - PROFILES="-Phadoop2 -Ptravis"
+    - PROFILES="-Ptravis"
     - SPARK_1_6=http://d3kbcqa49mib13.cloudfront.net/spark-1.6.3-bin-hadoop2.6.tgz
     - SPARK_2_0=http://d3kbcqa49mib13.cloudfront.net/spark-2.0.2-bin-hadoop2.7.tgz
     - SPARK_2_1=http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
