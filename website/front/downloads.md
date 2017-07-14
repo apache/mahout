@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Downloads
-theme: mahout
+theme: mahout4
 ---
 
 <a name="Downloads-OfficialRelease"></a>
