@@ -56,7 +56,7 @@ matrix:
       env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11" SPARK_BIN=$SPARK_2_1
 
     # Build Spark 2.2.0 , Scala 2.11 - replace -D... with profiles when available
-    - jdk: "openjdk7"
+    - jdk: "openjdk8"
       env: PROFILES="${PROFILES} -Pspark-2.2 -Pscala-2.11" SPARK_BIN=$SPARK_2_2
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL
@@ -72,7 +72,7 @@ matrix:
       env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_1
 
     # Build Spark 2.2.0 , Scala 2.11, ViennaCL - replace -D... with profiles when available
-    - jdk: "openjdk7"
+    - jdk: "openjdk8"
       env: PROFILES="${PROFILES} -Pspark-2.2 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_2
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL-OMP
@@ -88,7 +88,7 @@ matrix:
       env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_1
 
     # Build Spark 2.2.0 , Scala 2.11, ViennaCL-OMP - replace -D... with profiles when available
-    - jdk: "openjdk7"
+    - jdk: "openjdk8"
       env: PROFILES="${PROFILES} -Pspark-2.2 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_2
 
 git:
