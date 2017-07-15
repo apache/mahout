@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: " en " }}">
+
+{% include head.html %}
+
+<body>
+
+    {% include navbar.html %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9">
+                {{ content }}
+            </div>
+            <div class="col-lg-3">
+                <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+            </div>
+        </div>
+    </div>
+
+    {% include footer.html %}
+
+    <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+    <script src="/assets/vendor/popper/popper.min.js"></script>
+    <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
