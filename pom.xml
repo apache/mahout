@@ -28,7 +28,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>0.13.2-SNAPSHOT</version>
+  <version>0.13.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -997,18 +997,16 @@
       <activation>
         <property><name>spark-2.2</name></property>
       </activation>
-      <properties>    <!--Enforce Java8, Scala 2.11, Hadoop 2.6-->
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+      <properties><!--Enforce Java8, Scala 2.11, Hadoop 2.6-->
         <spark.version>2.2.0</spark.version>
         <spark.compat.version>2.2</spark.compat.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <hadoop.version>2.6.0</hadoop.version>
         <scala.version>2.11.8</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
       </properties>
-
     </profile>
-
     <profile>
       <!-- most of this profile lives in other places, like distribution -->
       <id>release.prepare</id>
