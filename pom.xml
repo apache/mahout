@@ -256,6 +256,26 @@
       <!-- 3rd party  -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-auth</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-mapreduce-client-core</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-yarn-common</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-client</artifactId>
         <version>${hadoop.version}</version>
         <exclusions>
@@ -586,7 +606,7 @@
           <version>2.5.2</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
-            <releaseProfiles>mahout-release,apache-release,hadoop2</releaseProfiles>
+            <releaseProfiles>mahout-release,apache-release</releaseProfiles>
             <goals>deploy</goals>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <arguments>${arguments}</arguments>
@@ -872,7 +892,7 @@
       </modules>
     </profile>
 
-    <profile>
+    <!--<profile>
       <id>hadoop2</id>
       <activation>
         <activeByDefault>true</activeByDefault>
@@ -905,7 +925,7 @@
           </dependency>
         </dependencies>
       </dependencyManagement>
-    </profile>
+    </profile>-->
     <profile>
       <id>fastinstall</id>
       <properties>
@@ -970,6 +990,21 @@
       <properties>
         <spark.version>2.1.0</spark.version>
         <spark.compat.version>2.1</spark.compat.version>
+      </properties>
+    </profile>
+    <profile>
+      <id>spark-2.2</id>
+      <activation>
+        <property><name>spark-2.2</name></property>
+      </activation>
+      <properties><!--Enforce Java8, Scala 2.11, Hadoop 2.6-->
+        <spark.version>2.2.0</spark.version>
+        <spark.compat.version>2.2</spark.compat.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <hadoop.version>2.6.0</hadoop.version>
+        <scala.version>2.11.8</scala.version>
+        <scala.compat.version>2.11</scala.compat.version>
       </properties>
     </profile>
     <profile>
