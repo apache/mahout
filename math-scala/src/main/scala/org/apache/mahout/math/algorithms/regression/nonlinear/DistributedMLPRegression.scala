@@ -56,7 +56,7 @@ class DistributedMLPRegression[K] extends NonlinearRegressorFitter[K] {
 
     setStandardHyperparameters(hyperparameters.toMap)
 
-    val arch: Vector = dvec( Array(drmX.ncol.toDouble) ++ hiddenArch.map(i => i.toDouble) ++Array(drmTarget.ncol.toDouble) )
+    val arch: Vector = dvec( Array(drmX.ncol.toDouble) ++ hiddenArch.map(i => i.toDouble) ++ Array(drmTarget.ncol.toDouble) )
     val distributedMLP = new DistributedMLPFitter[K]( arch = arch,
                                                 microIters = microIters,
                                                 macroIters = macroIters,

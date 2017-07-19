@@ -60,17 +60,23 @@ class DistributedMLPClassifier[K] extends ClassifierFitter[K] {
           hyperparameters: (Symbol, Any)*): DistributedMLPClassifierModel[K] = {
 
 
+    setStandardHyperparameters(hyperparameters.toMap)
+
     factorizerModel = new AsFactor().fit(drmTarget)
-    val factoredDrm = factorizerModel.transform(drmTarget)
-    val dataDrm = drmX cbind factoredDrm
+
+    // Have to add + 1, class = 0.0 causes index error (?)
+    val factoredDrm = factorizerModel.transform(drmTarget) + 1
+
 
     val arch: Vector = dvec(Array(drmX.ncol.toDouble) ++ hiddenArch.map(i => i.toDouble) ++ Array(factoredDrm.ncol.toDouble))
+
     val distributedMLP = new DistributedMLPFitter[K](arch = arch,
       microIters = microIters,
       macroIters = macroIters,
       offsets = dvec(0, drmX.ncol, drmX.ncol, factoredDrm.ncol),
       useBiases)
 
+    val dataDrm = (drmX cbind factoredDrm) cbind drmTarget
     distributedMLP.fit(dataDrm)
     new DistributedMLPClassifierModel[K](distributedMLP.createDistributedModel(), factorizerModel)
   }
@@ -98,7 +104,7 @@ class DistributedMLPClassifierModel[K](mlpModel: DistributedMLPModel[K],
     import collection._
     import JavaConversions._
     implicit val ktag =  drmPredictors.keyClassTag
-    rawPredictions(drmPredictors).mapBlock(1){
+    rawPredictions(drmPredictors).mapBlock(){//1){
       case (keys, block: Matrix) =>
         val copy: Matrix = block.cloned
         copy.foreach(v => v := v.maxValueIndex.toDouble)
