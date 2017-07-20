@@ -38,6 +38,7 @@ env:
     - SPARK_1_6=http://d3kbcqa49mib13.cloudfront.net/spark-1.6.3-bin-hadoop2.6.tgz
     - SPARK_2_0=http://d3kbcqa49mib13.cloudfront.net/spark-2.0.2-bin-hadoop2.7.tgz
     - SPARK_2_1=http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
+    - SPARK_2_2=http://d3kbcqa49mib13.cloudfront.net/spark-2.2.0-bin-hadoop2.7.tgz
 
 # The file assumes a certain build order for the maven / nightly build deployments.
 matrix:
@@ -54,6 +55,10 @@ matrix:
     - jdk: "openjdk7"
       env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11" SPARK_BIN=$SPARK_2_1
 
+    # Build Spark 2.2.0 , Scala 2.11 - replace -D... with profiles when available
+    - jdk: "openjdk8"
+      env: PROFILES="${PROFILES} -Pspark-2.2 -Pscala-2.11" SPARK_BIN=$SPARK_2_2
+
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL
     - jdk: "openjdk7"
       env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl" SPARK_BIN=$SPARK_1_6
@@ -66,6 +71,10 @@ matrix:
     - jdk: "openjdk7"
       env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_1
 
+    # Build Spark 2.2.0 , Scala 2.11, ViennaCL - replace -D... with profiles when available
+    - jdk: "openjdk8"
+      env: PROFILES="${PROFILES} -Pspark-2.2 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_2
+
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL-OMP
     - jdk: "openjdk7"
       env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_1_6
@@ -77,6 +86,10 @@ matrix:
     # Build Spark 2.1.0 , Scala 2.11, ViennaCL-OMP - replace -D... with profiles when available
     - jdk: "openjdk7"
       env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_1
+
+    # Build Spark 2.2.0 , Scala 2.11, ViennaCL-OMP - replace -D... with profiles when available
+    - jdk: "openjdk8"
+      env: PROFILES="${PROFILES} -Pspark-2.2 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_2
 
 git:
   depth: 10
