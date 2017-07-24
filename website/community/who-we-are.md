@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Who we are
+permalink: /community/who-we-are/
 ---
 
 

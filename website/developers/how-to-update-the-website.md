@@ -1,6 +1,7 @@
 ---
 layout: default
 title: How to Update the Website
+permalink: /developers/how-to-update-the-website/
 ---
 
 # How to update the Mahout Website

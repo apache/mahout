@@ -1,6 +1,7 @@
 ---
 layout: default
 title: History of Apache Mahout
+permalink: /community/blogs/
 ---
 
 <!-- Add to this collection, newest date on top in following format:

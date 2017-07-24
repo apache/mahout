@@ -1,6 +1,7 @@
 ---
 layout: default
 title: How to Publish Website
+permalink: /developers/publish-website/
 ---
 
 ## Publishing Docs

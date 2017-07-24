@@ -1,6 +1,7 @@
 ---
 layout: default
 title: How to Release Mahout
+permalink: /developers/how-to-release/
 ---
 
 

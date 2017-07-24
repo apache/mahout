@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Mailing Lists, IRC and Archives
+permalink: /community/mailing-lists/
 ---
 # General
 

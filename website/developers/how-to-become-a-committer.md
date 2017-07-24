@@ -1,6 +1,7 @@
 ---
 layout: default
 title: How to Become a Commmiter
+permalink: /developers/how-to-become-a-committer/
 ---
 
 # How to Become a Committer

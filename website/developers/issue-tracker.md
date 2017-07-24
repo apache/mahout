@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Issue Tracker
+permalink: /developers/issue-tracker/
 ---
 
 # Issue tracker

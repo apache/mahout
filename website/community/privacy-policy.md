@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Privacy Policy
+permalink: /community/privacy-policy/
 ---
 
 

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Recent and Upcoming Talks
+permalink: /community/recent-upcoming-talks/
 ---
 
 

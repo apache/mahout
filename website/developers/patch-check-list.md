@@ -1,6 +1,7 @@
 ---
 layout: default
-title: Pathc Check List
+title: Patch Check List
+permalink: /developers/partch-check-list/
 ---
 
 

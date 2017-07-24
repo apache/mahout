@@ -1,6 +1,7 @@
 ---
 layout: default
-title: Thirdparty Dependencies
+title: Third Party Dependencies
+permalink: /developers/version-control/
 ---
 
 # Version control access

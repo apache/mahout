@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Release notes
+permalink: /developers/release-notes/
 ---
 
 

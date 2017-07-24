@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Quickstart
+permalink: /docs/quickstart/
 ---
 
 # Mahout Quick Start

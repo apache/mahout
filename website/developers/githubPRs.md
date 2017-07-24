@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Github PRs
+permalink: /developers/githubPRs/
 ---
 
 

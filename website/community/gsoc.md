@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Google Summer of Code
+permalink: /community/gsoc/
 ---
 
 # Google Summer of Code

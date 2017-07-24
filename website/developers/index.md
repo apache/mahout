@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Developers
+permalink: /developers/
 ---
 
 <a name="DeveloperResources-MakingaContribution"></a>

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Downloads
+permalink: /downloads/
 ---
 
 <a name="Downloads-OfficialRelease"></a>

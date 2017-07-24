@@ -1,6 +1,7 @@
 ---
 layout: default
 title: How to Contribute
+permalink: /developers/how-to-contribute/
 ---
 
 

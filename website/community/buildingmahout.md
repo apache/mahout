@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Building Mahout
+permalink: /community/buildingmahout/
 ---
 
 
