@@ -18,7 +18,7 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
 	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
-  <id>bin</id>
+  <id>scala-2.10_spark-1.6</id>
   <formats>
     <format>dir</format>
     <format>tar.gz</format>
@@ -118,8 +118,7 @@
     <fileSet>
       <directory>${project.basedir}/../math-scala/target</directory>
       <includes>
-        <include>mahout-*.jar</include>
-        <include>mahout-*.job</include>
+        <include>mahout-*2.10*.jar</include>
       </includes>
       <excludes>
         <exclude>*sources.jar</exclude>
@@ -131,8 +130,8 @@
     <fileSet>
       <directory>${project.basedir}/../spark/target</directory>
       <includes>
-        <include>mahout-*.jar</include>
-        <include>mahout-*.job</include>
+        <include>mahout-*2.10*.jar</include>
+        <include>mahout-*2.10*dependency-reduced.jar</include>
       </includes>
       <excludes>
         <exclude>*sources.jar</exclude>
@@ -157,7 +156,7 @@
     <fileSet>
       <directory>${project.basedir}/../viennacl/target</directory>
       <includes>
-        <include>mahout-*.jar</include>
+        <include>mahout-*2.10*.jar</include>
       </includes>
       <excludes>
         <exclude>*sources.jar</exclude>
@@ -169,7 +168,7 @@
     <fileSet>
       <directory>${project.basedir}/../viennacl-omp/target</directory>
       <includes>
-        <include>mahout-*.jar</include>
+        <include>mahout-*2.10*.jar</include>
       </includes>
       <excludes>
         <exclude>*sources.jar</exclude>
