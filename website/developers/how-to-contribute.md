@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: How to Contribute
 permalink: /developers/how-to-contribute/
 ---

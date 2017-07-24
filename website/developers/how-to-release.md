@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: How to Release Mahout
 permalink: /developers/how-to-release/
 ---

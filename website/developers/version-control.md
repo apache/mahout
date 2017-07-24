@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Third Party Dependencies
 permalink: /developers/version-control/
 ---

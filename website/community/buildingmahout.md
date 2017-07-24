@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Building Mahout
 permalink: /community/buildingmahout/
 ---

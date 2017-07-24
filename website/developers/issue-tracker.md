@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Issue Tracker
 permalink: /developers/issue-tracker/
 ---

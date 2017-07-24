@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: History of Apache Mahout
 permalink: /community/history/
 ---

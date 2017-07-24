@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Github PRs
 permalink: /developers/githubPRs/
 ---

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: How to Publish Website
 permalink: /developers/publish-website/
 ---

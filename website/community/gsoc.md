@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Google Summer of Code
 permalink: /community/gsoc/
 ---

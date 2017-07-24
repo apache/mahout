@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Patch Check List
 permalink: /developers/partch-check-list/
 ---

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: How to Become a Commmiter
 permalink: /developers/how-to-become-a-committer/
 ---

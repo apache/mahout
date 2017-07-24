@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Key Concepts Overview
 permalink: /developers/key-concepts/
 ---

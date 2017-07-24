@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Who we are
 permalink: /community/who-we-are/
 ---

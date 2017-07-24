@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Release notes
 permalink: /developers/release-notes/
 ---

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Mailing Lists, IRC and Archives
 permalink: /community/mailing-lists/
 ---

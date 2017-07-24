@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: How to Update the Website
 permalink: /developers/how-to-update-the-website/
 ---
