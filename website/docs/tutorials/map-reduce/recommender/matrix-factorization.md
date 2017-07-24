@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Perceptron and Winnow
+permalink: /docs/tutorials/map-reduce/recommender/matrix-factorization/
 ---
 <a name="MatrixFactorization-Intro"></a>
 # Introduction to Matrix Factorization for Recommendation Mining

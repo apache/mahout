@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Parallel Frequent Pattern Mining
+permalink: /docs/tutorials/map-reduce/misc/parallel-frequent-pattern-mining/
 ---
 Mahout has a Top K Parallel FPGrowth Implementation. Its based on the paper [http://infolab.stanford.edu/~echang/recsys08-69.pdf](http://infolab.stanford.edu/~echang/recsys08-69.pdf)
  with some optimisations in mining the data.

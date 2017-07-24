@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  canopy-commandline
+permalink: /docs/tutorials/map-reduce/clustering/canopy-commandline/
 ---
 
 <a name="canopy-commandline-RunningCanopyClusteringfromtheCommandLine"></a>

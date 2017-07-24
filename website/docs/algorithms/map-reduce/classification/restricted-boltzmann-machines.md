@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Restricted Boltzmann Machines
+permalink: /docs/algorithms/map-reduce/classification/restricted-boltzmann-machines/
 ---
 
 NOTE: This implementation is a Work-In-Progress, at least till September,

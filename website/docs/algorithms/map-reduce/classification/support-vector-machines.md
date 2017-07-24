@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Support Vector Machines
+permalink: /docs/algorithms/map-reduce/classification/support-vector-machines/
 ---
 
 <a name="SupportVectorMachines-SupportVectorMachines"></a>

@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Canopy Clustering
+permalink: /docs/algorithms/map-reduce/clustering/canopy-clustering/
 ---
 
 

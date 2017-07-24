@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Wikipedia XML parser and Naive Bayes Example
+permalink: /docs/tutorials/map-reduce/classification/wikipedia-classifier-example/
 ---
 # Wikipedia XML parser and Naive Bayes Classifier Example
 

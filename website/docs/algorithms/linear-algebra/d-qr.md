@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Distributed Cholesky QR
+permalink: /docs/algorithms/linear-algebra/d-qr/
 ---
 
 ## Intro

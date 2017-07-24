@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  LLR - Log-likelihood Ratio
+permalink: /docs/algorithms/map-reduce/clustering/llr---log-likelihood-ratio/
 ---
 
 # Likelihood ratio test

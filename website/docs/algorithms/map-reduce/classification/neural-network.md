@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Neural Network
+permalink: /docs/algorithms/map-reduce/classification/neuralnetwork/
 ---
 
 <a name="NeuralNetwork-NeuralNetworks"></a>

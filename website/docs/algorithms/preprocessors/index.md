@@ -1,8 +1,9 @@
 ---
 layout: page
 title: Preprocesors
+permalink: /docs/algorithms/preprocessors/
 ---
 
-[AsFactor](AsFactor.html) - For "one-hot-encoding"
+[AsFactor](AsFactor/) - For "one-hot-encoding"
 
-[StandardScaler](StandardScaler.html) - For mean centering an unit variance
+[StandardScaler](StandardScaler/) - For mean centering an unit variance

@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Logistic Regression
+permalink: /docs/algorithms/map-reduce/classification/logistic-regression/
 ---
 
 <a name="LogisticRegression-LogisticRegression(SGD)"></a>

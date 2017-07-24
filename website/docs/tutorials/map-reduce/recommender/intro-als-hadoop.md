@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Perceptron and Winnow
+permalink: /docs/tutorials/map-reduce/recommender/intro-als-hadoop/
 ---
 
 # Introduction to ALS Recommendations with Hadoop

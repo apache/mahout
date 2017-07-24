@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Random Forests
+permalink: /docs/algorithms/map-reduce/classification/random-forests/
 ---
 
 <a name="RandomForests-HowtogrowaDecisionTree"></a>

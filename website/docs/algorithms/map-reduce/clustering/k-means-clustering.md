@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  K-Means Clustering
+permalink: /docs/algorithms/map-reduce/clustering/k-means-clustering/
 ---
 
 # k-Means clustering - basics

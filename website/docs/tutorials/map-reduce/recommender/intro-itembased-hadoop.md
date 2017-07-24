@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Perceptron and Winnow
+permalink: /docs/tutorials/map-reduce/recommender/intro-itembased-hadoop/
 ---
 # Introduction to Item-Based Recommendations with Hadoop
 

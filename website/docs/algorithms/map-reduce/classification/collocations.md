@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Collocations
+permalink: /docs/algorithms/map-reduce/classification/collocations/
 ---
 
 <a name="Collocations-CollocationsinMahout"></a>

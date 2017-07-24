@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  User Based Recommender in 5 Minutes
+permalink: /docs/tutorials/map-reduce/recommender/userbased-5-minutes/
 ---
 
 # Creating a User-Based Recommender in 5 minutes

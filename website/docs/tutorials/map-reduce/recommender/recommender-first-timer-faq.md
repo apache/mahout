@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Recommender First-Timer FAQ
+permalink: /docs/tutorials/map-reduce/recommender/recommender-first-timer-faq/
 ---
 
 # Recommender First Timer Dos and Don'ts

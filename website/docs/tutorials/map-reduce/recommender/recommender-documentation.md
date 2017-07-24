@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Recommender Documentation
+permalink: /docs/tutorials/map-reduce/recommender/recommender-documentation/
 ---
 
 <a name="RecommenderDocumentation-Overview"></a>

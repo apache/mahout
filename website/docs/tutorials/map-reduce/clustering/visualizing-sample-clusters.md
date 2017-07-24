@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Visualizing Sample Clusters
+permalink: /docs/tutorials/map-reduce/clustering/visualizing-sample-clusters/
 ---
 
 <a name="VisualizingSampleClusters-Introduction"></a>

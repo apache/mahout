@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Spark Naive Bayes
+permalink: /docs/tutorials/samsara/spark-naive-bayes/
 ---
 
 # Spark Naive Bayes

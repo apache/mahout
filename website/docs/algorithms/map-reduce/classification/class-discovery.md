@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Class Discovery
+permalink: /docs/algorithms/map-reduce/classification/class-discovery/
 ---
 <a name="ClassDiscovery-ClassDiscovery"></a>
 # Class Discovery

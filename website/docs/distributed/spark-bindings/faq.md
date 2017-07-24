@@ -1,6 +1,7 @@
 ---
 layout: page
 title: FAQ
+permalink: /docs/distributed/spark-bindings/faq/
 ---
 
 # FAQ for using Mahout with Spark

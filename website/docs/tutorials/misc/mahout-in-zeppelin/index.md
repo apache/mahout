@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Visualizing Mahout in Zeppelin
+permalink: /docs/tutorials/misc/mahout-in-zeppelin/
 ---
 
 

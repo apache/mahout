@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Spectral Clustering
+permalink: /docs/algorithms/map-reduce/clustering/spectral-clustering/
 ---
 
 # Spectral Clustering Overview

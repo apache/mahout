@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Cluster Dumper
+permalink: /docs/algorithms/map-reduce/clustering/cluster-dumper/
 ---
 
 <a name="ClusterDumper-Introduction"></a>

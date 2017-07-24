@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Mahout Samsara H20 Bindings
+permalink: /docs/distributed/h2o-internals/
 ---
 # Introduction
  

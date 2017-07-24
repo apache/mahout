@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Latent Dirichlet Allocation
+permalink: /docs/algorithms/map-reduce/clustering/latent-dirichlet-allocation/
 ---
 
 <a name="LatentDirichletAllocation-Overview"></a>

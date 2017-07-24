@@ -1,6 +1,7 @@
 ---
 layout: page
 title: 
+permalink: /docs/tutorials/samsara/playing-with-samsara-flink-batch/
 ---
 
 ## Getting Started 

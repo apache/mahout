@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Distributed Stochastic PCA
+permalink: /docs/algorithms/linear-algebra/d-spca/
 ---
 
 

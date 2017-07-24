@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Mahout Samsara Flink Bindings
+permalink: /docs/distributed/flink-bindings/
 ---
 # Introduction
 

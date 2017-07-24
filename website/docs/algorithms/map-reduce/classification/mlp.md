@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Multilayer Perceptron
+permalink: /docs/algorithms/map-reduce/classification/mlp/
 ---
 
 Multilayer Perceptron

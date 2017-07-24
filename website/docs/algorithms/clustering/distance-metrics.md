@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Distance Metrics
+permalink: /docs/algorithms/clustering/distance-metrics/
 ---
 
 ### Distance Metrics Supported By Mahout

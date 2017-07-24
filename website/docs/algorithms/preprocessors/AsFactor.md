@@ -1,6 +1,7 @@
 ---
 layout: page
 title: AsFactor
+permalink: /docs/algorithms/preprocessors/AsFactor/
 ---
 
 

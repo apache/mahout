@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Ordinary Least Squares Regression
+permalink: /docs/algorithms/regression/ols/
 ---
 
 ### About

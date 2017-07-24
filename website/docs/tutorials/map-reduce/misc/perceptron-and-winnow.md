@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Perceptron and Winnow
+permalink: /docs/tutorials/map-reduce/misc/perceptron-and-winnow/
 ---
 <a name="PerceptronandWinnow-ClassificationwithPerceptronorWinnow"></a>
 # Classification with Perceptron or Winnow

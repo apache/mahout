@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)
+permalink: /docs/algorithms/map-reduce/classification/bayesian/
 ---
 
 # Naive Bayes

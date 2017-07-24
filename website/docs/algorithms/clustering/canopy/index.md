@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Canopy Clustering
+permalink: /docs/algorithms/clustering/canopy/
 ---
 
 ### About

@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Intro to Cooccurrence Recommenders with Spark
+permalink: /docs/tutorials/intro-cooccurrence-spark/
 ---
 
 # Intro to Cooccurrence Recommenders with Spark

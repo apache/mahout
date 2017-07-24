@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Using Mahout with Python via JPype
+permalink: /docs/tutorials/map-reduce/misc/using-mahout-with-python-via-jpype/
 ---
 
 <a name="UsingMahoutwithPythonviaJPype-overview"></a>

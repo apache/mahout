@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Recommender Quickstart
+permalink: /docs/tutorials/map-reduce/recommender/quickstart/
 ---
 
 # Recommender Overview

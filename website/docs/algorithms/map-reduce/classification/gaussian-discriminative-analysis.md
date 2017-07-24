@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Gaussian Discriminative Analysis
+permalink: /docs/algorithms/map-reduce/classification/gaussian-discriminative-analysis/
 ---
 
 <a name="GaussianDiscriminativeAnalysis-GaussianDiscriminativeAnalysis"></a>

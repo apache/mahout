@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Twenty Newsgroups
+permalink: /docs/tutorials/map-reduce/classification/twenty-newsgroups/
 ---
 
 

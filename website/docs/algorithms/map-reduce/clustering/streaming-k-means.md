@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Spectral Clustering
+permalink: /docs/algorithms/map-reduce/clustering/streaming-k-means/
 ---
 
 # *StreamingKMeans* algorithm 

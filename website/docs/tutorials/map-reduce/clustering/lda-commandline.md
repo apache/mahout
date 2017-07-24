@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  lda-commandline
+permalink: /docs/tutorials/map-reduce/clustering/lda-commandline/
 ---
 
 <a name="lda-commandline-RunningLatentDirichletAllocation(algorithm)fromtheCommandLine"></a>

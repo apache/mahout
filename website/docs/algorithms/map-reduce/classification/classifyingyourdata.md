@@ -1,6 +1,7 @@
 ---
 layout: page
-title: (Deprecated) ClassifyingYourData
+title: (Deprecated) Classifying Your Data
+permalink: /docs/algorithms/map-reduce/classification/classifyingyourdata/
 ---
 
 # Classifying data from the command line

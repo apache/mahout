@@ -1,6 +1,7 @@
 ---
 layout: page
 title: MeanCenter
+permalink: /docs/algorithms/preprocessors/MeanCenter/
 ---
 
 ### About

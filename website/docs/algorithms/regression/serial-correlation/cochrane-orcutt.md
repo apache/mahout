@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Cochrane-Orcutt Procedure
+permalink: /docs/algorithms/regression/serial-correlation/cochrane-orcutt/
 ---
 
 ### About

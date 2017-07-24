@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Locally Weighted Linear Regression
+permalink: /docs/algorithms/map-reduce/classification/locally-weighted-linear-regression/
 ---
 
 <a name="LocallyWeightedLinearRegression-LocallyWeightedLinearRegression"></a>

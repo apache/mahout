@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Hidden Markov Models
+permalink: /docs/algorithms/map-reduce/classification/hidden-markov-models/
 ---
 
 # Hidden Markov Models

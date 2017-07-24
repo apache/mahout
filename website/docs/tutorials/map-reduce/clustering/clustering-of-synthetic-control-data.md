@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Clustering of synthetic control data
+permalink: /docs/tutorials/map-reduce/clustering/clustering-of-synthetic-control-data/
 ---
 
 # Clustering synthetic control data

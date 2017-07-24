@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Recommender Quickstart
+permalink: /docs/algorithms/reccomenders/
 ---
 
 

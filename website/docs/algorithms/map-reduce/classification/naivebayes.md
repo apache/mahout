@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  NaiveBayes
+permalink: /docs/algorithms/map-reduce/classification/naivebayes/
 ---
 
 <a name="NaiveBayes-NaiveBayes"></a>

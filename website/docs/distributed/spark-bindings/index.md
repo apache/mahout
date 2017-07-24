@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Spark Bindings
+permalink: /docs/distributed/spark-bindings/
 ---
 
 # Scala & Spark Bindings:

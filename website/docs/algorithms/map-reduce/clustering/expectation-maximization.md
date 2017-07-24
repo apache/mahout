@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Expectation Maximization
+permalink: /docs/algorithms/map-reduce/clustering/expectation-maximization/
 ---
 <a name="ExpectationMaximization-ExpectationMaximization"></a>
 # Expectation Maximization

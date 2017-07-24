@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Mahout Samsara In Core
+permalink: /docs/tutorials/samsara/play-with-shell/
 ---
 # Playing with Mahout's Spark Shell 
 

@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  mahout-collections
+permalink: /docs/algorithms/map-reduce/classification/mahout-collections/
 ---
 
 # Mahout collections

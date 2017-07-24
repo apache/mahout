@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Partial Implementation
+permalink: /docs/algorithms/map-reduce/classification/partial-implementation/
 ---
 
 

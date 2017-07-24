@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Viewing Result
+permalink: /docs/tutorials/map-reduce/clustering/viewing-result/
 ---
 * [Algorithm Viewing pages](#ViewingResult-AlgorithmViewingpages)
 

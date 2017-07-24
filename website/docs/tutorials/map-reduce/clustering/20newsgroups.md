@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  20Newsgroups
+permalink: /docs/tutorials/map-reduce/clustering/20newsgroups/
 ---
 
 <a name="20Newsgroups-NaiveBayesusing20NewsgroupsData"></a>

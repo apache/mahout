@@ -1,6 +1,7 @@
 ---
 layout: page
 title: StandardScaler
+permalink: /docs/algorithms/preprocessors/StandardScaler/
 ---
 
 ### About

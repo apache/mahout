@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Viewing Results
+permalink: /docs/tutorials/map-reduce/clustering/viewing-results/
 ---
 <a name="ViewingResults-Intro"></a>
 # Intro

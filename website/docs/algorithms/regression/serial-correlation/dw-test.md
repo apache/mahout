@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Durbin-Watson Test
+permalink: /docs/algorithms/regression/serial-correlation/dw-test/
 ---
 
 ### About

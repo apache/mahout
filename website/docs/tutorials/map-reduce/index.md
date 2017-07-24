@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Deprecated Map Reduce Based Examples
+permalink: /docs/tutorials/map-reduce/
 ---
 
 A note about the sunsetting of our support for Map Reduce.

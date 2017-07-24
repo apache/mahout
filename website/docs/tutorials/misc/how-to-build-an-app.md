@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Mahout Samsara In Core
+permalink: /docs/tutorials/misc/how-to-build-an-app/
 ---
 # How to create and App using Mahout
 

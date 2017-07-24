@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  Testing
+permalink: /docs/tutorials/map-reduce/misc/testing/
 ---
 <a name="Testing-Intro"></a>
 # Intro

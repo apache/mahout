@@ -1,6 +1,7 @@
 ---
 layout: page
 title: (Deprecated)  ClusteringYourData
+permalink: /docs/tutorials/map-reduce/clustering/clusteringyourdata/
 ---
 
 # Clustering your data
