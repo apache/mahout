@@ -45,7 +45,12 @@ warnings)
 1. Check that all tests pass after a clean compile: `mvn clean test`
 1. Check that there are no remaining unresolved Jira issues with the upcoming version number listed as the "Fix" version
 1. Publish any previously unpublished third-party dependenciess: [Thirdparty Dependencies](thirdparty-dependencies.html)
-1. *Confirm whether the viennacl/etc profiles should be in here* Build and preview resulting artifacts: `mvn -Pmahout-release,apache-release,hadoop2 package`
+1. Build and preview resulting artifacts:
+    ```bash
+    cd buildtools
+    ./build-all-release-jars.sh
+    ```
+1. Make sure packages will come out looking right 
 
 <a name="HowToRelease-Makingarelease"></a>
 ## Making a release
@@ -84,9 +89,9 @@ warnings)
 
 * *Clarify which env var is better or choose one* Set environment variable `MAVEN_OPTS` to `-Xmx1024m` to ensure the tests can run: `export JAVA_OPTIONS="-Xmx1g"`
 * If you are outside the US, then svn.apache.org may not resolve to the main US-based Subversion servers. (Compare the IP address you get for svn.apache.org with svn.us.apache.org to see if they are different.) This will cause problems during the release since it will create a revision and then immediately access, but, there is a replication lag of perhaps a minute to the non-US servers. To temporarily force using the US-based server, edit your equivalent of /etc/hosts and map the IP address of svn.us.apache.org to svn.apache.org.
-* *Confirm whether the viennacl/etc profiles should be in here* Create the release candidate: `mvn -Pmahout-release,apache-release,hadoop2 release:prepare release:perform`
+* Create the release candidate: `mvn -Pmahout-release,apache-release release:prepare release:perform`
 * If you have problems authenticating to svn.apache.org, try adding to the command line `-Dusername=USERNAME -Dpassword=PASSWORD`
-* If there is an issue first try doing: `mvn -Dmahout-release,apache-release,hadoop2 release:rollback` followed by `mvn -Dmahout-release,apache-release,hadoop2 release:clean` as this will likely save you time and do the right thing. You may also have to rollback the version numbers in the POM files. If you want to skip test cases while rebuilding, use `mvn -DpreparationGoals="clean compile" release:prepare release:perform`
+* If there is an issue first try doing: `mvn -Dmahout-release,apache-release release:rollback` followed by `mvn -Dmahout-release,apache-release,hadoop2 release:clean` as this will likely save you time and do the right thing. You may also have to rollback the version numbers in the POM files. If you want to skip test cases while rebuilding, use `mvn -DpreparationGoals="clean compile" release:prepare release:perform`
 * Review the artifacts, etc. on the Apache Repository (using Sonatype's Nexus application) site: https://repository.apache.org/. You will need to login using your ASF SVN credentials and then browse to the staging area.
 * Once you have reviewed the artifacts, you will need to "Close" out
 the staging area under Nexus, which then makes the artifacts available for
@@ -101,8 +106,8 @@ release:perform target
 * If there's a problem, you need to unwind the release and start all over.
 
 ```
-mvn -Pmahout-release,apache-release,hadoop2 versions:set -DnewVersion=PREVIOUS_SNAPSHOT
-mvn -Pmahout-release,apache-release,hadoop2 versions:commit
+mvn -Pmahout-release,apache-release versions:set -DnewVersion=PREVIOUS_SNAPSHOT
+mvn -Pmahout-release,apache-release versions:commit
 git commit 
 git push --delete apache <tagname> (deletes the remote tag)
 git tag -d tagname (deletes the local tag)
