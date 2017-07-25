@@ -27,13 +27,15 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+
+  <artifactId>mahout-native-viennacl</artifactId>
 
   <name>Mahout Native VienniaCL OpenCL Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 
-  <packaging>jar</packaging>
+
+  <packaging>pom</packaging>
 
   <build>
     <plugins>
@@ -177,11 +179,11 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-      </plugin>
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>exec-maven-plugin</artifactId>-->
+        <!--<version>1.2.1</version>-->
+      <!--</plugin>-->
 
       <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
@@ -193,7 +195,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-native-viennacl_${scala.compat.version}-${version}.jar" tofile="../mahout-native-viennacl_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-native-viennacl_${scala.compat.version}-${project.version}.jar" tofile="../mahout-native-viennacl_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -301,5 +303,12 @@
         </plugins>
       </build>
     </profile>
+      <profile>
+          <id>all-scala</id>
+          <modules>
+              <module>scala-2.10</module>
+              <module>scala-2.11</module>
+          </modules>
+      </profile>
   </profiles>
 </project>

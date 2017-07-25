@@ -27,14 +27,14 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+  <artifactId>mahout-math-scala</artifactId>
   <name>Mahout Math Scala bindings</name>
   <description>High performance scientific and technical computing data structures and methods,
     mostly based on CERN's
     Colt Java API
   </description>
 
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <build>
 
@@ -95,10 +95,9 @@
         <executions>
           <execution>
             <id>copy</id>
-            <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-math-scala_${scala.compat.version}-${version}.jar" tofile="../mahout-math-scala_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-math-scala_${scala.compat.version}-${project.version}.jar" tofile="../mahout-math-scala_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -239,6 +238,25 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>all-scala</id>
+      <modules>
+        <module>scala-2.10</module>
+        <module>scala-2.11</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>scala-2.10</id>
+      <modules>
+        <module>scala-2.10</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>scala-2.11</id>
+      <modules>
+        <module>scala-2.11</module>
+      </modules>
     </profile>
   </profiles>
 </project>
