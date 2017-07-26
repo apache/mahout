@@ -27,6 +27,7 @@ import org.apache.mahout.util.IOUtilsScala
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.ml.linalg.{Vector => SparkMLVector, SparseVector => SparseSparkMLVector}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.linalg.{Vector => SparkVector, SparseVector => SparseSparkVector, DenseVector => DenseSparkVector}
 import org.apache.spark.sql.DataFrame
@@ -165,6 +166,32 @@ package object sparkbindings {
           new org.apache.mahout.math.RandomAccessSparseVector(new org.apache.mahout.math.DenseVector( lv._1.features.toArray ++ Array(lv._1.label) )) )
       }
     })
+
+    drmWrap(drmRDD, nrow, ncol, cacheHint, canHaveMissingRows)
+  }
+
+  /**
+   * Convert a Spark Vector into a Mahout vector.
+   */
+  def convertSparkMLVector(vector: SparkMLVector): Vector = {
+    vector match {
+      case vec: SparseSparkMLVector =>
+        val mvec = new org.apache.mahout.math.RandomAccessSparseVector(vec.size, vec.indices.size)
+        val updates = new org.apache.mahout.math.OrderedIntDoubleMapping(vec.indices, vec.values, vec.indices.size)
+        mvec.mergeUpdates(updates)
+        mvec
+      case vec =>
+        new org.apache.mahout.math.DenseVector(vec.toArray)
+    }
+  }
+
+  def drmWrapSparkMLVector[T: ClassTag](rdd: RDD[(T, SparkMLVector)],
+    nrow: Long = -1,
+    ncol: Int = -1,
+    cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+    canHaveMissingRows: Boolean = false): CheckpointedDrm[T] = {
+
+    val drmRDD = rdd.mapValues(convertSparkMLVector)
 
     drmWrap(drmRDD, nrow, ncol, cacheHint, canHaveMissingRows)
   }

@@ -17,24 +17,53 @@
   * under the License.
   */
 
-package org.apache.mahout.spark.sparkbindings.algorithms.regression
+package org.apache.mahout.sparkbindings.algorithms.regression
 
-import org.apache.mahout.spark.sparkbindings.algorithms._
+import org.apache.mahout.sparkbindings.algorithms._
 import org.apache.mahout.math.algorithms.regression._
+
+import org.apache.spark.ml.util.Identifiable
+import org.apache.spark.ml.param.ParamMap
 
 /**
  * A wrapper to expose the OrdinaryLeastSquares algorithm from mahout
  * in Spark's pipeline interface.
  */
-class OrdinaryLeastSquaresEstimator
+/*
+class OrdinaryLeastSquaresEstimator(override val uid: String)
     extends SupervisedSparkEstimator[
-      OrdinaryLeastSquares[Double], OrdinaryLeastSquaresModel[Double],
+      OrdinaryLeastSquaresModel[Double],
+      OrdinaryLeastSquares[Double],
       OrdinaryLeastSquaresPipelineModel]
 // TODO(provide these)
 //    with HasCalcCommonStatistics with HasCalcStandardErrors with HasAddIntercept {
 {
+  def this() = this(Identifiable.randomUID("OrdinaryLeastSquaresEstimator"))
+
+  def constructSupervisedMahoutFitter() = {
+    new OrdinaryLeastSquares[Double]()
+  }
+
+  def constructSparkModel(model: OrdinaryLeastSquaresModel[Double]) = {
+    new OrdinaryLeastSquaresPipelineModel(model)
+  }
+
+  override def copy(extra: ParamMap) = {
+    defaultCopy(extra)
+  }
 }
 
-class OrdinaryLeastSquaresPipelineModel(val model: OrdinaryLeastSquaresModel[Double]) extends
+class OrdinaryLeastSquaresPipelineModel(
+  override val uid: String,
+  val model: OrdinaryLeastSquaresModel[Double]) extends
     SparkModel[OrdinaryLeastSquaresModel[Double]] {
+  private[mahout] def this(model: OrdinaryLeastSquaresModel[Double]) = {
+    this(Identifiable.randomUID("OLSPM"), model)
+  }
+
+  override def copy(extra: ParamMap) = {
+    val copied = new OrdinaryLeastSquaresPipelineModel(uid, model)
+    copyValues(copied, extra)
+  }
 }
+*/

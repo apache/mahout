@@ -17,7 +17,7 @@
   * under the License.
   */
 
-package org.apache.mahout.spark.sparkbindings.algorithms
+package org.apache.mahout.sparkbindings.algorithms
 
 import org.apache.spark.ml.param._
 

@@ -17,12 +17,22 @@
   * under the License.
   */
 
-package org.apache.mahout.spark.sparkbindings.algorithms
+package org.apache.mahout.sparkbindings.algorithms
 
 import org.apache.mahout.math.algorithms.{Model => MModel}
 
-import org.apache.spark.ml.{Model => SModel}
+import org.apache.spark.ml.{Model => SModel, PredictionModel}
+import org.apache.spark.ml.linalg.{Vector => SparkVector}
 import org.apache.spark.sql.{Dataset, DataFrame}
 
-trait SparkModel[M <: MModel] extends SModel[SparkModel[M]] {
+/**
+ * Common Spark Model created around a Mahout model.
+ */
+trait SparkModel[M <: MModel] extends SModel[SparkModel[M]] with HasOutputCol {
+}
+
+/**
+ * Spark Predictor Model.
+ */
+trait SparkPredictorModel[M <: MModel] extends PredictionModel[SparkVector, SparkPredictorModel[M]] {
 }

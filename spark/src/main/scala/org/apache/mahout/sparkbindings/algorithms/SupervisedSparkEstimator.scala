@@ -17,35 +17,65 @@
   * under the License.
   */
 
-package org.apache.mahout.spark.sparkbindings.algorithms
+package org.apache.mahout.sparkbindings.algorithms
 
+import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.algorithms._
+import org.apache.mahout.sparkbindings._
+import org.apache.mahout.spark.sparkbindings._
 
+import org.apache.spark.rdd._
 import org.apache.spark.ml.linalg.{Vector => SparkVector}
+import org.apache.spark.ml.param.ParamMap
+import org.apache.spark.ml.{Predictor, PredictionModel}
 import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.StructType
 
-class SupervisedSparkEstimator[
+trait JunkModel extends PredictionModel[SparkVector, JunkModel]
+
+trait SupervisedSparkEstimator[
   M <: SupervisedModel[Long],
   F <: SupervisedFitter[Long, M],
-  S <: SparkModel[M]] extends SparkEstimator[S]
-    with HasFeaturesCol with HasLabelCol with HasOutputCol {
-  override def fit(ds: Dataset[_], hyperparameters: (Symbol, Any)*): S = {
+  S <: SparkPredictorModel[M]]
+    extends Predictor[SparkVector, SupervisedSparkEstimator[M, F, S], JunkModel] {
+  /*
+  override def train(ds: Dataset[_]): S = {
+   val hyperparameters = extractParamMap(ParamMap.empty).toSeq.map{
+      paramPair => (Symbol.apply(paramPair.param.name), paramPair.value)
+    }
+
     // We would use TypedColumns here except Spark's VectorUDT is private because of "reasons".
     val sparkInput = ds.select(
-      monotonicallyIncreasingId(), ds($(labelCol)), ds($(featuresCol))).rdd.persist()
+      monotonically_increasing_id(), ds($(labelCol)), ds($(featuresCol))).rdd.persist()
+
+    // Compute the number of rows and number of columns of the features
+    val nrow = sparkInput.count()
+    val ncol = sparkInput.take(1).headOption.map{
+      vec => vec.get(2).asInstanceOf[SparkVector].size}.getOrElse(0)
+
+    // Extract the labels and features as separate RDDs
     val labels: RDD[(Long, Double)] = sparkInput.map{row => (row.getLong(0), row.getDouble(1))}
     val features: RDD[(Long, SparkVector)] = sparkInput.map{row => (row.getLong(0), row.get(2).asInstanceOf[SparkVector])}
+
+    // Convert the labels and features into Mahout's internal format
+    val labelsDrmRdd = labels.mapValues(v =>
+      new org.apache.mahout.math.DenseVector(Array(v)).asInstanceOf[MahoutVector])
+    val mahoutLabels = drmWrap[Long](
+      labelsDrmRdd, nrow = nrow, ncol = 1, canHaveMissingRows = true)
+    val mahoutFeatures = drmWrapSparkMLVector[Long](
+      rdd = features, nrow = nrow, ncol = ncol, canHaveMissingRows = true)
+
+    // Fit the mahout model and wrap it.
     val fitter = constructSupervisedMahoutFitter()
-    // For some reason we index these?
-    val mahoutLabels: DrmRdd[Long] = drmWrap[](labels)
-    val mahoutFeatures: DrmRdd[Long] = drmWrapSparkMLVector(features)
     val model = constructSparkModel(
-      fitter.fit(mahoutLabels, mahoutFeatures, hyperparameters))
+      fitter.fit(mahoutLabels, mahoutFeatures, hyperparameters:_*))
     sparkInput.unpersist()
-    model
+    copyValues(model)
   }
 
   def constructSupervisedMahoutFitter(): F
 
   def constructSparkModel(mahoutModel: M): S
+   */
 }
