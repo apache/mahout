@@ -17,14 +17,20 @@
   * under the License.
   */
 
-package org.apache.mahout.spark.sparkbindings.algorithms
+package org.apache.mahout.sparkbindings.algorithms
 
+import org.apache.mahout.math.algorithms.{Model => MModel}
 
 import org.apache.spark.ml.{Estimator, Model => SModel}
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.sql.Dataset
 
-trait SparkEstimator[S <: SparkModel[_]] extends Estimator[S] {
+/**
+ * This is a general purpose base trait for helping implement different bridges in Mahout.
+ * This should not be assumed to be the root trait since we often need to inherit from a specific
+ * subtrait in Spark that may conflict, so some estimators will not have this as a parent.
+ */
+trait SparkEstimator[M <: MModel, S <: SModel[S]] extends Estimator[S] with HasOutputCol {
   /**
    * Fit your model. This helper function extracts the parameter map
    * and converts it to the Mahout hyperparameters for interop.
