@@ -32,14 +32,12 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StructType
 
-trait JunkModel extends PredictionModel[SparkVector, JunkModel]
-
 trait SupervisedSparkEstimator[
   M <: SupervisedModel[Long],
   F <: SupervisedFitter[Long, M],
-  S <: SparkPredictorModel[M]]
-    extends Predictor[SparkVector, SupervisedSparkEstimator[M, F, S], JunkModel] {
-  /*
+  S <: PredictionModel[SparkVector, S]]
+    extends Predictor[SparkVector, SupervisedSparkEstimator[M, F, S], S] {
+
   override def train(ds: Dataset[_]): S = {
    val hyperparameters = extractParamMap(ParamMap.empty).toSeq.map{
       paramPair => (Symbol.apply(paramPair.param.name), paramPair.value)
@@ -77,5 +75,4 @@ trait SupervisedSparkEstimator[
   def constructSupervisedMahoutFitter(): F
 
   def constructSparkModel(mahoutModel: M): S
-   */
 }
