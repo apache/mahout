@@ -36,6 +36,9 @@
   <packaging>jar</packaging>
 
   <build>
+    <sourceDirectory>src/main/scala, ${spark.extra.srcs}</sourceDirectory>
+    <testSourceDirectory>src/test/scala, ${spark.extra.tests}</testSourceDirectory>
+
     <plugins>
 
 
@@ -221,7 +224,14 @@
 
 
 
-  <!--  3rd-party -->
+    <!--  3rd-party -->
+
+    <dependency>
+      <groupId>com.holdenkarau</groupId>
+      <artifactId>spark-testing-base_${scala.compat.version}</artifactId>
+      <version>${spark.version}_0.7.2</version>
+      <scope>test</scope>
+    </dependency>
 
     <!-- scala stuff -->
     <dependency>
@@ -232,6 +242,21 @@
   </dependencies>
 
   <profiles>
+    <!-- Allow us to selectively build Spark 2+ features -->
+    <profile>
+      <id>spark-1</id>
+      <properties>
+	<spark.extra.srcs>${project.build.directory}/spark-1/main/scala</spark.extra.srcs>
+	<spark.extra.tests>${project.build.directory}/spark-1/test/scala</spark.extra.tests>
+      </properties>
+    </profile>
+    <profile>
+      <id>spark-2</id>
+      <properties>
+	<spark.extra.srcs>${project.build.directory}/spark-2/main/scala</spark.extra.srcs>
+	<spark.extra.tests>${project.build.directory}/spark-2/test/scala</spark.extra.tests>
+      </properties>
+    </profile>
     <profile>
       <id>mahout-release</id>
       <build>
