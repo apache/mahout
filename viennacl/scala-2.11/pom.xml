@@ -215,7 +215,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>../</directory>
+              <directory>../../</directory>
               <includes>
                 <include>mahout-native-viennacl_2.11*.jar</include>
               </includes>
