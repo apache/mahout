@@ -116,7 +116,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../math-scala/target</directory>
+      <directory>${project.basedir}/../math-scala/scala-2.11/target</directory>
       <includes>
         <include>mahout-*2.11*.jar</include>
       </includes>
@@ -128,7 +128,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../spark/target</directory>
+      <directory>${project.basedir}/../spark/spark-2.1/target</directory>
       <includes>
         <include>mahout-*2.1-2.11*spark.jar</include>
         <include>mahout-*2.1-2.11*dependency-reduced.jar</include>
