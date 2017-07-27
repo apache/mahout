@@ -97,7 +97,7 @@
             <id>copy</id>
             <configuration>
               <tasks>
-                <copy file="target/mahout-math-scala_${scala.compat.version}-${project.version}.jar" tofile="../mahout-math-scala_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/mahout-math-scala_${scala.compat.version}-${project.version}.jar" tofile="../../mahout-math-scala_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
