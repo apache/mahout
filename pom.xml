@@ -924,7 +924,7 @@
     <profile>
       <id>scala-2.10</id>
       <activation>
-        <property><name>!scala-2.11</name></property>
+        <property><name>!*scala*</name></property>
       </activation>
       <properties>
         <scala.compat.version>2.10</scala.compat.version>

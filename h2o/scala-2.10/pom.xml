@@ -18,42 +18,29 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-spark</artifactId>
-        <version>0.13.1-SNAPSHOT</version>
+        <artifactId>mahout-h2o</artifactId>
+        <version>0.13.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>mahout-spark_1.6_${scala.compat.version}</artifactId>
-    <name>Mahout Spark-1.6 Bindings</name>
-    <description>
-        Mahout Bindings for Apache Spark version 1.6
-    </description>
+    <artifactId>mahout-h2o_2.10</artifactId>
+    <name>Mahout H2O Scala 2.10 backend</name>
 
-    <packaging>jar</packaging>
 
     <properties>
         <scala.compat.version>2.10</scala.compat.version>
         <scala.version>2.10.4</scala.version>
-        <spark.compat.version>1.6</spark.compat.version>
-        <spark.version>1.6.3</spark.version>
     </properties>
+
+    <packaging>jar</packaging>
 
     <build>
         <sourceDirectory>../src/main</sourceDirectory>
         <testSourceDirectory>../src/test</testSourceDirectory>
         <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>dependency-reduced</id>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
@@ -65,6 +52,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

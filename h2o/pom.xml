@@ -27,13 +27,13 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
+  <artifactId>mahout-h2o</artifactId>
   <name>Mahout H2O backend</name>
   <description>
     H2O Backend for Mahout DSL
   </description>
 
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
 
 
@@ -50,7 +50,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-h2o_${scala.compat.version}-${version}.jar" tofile="../mahout-h2o_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-h2o_${scala.compat.version}-${project.version}.jar" tofile="../mahout-h2o_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -71,7 +71,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+                <descriptor>../src/main/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
@@ -239,5 +239,24 @@
         </plugins>
       </build>
     </profile>
+      <profile>
+          <id>all-scala</id>
+          <modules>
+              <module>scala-2.10</module>
+              <module>scala-2.11</module>
+          </modules>
+      </profile>
+      <profile>
+          <id>scala-2.10</id>
+          <modules>
+              <module>scala-2.10</module>
+          </modules>
+      </profile>
+      <profile>
+          <id>scala-2.11</id>
+          <modules>
+              <module>scala-2.11</module>
+          </modules>
+      </profile>
   </profiles>
 </project>

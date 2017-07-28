@@ -42,7 +42,8 @@
     </properties>
 
     <build>
-        <sourceDirectory>../src/main/scala</sourceDirectory>
+        <sourceDirectory>../src/main</sourceDirectory>
+        <testSourceDirectory>../src/test</testSourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

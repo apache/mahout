@@ -22,7 +22,7 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout</artifactId>
+    <artifactId>mahout-native-viennacl</artifactId>
     <version>0.13.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
@@ -183,11 +183,11 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-      </plugin>
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>exec-maven-plugin</artifactId>-->
+        <!--<version>1.2.1</version>-->
+      <!--</plugin>-->
 
       <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
@@ -199,7 +199,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-native-viennacl_2.11-${version}.jar" tofile="../../mahout-native-viennacl_2.11-${version}.jar" />
+                <copy file="target/mahout-native-viennacl_2.11-${project.version}.jar" tofile="../../mahout-native-viennacl_2.11-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>

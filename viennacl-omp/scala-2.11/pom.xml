@@ -22,14 +22,14 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout</artifactId>
+    <artifactId>mahout-native-viennacl-omp</artifactId>
     <version>0.13.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>mahout-native-viennacl-omp_2.11</artifactId>
 
-  <name>Mahout Native VienniaCL OpenMP Bindings</name>
+  <name>Mahout Native VienniaCL OpenMP Scala 2.11 Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 
@@ -182,11 +182,11 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-      </plugin>
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>exec-maven-plugin</artifactId>-->
+        <!--<version>1.2.1</version>-->
+      <!--</plugin>-->
 
       <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>

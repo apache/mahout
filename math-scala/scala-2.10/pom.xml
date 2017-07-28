@@ -38,7 +38,8 @@
     <packaging>jar</packaging>
 
     <build>
-        <sourceDirectory>../src/main/scala</sourceDirectory>
+        <sourceDirectory>../src/main</sourceDirectory>
+        <testSourceDirectory>../src/test</testSourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -49,7 +50,20 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>test-jar</id>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
+
     </build>
+
 
 </project>
