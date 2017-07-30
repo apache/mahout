@@ -225,14 +225,6 @@
 
 
     <!--  3rd-party -->
-
-    <dependency>
-      <groupId>com.holdenkarau</groupId>
-      <artifactId>spark-testing-base_${scala.compat.version}</artifactId>
-      <version>${spark.version}_0.7.2</version>
-      <scope>test</scope>
-    </dependency>
-
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
