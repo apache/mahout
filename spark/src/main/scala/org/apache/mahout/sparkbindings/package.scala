@@ -185,6 +185,12 @@ package object sparkbindings {
     }
   }
 
+  def drmWrapDataFrameML(df: DataFrame) = {
+    val rdd = df.rdd.map{row =>
+      (row.getLong(0), row.get(1).asInstanceOf[SparkMLVector])}
+    drmWrapSparkMLVector(rdd)
+  }
+
   def drmWrapSparkMLVector[T: ClassTag](rdd: RDD[(T, SparkMLVector)],
     nrow: Long = -1,
     ncol: Int = -1,

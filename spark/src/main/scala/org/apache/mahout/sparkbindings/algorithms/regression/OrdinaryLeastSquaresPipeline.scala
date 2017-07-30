@@ -19,21 +19,26 @@
 
 package org.apache.mahout.sparkbindings.algorithms.regression
 
+import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.algorithms._
 import org.apache.mahout.math.algorithms.regression._
 
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
 import org.apache.spark.ml.util.Identifiable
 import org.apache.spark.ml.param.ParamMap
+import org.apache.spark.ml.linalg.{Vector => SparkMLVector}
 
 /**
  * A wrapper to expose the OrdinaryLeastSquares algorithm from mahout
  * in Spark's pipeline interface.
  */
-/*
 class OrdinaryLeastSquaresEstimator(override val uid: String)
     extends SupervisedSparkEstimator[
-      OrdinaryLeastSquaresModel[Double],
-      OrdinaryLeastSquares[Double],
+      OrdinaryLeastSquaresModel[Long],
+      OrdinaryLeastSquares[Long],
       OrdinaryLeastSquaresPipelineModel]
 // TODO(provide these)
 //    with HasCalcCommonStatistics with HasCalcStandardErrors with HasAddIntercept {
@@ -41,10 +46,10 @@ class OrdinaryLeastSquaresEstimator(override val uid: String)
   def this() = this(Identifiable.randomUID("OrdinaryLeastSquaresEstimator"))
 
   def constructSupervisedMahoutFitter() = {
-    new OrdinaryLeastSquares[Double]()
+    new OrdinaryLeastSquares[Long]()
   }
 
-  def constructSparkModel(model: OrdinaryLeastSquaresModel[Double]) = {
+  def constructSparkModel(model: OrdinaryLeastSquaresModel[Long]) = {
     new OrdinaryLeastSquaresPipelineModel(model)
   }
 
@@ -53,11 +58,14 @@ class OrdinaryLeastSquaresEstimator(override val uid: String)
   }
 }
 
-class OrdinaryLeastSquaresPipelineModel(
+class OrdinaryLeastSquaresPipelineModel private (
   override val uid: String,
-  val model: OrdinaryLeastSquaresModel[Double]) extends
-    SparkModel[OrdinaryLeastSquaresModel[Double]] {
-  private[mahout] def this(model: OrdinaryLeastSquaresModel[Double]) = {
+  private val model: OrdinaryLeastSquaresModel[Long])
+    extends SparkPredictorModel[
+      OrdinaryLeastSquaresPipelineModel,
+      OrdinaryLeastSquaresModel[Long]] {
+
+  private[mahout] def this(model: OrdinaryLeastSquaresModel[Long]) = {
     this(Identifiable.randomUID("OLSPM"), model)
   }
 
@@ -65,5 +73,38 @@ class OrdinaryLeastSquaresPipelineModel(
     val copied = new OrdinaryLeastSquaresPipelineModel(uid, model)
     copyValues(copied, extra)
   }
+
+  /**
+   * Override transformImpl so we can convert the input into a DRM like
+   */
+  override protected def transformImpl(dataset: Dataset[_]) = {
+    val session = dataset.sparkSession
+    import session.implicits._
+    val ds = dataset.select(
+      dataset("*"),
+      monotonically_increasing_id().as("_temporary_id"),
+      dataset($(featuresCol)))
+    val drmInput: DrmLike[Long] = drmWrapDataFrameML(ds)
+    val predictedDrm = model.predict(drmInput)
+    val predictedRDD: RDD[(Long, Double)] = predictedDrm match {
+      case x: DrmRdd[Long] =>
+          x.map{case (id, mahoutRow) =>
+            (id, mahoutRow.get(0))
+          }
+      // In theory we can't have a blockified drm since long keys.
+      case _ =>
+        throw new Exception("Unsupported DrmLike type returned. Expected DrmRdd or BlockifiedDrmRdd got ${predict}")
+    }
+    val predictedDS = predictedRDD.toDF("_temporary_id", $(predictionCol))
+    val columnNames = predictedDS.columns.filter(_ != "_temporary_id")
+    predictedDS.join(ds, "_temporary_id").select(columnNames.head, columnNames.tail:_*)
+  }
+
+  /**
+   * This is a little bad, we don't actually implement predict but it is protected
+   * and we override the only case where it is called.
+   */
+  override protected def predict(features: SparkMLVector): Double = {
+    throw new Exception("Predict is not supported, use transform.")
+  }
 }
-*/

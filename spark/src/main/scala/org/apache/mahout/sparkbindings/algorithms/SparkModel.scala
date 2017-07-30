@@ -28,11 +28,13 @@ import org.apache.spark.sql.{Dataset, DataFrame}
 /**
  * Common Spark Model created around a Mahout model.
  */
-trait SparkModel[M <: MModel] extends SModel[SparkModel[M]] with HasOutputCol {
+trait SparkModel[T <: SparkModel[T, M], M <: MModel]
+    extends SModel[T] with HasOutputCol {
 }
 
 /**
  * Spark Predictor Model.
  */
-trait SparkPredictorModel[M <: MModel] extends PredictionModel[SparkVector, SparkPredictorModel[M]] {
+trait SparkPredictorModel[T <: SparkPredictorModel[T, M], M <: MModel]
+    extends PredictionModel[SparkVector, T] with SparkModel[T, M] {
 }

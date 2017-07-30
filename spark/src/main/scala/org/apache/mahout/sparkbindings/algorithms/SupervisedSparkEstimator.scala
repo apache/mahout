@@ -23,6 +23,7 @@ import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.algorithms._
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.spark.sparkbindings._
+import org.apache.mahout.math.algorithms.regression._
 
 import org.apache.spark.rdd._
 import org.apache.spark.ml.linalg.{Vector => SparkVector}
@@ -33,9 +34,11 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StructType
 
 trait SupervisedSparkEstimator[
-  M <: SupervisedModel[Long],
-  F <: SupervisedFitter[Long, M],
-  S <: PredictionModel[SparkVector, S]]
+    M <: OrdinaryLeastSquaresModel[Long],
+    F <: OrdinaryLeastSquares[Long],
+//  M <: SupervisedModel[Long],
+//  F <: SupervisedFitter[Long, M],
+  S <: SparkPredictorModel[S, M]]
     extends Predictor[SparkVector, SupervisedSparkEstimator[M, F, S], S] {
 
   override def train(ds: Dataset[_]): S = {
@@ -66,8 +69,8 @@ trait SupervisedSparkEstimator[
 
     // Fit the mahout model and wrap it.
     val fitter = constructSupervisedMahoutFitter()
-    val model = constructSparkModel(
-      fitter.fit(mahoutLabels, mahoutFeatures, hyperparameters:_*))
+    val mahoutModel = fitter.fit(mahoutLabels, mahoutFeatures, hyperparameters:_*)
+    val model = constructSparkModel(mahoutModel.asInstanceOf[M])
     sparkInput.unpersist()
     copyValues(model)
   }
