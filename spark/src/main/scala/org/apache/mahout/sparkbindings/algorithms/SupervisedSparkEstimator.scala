@@ -34,10 +34,8 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StructType
 
 trait SupervisedSparkEstimator[
-    M <: OrdinaryLeastSquaresModel[Long],
-    F <: OrdinaryLeastSquares[Long],
-//  M <: SupervisedModel[Long],
-//  F <: SupervisedFitter[Long, M],
+  M <: SupervisedModel[Long],
+  F <: SupervisedFitter[Long, _],
   S <: SparkPredictorModel[S, M]]
     extends Predictor[SparkVector, SupervisedSparkEstimator[M, F, S], S] {
 
