@@ -47,7 +47,7 @@
         <executions>
           <execution>
             <id>copy</id>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
             <configuration>
               <tasks>
                 <copy file="target/mahout-h2o_${scala.compat.version}-${project.version}.jar" tofile="../mahout-h2o_${scala.compat.version}-${project.version}.jar" />
