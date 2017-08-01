@@ -252,12 +252,24 @@
     </profile>
     <profile>
       <id>scala-2.10</id>
+      <activation>
+        <property>
+          <name>scala.compat.version</name>
+          <value>2.10</value>
+        </property>
+      </activation>
       <modules>
         <module>scala-2.10</module>
       </modules>
     </profile>
     <profile>
       <id>scala-2.11</id>
+      <activation>
+        <property>
+          <name>scala.compat.version</name>
+          <value>2.11</value>
+        </property>
+      </activation>
       <modules>
         <module>scala-2.11</module>
       </modules>
