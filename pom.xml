@@ -959,6 +959,8 @@
       <properties>
         <spark.version>2.0.2</spark.version>
         <spark.compat.version>2.0</spark.compat.version>
+          <scala.compat.version>2.11</scala.compat.version>
+          <scala.version>2.11.8</scala.version>
       </properties>
     </profile>
     <profile>
@@ -969,6 +971,8 @@
       <properties>
         <spark.version>2.1.0</spark.version>
         <spark.compat.version>2.1</spark.compat.version>
+          <scala.compat.version>2.11</scala.compat.version>
+          <scala.version>2.11.8</scala.version>
       </properties>
     </profile>
     <profile>
