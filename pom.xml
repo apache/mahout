@@ -28,7 +28,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>0.13.2-SNAPSHOT</version>
+  <version>0.13.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -840,12 +840,12 @@
     <module>math</module>
     <module>hdfs</module>
     <module>mr</module>
-    <module>integration</module>
     <module>examples</module>
     <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
     <module>h2o</module>
+    <module>integration</module>
   </modules>
 
   <profiles>
