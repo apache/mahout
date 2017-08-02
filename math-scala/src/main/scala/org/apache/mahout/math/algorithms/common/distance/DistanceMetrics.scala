@@ -32,10 +32,22 @@ object DistanceMetricSelector extends Serializable{
     dm match {
       case 1.0 => Chebyshev
       case 2.0 => Cosine
+      case 3.0 => Euclidean
     }
   }
 }
 
+object Euclidean extends DistanceMetric {
+
+  def distance(v1: Vector, v2: Vector): Double =  {
+    if (v1.size != v2.size) throw new CardinalityException(v1.size, v2.size)
+    else {
+      val diffSq = v1.getDistanceSquared(v2)
+      math.sqrt(diffSq)
+    }
+  }
+
+}
 object Chebyshev extends DistanceMetric {
   def distance(v1: Vector, v2: Vector): Double =  {
     if (v1.size != v2.size) throw new CardinalityException(v1.size, v2.size)
