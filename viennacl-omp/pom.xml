@@ -46,7 +46,7 @@
             <goals>
               <goal>test-jar</goal>
             </goals>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
           </execution>
         </executions>
       </plugin>
@@ -65,26 +65,29 @@
         <executions>
           <execution>
             <id>add-scala-sources</id>
-            <phase>initialize</phase>
+            <!--<phase>initialize</phase>-->
             <goals>
               <goal>add-source</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-compile</id>
-            <phase>process-resources</phase>
+            <!--<phase>process-resources</phase>-->
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <!--<phase>process-test-resources</phase>-->
             <goals>
               <goal>testCompile</goal>
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <skip>true</skip>  <!-- this gets you past the class not found errrors -->
+        </configuration>
       </plugin>
 
       <!--this is what scalatest recommends to do to enable scala tests -->
@@ -126,7 +129,7 @@
         <executions>
           <execution>
             <id>javacpp</id>
-            <phase>process-classes</phase>
+            <!--<phase>process-classes</phase>-->
             <goals>
               <goal>exec</goal>
             </goals>
@@ -140,7 +143,7 @@
                 <argument>-jar</argument>
                 <argument>${org.bytedeco:javacpp:jar}</argument>
                 <argument>-propertyfile</argument>
-                <argument>linux-x86_64-viennacl.properties</argument>
+                <argument>../linux-x86_64-viennacl.properties</argument>
                 <argument>-classpath</argument>
                 <argument>${project.build.outputDirectory}:${org.scala-lang:scala-library:jar}</argument>
                 <argument>org.apache.mahout.viennacl.openmp.javacpp.CompressedMatrix</argument>
@@ -189,7 +192,7 @@
         <executions>
           <execution>
             <id>copy</id>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
             <configuration>
               <tasks>
                 <copy file="target/mahout-native-viennacl-omp_2.10-${project.version}.jar" tofile="../../mahout-native-viennacl-omp_2.10-${project.version}.jar" />
