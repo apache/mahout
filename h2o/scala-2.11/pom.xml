@@ -27,7 +27,7 @@
     </parent>
 
     <artifactId>mahout-h2o_2.11</artifactId>
-    <name>Mahout H2O Scala 2.10 backend</name>
+    <name>Mahout H2O Scala 2.11 backend</name>
 
 
     <properties>
