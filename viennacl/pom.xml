@@ -191,7 +191,12 @@
             <!--<phase>package</phase>-->
             <configuration>
               <tasks>
-                <copy file="target/mahout-native-viennacl_2.10-${project.version}.jar" tofile="../../mahout-native-viennacl_2.10-${project.version}.jar" />
+                <copy todir="../../">
+                  <fileset dir="target">
+                    <include name="*.jar"/>
+                    <exclude name="*tests.jar"/>
+                  </fileset>
+                </copy>
               </tasks>
             </configuration>
             <goals>
