@@ -41,7 +41,7 @@
             <goals>
               <goal>test-jar</goal>
             </goals>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
           </execution>
         </executions>
       </plugin>
@@ -60,21 +60,21 @@
         <executions>
           <execution>
             <id>add-scala-sources</id>
-            <phase>initialize</phase>
+            <!--<phase>initialize</phase>-->
             <goals>
               <goal>add-source</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-compile</id>
-            <phase>process-resources</phase>
+            <!--<phase>process-resources</phase>-->
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <!--<phase>process-test-resources</phase>-->
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -120,7 +120,7 @@
         <executions>
           <execution>
             <id>javacpp</id>
-            <phase>process-classes</phase>
+            <!--<phase>process-classes</phase>-->
             <goals>
               <goal>exec</goal>
             </goals>
@@ -185,7 +185,7 @@
         <executions>
           <execution>
             <id>copy</id>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
             <configuration>
               <tasks>
                 <copy file="target/mahout-native-viennacl_2.10-${project.version}.jar" tofile="../../mahout-native-viennacl_2.10-${project.version}.jar" />
@@ -206,7 +206,7 @@
             <fileset>
               <directory>../../</directory>
               <includes>
-                <include>mahout-native-viennacl_2.10*.jar</include>
+                <include>mahout-native-viennacl*.jar</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
