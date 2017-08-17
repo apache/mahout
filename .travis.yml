@@ -32,7 +32,7 @@ branches:
 env:
   global:
     - JAVA_OPTS=-Xmx3g
-    - TEST_MODULES="hdfs,math"
+    - TEST_MODULES="mahout-hdfs,mahout-math"
     - STANDARD_BUILD_OPTS="-Dmaven.javadoc.skip=true -B -V"
     - PROFILES="-Ptravis"
     - SPARK_1_6=http://d3kbcqa49mib13.cloudfront.net/spark-1.6.3-bin-hadoop2.6.tgz
