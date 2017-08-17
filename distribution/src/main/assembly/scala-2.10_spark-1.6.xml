@@ -130,8 +130,8 @@
     <fileSet>
       <directory>${project.basedir}/../spark/spark-1.6/target</directory>
       <includes>
-        <include>mahout-*1.6-2.10*.jar</include>
-        <include>mahout-*1.6-2.10*dependency-reduced.jar</include>
+        <include>mahout-*1.6_2.10*.jar</include>
+        <include>mahout-*1.6_2.10*dependency-reduced.jar</include>
       </includes>
       <excludes>
         <exclude>*sources.jar</exclude>
