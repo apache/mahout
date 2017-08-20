@@ -105,7 +105,7 @@ object Test{
   }
 }
 
-class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int) extends Serializable {
+class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: DistanceMetric) extends Serializable {
 
   var data: Matrix = input
   val eps: Double = epsilon
