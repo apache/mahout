@@ -28,7 +28,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>0.13.2-SNAPSHOT</version>
+  <version>0.13.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -840,12 +840,12 @@
     <module>math</module>
     <module>hdfs</module>
     <module>mr</module>
-    <module>integration</module>
     <module>examples</module>
-    <module>distribution</module>
     <module>math-scala</module>
     <module>spark</module>
     <module>h2o</module>
+    <module>integration</module>
+    <module>distribution</module>
   </modules>
 
   <profiles>
@@ -924,7 +924,7 @@
     <profile>
       <id>scala-2.10</id>
       <activation>
-        <property><name>!*scala*</name></property>
+        <property><name>!scala-2.11</name></property>
       </activation>
       <properties>
         <scala.compat.version>2.10</scala.compat.version>
@@ -959,6 +959,8 @@
       <properties>
         <spark.version>2.0.2</spark.version>
         <spark.compat.version>2.0</spark.compat.version>
+          <scala.compat.version>2.11</scala.compat.version>
+          <scala.version>2.11.8</scala.version>
       </properties>
     </profile>
     <profile>
@@ -969,6 +971,8 @@
       <properties>
         <spark.version>2.1.0</spark.version>
         <spark.compat.version>2.1</spark.compat.version>
+          <scala.compat.version>2.11</scala.compat.version>
+          <scala.version>2.11.8</scala.version>
       </properties>
     </profile>
     <profile>

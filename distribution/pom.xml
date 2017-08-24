@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.13.2-SNAPSHOT</version>
+    <version>0.13.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>apache-mahout-distribution</artifactId>
@@ -137,8 +137,7 @@
           </dependency>
           <dependency>
             <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-            <classifier>spark_${spark.compat.version}</classifier>
+            <artifactId>mahout-spark_${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
           </dependency>
           <dependency>
@@ -182,8 +181,7 @@
         </dependency>
         <dependency>
           <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-          <classifier>spark_${spark.compat.version}</classifier>
+          <artifactId>mahout-spark_${spark.compat.version}_${scala.compat.version}</artifactId>
           <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -222,8 +220,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-      <classifier>spark_${spark.compat.version}</classifier>
+      <artifactId>mahout-spark_${spark.compat.version}_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
