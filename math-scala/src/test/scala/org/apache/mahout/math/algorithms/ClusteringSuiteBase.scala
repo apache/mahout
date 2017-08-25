@@ -19,13 +19,16 @@
 
 package org.apache.mahout.math.algorithms
 
+import java.net.URL
+
 import org.apache.mahout.math.algorithms.preprocessing._
 import org.apache.mahout.math.drm.drmParallelize
 import org.apache.mahout.math.scalabindings.{dense, sparse, svec}
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.test.DistributedMahoutSuite
 import org.scalatest.{FunSuite, Matchers}
-
+import org.apache.mahout.math.algorithms.clustering._
+import org.apache.mahout.math.algorithms.common.distance.{DistanceMetricSelector, Euclidean}
 import org.apache.mahout.test.DistributedMahoutSuite
 
 trait ClusteringSuiteBase extends DistributedMahoutSuite with Matchers {
@@ -44,5 +47,18 @@ trait ClusteringSuiteBase extends DistributedMahoutSuite with Matchers {
 
     val epsilon = 1E-6
     (myAnswer.norm - correctAnswer.norm) should be <= epsilon
+  }
+
+  test("inCore DBSCAN test") {
+//    import org.apache.mahout.math.algorithms.clustering._
+//
+//    val dm = DistanceMetricSelector.namedMetricLookup('Euclidean)
+////    val url: URL = getClass().getResource("./data21.txt")
+//    //TO DO //Need help
+//    val input = Test.readInputAndMakeMatrix("/data21.txt")
+//    val dbscan = new InCoreDBSCAN(input, 2, 4, DistanceMetricSelector.select(dm))
+//    val (a, b, c) = dbscan.interpretResults(dbscan.DBSCAN())
+//    (a,b,c) should equal (8,2,10)
+
   }
 }

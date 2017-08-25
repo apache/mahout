@@ -26,7 +26,7 @@ trait DistanceMetric extends Serializable {
 
 object DistanceMetricSelector extends Serializable{
 
-  val namedMetricLookup = Map('Chebyshev -> 1.0, 'Cosine -> 2.0)
+  val namedMetricLookup = Map('Chebyshev -> 1.0, 'Cosine -> 2.0, 'Euclidean -> 3.0)
 
   def select(dm: Double): DistanceMetric = {
     dm match {

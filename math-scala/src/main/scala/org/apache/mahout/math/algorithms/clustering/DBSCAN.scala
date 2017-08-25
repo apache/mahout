@@ -145,13 +145,14 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
     }
   }
 
-  def interpretResults(metadata: Matrix): Unit = {
+  def interpretResults(metadata: Matrix): Tuple3[Int, Int, Int] = {
     for(i <- 0 until metadata.numRows()) {
       if(metadata(i, 5) == 1)noiseCount = noiseCount + 1
     }
-    println("CoreCount = " + coreCount)
-    println("ClusterCount = " + clusterCount)
-    println("NoiseCount = " + noiseCount)
+//    println("CoreCount = " + coreCount)
+//    println("ClusterCount = " + clusterCount)
+//    println("NoiseCount = " + noiseCount)
+    (coreCount, clusterCount, noiseCount)
   }
 
   def DBSCAN(): Matrix = {
@@ -185,7 +186,7 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
       }
     }
     clusterCount = clusterId
-    interpretResults(metadata)
+//    interpretResults(metadata)
     metadata
   }
 
