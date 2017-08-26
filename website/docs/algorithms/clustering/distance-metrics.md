@@ -24,6 +24,11 @@ theme:
         <td><code>org.apache.mahout.math.algorithms.common.distance.Cosine</code></td>
         <td><code>'Cosine</code></td>
     </tr>
+    <tr>
+        <td><a href="https://en.wikipedia.org/wiki/Euclidean_distance">Euclidean Distance</a></td>
+        <td><code>org.apache.mahout.math.algorithms.common.distance.Euclidean</code></td>
+        <td><code>'Euclidean</code></td>
+     </tr>
     </table>
 </div>
 
@@ -67,7 +72,7 @@ and recompile.
     val v1 = dvec(1.0, 1.5, -1.2, 3.5)
     val v2 = dvec(0.1, -1.4, 10.5, 3.2)
     
-    Cosine.distance(v1, v2)
+    Euclidean.distance(v1,v2)
 
 **Using distance in clustering**
 
