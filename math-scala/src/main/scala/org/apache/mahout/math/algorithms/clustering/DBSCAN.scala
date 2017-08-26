@@ -202,8 +202,8 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
     var neighbourCount = 0
     for(row <- 0 until data.numRows()) {
       if(row != pointId) {
-        val arg1 = dvec(data(row, ::))
-        val arg2 = dvec(data(pointId, ::))
+        val arg1 = (data(row, ::))
+        val arg2 = (data(pointId, ::))
         if(distanceMetric.distance(arg1, arg2) <= eps) {
           neighbourCount += 1
           neighbours += row.toInt
