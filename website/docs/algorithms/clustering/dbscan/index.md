@@ -87,4 +87,15 @@ that are nearby and that contain significant number of points.
 
 
 ### Example
-    Upcoming!
+
+    //Using the InCoreDBSCAN module
+    val input = dense((1.0, 1.2, 1.3, 1.4), (1.1, 1.5, 2.5, 1.0), (6.0, 5.2, -5.2, 5.3), (7.0,6.0, 5.0, 5.0), (10.0, 1.0, 20.0, -10.0))
+
+    import org.apache.mahout.math.algorithms.clustering.InCoreDBSCAN
+    val distanceMetric = DistanceMetricSelector.select(DistanceMetricSelector.namedMetricLookup('Euclidean)))
+
+    val dbscan_model = new InCoreDBSCAN(input, 2, 4, distanceMetric);
+
+    dbscan_model.interpretResults(dbscan_model.DBSCAN())
+    //Interpret results parses over the cluster output and returns the total number of core points, noise points and clusters which
+    characterize clustering in DBSCAN.
