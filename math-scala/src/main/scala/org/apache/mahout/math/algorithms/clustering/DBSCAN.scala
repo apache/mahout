@@ -39,7 +39,7 @@ class DistributedDBSCAN extends ClusteringFitter {
   def setStandardHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     epsilon = hyperparameters.asInstanceOf[Map[Symbol, Double]].getOrElse('epsilon, 0.5)
     minPts = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('minPts, 1)
-    distanceMeasure = hyperparameters.asInstanceOf[Map[Symbol, Symbol]].getOrElse('distanceMeasure, 'Cosine)
+    distanceMeasure = hyperparameters.asInstanceOf[Map[Symbol, Symbol]].getOrElse('distanceMeasure, 'Euclidean)
   }
 
   def fit[K](input: DrmLike[K],
@@ -204,7 +204,7 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
       if(row != pointId) {
         val arg1 = dvec(data(row, ::))
         val arg2 = dvec(data(pointId, ::))
-        if(distanceMetric(arg1, arg2) <= eps) {
+        if(distanceMetric.distance(arg1, arg2) <= eps) {
           neighbourCount += 1
           neighbours += row.toInt
         }
@@ -234,21 +234,21 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
   //DistanceMetric is Euclidean distance as of now, Check and add other types of distance metrics and rename methods accordingly
   Also give user the option of choosing the distance metric while running the algorithm.
    */
-  def distanceMetric(arg1: DenseVector, arg2: DenseVector) : Double = {
-    var diffsqSum = -1.0
-    if(arg1.length != arg2.length) {
-      return diffsqSum
-    }
-    else {
-      val diff = arg1 - arg2
-      val diffsq = diff^2
-      diffsqSum = 0.0
-      for(i <- 0 until diffsq.length) {
-        diffsqSum += diffsq(i)
-      }
-      diffsqSum = Math.sqrt(diffsqSum)
-    }
-    diffsqSum
-  }
+//  def distanceMetric(arg1: DenseVector, arg2: DenseVector) : Double = {
+//    var diffsqSum = -1.0
+//    if(arg1.length != arg2.length) {
+//      return diffsqSum
+//    }
+//    else {
+//      val diff = arg1 - arg2
+//      val diffsq = diff^2
+//      diffsqSum = 0.0
+//      for(i <- 0 until diffsq.length) {
+//        diffsqSum += diffsq(i)
+//      }
+//      diffsqSum = Math.sqrt(diffsqSum)
+//    }
+//    diffsqSum
+//  }
 
 }
