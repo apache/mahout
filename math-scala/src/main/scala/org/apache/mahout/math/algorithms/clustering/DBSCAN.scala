@@ -19,7 +19,6 @@
 
 package org.apache.mahout.math.algorithms.clustering
 
-import scala.collection.JavaConversions.iterableAsScalaIterable
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math._
@@ -63,13 +62,13 @@ class DistributedDBSCAN extends ClusteringFitter {
           val distanceMetric = DistanceMetricSelector.select(configBC.value.get(3))
           val icDBSCAN = new InCoreDBSCAN(block, epsilon_local, minPts_local.toInt, distanceMetric)
           // do stuff on icDBSCAN
-          icDBSCAN.data
+          icDBSCAN.DBSCAN()
         }
       }, {
         // Optionally Merge Clusters that are close enough
-        case (oldM: Matrix, newM: Matrix) => {
+        case (metadata1: Matrix, metadata2: Matrix) => {
           // this does nothing- just returns the left matrix
-          oldM
+          metadata1
         }
       })
 
@@ -115,6 +114,10 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
   var noiseCount = 0
   var clusterCount = 0
 
+  def getCoreCount: Int = coreCount
+  def getNoiseCount: Int = noiseCount
+  def getClusterCount: Int = clusterCount
+
   var metadata: Matrix = new DenseMatrix(input.numRows(), 6) //0-Id, 1-Processed, 2-Core, 3-ClusterId, 4-ParentId, 5-Noise
 
   def expandCluster(i: Int, neighbours: DenseVector, clusterId: Int): Unit = {
@@ -149,9 +152,6 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
     for(i <- 0 until metadata.numRows()) {
       if(metadata(i, 5) == 1)noiseCount = noiseCount + 1
     }
-//    println("CoreCount = " + coreCount)
-//    println("ClusterCount = " + clusterCount)
-//    println("NoiseCount = " + noiseCount)
     (coreCount, clusterCount, noiseCount)
   }
 
@@ -186,7 +186,6 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
       }
     }
     clusterCount = clusterId
-//    interpretResults(metadata)
     metadata
   }
 
@@ -213,42 +212,6 @@ class InCoreDBSCAN(input: Matrix, epsilon: Double, minPts: Int, distanceMetric: 
     var neighboursDvec: DenseVector = dvec(neighbours)
     neighboursDvec
   }
-  //
-  //  def addColumns(arg: Array[Double]): Array[Double] = {
-  //    val newArr = new Array[Double](arg.length + 5)
-  //    newArr(0) = 0.0 //coreFlag //Initialize all points as non-core points
-  //    newArr(1) = 0.0 //processedFlag //Initialize all points as non-processed points
-  //    newArr(2) = -1.0 //globalId
-  //    newArr(3) = -1.0 //clusterId //Initialize all points as not belonging to any cluster
-  //    newArr(4) = 0.0 //noiseFlag //Initialize all points as not-Noise
-  //
-  //    for (i <- 0 until (arg.size)) {
-  //      newArr(i + 5) = arg(i)
-  //    }
-  //    newArr
-  //  }
 
-  /*
-  Takes in two rows as input. Rows that contain the co-ordinates of the data as well as the augmented columns added at the beginning.
-  Computes distance of only the data part of the rows, ignoring the augmented columns.
-  //DistanceMetric is Euclidean distance as of now, Check and add other types of distance metrics and rename methods accordingly
-  Also give user the option of choosing the distance metric while running the algorithm.
-   */
-//  def distanceMetric(arg1: DenseVector, arg2: DenseVector) : Double = {
-//    var diffsqSum = -1.0
-//    if(arg1.length != arg2.length) {
-//      return diffsqSum
-//    }
-//    else {
-//      val diff = arg1 - arg2
-//      val diffsq = diff^2
-//      diffsqSum = 0.0
-//      for(i <- 0 until diffsq.length) {
-//        diffsqSum += diffsq(i)
-//      }
-//      diffsqSum = Math.sqrt(diffsqSum)
-//    }
-//    diffsqSum
-//  }
 
 }
