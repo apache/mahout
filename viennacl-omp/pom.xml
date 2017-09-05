@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.13.2-SNAPSHOT</version>
+    <version>0.13.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
 
-  <name>Mahout Native VienniaCL OpenMP Bindings</name>
+  <name>Mahout Native ViennaCL OpenMP Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 
