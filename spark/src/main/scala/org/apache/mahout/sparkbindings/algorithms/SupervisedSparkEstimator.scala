@@ -22,7 +22,6 @@ package org.apache.mahout.sparkbindings.algorithms
 import org.apache.mahout.math.{Vector => MahoutVector}
 import org.apache.mahout.math.algorithms._
 import org.apache.mahout.sparkbindings._
-import org.apache.mahout.spark.sparkbindings._
 import org.apache.mahout.math.algorithms.regression._
 
 import org.apache.spark.rdd._
