@@ -40,7 +40,11 @@ trait SupervisedSparkEstimator[
     extends Predictor[SparkVector, SupervisedSparkEstimator[M, F, S], S] {
 
   override def train(ds: Dataset[_]): S = {
-   val hyperparameters = extractParamMap(ParamMap.empty).toSeq.map{
+    val session = ds.sparkSession
+    // Check the session has the required configuration
+    // TODO(holden): unit test this
+    // TODO(holden): Add this based on http://mahout.apache.org/docs/0.13.1-SNAPSHOT/tutorials/misc/mahout-in-zeppelin/
+    val hyperparameters = extractParamMap(ParamMap.empty).toSeq.map{
       paramPair => (Symbol.apply(paramPair.param.name), paramPair.value)
     }
 

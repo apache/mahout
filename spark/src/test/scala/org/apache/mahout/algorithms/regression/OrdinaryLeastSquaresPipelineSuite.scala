@@ -38,6 +38,19 @@ class OrdinaryLeastSquaresPipelineSuite extends FunSuite with DataFrameSuiteBase
 
   override protected implicit def enableHiveSupport: Boolean = false
 
+  override def conf = {
+    new SparkConf().
+      setMaster(System.getProperties.getOrElse("test.spark.master", "local[4]")).
+      setAppName("test").
+      set("spark.ui.enabled", "false").
+      set("spark.app.id", appID).
+      set("spark.kryo.referenceTracking", "false").
+      set("spark.kryo.registrator", "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator").
+      set("spark.kryoserializer.buffer", "32").
+      set("spark.kryoserializer.buffer.max", "600m").
+      set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+  }
+
   val miniPandasList = List(
     MiniPanda(1.0, 1.0, 1.0),
     MiniPanda(1.0, 1.0, 0.0),

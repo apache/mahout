@@ -23,14 +23,13 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleMap.Entry;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.apache.mahout.math.set.AbstractSet;
 
 /** Implements vector that only stores non-zero doubles */
-public class RandomAccessSparseVector extends AbstractVector implements Serializable {
+public class RandomAccessSparseVector extends AbstractVector {
 
   private static final int INITIAL_CAPACITY = 11;
 
