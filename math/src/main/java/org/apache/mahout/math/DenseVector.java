@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -24,7 +25,7 @@ import java.util.NoSuchElementException;
 import com.google.common.base.Preconditions;
 
 /** Implements vector as an array of doubles */
-public class DenseVector extends AbstractVector {
+public class DenseVector extends AbstractVector implements Serializable {
 
   private double[] values;
 

@@ -110,7 +110,7 @@
     <maven.compiler.target>1.7</maven.compiler.target>
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <msurefire.version>2.18.1</msurefire.version>
+    <msurefire.version>2.19.1</msurefire.version>
     <mpmd.version>3.4</mpmd.version>
     <mcheckstyle.version>2.15</mcheckstyle.version>
     <mfindbugs.version>3.0.1</mfindbugs.version>
@@ -147,6 +147,15 @@
     <repository>
       <id>mapr</id>
       <url>http://repository.mapr.com/maven</url>
+    </repository>
+    <repository>
+      <id>central</id>
+      <name>Maven Repository Switchboard</name>
+      <layout>default</layout>
+      <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
   </repositories>
 

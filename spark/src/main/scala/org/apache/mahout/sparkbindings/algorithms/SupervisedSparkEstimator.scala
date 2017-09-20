@@ -67,7 +67,7 @@ trait SupervisedSparkEstimator[
 
     // Fit the mahout model and wrap it.
     val fitter = constructSupervisedMahoutFitter()
-    val mahoutModel = fitter.fit(mahoutLabels, mahoutFeatures, hyperparameters:_*)
+    val mahoutModel = fitter.fit(mahoutFeatures, mahoutLabels, hyperparameters:_*)
     val model = constructSparkModel(mahoutModel.asInstanceOf[M])
     sparkInput.unpersist()
     copyValues(model)
