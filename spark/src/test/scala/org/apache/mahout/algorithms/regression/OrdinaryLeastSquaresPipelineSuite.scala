@@ -19,37 +19,23 @@
 
 package org.apache.mahout.sparkbindings.algorithms.regression
 
-import com.holdenkarau.spark.testing._
+import org.apache.mahout.sparkbindings.test._
+import org.apache.mahout.test.MahoutSuite
 
 import org.apache.spark.ml._
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.param._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SQLContext}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession, SQLContext}
 
 import org.scalatest.Matchers._
 import org.scalatest.FunSuite
 
+import scala.collection.JavaConversions._
+
 case class MiniPanda(happy: Double, fuzzy: Double, old: Double)
 
-class OrdinaryLeastSquaresPipelineSuite extends FunSuite with DataFrameSuiteBase {
-
-  override protected implicit def reuseContextIfPossible: Boolean = false
-
-  override protected implicit def enableHiveSupport: Boolean = false
-
-  override def conf = {
-    new SparkConf().
-      setMaster(System.getProperties.getOrElse("test.spark.master", "local[4]")).
-      setAppName("test").
-      set("spark.ui.enabled", "false").
-      set("spark.app.id", appID).
-      set("spark.kryo.referenceTracking", "false").
-      set("spark.kryo.registrator", "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator").
-      set("spark.kryoserializer.buffer", "32").
-      set("spark.kryoserializer.buffer.max", "600m").
-      set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-  }
+class OrdinaryLeastSquaresPipelineSuite extends FunSuite with MahoutSuite with DistributedSparkSuite  {
 
   val miniPandasList = List(
     MiniPanda(1.0, 1.0, 1.0),
@@ -59,7 +45,7 @@ class OrdinaryLeastSquaresPipelineSuite extends FunSuite with DataFrameSuiteBase
     MiniPanda(0.0, 0.0, 0.0))
 
   test("basic train test") {
-    val session = spark
+    val session = SparkSession.builder().getOrCreate()
     import session.implicits._
     val ds: Dataset[MiniPanda] = session.createDataset(miniPandasList)
     val assembler = new VectorAssembler()

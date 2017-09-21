@@ -22,6 +22,7 @@ package org.apache.mahout.sparkbindings.algorithms.regression
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.algorithms._
+import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
 import org.apache.mahout.math.algorithms.regression._
 
 import org.apache.spark.rdd.RDD
@@ -81,19 +82,19 @@ class OrdinaryLeastSquaresPipelineModel private (
     val session = dataset.sparkSession
     import session.implicits._
     val ds = dataset.select(
-      dataset("*"),
-      monotonically_increasing_id().as("_temporary_id"),
+      monotonically_increasing_id().alias("_temporary_id"),
       dataset($(featuresCol)))
     val drmInput: DrmLike[Long] = drmWrapDataFrameML(ds)
-    val predictedDrm = model.predict(drmInput)
+    val predictedDrm = model.predict(drmInput).checkpoint()
     val predictedRDD: RDD[(Long, Double)] = predictedDrm match {
-      case x: DrmRdd[Long] =>
-          x.map{case (id, mahoutRow) =>
-            (id, mahoutRow.get(0))
-          }
       // In theory we can't have a blockified drm since long keys.
+      case x: CheckpointedDrmSpark[Long] =>
+        x.rddInput.asRowWise().map{case (id, mahoutRow) =>
+          (id, mahoutRow.get(0))
+        }
       case _ =>
-        throw new Exception("Unsupported DrmLike type returned. Expected DrmRdd or BlockifiedDrmRdd got ${predict}")
+        throw new Exception(
+          s"Unsupported DrmLike type returned. Expected CheckpointedDrmSpark got ${predictedDrm}")
     }
     val predictedDS = predictedRDD.toDF("_temporary_id", $(predictionCol))
     val columnNames = predictedDS.columns.filter(_ != "_temporary_id")
