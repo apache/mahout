@@ -121,7 +121,7 @@
     <slf4j.version>1.7.22</slf4j.version>
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
-    <spark.version>2.0.2</spark.version> <!-- 1.6.3, 2.0.2, 2.1.0 all tested -->
+    <spark.version>1.6.3</spark.version> <!-- 1.6.3, 2.0.2, 2.1.0 all tested -->
     <flink.version>1.1.4</flink.version>
     <h2o.version>0.1.25</h2o.version>
     <jackson.version>2.7.4</jackson.version>
