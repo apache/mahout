@@ -1,0 +1,126 @@
+/* Custom container */
+@import url(//fonts.googleapis.com/css?family=Open+Sans);
+
+/*
+* Mahout Colors:
+* - Mahout Light Blue: 0099cc
+* palleton.com good tool for generating pallettes
+* Current Scheme is Tetrad (4 colors) http://paletton.com/palette.php?uid=73p0u0k%2B%2BJWumZMPf%2BV%2BWtQ%2B8nq
+* Other's that keep mahout blue:
+* Triad: http://paletton.com/palette.php?uid=33p0u0k%2B%2BJWumZMPf%2BV%2BWtQ%2B8nq
+* 3-Adjacent (30degree): http://paletton.com/#uid=53p0u0k++JWumZMPf+V+WtQ+8nq
+* 3-Adjacent (90degree): http://paletton.com/palette.php?uid=53p1q0k%2B%2BJWumZMPf%2BV%2BWtQ%2B8nq
+* ^^ Personal Favorite
+*/
+
+/* Replaced with normal container and standard footer */
+/*.container-narrow {
+  margin: 0 auto;
+  max-width: 700px; }
+
+.container-narrow > hr {
+  margin: 30px 0; }
+*/
+
+/* Replaced with standard BS3 Navbar */
+/*.navbar .nav {
+  float: right; }*/
+
+/* Jekyll Bootstrap Colors */
+h1, h2, h3, h4 {
+  color: #005875;
+}
+#footer {
+
+}
+
+
+/* posts index */
+.post > h3.title {
+  position: relative;
+  padding-top: 10px; }
+
+.post > h3.title span.date {
+  position: absolute;
+  right: 0;
+  font-size: 0.9em; }
+
+.post > .more {
+  margin: 10px 0;
+  text-align: left; }
+
+/* post-full*/
+.post-full .date {
+  margin-bottom: 20px;
+  font-weight: bold; }
+
+/* tag_box */
+.tag_box {
+  list-style: none;
+  margin: 0;
+  overflow: hidden; }
+
+.tag_box li {
+  line-height: 28px; }
+
+.tag_box li i {
+  opacity: 0.9; }
+
+.tag_box.inline li {
+  float: left; }
+
+.tag_box a {
+  padding: 3px 6px;
+  margin: 2px;
+  background: #eee;
+  color: #555;
+  border-radius: 3px;
+  text-decoration: none;
+  border: 1px dashed #cccccc; }
+
+.tag_box a span {
+  vertical-align: super;
+  font-size: 0.8em; }
+
+.tag_box a:hover {
+  background-color: #e5e5e5; }
+
+.tag_box a.active {
+  background: #57A957;
+  border: 1px solid #4c964d;
+  color: #FFF; }
+
+
+.newMahout {
+  text-align: center;
+  background-color: #03c0ff;
+  padding-bottom: 28px;
+  color: #0099cc;
+}
+
+/** A handy link for new navbars: https://work.smarchal.com/twbscolor/css/e74c3c91d9e8ecf0f1ffbbbc0 **/
+.navbar-default{
+    background-image:-webkit-linear-gradient(top,#fff 0,#E7FD00 100%);
+    background-image:linear-gradient(to bottom,#fff 0,#E7FD00 100%);
+    background-repeat:repeat-x;border-radius:4px;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff',endColorstr='#fff8f8f8',GradientType=0);
+    filter:progid:DXImageTransform.Microsoft.gradient(enabled=false);-webkit-box-shadow:inset 0 1px 0 rgba(255,255,255,0.15),0 1px 5px rgba(0,0,0,0.075);
+    /** box-shadow:inset 0 1px 0 rgba(255,255,255,0.15),0 1px 5px rgba(0,0,0,0.075); **/
+    margin-bottom: 0px;
+    border-color: #bfe8ec;
+}
+
+/** can't just set the color, have to be fancy, see above- this block will be overridden anyway
+.navbar-default {
+  background-color: #bfe8ec;
+  border-color: #91d9e8;
+}
+**/
+
+.jumbotron {
+/*  background-color: #cde9fc; */
+  background-color: #60007B;
+  margin-bottom: 0px;
+  padding-top: 28px;
+  color: #f5f5f5;
+}
+

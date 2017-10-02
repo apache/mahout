@@ -23,6 +23,7 @@ import scalabindings._
 import drm._
 import RLikeOps._
 import RLikeDrmOps._
+import org.apache.mahout.logging.info
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
@@ -138,5 +139,24 @@ class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuite
     val testM = dense((2,0,4), (3,0,5), (4,0,6))
 
     assert(dfM === testM)
+  }
+
+  test("Aggregating transpose") {
+
+    val mxA = new DenseMatrix(20, 10) := 1
+
+    val drmA = drmParallelize(mxA, numPartitions = 3)
+
+    val reassignedA = drmA.mapBlock() { case (keys, block) ⇒
+      keys.map(_ % 3) → block
+    }
+
+    val mxAggrA = reassignedA.t(::, 0 until 3).collect
+
+    info(mxAggrA.toString)
+
+    mxAggrA(0,0) shouldBe 7
+    mxAggrA(0,1) shouldBe 7
+    mxAggrA(0,2) shouldBe 6
   }
 }

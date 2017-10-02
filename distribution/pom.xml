@@ -37,8 +37,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
+          <!-- Add more executions here to create more tarballs on release -->
           <execution>
-            <id>bin-assembly</id>
+            <id>scala_2.10_spark-1.6-assembly</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
@@ -46,10 +47,40 @@
             <configuration>
               <skipAssembly>${mahout.skip.distribution}</skipAssembly>
               <descriptors>
-                <descriptor>src/main/assembly/bin.xml</descriptor>
+                <descriptor>src/main/assembly/scala-2.10_spark-1.6.xml</descriptor>
               </descriptors>
               <tarLongFileMode>gnu</tarLongFileMode>
-              <appendAssemblyId>false</appendAssemblyId>
+              <appendAssemblyId>true</appendAssemblyId>
+            </configuration>
+          </execution>
+          <execution>
+            <id>scala-2.11_spark-2.0-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+              <descriptors>
+                <descriptor>src/main/assembly/scala-2.11_spark-2.0.xml</descriptor>
+              </descriptors>
+              <tarLongFileMode>gnu</tarLongFileMode>
+              <appendAssemblyId>true</appendAssemblyId>
+            </configuration>
+          </execution>
+          <execution>
+            <id>scala-2.11_spark-2.1-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+              <descriptors>
+                <descriptor>src/main/assembly/scala-2.11_spark-2.1.xml</descriptor>
+              </descriptors>
+              <tarLongFileMode>gnu</tarLongFileMode>
+              <appendAssemblyId>true</appendAssemblyId>
             </configuration>
           </execution>
           <execution>
@@ -79,6 +110,8 @@
         <mahout.skip.distribution>false</mahout.skip.distribution>
       </properties>
     </profile>
+
+
     <profile>
       <id>viennacl</id>
         <dependencies>
@@ -105,6 +138,8 @@
           <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+            <classifier>spark_${spark.compat.version}</classifier>
+            <version>${project.version}</version>
           </dependency>
           <dependency>
             <groupId>org.apache.mahout</groupId>
@@ -117,7 +152,7 @@
           <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
-            <version>0.13.0-SNAPSHOT</version>
+            <version>${project.version}</version>
           </dependency>
         </dependencies>
     </profile>
@@ -148,6 +183,8 @@
         <dependency>
           <groupId>org.apache.mahout</groupId>
           <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+          <classifier>spark_${spark.compat.version}</classifier>
+          <version>${project.version}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.mahout</groupId>
@@ -156,7 +193,7 @@
         <dependency>
           <groupId>org.apache.mahout</groupId>
           <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
-          <version>0.13.0-SNAPSHOT</version>
+          <version>${project.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -186,6 +223,8 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+      <classifier>spark_${spark.compat.version}</classifier>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>

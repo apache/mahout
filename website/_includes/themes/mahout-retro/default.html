@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Apache Mahout: Scalable machine learning and data mining</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="Distribution" content="Global">
+  <meta name="Robots" content="index,follow">
+  <meta name="keywords" content="apache, apache hadoop, apache lucene,
+        business data mining, cluster analysis,
+        collaborative filtering, data extraction, data filtering, data framework, data integration,
+        data matching, data mining, data mining algorithms, data mining analysis, data mining data,
+        data mining introduction, data mining software,
+        data mining techniques, data representation, data set, datamining,
+        feature extraction, fuzzy k means, genetic algorithm, hadoop,
+        hierarchical clustering, high dimensional, introduction to data mining, kmeans,
+        knowledge discovery, learning approach, learning approaches, learning methods,
+        learning techniques, lucene, machine learning, machine translation, mahout apache,
+        mahout taste, map reduce hadoop, mining data, mining methods, naive bayes,
+        natural language processing,
+        supervised, text mining, time series data, unsupervised, web data mining">
+  <link rel="shortcut icon" type="image/x-icon" href="https://mahout.apache.org/images/favicon.ico">
+  <!--<script type="text/javascript" src="{{ BASE_PATH}}/js/prototype.js"></script>-->
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.7.2.0/prototype.js"></script>
+  <script type="text/javascript" src="{{ ASSET_PATH}}/js/effects.js"></script>
+  <script type="text/javascript" src="{{ ASSET_PATH}}/js/search.js"></script>
+  <script type="text/javascript" src="{{ ASSET_PATH}}/js/slides.js"></script>
+
+  <link href="{{ ASSET_PATH }}/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="{{ ASSET_PATH }}/css/bootstrap-responsive.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ ASSET_PATH }}/css/global.css" type="text/css">
+
+  <!-- mathJax stuff -- use `\(...\)` for inline style math in markdown -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script'); 
+    mathjax.type = 'text/javascript'; 
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' : 
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+	
+	  var s = document.getElementsByTagName('script')[0]; 
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<body id="home" data-twttr-rendered="true">
+  <div id="wrap">
+   <div id="header">
+    <div id="logo"><a href="{{ BASE_PATH }}/"><img src="/assets/img/mahout-logo-brudman.png" alt="Logos for Mahout and Apache Software Foundation" /></a></div>
+  <div id="search">
+    <form id="search-form" action="http://www.google.com/search" method="get" class="navbar-search pull-right">    
+      <input value="http://mahout.apache.org" name="sitesearch" type="hidden">
+      <input class="search-query" name="q" id="query" type="text">
+      <input id="submission" type="image" src="/assets/img/mahout-lupe.png" alt="Search" />
+    </form>
+  </div>
+ 
+    <div class="navbar navbar-inverse" style="position:absolute;top:133px;padding-right:0px;padding-left:0px;">
+      <div class="navbar-inner" style="border: none; background: #999; border: none; border-radius: 0px;">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!-- <a class="brand" href="#">Apache Community Development Project</a> -->
+            {% include navbar.html %}
+        </div>
+      </div>
+    </div>
+
+</div>
+
+ <div id="sidebar">
+  <div id="sidebar-wrap">
+    <h2>Twitter</h2>
+	<ul class="sidemenu">
+		<li>
+<a class="twitter-timeline" href="https://twitter.com/ApacheMahout" data-widget-id="422861673444028416">Tweets by @ApacheMahout</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</li>
+	</ul>
+    <h2>Apache Software Foundation</h2>
+    <ul class="sidemenu">
+      <li><a href="http://www.apache.org/foundation/how-it-works.html">How the ASF works</a></li>
+      <li><a href="http://www.apache.org/foundation/getinvolved.html">Get Involved</a></li>
+      <li><a href="http://www.apache.org/dev/">Developer Resources</a></li>
+      <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+      <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+    </ul>
+    <h2>Related Projects</h2>
+    <ul class="sidemenu">
+      <li><a href="http://lucene.apache.org/">Apache Lucene</a></li>
+      <li><a href="http://hadoop.apache.org/">Apache Hadoop</a></li>
+      <li><a href="http://bigtop.apache.org/">Apache Bigtop</a></li>
+      <li><a href="http://spark.apache.org/">Apache Spark</a></li>
+	  <li><a href="http://flink.apache.org/">Apache Flink</a></li>
+    </ul>
+  </div>
+</div>
+
+  <div id="content-wrap" class="clearfix">
+   <div id="main">
+
+    {{ content }}
+   </div>
+  </div>     
+</div> 
+  <footer class="footer" align="center">
+    <div class="container">
+      <p>
+        Copyright &copy; 2014-2016 The Apache Software Foundation, Licensed under
+        the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.
+        <br />
+		  Apache Mahout, Mahout, Apache, the Apache feather logo, and the elephant rider logo are either registered trademarks or trademarks of <a href="http://www.apache.org/foundation/marks/">The Apache Software Foundation</a> in the United States and other countries.
+      </p>
+    </div>
+  </footer>
+  
+  <script src="{{ ASSET_PATH}}/js/jquery-1.9.1.min.js"></script>
+  <script src="{{ ASSET_PATH}}/js/bootstrap.min.js"></script>
+  <script>
+    (function() {
+      var cx = '012254517474945470291:vhsfv7eokdc';
+      var gcse = document.createElement('script');
+      gcse.type = 'text/javascript';
+      gcse.async = true;
+      gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+          '//www.google.com/cse/cse.js?cx=' + cx;
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(gcse, s);
+    })();
+  </script>
+</body>
+</html>

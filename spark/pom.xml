@@ -130,7 +130,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-spark_${scala.compat.version}-${version}.jar" tofile="../mahout-spark_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" />
                 <copy file="target/mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
@@ -154,9 +154,34 @@
             </goals>
             <phase>package</phase>
           </execution>
+          <execution>
+            <id>default-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>spark_${spark.compat.version}</classifier>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
-
+      <!-- remove jars from top directory on clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../</directory>
+              <includes>
+                <include>mahout-spark*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

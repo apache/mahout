@@ -49,7 +49,7 @@ object FlinkOpAt {
             val columnVector: Vector = new SequentialAccessSparseVector(ncol)
 
             keys.zipWithIndex.foreach {
-              case (key, idx) => columnVector(key) = block(idx, columnIndex)
+              case (key, idx) => columnVector(key) += block(idx, columnIndex)
             }
 
             (columnIndex, columnVector)

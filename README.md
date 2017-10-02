@@ -190,21 +190,21 @@ That file does not exist
 
 
 scala>
-
+```
 At the scala> prompt, enter: 
-    
-scala> :load home/<andy>/apache/mahout/examples
+```   
+scala> :load /home/<andy>/apache/mahout/examples
                                /bin/SparseSparseDrmTimer.mscala
-
+```
 Which will load a matrix multiplication timer function definition. To run the matrix timer: 
-
+```
         scala> timeSparseDRMMMul(1000,1000,1000,1,.02,1234L)
             {...} res3: Long = 16321
-
+```
 We can see that the JVM only version is rather slow, thus our motive for GPU and Native Multithreading support.
 
 To get an idea of what’s going on under the hood of the timer, we may examine the .mscala (mahout scala) code which is both fully functional scala and the Mahout R-Like DSL for tensor algebra:    
-
+```
 
 
 
@@ -214,7 +214,7 @@ def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20,
            val R =  scala.util.Random
            R.setSeed(seed)
            val blockB = new SparseRowMatrix(block.nrow, block.ncol)
-           blockB := {x => if (R.nextDouble > pctDense) R.nextDouble else x }
+           blockB := {x => if (R.nextDouble < pctDense) R.nextDouble else x }
        (keys -> blockB)
   }
 
@@ -223,7 +223,7 @@ def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20,
            val R =  scala.util.Random
            R.setSeed(seed + 1)
            val blockB = new SparseRowMatrix(block.nrow, block.ncol)
-           blockB := {x => if (R.nextDouble > pctDense) R.nextDouble else x }
+           blockB := {x => if (R.nextDouble < pctDense) R.nextDouble else x }
        (keys -> blockB)
   }
 
@@ -244,8 +244,11 @@ def timeSparseDRMMMul(m: Int, n: Int, s: Int, para: Int, pctDense: Double = .20,
 For more information please see the following references:
 
 http://mahout.apache.org/users/environment/in-core-reference.html
+
 http://mahout.apache.org/users/environment/out-of-core-reference.html
+
 http://mahout.apache.org/users/sparkbindings/play-with-shell.html
+
 http://mahout.apache.org/users/environment/classify-a-doc-from-the-shell.html
 
 Note that due to an intermittent out-of-memory bug in a Flink test we have disabled it from the binary releases. To use Flink please uncomment the line in the root pom.xml in the `<modules>` block so it reads `<module>flink</module>`.

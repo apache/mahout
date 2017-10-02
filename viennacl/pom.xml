@@ -17,20 +17,19 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>0.13.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
 
-  <name>Mahout Native VienniaCL OpenCL Bindings</name>
+  <name>Mahout Native ViennaCL OpenCL Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 
@@ -203,7 +202,22 @@
           </execution>
         </executions>
       </plugin>
-
+      <!-- delete jars on claen in top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../</directory>
+              <includes>
+                <include>mahout-native-viennacl_*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins>
 
   </build>

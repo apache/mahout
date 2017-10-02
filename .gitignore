@@ -23,3 +23,9 @@ math-tests/
 metastore_db/*
 bin/derby.log
 bin/metastore_db
+*jar
+*log
+website/oldsite/_site
+website/docs/_site
+website/front/_site
+website/Gemfile.lock

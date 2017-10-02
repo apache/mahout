@@ -1,0 +1,138 @@
+<!--<div class="nav-collapse collapse">-->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+        <!-- <li><a href="{{ BASE_PATH }}/">Home</a></li> -->
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">General<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ BASE_PATH }}/general/downloads.html">Downloads</a>
+                <li><a href="{{ BASE_PATH }}/general/who-we-are.html">Who we are</a>
+                <li><a href="{{ BASE_PATH }}/general/mailing-lists,-irc-and-archives.html">Mailing Lists</a>
+                <li><a href="{{ BASE_PATH }}/general/release-notes.html">Release Notes</a>
+                <li><a href="{{ BASE_PATH }}/general/books-tutorials-and-talks.html">Books, Tutorials, Talks</a></li>
+                <li><a href="{{ BASE_PATH }}/general/powered-by-mahout.html">Powered By Mahout</a>
+                <li><a href="{{ BASE_PATH }}/general/professional-support.html">Professional Support</a>
+                <li class="divider"></li>
+                <li class="nav-header">Resources</li>
+                <li><a href="{{ BASE_PATH }}/general/reference-reading.html">Reference Reading</a>
+                <li><a href="{{ BASE_PATH }}/general/faq.html">FAQ</a>
+                <li class="divider"></li>
+                <li class="nav-header">Legal</li>
+                <li><a href="http://www.apache.org/licenses/">License</a></li>
+                <li><a href="http://www.apache.org/security/">Security</a></li>
+                <li><a href="{{ BASE_PATH }}/general/privacy-policy.html">Privacy Policy</a>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developers<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ BASE_PATH }}/developers/developer-resources.html">Developer resources</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/version-control.html">Version control</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/buildingmahout.html">Build from source</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/issue-tracker.html">Issue tracker</a></li>
+                <li><a href="https://builds.apache.org/job/Mahout-Quality/" target="_blank">Code quality reports</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Contributions</li>
+                <li><a href="{{ BASE_PATH }}/developers/how-to-contribute.html">How to contribute</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/how-to-become-a-committer.html">How to become a committer</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/gsoc.html">GSoC</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">For committers</li>
+                <li><a href="{{ BASE_PATH }}/developers/how-to-update-the-website.html">How to update the website</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/patch-check-list.html">Patch check list</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/github.html">Handling Github PRs</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/how-to-release.html">How to release</a></li>
+                <li><a href="{{ BASE_PATH }}/developers/thirdparty-dependencies.html">Third party dependencies</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout-Samsara<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ BASE_PATH }}/users/sparkbindings/home.html">Scala &amp; Spark Bindings Overview</a></li>
+                <li><a href="{{ BASE_PATH }}/users/sparkbindings/faq.html">FAQ</a></li>
+                <li><a href="{{ BASE_PATH }}/users/flinkbindings/playing-with-samsara-flink.html">Flink Bindings Overview</a></li>
+                <li class="nav-header">Engines</li>
+                <li><a href="{{ BASE_PATH }}/users/sparkbindings/home.html">Spark</a></li>
+                <li><a href="{{ BASE_PATH }}/users/environment/h2o-internals.html">H2O</a></li>
+                <li><a href="{{ BASE_PATH }}/users/flinkbindings/flink-internals.html">Flink</a></li>
+                <li class="nav-header">References</li>
+                <li><a href="{{ BASE_PATH }}/users/environment/in-core-reference.html">In-Core Algebraic DSL Reference</a></li>
+                <li><a href="{{ BASE_PATH }}/users/environment/out-of-core-reference.html">Distributed Algebraic DSL Reference</a></li>
+                <li class="nav-header">Tutorials</li>
+                <li><a href="{{ BASE_PATH }}/users/sparkbindings/play-with-shell.html">Playing with Mahout's Spark Shell</a></li>
+                <li><a href="{{ BASE_PATH }}/users/environment/how-to-build-an-app.html">How to build an app</a></li>
+                <li><a href="{{ BASE_PATH }}/users/environment/classify-a-doc-from-the-shell.html">Building a text classifier in Mahout's Spark Shell</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Algorithms<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ BASE_PATH }}/users/basics/algorithms.html">List of algorithms</a>
+                <li class="nav-header">Distributed Matrix Decomposition</li>
+                <li><a href="{{ BASE_PATH }}/users/algorithms/d-qr.html">Cholesky QR</a></li>
+                <li><a href="{{ BASE_PATH }}/users/algorithms/d-ssvd.html">SSVD</a></li>
+                <li><a href="{{ BASE_PATH }}/users/algorithms/d-als.html">Distributed ALS</a></li>
+                <li><a href="{{ BASE_PATH }}/users/algorithms/d-spca.html">SPCA</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="{{ BASE_PATH }}/users/algorithms/recommender-overview.html">Recommender Overview</a></li>
+                <li><a href="{{ BASE_PATH }}/users/algorithms/intro-cooccurrence-spark.html">Intro to cooccurrence-based<br/> recommendations with Spark</a></li>
+                <li class="nav-header">Classification</li>
+                <li><a href="{{ BASE_PATH }}/users/algorithms/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">MapReduce Basics<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ BASE_PATH }}/users/basics/algorithms.html">List of algorithms</a>
+                <li><a href="{{ BASE_PATH }}/users/basics/quickstart.html">Overview</a>
+                <li class="divider"></li>
+                <li class="nav-header">Working with text</li>
+                <li><a href="{{ BASE_PATH }}/users/basics/creating-vectors-from-text.html">Creating vectors from text</a>
+                <li><a href="{{ BASE_PATH }}/users/basics/collocations.html">Collocations</a>
+                <li class="divider"></li>
+                <li class="nav-header">Dimensionality reduction</li>
+                <li><a href="{{ BASE_PATH }}/users/dim-reduction/dimensional-reduction.html">Singular Value Decomposition</a></li>
+                <li><a href="{{ BASE_PATH }}/users/dim-reduction/ssvd.html">Stochastic SVD</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Topic Models</li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout MapReduce<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li class="nav-header">Classification</li>
+                <li><a href="{{ BASE_PATH }}/users/classification/bayesian.html">Naive Bayes</a></li>
+                <li><a href="{{ BASE_PATH }}/users/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li><a href="{{ BASE_PATH }}/users/classification/logistic-regression.html">Logistic Regression (Single Machine)</a></li>
+                <li><a href="{{ BASE_PATH }}/users/classification/partial-implementation.html">Random Forest</a></li>
+                <li class="nav-header">Classification Examples</li>
+                <li><a href="{{ BASE_PATH }}/users/classification/breiman-example.html">Breiman example</a></li>
+                <li><a href="{{ BASE_PATH }}/users/classification/twenty-newsgroups.html">20 newsgroups example</a></li>
+                <li><a href="{{ BASE_PATH }}/users/classification/bankmarketing-example.html">SGD classifier bank marketing</a></li>
+                <li><a href="{{ BASE_PATH }}/users/classification/wikipedia-classifier-example.html">Wikipedia XML parser and classifier</a></li>
+                <li class="nav-header">Clustering</li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/k-means-clustering.html">k-Means</a></li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/canopy-clustering.html">Canopy</a></li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/fuzzy-k-means.html">Fuzzy k-Means</a></li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/streaming-k-means.html">Streaming KMeans</a></li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li class="nav-header">Clustering Commandline usage</li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/k-means-commandline.html">Options for k-Means</a></li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/canopy-commandline.html">Options for Canopy</a></li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/fuzzy-k-means-commandline.html">Options for Fuzzy k-Means</a></li>
+                <li class="nav-header">Clustering Examples</li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/clustering-of-synthetic-control-data.html">Synthetic data</a></li>
+                <li class="nav-header">Cluster Post processing</li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/cluster-dumper.html">Cluster Dumper tool</a></li>
+                <li><a href="{{ BASE_PATH }}/users/clustering/visualizing-sample-clusters.html">Cluster visualisation</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="{{ BASE_PATH }}/users/recommender/recommender-first-timer-faq.html">First Timer FAQ</a></li>
+                <li><a href="{{ BASE_PATH }}/users/recommender/userbased-5-minutes.html">A user-based recommender <br/>in 5 minutes</a></li>
+                <li><a href="{{ BASE_PATH }}/users/recommender/matrix-factorization.html">Matrix factorization-based<br/> recommenders</a></li>
+                <li><a href="{{ BASE_PATH }}/users/recommender/recommender-documentation.html">Overview</a></li>
+                <li><a href="{{ BASE_PATH }}/users/recommender/intro-itembased-hadoop.html">Intro to item-based recommendations<br/> with Hadoop</a></li>
+                <li><a href="{{ BASE_PATH }}/users/recommender/intro-als-hadoop.html">Intro to ALS recommendations<br/> with Hadoop</a></li>
+            </ul>
+        </li>
+        <!--  <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Recommendations<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+
+          </ul> -->
+        </li>
+    </ul>
+</div><!--/.nav-collapse -->

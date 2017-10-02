@@ -23,8 +23,8 @@
 # https://issues.apache.org/jira/browse/MAHOUT-1679
 
 OUT_DIR="/item-sim-out" # output dir for cooccurrence and cross-cooccurrence matrices
-INPUT="/examples/src/main/resources/cf-data-purchase.txt" # purchase actions
-INPUT2="/examples/src/main/resources/cf-data-view.txt" # view actions
+INPUT="/examples/bin/resources/cf-data-purchase.txt" # purchase actions
+INPUT2="/examples/bin/resources/cf-data-view.txt" # view actions
 FS=file://
 PURCHASE=$FS$MAHOUT_HOME$INPUT
 VIEW=$FS$MAHOUT_HOME$INPUT2
