@@ -181,8 +181,8 @@ public class SparseRowMatrix extends AbstractMatrix {
           setQuick(row, col, function.apply(getQuick(row, col), other.getQuick(row, col)));
         }
       }
-      return this;
     }
+    return this;
   }
 
   @Override
