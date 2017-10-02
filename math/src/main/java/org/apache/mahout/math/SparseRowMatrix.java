@@ -19,7 +19,10 @@ package org.apache.mahout.math;
 
 import org.apache.mahout.math.flavor.MatrixFlavor;
 import org.apache.mahout.math.flavor.TraversingStructureEnum;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
+
+import java.util.Iterator;
 
 /**
  * sparse matrix with general element values whose rows are accessible quickly. Implemented as a row
@@ -130,6 +133,40 @@ public class SparseRowMatrix extends AbstractMatrix {
       throw new IndexException(offset[COL] + size[COL], rowVectors[ROW].size());
     }
     return new MatrixView(this, offset, size);
+  }
+
+  @Override
+  public Matrix assign(Matrix other, DoubleDoubleFunction function) {
+    int rows = rowSize();
+    if (rows != other.rowSize()) {
+      throw new CardinalityException(rows, other.rowSize());
+    }
+    int columns = columnSize();
+    if (columns != other.columnSize()) {
+      throw new CardinalityException(columns, other.columnSize());
+    }
+    for (int row = 0; row < rows; row++) {
+      if( function.isLikeMult()) { // TODO: is this a sufficient test?
+        // TODO: this may cause an exception if the row type is not compatible but it is currently guaranteed to be
+        // a SequentialAccessSparseVector, should "try" here just in case and Warn
+        // TODO: can we use iterateNonZero on both rows until the index is the same to get better speedup?
+        Iterator<Vector.Element> sparseRowIterator = ((SequentialAccessSparseVector) this.rowVectors[row])
+                .iterateNonZero();
+        // TODO: SASVs have an iterateNonZero that returns zeros, this should not hurt but is far from optimal
+        // this might perform much better if SparseRowMatrix were backed by RandomAccessSparseVectors, which
+        // are backed by fastutil hashmaps and the iterateNonZero does only return nonZeros.
+        while (sparseRowIterator.hasNext()) {
+          Vector.Element element = sparseRowIterator.next();
+          int col = element.index();
+          setQuick(row, col, function.apply(element.get(), other.getQuick(row, col)));
+        }
+      } else {
+        for (int col = 0; col < columns; col++) {
+          setQuick(row, col, function.apply(getQuick(row, col), other.getQuick(row, col)));
+        }
+      }
+    }
+    return this;
   }
 
   @Override
