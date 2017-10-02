@@ -21,6 +21,8 @@ import org.apache.mahout.math.flavor.MatrixFlavor;
 import org.apache.mahout.math.flavor.TraversingStructureEnum;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
@@ -32,6 +34,8 @@ public class SparseRowMatrix extends AbstractMatrix {
   private Vector[] rowVectors;
 
   private final boolean randomAccessRows;
+
+  private static final Logger log = LoggerFactory.getLogger(SparseRowMatrix.class);
 
   /**
    * Construct a sparse matrix starting with the provided row vectors.
@@ -146,27 +150,39 @@ public class SparseRowMatrix extends AbstractMatrix {
       throw new CardinalityException(columns, other.columnSize());
     }
     for (int row = 0; row < rows; row++) {
-      if( function.isLikeMult()) { // TODO: is this a sufficient test?
-        // TODO: this may cause an exception if the row type is not compatible but it is currently guaranteed to be
-        // a SequentialAccessSparseVector, should "try" here just in case and Warn
-        // TODO: can we use iterateNonZero on both rows until the index is the same to get better speedup?
+      try {
         Iterator<Vector.Element> sparseRowIterator = ((SequentialAccessSparseVector) this.rowVectors[row])
                 .iterateNonZero();
-        // TODO: SASVs have an iterateNonZero that returns zeros, this should not hurt but is far from optimal
-        // this might perform much better if SparseRowMatrix were backed by RandomAccessSparseVectors, which
-        // are backed by fastutil hashmaps and the iterateNonZero does only return nonZeros.
-        while (sparseRowIterator.hasNext()) {
-          Vector.Element element = sparseRowIterator.next();
-          int col = element.index();
-          setQuick(row, col, function.apply(element.get(), other.getQuick(row, col)));
+        if (function.isLikeMult()) { // TODO: is this a sufficient test?
+          // TODO: this may cause an exception if the row type is not compatible but it is currently guaranteed to be
+          // a SequentialAccessSparseVector, should "try" here just in case and Warn
+          // TODO: can we use iterateNonZero on both rows until the index is the same to get better speedup?
+
+          // TODO: SASVs have an iterateNonZero that returns zeros, this should not hurt but is far from optimal
+          // this might perform much better if SparseRowMatrix were backed by RandomAccessSparseVectors, which
+          // are backed by fastutil hashmaps and the iterateNonZero does only return nonZeros.
+          while (sparseRowIterator.hasNext()) {
+            Vector.Element element = sparseRowIterator.next();
+            int col = element.index();
+            setQuick(row, col, function.apply(element.get(), other.getQuick(row, col)));
+          }
+        } else {
+          for (int col = 0; col < columns; col++) {
+            setQuick(row, col, function.apply(getQuick(row, col), other.getQuick(row, col)));
+          }
         }
-      } else {
+
+      } catch (ClassCastException e) {
+        // Warn and use default implementation
+        log.warn("Error casting the row to SequentialAccessSparseVector, this should never happen because" +
+                "SparseRomMatrix is always made of SequentialAccessSparseVectors. Proceeding with non-optimzed" +
+                "implementation.");
         for (int col = 0; col < columns; col++) {
           setQuick(row, col, function.apply(getQuick(row, col), other.getQuick(row, col)));
         }
       }
+      return this;
     }
-    return this;
   }
 
   @Override
