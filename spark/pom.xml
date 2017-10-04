@@ -106,13 +106,13 @@
         <executions>
           <execution>
             <id>dependency-reduced</id>
-            <!--<phase>package</phase>-->
+            <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>../src/main/assembly/dependency-reduced.xml</descriptor>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
@@ -133,16 +133,16 @@
             <goals>
               <goal>test-jar</goal>
             </goals>
-            <!--<phase>package</phase>-->
+            <phase>package</phase>
           </execution>
           <execution>
             <id>default-jar</id>
-            <!--<phase>package</phase>-->
+            <phase>package</phase>
             <goals>
               <goal>jar</goal>
             </goals>
             <configuration>
-              <!--<classifier>spark_${spark.compat.version}</classifier>-->
+              <classifier>spark_${spark.compat.version}</classifier>
             </configuration>
           </execution>
         </executions>
@@ -170,10 +170,10 @@
         <executions>
           <execution>
             <id>copy</id>
-            <!--<phase>package</phase>-->
+            <phase>package</phase>
             <configuration>
               <tasks>
-                <copy todir="../../">
+                <copy todir="${project.basedir}/..">
                   <fileset dir="target">
                     <include name="*.jar"/>
                     <exclude name="*tests.jar"/>

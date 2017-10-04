@@ -50,7 +50,7 @@
             <!--<phase>package</phase>-->
             <configuration>
               <tasks>
-                <copy file="target/mahout-h2o_${scala.compat.version}-${project.version}.jar" tofile="../mahout-h2o_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/mahout-h2o_${scala.compat.version}-${project.version}.jar" tofile="../../mahout-h2o_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -65,13 +65,13 @@
         <executions>
           <execution>
             <id>dependency-reduced</id>
-            <!--<phase>package</phase>-->
+            <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>../src/main/assembly/dependency-reduced.xml</descriptor>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>

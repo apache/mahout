@@ -49,7 +49,7 @@
             <goals>
               <goal>test-jar</goal>
             </goals>
-            <!--<phase>package</phase>-->
+            <phase>package</phase>
           </execution>
         </executions>
       </plugin>
@@ -253,11 +253,12 @@
     <profile>
       <id>scala-2.10</id>
       <activation>
-        <property>
-          <name>scala.compat.version</name>
-          <value>2.10</value>
-        </property>
+        <property><name>!scala-2.11</name></property>
       </activation>
+      <properties>
+        <scala.compat.version>2.10</scala.compat.version>
+        <scala.version>2.10.4</scala.version>
+      </properties>
       <modules>
         <module>scala-2.10</module>
       </modules>
@@ -265,14 +266,16 @@
     <profile>
       <id>scala-2.11</id>
       <activation>
-        <property>
-          <name>scala.compat.version</name>
-          <value>2.11</value>
-        </property>
+        <property><name>scala-2.11</name></property>
       </activation>
+      <properties>
+        <scala.compat.version>2.11</scala.compat.version>
+        <scala.version>2.11.8</scala.version>
+      </properties>
       <modules>
         <module>scala-2.11</module>
       </modules>
     </profile>
+
   </profiles>
 </project>

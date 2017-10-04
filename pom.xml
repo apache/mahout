@@ -906,6 +906,7 @@
         </dependencies>
       </dependencyManagement>
     </profile>
+
     <profile>
       <id>fastinstall</id>
       <properties>
