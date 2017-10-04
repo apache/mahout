@@ -112,7 +112,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+                <descriptor>${build.sourceDirectory}/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
