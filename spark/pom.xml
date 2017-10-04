@@ -106,13 +106,13 @@
         <executions>
           <execution>
             <id>dependency-reduced</id>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
             <goals>
               <goal>single</goal>
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>${build.sourceDirectory}/assembly/dependency-reduced.xml</descriptor>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
