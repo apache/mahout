@@ -126,7 +126,6 @@
         <executions>
           <execution>
             <id>copy</id>
-            <phase>package</phase>
             <configuration>
               <tasks>
                 <copy file="target/mahout-spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" />
