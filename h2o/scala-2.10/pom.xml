@@ -52,15 +52,43 @@
             </plugin>
             <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <executions>
-            <execution>
-            <id>dependency-reduced</id>
-            <phase>package</phase>
-            </execution>
-            </executions>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                <execution>
+                <id>dependency-reduced</id>
+                <phase>package</phase>
+                </execution>
+                </executions>
             </plugin>
+
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-scala-sources</id>
+                        <phase>initialize</phase>
+                    </execution>
+                    <execution>
+                        <id>scala-compile</id>
+                        <phase>process-resources</phase>
+                    </execution>
+                    <execution>
+                        <id>scala-test-compile</id>
+                        <phase>process-test-resources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
+
+    <!--<dependencies>-->
+        <!--<dependency>-->
+            <!--<groupId>org.scalatest</groupId>-->
+            <!--<artifactId>scalatest_2.10</artifactId>-->
+            <!--<version>3.0.3</version>-->
+        <!--</dependency>-->
+    <!--</dependencies>-->
 
 </project>
