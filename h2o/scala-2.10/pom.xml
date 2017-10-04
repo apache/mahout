@@ -45,7 +45,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <!--<id>copy</id>-->
+                        <id>copy</id>
                         <phase>package</phase>
                     </execution>
                 </executions>
@@ -55,7 +55,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                 <execution>
-                <!--<id>dependency-reduced</id>-->
+                <id>dependency-reduced</id>
                 <phase>package</phase>
                 </execution>
                 </executions>

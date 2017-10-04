@@ -41,6 +41,25 @@
         <sourceDirectory>../src/main</sourceDirectory>
         <testSourceDirectory>../src/test</testSourceDirectory>
         <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>dependency-reduced</id>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
 
 
             <plugin>
