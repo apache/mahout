@@ -58,7 +58,9 @@ public final class BookCrossingDataModel extends FileDataModel {
       throw new FileNotFoundException(originalFile.toString());
     }
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")), "taste.bookcrossing.txt");
-    resultFile.delete();
+    if (!resultFile.exists() && !resultFile.delete()) {
+	throw new IOException("Can not delete the result file.");
+    }
     Writer writer = null;
     try {
       writer = new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8);
