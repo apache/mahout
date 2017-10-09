@@ -188,9 +188,9 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
     if (this == otherObj) {
       return true;
     }
-    if (otherObj == null) {
-      return false;
-    }
+    //if (otherObj == null) {
+    //  return false;
+    //}
     ObjectArrayList<?> other = (ObjectArrayList<?>) otherObj;
     if (size() != other.size()) {
       return false;
