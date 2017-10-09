@@ -521,7 +521,7 @@ public class CVB0Driver extends AbstractJob {
   public static Path[] getModelPaths(Configuration conf) {
     String[] modelPathNames = conf.getStrings(MODEL_PATHS);
     if (modelPathNames == null || modelPathNames.length == 0) {
-      return null;
+      return new Path[0];
     }
     Path[] modelPaths = new Path[modelPathNames.length];
     for (int i = 0; i < modelPathNames.length; i++) {
