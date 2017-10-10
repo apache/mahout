@@ -50,6 +50,24 @@ object TrainHMMDriver extends MahoutSparkDriver {
         options + ("numberOfHiddenStates" -> true)
       } text "Number of hidden states"
 
+      opts = opts + ("numberOfObservableSymbols" -> false)
+      opt[Int]("numberOfOfObservableSymbols") abbr "no" action { (_, options) =>
+        options + ("numberOfObservableSymbols" -> true)
+      } text "Number of observable symbols"
+
+      // epsilon
+      opts = opts + ("epsilon" -> 1.0)
+      opt[Double]("epsilon") abbr "e" action { (x, options) =>
+        options + ("epsilon" -> x)
+      } text "Convergence threshold" validate { x =>
+        if (x > 0) success else failure("Option --epsilon must be > 0")
+      }
+
+      opts = opts + ("maxNumberOfIterations" -> false)
+      opt[Int]("maxNumberOfIterations") abbr "no" action { (_, options) =>
+        options + ("maxNumberOfIterations" -> true)
+      } text "Maximum Number of Iterations"
+      
       // default scale is false
       opts = opts + ("scale" -> false)
       opt[Unit]("scale") abbr "s" action { (_, options) =>
