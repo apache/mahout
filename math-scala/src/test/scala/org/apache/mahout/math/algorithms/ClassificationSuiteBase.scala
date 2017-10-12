@@ -33,21 +33,21 @@ trait ClassificationSuiteBase extends DistributedMahoutSuite with Matchers {
     import org.apache.mahout.math.algorithms.classifier.DistributedMLPClassifier
 
     val drmData = drmParallelize(
-      dense((1.0, 1.2, 1.3, 1.4),
-        (1.1, 1.5, 2.5, 1.0),
-        (6.0, 5.2, -5.2, 5.3),
-        (7.0,6.0, 5.0, 5.0),
-        (10.0, 1.0, 20.0, -10.0)))
+      dense((0.1, 1.2, 0.3, 0.1),
+        (1.1, 0.2, 0.3, 0.1),
+        (0.1, 1.2, 0.3, 0.1),
+        (1.1, 0.2, 0.3, 0.1),
+        (0.1, 0.2, 1.3, 0.1),
+        (0.1, 0.2, 1.3, 0.1)))
 
-    val drmClasses = drmParallelize(dense((0.0), (0.0), (1.0), (0.0), (2.0)))
+    val drmClasses = drmParallelize(dense((1.0), (0.0), (1.0), (0.0), (2.0), (2.0)))
 
-    val model = new DistributedMLPClassifier[Int]().fit(drmData, drmClasses)
+    val model = new DistributedMLPClassifier[Int]().fit(drmData, drmClasses, 'microIters -> 3000, 'macroIters -> 3)
 
     val myAnswer = model.classify(drmData).collect
     println(myAnswer)
-    val correctAnswer = dense(1.0)
 
     val epsilon = 1E-6
-    (myAnswer.norm - correctAnswer.norm) should be <= epsilon
+    ((drmClasses.collect - myAnswer).sum) should be <= epsilon
   }
 }

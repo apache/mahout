@@ -76,7 +76,7 @@ class DistributedMLPClassifier[K] extends ClassifierFitter[K] {
       offsets = dvec(0, drmX.ncol, drmX.ncol, factoredDrm.ncol),
       useBiases)
 
-    val dataDrm = (drmX cbind factoredDrm) cbind drmTarget
+    val dataDrm = (drmX cbind factoredDrm) // cbind drmTarget
     distributedMLP.fit(dataDrm)
     new DistributedMLPClassifierModel[K](distributedMLP.createDistributedModel(), factorizerModel)
   }
@@ -104,12 +104,13 @@ class DistributedMLPClassifierModel[K](mlpModel: DistributedMLPModel[K],
     import collection._
     import JavaConversions._
     implicit val ktag =  drmPredictors.keyClassTag
-    rawPredictions(drmPredictors).mapBlock(){//1){
+    val output = rawPredictions(drmPredictors).mapBlock(){//1){
       case (keys, block: Matrix) =>
         val copy: Matrix = block.cloned
         copy.foreach(v => v := v.maxValueIndex.toDouble)
         (keys, copy)
     }
+    output(::, 0 until 1)
   }
 
 
