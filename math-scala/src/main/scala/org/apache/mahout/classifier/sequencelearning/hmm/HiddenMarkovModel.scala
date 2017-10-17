@@ -35,7 +35,12 @@ trait HiddenMarkovModel extends java.io.Serializable{
 
 
   
-  def train(observationsPerLabel: DrmLike[Int]
+  def train(observations: DrmLike[Int],
+            numberOfHiddenStates:Int,
+	    numberOfObservableSymbols:Int,
+	    epsilon: Double,
+	    maxNumberOfIterations:Int,
+      	    scale: Boolean = false
             ): HMMModel = {
 
     new HMMModel(0,0)

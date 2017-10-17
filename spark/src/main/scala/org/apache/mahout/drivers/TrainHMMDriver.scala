@@ -17,6 +17,7 @@
 
 package org.apache.mahout.drivers
 
+import org.apache.mahout.classifier.sequencelearning.hmm.{SparkHiddenMarkovModel, _}
 import org.apache.mahout.common.Hadoop2HDFSUtil
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
@@ -89,6 +90,18 @@ object TrainHMMDriver extends MahoutSparkDriver {
   override def process(): Unit = {
     start()
 
+    val outputPath = parser.opts("output").asInstanceOf[String]
+    val scale = parser.opts("scale").asInstanceOf[Boolean]
+    val numberOfHiddenStates = parser.opts("numberOfHiddenStates").asInstanceOf[Int]
+    val numberOfObservableSymbols = parser.opts("numberOfObservableSymbols").asInstanceOf[Int]
+    val epsilon = parser.opts("epsilon").asInstanceOf[Double]
+    val maxNumberOfIterations = parser.opts("maxNumberOfIterations").asInstanceOf[Int]
+    val observations
+    val model = SparkHiddenMarkovModel.train(observations, numberOfHiddenStates, 
+      numberOfObservableSymbols, epsilon, maxNumberOfIterations, scale)
+
+    model.dfsWrite(outputPath)
+    
     stop()
   }
 

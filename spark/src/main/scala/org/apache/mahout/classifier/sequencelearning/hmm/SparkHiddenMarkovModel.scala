@@ -32,3 +32,6 @@ import collection._
 import JavaConversions._
 
 import org.apache.mahout.sparkbindings._
+
+object SparkHiddenMarkovModel extends HiddenMarkovModel {
+}
