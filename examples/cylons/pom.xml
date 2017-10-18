@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.apache.mahout</groupId>
+  <artifactId>cylon-example</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <modules>
+    <module>common</module>
+
+    <module>frameprocessors</module>
+    <module>local-engine</module>
+    <module>httpserver</module>
+    <module>flink-engine</module>
+    <module>eigenfaces</module>
+    <module>examples</module>
+  </modules>
+
+  <properties>
+    <scala.version>2.11.8</scala.version>
+    <scala.compat.version>2.11</scala.compat.version>
+    <mahout.version>0.13.1-SNAPSHOT</mahout.version>
+    <!-- but spark 2.1 is so grrrreat.  They monkeyed with the way sc.binaryFiles works and
+     I can't get the image files to load more than -->
+    <spark.version>2.0.2</spark.version>
+    <spark.compat.version>2.0</spark.compat.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <!-- Fat Jar -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>fat-jar</id>
+            <!--<phase>package</phase>-->
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+
+</project>

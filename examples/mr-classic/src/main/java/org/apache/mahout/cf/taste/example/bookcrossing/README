@@ -1,0 +1,9 @@
+Code works with BookCrossing data set, which is not included in this distribution but is downloadable from
+http://www.informatik.uni-freiburg.de/~cziegler/BX/
+
+Data set originated from:
+
+Improving Recommendation Lists Through Topic Diversification,
+ Cai-Nicolas Ziegler, Sean M. McNee, Joseph A. Konstan, Georg Lausen;
+ Proceedings of the 14th International World Wide Web Conference (WWW '05), May 10-14, 2005, Chiba, Japan.
+ To appear.

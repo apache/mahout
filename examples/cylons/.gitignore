@@ -1,0 +1,13 @@
+
+.idea/
+*/target
+*jar
+*iml
+cylon-blog.iml
+data/lfw-deepfunneled
+*log
+
+
+
+
+
