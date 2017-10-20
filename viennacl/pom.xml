@@ -29,7 +29,7 @@
 
   <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
 
-  <name>Mahout Native VienniaCL OpenCL Bindings</name>
+  <name>Mahout Native ViennaCL OpenCL Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 

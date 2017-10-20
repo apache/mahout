@@ -944,8 +944,7 @@
     <profile>
       <id>spark-1.6</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
-        <property><name>spark-1.6</name></property>
+        <property><name>!spark-2.*</name></property>
       </activation>
       <properties>
         <spark.version>1.6.3</spark.version>
@@ -1112,6 +1111,7 @@
         </plugins>
       </build>
     </profile>
+
   </profiles>
   <reporting>
     <plugins>
