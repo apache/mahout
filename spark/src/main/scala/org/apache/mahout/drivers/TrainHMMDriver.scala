@@ -20,12 +20,13 @@ package org.apache.mahout.drivers
 import org.apache.mahout.classifier.sequencelearning.hmm.{SparkHiddenMarkovModel, _}
 import org.apache.mahout.common.Hadoop2HDFSUtil
 import org.apache.mahout.math.drm
+import org.apache.mahout.math._
 import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.drm.{CheckpointedDrm, drmParallelizeEmpty}
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.{`::`, dense}
 import scala.collection.immutable.HashMap
-
+import org.apache.mahout.sparkbindings._
 
 object TrainHMMDriver extends MahoutSparkDriver {
   // define only the options specific to TrainHMM
@@ -89,6 +90,20 @@ object TrainHMMDriver extends MahoutSparkDriver {
     }
   }
 
+  private def readTrainingSet() : DrmLike[Int]= {
+    val inputPath = parser.opts("input").asInstanceOf[String]
+    var rddA = mc.textFile(inputPath).map { line => line.split(' ') }
+    .map(numbers => new DenseVector(numbers.map(_.toInt)))
+    //val drmRddA: DrmRdd[Long] = rddA.map(a => new DenseVector(a))
+      //           .zipWithIndex()
+        //         .map(t => (t._2, t._1))
+val drmRddA: DrmRdd[Int] = rddA
+                 .zipWithIndex()
+                 .map(t => (t._2, t._1))
+    val observations = drmWrap(rdd= drmRddA)
+    observations
+  }
+  
   override def process(): Unit = {
     start()
 
@@ -98,8 +113,9 @@ object TrainHMMDriver extends MahoutSparkDriver {
     val numberOfObservableSymbols = parser.opts("numberOfObservableSymbols").asInstanceOf[Int]
     val epsilon = parser.opts("epsilon").asInstanceOf[Double]
     val maxNumberOfIterations = parser.opts("maxNumberOfIterations").asInstanceOf[Int]
-    val observations = drmParallelizeEmpty(100,25)
-    val model = SparkHiddenMarkovModel.train(observations, numberOfHiddenStates, 
+    
+    val trainingSet = readTrainingSet()
+    val model = SparkHiddenMarkovModel.train(trainingSet, numberOfHiddenStates, 
       numberOfObservableSymbols, epsilon, maxNumberOfIterations, scale)
 
     model.dfsWrite(outputPath)
