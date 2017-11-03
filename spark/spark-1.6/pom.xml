@@ -26,7 +26,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>mahout-spark_1.6_${scala.compat.version}</artifactId>
+    <artifactId>mahout-spark_${scala.compat.version}</artifactId>
     <name>Mahout Spark-1.6 Bindings</name>
     <description>
         Mahout Bindings for Apache Spark version 1.6
@@ -34,12 +34,7 @@
 
     <packaging>jar</packaging>
 
-    <properties>
-        <scala.compat.version>2.10</scala.compat.version>
-        <scala.version>2.10.4</scala.version>
-        <spark.compat.version>1.6</spark.compat.version>
-        <spark.version>1.6.3</spark.version>
-    </properties>
+
 
     <build>
         <sourceDirectory>../src/main</sourceDirectory>

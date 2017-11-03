@@ -253,7 +253,10 @@
     <profile>
       <id>scala-2.10</id>
       <activation>
-        <property><name>!scala-2.11</name></property>
+        <property>
+          <name>scala.compat.version</name>
+          <value>2.10</value>
+        </property>
       </activation>
       <properties>
         <scala.compat.version>2.10</scala.compat.version>
@@ -266,7 +269,10 @@
     <profile>
       <id>scala-2.11</id>
       <activation>
-        <property><name>scala-2.11</name></property>
+        <property>
+          <name>scala.compat.version</name>
+          <value>2.11</value>
+        </property>
       </activation>
       <properties>
         <scala.compat.version>2.11</scala.compat.version>

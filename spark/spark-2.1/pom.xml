@@ -26,7 +26,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>mahout-spark_2.1_${scala.compat.version}</artifactId>
+    <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+
     <name>Mahout Spark-2.1 Bindings</name>
     <description>
         Mahout Bindings for Apache Spark

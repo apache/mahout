@@ -208,6 +208,7 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -230,6 +231,7 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+      <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
@@ -306,10 +308,17 @@
     </profile>
     <profile>
       <id>spark-1.6</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property><name>!spark-2.*</name></property>
+      </activation>
       <modules><module>spark-1.6</module></modules>
     </profile>
     <profile>
       <id>spark-2.0</id>
+      <activation>
+        <property><name>spark-2.0</name></property>
+      </activation>
       <modules><module>spark-2.0</module></modules>
     </profile>
     <profile>

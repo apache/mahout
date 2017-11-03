@@ -104,6 +104,7 @@
     <url>https://git-wip-us.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
     <tag>master</tag>
   </scm>
+
   <properties>
     <skipTests>false</skipTests>
     <maven.compiler.source>1.7</maven.compiler.source>
@@ -120,8 +121,8 @@
     <lucene.version>5.5.2</lucene.version>
     <slf4j.version>1.7.22</slf4j.version>
     <scala.compat.version>2.10</scala.compat.version>
-    <scala.version>2.10.4</scala.version>
-    <spark.version>1.6.3</spark.version> <!-- 1.6.3, 2.0.2, 2.1.0 all tested -->
+    <!--<scala.version>2.10.4</scala.version>-->
+    <!--<spark.version>1.6.3</spark.version> &lt;!&ndash; 1.6.3, 2.0.2, 2.1.0 all tested &ndash;&gt;-->
     <flink.version>1.1.4</flink.version>
     <h2o.version>0.1.25</h2o.version>
     <jackson.version>2.7.4</jackson.version>
@@ -216,41 +217,7 @@
         <optional>true</optional>
       </dependency>
 
-      <dependency>
-        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
-        <groupId>${project.groupId}</groupId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
-        <groupId>${project.groupId}</groupId>
-        <version>${project.version}</version>
-        <classifier>tests</classifier>
-      </dependency>
 
-      <dependency>
-        <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-        <groupId>${project.groupId}</groupId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <artifactId>mahout-flink_${scala.compat.version}</artifactId>
-        <groupId>${project.groupId}</groupId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
-        <groupId>${project.groupId}</groupId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
-        <groupId>${project.groupId}</groupId>
-        <version>${project.version}</version>
-      </dependency>
 
 
       <!-- 3rd party  -->
@@ -944,36 +911,42 @@
     </profile>
     <profile>
       <id>spark-1.6</id>
+      <modules>
+        <module>spark/spark-1.6</module>
+      </modules>
       <activation>
+        <activeByDefault>true</activeByDefault>
         <property><name>!spark-2.*</name></property>
       </activation>
       <properties>
-        <spark.version>1.6.3</spark.version>
         <spark.compat.version>1.6</spark.compat.version>
+        <spark.version>1.6.3</spark.version>
       </properties>
     </profile>
     <profile>
       <id>spark-2.0</id>
+      <modules>
+        <module>spark/spark-2.0</module>
+      </modules>
       <activation>
         <property><name>spark-2.0</name></property>
       </activation>
       <properties>
-        <spark.version>2.0.2</spark.version>
         <spark.compat.version>2.0</spark.compat.version>
-          <scala.compat.version>2.11</scala.compat.version>
-          <scala.version>2.11.8</scala.version>
+        <spark.version>2.0.2</spark.version>
       </properties>
     </profile>
     <profile>
       <id>spark-2.1</id>
+      <modules>
+        <module>spark/spark-2.1</module>
+      </modules>
       <activation>
         <property><name>spark-2.1</name></property>
       </activation>
       <properties>
-        <spark.version>2.1.0</spark.version>
         <spark.compat.version>2.1</spark.compat.version>
-          <scala.compat.version>2.11</scala.compat.version>
-          <scala.version>2.11.8</scala.version>
+        <spark.version>2.1.1</spark.version>
       </properties>
     </profile>
     <profile>
