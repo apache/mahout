@@ -1,15 +1,22 @@
 @charset "utf-8";
 
-// Variables
+// Override Bootstrap Variables
 
-$blue: #23a9ff;
+$blue: #00bcd4;
 
 // Import bootstrap-sass
 @import "../assets/vendor/bootstrap/scss/bootstrap.scss";
 
+// Custom Variables
+
+// Set this to the footer height - used for sticky footer
+$footer-height: 60px;
+
 // Import partials.
 @import
+  "mahout/mixins",
   "mahout/base",
   "mahout/layout",
+  "mahout/posts",
   "mahout/syntax-highlighting"
 ;
