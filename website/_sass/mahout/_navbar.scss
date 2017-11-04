@@ -1,0 +1,16 @@
+.navbar-mahout {
+  border-bottom: 1px solid $gray-200;
+  .navbar-nav > .nav-item > .nav-link {
+    @include font-heading;
+    text-transform: uppercase;
+    letter-spacing: .2rem;
+    font-size: 80%;
+    color: $body-color;
+    i {
+      font-size: 1rem;
+    }
+    &:hover {
+      color: $blue;
+    }
+  }
+}

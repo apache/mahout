@@ -1,6 +1,8 @@
 title : Apache Mahout
 description: Distributed Linear Algebra
 
+mahout-version: 0.13.0
+
 author :
   name : The Apache Software Foundation
   email : dev@mahout.apache.org
