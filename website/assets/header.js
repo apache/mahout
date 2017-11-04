@@ -40,9 +40,9 @@ SineWaveGenerator.prototype._resizeWidth = function() {
   this.dpr = window.devicePixelRatio || 1;
 
   this.width = this.el.width = document.body.clientWidth * this.dpr;
-  this.height = this.el.height = 650 * this.dpr;
+  this.height = this.el.height = 700 * this.dpr;
   this.el.style.width = document.body.clientWidth + 'px';
-  this.el.style.height = 650 + 'px';
+  this.el.style.height = 700 + 'px';
 
   this.waveWidth = this.width * 0.95;
   this.waveLeft = this.width * 0.25;
