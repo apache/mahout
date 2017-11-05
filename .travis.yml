@@ -32,7 +32,7 @@ branches:
 env:
   global:
     - JAVA_OPTS=-Xmx3g
-    - TEST_MODULES="hdfs,math,math-scala,spark"
+    - TEST_MODULES=":mahout-hdfs,:mahout-math"
     - STANDARD_BUILD_OPTS="-Dmaven.javadoc.skip=true -B -V"
     - PROFILES="-Ptravis"
     - SPARK_1_6=http://d3kbcqa49mib13.cloudfront.net/spark-1.6.3-bin-hadoop2.6.tgz
@@ -44,39 +44,39 @@ matrix:
   include:
     # Build Spark 1.6.3 , Scala 2.10
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pscala-2.10 -Pspark-1.6" SPARK_BIN=$SPARK_1_6
+      env: PROFILES="${PROFILES} -Pscala-2.10,spark-1.6" SPARK_BIN=$SPARK_1_6 TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.10,:mahout-spark_1.6_2.10"
 
-    # Build Spark 2.0.2 , Scala 2.11 - replace -D... with profiles when available
+    # Build Spark 2.0.2 , Scala 2.11
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11" SPARK_BIN=$SPARK_2_0
+      env: PROFILES="${PROFILES} -Pscala-2.11,spark-2.0" SPARK_BIN=$SPARK_2_0 TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.11,:mahout-spark_2.0_2.11"
 
-    # Build Spark 2.1.0 , Scala 2.11 - replace -D... with profiles when available
+    # Build Spark 2.1.0 , Scala 2.11
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11" SPARK_BIN=$SPARK_2_1
+      env: PROFILES="${PROFILES} -Pscala-2.11,spark-2.1" SPARK_BIN=$SPARK_2_1 TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.11,:mahout-spark_2.1_2.11"
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl" SPARK_BIN=$SPARK_1_6
+      env: PROFILES="${PROFILES} -Pscala-2.10,spark-1.6,viennacl" SPARK_BIN=$SPARK_1_6 TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.10,:mahout-spark_1.6_2.10" # we don't test viennacl on travis
 
-    # Build Spark 2.0.2 , Scala 2.11, ViennaCL - replace -D... with profiles when available
+    # Build Spark 2.0.2 , Scala 2.11, ViennaCL
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_0
+      env: PROFILES="${PROFILES} -Pscala-2.11,spark-2.0,viennacl" SPARK_BIN=$SPARK_2_0 TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.11,:mahout-spark_2.0_2.11" # we don't test viennacl on travis
 
-    # Build Spark 2.1.0 , Scala 2.11, ViennaCL - replace -D... with profiles when available
+    # Build Spark 2.1.0 , Scala 2.11, ViennaCL
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_1
+      env: PROFILES="${PROFILES} -Pscala-2.11,spark-2.1,viennacl" SPARK_BIN=$SPARK_2_1 TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.11,:mahout-spark_2.1_2.11" # we don't test viennacl on travis
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL-OMP
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_1_6
+      env: PROFILES="${PROFILES} -Pscala-2.10,spark-1.6,viennacl-omp" TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.10,:mahout-spark_1.6_2.10,:mahout-native-viennacl-omp_2.10" SPARK_BIN=$SPARK_1_6
 
-    # Build Spark 2.0.2 , Scala 2.11, ViennaCL-OMP - replace -D... with profiles when available
+    # Build Spark 2.0.2 , Scala 2.11, ViennaCL-OMP
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_0
+      env: PROFILES="${PROFILES} -Pscala-2.11,spark-2.0,viennacl-omp" TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.11,:mahout-spark_2.0_2.11,:mahout-native-viennacl-omp_2.11" SPARK_BIN=$SPARK_2_0
 
-    # Build Spark 2.1.0 , Scala 2.11, ViennaCL-OMP - replace -D... with profiles when available
+    # Build Spark 2.1.0 , Scala 2.11, ViennaCL-OMP
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_1
+      env: PROFILES="${PROFILES} -Pscala-2.11,spark-2.1,viennacl-omp" TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.11,:mahout-spark_2.1_2.11,:mahout-native-viennacl-omp_2.11" SPARK_BIN=$SPARK_2_1
 
 git:
   depth: 10

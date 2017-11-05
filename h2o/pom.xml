@@ -27,13 +27,13 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
+  <artifactId>mahout-h2o</artifactId>
   <name>Mahout H2O backend</name>
   <description>
     H2O Backend for Mahout DSL
   </description>
 
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
 
 
@@ -47,10 +47,10 @@
         <executions>
           <execution>
             <id>copy</id>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
             <configuration>
               <tasks>
-                <copy file="target/mahout-h2o_${scala.compat.version}-${version}.jar" tofile="../mahout-h2o_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-h2o_${scala.compat.version}-${project.version}.jar" tofile="../../mahout-h2o_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -65,13 +65,13 @@
         <executions>
           <execution>
             <id>dependency-reduced</id>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
             <goals>
               <goal>single</goal>
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+                <descriptor>../src/main/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
@@ -92,21 +92,22 @@
         <executions>
           <execution>
             <id>add-scala-sources</id>
-            <phase>initialize</phase>
+            <!--<phase>initialize</phase>-->
             <goals>
               <goal>add-source</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-compile</id>
-            <phase>process-resources</phase>
+            <!--<phase>process-resources</phase>-->
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <!--<phase>process-test-resources</phase>-->
+            <phase/>
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -179,6 +180,7 @@
    <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+      <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
    </dependency>
@@ -209,6 +211,7 @@
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <version>3.0.3</version>
     </dependency>
 
   </dependencies>
@@ -239,5 +242,24 @@
         </plugins>
       </build>
     </profile>
+      <profile>
+          <id>all-scala</id>
+          <modules>
+              <module>scala-2.10</module>
+              <module>scala-2.11</module>
+          </modules>
+      </profile>
+      <profile>
+          <id>scala-2.10</id>
+          <modules>
+              <module>scala-2.10</module>
+          </modules>
+      </profile>
+      <profile>
+          <id>scala-2.11</id>
+          <modules>
+              <module>scala-2.11</module>
+          </modules>
+      </profile>
   </profiles>
 </project>
