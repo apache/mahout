@@ -90,17 +90,16 @@ object TrainHMMDriver extends MahoutSparkDriver {
     }
   }
 
-  private def readTrainingSet() : DrmLike[Int]= {
+  private def readTrainingSet() : DrmLike[Long]= {
     val inputPath = parser.opts("input").asInstanceOf[String]
-    var rddA = mc.textFile(inputPath).map { line => line.split(' ') }
-    .map(numbers => new DenseVector(numbers.map(_.toInt)))
-    //val drmRddA: DrmRdd[Long] = rddA.map(a => new DenseVector(a))
-      //           .zipWithIndex()
-        //         .map(t => (t._2, t._1))
-val drmRddA: DrmRdd[Int] = rddA
+    var rddA = mc.textFile(inputPath).map ( line => line.split(" ") )
+    .map(numbers => new DenseVector(numbers.map(_.toDouble)))
+
+    val drmRddA: DrmRdd[Long] = rddA
                  .zipWithIndex()
                  .map(t => (t._2, t._1))
-    val observations = drmWrap(rdd= drmRddA)
+    
+    val observations = drmWrap(rdd = drmRddA)
     observations
   }
   
