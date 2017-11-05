@@ -35,6 +35,12 @@
 
   <packaging>pom</packaging>
 
+  <modules>
+    <module>spark-1.6</module>
+    <module>spark-2.0</module>
+    <module>spark-2.1</module>
+  </modules>
+
   <build>
     <plugins>
 
@@ -46,36 +52,8 @@
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
 
-      <plugin>
-        <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-scala-sources</id>
-            <!--<phase>initialize</phase>-->
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>scala-compile</id>
-            <!--<phase>process-resources</phase>-->
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>scala-test-compile</id>
-            <!--<phase>process-test-resources</phase>-->
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
 
       <!--this is what scalatest recommends to do to enable scala tests -->
-
       <!-- disable surefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -133,18 +111,18 @@
             <goals>
               <goal>test-jar</goal>
             </goals>
-            <phase>package</phase>
+            <!--<phase>package</phase>-->
           </execution>
-          <execution>
-            <id>default-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>spark_${spark.compat.version}</classifier>
-            </configuration>
-          </execution>
+          <!--<execution>-->
+            <!--<id>default-jar</id>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+              <!--<goal>jar</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+              <!--<classifier>spark_${spark.compat.version}</classifier>-->
+            <!--</configuration>-->
+          <!--</execution>-->
         </executions>
       </plugin>
       <!-- remove jars from top directory on clean -->
@@ -193,17 +171,17 @@
   <dependencies>
 
     <!-- spark stuff - need to put this first to use spark's mahout dependencies in tests -->
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_${scala.compat.version}</artifactId>
-      <version>${spark.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.spark</groupId>-->
+      <!--<artifactId>spark-core_${scala.compat.version}</artifactId>-->
+      <!--<version>${spark.version}</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-mllib_${scala.compat.version}</artifactId>
-      <version>${spark.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.spark</groupId>-->
+      <!--<artifactId>spark-mllib_${scala.compat.version}</artifactId>-->
+      <!--<version>${spark.version}</version>-->
+    <!--</dependency>-->
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
@@ -284,7 +262,7 @@
                 <!--<phase>package</phase>-->
               </execution>
               <execution>
-                <id>default-jar</id>
+                <id>spark-1.6</id>
                 <!--<phase>package</phase>-->
                 <goals>
                   <goal>jar</goal>
@@ -298,19 +276,18 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>all-spark</id>
-      <modules>
-        <module>spark-1.6</module>
-        <module>spark-2.0</module>
-        <module>spark-2.1</module>
-      </modules>
-    </profile>
+    <!--<profile>-->
+      <!--<id>all-spark</id>-->
+      <!--<modules>-->
+        <!--<module>spark-1.6</module>-->
+        <!--<module>spark-2.0</module>-->
+        <!--<module>spark-2.1</module>-->
+      <!--</modules>-->
+    <!--</profile>-->
     <profile>
       <id>spark-1.6</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
-        <property><name>!spark-2.*</name></property>
+        <property><name>spark-1.6</name></property>
       </activation>
       <modules><module>spark-1.6</module></modules>
     </profile>

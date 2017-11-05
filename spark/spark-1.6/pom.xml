@@ -26,13 +26,17 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-    <name>Mahout Spark-1.6 Bindings</name>
+    <artifactId>mahout-spark1.6_${scala.compat.version}</artifactId>
+    <name>Mahout Spark-1.6 Bindings (Scala ${scala.compat.version})</name>
     <description>
         Mahout Bindings for Apache Spark version 1.6
     </description>
 
     <packaging>jar</packaging>
+    <properties>
+      <spark.version>1.6.3</spark.version>
+      <spark.compat.version>1.6</spark.compat.version>
+    </properties>
 
 
 
@@ -40,27 +44,47 @@
         <sourceDirectory>../src/main</sourceDirectory>
         <testSourceDirectory>../src/test</testSourceDirectory>
         <plugins>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-scala-sources</id>
-                        <phase>initialize</phase>
-                    </execution>
-                    <execution>
-                        <id>scala-compile</id>
-                        <phase>process-resources</phase>
-                    </execution>
-                    <execution>
-                        <id>scala-test-compile</id>
-                        <phase>process-test-resources</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>add-scala-sources</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>add-source</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>scala-compile</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>scala-test-compile</id>
+                <phase>process-test-resources</phase>
+                <goals>
+                  <goal>testCompile</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_${scala.compat.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_${scala.compat.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+    </dependencies>
 </project>

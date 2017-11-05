@@ -52,7 +52,7 @@ matrix:
 
     # Build Spark 2.1.0 , Scala 2.11
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.1,scala-2.11" SPARK_BIN=$SPARK_2_1 TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.11,:mahout-spark_2.1_2.11"
+      env: PROFILES="${PROFILES} -Pscala-2.11,spark-2.1" SPARK_BIN=$SPARK_2_1 TEST_MODULES="${TEST_MODULES},:mahout-math-scala_2.11,:mahout-spark_2.1_2.11"
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL
     - jdk: "openjdk7"

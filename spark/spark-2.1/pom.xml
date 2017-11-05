@@ -26,9 +26,9 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+    <artifactId>mahout-spark2.1_${scala.compat.version}</artifactId>
 
-    <name>Mahout Spark-2.1 Bindings</name>
+    <name>Mahout Spark-2.1 Bindings (Scala ${scala.compat.version})</name>
     <description>
         Mahout Bindings for Apache Spark
     </description>
@@ -36,10 +36,10 @@
     <packaging>jar</packaging>
 
     <properties>
-        <scala.compat.version>2.11</scala.compat.version>
-        <scala.version>2.11.8</scala.version>
         <spark.compat.version>2.1</spark.compat.version>
         <spark.version>2.1.1</spark.version>
+        <scala.version>2.11.6</scala.version>
+        <scala.compat.version>2.11</scala.compat.version>
     </properties>
 
     <build>
@@ -53,20 +53,40 @@
                     <execution>
                         <id>add-scala-sources</id>
                         <phase>initialize</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>scala-compile</id>
                         <phase>process-resources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>scala-test-compile</id>
                         <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_${scala.compat.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_${scala.compat.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+    </dependencies>
 </project>
