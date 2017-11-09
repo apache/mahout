@@ -23,7 +23,8 @@ header.mahout-header {
     top: 0;
     img {
       margin-bottom: 2rem;
-      height: 8rem;
+      width: 100%;
+      max-width: 800px;
     }
   }
   .mahout-header-lower {
