@@ -30,7 +30,7 @@ import org.apache.mahout.sparkbindings._
 
 object TrainHMMDriver extends MahoutSparkDriver {
   // define only the options specific to TrainHMM
-  private final val trainHMMOptipns = HashMap[String, Any](
+  private final val trainHMMOptions = HashMap[String, Any](
     "appName" -> "TrainHMMDriver")
 
   /**
@@ -45,19 +45,23 @@ object TrainHMMDriver extends MahoutSparkDriver {
       parseIOOptions(numInputs = 1)
 
       // Algorithm control options--driver specific
-      opts = opts ++ trainHMMOptipns
+      opts = opts ++ trainHMMOptions
       note("\nAlgorithm control options:")
 
-      // Overwrite the output directory (with the model) if it exists?  Default: false
-      opts = opts + ("numberOfHiddenStates" -> false)
-      opt[Int]("numberOfHiddenStates") abbr "nh" action { (_, options) =>
-        options + ("numberOfHiddenStates" -> true)
-      } text "Number of hidden states"
+      // The number of hidden states
+      opt[Int]("numberOfHiddenStates") abbr "nh" required() action { (x, options) =>
+        options + ("numberOfHiddenStates" -> x)
+      } text "Number of hidden states" +
+      trainHMMOptions("numberOfHiddenStates") validate { x =>
+        if (x > 0) success else failure("Option --numberOfHiddenStates must be > 0")
+      }
 
-      opts = opts + ("numberOfObservableSymbols" -> false)
-      opt[Int]("numberOfOfObservableSymbols") abbr "no" action { (_, options) =>
-        options + ("numberOfObservableSymbols" -> true)
-      } text "Number of observable symbols"
+      opt[Int]("numberOfOfObservableSymbols") abbr "no" required()  action { (x, options) =>
+        options + ("numberOfObservableSymbols" -> x)
+      } text "Number of observable symbols" +
+      trainHMMOptions("numberOfOfObservableSymbols") validate { x =>
+        if (x > 0) success else failure("Option --numberOfOfObservableSymbols must be > 0")
+      }
 
       // epsilon
       opts = opts + ("epsilon" -> 1.0)
@@ -67,10 +71,12 @@ object TrainHMMDriver extends MahoutSparkDriver {
         if (x > 0) success else failure("Option --epsilon must be > 0")
       }
 
-      opts = opts + ("maxNumberOfIterations" -> false)
-      opt[Int]("maxNumberOfIterations") abbr "no" action { (_, options) =>
-        options + ("maxNumberOfIterations" -> true)
-      } text "Maximum Number of Iterations"
+      opt[Int]("maxNumberOfIterations") abbr "no" required() action { (x, options) =>
+        options + ("maxNumberOfIterations" -> x)
+      } text "Maximum Number of Iterations" +
+      trainHMMOptions("maxNumberOfIterations") validate { x =>
+        if (x > 0) success else failure("Option --maxNumberOfIterations must be > 0")
+      }
       
       // default scale is false
       opts = opts + ("scale" -> false)
@@ -78,12 +84,17 @@ object TrainHMMDriver extends MahoutSparkDriver {
         options + ("scale" -> true)
       } text "Rescale forward and backward variables after each iteration, Default: false."
 
+      opt[String]("pathToInitialModel") abbr ("pm") action { (x, options) =>
+        options + ("pathToModel" -> x)
+      } text ("Path to the file with Initial Model parameters")
+
       // Spark config options--not driver specific
       parseSparkOptions()
 
       help("help") abbr "h" text "prints this usage text\n"
 
     }
+
     parser.parse(args, parser.opts) map { opts =>
       parser.opts = opts
       process
