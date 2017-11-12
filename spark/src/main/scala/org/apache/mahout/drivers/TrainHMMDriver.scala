@@ -31,6 +31,9 @@ import org.apache.mahout.sparkbindings._
 object TrainHMMDriver extends MahoutSparkDriver {
   // define only the options specific to TrainHMM
   private final val trainHMMOptions = HashMap[String, Any](
+    "numberOfHiddenStates" -> 0,
+    "numberOfOfObservableSymbols" -> 0,
+    "maxNumberOfIterations" -> 0,
     "appName" -> "TrainHMMDriver")
 
   /**
@@ -42,7 +45,17 @@ object TrainHMMDriver extends MahoutSparkDriver {
       head("spark-trainhmm", "Mahout 0.10.0")
 
       // Input output options, non-driver specific
-      parseIOOptions(numInputs = 1)
+      note("Input, option")
+      opt[String]('i', "input") required() action { (x, options) =>
+        options + ("input" -> x)
+      } text ("Input: path to training data " +
+        " (required)")
+
+      note("Output, option")
+      opt[String]('o', "output") required() action { (x, options) =>
+        options + ("output" -> x)
+      } text ("Output: path to store trained model " +
+        " (required)")
 
       // Algorithm control options--driver specific
       opts = opts ++ trainHMMOptions
