@@ -32,19 +32,16 @@ import JavaConversions._
  * @param numHiddenStates number of hidden states
  * @param numOutputStates number of output states
  */
-class HMMModel(val numHiddenStates: Int,
-               val numOutputStates: Int)  extends java.io.Serializable {
-
-  val numberHiddenStates: Int = numHiddenStates
-  val numberOutputSymbols: Int = numOutputStates
-  val transitionMatrix: Matrix = null
-  val emissionMatrix: Matrix = null
-  val initialProbabilities: Vector = null
+class HMMModel(val numberOfHiddenStates: Int,
+               val numberOfOutputSymbols: Int,
+	       val transitionMatrix: Matrix = null,
+	       val emissionMatrix: Matrix = null,
+  	       val initialProbabilities: Vector = null)  extends java.io.Serializable {
 
   validate()
 
-  def numberOfHiddenStates: Int = {
-      numberHiddenStates
+  def numHiddenStates: Int = {
+      numberOfHiddenStates
   }
 
   /**

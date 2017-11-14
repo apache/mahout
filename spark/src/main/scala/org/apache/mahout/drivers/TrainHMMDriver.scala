@@ -97,8 +97,9 @@ object TrainHMMDriver extends MahoutSparkDriver {
         options + ("scale" -> true)
       } text "Rescale forward and backward variables after each iteration, Default: false."
 
+      opts = opts + ("pathToInitialModel" -> "")
       opt[String]("pathToInitialModel") abbr ("pm") action { (x, options) =>
-        options + ("pathToModel" -> x)
+        options + ("pathToInitialModel" -> x)
       } text ("Path to the file with Initial Model parameters")
 
       // Spark config options--not driver specific
@@ -126,7 +127,27 @@ object TrainHMMDriver extends MahoutSparkDriver {
     val observations = drmWrap(rdd = drmRddA)
     observations
   }
-  
+
+  private def createInitialModel(): HMMModel = {
+    val pathToModel = parser.opts("pathToInitialModel").asInstanceOf[String]
+    val numberOfHiddenStates = parser.opts("numberOfHiddenStates").asInstanceOf[Int]
+    val numberOfObservableSymbols = parser.opts("numberOfObservableSymbols").asInstanceOf[Int]
+    var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
+    var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
+    var initialProbabilities = new DenseVector(numberOfHiddenStates)
+    if (pathToModel != "")
+    {
+//var rddA = sc.textFile("initmodel").map ( line => line.split(" ") ).map(n => new DenseVector(n.map(_.toDouble))).collect
+        new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+    }
+    else
+    {
+	// create random initial model
+        new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+    }
+
+  }
+
   override def process(): Unit = {
     start()
 
@@ -138,7 +159,8 @@ object TrainHMMDriver extends MahoutSparkDriver {
     val maxNumberOfIterations = parser.opts("maxNumberOfIterations").asInstanceOf[Int]
     
     val trainingSet = readTrainingSet()
-    val model = SparkHiddenMarkovModel.train(trainingSet, numberOfHiddenStates, 
+    val initModel = createInitialModel()
+    val model = SparkHiddenMarkovModel.train(initModel, trainingSet, numberOfHiddenStates, 
       numberOfObservableSymbols, epsilon, maxNumberOfIterations, scale)
 
     model.dfsWrite(outputPath)
