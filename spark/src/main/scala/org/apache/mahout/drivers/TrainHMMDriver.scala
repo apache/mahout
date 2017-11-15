@@ -137,8 +137,21 @@ object TrainHMMDriver extends MahoutSparkDriver {
     var initialProbabilities = new DenseVector(numberOfHiddenStates)
     if (pathToModel != "")
     {
-//var rddA = sc.textFile("initmodel").map ( line => line.split(" ") ).map(n => new DenseVector(n.map(_.toDouble))).collect
-        new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+        var rddA = mc.textFile(pathToModel)
+    		.map ( line => line.split(" ") )
+		.map(n => new DenseVector(n.map(_.toDouble)))
+		.collect
+
+	initialProbabilities = rddA(0)
+	for (index <- 1 to numberOfHiddenStates) {
+	    transitionMatrix.assignRow(index - 1, rddA(index));
+	}
+
+	for (index <- numberOfHiddenStates + 1 to numberOfHiddenStates * 2) {
+	    emissionMatrix.assignRow(index - numberOfHiddenStates - 1, rddA(index));
+	}
+
+	new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
     }
     else
     {

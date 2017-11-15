@@ -29,7 +29,7 @@ import collection._
 import scala.collection.JavaConversions._
 
 
-trait HiddenMarkovModel extends java.io.Serializable{
+trait HiddenMarkovModel extends java.io.Serializable {
 
   
 
@@ -44,7 +44,16 @@ trait HiddenMarkovModel extends java.io.Serializable{
       	    scale: Boolean = false
             ): HMMModel = {
 
-    new HMMModel(0,0)
+	    var curModel = initModel
+	    for (index <- 0 to maxNumberOfIterations - 1) {
+	    	var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
+		var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
+    		var initialProbabilities = new DenseVector(numberOfHiddenStates)
+
+		curModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+	    }
+
+	    curModel
   }
 
   
