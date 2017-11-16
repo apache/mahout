@@ -56,8 +56,9 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark_${spark.compat.version}_${scala.compat.version}</artifactId>
+      <artifactId>mahout-spark_${scala.compat.version}</artifactId>
       <version>${mahout.version}</version>
+      <classifier>spark_${spark.compat.version}</classifier>
     </dependency>
 
     <!-- I'm cheating here, I have built Mahout locally with `mvn clean install -Pviennacl-omp`
