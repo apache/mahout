@@ -110,7 +110,7 @@ These should be added to the your ~/.bashrc file.
 
 ###### Building Mahout with Apache Maven
 
-Currently Mahout has 3 builds.  From the  $MAHOUT_HOME directory we may issue the commands to build each using mvn profiles.
+From the  $MAHOUT_HOME directory we may issue the commands to build each using mvn profiles.
 
 JVM only:
 ```
@@ -125,4 +125,69 @@ JVM with native OpenMP and OpenCL for Level 2 and level 3 matrix/vector Multipli
 ```
 mvn clean install -Pviennacl -Phadoop2 -DskipTests
 ```
- 
+
+### Changing Scala Version
+
+To change the Scala version used it is possible to use profiles, however the resulting artifacts seem to have trouble being resolved with SBT.
+
+```bash
+mvn clean install -Pscala-2.11
+```
+
+Maven is able to resolve the resulting artifacts effectively, this will also work if the goal is simply to use the Mahout-Shell. However if the goal is to build with SBT, the following tool should be used
+
+```bash
+cd $MAHOUT_HOME/buildtools
+./change-scala-version.sh 2.11
+```
+
+Now go back to `$MAHOUT_HOME` and execute
+
+```bash
+mvn clean install -Pscala-2.11
+```
+
+**NOTE:** you still need to pass the `-Pscala-2.11` profile, as this determines and propegates the minor scala version (e.g. 2.11.8)
+
+
+### The Distribution Profile
+
+The distribution profile, among other things, will produce the same artifact for multiple Scala and Spark versions.
+
+Specifically, in addition to creating all of the
+
+Default Targets:
+- Spark 1.6 Bindings, Scala-2.10
+- Mahout-Math Scala-2.10
+- ViennaCL Scala-2.10*
+- ViennaCL-OMP Scala-2.10*
+- H2O Scala-2.10
+
+It will also create:
+- Spark 2.0 Bindings, Scala-2.11
+- Spark 2.1 Bindings, Scala-2.11
+- Mahout-Math Scala-2.11
+- ViennaCL Scala-2.11*
+- ViennaCL-OMP Scala-2.11*
+- H2O Scala-2.11
+
+Note: * ViennaCLs are only created if the `viennacl` or `viennacl-omp` profiles are activated.
+
+By default, this phase will execute the `package` lifecycle goal on all built "extra" varients.
+
+E.g. if you were to run
+
+```bash
+mvn clean install -Pdistribution
+```
+
+You will `install` all of the "Default Targets" but only `package` the "Also created".
+
+If you wish to `install` all of the above, you can set the `lifecycle.target` switch as follows:
+
+```bash
+mvn clean install -Pdistribution -Dlifecycle.target=install
+```
+
+
+

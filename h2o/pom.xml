@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
+  <artifactId>mahout-h2o_2.10</artifactId>
   <name>Mahout H2O backend</name>
   <description>
     H2O Backend for Mahout DSL

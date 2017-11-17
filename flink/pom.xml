@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-flink_${scala.compat.version}</artifactId>
+  <artifactId>mahout-flink_2.10</artifactId>
   <name>Mahout Flink bindings</name>
   <description>
     Mahout Bindings for Apache Flink

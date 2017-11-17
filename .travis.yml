@@ -44,39 +44,39 @@ matrix:
   include:
     # Build Spark 1.6.3 , Scala 2.10
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pscala-2.10 -Pspark-1.6" SPARK_BIN=$SPARK_1_6
+      env: PROFILES="${PROFILES} -Pscala-2.10 -Pspark-1.6" SPARK_BIN=$SPARK_1_6 SCALA_VERSION="2.10"
 
     # Build Spark 2.0.2 , Scala 2.11 - replace -D... with profiles when available
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11" SPARK_BIN=$SPARK_2_0
+      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11" SPARK_BIN=$SPARK_2_0 SCALA_VERSION="2.11"
 
     # Build Spark 2.1.0 , Scala 2.11 - replace -D... with profiles when available
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11" SPARK_BIN=$SPARK_2_1
+      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11" SPARK_BIN=$SPARK_2_1 SCALA_VERSION="2.11"
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl" SPARK_BIN=$SPARK_1_6
+      env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl" SPARK_BIN=$SPARK_1_6 SCALA_VERSION="2.10"
 
     # Build Spark 2.0.2 , Scala 2.11, ViennaCL - replace -D... with profiles when available
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_0
+      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_0 SCALA_VERSION="2.11"
 
     # Build Spark 2.1.0 , Scala 2.11, ViennaCL - replace -D... with profiles when available
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_1
+      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_1 SCALA_VERSION="2.11"
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL-OMP
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_1_6
+      env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_1_6 SCALA_VERSION="2.10"
 
     # Build Spark 2.0.2 , Scala 2.11, ViennaCL-OMP - replace -D... with profiles when available
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_0
+      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_0 SCALA_VERSION="2.11"
 
     # Build Spark 2.1.0 , Scala 2.11, ViennaCL-OMP - replace -D... with profiles when available
     - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_1
+      env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11 -Pviennacl-omp" TEST_MODULES="${TEST_MODULES},viennacl-omp" SPARK_BIN=$SPARK_2_1 SCALA_VERSION="2.11"
 
 git:
   depth: 10
@@ -107,6 +107,7 @@ before_install:
 
 
 script:
+  - buildtools/change-scala-version.sh $SCALA_VERSION
   # Build Mahout
   - mvn clean package $PROFILES $STANDARD_BUILD_OPTS -DskipTests
   # Start Spark
