@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+  <artifactId>mahout-native-viennacl-omp_2.10</artifactId>
 
   <name>Mahout Native ViennaCL OpenMP Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
