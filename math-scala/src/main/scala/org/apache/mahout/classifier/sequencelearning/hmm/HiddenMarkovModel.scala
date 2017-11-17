@@ -30,43 +30,72 @@ import scala.collection.JavaConversions._
 
 
 trait HiddenMarkovModel extends java.io.Serializable {
-
   
+  def computeForwardVariables(initModel: HMMModel,
+    observationSequence:Array[Int],
+    scale: Boolean
+  ): (Matrix, Option[Array[Double]]) = {
+    var forwardVariables = new DenseMatrix(0,0)
+    var scalingFactors = None: Option[Array[Double]]
 
+    if (scale) {
+      scalingFactors = Some(new Array(observationSequence.length));
+    } else {
+      // Initialization
+      for (index <- 0 to initModel.getNumberOfHiddenStates) {
+        forwardVariables.setQuick(0, index, initModel.getInitialProbabilities.getQuick(index)
+	    			* initModel.getEmissionMatrix.getQuick(index, observationSequence(0)));
+      }
 
+      // Induction
+      for (indexT <- 1 to observationSequence.length) {
+	for (indexN <- 0 to initModel.getNumberOfHiddenStates) {
+	  var sum:Double = 0.0
+	  for (indexM <- 0 to initModel.getNumberOfHiddenStates) {
+	    sum += forwardVariables.getQuick(indexT - 1, indexM) * initModel.getTransitionMatrix.getQuick(indexM, indexN);
+	  }
+
+	  forwardVariables.setQuick(indexT, indexN, sum * initModel.getEmissionMatrix.getQuick(indexN, observationSequence(indexT)))
+	}
+      }
+    }
+
+    (forwardVariables, scalingFactors)
+  }
+
+  def computeBackwardVariables(initModel: HMMModel,
+    observationSequence:Array[Int],
+    scale: Boolean,
+    scalingFactors: Array[Double]
+  ): Matrix = {
+    var backwardVariables = new DenseMatrix(0,0)
+    backwardVariables
+  }
   
   def train(initModel: HMMModel,
-	    observations: DrmLike[Long],
-            numberOfHiddenStates:Int,
-	    numberOfObservableSymbols:Int,
-	    epsilon: Double,
-	    maxNumberOfIterations:Int,
-      	    scale: Boolean = false
-            ): HMMModel = {
+    observations: DrmLike[Long],
+    numberOfHiddenStates:Int,
+    numberOfObservableSymbols:Int,
+    epsilon: Double,
+    maxNumberOfIterations:Int,
+    scale: Boolean = false
+  ): HMMModel = {
 
-	    var curModel = initModel
-	    for (index <- 0 to maxNumberOfIterations - 1) {
-	    	var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
-		var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
-    		var initialProbabilities = new DenseVector(numberOfHiddenStates)
+    var curModel = initModel
+    for (index <- 0 to maxNumberOfIterations - 1) {
+      var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
+      var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
+      var initialProbabilities = new DenseVector(numberOfHiddenStates)
 
-		curModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
-	    }
+      curModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+    }
 
-	    curModel
+    curModel
   }
-
-  
-
  
   def test[K: ClassTag](model: HMMModel
-                        ) = {
-
-    
+  ) = {
   }
-
-  
-
 }
 
 object HiddenMarkovModel extends HiddenMarkovModel with java.io.Serializable

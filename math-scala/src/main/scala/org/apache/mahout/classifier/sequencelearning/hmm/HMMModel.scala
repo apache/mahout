@@ -40,8 +40,20 @@ class HMMModel(val numberOfHiddenStates: Int,
 
   validate()
 
-  def numHiddenStates: Int = {
+  def getNumberOfHiddenStates: Int = {
       numberOfHiddenStates
+  }
+
+  def getInitialProbabilities: Vector = {
+      initialProbabilities
+  }
+
+  def getEmissionMatrix: Matrix = {
+      emissionMatrix
+  }
+
+  def getTransitionMatrix: Matrix = {
+      transitionMatrix
   }
 
   /**
