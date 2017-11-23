@@ -150,7 +150,23 @@ trait HiddenMarkovModel extends java.io.Serializable {
 
     backwardVariables
   }
-  
+
+  def sequenceLikelihood(forwardVariables: DenseMatrix,
+    scalingFactors: Option[Array[Double]]
+  ): Double = {
+    var likelihood: Double = 0.0
+
+    if (forwardVariables == None) {
+      for (indexN <- 0 to forwardVariables.columnSize() - 1) {
+        likelihood += forwardVariables.getQuick(forwardVariables.rowSize() - 1, indexN)
+      }
+    } else {
+
+    }
+
+    likelihood
+  }
+
   def train(initModel: HMMModel,
     observations: DrmLike[Long],
     numberOfHiddenStates:Int,
@@ -169,8 +185,28 @@ trait HiddenMarkovModel extends java.io.Serializable {
       curModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
       val observationsMatrix = observations.collect
       val observation = observationsMatrix.viewRow(0)
-      val (forwardVariables, scalingFactors) = computeForwardVariables(initModel, observation, scale)
-      val backwardVariables = computeBackwardVariables(initModel, observation, scale, scalingFactors)
+      val (forwardVariables, scalingFactors) = computeForwardVariables(curModel, observation, scale)
+      val backwardVariables = computeBackwardVariables(curModel, observation, scale, scalingFactors)
+      if (scale) {
+
+      } else {
+        // recompute initial probabilities
+        for (index <- 0 to curModel.getNumberOfHiddenStates - 1) {
+          initialProbabilities.setQuick(index, forwardVariables.getQuick(0, index) * backwardVariables.getQuick(0, index))
+        }
+        // recompute transitionmatrix
+        for (indexN <- 0 to curModel.getNumberOfHiddenStates - 1) {
+          for (indexM <- 0 to curModel.getNumberOfHiddenStates - 1) {
+            var temp:Double = 0.0
+            for (indexT <- 0 to observation.length - 2) {
+              temp += forwardVariables.getQuick(indexT, indexN)
+
+            }
+          }
+        }
+        // recompute emissionmatrix
+
+      }
     }
 
     curModel
