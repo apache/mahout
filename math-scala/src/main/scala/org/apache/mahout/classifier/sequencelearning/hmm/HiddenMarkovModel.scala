@@ -108,7 +108,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
     scale: Boolean,
     scalingFactors: Option[Array[Double]]
   ): DenseMatrix = {
-    var backwardVariables = new DenseMatrix(0,0)
+    var backwardVariables = new DenseMatrix(observationSequence.length, initModel.getNumberOfHiddenStates)
     if (scale)
     {
       var backwardVariablesTemp = new DenseMatrix(observationSequence.length, initModel.getNumberOfHiddenStates)
@@ -225,7 +225,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
               denominator += forwardVariables.getQuick(indexT, indexN) * backwardVariables.getQuick(indexT, indexN)
             }
 
-            emissionMatrix.setQuick(indexM, indexN, numerator/denominator)
+            emissionMatrix.setQuick(indexN, indexM, numerator/denominator)
           }
         }
 
