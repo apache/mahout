@@ -24,31 +24,32 @@
 # Run by each example script.
 
 # Find a hadoop shell
-if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
+if [ "${HADOOP_HOME}" != "" ] && [ "${MAHOUT_LOCAL}" == "" ] ; then
   HADOOP="${HADOOP_HOME}/bin/hadoop"
   if [ ! -e $HADOOP ]; then
     echo "Can't find hadoop in $HADOOP, exiting"
     exit 1
   fi
+
+  # Check Hadoop version
+  v=`${HADOOP_HOME}/bin/hadoop version | egrep "Hadoop [0-9]+.[0-9]+.[0-9]+" | cut -f 2 -d ' ' | cut -f 1 -d '.'`
+
+  if [ $v -eq "1" -o $v -eq "0" ]
+  then
+    echo "Discovered Hadoop v0 or v1."
+    export DFS="${HADOOP_HOME}/bin/hadoop dfs"
+    export DFSRM="$DFS -rmr -skipTrash"
+  elif [ $v -eq "2" ]
+  then
+    echo "Discovered Hadoop v2."
+    export DFS="${HADOOP_HOME}/bin/hdfs dfs"
+    export DFSRM="$DFS -rm -r -skipTrash"
+  else
+    echo "Can't determine Hadoop version."
+    exit 1
+  fi
+  echo "Setting dfs command to $DFS, dfs rm to $DFSRM."
+
+  export HVERSION=$v
 fi
 
-# Check Hadoop version
-v=`${HADOOP_HOME}/bin/hadoop version | egrep "Hadoop [0-9]+.[0-9]+.[0-9]+" | cut -f 2 -d ' ' | cut -f 1 -d '.'`
-
-if [ $v -eq "1" -o $v -eq "0" ]
-then
-  echo "Discovered Hadoop v0 or v1."
-  export DFS="${HADOOP_HOME}/bin/hadoop dfs"
-  export DFSRM="$DFS -rmr -skipTrash"
-elif [ $v -eq "2" ]
-then
-  echo "Discovered Hadoop v2."
-  export DFS="${HADOOP_HOME}/bin/hdfs dfs"
-  export DFSRM="$DFS -rm -r -skipTrash"
-else
-  echo "Can't determine Hadoop version."
-  exit 1
-fi
-echo "Setting dfs command to $DFS, dfs rm to $DFSRM."
-
-export HVERSION=$v 
