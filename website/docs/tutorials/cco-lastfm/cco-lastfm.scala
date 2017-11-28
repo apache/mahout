@@ -32,10 +32,39 @@ val userArtistsIDS = IndexedDatasetSpark.apply(userArtistsRDD)(sc)
 val userFriendsRDD = sc.textFile("/path/to/data/lastfm/user_friends.dat").map(line => line.split("\t")).map(a => (a(0), a(1))).filter(_._1 != "userID")
 val userFriendsIDS = IndexedDatasetSpark.apply(userFriendsRDD)(sc)
 
+val primaryIDS = userFriendsIDS
+val secondaryActionRDDs = List(userArtistsRDD, userTagsRDD)
+
+import org.apache.mahout.math.indexeddataset.{IndexedDataset, BiDictionary}
+
+def adjustRowCardinality(rowCardinality: Integer, datasetA: IndexedDataset): IndexedDataset = {
+  val returnedA = if (rowCardinality != datasetA.matrix.nrow) datasetA.newRowCardinality(rowCardinality)
+  else datasetA // this guarantees matching cardinality
+
+  returnedA
+}
+
+var rowCardinality = primaryIDS.rowIDs.size
+
+val secondaryActionIDS: Array[IndexedDataset] = new Array[IndexedDataset](secondaryActionRDDs.length)
+for (i <- secondaryActionRDDs.indices) {
+
+  val bcPrimaryRowIDs = sc.broadcast(primaryIDS.rowIDs)
+  bcPrimaryRowIDs.value
+
+  val tempRDD = secondaryActionRDDs(i).filter(a => bcPrimaryRowIDs.value.contains(a._1))
+
+  var tempIDS = IndexedDatasetSpark.apply(tempRDD, existingRowIDs = Some(primaryIDS.rowIDs))(sc)
+  secondaryActionIDS(i) = adjustRowCardinality(rowCardinality,tempIDS)
+}
+
 import org.apache.mahout.math.cf.SimilarityAnalysis
 
-val artistReccosLlrDrmListByArtist = SimilarityAnalysis.cooccurrencesIDSs(Array(userArtistsIDS, userTagsIDS, userFriendsIDS), maxInterestingItemsPerThing = 20, maxNumInteractions = 500, randomSeed = 1234)
-
+val artistReccosLlrDrmListByArtist = SimilarityAnalysis.cooccurrencesIDSs(
+  Array(primaryIDS, secondaryActionIDS(0), secondaryActionIDS(1)),
+  maxInterestingItemsPerThing = 20,
+  maxNumInteractions = 500,
+  randomSeed = 1234)
 // Anonymous User
 
 val artistMap = sc.textFile("/path/to/lastfm/artists.dat").map(line => line.split("\t")).map(a => (a(1), a(0))).filter(_._1 != "name").collect.toMap
