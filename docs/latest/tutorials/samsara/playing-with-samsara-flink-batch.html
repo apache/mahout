@@ -1,0 +1,428 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title></title>
+  
+  <meta name="author" content="Apache Mahout">
+
+  <!-- Enable responsive viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap styles -->
+  <link href="/assets/themes/mahout3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional theme -->
+  <link href="/assets/themes/mahout3/css/bootstrap-theme.min.css" rel="stylesheet">
+  <!-- Sticky Footer -->
+  <link href="/assets/themes/mahout3/css/bs-sticky-footer.css" rel="stylesheet">
+
+  <!-- Custom styles -->
+  <link href="/assets/themes/mahout3/css/style.css" rel="stylesheet" type="text/css" media="all">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+  <!-- atom & rss feed -->
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script');
+    mathjax.type = 'text/javascript';
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' :
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+
+      var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">
+        <img src="/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
+      </a>
+    </div>
+
+    
+
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+
+        <!-- Quick Start -->
+        <li id="quickstart">
+            <a href="/index.html" >Mahout Overview</a>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Key Concepts<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/index.html">Mahout Overview</a></li>
+                <li><span><b>&nbsp;&nbsp;Scala DSL</b><span></li>
+                <li><a href="/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
+                <li><a href="/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
+                <li><a href="/mahout-samsara/faq.html">Samsara FAQ</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Bindings</b><span></li>
+                <li><a href="/distributed/spark-bindings/">Spark Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">Flink Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">H20 Bindings</a></li>
+                <!--<li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Native Solvers</b><span></li>
+                <li><a href="/native-solvers/viennacl.html">ViennaCL</a></li>
+                <li><a href="/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
+                <li><a href="/native-solvers/cuda.html">CUDA</a></li>-->
+            </ul>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><span>&nbsp;&nbsp;<b>Reccomenders</b><span></li>
+                <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
+                <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Mahout Samsara</b><span></li>
+                <li><a href="/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
+                <li><a href="/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a></li>
+                <li><a href="/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
+                <li><a href="/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Misc</b><span></li>
+                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
+                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
+                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Deprecated</b><span></li>
+                <li><a href="/tutorials/map-reduce">MapReduce</a></li>
+            </ul>
+        </li>
+
+
+        <!-- Algorithms (Samsara / MR) -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/algorithms/linear-algebra">Distributed Linear Algebra</a></li>
+                <li><a href="/algorithms/preprocessors">Preprocessors</a></li>
+                <li><a href="/algorithms/regression">Regression</a></li>
+                <li><a href="/algorithms/reccomenders">Reccomenders</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a></li>
+            </ul>
+                <!--<li><a href="/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                <!--
+                <li><a href="/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<a href="/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+
+
+             -->
+        </li>
+
+        <!-- Scala Docs -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API Docs<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li class="title"><span>&nbsp;&nbsp;<b>0.13.1-SNAPSHOT</b>(latest)</span></li>
+                <li><a href="/scaladocs/math-scala/index.html">Mahout Math Scala Docs</a></li>
+                <li><a href="/scaladocs/spark/index.html">Mahout Spark Bindings Scala Docs</a></li>
+                <li><a href="/javadocs/index.html">Mahout Java Docs</a></li>
+            </ul>
+        </li>
+
+
+    </ul>
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="http://github.com/apache/mahout">Github</a></li>
+
+        <!-- Apache -->
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
+                <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
+                <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+                <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+            </ul>
+        </li>
+
+    </ul>
+</div><!-- /.navbar-collapse -->
+
+  </div><!-- /.container-fluid -->
+</nav>
+
+<body>
+
+<div id="wrap">
+  <body class="">
+
+  <div class="container">
+    
+
+
+<div class="row">
+    <div class="col-xs-3">
+        <div id="TutorialMenu">
+    <span><b>Tutorials</b></span>
+    <div class="list-group panel">
+        <a href="#linalg" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Linear Algebra</b><i class="fa fa-caret-down"></i></a>
+            <div class="collapse" id="linalg">
+                <ul class="nav sidebar-nav">
+                    <li><a href="/tutorials/eigenfaces">Eigenfaces Demo (Shell or Zeppelin)</a></li>
+                </ul>
+            </div>
+        <a href="#reccomenders" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Reccomenders</b><i class="fa fa-caret-down"></i></a>
+            <div class="collapse" id="reccomenders">
+                <ul class="nav sidebar-nav">
+                    <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
+                    <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
+                </ul>
+            </div>
+        <a href="#other" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Other</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="other">
+            <ul class="nav sidebar-nav">
+                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
+                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
+                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
+            </ul>
+        </div>
+    </div>
+    <span><b>Map Reduce Tutorials</b> (deprecated)</span>
+    <div class="list-group panel">
+        <a href="#classification" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Classification</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="classification">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/tutorials/map-reduce/classification/bankmarketing-example.html">Bank Marketing Example</a></li>
+                <li> <a href="/tutorials/map-reduce/classification/breiman-example.html">Breiman Example</a></li>
+                <li> <a href="/tutorials/map-reduce/classification/twenty-newsgroups.html">Twenty Newsgroups Example</a></li>
+                <li> <a href="/tutorials/map-reduce/classification/wikipedia-classifier-example.html">Wikipedia Classifier Example</a></li>
+                <li> <a href="/tutorials/map-reduce/classification/parallel-frequent-pattern-mining.html">Parallel Frequent Pattern Mining</a></li>
+            </ul>
+        </div>
+        <a href="#clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="clustering">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/tutorials/map-reduce/clustering/20newsgroups.html">Twenty Newsgroups Example</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/canopy-commandline.html">Canopy Clustering from the Commandline</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/clustering-of-synthetic-control-data.html">Clustering of Synthetic Control Data</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/clustering-seinfeld-episodes.html">Clustering of Seinfeld Episodes</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/clusteringyourdata.html">Clustering Your Data</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/fuzzy-k-means-commandline.html">Fuzzy K-Means from the Commandline</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/k-means-commandline.html">K-Means from the Commandline</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/lda-commandline.html">LDA from the Commandline</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/viewing-results.html">Viewing Results</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/visualizing-sample-clusters.html">Visualizing Sample Clusters</a></li>
+            </ul>
+        </div>
+        <a href="#misc" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Miscelaneous</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="misc">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/tutorials/map-reduce/misc/mr---map-reduce.html">MR Map-Reduce</a></li>
+                <li> <a href="/tutorials/map-reduce/misc/parallel-frequent-pattern-mining.html">Parallel Frequent Pattern Mining</a></li>
+                <li> <a href="/tutorials/map-reduce/misc/using-mahout-with-python-via-jpype.html">Using Mahout (Map Reduce) with Python via Jpype</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <div class="col-xs-8">
+        <div class="page-header">
+            <h1> </h1>
+        </div>
+        <h2 id="getting-started">Getting Started</h2>
+
+<p>To get started, add the following dependency to the pom:</p>
+
+<pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
+  &lt;artifactId&gt;mahout-flink_2.10&lt;/artifactId&gt;
+  &lt;version&gt;0.12.0&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<p>Here is how to use the Flink backend:</p>
+
+<pre><code>import org.apache.flink.api.scala._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.mahout.flinkbindings._
+
+object ReadCsvExample {
+
+  def main(args: Array[String]): Unit = {
+    val filePath = "path/to/the/input/file"
+
+    val env = ExecutionEnvironment.getExecutionEnvironment
+    implicit val ctx = new FlinkDistributedContext(env)
+
+    val drm = readCsv(filePath, delim = "\t", comment = "#")
+    val C = drm.t %*% drm
+    println(C.collect)
+  }
+
+}
+</code></pre>
+
+<h2 id="current-status">Current Status</h2>
+
+<p>The top JIRA for Flink backend is <a href="https://issues.apache.org/jira/browse/MAHOUT-1570">MAHOUT-1570</a> which has been fully implemented.</p>
+
+<h3 id="implemented">Implemented</h3>
+
+<ul>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1701">MAHOUT-1701</a> Mahout DSL for Flink: implement AtB ABt and AtA operators</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1702">MAHOUT-1702</a> implement element-wise operators (like <code>A + 2</code> or <code>A + B</code>)</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1703">MAHOUT-1703</a> implement <code>cbind</code> and <code>rbind</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1709">MAHOUT-1709</a> implement slicing (like <code>A(1 to 10, ::)</code>)</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1710">MAHOUT-1710</a> implement right in-core matrix multiplication (<code>A %*% B</code> when <code>B</code> is in-core)</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1711">MAHOUT-1711</a> implement broadcasting</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1712">MAHOUT-1712</a> implement operators <code>At</code>, <code>Ax</code>, <code>Atx</code> - <code>Ax</code> and <code>At</code> are implemented</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1734">MAHOUT-1734</a> implement I/O - should be able to read results of Flink bindings</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1747">MAHOUT-1747</a> add support for different types of indexes (String, long, etc) - now supports <code>Int</code>, <code>Long</code> and <code>String</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1748">MAHOUT-1748</a> switch to Flink Scala API</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1749">MAHOUT-1749</a> Implement <code>Atx</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1750">MAHOUT-1750</a> Implement <code>ABt</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1751">MAHOUT-1751</a> Implement <code>AtA</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1755">MAHOUT-1755</a> Flush intermediate results to FS - Flink, unlike Spark, does not store intermediate results in memory.</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1764">MAHOUT-1764</a> Add standard backend tests for Flink</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1765">MAHOUT-1765</a> Add documentation about Flink backend</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1776">MAHOUT-1776</a> Refactor common Engine agnostic classes to Math-Scala module</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1777">MAHOUT-1777</a> move HDFSUtil classes into the HDFS module</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1804">MAHOUT-1804</a> Implement drmParallelizeWithRowLabels(..) in Flink</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1805">MAHOUT-1805</a> Implement allReduceBlock(..) in Flink bindings</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1809">MAHOUT-1809</a> Failing tests in flin-bindings: dals and dspca</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1810">MAHOUT-1810</a> Failing test in flink-bindings: A + B Identically partitioned (mapBlock Checkpointing issue)</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1812">MAHOUT-1812</a> Implement drmParallelizeWithEmptyLong(..) in flink bindings</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1814">MAHOUT-1814</a> Implement drm2intKeyed in flink bindings</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1815">MAHOUT-1815</a> dsqDist(X,Y) and dsqDist(X) failing in flink tests</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1816">MAHOUT-1816</a> Implement newRowCardinality in CheckpointedFlinkDrm</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1817">MAHOUT-1817</a> Implement caching in Flink Bindings</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1818">MAHOUT-1818</a> dals test failing in Flink Bindings</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1819">MAHOUT-1819</a> Set the default Parallelism for Flink execution in FlinkDistributedContext</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1820">MAHOUT-1820</a> Add a method to generate Tuple&lt;PartitionId, Partition elements count» to support Flink backend</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1821">MAHOUT-1821</a> Use a mahout-flink-conf.yaml configuration file for Mahout specific Flink configuration</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1822">MAHOUT-1822</a> Update NOTICE.txt, License.txt to add Apache Flink</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1823">MAHOUT-1823</a> Modify MahoutFlinkTestSuite to implement FlinkTestBase</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1824">MAHOUT-1824</a> Optimize FlinkOpAtA to use upper triangular matrices</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1825">MAHOUT-1825</a> Add List of Flink algorithms to Mahout wiki page</li>
+</ul>
+
+<h3 id="tests">Tests</h3>
+
+<p>There is a set of standard tests that all engines should pass (see <a href="https://issues.apache.org/jira/browse/MAHOUT-1764">MAHOUT-1764</a>).</p>
+
+<ul>
+  <li><code>DistributedDecompositionsSuite</code></li>
+  <li><code>DrmLikeOpsSuite</code></li>
+  <li><code>DrmLikeSuite</code></li>
+  <li><code>RLikeDrmOpsSuite</code></li>
+</ul>
+
+<p>These are Flink-backend specific tests, e.g.</p>
+
+<ul>
+  <li><code>DrmLikeOpsSuite</code> for operations like <code>norm</code>, <code>rowSums</code>, <code>rowMeans</code></li>
+  <li><code>RLikeOpsSuite</code> for basic LA like <code>A.t %*% A</code>, <code>A.t %*% x</code>, etc</li>
+  <li><code>LATestSuite</code> tests for specific operators like <code>AtB</code>, <code>Ax</code>, etc</li>
+  <li><code>UseCasesSuite</code> has more complex examples, like power iteration, ridge regression, etc</li>
+</ul>
+
+<h2 id="environment">Environment</h2>
+
+<p>For development the minimal supported configuration is</p>
+
+<ul>
+  <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">JDK 1.7</a></li>
+  <li>[Scala 2.10]</li>
+</ul>
+
+<p>When using mahout, please import the following modules:</p>
+
+<ul>
+  <li><code>mahout-math</code></li>
+  <li><code>mahout-math-scala</code></li>
+  <li><code>mahout-flink_2.10</code>
+*</li>
+</ul>
+
+    </div>
+</div>
+
+  </div>
+
+
+</div>
+
+<div id="footer">
+  <div class="container">
+    <p>&copy; 2017 Apache Mahout
+      with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+      and <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>
+    </p>
+  </div>
+</div>
+
+
+
+
+
+
+
+<!-- Latest compiled and minified JavaScript, requires jQuery 1.x (2.x not supported in IE8) -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/assets/themes/mahout3/js/bootstrap.min.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,578 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>(Deprecated)  Random Forests</title>
+  
+  <meta name="author" content="Apache Mahout">
+
+  <!-- Enable responsive viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap styles -->
+  <link href="/assets/themes/mahout3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional theme -->
+  <link href="/assets/themes/mahout3/css/bootstrap-theme.min.css" rel="stylesheet">
+  <!-- Sticky Footer -->
+  <link href="/assets/themes/mahout3/css/bs-sticky-footer.css" rel="stylesheet">
+
+  <!-- Custom styles -->
+  <link href="/assets/themes/mahout3/css/style.css" rel="stylesheet" type="text/css" media="all">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+  <!-- atom & rss feed -->
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script');
+    mathjax.type = 'text/javascript';
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' :
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+
+      var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">
+        <img src="/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
+      </a>
+    </div>
+
+    
+
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+
+        <!-- Quick Start -->
+        <li id="quickstart">
+            <a href="/index.html" >Mahout Overview</a>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Key Concepts<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/index.html">Mahout Overview</a></li>
+                <li><span><b>&nbsp;&nbsp;Scala DSL</b><span></li>
+                <li><a href="/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
+                <li><a href="/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
+                <li><a href="/mahout-samsara/faq.html">Samsara FAQ</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Bindings</b><span></li>
+                <li><a href="/distributed/spark-bindings/">Spark Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">Flink Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">H20 Bindings</a></li>
+                <!--<li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Native Solvers</b><span></li>
+                <li><a href="/native-solvers/viennacl.html">ViennaCL</a></li>
+                <li><a href="/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
+                <li><a href="/native-solvers/cuda.html">CUDA</a></li>-->
+            </ul>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><span>&nbsp;&nbsp;<b>Reccomenders</b><span></li>
+                <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
+                <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Mahout Samsara</b><span></li>
+                <li><a href="/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
+                <li><a href="/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a></li>
+                <li><a href="/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
+                <li><a href="/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Misc</b><span></li>
+                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
+                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
+                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Deprecated</b><span></li>
+                <li><a href="/tutorials/map-reduce">MapReduce</a></li>
+            </ul>
+        </li>
+
+
+        <!-- Algorithms (Samsara / MR) -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/algorithms/linear-algebra">Distributed Linear Algebra</a></li>
+                <li><a href="/algorithms/preprocessors">Preprocessors</a></li>
+                <li><a href="/algorithms/regression">Regression</a></li>
+                <li><a href="/algorithms/reccomenders">Reccomenders</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a></li>
+            </ul>
+                <!--<li><a href="/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                <!--
+                <li><a href="/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<a href="/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+
+
+             -->
+        </li>
+
+        <!-- Scala Docs -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API Docs<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li class="title"><span>&nbsp;&nbsp;<b>0.13.1-SNAPSHOT</b>(latest)</span></li>
+                <li><a href="/scaladocs/math-scala/index.html">Mahout Math Scala Docs</a></li>
+                <li><a href="/scaladocs/spark/index.html">Mahout Spark Bindings Scala Docs</a></li>
+                <li><a href="/javadocs/index.html">Mahout Java Docs</a></li>
+            </ul>
+        </li>
+
+
+    </ul>
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="http://github.com/apache/mahout">Github</a></li>
+
+        <!-- Apache -->
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
+                <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
+                <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+                <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+            </ul>
+        </li>
+
+    </ul>
+</div><!-- /.navbar-collapse -->
+
+  </div><!-- /.container-fluid -->
+</nav>
+
+<body>
+
+<div id="wrap">
+  <body class="">
+
+  <div class="container">
+    
+
+
+<div class="row">
+    <div class="col-md-3">
+        <div id="AlgoMenu">
+    <span><b>Mahout-Samsara Algorithms</b></span>
+    <div class="list-group panel">
+        <a href="#linalg" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Linear Algebra</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="linalg">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/linear-algebra/d-qr.html">Distributed QR Decomposition</a></li>
+                <li> <a href="/algorithms/linear-algebra/d-spca.html">Distributed Stochastic Principal Component Analysis</a></li>
+                <li> <a href="/algorithms/linear-algebra/d-ssvd.html">Distributed Stochastic Singular Value Decomposition</a></li>
+            </ul>
+        </div>
+        <a href="#clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="clustering">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/clustering">Clustering Algorithms</a></li>
+                <li> <a href="/algorithms/clustering/distance-metrics.html">Distance Metrics</a></li>
+                <li> <a href="/algorithms/clustering/canopy">Canopy Clustering</a></li>
+            </ul>
+        </div>
+        <a href="#preprocessors" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Preprocessors</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="preprocessors">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/preprocessors/AsFactor.html">AsFactor (a.k.a. One-Hot-Encoding)</a></li>
+                <li> <a href="/algorithms/preprocessors/StandardScaler.html">StandardScaler</a></li>
+                <li> <a href="/algorithms/preprocessors/MeanCenter.html">MeanCenter</a></li>
+            </ul>
+        </div>
+        <a href="#regression" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Regression</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="regression">
+            <ul class="nav sidebar-nav">
+                <a href="#serial-correlation" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#regression"><b>&#8226;&nbsp;Serial Correlation</b><i class="fa fa-caret-down"></i></a>
+                <div class="collapse" id="serial-correlation">
+                    <ul class="nav sidebar-nav">
+                        <li> <a href="/algorithms/regression/serial-correlation/cochrane-orcutt.html">Cochrane-Orcutt Procedure</a></li>
+                        <li> <a href="/algorithms/regression/serial-correlation/dw-test.html">Durbin Watson Test</a></li>
+                    </ul>
+                </div>
+                <li> <a href="/algorithms/regression/ols.html">Ordinary Least Squares (Closed Form)</a></li>
+                <li> <a href="/algorithms/regression/fittness-tests.html">Fitness Tests</a></li>
+            </ul>
+        </div>
+        <a href="#reccomenders" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Reccomenders</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="reccomenders">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/reccomenders">Reccomender Overview</a></li>
+                <li> <a href="/algorithms/reccomenders/cco.html">CCO</a></li>
+                <li> <a href="/algorithms/reccomenders/d-als.html">Distributed Alternating Least Squares</a></li>
+            </ul>
+        </div>
+    </div>
+    <span><b>Map Reduce Algorithms</b> (deprecated)</span>
+    <div class="list-group panel">
+        <a href="#classification" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Classification</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="classification">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/map-reduce/classification/bayesian.html">Bayesian</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/class-discovery.html">Class Discovery</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/classifyingyourdata.html">Classifying Your Data</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/collocations.html">Collocation</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/gaussian-discriminative-analysis.html">Gaussian Discriminative Analysis</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/independent-component-analysis.html">Independent Component Analysis</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/locally-weighted-linear-regression.html">Locally Weighted Linear Regression</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/logistic-regression.html">Logistic Regression</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/mahout-collections.html">Mahout Collections</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/mlp.html">Multilayer Perceptron</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/naivebayes.html">Naive Bayes</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/neural-network.html">Neural Networks</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/partial-implementation.html">Partial Implementation</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/random-forrests.html">Random Forrests</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/restricted-boltzman-machines.html">Restricted Boltzman Machines</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/support-vector-machines.html">Support Vector Machines</a></li>
+            </ul>
+        </div>
+        <a href="#mr-clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="mr-clustering">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/map-reduce/clustering/canopy-clustering.html">Canopy Clustering</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/cluster-dumper.html">Cluster Dumper</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/expectation-maximization.html">Expectation Maximization</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/fuzzy-k-means.html">Fuzzy K-Means</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/hierarchical-clustering.html">Hierarchical Clustering</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/k-means-clustering.html">K-Means Clustering</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/llr---log-likelihood-ratio.html">Log Likelihood Ratio</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/streaming-k-means.html">Streaming K-Means</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <div class="col-md-8">
+        <div class="page-header">
+            <h1>(Deprecated)  Random Forests </h1>
+        </div>
+        <p><a name="RandomForests-HowtogrowaDecisionTree"></a></p>
+<h3 id="how-to-grow-a-decision-tree">How to grow a Decision Tree</h3>
+
+<p>source : [3](3.html)</p>
+
+<p>LearnUnprunedTree(<em>X</em>,<em>Y</em>)</p>
+
+<p>Input: <em>X</em> a matrix of <em>R</em> rows and <em>M</em> columns where <em>X{</em>}{<em>}{~}ij{~}</em> =
+the value of the <em>j</em>‘th attribute in the <em>i</em>‘th input datapoint. Each
+column consists of either all real values or all categorical values.
+Input: <em>Y</em> a vector of <em>R</em> elements, where <em>Y{</em>}{<em>}{~}i{~}</em> = the output
+class of the <em>i</em>‘th datapoint. The <em>Y{</em>}{<em>}{~}i{~}</em> values are categorical.
+Output: An Unpruned decision tree</p>
+
+<p>If all records in <em>X</em> have identical values in all their attributes (this
+includes the case where <em>R&lt;2</em>), return a Leaf Node predicting the majority
+output, breaking ties randomly. This case also includes
+If all values in <em>Y</em> are the same, return a Leaf Node predicting this value
+as the output
+Else
+    select <em>m</em> variables at random out of the <em>M</em> variables
+    For <em>j</em> = 1 .. <em>m</em>
+        If <em>j</em>‘th attribute is
+categorical
+<em>           
+IG{</em>}{<em>}{~}j{~}</em> = IG(<em>Y</em>|<em>X{</em>}{<em>}{~}j{~}</em>) (see Information
+Gain)            
+        Else (<em>j</em>‘th attribute is
+real-valued)
+<em>           
+IG{</em>}{<em>}{~}j{~}</em> = IG<em>(</em>Y<em>|</em>X{<em>}{</em>}{~}j{~}<em>) (see Information Gain)
+    Let *j*</em> = argmax{~}j~ <em>IG{</em>}{<em>}{~}j{~}</em> (this is the
+splitting attribute we’ll use)
+    If <em>j*</em> is categorical then
+        For each value <em>v</em> of the <em>j</em>‘th
+attribute
+            Let
+<em>X{</em>}{<em>}{^}v{^}</em> = subset of rows of <em>X</em> in which <em>X{</em>}{<em>}{~}ij{~}</em> = <em>v</em>.
+Let <em>Y{</em>}{<em>}{^}v{^}</em> = corresponding subset of <em>Y</em>
+            Let <em>Child{</em>}{<em>}{^}v{^}</em> =
+LearnUnprunedTree(<em>X{</em>}{<em>}{^}v{^}</em>,<em>Y{</em>}{<em>}{^}v{^}</em>)
+        Return a decision tree node,
+splitting on <em>j</em>‘th attribute. The number of children equals the number of
+values of the <em>j</em>‘th attribute, and the <em>v</em>‘th child is
+<em>Child{</em>}{<em>}{^}v{^}</em>
+    Else <em>j*</em> is real-valued and let <em>t</em> be the best split
+threshold
+        Let <em>X{</em>}{<em>}{^}LO{^}</em> = subset
+of rows of <em>X</em> in which <em>X{</em>}{<em>}{~}ij{~}</em> <em>&lt;= t</em>. Let <em>Y{</em>}{<em>}{^}LO{^}</em> =
+corresponding subset of <em>Y</em>
+        Let <em>Child{</em>}{<em>}{^}LO{^}</em> =
+LearnUnprunedTree(<em>X{</em>}{<em>}{^}LO{^}</em>,<em>Y{</em>}{<em>}{^}LO{^}</em>)
+        Let <em>X{</em>}{<em>}{^}HI{^}</em> = subset of rows of <em>X</em>
+in which <em>X{</em>}{<em>}{~}ij{~}</em> <em>&gt; t</em>. Let <em>Y{</em>}{<em>}{^}HI{^}</em> = corresponding
+subset of <em>Y</em>
+        Let <em>Child{</em>}{<em>}{^}HI{^}</em> =
+LearnUnprunedTree(<em>X{</em>}{<em>}{^}HI{^}</em>,<em>Y{</em>}{<em>}{^}HI{^}</em>)
+        Return a decision tree node, splitting on
+<em>j</em>‘th attribute. It has two children corresponding to whether the <em>j</em>‘th
+attribute is above or below the given threshold.</p>
+
+<p><em>Note</em>: There are alternatives to Information Gain for splitting nodes
+ </p>
+
+<p><a name="RandomForests-Informationgain"></a></p>
+<h3 id="information-gain">Information gain</h3>
+
+<p>source : [3](3.html)</p>
+<ol>
+  <li>h4. nominal attributes</li>
+</ol>
+
+<p>suppose X can have one of m values V{~}1~,V{~}2~,…,V{~}m~
+P(X=V{~}1~)=p{~}1~, P(X=V{~}2~)=p{~}2~,…,P(X=V{~}m~)=p{~}m~
+ 
+H(X)= -sum{~}j=1{~}{^}m^ p{~}j~ log{~}2~ p{~}j~ (The entropy of X)
+H(Y|X=v) = the entropy of Y among only those records in which X has value
+v
+H(Y|X) = sum{~}j~ p{~}j~ H(Y|X=v{~}j~)
+IG(Y|X) = H(Y) - H(Y|X)</p>
+<ol>
+  <li>h4. real-valued attributes</li>
+</ol>
+
+<p>suppose X is real valued
+define IG(Y|X:t) as H(Y) - H(Y|X:t)
+define H(Y|X:t) = H(Y|X&lt;t) P(X&lt;t) + H(Y|X&gt;=t) P(X&gt;=t)
+define IG*(Y|X) = max{~}t~ IG(Y|X:t)</p>
+
+<p><a name="RandomForests-HowtogrowaRandomForest"></a></p>
+<h3 id="how-to-grow-a-random-forest">How to grow a Random Forest</h3>
+
+<p>source : [1](1.html)</p>
+
+<p>Each tree is grown as follows:</p>
+<ol>
+  <li>if the number of cases in the training set is <em>N</em>, sample <em>N</em> cases at
+random -but with replacement, from the original data. This sample will be
+the training set for the growing tree.</li>
+  <li>if there are <em>M</em> input variables, a number <em>m « M</em> is specified such
+that at each node, <em>m</em> variables are selected at random out of the <em>M</em> and
+the best split on these <em>m</em> is used to split the node. The value of <em>m</em> is
+held constant during the forest growing.</li>
+  <li>each tree is grown to its large extent possible. There is no pruning.</li>
+</ol>
+
+<p><a name="RandomForests-RandomForestparameters"></a></p>
+<h3 id="random-forest-parameters">Random Forest parameters</h3>
+
+<p>source : [2](2.html)
+Random Forests are easy to use, the only 2 parameters a user of the
+technique has to determine are the number of trees to be used and the
+number of variables (<em>m</em>) to be randomly selected from the available set of
+variables.
+Breinman’s recommendations are to pick a large number of trees, as well as
+the square root of the number of variables for <em>m</em>.
+ </p>
+
+<p><a name="RandomForests-Howtopredictthelabelofacase"></a></p>
+<h3 id="how-to-predict-the-label-of-a-case">How to predict the label of a case</h3>
+
+<p>Classify(<em>node</em>,<em>V</em>)
+    Input: <em>node</em> from the decision tree, if <em>node.attribute
+= j</em> then the split is done on the <em>j</em>‘th attribute</p>
+
+<p>    Input: <em>V</em> a vector of <em>M</em> columns where
+<em>V{</em>}{<em>}{~}j{~}</em> = the value of the <em>j</em>‘th attribute.
+    Output: label of <em>V</em></p>
+
+<p>    If <em>node</em> is a Leaf then
+            Return the value predicted
+by <em>node</em></p>
+
+<p>    Else
+            Let <em>j =
+node.attribute</em>
+            If <em>j</em> is
+categorical then
+      
+            
+Let <em>v</em> = <em>V{</em>}{<em>}{~}j{~}</em>
+      
+            
+Let <em>child{</em>}{<em>}{^}v{^}</em> = child node corresponding to the attribute’s
+value <em>v</em>
+              
+     Return Classify(<em>child{</em>}{<em>}{^}v{^}</em>,<em>V</em>)</p>
+
+<p>            Else <em>j</em> is
+real-valued
+      
+            
+Let <em>t = node.threshold</em> (split threshold)
+              
+     If Vj &lt; t then
+                  
+         Let <em>child{</em>}{<em>}{^}LO{^}</em> = child
+node corresponding to (<em>&lt;t</em>)
+                  
+         Return
+Classify(<em>child{</em>}{<em>}{^}LO{^}</em>,<em>V</em>)
+      
+            
+Else
+                  
+         Let <em>child{</em>}{<em>}{^}HI{^}</em> =
+child node corresponding to (<em>&gt;=t</em>)
+               
+            Return
+Classify(<em>child{</em>}{<em>}{^}HI{^}</em>,<em>V</em>)
+ </p>
+
+<p><a name="RandomForests-Theoutofbag(oob)errorestimation"></a></p>
+<h3 id="the-out-of-bag-oob-error-estimation">The out of bag (oob) error estimation</h3>
+
+<p>source : [1](1.html)</p>
+
+<p>in random forests, there is no need for cross-validation or a separate test
+set to get an unbiased estimate of the test set error. It is estimated
+internally, during the run, as follows:</p>
+<ul>
+  <li>each tree is constructed using a different bootstrap sample from the
+original data. About one-third of the cases left of the bootstrap sample
+and not used in the construction of the <em>kth</em> tree.</li>
+  <li>put each case left out in the construction of the <em>kth</em> tree down the
+<em>kth{</em>}tree to get a classification. In this way, a test set classification
+is obtained for each case in about one-thrid of the trees. At the end of
+the run, take <em>j</em> to be the class that got most of the the votes every time
+case <em>n</em> was <em>oob</em>. The proportion of times that <em>j</em> is not equal to the
+true class of <em>n</em> averaged over all cases is the <em>oob error estimate</em>. This
+has proven to be unbiased in many tests.</li>
+</ul>
+
+<p><a name="RandomForests-OtherRFuses"></a></p>
+<h3 id="other-rf-uses">Other RF uses</h3>
+
+<p>source : [1](1.html)</p>
+<ul>
+  <li>variable importance</li>
+  <li>gini importance</li>
+  <li>proximities</li>
+  <li>scaling</li>
+  <li>prototypes</li>
+  <li>missing values replacement for the training set</li>
+  <li>missing values replacement for the test set</li>
+  <li>detecting mislabeled cases</li>
+  <li>detecting outliers</li>
+  <li>detecting novelties</li>
+  <li>unsupervised learning</li>
+  <li>balancing prediction error
+Please refer to [1](1.html)
+ for a detailed description</li>
+</ul>
+
+<p><a name="RandomForests-References"></a></p>
+<h3 id="references">References</h3>
+
+<p>[1](1.html)
+  Random Forests - Classification Description
+        <a href="http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm">http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm</a>
+[2](2.html)
+  B. Larivi�re &amp; D. Van Den Poel, 2004. “Predicting Customer Retention
+and Profitability by Using Random Forests and Regression Forests
+Techniques,”
+        Working Papers of Faculty of
+Economics and Business Administration, Ghent University, Belgium 04/282,
+Ghent University,
+        Faculty of Economics and
+Business Administration.
+        Available online : <a href="http://ideas.repec.org/p/rug/rugwps/04-282.html">http://ideas.repec.org/p/rug/rugwps/04-282.html</a>
+[3](3.html)
+  Decision Trees - Andrew W. Moore[4]
+        http://www.cs.cmu.edu/~awm/tutorials[1](1.html)
+[4](4.html)
+  Information Gain - Andrew W. Moore
+        <a href="http://www.cs.cmu.edu/~awm/tutorials">http://www.cs.cmu.edu/~awm/tutorials</a></p>
+
+    </div>
+</div>
+
+  </div>
+
+
+</div>
+
+<div id="footer">
+  <div class="container">
+    <p>&copy; 2017 Apache Mahout
+      with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+      and <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>
+    </p>
+  </div>
+</div>
+
+
+
+
+
+
+
+<!-- Latest compiled and minified JavaScript, requires jQuery 1.x (2.x not supported in IE8) -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/assets/themes/mahout3/js/bootstrap.min.js"></script>
+</body>
+</html>
+

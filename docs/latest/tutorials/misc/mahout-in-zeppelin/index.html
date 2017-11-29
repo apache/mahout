@@ -1,0 +1,583 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Visualizing Mahout in Zeppelin</title>
+  
+  <meta name="author" content="Apache Mahout">
+
+  <!-- Enable responsive viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap styles -->
+  <link href="/assets/themes/mahout3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional theme -->
+  <link href="/assets/themes/mahout3/css/bootstrap-theme.min.css" rel="stylesheet">
+  <!-- Sticky Footer -->
+  <link href="/assets/themes/mahout3/css/bs-sticky-footer.css" rel="stylesheet">
+
+  <!-- Custom styles -->
+  <link href="/assets/themes/mahout3/css/style.css" rel="stylesheet" type="text/css" media="all">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+  <!-- atom & rss feed -->
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script');
+    mathjax.type = 'text/javascript';
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' :
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+
+      var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">
+        <img src="/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
+      </a>
+    </div>
+
+    
+
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+
+        <!-- Quick Start -->
+        <li id="quickstart">
+            <a href="/index.html" >Mahout Overview</a>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Key Concepts<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/index.html">Mahout Overview</a></li>
+                <li><span><b>&nbsp;&nbsp;Scala DSL</b><span></li>
+                <li><a href="/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
+                <li><a href="/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
+                <li><a href="/mahout-samsara/faq.html">Samsara FAQ</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Bindings</b><span></li>
+                <li><a href="/distributed/spark-bindings/">Spark Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">Flink Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">H20 Bindings</a></li>
+                <!--<li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Native Solvers</b><span></li>
+                <li><a href="/native-solvers/viennacl.html">ViennaCL</a></li>
+                <li><a href="/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
+                <li><a href="/native-solvers/cuda.html">CUDA</a></li>-->
+            </ul>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><span>&nbsp;&nbsp;<b>Reccomenders</b><span></li>
+                <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
+                <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Mahout Samsara</b><span></li>
+                <li><a href="/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
+                <li><a href="/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a></li>
+                <li><a href="/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
+                <li><a href="/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Misc</b><span></li>
+                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
+                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
+                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Deprecated</b><span></li>
+                <li><a href="/tutorials/map-reduce">MapReduce</a></li>
+            </ul>
+        </li>
+
+
+        <!-- Algorithms (Samsara / MR) -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/algorithms/linear-algebra">Distributed Linear Algebra</a></li>
+                <li><a href="/algorithms/preprocessors">Preprocessors</a></li>
+                <li><a href="/algorithms/regression">Regression</a></li>
+                <li><a href="/algorithms/reccomenders">Reccomenders</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a></li>
+            </ul>
+                <!--<li><a href="/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                <!--
+                <li><a href="/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<a href="/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+
+
+             -->
+        </li>
+
+        <!-- Scala Docs -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API Docs<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li class="title"><span>&nbsp;&nbsp;<b>0.13.1-SNAPSHOT</b>(latest)</span></li>
+                <li><a href="/scaladocs/math-scala/index.html">Mahout Math Scala Docs</a></li>
+                <li><a href="/scaladocs/spark/index.html">Mahout Spark Bindings Scala Docs</a></li>
+                <li><a href="/javadocs/index.html">Mahout Java Docs</a></li>
+            </ul>
+        </li>
+
+
+    </ul>
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="http://github.com/apache/mahout">Github</a></li>
+
+        <!-- Apache -->
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
+                <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
+                <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+                <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+            </ul>
+        </li>
+
+    </ul>
+</div><!-- /.navbar-collapse -->
+
+  </div><!-- /.container-fluid -->
+</nav>
+
+<body>
+
+<div id="wrap">
+  <body class="">
+
+  <div class="container">
+    
+
+
+<div class="row">
+    <div class="col-xs-3">
+        <div id="TutorialMenu">
+    <span><b>Tutorials</b></span>
+    <div class="list-group panel">
+        <a href="#linalg" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Linear Algebra</b><i class="fa fa-caret-down"></i></a>
+            <div class="collapse" id="linalg">
+                <ul class="nav sidebar-nav">
+                    <li><a href="/tutorials/eigenfaces">Eigenfaces Demo (Shell or Zeppelin)</a></li>
+                </ul>
+            </div>
+        <a href="#reccomenders" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Reccomenders</b><i class="fa fa-caret-down"></i></a>
+            <div class="collapse" id="reccomenders">
+                <ul class="nav sidebar-nav">
+                    <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
+                    <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
+                </ul>
+            </div>
+        <a href="#other" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Other</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="other">
+            <ul class="nav sidebar-nav">
+                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
+                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
+                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
+            </ul>
+        </div>
+    </div>
+    <span><b>Map Reduce Tutorials</b> (deprecated)</span>
+    <div class="list-group panel">
+        <a href="#classification" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Classification</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="classification">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/tutorials/map-reduce/classification/bankmarketing-example.html">Bank Marketing Example</a></li>
+                <li> <a href="/tutorials/map-reduce/classification/breiman-example.html">Breiman Example</a></li>
+                <li> <a href="/tutorials/map-reduce/classification/twenty-newsgroups.html">Twenty Newsgroups Example</a></li>
+                <li> <a href="/tutorials/map-reduce/classification/wikipedia-classifier-example.html">Wikipedia Classifier Example</a></li>
+                <li> <a href="/tutorials/map-reduce/classification/parallel-frequent-pattern-mining.html">Parallel Frequent Pattern Mining</a></li>
+            </ul>
+        </div>
+        <a href="#clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="clustering">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/tutorials/map-reduce/clustering/20newsgroups.html">Twenty Newsgroups Example</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/canopy-commandline.html">Canopy Clustering from the Commandline</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/clustering-of-synthetic-control-data.html">Clustering of Synthetic Control Data</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/clustering-seinfeld-episodes.html">Clustering of Seinfeld Episodes</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/clusteringyourdata.html">Clustering Your Data</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/fuzzy-k-means-commandline.html">Fuzzy K-Means from the Commandline</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/k-means-commandline.html">K-Means from the Commandline</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/lda-commandline.html">LDA from the Commandline</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/viewing-results.html">Viewing Results</a></li>
+                <li> <a href="/tutorials/map-reduce/clustering/visualizing-sample-clusters.html">Visualizing Sample Clusters</a></li>
+            </ul>
+        </div>
+        <a href="#misc" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Miscelaneous</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="misc">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/tutorials/map-reduce/misc/mr---map-reduce.html">MR Map-Reduce</a></li>
+                <li> <a href="/tutorials/map-reduce/misc/parallel-frequent-pattern-mining.html">Parallel Frequent Pattern Mining</a></li>
+                <li> <a href="/tutorials/map-reduce/misc/using-mahout-with-python-via-jpype.html">Using Mahout (Map Reduce) with Python via Jpype</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <div class="col-xs-8">
+        <div class="page-header">
+            <h1>Visualizing Mahout in Zeppelin </h1>
+        </div>
+        <p>The <a href="http://zeppelin.apache.org">Apache Zeppelin</a> is an exciting notebooking tool, designed for working with Big Data
+applications.  It comes with great integration for graphing in R and Python, supports multiple langauges in a single 
+notebook (and facilitates sharing of variables between interpreters), and makes working with Spark and Flink in an interactive environment (either locally or in cluster mode) a 
+breeze.  Of course, it does lots of other cool things too- but those are the features we’re going to take advantage of.</p>
+
+<h3 id="step1-download-and-install-zeppelin">Step1: Download and Install Zeppelin</h3>
+
+<p>Zeppelin binaries by default use Spark 2.1 / Scala 2.11, until Mahout puts out Spark 2.1/Scala 2.11 binaries you have
+two options.</p>
+
+<h4 id="option-1-build-mahout-for-spark-21scala-211">Option 1: Build Mahout for Spark 2.1/Scala 2.11</h4>
+
+<p><strong>Build Mahout</strong></p>
+
+<p>Follow the standard procedures for building Mahout, except manually set the Spark and Scala versions - the easiest way being:</p>
+
+<pre><code>git clone http://github.com/apache/mahout
+cd mahout
+mvn clean package -Dspark.version=2.1.0 -Dscala.version=2.11.8 -Dscala.compat.version=2.11 -DskipTests
+</code></pre>
+
+<p><strong>Download Zeppelin</strong></p>
+
+<pre><code>cd /a/good/place/to/install/
+wget http://apache.mirrors.tds.net/zeppelin/zeppelin-0.7.1/zeppelin-0.7.1-bin-all.tgz
+tar -xzf zeppelin-0.7.1-bin-all.tgz
+cd zeppelin*
+bin/zeppelin-daemon.sh start
+</code></pre>
+
+<p>And that’s it. Open a web browser and surf to <a href="http://localhost:8080">http://localhost:8080</a></p>
+
+<p>Proceed to Step 2.</p>
+
+<h4 id="option2-build-zeppelin-for-spark-16scala-210">Option2: Build Zeppelin for Spark 1.6/Scala 2.10</h4>
+
+<p>We’ll use Mahout binaries from Maven, so all you need to do is clone, and build Zeppelin-</p>
+
+<pre><code>git clone http://github.com/apache/zeppelin
+cd zeppelin
+mvn clean package -Pspark1.6 -Pscala2.10 -DskipTests
+</code></pre>
+
+<p>After it builds successfully…</p>
+
+<pre><code>bin/zeppelin-daemon.sh start
+</code></pre>
+
+<p>And that’s it. Open a web browser and surf to <a href="http://localhost:8080">http://localhost:8080</a></p>
+
+<h3 id="step2-create-the-mahout-spark-interpreter">Step2: Create the Mahout Spark Interpreter</h3>
+
+<p>After opening your web browser and surfing to <a href="http://localhost:8080">http://localhost:8080</a>, click on the <code>Anonymous</code> 
+button on the top right corner, which will open a drop down. Then click <code>Interpreter</code>.</p>
+
+<p><img src="zeppelin1.png" alt="Screen Shot1" /></p>
+
+<p>At the top right, just below the blue nav bar- you will see two buttons, “Repository” and “+Create”.  Click on “+Create”</p>
+
+<p>The following screen should appear.</p>
+
+<p><img src="zeppelin2.png" alt="Screen Shot2" /></p>
+
+<p>In the <strong>Interpreter Name</strong> enter <code>mahoutSpark</code> (you can name it whatever you like, but this is what we’ll assume you’ve
+named it later in the tutorial)</p>
+
+<p>In the <strong>Interpreter group</strong> drop down, select <code>spark</code>. A bunch of other settings will now auto-populate.</p>
+
+<p>Scroll to the bottom of the <strong>Properties</strong> list. In the last row, you’ll see two blank boxes.</p>
+
+<p>Add the following properies by clicking the “+” button to the right.</p>
+
+<div class="table-striped">
+<table class="table">
+    <tr>
+        <th>name</th>
+        <th>value</th>
+    </tr>
+    <tr>
+        <td>spark.kryo.referenceTracking</td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td>spark.kryo.registrator</td>
+        <td>org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator</td>
+    </tr>
+    <tr>
+        <td>spark.kryoserializer.buffer</td>
+        <td>32</td>
+    </tr>
+    <tr>
+        <td>spark.kryoserializer.buffer.max</td>
+        <td>600m</td>
+    </tr>    
+    <tr>
+        <td>spark.serializer</td>
+        <td>org.apache.spark.serializer.KryoSerializer</td>
+    </tr> 
+</table>
+</div>
+
+<h3 id="step-3-add-dependendencies">Step 3: Add Dependendencies</h3>
+<p>You’ll also need to add the following <strong>Dependencies</strong>.</p>
+
+<h4 id="if-you-chose-option1-in-step-1">If you chose Option1 in Step 1:</h4>
+
+<p>Where <code>/path/to/mahout</code> is the path to the directory where you’ve built mahout.</p>
+
+<div class="table-striped">
+<table class="table">
+    <tr>
+        <th>artifact</th>
+        <th>exclude</th>
+    </tr>
+    <tr>
+        <td>/path/to/mahout/mahout-math-0.13.0.jar</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>/path/to/mahout/mahout-math-scala_2.11-0.13.0.jar</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>/path/to/mahout/mahout-spark_2.11-0.13.0.jar</td>
+        <td></td>
+    </tr>  
+    <tr>
+        <td>/path/to/mahout/mahout-spark_2.11-0.13.0-dependeny-reduced.jar</td>
+        <td></td>
+    </tr>
+</table>
+</div>
+
+<h4 id="if-you-chose-option2-in-step-1">If you chose Option2 in Step 1:</h4>
+
+<div class="table-striped">
+<table class="table">
+    <tr>
+        <th>artifact</th>
+        <th>exclude</th>
+    </tr>
+    <tr>
+        <td>org.apache.mahout:mahout-math:0.13.0</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>org.apache.mahout:mahout-math-scala_2.10:0.13.0</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>org.apache.mahout:mahout-spark_2.10:0.13.0</td>
+        <td></td>
+    </tr>
+     <tr>
+         <td>org.apache.mahout:mahout-native-viennacl-omp_2.10:0.13.0</td>
+         <td></td>
+     </tr> 
+
+</table>
+</div>
+
+<p><em><strong>OPTIONALLY</strong></em> You can add <strong>one</strong> of the following artifacts for CPU/GPU acceleration.</p>
+
+<div class="table-striped">
+<table class="table">
+    <tr>
+        <th>artifact</th>
+        <th>exclude</th>
+        <th>type of native solver</th>
+    </tr>
+     <tr>
+         <td>org.apache.mahout:mahout-native-viennacl_2.10:0.13.0</td>
+         <td></td>
+         <td>ViennaCL GPU Accelerated</td>
+     </tr> 
+     <tr>
+         <td>org.apache.mahout:mahout-native-viennacl-omp_2.10:0.13.0</td>
+         <td></td>
+         <td>ViennaCL-OMP CPU Accelerated (use this if you don't have a good graphics card)</td>
+     </tr> 
+</table>
+</div>
+
+<p>Make sure to click “Save” and you’re all set.</p>
+
+<h3 id="step-4-rock-and-roll">Step 4. Rock and Roll.</h3>
+
+<p>Mahout in Zeppelin, unlike the Mahout Shell, won’t take care of importing the Mahout libraries or creating the 
+<code>MahoutSparkContext</code>, we need to do that manually. This is easy though.  When ever you start Zeppelin (or restart) the 
+Mahout interpreter, you’ll need to run the following code first:</p>
+
+<pre><code>%sparkMahout
+
+import org.apache.mahout.math._
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.mahout.sparkbindings._
+
+implicit val sdc: org.apache.mahout.sparkbindings.SparkDistributedContext = sc2sdc(sc)
+</code></pre>
+
+<p>At this point, you have a Zeppelin Interpreter which will behave like the <code>$MAHOUT_HOME/bin/mahout spark-shell</code></p>
+
+<p>Except, much much more.</p>
+
+<p>At the begining I mentioned a few important features of Zeppelin, that we could leverage to use Zeppelin for visualizatoins.</p>
+
+<h4 id="example-1-visualizing-a-matrix-sample-with-r">Example 1: Visualizing a Matrix (Sample) with R</h4>
+
+<p>In Mahout we can use <code>Matrices.symmetricUniformView</code> to create a Gaussian Matrix.</p>
+
+<p>We can use <code>.mapBlock</code> and some clever code to create a 3D Gausian Matrix.</p>
+
+<p>We can use <code>.drmSampleToTsv</code> to take a sample of the matrix and turn it in to a tab seperated string. We take a sample of 
+ the matrix because, since we are dealing with “big” data, we wouldn’t want to try to collect and plot the entire matrix, 
+ however, IF we knew we had a small matrix and we DID want to sample the entire thing, then we could sample <code>100.0</code> e.g. 100%.</p>
+
+<p>Finally we use <code>z.put(...)</code> to put a variable into Zeppelin’s <code>ResourcePool</code> a block of memory shared by all interpreters.</p>
+
+<pre><code>%sparkMahout
+
+val mxRnd3d = Matrices.symmetricUniformView(5000, 3, 1234)
+val drmRand3d = drmParallelize(mxRnd3d)
+
+val drmGauss = drmRand3d.mapBlock() {case (keys, block) =&gt;
+  val blockB = block.like()
+  for (i &lt;- 0 until block.nrow) {
+    val x: Double = block(i, 0)
+    val y: Double = block(i, 1)
+    val z: Double = block(i, 2)
+
+    blockB(i, 0) = x
+    blockB(i, 1) = y
+    blockB(i, 2) = Math.exp(-((Math.pow(x, 2)) + (Math.pow(y, 2)))/2)
+  }
+  keys -&gt; blockB
+}
+
+resourcePool.put("gaussDrm", drm.drmSampleToTSV(drmGauss, 50.0))
+</code></pre>
+
+<p>Here we sample 50% of the matrix and put it in the <code>ResourcePool</code> under a variable named “gaussDrm”.</p>
+
+<p>Now, for the exciting part. Scala doesn’t have a lot of great graphing utilities. But you know who does? R and Python. So
+instead of trying to akwardly visualize our data using Scala, let’s just use R and Python.</p>
+
+<p>We start the Spark R interpreter (we do this because the regular R interpreter doesn’t have access to the resource pools).</p>
+
+<p>We <code>z.get</code> the variable we just put in.</p>
+
+<p>We use R’s <code>read.table</code> to read the string- this is very similar to how we would read a tsv file in R.</p>
+
+<p>Then we plot the data using the R <code>scatterplot3d</code> package.</p>
+
+<p><strong>Note</strong> you may need to install <code>scatterplot3d</code>. In Ubuntu, do this with <code>sudo apt-get install r-cran-scatterplot3d</code></p>
+
+<pre><code>%spark.r {"imageWidth": "400px"}
+
+library(scatterplot3d)
+
+
+gaussStr = z.get("gaussDrm")
+data &lt;- read.table(text= gaussStr, sep="\t", header=FALSE)
+
+scatterplot3d(data, color="green")
+</code></pre>
+
+<p><img src="zeppelin3.png" alt="A neat plot" /></p>
+
+    </div>
+</div>
+
+  </div>
+
+
+</div>
+
+<div id="footer">
+  <div class="container">
+    <p>&copy; 2017 Apache Mahout
+      with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+      and <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>
+    </p>
+  </div>
+</div>
+
+
+
+
+
+
+
+<!-- Latest compiled and minified JavaScript, requires jQuery 1.x (2.x not supported in IE8) -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/assets/themes/mahout3/js/bootstrap.min.js"></script>
+</body>
+</html>
+

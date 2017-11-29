@@ -1,0 +1,483 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Cochrane-Orcutt Procedure</title>
+  
+  <meta name="author" content="Apache Mahout">
+
+  <!-- Enable responsive viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap styles -->
+  <link href="/assets/themes/mahout3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional theme -->
+  <link href="/assets/themes/mahout3/css/bootstrap-theme.min.css" rel="stylesheet">
+  <!-- Sticky Footer -->
+  <link href="/assets/themes/mahout3/css/bs-sticky-footer.css" rel="stylesheet">
+
+  <!-- Custom styles -->
+  <link href="/assets/themes/mahout3/css/style.css" rel="stylesheet" type="text/css" media="all">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+  <!-- atom & rss feed -->
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script');
+    mathjax.type = 'text/javascript';
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' :
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+
+      var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">
+        <img src="/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
+      </a>
+    </div>
+
+    
+
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+
+        <!-- Quick Start -->
+        <li id="quickstart">
+            <a href="/index.html" >Mahout Overview</a>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Key Concepts<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/index.html">Mahout Overview</a></li>
+                <li><span><b>&nbsp;&nbsp;Scala DSL</b><span></li>
+                <li><a href="/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
+                <li><a href="/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
+                <li><a href="/mahout-samsara/faq.html">Samsara FAQ</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Bindings</b><span></li>
+                <li><a href="/distributed/spark-bindings/">Spark Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">Flink Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">H20 Bindings</a></li>
+                <!--<li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Native Solvers</b><span></li>
+                <li><a href="/native-solvers/viennacl.html">ViennaCL</a></li>
+                <li><a href="/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
+                <li><a href="/native-solvers/cuda.html">CUDA</a></li>-->
+            </ul>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><span>&nbsp;&nbsp;<b>Reccomenders</b><span></li>
+                <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
+                <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Mahout Samsara</b><span></li>
+                <li><a href="/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
+                <li><a href="/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a></li>
+                <li><a href="/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
+                <li><a href="/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Misc</b><span></li>
+                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
+                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
+                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Deprecated</b><span></li>
+                <li><a href="/tutorials/map-reduce">MapReduce</a></li>
+            </ul>
+        </li>
+
+
+        <!-- Algorithms (Samsara / MR) -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/algorithms/linear-algebra">Distributed Linear Algebra</a></li>
+                <li><a href="/algorithms/preprocessors">Preprocessors</a></li>
+                <li><a href="/algorithms/regression">Regression</a></li>
+                <li><a href="/algorithms/reccomenders">Reccomenders</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a></li>
+            </ul>
+                <!--<li><a href="/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                <!--
+                <li><a href="/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<a href="/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+
+
+             -->
+        </li>
+
+        <!-- Scala Docs -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API Docs<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li class="title"><span>&nbsp;&nbsp;<b>0.13.1-SNAPSHOT</b>(latest)</span></li>
+                <li><a href="/scaladocs/math-scala/index.html">Mahout Math Scala Docs</a></li>
+                <li><a href="/scaladocs/spark/index.html">Mahout Spark Bindings Scala Docs</a></li>
+                <li><a href="/javadocs/index.html">Mahout Java Docs</a></li>
+            </ul>
+        </li>
+
+
+    </ul>
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="http://github.com/apache/mahout">Github</a></li>
+
+        <!-- Apache -->
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
+                <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
+                <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+                <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+            </ul>
+        </li>
+
+    </ul>
+</div><!-- /.navbar-collapse -->
+
+  </div><!-- /.container-fluid -->
+</nav>
+
+<body>
+
+<div id="wrap">
+  <body class="">
+
+  <div class="container">
+    
+
+
+<div class="row">
+    <div class="col-md-3">
+        <div id="AlgoMenu">
+    <span><b>Mahout-Samsara Algorithms</b></span>
+    <div class="list-group panel">
+        <a href="#linalg" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Linear Algebra</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="linalg">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/linear-algebra/d-qr.html">Distributed QR Decomposition</a></li>
+                <li> <a href="/algorithms/linear-algebra/d-spca.html">Distributed Stochastic Principal Component Analysis</a></li>
+                <li> <a href="/algorithms/linear-algebra/d-ssvd.html">Distributed Stochastic Singular Value Decomposition</a></li>
+            </ul>
+        </div>
+        <a href="#clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="clustering">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/clustering">Clustering Algorithms</a></li>
+                <li> <a href="/algorithms/clustering/distance-metrics.html">Distance Metrics</a></li>
+                <li> <a href="/algorithms/clustering/canopy">Canopy Clustering</a></li>
+            </ul>
+        </div>
+        <a href="#preprocessors" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Preprocessors</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="preprocessors">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/preprocessors/AsFactor.html">AsFactor (a.k.a. One-Hot-Encoding)</a></li>
+                <li> <a href="/algorithms/preprocessors/StandardScaler.html">StandardScaler</a></li>
+                <li> <a href="/algorithms/preprocessors/MeanCenter.html">MeanCenter</a></li>
+            </ul>
+        </div>
+        <a href="#regression" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Regression</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="regression">
+            <ul class="nav sidebar-nav">
+                <a href="#serial-correlation" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#regression"><b>&#8226;&nbsp;Serial Correlation</b><i class="fa fa-caret-down"></i></a>
+                <div class="collapse" id="serial-correlation">
+                    <ul class="nav sidebar-nav">
+                        <li> <a href="/algorithms/regression/serial-correlation/cochrane-orcutt.html">Cochrane-Orcutt Procedure</a></li>
+                        <li> <a href="/algorithms/regression/serial-correlation/dw-test.html">Durbin Watson Test</a></li>
+                    </ul>
+                </div>
+                <li> <a href="/algorithms/regression/ols.html">Ordinary Least Squares (Closed Form)</a></li>
+                <li> <a href="/algorithms/regression/fittness-tests.html">Fitness Tests</a></li>
+            </ul>
+        </div>
+        <a href="#reccomenders" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Reccomenders</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="reccomenders">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/reccomenders">Reccomender Overview</a></li>
+                <li> <a href="/algorithms/reccomenders/cco.html">CCO</a></li>
+                <li> <a href="/algorithms/reccomenders/d-als.html">Distributed Alternating Least Squares</a></li>
+            </ul>
+        </div>
+    </div>
+    <span><b>Map Reduce Algorithms</b> (deprecated)</span>
+    <div class="list-group panel">
+        <a href="#classification" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Classification</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="classification">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/map-reduce/classification/bayesian.html">Bayesian</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/class-discovery.html">Class Discovery</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/classifyingyourdata.html">Classifying Your Data</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/collocations.html">Collocation</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/gaussian-discriminative-analysis.html">Gaussian Discriminative Analysis</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/independent-component-analysis.html">Independent Component Analysis</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/locally-weighted-linear-regression.html">Locally Weighted Linear Regression</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/logistic-regression.html">Logistic Regression</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/mahout-collections.html">Mahout Collections</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/mlp.html">Multilayer Perceptron</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/naivebayes.html">Naive Bayes</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/neural-network.html">Neural Networks</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/partial-implementation.html">Partial Implementation</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/random-forrests.html">Random Forrests</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/restricted-boltzman-machines.html">Restricted Boltzman Machines</a></li>
+                <li> <a href="/algorithms/map-reduce/classification/support-vector-machines.html">Support Vector Machines</a></li>
+            </ul>
+        </div>
+        <a href="#mr-clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#AlgoMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
+        <div class="collapse" id="mr-clustering">
+            <ul class="nav sidebar-nav">
+                <li> <a href="/algorithms/map-reduce/clustering/canopy-clustering.html">Canopy Clustering</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/cluster-dumper.html">Cluster Dumper</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/expectation-maximization.html">Expectation Maximization</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/fuzzy-k-means.html">Fuzzy K-Means</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/hierarchical-clustering.html">Hierarchical Clustering</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/k-means-clustering.html">K-Means Clustering</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/llr---log-likelihood-ratio.html">Log Likelihood Ratio</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li> <a href="/algorithms/map-reduce/clustering/streaming-k-means.html">Streaming K-Means</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <div class="col-md-8">
+        <div class="page-header">
+            <h1>Cochrane-Orcutt Procedure </h1>
+        </div>
+        <h3 id="about">About</h3>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation">Cochrane Orcutt</a> procedure is use in economics to 
+adjust a linear model for serial correlation in the error term.</p>
+
+<p>The cooresponding method in R is <a href="https://cran.r-project.org/web/packages/orcutt/orcutt.pdf"><code>cochrane.orcutt</code></a>
+however the implementation differes slightly.</p>
+
+<h4 id="r-prototype">R Prototype:</h4>
+<pre><code>library(orcutt)
+
+df = data.frame(t(data.frame(
+    c(20.96,  127.3),
+    c(21.40,  130.0),
+    c(21.96,  132.7),
+    c(21.52,  129.4),
+    c(22.39,  135.0),
+    c(22.76,  137.1),
+    c(23.48,  141.2),
+    c(23.66,  142.8),
+    c(24.10,  145.5),
+    c(24.01,  145.3),
+    c(24.54,  148.3),
+    c(24.30,  146.4),
+    c(25.00,  150.2),
+    c(25.64,  153.1),
+    c(26.36,  157.3),
+    c(26.98,  160.7),
+    c(27.52,  164.2),
+    c(27.78,  165.6),
+    c(28.24,  168.7),
+    c(28.78,  171.7))))
+
+rownames(df) &lt;- NULL
+colnames(df) &lt;- c("y", "x")
+my_lm = lm(y ~ x, data=df)
+coch = cochrane.orcutt(my_lm)
+</code></pre>
+
+<p>The R-implementation is kind of…silly.</p>
+
+<p>The above works- converges at 318 iterations- the transformed DW is   1.72, yet the rho is
+ .95882.   After 318 iteartions, this will also report a rho of .95882 (which sugguests SEVERE
+ autocorrelation- nothing close to 1.72.</p>
+
+<p>At anyrate, the real prototype for this is the example from <a href="https://www.amazon.com/Applied-Linear-Statistical-Models-Hardcover/dp/B010EWX85C/ref=sr_1_4?ie=UTF8&amp;qid=1493847480&amp;sr=8-4&amp;keywords=applied+linear+statistical+models+5th+edition">Applied Linear Statistcal Models
+ 5th Edition by Kunter, Nachstheim, Neter, and Li</a>.</p>
+
+<p>Steps:</p>
+<ol>
+  <li>Normal Regression</li>
+  <li>Estimate <foo>\(\rho\)</foo></li>
+  <li>Get Estimates of Transformed Equation</li>
+  <li>Step 5: Use Betas from (4) to recalculate model from (1)</li>
+  <li>Step 6: repeat  Step 2 through 5 until a stopping criteria is met. Some models call for convergence-
+Kunter et. al reccomend 3 iterations, if you don’t achieve desired results, use an alternative method.</li>
+</ol>
+
+<h4 id="some-additional-notes-from-applied-linear-statistical-models">Some additional notes from Applied Linear Statistical Models:</h4>
+<p>They also provide some interesting notes on p 494:</p>
+
+<ol>
+  <li>“Cochrane-Orcutt does not always work properly.  A major reason is that when the error terms
+ are positively autocorrelated, the estimate <foo>\(r\)</foo> in (12.22) tends to underestimate the autocorrelation
+ parameter <foo>\(\rho\)</foo>.  When this bias is serious, it can significantly reduce the effectiveness of the
+ Cochrane-Orcutt approach.</li>
+  <li>“There exists an approximate relation between the <a href="dw-test.html">Durbin Watson test statistic</a> <foo>\(\mathbf{D}\)</foo> in (12.14)
+ and the estimated autocorrelation paramater <foo>\(r\)</foo> in (12.22):</li>
+</ol>
+<center>\(D ~= 2(1-\rho)\)</center>
+
+<p>They also note on p492:
+ “… If the process does not terminate after one or two iterations, a different procedure
+ should be employed.”
+ This differs from the logic found elsewhere, and the method presented in R where, in the simple
+  example in the prototype, the procedure runs for 318 iterations. This is why the default
+ maximum iteratoins are 3, and should be left as such.</p>
+
+<p>Also, the prototype and ‘correct answers’ are based on the example presented in Kunter et. al on
+ p492-4 (including dataset).</p>
+
+<h3 id="parameters">Parameters</h3>
+
+<div class="table-striped">
+  <table class="table">
+    <tr>
+        <th>Parameter</th>
+        <th>Description</th>
+        <th>Default Value</th>
+     </tr>
+     <tr>
+        <td><code>'regressor</code></td>
+        <td>Any subclass of <code>org.apache.mahout.math.algorithms.regression.LinearRegressorFitter</code></td>
+        <td><code>OrdinaryLeastSquares()</code></td>
+     </tr>
+     <tr>
+        <td><code>'iteratoins</code></td>
+        <td>Unlike our friends in R- we stick to the 3 iteration guidance.</td>
+        <td>3</td>
+     </tr>
+     <tr>
+        <td><code>'cacheHint</code></td>
+        <td>The DRM Cache Hint to use when holding the data in memory between iterations</td>
+        <td><code>CacheHint.MEMORY_ONLY</code></td>
+     </tr>                 
+  </table>
+</div>
+
+<h3 id="example">Example</h3>
+
+<pre><code>val alsmBlaisdellCo = drmParallelize( dense(
+      (20.96,  127.3),
+      (21.40,  130.0),
+      (21.96,  132.7),
+      (21.52,  129.4),
+      (22.39,  135.0),
+      (22.76,  137.1),
+      (23.48,  141.2),
+      (23.66,  142.8),
+      (24.10,  145.5),
+      (24.01,  145.3),
+      (24.54,  148.3),
+      (24.30,  146.4),
+      (25.00,  150.2),
+      (25.64,  153.1),
+      (26.36,  157.3),
+      (26.98,  160.7),
+      (27.52,  164.2),
+      (27.78,  165.6),
+      (28.24,  168.7),
+      (28.78,  171.7) ))
+
+val drmY = alsmBlaisdellCo(::, 0 until 1)
+val drmX = alsmBlaisdellCo(::, 1 until 2)
+
+var coModel = new CochraneOrcutt[Int]().fit(drmX, drmY , ('iterations -&gt; 2))
+
+println(coModel.rhos)
+println(coModel.summary)
+</code></pre>
+
+
+    </div>
+</div>
+
+  </div>
+
+
+</div>
+
+<div id="footer">
+  <div class="container">
+    <p>&copy; 2017 Apache Mahout
+      with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+      and <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>
+    </p>
+  </div>
+</div>
+
+
+
+
+
+
+
+<!-- Latest compiled and minified JavaScript, requires jQuery 1.x (2.x not supported in IE8) -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/assets/themes/mahout3/js/bootstrap.min.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>(Deprecated)  Testing</title>
+  
+  <meta name="author" content="Apache Mahout">
+
+  <!-- Enable responsive viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap styles -->
+  <link href="/assets/themes/mahout3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional theme -->
+  <link href="/assets/themes/mahout3/css/bootstrap-theme.min.css" rel="stylesheet">
+  <!-- Sticky Footer -->
+  <link href="/assets/themes/mahout3/css/bs-sticky-footer.css" rel="stylesheet">
+
+  <!-- Custom styles -->
+  <link href="/assets/themes/mahout3/css/style.css" rel="stylesheet" type="text/css" media="all">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+  <!-- atom & rss feed -->
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script');
+    mathjax.type = 'text/javascript';
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' :
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+
+      var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">
+        <img src="/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
+      </a>
+    </div>
+
+    
+
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+
+        <!-- Quick Start -->
+        <li id="quickstart">
+            <a href="/index.html" >Mahout Overview</a>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Key Concepts<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/index.html">Mahout Overview</a></li>
+                <li><span><b>&nbsp;&nbsp;Scala DSL</b><span></li>
+                <li><a href="/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
+                <li><a href="/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
+                <li><a href="/mahout-samsara/faq.html">Samsara FAQ</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Bindings</b><span></li>
+                <li><a href="/distributed/spark-bindings/">Spark Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">Flink Bindings</a></li>
+                <li><a href="/distributed/flink-bindings.html">H20 Bindings</a></li>
+                <!--<li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Native Solvers</b><span></li>
+                <li><a href="/native-solvers/viennacl.html">ViennaCL</a></li>
+                <li><a href="/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
+                <li><a href="/native-solvers/cuda.html">CUDA</a></li>-->
+            </ul>
+        </li>
+
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><span>&nbsp;&nbsp;<b>Reccomenders</b><span></li>
+                <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
+                <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Mahout Samsara</b><span></li>
+                <li><a href="/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
+                <li><a href="/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a></li>
+                <li><a href="/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
+                <li><a href="/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Misc</b><span></li>
+                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
+                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
+                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<b>Deprecated</b><span></li>
+                <li><a href="/tutorials/map-reduce">MapReduce</a></li>
+            </ul>
+        </li>
+
+
+        <!-- Algorithms (Samsara / MR) -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/algorithms/linear-algebra">Distributed Linear Algebra</a></li>
+                <li><a href="/algorithms/preprocessors">Preprocessors</a></li>
+                <li><a href="/algorithms/regression">Regression</a></li>
+                <li><a href="/algorithms/reccomenders">Reccomenders</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a></li>
+            </ul>
+                <!--<li><a href="/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                <!--
+                <li><a href="/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span>&nbsp;&nbsp;<a href="/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+
+
+             -->
+        </li>
+
+        <!-- Scala Docs -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API Docs<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li class="title"><span>&nbsp;&nbsp;<b>0.13.1-SNAPSHOT</b>(latest)</span></li>
+                <li><a href="/scaladocs/math-scala/index.html">Mahout Math Scala Docs</a></li>
+                <li><a href="/scaladocs/spark/index.html">Mahout Spark Bindings Scala Docs</a></li>
+                <li><a href="/javadocs/index.html">Mahout Java Docs</a></li>
+            </ul>
+        </li>
+
+
+    </ul>
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="http://github.com/apache/mahout">Github</a></li>
+
+        <!-- Apache -->
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
+                <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
+                <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+                <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+            </ul>
+        </li>
+
+    </ul>
+</div><!-- /.navbar-collapse -->
+
+  </div><!-- /.container-fluid -->
+</nav>
+
+<body>
+
+<div id="wrap">
+  <body class="">
+
+  <div class="container">
+    <p><a name="Testing-Intro"></a></p>
+<h1 id="intro">Intro</h1>
+
+<p>As Mahout matures, solid testing procedures are needed.  This page and its
+children capture test plans along with ideas for improving our testing.</p>
+
+<p><a name="Testing-TestPlans"></a></p>
+<h1 id="test-plans">Test Plans</h1>
+
+<ul>
+  <li><a href="0.6.html">0.6</a></li>
+  <li>Test Plans for the 0.6 release
+There are no special plans except for unit tests, and user testing of the
+Hadoop jobs.</li>
+</ul>
+
+<p><a name="Testing-TestIdeas"></a></p>
+<h1 id="test-ideas">Test Ideas</h1>
+
+<p><a name="Testing-Regressions/Benchmarks/Integrations"></a></p>
+<h2 id="regressionsbenchmarksintegrations">Regressions/Benchmarks/Integrations</h2>
+<ul>
+  <li>Algorithmic quality and speed are not tested, except in a few instances.
+Such tests often require much longer run times (minutes to hours), a
+running Hadoop cluster, and downloads of large datasets (in the megabytes).</li>
+  <li>Standardized speed tests are difficult on different hardware.</li>
+  <li>Unit tests of external integrations require access to externals: HDFS,
+S3, JDBC, Cassandra, etc.</li>
+</ul>
+
+<p>Apache Jenkins is not able to support these environments. Commercial
+donations would help.</p>
+
+<p><a name="Testing-UnitTests"></a></p>
+<h2 id="unit-tests">Unit Tests</h2>
+<p>Mahout’s current tests are almost entirely unit tests. Algorithm tests
+generally supply a few numbers to code paths and verify that expected
+numbers come out. ‘mvn test’ runs these tests. There is “positive” coverage
+of a great many utilities and algorithms. A much smaller percent include
+“negative” coverage (bogus setups, inputs, combinations).</p>
+
+<p><a name="Testing-Other"></a></p>
+<h2 id="other">Other</h2>
+
+
+  </div>
+
+
+</div>
+
+<div id="footer">
+  <div class="container">
+    <p>&copy; 2017 Apache Mahout
+      with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+      and <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>
+    </p>
+  </div>
+</div>
+
+
+
+
+
+
+
+<!-- Latest compiled and minified JavaScript, requires jQuery 1.x (2.x not supported in IE8) -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/assets/themes/mahout3/js/bootstrap.min.js"></script>
+</body>
+</html>
+
