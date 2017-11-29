@@ -12,21 +12,21 @@ curl -sSL https://get.rvm.io | bash -s -- --path ${RUBY_PATH}
 mkdir -p ${GEM_HOME}/gems
 gem install  --install-dir ${GEM_HOME} bundler
 export PATH=${GEM_HOME}/bin:$PATH
-(cd oldsite && bundle install --path ${GEM_HOME})
-(cd oldsite && bundle)
-(cd oldsite && bundle exec jekyll build --destination $WORKDIR)
-(cd docs && bundle install --path ${GEM_HOME})
-(cd docs && bundle)
-(cd docs && bundle exec jekyll build --destination $WORKDIR/docs/latest)
+(cd website/oldsite && bundle install --path ${GEM_HOME})
+(cd website/oldsite && bundle)
+(cd website/oldsite && bundle exec jekyll build --destination $WORKDIR)
+(cd website/docs && bundle install --path ${GEM_HOME})
+(cd website/docs && bundle)
+(cd website/docs && bundle exec jekyll build --destination $WORKDIR/docs/latest)
 
 
 # Set env for docs
 MAHOUT_VERSION=0.13.0
 DISTFILE=apache-mahout-distribution-$MAHOUT_VERSION.tar.gz
-DISTPATH=http://mirrors.ocf.berkeley.edu/apache/mahout/$MAHOUT_VERSION/$DISTFILE
+DISTPATH= https://dist.apache.org/repos/dist/release/mahout/$MAHOUT_VERSION/$DISTFILE
 
 # Copy API docs into _site
-wget -P $WORKDIR $DISTPATH
+wget -P $WORKDIR $DISTPATH -q
 tar -C $WORKDIR -xzf $WORKDIR/$DISTFILE apache-mahout-distribution-$MAHOUT_VERSION/docs
 mkdir -p $WORKDIR/docs/$MAHOUT_VERSION/api
 mv $WORKDIR/apache-mahout-distribution-$MAHOUT_VERSION/docs $WORKDIR/docs/$MAHOUT_VERSION/api
