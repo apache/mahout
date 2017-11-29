@@ -19,6 +19,7 @@ export PATH=${GEM_HOME}/bin:$PATH
 (cd docs && bundle)
 (cd docs && bundle exec jekyll build --destination $WORKDIR/docs/latest)
 
+
 # Set env for docs
 MAHOUT_VERSION=0.13.0
 DISTFILE=apache-mahout-distribution-$MAHOUT_VERSION.tar.gz
@@ -37,4 +38,8 @@ rm -rf *
 cp -a $WORKDIR/* .
 git add .
 git commit -m "Automatic Site Publish by Buildbot"
+<<<<<<< HEAD
 git push origin asf-site
+=======
+git push origin asf-site
+>>>>>>> e591012439c04e98d669ef9732fde865a9ef76fa
