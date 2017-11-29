@@ -1,0 +1,371 @@
+/********************************** 
+ The Apache Software Foundation
+
+Derived from: Open for Business Project Website
+ 
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+*********************************/ 
+
+/******************************** 
+ Global Reset
+********************************/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td, a {
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  border:0; 
+  margin:0; 
+  outline:0; 
+  padding:0; 
+  background:transparent; 
+  vertical-align: baseline;
+}
+
+body, .bodytext, .stepfield, .wiki-content, .wiki-content p, .wiki-content table, .wiki-content tr, .wiki-content td, .wiki-content th, .wiki-content ol, .wiki-content ul, .wiki-content li, h4.author {
+  font-size:13px;
+  color: #555;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content:''; 
+  content: none;
+}
+
+.wiki-content a, address, body, caption, cite, code, dfn, em, strong, th, var {
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+.wiki-content a, address, body, caption, cite, code, dfn, em, strong, th, var {
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;  	  
+}
+.wiki-content p, 
+.wiki-content span,
+.wiki-content div,
+.wiki-content ol,
+.wiki-content ul,
+.wiki-content li,
+.wiki-content th,
+.wiki-content td, address, body, caption, cite, code, dfn, em, strong, th, var {
+  font-family: "Lucida Grande", Geneva, Verdana, Arial, Helvetica, sans-serif;   	  
+  color: #333;
+}
+
+a img {
+  border: none;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/******************************** 
+General Layout
+ ********************************/ 
+* {margin:0;padding:0;}
+
+html, body, #wrap {height: 100%;}
+
+body > #wrap {height: auto; min-height: 100%;}
+
+body{
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  color: #333;
+  margin: 0;
+  font-size:80%;
+  padding: 0;
+  background: url(http://mahout.apache.org/images/bg.png) top left repeat-x  #A6A6A6;
+  text-align: center;
+  background-color:#A6A6A6!important;
+}
+
+.wiki-content {
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  color: #333;
+}
+
+a,a:active,a:link {
+  text-decoration: none;
+  color: #304c90;
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  color: #304c90;
+}
+
+.wiki-content h1, .wiki-content h2, .wiki-content h3, h1, h2, h3 {
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  color: #333;
+}
+
+.wiki-content h1, h1 {
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 350%;
+  font-weight: 100!important;
+  letter-spacing: -1px;
+}
+
+.wiki-content h2, h2 {
+  font-size: 200%;
+  font-weight: 100;
+  color: #895F30;
+}
+
+.wiki-content h3, h3 {
+  font-size: 170%;
+  font-weight: 100;
+}
+
+p,dl {
+  padding: 10px;
+  margin: 0;
+}
+
+ul{
+  margin: 0px 5px;
+  padding: 0 0 0 10px;
+}
+
+ul {
+  list-style: none;
+}
+
+ol {
+  margin: 0px 5px;
+  padding: 0 0 0 10px;
+}
+
+dt {
+  font-weight: bold;
+  color: #b13f1a;
+}
+
+dd {
+  padding-left: 25px;
+}
+
+.wiki-content {
+  margin-top: 0px;
+}
+
+.wiki-content, #labels-section {
+  width: 950px;
+  margin-left:0px;
+  float:left;
+  clear:none;
+}
+
+.wiki-content p {
+  margin: 10px 0px;
+}
+
+#title-heading{
+  display:block;
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 28px;
+  font-weight: 100!important;
+  margin-bottom:14px;
+  margin-top:35px!important;
+  line-height: 1.4em;
+}
+
+#title-heading span a, h1{
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 28px!important;
+  font-weight: 100!important;
+  letter-spacing: -1px!important;
+}
+
+#footer, #footer p.license, #footer p.license a {
+  background-color:#E0BB12;
+  color: #304c90;
+  clear:both;
+}
+
+#footer {
+  margin-top:20px!important;
+}
+
+#main {
+  clear:both;
+  background: url(http://mahout.apache.org/images/wiki-wrapper.png) top left no-repeat;
+  padding-top:170px;
+  padding-left:25px;
+  padding-bottom:80px;
+}
+
+.has-sidebar {
+  padding-top:190px!important;
+}
+.page-metadata {
+  position:absolute;
+  top:185px;
+}
+
+.page-metadata ul li, .page-metadata ul li a, .page-metadata ul li span{
+  font-size: 9px!important;
+}
+
+#navigation {
+  float: right;
+  right:0px;
+  margin:10px 0px;
+}
+
+#children-section {
+  width: 370px;
+  position:absolute;
+  right:10px;   
+  top:190px;
+}
+
+#children-section .section-header {
+  display:block;
+}
+
+#children-section-title {
+  display:none;
+}
+
+
+#children-section .section-header span {
+  color:white;
+  scroll:none;
+  overflow:hidden;
+}
+
+#children-section .section-header span a{
+  display:none;
+}
+
+#children-section .section-header span a#hide-children-link, 
+#children-section .section-header span a#show-children-link{
+  display:block;
+  padding: 5px 5px 3px 5px;
+  font-size: 22px;
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  color: #666666;
+  letter-spacing: -.5px;
+  height: 27px; 
+  width: 89px;
+  overflow:hidden;
+} 
+#children-section .section-header span a#hide-children-link:before ,
+#children-section .section-header span a#show-children-link:before {
+
+  content: "Contents           ";
+}
+
+.hidden parameters {
+  clear:none;
+  display:none;
+}
+
+#full-height-container {
+  width:1400px;
+}
+
+#header {
+  position:absolute;
+  top:130px;
+  height:38px;
+  width:1360px;
+  padding-left:20px;
+  padding-right:20px;
+  background:none;
+}
+
+#page-children, #page-children a {
+  text-decoration: none;
+  color: #304c70;
+  font-family: Opensans , "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 14px;
+  line-height:28px;
+  position:relative;
+  top:-10px;
+  padding-left:10px;
+}
+
+#page-children img {
+  display:none;
+}
+
+#quick-search {
+  float:right;
+  padding:5px;
+  padding-top:4px;
+  border-radius:3px;
+  background-color:#444;
+  height:23px;
+  position:relative;
+  top: -130px;
+  left:20px;
+  width: 300px;
+  height: 24px;
+}
+
+#quick-search fieldset{
+  margin:0;
+  padding:0;
+  height:15px;
+  line-height:22px;
+}
+
+#quick-search-query{
+  width: 295px;
+  margin-left:1px;
+  background:white;
+  -webkit-appearance:text;
+}
+
+#header-menu-bar {
+  float:right;
+  position:relative;
+  left:300px;
+}
+
+.clear {
+  margin-bottom:20px;
+}
+
+.panelContent {
+  font-size: 13px;
+}

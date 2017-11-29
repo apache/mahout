@@ -1,0 +1,661 @@
+
+
+<!DOCTYPE html>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Apache Mahout: Scalable machine learning and data mining</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="Distribution" content="Global">
+  <meta name="Robots" content="index,follow">
+  <meta name="keywords" content="apache, apache hadoop, apache lucene,
+        business data mining, cluster analysis,
+        collaborative filtering, data extraction, data filtering, data framework, data integration,
+        data matching, data mining, data mining algorithms, data mining analysis, data mining data,
+        data mining introduction, data mining software,
+        data mining techniques, data representation, data set, datamining,
+        feature extraction, fuzzy k means, genetic algorithm, hadoop,
+        hierarchical clustering, high dimensional, introduction to data mining, kmeans,
+        knowledge discovery, learning approach, learning approaches, learning methods,
+        learning techniques, lucene, machine learning, machine translation, mahout apache,
+        mahout taste, map reduce hadoop, mining data, mining methods, naive bayes,
+        natural language processing,
+        supervised, text mining, time series data, unsupervised, web data mining">
+  <link rel="shortcut icon" type="image/x-icon" href="https://mahout.apache.org/images/favicon.ico">
+  <!--<script type="text/javascript" src="/js/prototype.js"></script>-->
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.7.2.0/prototype.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/effects.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/search.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/slides.js"></script>
+
+  <link href="/assets/themes/mahout-retro/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="/assets/themes/mahout-retro/css/bootstrap-responsive.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/themes/mahout-retro/css/global.css" type="text/css">
+
+  <!-- mathJax stuff -- use `\(...\)` for inline style math in markdown -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script'); 
+    mathjax.type = 'text/javascript'; 
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' : 
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+	
+	  var s = document.getElementsByTagName('script')[0]; 
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<body id="home" data-twttr-rendered="true">
+  <div id="wrap">
+   <div id="header">
+    <div id="logo"><a href="/"><img src="/assets/img/mahout-logo-brudman.png" alt="Logos for Mahout and Apache Software Foundation" /></a></div>
+  <div id="search">
+    <form id="search-form" action="http://www.google.com/search" method="get" class="navbar-search pull-right">    
+      <input value="http://mahout.apache.org" name="sitesearch" type="hidden">
+      <input class="search-query" name="q" id="query" type="text">
+      <input id="submission" type="image" src="/assets/img/mahout-lupe.png" alt="Search" />
+    </form>
+  </div>
+ 
+    <div class="navbar navbar-inverse" style="position:absolute;top:133px;padding-right:0px;padding-left:0px;">
+      <div class="navbar-inner" style="border: none; background: #999; border: none; border-radius: 0px;">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!-- <a class="brand" href="#">Apache Community Development Project</a> -->
+            <!--<div class="nav-collapse collapse">-->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+        <!-- <li><a href="/">Home</a></li> -->
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">General<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/general/downloads.html">Downloads</a>
+                <li><a href="/general/who-we-are.html">Who we are</a>
+                <li><a href="/general/mailing-lists,-irc-and-archives.html">Mailing Lists</a>
+                <li><a href="/general/release-notes.html">Release Notes</a>
+                <li><a href="/general/books-tutorials-and-talks.html">Books, Tutorials, Talks</a></li>
+                <li><a href="/general/powered-by-mahout.html">Powered By Mahout</a>
+                <li><a href="/general/professional-support.html">Professional Support</a>
+                <li class="divider"></li>
+                <li class="nav-header">Resources</li>
+                <li><a href="/general/reference-reading.html">Reference Reading</a>
+                <li><a href="/general/faq.html">FAQ</a>
+                <li class="divider"></li>
+                <li class="nav-header">Legal</li>
+                <li><a href="http://www.apache.org/licenses/">License</a></li>
+                <li><a href="http://www.apache.org/security/">Security</a></li>
+                <li><a href="/general/privacy-policy.html">Privacy Policy</a>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developers<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/developers/developer-resources.html">Developer resources</a></li>
+                <li><a href="/developers/version-control.html">Version control</a></li>
+                <li><a href="/developers/buildingmahout.html">Build from source</a></li>
+                <li><a href="/developers/issue-tracker.html">Issue tracker</a></li>
+                <li><a href="https://builds.apache.org/job/Mahout-Quality/" target="_blank">Code quality reports</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Contributions</li>
+                <li><a href="/developers/how-to-contribute.html">How to contribute</a></li>
+                <li><a href="/developers/how-to-become-a-committer.html">How to become a committer</a></li>
+                <li><a href="/developers/gsoc.html">GSoC</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">For committers</li>
+                <li><a href="/developers/how-to-update-the-website.html">How to update the website</a></li>
+                <li><a href="/developers/patch-check-list.html">Patch check list</a></li>
+                <li><a href="/developers/github.html">Handling Github PRs</a></li>
+                <li><a href="/developers/how-to-release.html">How to release</a></li>
+                <li><a href="/developers/thirdparty-dependencies.html">Third party dependencies</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout-Samsara<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/sparkbindings/home.html">Scala &amp; Spark Bindings Overview</a></li>
+                <li><a href="/users/sparkbindings/faq.html">FAQ</a></li>
+                <li><a href="/users/flinkbindings/playing-with-samsara-flink.html">Flink Bindings Overview</a></li>
+                <li class="nav-header">Engines</li>
+                <li><a href="/users/sparkbindings/home.html">Spark</a></li>
+                <li><a href="/users/environment/h2o-internals.html">H2O</a></li>
+                <li><a href="/users/flinkbindings/flink-internals.html">Flink</a></li>
+                <li class="nav-header">References</li>
+                <li><a href="/users/environment/in-core-reference.html">In-Core Algebraic DSL Reference</a></li>
+                <li><a href="/users/environment/out-of-core-reference.html">Distributed Algebraic DSL Reference</a></li>
+                <li class="nav-header">Tutorials</li>
+                <li><a href="/users/sparkbindings/play-with-shell.html">Playing with Mahout's Spark Shell</a></li>
+                <li><a href="/users/environment/how-to-build-an-app.html">How to build an app</a></li>
+                <li><a href="/users/environment/classify-a-doc-from-the-shell.html">Building a text classifier in Mahout's Spark Shell</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Algorithms<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li class="nav-header">Distributed Matrix Decomposition</li>
+                <li><a href="/users/algorithms/d-qr.html">Cholesky QR</a></li>
+                <li><a href="/users/algorithms/d-ssvd.html">SSVD</a></li>
+                <li><a href="/users/algorithms/d-als.html">Distributed ALS</a></li>
+                <li><a href="/users/algorithms/d-spca.html">SPCA</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/algorithms/recommender-overview.html">Recommender Overview</a></li>
+                <li><a href="/users/algorithms/intro-cooccurrence-spark.html">Intro to cooccurrence-based<br/> recommendations with Spark</a></li>
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/algorithms/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">MapReduce Basics<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li><a href="/users/basics/quickstart.html">Overview</a>
+                <li class="divider"></li>
+                <li class="nav-header">Working with text</li>
+                <li><a href="/users/basics/creating-vectors-from-text.html">Creating vectors from text</a>
+                <li><a href="/users/basics/collocations.html">Collocations</a>
+                <li class="divider"></li>
+                <li class="nav-header">Dimensionality reduction</li>
+                <li><a href="/users/dim-reduction/dimensional-reduction.html">Singular Value Decomposition</a></li>
+                <li><a href="/users/dim-reduction/ssvd.html">Stochastic SVD</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Topic Models</li>
+                <li><a href="/users/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout MapReduce<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/classification/bayesian.html">Naive Bayes</a></li>
+                <li><a href="/users/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li><a href="/users/classification/logistic-regression.html">Logistic Regression (Single Machine)</a></li>
+                <li><a href="/users/classification/partial-implementation.html">Random Forest</a></li>
+                <li class="nav-header">Classification Examples</li>
+                <li><a href="/users/classification/breiman-example.html">Breiman example</a></li>
+                <li><a href="/users/classification/twenty-newsgroups.html">20 newsgroups example</a></li>
+                <li><a href="/users/classification/bankmarketing-example.html">SGD classifier bank marketing</a></li>
+                <li><a href="/users/classification/wikipedia-classifier-example.html">Wikipedia XML parser and classifier</a></li>
+                <li class="nav-header">Clustering</li>
+                <li><a href="/users/clustering/k-means-clustering.html">k-Means</a></li>
+                <li><a href="/users/clustering/canopy-clustering.html">Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means.html">Fuzzy k-Means</a></li>
+                <li><a href="/users/clustering/streaming-k-means.html">Streaming KMeans</a></li>
+                <li><a href="/users/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li class="nav-header">Clustering Commandline usage</li>
+                <li><a href="/users/clustering/k-means-commandline.html">Options for k-Means</a></li>
+                <li><a href="/users/clustering/canopy-commandline.html">Options for Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means-commandline.html">Options for Fuzzy k-Means</a></li>
+                <li class="nav-header">Clustering Examples</li>
+                <li><a href="/users/clustering/clustering-of-synthetic-control-data.html">Synthetic data</a></li>
+                <li class="nav-header">Cluster Post processing</li>
+                <li><a href="/users/clustering/cluster-dumper.html">Cluster Dumper tool</a></li>
+                <li><a href="/users/clustering/visualizing-sample-clusters.html">Cluster visualisation</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/recommender/recommender-first-timer-faq.html">First Timer FAQ</a></li>
+                <li><a href="/users/recommender/userbased-5-minutes.html">A user-based recommender <br/>in 5 minutes</a></li>
+                <li><a href="/users/recommender/matrix-factorization.html">Matrix factorization-based<br/> recommenders</a></li>
+                <li><a href="/users/recommender/recommender-documentation.html">Overview</a></li>
+                <li><a href="/users/recommender/intro-itembased-hadoop.html">Intro to item-based recommendations<br/> with Hadoop</a></li>
+                <li><a href="/users/recommender/intro-als-hadoop.html">Intro to ALS recommendations<br/> with Hadoop</a></li>
+            </ul>
+        </li>
+        <!--  <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Recommendations<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+
+          </ul> -->
+        </li>
+    </ul>
+</div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+</div>
+
+ <div id="sidebar">
+  <div id="sidebar-wrap">
+    <h2>Twitter</h2>
+	<ul class="sidemenu">
+		<li>
+<a class="twitter-timeline" href="https://twitter.com/ApacheMahout" data-widget-id="422861673444028416">Tweets by @ApacheMahout</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</li>
+	</ul>
+    <h2>Apache Software Foundation</h2>
+    <ul class="sidemenu">
+      <li><a href="http://www.apache.org/foundation/how-it-works.html">How the ASF works</a></li>
+      <li><a href="http://www.apache.org/foundation/getinvolved.html">Get Involved</a></li>
+      <li><a href="http://www.apache.org/dev/">Developer Resources</a></li>
+      <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+      <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+    </ul>
+    <h2>Related Projects</h2>
+    <ul class="sidemenu">
+      <li><a href="http://lucene.apache.org/">Apache Lucene</a></li>
+      <li><a href="http://hadoop.apache.org/">Apache Hadoop</a></li>
+      <li><a href="http://bigtop.apache.org/">Apache Bigtop</a></li>
+      <li><a href="http://spark.apache.org/">Apache Spark</a></li>
+	  <li><a href="http://flink.apache.org/">Apache Flink</a></li>
+    </ul>
+  </div>
+</div>
+
+  <div id="content-wrap" class="clearfix">
+   <div id="main">
+
+    <hr />
+<p><em>Mahout 0.12.0 Features by Engine</em> <br />
+—</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th style="text-align: center"><strong>Single Machine</strong></th>
+      <th style="text-align: center"><a href="http://hadoop.apache.org/"><strong>MapReduce</strong></a></th>
+      <th style="text-align: center"><a href="https://spark.apache.org/"><strong>Spark</strong></a></th>
+      <th style="text-align: center"><a href="http://0xdata.com/"><strong>H2O</strong></a></th>
+      <th style="text-align: center"><a href="https://flink.apache.org/"><strong>Flink</strong></a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Mahout Math-Scala Core Library and Scala DSL</strong></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><a href="http://mahout.apache.org/users/sparkbindings/home.html">Mahout Distributed BLAS. Distributed Row Matrix API with R and Matlab like operators. Distributed ALS, SPCA, SSVD, thin-QR. Similarity Analysis</a>.</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/sparkbindings/ScalaSparkBindings.pdf">x</a></td>
+      <td style="text-align: center"><a href="https://github.com/apache/mahout/tree/master/h2o">x</a></td>
+      <td style="text-align: center"><a href="https://github.com/apache/mahout/tree/flink-binding/flink">x</a></td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><strong>Mahout Interactive Shell</strong></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><a href="http://mahout.apache.org/users/sparkbindings/play-with-shell.html">Interactive REPL shell for Spark optimized Mahout DSL</a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center">x</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><strong>Collaborative Filtering</strong> <em>with CLI drivers</em></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>User-Based Collaborative Filtering</td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/algorithms/intro-cooccurrence-spark.html">x</a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Item-Based Collaborative Filtering</td>
+      <td style="text-align: center">x</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/recommender/intro-itembased-hadoop.html">x</a></td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/algorithms/intro-cooccurrence-spark.html">x</a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Matrix Factorization with ALS</td>
+      <td style="text-align: center">x</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/recommender/intro-als-hadoop.html">x</a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Matrix Factorization with ALS on Implicit Feedback</td>
+      <td style="text-align: center">x</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/recommender/intro-als-hadoop.html">x</a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Weighted Matrix Factorization, SVD++</td>
+      <td style="text-align: center">x</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><strong>Classification</strong> <em>with CLI drivers</em></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Logistic Regression - trained via SGD</td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/classification/logistic-regression.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Naive Bayes / Complementary Naive Bayes</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/classification/bayesian.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/algorithms/spark-naive-bayes.html">x</a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Hidden Markov Models</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/classification/hidden-markov-models.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><strong>Clustering</strong> <em>with CLI drivers</em></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Canopy Clustering</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/canopy-clustering.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/canopy-clustering.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>k-Means Clustering</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/k-means-clustering.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/k-means-clustering.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Fuzzy k-Means</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/fuzzy-k-means.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/fuzzy-k-means.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Streaming k-Means</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/streaming-k-means.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/streaming-k-means.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Spectral Clustering</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/clustering/spectral-clustering.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><strong>Dimensionality Reduction</strong> <em>note: most scala-based dimensionality reduction algorithms are available through the <a href="https://mahout.apache.org/users/sparkbindings/home.html">Mahout Math-Scala Core Library for all engines</a></em></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Singular Value Decomposition</td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/sparkbindings/home.html">x</a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/environment/h2o-internals.html">x</a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/flinkbindings/flink-internals.html">x</a></td>
+    </tr>
+    <tr>
+      <td>Lanczos Algorithm</td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Stochastic SVD</td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/dim-reduction/ssvd.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/dim-reduction/ssvd.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/algorithms/d-ssvd.html">x</a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/algorithms/d-ssvd.html">x</a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/algorithms/d-ssvd.html">x</a></td>
+    </tr>
+    <tr>
+      <td>PCA (via Stochastic SVD)</td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/sparkbindings/home.html">x</a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/environment/h2o-internals.html">x</a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/flinkbindings/flink-internals.html">x</a></td>
+    </tr>
+    <tr>
+      <td>QR Decomposition</td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/algorithms/d-qr.html">x</a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/algorithms/d-qr.html">x</a></td>
+      <td style="text-align: center"><a href="http://mahout.apache.org/users/algorithms/d-qr.html">x</a></td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><strong>Topic Models</strong></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Latent Dirichlet Allocation</td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td><strong>Miscellaneous</strong></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>RowSimilarityJob</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"><em>deprecated</em></td>
+      <td style="text-align: center"><a href="https://github.com/apache/mahout/blob/master/spark/src/test/scala/org/apache/mahout/drivers/RowSimilarityDriverSuite.scala">x</a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Collocations</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/basics/collocations.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Sparse TF-IDF Vectors from Text</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"><a href="https://mahout.apache.org/users/basics/creating-vectors-from-text.html"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>XML Parsing</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"><a href="https://issues.apache.org/jira/browse/MAHOUT-1479?jql=text%20~%20%22wikipedia%20mahout%22"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Email Archive Parsing</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"><a href="https://github.com/apache/mahout/tree/master/integration/src/main/java/org/apache/mahout/text"><em>deprecated</em></a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td>Evolutionary Processes</td>
+      <td style="text-align: center"><a href="https://github.com/apache/mahout/tree/master/mr/src/main/java/org/apache/mahout/ep">x</a></td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+  </tbody>
+</table>
+
+
+   </div>
+  </div>     
+</div> 
+  <footer class="footer" align="center">
+    <div class="container">
+      <p>
+        Copyright &copy; 2014-2016 The Apache Software Foundation, Licensed under
+        the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.
+        <br />
+		  Apache Mahout, Mahout, Apache, the Apache feather logo, and the elephant rider logo are either registered trademarks or trademarks of <a href="http://www.apache.org/foundation/marks/">The Apache Software Foundation</a> in the United States and other countries.
+      </p>
+    </div>
+  </footer>
+  
+  <script src="/assets/themes/mahout-retro/js/jquery-1.9.1.min.js"></script>
+  <script src="/assets/themes/mahout-retro/js/bootstrap.min.js"></script>
+  <script>
+    (function() {
+      var cx = '012254517474945470291:vhsfv7eokdc';
+      var gcse = document.createElement('script');
+      gcse.type = 'text/javascript';
+      gcse.async = true;
+      gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+          '//www.google.com/cse/cse.js?cx=' + cx;
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(gcse, s);
+    })();
+  </script>
+</body>
+</html>
+

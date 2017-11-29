@@ -1,0 +1,460 @@
+
+
+<!DOCTYPE html>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Apache Mahout: Scalable machine learning and data mining</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="Distribution" content="Global">
+  <meta name="Robots" content="index,follow">
+  <meta name="keywords" content="apache, apache hadoop, apache lucene,
+        business data mining, cluster analysis,
+        collaborative filtering, data extraction, data filtering, data framework, data integration,
+        data matching, data mining, data mining algorithms, data mining analysis, data mining data,
+        data mining introduction, data mining software,
+        data mining techniques, data representation, data set, datamining,
+        feature extraction, fuzzy k means, genetic algorithm, hadoop,
+        hierarchical clustering, high dimensional, introduction to data mining, kmeans,
+        knowledge discovery, learning approach, learning approaches, learning methods,
+        learning techniques, lucene, machine learning, machine translation, mahout apache,
+        mahout taste, map reduce hadoop, mining data, mining methods, naive bayes,
+        natural language processing,
+        supervised, text mining, time series data, unsupervised, web data mining">
+  <link rel="shortcut icon" type="image/x-icon" href="https://mahout.apache.org/images/favicon.ico">
+  <!--<script type="text/javascript" src="/js/prototype.js"></script>-->
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.7.2.0/prototype.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/effects.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/search.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/slides.js"></script>
+
+  <link href="/assets/themes/mahout-retro/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="/assets/themes/mahout-retro/css/bootstrap-responsive.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/themes/mahout-retro/css/global.css" type="text/css">
+
+  <!-- mathJax stuff -- use `\(...\)` for inline style math in markdown -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script'); 
+    mathjax.type = 'text/javascript'; 
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' : 
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+	
+	  var s = document.getElementsByTagName('script')[0]; 
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<body id="home" data-twttr-rendered="true">
+  <div id="wrap">
+   <div id="header">
+    <div id="logo"><a href="/"><img src="/assets/img/mahout-logo-brudman.png" alt="Logos for Mahout and Apache Software Foundation" /></a></div>
+  <div id="search">
+    <form id="search-form" action="http://www.google.com/search" method="get" class="navbar-search pull-right">    
+      <input value="http://mahout.apache.org" name="sitesearch" type="hidden">
+      <input class="search-query" name="q" id="query" type="text">
+      <input id="submission" type="image" src="/assets/img/mahout-lupe.png" alt="Search" />
+    </form>
+  </div>
+ 
+    <div class="navbar navbar-inverse" style="position:absolute;top:133px;padding-right:0px;padding-left:0px;">
+      <div class="navbar-inner" style="border: none; background: #999; border: none; border-radius: 0px;">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!-- <a class="brand" href="#">Apache Community Development Project</a> -->
+            <!--<div class="nav-collapse collapse">-->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+        <!-- <li><a href="/">Home</a></li> -->
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">General<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/general/downloads.html">Downloads</a>
+                <li><a href="/general/who-we-are.html">Who we are</a>
+                <li><a href="/general/mailing-lists,-irc-and-archives.html">Mailing Lists</a>
+                <li><a href="/general/release-notes.html">Release Notes</a>
+                <li><a href="/general/books-tutorials-and-talks.html">Books, Tutorials, Talks</a></li>
+                <li><a href="/general/powered-by-mahout.html">Powered By Mahout</a>
+                <li><a href="/general/professional-support.html">Professional Support</a>
+                <li class="divider"></li>
+                <li class="nav-header">Resources</li>
+                <li><a href="/general/reference-reading.html">Reference Reading</a>
+                <li><a href="/general/faq.html">FAQ</a>
+                <li class="divider"></li>
+                <li class="nav-header">Legal</li>
+                <li><a href="http://www.apache.org/licenses/">License</a></li>
+                <li><a href="http://www.apache.org/security/">Security</a></li>
+                <li><a href="/general/privacy-policy.html">Privacy Policy</a>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developers<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/developers/developer-resources.html">Developer resources</a></li>
+                <li><a href="/developers/version-control.html">Version control</a></li>
+                <li><a href="/developers/buildingmahout.html">Build from source</a></li>
+                <li><a href="/developers/issue-tracker.html">Issue tracker</a></li>
+                <li><a href="https://builds.apache.org/job/Mahout-Quality/" target="_blank">Code quality reports</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Contributions</li>
+                <li><a href="/developers/how-to-contribute.html">How to contribute</a></li>
+                <li><a href="/developers/how-to-become-a-committer.html">How to become a committer</a></li>
+                <li><a href="/developers/gsoc.html">GSoC</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">For committers</li>
+                <li><a href="/developers/how-to-update-the-website.html">How to update the website</a></li>
+                <li><a href="/developers/patch-check-list.html">Patch check list</a></li>
+                <li><a href="/developers/github.html">Handling Github PRs</a></li>
+                <li><a href="/developers/how-to-release.html">How to release</a></li>
+                <li><a href="/developers/thirdparty-dependencies.html">Third party dependencies</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout-Samsara<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/sparkbindings/home.html">Scala &amp; Spark Bindings Overview</a></li>
+                <li><a href="/users/sparkbindings/faq.html">FAQ</a></li>
+                <li><a href="/users/flinkbindings/playing-with-samsara-flink.html">Flink Bindings Overview</a></li>
+                <li class="nav-header">Engines</li>
+                <li><a href="/users/sparkbindings/home.html">Spark</a></li>
+                <li><a href="/users/environment/h2o-internals.html">H2O</a></li>
+                <li><a href="/users/flinkbindings/flink-internals.html">Flink</a></li>
+                <li class="nav-header">References</li>
+                <li><a href="/users/environment/in-core-reference.html">In-Core Algebraic DSL Reference</a></li>
+                <li><a href="/users/environment/out-of-core-reference.html">Distributed Algebraic DSL Reference</a></li>
+                <li class="nav-header">Tutorials</li>
+                <li><a href="/users/sparkbindings/play-with-shell.html">Playing with Mahout's Spark Shell</a></li>
+                <li><a href="/users/environment/how-to-build-an-app.html">How to build an app</a></li>
+                <li><a href="/users/environment/classify-a-doc-from-the-shell.html">Building a text classifier in Mahout's Spark Shell</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Algorithms<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li class="nav-header">Distributed Matrix Decomposition</li>
+                <li><a href="/users/algorithms/d-qr.html">Cholesky QR</a></li>
+                <li><a href="/users/algorithms/d-ssvd.html">SSVD</a></li>
+                <li><a href="/users/algorithms/d-als.html">Distributed ALS</a></li>
+                <li><a href="/users/algorithms/d-spca.html">SPCA</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/algorithms/recommender-overview.html">Recommender Overview</a></li>
+                <li><a href="/users/algorithms/intro-cooccurrence-spark.html">Intro to cooccurrence-based<br/> recommendations with Spark</a></li>
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/algorithms/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">MapReduce Basics<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li><a href="/users/basics/quickstart.html">Overview</a>
+                <li class="divider"></li>
+                <li class="nav-header">Working with text</li>
+                <li><a href="/users/basics/creating-vectors-from-text.html">Creating vectors from text</a>
+                <li><a href="/users/basics/collocations.html">Collocations</a>
+                <li class="divider"></li>
+                <li class="nav-header">Dimensionality reduction</li>
+                <li><a href="/users/dim-reduction/dimensional-reduction.html">Singular Value Decomposition</a></li>
+                <li><a href="/users/dim-reduction/ssvd.html">Stochastic SVD</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Topic Models</li>
+                <li><a href="/users/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout MapReduce<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/classification/bayesian.html">Naive Bayes</a></li>
+                <li><a href="/users/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li><a href="/users/classification/logistic-regression.html">Logistic Regression (Single Machine)</a></li>
+                <li><a href="/users/classification/partial-implementation.html">Random Forest</a></li>
+                <li class="nav-header">Classification Examples</li>
+                <li><a href="/users/classification/breiman-example.html">Breiman example</a></li>
+                <li><a href="/users/classification/twenty-newsgroups.html">20 newsgroups example</a></li>
+                <li><a href="/users/classification/bankmarketing-example.html">SGD classifier bank marketing</a></li>
+                <li><a href="/users/classification/wikipedia-classifier-example.html">Wikipedia XML parser and classifier</a></li>
+                <li class="nav-header">Clustering</li>
+                <li><a href="/users/clustering/k-means-clustering.html">k-Means</a></li>
+                <li><a href="/users/clustering/canopy-clustering.html">Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means.html">Fuzzy k-Means</a></li>
+                <li><a href="/users/clustering/streaming-k-means.html">Streaming KMeans</a></li>
+                <li><a href="/users/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li class="nav-header">Clustering Commandline usage</li>
+                <li><a href="/users/clustering/k-means-commandline.html">Options for k-Means</a></li>
+                <li><a href="/users/clustering/canopy-commandline.html">Options for Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means-commandline.html">Options for Fuzzy k-Means</a></li>
+                <li class="nav-header">Clustering Examples</li>
+                <li><a href="/users/clustering/clustering-of-synthetic-control-data.html">Synthetic data</a></li>
+                <li class="nav-header">Cluster Post processing</li>
+                <li><a href="/users/clustering/cluster-dumper.html">Cluster Dumper tool</a></li>
+                <li><a href="/users/clustering/visualizing-sample-clusters.html">Cluster visualisation</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/recommender/recommender-first-timer-faq.html">First Timer FAQ</a></li>
+                <li><a href="/users/recommender/userbased-5-minutes.html">A user-based recommender <br/>in 5 minutes</a></li>
+                <li><a href="/users/recommender/matrix-factorization.html">Matrix factorization-based<br/> recommenders</a></li>
+                <li><a href="/users/recommender/recommender-documentation.html">Overview</a></li>
+                <li><a href="/users/recommender/intro-itembased-hadoop.html">Intro to item-based recommendations<br/> with Hadoop</a></li>
+                <li><a href="/users/recommender/intro-als-hadoop.html">Intro to ALS recommendations<br/> with Hadoop</a></li>
+            </ul>
+        </li>
+        <!--  <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Recommendations<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+
+          </ul> -->
+        </li>
+    </ul>
+</div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+</div>
+
+ <div id="sidebar">
+  <div id="sidebar-wrap">
+    <h2>Twitter</h2>
+	<ul class="sidemenu">
+		<li>
+<a class="twitter-timeline" href="https://twitter.com/ApacheMahout" data-widget-id="422861673444028416">Tweets by @ApacheMahout</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</li>
+	</ul>
+    <h2>Apache Software Foundation</h2>
+    <ul class="sidemenu">
+      <li><a href="http://www.apache.org/foundation/how-it-works.html">How the ASF works</a></li>
+      <li><a href="http://www.apache.org/foundation/getinvolved.html">Get Involved</a></li>
+      <li><a href="http://www.apache.org/dev/">Developer Resources</a></li>
+      <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+      <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+    </ul>
+    <h2>Related Projects</h2>
+    <ul class="sidemenu">
+      <li><a href="http://lucene.apache.org/">Apache Lucene</a></li>
+      <li><a href="http://hadoop.apache.org/">Apache Hadoop</a></li>
+      <li><a href="http://bigtop.apache.org/">Apache Bigtop</a></li>
+      <li><a href="http://spark.apache.org/">Apache Spark</a></li>
+	  <li><a href="http://flink.apache.org/">Apache Flink</a></li>
+    </ul>
+  </div>
+</div>
+
+  <div id="content-wrap" class="clearfix">
+   <div id="main">
+
+    <h1 id="what-is-apache-mahout">What is Apache Mahout?</h1>
+<h2 id="the-apache-mahout-projects-goal-is-to-build-an-environment-for-quickly-creating-scalable-performant-machine-learning-applications">The Apache Mahout™ project’s goal is to build an environment for quickly creating scalable performant machine learning applications.</h2>
+
+<div class="highlights">
+    <a href="http://mahout.apache.org/general/downloads.html"><img src="http://mahout.apache.org/images/download-mahout.png" /></a>
+    <h4>Latest release version 0.12.2 has</h4>
+    <h6>Apache Mahout Samsara Environment includes</h6>
+    <ul>
+      <li>Distributed Algebraic optimizer</li>
+      <li>R-Like DSL Scala API</li>
+      <li>Linear algebra operations</li>
+      <li>Ops are extensions to Scala</li>
+      <li>IScala REPL based interactive shell</li>
+      <li>Integrates with compatible libraries like MLLib</li>
+      <li>Runs on distributed Spark, H2O, and Flink</li>
+      <li>fastutil to speed up sparse matrix and vector computations</li>
+      <li>Matrix to tsv conversions for integration with Apache Zeppelin</li>
+    </ul>
+    <h6>Apache Mahout Samsara Algorithms included</h6>
+    <ul>
+      <li>Stochastic Singular Value Decomposition (ssvd, dssvd)</li>
+      <li>Stochastic Principal Component Analysis (spca, dspca)</li>
+      <li>Distributed Cholesky QR (thinQR) </li>
+      <li>Distributed regularized Alternating Least Squares (dals)</li>
+      <li>Collaborative Filtering: Item and Row Similarity</li>
+      <li>Naive Bayes Classification</li>
+      <li>Distributed and in-core</li>
+    </ul>
+  </div>
+
+<p><strong>Apache Mahout software</strong> provides three major features:</p>
+<ul>
+  <li>A simple and extensible programming environment and framework for building scalable algorithms</li>
+  <li>A wide variety of premade algorithms for Scala + Apache Spark, H2O, Apache Flink</li>
+  <li>Samsara, a vector math experimentation environment with R-like syntax which works at scale</li>
+</ul>
+
+<p>Read an <a href="http://mahout.apache.org/users/environment/how-to-build-an-app.html">Overview of programming a Mahout Samsara Application</a>, 
+learn <a href="http://mahout.apache.org/developers/how-to-contribute.html">How To Contribute to Mahout</a>,
+<a href="http://mahout.apache.org/developers/issue-tracker.html">report an issue, bug, or suggestion</a> in our JIRA, 
+see the <a href="http://mahout.apache.org/users/sparkbindings/home.html">Samsara bindings for Scala and Spark</a>,
+and <a href="http://mahout.apache.org/general/mailing-lists,-irc-and-archives.html">contact us on our mailing lists</a>.</p>
+
+<h4 id="13-may-2017---apache-mahout-website-beta-release">13 May 2017 - Apache Mahout website beta release</h4>
+
+<p>Docs available <a href="http://mahout.apache.org/docs/0.13.1-SNAPSHOT">here</a></p>
+
+<h4 id="17-april-2017---apache-mahout-0130-released">17 April 2017 - Apache Mahout 0.13.0 released</h4>
+
+<p>Mahout 0.13.0 includes</p>
+
+<ul>
+  <li>In-core matrices backed by ViennaCL <a href="http://mahout.apache.org/developers/issue-tracker.html">3</a> providing in some cases speedups
+of an order of magnitude.</li>
+  <li>A JavaCPP bridge to native/GPU operations in ViennaCL</li>
+  <li>Distributed GPU Matrix-Matrix and Matrix-Vector multiplication on Spark</li>
+  <li>Distributed OpenMP Matrix-Matrix and Matrix-Vector multiplication on Spark</li>
+  <li>Sparse and dense matrix GPU-backed support.</li>
+  <li>Fault tolerance by falling back to Mahout JVM counterpart of new solvers
+in the case of failure on GPU or OpenMP</li>
+  <li>A new scikit-learn-like framework for algorithms with the goal for
+creating a consistent API for various machine-learning algorithms and an
+orderly package structure for grouping regression, classification,
+clustering, and pre-processing algorithms together</li>
+  <li>New DRM wrappers in Spark Bindings making it more convenient to create
+DRMs from MLLib RDDs and DataFrames</li>
+  <li>MahoutConversions adds Scala-like compatibility to Vectors introducing
+methods such as toArray() and toMap()</li>
+</ul>
+
+<h4 id="13-jun-2016---apache-mahout-0122-released">13 Jun 2016 - Apache Mahout 0.12.2 released</h4>
+
+<p>Mahout 0.12.2 is a minor release following 0.12.1 that provides Matrix exports for Apache Zeppelin integration along with a few minor bug fixes and dependency upgrades.</p>
+
+<h4 id="19-may-2016---visualizing-apache-mahout-in-r-via-apache-zeppelin-posted">19 May 2016 - “Visualizing Apache Mahout in R via Apache Zeppelin” posted</h4>
+<p>A tutorial on connecting Mahout, R, Spark, and Zeppelin by <a href="https://trevorgrant.org/2016/05/19/visualizing-apache-mahout-in-r-via-apache-zeppelin-incubating" target="_blank">Trevor Grant</a> showing how to plot results in Apache Zeppelin.</p>
+
+<h4 id="18-may-2016---apache-mahout-0121-released">18 May 2016 - Apache Mahout 0.12.1 released</h4>
+
+<p>Mahout 0.12.1 is a minor release following 0.12.0 that fixes issues in the newly added Flink backend and supports Flink 1.0.3.</p>
+
+<h4 id="11-apr-2016---apache-mahout-0120-released"><strong>11 Apr 2016 - Apache Mahout 0.12.0 released</strong></h4>
+
+<p>The Mahout 0.12.0 release marks a major milestone for the “Samsara” environment’s goal of providing an engine neutral math platform by now supporting Flink.  While still experimental, the mahout Flink bindings now offer all of the R-Like semantics for linear algebra operations, matrix decompositions, and algorithms of the “Samsara” platform for execution on a Flink back-end.</p>
+
+<h4 id="12-mar-2016---apache-mahout-0112-released"><strong>12 Mar 2016 - Apache Mahout 0.11.2 released</strong></h4>
+<p><strong>Apache Mahout introduces a new math environment called</strong> <a href="http://mahout.apache.org/users/sparkbindings/home.html"><strong>Samsara</strong></a>, 
+    for its theme of universal renewal. It reflects a fundamental rethinking of how scalable machine learning 
+    algorithms are built and customized. Mahout-Samsara is here to help people create their own math while providing
+    some off-the-shelf algorithm implementations. At its core are general linear algebra and statistical operations 
+   along with the data structures to support them. You can use is as a library or customize it in Scala with Mahout-specific extensions 
+   that look something like R. 
+   Mahout-Samsara comes with an interactive shell that runs distributed operations on an Apache Spark cluster. 
+   This make prototyping or task submission much easier and allows users to customize algorithms with
+   a whole new degree of freedom.</p>
+
+<p><a href="http://mahout.apache.org/users/basics/algorithms.html"><strong>Mahout Algorithms</strong></a> include many new 
+    implementations built for speed on Mahout-Samsara. They run on Spark 1.3+, Flink 1.0.1, and some on H2O, which means as 
+    much as a 10x speed increase. You’ll find robust matrix decomposition algorithms as well as a <strong><a href="http://mahout.apache.org/users/algorithms/spark-naive-bayes.html">Naive Bayes</a></strong> 
+   classifier and collaborative filtering. The new spark-itemsimilarity enables the next generation of <strong><a href="http://mahout.apache.org/users/algorithms/intro-cooccurrence-spark.html">cooccurrence 
+   recommenders</a></strong> that can use entire user click streams and context in making recommendations.</p>
+
+<p>Our <a href="http://mahout.apache.org/general/release-notes.html">release notes</a> have details. Interested in helping? Join the <a href="https://mahout.apache.org/general/mailing-lists,-irc-and-archives.html">Mailing lists</a>.</p>
+
+<h1 id="mahout-news">Mahout News</h1>
+
+<h4 id="13-may-2017---apache-mahout-website-beta-release-1">13 May 2017 - Apache Mahout website beta release</h4>
+
+<p>Docs available <a href="http://mahout.apache.org/docs/0.13.1-SNAPSHOT">here</a></p>
+
+<h4 id="17-april-2017---apache-mahout-0130-released-1">17 April 2017 - Apache Mahout 0.13.0 released</h4>
+
+<h4 id="13-june-2016---apache-mahout-0122-released">13 June 2016 - Apache Mahout 0.12.2 released</h4>
+
+<h4 id="18-may-2016---apache-mahout-0121-released-1">18 May 2016 - Apache Mahout 0.12.1 released</h4>
+
+<h4 id="11-april-2016---apache-mahout-0120-released">11 April 2016 - Apache Mahout 0.12.0 released</h4>
+
+<h4 id="12-march-2016---apache-mahout-0112-released">12 March 2016 - Apache Mahout 0.11.2 released</h4>
+
+<h4 id="23-february-2016---new-apache-mahout-book---apache-mahout-beyond-mapreduce-by-dlyubimov-and-apalumbo-released-see-link-mahout-samsara-book-is-out">23 February 2016 - New Apache Mahout Book - “Apache Mahout: Beyond MapReduce” by D.Lyubimov and A.Palumbo released. See <a href="http://www.weatheringthroughtechdays.com/2016/02/mahout-samsara-book-is-out.html">link</a> Mahout “Samsara” Book Is Out</h4>
+
+<h4 id="6-november-2015---apache-mahout-0111-released">6 November 2015 - Apache Mahout 0.11.1 released</h4>
+
+<h4 id="7-august-2015---apache-mahout-0110-released">7 August 2015 - Apache Mahout 0.11.0 released</h4>
+
+<h4 id="6-august-2015---apache-mahout-0102-released">6 August 2015 - Apache Mahout 0.10.2 released</h4>
+
+<h4 id="31-may-2015---apache-mahout-0101-released">31 May 2015 - Apache Mahout 0.10.1 released</h4>
+
+<h4 id="11-april-2015---apache-mahout-0100-released">11 April 2015 - Apache Mahout 0.10.0 released</h4>
+
+<h4 id="1-february-2014---apache-mahout-09-released">1 February 2014 - Apache Mahout 0.9 released</h4>
+
+<p>Visit our <a href="http://svn.apache.org/viewvc/mahout/trunk/CHANGELOG?view=markup&amp;pathrev=1563661">release notes</a> page for details.</p>
+
+<p>####25 July 2013 - Apache Mahout 0.8 released</p>
+
+<p>Visit our <a href="http://mahout.apache.org/general/release-notes.html">release notes</a> page for details.</p>
+
+<h4 id="16-june-2012---apache-mahout-07-released">16 June 2012 - Apache Mahout 0.7 released</h4>
+
+<p>Visit our <a href="http://mahout.apache.org/general/release-notes.html">release notes</a> page for details.</p>
+
+<h4 id="6-feb-2012---apache-mahout-06-released">6 Feb 2012 - Apache Mahout 0.6 released</h4>
+
+<p>Visit our <a href="http://mahout.apache.org/general/release-notes.html">release notes</a> page for details.</p>
+
+<h4 id="9-oct-2011---mahout-in-action-released">9 Oct 2011 - Mahout in Action released</h4>
+
+<p>The book <em>Mahout in Action</em> is available in print. Sean Owen, Robin Anil, Ted Dunning and Ellen Friedman thank the community (especially those who were reviewers) for input during the process and hope it is enjoyable.</p>
+
+<p>Find <em>Mahout in Action</em> at your favorite bookstore, or <a href="http://manning.com/owen/">order print and eBook copies from Manning</a> – use discount code “mahout37” for 37% off.</p>
+
+
+   </div>
+  </div>     
+</div> 
+  <footer class="footer" align="center">
+    <div class="container">
+      <p>
+        Copyright &copy; 2014-2016 The Apache Software Foundation, Licensed under
+        the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.
+        <br />
+		  Apache Mahout, Mahout, Apache, the Apache feather logo, and the elephant rider logo are either registered trademarks or trademarks of <a href="http://www.apache.org/foundation/marks/">The Apache Software Foundation</a> in the United States and other countries.
+      </p>
+    </div>
+  </footer>
+  
+  <script src="/assets/themes/mahout-retro/js/jquery-1.9.1.min.js"></script>
+  <script src="/assets/themes/mahout-retro/js/bootstrap.min.js"></script>
+  <script>
+    (function() {
+      var cx = '012254517474945470291:vhsfv7eokdc';
+      var gcse = document.createElement('script');
+      gcse.type = 'text/javascript';
+      gcse.async = true;
+      gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+          '//www.google.com/cse/cse.js?cx=' + cx;
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(gcse, s);
+    })();
+  </script>
+</body>
+</html>
+

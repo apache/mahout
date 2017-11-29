@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Apache Mahout: Scalable machine learning and data mining</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="Distribution" content="Global">
+  <meta name="Robots" content="index,follow">
+  <meta name="keywords" content="apache, apache hadoop, apache lucene,
+        business data mining, cluster analysis,
+        collaborative filtering, data extraction, data filtering, data framework, data integration,
+        data matching, data mining, data mining algorithms, data mining analysis, data mining data,
+        data mining introduction, data mining software,
+        data mining techniques, data representation, data set, datamining,
+        feature extraction, fuzzy k means, genetic algorithm, hadoop,
+        hierarchical clustering, high dimensional, introduction to data mining, kmeans,
+        knowledge discovery, learning approach, learning approaches, learning methods,
+        learning techniques, lucene, machine learning, machine translation, mahout apache,
+        mahout taste, map reduce hadoop, mining data, mining methods, naive bayes,
+        natural language processing,
+        supervised, text mining, time series data, unsupervised, web data mining">
+  <link rel="shortcut icon" type="image/x-icon" href="https://mahout.apache.org/images/favicon.ico">
+  <!--<script type="text/javascript" src="/js/prototype.js"></script>-->
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.7.2.0/prototype.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/effects.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/search.js"></script>
+  <script type="text/javascript" src="/assets/themes/mahout-retro/js/slides.js"></script>
+
+  <link href="/assets/themes/mahout-retro/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="/assets/themes/mahout-retro/css/bootstrap-responsive.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/themes/mahout-retro/css/global.css" type="text/css">
+
+  <!-- mathJax stuff -- use `\(...\)` for inline style math in markdown -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+  </script>
+  <script type="text/javascript">
+    var mathjax = document.createElement('script'); 
+    mathjax.type = 'text/javascript'; 
+    mathjax.async = true;
+
+    mathjax.src = ('https:' == document.location.protocol) ?
+        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' : 
+        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+	
+	  var s = document.getElementsByTagName('script')[0]; 
+    s.parentNode.insertBefore(mathjax, s);
+  </script>
+</head>
+
+<body id="home" data-twttr-rendered="true">
+  <div id="wrap">
+   <div id="header">
+    <div id="logo"><a href="/"><img src="/assets/img/mahout-logo-brudman.png" alt="Logos for Mahout and Apache Software Foundation" /></a></div>
+  <div id="search">
+    <form id="search-form" action="http://www.google.com/search" method="get" class="navbar-search pull-right">    
+      <input value="http://mahout.apache.org" name="sitesearch" type="hidden">
+      <input class="search-query" name="q" id="query" type="text">
+      <input id="submission" type="image" src="/assets/img/mahout-lupe.png" alt="Search" />
+    </form>
+  </div>
+ 
+    <div class="navbar navbar-inverse" style="position:absolute;top:133px;padding-right:0px;padding-left:0px;">
+      <div class="navbar-inner" style="border: none; background: #999; border: none; border-radius: 0px;">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!-- <a class="brand" href="#">Apache Community Development Project</a> -->
+            <!--<div class="nav-collapse collapse">-->
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+        <!-- <li><a href="/">Home</a></li> -->
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">General<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/general/downloads.html">Downloads</a>
+                <li><a href="/general/who-we-are.html">Who we are</a>
+                <li><a href="/general/mailing-lists,-irc-and-archives.html">Mailing Lists</a>
+                <li><a href="/general/release-notes.html">Release Notes</a>
+                <li><a href="/general/books-tutorials-and-talks.html">Books, Tutorials, Talks</a></li>
+                <li><a href="/general/powered-by-mahout.html">Powered By Mahout</a>
+                <li><a href="/general/professional-support.html">Professional Support</a>
+                <li class="divider"></li>
+                <li class="nav-header">Resources</li>
+                <li><a href="/general/reference-reading.html">Reference Reading</a>
+                <li><a href="/general/faq.html">FAQ</a>
+                <li class="divider"></li>
+                <li class="nav-header">Legal</li>
+                <li><a href="http://www.apache.org/licenses/">License</a></li>
+                <li><a href="http://www.apache.org/security/">Security</a></li>
+                <li><a href="/general/privacy-policy.html">Privacy Policy</a>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developers<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/developers/developer-resources.html">Developer resources</a></li>
+                <li><a href="/developers/version-control.html">Version control</a></li>
+                <li><a href="/developers/buildingmahout.html">Build from source</a></li>
+                <li><a href="/developers/issue-tracker.html">Issue tracker</a></li>
+                <li><a href="https://builds.apache.org/job/Mahout-Quality/" target="_blank">Code quality reports</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Contributions</li>
+                <li><a href="/developers/how-to-contribute.html">How to contribute</a></li>
+                <li><a href="/developers/how-to-become-a-committer.html">How to become a committer</a></li>
+                <li><a href="/developers/gsoc.html">GSoC</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">For committers</li>
+                <li><a href="/developers/how-to-update-the-website.html">How to update the website</a></li>
+                <li><a href="/developers/patch-check-list.html">Patch check list</a></li>
+                <li><a href="/developers/github.html">Handling Github PRs</a></li>
+                <li><a href="/developers/how-to-release.html">How to release</a></li>
+                <li><a href="/developers/thirdparty-dependencies.html">Third party dependencies</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout-Samsara<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/sparkbindings/home.html">Scala &amp; Spark Bindings Overview</a></li>
+                <li><a href="/users/sparkbindings/faq.html">FAQ</a></li>
+                <li><a href="/users/flinkbindings/playing-with-samsara-flink.html">Flink Bindings Overview</a></li>
+                <li class="nav-header">Engines</li>
+                <li><a href="/users/sparkbindings/home.html">Spark</a></li>
+                <li><a href="/users/environment/h2o-internals.html">H2O</a></li>
+                <li><a href="/users/flinkbindings/flink-internals.html">Flink</a></li>
+                <li class="nav-header">References</li>
+                <li><a href="/users/environment/in-core-reference.html">In-Core Algebraic DSL Reference</a></li>
+                <li><a href="/users/environment/out-of-core-reference.html">Distributed Algebraic DSL Reference</a></li>
+                <li class="nav-header">Tutorials</li>
+                <li><a href="/users/sparkbindings/play-with-shell.html">Playing with Mahout's Spark Shell</a></li>
+                <li><a href="/users/environment/how-to-build-an-app.html">How to build an app</a></li>
+                <li><a href="/users/environment/classify-a-doc-from-the-shell.html">Building a text classifier in Mahout's Spark Shell</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Algorithms<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li class="nav-header">Distributed Matrix Decomposition</li>
+                <li><a href="/users/algorithms/d-qr.html">Cholesky QR</a></li>
+                <li><a href="/users/algorithms/d-ssvd.html">SSVD</a></li>
+                <li><a href="/users/algorithms/d-als.html">Distributed ALS</a></li>
+                <li><a href="/users/algorithms/d-spca.html">SPCA</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/algorithms/recommender-overview.html">Recommender Overview</a></li>
+                <li><a href="/users/algorithms/intro-cooccurrence-spark.html">Intro to cooccurrence-based<br/> recommendations with Spark</a></li>
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/algorithms/spark-naive-bayes.html">Spark Naive Bayes</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">MapReduce Basics<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/basics/algorithms.html">List of algorithms</a>
+                <li><a href="/users/basics/quickstart.html">Overview</a>
+                <li class="divider"></li>
+                <li class="nav-header">Working with text</li>
+                <li><a href="/users/basics/creating-vectors-from-text.html">Creating vectors from text</a>
+                <li><a href="/users/basics/collocations.html">Collocations</a>
+                <li class="divider"></li>
+                <li class="nav-header">Dimensionality reduction</li>
+                <li><a href="/users/dim-reduction/dimensional-reduction.html">Singular Value Decomposition</a></li>
+                <li><a href="/users/dim-reduction/ssvd.html">Stochastic SVD</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">Topic Models</li>
+                <li><a href="/users/clustering/latent-dirichlet-allocation.html">Latent Dirichlet Allocation</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mahout MapReduce<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li class="nav-header">Classification</li>
+                <li><a href="/users/classification/bayesian.html">Naive Bayes</a></li>
+                <li><a href="/users/classification/hidden-markov-models.html">Hidden Markov Models</a></li>
+                <li><a href="/users/classification/logistic-regression.html">Logistic Regression (Single Machine)</a></li>
+                <li><a href="/users/classification/partial-implementation.html">Random Forest</a></li>
+                <li class="nav-header">Classification Examples</li>
+                <li><a href="/users/classification/breiman-example.html">Breiman example</a></li>
+                <li><a href="/users/classification/twenty-newsgroups.html">20 newsgroups example</a></li>
+                <li><a href="/users/classification/bankmarketing-example.html">SGD classifier bank marketing</a></li>
+                <li><a href="/users/classification/wikipedia-classifier-example.html">Wikipedia XML parser and classifier</a></li>
+                <li class="nav-header">Clustering</li>
+                <li><a href="/users/clustering/k-means-clustering.html">k-Means</a></li>
+                <li><a href="/users/clustering/canopy-clustering.html">Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means.html">Fuzzy k-Means</a></li>
+                <li><a href="/users/clustering/streaming-k-means.html">Streaming KMeans</a></li>
+                <li><a href="/users/clustering/spectral-clustering.html">Spectral Clustering</a></li>
+                <li class="nav-header">Clustering Commandline usage</li>
+                <li><a href="/users/clustering/k-means-commandline.html">Options for k-Means</a></li>
+                <li><a href="/users/clustering/canopy-commandline.html">Options for Canopy</a></li>
+                <li><a href="/users/clustering/fuzzy-k-means-commandline.html">Options for Fuzzy k-Means</a></li>
+                <li class="nav-header">Clustering Examples</li>
+                <li><a href="/users/clustering/clustering-of-synthetic-control-data.html">Synthetic data</a></li>
+                <li class="nav-header">Cluster Post processing</li>
+                <li><a href="/users/clustering/cluster-dumper.html">Cluster Dumper tool</a></li>
+                <li><a href="/users/clustering/visualizing-sample-clusters.html">Cluster visualisation</a></li>
+                <li class="nav-header">Recommendations</li>
+                <li><a href="/users/recommender/recommender-first-timer-faq.html">First Timer FAQ</a></li>
+                <li><a href="/users/recommender/userbased-5-minutes.html">A user-based recommender <br/>in 5 minutes</a></li>
+                <li><a href="/users/recommender/matrix-factorization.html">Matrix factorization-based<br/> recommenders</a></li>
+                <li><a href="/users/recommender/recommender-documentation.html">Overview</a></li>
+                <li><a href="/users/recommender/intro-itembased-hadoop.html">Intro to item-based recommendations<br/> with Hadoop</a></li>
+                <li><a href="/users/recommender/intro-als-hadoop.html">Intro to ALS recommendations<br/> with Hadoop</a></li>
+            </ul>
+        </li>
+        <!--  <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Recommendations<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+
+          </ul> -->
+        </li>
+    </ul>
+</div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+</div>
+
+ <div id="sidebar">
+  <div id="sidebar-wrap">
+    <h2>Twitter</h2>
+	<ul class="sidemenu">
+		<li>
+<a class="twitter-timeline" href="https://twitter.com/ApacheMahout" data-widget-id="422861673444028416">Tweets by @ApacheMahout</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</li>
+	</ul>
+    <h2>Apache Software Foundation</h2>
+    <ul class="sidemenu">
+      <li><a href="http://www.apache.org/foundation/how-it-works.html">How the ASF works</a></li>
+      <li><a href="http://www.apache.org/foundation/getinvolved.html">Get Involved</a></li>
+      <li><a href="http://www.apache.org/dev/">Developer Resources</a></li>
+      <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+      <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+    </ul>
+    <h2>Related Projects</h2>
+    <ul class="sidemenu">
+      <li><a href="http://lucene.apache.org/">Apache Lucene</a></li>
+      <li><a href="http://hadoop.apache.org/">Apache Hadoop</a></li>
+      <li><a href="http://bigtop.apache.org/">Apache Bigtop</a></li>
+      <li><a href="http://spark.apache.org/">Apache Spark</a></li>
+	  <li><a href="http://flink.apache.org/">Apache Flink</a></li>
+    </ul>
+  </div>
+</div>
+
+  <div id="content-wrap" class="clearfix">
+   <div id="main">
+
+    <h1 id="how-to-contribute">How to contribute</h1>
+
+<p><em>Contributing to an Apache project</em> is about more than just writing code –
+it’s about doing what you can to make the project better.  There are lots
+of ways to contribute!</p>
+
+<p><a name="HowToContribute-BeInvolved"></a></p>
+<h2 id="get-involved">Get Involved</h2>
+
+<p>Discussions at Apache happen on the mailing list. To get involved, you should join the <a href="/general/mailing-lists,-irc-and-archives.html">Mahout mailing lists</a>.  In particular:</p>
+
+<ul>
+  <li>The <strong>user list</strong> (to help others)</li>
+  <li>The <strong>development list</strong> (to join discussions of changes)  – This is the best place
+to understand where the project is headed.</li>
+  <li>The <strong>commit list</strong> (to see changes as they are made)</li>
+</ul>
+
+<p>Please keep discussions about Mahout on list so that everyone benefits. 
+Emailing individual committers with questions about specific Mahout issues
+is discouraged.  See <a href="http://people.apache.org/~hossman/#private_q">http://people.apache.org/~hossman/#private_q</a>
+.  Apache  has a number of <a href="http://www.apache.org/dev/contrib-email-tips">email tips for contributors</a> as well.</p>
+
+<p><a name="HowToContribute-WhattoWorkOn?"></a></p>
+<h2 id="what-to-work-on">What to Work On?</h2>
+
+<p>What do you like to work on?  There are a ton of things in Mahout that we
+would love to have contributions for: documentation, performance improvements, better tests, etc.
+The best place to start is by looking into our <a href="https://issues.apache.org/jira/browse/MAHOUT">issue tracker</a> and
+seeing what bugs have been reported and seeing if any look like you could
+take them on.  Small, well written, well tested patches are a great way to
+get your feet wet.  It could be something as simple as fixing a typo.  The
+more important piece is you are showing you understand the necessary steps
+for making changes to the code.  Mahout is a pretty big beast at this
+point, so changes, especially from non-committers, need to be evolutionary
+not revolutionary since it is often very difficult to evaluate the merits
+of a very large patch.	Think small, at least to start!</p>
+
+<p>Beyond JIRA, hang out on the dev@ mailing list. That’s where we discuss
+what we are working on in the internals and where you can get a sense of
+where people are working.</p>
+
+<p>Also, documentation is a great way to familiarize yourself with the code
+and is always a welcome addition to the codebase and this website. Feel free 
+to contribute texts and tutorials! Committers will make sure they are added 
+to this website, and we have a <a href="http://mahout.apache.org/developers/how-to-update-the-website.html">guide for making website updates</a>.
+We also have a <a href="http://mahout.apache.org/general/books-tutorials-and-talks.html">wide variety of books and slides</a> for learning more about 
+machine learning algorithms.</p>
+
+<p>If you are interested in working towards being a committer, <a href="/developers/how-to-become-a-committer.html">general guidelines are available online</a>.</p>
+
+<p><a name="HowToContribute-ContributingCode(Features,BigFixes,Tests,etc...)"></a></p>
+<h2 id="contributing-code-features-big-fixes-tests-etc">Contributing Code (Features, Big Fixes, Tests, etc…)</h2>
+
+<p>This section identifies the ‘‘optimal’’ steps community member can take to
+submit a changes or additions to the Mahout code base.	This can be new
+features, bug fixes optimizations of existing features, or tests of
+existing code to prove it works as advertised (and to make it more robust
+against possible future changes).</p>
+
+<p>Please note that these are the “optimal” steps, and community members that
+don’t have the time or resources to do everything outlined on this below
+should not be discouraged from submitting their ideas “as is” per “Yonik
+Seeley’s (Solr committer) Law of Patches”:</p>
+
+<p><em>A half-baked patch in Jira, with no documentation, no tests and no backwards compatibility is better than no patch at all.</em></p>
+
+<p>Just because you may not have the time to write unit tests, or cleanup
+backwards compatibility issues, or add documentation, doesn’t mean other
+people don’t. Putting your patch out there allows other people to try it
+and possibly improve it.</p>
+
+<p><a name="HowToContribute-Gettingthesourcecode"></a></p>
+<h2 id="getting-the-source-code">Getting the source code</h2>
+
+<p>First of all, you need to get the <a href="/developers/version-control.html">Mahout source code</a>. Most development is done on the “trunk”.  Mahout mirrors its codebase on <a href="https://github.com/apache/mahout">GitHub</a>. The first step to making a contribution is to fork Mahout’s master branch to your GitHub repository.</p>
+
+<p><a name="HowToContribute-MakingChanges"></a></p>
+<h2 id="making-changes">Making Changes</h2>
+
+<p>Before you start, you should send a message to the <a href="/general/mailing-lists,-irc-and-archives.html">Mahout developer mailing list</a>
+(note: you have to subscribe before you can post), or file a ticket in  our <a href="/developers/issue-tracker.html">issue tracker</a>.
+Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.</p>
+
+<ol>
+  <li>Create a JIRA Issue (if one does not already exist or you haven’t already)</li>
+  <li>Pull the code from your GitHub repository</li>
+  <li>Ensure that you are working with the latest code from the <a href="https://github.com/apache/mahout">apache/mahout</a> master branch.</li>
+  <li>Modify the source code and add some (very) nice features.
+    <ul>
+      <li>Be sure to adhere to the following points:
+        <ul>
+          <li>All public classes and methods should have informative Javadoc
+comments.</li>
+          <li>Code should be formatted according to standard
+<a href="http://www.oracle.com/technetwork/java/codeconventions-150003.pdf">Java coding conventions</a>,
+with two exceptions:
+            <ul>
+              <li>indent two spaces per level, not four.</li>
+              <li>lines can be 120 characters, not 80.</li>
+            </ul>
+          </li>
+          <li>Contributions should pass existing unit tests.</li>
+          <li>New unit tests should be provided to demonstrate bugs and fixes.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Commit the changes to your local repository.</li>
+  <li>Push the code back up to your GitHub repository.</li>
+  <li>Create a <a href="https://help.github.com/articles/creating-a-pull-request">Pull Request</a> to the to apache/mahout repository on Github.
+    <ul>
+      <li>Include the corresponding JIRA Issue number and description in the title of the pull request:
+        <ul>
+          <li>ie. MAHOUT-xxxx: &lt; JIRA-Issue-Description &gt;</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Committers and other members of the Mahout community can then comment on the Pull Request.  Be sure to watch for comments, respond and make any necessary changes.</li>
+</ol>
+
+<p>Please be patient. Committers are busy people too. If no one responds to your Pull Request after a few days, please make friendly reminders on the mailing list.  Please
+incorporate other’s suggestions into into your changes if you think they’re reasonable.  Finally, remember that even changes that are not committed are useful to the community.</p>
+
+<p><a name="HowToContribute-UnitTests"></a></p>
+<h4 id="unit-tests">Unit Tests</h4>
+
+<p>Please make sure that all unit tests succeed before creating your Pull Request.</p>
+
+<p>Run <em>mvn clean test</em>, if you see <em>BUILD SUCCESSFUL</em> after the tests have finished, all is ok, but if you see <em>BUILD FAILED</em>, 
+please carefully read the errors messages and check your code.</p>
+
+<h4 id="dos-and-donts">Do’s and Don’ts</h4>
+
+<p>Please do not:</p>
+
+<ul>
+  <li>reformat code unrelated to the bug being fixed: formatting changes should
+be done in separate issues.</li>
+  <li>comment out code that is now obsolete: just remove it.</li>
+  <li>insert comments around each change, marking the change: folks can use
+subversion to figure out what’s changed and by whom.</li>
+  <li>make things public which are not required by end users.</li>
+</ul>
+
+<p>Please do:</p>
+
+<ul>
+  <li>try to adhere to the coding style of files you edit;</li>
+  <li>comment code whose function or rationale is not obvious;</li>
+  <li>update documentation (e.g., ‘‘package.html’’ files, the website, etc.)</li>
+</ul>
+
+<p><a name="HowToContribute-Review/ImproveExistingPatches"></a></p>
+<h2 id="reviewimprove-existing-pull-requests">Review/Improve Existing Pull Requests</h2>
+
+<p>If there’s a JIRA issue that already has a Pull Request with changes that you think are really good, and works well for you – please add a comment saying so.   If there’s room
+for improvement (more tests, better javadocs, etc…) then make the changes on your GitHub branch and add a comment about them.	If a lot of people review a Pull Request and give it a
+thumbs up, that’s a good sign for committers when deciding if it’s worth spending time to review it – and if other people have already put in
+effort to improve the docs/tests for an issue, that helps even more.</p>
+
+<p>For more information see <a href="http://mahout.apache.org/developers/github.html">Handling GitHub PRs</a>.</p>
+
+
+   </div>
+  </div>     
+</div> 
+  <footer class="footer" align="center">
+    <div class="container">
+      <p>
+        Copyright &copy; 2014-2016 The Apache Software Foundation, Licensed under
+        the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.
+        <br />
+		  Apache Mahout, Mahout, Apache, the Apache feather logo, and the elephant rider logo are either registered trademarks or trademarks of <a href="http://www.apache.org/foundation/marks/">The Apache Software Foundation</a> in the United States and other countries.
+      </p>
+    </div>
+  </footer>
+  
+  <script src="/assets/themes/mahout-retro/js/jquery-1.9.1.min.js"></script>
+  <script src="/assets/themes/mahout-retro/js/bootstrap.min.js"></script>
+  <script>
+    (function() {
+      var cx = '012254517474945470291:vhsfv7eokdc';
+      var gcse = document.createElement('script');
+      gcse.type = 'text/javascript';
+      gcse.async = true;
+      gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+          '//www.google.com/cse/cse.js?cx=' + cx;
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(gcse, s);
+    })();
+  </script>
+</body>
+</html>
+
