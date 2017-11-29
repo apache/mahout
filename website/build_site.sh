@@ -12,11 +12,12 @@ curl -sSL https://get.rvm.io | bash -s -- --path ${RUBY_PATH}
 mkdir -p ${GEM_HOME}/gems
 gem install  --install-dir ${GEM_HOME} bundler
 export PATH=${GEM_HOME}/bin:$PATH
-bundle install --path ${GEM_HOME}
+(cd oldsite && bundle install --path ${GEM_HOME})
 (cd oldsite && bundle)
 (cd oldsite && bundle exec jekyll build --destination $WORKDIR)
+(cd docs && bundle install --path ${GEM_HOME})
 (cd docs && bundle)
-(cd oldsite && bundle exec jekyll build --destination $WORKDIR/docs/latest)
+(cd docs && bundle exec jekyll build --destination $WORKDIR/docs/latest)
 
 # Set env for docs
 MAHOUT_VERSION=0.13.0
