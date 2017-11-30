@@ -18,8 +18,6 @@ export PATH=${GEM_HOME}/bin:$PATH
 (cd website/docs && bundle install --path ${GEM_HOME})
 (cd website/docs && bundle)
 (cd website/docs && bundle exec jekyll build --destination $WORKDIR/docs/latest)
-<<<<<<< HEAD
-
 
 # Set env for docs
 MAHOUT_VERSION=0.13.0
@@ -32,7 +30,6 @@ tar -C $WORKDIR -xzf $WORKDIR/$DISTFILE apache-mahout-distribution-$MAHOUT_VERSI
 mkdir -p $WORKDIR/docs/$MAHOUT_VERSION/api
 mv $WORKDIR/apache-mahout-distribution-$MAHOUT_VERSION/docs $WORKDIR/docs/$MAHOUT_VERSION/api
 rm -f $WORKDIR/$DISTFILE
-=======
 
 # Set env for docs
 MAHOUT_VERSION=0.13.0
@@ -49,7 +46,6 @@ if [ ! -d "$WORKDIR/docs/$MAHOUT_VERSION/api" ]; then
 	rm -f $WORKDIR/$DISTFILE
 fi
 
->>>>>>> 200882a468a5d5f72a53744ed959d38b56984ddb
 git checkout asf-site
 git clean -f -d
 git pull origin asf-site
