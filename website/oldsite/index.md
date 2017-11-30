@@ -10,7 +10,7 @@ theme:
 
   <div class="highlights">
     <a href="http://mahout.apache.org/general/downloads.html"><img src="http://mahout.apache.org/images/download-mahout.png"/></a>
-    <h4>Latest release version 0.12.2 has</h4>
+    <h4>Latest release version 0.13.0 has</h4>
     <h6>Apache Mahout Samsara Environment includes</h6>
     <ul>
       <li>Distributed Algebraic optimizer</li>
