@@ -300,8 +300,8 @@ results to greater values of <em>m</em></li>
 
 <p>First, we deal with <a href="http://archive.ics.uci.edu/ml/datasets/Glass+Identification">Glass Identification</a>: download the <a href="http://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.data">dataset</a> file called <strong>glass.data</strong> and store it onto your local machine. Next, we must generate the descriptor file <strong>glass.info</strong> for this dataset with the following command:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.classifier.df.tools.Describe -p /path/to/glass.data -f /path/to/glass.info -d I 9 N L
-</code></pre></div></div>
+<pre><code>bin/mahout org.apache.mahout.classifier.df.tools.Describe -p /path/to/glass.data -f /path/to/glass.info -d I 9 N L
+</code></pre>
 
 <p>Substitute <em>/path/to/</em> with the folder where you downloaded the dataset, the argument “I 9 N L” indicates the nature of the variables. Here it means 1
 ignored (I) attribute, followed by 9 numerical(N) attributes, followed by
@@ -309,8 +309,8 @@ the label (L).</p>
 
 <p>Finally, we build and evaluate our random forest classifier as follows:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.classifier.df.BreimanExample -d /path/to/glass.data -ds /path/to/glass.info -i 10 -t 100 which builds 100 trees (-t argument) and repeats the test 10 iterations (-i argument) 
-</code></pre></div></div>
+<pre><code>bin/mahout org.apache.mahout.classifier.df.BreimanExample -d /path/to/glass.data -ds /path/to/glass.info -i 10 -t 100 which builds 100 trees (-t argument) and repeats the test 10 iterations (-i argument) 
+</code></pre>
 
 <p>The example outputs the following results:</p>
 
@@ -327,13 +327,13 @@ iterations</li>
 
 <p>We can repeat this for a <a href="http://archive.ics.uci.edu/ml/datasets/Connectionist+Bench+%28Sonar,+Mines+vs.+Rocks%29">Sonar</a> usecase: download the <a href="http://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectionist-bench/sonar/sonar.all-data">dataset</a> file called <strong>sonar.all-data</strong> and store it onto your local machine. Generate the descriptor file <strong>sonar.info</strong> for this dataset with the following command:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.classifier.df.tools.Describe -p /path/to/sonar.all-data -f /path/to/sonar.info -d 60 N L
-</code></pre></div></div>
+<pre><code>bin/mahout org.apache.mahout.classifier.df.tools.Describe -p /path/to/sonar.all-data -f /path/to/sonar.info -d 60 N L
+</code></pre>
 
 <p>The argument “60 N L” means 60 numerical(N) attributes, followed by the label (L). Analogous to the previous case, we run the evaluation as follows:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.classifier.df.BreimanExample -d /path/to/sonar.all-data -ds /path/to/sonar.info -i 10 -t 100
-</code></pre></div></div>
+<pre><code>bin/mahout org.apache.mahout.classifier.df.BreimanExample -d /path/to/sonar.all-data -ds /path/to/sonar.info -i 10 -t 100
+</code></pre>
 
 
    </div>

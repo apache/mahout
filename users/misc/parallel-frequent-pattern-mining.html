@@ -286,7 +286,7 @@ creating Iterators, Convertors and TopKPatternWritable for that particular
 object. For more information please refer the package
 org.apache.mahout.fpm.pfpgrowth.convertors.string</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>e.g:
+<pre><code>e.g:
  FPGrowth&lt;String&gt; fp = new FPGrowth&lt;String&gt;();
  Set&lt;String&gt; features = new HashSet&lt;String&gt;();
  fp.generateTopKStringFrequentPatterns(
@@ -298,7 +298,7 @@ org.apache.mahout.fpm.pfpgrowth.convertors.string</p>
 	features,
 	new StringOutputConvertor(new SequenceFileOutputCollector&lt;Text, TopKStringPatterns&gt;(writer))
   );
-</code></pre></div></div>
+</code></pre>
 
 <ul>
   <li>The first argument is the iterator of transaction in this case its

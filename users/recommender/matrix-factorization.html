@@ -282,39 +282,39 @@ There are many different matrix decompositions, each finds use among a particula
 <p>In mahout, the SVDRecommender provides an interface to build recommender based on matrix factorization.
 The idea behind is to project the users and items onto a feature space and try to optimize U and M so that U * (M^t) is as close to R as possible:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> U is n * p user feature matrix, 
+<pre><code> U is n * p user feature matrix, 
  M is m * p item feature matrix, M^t is the conjugate transpose of M,
  R is n * m rating matrix,
  n is the number of users,
  m is the number of items,
  p is the number of features
-</code></pre></div></div>
+</code></pre>
 
 <p>We usually use RMSE to represent the deviations between predictions and atual ratings.
 RMSE is defined as the squared root of the sum of squared errors at each known user item ratings.
 So our matrix factorization target could be mathmatically defined as:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> find U and M, (U, M) = argmin(RMSE) = argmin(pow(SSE / K, 0.5))
+<pre><code> find U and M, (U, M) = argmin(RMSE) = argmin(pow(SSE / K, 0.5))
  
  SSE = sum(e(u,i)^2)
  e(u,i) = r(u, i) - U[u,] * (M[i,]^t) = r(u,i) - sum(U[u,f] * M[i,f]), f = 0, 1, .. p - 1
  K is the number of known user item ratings.
-</code></pre></div></div>
+</code></pre>
 
 <p><a name="MatrixFactorization-Factorizers"></a></p>
 
 <p>Mahout has implemented matrix factorization based on</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(1) SGD(Stochastic Gradient Descent)
+<pre><code>(1) SGD(Stochastic Gradient Descent)
 (2) ALSWR(Alternating-Least-Squares with Weighted-λ-Regularization).
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="sgd">SGD</h2>
 
 <p>Stochastic gradient descent is a gradient descent optimization method for minimizing an objective function that is written as a su of differentiable functions.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   Q(w) = sum(Q_i(w)), 
-</code></pre></div></div>
+<pre><code>   Q(w) = sum(Q_i(w)), 
+</code></pre>
 
 <p>where w is the parameters to be estimated,
       Q(w) is the objective function that could be expressed as sum of differentiable functions,
@@ -322,14 +322,14 @@ So our matrix factorization target could be mathmatically defined as:</p>
 
 <p>In practice, w is estimated using an iterative method at each single sample until an approximate miminum is obtained,</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  w = w - alpha * (d(Q_i(w))/dw), where aplpha is the learning rate,
+<pre><code>  w = w - alpha * (d(Q_i(w))/dw), where aplpha is the learning rate,
   (d(Q_i(w))/dw) is the first derivative of Q_i(w) on w.
-</code></pre></div></div>
+</code></pre>
 
 <p>In matrix factorization, the RatingSGDFactorizer class implements the SGD with w = (U, M) and objective function Q(w) = sum(Q(u,i)),</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   Q(u,i) =  sum(e(u,i) * e(u,i)) / 2 + lambda * [(U[u,] * (U[u,]^t)) + (M[i,] * (M[i,]^t))] / 2
-</code></pre></div></div>
+<pre><code>   Q(u,i) =  sum(e(u,i) * e(u,i)) / 2 + lambda * [(U[u,] * (U[u,]^t)) + (M[i,] * (M[i,]^t))] / 2
+</code></pre>
 
 <p>where Q(u, i) is the objecive function for user u and item i,
       e(u, i) is the error between predicted rating and actual rating,
@@ -339,7 +339,7 @@ So our matrix factorization target could be mathmatically defined as:</p>
 
 <p>The algorithm is sketched as follows:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  init U and M with randomized value between 0.0 and 1.0 with standard Gaussian distribution   
+<pre><code>  init U and M with randomized value between 0.0 and 1.0 with standard Gaussian distribution   
   
   for(iter = 0; iter &lt; numIterations; iter++)
   {
@@ -360,7 +360,7 @@ So our matrix factorization target could be mathmatically defined as:</p>
           U[u,] = NU[u,]
       }
   }
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="svd">SVD++</h2>
 
@@ -370,18 +370,18 @@ So our matrix factorization target could be mathmatically defined as:</p>
 
 <p>The complete model is a sum of 3 sub-models with complete prediction formula as follows:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pr(u,i) = b[u,i] + fm + nm   //user u and item i
+<pre><code>pr(u,i) = b[u,i] + fm + nm   //user u and item i
 
 pr(u,i) is the predicted rating of user u on item i,
 b[u,i] = U + b(u) + b(i)
 fm = (q[i,]) * (p[u,] + pow(|N(u)|, -0.5) * sum(y[j,])),  j is an item in N(u)
 nm = pow(|R(i;u;k)|, -0.5) * sum((r[u,j0] - b[u,j0]) * w[i,j0]) + pow(|N(i;u;k)|, -0.5) * sum(c[i,j1]), j0 is an item in R(i;u;k), j1 is an item in N(i;u;k)
-</code></pre></div></div>
+</code></pre>
 
 <p>The associated regularized squared error function to be minimized is:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{sum((r[u,i] - pr[u,i]) * (r[u,i] - pr[u,i]))  - lambda * (b(u) * b(u) + b(i) * b(i) + ||q[i,]||^2 + ||p[u,]||^2 + sum(||y[j,]||^2) + sum(w[i,j0] * w[i,j0]) + sum(c[i,j1] * c[i,j1]))}
-</code></pre></div></div>
+<pre><code>{sum((r[u,i] - pr[u,i]) * (r[u,i] - pr[u,i]))  - lambda * (b(u) * b(u) + b(i) * b(i) + ||q[i,]||^2 + ||p[u,]||^2 + sum(||y[j,]||^2) + sum(w[i,j0] * w[i,j0]) + sum(c[i,j1] * c[i,j1]))}
+</code></pre>
 
 <p>b[u,i] is the baseline estimate of user u’s predicted rating on item i. U is users’ overall average rating and b(u) and b(i) indicate the observed deviations of user u and item i’s ratings from average.</p>
 
@@ -420,12 +420,12 @@ please refer to the paper <a href="http://research.yahoo.com/files/kdd08koren.pd
 
 <p>The update to q, p, y in each gradient descent step is:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  err(u,i) = r[u,i] - pr[u,i]
+<pre><code>  err(u,i) = r[u,i] - pr[u,i]
   q[i,] = q[i,] + alpha * (err(u,i) * (p[u,] + pow(|N(u)|, -0.5) * sum(y[j,])) - lamda * q[i,]) 
   p[u,] = p[u,] + alpha * (err(u,i) * q[i,] - lambda * p[u,])
   for j that is an item in N(u):
      y[j,] = y[j,] + alpha * (err(u,i) * pow(|N(u)|, -0.5) * q[i,] - lambda * y[j,])
-</code></pre></div></div>
+</code></pre>
 
 <p>where alpha is the learning rate of gradient descent, N(u) is the items that user u has expressed preference.</p>
 
@@ -443,8 +443,8 @@ vanilla SGD.</p>
 <p>ALSWR is an iterative algorithm to solve the low rank factorization of user feature matrix U and item feature matrix M.<br />
 The loss function to be minimized is formulated as the sum of squared errors plus <a href="http://en.wikipedia.org/wiki/Tikhonov_regularization">Tikhonov regularization</a>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> L(R, U, M) = sum(pow((R[u,i] - U[u,]* (M[i,]^t)), 2)) + lambda * (sum(n(u) * ||U[u,]||^2) + sum(n(i) * ||M[i,]||^2))
-</code></pre></div></div>
+<pre><code> L(R, U, M) = sum(pow((R[u,i] - U[u,]* (M[i,]^t)), 2)) + lambda * (sum(n(u) * ||U[u,]||^2) + sum(n(i) * ||M[i,]||^2))
+</code></pre>
 
 <p>At the beginning of the algorithm, M is initialized with the average item ratings as its first row and random numbers for the rest row.</p>
 
@@ -454,14 +454,14 @@ the cost function similarly. The iteration stops until a certain stopping criter
 <p>To solve the matrix U when M is given, each user’s feature vector is calculated by resolving a regularized linear least square error function 
 using the items the user has rated and their feature vectors:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  1/2 * d(L(R,U,M)) / d(U[u,f]) = 0 
-</code></pre></div></div>
+<pre><code>  1/2 * d(L(R,U,M)) / d(U[u,f]) = 0 
+</code></pre>
 
 <p>Similary, when M is updated, we resolve a regularized linear least square error function using feature vectors of the users that have rated the 
 item and their feature vectors:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  1/2 * d(L(R,U,M)) / d(M[i,f]) = 0
-</code></pre></div></div>
+<pre><code>  1/2 * d(L(R,U,M)) / d(M[i,f]) = 0
+</code></pre>
 
 <p>The ALSWRFactorizer class is a non-distributed implementation of ALSWR using multi-threading to dispatch the computation among several threads.
 Mahout also offers a <a href="https://mahout.apache.org/users/recommender/intro-als-hadoop.html">parallel map-reduce implementation</a>.</p>

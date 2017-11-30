@@ -331,14 +331,14 @@ clustering and convergence values.</p>
 
 <p>Canopy clustering can be used to compute the initial clusters for k-KMeans:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// run the CanopyDriver job
+<pre><code>// run the CanopyDriver job
 CanopyDriver.runJob("testdata", "output"
 ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1, false);
 
 // now run the KMeansDriver job
 KMeansDriver.runJob("testdata", "output/clusters-0", "output",
 EuclideanDistanceMeasure.class.getName(), "0.001", "10", true);
-</code></pre></div></div>
+</code></pre>
 
 <p>In the above example, the input data points are stored in ‘testdata’ and
 the CanopyDriver is configured to output to the ‘output/clusters-0’
@@ -359,7 +359,7 @@ on KMeansDriver.main or by making a Java call to KMeansDriver.runJob().</p>
 
 <p>Invocation using the command line takes the form:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout kmeans \
+<pre><code>bin/mahout kmeans \
     -i &lt;input vectors directory&gt; \
     -c &lt;input clusters directory&gt; \
     -o &lt;output working directory&gt; \
@@ -370,7 +370,7 @@ on KMeansDriver.main or by making a Java call to KMeansDriver.runJob().</p>
     -ow &lt;overwrite output directory if present&gt;
     -cl &lt;run input vector clustering after computing Canopies&gt;
     -xm &lt;execution method: sequential or mapreduce&gt;
-</code></pre></div></div>
+</code></pre>
 
 <p>Note: if the -k argument is supplied, any clusters in the -c directory
 will be overwritten and -k random points will be sampled from the input

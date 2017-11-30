@@ -295,15 +295,15 @@ you can run clusterdumper in 2 modes:</p>
 <h3 id="hadoop-environment">Hadoop Environment</h3>
 
 <p>If you have setup your HADOOP_HOME environment variable, you can use the
-command line utility <code class="highlighter-rouge">mahout</code> to execute the ClusterDumper on Hadoop. In
+command line utility <code>mahout</code> to execute the ClusterDumper on Hadoop. In
 this case we wont need to get the output clusters to our local machines.
 The utility will read the output clusters present in HDFS and output the
 human-readable cluster values into our local file system. Say you’ve just
 executed the <a href="clustering-of-synthetic-control-data.html">synthetic control example </a>
- and want to analyze the output, you can execute the <code class="highlighter-rouge">mahout clusterdumper</code> utility from the command line.</p>
+ and want to analyze the output, you can execute the <code>mahout clusterdumper</code> utility from the command line.</p>
 
 <h4 id="cli-options">CLI options:</h4>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--help                               Print out help	
+<pre><code>--help                               Print out help	
 --input (-i) input                   The directory containing Sequence
                                        Files for the Clusters	    
 --output (-o) output                 The output file.  If not specified,
@@ -329,7 +329,7 @@ executed the <a href="clustering-of-synthetic-control-data.html">synthetic contr
 --evaluate (-e)                      Run ClusterEvaluator and CDbwEvaluator over the
                                       input. The output will be appended to the rest of
                                       the output at the end.   
-</code></pre></div></div>
+</code></pre>
 
 <h3 id="standalone-java-program">Standalone Java Program</h3>
 
@@ -350,11 +350,11 @@ executed the <a href="clustering-of-synthetic-control-data.html">synthetic contr
 
 <p>In the arguments tab, specify the below arguments</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--seqFileDir &lt;MAHOUT_HOME&gt;/examples/output/clusters-10 
+<pre><code>--seqFileDir &lt;MAHOUT_HOME&gt;/examples/output/clusters-10 
 --pointsDir &lt;MAHOUT_HOME&gt;/examples/output/clusteredPoints 
 --output &lt;MAHOUT_HOME&gt;/examples/output/clusteranalyze.txt
 replace &lt;MAHOUT_HOME&gt; with the actual path of your $MAHOUT_HOME
-</code></pre></div></div>
+</code></pre>
 
 <ul>
   <li>Hit run to execute the ClusterDumper using Eclipse. Setting breakpoints etc should just work fine.</li>

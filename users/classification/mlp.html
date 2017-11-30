@@ -285,9 +285,9 @@ can be used for classification and regression tasks in a supervised learning app
 can be used with the following commands:</p>
 
 <h1 id="model-training">model training</h1>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron  # model usage
+<pre><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron  # model usage
 $ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron
-</code></pre></div></div>
+</code></pre>
 
 <p>To train and use the model, a number of parameters can be specified. Parameters without default values have to be specified by the user. Consider that not all parameters can be used both for training and running the model. We give an example of the usage below.</p>
 
@@ -336,7 +336,7 @@ $ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron
     <tr>
       <td style="text-align: left">–layerSize -ls</td>
       <td style="text-align: right"> </td>
-      <td style="text-align: left">Number of units per layer, including input, hidden and ouput layers. This parameter specifies the topology of the network (see <a href="mlperceptron_structure.png" title="Architecture of a three-layer MLP">this image</a> for an example specified by <code class="highlighter-rouge">-ls 4 8 3</code>).</td>
+      <td style="text-align: left">Number of units per layer, including input, hidden and ouput layers. This parameter specifies the topology of the network (see <a href="mlperceptron_structure.png" title="Architecture of a three-layer MLP">this image</a> for an example specified by <code>-ls 4 8 3</code>).</td>
       <td style="text-align: left">training</td>
     </tr>
     <tr>
@@ -372,7 +372,7 @@ $ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron
     <tr>
       <td style="text-align: left">–columnRange -cr</td>
       <td style="text-align: right"> </td>
-      <td style="text-align: left">Range of the columns to use from the input file, starting with 0 (i.e. <code class="highlighter-rouge">-cr 0 5</code> for including the first six columns only)</td>
+      <td style="text-align: left">Range of the columns to use from the input file, starting with 0 (i.e. <code>-cr 0 5</code> for including the first six columns only)</td>
       <td style="text-align: left">testing</td>
     </tr>
     <tr>
@@ -393,23 +393,23 @@ The dimensions of the data set are given through some flower parameters (sepal l
 
 <p>To train our multilayer perceptron model from the command line, we call the following command</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron \
+<pre><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron \
             -i ./mrlegacy/src/test/resources/iris.csv -sh \
             -labels setosa versicolor virginica \
             -mo /tmp/model.model -ls 4 8 3 -l 0.2 -m 0.35 -r 0.0001
-</code></pre></div></div>
+</code></pre>
 
 <p>The individual parameters are explained in the following.</p>
 
 <ul>
-  <li><code class="highlighter-rouge">-i ./mrlegacy/src/test/resources/iris.csv</code> use the iris data set as input data</li>
-  <li><code class="highlighter-rouge">-sh</code> since the file <code class="highlighter-rouge">iris.csv</code> contains a header row, this row needs to be skipped</li>
-  <li><code class="highlighter-rouge">-labels setosa versicolor virginica</code> we specify, which class labels should be learnt (which are the flower species in this case)</li>
-  <li><code class="highlighter-rouge">-mo /tmp/model.model</code> specify where to store the model file</li>
-  <li><code class="highlighter-rouge">-ls 4 8 3</code> we specify the structure and depth of our layers. The actual network structure can be seen in the figure below.</li>
-  <li><code class="highlighter-rouge">-l 0.2</code> we set the learning rate to <code class="highlighter-rouge">0.2</code></li>
-  <li><code class="highlighter-rouge">-m 0.35</code> momemtum weight is set to <code class="highlighter-rouge">0.35</code></li>
-  <li><code class="highlighter-rouge">-r 0.0001</code> regularization weight is set to <code class="highlighter-rouge">0.0001</code></li>
+  <li><code>-i ./mrlegacy/src/test/resources/iris.csv</code> use the iris data set as input data</li>
+  <li><code>-sh</code> since the file <code>iris.csv</code> contains a header row, this row needs to be skipped</li>
+  <li><code>-labels setosa versicolor virginica</code> we specify, which class labels should be learnt (which are the flower species in this case)</li>
+  <li><code>-mo /tmp/model.model</code> specify where to store the model file</li>
+  <li><code>-ls 4 8 3</code> we specify the structure and depth of our layers. The actual network structure can be seen in the figure below.</li>
+  <li><code>-l 0.2</code> we set the learning rate to <code>0.2</code></li>
+  <li><code>-m 0.35</code> momemtum weight is set to <code>0.35</code></li>
+  <li><code>-r 0.0001</code> regularization weight is set to <code>0.0001</code></li>
 </ul>
 
 <table>
@@ -431,19 +431,19 @@ The dimensions of the data set are given through some flower parameters (sepal l
 
 <p>To test / run the multilayer perceptron classification on the trained model, we can use the following command</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron \
+<pre><code>$ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron \
             -i ./mrlegacy/src/test/resources/iris.csv -sh -cr 0 3 \
             -mo /tmp/model.model -o /tmp/labelResult.txt
-</code></pre></div></div>
+</code></pre>
 
 <p>The individual parameters are explained in the following.</p>
 
 <ul>
-  <li><code class="highlighter-rouge">-i ./mrlegacy/src/test/resources/iris.csv</code> use the iris data set as input data</li>
-  <li><code class="highlighter-rouge">-sh</code> since the file <code class="highlighter-rouge">iris.csv</code> contains a header row, this row needs to be skipped</li>
-  <li><code class="highlighter-rouge">-cr 0 3</code> we specify the column range of the input file</li>
-  <li><code class="highlighter-rouge">-mo /tmp/model.model</code> specify where the model file is stored</li>
-  <li><code class="highlighter-rouge">-o /tmp/labelResult.txt</code> specify where the labeled output file will be stored</li>
+  <li><code>-i ./mrlegacy/src/test/resources/iris.csv</code> use the iris data set as input data</li>
+  <li><code>-sh</code> since the file <code>iris.csv</code> contains a header row, this row needs to be skipped</li>
+  <li><code>-cr 0 3</code> we specify the column range of the input file</li>
+  <li><code>-mo /tmp/model.model</code> specify where the model file is stored</li>
+  <li><code>-o /tmp/labelResult.txt</code> specify where the labeled output file will be stored</li>
 </ul>
 
 <h2 id="implementation">Implementation</h2>
@@ -460,7 +460,7 @@ Currently, the logistic sigmoid is used as a squashing function in every hidden 
 
 <p>The command line version <strong>does not perform iterations</strong> which leads to bad results on small datasets. Another restriction is, that the CLI version of the MLP only supports classification, since the labels have to be given explicitly when executing on the command line.</p>
 
-<p>A learned model can be stored and updated with new training instanced using the <code class="highlighter-rouge">--update</code> flag. Output of classification reults is saved as a .txt-file and only consists of the assigned labels. Apart from the command-line interface, it is possible to construct and compile more specialized neural networks using the API and interfaces in the mrlegacy package.</p>
+<p>A learned model can be stored and updated with new training instanced using the <code>--update</code> flag. Output of classification reults is saved as a .txt-file and only consists of the assigned labels. Apart from the command-line interface, it is possible to construct and compile more specialized neural networks using the API and interfaces in the mrlegacy package.</p>
 
 <h2 id="theoretical-background">Theoretical Background</h2>
 

@@ -375,34 +375,34 @@ We’ll start with an example of this.</p>
 on data in a file. The file should be in CSV format, with lines of the form
 “userID,itemID,prefValue” (e.g. “39505,290002,3.5”):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DataModel model = new FileDataModel(new File("data.txt"));
-</code></pre></div></div>
+<pre><code>DataModel model = new FileDataModel(new File("data.txt"));
+</code></pre>
 
 <p>We’ll use the <strong>PearsonCorrelationSimilarity</strong> implementation of <strong>UserSimilarity</strong>
 as our user correlation algorithm, and add an optional preference inference
 algorithm:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
-</code></pre></div></div>
+<pre><code>UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
+</code></pre>
 
 <p>Now we create a <strong>UserNeighborhood</strong> algorithm. Here we use nearest-3:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>UserNeighborhood neighborhood =
+<pre><code>UserNeighborhood neighborhood =
 	  new NearestNUserNeighborhood(3, userSimilarity, model);{code}
-</code></pre></div></div>
+</code></pre>
 
 <p>Now we can create our <strong>Recommender</strong>, and add a caching decorator:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Recommender recommender =
+<pre><code>Recommender recommender =
   new GenericUserBasedRecommender(model, neighborhood, userSimilarity);
 Recommender cachingRecommender = new CachingRecommender(recommender);
-</code></pre></div></div>
+</code></pre>
 
 <p>Now we can get 10 recommendations for user ID “1234” — done!</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>List&lt;RecommendedItem&gt; recommendations =
+<pre><code>List&lt;RecommendedItem&gt; recommendations =
   cachingRecommender.recommend(1234, 10);
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="item-based-recommender">Item-based Recommender</h2>
 
@@ -417,8 +417,8 @@ are more appropriate.</p>
 
 <p>Let’s start over, again with a <strong>FileDataModel</strong> to start:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DataModel model = new FileDataModel(new File("data.txt"));
-</code></pre></div></div>
+<pre><code>DataModel model = new FileDataModel(new File("data.txt"));
+</code></pre>
 
 <p>We’ll also need an <strong>ItemSimilarity</strong>. We could use
 <strong>PearsonCorrelationSimilarity</strong>, which computes item similarity in realtime,
@@ -426,22 +426,22 @@ but, this is generally too slow to be useful. Instead, in a real
 application, you would feed a list of pre-computed correlations to a
 <strong>GenericItemSimilarity</strong>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// Construct the list of pre-computed correlations
+<pre><code>// Construct the list of pre-computed correlations
 Collection&lt;GenericItemSimilarity.ItemItemSimilarity&gt; correlations =
   ...;
 ItemSimilarity itemSimilarity =
   new GenericItemSimilarity(correlations);
-</code></pre></div></div>
+</code></pre>
 
 <p>Then we can finish as before to produce recommendations:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Recommender recommender =
+<pre><code>Recommender recommender =
   new GenericItemBasedRecommender(model, itemSimilarity);
 Recommender cachingRecommender = new CachingRecommender(recommender);
 ...
 List&lt;RecommendedItem&gt; recommendations =
   cachingRecommender.recommend(1234, 10);
-</code></pre></div></div>
+</code></pre>
 
 <p><a name="RecommenderDocumentation-Integrationwithyourapplication"></a></p>
 <h2 id="integration-with-your-application">Integration with your application</h2>
@@ -499,7 +499,7 @@ provides a good starting point.</p>
 <p>Fortunately, Mahout provides a way to evaluate the accuracy of your
 Recommender on your own data, in org.apache.mahout.cf.taste.eval</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DataModel myModel = ...;
+<pre><code>DataModel myModel = ...;
 RecommenderBuilder builder = new RecommenderBuilder() {
   public Recommender buildRecommender(DataModel model) {
     // build and return the Recommender to evaluate here
@@ -508,7 +508,7 @@ RecommenderBuilder builder = new RecommenderBuilder() {
 RecommenderEvaluator evaluator =
 	  new AverageAbsoluteDifferenceRecommenderEvaluator();
 double evaluation = evaluator.evaluate(builder, myModel, 0.9, 1.0);
-</code></pre></div></div>
+</code></pre>
 
 <p>For “boolean” data model situations, where there are no notions of
 preference value, the above evaluation based on estimated preference does

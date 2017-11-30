@@ -289,8 +289,8 @@ an operating Hadoop cluster on the target machine then the invocation will
 run k-Means on that cluster. If either of the environment variables are
 missing then the stand-alone Hadoop configuration will be invoked instead.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./bin/mahout kmeans &lt;OPTIONS&gt;
-</code></pre></div></div>
+<pre><code>./bin/mahout kmeans &lt;OPTIONS&gt;
+</code></pre>
 
 <p>In $MAHOUT_HOME/, build the jar containing the job (mvn install) The job
 will be generated in $MAHOUT_HOME/core/target/ and it’s name will contain
@@ -331,7 +331,7 @@ to view all outputs.</li>
 <p><a name="k-means-commandline-Commandlineoptions"></a></p>
 <h1 id="command-line-options">Command line options</h1>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --input (-i) input			       Path to job input directory. 
+<pre><code>  --input (-i) input			       Path to job input directory. 
 					       Must be a SequenceFile of    
 					       VectorWritable		    
   --clusters (-c) clusters		       The input centroids, as Vectors. 
@@ -362,7 +362,7 @@ to view all outputs.</li>
   --help (-h)				       Print out help		    
   --clustering (-cl)			       If present, run clustering after 
 					       the iterations have taken place  
-</code></pre></div></div>
+</code></pre>
 
 
    </div>

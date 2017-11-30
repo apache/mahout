@@ -312,13 +312,13 @@ warnings)</li>
 <p><a name="HowToRelease-Beforebuildingrelease"></a></p>
 <h2 id="before-building-release">Before building release</h2>
 <ol>
-  <li>Check that all tests pass after a clean compile: <code class="highlighter-rouge">mvn clean test</code></li>
+  <li>Check that all tests pass after a clean compile: <code>mvn clean test</code></li>
   <li>Check that there are no remaining unresolved Jira issues with the upcoming version number listed as the “Fix” version</li>
   <li>Publish any previously unpublished third-party dependenciess: <a href="thirdparty-dependencies.html">Thirdparty Dependencies</a></li>
   <li>Build and preview resulting artifacts:
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nb">cd </span>buildtools
+    <pre><code class="language-bash"> cd buildtools
  ./build-all-release-jars.sh
-</code></pre></div>    </div>
+</code></pre>
   </li>
   <li>Make sure packages will come out looking right</li>
 </ol>
@@ -333,10 +333,10 @@ warnings)</li>
   <li>Ensure you have set up standard Apache committer settings in
  ~/.m2/settings.xml as per <a href="http://maven.apache.org/developers/committer-settings.html">this page</a>
 .</li>
-  <li>Add a profile to your <code class="highlighter-rouge">~/.m2/settings.xml</code> in the <code class="highlighter-rouge">&lt;profiles&gt;</code> section with:</li>
+  <li>Add a profile to your <code>~/.m2/settings.xml</code> in the <code>&lt;profiles&gt;</code> section with:</li>
 </ul>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;profiles&gt;
+<pre><code>&lt;profiles&gt;
   &lt;profile&gt;
     &lt;id&gt;mahout_release&lt;/id&gt;
     &lt;properties&gt;
@@ -348,10 +348,10 @@ warnings)</li>
     &lt;/properties&gt;
   &lt;/profile&gt;
 &lt;/profiles&gt;
-</code></pre></div></div>
+</code></pre>
 
 <ul>
-  <li>You may also need to add the following to the <code class="highlighter-rouge">&lt;servers&gt;</code> section in <code class="highlighter-rouge">~/.m2/settings.xml</code> in order to upload artifacts (as the <code class="highlighter-rouge">-Dusername=</code> <code class="highlighter-rouge">-Dpassword=</code> didn’t work for gsingers for 0.8, but this did; n.b. it didn’t work for akm for the 0.13 release):
+  <li>You may also need to add the following to the <code>&lt;servers&gt;</code> section in <code>~/.m2/settings.xml</code> in order to upload artifacts (as the <code>-Dusername=</code> <code>-Dpassword=</code> didn’t work for gsingers for 0.8, but this did; n.b. it didn’t work for akm for the 0.13 release):
 ```</li>
 </ul>
 <server>
@@ -359,7 +359,7 @@ warnings)</li>
   <username>USERNAME</username>
   <password>PASSWORD</password>
 </server>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<pre><code>
 * *Clarify which env var is better or choose one* Set environment variable `MAVEN_OPTS` to `-Xmx1024m` to ensure the tests can run: `export JAVA_OPTIONS="-Xmx1g"`
 * If you are outside the US, then svn.apache.org may not resolve to the main US-based Subversion servers. (Compare the IP address you get for svn.apache.org with svn.us.apache.org to see if they are different.) This will cause problems during the release since it will create a revision and then immediately access, but, there is a replication lag of perhaps a minute to the non-US servers. To temporarily force using the US-based server, edit your equivalent of /etc/hosts and map the IP address of svn.us.apache.org to svn.apache.org.
 * Create the release candidate: `mvn -Pmahout-release,apache-release release:prepare release:perform`
@@ -378,7 +378,7 @@ release:perform target
 * Call a VOTE on dev@mahout.apache.org.  Votes require 3 days before passing.  See Apache [release policy|http://www.apache.org/foundation/voting.html#ReleaseVotes] for more info.
 * If there's a problem, you need to unwind the release and start all over.
 
-</code></pre></div></div>
+</code></pre>
 <p>mvn -Pmahout-release,apache-release versions:set -DnewVersion=PREVIOUS_SNAPSHOT
 mvn -Pmahout-release,apache-release versions:commit
 git commit 

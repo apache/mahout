@@ -288,14 +288,14 @@ complementary naive bayesian classification algorithms on a Hadoop cluster.</p>
 
 <p>In the examples directory type:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mvn -q exec:java
+<pre><code>mvn -q exec:java
     -Dexec.mainClass="org.apache.mahout.classifier.bayes.mapreduce.bayes.&lt;JOB&gt;"
     -Dexec.args="&lt;OPTIONS&gt;"
 
 mvn -q exec:java
     -Dexec.mainClass="org.apache.mahout.classifier.bayes.mapreduce.cbayes.&lt;JOB&gt;"
     -Dexec.args="&lt;OPTIONS&gt;"
-</code></pre></div></div>
+</code></pre>
 
 <p><a name="bayesian-commandline-Runningitonthecluster"></a></p>
 <h3 id="running-it-on-the-cluster">Running it on the cluster</h3>
@@ -328,7 +328,7 @@ to view all outputs.</p>
 <p><a name="bayesian-commandline-Commandlineoptions"></a></p>
 <h2 id="command-line-options">Command line options</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BayesDriver, BayesThetaNormalizerDriver, CBayesNormalizedWeightDriver, CBayesDriver, CBayesThetaDriver, CBayesThetaNormalizerDriver, BayesWeightSummerDriver, BayesFeatureDriver, BayesTfIdfDriver Usage:
+<pre><code>BayesDriver, BayesThetaNormalizerDriver, CBayesNormalizedWeightDriver, CBayesDriver, CBayesThetaDriver, CBayesThetaNormalizerDriver, BayesWeightSummerDriver, BayesFeatureDriver, BayesTfIdfDriver Usage:
     [--input &lt;input&gt; --output &lt;output&gt; --help]
   
 Options
@@ -336,7 +336,7 @@ Options
   --input (-i) input	  The Path for input Vectors. Must be a SequenceFile of Writable, Vector.
   --output (-o) output	  The directory pathname for output points.
   --help (-h)		  Print out help.
-</code></pre></div></div>
+</code></pre>
 
 
    </div>

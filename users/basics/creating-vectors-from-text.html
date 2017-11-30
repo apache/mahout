@@ -310,7 +310,7 @@ option.  Examples of running the driver are included below:</p>
 <p><a name="CreatingVectorsfromText-GeneratinganoutputfilefromaLuceneIndex"></a></p>
 <h4 id="generating-an-output-file-from-a-lucene-index">Generating an output file from a Lucene Index</h4>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout lucene.vector 
+<pre><code>$MAHOUT_HOME/bin/mahout lucene.vector 
     --dir (-d) dir                     The Lucene directory      
     --idField idField                  The field in the index    
                                            containing the index.  If 
@@ -362,17 +362,17 @@ option.  Examples of running the driver are included below:</p>
                                            percentage is expressed   
                                            as a value between 0 and  
                                            1. The default is 0.  
-</code></pre></div></div>
+</code></pre>
 
 <h4 id="example-create-50-vectors-from-an-index">Example: Create 50 Vectors from an Index</h4>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout lucene.vector
+<pre><code>$MAHOUT_HOME/bin/mahout lucene.vector
     --dir $WORK_DIR/wikipedia/solr/data/index 
     --field body 
     --dictOut $WORK_DIR/solr/wikipedia/dict.txt
     --output $WORK_DIR/solr/wikipedia/out.txt 
     --max 50
-</code></pre></div></div>
+</code></pre>
 
 <p>This uses the index specified by –dir and the body field in it and writes
 out the info to the output dir and the dictionary to dict.txt.	It only
@@ -382,14 +382,14 @@ the index are output.</p>
 <p><a name="CreatingVectorsfromText-50VectorsFromLuceneL2Norm"></a></p>
 <h4 id="example-creating-50-normalized-vectors-from-a-lucene-index-using-the-l_2-norm">Example: Creating 50 Normalized Vectors from a Lucene Index using the <a href="http://en.wikipedia.org/wiki/Lp_space">L_2 Norm</a></h4>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout lucene.vector 
+<pre><code>$MAHOUT_HOME/bin/mahout lucene.vector 
     --dir $WORK_DIR/wikipedia/solr/data/index 
     --field body 
     --dictOut $WORK_DIR/solr/wikipedia/dict.txt
     --output $WORK_DIR/solr/wikipedia/out.txt 
     --max 50 
     --norm 2
-</code></pre></div></div>
+</code></pre>
 
 <p><a name="CreatingVectorsfromText-FromDirectoryofTextdocuments"></a></p>
 <h2 id="from-a-directory-of-text-documents">From A Directory of Text documents</h2>
@@ -408,7 +408,7 @@ binary documents to text.</p>
 <p>Mahout has a nifty utility which reads a directory path including its
 sub-directories and creates the SequenceFile in a chunked manner for us.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seqdirectory 
+<pre><code>$MAHOUT_HOME/bin/mahout seqdirectory 
     --input (-i) input                       Path to job input directory.   
     --output (-o) output                     The directory pathname for     
                                                  output.                        
@@ -438,7 +438,7 @@ sub-directories and creates the SequenceFile in a chunked manner for us.</p>
     --tempDir tempDir                        Intermediate output directory  
     --startPhase startPhase                  First phase to run             
     --endPhase endPhase                      Last phase to run  
-</code></pre></div></div>
+</code></pre>
 
 <p>The output of seqDirectory will be a Sequence file &lt; Text, Text &gt; of all documents (/sub-directory-path/documentFileName, documentText).</p>
 
@@ -448,7 +448,7 @@ sub-directories and creates the SequenceFile in a chunked manner for us.</p>
 <p>From the sequence file generated from the above step run the following to
 generate vectors.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seq2sparse
+<pre><code>$MAHOUT_HOME/bin/mahout seq2sparse
     --minSupport (-s) minSupport      (Optional) Minimum Support. Default       
                                           Value: 2                                  
     --analyzerName (-a) analyzerName  The class name of the analyzer            
@@ -497,7 +497,7 @@ generate vectors.</p>
                                           be NamedVectors. If set true else false   
     --logNormalize (-lnorm)           (Optional) Whether output vectors should  
                                           be logNormalize. If set true else false
-</code></pre></div></div>
+</code></pre>
 
 <p>This will create SequenceFiles of tokenized documents &lt; Text, StringTuple &gt;  (docID, tokenizedDoc) and vectorized documents &lt; Text, VectorWritable &gt; (docID, TF-IDF Vector).</p>
 
@@ -510,17 +510,17 @@ generate vectors.</p>
 <h4 id="example-creating-normalized-tf-idf-vectors-from-a-directory-of-text-documents-using-trigrams-and-the-l_2-norm">Example: Creating Normalized <a href="http://en.wikipedia.org/wiki/Tf%E2%80%93idf">TF-IDF</a> Vectors from a directory of text documents using <a href="http://en.wikipedia.org/wiki/N-gram">trigrams</a> and the <a href="http://en.wikipedia.org/wiki/Lp_space">L_2 Norm</a></h4>
 <p>Create sequence files from the directory of text documents:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seqdirectory 
+<pre><code>$MAHOUT_HOME/bin/mahout seqdirectory 
     -i $WORK_DIR/reuters 
     -o $WORK_DIR/reuters-seqdir 
     -c UTF-8
     -chunk 64
     -xm sequential
-</code></pre></div></div>
+</code></pre>
 
 <p>Vectorize the documents using trigrams, L_2 length normalization and a maximum document frequency cutoff of 85%.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seq2sparse 
+<pre><code>$MAHOUT_HOME/bin/mahout seq2sparse 
     -i $WORK_DIR/reuters-out-seqdir/ 
     -o $WORK_DIR/reuters-out-seqdir-sparse-kmeans 
     --namedVec
@@ -528,7 +528,7 @@ generate vectors.</p>
     -ng 3
     -n 2
     --maxDFPercent 85 
-</code></pre></div></div>
+</code></pre>
 
 <p>The sequence file in the $WORK_DIR/reuters-out-seqdir-sparse-kmeans/tfidf-vectors directory can now be used as input to the Mahout <a href="http://mahout.apache.org/users/clustering/k-means-clustering.html">k-Means</a> clustering algorithm.</p>
 
@@ -549,14 +549,14 @@ format. Probably the easiest way to go would be to implement your own
 Iterable<Vector> (called VectorIterable in the example below) and then
 reuse the existing VectorWriter classes:</Vector></p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>VectorWriter vectorWriter = SequenceFile.createWriter(filesystem,
+<pre><code>VectorWriter vectorWriter = SequenceFile.createWriter(filesystem,
                                                       configuration,
                                                       outfile,
                                                       LongWritable.class,
                                                       SparseVector.class);
 
 long numDocs = vectorWriter.write(new VectorIterable(), Long.MAX_VALUE);
-</code></pre></div></div>
+</code></pre>
 
 
    </div>

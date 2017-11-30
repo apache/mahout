@@ -274,72 +274,72 @@
 
     <p>#Building a text classifier in Mahout’s Spark Shell</p>
 
-<p>This tutorial will take you through the steps used to train a Multinomial Naive Bayes model and create a text classifier based on that model using the <code class="highlighter-rouge">mahout spark-shell</code>.</p>
+<p>This tutorial will take you through the steps used to train a Multinomial Naive Bayes model and create a text classifier based on that model using the <code>mahout spark-shell</code>.</p>
 
 <h2 id="prerequisites">Prerequisites</h2>
-<p>This tutorial assumes that you have your Spark environment variables set for the <code class="highlighter-rouge">mahout spark-shell</code> see: <a href="http://mahout.apache.org/users/sparkbindings/play-with-shell.html">Playing with Mahout’s Shell</a>.  As well we assume that Mahout is running in cluster mode (i.e. with the <code class="highlighter-rouge">MAHOUT_LOCAL</code> environment variable <strong>unset</strong>) as we’ll be reading and writing to HDFS.</p>
+<p>This tutorial assumes that you have your Spark environment variables set for the <code>mahout spark-shell</code> see: <a href="http://mahout.apache.org/users/sparkbindings/play-with-shell.html">Playing with Mahout’s Shell</a>.  As well we assume that Mahout is running in cluster mode (i.e. with the <code>MAHOUT_LOCAL</code> environment variable <strong>unset</strong>) as we’ll be reading and writing to HDFS.</p>
 
 <h2 id="downloading-and-vectorizing-the-wikipedia-dataset">Downloading and Vectorizing the Wikipedia dataset</h2>
-<p><em>As of Mahout v. 0.10.0, we are still reliant on the MapReduce versions of <code class="highlighter-rouge">mahout seqwiki</code> and <code class="highlighter-rouge">mahout seq2sparse</code> to extract and vectorize our text.  A</em> <a href="https://issues.apache.org/jira/browse/MAHOUT-1663"><em>Spark implementation of seq2sparse</em></a> <em>is in the works for Mahout v. 0.11.</em> However, to download the Wikipedia dataset, extract the bodies of the documentation, label each document and vectorize the text into TF-IDF vectors, we can simpmly run the <a href="https://github.com/apache/mahout/blob/master/examples/bin/classify-wikipedia.sh">wikipedia-classifier.sh</a> example.</p>
+<p><em>As of Mahout v. 0.10.0, we are still reliant on the MapReduce versions of <code>mahout seqwiki</code> and <code>mahout seq2sparse</code> to extract and vectorize our text.  A</em> <a href="https://issues.apache.org/jira/browse/MAHOUT-1663"><em>Spark implementation of seq2sparse</em></a> <em>is in the works for Mahout v. 0.11.</em> However, to download the Wikipedia dataset, extract the bodies of the documentation, label each document and vectorize the text into TF-IDF vectors, we can simpmly run the <a href="https://github.com/apache/mahout/blob/master/examples/bin/classify-wikipedia.sh">wikipedia-classifier.sh</a> example.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Please select a number to choose the corresponding task to run
+<pre><code>Please select a number to choose the corresponding task to run
 1. CBayes (may require increased heap space on yarn)
 2. BinaryCBayes
 3. clean -- cleans up the work area in /tmp/mahout-work-wiki
 Enter your choice :
-</code></pre></div></div>
+</code></pre>
 
-<p>Enter (2). This will download a large recent XML dump of the Wikipedia database, into a <code class="highlighter-rouge">/tmp/mahout-work-wiki</code> directory, unzip it and  place it into HDFS.  It will run a <a href="http://mahout.apache.org/users/classification/wikipedia-classifier-example.html">MapReduce job to parse the wikipedia set</a>, extracting and labeling only pages with category tags for [United States] and [United Kingdom] (~11600 documents). It will then run <code class="highlighter-rouge">mahout seq2sparse</code> to convert the documents into TF-IDF vectors.  The script will also a build and test a <a href="http://mahout.apache.org/users/classification/bayesian.html">Naive Bayes model using MapReduce</a>.  When it is completed, you should see a confusion matrix on your screen.  For this tutorial, we will ignore the MapReduce model, and build a new model using Spark based on the vectorized text output by <code class="highlighter-rouge">seq2sparse</code>.</p>
+<p>Enter (2). This will download a large recent XML dump of the Wikipedia database, into a <code>/tmp/mahout-work-wiki</code> directory, unzip it and  place it into HDFS.  It will run a <a href="http://mahout.apache.org/users/classification/wikipedia-classifier-example.html">MapReduce job to parse the wikipedia set</a>, extracting and labeling only pages with category tags for [United States] and [United Kingdom] (~11600 documents). It will then run <code>mahout seq2sparse</code> to convert the documents into TF-IDF vectors.  The script will also a build and test a <a href="http://mahout.apache.org/users/classification/bayesian.html">Naive Bayes model using MapReduce</a>.  When it is completed, you should see a confusion matrix on your screen.  For this tutorial, we will ignore the MapReduce model, and build a new model using Spark based on the vectorized text output by <code>seq2sparse</code>.</p>
 
 <h2 id="getting-started">Getting Started</h2>
 
-<p>Launch the <code class="highlighter-rouge">mahout spark-shell</code>.  There is an example script: <code class="highlighter-rouge">spark-document-classifier.mscala</code> (.mscala denotes a Mahout-Scala script which can be run similarly to an R script).   We will be walking through this script for this tutorial but if you wanted to simply run the script, you could just issue the command:</p>
+<p>Launch the <code>mahout spark-shell</code>.  There is an example script: <code>spark-document-classifier.mscala</code> (.mscala denotes a Mahout-Scala script which can be run similarly to an R script).   We will be walking through this script for this tutorial but if you wanted to simply run the script, you could just issue the command:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mahout&gt; :load /path/to/mahout/examples/bin/spark-document-classifier.mscala
-</code></pre></div></div>
+<pre><code>mahout&gt; :load /path/to/mahout/examples/bin/spark-document-classifier.mscala
+</code></pre>
 
-<p>For now, lets take the script apart piece by piece.  You can cut and paste the following code blocks into the <code class="highlighter-rouge">mahout spark-shell</code>.</p>
+<p>For now, lets take the script apart piece by piece.  You can cut and paste the following code blocks into the <code>mahout spark-shell</code>.</p>
 
 <h2 id="imports">Imports</h2>
 
 <p>Our Mahout Naive Bayes imports:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.mahout.classifier.naivebayes._
+<pre><code>import org.apache.mahout.classifier.naivebayes._
 import org.apache.mahout.classifier.stats._
 import org.apache.mahout.nlp.tfidf._
-</code></pre></div></div>
+</code></pre>
 
 <p>Hadoop imports needed to read our dictionary:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.hadoop.io.Text
+<pre><code>import org.apache.hadoop.io.Text
 import org.apache.hadoop.io.IntWritable
 import org.apache.hadoop.io.LongWritable
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="read-in-our-full-set-from-hdfs-as-vectorized-by-seq2sparse-in-classify-wikipediash">Read in our full set from HDFS as vectorized by seq2sparse in classify-wikipedia.sh</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>val pathToData = "/tmp/mahout-work-wiki/"
+<pre><code>val pathToData = "/tmp/mahout-work-wiki/"
 val fullData = drmDfsRead(pathToData + "wikipediaVecs/tfidf-vectors")
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="extract-the-category-of-each-observation-and-aggregate-those-observations-by-category">Extract the category of each observation and aggregate those observations by category</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(
+<pre><code>val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(
                                                              fullData)
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="build-a-muitinomial-naive-bayes-model-and-self-test-on-the-training-set">Build a Muitinomial Naive Bayes model and self test on the training set</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, false)
+<pre><code>val model = SparkNaiveBayes.train(aggregatedObservations, labelIndex, false)
 val resAnalyzer = SparkNaiveBayes.test(model, fullData, false)
 println(resAnalyzer)
-</code></pre></div></div>
+</code></pre>
 
-<p>printing the <code class="highlighter-rouge">ResultAnalyzer</code> will display the confusion matrix.</p>
+<p>printing the <code>ResultAnalyzer</code> will display the confusion matrix.</p>
 
 <h2 id="read-in-the-dictionary-and-document-frequency-count-from-hdfs">Read in the dictionary and document frequency count from HDFS</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>val dictionary = sdc.sequenceFile(pathToData + "wikipediaVecs/dictionary.file-0",
+<pre><code>val dictionary = sdc.sequenceFile(pathToData + "wikipediaVecs/dictionary.file-0",
                                   classOf[Text],
                                   classOf[IntWritable])
 val documentFrequencyCount = sdc.sequenceFile(pathToData + "wikipediaVecs/df-count",
@@ -359,13 +359,13 @@ val documentFrequencyCountRDD = documentFrequencyCount.map {
 
 val dictionaryMap = dictionaryRDD.collect.map(x =&gt; x._1.toString -&gt; x._2.toInt).toMap
 val dfCountMap = documentFrequencyCountRDD.collect.map(x =&gt; x._1.toInt -&gt; x._2.toLong).toMap
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="define-a-function-to-tokenize-and-vectorize-new-text-using-our-current-dictionary">Define a function to tokenize and vectorize new text using our current dictionary</h2>
 
-<p>For this simple example, our function <code class="highlighter-rouge">vectorizeDocument(...)</code> will tokenize a new document into unigrams using native Java String methods and vectorize using our dictionary and document frequencies. You could also use a <a href="https://lucene.apache.org/core/">Lucene</a> analyzer for bigrams, trigrams, etc., and integrate Apache <a href="https://tika.apache.org/">Tika</a> to extract text from different document types (PDF, PPT, XLS, etc.).  Here, however we will keep it simple, stripping and tokenizing our text using regexs and native String methods.</p>
+<p>For this simple example, our function <code>vectorizeDocument(...)</code> will tokenize a new document into unigrams using native Java String methods and vectorize using our dictionary and document frequencies. You could also use a <a href="https://lucene.apache.org/core/">Lucene</a> analyzer for bigrams, trigrams, etc., and integrate Apache <a href="https://tika.apache.org/">Tika</a> to extract text from different document types (PDF, PPT, XLS, etc.).  Here, however we will keep it simple, stripping and tokenizing our text using regexs and native String methods.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def vectorizeDocument(document: String,
+<pre><code>def vectorizeDocument(document: String,
                         dictionaryMap: Map[String,Int],
                         dfMap: Map[Int,Long]): Vector = {
     val wordCounts = document.replaceAll("[^\\p{L}\\p{Nd}]+", " ")
@@ -392,11 +392,11 @@ val dfCountMap = documentFrequencyCountRDD.collect.map(x =&gt; x._1.toInt -&gt; 
     }
     vec
 }
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="setup-our-classifier">Setup our classifier</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>val labelMap = model.labelIndex
+<pre><code>val labelMap = model.labelIndex
 val numLabels = model.numLabels
 val reverseLabelMap = labelMap.map(x =&gt; x._2 -&gt; x._1)
 
@@ -405,13 +405,13 @@ val classifier = model.isComplementary match {
     case true =&gt; new ComplementaryNBClassifier(model)
     case _ =&gt; new StandardNBClassifier(model)
 }
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="define-an-argmax-function">Define an argmax function</h2>
 
 <p>The label with the highest score wins the classification for a given document.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def argmax(v: Vector): (Int, Double) = {
+<pre><code>def argmax(v: Vector): (Int, Double) = {
     var bestIdx: Int = Integer.MIN_VALUE
     var bestScore: Double = Integer.MIN_VALUE.asInstanceOf[Int].toDouble
     for(i &lt;- 0 until v.size) {
@@ -422,20 +422,20 @@ val classifier = model.isComplementary match {
     }
     (bestIdx, bestScore)
 }
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="define-our-tf-idf-vector-classifier">Define our TF(-IDF) vector classifier</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def classifyDocument(clvec: Vector) : String = {
+<pre><code>def classifyDocument(clvec: Vector) : String = {
     val cvec = classifier.classifyFull(clvec)
     val (bestIdx, bestScore) = argmax(cvec)
     reverseLabelMap(bestIdx)
 }
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="two-sample-news-articles-united-states-football-and-united-kingdom-football">Two sample news articles: United States Football and United Kingdom Football</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// A random United States football article
+<pre><code>// A random United States football article
 // http://www.reuters.com/article/2015/01/28/us-nfl-superbowl-security-idUSKBN0L12JR20150128
 val UStextToClassify = new String("(Reuters) - Super Bowl security officials acknowledge" +
     " the NFL championship game represents a high profile target on a world stage but are" +
@@ -500,11 +500,11 @@ val UKtextToClassify = new String("(Reuters) - Manchester United have signed a s
     " Premier League last season and missing out on a place in the lucrative Champions League." +
     " ($1 = 0.8910 Swiss francs) (Writing by Neil Maidment, additional reporting by Jemima" + 
     " Kelly; editing by Keith Weir)")
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="vectorize-and-classify-our-documents">Vectorize and classify our documents</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>val usVec = vectorizeDocument(UStextToClassify, dictionaryMap, dfCountMap)
+<pre><code>val usVec = vectorizeDocument(UStextToClassify, dictionaryMap, dfCountMap)
 val ukVec = vectorizeDocument(UKtextToClassify, dictionaryMap, dfCountMap)
 
 println("Classifying the news article about superbowl security (united states)")
@@ -512,33 +512,33 @@ classifyDocument(usVec)
 
 println("Classifying the news article about Manchester United (united kingdom)")
 classifyDocument(ukVec)
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="tie-everything-together-in-a-new-method-to-classify-text">Tie everything together in a new method to classify text</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def classifyText(txt: String): String = {
+<pre><code>def classifyText(txt: String): String = {
     val v = vectorizeDocument(txt, dictionaryMap, dfCountMap)
     classifyDocument(v)
 }
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="now-we-can-simply-call-our-classifytext-method-on-any-string">Now we can simply call our classifyText(…) method on any String</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classifyText("Hello world from Queens")
+<pre><code>classifyText("Hello world from Queens")
 classifyText("Hello world from London")
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="model-persistance">Model persistance</h2>
 
 <p>You can save the model to HDFS:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>model.dfsWrite("/path/to/model")
-</code></pre></div></div>
+<pre><code>model.dfsWrite("/path/to/model")
+</code></pre>
 
 <p>And retrieve it with:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>val model =  NBModel.dfsRead("/path/to/model")
-</code></pre></div></div>
+<pre><code>val model =  NBModel.dfsRead("/path/to/model")
+</code></pre>
 
 <p>The trained model can now be embedded in an external application.</p>
 

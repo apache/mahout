@@ -286,19 +286,19 @@ the Apache mirrors. The latest Mahout release is available for download at:</p>
 
 <p>Apache Mahout is mirrored to <a href="https://github.com/apache/mahout">Github</a>. To get all source:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/apache/mahout.git mahout
-</code></pre></div></div>
+<pre><code>git clone https://github.com/apache/mahout.git mahout
+</code></pre>
 
 <h1 id="environment">Environment</h1>
 
 <p>Whether you are using Mahout’s Shell, running command line jobs or using it as a library to build your own apps 
 you’ll need to setup several environment variables. 
-Edit your environment in <code class="highlighter-rouge">~/.bash_profile</code> for Mac or <code class="highlighter-rouge">~/.bashrc</code> for many linux distributions. Add the following</p>
+Edit your environment in <code>~/.bash_profile</code> for Mac or <code>~/.bashrc</code> for many linux distributions. Add the following</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export MAHOUT_HOME=/path/to/mahout
+<pre><code>export MAHOUT_HOME=/path/to/mahout
 export MAHOUT_LOCAL=true # for running standalone on your dev machine, 
 # unset MAHOUT_LOCAL for running on a cluster 
-</code></pre></div></div>
+</code></pre>
 
 <p>If you are running on Spark you will also need $SPARK_HOME</p>
 
@@ -311,21 +311,21 @@ Then add the appropriate setting to your pom.xml or build.sbt following the temp
 
 <p>If you only need the math part of Mahout:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dependency&gt;
+<pre><code>&lt;dependency&gt;
     &lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
     &lt;artifactId&gt;mahout-math&lt;/artifactId&gt;
     &lt;version&gt;${mahout.version}&lt;/version&gt;
 &lt;/dependency&gt;
-</code></pre></div></div>
+</code></pre>
 
 <p>In case you would like to use some of our integration tooling (e.g. for generating vectors from Lucene):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dependency&gt;
+<pre><code>&lt;dependency&gt;
     &lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
     &lt;artifactId&gt;mahout-hdfs&lt;/artifactId&gt;
     &lt;version&gt;${mahout.version}&lt;/version&gt;
 &lt;/dependency&gt;
-</code></pre></div></div>
+</code></pre>
 
 <p>In case you are using Ivy, Gradle, Buildr, Grape or SBT you might want to directly head over to the official <a href="http://mvnrepository.com/artifact/org.apache.mahout/mahout-core">Maven Repository search</a>.</p>
 

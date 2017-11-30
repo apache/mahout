@@ -350,8 +350,8 @@ for item IDs. Then after recommendations are calculated you will have to transla
 
 <p>Assuming your <em>JAVA_HOME</em> is appropriately set and Mahout was installed properly we’re ready to configure our syntax. Enter the following command:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mahout parallelALS --input $als_input --output $als_output --lambda 0.1 --implicitFeedback true --alpha 0.8 --numFeatures 2 --numIterations 5  --numThreadsPerSolver 1 --tempDir tmp 
-</code></pre></div></div>
+<pre><code>$ mahout parallelALS --input $als_input --output $als_output --lambda 0.1 --implicitFeedback true --alpha 0.8 --numFeatures 2 --numIterations 5  --numThreadsPerSolver 1 --tempDir tmp 
+</code></pre>
 
 <p>Running the command will execute a series of jobs the final product of which will be an output file deposited to the output directory specified in the command syntax. The output directory contains 3 sub-directories: <em>M</em> stores the item to feature matrix, <em>U</em> stores the user to feature matrix and userRatings stores the user’s ratings on the items. The <em>tempDir</em> parameter specifies the directory to store the intermediate output of the job, such as the matrix output in each iteration and each item’s average rating. Using the <em>tempDir</em> will help on debugging.</p>
 
@@ -359,8 +359,8 @@ for item IDs. Then after recommendations are calculated you will have to transla
 
 <p>Based on the output feature matrices from step 3, we could make recommendations for users. Enter the following command:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> $ mahout recommendfactorized --input $als_recommender_input --userFeatures $als_output/U/ --itemFeatures $als_output/M/ --numRecommendations 1 --output recommendations --maxRating 1
-</code></pre></div></div>
+<pre><code> $ mahout recommendfactorized --input $als_recommender_input --userFeatures $als_output/U/ --itemFeatures $als_output/M/ --numRecommendations 1 --output recommendations --maxRating 1
+</code></pre>
 
 <p>The input user file is a sequence file, the sequence record key is user id and value is the user’s rated item ids which will be removed from recommendation. The output file generated in our simple example will be a text file giving the recommended item ids for each user. 
 Remember to translate the Mahout ids back into your application specific ids.</p>

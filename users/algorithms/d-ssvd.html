@@ -280,58 +280,58 @@
 
 <h2 id="modified-ssvd-algorithm">Modified SSVD Algorithm</h2>
 
-<p>Given an <code class="highlighter-rouge">\(m\times n\)</code>
-matrix <code class="highlighter-rouge">\(\mathbf{A}\)</code>, a target rank <code class="highlighter-rouge">\(k\in\mathbb{N}_{1}\)</code>
-, an oversampling parameter <code class="highlighter-rouge">\(p\in\mathbb{N}_{1}\)</code>, 
-and the number of additional power iterations <code class="highlighter-rouge">\(q\in\mathbb{N}_{0}\)</code>, 
-this procedure computes an <code class="highlighter-rouge">\(m\times\left(k+p\right)\)</code>
-SVD <code class="highlighter-rouge">\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)</code>:</p>
+<p>Given an <code>\(m\times n\)</code>
+matrix <code>\(\mathbf{A}\)</code>, a target rank <code>\(k\in\mathbb{N}_{1}\)</code>
+, an oversampling parameter <code>\(p\in\mathbb{N}_{1}\)</code>, 
+and the number of additional power iterations <code>\(q\in\mathbb{N}_{0}\)</code>, 
+this procedure computes an <code>\(m\times\left(k+p\right)\)</code>
+SVD <code>\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)</code>:</p>
 
 <ol>
   <li>
-    <p>Create seed for random <code class="highlighter-rouge">\(n\times\left(k+p\right)\)</code>
-  matrix <code class="highlighter-rouge">\(\boldsymbol{\Omega}\)</code>. The seed defines matrix <code class="highlighter-rouge">\(\mathbf{\Omega}\)</code>
+    <p>Create seed for random <code>\(n\times\left(k+p\right)\)</code>
+  matrix <code>\(\boldsymbol{\Omega}\)</code>. The seed defines matrix <code>\(\mathbf{\Omega}\)</code>
   using Gaussian unit vectors per one of suggestions in [Halko, Martinsson, Tropp].</p>
   </li>
   <li>
-    <p><code class="highlighter-rouge">\(\mathbf{Y=A\boldsymbol{\Omega}},\,\mathbf{Y}\in\mathbb{R}^{m\times\left(k+p\right)}\)</code></p>
+    <p><code>\(\mathbf{Y=A\boldsymbol{\Omega}},\,\mathbf{Y}\in\mathbb{R}^{m\times\left(k+p\right)}\)</code></p>
   </li>
   <li>
-    <p>Column-orthonormalize <code class="highlighter-rouge">\(\mathbf{Y}\rightarrow\mathbf{Q}\)</code>
-  by computing thin decomposition <code class="highlighter-rouge">\(\mathbf{Y}=\mathbf{Q}\mathbf{R}\)</code>.
-  Also, <code class="highlighter-rouge">\(\mathbf{Q}\in\mathbb{R}^{m\times\left(k+p\right)},\,\mathbf{R}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)</code>; denoted as <code class="highlighter-rouge">\(\mathbf{Q}=\mbox{qr}\left(\mathbf{Y}\right).\mathbf{Q}\)</code></p>
+    <p>Column-orthonormalize <code>\(\mathbf{Y}\rightarrow\mathbf{Q}\)</code>
+  by computing thin decomposition <code>\(\mathbf{Y}=\mathbf{Q}\mathbf{R}\)</code>.
+  Also, <code>\(\mathbf{Q}\in\mathbb{R}^{m\times\left(k+p\right)},\,\mathbf{R}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)</code>; denoted as <code>\(\mathbf{Q}=\mbox{qr}\left(\mathbf{Y}\right).\mathbf{Q}\)</code></p>
   </li>
   <li>
-    <p><code class="highlighter-rouge">\(\mathbf{B}_{0}=\mathbf{Q}^{\top}\mathbf{A}:\,\,\mathbf{B}\in\mathbb{R}^{\left(k+p\right)\times n}\)</code>.</p>
+    <p><code>\(\mathbf{B}_{0}=\mathbf{Q}^{\top}\mathbf{A}:\,\,\mathbf{B}\in\mathbb{R}^{\left(k+p\right)\times n}\)</code>.</p>
   </li>
   <li>
-    <p>If <code class="highlighter-rouge">\(q&gt;0\)</code>
-  repeat: for <code class="highlighter-rouge">\(i=1..q\)</code>: 
-  <code class="highlighter-rouge">\(\mathbf{B}_{i}^{\top}=\mathbf{A}^{\top}\mbox{qr}\left(\mathbf{A}\mathbf{B}_{i-1}^{\top}\right).\mathbf{Q}\)</code>
+    <p>If <code>\(q&gt;0\)</code>
+  repeat: for <code>\(i=1..q\)</code>: 
+  <code>\(\mathbf{B}_{i}^{\top}=\mathbf{A}^{\top}\mbox{qr}\left(\mathbf{A}\mathbf{B}_{i-1}^{\top}\right).\mathbf{Q}\)</code>
   (power iterations step).</p>
   </li>
   <li>
-    <p>Compute Eigensolution of a small Hermitian <code class="highlighter-rouge">\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}=\mathbf{\hat{U}}\boldsymbol{\Lambda}\mathbf{\hat{U}}^{\top}\)</code>,
-  <code class="highlighter-rouge">\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)</code>.</p>
+    <p>Compute Eigensolution of a small Hermitian <code>\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}=\mathbf{\hat{U}}\boldsymbol{\Lambda}\mathbf{\hat{U}}^{\top}\)</code>,
+  <code>\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)</code>.</p>
   </li>
   <li>
-    <p>Singular values <code class="highlighter-rouge">\(\mathbf{\boldsymbol{\Sigma}}=\boldsymbol{\Lambda}^{0.5}\)</code>,
-  or, in other words, <code class="highlighter-rouge">\(s_{i}=\sqrt{\sigma_{i}}\)</code>.</p>
+    <p>Singular values <code>\(\mathbf{\boldsymbol{\Sigma}}=\boldsymbol{\Lambda}^{0.5}\)</code>,
+  or, in other words, <code>\(s_{i}=\sqrt{\sigma_{i}}\)</code>.</p>
   </li>
   <li>
-    <p>If needed, compute <code class="highlighter-rouge">\(\mathbf{U}=\mathbf{Q}\hat{\mathbf{U}}\)</code>.</p>
+    <p>If needed, compute <code>\(\mathbf{U}=\mathbf{Q}\hat{\mathbf{U}}\)</code>.</p>
   </li>
   <li>
-    <p>If needed, compute <code class="highlighter-rouge">\(\mathbf{V}=\mathbf{B}_{q}^{\top}\hat{\mathbf{U}}\boldsymbol{\Sigma}^{-1}\)</code>.
-Another way is <code class="highlighter-rouge">\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^{-1}\)</code>.</p>
+    <p>If needed, compute <code>\(\mathbf{V}=\mathbf{B}_{q}^{\top}\hat{\mathbf{U}}\boldsymbol{\Sigma}^{-1}\)</code>.
+Another way is <code>\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^{-1}\)</code>.</p>
   </li>
 </ol>
 
 <h2 id="implementation">Implementation</h2>
 
-<p>Mahout <code class="highlighter-rouge">dssvd(...)</code> is implemented in the mahout <code class="highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
+<p>Mahout <code>dssvd(...)</code> is implemented in the mahout <code>math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dssvd[K: ClassTag](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+<pre><code>def dssvd[K: ClassTag](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
     (DrmLike[K], DrmLike[Int], Vector) = {
 
     val drmAcp = drmA.checkpoint()
@@ -387,21 +387,21 @@ Another way is <code class="highlighter-rouge">\(\mathbf{V}=\mathbf{A}^{\top}\ma
 
     (drmU(::, 0 until k), drmV(::, 0 until k), s(0 until k))
 }
-</code></pre></div></div>
+</code></pre>
 
-<p>Note: As a side effect of checkpointing, U and V values are returned as logical operators (i.e. they are neither checkpointed nor computed).  Therefore there is no physical work actually done to compute <code class="highlighter-rouge">\(\mathbf{U}\)</code> or <code class="highlighter-rouge">\(\mathbf{V}\)</code> until they are used in a subsequent expression.</p>
+<p>Note: As a side effect of checkpointing, U and V values are returned as logical operators (i.e. they are neither checkpointed nor computed).  Therefore there is no physical work actually done to compute <code>\(\mathbf{U}\)</code> or <code>\(\mathbf{V}\)</code> until they are used in a subsequent expression.</p>
 
 <h2 id="usage">Usage</h2>
 
-<p>The scala <code class="highlighter-rouge">dssvd(...)</code> method can easily be called in any Spark or H2O application built with the <code class="highlighter-rouge">math-scala</code> library and the corresponding <code class="highlighter-rouge">Spark</code> or <code class="highlighter-rouge">H2O</code> engine module as follows:</p>
+<p>The scala <code>dssvd(...)</code> method can easily be called in any Spark or H2O application built with the <code>math-scala</code> library and the corresponding <code>Spark</code> or <code>H2O</code> engine module as follows:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.mahout.math._
+<pre><code>import org.apache.mahout.math._
 import decompositions._
 import drm._
 
 
 val(drmU, drmV, s) = dssvd(drma, k = 40, q = 1)
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="references">References</h2>
 

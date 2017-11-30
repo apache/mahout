@@ -351,7 +351,7 @@ FuzzyKMeansDriver.run().</p>
 
 <p>Invocation using the command line takes the form:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout fkmeans \
+<pre><code>bin/mahout fkmeans \
     -i &lt;input vectors directory&gt; \
     -c &lt;input clusters directory&gt; \
     -o &lt;output working directory&gt; \
@@ -365,7 +365,7 @@ FuzzyKMeansDriver.run().</p>
     -e &lt;emit vectors to most likely cluster during clustering&gt;
     -t &lt;threshold to use for clustering if -e is false&gt;
     -xm &lt;execution method: sequential or mapreduce&gt;
-</code></pre></div></div>
+</code></pre>
 
 <p><em>Note:</em> if the -k argument is supplied, any clusters in the -c directory
 will be overwritten and -k random points will be sampled from the input

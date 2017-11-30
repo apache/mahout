@@ -280,13 +280,13 @@
 
 <h2 id="algorithm">Algorithm</h2>
 
-<p>For the classic QR decomposition of the form <code class="highlighter-rouge">\(\mathbf{A}=\mathbf{QR},\mathbf{A}\in\mathbb{R}^{m\times n}\)</code> a distributed version is fairly easily achieved if <code class="highlighter-rouge">\(\mathbf{A}\)</code> is tall and thin such that <code class="highlighter-rouge">\(\mathbf{A}^{\top}\mathbf{A}\)</code> fits in memory, i.e. <em>m</em> is large but <em>n</em> &lt; ~5000 Under such circumstances, only <code class="highlighter-rouge">\(\mathbf{A}\)</code> and <code class="highlighter-rouge">\(\mathbf{Q}\)</code> are distributed matricies and <code class="highlighter-rouge">\(\mathbf{A^{\top}A}\)</code> and <code class="highlighter-rouge">\(\mathbf{R}\)</code> are in-core products. We just compute the in-core version of the Cholesky decomposition in the form of <code class="highlighter-rouge">\(\mathbf{LL}^{\top}= \mathbf{A}^{\top}\mathbf{A}\)</code>.  After that we take <code class="highlighter-rouge">\(\mathbf{R}= \mathbf{L}^{\top}\)</code> and <code class="highlighter-rouge">\(\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}\)</code>.  The latter is easily achieved by multiplying each verticle block of <code class="highlighter-rouge">\(\mathbf{A}\)</code> by <code class="highlighter-rouge">\(\left(\mathbf{L}^{\top}\right)^{-1}\)</code>.  (There is no actual matrix inversion happening).</p>
+<p>For the classic QR decomposition of the form <code>\(\mathbf{A}=\mathbf{QR},\mathbf{A}\in\mathbb{R}^{m\times n}\)</code> a distributed version is fairly easily achieved if <code>\(\mathbf{A}\)</code> is tall and thin such that <code>\(\mathbf{A}^{\top}\mathbf{A}\)</code> fits in memory, i.e. <em>m</em> is large but <em>n</em> &lt; ~5000 Under such circumstances, only <code>\(\mathbf{A}\)</code> and <code>\(\mathbf{Q}\)</code> are distributed matricies and <code>\(\mathbf{A^{\top}A}\)</code> and <code>\(\mathbf{R}\)</code> are in-core products. We just compute the in-core version of the Cholesky decomposition in the form of <code>\(\mathbf{LL}^{\top}= \mathbf{A}^{\top}\mathbf{A}\)</code>.  After that we take <code>\(\mathbf{R}= \mathbf{L}^{\top}\)</code> and <code>\(\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}\)</code>.  The latter is easily achieved by multiplying each verticle block of <code>\(\mathbf{A}\)</code> by <code>\(\left(\mathbf{L}^{\top}\right)^{-1}\)</code>.  (There is no actual matrix inversion happening).</p>
 
 <h2 id="implementation">Implementation</h2>
 
-<p>Mahout <code class="highlighter-rouge">dqrThin(...)</code> is implemented in the mahout <code class="highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
+<p>Mahout <code>dqrThin(...)</code> is implemented in the mahout <code>math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {        
+<pre><code>def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {        
     if (drmA.ncol &gt; 5000)
         log.warn("A is too fat. A'A must fit in memory and easily broadcasted.")
     implicit val ctx = drmA.context
@@ -302,18 +302,18 @@
     }
     Q -&gt; inCoreR
 }
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="usage">Usage</h2>
 
-<p>The scala <code class="highlighter-rouge">dqrThin(...)</code> method can easily be called in any Spark or H2O application built with the <code class="highlighter-rouge">math-scala</code> library and the corresponding <code class="highlighter-rouge">Spark</code> or <code class="highlighter-rouge">H2O</code> engine module as follows:</p>
+<p>The scala <code>dqrThin(...)</code> method can easily be called in any Spark or H2O application built with the <code>math-scala</code> library and the corresponding <code>Spark</code> or <code>H2O</code> engine module as follows:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.mahout.math._
+<pre><code>import org.apache.mahout.math._
 import decompositions._
 import drm._
 
 val(drmQ, inCoreR) = dqrThin(drma)
-</code></pre></div></div>
+</code></pre>
 
 <h2 id="references">References</h2>
 

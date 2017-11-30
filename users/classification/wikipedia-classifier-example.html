@@ -281,32 +281,32 @@
 
 <h2 id="oververview">Oververview</h2>
 
-<p>Tou run the example simply execute the <code class="highlighter-rouge">$MAHOUT_HOME/examples/bin/classify-wikipedia.sh</code> script.</p>
+<p>Tou run the example simply execute the <code>$MAHOUT_HOME/examples/bin/classify-wikipedia.sh</code> script.</p>
 
 <p>By defult the script is set to run on a medium sized Wikipedia XML dump.  To run on the full set (the entire english Wikipedia) you can change the download by commenting out line 78, and uncommenting line 80  of <a href="https://github.com/apache/mahout/blob/master/examples/bin/classify-wikipedia.sh">classify-wikipedia.sh</a> [1]. However this is not recommended unless you have the resources to do so. <em>Be sure to clean your work directory when changing datasets- option (3).</em></p>
 
-<p>The step by step process for Creating a Naive Bayes Classifier for the Wikipedia XML dump is very similar to that for <a href="http://mahout.apache.org/users/classification/twenty-newsgroups.html">creating a 20 Newsgroups Classifier</a> [4].  The only difference being that instead of running <code class="highlighter-rouge">$mahout seqdirectory</code> on the unzipped 20 Newsgroups file, you’ll run <code class="highlighter-rouge">$mahout seqwiki</code> on the unzipped Wikipedia xml dump.</p>
+<p>The step by step process for Creating a Naive Bayes Classifier for the Wikipedia XML dump is very similar to that for <a href="http://mahout.apache.org/users/classification/twenty-newsgroups.html">creating a 20 Newsgroups Classifier</a> [4].  The only difference being that instead of running <code>$mahout seqdirectory</code> on the unzipped 20 Newsgroups file, you’ll run <code>$mahout seqwiki</code> on the unzipped Wikipedia xml dump.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mahout seqwiki 
-</code></pre></div></div>
+<pre><code>$ mahout seqwiki 
+</code></pre>
 
-<p>The above command launches <code class="highlighter-rouge">WikipediaToSequenceFile.java</code> which accepts a text file of categories [3] and starts an MR job to parse the each document in the XML file.  This process will seek to extract documents with a wikipedia category tag which (exactly, if the <code class="highlighter-rouge">-exactMatchOnly</code> option is set) matches a line in the category file.  If no match is found and the <code class="highlighter-rouge">-all</code> option is set, the document will be dumped into an “unknown” category. The documents will then be written out as a <code class="highlighter-rouge">&lt;Text,Text&gt;</code> sequence file of the form (K:/category/document_title , V: document).</p>
+<p>The above command launches <code>WikipediaToSequenceFile.java</code> which accepts a text file of categories [3] and starts an MR job to parse the each document in the XML file.  This process will seek to extract documents with a wikipedia category tag which (exactly, if the <code>-exactMatchOnly</code> option is set) matches a line in the category file.  If no match is found and the <code>-all</code> option is set, the document will be dumped into an “unknown” category. The documents will then be written out as a <code>&lt;Text,Text&gt;</code> sequence file of the form (K:/category/document_title , V: document).</p>
 
 <p>There are 3 different example category files available to in the /examples/src/test/resources
 directory:  country.txt, country10.txt and country2.txt.  You can edit these categories to extract a different corpus from the Wikipedia dataset.</p>
 
-<p>The CLI options for <code class="highlighter-rouge">seqwiki</code> are as follows:</p>
+<p>The CLI options for <code>seqwiki</code> are as follows:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--input          (-i)         input pathname String
+<pre><code>--input          (-i)         input pathname String
 --output         (-o)         the output pathname String
 --categories     (-c)         the file containing the Wikipedia categories
 --exactMatchOnly (-e)         if set, then the Wikipedia category must match
                                 exactly instead of simply containing the category string
 --all            (-all)       if set select all categories
 --removeLabels   (-rl)        if set, remove [[Category:labels]] from document text after extracting label.
-</code></pre></div></div>
+</code></pre>
 
-<p>After <code class="highlighter-rouge">seqwiki</code>, the script runs <code class="highlighter-rouge">seq2sparse</code>, <code class="highlighter-rouge">split</code>, <code class="highlighter-rouge">trainnb</code> and <code class="highlighter-rouge">testnb</code> as in the <a href="http://mahout.apache.org/users/classification/twenty-newsgroups.html">step by step 20newsgroups example</a>.  When all of the jobs have finished, a confusion matrix will be displayed.</p>
+<p>After <code>seqwiki</code>, the script runs <code>seq2sparse</code>, <code>split</code>, <code>trainnb</code> and <code>testnb</code> as in the <a href="http://mahout.apache.org/users/classification/twenty-newsgroups.html">step by step 20newsgroups example</a>.  When all of the jobs have finished, a confusion matrix will be displayed.</p>
 
 <p>#Resourcese</p>
 
