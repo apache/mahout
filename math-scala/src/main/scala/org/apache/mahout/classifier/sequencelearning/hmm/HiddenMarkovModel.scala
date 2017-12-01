@@ -60,7 +60,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
 
       // Induction
       for (indexT <- 1 to observationSequence.length - 1) {
-	for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+        for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
 	  var sumA:Double = 0.0
 	  for (indexM <- 0 to initModel.getNumberOfHiddenStates - 1) {
             sumA += forwardVariables.getQuick(indexM, indexT - 1) * initModel.getTransitionMatrix.getQuick(indexM, indexN) * initModel.getEmissionMatrix.getQuick(indexN, observationSequence(indexT).toInt)
@@ -88,8 +88,8 @@ trait HiddenMarkovModel extends java.io.Serializable {
       }
 
       // Induction
-      for (indexT <- 1 to observationSequence.length - 1) {
-	for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+        for (indexT <- 1 to observationSequence.length - 1) {
 	  var sum:Double = 0.0
 	  for (indexM <- 0 to initModel.getNumberOfHiddenStates - 1) {
 	    sum += forwardVariables.getQuick(indexM, indexT - 1) * initModel.getTransitionMatrix.getQuick(indexM, indexN);
@@ -120,7 +120,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
 
       // induction
       for (indexT <- observationSequence.length - 2 to 0) {
-	for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+        for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
 	  var sum:Double = 0.0
 	  for (indexM <- 0 to initModel.getNumberOfHiddenStates - 1) {
             sum += backwardVariables.getQuick(indexM, indexT + 1) * initModel.getTransitionMatrix.getQuick(indexN, indexM) * initModel.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt) 
@@ -136,8 +136,8 @@ trait HiddenMarkovModel extends java.io.Serializable {
         backwardVariables.setQuick(index, observationSequence.length - 1, 1)
       }
       // Induction
-      for (indexT <- observationSequence.length - 2 to 0) {
-	for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+        for (indexT <- observationSequence.length - 2 to 0) {
 	  var sum:Double = 0.0
 	  for (indexM <- 0 to initModel.getNumberOfHiddenStates - 1) {
 	  	      sum += backwardVariables.getQuick(indexM, indexT + 1) * initModel.getTransitionMatrix.getQuick(indexN, indexM) * initModel.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt)
