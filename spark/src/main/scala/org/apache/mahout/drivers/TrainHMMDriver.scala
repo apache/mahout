@@ -84,7 +84,7 @@ object TrainHMMDriver extends MahoutSparkDriver {
         if (x > 0) success else failure("Option --epsilon must be > 0")
       }
 
-      opt[Int]("maxNumberOfIterations") abbr "no" required() action { (x, options) =>
+      opt[Int]("maxNumberOfIterations") abbr "n" required() action { (x, options) =>
         options + ("maxNumberOfIterations" -> x)
       } text "Maximum Number of Iterations" +
       trainHMMOptions("maxNumberOfIterations") validate { x =>
@@ -176,6 +176,19 @@ object TrainHMMDriver extends MahoutSparkDriver {
     val model = SparkHiddenMarkovModel.train(initModel, trainingSet, numberOfHiddenStates, 
       numberOfObservableSymbols, epsilon, maxNumberOfIterations, scale)
 
+    println("TM:")
+    for (indexN <- 0 to model.getNumberOfHiddenStates - 1) {
+      for (indexM <- 0 to model.getNumberOfHiddenStates - 1) {
+        println(model.getTransitionMatrix.getQuick(indexN, indexM))
+      }
+    }
+
+    println("EM:")
+    for (indexN <- 0 to model.getNumberOfHiddenStates - 1) {
+      for (indexM <- 0 to model.getNumberOfObservableSymbols - 1) {
+        println(model.getEmissionMatrix.getQuick(indexN, indexM))
+      }
+    }
     model.dfsWrite(outputPath)
     
     stop()
