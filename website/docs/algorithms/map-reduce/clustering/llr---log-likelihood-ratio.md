@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  LLR - Log-likelihood Ratio
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/map-reduce/clustering/llr---log-likelihood-ratio/
 ---
 
 # Likelihood ratio test

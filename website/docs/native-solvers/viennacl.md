@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Native Solvers- ViennaCL
-theme:
-    name: mahout2
+permalink: /docs/native-solvers/viennacl/
 ---
+
+# TBD

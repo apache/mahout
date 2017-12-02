@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  Twenty Newsgroups
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/classification/twenty-newsgroups/
 ---
 
 

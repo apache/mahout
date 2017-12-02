@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Multilayer Perceptron
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/mlp/
 ---
 
 Multilayer Perceptron

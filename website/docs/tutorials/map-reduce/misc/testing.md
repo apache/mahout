@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: (Deprecated)  Testing
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/misc/testing/
 ---
 <a name="Testing-Intro"></a>
 # Intro

@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Durbin-Watson Test
-theme:
-    name: mahout2
+permalink: /docs/algorithms/regression/serial-correlation/dw-test/
 ---
 
 ### About

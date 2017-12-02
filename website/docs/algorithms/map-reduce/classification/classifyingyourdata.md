@@ -1,8 +1,7 @@
 ---
-layout: algorithm
-title: (Deprecated)  ClassifyingYourData
-theme:
-    name: retro-mahout
+layout: page
+title: (Deprecated) Classifying Your Data
+permalink: /docs/algorithms/map-reduce/classification/classifyingyourdata/
 ---
 
 # Classifying data from the command line

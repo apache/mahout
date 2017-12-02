@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  Viewing Result
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/map-reduce/clustering/viewing-result/
 ---
 * [Algorithm Viewing pages](#ViewingResult-AlgorithmViewingpages)
 

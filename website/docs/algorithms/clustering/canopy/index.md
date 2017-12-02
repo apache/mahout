@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Canopy Clustering
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/clustering/canopy/
 ---
 
 ### About

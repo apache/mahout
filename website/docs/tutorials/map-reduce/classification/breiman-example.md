@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  Breiman Example
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/classification/breiman-example/
 ---
 
 #Breiman Example

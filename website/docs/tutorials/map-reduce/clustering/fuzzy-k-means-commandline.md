@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  fuzzy-k-means-commandline
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/map-reduce/clustering/fuzzy-k-means-commandline/
 ---
 
 <a name="fuzzy-k-means-commandline-RunningFuzzyk-MeansClusteringfromtheCommandLine"></a>

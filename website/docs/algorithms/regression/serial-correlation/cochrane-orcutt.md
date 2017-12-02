@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Cochrane-Orcutt Procedure
-theme:
-    name: mahout2
+permalink: /docs/algorithms/regression/serial-correlation/cochrane-orcutt/
 ---
 
 ### About

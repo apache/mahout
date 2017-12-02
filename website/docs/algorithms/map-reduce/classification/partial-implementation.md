@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Partial Implementation
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/partial-implementation/
 ---
 
 

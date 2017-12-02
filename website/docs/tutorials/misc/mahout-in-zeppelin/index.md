@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: Visualizing Mahout in Zeppelin
-theme: 
-    name: mahout2
+permalink: /docs/tutorials/misc/mahout-in-zeppelin/
 ---
 
 

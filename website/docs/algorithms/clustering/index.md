@@ -1,6 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Clustering Algorithms
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/clustering/
 ---
+
+## TBD

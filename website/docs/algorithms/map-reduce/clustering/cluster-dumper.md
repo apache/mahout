@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Cluster Dumper
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/map-reduce/clustering/cluster-dumper/
 ---
 
 <a name="ClusterDumper-Introduction"></a>

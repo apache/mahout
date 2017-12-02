@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: (Deprecated)  Perceptron and Winnow
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/misc/perceptron-and-winnow/
 ---
 <a name="PerceptronandWinnow-ClassificationwithPerceptronorWinnow"></a>
 # Classification with Perceptron or Winnow

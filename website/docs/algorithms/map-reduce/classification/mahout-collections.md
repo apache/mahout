@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  mahout-collections
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/mahout-collections/
 ---
 
 # Mahout collections

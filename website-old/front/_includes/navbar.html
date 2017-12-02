@@ -1,0 +1,91 @@
+{% include JB/setup %}
+<div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="nav navbar-nav">
+
+        <!-- Download -->
+        <li><a href="{{ BASE_PATH }}/downloads.html">Download Mahout</a></li>
+
+        <!-- Developers -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Developers<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <!--<li><a href="/developers/key-concepts.html">Key-Concepts</a></li>  needs to be filled out -->
+                <!--<li><a href="/developers/index.html">Developer Resources</a></li>  moved to docs -->
+                <!--<li><a href="/developers/patch-check-list.html">Patch Check List</a></li> going to github template -->
+                <!--<li><a href="/developers/reference.html">References</a></li> a lot of overlap with books, talks, etc. page -->
+                <!--<li><a href="/developers/thirdparty-dependencies.html">Third Party Dependencies</a></li> is our site the reasonable place for this? -->
+                <!--<li><a href="/developers/version-control.html">Version Control</a></li>-->
+                <li class="divider"></li>
+                <li class="nav-header">&nbsp;&nbsp;<b>How Tos</b></li>
+                <li><a href="/developers/how-to-contribute.html">How to Contribute</a></li>
+                <li><a href="/developers/buildingmahout.html">How to Build Mahout</a></li>
+                <li><a href="/developers/githubPRs.html">How to Merge a Github PR</a></li> <!-- gtg, added new info for develop and feature branching -->
+                <li><a href="/developers/how-to-become-a-committer.html">How to Become a Committer</a></li>
+                <li><a href="/developers/how-to-release.html">How to Release</a></li>
+                <li><a href="/developers/how-to-update-the-website.html">How to Update the Website</a></li>
+                <li><a href="/developers/publish-website.html">How to Publish the Website</a></li>
+                <li class="divider"></li>
+                <li class="nav-header">&nbsp;&nbsp;<b>Miscellaneous</b></li>
+                <li><a href="/developers/issue-tracker.html">Issues Tracking (JIRA)</a></li>
+                <li><a href="/developers/release-notes.html">Release Notes</a></li>
+
+            </ul>
+        </li>
+
+        <!-- Docs -->
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Docs <span class="caret"></span></a>    <ul class="dropdown-menu">
+                <li><span><b>&nbsp;&nbsp;Release</b></span></li>
+                <li><a href="/docs/0.13.0">0.13.0</a></li>
+                <li><a href="/tbd">Older Versions</a></li>
+                <li role="separator" class="divider"></li>
+                <li><span><b>&nbsp;&nbsp;Snapshot</b>&nbsp;(development)&nbsp;<span></li>
+                <li><a href="/docs/0.13.1-SNAPSHOT">0.13.1-SNAPSHOT</a></li>
+            </ul>
+        </li>
+
+
+        <!-- Community -->
+        <li id="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Community<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/community/history.html">History of the Apache Mahout Project</a></li>
+                <li><a href="/community/blogs.html">Blog Posts About Mahout</a></li>
+                <li><a href="/community/recent-upcoming-talks.html">Recent and Upcoming Talks</a></li>
+                <!--<li><a href="/community/books-tutorials-and-talks.html">Books Tutorials and Talks</a></li>-->
+                <!--<li><a href="/community/faq.html">FAQ</a></li> needs a lot of updating -->
+                <li><a href="/community/gsoc.html">GSoC</a></li> <!-- Is OK- updated Map/Reduce verbage to reflect Samsara -->
+                <!--<li><a href="/community/mahout-benchmarks.html">Mahout Benchmarks</a></li> These are old, Keep them? -->
+                <!--<li><a href="/community/mahout-wiki.html">Mahout Wiki</a></li> at very least needs links cleanedup - do we still want this even?-->
+                <li><a href="/community/mailing-lists.html">Mailing Lists</a></li> <!-- Clean and pretty -->
+                <!--<li><a href="/community/powered-by-mahout.html">Powered By Mahout</a></li> needs update -->
+                <li><a href="/community/privacy-policy.html">Privacy Policy</a></li>
+                <!--<li><a href="/community/professional-support.html">Professional Support</a></li> update if we even want to keep -->
+                <li><a href="/community/who-we-are.html">Who We Are</a></li> <!-- nikolai needs to add himself -->
+            </ul>
+        </li>
+        <!--<li><a href="/docs/0.13.1-SNAPSHOT/index.html">Overview</a></li> not sure this need to be-->
+
+    </ul>
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="http://github.com/apache/mahout">Github</a></li>
+
+        <!-- Apache -->
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
+                <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
+                <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+                <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+            </ul>
+        </li>
+
+    </ul>
+</div><!-- /.navbar-collapse -->

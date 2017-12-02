@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Hierarchical Clustering
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/map-reduce/clustering/hierarchical-clustering/
 ---
 Hierarchical clustering is the process or finding bigger clusters, and also
 the smaller clusters inside the bigger clusters.

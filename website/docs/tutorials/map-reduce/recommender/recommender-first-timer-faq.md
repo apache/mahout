@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: (Deprecated)  Recommender First-Timer FAQ
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/recommender/recommender-first-timer-faq/
 ---
 
 # Recommender First Timer Dos and Don'ts

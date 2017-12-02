@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  Wikipedia XML parser and Naive Bayes Example
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/classification/wikipedia-classifier-example/
 ---
 # Wikipedia XML parser and Naive Bayes Classifier Example
 

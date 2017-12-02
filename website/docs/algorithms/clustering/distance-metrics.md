@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Distance Metrics
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/clustering/distance-metrics/
 ---
 
 ### Distance Metrics Supported By Mahout

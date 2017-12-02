@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: (Deprecated)  Recommender Documentation
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/recommender/recommender-documentation/
 ---
 
 <a name="RecommenderDocumentation-Overview"></a>

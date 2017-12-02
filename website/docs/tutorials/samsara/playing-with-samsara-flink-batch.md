@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: 
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/samsara/playing-with-samsara-flink-batch/
 ---
 
 ## Getting Started 

@@ -1,9 +1,7 @@
 ---
-layout: algorithm
-
+layout: page
 title: Distributed Stochastic PCA
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/linear-algebra/d-spca/
 ---
 
 

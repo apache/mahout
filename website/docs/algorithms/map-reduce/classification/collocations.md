@@ -1,11 +1,8 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Collocations
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/collocations/
 ---
-
-
 
 <a name="Collocations-CollocationsinMahout"></a>
 # Collocations in Mahout

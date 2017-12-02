@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  20Newsgroups
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/map-reduce/clustering/20newsgroups/
 ---
 
 <a name="20Newsgroups-NaiveBayesusing20NewsgroupsData"></a>

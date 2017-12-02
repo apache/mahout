@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: StandardScaler
-theme:
-    name: mahout2
+permalink: /docs/algorithms/preprocessors/StandardScaler/
 ---
 
 ### About

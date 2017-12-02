@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Support Vector Machines
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/support-vector-machines/
 ---
 
 <a name="SupportVectorMachines-SupportVectorMachines"></a>

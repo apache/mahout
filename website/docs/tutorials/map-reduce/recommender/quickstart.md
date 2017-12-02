@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: (Deprecated)  Recommender Quickstart
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/recommender/quickstart/
 ---
 
 # Recommender Overview

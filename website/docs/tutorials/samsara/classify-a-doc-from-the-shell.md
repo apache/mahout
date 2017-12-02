@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: Text Classification Example
-theme:
-    name: mahout2
+permalink: /docs/tutorials/samsara/classify-a-doc-from-the-shell/
 ---
 
 # Building a text classifier in Mahout's Spark Shell

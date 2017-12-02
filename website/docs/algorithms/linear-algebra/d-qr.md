@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Distributed Cholesky QR
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/linear-algebra/d-qr/
 ---
 
 ## Intro

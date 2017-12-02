@@ -2,8 +2,8 @@
 layout: page
 title: Welcome to the Docs
 tagline: Apache Mahout from 30,000 feet (10,000 meters)
+permalink: /docs/
 ---
-
 
 You've probably already noticed Mahout has a lot of things going on at different levels, and it can be hard to know where
 to start.  Let's provide an overview to help you see how the pieces fit together. In general the stack is something like this:

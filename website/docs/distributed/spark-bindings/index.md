@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: Spark Bindings
-theme:
-    name: retro-mahout
+permalink: /docs/distributed/spark-bindings/
 ---
 
 # Scala & Spark Bindings:

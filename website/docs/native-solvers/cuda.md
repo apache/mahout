@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Native Solvers- CUDA
-theme:
-    name: mahout2
+permalink: /docs/native-solvers/cuda/
 ---
+
+# TBD

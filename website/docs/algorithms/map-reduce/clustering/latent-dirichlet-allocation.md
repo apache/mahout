@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Latent Dirichlet Allocation
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/map-reduce/clustering/latent-dirichlet-allocation/
 ---
 
 <a name="LatentDirichletAllocation-Overview"></a>

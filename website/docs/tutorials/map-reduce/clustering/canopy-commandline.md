@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  canopy-commandline
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/map-reduce/clustering/canopy-commandline/
 ---
 
 <a name="canopy-commandline-RunningCanopyClusteringfromtheCommandLine"></a>

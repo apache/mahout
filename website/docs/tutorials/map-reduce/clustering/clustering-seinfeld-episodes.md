@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  Clustering Seinfeld Episodes
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/map-reduce/clustering/clustering-of-seinfeld-episodes/
 ---
 
 Below is short tutorial on how to cluster Seinfeld episode transcripts with

@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Neural Network
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/neuralnetwork/
 ---
 
 <a name="NeuralNetwork-NeuralNetworks"></a>

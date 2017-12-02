@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Random Forests
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/random-forests/
 ---
 
 <a name="RandomForests-HowtogrowaDecisionTree"></a>

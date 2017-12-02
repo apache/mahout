@@ -1,13 +1,12 @@
 ---
-layout: default
+layout: page
 title: Quickstart
-theme: 
-    name: mahout2
+permalink: /docs/quickstart/
 ---
-# Mahout Quick Start 
+
+# Mahout Quick Start
+
 # TODO : Fill this in with the bare essential basics
-
-
 
 # Mahout MapReduce Overview
 

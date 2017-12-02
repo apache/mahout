@@ -1,0 +1,49 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    // Set this to footer height
+    margin-bottom: $footer-height;
+    @include font-body;
+}
+
+// Typography
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @include font-heading;
+}
+
+.section-heading {
+  font-size: 1rem;
+  border-bottom: 1px solid $gray-200;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.card {
+  border-color: $gray-200;
+  box-shadow: 0 0.2rem 0.5rem $gray-200;
+  .card-header,
+  .card-footer {
+    background-color: $gray-100;
+    border-color: $gray-200;
+  }
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    // Set this to footer height
+    height: $footer-height;
+    line-height: $footer-height;
+}

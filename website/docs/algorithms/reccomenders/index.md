@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Recommender Quickstart
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/reccomenders/
 ---
 
 

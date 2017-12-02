@@ -1,0 +1,19 @@
+.card-post-preview {
+  .card-body {
+    padding: 0;
+    .card-title a {
+      color: $body-color;
+      &:hover {
+        color: $blue;
+        text-decoration: none;
+      }
+    }
+    .card-post-img,
+    .card-post-text {
+      padding: 1.25rem;
+    }
+    .card-post-text {
+      border-left: 1px solid $gray-300;
+    }
+  }
+}

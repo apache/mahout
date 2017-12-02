@@ -1,0 +1,56 @@
+header.mahout-header {
+  height: 700px;
+  position: relative;
+  background: url('https://www.transparenttextures.com/patterns/cubes.png'), -moz-linear-gradient(45deg, $blue 0%, darken($blue, 15%) 100%);
+  background: url('https://www.transparenttextures.com/patterns/cubes.png'), -webkit-linear-gradient(45deg, $blue 0%, darken($blue, 15%) 100%);
+  background: url('https://www.transparenttextures.com/patterns/cubes.png'), linear-gradient(45deg, $blue 0%, darken($blue, 15%) 100%);
+  background-color: $blue;
+  background-repeat: repeat;
+  canvas {
+    position: absolute;
+    z-index: 1;
+  }
+  .mahout-header-lower,
+  .mahout-header-upper {
+    z-index: 2;
+    display: flex;
+    position: absolute;
+    height: 50%;
+    left: 0;
+    width: 100%;
+  }
+  .mahout-header-upper {
+    top: 0;
+    img {
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 800px;
+    }
+  }
+  .mahout-header-lower {
+    bottom: 0;
+    h2 {
+      color: white;
+      font-size: 2rem;
+      max-width: 500px;
+      display: flex;
+      margin-top: 2rem;
+      font-weight: 400;
+    }
+    .btn-download {
+      padding: 1rem 2rem;
+      background-color: $white;
+      border-color: $white;
+      color: darken($blue, 7.5%);
+      box-shadow: 0 0.1rem 0.5rem fade-out($gray-900, 0.8);
+      &:hover {
+        background-color: $gray-100;
+        border-color: $gray-100;
+        color: $body-color;
+      }
+    }
+    .asf-logo {
+      height: 75px;
+    }
+  }
+}

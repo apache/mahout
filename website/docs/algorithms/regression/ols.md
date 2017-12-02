@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Ordinary Least Squares Regression
-theme:
-    name: mahout2
+permalink: /docs/algorithms/regression/ols/
 ---
 
 ### About

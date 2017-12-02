@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Spectral Clustering
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/map-reduce/clustering/streaming-k-means/
 ---
 
 # *StreamingKMeans* algorithm 

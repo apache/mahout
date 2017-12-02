@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: Spark Naive Bayes
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/samsara/spark-naive-bayes/
 ---
 
 # Spark Naive Bayes

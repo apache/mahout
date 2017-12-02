@@ -1,8 +1,7 @@
 ---
-layout: tutorial
-title: (Deprecated) 
-theme:
-    name: retro-mahout
+layout: page
+title: (Deprecated)
+permalink: /docs/tutorials/map-reduce/classification/bankmarketing-example/
 ---
 
 Notice:    Licensed to the Apache Software Foundation (ASF) under one

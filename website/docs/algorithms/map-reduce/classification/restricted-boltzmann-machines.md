@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Restricted Boltzmann Machines
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/restricted-boltzmann-machines/
 ---
 
 NOTE: This implementation is a Work-In-Progress, at least till September,

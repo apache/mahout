@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: (Deprecated)  Perceptron and Winnow
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/recommender/intro-als-hadoop/
 ---
 
 # Introduction to ALS Recommendations with Hadoop

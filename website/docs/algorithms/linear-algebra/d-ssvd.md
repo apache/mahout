@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Distributed Stochastic Singular Value Decomposition
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/linear-algebra/d-ssvd/
 ---
 
 ## Intro

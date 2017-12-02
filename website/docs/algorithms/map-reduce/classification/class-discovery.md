@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Class Discovery
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/class-discovery/
 ---
 <a name="ClassDiscovery-ClassDiscovery"></a>
 # Class Discovery

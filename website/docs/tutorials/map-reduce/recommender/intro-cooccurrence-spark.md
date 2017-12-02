@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: (Deprecated)  Perceptron and Winnow
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/map-reduce/recommender/intro-cooccurrence-spark/
 ---
 
 #Intro to Cooccurrence Recommenders with Spark

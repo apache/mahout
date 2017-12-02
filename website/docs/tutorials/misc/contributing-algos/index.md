@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: Contributing new algorithms
-theme: 
-    name: mahout2
+permalink: /docs/tutorials/misc/contributing-algos/
 ---
 
 The Mahout community is driven by user contribution.  If you have implemented an algorithm and are interested in 

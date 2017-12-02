@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  Deprecated Map Reduce Based Examples
-theme:
-    name: mahout2
+permalink: /docs/tutorials/map-reduce/
 ---
 
 A note about the sunsetting of our support for Map Reduce.

@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Intro to Cooccurrence Recommenders with Spark
-theme:
-    name: retro-mahout
+permalink: /docs/tutorials/intro-cooccurrence-spark/
 ---
 
 # Intro to Cooccurrence Recommenders with Spark

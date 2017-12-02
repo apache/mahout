@@ -1,0 +1,37 @@
+title : Apache Mahout
+description: Distributed Linear Algebra
+
+mahout-version: 0.13.0
+
+author :
+  name : The Apache Software Foundation
+  email : dev@mahout.apache.org
+  github : apache
+  twitter : ApacheMahout
+
+url: http://mahout.apache.org/
+
+# Serving
+detach:   false
+port:     4000
+host:     127.0.0.1
+baseurl:  ""
+
+mahout_version: 0.13.1
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+
+# Exclude from processing.
+# The following items will not be processed, by default. Create a custom list
+# to override the default setting.
+# exclude:
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/

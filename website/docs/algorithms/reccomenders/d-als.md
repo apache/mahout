@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: Mahout Samsara Distributed ALS
-theme:
-    name: mahout2
+permalink: /docs/algorithms/reccomenders/d-als/
 ---
 Seems like someone has jacked up this page? 
 TODO: Find the ALS Page

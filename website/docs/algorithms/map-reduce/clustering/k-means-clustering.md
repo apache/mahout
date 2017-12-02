@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  K-Means Clustering
-theme:
-   name: retro-mahout
+permalink: /docs/algorithms/map-reduce/clustering/k-means-clustering/
 ---
 
 # k-Means clustering - basics

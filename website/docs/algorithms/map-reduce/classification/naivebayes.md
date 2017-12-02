@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  NaiveBayes
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/naivebayes/
 ---
 
 <a name="NaiveBayes-NaiveBayes"></a>

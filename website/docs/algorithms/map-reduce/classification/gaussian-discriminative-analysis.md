@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Gaussian Discriminative Analysis
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/gaussian-discriminative-analysis/
 ---
 
 <a name="GaussianDiscriminativeAnalysis-GaussianDiscriminativeAnalysis"></a>

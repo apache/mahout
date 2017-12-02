@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  ClusteringYourData
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/map-reduce/clustering/clusteringyourdata/
 ---
 
 # Clustering your data

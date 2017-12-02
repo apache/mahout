@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Locally Weighted Linear Regression
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/locally-weighted-linear-regression/
 ---
 
 <a name="LocallyWeightedLinearRegression-LocallyWeightedLinearRegression"></a>

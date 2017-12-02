@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  lda-commandline
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/map-reduce/clustering/lda-commandline/
 ---
 
 <a name="lda-commandline-RunningLatentDirichletAllocation(algorithm)fromtheCommandLine"></a>

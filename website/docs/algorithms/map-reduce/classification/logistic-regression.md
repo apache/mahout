@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Logistic Regression
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/logistic-regression/
 ---
 
 <a name="LogisticRegression-LogisticRegression(SGD)"></a>

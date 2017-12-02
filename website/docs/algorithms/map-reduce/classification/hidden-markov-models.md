@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: (Deprecated)  Hidden Markov Models
-theme:
-    name: retro-mahout
+permalink: /docs/algorithms/map-reduce/classification/hidden-markov-models/
 ---
 
 # Hidden Markov Models

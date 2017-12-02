@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: page
 title: FAQ
-theme:
-    name: retro-mahout
+permalink: /docs/distributed/spark-bindings/faq/
 ---
 
 # FAQ for using Mahout with Spark

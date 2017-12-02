@@ -1,0 +1,8 @@
+@mixin font-heading {
+  font-family: 'Maven Pro', Arial, sans-serif;
+  font-weight: 500;
+}
+
+@mixin font-body {
+  font-family: 'Muli', Arial, sans-serif;
+}

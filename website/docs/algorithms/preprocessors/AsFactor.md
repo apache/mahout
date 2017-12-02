@@ -1,8 +1,7 @@
 ---
-layout: algorithm
+layout: page
 title: AsFactor
-theme:
-    name: mahout2
+permalink: /docs/algorithms/preprocessors/AsFactor/
 ---
 
 

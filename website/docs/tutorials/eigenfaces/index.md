@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: Eigenfaces Demo
-theme:
-   name: mahout3
+permalink: /docs/tutorials/eigenfaces/
 ---
 
 *Credit: [original blog post by rawkintrevo](https://rawkintrevo.org/2016/11/10/deep-magic-volume-3-eigenfaces/). This will be maintained through version changes, blog post will not.*

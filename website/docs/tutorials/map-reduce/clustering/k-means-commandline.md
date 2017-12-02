@@ -1,8 +1,7 @@
 ---
-layout: tutorial
+layout: page
 title: (Deprecated)  k-means-commandline
-theme:
-   name: retro-mahout
+permalink: /docs/tutorials/map-reduce/clustering/k-means-commandline/
 ---
 
 <a name="k-means-commandline-Introduction"></a>
