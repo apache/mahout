@@ -34,7 +34,7 @@
       </unpackOptions>
       <scope>runtime</scope>
       <outputDirectory>/</outputDirectory>
-      <useTransitiveFiltering>true</useTransitiveFiltering>
+      <useProjectArtifact>true</useProjectArtifact>
       <includes>
         <!-- guava only included to get Preconditions in mahout-math and mahout-hdfs -->
         <include>com.google.guava:guava</include>
@@ -42,8 +42,6 @@
         <include>com.tdunning:t-digest</include>
         <include>org.apache.commons:commons-math3</include>
         <include>it.unimi.dsi:fastutil</include>
-        <include>org.apache.mahout:mahout-native-viennacl_${scala.compat.version}</include>
-        <include>org.apache.mahout:mahout-native-viennacl-omp_${scala.compat.version}</include>
         <include>org.bytedeco:javacpp</include>
       </includes>
     </dependencySet>
