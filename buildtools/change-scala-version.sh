@@ -46,10 +46,17 @@ check_scala_version() {
 
 check_scala_version "$TO_VERSION"
 
+SCALA_210_LONG="2.10.6"
+SCALA_211_LONG="2.11.8"
+
 if [ $TO_VERSION = "2.11" ]; then
   FROM_VERSION="2.10"
+  FROM_LONG_VERSION=$SCALA_210_LONG
+  TO_LONG_VERSION=$SCALA_211_LONG
 else
   FROM_VERSION="2.11"
+  FROM_LONG_VERSION=$SCALA_211_LONG
+  TO_LONG_VERSION=$SCALA_210_LONG
 fi
 
 sed_i() {
@@ -59,13 +66,21 @@ sed_i() {
 export -f sed_i
 
 BASEDIR=$(dirname $0)/..
+echo "Changing ArtifactIDs"
+
 find "$BASEDIR" -name 'pom.xml' -not -path '*target*' -print \
   -exec bash -c "sed_i 's/\(artifactId.*\)_'$FROM_VERSION'/\1_'$TO_VERSION'/g' {}" \;
 
-# Also update <scala.binary.version> in parent POM
+# Also update <scala.version> and <scala.compat.version> in parent POM
 # Match any scala binary version to ensure idempotency
+
+## Parent POM
 sed_i '1,/<scala\.compat\.version>[0-9]*\.[0-9]*</s/<scala\.compat\.version>[0-9]*\.[0-9]*</<scala.compat.version>'$TO_VERSION'</' \
   "$BASEDIR/pom.xml"
+
+sed_i '1,/<scala\.version>[0-9]*\.[0-9]*\.[0-9]*</s/<scala\.version>[0-9]*\.[0-9]*\.[0-9]*</<scala.version>'$TO_LONG_VERSION'</' \
+  "$BASEDIR/pom.xml"
+
 
 #
 # Mahout doesn't need this until we get our website acting right.

@@ -253,21 +253,21 @@
           </dependency>
           <dependency>
             <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+            <artifactId>mahout-spark_2.10</artifactId>
             <classifier>spark_${spark.compat.version}</classifier>
             <version>${project.version}</version>
           </dependency>
           <dependency>
             <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+            <artifactId>mahout-math-scala_2.10</artifactId>
           </dependency>
           <dependency>
             <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+            <artifactId>mahout-native-viennacl_2.10</artifactId>
           </dependency>
           <dependency>
             <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+            <artifactId>mahout-native-viennacl-omp_2.10</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>
@@ -326,17 +326,17 @@
         </dependency>
         <dependency>
           <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+          <artifactId>mahout-spark_2.10</artifactId>
           <classifier>spark_${spark.compat.version}</classifier>
           <version>${project.version}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+          <artifactId>mahout-math-scala_2.10</artifactId>
         </dependency>
         <dependency>
           <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+          <artifactId>mahout-native-viennacl-omp_2.10</artifactId>
           <version>${project.version}</version>
         </dependency>
       </dependencies>
@@ -395,13 +395,13 @@
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+      <artifactId>mahout-spark_2.10</artifactId>
       <classifier>spark_${spark.compat.version}</classifier>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+      <artifactId>mahout-math-scala_2.10</artifactId>
     </dependency>
   </dependencies>
 </project>
