@@ -1,11 +1,11 @@
 ---
 layout: page
-title: How to Contribute
-permalink: /developers/how-to-contribute/
+title: How To Contribute
+theme:
+    name: retro-mahout
 ---
 
-
-# How to Contribute
+# How to contribute
 
 *Contributing to an Apache project* is about more than just writing code --
 it's about doing what you can to make the project better.  There are lots

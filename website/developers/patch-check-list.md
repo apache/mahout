@@ -1,9 +1,9 @@
 ---
 layout: page
 title: Patch Check List
-permalink: /developers/partch-check-list/
+theme:
+    name: retro-mahout
 ---
-
 
 # Patch Check List
 

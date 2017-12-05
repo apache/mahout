@@ -1,7 +1,8 @@
 ---
 layout: page
-title: Third Party Dependencies
-permalink: /developers/version-control/
+title: Version Control
+theme:
+    name: retro-mahout
 ---
 
 # Version control access

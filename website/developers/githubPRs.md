@@ -1,22 +1,21 @@
 ---
 layout: page
-title: Github PRs
-permalink: /developers/githubPRs/
+title:
+theme:
+    name: retro-mahout
 ---
-
-
 # Handling Github PRs #
 
 ----------
 
 
-## How to Create a PR (for contributers)
+## how to create a PR (for contributers)
 
 Read [[1]]. 
 
 Pull requests are made to apache/mahout repository on Github. 
 
-## Merging a PR and Closing it (for committers). 
+## merging a PR and closing it (for committers). 
 
 Remember that pull requests are equivalent to a remote branch with potentially a multitude of commits. 
 In this case it is recommended to squash remote commit history to have one commit per issue, rather 
@@ -42,6 +41,8 @@ fast forward is possible, so you get chance to change things before committing.
 
 At this point resolve conflicts, if any, or ask contributor to rebase on top of master, if PR went out of sync.
 
+Also run regular patch checks and change CHANGELOG.
+
 Suppose everything is fine, you now can commit the squashed request 
 
     git commit -a
@@ -52,10 +53,6 @@ Including "closes #ZZ" will close PR automatically. More information [[3]].
    push apache master
 
 (this will require credentials).
-
-Note on `master` branch: Minor patches, bug fixes, complete features, etc. may be merged to `master`.  Features that 
-are still under development should be pushed to a feature branch with reasonable name or better yet `mahout-xxxx` where 
-`xxxx` is the JIRA number. 
 
 Note on squashing: Since squash discards remote branch history, repeated PRs from the same remote branch are 
 difficult for merging. The workflow implies that every new PR starts with a new rebased branch. This is more 

@@ -1,10 +1,11 @@
 ---
 layout: page
-title: How to Become a Commmiter
-permalink: /developers/how-to-become-a-committer/
+title: How To Become A Committer
+theme:
+    name: retro-mahout
 ---
 
-# How to Become a Committer
+# How to become a committer
 
 While there's no exact criteria for becoming a committer, there is a fairly
 obvious path to becoming a committer.
