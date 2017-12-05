@@ -151,17 +151,33 @@ trait HiddenMarkovModel extends java.io.Serializable {
     backwardVariables
   }
 
+  def computeXiVariable(model: HMMModel, observationSequence:Vector, forwardVariables: DenseMatrix,
+    backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexM: Int, indexT:Int): Double = {
+    forwardVariables.getQuick(indexN, indexT) * model.getTransitionMatrix.getQuick(indexN, indexM) * model.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt) * backwardVariables.getQuick(indexM, indexT + 1)/likelihood
+    0
+  }
+
+  def computeGammaVariable(forwardVariables: DenseMatrix,
+    backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexT: Int): Double = {
+    forwardVariables.getQuick(indexN, indexT) * backwardVariables.getQuick(indexN, indexT)/likelihood
+  }
+
   def sequenceLikelihood(forwardVariables: DenseMatrix,
     scalingFactors: Option[Array[Double]]
   ): Double = {
     var likelihood: Double = 0.0
 
-    if (forwardVariables == None) {
+    if (scalingFactors == None) {
       for (indexN <- 0 to forwardVariables.rowSize() - 1) {
         likelihood += forwardVariables.getQuick(indexN, forwardVariables.columnSize() - 1)
       }
     } else {
+      var product: Double = 1.0
+      for (indexT <- 0 to scalingFactors.get.length - 1) {
+        product = product * scalingFactors.get(indexT)
+      }
 
+      likelihood = 1.0 / product
     }
 
     likelihood
@@ -202,14 +218,16 @@ trait HiddenMarkovModel extends java.io.Serializable {
             var numerator:Double = 0.0
             var denominator:Double = 0.0            
             for (indexT <- 0 to observation.length - 2) {
-              numerator += forwardVariables.getQuick(indexN, indexT) * curModel.getTransitionMatrix.getQuick(indexN, indexM) * curModel.getEmissionMatrix.getQuick(indexM, observation(indexT + 1).toInt) * backwardVariables.getQuick(indexM, indexT + 1)
+              numerator += computeXiVariable(curModel, observation, forwardVariables, backwardVariables, obsLikelihood, indexN, indexM, indexT)
 
-              denominator += forwardVariables.getQuick(indexN, indexT) * backwardVariables.getQuick(indexN, indexT)
+              denominator += computeGammaVariable(forwardVariables, backwardVariables, obsLikelihood, indexN, indexT)
             }
 
             transitionMatrix.setQuick(indexN, indexM, numerator/denominator)
           }
         }
+        println("===")
+        println(transitionMatrix)
 
         // recompute emissionmatrix
         for (indexN <- 0 to curModel.getNumberOfHiddenStates - 1) {
@@ -224,11 +242,15 @@ trait HiddenMarkovModel extends java.io.Serializable {
 
               denominator += forwardVariables.getQuick(indexN, indexT) * backwardVariables.getQuick(indexN, indexT)
             }
-
+            println(numerator)
+            println(denominator)
+            println(indexN)
+            println(indexM)            
             emissionMatrix.setQuick(indexN, indexM, numerator/denominator)
           }
         }
-
+        println("===")
+        println(emissionMatrix)
         curModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
       }
     }
