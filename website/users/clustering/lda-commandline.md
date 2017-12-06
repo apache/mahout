@@ -1,8 +1,8 @@
 ---
 layout: default
 title: lda-commandline
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="lda-commandline-RunningLatentDirichletAllocation(algorithm)fromtheCommandLine"></a>

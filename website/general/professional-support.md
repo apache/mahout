@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Professional Support
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="ProfessionalSupport-ProfessionalsupportforMahout"></a>

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Distributed Cholesky QR
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Distributed Cholesky QR

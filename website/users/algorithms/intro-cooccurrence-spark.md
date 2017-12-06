@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Intro to Cooccurrence Recommenders with Spark
-theme:
-    name: retro-mahout
+
+    
 ---
 
 #Intro to Cooccurrence Recommenders with Spark

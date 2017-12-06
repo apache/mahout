@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Spectral Clustering
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Spectral Clustering Overview

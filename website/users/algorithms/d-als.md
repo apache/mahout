@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Disitrubted ALS
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

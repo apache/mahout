@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Locally Weighted Linear Regression
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="LocallyWeightedLinearRegression-LocallyWeightedLinearRegression"></a>

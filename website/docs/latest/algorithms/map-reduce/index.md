@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Deprecated Map Reduce Algorithms
-theme:
-    name: mahout2
+
+    
 ---
 
 ### Classification

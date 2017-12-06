@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Viewing Result
-theme:
-   name: retro-mahout
+
+   
 ---
 * [Algorithm Viewing pages](#ViewingResult-AlgorithmViewingpages)
 

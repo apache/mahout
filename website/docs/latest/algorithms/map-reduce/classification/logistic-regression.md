@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Logistic Regression
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="LogisticRegression-LogisticRegression(SGD)"></a>

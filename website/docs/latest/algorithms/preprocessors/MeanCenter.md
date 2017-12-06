@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: MeanCenter
-theme:
-    name: mahout2
+
+    
 ---
 
 ### About

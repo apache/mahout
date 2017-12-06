@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Contributing new algorithms
-theme: 
-    name: mahout2
+
+    
 ---
 
 The Mahout community is driven by user contribution.  If you have implemented an algorithm and are interested in 
@@ -305,8 +305,8 @@ In that file create a blank Jekyll template:
     ---
     layout: doc-page
     title: Foo
-    theme:
-        name: mahout2
+    
+        
     ---
     
     ### About

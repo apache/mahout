@@ -1,8 +1,8 @@
 ---
 layout: default
 title: 
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # How to create and App using Mahout

@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Patch Check List
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Patch Check List

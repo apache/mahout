@@ -1,8 +1,8 @@
 ---
 layout: default
 title: 
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Mahout-Samsara's Distributed Linear Algebra DSL Reference

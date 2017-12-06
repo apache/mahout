@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Distance Metrics
-theme:
-   name: retro-mahout
+
+   
 ---
 
 ### Distance Metrics Supported By Mahout

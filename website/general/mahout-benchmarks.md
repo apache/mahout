@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Mahout Benchmarks
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="MahoutBenchmarks-Introduction"></a>

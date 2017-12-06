@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Recommender Quickstart
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Recommender Overview

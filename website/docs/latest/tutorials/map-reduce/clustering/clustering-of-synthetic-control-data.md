@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Clustering of synthetic control data
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Clustering synthetic control data

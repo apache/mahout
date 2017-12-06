@@ -1,8 +1,8 @@
 ---
 layout: default
 title: k-means-commandline
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="k-means-commandline-Introduction"></a>

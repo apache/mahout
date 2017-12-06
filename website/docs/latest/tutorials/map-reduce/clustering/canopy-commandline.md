@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  canopy-commandline
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="canopy-commandline-RunningCanopyClusteringfromtheCommandLine"></a>

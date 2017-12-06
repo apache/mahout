@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Wikipedia XML parser and Naive Bayes Example
-theme:
-    name: retro-mahout
+
+    
 ---
 # Wikipedia XML parser and Naive Bayes Classifier Example
 

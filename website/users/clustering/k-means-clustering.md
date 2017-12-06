@@ -1,8 +1,8 @@
 ---
 layout: default
 title: K-Means Clustering
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # k-Means clustering - basics

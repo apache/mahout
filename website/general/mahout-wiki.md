@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Mahout Wiki
-theme:
-    name: retro-mahout
+
+    
 ---
 Apache Mahout is a new Apache TLP project to create scalable, machine
 learning algorithms under the Apache license. 

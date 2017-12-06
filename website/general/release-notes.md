@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Release Notes
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Release Notes

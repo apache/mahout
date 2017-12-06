@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Distributed Cholesky QR
-theme:
-    name: retro-mahout
+
+    
 ---
 
 ## Intro

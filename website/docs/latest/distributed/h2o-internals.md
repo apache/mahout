@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara H20 Bindings
-theme:
-    name: mahout2
+
+    
 ---
 # Introduction
  

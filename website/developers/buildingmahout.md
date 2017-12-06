@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Building Mahout
-theme: 
-    name: mahout2
+
+    
 ---
 
 
@@ -13,7 +13,7 @@ theme:
 * Java JDK 1.7
 * Apache Maven 3.3.9
 
-
+<a name="getting-code"></a>
 ## Getting the source code
 
 Checkout the sources from the [Mahout GitHub repository](https://github.com/apache/mahout)
@@ -119,22 +119,17 @@ mvn clean install -DskipTests
 
 JVM with native OpenMP level 2 and level 3 matrix/vector Multiplication
 ```
-mvn clean install -Pviennacl-omp -Phadoop2 -DskipTests
+mvn clean install -Pviennacl-omp -DskipTests
 ```
 JVM with native OpenMP and OpenCL for Level 2 and level 3 matrix/vector Multiplication.  (GPU errors fall back to OpenMP, currently only a single GPU/node is supported).
 ```
-mvn clean install -Pviennacl -Phadoop2 -DskipTests
+mvn clean install -Pviennacl -DskipTests
 ```
 
 ### Changing Scala Version
 
-To change the Scala version used it is possible to use profiles, however the resulting artifacts seem to have trouble being resolved with SBT.
 
-```bash
-mvn clean install -Pscala-2.11
-```
-
-Maven is able to resolve the resulting artifacts effectively, this will also work if the goal is simply to use the Mahout-Shell. However if the goal is to build with SBT, the following tool should be used
+A convenience script for updating maven dependencies is included in `buildtools`
 
 ```bash
 cd $MAHOUT_HOME/buildtools
@@ -144,10 +139,8 @@ cd $MAHOUT_HOME/buildtools
 Now go back to `$MAHOUT_HOME` and execute
 
 ```bash
-mvn clean install -Pscala-2.11
+mvn clean install 
 ```
-
-**NOTE:** you still need to pass the `-Pscala-2.11` profile, as this determines and propegates the minor scala version (e.g. 2.11.8)
 
 
 ### The Distribution Profile

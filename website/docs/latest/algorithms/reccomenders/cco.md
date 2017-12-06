@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Intro to Cooccurrence Recommenders with Spark
-theme:
-    name: retro-mahout
+
+    
 ---
 
 Mahout provides several important building blocks for creating recommendations using Spark. *spark-itemsimilarity* can 

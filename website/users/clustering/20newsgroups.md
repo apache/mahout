@@ -1,8 +1,8 @@
 ---
 layout: default
 title: 20Newsgroups
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="20Newsgroups-NaiveBayesusing20NewsgroupsData"></a>

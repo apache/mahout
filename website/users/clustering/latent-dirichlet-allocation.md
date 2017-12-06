@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Latent Dirichlet Allocation
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="LatentDirichletAllocation-Overview"></a>

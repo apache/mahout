@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara In Core
-theme:
-    name: mahout2
+
+    
 ---
 # How to create and App using Mahout
 

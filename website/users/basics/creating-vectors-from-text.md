@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Creating Vectors from Text
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

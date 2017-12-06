@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Visualizing Mahout in Zeppelin
-theme: 
-    name: mahout2
+
+    
 ---
 
 

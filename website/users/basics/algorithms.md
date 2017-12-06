@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Algorithms
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Durbin-Watson Test
-theme:
-    name: mahout2
+
+    
 ---
 
 ### About

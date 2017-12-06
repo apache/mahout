@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Who We Are
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="WhoWeAre-Whoweare"></a>

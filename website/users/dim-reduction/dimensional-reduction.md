@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Dimensional Reduction
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Support for dimensional reduction

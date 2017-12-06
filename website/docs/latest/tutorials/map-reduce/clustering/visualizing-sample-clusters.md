@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Visualizing Sample Clusters
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="VisualizingSampleClusters-Introduction"></a>

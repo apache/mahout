@@ -1,8 +1,8 @@
 ---
 layout: default
 title: ClusteringYourData
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Clustering your data

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  fuzzy-k-means-commandline
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="fuzzy-k-means-commandline-RunningFuzzyk-MeansClusteringfromtheCommandLine"></a>

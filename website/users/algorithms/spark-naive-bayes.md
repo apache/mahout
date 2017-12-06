@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Spark Naive Bayes
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Spark Naive Bayes

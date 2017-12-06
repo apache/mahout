@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Independent Component Analysis
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="IndependentComponentAnalysis-IndependentComponentAnalysis"></a>

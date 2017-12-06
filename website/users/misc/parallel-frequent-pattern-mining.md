@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Parallel Frequent Pattern Mining
-theme:
-    name: retro-mahout
+
+    
 ---
 Mahout has a Top K Parallel FPGrowth Implementation. Its based on the paper [http://infolab.stanford.edu/~echang/recsys08-69.pdf](http://infolab.stanford.edu/~echang/recsys08-69.pdf)
  with some optimisations in mining the data.

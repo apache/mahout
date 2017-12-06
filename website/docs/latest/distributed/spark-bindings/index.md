@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Spark Bindings
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Scala & Spark Bindings:

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Recommender Quickstart
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

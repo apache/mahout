@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Using Mahout with Python via JPype
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="UsingMahoutwithPythonviaJPype-overview"></a>

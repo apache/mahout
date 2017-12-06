@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Viewing Result
-theme:
-   name: retro-mahout
+
+   
 ---
 * [Algorithm Viewing pages](#ViewingResult-AlgorithmViewingpages)
 

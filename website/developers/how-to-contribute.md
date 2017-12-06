@@ -1,8 +1,8 @@
 ---
 layout: page
 title: How To Contribute
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # How to contribute

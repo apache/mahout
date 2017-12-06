@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: StandardScaler
-theme:
-    name: mahout2
+
+    
 ---
 
 ### About

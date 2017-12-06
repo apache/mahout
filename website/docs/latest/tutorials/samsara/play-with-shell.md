@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara In Core
-theme:
-    name: mahout2
+
+    
 ---
 # Playing with Mahout's Spark Shell 
 

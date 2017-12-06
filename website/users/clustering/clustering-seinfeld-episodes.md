@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Clustering Seinfeld Episodes
-theme:
-   name: retro-mahout
+
+   
 ---
 
 Below is short tutorial on how to cluster Seinfeld episode transcripts with

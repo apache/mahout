@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Support Vector Machines
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="SupportVectorMachines-SupportVectorMachines"></a>

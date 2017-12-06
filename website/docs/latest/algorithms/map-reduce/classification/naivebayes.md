@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  NaiveBayes
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="NaiveBayes-NaiveBayes"></a>

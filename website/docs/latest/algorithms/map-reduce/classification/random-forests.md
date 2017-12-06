@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Random Forests
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="RandomForests-HowtogrowaDecisionTree"></a>

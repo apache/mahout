@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Creating Vectors
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Visualizing Sample Clusters
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="VisualizingSampleClusters-Introduction"></a>

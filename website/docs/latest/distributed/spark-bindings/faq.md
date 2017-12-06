@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: FAQ
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # FAQ for using Mahout with Spark

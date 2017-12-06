@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Recommender Documentation
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="RecommenderDocumentation-Overview"></a>

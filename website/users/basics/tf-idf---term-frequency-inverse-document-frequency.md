@@ -1,8 +1,8 @@
 ---
 layout: default
 title: TF-IDF - Term Frequency-Inverse Document Frequency
-theme:
-    name: retro-mahout
+
+    
 ---
 
 {excerpt}Is a weight measure often used in information retrieval and text

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  ClassifyingYourData
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Classifying data from the command line

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Cluster Dumper
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="ClusterDumper-Introduction"></a>

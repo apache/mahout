@@ -1,8 +1,8 @@
 ---
 layout: default
 title: 
-theme:
-   name: retro-mahout
+
+   
 ---
 
 ## Mahout-Samsara's In-Core Linear Algebra DSL Reference

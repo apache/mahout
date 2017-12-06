@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Support Vector Machines
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="SupportVectorMachines-SupportVectorMachines"></a>

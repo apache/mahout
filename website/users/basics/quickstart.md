@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Quickstart
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Mahout MapReduce Overview

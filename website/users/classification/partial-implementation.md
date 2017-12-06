@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Partial Implementation
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

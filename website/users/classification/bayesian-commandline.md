@@ -1,8 +1,8 @@
 ---
 layout: default
 title: bayesian-commandline
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Naive Bayes commandline documentation

@@ -1,8 +1,8 @@
 ---
 layout: default
 title:     Stochastic SVD
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Stochastic Singular Value Decomposition #

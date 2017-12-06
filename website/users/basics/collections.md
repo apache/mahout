@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Collections
-theme:
-    name: retro-mahout
+
+    
 ---
 
 TODO: Organize these somehow, add one-line blurbs

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Canopy Clustering
-theme:
-   name: retro-mahout
+
+   
 ---
 
 ### About

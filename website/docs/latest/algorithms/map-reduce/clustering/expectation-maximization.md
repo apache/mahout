@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Expectation Maximization
-theme:
-   name: retro-mahout
+
+   
 ---
 <a name="ExpectationMaximization-ExpectationMaximization"></a>
 # Expectation Maximization

@@ -1,8 +1,8 @@
 ---
 layout: default
 title:
-theme:
-    name: retro-mahout
+
+    
 ---
 
 Notice:    Licensed to the Apache Software Foundation (ASF) under one

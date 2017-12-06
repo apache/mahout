@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Fuzzy K-Means
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Fuzzy K-Means

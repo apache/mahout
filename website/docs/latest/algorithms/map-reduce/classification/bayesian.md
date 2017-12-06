@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated) 
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Naive Bayes

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Cluster Dumper
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="ClusterDumper-Introduction"></a>

@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Developer Resources
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="DeveloperResources-MakingaContribution"></a>

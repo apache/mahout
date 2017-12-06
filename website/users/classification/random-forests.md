@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Random Forests
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="RandomForests-HowtogrowaDecisionTree"></a>

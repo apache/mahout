@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Twenty Newsgroups
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara Flink Bindings
-theme:
-    name: mahout2
+
+    
 ---
 # Introduction
 

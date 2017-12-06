@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Cochrane-Orcutt Procedure
-theme:
-    name: mahout2
+
+    
 ---
 
 ### About

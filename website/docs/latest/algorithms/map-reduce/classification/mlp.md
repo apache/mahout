@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Multilayer Perceptron
-theme:
-    name: retro-mahout
+
+    
 ---
 
 Multilayer Perceptron

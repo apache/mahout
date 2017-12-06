@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Perceptron and Winnow
-theme:
-    name: retro-mahout
+
+    
 ---
 
 #Intro to Cooccurrence Recommenders with Spark

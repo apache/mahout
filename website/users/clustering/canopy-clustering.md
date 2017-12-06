@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Canopy Clustering
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="CanopyClustering-CanopyClustering"></a>

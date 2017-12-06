@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara
-theme:
-    name: mahout2
+
+    
 ---
 # FAQ for using Mahout with Spark
 

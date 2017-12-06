@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Clustering of synthetic control data
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Clustering synthetic control data

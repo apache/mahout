@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Preprocesors
-theme:
-    name: mahout2
+
+    
 ---
 
 [AsFactor](AsFactor.html) - For "one-hot-encoding"

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  k-means-commandline
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="k-means-commandline-Introduction"></a>

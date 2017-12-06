@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: 
-theme:
-   name: retro-mahout
+
+   
 ---
 
 ## Getting Started 

@@ -14,7 +14,7 @@ P.S. If there is a standard (popular) changelog format, please let me know.
     - Small typo fixes.
 
     - **Bug Fixes**
-    - @xuhdev fixes theme:install bug which does not overwrite theme even if saying 'yes'.
+    - @xuhdev fixes install bug which does not overwrite theme even if saying 'yes'.
 
 - **0.2.13 : 2012.03.24**   
     - **Features**

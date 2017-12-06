@@ -1,8 +1,8 @@
 ---
 layout: default
 title: User Based Recommender in 5 Minutes
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Creating a User-Based Recommender in 5 minutes

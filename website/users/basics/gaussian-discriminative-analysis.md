@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Gaussian Discriminative Analysis
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="GaussianDiscriminativeAnalysis-GaussianDiscriminativeAnalysis"></a>

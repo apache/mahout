@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Twenty Newsgroups
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

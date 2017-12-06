@@ -1,8 +1,8 @@
 ---
 layout: page
 title: How To Become A Committer
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # How to become a committer

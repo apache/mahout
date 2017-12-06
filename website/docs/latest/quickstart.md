@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Quickstart
-theme: 
-    name: mahout2
+
+    
 ---
 # Mahout Quick Start 
 # TODO : Fill this in with the bare essential basics

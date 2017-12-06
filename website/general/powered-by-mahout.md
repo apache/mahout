@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Powered By Mahout
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Powered by Mahout

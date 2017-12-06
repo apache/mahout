@@ -1,8 +1,8 @@
 ---
 layout: default
 title: SVD - Singular Value Decomposition
-theme:
-    name: retro-mahout
+
+    
 ---
 
 {excerpt}Singular Value Decomposition is a form of product decomposition of

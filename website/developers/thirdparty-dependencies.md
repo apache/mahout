@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Thirdparty Dependencies
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Adding Thirdparty Dependencies in Maven

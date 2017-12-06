@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Class Discovery
-theme:
-    name: retro-mahout
+
+    
 ---
 <a name="ClassDiscovery-ClassDiscovery"></a>
 # Class Discovery

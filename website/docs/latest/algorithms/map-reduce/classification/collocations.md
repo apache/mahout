@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Collocations
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

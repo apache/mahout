@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Hidden Markov Models
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Hidden Markov Models

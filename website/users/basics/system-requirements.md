@@ -1,8 +1,8 @@
 ---
 layout: default
 title: System Requirements
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

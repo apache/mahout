@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  ClusteringYourData
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Clustering your data

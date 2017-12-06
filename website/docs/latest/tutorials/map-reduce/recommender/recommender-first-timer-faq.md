@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Recommender First-Timer FAQ
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Recommender First Timer Dos and Don'ts

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: CCOs with Last.fm
-theme:
-    name: mahout2
+
+    
 ---
 
 Most reccomender examples utilize the MovieLense dataset, but that relies only on ratings (which makes the recommender being demonstrated look less trivial).  Right next to the MovieLense dataset is the LastFM data set.  The LastFM dataset has ratings by user, friends of the user, bands listened to by user, and tags by user.  This is the kind of exciting data set we’d like to work with!

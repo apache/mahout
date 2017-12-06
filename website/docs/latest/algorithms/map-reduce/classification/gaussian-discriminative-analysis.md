@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Gaussian Discriminative Analysis
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="GaussianDiscriminativeAnalysis-GaussianDiscriminativeAnalysis"></a>

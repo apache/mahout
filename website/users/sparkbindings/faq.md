@@ -1,8 +1,8 @@
 ---
 layout: default
 title: FAQ
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # FAQ for using Mahout with Spark

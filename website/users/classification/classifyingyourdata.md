@@ -1,8 +1,8 @@
 ---
 layout: default
 title: ClassifyingYourData
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Classifying data from the command line

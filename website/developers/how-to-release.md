@@ -1,8 +1,8 @@
 ---
 layout: page
 title: How To Release
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # How To Release Mahout

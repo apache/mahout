@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Expectation Maximization
-theme:
-   name: retro-mahout
+
+   
 ---
 <a name="ExpectationMaximization-ExpectationMaximization"></a>
 # Expectation Maximization

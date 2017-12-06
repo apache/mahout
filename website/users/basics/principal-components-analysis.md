@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Principal Components Analysis
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="PrincipalComponentsAnalysis-PrincipalComponentsAnalysis"></a>

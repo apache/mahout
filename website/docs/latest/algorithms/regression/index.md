@@ -2,8 +2,8 @@
 layout: doc-page
 
 title: Regressoin Algorithms
-theme:
-    name: retro-mahout
+
+    
 ---
 
 Apache Mahout implements the following regression algorithms "off the shelf".

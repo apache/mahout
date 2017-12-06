@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Multilayer Perceptron
-theme:
-    name: retro-mahout
+
+    
 ---
 
 Multilayer Perceptron

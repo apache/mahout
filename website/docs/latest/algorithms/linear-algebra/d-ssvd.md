@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Distributed Stochastic Singular Value Decomposition
-theme:
-    name: retro-mahout
+
+    
 ---
 
 ## Intro

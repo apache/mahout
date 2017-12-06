@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Reference Reading
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Reference Reading

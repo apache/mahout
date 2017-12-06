@@ -1,8 +1,8 @@
 ---
 layout: default
 title: LLR - Log-likelihood Ratio
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Likelihood ratio test

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Spectral Clustering
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Spectral Clustering Overview

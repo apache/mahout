@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Perceptron and Winnow
-theme:
-    name: retro-mahout
+
+    
 ---
 # Playing with Mahout's Spark Shell
 

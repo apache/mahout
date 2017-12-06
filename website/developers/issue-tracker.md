@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Issue Tracker
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Issue tracker

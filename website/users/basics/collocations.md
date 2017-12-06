@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Collocations
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Viewing Results
-theme:
-   name: retro-mahout
+
+   
 ---
 <a name="ViewingResults-Intro"></a>
 # Intro

@@ -1,8 +1,8 @@
 ---
 layout: page
 title: GSOC
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Google Summer of Code

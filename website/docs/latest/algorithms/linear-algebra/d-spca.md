@@ -2,8 +2,8 @@
 layout: doc-page
 
 title: Distributed Stochastic PCA
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

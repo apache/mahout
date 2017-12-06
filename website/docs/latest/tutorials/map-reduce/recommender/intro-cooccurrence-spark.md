@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Perceptron and Winnow
-theme:
-    name: retro-mahout
+
+    
 ---
 
 #Intro to Cooccurrence Recommenders with Spark

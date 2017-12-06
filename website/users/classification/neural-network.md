@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Neural Network
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="NeuralNetwork-NeuralNetworks"></a>

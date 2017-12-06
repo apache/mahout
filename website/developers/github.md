@@ -1,8 +1,8 @@
 ---
 layout: page
 title:
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Github Setup and Pull Requests (PRs) #

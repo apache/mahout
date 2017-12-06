@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Distributed Stochastic PCA
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Distributed Stochastic PCA

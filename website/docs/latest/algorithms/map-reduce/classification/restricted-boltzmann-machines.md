@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Restricted Boltzmann Machines
-theme:
-    name: retro-mahout
+
+    
 ---
 
 NOTE: This implementation is a Work-In-Progress, at least till September,

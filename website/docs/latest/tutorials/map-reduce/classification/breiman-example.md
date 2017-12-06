@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Breiman Example
-theme:
-    name: retro-mahout
+
+    
 ---
 
 #Breiman Example

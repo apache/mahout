@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Downloads
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="Downloads-OfficialRelease"></a>

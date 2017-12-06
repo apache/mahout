@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara Distributed ALS
-theme:
-    name: mahout2
+
+    
 ---
 Seems like someone has jacked up this page? 
 TODO: Find the ALS Page

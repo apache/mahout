@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Ordinary Least Squares Regression
-theme:
-    name: mahout2
+
+    
 ---
 
 ### About

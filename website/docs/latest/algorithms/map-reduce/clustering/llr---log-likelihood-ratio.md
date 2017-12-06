@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  LLR - Log-likelihood Ratio
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # Likelihood ratio test

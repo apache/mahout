@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Class Discovery
-theme:
-    name: retro-mahout
+
+    
 ---
 <a name="ClassDiscovery-ClassDiscovery"></a>
 # Class Discovery

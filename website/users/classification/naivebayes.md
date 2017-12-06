@@ -1,8 +1,8 @@
 ---
 layout: default
 title: NaiveBayes
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="NaiveBayes-NaiveBayes"></a>

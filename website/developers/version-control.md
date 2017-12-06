@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Version Control
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Version control access

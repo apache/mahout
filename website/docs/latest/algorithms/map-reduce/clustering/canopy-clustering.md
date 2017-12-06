@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Canopy Clustering
-theme:
-   name: retro-mahout
+
+   
 ---
 
 

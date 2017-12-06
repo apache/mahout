@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Privacy Policy
-theme:
-    name: retro-mahout
+
+    
 ---
 Information about your use of this website is collected using server access
 logs and a tracking cookie. The collected information consists of the

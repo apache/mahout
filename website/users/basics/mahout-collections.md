@@ -1,8 +1,8 @@
 ---
 layout: default
 title: mahout-collections
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Mahout collections

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  MR - Map Reduce
-theme:
-   name: retro-mahout
+
+   
 ---
 
 {excerpt}MapReduce is a framework for processing huge datasets on certain

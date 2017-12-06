@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: Text Classification Example
-theme:
-    name: mahout2
+
+    
 ---
 
 # Building a text classifier in Mahout's Spark Shell

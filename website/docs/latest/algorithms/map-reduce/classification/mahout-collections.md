@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  mahout-collections
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Mahout collections

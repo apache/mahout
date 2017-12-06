@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Matrix and Vector Needs
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="MatrixandVectorNeeds-Intro"></a>

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: AsFactor
-theme:
-    name: mahout2
+
+    
 ---
 
 

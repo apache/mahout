@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Testing
-theme:
-    name: retro-mahout
+
+    
 ---
 <a name="Testing-Intro"></a>
 # Intro

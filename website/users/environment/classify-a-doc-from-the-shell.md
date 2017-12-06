@@ -1,8 +1,8 @@
 ---
 layout: default
 title: 
-theme:
-   name: retro-mahout
+
+   
 ---
 
 #Building a text classifier in Mahout's Spark Shell

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Perceptron and Winnow
-theme:
-    name: retro-mahout
+
+    
 ---
 <a name="PerceptronandWinnow-ClassificationwithPerceptronorWinnow"></a>
 # Classification with Perceptron or Winnow

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Partial Implementation
-theme:
-    name: retro-mahout
+
+    
 ---
 
 

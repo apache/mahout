@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Breiman Example
-theme:
-    name: retro-mahout
+
+    
 ---
 
 #Breiman Example

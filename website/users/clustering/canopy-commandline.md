@@ -1,8 +1,8 @@
 ---
 layout: default
 title: canopy-commandline
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="canopy-commandline-RunningCanopyClusteringfromtheCommandLine"></a>

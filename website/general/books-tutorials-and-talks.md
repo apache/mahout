@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Books Tutorials and Talks
-theme:
-    name: retro-mahout
+
+    
 ---
 # Intro
 

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Locally Weighted Linear Regression
-theme:
-    name: retro-mahout
+
+    
 ---
 
 <a name="LocallyWeightedLinearRegression-LocallyWeightedLinearRegression"></a>

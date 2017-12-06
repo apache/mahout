@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  20Newsgroups
-theme:
-   name: retro-mahout
+
+   
 ---
 
 <a name="20Newsgroups-NaiveBayesusing20NewsgroupsData"></a>

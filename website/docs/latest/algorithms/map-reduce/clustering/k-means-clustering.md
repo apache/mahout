@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  K-Means Clustering
-theme:
-   name: retro-mahout
+
+   
 ---
 
 # k-Means clustering - basics

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Mailing Lists, IRC and Archives
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # General

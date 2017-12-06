@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Hidden Markov Models
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Hidden Markov Models

@@ -1,8 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Perceptron and Winnow
-theme:
-    name: retro-mahout
+
+    
 ---
 
 # Introduction to ALS Recommendations with Hadoop
