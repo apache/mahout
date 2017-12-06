@@ -1,5 +1,5 @@
 header.mahout-header {
-  height: 700px;
+  height: 500px;
   position: relative;
   background: url('https://www.transparenttextures.com/patterns/cubes.png'), -moz-linear-gradient(45deg, $blue 0%, darken($blue, 15%) 100%);
   background: url('https://www.transparenttextures.com/patterns/cubes.png'), -webkit-linear-gradient(45deg, $blue 0%, darken($blue, 15%) 100%);
@@ -26,6 +26,10 @@ header.mahout-header {
       width: 100%;
       max-width: 800px;
     }
+    .asf-logo {
+      height: 75px;
+      width: 150px;
+    }
   }
   .mahout-header-lower {
     bottom: 0;
@@ -48,9 +52,6 @@ header.mahout-header {
         border-color: $gray-100;
         color: $body-color;
       }
-    }
-    .asf-logo {
-      height: 75px;
     }
   }
 }
