@@ -120,7 +120,7 @@
     <lucene.version>5.5.2</lucene.version>
     <slf4j.version>1.7.22</slf4j.version>
     <scala.compat.version>2.10</scala.compat.version>
-    <scala.version>2.10.4</scala.version>
+    <scala.version>2.10.6</scala.version>
     <spark.version>1.6.3</spark.version> <!-- 1.6.3, 2.0.2, 2.1.0 all tested -->
     <flink.version>1.1.4</flink.version>
     <h2o.version>0.1.25</h2o.version>
@@ -217,37 +217,37 @@
       </dependency>
 
       <dependency>
-        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+        <artifactId>mahout-math-scala_2.10</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+        <artifactId>mahout-math-scala_2.10</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
       </dependency>
 
       <dependency>
-        <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+        <artifactId>mahout-spark_2.10</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
-        <artifactId>mahout-flink_${scala.compat.version}</artifactId>
+        <artifactId>mahout-flink_2.10</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
-        <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
+        <artifactId>mahout-h2o_2.10</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
-        <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
+        <artifactId>mahout-native-viennacl_2.10</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
@@ -365,7 +365,7 @@
       </dependency>
       <dependency>
         <groupId>org.scalatest</groupId>
-        <artifactId>scalatest_${scala.compat.version}</artifactId>
+        <artifactId>scalatest_2.10</artifactId>
         <version>2.2.4</version>
         <scope>test</scope>
       </dependency>
@@ -930,26 +930,7 @@
         <checkstyle.skip>true</checkstyle.skip>
       </properties>
     </profile>
-    <profile>
-      <id>scala-2.10</id>
-      <activation>
-        <property><name>!scala-2.11</name></property>
-      </activation>
-      <properties>
-        <scala.compat.version>2.10</scala.compat.version>
-        <scala.version>2.10.4</scala.version>
-      </properties>
-    </profile>
-    <profile>
-      <id>scala-2.11</id>
-      <activation>
-        <property><name>scala-2.11</name></property>
-      </activation>
-      <properties>
-        <scala.compat.version>2.11</scala.compat.version>
-        <scala.version>2.11.8</scala.version>
-      </properties>
-    </profile>
+
     <profile>
       <id>spark-1.6</id>
       <activation>

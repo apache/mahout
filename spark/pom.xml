@@ -190,19 +190,19 @@
     <!-- spark stuff - need to put this first to use spark's mahout dependencies in tests -->
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_${scala.compat.version}</artifactId>
+      <artifactId>spark-core_2.10</artifactId>
       <version>${spark.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-mllib_${scala.compat.version}</artifactId>
+      <artifactId>spark-mllib_2.10</artifactId>
       <version>${spark.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+      <artifactId>mahout-math-scala_2.10</artifactId>
     </dependency>
 
     <dependency>
@@ -224,7 +224,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+      <artifactId>mahout-math-scala_2.10</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
@@ -236,7 +236,7 @@
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <artifactId>scalatest_2.10</artifactId>
     </dependency>
 
   </dependencies>

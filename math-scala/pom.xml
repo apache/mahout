@@ -35,7 +35,6 @@
   </description>
 
   <packaging>jar</packaging>
-
   <build>
 
     <plugins>
@@ -173,7 +172,7 @@
 
     <dependency>
       <groupId>com.github.scopt</groupId>
-      <artifactId>scopt_${scala.compat.version}</artifactId>
+      <artifactId>scopt_2.10</artifactId>
       <version>3.3.0</version>
     </dependency>
 
@@ -181,7 +180,7 @@
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <artifactId>scalatest_2.10</artifactId>
     </dependency>
 
    <dependency>

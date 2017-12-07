@@ -226,7 +226,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+      <artifactId>mahout-math-scala_2.10</artifactId>
     </dependency>
 
     <!--  3rd-party -->
@@ -238,7 +238,7 @@
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <artifactId>scalatest_2.10</artifactId>
     </dependency>
 
     <dependency>
