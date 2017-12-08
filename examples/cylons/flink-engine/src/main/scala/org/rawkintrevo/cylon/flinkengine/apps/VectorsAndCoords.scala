@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flinkengine.apps
+package org.apache.mahout.cylon-example.flinkengine.apps
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -26,7 +26,7 @@ import org.apache.flink.streaming.connectors.fs.bucketing.BucketingSink
 import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010, FlinkKafkaProducer010}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.mahout.math.Vector
-import org.rawkintrevo.cylon.flinkengine.schemas.{KeyedBufferedImageSchema, MahoutVectorAndCoordsSchema}
+import org.apache.mahout.cylon-example.flinkengine.schemas.{KeyedBufferedImageSchema, MahoutVectorAndCoordsSchema}
 import org.slf4j.{Logger, LoggerFactory}
 
 object VectorsAndCoords {
@@ -167,7 +167,7 @@ object VectorsAndCoords {
 //object FaceDetectorProcessor extends Serializable {
 //
 ////  //System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
-////  Class.forName("org.rawkintrevo.cylon.opencv.LoadNative")
+////  Class.forName("org.apache.mahout.cylon-example.opencv.LoadNative")
 ////  //NativeUtils.loadOpenCVLibFromJar()
 ////
 ////  var inputRawImage: BufferedImage = _

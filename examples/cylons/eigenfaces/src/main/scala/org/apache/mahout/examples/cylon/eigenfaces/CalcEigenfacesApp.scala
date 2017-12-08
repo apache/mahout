@@ -27,8 +27,8 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.sparkbindings._
 import org.apache.spark.{SparkConf, SparkContext}
-import org.rawkintrevo.cylon.common.mahout.MahoutUtils
-import org.rawkintrevo.cylon.frameprocessors.OpenCVImageUtils
+import org.apache.mahout.cylon-example.common.mahout.MahoutUtils
+import org.apache.mahout.cylon-example.frameprocessors.OpenCVImageUtils
 
 object CalcEigenfacesApp {
   def main(args: Array[String]): Unit = {

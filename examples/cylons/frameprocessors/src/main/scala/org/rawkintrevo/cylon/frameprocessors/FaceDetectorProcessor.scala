@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.frameprocessors
+package org.apache.mahout.cylon-example.frameprocessors
 
 import java.awt.image.BufferedImage
 import java.awt.{Color, Font}

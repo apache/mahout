@@ -1,11 +1,11 @@
-package org.rawkintrevo.cylon.flinkengine.coprocessfns
+package org.apache.mahout.cylon-example.flinkengine.coprocessfns
 
 import java.awt.image.BufferedImage
 import java.awt.{Color, Font}
 
 import org.apache.flink.streaming.api.functions.co.CoProcessFunction
 import org.apache.flink.util.Collector
-import org.rawkintrevo.cylon.flinkengine.windowfns.DecomposedFace
+import org.apache.mahout.cylon-example.flinkengine.windowfns.DecomposedFace
 
 /**
   * pe1: When a Decomposed Face Comes in add it to the appropriate frame

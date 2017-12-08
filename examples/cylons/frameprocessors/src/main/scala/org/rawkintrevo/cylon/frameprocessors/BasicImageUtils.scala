@@ -1,9 +1,9 @@
-package org.rawkintrevo.cylon.frameprocessors
+package org.apache.mahout.cylon-example.frameprocessors
 
 import java.awt.Font
 import java.awt.image.BufferedImage
 
-import org.rawkintrevo.cylon.frameprocessors.OpenCVImageUtils.{bufferedImageToMat, grayAndEqualizeMat, matToPixelArray}
+import org.apache.mahout.cylon-example.frameprocessors.OpenCVImageUtils.{bufferedImageToMat, grayAndEqualizeMat, matToPixelArray}
 
 object BasicImageUtils {
   def drawRectOnImage(img: BufferedImage,

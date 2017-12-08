@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flink
+package org.apache.mahout.cylon-example.flink
 
 import org.junit._
 import Assert._

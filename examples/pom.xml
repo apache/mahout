@@ -31,9 +31,14 @@
   <name>Mahout Examples</name>
   <description>Scalable machine learning library examples</description>
 
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
   <properties>
     <mahout.skip.example>false</mahout.skip.example>
   </properties>
+
+  <modules>
+    <module>cylons</module>
+    <module>mr-classic</module>
+  </modules>
 
 </project>

@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flinkengine.apps
+package org.apache.mahout.cylon-example.flinkengine.apps
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -40,11 +40,11 @@ import org.apache.mahout.math.algorithms.clustering.CanopyFn
 import org.apache.mahout.math.{DenseVector, Matrix, Vector}
 import org.apache.mahout.math.algorithms.common.distance.Cosine
 import org.apache.mahout.math.scalabindings._
-import org.rawkintrevo.cylon.flinkengine.coprocessfns.MarkupBufferedImagesWithDecomposedFacesCoProcessFunction
-import org.rawkintrevo.cylon.flinkengine.processfns.MergeImagesProcessFunction
-import org.rawkintrevo.cylon.flinkengine.schemas.{KeyedBufferedImageSchema, KeyedFrameBufferedImageSchema, MahoutVectorAndCoordsSchema}
-import org.rawkintrevo.cylon.flinkengine.windowfns._
-import org.rawkintrevo.cylon.frameprocessors.OpenCVImageUtils
+import org.apache.mahout.cylon-example.flinkengine.coprocessfns.MarkupBufferedImagesWithDecomposedFacesCoProcessFunction
+import org.apache.mahout.cylon-example.flinkengine.processfns.MergeImagesProcessFunction
+import org.apache.mahout.cylon-example.flinkengine.schemas.{KeyedBufferedImageSchema, KeyedFrameBufferedImageSchema, MahoutVectorAndCoordsSchema}
+import org.apache.mahout.cylon-example.flinkengine.windowfns._
+import org.apache.mahout.cylon-example.frameprocessors.OpenCVImageUtils
 import org.slf4j.{Logger, LoggerFactory}
 
 // http://localhost:8090/cylon/cam/test-flink/flink-cluster-cam

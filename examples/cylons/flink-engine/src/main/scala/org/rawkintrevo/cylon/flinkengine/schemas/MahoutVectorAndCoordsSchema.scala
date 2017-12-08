@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flinkengine.schemas
+package org.apache.mahout.cylon-example.flinkengine.schemas
 
 import java.awt.image.BufferedImage
 
@@ -7,7 +7,7 @@ import org.apache.flink.streaming.api.scala.createTypeInformation
 import org.apache.flink.streaming.util.serialization.KeyedDeserializationSchema
 import org.apache.mahout.math.Vector
 import org.apache.mahout.math.scalabindings.MahoutCollections._
-import org.rawkintrevo.cylon.common.mahout.MahoutUtils
+import org.apache.mahout.cylon-example.common.mahout.MahoutUtils
 import org.slf4j.{Logger, LoggerFactory}
 
 

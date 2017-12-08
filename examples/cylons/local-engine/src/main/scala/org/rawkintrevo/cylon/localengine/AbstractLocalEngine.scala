@@ -1,12 +1,12 @@
-package org.rawkintrevo.cylon.localengine
+package org.apache.mahout.cylon-example.localengine
 
 import org.apache.mahout.math.Matrix
 import org.apache.solr.client.solrj.SolrClient
 import org.apache.solr.client.solrj.impl.HttpSolrClient
 import org.opencv.core.Core
 import org.opencv.videoio.VideoCapture
-import org.rawkintrevo.cylon.common.mahout.MahoutUtils
-import org.rawkintrevo.cylon.common.solr.CylonSolrClient
+import org.apache.mahout.cylon-example.common.mahout.MahoutUtils
+import org.apache.mahout.cylon-example.common.solr.CylonSolrClient
 
 import org.slf4j.{Logger, LoggerFactory}
 

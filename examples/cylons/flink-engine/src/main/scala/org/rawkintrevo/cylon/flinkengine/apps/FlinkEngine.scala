@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flinkengine.apps
+package org.apache.mahout.cylon-example.flinkengine.apps
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -23,7 +23,7 @@ import java.util.Properties
 
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010, FlinkKafkaProducer010}
-import org.rawkintrevo.cylon.flinkengine.schemas.KeyedBufferedImageSchema
+import org.apache.mahout.cylon-example.flinkengine.schemas.KeyedBufferedImageSchema
 
 object Basic {
   def main(args: Array[String]) {
@@ -104,7 +104,7 @@ object Basic {
 //object FaceDetectorProcessor extends Serializable {
 //
 ////  //System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
-////  Class.forName("org.rawkintrevo.cylon.opencv.LoadNative")
+////  Class.forName("org.apache.mahout.cylon-example.opencv.LoadNative")
 ////  //NativeUtils.loadOpenCVLibFromJar()
 ////
 ////  var inputRawImage: BufferedImage = _

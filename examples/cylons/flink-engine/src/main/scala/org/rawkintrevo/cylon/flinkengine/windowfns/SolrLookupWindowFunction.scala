@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flinkengine.windowfns
+package org.apache.mahout.cylon-example.flinkengine.windowfns
 
 import org.apache.flink.api.java.tuple.Tuple
 import org.apache.flink.streaming.api.scala.function.WindowFunction
@@ -10,9 +10,9 @@ import org.apache.mahout.math.scalabindings.{::, dense}
 import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocument
-import org.rawkintrevo.cylon.common.solr.CylonSolrClient
+import org.apache.mahout.cylon-example.common.solr.CylonSolrClient
 
-import scala.org.rawkintrevo.cylon.common.mahout.DistanceMetricSelector
+import scala.org.apache.mahout.cylon-example.common.mahout.DistanceMetricSelector
 
 class SolrLookupWindowFunction(solrURL :String,
                                minOccurances: Int = 2,

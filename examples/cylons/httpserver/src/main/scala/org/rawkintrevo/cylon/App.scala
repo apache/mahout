@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.rawkintrevo.cylon
+package org.apache.mahout.cylon-example
 
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.StreamApp

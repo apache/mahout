@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.frameprocessors
+package org.apache.mahout.cylon-example.frameprocessors
 
 import java.awt.Font
 import java.awt.image.{BufferedImage, DataBufferByte}
@@ -9,7 +9,7 @@ import org.opencv.imgproc.Imgproc
 
 object OpenCVImageUtils {
 
-  Class.forName("org.rawkintrevo.cylon.common.opencv.LoadNative")
+  Class.forName("org.apache.mahout.cylon-example.common.opencv.LoadNative")
 
   def bufferedImageToMat(bi: BufferedImage): Mat = {
     // https://stackoverflow.com/questions/14958643/converting-bufferedimage-to-mat-in-opencv

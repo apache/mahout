@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.localengine
+package org.apache.mahout.cylon-example.localengine
 
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream

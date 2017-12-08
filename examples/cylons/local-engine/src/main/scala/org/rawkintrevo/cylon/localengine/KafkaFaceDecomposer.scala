@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.localengine
+package org.apache.mahout.cylon-example.localengine
 
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
@@ -7,8 +7,8 @@ import javax.imageio.ImageIO
 import org.apache.mahout.math.Vector
 import org.opencv.core.{Mat, MatOfByte}
 import org.opencv.imgcodecs.Imgcodecs
-import org.rawkintrevo.cylon.common.mahout.MahoutUtils
-import org.rawkintrevo.cylon.frameprocessors.FaceDetectorDemo.mat
+import org.apache.mahout.cylon-example.common.mahout.MahoutUtils
+import org.apache.mahout.cylon-example.frameprocessors.FaceDetectorDemo.mat
 
 
 class KafkaFaceDecomposer(topic: String, key: String)

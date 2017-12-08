@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.localengine
+package org.apache.mahout.cylon-example.localengine
 
 import org.apache.mahout.math.{DenseVector, Matrix, Vector}
 import org.apache.mahout.math._
@@ -15,8 +15,8 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.opencv.core.{Core, Mat, Size}
 import org.opencv.imgproc.Imgproc
 import org.opencv.videoio.{VideoCapture, Videoio}
-import org.rawkintrevo.cylon.common.mahout.MahoutUtils
-import org.rawkintrevo.cylon.frameprocessors.{FaceDetectorProcessor, OpenCVImageUtils}
+import org.apache.mahout.cylon-example.common.mahout.MahoutUtils
+import org.apache.mahout.cylon-example.frameprocessors.{FaceDetectorProcessor, OpenCVImageUtils}
 
 trait AbstractFaceDecomposer extends AbstractLocalEngine {
 
@@ -43,7 +43,7 @@ trait AbstractFaceDecomposer extends AbstractLocalEngine {
 
   def run() = {
     //System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
-    Class.forName("org.rawkintrevo.cylon.common.opencv.LoadNative")
+    Class.forName("org.apache.mahout.cylon-example.common.opencv.LoadNative")
 
     val videoCapture = new VideoCapture
     logger.info(s"Attempting to open video source at ${inputPath}")

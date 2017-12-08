@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flinkengine.processfns
+package org.apache.mahout.cylon-example.flinkengine.processfns
 
 import java.awt.image.BufferedImage
 import java.awt.Color

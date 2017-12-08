@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flinkengine.windowfns
+package org.apache.mahout.cylon-example.flinkengine.windowfns
 
 import org.apache.flink.api.java.tuple.Tuple
 import org.apache.flink.streaming.api.functions.co.CoProcessFunction
@@ -19,7 +19,7 @@ import org.apache.mahout.math.scalabindings.MahoutCollections._
 
 import scala.collection.JavaConversions._
 import org.apache.mahout.math.algorithms.clustering.CanopyFn
-import scala.org.rawkintrevo.cylon.common.mahout.DistanceMetricSelector
+import scala.org.apache.mahout.cylon-example.common.mahout.DistanceMetricSelector
 import org.slf4j.{Logger, LoggerFactory}
 
 

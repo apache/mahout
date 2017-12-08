@@ -1,6 +1,6 @@
-package org.rawkintrevo.cylon.examples
+package org.apache.mahout.cylon-example.examples
 
-import org.rawkintrevo.cylon.localengine.KafkaFaceDecomposer
+import org.apache.mahout.cylon-example.localengine.KafkaFaceDecomposer
 import org.slf4j.{Logger, LoggerFactory}
 
 /**

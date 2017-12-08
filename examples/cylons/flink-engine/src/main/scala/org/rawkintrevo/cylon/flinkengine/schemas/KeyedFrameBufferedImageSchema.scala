@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.flinkengine.schemas
+package org.apache.mahout.cylon-example.flinkengine.schemas
 
 import java.awt.image.BufferedImage
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}

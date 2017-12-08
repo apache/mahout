@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.frameprocessors
+package org.apache.mahout.cylon-example.frameprocessors
 
 import java.awt.image.{BufferedImage, DataBufferByte}
 
@@ -7,7 +7,7 @@ import org.opencv.core.{CvType, Mat}
 
 trait FrameProcessor extends Serializable {
 
-  Class.forName("org.rawkintrevo.cylon.opencv.LoadNative")
+  Class.forName("org.apache.mahout.cylon-example.opencv.LoadNative")
 
 
   var inputRawImage: BufferedImage = _

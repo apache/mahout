@@ -1,4 +1,4 @@
-package org.rawkintrevo.cylon.examples.localfacialrecognition
+package org.apache.mahout.cylon-example.examples.localfacialrecognition
 
 import java.awt.{Color, Font}
 import java.awt.image.{BufferedImage, DataBufferByte}
@@ -14,10 +14,10 @@ import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
 import org.opencv.objdetect.CascadeClassifier
 import org.opencv.videoio.VideoCapture
-import org.rawkintrevo.cylon.common.mahout.MahoutUtils
-import org.rawkintrevo.cylon.common.solr.CylonSolrClient
-import org.rawkintrevo.cylon.frameprocessors.{FaceDetectorProcessor, OpenCVImageUtils}
-import org.rawkintrevo.cylon.localengine.{AbstractKafkaImageBroadcaster, KafkaFaceDecomposer}
+import org.apache.mahout.cylon-example.common.mahout.MahoutUtils
+import org.apache.mahout.cylon-example.common.solr.CylonSolrClient
+import org.apache.mahout.cylon-example.frameprocessors.{FaceDetectorProcessor, OpenCVImageUtils}
+import org.apache.mahout.cylon-example.localengine.{AbstractKafkaImageBroadcaster, KafkaFaceDecomposer}
 
 class SimpleKafkaFacialRecognition(topic: String, key: String)
   extends KafkaFaceDecomposer(topic: String, key: String)
@@ -27,7 +27,7 @@ class SimpleKafkaFacialRecognition(topic: String, key: String)
 
 
   override def run(): Unit = {
-    Class.forName("org.rawkintrevo.cylon.common.opencv.LoadNative")
+    Class.forName("org.apache.mahout.cylon-example.common.opencv.LoadNative")
 
 
     val videoCapture = new VideoCapture
@@ -253,7 +253,7 @@ object FaceDetectorProcessor_v1 extends Serializable {
   // ** Lifting this old code to make a demo work quick and dirty -will refactor later
 
   //System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
-  Class.forName("org.rawkintrevo.cylon.common.opencv.LoadNative")
+  Class.forName("org.apache.mahout.cylon-example.common.opencv.LoadNative")
   //NativeUtils.loadOpenCVLibFromJar()
 
   var inputRawImage: BufferedImage = _
