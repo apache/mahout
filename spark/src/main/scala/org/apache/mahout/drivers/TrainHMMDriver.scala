@@ -155,8 +155,10 @@ object TrainHMMDriver extends MahoutSparkDriver {
     }
     else
     {
-	// create random initial model
-        new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+      // create random initial model
+      var model:HMMModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+      model.initModelWithRandomParameters(System.currentTimeMillis().toInt)
+      model
     }
 
   }
@@ -176,19 +178,11 @@ object TrainHMMDriver extends MahoutSparkDriver {
     val model = SparkHiddenMarkovModel.train(initModel, trainingSet, numberOfHiddenStates, 
       numberOfObservableSymbols, epsilon, maxNumberOfIterations, scale)
 
-    println("TM:")
-    for (indexN <- 0 to model.getNumberOfHiddenStates - 1) {
-      for (indexM <- 0 to model.getNumberOfHiddenStates - 1) {
-        println(model.getTransitionMatrix.getQuick(indexN, indexM))
-      }
-    }
-
-    println("EM:")
-    for (indexN <- 0 to model.getNumberOfHiddenStates - 1) {
-      for (indexM <- 0 to model.getNumberOfObservableSymbols - 1) {
-        println(model.getEmissionMatrix.getQuick(indexN, indexM))
-      }
-    }
+    println("Trained Transition Matrix:")
+    println(model.getTransitionMatrix)
+    println("Trained Emission Matrix:")
+    println(model.getEmissionMatrix)
+    
     model.dfsWrite(outputPath)
     
     stop()

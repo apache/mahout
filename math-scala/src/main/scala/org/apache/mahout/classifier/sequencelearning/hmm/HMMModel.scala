@@ -26,6 +26,7 @@ import drm._
 import scala.language.asInstanceOf
 import scala.collection._
 import JavaConversions._
+import org.apache.mahout.common.RandomUtils
 
 /**
  *
@@ -58,6 +59,51 @@ class HMMModel(val numberOfHiddenStates: Int,
 
   def getTransitionMatrix: Matrix = {
     transitionMatrix
+  }
+
+  def initModelWithRandomParameters(inSeed:Long): Unit = {
+    var seed:Long = inSeed
+    if (seed == 0) {
+      seed = RandomUtils.getRandom().nextInt()
+    }
+
+    // initialize the initial Probabilities
+    var sum:Double = 0; // used for normalization
+    for (i <- 0 to numberOfHiddenStates - 1) {
+      val nextRand:Double = RandomUtils.getRandom.nextDouble();
+      initialProbabilities.setQuick(i, nextRand);
+      sum += nextRand;
+    }
+    // "normalize" the vector to generate probabilities
+    for (i <- 0 to numberOfHiddenStates - 1) {
+      initialProbabilities.setQuick(i, initialProbabilities.getQuick(i)/sum);
+    }
+
+    // initialize the transition matrix
+    for (i <- 0 to numberOfHiddenStates -1) {
+      sum = 0
+      for (j <- 0 to numberOfHiddenStates - 1) {
+        transitionMatrix.setQuick(i, j, RandomUtils.getRandom.nextDouble())
+        sum += transitionMatrix.getQuick(i, j)
+      }
+      // normalize the random values to obtain probabilities
+      for (j <- 0 to numberOfHiddenStates - 1) {
+        transitionMatrix.setQuick(i, j, transitionMatrix.getQuick(i, j)/sum)
+      }
+    }
+
+    // initialize the output matrix
+    for (i <- 0 to numberOfHiddenStates - 1) {
+      sum = 0
+      for (j <- 0 to numberOfOutputSymbols - 1) {
+        emissionMatrix.setQuick(i, j, RandomUtils.getRandom.nextDouble())
+        sum += emissionMatrix.getQuick(i, j)
+      }
+      // normalize the random values to obtain probabilities
+      for (j <- 0 to numberOfOutputSymbols - 1) {
+        emissionMatrix.setQuick(i, j, emissionMatrix.getQuick(i, j)/sum)
+      }
+    }
   }
 
   /**
