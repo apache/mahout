@@ -168,15 +168,13 @@ object TrainHMMDriver extends MahoutSparkDriver {
 
     val outputPath = parser.opts("output").asInstanceOf[String]
     val scale = parser.opts("scale").asInstanceOf[Boolean]
-    val numberOfHiddenStates = parser.opts("numberOfHiddenStates").asInstanceOf[Int]
-    val numberOfObservableSymbols = parser.opts("numberOfObservableSymbols").asInstanceOf[Int]
     val epsilon = parser.opts("epsilon").asInstanceOf[Double]
     val maxNumberOfIterations = parser.opts("maxNumberOfIterations").asInstanceOf[Int]
     
     val trainingSet = readTrainingSet()
     val initModel = createInitialModel()
-    val model = SparkHiddenMarkovModel.train(initModel, trainingSet, numberOfHiddenStates, 
-      numberOfObservableSymbols, epsilon, maxNumberOfIterations, scale)
+    val model = SparkHiddenMarkovModel.train(initModel, trainingSet, 
+      epsilon, maxNumberOfIterations, scale)
 
     println("Trained Transition Matrix:")
     println(model.getTransitionMatrix)

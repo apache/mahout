@@ -211,8 +211,6 @@ trait HiddenMarkovModel extends java.io.Serializable {
 
   def train(initModel: HMMModel,
     observations: DrmLike[Long],
-    numberOfHiddenStates:Int,
-    numberOfObservableSymbols:Int,
     epsilon: Double,
     maxNumberOfIterations:Int,
     scale: Boolean = false
@@ -222,9 +220,9 @@ trait HiddenMarkovModel extends java.io.Serializable {
     var stop = false
     while ((iter < maxNumberOfIterations) && (!stop)) {
       iter = iter + 1
-      var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
-      var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
-      var initialProbabilities = new DenseVector(numberOfHiddenStates)
+      var transitionMatrix = new DenseMatrix(curModel.getNumberOfHiddenStates, curModel.getNumberOfHiddenStates)
+      var emissionMatrix = new DenseMatrix(curModel.getNumberOfHiddenStates, curModel.getNumberOfObservableSymbols)
+      var initialProbabilities = new DenseVector(curModel.getNumberOfHiddenStates)
 
       val observationsMatrix = observations.collect
       val observation = observationsMatrix.viewRow(0)
@@ -279,7 +277,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
         }
       }
 
-      val newModel:HMMModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+      val newModel:HMMModel = new HMMModel(curModel.getNumberOfHiddenStates, curModel.getNumberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
 
       if (checkForConvergence(newModel, curModel, epsilon)) {
         stop = true

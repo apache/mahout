@@ -31,7 +31,14 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
   val epsilon = 1E-6
 
   test("Simple Standard NHMM Model") {
-    epsilon should be = epsilon
+    var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
+    var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
+    var initialProbabilities = DenseVector(0.2, 0.1, 0.4, 0.3)
+
+    val observations = dense((1, 0, 2, 2, 0, 0, 1, 1, 1, 0, 2, 0, 1, 0, 0))
+    val observationsDrm = drm.drmParallelize(m = observations, numPartitions = 1)
+    val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
+    val trainedModel = HiddenMarkovModel.train(initModel, observationsDrm, 0.1, 10, false)
   }
 
 }
