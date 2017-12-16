@@ -19,7 +19,7 @@ package org.apache.mahout.classifier.sequencelearning.hmm
 
 import org.apache.mahout.math._
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.test.DistributedMahoutSuite
+import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
 import org.scalatest.{FunSuite, Matchers}
 import collection._
@@ -29,6 +29,6 @@ import collection.JavaConversions
 class HMMSparkTestSuite extends FunSuite with MahoutSuite with DistributedSparkSuite with HMMTestBase {
 
   test("Spark HMM test") {
-    1 should be 1
+/*    1 should be 1 */
   }
 }

@@ -151,14 +151,28 @@ trait HiddenMarkovModel extends java.io.Serializable {
     backwardVariables
   }
 
-  def computeXiVariable(model: HMMModel, observationSequence:Vector, forwardVariables: DenseMatrix,
-    backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexM: Int, indexT:Int): Double = {
-    forwardVariables.getQuick(indexT, indexN) * model.getTransitionMatrix.getQuick(indexN, indexM) * model.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt) * backwardVariables.getQuick(indexT + 1, indexM)/likelihood
+  def expectedNumberOfTransitions(model: HMMModel, observationSequence:Vector, forwardVariables: DenseMatrix,
+    backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexM: Int): Double = {
+    var numTransitions:Double = 0.0
+    for (indexT <- 0 to observationSequence.length - 2) {
+      numTransitions += forwardVariables.getQuick(indexT, indexN) * model.getTransitionMatrix.getQuick(indexN, indexM) * model.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt) * backwardVariables.getQuick(indexT + 1, indexM)
+    }
+
+    numTransitions = numTransitions / likelihood
+    numTransitions
   }
 
-  def computeGammaVariable(forwardVariables: DenseMatrix,
-    backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexT: Int): Double = {
-    forwardVariables.getQuick(indexT, indexN) * backwardVariables.getQuick(indexT, indexN)/likelihood
+  def expectedNumberOfEmissions(observationSequence:Vector, forwardVariables: DenseMatrix,
+    backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexM: Int): Double = {
+    var numEmissions:Double = 0.0
+    for (indexT <- 0 to observationSequence.length - 1) {
+      if (observationSequence(indexT).toInt == indexM) {
+        numEmissions += forwardVariables.getQuick(indexT, indexN) * backwardVariables.getQuick(indexT, indexN)
+      }
+    }
+
+    numEmissions = numEmissions / likelihood
+    numEmissions
   }
 
   def sequenceLikelihood(forwardVariables: DenseMatrix,
@@ -228,9 +242,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
       val observation = observationsMatrix.viewRow(0)
       val (forwardVariables, scalingFactors) = computeForwardVariables(curModel, observation, scale)
       val backwardVariables = computeBackwardVariables(curModel, observation, scale, scalingFactors)
-      println(forwardVariables)
-      println(backwardVariables)
-      println(forwardVariables.getQuick(1,3))
+
       if (scale) {
 
       } else {
@@ -242,37 +254,29 @@ trait HiddenMarkovModel extends java.io.Serializable {
 
         // recompute transitionmatrix
         for (indexN <- 0 to curModel.getNumberOfHiddenStates - 1) {
+          var denominator:Double = 0.0
           for (indexM <- 0 to curModel.getNumberOfHiddenStates - 1) {
-            var numerator:Double = 0.0
-            var denominator:Double = 0.0
+            val numTransitions = expectedNumberOfTransitions(curModel, observation, forwardVariables, backwardVariables, obsLikelihood, indexN, indexM)
+            denominator += numTransitions
+            transitionMatrix.setQuick(indexN, indexM, numTransitions)
+          }
 
-            for (indexT <- 0 to observation.length - 2) {
-              numerator += computeXiVariable(curModel, observation, forwardVariables, backwardVariables, obsLikelihood, indexN, indexM, indexT)
-
-              denominator += computeGammaVariable(forwardVariables, backwardVariables, obsLikelihood, indexN, indexT)
-            }
-            println(numerator)
-            println(denominator)
-            transitionMatrix.setQuick(indexN, indexM, numerator/denominator)
+          for (indexM <- 0 to curModel.getNumberOfHiddenStates - 1) {
+            transitionMatrix.setQuick(indexN, indexM, transitionMatrix.getQuick(indexN, indexM)/denominator)
           }
         }
 
         // recompute emissionmatrix
         for (indexN <- 0 to curModel.getNumberOfHiddenStates - 1) {
+          var denominator:Double = 0.0
           for (indexM <- 0 to curModel.getNumberOfObservableSymbols - 1) {
-            var numerator:Double = 0.0
-            var denominator:Double = 0.0
+            var numEmissions:Double = expectedNumberOfEmissions(observation, forwardVariables, backwardVariables, obsLikelihood, indexN, indexM)
+            denominator += numEmissions
+            emissionMatrix.setQuick(indexN, indexM, numEmissions)
+          }
 
-            for (indexT <- 0 to observation.length - 1) {
-              val gamma:Double = computeGammaVariable(forwardVariables, backwardVariables, obsLikelihood, indexN, indexT)
-              if (observation(indexT).toInt == indexM) {
-                numerator += gamma
-              }
-
-              denominator += gamma
-            }
-
-            emissionMatrix.setQuick(indexN, indexM, numerator/denominator)
+          for (indexM <- 0 to curModel.getNumberOfObservableSymbols - 1) {
+            emissionMatrix.setQuick(indexN, indexM, emissionMatrix.getQuick(indexN, indexM)/denominator)
           }
         }
       }

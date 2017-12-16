@@ -17,7 +17,11 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm
 
+import org.apache.mahout.math.drm
 import org.apache.mahout.math._
+import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.drm.{CheckpointedDrm, drmParallelizeEmpty}
+import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.test.DistributedMahoutSuite
 import org.apache.mahout.test.MahoutSuite
@@ -31,14 +35,21 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
   val epsilon = 1E-6
 
   test("Simple Standard NHMM Model") {
-    var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
-    var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
-    var initialProbabilities = DenseVector(0.2, 0.1, 0.4, 0.3)
+    var transitionMatrix = dense((0.5, 0.1, 0.1, 0.3),
+      (0.4, 0.4, 0.1, 0.1),
+      (0.1, 0.0, 0.8, 0.1),
+      (0.1, 0.1, 0.1, 0.7))
+
+    var emissionMatrix = dense((0.8, 0.1, 0.1), (0.6, 0.1, 0.3),
+      (0.1, 0.8, 0.1), (0.0, 0.1, 0.9))
+
+/*    var initialProbabilities = DenseVector(0.2, 0.1, 0.4, 0.3)
 
     val observations = dense((1, 0, 2, 2, 0, 0, 1, 1, 1, 0, 2, 0, 1, 0, 0))
-    val observationsDrm = drm.drmParallelize(m = observations, numPartitions = 1)
+
+    val observationsDrm:DrmLike[Long] = drm.drmParallelize(m = observations, numPartitions = 1)
     val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
-    val trainedModel = HiddenMarkovModel.train(initModel, observationsDrm, 0.1, 10, false)
+    val trainedModel = HiddenMarkovModel.train(initModel, observationsDrm, 0.1, 10, false)*/
   }
 
 }
