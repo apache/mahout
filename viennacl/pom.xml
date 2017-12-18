@@ -27,9 +27,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-native-viennacl</artifactId>
+  <artifactId>mahout-native-viennacl_2.10</artifactId>
 
-  <name>Mahout Native VienniaCL OpenCL Bindings</name>
+  <name>Mahout Native ViennaCL OpenCL Bindings</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 

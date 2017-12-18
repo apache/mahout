@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-math-scala</artifactId>
+  <artifactId>mahout-math-scala_2.10</artifactId>
   <name>Mahout Math Scala bindings</name>
   <description>High performance scientific and technical computing data structures and methods,
     mostly based on CERN's

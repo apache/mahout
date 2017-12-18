@@ -586,7 +586,7 @@
           <version>2.5.2</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
-            <releaseProfiles>mahout-release,apache-release,hadoop2</releaseProfiles>
+            <releaseProfiles>viennacl,viennacl-omp,distribution,mahout-release,apache-release</releaseProfiles>
             <goals>deploy</goals>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <arguments>${arguments}</arguments>
@@ -849,6 +849,15 @@
   </modules>
 
   <profiles>
+    <profile>
+      <id>distribution</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>distribution</module>
+      </modules>
+    </profile>
 
     <profile>
       <id>flink</id>

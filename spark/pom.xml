@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-spark</artifactId>
+  <artifactId>mahout-spark_2.10</artifactId>
   <name>Mahout Spark bindings</name>
   <description>
     Mahout Bindings for Apache Spark
@@ -119,7 +119,26 @@
         </executions>
       </plugin>
 
-
+      <!-- copy jars to top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/mahout-spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" />
+                <copy file="target/mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!-- create test jar so other modules can reuse the math test utility classes.
         DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
         Please contact @dlyubimov.

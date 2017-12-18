@@ -128,7 +128,6 @@ class CanopyClustering extends ClusteringFitter {
 
 object CanopyFn extends Serializable {
   def findCenters(block: Matrix, distanceMeasure: DistanceMetric, t1: Double, t2: Double): Matrix = {
-    val block = dense((1.0, 1.2, 1.3, 1.4), (1.1, 1.5, 2.5, 1.0), (6.0, 5.2, -5.2, 5.3), (7.0,6.0, 5.0, 5.0), (10.0, 1.0, 20.0, -10.0))
     var rowAssignedToCanopy = Array.fill(block.nrow) { false }
     val clusterBuf = scala.collection.mutable.ListBuffer.empty[org.apache.mahout.math.Vector]
     while (rowAssignedToCanopy.contains(false)) {
