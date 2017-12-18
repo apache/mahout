@@ -253,7 +253,8 @@
           </dependency>
           <dependency>
             <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-spark_${spark.compat.version}_${scala.compat.version}</artifactId>
+            <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+            <classifier>spark_${spark.compat.version}</classifier>
             <version>${project.version}</version>
           </dependency>
           <dependency>
@@ -325,7 +326,8 @@
         </dependency>
         <dependency>
           <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-spark_${spark.compat.version}_${scala.compat.version}</artifactId>
+          <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+          <classifier>spark_${spark.compat.version}</classifier>
           <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -393,7 +395,8 @@
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark_${spark.compat.version}_${scala.compat.version}</artifactId>
+      <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+      <classifier>spark_${spark.compat.version}</classifier>
       <version>${project.version}</version>
     </dependency>
     <dependency>

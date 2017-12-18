@@ -33,7 +33,222 @@
   <description>Native Structures and interfaces to be used from Mahout math-scala.
   </description>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
+
+  <build>
+    <plugins>
+      <!-- create test jar so other modules can reuse the native test utility classes. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-scala-sources</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-compile</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--this is what scalatest recommends to do to enable scala tests -->
+
+      <!-- disable surefire -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <!-- enable scalatest -->
+      <plugin>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+            <argLine>-Xmx4g</argLine>
+        </configuration>
+      </plugin>
+
+
+      <!--JavaCPP native build plugin-->
+      <!--  old-style way to get it to compile. -->
+      <!--based on https://github.com/bytedeco/javacpp/wiki/Maven-->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>javacpp</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <environmentVariables>
+                <LD_LIBRARY_PATH>{project.basedir}/target/classes/org/apache/mahout/javacpp/linalg/linux-x86_64/
+                </LD_LIBRARY_PATH>
+              </environmentVariables>
+              <executable>java</executable>
+              <arguments>
+                <argument>-jar</argument>
+                <argument>${org.bytedeco:javacpp:jar}</argument>
+                <argument>-propertyfile</argument>
+                <argument>linux-x86_64-viennacl.properties</argument>
+                <argument>-classpath</argument>
+                <argument>${project.build.outputDirectory}:${org.scala-lang:scala-library:jar}</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.CompressedMatrix</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.Context</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.MatrixBase</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.DenseRowMatrix</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.DenseColumnMatrix</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.MatMatProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.ProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.SrMatDnMatProdExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.MatrixTransExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.LinalgFunctions</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.Functions</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.VectorBase</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.VCLVector</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.VecMultExpression</argument>
+                <argument>org.apache.mahout.viennacl.opencl.javacpp.MemHandle</argument>
+                <argument>org.apache.mahout.viennacl.opencl.GPUMMul</argument>
+                <argument>org.apache.mahout.viennacl.opencl.GPUMMul$</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+      </plugin>
+
+      <!-- copy jars to top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/mahout-native-viennacl_${scala.compat.version}-${version}.jar" tofile="../mahout-native-viennacl_${scala.compat.version}-${version}.jar" />
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- delete jars on claen in top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../</directory>
+              <includes>
+                <include>mahout-native-viennacl_*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+    </plugins>
+
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
+    </dependency>
+
+    <!--  3rd-party -->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+
+    <!-- scala stuff -->
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>javacpp</artifactId>
+      <version>1.2.4</version>
+    </dependency>
+
+  </dependencies>
+
 
   <profiles>
     <profile>
@@ -86,25 +301,5 @@
         </plugins>
       </build>
     </profile>
-      <profile>
-          <id>all-scala</id>
-          <modules>
-              <module>scala-2.10</module>
-              <module>scala-2.11</module>
-          </modules>
-      </profile>
-      <profile>
-          <id>scala-2.10</id>
-          <modules>
-              <module>scala-2.10</module>
-          </modules>
-      </profile>
-      <profile>
-          <id>scala-2.11</id>
-          <modules>
-              <module>scala-2.11</module>
-          </modules>
-      </profile>
-
   </profiles>
 </project>

@@ -34,7 +34,7 @@
     Colt Java API
   </description>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <build>
 
@@ -45,11 +45,10 @@
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
           <execution>
-              <id>test-jar</id>
             <goals>
               <goal>test-jar</goal>
             </goals>
-            <!--<phase>package</phase>-->
+            <phase>package</phase>
           </execution>
         </executions>
       </plugin>
@@ -68,21 +67,21 @@
         <executions>
           <execution>
             <id>add-scala-sources</id>
-            <!--<phase>initialize</phase>-->
+            <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-compile</id>
-            <!--<phase>process-resources</phase>-->
+            <phase>process-resources</phase>
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <!--<phase>process-test-resources</phase>-->
+            <phase>process-test-resources</phase>
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -96,9 +95,10 @@
         <executions>
           <execution>
             <id>copy</id>
+            <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-math-scala_${scala.compat.version}-${project.version}.jar" tofile="../../mahout-math-scala_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/mahout-math-scala_${scala.compat.version}-${version}.jar" tofile="../mahout-math-scala_${scala.compat.version}-${version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -133,7 +133,6 @@
           </execution>
         </executions>
       </plugin>
-
       <!-- remove jars from top directory on clean -->
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
@@ -183,8 +182,6 @@
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
-        <version>3.0.3</version>
-        <scope>test</scope>
     </dependency>
 
    <dependency>
@@ -242,37 +239,6 @@
           </plugin>
         </plugins>
       </build>
-    </profile>
-    <profile>
-      <id>all-scala</id>
-      <modules>
-        <module>scala-2.10</module>
-        <module>scala-2.11</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>scala-2.10</id>
-      <activation>
-        <property>
-          <name>scala.compat.version</name>
-          <value>2.10</value>
-        </property>
-      </activation>
-      <modules>
-        <module>scala-2.10</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>scala-2.11</id>
-      <activation>
-        <property>
-          <name>scala.compat.version</name>
-          <value>2.11</value>
-        </property>
-      </activation>
-      <modules>
-        <module>scala-2.11</module>
-      </modules>
     </profile>
   </profiles>
 </project>
