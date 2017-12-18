@@ -95,7 +95,7 @@ Kunter et. al reccomend 3 iterations, if you don't achieve desired results, use 
      </tr>
      <tr>
         <td><code>'regressor</code></td>
-        <td>Any subclass of <code>org.apache.mahout.math.algorithms.regression.LinearRegressorFitter</code></td>
+        <td>Any subclass of <code>org.apache.mahout.math.algorithms.regression.linear.LinearRegressorFitter</code></td>
         <td><code>OrdinaryLeastSquares()</code></td>
      </tr>
      <tr>

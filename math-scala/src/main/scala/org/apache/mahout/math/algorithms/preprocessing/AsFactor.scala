@@ -19,8 +19,6 @@
 
 package org.apache.mahout.math.algorithms.preprocessing
 
-
-
 import collection._
 import JavaConversions._
 import org.apache.mahout.math._
@@ -37,7 +35,7 @@ class AsFactor extends PreprocessorFitter {
              hyperparameters: (Symbol, Any)*): AsFactorModel = {
 
     import org.apache.mahout.math.function.VectorFunction
-    val factorMap = input.allreduceBlock(
+    val colMax = input.allreduceBlock(
       { case (keys, block: Matrix) => block },
       { case (oldM: Matrix, newM: Matrix) =>
         // someday we'll replace this with block.max: Vector
@@ -54,8 +52,9 @@ class AsFactor extends PreprocessorFitter {
       (1, 1, 1))
       -> (4,2,2),  now 4,3,2
      */
-    new AsFactorModel(factorMap.sum.toInt,
-      dvec(factorMap.toArray.scanLeft(0.0)((l, r) => l + r ).take(factorMap.length))
+    val factorMap = colMax.toArray.scanLeft(0.0)((l, r) => l + r + 1 ) //.take(colMax.length + 1)
+    new AsFactorModel((colMax.toArray.last + factorMap.last).toInt,
+      dvec(factorMap)
     //  factorMap
     )
   }

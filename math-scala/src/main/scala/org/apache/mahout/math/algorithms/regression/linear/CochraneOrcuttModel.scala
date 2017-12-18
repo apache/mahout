@@ -17,11 +17,11 @@
   * under the License.
   */
 
-package org.apache.mahout.math.algorithms.regression
+package org.apache.mahout.math.algorithms.regression.linear
 
 import org.apache.mahout.math.algorithms.regression.tests._
-import org.apache.mahout.math.drm.{CacheHint, DrmLike, safeToNonNegInt}
 import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.mahout.math.drm.{CacheHint, DrmLike, safeToNonNegInt}
 import org.apache.mahout.math.function.Functions
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.{Vector => MahoutVector}
@@ -40,7 +40,7 @@ class CochraneOrcuttModel[K](regressor: LinearRegressorModel[K]) extends LinearR
 
 }
 
-class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegressorFitter[K] {
+class   CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegressorFitter[K] {
 
   var regressor: LinearRegressorFitter[K] = _
   var iterations: Int = _

@@ -17,12 +17,12 @@
   * under the License.
   */
 
-package org.apache.mahout.math.algorithms.regression
+package org.apache.mahout.math.algorithms.regression.linear
 
-import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.drm.DrmLike
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
 
 class OrdinaryLeastSquaresModel[K]
   extends LinearRegressorModel[K] {

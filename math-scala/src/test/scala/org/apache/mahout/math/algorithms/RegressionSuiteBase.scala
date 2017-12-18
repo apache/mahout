@@ -18,6 +18,7 @@
 package org.apache.mahout.math.algorithms
 
 import org.apache.mahout.math.algorithms.regression._
+import org.apache.mahout.math.algorithms.regression.linear.{CochraneOrcutt, OrdinaryLeastSquares}
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings._
@@ -177,4 +178,29 @@ trait RegressionSuiteBase extends DistributedMahoutSuite with Matchers {
     (coModel.se - correctSe).sum.abs < shortEpsilon
   }
 
+  test("mlp-regression") {
+    /* Majority of functionality is tested inCoreMLP
+        here, we just test the over all functionality of
+        the wrapper.
+     */
+    import org.apache.mahout.math.algorithms.regression.nonlinear.DistributedMLPRegression
+
+    val block = dense((0.1, 0.0, 0.0, 0.0, 0.1),
+      (0.0, 0.0, 0.0, 0.4, 0.4),
+      (0.0, 0.5, 0.0, 0.0, 0.5),
+      (0.3, 0.0, 0.0, 0.0, 0.2),
+      (0.0, 0.0, 0.2, 0.0, 0.3)
+    )
+
+    val drmData = drmParallelize(block, 2)
+
+    val X = drmData(::, 0 until 4)
+    val y = drmData(::, 4 until 5)
+
+    val model = new DistributedMLPRegression[Int]().fit(X, y, 'useBiases -> false)
+
+    val output = model.predict(X).collect(::, 0).max
+
+    output should be < (2.0) // an MLP with no biases shouldn't have any guesses > 2.0 out of the gate
+  }
 }
