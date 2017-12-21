@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Matrix and Vector Needs
+    Mailing Lists, IRC and Archives
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//users/basics/matrix-and-vector-needs.html">
+  <link rel="canonical" href="http://mahout.apache.org//general/mailing-lists.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/%20/feed.xml">
 
 
@@ -140,85 +140,84 @@
 </nav>
 
 
-  <p><a name="MatrixandVectorNeeds-Intro"></a></p>
-<h1 id="intro">Intro</h1>
+  <h1 id="general">General</h1>
 
-<p>Most ML algorithms require the ability to represent multidimensional data
-concisely and to be able to easily perform common operations on that data.
-MAHOUT-6 introduced Vector and Matrix datatypes of arbitrary cardinality,
-along with a set of common operations on their instances. Vectors and
-matrices are provided with sparse and dense implementations that are memory
-resident and are suitable for manipulating intermediate results within
-mapper, combiner and reducer implementations. They are not intended for
-applications requiring vectors or matrices that exceed the size of a single
-JVM, though such applications might be able to utilize them within a larger
-organizing framework.</p>
+<p>Communication at Mahout happens primarily online via mailing lists. We have
+a user as well as a dev list for discussion. In addition there is a commit
+list so we are able to monitor what happens on the wiki and in svn.</p>
 
-<p><a name="MatrixandVectorNeeds-Background"></a></p>
-<h2 id="background">Background</h2>
+<p><a name="MailingLists,IRCandArchives-Mailinglists"></a></p>
+<h1 id="mailing-lists">Mailing lists</h1>
 
-<p>See <a href="http://mail-archives.apache.org/mod_mbox/lucene-mahout-dev/200802.mbox/browser">http://mail-archives.apache.org/mod_mbox/lucene-mahout-dev/200802.mbox/browser</a></p>
+<p><a name="MailingLists,IRCandArchives-MahoutUserList"></a></p>
+<h2 id="mahout-user-list">Mahout User List</h2>
 
-<p><a name="MatrixandVectorNeeds-Vectors"></a></p>
-<h2 id="vectors">Vectors</h2>
+<p>This list is for users of Mahout to ask questions, share knowledge, and
+discuss issues. Do send mail to this list with usage and configuration
+questions and problems. Also, please send questions to this list to verify
+your problem before filing issues in JIRA.</p>
 
-<p>Mahout supports a Vector interface that defines the following operations over all implementation classes: assign, cardinality, copy, divide, dot, get, haveSharedCells, like, minus, normalize, plus, set, size, times, toArray, viewPart, zSum and cross. The class DenseVector implements vectors as a double<a href=".html"></a>
- that is storage and access efficient. The class SparseVector implements
-vectors as a HashMap&lt;Integer, Double&gt; that is surprisingly fast and
-efficient. For sparse vectors, the size() method returns the current number
-of elements whereas the cardinality() method returns the number of
-dimensions it holds. An additional VectorView class allows views of an
-underlying vector to be specified by the viewPart() method. See the
-JavaDocs for more complete definitions.</p>
+<ul>
+  <li><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a></li>
+  <li><a href="mailto:user-unsubscribe@mahout.apache.org">Unsubscribe</a></li>
+</ul>
 
-<p><a name="MatrixandVectorNeeds-Matrices"></a></p>
-<h2 id="matrices">Matrices</h2>
+<p><a name="MailingLists,IRCandArchives-MahoutDeveloperList"></a></p>
+<h2 id="mahout-developer-list">Mahout Developer List</h2>
 
-<p>Mahout also supports a Matrix interface that defines a similar set of operations over all implementation classes: assign, assignColumn, assignRow, cardinality, copy, divide, get, haveSharedCells, like, minus, plus, set, size, times, transpose, toArray, viewPart and zSum. The class DenseMatrix implements matrices as a double<a href=".html"></a>
-[] that is storage and access efficient. The class SparseRowMatrix
-implements matrices as a Vector[] holding the rows of the matrix in a
-SparseVector, and the symmetric class SparseColumnMatrix implements
-matrices as a Vector[] holding the columns in a SparseVector. Each of these
-classes can quickly produce a given row or column, respectively. A fourth
-class SparseMatrix, uses a HashMap&lt;Integer, Vector&gt; which is also a
-SparseVector. For sparse matrices, the size() method returns an int[2]
-containing the actual row and column sizes whereas the cardinality() method
-returns an int[2] with the number of dimensions of each. An additional
-MatrixView class allows views of an underlying matrix to be specified by
-the viewPart() method. See the JavaDocs for more complete definitions.</p>
+<p>This is the list where participating developers of the Mahout project meet
+and discuss issues concerning Mahout internals, code changes/additions,
+etc. Do not send mail to this list with usage questions or configuration
+questions and problems.</p>
 
-<p>The Matrix interface does not currently provide invert or determinant
-methods, though these are desirable. It is arguable that the
-implementations of SparseRowMatrix and SparseColumnMatrix ought to use the
-HashMap&lt;Integer, Vector&gt; implementations and that SparseMatrix should
-instead use a HashMap&lt;Integer, HashMap&lt;Integer, Double». Other forms of
-sparse matrices can also be envisioned that support different storage and
-access characteristics. Because the arguments of assignColumn and assignRow
-operations accept all forms of Vector, it is possible to construct
-instances of sparse matrices containing dense rows or columns. See the
-JavaDocs for more complete definitions.</p>
+<p>Discussion list:</p>
 
-<p>For applications like PageRank/TextRank, iterative approaches to calculate
-eigenvectors would also be useful. Batching of row/column operations would
-also be useful, such as perhaps assignRow or assighColumn accepting
-UnaryFunction and BinaryFunction arguments.</p>
+<ul>
+  <li><a href="mailto:dev-subscribe@mahout.apache.org">Subscribe</a>
+ – Do not send mail to this list with usage questions or configuration
+questions and problems.</li>
+  <li><a href="mailto:dev-unsubscribe@mahout.apache.org">Unsubscribe</a></li>
+</ul>
 
-<p><a name="MatrixandVectorNeeds-Ideas"></a></p>
-<h2 id="ideas">Ideas</h2>
+<p>Commit notifications:</p>
 
-<p>As Vector and Matrix implementations are currently memory-resident, very
-large instances greater than available memory are not supported. An
-extended set of implementations that use HBase (BigTable) in Hadoop to
-represent their instances would facilitate applications requiring such
-large collections.<br />
-See <a href="https://issues.apache.org/jira/browse/MAHOUT-6">MAHOUT-6</a>
-See <a href="http://wiki.apache.org/hadoop/Hama">Hama</a></p>
+<ul>
+  <li><a href="mailto:commits-subscribe@mahout.apache.org">Subscribe</a></li>
+  <li><a href="mailto:commits-unsubscribe@mahout.apache.org">Unsubscribe</a></li>
+</ul>
 
-<p><a name="MatrixandVectorNeeds-References"></a></p>
-<h2 id="references">References</h2>
+<p><a name="MailingLists,IRCandArchives-IRC"></a></p>
+<h1 id="irc">IRC</h1>
 
-<p>Have a look at the old parallel computing libraries like <a href="http://www.netlib.org/scalapack/">ScalaPACK</a>
-, others</p>
+<p>Mahout’s IRC channel is <strong>#mahout</strong>.  It is a logged channel.  Please keep in
+mind that it is for discussion purposes only and that (pseudo)decisions
+should be brought back to the dev@ mailing list or JIRA and other people
+who are not on IRC should be given time to respond before any work is
+committed.</p>
+
+<p><a name="MailingLists,IRCandArchives-Archives"></a></p>
+<h1 id="archives">Archives</h1>
+
+<p><a name="MailingLists,IRCandArchives-OfficialApacheArchive"></a></p>
+<h2 id="official-apache-archive">Official Apache Archive</h2>
+
+<ul>
+  <li><a href="http://mail-archives.apache.org/mod_mbox/mahout-dev/">http://mail-archives.apache.org/mod_mbox/mahout-dev/</a></li>
+  <li><a href="http://mail-archives.apache.org/mod_mbox/mahout-user/">http://mail-archives.apache.org/mod_mbox/mahout-user/</a></li>
+</ul>
+
+<p><a name="MailingLists,IRCandArchives-ExternalArchives"></a></p>
+<h2 id="external-archives">External Archives</h2>
+
+<ul>
+  <li><a href="http://mahout.markmail.org/">MarkMail</a></li>
+  <li><a href="http://dir.gmane.org/gmane.comp.apache.mahout.user">Gmane</a></li>
+</ul>
+
+<p>Please note the inclusion of a link to an archive does not imply an
+endorsement of that company by any of the committers of Mahout the Lucene
+PMC or the Apache Software Foundation. Each archive owner is solely
+responsible for the contents and availability of their archive.</p>
 
 
   <footer class="footer bg-light">

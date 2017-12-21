@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Who We Are
+    Who Are We?
     
   </title>
 
@@ -28,7 +28,15 @@
 
 </head>
 
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
+  ga('create', 'UA-98314020-1', 'auto');
+  ga('send', 'pageview');
+</script>
 <body>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
@@ -49,11 +57,11 @@
 
                 <!-- Download -->
                 <li class="nav-item">
-                    <a class="nav-link" href="/downloads/">Download</a>
+                    <a class="nav-link" href="/general/downloads">Download</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/docs/0.13.1-SNAPSHOT/index.html">Overview</a>
+                    <a class="nav-link" href="/docs/latest/index.html">Overview</a>
                 </li>
 
                 <!-- Developers -->
@@ -70,11 +78,11 @@
                         <!-- <a class="dropdown-item" href="/developers/version-control/">Version Control</a> -->
                         <div class="dropdown-divider"></div>
                         <h6 class="dropdown-header">How To's</h6>
-                        <a class="dropdown-item" href="/developers/how-to-contribute/">How to Contribute</a>
-                        <a class="dropdown-item" href="/developers/githubPRs/">Github PRs</a>
-                        <a class="dropdown-item" href="/developers/how-to-become-a-committer/">How to Become a Committer</a>
-                        <a class="dropdown-item" href="/developers/how-to-release/">How to Release</a>
-                        <a class="dropdown-item" href="/developers/how-to-update-the-website/">How to Update the Website</a>
+                        <a class="dropdown-item" href="/developers/how-to-contribute">How to Contribute</a>
+                        <a class="dropdown-item" href="/developers/githubPRs">Github PRs</a>
+                        <a class="dropdown-item" href="/developers/how-to-become-a-committer">How to Become a Committer</a>
+                        <a class="dropdown-item" href="/developers/how-to-release">How to Release</a>
+                        <a class="dropdown-item" href="/developers/how-to-update-the-website">How to Update the Website</a>
                     </div>
                 </li>
 
@@ -94,22 +102,21 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Community</a>
                     <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" href="/community/history/">History of the Apache Mahout Project</a>
-                        <a class="dropdown-item" href="/community/blogs/">Blog Posts About Mahout</a>
-                        <a class="dropdown-item" href="/community/recent-upcoming-talks/">Recent and Upcoming Talks</a>
+                        <!--<a class="dropdown-item" href="/community/history/">History of the Apache Mahout Project</a>-->
+                        <!--<a class="dropdown-item" href="/community/blogs/">Blog Posts About Mahout</a>-->
+                        <!--<a class="dropdown-item" href="/community/recent-upcoming-talks/">Recent and Upcoming Talks</a>-->
                         <!-- <a class="dropdown-item" href="/community/books-tutorials-and-talks/">Books Tutorials and Talks</a> -->
-                        <a class="dropdown-item" href="/community/buildingmahout/">Building Mahout</a>
                         <!-- <a class="dropdown-item" href="/community/faq/">FAQ</a> needs a lot of updating -->
-                        <a class="dropdown-item" href="/community/gsoc/">GSoC</a>
+                        <a class="dropdown-item" href="/developers/gsoc">GSoC</a>
                         <!-- Is OK- updated Map/Reduce verbage to reflect Samsara -->
                         <!-- <a class="dropdown-item" href="/community/mahout-benchmarks/">Mahout Benchmarks</a> These are old, Keep them? -->
                         <!-- <a class="dropdown-item" href="/community/mahout-wiki/">Mahout Wiki</a> at very least needs links cleanedup - do we still want this even?-->
-                        <a class="dropdown-item" href="/community/mailing-lists/">Mailing Lists</a>
+                        <a class="dropdown-item" href="/general/mailing-lists">Mailing Lists</a>
                         <!-- Clean and pretty -->
                         <!-- <a class="dropdown-item" href="/community/powered-by-mahout/">Powered By Mahout</a> needs update -->
-                        <a class="dropdown-item" href="/community/privacy-policy/">Privacy Policy</a>
+                        <a class="dropdown-item" href="/general/privacy-policy">Privacy Policy</a>
                         <!-- <a class="dropdown-item" href="/community/professional-support/">Professional Support</a> update if we even want to keep -->
-                        <a class="dropdown-item" href="/community/who-we-are/">Who We Are</a>
+                        <a class="dropdown-item" href="/general/who-we-are">Who We Are</a>
                         <!-- nikolai needs to add himself -->
                     </div>
                 </li>
@@ -133,7 +140,12 @@
 </nav>
 
 
-  <p><a name="WhoWeAre-Whoweare"></a></p>
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8">
+      <p><a name="WhoWeAre-Whoweare"></a></p>
 <h1 id="who-we-are">Who we are</h1>
 
 <p>Apache Mahout is maintained by a team of volunteer developers.</p>
@@ -147,155 +159,155 @@
   <thead>
     <tr>
       <th>Name</th>
-      <th>Mail</th>
-      <th>PMC</th>
-      <th>Comment</th>
+      <th style="text-align: right">Mail</th>
+      <th style="text-align: right">PMC</th>
+      <th style="text-align: right">Comment</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>Anand Avati</td>
-      <td>avati@…</td>
-      <td>No</td>
-      <td>Twitter: @anandavati</td>
+      <td style="text-align: right">avati@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right">Twitter: @anandavati</td>
     </tr>
     <tr>
       <td>Andrew Musselman</td>
-      <td>akm@…</td>
-      <td>Yes</td>
-      <td>Twitter: @akm</td>
-    </tr>
-    <tr>
-      <td>Andrew Palumbo</td>
-      <td>apalumbo@…</td>
-      <td>Yes (Chair)</td>
-      <td> </td>
+      <td style="text-align: right">akm@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right">Twitter: @akm</td>
     </tr>
     <tr>
       <td>Benson Margulies</td>
-      <td>bimargulies@…</td>
-      <td>Yes</td>
-      <td> </td>
+      <td style="text-align: right">bimargulies@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right">PMC Chair</td>
     </tr>
     <tr>
       <td>Dan Filimon</td>
-      <td>dfilimon@…</td>
-      <td>No</td>
-      <td> </td>
+      <td style="text-align: right">dfilimon@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right"> </td>
     </tr>
     <tr>
       <td>Dmitriy Lyubimov</td>
-      <td>dlyubimov@…</td>
-      <td>No (Emeritus)</td>
-      <td> </td>
+      <td style="text-align: right">dlyubimov@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right">(Emeritus PMC)</td>
     </tr>
     <tr>
       <td>Drew Farris</td>
-      <td>drew@…</td>
-      <td>Yes</td>
-      <td> </td>
+      <td style="text-align: right">drew@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right"> </td>
     </tr>
     <tr>
       <td>Ellen Friedman</td>
-      <td>ellenf@…</td>
-      <td>No</td>
-      <td>Twitter: @Ellen_Friedman</td>
+      <td style="text-align: right">ellenf@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right">Twitter: @Ellen_Friedman</td>
     </tr>
     <tr>
       <td>Frank Scholten</td>
-      <td>frankscholten@…</td>
-      <td>No</td>
-      <td> </td>
+      <td style="text-align: right">frankscholten@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right"> </td>
     </tr>
     <tr>
       <td>Gokhan Capan</td>
-      <td>gcapan@…</td>
-      <td>No</td>
-      <td><a href="http://www.linkedin.com/in/gokhancapan">LinkedIn Profile</a></td>
+      <td style="text-align: right">gcapan@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right"><a href="http://www.linkedin.com/in/gokhancapan">LinkedIn Profile</a></td>
     </tr>
     <tr>
       <td>Grant Ingersoll</td>
-      <td>gsingers@…</td>
-      <td>Yes</td>
-      <td>Twitter: @gsingers</td>
+      <td style="text-align: right">gsingers@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right">Twitter: @gsingers</td>
     </tr>
     <tr>
       <td>Isabel Drost-Fromm</td>
-      <td>isabel@…</td>
-      <td>Yes</td>
-      <td>Passion for free software (development, but to some extend also the political and economic implications), interested in agile development and project management, lives in Germany. Follow me on Twitter @MaineC</td>
+      <td style="text-align: right">isabel@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right"><!--Passion for free software (development, but to some extend also the political and economic implications), interested in agile development and project management, lives in Germany. Follow me on Twitter @MaineC--></td>
     </tr>
     <tr>
       <td>Jacob Alexander Mannix</td>
-      <td>jmannix@…</td>
-      <td>Yes</td>
-      <td> </td>
+      <td style="text-align: right">jmannix@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right"> </td>
     </tr>
     <tr>
       <td>Jeff Eastman</td>
-      <td>jeastman@…</td>
-      <td>No (Emeritus)</td>
-      <td> </td>
+      <td style="text-align: right">jeastman@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right">(Emeritus PMC)</td>
     </tr>
     <tr>
       <td>Paritosh Ranjan</td>
-      <td>pranjan@…</td>
-      <td>Yes</td>
-      <td>Twitter: @paritoshranjan</td>
+      <td style="text-align: right">pranjan@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right">Twitter: @paritoshranjan</td>
     </tr>
     <tr>
       <td>Pat Ferrel</td>
-      <td>pat@…</td>
-      <td>Yes</td>
-      <td>Twitter: @occam</td>
+      <td style="text-align: right">pat@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right">Twitter: @occam</td>
     </tr>
     <tr>
       <td>Robin Anil</td>
-      <td>robinanil@…</td>
-      <td>Yes</td>
-      <td> </td>
+      <td style="text-align: right">robinanil@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right"> </td>
     </tr>
     <tr>
       <td>Sean Owen</td>
-      <td>srowen@…</td>
-      <td>No (Emeritus)</td>
-      <td> </td>
+      <td style="text-align: right">srowen@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right">(Emeritus PMC)</td>
     </tr>
     <tr>
       <td>Sebastian Schelter</td>
-      <td>ssc@…</td>
-      <td>Yes</td>
-      <td> </td>
+      <td style="text-align: right">ssc@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right"> </td>
     </tr>
     <tr>
       <td>Shannon Quinn</td>
-      <td>squinn@…</td>
-      <td>No</td>
-      <td> </td>
+      <td style="text-align: right">squinn@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right"> </td>
     </tr>
     <tr>
       <td>Stevo Slavić</td>
-      <td>sslavic@…</td>
-      <td>No</td>
-      <td>Twitter: @sslavic</td>
+      <td style="text-align: right">sslavic@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right">Twitter: @sslavic</td>
     </tr>
     <tr>
       <td>Suneel Marthi</td>
-      <td>smarthi@…</td>
-      <td>Yes</td>
-      <td>Twitter: @suneelmarthi</td>
+      <td style="text-align: right">smarthi@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right">Twitter: @suneelmarthi</td>
     </tr>
     <tr>
       <td>Ted Dunning</td>
-      <td>tdunning@…</td>
-      <td>Yes</td>
-      <td> </td>
+      <td style="text-align: right">tdunning@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right"> </td>
     </tr>
     <tr>
       <td>Tom Pierce</td>
-      <td>tcp@…</td>
-      <td>No</td>
-      <td> </td>
+      <td style="text-align: right">tcp@…</td>
+      <td style="text-align: right">No</td>
+      <td style="text-align: right"> </td>
+    </tr>
+    <tr>
+      <td>Trevor Grant</td>
+      <td style="text-align: right">rawkintrevo@…</td>
+      <td style="text-align: right">Yes</td>
+      <td style="text-align: right">Twitter: @rawkintrevo</td>
     </tr>
   </tbody>
 </table>
@@ -320,6 +332,45 @@
 <h2 id="contributors">Contributors</h2>
 
 <p>Apache Mahout contributors and their contributions to individual issues can be found at Apache <a href="http://issues.apache.org/jira/browse/MAHOUT">JIRA</a>.</p>
+
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Apache Software Foundation Links -->
+<div class="card mb-4">
+    <div class="card-header">
+        Apache Software Foundation
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li>
+                <a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/licenses/">Apache License</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Twitter Posts Widget -->
+<div class="card">
+    <div class="card-body">
+        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
+        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+</div>
+    </div>
+
+  </div>
+
+</div>
 
 
   <footer class="footer bg-light">

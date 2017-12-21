@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Matrix and Vector Needs
+    New Website
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//users/basics/matrix-and-vector-needs.html">
+  <link rel="canonical" href="http://mahout.apache.org//posts/new-website.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/%20/feed.xml">
 
 
@@ -140,85 +140,56 @@
 </nav>
 
 
-  <p><a name="MatrixandVectorNeeds-Intro"></a></p>
-<h1 id="intro">Intro</h1>
+  <div class="container mt-5 pb-4">
 
-<p>Most ML algorithms require the ability to represent multidimensional data
-concisely and to be able to easily perform common operations on that data.
-MAHOUT-6 introduced Vector and Matrix datatypes of arbitrary cardinality,
-along with a set of common operations on their instances. Vectors and
-matrices are provided with sparse and dense implementations that are memory
-resident and are suitable for manipulating intermediate results within
-mapper, combiner and reducer implementations. They are not intended for
-applications requiring vectors or matrices that exceed the size of a single
-JVM, though such applications might be able to utilize them within a larger
-organizing framework.</p>
+  <div class="row">
 
-<p><a name="MatrixandVectorNeeds-Background"></a></p>
-<h2 id="background">Background</h2>
+    <div class="col-lg-8">
+      <h1 id="new-website-released">New Website Released</h1>
 
-<p>See <a href="http://mail-archives.apache.org/mod_mbox/lucene-mahout-dev/200802.mbox/browser">http://mail-archives.apache.org/mod_mbox/lucene-mahout-dev/200802.mbox/browser</a></p>
+<p>We’ve launced a new website, designed by David Miller from <a href="http://startbootstrap.com">StartBootstrap</a>.</p>
 
-<p><a name="MatrixandVectorNeeds-Vectors"></a></p>
-<h2 id="vectors">Vectors</h2>
+<p>It looks great but there’s lots to do as we migrate and clean up content from the old site. If you see anything broken, 
+please let us know via dev@mahout.apache.org or <a href="/developers/githubPRs">open a PR</a></p>
 
-<p>Mahout supports a Vector interface that defines the following operations over all implementation classes: assign, cardinality, copy, divide, dot, get, haveSharedCells, like, minus, normalize, plus, set, size, times, toArray, viewPart, zSum and cross. The class DenseVector implements vectors as a double<a href=".html"></a>
- that is storage and access efficient. The class SparseVector implements
-vectors as a HashMap&lt;Integer, Double&gt; that is surprisingly fast and
-efficient. For sparse vectors, the size() method returns the current number
-of elements whereas the cardinality() method returns the number of
-dimensions it holds. An additional VectorView class allows views of an
-underlying vector to be specified by the viewPart() method. See the
-JavaDocs for more complete definitions.</p>
+    </div>
 
-<p><a name="MatrixandVectorNeeds-Matrices"></a></p>
-<h2 id="matrices">Matrices</h2>
+    <div class="col-lg-4">
+      <!-- Apache Software Foundation Links -->
+<div class="card mb-4">
+    <div class="card-header">
+        Apache Software Foundation
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li>
+                <a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/licenses/">Apache License</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+            </li>
+        </ul>
+    </div>
+</div>
 
-<p>Mahout also supports a Matrix interface that defines a similar set of operations over all implementation classes: assign, assignColumn, assignRow, cardinality, copy, divide, get, haveSharedCells, like, minus, plus, set, size, times, transpose, toArray, viewPart and zSum. The class DenseMatrix implements matrices as a double<a href=".html"></a>
-[] that is storage and access efficient. The class SparseRowMatrix
-implements matrices as a Vector[] holding the rows of the matrix in a
-SparseVector, and the symmetric class SparseColumnMatrix implements
-matrices as a Vector[] holding the columns in a SparseVector. Each of these
-classes can quickly produce a given row or column, respectively. A fourth
-class SparseMatrix, uses a HashMap&lt;Integer, Vector&gt; which is also a
-SparseVector. For sparse matrices, the size() method returns an int[2]
-containing the actual row and column sizes whereas the cardinality() method
-returns an int[2] with the number of dimensions of each. An additional
-MatrixView class allows views of an underlying matrix to be specified by
-the viewPart() method. See the JavaDocs for more complete definitions.</p>
+<!-- Twitter Posts Widget -->
+<div class="card">
+    <div class="card-body">
+        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
+        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+</div>
+    </div>
 
-<p>The Matrix interface does not currently provide invert or determinant
-methods, though these are desirable. It is arguable that the
-implementations of SparseRowMatrix and SparseColumnMatrix ought to use the
-HashMap&lt;Integer, Vector&gt; implementations and that SparseMatrix should
-instead use a HashMap&lt;Integer, HashMap&lt;Integer, Double». Other forms of
-sparse matrices can also be envisioned that support different storage and
-access characteristics. Because the arguments of assignColumn and assignRow
-operations accept all forms of Vector, it is possible to construct
-instances of sparse matrices containing dense rows or columns. See the
-JavaDocs for more complete definitions.</p>
+  </div>
 
-<p>For applications like PageRank/TextRank, iterative approaches to calculate
-eigenvectors would also be useful. Batching of row/column operations would
-also be useful, such as perhaps assignRow or assighColumn accepting
-UnaryFunction and BinaryFunction arguments.</p>
-
-<p><a name="MatrixandVectorNeeds-Ideas"></a></p>
-<h2 id="ideas">Ideas</h2>
-
-<p>As Vector and Matrix implementations are currently memory-resident, very
-large instances greater than available memory are not supported. An
-extended set of implementations that use HBase (BigTable) in Hadoop to
-represent their instances would facilitate applications requiring such
-large collections.<br />
-See <a href="https://issues.apache.org/jira/browse/MAHOUT-6">MAHOUT-6</a>
-See <a href="http://wiki.apache.org/hadoop/Hama">Hama</a></p>
-
-<p><a name="MatrixandVectorNeeds-References"></a></p>
-<h2 id="references">References</h2>
-
-<p>Have a look at the old parallel computing libraries like <a href="http://www.netlib.org/scalapack/">ScalaPACK</a>
-, others</p>
+</div>
 
 
   <footer class="footer bg-light">
