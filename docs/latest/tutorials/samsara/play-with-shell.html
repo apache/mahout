@@ -1,283 +1,169 @@
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang=" en ">
+
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Mahout Samsara In Core</title>
-  
-  <meta name="author" content="Apache Mahout">
+  <title>
+    Mahout Samsara In Core
+    
+  </title>
 
-  <!-- Enable responsive viewport -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Distributed Linear Algebra">
 
-  <!-- Bootstrap styles -->
-  <link href="/assets/themes/mahout3/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Optional theme -->
-  <link href="/assets/themes/mahout3/css/bootstrap-theme.min.css" rel="stylesheet">
-  <!-- Sticky Footer -->
-  <link href="/assets/themes/mahout3/css/bs-sticky-footer.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
 
-  <!-- Custom styles -->
-  <link href="/assets/themes/mahout3/css/style.css" rel="stylesheet" type="text/css" media="all">
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-  <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-  <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-  <![endif]-->
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <!-- Fav and touch icons -->
-  <!-- Update these with your own images
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
-  -->
+  <link rel="canonical" href="http://mahout.apache.org//docs/latest/tutorials/samsara/play-with-shell.html">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/%20/feed.xml">
 
-  <!-- atom & rss feed -->
-  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
-  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
-  <script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-    }
-  });
-  MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i = 0; i < all.length; i += 1) {
-      all[i].SourceElement().parentNode.className += ' has-jax';
-    }
-  });
-  </script>
-  <script type="text/javascript">
-    var mathjax = document.createElement('script');
-    mathjax.type = 'text/javascript';
-    mathjax.async = true;
 
-    mathjax.src = ('https:' == document.location.protocol) ?
-        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' :
-        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-
-      var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(mathjax, s);
-  </script>
 </head>
 
-<nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/">
-        <img src="/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
-      </a>
-    </div>
-
-    
-
-
-<!-- Collect the nav links, forms, and other content for toggling -->
-<div class="collapse navbar-collapse" id="main-navbar">
-    <ul class="nav navbar-nav">
-
-        <!-- Quick Start -->
-        <li id="quickstart">
-            <a href="/index.html" >Mahout Overview</a>
-        </li>
-
-        <li id="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Key Concepts<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="/index.html">Mahout Overview</a></li>
-                <li><span><b>&nbsp;&nbsp;Scala DSL</b><span></li>
-                <li><a href="/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
-                <li><a href="/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
-                <li><a href="/mahout-samsara/faq.html">Samsara FAQ</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Bindings</b><span></li>
-                <li><a href="/distributed/spark-bindings/">Spark Bindings</a></li>
-                <li><a href="/distributed/flink-bindings.html">Flink Bindings</a></li>
-                <li><a href="/distributed/flink-bindings.html">H20 Bindings</a></li>
-                <!--<li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Native Solvers</b><span></li>
-                <li><a href="/native-solvers/viennacl.html">ViennaCL</a></li>
-                <li><a href="/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
-                <li><a href="/native-solvers/cuda.html">CUDA</a></li>-->
-            </ul>
-        </li>
-
-        <li id="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><span>&nbsp;&nbsp;<b>Reccomenders</b><span></li>
-                <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
-                <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Mahout Samsara</b><span></li>
-                <li><a href="/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
-                <li><a href="/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a></li>
-                <li><a href="/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
-                <li><a href="/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Misc</b><span></li>
-                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
-                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
-                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Deprecated</b><span></li>
-                <li><a href="/tutorials/map-reduce">MapReduce</a></li>
-            </ul>
-        </li>
-
-
-        <!-- Algorithms (Samsara / MR) -->
-        <li id="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="/algorithms/linear-algebra">Distributed Linear Algebra</a></li>
-                <li><a href="/algorithms/preprocessors">Preprocessors</a></li>
-                <li><a href="/algorithms/regression">Regression</a></li>
-                <li><a href="/algorithms/reccomenders">Reccomenders</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a></li>
-            </ul>
-                <!--<li><a href="/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
-                <!--
-                <li><a href="/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<a href="/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
-
-
-             -->
-        </li>
-
-        <!-- Scala Docs -->
-        <li id="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API Docs<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="/0.13.0/api/index.html">0.13.0</a></li>
-            </ul>
-        </li>
-
-
-    </ul>
-    <form class="navbar-form navbar-left">
-        <div class="form-group">
-            <input type="text" class="form-control" placeholder="Search">
-        </div>
-        <button type="submit" class="btn btn-default">Submit</button>
-    </form>
-    <ul class="nav navbar-nav navbar-right">
-        <li><a href="http://github.com/apache/mahout">Github</a></li>
-
-        <!-- Apache -->
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
-                <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
-                <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
-                <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
-            </ul>
-        </li>
-
-    </ul>
-</div><!-- /.navbar-collapse -->
-
-  </div><!-- /.container-fluid -->
-</nav>
 
 <body>
 
-<div id="wrap">
-  <body class="">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
 
-  <div class="container">
-    
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+            <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <div class="navbar-nav ml-auto">
+
+                <!-- Quick Start -->
+                <li class="nav-item">
+                    <a class="nav-link" href="//docs/latest/" >Mahout Overview</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Key Concepts</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/index.html">Mahout Overview</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Scala DSL</h6>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/in-core-reference.html">In-core Reference</a>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/faq.html">Samsara FAQ</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Distributed Engine Bindings</h6>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/spark-bindings/">Spark Bindings</a>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/flink-bindings.html">Flink Bindings</a>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/flink-bindings.html">H20 Bindings</a>
+                        <!--<div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Native Solvers</h6>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/viennacl.html">ViennaCL</a></li>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/cuda.html">CUDA</a></li>-->
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tutorial</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Reccomenders</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/cco-lastfm">CCO Example with Last.FM Data</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Mahout Samsara</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Misc</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/how-to-build-an-app.html">How To Build An App</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/map-reduce">MapReduce</a>
+                    </div>
+                </li>
 
 
-<div class="row">
-    <div class="col-xs-3">
-        <div id="TutorialMenu">
-    <span><b>Tutorials</b></span>
-    <div class="list-group panel">
-        <a href="#linalg" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Linear Algebra</b><i class="fa fa-caret-down"></i></a>
-            <div class="collapse" id="linalg">
-                <ul class="nav sidebar-nav">
-                    <li><a href="/tutorials/eigenfaces">Eigenfaces Demo (Shell or Zeppelin)</a></li>
-                </ul>
-            </div>
-        <a href="#reccomenders" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Reccomenders</b><i class="fa fa-caret-down"></i></a>
-            <div class="collapse" id="reccomenders">
-                <ul class="nav sidebar-nav">
-                    <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
-                    <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
-                </ul>
-            </div>
-        <a href="#other" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#TutorialMenu"><b>Other</b><i class="fa fa-caret-down"></i></a>
-        <div class="collapse" id="other">
-            <ul class="nav sidebar-nav">
-                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
-                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
-                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
+                <!-- Algorithms (Samsara / MR) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Algorithms</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/linear-algebra">Distributed Linear Algebra</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/preprocessors">Preprocessors</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/regression">Regression</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/reccomenders">Reccomenders</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
+                    </div>
+                        <!--<a class="dropdown-item"  href="/docs/latest/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                        <!--
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+
+
+                     -->
+                </li>
+
+                <!-- Scala /docs -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">API /docs</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/0.13.0/api/index.html">0.13.0</a>
+                    </div>
+                </li>
+
+                <!-- Apache -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Apache</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/licenses/">Apache License</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+                    </div>
+                </li>
+
             </ul>
-        </div>
+
+                <!--<form class="navbar-form navbar-left">-->
+                    <!--<div class="form-group">-->
+                        <!--<input type="text" class="form-control" placeholder="Search">-->
+                    <!--</div>-->
+                    <!--<button type="submit" class="btn btn-default">Submit</button>-->
+                <!--</form>-->
+                <!--<ul class="nav navbar-nav navbar-right">-->
+                    <!--<a class="dropdown-item"  href="http://github.com/apache/mahout">Github</a></li>-->
+
+
+
+                <!--</ul>-->
+        </div><!-- /.navbar-collapse -->
     </div>
-    <span><b>Map Reduce Tutorials</b> (deprecated)</span>
-    <div class="list-group panel">
-        <a href="#classification" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Classification</b><i class="fa fa-caret-down"></i></a>
-        <div class="collapse" id="classification">
-            <ul class="nav sidebar-nav">
-                <li> <a href="/tutorials/map-reduce/classification/bankmarketing-example.html">Bank Marketing Example</a></li>
-                <li> <a href="/tutorials/map-reduce/classification/breiman-example.html">Breiman Example</a></li>
-                <li> <a href="/tutorials/map-reduce/classification/twenty-newsgroups.html">Twenty Newsgroups Example</a></li>
-                <li> <a href="/tutorials/map-reduce/classification/wikipedia-classifier-example.html">Wikipedia Classifier Example</a></li>
-                <li> <a href="/tutorials/map-reduce/classification/parallel-frequent-pattern-mining.html">Parallel Frequent Pattern Mining</a></li>
-            </ul>
-        </div>
-        <a href="#clustering" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Clustering</b><i class="fa fa-caret-down"></i></a>
-        <div class="collapse" id="clustering">
-            <ul class="nav sidebar-nav">
-                <li> <a href="/tutorials/map-reduce/clustering/20newsgroups.html">Twenty Newsgroups Example</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/canopy-commandline.html">Canopy Clustering from the Commandline</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/clustering-of-synthetic-control-data.html">Clustering of Synthetic Control Data</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/clustering-seinfeld-episodes.html">Clustering of Seinfeld Episodes</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/clusteringyourdata.html">Clustering Your Data</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/fuzzy-k-means-commandline.html">Fuzzy K-Means from the Commandline</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/k-means-commandline.html">K-Means from the Commandline</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/lda-commandline.html">LDA from the Commandline</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/viewing-results.html">Viewing Results</a></li>
-                <li> <a href="/tutorials/map-reduce/clustering/visualizing-sample-clusters.html">Visualizing Sample Clusters</a></li>
-            </ul>
-        </div>
-        <a href="#misc" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MrTutorialMenu"><b>Miscelaneous</b><i class="fa fa-caret-down"></i></a>
-        <div class="collapse" id="misc">
-            <ul class="nav sidebar-nav">
-                <li> <a href="/tutorials/map-reduce/misc/mr---map-reduce.html">MR Map-Reduce</a></li>
-                <li> <a href="/tutorials/map-reduce/misc/parallel-frequent-pattern-mining.html">Parallel Frequent Pattern Mining</a></li>
-                <li> <a href="/tutorials/map-reduce/misc/using-mahout-with-python-via-jpype.html">Using Mahout (Map Reduce) with Python via Jpype</a></li>
-            </ul>
-        </div>
-    </div>
-</div>
+</nav>
 
-    </div>
+  <div class="container mt-5 pb-4">
 
-    <div class="col-xs-8">
-        <div class="page-header">
-            <h1>Mahout Samsara In Core </h1>
-        </div>
-        <h1 id="playing-with-mahouts-spark-shell">Playing with Mahout’s Spark Shell</h1>
+  <div class="row">
+
+    <div class="col-lg-8">
+      <h1 id="playing-with-mahouts-spark-shell">Playing with Mahout’s Spark Shell</h1>
 
 <p>This tutorial will show you how to play with Mahout’s scala DSL for linear algebra and its Spark shell. <strong>Please keep in mind that this code is still in a very early experimental stage</strong>.</p>
 
@@ -380,15 +266,15 @@
 
 <ol>
   <li>Download <a href="http://d3kbcqa49mib13.cloudfront.net/spark-1.6.2-bin-hadoop2.6.tgz">Apache Spark 1.6.2</a> and unpack the archive file</li>
-  <li>Change to the directory where you unpacked Spark and type <code>sbt/sbt assembly</code> to build it</li>
-  <li>Create a directory for Mahout somewhere on your machine, change to there and checkout the master branch of Apache Mahout from GitHub <code>git clone https://github.com/apache/mahout mahout</code></li>
-  <li>Change to the <code>mahout</code> directory and build mahout using <code>mvn -DskipTests clean install</code></li>
+  <li>Change to the directory where you unpacked Spark and type <code class="highlighter-rouge">sbt/sbt assembly</code> to build it</li>
+  <li>Create a directory for Mahout somewhere on your machine, change to there and checkout the master branch of Apache Mahout from GitHub <code class="highlighter-rouge">git clone https://github.com/apache/mahout mahout</code></li>
+  <li>Change to the <code class="highlighter-rouge">mahout</code> directory and build mahout using <code class="highlighter-rouge">mvn -DskipTests clean install</code></li>
 </ol>
 
 <h2 id="starting-mahouts-spark-shell">Starting Mahout’s Spark shell</h2>
 
 <ol>
-  <li>Goto the directory where you unpacked Spark and type <code>sbin/start-all.sh</code> to locally start Spark</li>
+  <li>Goto the directory where you unpacked Spark and type <code class="highlighter-rouge">sbin/start-all.sh</code> to locally start Spark</li>
   <li>Open a browser, point it to <a href="http://localhost:8080/">http://localhost:8080/</a> to check whether Spark successfully started. Copy the url of the spark master at the top of the page (it starts with <strong>spark://</strong>)</li>
   <li>Define the following environment variables: &lt;pre class="codehilite"&gt;export MAHOUT_HOME=[directory into which you checked out Mahout]
 export SPARK_HOME=[directory where you unpacked Spark]
@@ -396,8 +282,8 @@ export MASTER=[url of the Spark master]</li>
 </ol>
 <p>&lt;/pre&gt;</p>
 <ol>
-  <li>Finally, change to the directory where you unpacked Mahout and type <code>bin/mahout spark-shell</code>, 
-you should see the shell starting and get the prompt <code>mahout&gt;</code>. Check 
+  <li>Finally, change to the directory where you unpacked Mahout and type <code class="highlighter-rouge">bin/mahout spark-shell</code>, 
+you should see the shell starting and get the prompt <code class="highlighter-rouge">mahout&gt;</code>. Check 
 <a href="http://mahout.apache.org/users/sparkbindings/faq.html">FAQ</a> for further troubleshooting.</li>
 </ol>
 
@@ -407,7 +293,7 @@ you should see the shell starting and get the prompt <code>mahout&gt;</code>. Ch
 
 <p><em>Note: You can incrementally follow the example by copy-and-pasting the code into your running Mahout shell.</em></p>
 
-<p>Mahout’s linear algebra DSL has an abstraction called <em>DistributedRowMatrix (DRM)</em> which models a matrix that is partitioned by rows and stored in the memory of a cluster of machines. We use <code>dense()</code> to create a dense in-memory matrix from our toy dataset and use <code>drmParallelize</code> to load it into the cluster, “mimicking” a large, partitioned dataset.</p>
+<p>Mahout’s linear algebra DSL has an abstraction called <em>DistributedRowMatrix (DRM)</em> which models a matrix that is partitioned by rows and stored in the memory of a cluster of machines. We use <code class="highlighter-rouge">dense()</code> to create a dense in-memory matrix from our toy dataset and use <code class="highlighter-rouge">drmParallelize</code> to load it into the cluster, “mimicking” a large, partitioned dataset.</p>
 
 <div class="codehilite"><pre>
 val drmData = drmParallelize(dense(
@@ -426,47 +312,47 @@ val drmData = drmParallelize(dense(
 <p>Have a look at this matrix. The first four columns represent the ingredients 
 (our features) and the last column (the rating) is the target variable for 
 our regression. <a href="https://en.wikipedia.org/wiki/Linear_regression">Linear regression</a> 
-assumes that the <strong>target variable</strong> <code>\(\mathbf{y}\)</code> is generated by the 
-linear combination of <strong>the feature matrix</strong> <code>\(\mathbf{X}\)</code> with the 
-<strong>parameter vector</strong> <code>\(\boldsymbol{\beta}\)</code> plus the
- <strong>noise</strong> <code>\(\boldsymbol{\varepsilon}\)</code>, summarized in the formula 
-<code>\(\mathbf{y}=\mathbf{X}\boldsymbol{\beta}+\boldsymbol{\varepsilon}\)</code>. 
+assumes that the <strong>target variable</strong> <code class="highlighter-rouge">\(\mathbf{y}\)</code> is generated by the 
+linear combination of <strong>the feature matrix</strong> <code class="highlighter-rouge">\(\mathbf{X}\)</code> with the 
+<strong>parameter vector</strong> <code class="highlighter-rouge">\(\boldsymbol{\beta}\)</code> plus the
+ <strong>noise</strong> <code class="highlighter-rouge">\(\boldsymbol{\varepsilon}\)</code>, summarized in the formula 
+<code class="highlighter-rouge">\(\mathbf{y}=\mathbf{X}\boldsymbol{\beta}+\boldsymbol{\varepsilon}\)</code>. 
 Our goal is to find an estimate of the parameter vector 
-<code>\(\boldsymbol{\beta}\)</code> that explains the data very well.</p>
+<code class="highlighter-rouge">\(\boldsymbol{\beta}\)</code> that explains the data very well.</p>
 
-<p>As a first step, we extract <code>\(\mathbf{X}\)</code> and <code>\(\mathbf{y}\)</code> from our data matrix. We get <em>X</em> by slicing: we take all rows (denoted by <code>::</code>) and the first four columns, which have the ingredients in milligrams as content. Note that the result is again a DRM. The shell will not execute this code yet, it saves the history of operations and defers the execution until we really access a result. <strong>Mahout’s DSL automatically optimizes and parallelizes all operations on DRMs and runs them on Apache Spark.</strong></p>
+<p>As a first step, we extract <code class="highlighter-rouge">\(\mathbf{X}\)</code> and <code class="highlighter-rouge">\(\mathbf{y}\)</code> from our data matrix. We get <em>X</em> by slicing: we take all rows (denoted by <code class="highlighter-rouge">::</code>) and the first four columns, which have the ingredients in milligrams as content. Note that the result is again a DRM. The shell will not execute this code yet, it saves the history of operations and defers the execution until we really access a result. <strong>Mahout’s DSL automatically optimizes and parallelizes all operations on DRMs and runs them on Apache Spark.</strong></p>
 
 <div class="codehilite"><pre>
 val drmX = drmData(::, 0 until 4)
 </pre></div>
 
-<p>Next, we extract the target variable vector <em>y</em>, the fifth column of the data matrix. We assume this one fits into our driver machine, so we fetch it into memory using <code>collect</code>:</p>
+<p>Next, we extract the target variable vector <em>y</em>, the fifth column of the data matrix. We assume this one fits into our driver machine, so we fetch it into memory using <code class="highlighter-rouge">collect</code>:</p>
 
 <div class="codehilite"><pre>
 val y = drmData.collect(::, 4)
 </pre></div>
 
-<p>Now we are ready to think about a mathematical way to estimate the parameter vector <em>β</em>. A simple textbook approach is <a href="https://en.wikipedia.org/wiki/Ordinary_least_squares">ordinary least squares (OLS)</a>, which minimizes the sum of residual squares between the true target variable and the prediction of the target variable. In OLS, there is even a closed form expression for estimating <code>\(\boldsymbol{\beta}\)</code> as 
-<code>\(\left(\mathbf{X}^{\top}\mathbf{X}\right)^{-1}\mathbf{X}^{\top}\mathbf{y}\)</code>.</p>
+<p>Now we are ready to think about a mathematical way to estimate the parameter vector <em>β</em>. A simple textbook approach is <a href="https://en.wikipedia.org/wiki/Ordinary_least_squares">ordinary least squares (OLS)</a>, which minimizes the sum of residual squares between the true target variable and the prediction of the target variable. In OLS, there is even a closed form expression for estimating <code class="highlighter-rouge">\(\boldsymbol{\beta}\)</code> as 
+<code class="highlighter-rouge">\(\left(\mathbf{X}^{\top}\mathbf{X}\right)^{-1}\mathbf{X}^{\top}\mathbf{y}\)</code>.</p>
 
-<p>The first thing which we compute for this is  <code>\(\mathbf{X}^{\top}\mathbf{X}\)</code>. The code for doing this in Mahout’s scala DSL maps directly to the mathematical formula. The operation <code>.t()</code> transposes a matrix and analogous to R <code>%*%</code> denotes matrix multiplication.</p>
+<p>The first thing which we compute for this is  <code class="highlighter-rouge">\(\mathbf{X}^{\top}\mathbf{X}\)</code>. The code for doing this in Mahout’s scala DSL maps directly to the mathematical formula. The operation <code class="highlighter-rouge">.t()</code> transposes a matrix and analogous to R <code class="highlighter-rouge">%*%</code> denotes matrix multiplication.</p>
 
 <div class="codehilite"><pre>
 val drmXtX = drmX.t %*% drmX
 </pre></div>
 
-<p>The same is true for computing <code>\(\mathbf{X}^{\top}\mathbf{y}\)</code>. We can simply type the math in scala expressions into the shell. Here, <em>X</em> lives in the cluster, while is <em>y</em> in the memory of the driver, and the result is a DRM again.</p>
+<p>The same is true for computing <code class="highlighter-rouge">\(\mathbf{X}^{\top}\mathbf{y}\)</code>. We can simply type the math in scala expressions into the shell. Here, <em>X</em> lives in the cluster, while is <em>y</em> in the memory of the driver, and the result is a DRM again.</p>
 <div class="codehilite"><pre>
 val drmXty = drmX.t %*% y
 </pre></div>
 
-<p>We’re nearly done. The next step we take is to fetch <code>\(\mathbf{X}^{\top}\mathbf{X}\)</code> and 
-<code>\(\mathbf{X}^{\top}\mathbf{y}\)</code> into the memory of our driver machine (we are targeting 
+<p>We’re nearly done. The next step we take is to fetch <code class="highlighter-rouge">\(\mathbf{X}^{\top}\mathbf{X}\)</code> and 
+<code class="highlighter-rouge">\(\mathbf{X}^{\top}\mathbf{y}\)</code> into the memory of our driver machine (we are targeting 
 features matrices that are tall and skinny , 
-so we can assume that <code>\(\mathbf{X}^{\top}\mathbf{X}\)</code> is small enough 
+so we can assume that <code class="highlighter-rouge">\(\mathbf{X}^{\top}\mathbf{X}\)</code> is small enough 
 to fit in). Then, we provide them to an in-memory solver (Mahout provides 
-the an analog to R’s <code>solve()</code> for that) which computes <code>beta</code>, our 
-OLS estimate of the parameter vector <code>\(\boldsymbol{\beta}\)</code>.</p>
+the an analog to R’s <code class="highlighter-rouge">solve()</code> for that) which computes <code class="highlighter-rouge">beta</code>, our 
+OLS estimate of the parameter vector <code class="highlighter-rouge">\(\boldsymbol{\beta}\)</code>.</p>
 
 <div class="codehilite"><pre>
 val XtX = drmXtX.collect
@@ -483,9 +369,9 @@ as much as possible, while still retaining decent performance and
 scalability.</p>
 
 <p>We can now check how well our model fits its training data. 
-First, we multiply the feature matrix <code>\(\mathbf{X}\)</code> by our estimate of 
-<code>\(\boldsymbol{\beta}\)</code>. Then, we look at the difference (via L2-norm) of 
-the target variable <code>\(\mathbf{y}\)</code> to the fitted target variable:</p>
+First, we multiply the feature matrix <code class="highlighter-rouge">\(\mathbf{X}\)</code> by our estimate of 
+<code class="highlighter-rouge">\(\boldsymbol{\beta}\)</code>. Then, we look at the difference (via L2-norm) of 
+the target variable <code class="highlighter-rouge">\(\mathbf{y}\)</code> to the fitted target variable:</p>
 
 <div class="codehilite"><pre>
 val yFitted = (drmX %*% beta).collect(::, 0)
@@ -494,7 +380,7 @@ val yFitted = (drmX %*% beta).collect(::, 0)
 
 <p>We hope that we could show that Mahout’s shell allows people to interactively and incrementally write algorithms. We have entered a lot of individual commands, one-by-one, until we got the desired results. We can now refactor a little by wrapping our statements into easy-to-use functions. The definition of functions follows standard scala syntax.</p>
 
-<p>We put all the commands for ordinary least squares into a function <code>ols</code>.</p>
+<p>We put all the commands for ordinary least squares into a function <code class="highlighter-rouge">ols</code>.</p>
 
 <div class="codehilite"><pre>
 def ols(drmX: DrmLike[Int], y: Vector) = 
@@ -502,10 +388,10 @@ def ols(drmX: DrmLike[Int], y: Vector) =
 
 </pre></div>
 
-<p>Note that DSL declares implicit <code>collect</code> if coersion rules require an in-core argument. Hence, we can simply
-skip explicit <code>collect</code>s.</p>
+<p>Note that DSL declares implicit <code class="highlighter-rouge">collect</code> if coersion rules require an in-core argument. Hence, we can simply
+skip explicit <code class="highlighter-rouge">collect</code>s.</p>
 
-<p>Next, we define a function <code>goodnessOfFit</code> that tells how well a model fits the target variable:</p>
+<p>Next, we define a function <code class="highlighter-rouge">goodnessOfFit</code> that tells how well a model fits the target variable:</p>
 
 <div class="codehilite"><pre>
 def goodnessOfFit(drmX: DrmLike[Int], beta: Vector, y: Vector) = {
@@ -518,7 +404,7 @@ def goodnessOfFit(drmX: DrmLike[Int], beta: Vector, y: Vector) = {
 model. Usually there is a constant bias term added to the model. Without 
 that, our model always crosses through the origin and we only learn the 
 right angle. An easy way to add such a bias term to our model is to add a 
-column of ones to the feature matrix <code>\(\mathbf{X}\)</code>. 
+column of ones to the feature matrix <code class="highlighter-rouge">\(\mathbf{X}\)</code>. 
 The corresponding weight in the parameter vector will then be the bias term.</p>
 
 <p>Here is how we add a bias column:</p>
@@ -527,14 +413,14 @@ The corresponding weight in the parameter vector will then be the bias term.</p>
 val drmXwithBiasColumn = drmX cbind 1
 </pre></div>
 
-<p>Now we can give the newly created DRM <code>drmXwithBiasColumn</code> to our model fitting method <code>ols</code> and see how well the resulting model fits the training data with <code>goodnessOfFit</code>. You should see a large improvement in the result.</p>
+<p>Now we can give the newly created DRM <code class="highlighter-rouge">drmXwithBiasColumn</code> to our model fitting method <code class="highlighter-rouge">ols</code> and see how well the resulting model fits the training data with <code class="highlighter-rouge">goodnessOfFit</code>. You should see a large improvement in the result.</p>
 
 <div class="codehilite"><pre>
 val betaWithBiasTerm = ols(drmXwithBiasColumn, y)
 goodnessOfFit(drmXwithBiasColumn, betaWithBiasTerm, y)
 </pre></div>
 
-<p>As a further optimization, we can make use of the DSL’s caching functionality. We use <code>drmXwithBiasColumn</code> repeatedly  as input to a computation, so it might be beneficial to cache it in memory. This is achieved by calling <code>checkpoint()</code>. In the end, we remove it from the cache with uncache:</p>
+<p>As a further optimization, we can make use of the DSL’s caching functionality. We use <code class="highlighter-rouge">drmXwithBiasColumn</code> repeatedly  as input to a computation, so it might be beneficial to cache it in memory. This is achieved by calling <code class="highlighter-rouge">checkpoint()</code>. In the end, we remove it from the cache with uncache:</p>
 
 <div class="codehilite"><pre>
 val cachedDrmX = drmXwithBiasColumn.checkpoint()
@@ -550,32 +436,25 @@ goodness
 <p>Liked what you saw? Checkout Mahout’s overview for the <a href="/distributed/spark-bindings">Scala and Spark bindings</a>.</p>
 
     </div>
-</div>
+
 
   </div>
 
-
-</div>
-
-<div id="footer">
-  <div class="container">
-    <p>&copy; 2017 Apache Mahout
-      with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
-      and <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>
-    </p>
-  </div>
 </div>
 
 
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2017 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
 
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-
-
-
-<!-- Latest compiled and minified JavaScript, requires jQuery 1.x (2.x not supported in IE8) -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script src="/assets/themes/mahout3/js/bootstrap.min.js"></script>
 </body>
-</html>
 
+</html>

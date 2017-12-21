@@ -1,217 +1,177 @@
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang=" en ">
+
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Contributing new algorithms</title>
-  
-  <meta name="author" content="Apache Mahout">
+  <title>
+    Contributing new algorithms
+    
+  </title>
 
-  <!-- Enable responsive viewport -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Distributed Linear Algebra">
 
-  <!-- Bootstrap styles -->
-  <link href="/assets/themes/mahout3/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Optional theme -->
-  <link href="/assets/themes/mahout3/css/bootstrap-theme.min.css" rel="stylesheet">
-  <!-- Sticky Footer -->
-  <link href="/assets/themes/mahout3/css/bs-sticky-footer.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
 
-  <!-- Custom styles -->
-  <link href="/assets/themes/mahout3/css/style.css" rel="stylesheet" type="text/css" media="all">
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-  <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-  <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-  <![endif]-->
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <!-- Fav and touch icons -->
-  <!-- Update these with your own images
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
-  -->
+  <link rel="canonical" href="http://mahout.apache.org//docs/latest/tutorials/misc/contributing-algos/">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/%20/feed.xml">
 
-  <!-- atom & rss feed -->
-  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
-  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
-  <script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-    }
-  });
-  MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i = 0; i < all.length; i += 1) {
-      all[i].SourceElement().parentNode.className += ' has-jax';
-    }
-  });
-  </script>
-  <script type="text/javascript">
-    var mathjax = document.createElement('script');
-    mathjax.type = 'text/javascript';
-    mathjax.async = true;
 
-    mathjax.src = ('https:' == document.location.protocol) ?
-        'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' :
-        'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-
-      var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(mathjax, s);
-  </script>
 </head>
 
-<nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/">
-        <img src="/assets/img/Mahout-logo-82x100.png" height="30" alt="I'm mahout">
-      </a>
-    </div>
-
-    
-
-
-<!-- Collect the nav links, forms, and other content for toggling -->
-<div class="collapse navbar-collapse" id="main-navbar">
-    <ul class="nav navbar-nav">
-
-        <!-- Quick Start -->
-        <li id="quickstart">
-            <a href="/index.html" >Mahout Overview</a>
-        </li>
-
-        <li id="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Key Concepts<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="/index.html">Mahout Overview</a></li>
-                <li><span><b>&nbsp;&nbsp;Scala DSL</b><span></li>
-                <li><a href="/mahout-samsara/in-core-reference.html">In-core Reference</a></li>
-                <li><a href="/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a></li>
-                <li><a href="/mahout-samsara/faq.html">Samsara FAQ</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Bindings</b><span></li>
-                <li><a href="/distributed/spark-bindings/">Spark Bindings</a></li>
-                <li><a href="/distributed/flink-bindings.html">Flink Bindings</a></li>
-                <li><a href="/distributed/flink-bindings.html">H20 Bindings</a></li>
-                <!--<li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Native Solvers</b><span></li>
-                <li><a href="/native-solvers/viennacl.html">ViennaCL</a></li>
-                <li><a href="/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
-                <li><a href="/native-solvers/cuda.html">CUDA</a></li>-->
-            </ul>
-        </li>
-
-        <li id="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><span>&nbsp;&nbsp;<b>Reccomenders</b><span></li>
-                <li><a href="/tutorials/cco-lastfm">CCO Example with Last.FM Data</a></li>
-                <li><a href="/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Mahout Samsara</b><span></li>
-                <li><a href="/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a></li>
-                <li><a href="/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a></li>
-                <li><a href="/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a></li>
-                <li><a href="/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Misc</b><span></li>
-                <li><a href="/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a></li>
-                <li><a href="/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a></li>
-                <li><a href="/tutorials/misc/how-to-build-an-app.html">How To Build An App</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<b>Deprecated</b><span></li>
-                <li><a href="/tutorials/map-reduce">MapReduce</a></li>
-            </ul>
-        </li>
-
-
-        <!-- Algorithms (Samsara / MR) -->
-        <li id="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Algorithms<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="/algorithms/linear-algebra">Distributed Linear Algebra</a></li>
-                <li><a href="/algorithms/preprocessors">Preprocessors</a></li>
-                <li><a href="/algorithms/regression">Regression</a></li>
-                <li><a href="/algorithms/reccomenders">Reccomenders</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a></li>
-            </ul>
-                <!--<li><a href="/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
-                <!--
-                <li><a href="/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
-                <li role="separator" class="divider"></li>
-                <li><span>&nbsp;&nbsp;<a href="/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
-
-
-             -->
-        </li>
-
-        <!-- Scala Docs -->
-        <li id="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API Docs<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="/0.13.0/api/index.html">0.13.0</a></li>
-            </ul>
-        </li>
-
-
-    </ul>
-    <form class="navbar-form navbar-left">
-        <div class="form-group">
-            <input type="text" class="form-control" placeholder="Search">
-        </div>
-        <button type="submit" class="btn btn-default">Submit</button>
-    </form>
-    <ul class="nav navbar-nav navbar-right">
-        <li><a href="http://github.com/apache/mahout">Github</a></li>
-
-        <!-- Apache -->
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apache <span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a></li>
-                <li><a href="http://www.apache.org/licenses/">Apache License</a></li>
-                <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
-                <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
-            </ul>
-        </li>
-
-    </ul>
-</div><!-- /.navbar-collapse -->
-
-  </div><!-- /.container-fluid -->
-</nav>
 
 <body>
 
-<div id="wrap">
-  <body class="">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
 
-  <div class="container">
-    <p>The Mahout community is driven by user contribution.  If you have implemented an algorithm and are interested in 
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+            <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <div class="navbar-nav ml-auto">
+
+                <!-- Quick Start -->
+                <li class="nav-item">
+                    <a class="nav-link" href="//docs/latest/" >Mahout Overview</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Key Concepts</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/index.html">Mahout Overview</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Scala DSL</h6>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/in-core-reference.html">In-core Reference</a>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/faq.html">Samsara FAQ</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Distributed Engine Bindings</h6>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/spark-bindings/">Spark Bindings</a>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/flink-bindings.html">Flink Bindings</a>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/flink-bindings.html">H20 Bindings</a>
+                        <!--<div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Native Solvers</h6>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/viennacl.html">ViennaCL</a></li>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/cuda.html">CUDA</a></li>-->
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tutorial</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Reccomenders</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/cco-lastfm">CCO Example with Last.FM Data</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Mahout Samsara</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Misc</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/how-to-build-an-app.html">How To Build An App</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/map-reduce">MapReduce</a>
+                    </div>
+                </li>
+
+
+                <!-- Algorithms (Samsara / MR) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Algorithms</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/linear-algebra">Distributed Linear Algebra</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/preprocessors">Preprocessors</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/regression">Regression</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/reccomenders">Reccomenders</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
+                    </div>
+                        <!--<a class="dropdown-item"  href="/docs/latest/algorithms/reccomenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                        <!--
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/reccomenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+
+
+                     -->
+                </li>
+
+                <!-- Scala /docs -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">API /docs</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/0.13.0/api/index.html">0.13.0</a>
+                    </div>
+                </li>
+
+                <!-- Apache -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Apache</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/licenses/">Apache License</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+                    </div>
+                </li>
+
+            </ul>
+
+                <!--<form class="navbar-form navbar-left">-->
+                    <!--<div class="form-group">-->
+                        <!--<input type="text" class="form-control" placeholder="Search">-->
+                    <!--</div>-->
+                    <!--<button type="submit" class="btn btn-default">Submit</button>-->
+                <!--</form>-->
+                <!--<ul class="nav navbar-nav navbar-right">-->
+                    <!--<a class="dropdown-item"  href="http://github.com/apache/mahout">Github</a></li>-->
+
+
+
+                <!--</ul>-->
+        </div><!-- /.navbar-collapse -->
+    </div>
+</nav>
+
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8">
+      <p>The Mahout community is driven by user contribution.  If you have implemented an algorithm and are interested in 
 sharing it with the rest of the community, we highly encourage you to contribute it to the codebase.  However to
 keep things from getting too out of control, we have instituted a standard API for our algorithms, and we ask you 
 contribute your algorithm in a way that conforms to this API as much as possible.  You can always reach out on 
 <a href="dev@mahout.apache.org">dev@mahout.apache.org</a> if you need help.</p>
 
-<p>In this example, let’s say you’ve created a totally new algorithm- a regression algorithm called <code>Foo</code></p>
+<p>In this example, let’s say you’ve created a totally new algorithm- a regression algorithm called <code class="highlighter-rouge">Foo</code></p>
 
-<p>The <code>Foo</code> algorithm is a silly algorithm- it always guesses the target is 1. Not at all useful as an algorithm, but great for
+<p>The <code class="highlighter-rouge">Foo</code> algorithm is a silly algorithm- it always guesses the target is 1. Not at all useful as an algorithm, but great for
 illustrating how an algorithm would be added.</p>
 
 <h2 id="step-1-create--jira-ticket">Step 1: Create  JIRA ticket</h2>
@@ -222,7 +182,7 @@ illustrating how an algorithm would be added.</p>
 
 <p>Once you click “Create” a dialog box will pop up.</p>
 
-<p>In the Summary box write a short description, something like <code>Implement Foo Algorithm</code></p>
+<p>In the Summary box write a short description, something like <code class="highlighter-rouge">Implement Foo Algorithm</code></p>
 
 <p>Under assignee- click “Assign to Me”, this lets everyone know you’re working on the algorithm.</p>
 
@@ -240,26 +200,28 @@ illustrating how an algorithm would be added.</p>
 
 <p>Supposing you don’t already have a copy of Mahout on your computer open a terminal and type the following</p>
 
-<pre><code>git clone http://github.com/apache/mahout
+<div class="highlighter-rouge"><pre class="highlight"><code>git clone http://github.com/apache/mahout
 </code></pre>
+</div>
 
-<p>This will clone the Mahout source code into a directory called <code>mahout</code>.  Go into that directory and create a new branch called
-<code>mahout-xxxx</code> (where <code>xxxx</code> is your JIRA number from step 1)</p>
+<p>This will clone the Mahout source code into a directory called <code class="highlighter-rouge">mahout</code>.  Go into that directory and create a new branch called
+<code class="highlighter-rouge">mahout-xxxx</code> (where <code class="highlighter-rouge">xxxx</code> is your JIRA number from step 1)</p>
 
-<pre><code>cd mahout
+<div class="highlighter-rouge"><pre class="highlight"><code>cd mahout
 git checkout -b mahout-xxxx
 </code></pre>
+</div>
 
 <h2 id="step-3-create-classes-for-your-new-algorithm">Step 3. Create Classes for your new Algorithm</h2>
 
 <p><strong>NOTE</strong> I am using IntelliJ Community-Edition as an IDE.  There are several good IDEs that exist, and I <em>highly</em> reccomend
 you use one, but you can do what you like.  As far as screen shots go though, that is what I’m working with here.</p>
 
-<p>Create a file <code>mahout/math-scala/src/main/scala/org/apache/mahout/math/algorithms/regression/FooModel.scala</code></p>
+<p>Create a file <code class="highlighter-rouge">mahout/math-scala/src/main/scala/org/apache/mahout/math/algorithms/regression/FooModel.scala</code></p>
 
 <p>The first thing to add to the file is a license:</p>
 
-<pre><code>/**
+<div class="highlighter-rouge"><pre class="highlight"><code>/**
   * Licensed to the Apache Software Foundation (ASF) under one
   * or more contributor license agreements. See the NOTICE file
   * distributed with this work for additional information
@@ -278,15 +240,17 @@ you use one, but you can do what you like.  As far as screen shots go though, th
   * under the License.
   */
 </code></pre>
+</div>
 
-<p>The next thing to add to the file is the <code>package</code> statement.</p>
+<p>The next thing to add to the file is the <code class="highlighter-rouge">package</code> statement.</p>
 
-<pre><code>package org.apache.mahout.math.algorithms.regression
+<div class="highlighter-rouge"><pre class="highlight"><code>package org.apache.mahout.math.algorithms.regression
 </code></pre>
+</div>
 
 <p>And finally declare the Fitter and Model classes</p>
 
-<pre><code>class Foo extends RegressorFitter {
+<div class="highlighter-rouge"><pre class="highlight"><code>class Foo extends RegressorFitter {
 
 }
 
@@ -294,14 +258,15 @@ class FooModel extends RegressorModel {
 
 }
 </code></pre>
+</div>
 
 <p>The Fitter class holds the methods for fitting which returns a Model, the Model class hold the parameters for the model and 
- methods for using on new data sets. In a RegressorModel that is going to be a <code>predict()</code> method.</p>
+ methods for using on new data sets. In a RegressorModel that is going to be a <code class="highlighter-rouge">predict()</code> method.</p>
 
-<p>In your algorithm, most of your code is going to go into the <code>.fit</code> method. Since this is just a silly example, we’re 
+<p>In your algorithm, most of your code is going to go into the <code class="highlighter-rouge">.fit</code> method. Since this is just a silly example, we’re 
  don’t really have anything to fit- so we’re just going to return a FooModel (because that is what the Fitter must do)</p>
 
-<pre><code>class Foo[K] extends RegressorFitter[K] {
+<div class="highlighter-rouge"><pre class="highlight"><code>class Foo[K] extends RegressorFitter[K] {
 
   def fit(drmX  : DrmLike[K],
           drmTarget: DrmLike[K],
@@ -328,24 +293,27 @@ class FooModel[K] extends RegressorModel[K] {
   }
 }
 </code></pre>
+</div>
 
 <p>I’ve also added something to the summary string. It wasn’t a very helpful thing, but this isn’t a very helpful algorithm. I included
 as a reminder to you, the person writing a useful algorithm, that this is a good place to talk about the results of the fitting.</p>
 
 <p>At this point it would be reasonable to try building Mahout and checking that your algorithm is working the way you expect it to</p>
 
-<pre><code>mvn clean package -DskipTests
+<div class="highlighter-rouge"><pre class="highlight"><code>mvn clean package -DskipTests
 </code></pre>
+</div>
 
 <p>I like to use the Mahout Spark-Shell for cases like this.</p>
 
-<pre><code>cd $MAHOUT_HOME/bin
+<div class="highlighter-rouge"><pre class="highlight"><code>cd $MAHOUT_HOME/bin
 ./mahout spark-shell
 </code></pre>
+</div>
 
 <p>Then once I’m in the shell:</p>
 
-<pre><code>import org.apache.mahout.math.algorithms.regression.Foo
+<div class="highlighter-rouge"><pre class="highlight"><code>import org.apache.mahout.math.algorithms.regression.Foo
 
 val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4), (1.1, 1.5, 2.5, 1.0), (6.0, 5.2, -5.2, 5.3), (7.0,6.0, 5.0, 5.0), (10.0, 1.0, 20.0, -10.0)))
 
@@ -353,10 +321,11 @@ val model = new Foo().fit(drmA(::, 0 until 2), drmA(::, 2 until 3))
  
 model.predict(drmA).collect
 </code></pre>
+</div>
 
 <p>And everything seems to be in order.</p>
 
-<pre><code>res5: org.apache.mahout.math.Matrix =
+<div class="highlighter-rouge"><pre class="highlight"><code>res5: org.apache.mahout.math.Matrix =
 {
  0 =&gt;   {0:1.0}
  1 =&gt;   {0:1.0}
@@ -365,23 +334,24 @@ model.predict(drmA).collect
  4 =&gt;   {0:1.0}
 }
 </code></pre>
+</div>
 
 <h2 id="step-4-working-with-hyper-parameters">Step 4. Working with Hyper Parameters</h2>
 
 <p>It’s entirely likely you’ll need to have hyper-parameters to tune your algorithm.</p>
 
-<p>In Mahout we handle these with a map of Symbols. You might have noticed in the <code>fit</code> and <code>predict</code> methods we included 
-<code>hyperparameters: (Symbol, Any)*</code></p>
+<p>In Mahout we handle these with a map of Symbols. You might have noticed in the <code class="highlighter-rouge">fit</code> and <code class="highlighter-rouge">predict</code> methods we included 
+<code class="highlighter-rouge">hyperparameters: (Symbol, Any)*</code></p>
 
 <p>Well let’s look at how we would work with those.</p>
 
 <p>Suppose instead of always guessing “1.0” we wanted to guess some user defined number (a very silly algorithm).</p>
 
-<p>We’ll be adding a parameter called <code>guessThisNumber</code> to the Fitter method. By convention, we usually create a function in 
-the fitter called <code>setStandardHyperparameters</code> and let that take care of setting up all of our hyperparameters and then call
+<p>We’ll be adding a parameter called <code class="highlighter-rouge">guessThisNumber</code> to the Fitter method. By convention, we usually create a function in 
+the fitter called <code class="highlighter-rouge">setStandardHyperparameters</code> and let that take care of setting up all of our hyperparameters and then call
 that function inside of fit. This keeps things nice and clean.</p>
 
-<pre><code>class Foo[K] extends RegressorFitter[K] {
+<div class="highlighter-rouge"><pre class="highlight"><code>class Foo[K] extends RegressorFitter[K] {
 
   var guessThisNumber: Double = _
 
@@ -404,14 +374,15 @@ that function inside of fit. This keeps things nice and clean.</p>
   }
 }
 </code></pre>
+</div>
 
 <p>Also notice we set the <em>default value</em> to 1.0.  We also now have something to add into the summary string.</p>
 
-<p>To implement this, we’ll need to broadcast the guessed number in the <code>predict</code> method.  In Mahout you can only broadcast
-<code>Vectors</code> and <code>Matrices</code>.  We use <code>drmBroadcast</code> It might be tempting to use the broadcast method of the underlying engine, but 
+<p>To implement this, we’ll need to broadcast the guessed number in the <code class="highlighter-rouge">predict</code> method.  In Mahout you can only broadcast
+<code class="highlighter-rouge">Vectors</code> and <code class="highlighter-rouge">Matrices</code>.  We use <code class="highlighter-rouge">drmBroadcast</code> It might be tempting to use the broadcast method of the underlying engine, but 
 this is a no-no.  The reason for this is that we want to keep our algorithm abstracted over multiple distributed engines.</p>
 
-<pre><code>class FooModel[K] extends RegressorModel[K] {
+<div class="highlighter-rouge"><pre class="highlight"><code>class FooModel[K] extends RegressorModel[K] {
 
   var guessThisNumber: Double = _
 
@@ -433,17 +404,19 @@ this is a no-no.  The reason for this is that we want to keep our algorithm abst
   }
 }
 </code></pre>
+</div>
 
 <p>We can get pretty creative with what sort of information we can send out in the broadcast even when it’s just Vectors and Matrices</p>
 
-<p>Here we get the single number we need by broadcasting it in a length 1 vector.  We then <code>get</code> our number from that position.</p>
+<p>Here we get the single number we need by broadcasting it in a length 1 vector.  We then <code class="highlighter-rouge">get</code> our number from that position.</p>
 
-<pre><code>keys -&gt; (outputBlock += bcGuess.get(0))
+<div class="highlighter-rouge"><pre class="highlight"><code>keys -&gt; (outputBlock += bcGuess.get(0))
 </code></pre>
+</div>
 
-<p>Let’s open up the <code>$MAHOUT_HOME/bin/mahout spark-shell</code> and try out the hyperparameter</p>
+<p>Let’s open up the <code class="highlighter-rouge">$MAHOUT_HOME/bin/mahout spark-shell</code> and try out the hyperparameter</p>
 
-<pre><code>import org.apache.mahout.math.algorithms.regression.Foo
+<div class="highlighter-rouge"><pre class="highlight"><code>import org.apache.mahout.math.algorithms.regression.Foo
     
 val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4), (1.1, 1.5, 2.5, 1.0), (6.0, 5.2, -5.2, 5.3), (7.0,6.0, 5.0, 5.0), (10.0, 1.0, 20.0, -10.0)))
 
@@ -451,6 +424,7 @@ val model = new Foo().fit(drmA(::, 0 until 2), drmA(::, 2 until 3), 'guessThisNu
  
 model.predict(drmA).collect
 </code></pre>
+</div>
 
 <h2 id="step-5-unit-tests">Step 5. Unit Tests</h2>
 
@@ -467,15 +441,16 @@ in the paper you read).</p>
 
 <p>Since this is a regression model, open up</p>
 
-<pre><code>$MAHOUT_HOME/math-scala/src/test/scala/org/apache/mahout/math/algorithms/RegressionSuiteBase.scala
+<div class="highlighter-rouge"><pre class="highlight"><code>$MAHOUT_HOME/math-scala/src/test/scala/org/apache/mahout/math/algorithms/RegressionSuiteBase.scala
 </code></pre>
+</div>
 
-<p>You’ll see some other tests in there to get you started. You’ll also see some R-Prototypes, and in the case of <code>cochrane orcutt</code> 
+<p>You’ll see some other tests in there to get you started. You’ll also see some R-Prototypes, and in the case of <code class="highlighter-rouge">cochrane orcutt</code> 
 where the R implementation had divergent results and my argument for why our algorithm was right.</p>
 
-<p>I’m going to create a new test called <code>foo test</code> and I’m going to build it similar to the example I’ve been using.</p>
+<p>I’m going to create a new test called <code class="highlighter-rouge">foo test</code> and I’m going to build it similar to the example I’ve been using.</p>
 
-<pre><code>test("foo") {
+<div class="highlighter-rouge"><pre class="highlight"><code>test("foo") {
     import org.apache.mahout.math.algorithms.regression.Foo
 
     val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4),
@@ -498,29 +473,32 @@ where the R implementation had divergent results and my argument for why our alg
     (myAnswer - correctAnswer).sum should be &lt; epsilon
   }
 </code></pre>
+</div>
 
-<p>Note the use of <code>epsilon</code>.  The answer really <em>should be</em> 0.0. But, especially for more complicated algorithms, we allow 
+<p>Note the use of <code class="highlighter-rouge">epsilon</code>.  The answer really <em>should be</em> 0.0. But, especially for more complicated algorithms, we allow 
 for a touch of machine rounding error.</p>
 
 <p>Now build and check your tests by building without skipping the tests</p>
 
-<pre><code>mvn clean package
+<div class="highlighter-rouge"><pre class="highlight"><code>mvn clean package
 </code></pre>
+</div>
 
 <h2 id="step-6-add-documentation-to-the-website">Step 6. Add documentation to the website.</h2>
 
 <p>Now you’ve created this awesome algorithm- time to do a little marketing!  Create the following file:</p>
 
-<pre><code>$MAHOUT_HOME/website/docs/algorithms/regression/foo.md
+<div class="highlighter-rouge"><pre class="highlight"><code>$MAHOUT_HOME/website/docs/algorithms/regression/foo.md
 </code></pre>
+</div>
 
 <p>In that file create a blank Jekyll template:</p>
 
-<pre><code>---
-layout: algorithm
+<div class="highlighter-rouge"><pre class="highlight"><code>---
+layout: doc-page
 title: Foo
-theme:
-    name: mahout2
+
+    
 ---
 
 ### About
@@ -555,8 +533,9 @@ val model = new Foo().fit(drmA(::, 0 until 2), drmA(::, 2 until 3), 'guessThisNu
  
 model.predict(drmA).collect
 </code></pre>
+</div>
 
-<p>The firse few lines between the <code>---</code> is the header, this has the title and tells Jekyll what sort of page this is, it knows 
+<p>The firse few lines between the <code class="highlighter-rouge">---</code> is the header, this has the title and tells Jekyll what sort of page this is, it knows 
 elsewhere based on that, how to compile the page (add navbars, etc).</p>
 
 <p>The <em>About</em> section, is your chance to really dive into the algorithm and its implementation. More is more. If you didn’t have an 
@@ -569,22 +548,25 @@ the unit test.  That’s something I do often, but there is no reason you have t
 (or several illustrative examples) that’s encouraged.
 Add links to the nav-bars</p>
 
-<pre><code>$MAHOUT_HOME/website/docs/_includes/algo_navbar.html
+<div class="highlighter-rouge"><pre class="highlight"><code>$MAHOUT_HOME/website/docs/_includes/algo_navbar.html
 $MAHOUT_HOME/website/docs/_includes/navbar.html
 </code></pre>
+</div>
 
 <p>You can look at the links already in there, but it’s going to look something like</p>
 
-<pre><code>&lt;li&gt; &lt;a href="/algorithms/regression/Foo.html"&gt;Foo&lt;/a&gt;&lt;/li&gt;
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;li&gt; &lt;a href="/algorithms/regression/Foo.html"&gt;Foo&lt;/a&gt;&lt;/li&gt;
 </code></pre>
+</div>
 
 <p>Jeckyll will convert your *.md file into *.html at the same place on the directory tree.</p>
 
 <p>To check that your webpage look right:</p>
 
-<pre><code>cd $MAHOUT_HOME/website/docs
+<div class="highlighter-rouge"><pre class="highlight"><code>cd $MAHOUT_HOME/website/docs
 jeckyll --serve
 </code></pre>
+</div>
 
 <p>Then open a webbrowser and go to <a href="http://localhost:4000">http://localhost:4000</a></p>
 
@@ -592,38 +574,42 @@ jeckyll --serve
 
 <h2 id="step-7-commit-changes-push-to-github-and-open-a-pr">Step 7. Commit Changes, Push to Github, and Open a PR</h2>
 
-<p>Open a terminal, return to the <code>mahout</code> top directory and type</p>
+<p>Open a terminal, return to the <code class="highlighter-rouge">mahout</code> top directory and type</p>
 
-<pre><code>git status
+<div class="highlighter-rouge"><pre class="highlight"><code>git status
 </code></pre>
+</div>
 
-<p>You’ll see <code>Changes not staged for commit</code>.</p>
+<p>You’ll see <code class="highlighter-rouge">Changes not staged for commit</code>.</p>
 
 <p>Any file you touched will be listed there, but we only want to stage the files we were in.</p>
 
 <p>For this tutorial it was</p>
 
-<pre><code>git add mahout/math-scala/src/main/scala/org/apache/mahout/math/algorithms/regression/FooModel.scala
+<div class="highlighter-rouge"><pre class="highlight"><code>git add mahout/math-scala/src/main/scala/org/apache/mahout/math/algorithms/regression/FooModel.scala
 git add math-scala/src/test/scala/org/apache/mahout/math/algorithms/RegressionSuiteBase.scala
 git add website/docs/algorithms/regression/foo.md
 git add website/docs/_includes/algo_navbar.html
 git add website/docs/_includes/navbar.html
 </code></pre>
+</div>
 
-<p>Now we <em>commit</em> our changes. We add a message that starts with <code>MAHOUT-xxxx</code> where <code>xxxx</code> is the JIRA number your issue was
+<p>Now we <em>commit</em> our changes. We add a message that starts with <code class="highlighter-rouge">MAHOUT-xxxx</code> where <code class="highlighter-rouge">xxxx</code> is the JIRA number your issue was
 assigned, then a descriptive title.</p>
 
-<pre><code>git commit -m "MAHOUT-xxxx Implement Foo Algorithm"
+<div class="highlighter-rouge"><pre class="highlight"><code>git commit -m "MAHOUT-xxxx Implement Foo Algorithm"
 </code></pre>
+</div>
 
-<p>Finally, <em>push</em> the changes to your local repository. The <code>-u</code> flag will create a new branch</p>
+<p>Finally, <em>push</em> the changes to your local repository. The <code class="highlighter-rouge">-u</code> flag will create a new branch</p>
 
-<pre><code>git push -u origin mahout-xxxx
+<div class="highlighter-rouge"><pre class="highlight"><code>git push -u origin mahout-xxxx
 </code></pre>
+</div>
 
 <p>Now in your browser, go to <a href="http://github.com/yourusername/mahout">http://github.com/yourusername/mahout</a></p>
 
-<p>There is a “branch” drop down menu- scroll down and find <code>mahout-xxxx</code></p>
+<p>There is a “branch” drop down menu- scroll down and find <code class="highlighter-rouge">mahout-xxxx</code></p>
 
 <p><img src="github-branch.png" alt="i have lots of issues" /></p>
 
@@ -637,30 +623,26 @@ assigned, then a descriptive title.</p>
 
 <p>I’ve included <a href="Foo.scala">Foo.scala</a> and <a href="RegressionSuiteBase.scala">RegressionSuiteBase.scala</a> for reference.</p>
 
-  </div>
+    </div>
 
+
+  </div>
 
 </div>
 
-<div id="footer">
-  <div class="container">
-    <p>&copy; 2017 Apache Mahout
-      with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
-      and <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>
-    </p>
-  </div>
-</div>
 
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2017 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
 
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-
-
-
-
-<!-- Latest compiled and minified JavaScript, requires jQuery 1.x (2.x not supported in IE8) -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script src="/assets/themes/mahout3/js/bootstrap.min.js"></script>
 </body>
-</html>
 
+</html>
