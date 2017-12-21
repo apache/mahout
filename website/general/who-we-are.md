@@ -1,6 +1,6 @@
 ---
-layout: default
-title: Who We Are
+layout: page
+title: Who Are We?
 
     
 ---
@@ -15,32 +15,32 @@ Apache Mahout is maintained by a team of volunteer developers.
 
 (Please keep the list below in alphabetical order by first name.)
 
-Name | Mail | PMC | Comment 
-----|---------|------|------|----------
-Anand Avati | avati@... | No | Twitter: @anandavati
-Andrew Musselman | akm@... | Yes | Twitter: @akm
-Andrew Palumbo | apalumbo@... | Yes (Chair) | |
-Benson Margulies | bimargulies@... | Yes | |
-Dan Filimon | dfilimon@... | No | |
-Dmitriy Lyubimov | dlyubimov@... | No (Emeritus) | 
-Drew Farris | drew@... | Yes | |
-Ellen Friedman | ellenf@... | No | Twitter: @Ellen_Friedman 
-Frank Scholten | frankscholten@... | No | |
-Gokhan Capan | gcapan@... | No | <a href="http://www.linkedin.com/in/gokhancapan">LinkedIn Profile</a>
-Grant Ingersoll | gsingers@... | Yes | Twitter: @gsingers
-Isabel Drost-Fromm | isabel@... | Yes | Passion for free software (development, but to some extend also the political and economic implications), interested in agile development and project management, lives in Germany. Follow me on Twitter @MaineC
-Jacob Alexander Mannix | jmannix@... | Yes | |
-Jeff Eastman | jeastman@... | No (Emeritus) |
-Paritosh Ranjan | pranjan@... | Yes | Twitter: @paritoshranjan
-Pat Ferrel | pat@... |  Yes | Twitter: @occam 
-Robin Anil | robinanil@... | Yes | |
-Sean Owen | srowen@... | No (Emeritus) |
-Sebastian Schelter | ssc@... | Yes | |
-Shannon Quinn | squinn@... | No | |
-Stevo Slavić|  sslavic@... | No | Twitter: @sslavic
-Suneel Marthi | smarthi@... | Yes | Twitter: @suneelmarthi
-Ted Dunning | tdunning@... |  Yes | 
-Tom Pierce | tcp@... | No | |
+Name                    | Mail              | PMC | Comment 
+------------------------|------------------:|------:|---:|
+Anand Avati             | avati@...         | No  | Twitter: @anandavati
+Andrew Musselman        | akm@...           | Yes | Twitter: @akm
+Benson Margulies        | bimargulies@...   | Yes | PMC Chair
+Dan Filimon             | dfilimon@...      | No  | |
+Dmitriy Lyubimov        | dlyubimov@...     | No  | (Emeritus PMC)
+Drew Farris             | drew@...          | Yes | |
+Ellen Friedman          | ellenf@...        | No  | Twitter: @Ellen_Friedman 
+Frank Scholten          | frankscholten@... | No  | |
+Gokhan Capan            | gcapan@...        | No  | <a href="http://www.linkedin.com/in/gokhancapan">LinkedIn Profile</a>
+Grant Ingersoll         | gsingers@...      | Yes | Twitter: @gsingers
+Isabel Drost-Fromm      | isabel@...        | Yes | <!--Passion for free software (development, but to some extend also the political and economic implications), interested in agile development and project management, lives in Germany. Follow me on Twitter @MaineC-->
+Jacob Alexander Mannix  | jmannix@...       | Yes | 
+Jeff Eastman            | jeastman@...      | No  | (Emeritus PMC)
+Paritosh Ranjan         | pranjan@...       | Yes | Twitter: @paritoshranjan
+Pat Ferrel              | pat@...           | Yes | Twitter: @occam 
+Robin Anil              | robinanil@...     | Yes | 
+Sean Owen               | srowen@...        | No  | (Emeritus PMC)
+Sebastian Schelter      | ssc@...           | Yes | 
+Shannon Quinn           | squinn@...        | No  | 
+Stevo Slavić            |  sslavic@...      | No  | Twitter: @sslavic
+Suneel Marthi           | smarthi@...       | Yes | Twitter: @suneelmarthi
+Ted Dunning             | tdunning@...      | Yes | 
+Tom Pierce              | tcp@...           | No  | 
+Trevor Grant            | rawkintrevo@...   | Yes | Twitter: @rawkintrevo 
 
 <a name="WhoWeAre-EmeritusCommitters"></a>
 ## Emeritus Committers

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Version Control
+title: GSOC
 
     
 ---
@@ -23,14 +23,6 @@ The Git URL for anonymous users is [https://github.com/apache/mahout.git](https:
 ## Committer Access (read-write)
 
 The Git URL for committers is [https://git-wip-us.apache.org/repos/asf/mahout.git](https://git-wip-us.apache.org/repos/asf/mahout.git).
-
-## Mahout Website 
-The Mahout website resides in the [Apache SVN repository](https://svn.apache.org/viewvc/mahout/site).
-
-The SVN URL for the Mahout site is: [https://svn.apache.org/repos/asf/mahout/site](https://svn.apache.org/repos/asf/mahout/site).
-
-The Mahout website can be edited via the [ASF CMS Editor](http://www.apache.org/dev/cms.html) or by checking out the source locally from SVN.  A handy tool for publising the website locally while editing is available [here](https://gist.github.com/tuxdna/11223434). 
-
 
 <a name="VersionControl-Issues"></a>
 ## Issues
