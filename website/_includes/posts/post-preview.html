@@ -2,7 +2,11 @@
   <div class="card-body">
     <div class="row no-gutters">
       <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        <img class="rounded-circle img-fluid d-flex mx-auto" src="{{ post.image }}">
+        {% if post.image %}
+          <img class="rounded-circle img-fluid d-flex mx-auto" src="{{ post.image }}">
+        {% else %}
+          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg">
+        {% endif %}
       </div>
       <div class="col-12 col-md-9 card-post-text">
         <div class="clearfix mb-3">
