@@ -23,16 +23,12 @@ The source files are stored using Git, our page on [version control](/developers
 
 Javadoc and Scaladoc documentation is available online by module:
 
- * [Mahout Math](http://apache.github.io/mahout/0.10.1/docs/mahout-math/index.html)
- * [Mahout Math Scala bindings](http://apache.github.io/mahout/0.10.1/docs/mahout-math-scala/index.html)
- * [Mahout Spark bindings](http://apache.github.io/mahout/0.10.1/docs/mahout-spark/index.html)
- * [Mahout Spark bindings shell](http://apache.github.io/mahout/0.10.1/docs/mahout-spark-shell/index.html)
- * [Mahout H2O backend Scaladoc](http://apache.github.io/mahout/0.10.1/docs/mahout-h2o/scaladocs/index.html)
- * [Mahout H2O backend Javadoc](http://apache.github.io/mahout/0.10.1/docs/mahout-h2o/javadoc/index.html)
- * [Mahout HDFS](http://apache.github.io/mahout/0.10.1/docs/mahout-hdfs/index.html)
- * [Mahout Map-Reduce](http://apache.github.io/mahout/0.10.1/docs/mahout-mr/index.html)
- * [Mahout Examples](http://apache.github.io/mahout/0.10.1/docs/mahout-examples/index.html)
- * [Mahout Integration](http://apache.github.io/mahout/0.10.1/docs/mahout-integration/index.html)
+ * [Mahout Math](/docs/0.13.0/api/docs/mahout-math/index.html)
+ * [Mahout Math Scala bindings](/docs/0.13.0/api/docs/mahout-math-scala/index.html)
+ * [Mahout Spark bindings](/docs/0.13.0/api/docs/mahout-spark/index.html)
+ * [Mahout HDFS](/docs/0.13.0/api/docs/mahout-hdfs/index.html)
+ * [Mahout Map-Reduce](/docs/0.13.0/api/docs/mahout-mr/index.html)
+ * [Mahout Integration](/docs/0.13.0/api/docs/mahout-integration/index.html)
 
 
 <a name="DeveloperResources-Issues"></a>

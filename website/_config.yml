@@ -1,7 +1,7 @@
 title : Apache Mahout
 description: Distributed Linear Algebra
 
-mahout-version: 0.13.0
+mahoutversion: 0.13.0
 
 author :
   name : The Apache Software Foundation
@@ -17,7 +17,6 @@ port:     4000
 host:     127.0.0.1
 baseurl:  ""
 
-mahout_version: 0.13.1
 
 # Build settings
 markdown: kramdown
@@ -27,9 +26,9 @@ plugins:
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
 # to override the default setting.
-# exclude:
-#   - Gemfile
-#   - Gemfile.lock
+exclude:
+  - Gemfile
+  - Gemfile.lock
 #   - node_modules
 #   - vendor/bundle/
 #   - vendor/cache/
