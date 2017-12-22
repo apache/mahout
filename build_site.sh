@@ -24,7 +24,7 @@ if [ ! -d "$WORKDIR/docs/$MAHOUT_VERSION/api" ]; then
 	DISTPATH=https://dist.apache.org/repos/dist/release/mahout/$MAHOUT_VERSION/$DISTFILE
 
 	# Copy API docs into _site
-	wget --directory-prefix=$WORKDIR $DISTPATH
+	wget -q --directory-prefix=$WORKDIR $DISTPATH
 	tar -C $WORKDIR -xzf $WORKDIR/$DISTFILE apache-mahout-distribution-$MAHOUT_VERSION/docs
 	mkdir -p $WORKDIR/docs/$MAHOUT_VERSION/api
 	mv $WORKDIR/apache-mahout-distribution-$MAHOUT_VERSION/docs $WORKDIR/docs/$MAHOUT_VERSION/api
