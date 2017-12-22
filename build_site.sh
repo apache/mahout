@@ -21,10 +21,10 @@ MAHOUT_VERSION=0.13.0
 if [ ! -d "$WORKDIR/docs/$MAHOUT_VERSION/api" ]; then
 	echo "API docs for $MAHOUT_VERSION not found, downloading them"
 	DISTFILE=apache-mahout-distribution-$MAHOUT_VERSION.tar.gz
-	DISTPATH= https://dist.apache.org/repos/dist/release/mahout/$MAHOUT_VERSION/$DISTFILE
+	DISTPATH=https://dist.apache.org/repos/dist/release/mahout/$MAHOUT_VERSION/$DISTFILE
 
 	# Copy API docs into _site
-	wget -qP $WORKDIR $DISTPATH
+	wget --directory-prefix=$WORKDIR $DISTPATH
 	tar -C $WORKDIR -xzf $WORKDIR/$DISTFILE apache-mahout-distribution-$MAHOUT_VERSION/docs
 	mkdir -p $WORKDIR/docs/$MAHOUT_VERSION/api
 	mv $WORKDIR/apache-mahout-distribution-$MAHOUT_VERSION/docs $WORKDIR/docs/$MAHOUT_VERSION/api
