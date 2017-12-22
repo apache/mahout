@@ -11,6 +11,7 @@ Apache Mahout(TM) is a <strong>distributed linear algebra framework</strong> and
 -   Modular Native Solvers for CPU/GPU/CUDA Acceleration
 
 <h2 class="section-heading">Recent News</h2>
+
 {% for post in site.posts limit: 5 %}
   {% include posts/post-preview.html %}
 {% endfor %}

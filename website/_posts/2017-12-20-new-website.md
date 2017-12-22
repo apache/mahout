@@ -11,5 +11,3 @@ It looks great but there's lots to do as we migrate and clean up content from th
 please let us know via either:
 - drop a lint to dev@mahout.apache.org
 - fix it yourself and [open a PR](/developers/githubPRs)! 
-
- 
