@@ -18,7 +18,13 @@ export PATH=${GEM_HOME}/bin:$PATH
 
 # Set env for docs
 MAHOUT_VERSION=0.13.0
-if [ ! -d "$WORKDIR/docs/$MAHOUT_VERSION/api" ]; then
+
+
+
+git checkout asf-site
+git clean -f -d
+git pull origin asf-site
+if [ ! -d "/docs/$MAHOUT_VERSION/api" ]; then
 	echo "API docs for $MAHOUT_VERSION not found, downloading them"
 	DISTFILE=apache-mahout-distribution-$MAHOUT_VERSION.tar.gz
 	DISTPATH=https://dist.apache.org/repos/dist/release/mahout/$MAHOUT_VERSION/$DISTFILE
@@ -32,11 +38,6 @@ if [ ! -d "$WORKDIR/docs/$MAHOUT_VERSION/api" ]; then
 	rm -f $WORKDIR/$DISTFILE
 	"done."
 fi
-
-
-git checkout asf-site
-git clean -f -d
-git pull origin asf-site
 # rm -rf *
 #cp -a $WORKDIR/* .
 cp -r $WORKDIR/* .
