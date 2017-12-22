@@ -18,4 +18,6 @@ These methods used close form solutions (not stochastic) to solve regression pro
 
 Serial Correlation of the error terms can lead to biased estimates of regression parameters, the following remedial procedures are provided:
 
-[Cochrane Orcutt Procedure](cochrane-orcutt.html)
+[Cochrane Orcutt Procedure](serial-correlation/cochrane-orcutt.html)
+
+[Durbin Watson Test](serial-correlation/dw-test.html)

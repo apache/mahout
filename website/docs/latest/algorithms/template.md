@@ -1,6 +1,6 @@
 ---
 layout: doc-page
-title: AsFactor
+title: Template
 
     
 ---
