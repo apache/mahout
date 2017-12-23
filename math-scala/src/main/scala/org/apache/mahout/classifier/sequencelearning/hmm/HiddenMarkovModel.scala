@@ -155,10 +155,10 @@ trait HiddenMarkovModel extends java.io.Serializable {
     backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexM: Int): Double = {
     var numTransitions:Double = 0.0
     for (indexT <- 0 to observationSequence.length - 2) {
-      numTransitions += forwardVariables.getQuick(indexT, indexN) * model.getTransitionMatrix.getQuick(indexN, indexM) * model.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt) * backwardVariables.getQuick(indexT + 1, indexM)
+      numTransitions += forwardVariables.getQuick(indexT, indexN) * model.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt) * backwardVariables.getQuick(indexT + 1, indexM)
     }
 
-    numTransitions = numTransitions / likelihood
+    numTransitions = (numTransitions * model.getTransitionMatrix.getQuick(indexN, indexM)) / likelihood
     numTransitions
   }
 
@@ -201,8 +201,9 @@ trait HiddenMarkovModel extends java.io.Serializable {
     var diff: Double = 0.0;
     for (indexN <- 0 to model.getNumberOfHiddenStates - 1) {
       for (indexM <- 0 to model.getNumberOfHiddenStates - 1) {
-        val tmp: Double = model.getTransitionMatrix.getQuick(indexN, indexM)
-        - nextModel.getTransitionMatrix.getQuick(indexN, indexM)
+        val oldVal:Double = model.getTransitionMatrix.getQuick(indexN, indexM)
+        val newVal:Double = nextModel.getTransitionMatrix.getQuick(indexN, indexM)
+        val tmp: Double = oldVal - newVal
         diff += tmp * tmp
       }
     }
@@ -212,15 +213,17 @@ trait HiddenMarkovModel extends java.io.Serializable {
     // check convergence of emissionProbabilities
     for (indexN <- 0 to model.getNumberOfHiddenStates - 1) {
       for (indexM <- 0 to model.getNumberOfObservableSymbols - 1) {
-        val tmp: Double = model.getEmissionMatrix.getQuick(indexN, indexM)
-        - nextModel.getEmissionMatrix.getQuick(indexN, indexM)
+        val oldVal:Double = model.getEmissionMatrix.getQuick(indexN, indexM)
+        val newVal:Double = nextModel.getEmissionMatrix.getQuick(indexN, indexM)
+        val tmp: Double = oldVal - newVal
         diff += tmp * tmp
       }
     }
 
     norm += Math.sqrt(diff)
     // iteration has converged
-    (norm < epsilon)
+
+    norm < epsilon
   }
 
   def train(initModel: HMMModel,
@@ -247,6 +250,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
 
       } else {
         val obsLikelihood = sequenceLikelihood(forwardVariables, None)
+
         // recompute initial probabilities
         for (index <- 0 to curModel.getNumberOfHiddenStates - 1) {
           initialProbabilities.setQuick(index, forwardVariables.getQuick(0, index) * backwardVariables.getQuick(0, index) / obsLikelihood)
@@ -283,7 +287,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
 
       val newModel:HMMModel = new HMMModel(curModel.getNumberOfHiddenStates, curModel.getNumberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
 
-      if (checkForConvergence(newModel, curModel, epsilon)) {
+      if (checkForConvergence(curModel, newModel, epsilon)) {
         stop = true
       }
 
