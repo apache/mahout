@@ -324,7 +324,7 @@ inCoreA /: B
 
 <p><strong>Matrix-matrix multiplication %*%</strong>:</p>
 
-<p><code class="highlighter-rouge">\(\mathbf{M}=\mathbf{AB}\)</code></p>
+<p><code class="highlighter-rouge">$$\mathbf{M}=\mathbf{AB}$$</code></p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>A %*% B
 A %*% inCoreB
@@ -336,7 +336,7 @@ A %*%: B
 <p><em>Note: same as above, whenever operator arguments include both in-core and out-of-core arguments, the operator can only be associated with the out-of-core (DRM) argument to support the distributed implementation.</em></p>
 
 <p><strong>Matrix-vector multiplication %*%</strong>
-Currently we support a right multiply product of a DRM and an in-core Vector(<code class="highlighter-rouge">\(\mathbf{Ax}\)</code>) resulting in a single column DRM, which then can be collected in front (usually the desired outcome):</p>
+Currently we support a right multiply product of a DRM and an in-core Vector(<code class="highlighter-rouge">$$\mathbf{Ax}$$</code>) resulting in a single column DRM, which then can be collected in front (usually the desired outcome):</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>val Ax = A %*% x
 val inCoreX = Ax.collect(::, 0)
@@ -356,7 +356,7 @@ A / 5.0
 </code></pre>
 </div>
 
-<p>Note that <code class="highlighter-rouge">5.0 -: A</code> means <code class="highlighter-rouge">\(m_{ij} = 5 - a_{ij}\)</code> and <code class="highlighter-rouge">5.0 /: A</code> means <code class="highlighter-rouge">\(m_{ij} = \frac{5}{a{ij}}\)</code> for all elements of the result.</p>
+<p>Note that <code class="highlighter-rouge">5.0 -: A</code> means <code class="highlighter-rouge">$$m_{ij} = 5 - a_{ij}$$</code> and <code class="highlighter-rouge">5.0 /: A</code> means <code class="highlighter-rouge">$$m_{ij} = \frac{5}{a{ij}}$$</code> for all elements of the result.</p>
 
 <h4 id="slicing">Slicing</h4>
 

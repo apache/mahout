@@ -414,7 +414,7 @@ a !== b
 </code></pre>
 </div>
 
-<p><em>note: Transposition is currently handled via view, i.e. updating a transposed matrix will be updating the original.</em>  Also computing something like <code class="highlighter-rouge">\(\mathbf{X^\top}\mathbf{X}\)</code>:</p>
+<p><em>note: Transposition is currently handled via view, i.e. updating a transposed matrix will be updating the original.</em>  Also computing something like <code class="highlighter-rouge">$$\mathbf{X^\top}\mathbf{X}$$</code>:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>val XtX = X.t %*% X
 </code></pre>
@@ -470,19 +470,19 @@ a !== b
 
 <p><strong>Solving linear equation systems and matrix inversion:</strong> fully similar to R semantics; there are three forms of invocation:</p>
 
-<p>Solve <code class="highlighter-rouge">\(\mathbf{AX}=\mathbf{B}\)</code>:</p>
+<p>Solve <code class="highlighter-rouge">$$\mathbf{AX}=\mathbf{B}$$</code>:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>solve(A, B)
 </code></pre>
 </div>
 
-<p>Solve <code class="highlighter-rouge">\(\mathbf{Ax}=\mathbf{b}\)</code>:</p>
+<p>Solve <code class="highlighter-rouge">$$\mathbf{Ax}=\mathbf{b}$$</code>:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>solve(A, b)
 </code></pre>
 </div>
 
-<p>Compute <code class="highlighter-rouge">\(\mathbf{A^{-1}}\)</code>:</p>
+<p>Compute <code class="highlighter-rouge">$$\mathbf{A^{-1}}$$</code>:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>solve(A)
 </code></pre>
@@ -520,19 +520,19 @@ m.rowMeans
 
 <h4 id="random-matrices">Random Matrices</h4>
 
-<p><code class="highlighter-rouge">\(\mathcal{U}\)</code>(0,1) random matrix view:</p>
+<p><code class="highlighter-rouge">$$\mathcal{U}$$</code>(0,1) random matrix view:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>val incCoreA = Matrices.uniformView(m, n, seed)
 </code></pre>
 </div>
 
-<p><code class="highlighter-rouge">\(\mathcal{U}\)</code>(-1,1) random matrix view:</p>
+<p><code class="highlighter-rouge">$$\mathcal{U}$$</code>(-1,1) random matrix view:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>val incCoreA = Matrices.symmetricUniformView(m, n, seed)
 </code></pre>
 </div>
 
-<p><code class="highlighter-rouge">\(\mathcal{N}\)</code>(-1,1) random matrix view:</p>
+<p><code class="highlighter-rouge">$$\mathcal{N}$$</code>(-1,1) random matrix view:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>val incCoreA = Matrices.gaussianView(m, n, seed)
 </code></pre>

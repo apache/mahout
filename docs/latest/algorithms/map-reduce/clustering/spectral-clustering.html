@@ -173,16 +173,16 @@
 
 <ol>
   <li>
-    <p>Computing a similarity (or <em>affinity</em>) matrix <code class="highlighter-rouge">\(\mathbf{A}\)</code> from the data. This involves determining a pairwise distance function <code class="highlighter-rouge">\(f\)</code> that takes a pair of data points and returns a scalar.</p>
+    <p>Computing a similarity (or <em>affinity</em>) matrix <code class="highlighter-rouge">$$\mathbf{A}$$</code> from the data. This involves determining a pairwise distance function <code class="highlighter-rouge">$$f$$</code> that takes a pair of data points and returns a scalar.</p>
   </li>
   <li>
-    <p>Computing a graph Laplacian <code class="highlighter-rouge">\(\mathbf{L}\)</code> from the affinity matrix. There are several types of graph Laplacians; which is used will often depends on the situation.</p>
+    <p>Computing a graph Laplacian <code class="highlighter-rouge">$$\mathbf{L}$$</code> from the affinity matrix. There are several types of graph Laplacians; which is used will often depends on the situation.</p>
   </li>
   <li>
-    <p>Computing the eigenvectors and eigenvalues of <code class="highlighter-rouge">\(\mathbf{L}\)</code>. The degree of this decomposition is often modulated by <code class="highlighter-rouge">\(k\)</code>, or the number of clusters. Put another way, <code class="highlighter-rouge">\(k\)</code> eigenvectors and eigenvalues are computed.</p>
+    <p>Computing the eigenvectors and eigenvalues of <code class="highlighter-rouge">$$\mathbf{L}$$</code>. The degree of this decomposition is often modulated by <code class="highlighter-rouge">$$k$$</code>, or the number of clusters. Put another way, <code class="highlighter-rouge">$$k$$</code> eigenvectors and eigenvalues are computed.</p>
   </li>
   <li>
-    <p>The <code class="highlighter-rouge">\(k\)</code> eigenvectors are used as “proxy” data for the original dataset, and fed into k-means clustering. The resulting cluster assignments are transparently passed back to the original data.</p>
+    <p>The <code class="highlighter-rouge">$$k$$</code> eigenvectors are used as “proxy” data for the original dataset, and fed into k-means clustering. The resulting cluster assignments are transparently passed back to the original data.</p>
   </li>
 </ol>
 
@@ -196,11 +196,11 @@
 
 <h2 id="input">Input</h2>
 
-<p>The input format for the algorithm currently takes the form of a Hadoop-backed affinity matrix in the form of text files. Each line of the text file specifies a single element of the affinity matrix: the row index <code class="highlighter-rouge">\(i\)</code>, the column index <code class="highlighter-rouge">\(j\)</code>, and the value:</p>
+<p>The input format for the algorithm currently takes the form of a Hadoop-backed affinity matrix in the form of text files. Each line of the text file specifies a single element of the affinity matrix: the row index <code class="highlighter-rouge">$$i$$</code>, the column index <code class="highlighter-rouge">$$j$$</code>, and the value:</p>
 
 <p><code class="highlighter-rouge">i, j, value</code></p>
 
-<p>The affinity matrix is symmetric, and any unspecified <code class="highlighter-rouge">\(i, j\)</code> pairs are assumed to be 0 for sparsity. The row and column indices are 0-indexed. Thus, only the non-zero entries of either the upper or lower triangular need be specified.</p>
+<p>The affinity matrix is symmetric, and any unspecified <code class="highlighter-rouge">$$i, j$$</code> pairs are assumed to be 0 for sparsity. The row and column indices are 0-indexed. Thus, only the non-zero entries of either the upper or lower triangular need be specified.</p>
 
 <p>The matrix elements specified in the text files are collected into a Mahout <code class="highlighter-rouge">DistributedRowMatrix</code>.</p>
 
