@@ -76,7 +76,7 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
     }
   }
 
-  test("Simple Standard NHMM Model") {
+  test("Simple Standard HMM Model") {
     val observationsDrm:DrmLike[Long] = drm.drmParallelize(m = observations, numPartitions = 1)
     // Re-key into DrmLike[Long] instead of [Int]
       .mapBlock()({
@@ -89,7 +89,7 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
     compareModels(trainedModel)
   }
 
-  test("Simple Standard NHMM Model with scaling") {
+  test("Simple Standard HMM Model with scaling") {
     val observationsDrm:DrmLike[Long] = drm.drmParallelize(m = observations, numPartitions = 1)
     // Re-key into DrmLike[Long] instead of [Int]
       .mapBlock()({
