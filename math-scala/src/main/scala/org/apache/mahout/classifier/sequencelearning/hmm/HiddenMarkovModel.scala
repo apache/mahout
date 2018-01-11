@@ -39,30 +39,30 @@ trait HiddenMarkovModel extends java.io.Serializable {
     var scalingFactors = None: Option[Array[Double]]
 
     if (scale) {
-      scalingFactors = Some(new Array(observationSequence.length));
+      scalingFactors = Some(new Array(observationSequence.length))
       var forwardVariablesTemp = new DenseMatrix(observationSequence.length, initModel.getNumberOfHiddenStates)
       // Initialization
-      for (index <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (index <- 0 until initModel.getNumberOfHiddenStates) {
         forwardVariablesTemp.setQuick(0, index, initModel.getInitialProbabilities.getQuick(index)
 	    			* initModel.getEmissionMatrix.getQuick(index, observationSequence(0).toInt));
       }
 
       var sum:Double = 0.0
-      for (index <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (index <- 0 until initModel.getNumberOfHiddenStates) {
         sum += forwardVariablesTemp.getQuick(0, index)
       }
 
       scalingFactors.get(0) = 1.0/sum
 
-      for (index <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (index <- 0 until initModel.getNumberOfHiddenStates) {
         forwardVariables.setQuick(0, index, forwardVariablesTemp.getQuick(0, index) * scalingFactors.get(0))
       }
 
       // Induction
-      for (indexT <- 1 to observationSequence.length - 1) {
-        for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (indexT <- 1 until observationSequence.length) {
+        for (indexN <- 0 until initModel.getNumberOfHiddenStates) {
 	  var sumA:Double = 0.0
-	  for (indexM <- 0 to initModel.getNumberOfHiddenStates - 1) {
+	  for (indexM <- 0 until initModel.getNumberOfHiddenStates) {
             sumA += forwardVariables.getQuick(indexT - 1, indexM) * initModel.getTransitionMatrix.getQuick(indexM, indexN) * initModel.getEmissionMatrix.getQuick(indexN, observationSequence(indexT).toInt)
           }
 
@@ -70,28 +70,28 @@ trait HiddenMarkovModel extends java.io.Serializable {
         }
 
         var sumT:Double = 0.0
-        for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+        for (indexN <- 0 until initModel.getNumberOfHiddenStates) {
           sumT += forwardVariablesTemp.getQuick(indexT, indexN)
         }
 
         scalingFactors.get(indexT) = 1.0/sumT
 
-        for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+        for (indexN <- 0 until initModel.getNumberOfHiddenStates) {
           forwardVariables.setQuick(indexT, indexN, scalingFactors.get(indexT) * forwardVariablesTemp.getQuick(indexT, indexN))
         }
       }
     } else {
       // Initialization
-      for (index <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (index <- 0 until initModel.getNumberOfHiddenStates) {
         forwardVariables.setQuick(0, index, initModel.getInitialProbabilities.getQuick(index)
 	    			* initModel.getEmissionMatrix.getQuick(index, observationSequence(0).toInt));
       }
 
       // Induction
-      for (indexT <- 1 to observationSequence.length - 1) {
-        for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (indexT <- 1 until observationSequence.length) {
+        for (indexN <- 0 until initModel.getNumberOfHiddenStates) {
 	  var sum:Double = 0.0
-	  for (indexM <- 0 to initModel.getNumberOfHiddenStates - 1) {
+	  for (indexM <- 0 until initModel.getNumberOfHiddenStates) {
 	    sum += forwardVariables.getQuick(indexT - 1, indexM) * initModel.getTransitionMatrix.getQuick(indexM, indexN);
 	  }
 
@@ -113,16 +113,16 @@ trait HiddenMarkovModel extends java.io.Serializable {
     {
       var backwardVariablesTemp = new DenseMatrix(observationSequence.length, initModel.getNumberOfHiddenStates)
       // initialization
-      for (index <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (index <- 0 until initModel.getNumberOfHiddenStates) {
         backwardVariablesTemp.setQuick(observationSequence.length - 1, index, 1);
         backwardVariables.setQuick(observationSequence.length - 1, index, scalingFactors.get(observationSequence.length - 1) * backwardVariablesTemp.getQuick(observationSequence.length - 1, index))
       }
 
       // induction
       for (indexT <- observationSequence.length - 2 to 0 by -1) {
-        for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+        for (indexN <- 0 until initModel.getNumberOfHiddenStates) {
 	  var sum:Double = 0.0
-	  for (indexM <- 0 to initModel.getNumberOfHiddenStates - 1) {
+	  for (indexM <- 0 until initModel.getNumberOfHiddenStates) {
             sum += backwardVariables.getQuick(indexT + 1, indexM) * initModel.getTransitionMatrix.getQuick(indexN, indexM) * initModel.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt) 
           }
 
@@ -132,14 +132,14 @@ trait HiddenMarkovModel extends java.io.Serializable {
       }
     } else {
       // Initialization
-      for (index <- 0 to initModel.getNumberOfHiddenStates - 1) {
+      for (index <- 0 until initModel.getNumberOfHiddenStates) {
         backwardVariables.setQuick(observationSequence.length - 1, index, 1)
       }
       // Induction
       for (indexT <- observationSequence.length - 2 to 0 by -1) {
-        for (indexN <- 0 to initModel.getNumberOfHiddenStates - 1) {
+        for (indexN <- 0 until initModel.getNumberOfHiddenStates) {
 	  var sum:Double = 0.0
-	  for (indexM <- 0 to initModel.getNumberOfHiddenStates - 1) {
+	  for (indexM <- 0 until initModel.getNumberOfHiddenStates) {
 	  	      sum += backwardVariables.getQuick(indexT + 1, indexM) * initModel.getTransitionMatrix.getQuick(indexN, indexM) * initModel.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt)
 	  }
 
@@ -154,7 +154,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
   def expectedNumberOfTransitions(model: HMMModel, observationSequence:Vector, forwardVariables: DenseMatrix,
     backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexM: Int, scale: Boolean): Double = {
     var numTransitions:Double = 0.0
-    for (indexT <- 0 to observationSequence.length - 2) {
+    for (indexT <- 0 until observationSequence.length - 1) {
       numTransitions += forwardVariables.getQuick(indexT, indexN) * model.getEmissionMatrix.getQuick(indexM, observationSequence(indexT + 1).toInt) * backwardVariables.getQuick(indexT + 1, indexM)
     }
 
@@ -170,7 +170,7 @@ trait HiddenMarkovModel extends java.io.Serializable {
   def expectedNumberOfEmissions(observationSequence:Vector, forwardVariables: DenseMatrix,
     backwardVariables: DenseMatrix, likelihood: Double, indexN: Int, indexM: Int, scale: Boolean, scalingFactors: Option[Array[Double]]): Double = {
     var numEmissions:Double = 0.0
-    for (indexT <- 0 to observationSequence.length - 1) {
+    for (indexT <- 0 until observationSequence.length) {
       if (observationSequence(indexT).toInt == indexM) {
         if (scale) {
           numEmissions += forwardVariables.getQuick(indexT, indexN) * backwardVariables.getQuick(indexT, indexN)/scalingFactors.get(indexT)
@@ -193,12 +193,12 @@ trait HiddenMarkovModel extends java.io.Serializable {
     var likelihood: Double = 0.0
 
     if (scalingFactors == None) {
-      for (indexN <- 0 to forwardVariables.columnSize() - 1) {
+      for (indexN <- 0 until forwardVariables.columnSize()) {
         likelihood += forwardVariables.getQuick(forwardVariables.rowSize() - 1, indexN)
       }
     } else {
       var product: Double = 1.0
-      for (indexT <- 0 to scalingFactors.get.length - 1) {
+      for (indexT <- 0 until scalingFactors.get.length) {
         product = product * scalingFactors.get(indexT)
       }
 
@@ -211,8 +211,8 @@ trait HiddenMarkovModel extends java.io.Serializable {
   def checkForConvergence(model: HMMModel, nextModel: HMMModel, epsilon: Double): Boolean = {
     // check convergence of transitionProbabilities
     var diff: Double = 0.0;
-    for (indexN <- 0 to model.getNumberOfHiddenStates - 1) {
-      for (indexM <- 0 to model.getNumberOfHiddenStates - 1) {
+    for (indexN <- 0 until model.getNumberOfHiddenStates) {
+      for (indexM <- 0 until model.getNumberOfHiddenStates) {
         val oldVal:Double = model.getTransitionMatrix.getQuick(indexN, indexM)
         val newVal:Double = nextModel.getTransitionMatrix.getQuick(indexN, indexM)
         val tmp: Double = oldVal - newVal
@@ -223,8 +223,8 @@ trait HiddenMarkovModel extends java.io.Serializable {
     var norm: Double = Math.sqrt(diff)
     diff = 0
     // check convergence of emissionProbabilities
-    for (indexN <- 0 to model.getNumberOfHiddenStates - 1) {
-      for (indexM <- 0 to model.getNumberOfObservableSymbols - 1) {
+    for (indexN <- 0 until model.getNumberOfHiddenStates) {
+      for (indexM <- 0 until model.getNumberOfObservableSymbols) {
         val oldVal:Double = model.getEmissionMatrix.getQuick(indexN, indexM)
         val newVal:Double = nextModel.getEmissionMatrix.getQuick(indexN, indexM)
         val tmp: Double = oldVal - newVal
@@ -247,55 +247,87 @@ trait HiddenMarkovModel extends java.io.Serializable {
     var curModel:HMMModel = initModel
     var iter = 0
     var stop = false
+    val observationsMatrix = observations.collect
+
     while ((iter < maxNumberOfIterations) && (!stop)) {
       iter = iter + 1
       var transitionMatrix = new DenseMatrix(curModel.getNumberOfHiddenStates, curModel.getNumberOfHiddenStates)
       var emissionMatrix = new DenseMatrix(curModel.getNumberOfHiddenStates, curModel.getNumberOfObservableSymbols)
       var initialProbabilities = new DenseVector(curModel.getNumberOfHiddenStates)
 
-      val observationsMatrix = observations.collect
-      val observation = observationsMatrix.viewRow(0)
-      val (forwardVariables, scalingFactors) = computeForwardVariables(curModel, observation, scale)
-      val backwardVariables = computeBackwardVariables(curModel, observation, scale, scalingFactors)
-      val obsLikelihood = sequenceLikelihood(forwardVariables, scalingFactors)
+      for (indexN <- 0 until curModel.getNumberOfHiddenStates) {
+        initialProbabilities.setQuick(indexN, 0.0)
+        for (indexM <- 0 until curModel.getNumberOfHiddenStates) {
+          transitionMatrix.setQuick(indexN, indexM, 0.0)
+        }
+        
+        for (indexM <- 0 until curModel.getNumberOfObservableSymbols) {
+          emissionMatrix.setQuick(indexN, indexM, 0.0)          
+        }
+      }
+
+      for (obsIndex <- 0 until observationsMatrix.nrow) {
+        val observation = observationsMatrix.viewRow(obsIndex)
+        val (forwardVariables, scalingFactors) = computeForwardVariables(curModel, observation, scale)
+        val backwardVariables = computeBackwardVariables(curModel, observation, scale, scalingFactors)
+        val obsLikelihood = sequenceLikelihood(forwardVariables, scalingFactors)
       
-      if (scale == true) {
         // recompute initial probabilities
-        for (index <- 0 to curModel.getNumberOfHiddenStates - 1) {
-          initialProbabilities.setQuick(index, forwardVariables.getQuick(0, index) * backwardVariables.getQuick(0, index) / scalingFactors.get(0))
+        if (scale) {
+          for (index <- 0 until curModel.getNumberOfHiddenStates) {
+            val prob:Double = forwardVariables.getQuick(0, index) * backwardVariables.getQuick(0, index) / scalingFactors.get(0)
+            val oldVal:Double = initialProbabilities.getQuick(index)
+            initialProbabilities.setQuick(index, prob + oldVal)
+          }
+        } else {
+          for (index <- 0 until curModel.getNumberOfHiddenStates) {
+            val prob:Double = forwardVariables.getQuick(0, index) * backwardVariables.getQuick(0, index) / obsLikelihood
+            val oldVal:Double = initialProbabilities.getQuick(index)
+            initialProbabilities.setQuick(index, prob + oldVal)
+          }
         }
-      } else {
-        // recompute initial probabilities
-        for (index <- 0 to curModel.getNumberOfHiddenStates - 1) {
-          initialProbabilities.setQuick(index, forwardVariables.getQuick(0, index) * backwardVariables.getQuick(0, index) / obsLikelihood)
+
+        // recompute transitionmatrix
+        for (indexN <- 0 until curModel.getNumberOfHiddenStates) {
+          for (indexM <- 0 until curModel.getNumberOfHiddenStates) {
+            val numTransitions = expectedNumberOfTransitions(curModel, observation, forwardVariables, backwardVariables, obsLikelihood, indexN, indexM, scale)
+            val oldVal:Double = transitionMatrix.getQuick(indexN, indexM)
+            transitionMatrix.setQuick(indexN, indexM, numTransitions + oldVal)
+          }
+        }
+
+        // recompute emissionmatrix
+        for (indexN <- 0 until curModel.getNumberOfHiddenStates) {
+          var denominator:Double = 0.0
+          for (indexM <- 0 until curModel.getNumberOfObservableSymbols) {
+            var numEmissions:Double = expectedNumberOfEmissions(observation, forwardVariables, backwardVariables, obsLikelihood, indexN, indexM, scale, scalingFactors)
+            val oldVal:Double = emissionMatrix.getQuick(indexN, indexM)
+            emissionMatrix.setQuick(indexN, indexM, numEmissions + oldVal)
+          }
         }
       }
 
-      // recompute transitionmatrix
-      for (indexN <- 0 to curModel.getNumberOfHiddenStates - 1) {
-        var denominator:Double = 0.0
-        for (indexM <- 0 to curModel.getNumberOfHiddenStates - 1) {
-          val numTransitions = expectedNumberOfTransitions(curModel, observation, forwardVariables, backwardVariables, obsLikelihood, indexN, indexM, scale)
-          denominator += numTransitions
-          transitionMatrix.setQuick(indexN, indexM, numTransitions)
+      // normalize the matrices
+      for (indexN <- 0 until curModel.getNumberOfHiddenStates) {
+        val normI:Double = initialProbabilities.getQuick(indexN)/observationsMatrix.nrow
+        initialProbabilities.setQuick(indexN, normI)
+
+        var total:Double = 0.0
+        for (indexM <- 0 until curModel.getNumberOfHiddenStates) {
+          total += transitionMatrix.getQuick(indexN, indexM)
         }
 
-        for (indexM <- 0 to curModel.getNumberOfHiddenStates - 1) {
-          transitionMatrix.setQuick(indexN, indexM, transitionMatrix.getQuick(indexN, indexM)/denominator)
-        }
-      }
-
-      // recompute emissionmatrix
-      for (indexN <- 0 to curModel.getNumberOfHiddenStates - 1) {
-        var denominator:Double = 0.0
-        for (indexM <- 0 to curModel.getNumberOfObservableSymbols - 1) {
-          var numEmissions:Double = expectedNumberOfEmissions(observation, forwardVariables, backwardVariables, obsLikelihood, indexN, indexM, scale, scalingFactors)
-          denominator += numEmissions
-          emissionMatrix.setQuick(indexN, indexM, numEmissions)
+        for (indexM <- 0 until curModel.getNumberOfHiddenStates) {
+          transitionMatrix.setQuick(indexN, indexM, transitionMatrix.getQuick(indexN, indexM)/total)
         }
 
-        for (indexM <- 0 to curModel.getNumberOfObservableSymbols - 1) {
-          emissionMatrix.setQuick(indexN, indexM, emissionMatrix.getQuick(indexN, indexM)/denominator)
+        total = 0.0
+        for (indexM <- 0 until curModel.getNumberOfObservableSymbols) {
+          total += emissionMatrix.getQuick(indexN, indexM)
+        }
+
+        for (indexM <- 0 until curModel.getNumberOfObservableSymbols) {
+          emissionMatrix.setQuick(indexN, indexM, emissionMatrix.getQuick(indexN, indexM)/total)
         }
       }
 

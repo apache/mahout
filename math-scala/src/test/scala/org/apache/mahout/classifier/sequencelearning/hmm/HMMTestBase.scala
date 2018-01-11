@@ -47,6 +47,9 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
 
   val initialProbabilities = dvec(0.2, 0.1, 0.4, 0.3)
   val observations = dense((1, 0, 2, 2, 0, 0, 1, 1, 1, 0, 2, 0, 1, 0, 0))
+  val multipleObservations = sparse(
+    (0, 1) :: (1, 0) :: (2, 2) :: (3, 2) :: (4, 0) :: (5, 0) :: (6, 1) :: (7, 1) :: (8, 1) ::  (9, 0) :: (10, 2) :: (11, 0) :: (12, 1) :: (13, 0) :: (14, 0) :: Nil,
+    (0, 1) :: (1, 2) :: (2, 0) :: (3, 1) :: (4, 0) :: (5, 0) :: (6, 1) :: (7, 2) :: (8, 1) ::  (9, 2) :: (10, 0) :: (11, 2) :: (12, 1) ::  Nil)
 
   val transitionMatrixExpected = dense(
     (0.2319, 0.0993, 0.0005, 0.6683),
@@ -62,16 +65,30 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
 
   val initialProbabilitiesExpected = dvec(0, 0, 1.0, 0)
 
-  def compareModels(trainedModel:HMMModel):Unit = {
-    for (indexI <- 0 to trainedModel.getNumberOfHiddenStates - 1) {
-      trainedModel.getInitialProbabilities.getQuick(indexI) - initialProbabilitiesExpected.getQuick(indexI) should be < epsilon
+  val mTransitionMatrixExpected = dense(
+    (0.3271599282990272, 0.1086335029682492, 0.18057285889124233, 0.38363370984148126),
+    (0.26045820264596237, 0.5859457737112057, 0.13554086908114193, 0.01805515456169015),
+    (0.5619947559092133, 0.0, 0.04416126697971683, 0.3938439771110697),
+    (0.4458621414345233, 0.3784235350634106, 0.06095036408301116, 0.11476395941905497))
 
-      for (indexJ <- 0 to trainedModel.getNumberOfHiddenStates - 1) {
-        trainedModel.getTransitionMatrix.getQuick(indexI, indexJ) - transitionMatrixExpected.getQuick(indexI, indexJ) should be < epsilon
+  val mEmissionMatrixExpected = dense(
+    (0.8074678111696147, 0.11708554052631344, 0.07544664830407177),
+    (0.5718025775415391, 0.3336663565194518, 0.09453106593900908),
+    (0.013579876754409118, 0.9688892915228535, 0.01753083172273737),
+    (0.0, 0.1770898706525618, 0.8229101293474382))
+
+  val mInitialProbabilitiesExpected = dvec(1.1527590099040409E-7, 1.314705472922704E-6, 0.9999909531404041, 7.616878221414395E-6)
+
+  def compareModels(trainedModel:HMMModel, iExpected:DenseVector, tExpected:DenseMatrix, eExpected:DenseMatrix):Unit = {
+    for (indexI <- 0 until trainedModel.getNumberOfHiddenStates) {
+      trainedModel.getInitialProbabilities.getQuick(indexI) - iExpected.getQuick(indexI) should be < epsilon
+
+      for (indexJ <- 0 until trainedModel.getNumberOfHiddenStates) {
+        trainedModel.getTransitionMatrix.getQuick(indexI, indexJ) - tExpected.getQuick(indexI, indexJ) should be < epsilon
       }
 
-      for (indexJ <- 0 to trainedModel.getNumberOfObservableSymbols - 1) {
-        trainedModel.getEmissionMatrix.getQuick(indexI, indexJ) - emissionMatrixExpected.getQuick(indexI, indexJ) should be < epsilon
+      for (indexJ <- 0 until trainedModel.getNumberOfObservableSymbols) {
+        trainedModel.getEmissionMatrix.getQuick(indexI, indexJ) - eExpected.getQuick(indexI, indexJ) should be < epsilon
       }
     }
   }
@@ -86,7 +103,7 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
     val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
     val trainedModel = HiddenMarkovModel.train(initModel, observationsDrm, 0.1, 10, false)
     trainedModel.validate()
-    compareModels(trainedModel)
+    compareModels(trainedModel, initialProbabilitiesExpected, transitionMatrixExpected, emissionMatrixExpected)
   }
 
   test("Simple Standard HMM Model with scaling") {
@@ -99,6 +116,19 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
     val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
     val trainedModel = HiddenMarkovModel.train(initModel, observationsDrm, 0.1, 10, true)
     trainedModel.validate()
-    compareModels(trainedModel)
+    compareModels(trainedModel, initialProbabilitiesExpected, transitionMatrixExpected, emissionMatrixExpected)
+  }
+
+  test("Simple Standard HMM Model with multiple observations") {
+    val observationsDrm:DrmLike[Long] = drm.drmParallelize(m = multipleObservations, numPartitions = 1)
+    // Re-key into DrmLike[Long] instead of [Int]
+      .mapBlock()({
+        case (keys, block) => keys.map(_.toLong) -> block
+      })
+
+    val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
+    val trainedModel = HiddenMarkovModel.train(initModel, observationsDrm, 0.1, 10, false)
+    trainedModel.validate()
+    compareModels(trainedModel, mInitialProbabilitiesExpected, mTransitionMatrixExpected, mEmissionMatrixExpected)
   }
 }
