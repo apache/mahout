@@ -131,4 +131,17 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
     trainedModel.validate()
     compareModels(trainedModel, mInitialProbabilitiesExpected, mTransitionMatrixExpected, mEmissionMatrixExpected)
   }
+
+  test("Simple Standard HMM Model with multiple observations with multiple partitions") {
+    val observationsDrm:DrmLike[Long] = drm.drmParallelize(m = multipleObservations, numPartitions = 2)
+    // Re-key into DrmLike[Long] instead of [Int]
+      .mapBlock()({
+        case (keys, block) => keys.map(_.toLong) -> block
+      })
+
+    val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
+    val trainedModel = HiddenMarkovModel.train(initModel, observationsDrm, 0.1, 10, false)
+    trainedModel.validate()
+    compareModels(trainedModel, mInitialProbabilitiesExpected, mTransitionMatrixExpected, mEmissionMatrixExpected)
+  }
 }
