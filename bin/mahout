@@ -104,6 +104,10 @@ if [ "$1" == "spark-trainhmm" ]; then
   SPARK=1
 fi
 
+if [ "$1" == "spark-testhmm" ]; then
+  SPARK=1
+fi
+
 if [ "$MAHOUT_CORE" != "" ]; then
   IS_CORE=1
 fi
@@ -318,6 +322,10 @@ case "$1" in
   (spark-trainhmm)
     shift
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.TrainHMMDriver" "$@"
+    ;;
+  (spark-testhmm)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.TestHMMDriver" "$@"
     ;;
 
   (h2o-node)

@@ -102,6 +102,12 @@ object TrainHMMDriver extends MahoutSparkDriver {
         options + ("pathToInitialModel" -> x)
       } text ("Path to the file with Initial Model parameters")
 
+      // Overwrite the output directory (with the model) if it exists?  Default: false
+      opts = opts + ("overwrite" -> false)
+      opt[Unit]("overwrite") abbr "ow" action { (_, options) =>
+        options + ("overwrite" -> true)
+      } text "Overwrite the output directory (with the model) if it exists? Default: false"
+
       // Spark config options--not driver specific
       parseSparkOptions()
 
@@ -170,16 +176,20 @@ object TrainHMMDriver extends MahoutSparkDriver {
     val scale = parser.opts("scale").asInstanceOf[Boolean]
     val epsilon = parser.opts("epsilon").asInstanceOf[Double]
     val maxNumberOfIterations = parser.opts("maxNumberOfIterations").asInstanceOf[Int]
-    
+    val overwrite = parser.opts("overwrite").asInstanceOf[Boolean]
+    val fullPathToModel = outputPath + HMMModel.modelBaseDirectory
+
+    if (overwrite) {
+       Hadoop2HDFSUtil.delete(fullPathToModel)
+    }
+
     val trainingSet = readTrainingSet()
     val initModel = createInitialModel()
     val model = SparkHiddenMarkovModel.train(initModel, trainingSet, 
       epsilon, maxNumberOfIterations, scale)
 
-    println("Trained Transition Matrix:")
-    println(model.getTransitionMatrix)
-    println("Trained Emission Matrix:")
-    println(model.getEmissionMatrix)
+    println("Trained Model:")
+    model.printModel()
     
     model.dfsWrite(outputPath)
     

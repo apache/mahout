@@ -387,7 +387,106 @@ trait HiddenMarkovModel extends java.io.Serializable {
     curModel
   }
  
-  def test[K: ClassTag](model: HMMModel) = {
+  def likelihood(model: HMMModel, observationSequence: Vector, scale: Boolean):Double = {
+    val (forwardVariables, scalingFactors) = computeForwardVariables(model.getNumberOfHiddenStates, model.getInitialProbabilities, model.getTransitionMatrix, model.getEmissionMatrix, observationSequence, scale)
+
+    val obsLikelihood = sequenceLikelihood(forwardVariables, scalingFactors)
+    obsLikelihood
+  }
+
+  def decode(model: HMMModel, observationSequence: Vector, scale: Boolean):DenseVector = {
+    // probability that the most probable hidden states ends at state i at time t
+    val delta = Array.ofDim[Double](observationSequence.length, model.getNumberOfHiddenStates)
+    // previous hidden state in the most probable state leading up to state i at time t
+    val phi = Array.ofDim[Int](observationSequence.length - 1, model.getNumberOfHiddenStates)
+    var hiddenSeq = new DenseVector(observationSequence.length)
+
+    val initialProbabilities:Vector = model.getInitialProbabilities
+    val emissionMatrix:Matrix = model.getEmissionMatrix
+    val transitionMatrix:Matrix = model.getTransitionMatrix
+
+    // Initialization
+    if (scale) {
+      for (index <- 0 until model.getNumberOfHiddenStates) {
+        delta(0)(index) = Math.log(initialProbabilities.getQuick(index) * emissionMatrix.getQuick(index, observationSequence(0).toInt))
+      }
+    } else {
+      for (index <- 0 until model.getNumberOfHiddenStates) {
+        delta(0)(index) = initialProbabilities.getQuick(index) * emissionMatrix.getQuick(index, observationSequence(0).toInt)
+      }
+    }
+
+    // Induction
+    // iterate over time
+    if (scale) {
+      for (t <- 1 until observationSequence.length) {
+        // iterate over the hidden states
+        for (i <- 0 until model.getNumberOfHiddenStates) {
+          // find the maximum probability and most likely state
+          // leading up
+          // to this
+          var maxState:Int = 0;
+          var maxProb:Double = delta(t - 1)(0) + Math.log(transitionMatrix.getQuick(0, i))
+          for (j <- 1 until model.getNumberOfHiddenStates) {
+            val prob:Double = delta(t - 1)(j) + Math.log(transitionMatrix.getQuick(j, i))
+            if (prob > maxProb) {
+              maxProb = prob
+              maxState = j
+            }
+          }
+          delta(t)(i) = maxProb + Math.log(emissionMatrix.getQuick(i, observationSequence(t).toInt))
+          phi(t - 1)(i) = maxState
+        }
+      }
+    } else {
+      for (t <- 1 until observationSequence.length) {
+        // iterate over the hidden states
+        for (i <- 0 until model.getNumberOfHiddenStates) {
+          // find the maximum probability and most likely state
+          // leading up
+          // to this
+          var maxState:Int = 0
+          var maxProb:Double = delta(t - 1)(0) * transitionMatrix.getQuick(0, i)
+          for (j <- 1 until model.getNumberOfHiddenStates) {
+            val prob:Double = delta(t - 1)(j) * transitionMatrix.getQuick(j, i)
+            if (prob > maxProb) {
+              maxProb = prob
+              maxState = j
+            }
+          }
+          delta(t)(i) = maxProb * emissionMatrix.getQuick(i, observationSequence(t).toInt)
+          phi(t - 1)(i) = maxState
+        }
+      }
+    }
+
+    // find the most likely end state for initialization
+    var maxProb:Double = 0.0
+    if (scale) {
+      maxProb = Double.NegativeInfinity
+    } else {
+      maxProb = 0.0
+    }
+
+    for (i <- 0 until model.getNumberOfHiddenStates) {
+      if (delta(observationSequence.length - 1)(i) > maxProb) {
+        maxProb = delta(observationSequence.length - 1)(i)
+        hiddenSeq(observationSequence.length - 1) = i
+      }
+    }
+
+    // now backtrack to find the most likely hidden sequence
+    for (t <- observationSequence.length - 2 to 0 by -1) {
+      hiddenSeq(t) = phi(t)(hiddenSeq(t + 1).toInt)
+    }
+
+    hiddenSeq
+  }
+
+  def generate(model: HMMModel, len:Int):DenseVector = {
+    var hiddenSeq = new DenseVector(len)
+
+    hiddenSeq
   }
 }
 

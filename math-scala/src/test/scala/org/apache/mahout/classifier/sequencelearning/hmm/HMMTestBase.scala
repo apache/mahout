@@ -144,4 +144,14 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
     trainedModel.validate()
     compareModels(trainedModel, mInitialProbabilitiesExpected, mTransitionMatrixExpected, mEmissionMatrixExpected)
   }
+
+  test("Decode an observation sequence with viterbi algorithm") {
+    val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
+    val observationSequence = dvec(1, 0, 2, 2, 0, 0, 1)
+    val expectedHiddenSeq = dvec(2, 0, 3, 3, 0, 0, 2)
+    val hiddenSeq = HiddenMarkovModel.decode(initModel, observationSequence, false)
+    for (i <- 0 until observationSequence.size) {
+      expectedHiddenSeq(i) should be hiddenSeq(i)
+    }
+  }
 }
