@@ -151,7 +151,33 @@ trait HMMTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =
     val expectedHiddenSeq = dvec(2, 0, 3, 3, 0, 0, 2)
     val hiddenSeq = HiddenMarkovModel.decode(initModel, observationSequence, false)
     for (i <- 0 until observationSequence.size) {
-      expectedHiddenSeq(i) should be hiddenSeq(i)
+      expectedHiddenSeq.getQuick(i).toInt shouldBe hiddenSeq.getQuick(i).toInt
     }
+  }
+
+  test("Decode an observation sequence with viterbi algorithm (with log scaling)") {
+    val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
+    val observationSequence = dvec(1, 0, 2, 2, 0, 0, 1)
+    val expectedHiddenSeq = dvec(2, 0, 3, 3, 0, 0, 2)
+    val hiddenSeq = HiddenMarkovModel.decode(initModel, observationSequence, true)
+    for (i <- 0 until observationSequence.size) {
+      expectedHiddenSeq.getQuick(i).toInt shouldBe hiddenSeq.getQuick(i).toInt
+    }
+  }
+
+  test("likelihood of an observation seqeunce given a model") {
+    val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
+    val observationSequence = dvec(1, 0, 2, 2, 0, 0, 1)
+    val expectedLikelihood = 1.8425e-4
+    val likelihood = HiddenMarkovModel.likelihood(initModel, observationSequence, false)
+    likelihood - expectedLikelihood should be < epsilon
+  }
+
+  test("likelihood of an observation seqeunce given a model (with scaling)") {
+    val initModel = new HMMModel(4, 3, transitionMatrix, emissionMatrix, initialProbabilities)
+    val observationSequence = dvec(1, 0, 2, 2, 0, 0, 1)
+    val expectedLikelihood = 1.8425e-4
+    val likelihood = HiddenMarkovModel.likelihood(initModel, observationSequence, true)
+    likelihood - expectedLikelihood should be < epsilon
   }
 }
