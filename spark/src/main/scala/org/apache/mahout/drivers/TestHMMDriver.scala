@@ -112,7 +112,7 @@ object TestHMMDriver extends MahoutSparkDriver {
       bufferedSource.close
     } else if (op == "generate") {
       val len:Int = parser.opts("seq").asInstanceOf[Int]
-      val observationSeq:DenseVector = SparkHiddenMarkovModel.generate(inputModel, len)
+      val (observationSeq, hiddenSeq) = SparkHiddenMarkovModel.generate(inputModel, len, System.currentTimeMillis().toInt)
     } else if (op == "decode") {
       val seqFile = parser.opts("seq").asInstanceOf[String]
       val scale:Boolean = parser.opts("scale").asInstanceOf[Boolean]

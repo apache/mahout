@@ -27,7 +27,8 @@ import scala.reflect.ClassTag
 import scala.language.asInstanceOf
 import collection._
 import scala.collection.JavaConversions._
-
+import scala.util.Random
+import org.apache.mahout.common.RandomUtils
 
 trait HiddenMarkovModel extends java.io.Serializable {
   
@@ -483,10 +484,40 @@ trait HiddenMarkovModel extends java.io.Serializable {
     hiddenSeq
   }
 
-  def generate(model: HMMModel, len:Int):DenseVector = {
+  def generate(model: HMMModel, len:Int, seed:Long):(DenseVector, DenseVector) = {
+    var observationSeq = new DenseVector(len)
     var hiddenSeq = new DenseVector(len)
+    var rand:Random = RandomUtils.getRandom()
+    if (seed != 0) {
+      rand = RandomUtils.getRandom(seed)
+    }
+    var hiddenState:Int = 0
 
-    hiddenSeq
+    var randnr:Double = rand.nextDouble()
+    while (model.getCumulativeInitialProbabilities.getQuick(hiddenState) < randnr) {
+      hiddenState = hiddenState + 1
+    }
+
+    // now draw steps output states according to the cumulative
+    // distributions
+    for (step <- 0 until len) {
+      // choose output state to given hidden state
+      randnr = rand.nextDouble()
+      var outputState:Int = 0
+      while (model.getCumulativeEmissionMatrix.getQuick(hiddenState, outputState) < randnr) {
+        outputState = outputState + 1
+      }
+      observationSeq.setQuick(step, outputState)
+      // choose the next hidden state
+      randnr = rand.nextDouble()
+      var nextHiddenState:Int = 0
+      while (model.getCumulativeTransitionMatrix.getQuick(hiddenState, nextHiddenState) < randnr) {
+        nextHiddenState = nextHiddenState + 1
+      }
+      hiddenState = nextHiddenState;
+    }
+
+    (observationSeq, hiddenSeq)
   }
 }
 

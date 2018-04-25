@@ -26,6 +26,7 @@ import drm._
 import scala.language.asInstanceOf
 import scala.collection._
 import JavaConversions._
+import scala.util.Random
 import org.apache.mahout.common.RandomUtils
 
 /**
@@ -38,6 +39,11 @@ class HMMModel(val numberOfHiddenStates: Int,
 	       val transitionMatrix: Matrix = null,
 	       val emissionMatrix: Matrix = null,
   	       val initialProbabilities: Vector = null)  extends java.io.Serializable {
+
+  var cumulativesInitialized = false
+  var cumulativeTransitionMatrix:Matrix = _
+  var cumulativeEmissionMatrix:Matrix = _
+  var cumulativeInitialProbabilities:Vector = _
 
   validate()
 
@@ -61,6 +67,52 @@ class HMMModel(val numberOfHiddenStates: Int,
     transitionMatrix
   }
 
+  def getCumulativeTransitionMatrix: Matrix = {
+    if (cumulativesInitialized == false) {
+      cumulativeTransitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
+      for (i <- 0 until numberOfHiddenStates) {
+        var sum:Double = 0;
+        for (j <- 0 until numberOfHiddenStates) {
+          sum = sum + transitionMatrix.getQuick(i, j)
+          cumulativeTransitionMatrix.setQuick(i, j, sum)
+        }
+        cumulativeTransitionMatrix.setQuick(i, numberOfHiddenStates - 1, 1.0)
+      }
+    }
+
+    cumulativeTransitionMatrix
+  }
+
+  def getCumulativeEmissionMatrix: Matrix = {
+    if (cumulativesInitialized == false) {
+      cumulativeEmissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfOutputSymbols)
+      for (i <- 0 until numberOfHiddenStates) {
+        var sum:Double = 0;
+        for (j <- 0 until numberOfOutputSymbols) {
+          sum = sum + emissionMatrix.getQuick(i, j)
+          cumulativeEmissionMatrix.setQuick(i, j, sum)
+        }
+        cumulativeEmissionMatrix.setQuick(i, numberOfOutputSymbols - 1, 1.0)
+      }
+    }
+
+    cumulativeEmissionMatrix
+  }
+
+  def getCumulativeInitialProbabilities: Vector = {
+    if (cumulativesInitialized == false) {
+      cumulativeInitialProbabilities = new DenseVector(numberOfHiddenStates)
+      var sum:Double = 0;
+      for (i <- 0 until numberOfHiddenStates) {
+        sum = sum + initialProbabilities.getQuick(i)
+        cumulativeInitialProbabilities.setQuick(i, sum)
+      }
+      cumulativeInitialProbabilities.setQuick(numberOfHiddenStates - 1, 1.0)
+    }
+
+    cumulativeInitialProbabilities
+  }
+
   def printModel(): Unit = {
     println("Transition Matrix:")
     println(getTransitionMatrix)
@@ -70,16 +122,16 @@ class HMMModel(val numberOfHiddenStates: Int,
     println(getInitialProbabilities)
   }
 
-  def initModelWithRandomParameters(inSeed:Long): Unit = {
-    var seed:Long = inSeed
-    if (seed == 0) {
-      seed = RandomUtils.getRandom().nextInt()
+  def initModelWithRandomParameters(seed:Long): Unit = {
+    var rand:Random = RandomUtils.getRandom()
+    if (seed != 0) {
+      rand = RandomUtils.getRandom(seed)
     }
 
     // initialize the initial Probabilities
-    var sum:Double = 0; // used for normalization
+    var sum:Double = 0 
     for (i <- 0 to numberOfHiddenStates - 1) {
-      val nextRand:Double = RandomUtils.getRandom.nextDouble();
+      val nextRand:Double = rand.nextDouble();
       initialProbabilities.setQuick(i, nextRand);
       sum += nextRand;
     }
@@ -92,7 +144,7 @@ class HMMModel(val numberOfHiddenStates: Int,
     for (i <- 0 to numberOfHiddenStates -1) {
       sum = 0
       for (j <- 0 to numberOfHiddenStates - 1) {
-        transitionMatrix.setQuick(i, j, RandomUtils.getRandom.nextDouble())
+        transitionMatrix.setQuick(i, j, rand.nextDouble())
         sum += transitionMatrix.getQuick(i, j)
       }
       // normalize the random values to obtain probabilities
@@ -105,7 +157,7 @@ class HMMModel(val numberOfHiddenStates: Int,
     for (i <- 0 to numberOfHiddenStates - 1) {
       sum = 0
       for (j <- 0 to numberOfOutputSymbols - 1) {
-        emissionMatrix.setQuick(i, j, RandomUtils.getRandom.nextDouble())
+        emissionMatrix.setQuick(i, j, rand.nextDouble())
         sum += emissionMatrix.getQuick(i, j)
       }
       // normalize the random values to obtain probabilities
