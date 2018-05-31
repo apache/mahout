@@ -36,163 +36,163 @@
 
   <packaging>jar</packaging>
 
-  <build>
-    <plugins>
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-math-${version}.jar" tofile="../mahout-math-${version}.jar" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-collection-codegen-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration>
-              <!--<mainExcludes>-->
-              <!--<mainExclude>**/AbstractBooleanList.java</mainExclude>-->
-              <!--<mainExclude>**/BooleanArrayList.java</mainExclude>-->
-              <!--<mainExclude>**/BooleanBufferConsumer.java</mainExclude>-->
-              <!--</mainExcludes>-->
-              <!--<testExcludes>-->
-              <!--<testExclude>**/BooleanArrayListTest.java</testExclude>-->
-              <!--</testExcludes>-->
-              <outputDirectory>${project.build.directory}/generated-sources/mahout</outputDirectory>
-              <testOutputDirectory>${project.build.directory}/generated-test-sources/mahout</testOutputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-sources/mahout</source>
-              </sources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>add-test-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-test-sources/mahout</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- create test jar so other modules can reuse the math test utility classes. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-            <phase>package</phase>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-remote-resources-plugin</artifactId>
-        <configuration>
-          <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
-          <resourceBundles>
-            <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-          </resourceBundles>
-          <supplementalModels>
-            <supplementalModel>supplemental-models.xml</supplementalModel>
-          </supplementalModels>
-        </configuration>
-      </plugin>
-
+  <!--<build>-->
+    <!--<plugins>-->
+      <!--&lt;!&ndash; copy jars to top directory, which is MAHOUT_HOME &ndash;&gt;-->
       <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-shade-plugin</artifactId>-->
-        <!--<version>3.0.0</version>-->
+        <!--<artifactId>maven-antrun-plugin</artifactId>-->
+        <!--<version>1.4</version>-->
         <!--<executions>-->
           <!--<execution>-->
+            <!--<id>copy</id>-->
             <!--<phase>package</phase>-->
+            <!--<configuration>-->
+              <!--<tasks>-->
+                <!--<copy file="target/mahout-math-${version}.jar" tofile="../mahout-math-${version}.jar" />-->
+              <!--</tasks>-->
+            <!--</configuration>-->
             <!--<goals>-->
-              <!--<goal>shade</goal>-->
+              <!--<goal>run</goal>-->
+            <!--</goals>-->
+          <!--</execution>-->
+        <!--</executions>-->
+      <!--</plugin>-->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.mahout</groupId>-->
+        <!--<artifactId>mahout-collection-codegen-plugin</artifactId>-->
+        <!--<executions>-->
+          <!--<execution>-->
+            <!--<phase>generate-sources</phase>-->
+            <!--<goals>-->
+              <!--<goal>generate</goal>-->
             <!--</goals>-->
             <!--<configuration>-->
-              <!--<artifactSet>-->
-                <!--<includes>-->
-                  <!--<include>it.unimi.dsi:fastutil</include>-->
-                <!--</includes>-->
-              <!--</artifactSet>-->
-              <!--<relocations>-->
-                <!--<relocation>-->
-                  <!--<pattern>it.unimi.dsi.fastutil</pattern>-->
-                  <!--<shadedPattern>shaded.it.unimi.dsi.fastutil</shadedPattern>-->
-                <!--</relocation>-->
-              <!--</relocations>-->
+              <!--&lt;!&ndash;<mainExcludes>&ndash;&gt;-->
+              <!--&lt;!&ndash;<mainExclude>**/AbstractBooleanList.java</mainExclude>&ndash;&gt;-->
+              <!--&lt;!&ndash;<mainExclude>**/BooleanArrayList.java</mainExclude>&ndash;&gt;-->
+              <!--&lt;!&ndash;<mainExclude>**/BooleanBufferConsumer.java</mainExclude>&ndash;&gt;-->
+              <!--&lt;!&ndash;</mainExcludes>&ndash;&gt;-->
+              <!--&lt;!&ndash;<testExcludes>&ndash;&gt;-->
+              <!--&lt;!&ndash;<testExclude>**/BooleanArrayListTest.java</testExclude>&ndash;&gt;-->
+              <!--&lt;!&ndash;</testExcludes>&ndash;&gt;-->
+              <!--<outputDirectory>${project.build.directory}/generated-sources/mahout</outputDirectory>-->
+              <!--<testOutputDirectory>${project.build.directory}/generated-test-sources/mahout</testOutputDirectory>-->
             <!--</configuration>-->
           <!--</execution>-->
         <!--</executions>-->
       <!--</plugin>-->
-      <!-- remove jars from top directory on clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../</directory>
-              <includes>
-                <include>mahout-math*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>build-helper-maven-plugin</artifactId>-->
+        <!--<executions>-->
+          <!--<execution>-->
+            <!--<id>add-source</id>-->
+            <!--<phase>generate-sources</phase>-->
+            <!--<goals>-->
+              <!--<goal>add-source</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+              <!--<sources>-->
+                <!--<source>${project.build.directory}/generated-sources/mahout</source>-->
+              <!--</sources>-->
+            <!--</configuration>-->
+          <!--</execution>-->
+          <!--<execution>-->
+            <!--<id>add-test-source</id>-->
+            <!--<phase>generate-sources</phase>-->
+            <!--<goals>-->
+              <!--<goal>add-test-source</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+              <!--<sources>-->
+                <!--<source>${project.build.directory}/generated-test-sources/mahout</source>-->
+              <!--</sources>-->
+            <!--</configuration>-->
+          <!--</execution>-->
+        <!--</executions>-->
+      <!--</plugin>-->
+
+      <!--&lt;!&ndash; create test jar so other modules can reuse the math test utility classes. &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-jar-plugin</artifactId>-->
+        <!--<executions>-->
+          <!--<execution>-->
+            <!--<goals>-->
+              <!--<goal>test-jar</goal>-->
+            <!--</goals>-->
+            <!--<phase>package</phase>-->
+          <!--</execution>-->
+        <!--</executions>-->
+      <!--</plugin>-->
+
+      <!--<plugin>-->
+        <!--<artifactId>maven-javadoc-plugin</artifactId>-->
+      <!--</plugin>-->
+
+      <!--<plugin>-->
+        <!--<artifactId>maven-source-plugin</artifactId>-->
+      <!--</plugin>-->
+
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-remote-resources-plugin</artifactId>-->
+        <!--<configuration>-->
+          <!--<appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>-->
+          <!--<resourceBundles>-->
+            <!--<resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>-->
+          <!--</resourceBundles>-->
+          <!--<supplementalModels>-->
+            <!--<supplementalModel>supplemental-models.xml</supplementalModel>-->
+          <!--</supplementalModels>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+
+      <!--&lt;!&ndash;<plugin>&ndash;&gt;-->
+        <!--&lt;!&ndash;<groupId>org.apache.maven.plugins</groupId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifactId>maven-shade-plugin</artifactId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<version>3.0.0</version>&ndash;&gt;-->
+        <!--&lt;!&ndash;<executions>&ndash;&gt;-->
+          <!--&lt;!&ndash;<execution>&ndash;&gt;-->
+            <!--&lt;!&ndash;<phase>package</phase>&ndash;&gt;-->
+            <!--&lt;!&ndash;<goals>&ndash;&gt;-->
+              <!--&lt;!&ndash;<goal>shade</goal>&ndash;&gt;-->
+            <!--&lt;!&ndash;</goals>&ndash;&gt;-->
+            <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
+              <!--&lt;!&ndash;<artifactSet>&ndash;&gt;-->
+                <!--&lt;!&ndash;<includes>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<include>it.unimi.dsi:fastutil</include>&ndash;&gt;-->
+                <!--&lt;!&ndash;</includes>&ndash;&gt;-->
+              <!--&lt;!&ndash;</artifactSet>&ndash;&gt;-->
+              <!--&lt;!&ndash;<relocations>&ndash;&gt;-->
+                <!--&lt;!&ndash;<relocation>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<pattern>it.unimi.dsi.fastutil</pattern>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<shadedPattern>shaded.it.unimi.dsi.fastutil</shadedPattern>&ndash;&gt;-->
+                <!--&lt;!&ndash;</relocation>&ndash;&gt;-->
+              <!--&lt;!&ndash;</relocations>&ndash;&gt;-->
+            <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
+          <!--&lt;!&ndash;</execution>&ndash;&gt;-->
+        <!--&lt;!&ndash;</executions>&ndash;&gt;-->
+      <!--&lt;!&ndash;</plugin>&ndash;&gt;-->
+      <!--&lt;!&ndash; remove jars from top directory on clean &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<artifactId>maven-clean-plugin</artifactId>-->
+        <!--<version>3.0.0</version>-->
+        <!--<configuration>-->
+          <!--<filesets>-->
+            <!--<fileset>-->
+              <!--<directory>../</directory>-->
+              <!--<includes>-->
+                <!--<include>mahout-math*.jar</include>-->
+              <!--</includes>-->
+              <!--<followSymlinks>false</followSymlinks>-->
+            <!--</fileset>-->
+          <!--</filesets>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+    <!--</plugins>-->
+  <!--</build>-->
 
   <dependencies>
 
