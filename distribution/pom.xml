@@ -80,7 +80,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <workingDirectory>../viennacl</workingDirectory>
+              <workingDirectory>../experimental/viennacl</workingDirectory>
               <executable>mvn</executable>
               <arguments>
                 <argument>${lifecycle.target}</argument>
@@ -97,7 +97,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <workingDirectory>../viennacl-omp</workingDirectory>
+              <workingDirectory>../experimental/viennacl-omp</workingDirectory>
               <executable>mvn</executable>
               <arguments>
                 <argument>${lifecycle.target}</argument>
@@ -285,7 +285,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <workingDirectory>../viennacl</workingDirectory>
+                  <workingDirectory>../experimental/viennacl</workingDirectory>
                   <executable>mvn</executable>
                   <arguments>
                     <argument>${lifecycle.target}</argument>
@@ -354,7 +354,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <workingDirectory>../viennacl-omp</workingDirectory>
+                  <workingDirectory>../experimental/viennacl-omp</workingDirectory>
                   <executable>mvn</executable>
                   <arguments>
                     <argument>${lifecycle.target}</argument>

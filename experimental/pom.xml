@@ -27,26 +27,19 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>community</artifactId>
-  <name>Mahout Community</name>
-  <description>Not officially maintained, but still very useful scripts to use Mahout with.
+  <artifactId>experimental</artifactId>
+  <name>Mahout Experimental</name>
+  <description>Provided, and under work, be careful using in production.
   </description>
 
   <packaging>pom</packaging>
 
+  <properties>
+    <scala.compat.version>2.10</scala.compat.version>
+  </properties>
   <modules>
-    <module>spark-cli-drivers</module>
-    <module>community-engines</module>
-
+    <module>viennacl</module>
+    <module>viennacl-omp</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>mahout-mr</id>
-      <modules>
-        <module>mahout-mr</module>
-      </modules>
-    </profile>
-  </profiles>
 
 </project>

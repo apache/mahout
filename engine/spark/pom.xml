@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-spark_2.10</artifactId>
+  <artifactId>spark_2.11</artifactId>
   <name>- Mahout Spark Engine</name>
   <description>
     Mahout Bindings for Apache Spark
@@ -36,8 +36,9 @@
   <packaging>jar</packaging>
 
   <properties>
-      <scala.compat.version>2.10</scala.compat.version>
-      <spark.version>1.6.3</spark.version>
+      <scala.compat.version>2.11</scala.compat.version>
+      <spark.version>2.3.0</spark.version>
+      <spark.compat.version>2.3</spark.compat.version>
   </properties>
 
   <build>
@@ -135,8 +136,8 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" />
-                <copy file="target/mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../mahout-spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
+                <copy file="target/spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" tofile="../spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" />
+                <copy file="target/spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -180,7 +181,7 @@
             <fileset>
               <directory>../</directory>
               <includes>
-                <include>mahout-spark*.jar</include>
+                <include>spark*.jar</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
@@ -205,6 +206,7 @@
       <version>${spark.version}</version>
     </dependency>
 
+    <!-- mahout stuff -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>core</artifactId>
@@ -217,26 +219,11 @@
       <version>0.13.1-SNAPSHOT</version>
     </dependency>
 
-    <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
-    <!--</dependency>-->
-
-    <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>javacpp</artifactId>
-      <version>1.2.2</version>
-    </dependency>
 
     <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--<artifactId>mahout-hdfs</artifactId>-->
-      <!--<exclusions>-->
-        <!--<exclusion>-->
-          <!--<groupId>asm</groupId>-->
-          <!--<artifactId>asm</artifactId>-->
-        <!--</exclusion>-->
-      <!--</exclusions>-->
+      <!--<groupId>org.bytedeco</groupId>-->
+      <!--<artifactId>javacpp</artifactId>-->
+      <!--<version>1.2.2</version>-->
     <!--</dependency>-->
 
     <dependency>
@@ -254,7 +241,7 @@
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.10</artifactId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
   </dependencies>

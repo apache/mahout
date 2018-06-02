@@ -113,7 +113,8 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <slf4j.version>1.7.22</slf4j.version>
-
+    <scala.version>2.11.6</scala.version>
+    <scala.compat.version>2.11</scala.compat.version>
 
     <!--
     <maven.clover.multiproject>true</maven.clover.multiproject>
@@ -167,17 +168,8 @@
     <module>core</module>
     <module>engine</module>
     <module>community</module>
-    <!--<module>buildtools</module>-->
-    <!--<module>math</module>-->
-    <!--<module>hdfs</module>-->
-    <!--<module>mr</module>-->
-    <!--<module>integration</module>-->
-    <!--<module>examples</module>-->
-
-    <!--<module>math-scala</module>-->
-    <!--<module>spark</module>-->
-    <!---->
-    <!--<module>h2o</module>-->
+    <module>experimental</module>
+    <!-- <module>examples</module> -->
   </modules>
 
   <dependencyManagement>
@@ -194,17 +186,23 @@
         <version>3.2</version>
       </dependency>
 
+      <!-- scala stuff -->
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.12</version>
-        <scope>test</scope>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest_${scala.compat.version}</artifactId>
+        <version>3.0.5</version>
       </dependency>
 
       <dependency>
-        <groupId>org.scalatest</groupId>
-        <artifactId>scalatest_2.10</artifactId>
-        <version>3.0.5</version>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-reflect</artifactId>
+        <version>${scala.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala.version}</version>
       </dependency>
 
       <!-- TODO Move to ONE logging framework... -->
@@ -213,6 +211,21 @@
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- used in Core -->
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.17</version>
+      </dependency>
+
       <!-- our modules -->
       <!--
       <dependency>

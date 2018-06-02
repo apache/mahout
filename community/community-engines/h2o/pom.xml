@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-h2o_2.10</artifactId>
+  <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
   <name>-- Mahout H2O Engine (Community)</name>
   <description>
     H2O Backend for Mahout DSL
@@ -37,8 +37,6 @@
 
   <properties>
     <h2o.version>0.1.25</h2o.version>
-    <scala.compat.version>2.10</scala.compat.version>
-    <scala.version>2.10.5</scala.version>
   </properties>
 
 
@@ -162,17 +160,14 @@
   </build>
 
   <dependencies>
-  <dependency>
-    <groupId>org.scala-lang</groupId>
-    <artifactId>scala-library</artifactId>
-    <version>${scala.version}</version>
-  </dependency>
 
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>org.apache.mahout</groupId>-->
+      <!--&lt;!&ndash;<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>&ndash;&gt;-->
+      <!--<artifactId>a</artifactId>-->
+      <!--<version>${project.version}</version>-->
+    <!--</dependency>-->
 
     <!-- for MatrixWritable and VectorWritable -->
     <dependency>
@@ -219,6 +214,10 @@
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+    </dependency>
   </dependencies>
 
   <profiles>
