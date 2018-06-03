@@ -43,4 +43,14 @@
   <dependencies>
 
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- ensure licenses -->
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>

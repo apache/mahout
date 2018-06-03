@@ -37,6 +37,12 @@
 
   <build>
     <plugins>
+      <!-- ensure licenses -->
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
+
       <!-- create test jar so other modules can reuse the native test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

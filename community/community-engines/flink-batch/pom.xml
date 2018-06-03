@@ -40,6 +40,12 @@
 
   <build>
     <plugins>
+      <!-- ensure licenses -->
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
+      
       <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>

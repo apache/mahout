@@ -187,6 +187,12 @@
           </execution>
         </executions>
       </plugin>
+
+      <!-- ensure licenses -->
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 </project>

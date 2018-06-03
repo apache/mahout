@@ -40,6 +40,17 @@
 
   </modules>
 
+  <build>
+    <plugins>
+      <!-- ensure licenses -->
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+  
   <profiles>
     <profile>
       <id>mahout-mr</id>

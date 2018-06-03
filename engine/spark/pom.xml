@@ -43,8 +43,13 @@
 
   <build>
     <plugins>
+      <!-- ensure licenses -->
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
 
-
+      <!-- Pre-refactor plugins start here -->
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>

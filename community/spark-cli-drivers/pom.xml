@@ -32,6 +32,15 @@
   <description>These drivers will allow you to compile a handy Apache Spark App which utilizes Apache Mahout.
   </description>
 
+  <build>
+    <plugins>
+      <!-- ensure licenses -->
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
   <packaging>jar</packaging>
 
 </project>

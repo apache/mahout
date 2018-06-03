@@ -35,7 +35,7 @@ mahout
 -[x] IO Tests move over
 -[x] Add drivers to Community (to avoid future `scopt` hold ups)
 -[ ] update all poms to dump files in `lib/`
--[ ] Move MR to community engines.
+-[ ] Move MR to community engines. (Failling on OpenIntHash, etc.)
 -[ ] Figure out where mising classes are ^^ OpenIntIntHash, etc.
 -[x] failing tests on Naivebayes (needs 'Online Summarizer')
 -[ ] Add `examples` module
@@ -51,3 +51,16 @@ mahout
 -[ ] Update Website 
 -[ ] - Description of modules
 -[ ] - Available profiles and what they do
+-[ ] Update bin/mahout
+-[ ] Add licenes to files
+
+### Plugins to add in
+-[ ] Release
+-[x] Ratcheck
+-[ ] Checkstyle
+-[ ] Maven-enforcer
+-[ ] Maven Surefire
+-[ ] JavaDoc/Scala Doc Plugin
+
+-[ ] profile for fat jars (spark/flink/h2o)
+-[ ] profile to turn on flink / h2o / other non-essentials (then disable them in standard build)
