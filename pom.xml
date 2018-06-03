@@ -584,6 +584,18 @@
           <optimize>true</optimize>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.2</version>
+        <configuration>
+          <!--<useReleaseProfile>true</useReleaseProfile>-->
+          <!--<releaseProfiles>viennacl,viennacl-omp,distribution,mahout-release,apache-release</releaseProfiles>-->
+          <goals>deploy</goals>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <arguments>${arguments}</arguments>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
     <!--<defaultGoal>install</defaultGoal>-->

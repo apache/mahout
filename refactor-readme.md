@@ -17,7 +17,10 @@ mahout
 \-- spark_1.6(?)
 \- mr
 \- Spark CLI Drivers
-- examples
+- Experimental
+\- ViennaCL
+\- ViennaCL-OMP
+- examples (not implemented yet)
 ```
 
 
