@@ -57,7 +57,7 @@
         <artifactId>apache-rat-plugin</artifactId>
       </plugin>
       
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
+      <!-- copy jars to lib/ -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.4</version>
@@ -67,7 +67,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-mr-${version}.jar" tofile="../mahout-mr-${version}.jar" />
+                <copy file="target/mahout-mr-${version}.jar" tofile="../../lib/mahout-mr-${version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -75,6 +75,23 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <!-- delete files on mvn clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../../lib/</directory>
+              <includes>
+                <include>mahout-mr_*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
       <!-- create test jar so other modules can reuse the core test utility classes. -->
       <plugin>
@@ -137,7 +154,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>../</directory>
+              <directory>../../lib</directory>
               <includes>
                 <include>mahout-mr*.jar</include>
               </includes>

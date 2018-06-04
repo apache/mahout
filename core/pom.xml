@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>core</artifactId>
+  <artifactId>core_${scala.compat.version}</artifactId>
   <name>Mahout Core</name>
   <description>High performance scientific and technical computing data structures and methods,
     mostly based on CERN's Colt Java API
@@ -192,6 +192,43 @@
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
+
+      <!-- copy jars to lib/ -->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/core_${scala.compat.version}-${project.version}.jar" tofile="../lib/core_${scala.compat.version}-${project.version}.jar" />
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- delete files on mvn clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../lib/</directory>
+              <includes>
+                <include>core_*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -198,7 +198,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-native-viennacl-omp_${scala.compat.version}-${version}.jar" tofile="../mahout-native-viennacl-omp_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-native-viennacl-omp_${scala.compat.version}-${version}.jar" tofile="../../lib/mahout-native-viennacl-omp_${scala.compat.version}-${version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -214,7 +214,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>../</directory>
+              <directory>../../lib</directory>
               <includes>
                 <include>mahout-native-viennacl-omp*.jar</include>
               </includes>
@@ -233,7 +233,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -651,6 +651,23 @@
             <excludeSubProjects>false</excludeSubProjects>
           </configuration>
         </plugin>
+
+        <!-- delete jars on claen in top directory, which is lib/ -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+          <configuration>
+            <filesets>
+              <fileset>
+                <directory>lib/</directory>
+                <includes>
+                  <include>*.jar</include>
+                </includes>
+                <followSymlinks>false</followSymlinks>
+              </fileset>
+            </filesets>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 

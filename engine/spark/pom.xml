@@ -141,8 +141,8 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" tofile="../spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" />
-                <copy file="target/spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
+                <copy file="target/spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" />
+                <copy file="target/spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -177,16 +177,16 @@
           </execution>
         </executions>
       </plugin>
-      <!-- remove jars from top directory on clean -->
+      <!-- delete files on mvn clean -->
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>3.0.0</version>
         <configuration>
           <filesets>
             <fileset>
-              <directory>../</directory>
+              <directory>../../lib/</directory>
               <includes>
-                <include>spark*.jar</include>
+                <include>spark_*.jar</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
@@ -214,14 +214,14 @@
     <!-- mahout stuff -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core</artifactId>
-      <version>0.13.1-SNAPSHOT</version>
+      <artifactId>core_${scala.compat.version}</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>
-      <version>0.13.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
 
@@ -233,8 +233,8 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core</artifactId>
-      <version>0.13.1-SNAPSHOT</version>
+      <artifactId>core_${scala.compat.version}</artifactId>
+      <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>

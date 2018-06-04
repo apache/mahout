@@ -35,7 +35,6 @@
   <packaging>pom</packaging>
 
   <properties>
-    <scala.compat.version>2.10</scala.compat.version>
   </properties>
   <modules>
     <module>viennacl</module>

@@ -29,12 +29,13 @@ mahout
 
 -[x] get `org.apache.mahout.math.drm` squared away
 -[ ] see `core/pom.xml`
--[ ] move tests for `org.apache.mahout.math.solver`s
+-[x] move tests for `org.apache.mahout.math.solver`s
 -[x] move `org.apache.mahout.math.stats` esp OnlineSolver (but prob all of them)
 -[x] move above's tests over.
 -[x] IO Tests move over
 -[x] Add drivers to Community (to avoid future `scopt` hold ups)
--[ ] update all poms to dump files in `lib/`
+-[x] update all poms to dump files in `lib/`
+-[ ] add pludin to delete everything from `lib/` on clean.
 -[ ] Move MR to community engines. (Failling on OpenIntHash, etc.)
 -[ ] Figure out where mising classes are ^^ OpenIntIntHash, etc.
 -[x] failing tests on Naivebayes (needs 'Online Summarizer')
@@ -43,7 +44,7 @@ mahout
 -[ ] Update `.travis.yml` for new module structures
 -[ ] Add profiles back in.
 -[x] Fix POMs (correct heirarcy / inheritance) (for now is done...)
--[ ] Fix POMs (add required plugins for release)
+-[ ] Fix POMs (add required plugins for release, see below)
 -[ ] Clean up, delete directories no longer in use.
 -[ ] Create profile to create spark-fat-jar. (of if you get pushback to make no fat jars)
 -[ ] Move Kryo to top pom (spark, core and flink at least)
@@ -51,16 +52,21 @@ mahout
 -[ ] Update Website 
 -[ ] - Description of modules
 -[ ] - Available profiles and what they do
--[ ] Update bin/mahout
--[ ] Add licenes to files
+-[ ] Update bin/mahout (probably moving most of it to mr-classic)
+-[x] Add licenes to files
+-[ ] Last thing- delete this file. 
+
 
 ### Plugins to add in
 -[ ] Release
 -[x] Ratcheck
 -[ ] Checkstyle
--[ ] Maven-enforcer
+-[ ] Maven-enforcer (Java 1.8 bump for spark 2.3+ compatability)
 -[ ] Maven Surefire
 -[ ] JavaDoc/Scala Doc Plugin
 
 -[ ] profile for fat jars (spark/flink/h2o)
 -[ ] profile to turn on flink / h2o / other non-essentials (then disable them in standard build)
+
+### Current profiles
+`mahout-mr` - builds the MapReduce stuff.

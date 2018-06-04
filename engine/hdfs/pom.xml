@@ -42,6 +42,42 @@
         <artifactId>apache-rat-plugin</artifactId>
       </plugin>
 
+      <!-- copy jars to lib/ -->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/mahout-hdfs-${project.version}.jar" tofile="../../lib/mahout-hdfs-${project.version}.jar" />
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- delete files on mvn clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../../lib/</directory>
+              <includes>
+                <include>mahout-hdfs_*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <!--<build>-->
@@ -56,26 +92,7 @@
         <!--</includes>-->
       <!--</resource>-->
     <!--</resources>-->
-    <!--<plugins>-->
-      <!--&lt;!&ndash; copy jars to top directory, which is MAHOUT_HOME &ndash;&gt;-->
-      <!--<plugin>-->
-        <!--<artifactId>maven-antrun-plugin</artifactId>-->
-        <!--<version>1.4</version>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<id>copy</id>-->
-            <!--<phase>package</phase>-->
-            <!--<configuration>-->
-              <!--<tasks>-->
-                <!--<copy file="target/mahout-hdfs-${version}.jar" tofile="../mahout-hdfs-${version}.jar" />-->
-              <!--</tasks>-->
-            <!--</configuration>-->
-            <!--<goals>-->
-              <!--<goal>run</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-        <!--</executions>-->
-      <!--</plugin>-->
+
       <!--&lt;!&ndash; create test jar so other modules can reuse the core test utility classes. &ndash;&gt;-->
       <!--<plugin>-->
         <!--<groupId>org.apache.maven.plugins</groupId>-->
@@ -134,13 +151,13 @@
     <!-- our modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
