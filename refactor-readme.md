@@ -76,3 +76,5 @@ mahout
 `h2o` - build h2o community engine
 
 add note in how to release about calling the tag `mahout-0.X.Y-rcZ`
+
+`mvn --batch-mode release:update-versions -DdevelopmentVersion=0.14.0-SNAPSHOT`
