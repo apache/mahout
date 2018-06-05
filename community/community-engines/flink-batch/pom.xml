@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>community-engines</artifactId>
-    <version>0.14.1-SNAPSHOT</version>
+    <version>0.13.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -56,7 +56,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-flink-batch_${scala.compat.version}-${version}.jar" tofile="../../../lib/mahout-flink-batch_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-flink-batch_${scala.compat.version}-${version}.jar" tofile="../../../lib/mahout-flink-batch_${scala.compat.version}-${version}.jar"/>
               </tasks>
             </configuration>
             <goals>
