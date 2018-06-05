@@ -79,6 +79,7 @@ warnings)
 ```
 
 * You may also need to add the following to the `<servers>` section in `~/.m2/settings.xml` in order to upload artifacts (as the `-Dusername=` `-Dpassword=` didn't work for gsingers for 0.8, but this did; n.b. it didn't work for akm for the 0.13 release):
+
 ```
 <server>
   <id>apache.releases.https</id>

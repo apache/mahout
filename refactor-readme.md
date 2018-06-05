@@ -70,3 +70,4 @@ mahout
 
 ### Current profiles
 `mahout-mr` - builds the MapReduce stuff.
+`apache-release` - contains the release plugin
