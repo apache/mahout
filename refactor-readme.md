@@ -71,3 +71,6 @@ mahout
 ### Current profiles
 `mahout-mr` - builds the MapReduce stuff.
 `apache-release` - contains the release plugin
+`mahout_keys` - a profile used for releasing (actually lives in ~/.m2/settings.xml, see release instructions)
+
+add note in how to release about calling the tag `mahout-0.X.Y-rcZ`
