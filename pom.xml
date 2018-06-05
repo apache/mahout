@@ -672,6 +672,29 @@
     </pluginManagement>
 
   </build>
+
+  <profiles>
+    <profile>
+      <id>apache-release</id>
+      <properties>
+        <skipTests>false</skipTests>
+      </properties>
+      <build>
+        <plugins>
+          <!--maven source-->
+          <!--maven jar-->
+          <!--maven assembly-->
+          <plugin>
+            <artifactId>maven-release-plugin</artifactId>
+            <configuration>
+              <releaseProfiles>apache-release</releaseProfiles>
+              <preparationGoals>clean install</preparationGoals>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
     <!--<defaultGoal>install</defaultGoal>-->
     <!--<pluginManagement>-->
       <!--<plugins>-->
