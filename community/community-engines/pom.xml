@@ -34,11 +34,6 @@
 
   <packaging>pom</packaging>
 
-  <modules>
-    <module>h2o</module>
-    <module>flink-batch</module>
-  </modules>
-
   <build>
     <plugins>
       <!-- ensure licenses -->
@@ -48,4 +43,20 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>flink-batch</id>
+      <modules>
+        <module>flink-batch</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>h2o</id>
+      <modules>
+        <module>h2o</module>
+      </modules>
+    </profile>
+
+  </profiles>
 </project>
