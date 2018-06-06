@@ -50,6 +50,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>spark_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
+      <classifier>spark_${spark.compat.version}</classifier>
     </dependency>
 
     <dependency>
