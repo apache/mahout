@@ -169,6 +169,9 @@ The following profiles are available for building optional components:
 			<td>Build Community Engine of Mahout for H2o</td>
 		</tr>
 		<tr>
+			<td><code>mahout-mr</code></td>
+			<td>Build Community maintained Mahout for Map Reduce</td>
+		<tr>
 			<td><code>viennacl</code></td>
 			<td>Build Experimental ViennaCL (GPU) BLAS Pack</td>
 		</tr>
