@@ -34,11 +34,6 @@
 
   <packaging>pom</packaging>
 
-  <modules>
-    <module>spark-cli-drivers</module>
-    <module>community-engines</module>
-
-  </modules>
 
   <build>
     <plugins>
@@ -53,9 +48,33 @@
   
   <profiles>
     <profile>
+      <id>flink-batch</id>
+      <modules>
+        <module>community-engines</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>h2o</id>
+      <modules>
+        <module>community-engines</module>
+      </modules>
+    </profile>
+    <profile>
       <id>mahout-mr</id>
       <modules>
         <module>mahout-mr</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>spark-cli-drivers</id>
+      <activation>
+        <property>
+          <name>skipCli</name>
+          <value>!true</value>
+        </property>
+      </activation>
+      <modules>
+        <module>spark-cli-drivers</module>
       </modules>
     </profile>
   </profiles>
