@@ -180,6 +180,9 @@ The following profiles are available for building optional components:
 			<td>Build Experimental ViennaCL-OpenMP (CPU) BLAS Pack</td>
 		<tr>
 		<tr>
+			<td><code>docs</code></td>
+			<td>Profile for building Java/Scala Docs</td>
+		<tr>
 			<th>Mahout Specific Option</th>
 			<th>Description</th>
 		</tr>
@@ -198,4 +201,16 @@ command to build:
 ```bash
 mvn clean package -Pviennacl-omp -DskipCli
 ```
-	
+
+#### Building Java/Scala Docs
+
+To build the Java/Scala docs use the maven `site` goal and the `docs` profile. 
+
+Additionally, passing the `-Ddependency.locations.enabled=false` option will skip checking the dependency location and allow a much faster build.
+  
+```bash
+mvn clean site -Pall,docs -Ddependency.locations.enabled=false
+```
+
+
+

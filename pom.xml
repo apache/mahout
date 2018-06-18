@@ -112,6 +112,7 @@
     <apache-rat.plugin.version>0.12</apache-rat.plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <mjavadoc.version>2.10.3</mjavadoc.version>
     <slf4j.version>1.7.22</slf4j.version>
     <scala.version>2.11.6</scala.version>
     <scala.compat.version>2.11</scala.compat.version>
@@ -125,7 +126,7 @@
     <mpmd.version>3.4</mpmd.version>
     <mcheckstyle.version>2.15</mcheckstyle.version>
     <mfindbugs.version>3.0.1</mfindbugs.version>
-    <mjavadoc.version>2.10.3</mjavadoc.version>
+
     <mscala.version>3.2.0</mscala.version>
     <hbase.version>1.0.0</hbase.version>
     <lucene.version>5.5.2</lucene.version>
@@ -585,20 +586,18 @@
           <optimize>true</optimize>
         </configuration>
       </plugin>
-      <!-- TODO This isn't done (release plugin)-->
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <version>2.5.2</version>
         <configuration>
-          <!--<useReleaseProfile>true</useReleaseProfile>-->
-          <!--<releaseProfiles>viennacl,viennacl-omp,distribution,mahout-release,apache-release</releaseProfiles>-->
           <goals>deploy</goals>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <arguments>${arguments}</arguments>
         </configuration>
       </plugin>
-      <!-- TODO ^^ not done -->
+
     </plugins>
     <pluginManagement>
       <plugins>
@@ -669,6 +668,59 @@
             </filesets>
           </configuration>
         </plugin>
+
+        <!--&lt;!&ndash; Javadocs &ndash;&gt;-->
+        <!--<plugin>-->
+          <!--<groupId>org.apache.maven.plugins</groupId>-->
+          <!--<artifactId>maven-javadoc-plugin</artifactId>-->
+          <!--<version>3.0.1</version>-->
+          <!--<executions>-->
+            <!--<execution>-->
+              <!--<id>aggregate</id>-->
+              <!--<phase>site</phase>-->
+              <!--<goals>-->
+                <!--<goal>aggregate</goal>-->
+              <!--</goals>-->
+            <!--</execution>-->
+          <!--</executions>-->
+        <!--</plugin>-->
+
+        <!-- Scaladocs -->
+        <!--<plugin>-->
+          <!--<groupId>org.apache.maven.plugins</groupId>-->
+          <!--<artifactId>maven-site-plugin</artifactId>-->
+          <!--<version>3.0</version>-->
+          <!--<configuration>-->
+            <!--<reportPlugins>-->
+              <!--<plugin>-->
+                <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
+                <!--<version>2.2</version>-->
+              <!--</plugin>-->
+              <!--<plugin>-->
+                <!--<groupId>net.alchim31.maven</groupId>-->
+                <!--<artifactId>scala-maven-plugin</artifactId>-->
+                <!--<version>3.4.1</version>-->
+                <!--<configuration>-->
+                  <!--<jvmArgs>-->
+                    <!--<jvmArg>-Xms64m</jvmArg>-->
+                    <!--<jvmArg>-Xmx1024m</jvmArg>-->
+                  <!--</jvmArgs>-->
+                  <!--<args>-->
+                    <!--<arg>-target:jvm-${maven.compiler.target}</arg>-->
+                    <!--<arg>-deprecation</arg>-->
+                    <!--<arg>-feature</arg>-->
+                    <!--<arg>-language:existentials</arg>-->
+                    <!--<arg>-language:implicitConversions</arg>-->
+                    <!--<arg>-language:postfixOps</arg>-->
+                  <!--</args>-->
+                  <!--<sourceDir>src/main/scala</sourceDir>-->
+                  <!--<testSourceDir>src/test/scala</testSourceDir>-->
+                <!--</configuration>-->
+              <!--</plugin>-->
+            <!--</reportPlugins>-->
+          <!--</configuration>-->
+        <!--</plugin>-->
+
       </plugins>
     </pluginManagement>
 
@@ -718,6 +770,48 @@
       <modules>
         <module>experimental</module>
       </modules>
+    </profile>
+
+
+    <profile>
+      <id>docs</id>
+      <reporting>
+        <plugins>
+          <!-- generate java doc -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${mjavadoc.version}</version>
+          </plugin>
+        </plugins>
+      </reporting>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <configuration>
+              <reportPlugins>
+                <plugin>
+                  <artifactId>maven-project-info-reports-plugin</artifactId>
+                  <!--<version>2.2</version>-->
+                </plugin>
+                <plugin>
+                  <groupId>net.alchim31.maven</groupId>
+                  <artifactId>scala-maven-plugin</artifactId>
+                  <!--<version>3.4.1</version>-->
+                  <configuration>
+                    <jvmArgs>
+                      <jvmArg>-Xms64m</jvmArg>
+                      <jvmArg>-Xmx1024m</jvmArg>
+                    </jvmArgs>
+                  </configuration>
+                </plugin>
+              </reportPlugins>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
     <!--<defaultGoal>install</defaultGoal>-->
@@ -1334,12 +1428,7 @@
           <!--<generateHtml>true</generateHtml>-->
         <!--</configuration>-->
       <!--</plugin>-->
-      <!--&lt;!&ndash; generate java doc &ndash;&gt;-->
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-        <!--<version>${mjavadoc.version}</version>-->
-      <!--</plugin>-->
+
       <!--&lt;!&ndash; code duplication - copy and paste detection &ndash;&gt;-->
       <!--<plugin>-->
         <!--<groupId>org.apache.maven.plugins</groupId>-->
@@ -1429,4 +1518,7 @@
       <!--</plugin>-->
     <!--</plugins>-->
   <!--</reporting>-->
+
+
 </project>
+
