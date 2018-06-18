@@ -217,7 +217,7 @@ coch = cochrane.orcutt(my_lm)
 <p>Steps:</p>
 <ol>
   <li>Normal Regression</li>
-  <li>Estimate <foo>$$\rho$$</foo></li>
+  <li>Estimate <foo>\(\rho\)</foo></li>
   <li>Get Estimates of Transformed Equation</li>
   <li>Step 5: Use Betas from (4) to recalculate model from (1)</li>
   <li>Step 6: repeat  Step 2 through 5 until a stopping criteria is met. Some models call for convergence-
@@ -229,13 +229,13 @@ Kunter et. al reccomend 3 iterations, if you don’t achieve desired results, us
 
 <ol>
   <li>“Cochrane-Orcutt does not always work properly.  A major reason is that when the error terms
- are positively autocorrelated, the estimate <foo>$$r$$</foo> in (12.22) tends to underestimate the autocorrelation
- parameter <foo>$$\rho$$</foo>.  When this bias is serious, it can significantly reduce the effectiveness of the
+ are positively autocorrelated, the estimate <foo>\(r\)</foo> in (12.22) tends to underestimate the autocorrelation
+ parameter <foo>\(\rho\)</foo>.  When this bias is serious, it can significantly reduce the effectiveness of the
  Cochrane-Orcutt approach.</li>
-  <li>“There exists an approximate relation between the <a href="dw-test.html">Durbin Watson test statistic</a> <foo>$$\mathbf{D}$$</foo> in (12.14)
- and the estimated autocorrelation paramater <foo>$$r$$</foo> in (12.22):</li>
+  <li>“There exists an approximate relation between the <a href="dw-test.html">Durbin Watson test statistic</a> <foo>\(\mathbf{D}\)</foo> in (12.14)
+ and the estimated autocorrelation paramater <foo>\(r\)</foo> in (12.22):</li>
 </ol>
-<center>$$D ~= 2(1-\rho)$$</center>
+<center>\(D ~= 2(1-\rho)\)</center>
 
 <p>They also note on p492:
  “… If the process does not terminate after one or two iterations, a different procedure
@@ -319,7 +319,7 @@ println(coModel.summary)
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2017 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2018 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 
