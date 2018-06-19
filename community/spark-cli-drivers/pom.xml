@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark-cli-drivers_${scala.compat.version}</artifactId>
+  <artifactId>spark-cli-drivers_2.11</artifactId>
   <name>- Mahout Spark CLI Drivers</name>
   <description>These drivers will allow you to compile a handy Apache Spark App which utilizes Apache Mahout.
   </description>
@@ -120,6 +120,7 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
+        <version>3.2.2</version>
         <executions>
           <execution>
             <id>add-scala-sources</id>
@@ -162,6 +163,7 @@
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
+        <version>2.0.0</version>
         <executions>
           <execution>
             <id>test</id>

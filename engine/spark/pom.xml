@@ -59,6 +59,7 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
+        <version>3.2.2</version>
         <executions>
           <execution>
             <id>add-scala-sources</id>
@@ -98,6 +99,7 @@
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
+        <version>2.0.0</version>
         <executions>
           <execution>
             <id>test</id>
@@ -139,8 +141,8 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${version}-spark_${spark.compat.version}.jar" />
-                <copy file="target/spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
+                <copy file="target/spark_${scala.compat.version}-${project.version}-spark_${spark.compat.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-spark_${spark.compat.version}.jar" />
+                <copy file="target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -245,6 +247,7 @@
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <version>3.0.5</version>
     </dependency>
 
   </dependencies>
