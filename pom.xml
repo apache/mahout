@@ -117,6 +117,10 @@
 
     <spark.version>2.3.0</spark.version>
     <spark.compat.version>2.3</spark.compat.version>
+
+    <!-- `mvn site` throws a hissy fit searching no longer existing repos if this is not set false -->
+    <dependency.locations.enabled>false</dependency.locations.enabled>
+
     <!--
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -153,16 +157,7 @@
         <enabled>false</enabled>
       </releases>
     </repository>
-    <!--
-    <repository>
-      <id>cloudera</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-    </repository>
-    <repository>
-      <id>mapr</id>
-      <url>http://repository.mapr.com/maven</url>
-    </repository>
-    -->
+
   </repositories>
 
   <modules>
@@ -597,6 +592,7 @@
       </plugin>
 
     </plugins>
+
     <pluginManagement>
       <plugins>
         <plugin>
@@ -691,6 +687,23 @@
           </executions>
         </plugin>
 
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <forkCount>2</forkCount>
+            <reuseForks>false</reuseForks>
+            <argLine>-Xmx768m -Djava.security.manager
+              -Djava.security.policy=${project.build.directory}/../../buildtools/src/test/resources/java.policy</argLine>
+            <argLine>-Djava.security.auth.login.config=${project.build.directory}/../../buildtools/src/test/resources/jaas.config</argLine>
+            <testFailureIgnore>false</testFailureIgnore>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <systemPropertyVariables>
+              <mahout.test.directory>${project.build.directory}</mahout.test.directory>
+            </systemPropertyVariables>
+          </configuration>
+        </plugin>
+
 
       </plugins>
     </pluginManagement>
@@ -742,8 +755,6 @@
         <module>experimental</module>
       </modules>
     </profile>
-
-
     <profile>
       <id>docs</id>
       <reporting>
@@ -758,33 +769,54 @@
       </reporting>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-site-plugin</artifactId>
-            <configuration>
-              <reportPlugins>
-                <plugin>
-                  <artifactId>maven-project-info-reports-plugin</artifactId>
-                  <!--<version>2.2</version>-->
-                </plugin>
-                <plugin>
-                  <groupId>net.alchim31.maven</groupId>
-                  <artifactId>scala-maven-plugin</artifactId>
-                  <!--<version>3.4.1</version>-->
-                  <configuration>
-                    <jvmArgs>
-                      <jvmArg>-Xms64m</jvmArg>
-                      <jvmArg>-Xmx1024m</jvmArg>
-                    </jvmArgs>
-                  </configuration>
-                </plugin>
-              </reportPlugins>
-            </configuration>
-          </plugin>
+
         </plugins>
       </build>
     </profile>
   </profiles>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <configLocation>buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.7.1</version>
+        <configuration>
+          <reportPlugins>
+            <plugin>
+              <artifactId>maven-project-info-reports-plugin</artifactId>
+              <!--<version>2.2</version>-->
+            </plugin>
+            <plugin>
+              <groupId>net.alchim31.maven</groupId>
+              <artifactId>scala-maven-plugin</artifactId>
+              <!--<version>3.4.1</version>-->
+              <configuration>
+                <jvmArgs>
+                  <jvmArg>-Xms64m</jvmArg>
+                  <jvmArg>-Xmx1024m</jvmArg>
+                </jvmArgs>
+              </configuration>
+            </plugin>
+          </reportPlugins>
+        </configuration>
+      </plugin>
+
+
+
+    </plugins>
+  </reporting>
+
+
     <!--<defaultGoal>install</defaultGoal>-->
     <!--<pluginManagement>-->
       <!--<plugins>-->
@@ -946,7 +978,12 @@
           <!--<version>2.2</version>-->
         <!--</plugin>-->
 
-        <!--&lt;!&ndash; Coverage analysis for tests &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<groupId>com.atlassian.maven.plugins</groupId>-->
+        <!--<artifactId>maven-clover2-plugin</artifactId>-->
+        <!--<version>4.0.4</version>-->
+      <!--</plugin>-->
+       <!--&lt;!&ndash; Coverage analysis for tests &ndash;&gt;-->
         <!--<plugin>-->
           <!--<groupId>org.jacoco</groupId>-->
           <!--<artifactId>jacoco-maven-plugin</artifactId>-->
@@ -981,39 +1018,8 @@
       <!--</plugins>-->
     <!--</pluginManagement>-->
 
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-surefire-plugin</artifactId>-->
-        <!--<configuration>-->
-          <!--<forkCount>2</forkCount>-->
-          <!--<reuseForks>false</reuseForks>-->
-          <!--<argLine>-Xmx768m -Djava.security.manager -Djava.library.path=${env.HADOOP_HOME}\bin-->
-            <!-- -Djava.security.policy=${project.build.directory}/../../buildtools/src/test/resources/java.policy</argLine>-->
-          <!--<argLine>-Djava.security.auth.login.config=${project.build.directory}/../../buildtools/src/test/resources/jaas.config</argLine>-->
-          <!--<testFailureIgnore>false</testFailureIgnore>-->
-          <!--<redirectTestOutputToFile>true</redirectTestOutputToFile>-->
-          <!--<systemPropertyVariables>-->
-            <!--<mahout.test.directory>${project.build.directory}</mahout.test.directory>-->
-          <!--</systemPropertyVariables>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
-      <!--<plugin>-->
-        <!--<groupId>com.atlassian.maven.plugins</groupId>-->
-        <!--<artifactId>maven-clover2-plugin</artifactId>-->
-        <!--<version>4.0.4</version>-->
-      <!--</plugin>-->
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
-        <!--<version>${mcheckstyle.version}</version>-->
-        <!--<dependencies>-->
-          <!--<dependency>-->
-            <!--<groupId>org.apache.mahout</groupId>-->
-            <!--<artifactId>mahout-buildtools</artifactId>-->
-            <!--<version>${project.version}</version>-->
-          <!--</dependency>-->
-        <!--</dependencies>-->
-      <!--</plugin>-->
+
+
       <!--<plugin>-->
         <!--<groupId>org.apache.maven.plugins</groupId>-->
         <!--<artifactId>maven-pmd-plugin</artifactId>-->
