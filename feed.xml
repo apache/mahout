@@ -1,4 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.5.0">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2018-06-18T19:47:01+00:00</updated><id>http://mahout.apache.org//</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">New Website</title><link href="http://mahout.apache.org//news/2017/12/20/new-website.html" rel="alternate" type="text/html" title="New Website" /><published>2017-12-20T22:16:01+00:00</published><updated>2017-12-20T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2017/12/20/new-website</id><content type="html" xml:base="http://mahout.apache.org//news/2017/12/20/new-website.html">&lt;p&gt;We’ve launced a new website, (a HUUUGE special thanks to David Miller from &lt;a href=&quot;http://startbootstrap.com&quot;&gt;StartBootstrap.com&lt;/a&gt;).&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.5.0">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2018-06-26T19:10:24+00:00</updated><id>http://mahout.apache.org//</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Preparing for version 0.14.0</title><link href="http://mahout.apache.org//news/2018/06/18/preping-014.html" rel="alternate" type="text/html" title="Preparing for version 0.14.0" /><published>2018-06-18T22:16:01+00:00</published><updated>2018-06-18T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2018/06/18/preping-014</id><content type="html" xml:base="http://mahout.apache.org//news/2018/06/18/preping-014.html">&lt;p&gt;Hey all!  We’re preparing for Mahout version 0.14.0.&lt;/p&gt;
+
+&lt;p&gt;This release might not seem super exciting from a user perspective (except 
+we’re bumping Apache Spark to version 2.x and Scala to version 2.11) but
+it includes some very important ‘behind the scenes changes’.  We’re doing a 
+heavy refactoring which will combine &lt;code class=&quot;highlighter-rouge&quot;&gt;math&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;math-scala&lt;/code&gt; into a module 
+called &lt;code class=&quot;highlighter-rouge&quot;&gt;core&lt;/code&gt; (no change to code required!).&lt;/p&gt;
+
+&lt;p&gt;We will be moving H2o and Flink-batch engines into &lt;code class=&quot;highlighter-rouge&quot;&gt;community&lt;/code&gt; that is to 
+say the code will still be available, but we won’t be actively maintaining 
+it (we will accept PRs though).  We’re moving the Map Reduce code to community
+and have considered to once again accepting PRs against this code (if you have
+an open PR, we’ll hit you up after the release about rebasing and considering to
+resubmit the PR)&lt;/p&gt;
+
+&lt;p&gt;We’re going to be updating the Java dependency from 1.7 to 1.8.&lt;/p&gt;
+
+&lt;p&gt;There was a LOT of old junk in the POMs which we have clipped out.&lt;/p&gt;
+
+&lt;p&gt;Stay tuned and &lt;a href=&quot;https://issues.apache.org/jira/secure/RapidBoard.jspa?rapidView=80&amp;amp;projectKey=MAHOUT&amp;amp;view=detail&amp;amp;selectedIssue=MAHOUT-2047&quot;&gt;feel free to help out&lt;/a&gt;!&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">Hey all! We’re preparing for Mahout version 0.14.0.</summary></entry><entry><title type="html">New Website</title><link href="http://mahout.apache.org//news/2017/12/20/new-website.html" rel="alternate" type="text/html" title="New Website" /><published>2017-12-20T22:16:01+00:00</published><updated>2017-12-20T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2017/12/20/new-website</id><content type="html" xml:base="http://mahout.apache.org//news/2017/12/20/new-website.html">&lt;p&gt;We’ve launced a new website, (a HUUUGE special thanks to David Miller from &lt;a href=&quot;http://startbootstrap.com&quot;&gt;StartBootstrap.com&lt;/a&gt;).&lt;/p&gt;
 
 &lt;p&gt;It looks great but there’s lots to do as we migrate and clean up content from the old site. If you see anything broken, 
 please let us know via either:&lt;/p&gt;

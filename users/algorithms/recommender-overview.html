@@ -142,7 +142,15 @@
 
   <h1 id="recommender-overview">Recommender Overview</h1>
 
-<p>Recommenders have changed over the years. Mahout contains a long list of them, which you can still use. But to get the best  out of our more modern aproach we’ll need to think of the Recommender as a “model creation” component—supplied by Mahout’s new spark-itemsimilarity job, and a “serving” component—supplied by a modern scalable search engine, like Solr.</p>
+<p>Recommenders have changed over the years. Mahout contains a long list of them, which you can still use. However in about 2013 there was a revolution in recommenders, which favored what we might call “Multimodal”, meaning they could take in data of all sorts—basically anything we might think was an indicator of user taste. The new Samsara algorithm, called Correlated Cross-Occurrence (CCO) is just such a next gen recommender algorithm but Mahout-Samsara only implements the model building part. This can be integrated as the user see fit and the rest of this doc will explain how.</p>
+
+<h2 id="turnkey-implementation">Turnkey Implementation</h2>
+
+<p>If you are looking for an end-to-end OSS recommender based on the Mahout CCO algorithm have a look at <a href="https://github.com/actionml/universal-recommender">The Universal Recommender</a>, which is implemented using <a href="http://predictionio.apache.org/">Apache PredictionIO</a>. See instructions for <a href="http://actionml.com/docs/pio_by_actionml">installation here</a>. There is even an AWS AMI for convenience (this is a for-pay option)</p>
+
+<h2 id="build-your-own-integration">Build Your Own Integration</h2>
+
+<p>To get the most out of our more modern CCO algorithm we’ll need to think of the Recommender as a “model creation” component—supplied by Mahout’s new spark-itemsimilarity job, and a “serving” component—supplied by a modern scalable search engine, like Solr or Elasticsearch. Here we describe a loose integration that does not require using Mahout as a library, it uses Mahout’s command line interface. This is clearly not the best but allows one to experiments and get a real recommender running easily.</p>
 
 <p><img src="http://i.imgur.com/fliHMBo.png" alt="image" /></p>
 
@@ -154,7 +162,7 @@
 
 <p>All ids for users and items are preserved as string tokens and so work as an external key in DBs or as doc ids for search engines, they also work as tokens for search queries.</p>
 
-<p>##References</p>
+<h2 id="references">References</h2>
 
 <ol>
   <li>A free ebook, which talks about the general idea: <a href="https://www.mapr.com/practical-machine-learning">Practical Machine Learning</a></li>
@@ -164,7 +172,7 @@ and  <a href="http://occamsmachete.com/ml/2014/09/09/mahout-on-spark-whats-new-i
   <li>A post describing the loglikelihood ratio:  <a href="http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html">Surprise and Coinsidense</a>  LLR is used to reduce noise in the data while keeping the calculations O(n) complexity.</li>
 </ol>
 
-<p>##Mahout Model Creation</p>
+<h2 id="mahout-model-creation">Mahout Model Creation</h2>
 
 <p>See the page describing <a href="http://mahout.apache.org/users/recommender/intro-cooccurrence-spark.html"><em>spark-itemsimilarity</em></a> for more details.</p>
 
