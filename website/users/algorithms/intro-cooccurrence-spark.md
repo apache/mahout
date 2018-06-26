@@ -1,11 +1,11 @@
 ---
 layout: default
-title: Intro to Cooccurrence Recommenders with Spark
+title: Building a Mahout Recommender
 
     
 ---
 
-# Intro to Correlated Cross-Occurrence Recommenders with Spark
+# Building a Correlated Cross-Occurrence (CCO) Recommenders with the Mahout CLI
 
 Mahout's CCO algorithm is one of a new breed of "Multimodal" recommenders that can use input of many types in very flexible ways. 
 
