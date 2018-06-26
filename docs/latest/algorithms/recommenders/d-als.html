@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    (Deprecated)  Fuzzy K-Means
+    Mahout Samsara Distributed ALS
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//docs/latest/algorithms/map-reduce/clustering/fuzzy-k-means.html">
+  <link rel="canonical" href="http://mahout.apache.org//docs/latest/algorithms/recommenders/d-als.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/%20/feed.xml">
 
 
@@ -165,195 +165,54 @@
   <div class="row">
 
     <div class="col-lg-8">
-      <p>Fuzzy K-Means (also called Fuzzy C-Means) is an extension of <a href="http://mahout.apache.org/users/clustering/k-means-clustering.html">K-Means</a>
-, the popular simple clustering technique. While K-Means discovers hard
-clusters (a point belong to only one cluster), Fuzzy K-Means is a more
-statistically formalized method and discovers soft clusters where a
-particular point can belong to more than one cluster with certain
-probability.</p>
+      <p>Seems like someone has jacked up this page? 
+TODO: Find the ALS Page</p>
 
-<p><a name="FuzzyK-Means-Algorithm"></a></p>
-<h4 id="algorithm">Algorithm</h4>
+<h2 id="intro">Intro</h2>
 
-<p>Like K-Means, Fuzzy K-Means works on those objects which can be represented
-in n-dimensional vector space and a distance measure is defined.
-The algorithm is similar to k-means.</p>
+<p>Mahout has a distributed implementation of QR decomposition for tall thin matricies<a href="[Mahout Scala and Mahout Spark Bindings for Linear Algebra Subroutines](http://mahout.apache.org/users/sparkbindings/ScalaSparkBindings.pdf)">1</a>.</p>
 
-<ul>
-  <li>Initialize k clusters</li>
-  <li>Until converged
-    <ul>
-      <li>Compute the probability of a point belong to a cluster for every &lt;point,cluster&gt; pair</li>
-      <li>Recompute the cluster centers using above probability membership values of points to clusters</li>
-    </ul>
-  </li>
-</ul>
+<h2 id="algorithm">Algorithm</h2>
 
-<p><a name="FuzzyK-Means-DesignImplementation"></a></p>
-<h4 id="design-implementation">Design Implementation</h4>
+<p>For the classic QR decomposition of the form <code class="highlighter-rouge">\(\mathbf{A}=\mathbf{QR},\mathbf{A}\in\mathbb{R}^{m\times n}\)</code> a distributed version is fairly easily achieved if <code class="highlighter-rouge">\(\mathbf{A}\)</code> is tall and thin such that <code class="highlighter-rouge">\(\mathbf{A}^{\top}\mathbf{A}\)</code> fits in memory, i.e. <em>m</em> is large but <em>n</em> &lt; ~5000 Under such circumstances, only <code class="highlighter-rouge">\(\mathbf{A}\)</code> and <code class="highlighter-rouge">\(\mathbf{Q}\)</code> are distributed matricies and <code class="highlighter-rouge">\(\mathbf{A^{\top}A}\)</code> and <code class="highlighter-rouge">\(\mathbf{R}\)</code> are in-core products. We just compute the in-core version of the Cholesky decomposition in the form of <code class="highlighter-rouge">\(\mathbf{LL}^{\top}= \mathbf{A}^{\top}\mathbf{A}\)</code>.  After that we take <code class="highlighter-rouge">\(\mathbf{R}= \mathbf{L}^{\top}\)</code> and <code class="highlighter-rouge">\(\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}\)</code>.  The latter is easily achieved by multiplying each verticle block of <code class="highlighter-rouge">\(\mathbf{A}\)</code> by <code class="highlighter-rouge">\(\left(\mathbf{L}^{\top}\right)^{-1}\)</code>.  (There is no actual matrix inversion happening).</p>
 
-<p>The design is similar to K-Means present in Mahout. It accepts an input
-file containing vector points. User can either provide the cluster centers
-as input or can allow canopy algorithm to run and create initial clusters.</p>
+<h2 id="implementation">Implementation</h2>
 
-<p>Similar to K-Means, the program doesn’t modify the input directories. And
-for every iteration, the cluster output is stored in a directory cluster-N.
-The code has set number of reduce tasks equal to number of map tasks. So,
-those many part-0</p>
+<p>Mahout <code class="highlighter-rouge">dqrThin(...)</code> is implemented in the mahout <code class="highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<p>Files are created in clusterN directory. The code uses
-driver/mapper/combiner/reducer as follows:</p>
-
-<p>FuzzyKMeansDriver - This is similar to  KMeansDriver. It iterates over
-input points and cluster points for specified number of iterations or until
-it is converged.During every iteration i, a new cluster-i directory is
-created which contains the modified cluster centers obtained during
-FuzzyKMeans iteration. This will be feeded as input clusters in the next
-iteration.  Once Fuzzy KMeans is run for specified number of
-iterations or until it is converged, a map task is run to output “the point
-and the cluster membership to each cluster” pair as final output to a
-directory named “points”.</p>
-
-<p>FuzzyKMeansMapper - reads the input cluster during its configure() method,
-then  computes cluster membership probability of a point to each
-cluster.Cluster membership is inversely propotional to the distance.
-Distance is computed using  user supplied distance measure. Output key
-is encoded clusterId. Output values are ClusterObservations containing
-observation statistics.</p>
-
-<p>FuzzyKMeansCombiner - receives all key:value pairs from the mapper and
-produces partial sums of the cluster membership probability times input
-vectors for each cluster. Output key is: encoded cluster identifier. Output
-values are ClusterObservations containing observation statistics.</p>
-
-<p>FuzzyKMeansReducer - Multiple reducers receives certain keys and all values
-associated with those keys. The reducer sums the values to produce a new
-centroid for the cluster which is output. Output key is: encoded cluster
-identifier (e.g. “C14”. Output value is: formatted cluster identifier (e.g.
-“C14”). The reducer encodes unconverged clusters with a ‘Cn’ cluster Id and
-converged clusters with ‘Vn’ clusterId.</p>
-
-<p><a name="FuzzyK-Means-RunningFuzzyk-MeansClustering"></a></p>
-<h2 id="running-fuzzy-k-means-clustering">Running Fuzzy k-Means Clustering</h2>
-
-<p>The Fuzzy k-Means clustering algorithm may be run using a command-line
-invocation on FuzzyKMeansDriver.main or by making a Java call to
-FuzzyKMeansDriver.run().</p>
-
-<p>Invocation using the command line takes the form:</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code>bin/mahout fkmeans \
-    -i &lt;input vectors directory&gt; \
-    -c &lt;input clusters directory&gt; \
-    -o &lt;output working directory&gt; \
-    -dm &lt;DistanceMeasure&gt; \
-    -m &lt;fuzziness argument &gt;1&gt; \
-    -x &lt;maximum number of iterations&gt; \
-    -k &lt;optional number of initial clusters to sample from input vectors&gt; \
-    -cd &lt;optional convergence delta. Default is 0.5&gt; \
-    -ow &lt;overwrite output directory if present&gt;
-    -cl &lt;run input vector clustering after computing Clusters&gt;
-    -e &lt;emit vectors to most likely cluster during clustering&gt;
-    -t &lt;threshold to use for clustering if -e is false&gt;
-    -xm &lt;execution method: sequential or mapreduce&gt;
+<div class="highlighter-rouge"><pre class="highlight"><code>def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {        
+    if (drmA.ncol &gt; 5000)
+        log.warn("A is too fat. A'A must fit in memory and easily broadcasted.")
+    implicit val ctx = drmA.context
+    val AtA = (drmA.t %*% drmA).checkpoint()
+    val inCoreAtA = AtA.collect
+    val ch = chol(inCoreAtA)
+    val inCoreR = (ch.getL cloned) t
+    if (checkRankDeficiency &amp;&amp; !ch.isPositiveDefinite)
+        throw new IllegalArgumentException("R is rank-deficient.")
+    val bcastAtA = sc.broadcast(inCoreAtA)
+    val Q = A.mapBlock() {
+        case (keys, block) =&gt; keys -&gt; chol(bcastAtA).solveRight(block)
+    }
+    Q -&gt; inCoreR
+}
 </code></pre>
 </div>
 
-<p><em>Note:</em> if the -k argument is supplied, any clusters in the -c directory
-will be overwritten and -k random points will be sampled from the input
-vectors to become the initial cluster centers.</p>
+<h2 id="usage">Usage</h2>
 
-<p>Invocation using Java involves supplying the following arguments:</p>
+<p>The scala <code class="highlighter-rouge">dqrThin(...)</code> method can easily be called in any Spark or H2O application built with the <code class="highlighter-rouge">math-scala</code> library and the corresponding <code class="highlighter-rouge">Spark</code> or <code class="highlighter-rouge">H2O</code> engine module as follows:</p>
 
-<ol>
-  <li>input: a file path string to a directory containing the input data set a
-SequenceFile(WritableComparable, VectorWritable). The sequence file <em>key</em>
-is not used.</li>
-  <li>clustersIn: a file path string to a directory containing the initial
-clusters, a SequenceFile(key, SoftCluster | Cluster | Canopy). Fuzzy
-k-Means SoftClusters, k-Means Clusters and Canopy Canopies may be used for
-the initial clusters.</li>
-  <li>output: a file path string to an empty directory which is used for all
-output from the algorithm.</li>
-  <li>measure: the fully-qualified class name of an instance of DistanceMeasure
-which will be used for the clustering.</li>
-  <li>convergence: a double value used to determine if the algorithm has
-converged (clusters have not moved more than the value in the last
-iteration)</li>
-  <li>max-iterations: the maximum number of iterations to run, independent of
-the convergence specified</li>
-  <li>m: the “fuzzyness” argument, a double &gt; 1. For m equal to 2, this is
-equivalent to normalising the coefficient linearly to make their sum 1.
-When m is close to 1, then the cluster center closest to the point is given
-much more weight than the others, and the algorithm is similar to k-means.</li>
-  <li>runClustering: a boolean indicating, if true, that the clustering step is
-to be executed after clusters have been determined.</li>
-  <li>emitMostLikely: a boolean indicating, if true, that the clustering step
-should only emit the most likely cluster for each clustered point.</li>
-  <li>threshold: a double indicating, if emitMostLikely is false, the cluster
-probability threshold used for emitting multiple clusters for each point. A
-value of 0 will emit all clusters with their associated probabilities for
-each vector.</li>
-  <li>runSequential: a boolean indicating, if true, that the algorithm is to
-use the sequential reference implementation running in memory.</li>
-</ol>
+<div class="highlighter-rouge"><pre class="highlight"><code>import org.apache.mahout.math._
+import decompositions._
+import drm._
 
-<p>After running the algorithm, the output directory will contain:</p>
-<ol>
-  <li>clusters-N: directories containing SequenceFiles(Text, SoftCluster)
-produced by the algorithm for each iteration. The Text <em>key</em> is a cluster
-identifier string.</li>
-  <li>clusteredPoints: (if runClustering enabled) a directory containing
-SequenceFile(IntWritable, WeightedVectorWritable). The IntWritable <em>key</em> is
-the clusterId. The WeightedVectorWritable <em>value</em> is a bean containing a
-double <em>weight</em> and a VectorWritable <em>vector</em> where the weights are
-computed as 1/(1+distance) where the distance is between the cluster center
-and the vector using the chosen DistanceMeasure.</li>
-</ol>
+val(drmQ, inCoreR) = dqrThin(drma)
+</code></pre>
+</div>
 
-<p><a name="FuzzyK-Means-Examples"></a></p>
-<h1 id="examples">Examples</h1>
+<h2 id="references">References</h2>
 
-<p>The following images illustrate Fuzzy k-Means clustering applied to a set
-of randomly-generated 2-d data points. The points are generated using a
-normal distribution centered at a mean location and with a constant
-standard deviation. See the README file in the <a href="https://github.com/apache/mahout/blob/master/examples/src/main/java/org/apache/mahout/clustering/display/README.txt">/examples/src/main/java/org/apache/mahout/clustering/display/README.txt</a>
- for details on running similar examples.</p>
-
-<p>The points are generated as follows:</p>
-
-<ul>
-  <li>500 samples m=[1.0, 1.0](1.0,-1.0.html)
- sd=3.0</li>
-  <li>300 samples m=[1.0, 0.0](1.0,-0.0.html)
- sd=0.5</li>
-  <li>300 samples m=[0.0, 2.0](0.0,-2.0.html)
- sd=0.1</li>
-</ul>
-
-<p>In the first image, the points are plotted and the 3-sigma boundaries of
-their generator are superimposed.</p>
-
-<p><img src="/assets/img/SampleData.png" alt="fuzzy" /></p>
-
-<p>In the second image, the resulting clusters (k=3) are shown superimposed upon the sample data. As Fuzzy k-Means is an iterative algorithm, the centers of the clusters in each recent iteration are shown using different colors. Bold red is the final clustering and previous iterations are shown in [orange, yellow, green, blue, violet and gray](orange,-yellow,-green,-blue,-violet-and-gray.html)
-. Although it misses a lot of the points and cannot capture the original,
-superimposed cluster centers, it does a decent job of clustering this data.</p>
-
-<p><img src="/assets/img/FuzzyKMeans.png" alt="fuzzy" /></p>
-
-<p>The third image shows the results of running Fuzzy k-Means on a different
-data set which is generated using asymmetrical standard deviations.
-Fuzzy k-Means does a fair job handling this data set as well.</p>
-
-<p><img src="/assets/img/2dFuzzyKMeans.png" alt="fuzzy" /></p>
-
-<p><a name="FuzzyK-Means-References&nbsp;"></a></p>
-<h4 id="references">References </h4>
-
-<ul>
-  <li><a href="http://en.wikipedia.org/wiki/Fuzzy_clustering">http://en.wikipedia.org/wiki/Fuzzy_clustering</a></li>
-</ul>
 
     </div>
 
