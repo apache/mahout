@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: doc-page
 title: Building a Mahout Recommender
 
     
