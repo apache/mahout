@@ -28,15 +28,7 @@
 
 </head>
 
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-98314020-1', 'auto');
-  ga('send', 'pageview');
-</script>
 <body>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
@@ -44,7 +36,7 @@
     <div class="container">
 
         <a class="navbar-brand" href="/">
-          <img src="/assets/mahout-logo-blue.svg" alt="">
+            <img src="/assets/mahout-logo-blue.svg" alt="">
         </a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,16 +45,59 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
 
-            <ul class="navbar-nav ml-auto">
+            <div class="navbar-nav ml-auto">
 
-                <!-- Download -->
+                <!-- Quick Start -->
                 <li class="nav-item">
-                    <a class="nav-link" href="/general/downloads">Download</a>
+                    <a class="nav-link" href="/docs/latest" >Overview</a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/docs/latest/index.html">Overview</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Key Concepts</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/index.html">Mahout Overview</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Scala DSL</h6>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/in-core-reference.html">In-core Reference</a>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/out-of-core-reference.html">Out-of-core Reference</a>
+                        <a class="dropdown-item"  href="/docs/latest/mahout-samsara/faq.html">Samsara FAQ</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Distributed Engine Bindings</h6>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/spark-bindings/">Spark Bindings</a>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/flink-bindings.html">Flink Bindings</a>
+                        <a class="dropdown-item"  href="/docs/latest/distributed/flink-bindings.html">H20 Bindings</a>
+                        <!--<div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Native Solvers</h6>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/viennacl.html">ViennaCL</a></li>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/viennacl-omp.html">ViennaCL-OMP</a></li>
+                        <a class="dropdown-item"  href="/docs/latest/native-solvers/cuda.html">CUDA</a></li>-->
+                    </div>
                 </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tutorial</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Recommenders</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/cco-lastfm">CCO Example with Last.FM Data</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/intro-cooccurrence-spark">Introduction to Cooccurrence in Spark</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Mahout Samsara</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/play-with-shell.html">Playing with Samsara in Spark Shell</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/playing-with-samsara-flink-batch.html">Playing with Samsara in Flink Batch</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/classify-a-doc-from-the-shell.html">Text Classification (Shell)</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/samsara/spark-naive-bayes.html">Spark Naive Bayes</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Misc</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/mahout-in-zeppelin">Mahout in Apache Zeppelin</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/contributing-algos">How To Contribute a New Algorithm</a>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/misc/how-to-build-an-app.html">How To Build An App</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/tutorials/map-reduce">MapReduce</a>
+                    </div>
+                </li>
+
 
                 <!-- Algorithms (Samsara / MR) -->
                 <li class="nav-item dropdown">
@@ -77,112 +112,60 @@
                         <h6 class="dropdown-header">Deprecated</h6>
                         <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
                     </div>
-                    <!--<a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
-                    <!--
-                    <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+                        <!--<a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                        <!--
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
 
-                 -->
+
+                     -->
                 </li>
-                <!-- Algorithms (Samsara / MR) -->
+
+                <!-- Scala /docs -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Algorithms</a>
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">API /docs</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/linear-algebra">Distributed Linear Algebra</a>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/preprocessors">Preprocessors</a>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/regression">Regression</a>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/clustering">Clustering</a>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders">Recommenders</a>
-                        <div class="dropdown-divider"></div>
-                        <h6 class="dropdown-header">Deprecated</h6>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
+                        <a class="dropdown-item"  href="/docs/0.13.0/api/docs/">0.13.0</a>
                     </div>
-                    <!--<a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
-                    <!--
-                    <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
-                 -->
                 </li>
 
-                <!-- Developers -->
+                <!-- Apache -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Developers</a>
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Apache</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="/developers/developer-resources.html">Developer Resources</a>
-                        <a class="dropdown-item" href="/developers/buildingmahout">Building Mahout from Source</a>
-                        <a class="dropdown-item" href="/developers/issue-tracker">Issues Tracking (JIRA)</a>
-                        <!-- <a class="dropdown-item" href="/developers/patch-check-list/">Patch Check List</a> going to github template -->
-                        <!-- <a class="dropdown-item" href="/developers/reference/">References</a> a lot of overlap with books, talks, etc. page -->
-                        <a class="dropdown-item" href="/developers/release-notes/">Release Notes</a>
-                        <!-- <a class="dropdown-item" href="/developers/thirdparty-dependencies/">Third Party Dependencies</a> is our site the reasonable place for this? -->
-                        <!-- <a class="dropdown-item" href="/developers/version-control/">Version Control</a> -->
-                        <div class="dropdown-divider"></div>
-                        <h6 class="dropdown-header">How To's</h6>
-                        <a class="dropdown-item" href="/developers/how-to-contribute">How to Contribute</a>
-                        <a class="dropdown-item" href="/developers/githubPRs">Github PRs</a>
-                        <a class="dropdown-item" href="/developers/how-to-become-a-committer">How to Become a Committer</a>
-                        <a class="dropdown-item" href="/developers/how-to-release">How to Release</a>
-                        <a class="dropdown-item" href="/developers/how-to-update-the-website">How to Update the Website</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/licenses/">Apache License</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+                        <a class="dropdown-item"  href="http://www.apache.org/foundation/thanks.html">Thanks</a>
                     </div>
-                </li>
-
-                <!-- Docs -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Docs</a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <h6 class="dropdown-header">Release</h6>
-                        <a class="dropdown-item" href="/docs/0.13.0">0.13.0</a>
-                        <div class="dropdown-divider"></div>
-                        <h6 class="dropdown-header">Latest Snapshot (Development)</h6>
-                        <a class="dropdown-item" href="/docs/latest">0.13.1-SNAPSHOT</a>
-                    </div>
-                </li>
-
-                <!-- Community -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Community</a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <!--<a class="dropdown-item" href="/community/history/">History of the Apache Mahout Project</a>-->
-                        <!--<a class="dropdown-item" href="/community/blogs/">Blog Posts About Mahout</a>-->
-                        <!--<a class="dropdown-item" href="/community/recent-upcoming-talks/">Recent and Upcoming Talks</a>-->
-                        <!-- <a class="dropdown-item" href="/community/books-tutorials-and-talks/">Books Tutorials and Talks</a> -->
-                        <!-- <a class="dropdown-item" href="/community/faq/">FAQ</a> needs a lot of updating -->
-                        <a class="dropdown-item" href="/developers/gsoc">GSoC</a>
-                        <!-- Is OK- updated Map/Reduce verbage to reflect Samsara -->
-                        <!-- <a class="dropdown-item" href="/community/mahout-benchmarks/">Mahout Benchmarks</a> These are old, Keep them? -->
-                        <!-- <a class="dropdown-item" href="/community/mahout-wiki/">Mahout Wiki</a> at very least needs links cleanedup - do we still want this even?-->
-                        <a class="dropdown-item" href="/general/mailing-lists">Mailing Lists</a>
-                        <!-- Clean and pretty -->
-                        <!-- <a class="dropdown-item" href="/community/powered-by-mahout/">Powered By Mahout</a> needs update -->
-                        <a class="dropdown-item" href="/general/privacy-policy">Privacy Policy</a>
-                        <!-- <a class="dropdown-item" href="/community/professional-support/">Professional Support</a> update if we even want to keep -->
-                        <a class="dropdown-item" href="/general/who-we-are">Who We Are</a>
-                        <!-- nikolai needs to add himself -->
-                    </div>
-                </li>
-
-                <!-- GitHub -->
-                <li class="nav-item">
-                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
                 </li>
 
             </ul>
 
-            <!-- <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form> -->
+                <!--<form class="navbar-form navbar-left">-->
+                    <!--<div class="form-group">-->
+                        <!--<input type="text" class="form-control" placeholder="Search">-->
+                    <!--</div>-->
+                    <!--<button type="submit" class="btn btn-default">Submit</button>-->
+                <!--</form>-->
+                <!--<ul class="nav navbar-nav navbar-right">-->
+                    <!--<a class="dropdown-item"  href="http://github.com/apache/mahout">Github</a></li>-->
 
-        </div>
 
+
+                <!--</ul>-->
+        </div><!-- /.navbar-collapse -->
     </div>
-
 </nav>
 
 
-  <h1 id="recommender-overview">Recommender Overview</h1>
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8">
+      <h1 id="recommender-overview">Recommender Overview</h1>
 
 <p>Recommenders have changed over the years. Mahout contains a long list of them, which you can still use. However in about 2013 there was a revolution in recommenders, which favored what we might call “Multimodal”, meaning they could take in data of all sorts—basically anything we might think was an indicator of user taste. The new Samsara algorithm, called Correlated Cross-Occurrence (CCO) is just such a next gen recommender algorithm but Mahout-Samsara only implements the model building part. This can be integrated as the user see fit and the rest of this doc will explain how.</p>
 
@@ -217,6 +200,13 @@ and  <a href="http://occamsmachete.com/ml/2014/09/09/mahout-on-spark-whats-new-i
 <h2 id="mahout-model-creation">Mahout Model Creation</h2>
 
 <p>See the page describing <a href="http://mahout.apache.org/users/recommender/intro-cooccurrence-spark.html"><em>spark-itemsimilarity</em></a> for more details.</p>
+
+    </div>
+
+
+  </div>
+
+</div>
 
 
   <footer class="footer bg-light">
