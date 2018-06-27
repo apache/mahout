@@ -746,13 +746,13 @@
     <profile>
       <id>viennacl</id>
       <modules>
-        <module>experimental</module>
+        <module>experimental/viennacl</module>
       </modules>
     </profile>
     <profile>
       <id>viennacl-omp</id>
       <modules>
-        <module>experimental</module>
+        <module>experimental/viennacl-omp</module>
       </modules>
     </profile>
     <profile>

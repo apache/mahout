@@ -34,6 +34,10 @@
 
   <packaging>jar</packaging>
 
+  <modules>
+    <module>mr-examples</module>
+  </modules>
+
   <properties>
     <hadoop.version>2.4.1</hadoop.version>
     <lucene.version>5.5.2</lucene.version>

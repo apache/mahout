@@ -85,10 +85,10 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]; then
       options="${options} --numClusters 6"
       # t1 & t2 not used if --numClusters specified, but parser requires input
       options="${options} --t1 1 --t2 2"
-      ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job ${options}
+      ../../bin/mahout.bu org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job ${options}
     else
       options="${options} --m 2.0f --t1 80 --t2 55"
-      ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job ${options}
+      ../../bin/mahout.bu org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job ${options}
     fi
   else
     echo " HADOOP is not running. Please make sure you hadoop is running. "
@@ -96,7 +96,7 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]; then
 elif [ "$MAHOUT_LOCAL" != "" ]; then
   echo "running MAHOUT_LOCAL"
   cp ${WORK_DIR}/synthetic_control.data testdata
-  ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job
+  ../../bin/mahout.bu org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job
   rm testdata
 else
   echo " HADOOP_HOME variable is not set. Please set this environment variable and rerun the script"
