@@ -83,6 +83,19 @@
           </filesets>
         </configuration>
       </plugin>
+
+      <!-- create test jar so other modules can reuse the core test utility classes. (currently only mr uses this, profile?)-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <!--<build>-->
@@ -98,18 +111,7 @@
       <!--</resource>-->
     <!--</resources>-->
 
-      <!--&lt;!&ndash; create test jar so other modules can reuse the core test utility classes. &ndash;&gt;-->
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-jar-plugin</artifactId>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<goals>-->
-              <!--<goal>test-jar</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-        <!--</executions>-->
-      <!--</plugin>-->
+
 
       <!--<plugin>-->
         <!--<artifactId>maven-javadoc-plugin</artifactId>-->

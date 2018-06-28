@@ -25,7 +25,7 @@
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
     <version>0.13.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../mr/pom.xml</relativePath>
   </parent>
 
   <artifactId>mahout-integration</artifactId>

@@ -28,7 +28,7 @@
   </parent>
 
   <artifactId>mr-examples</artifactId>
-  <name>Mahout Examples</name>
+  <name>-- Mahout Classic: Examples</name>
   <description>Scalable machine learning library examples</description>
 
   <packaging>jar</packaging>
@@ -80,7 +80,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
         <configuration>
-          <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
+          <appendedResourcesDirectory>../mr/src/main/appended-resources</appendedResourcesDirectory>
           <resourceBundles>
             <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
           </resourceBundles>
@@ -105,86 +105,8 @@
 
   <dependencies>
 
-    <!-- our modules -->
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-hdfs</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-mr</artifactId>
-    </dependency>
-   <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-hdfs</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-mr</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-math</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-math</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-integration</artifactId>
-    </dependency>
 
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-benchmark</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-analyzers-common</artifactId>
-    </dependency>
 
-    <dependency>
-      <groupId>com.carrotsearch.randomizedtesting</groupId>
-      <artifactId>randomizedtesting-runner</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-    </dependency>
 
   </dependencies>
 
