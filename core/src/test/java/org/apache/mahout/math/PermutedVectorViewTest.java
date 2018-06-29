@@ -24,8 +24,6 @@ import org.junit.Test;
 import java.util.Iterator;
 import java.util.Random;
 
-import static org.junit.Assert.*;
-
 public class PermutedVectorViewTest extends MahoutTestCase {
   @Test
   public void testViewBasics() {

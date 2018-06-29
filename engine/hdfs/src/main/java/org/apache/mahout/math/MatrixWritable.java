@@ -18,9 +18,8 @@
 package org.apache.mahout.math;
 
 import com.google.common.base.Preconditions;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.apache.hadoop.io.Writable;
-//import org.apache.mahout.math.list.IntArrayList;
+import org.apache.mahout.math.list.IntArrayList;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -190,7 +189,7 @@ public class MatrixWritable implements Writable {
       int numNonZeroRows = rowIndices.size();
       out.writeInt(numNonZeroRows);
       for (int i = 0; i < numNonZeroRows; i++) {
-        int rowIndex = rowIndices.getInt(i); //.getQuick(i);
+        int rowIndex = rowIndices.getQuick(i);
         out.writeInt(rowIndex);
         VectorWritable.writeVectorContents(out, matrix.viewRow(rowIndex), vectorFlags);
       }

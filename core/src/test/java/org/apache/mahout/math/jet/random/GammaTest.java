@@ -24,7 +24,6 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
-import static org.junit.Assert.*;
 
 public final class GammaTest extends MahoutTestCase {
 

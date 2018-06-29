@@ -18,7 +18,6 @@
 package org.apache.mahout.math;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public final class TestOrderedIntDoubleMapping extends MahoutTestCase {
 

@@ -20,19 +20,17 @@ package org.apache.mahout.math;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-//
+
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakAction;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies;
 import com.carrotsearch.randomizedtesting.annotations.TimeoutSuite;
 import org.apache.lucene.util.TimeUnits;
-import junit.framework.TestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.After;
 import org.junit.Before;
 
-import static org.junit.Assert.*;
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 
 /**
@@ -47,7 +45,7 @@ public abstract class MahoutTestCase extends RandomizedTest {
 
   /** "Close enough" value for floating-point comparisons. */
   public static final double EPSILON = 0.000001;
-
+  
   private File testTempDir;
 
   @Before

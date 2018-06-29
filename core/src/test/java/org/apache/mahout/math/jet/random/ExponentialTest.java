@@ -22,7 +22,6 @@ import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Arrays;
-import static org.junit.Assert.*;
 
 public final class ExponentialTest extends MahoutTestCase {
 

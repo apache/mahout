@@ -20,7 +20,6 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.IntIntFunction;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class MatricesTest extends MahoutTestCase {
 

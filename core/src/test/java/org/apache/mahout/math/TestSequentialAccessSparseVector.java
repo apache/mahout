@@ -21,7 +21,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
 import java.util.Random;
-import static org.junit.Assert.*;
 
 public final class TestSequentialAccessSparseVector extends AbstractVectorTest<SequentialAccessSparseVector> {
 

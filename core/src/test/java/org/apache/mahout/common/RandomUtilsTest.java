@@ -21,7 +21,6 @@ import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Random;
-import static org.junit.Assert.*;
 
 /**
  * Tests {@link RandomUtils}.

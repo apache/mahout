@@ -28,7 +28,6 @@ import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
 import java.io.InputStreamReader;
-import static org.junit.Assert.*;
 
 public final class NegativeBinomialTest extends MahoutTestCase {
 

@@ -69,25 +69,20 @@
       <version>7.0.12</version>
     </dependency>
 
-    <!-- TODO dump the "jet" random engine... -->
-    <!-- TODO dump org.apache.mahout.common/* -->
-    <!-- TODO dump org.apache.mahout.math.list.* -->
-    <!-- ToDO dump org.apachche.mahout.common.* -->
-    <!-- TODO lots of references commented out referencing OpenIntHashSet, change them to java.util.HashSet-->
-
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
     </dependency>
 
     <!-- TODO this is declared at top, fix this reimport -->
-    <!-- TODO fix all tests to stop using `com.carrotsearch.randomizedtesting.annotations` and `org.apache.lucene.util` -->
+    <!-- TODO fix all tests to stop using `com.carrotsearch.randomizedtesting.annotations` and `org.apache.lucene.util` and easymock -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
+
 
     <!-- Todo Factor this out-->
     <dependency>
@@ -104,6 +99,12 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>3.2</version>
+      <scope>test</scope>
+    </dependency>
 
     <!-- TODO ONE Logging framework... -->
     <dependency>
@@ -121,6 +122,66 @@
 
   <build>
     <plugins>
+
+      <!-- Build templates into code for various old-school Vector fns -->
+      <plugin>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-collection-codegen-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!--<mainExcludes>-->
+              <!--<mainExclude>**/AbstractBooleanList.java</mainExclude>-->
+              <!--<mainExclude>**/BooleanArrayList.java</mainExclude>-->
+              <!--<mainExclude>**/BooleanBufferConsumer.java</mainExclude>-->
+              <!--</mainExcludes>-->
+              <!--<testExcludes>-->
+              <!--<testExclude>**/BooleanArrayListTest.java</testExclude>-->
+              <!--</testExcludes>-->
+              <outputDirectory>${project.build.directory}/generated-sources/mahout</outputDirectory>
+              <testOutputDirectory>${project.build.directory}/generated-test-sources/mahout</testOutputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- add generated sources into build -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/mahout</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-test-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-test-sources/mahout</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- End Generate Source -->
+
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>

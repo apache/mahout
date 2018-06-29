@@ -67,7 +67,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-mr-${version}.jar" tofile="../../lib/mahout-mr-${version}.jar" />
+                <copy file="target/mr-${version}.jar" tofile="../../../lib/mahout-mr-${version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -84,7 +84,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>../../lib/</directory>
+              <directory>../../../lib/</directory>
               <includes>
                 <include>mahout-mr_*.jar</include>
               </includes>
@@ -155,7 +155,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>../../lib</directory>
+              <directory>../../../lib</directory>
               <includes>
                 <include>mahout-mr*.jar</include>
               </includes>

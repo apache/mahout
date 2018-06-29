@@ -36,6 +36,7 @@
 
   <modules>
     <module>mr</module>
+    <module>integration</module>
     <module>mr-examples</module>
   </modules>
 

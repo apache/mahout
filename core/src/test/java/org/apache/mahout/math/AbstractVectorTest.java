@@ -25,12 +25,9 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.Normal;
-//import org.apache.mahout.math.random.MultiNormal;
+import org.apache.mahout.math.random.MultiNormal;
 import org.junit.Before;
-
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Makes sure that a vector under test acts the same as a DenseVector or RandomAccessSparseVector
@@ -47,9 +44,9 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
   private static final double[] gold = {0.0, 1.1, 0.0, 2.2, 0.0, 3.3, 0.0};
   private Vector test;
 
-  private static void checkIterator(Iterator<Element> nzIter, double[] values) {
+  private static void checkIterator(Iterator<Vector.Element> nzIter, double[] values) {
     while (nzIter.hasNext()) {
-      Element elt = nzIter.next();
+      Vector.Element elt = nzIter.next();
       assertEquals(elt.index() + " Value: " + values[elt.index()]
           + " does not equal: " + elt.get(), values[elt.index()], elt.get(), 0.0);
     }
@@ -181,7 +178,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
     // getNumNondefaultElements
 
-    for (Element element : v1.all()) {
+    for (Vector.Element element : v1.all()) {
       assertEquals(dv1.get(element.index()), element.get(), 0);
       assertEquals(dv1.get(element.index()), v1.get(element.index()), 0);
       assertEquals(dv1.get(element.index()), v1.getQuick(element.index()), 0);
@@ -213,7 +210,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
   @Test
   public void testIterator() {
-    Iterator<Element> iterator = test.nonZeroes().iterator();
+    Iterator<Vector.Element> iterator = test.nonZeroes().iterator();
     checkIterator(iterator, gold);
 
     iterator = test.all().iterator();
@@ -621,25 +618,25 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
     assertEquals(v0.zSum(), sum, 0);
   }
 
-//  @Test
-//  public void testSmallDistances() {
-//    for (double fuzz : new double[]{1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8, 1.0e-9, 1.0e-10}) {
-//      MultiNormal x = new MultiNormal(fuzz, new ConstantVector(0, 20));
-//      for (int i = 0; i < 10000; i++) {
-//        final T v1 = vectorToTest(20);
-//        Vector v2 = v1.plus(x.sample());
-//        if (1 + fuzz * fuzz > 1) {
-//          String msg = String.format("fuzz = %.1g, >", fuzz);
-//          assertTrue(msg, v1.getDistanceSquared(v2) > 0);
-//          assertTrue(msg, v2.getDistanceSquared(v1) > 0);
-//        } else {
-//          String msg = String.format("fuzz = %.1g, >=", fuzz);
-//          assertTrue(msg, v1.getDistanceSquared(v2) >= 0);
-//          assertTrue(msg, v2.getDistanceSquared(v1) >= 0);
-//        }
-//      }
-//    }
-//  }
+  @Test
+  public void testSmallDistances() {
+    for (double fuzz : new double[]{1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8, 1.0e-9, 1.0e-10}) {
+      MultiNormal x = new MultiNormal(fuzz, new ConstantVector(0, 20));
+      for (int i = 0; i < 10000; i++) {
+        final T v1 = vectorToTest(20);
+        Vector v2 = v1.plus(x.sample());
+        if (1 + fuzz * fuzz > 1) {
+          String msg = String.format("fuzz = %.1g, >", fuzz);
+          assertTrue(msg, v1.getDistanceSquared(v2) > 0);
+          assertTrue(msg, v2.getDistanceSquared(v1) > 0);
+        } else {
+          String msg = String.format("fuzz = %.1g, >=", fuzz);
+          assertTrue(msg, v1.getDistanceSquared(v2) >= 0);
+          assertTrue(msg, v2.getDistanceSquared(v1) >= 0);
+        }
+      }
+    }
+  }
 
 
   public void testToString() {

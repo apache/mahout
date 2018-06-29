@@ -22,7 +22,6 @@ import java.util.Iterator;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.TimesFunction;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public final class TestVectorView extends MahoutTestCase {
 

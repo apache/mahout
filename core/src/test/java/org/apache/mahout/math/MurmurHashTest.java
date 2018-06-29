@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 
-public class MurmurHashTest extends MahoutTestCase {
+public class MurmurHashTest extends org.apache.mahout.math.MahoutTestCase {
 
   @Test
   public void testForLotsOfChange64() throws UnsupportedEncodingException {

@@ -19,14 +19,13 @@ package org.apache.mahout.math;
 
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.Functions;
-//import org.apache.mahout.math.random.MultiNormal;
+import org.apache.mahout.math.random.MultiNormal;
 import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
-import static org.junit.Assert.*;
 
 public class FileBasedMatrixTest extends MahoutTestCase {
   // 10 million rows x 40 columns x 8 bytes = 3.2GB of data
@@ -65,26 +64,26 @@ public class FileBasedMatrixTest extends MahoutTestCase {
     return (i * 88513) % 10000;
   }
 
-//  @Test
-//  public void testSetData() throws IOException {
-//    File f = File.createTempFile("matrix", ".m", getTestTempDir());
-//    f.deleteOnExit();
-//
-//    Matrix m0 = new DenseMatrix(100000, 30);
-//    MultiNormal gen = new MultiNormal(30);
-//    for (MatrixSlice row : m0) {
-//      row.vector().assign(gen.sample());
-//    }
-//    FileBasedMatrix.writeMatrix(f, m0);
-//
-//    FileBasedMatrix m = new FileBasedMatrix(100000, 30);
-//    m.setData(f, true);
-//
-//    assertEquals(0, m0.minus(m).aggregate(Functions.MAX, Functions.ABS), 1.0e-8);
-//
-//    int i = 0;
-//    for (MatrixSlice row : m) {
-//      assertEquals(0, row.vector().minus(m0.viewRow(i++)).norm(1), 1.0e-8);
-//    }
-//  }
+  @Test
+  public void testSetData() throws IOException {
+    File f = File.createTempFile("matrix", ".m", getTestTempDir());
+    f.deleteOnExit();
+
+    Matrix m0 = new DenseMatrix(100000, 30);
+    MultiNormal gen = new MultiNormal(30);
+    for (MatrixSlice row : m0) {
+      row.vector().assign(gen.sample());
+    }
+    FileBasedMatrix.writeMatrix(f, m0);
+
+    FileBasedMatrix m = new FileBasedMatrix(100000, 30);
+    m.setData(f, true);
+
+    assertEquals(0, m0.minus(m).aggregate(Functions.MAX, Functions.ABS), 1.0e-8);
+
+    int i = 0;
+    for (MatrixSlice row : m) {
+      assertEquals(0, row.vector().minus(m0.viewRow(i++)).norm(1), 1.0e-8);
+    }
+  }
 }

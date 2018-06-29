@@ -23,13 +23,13 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout</artifactId>
-    <version>0.13.1-SNAPSHOT</version>
-    <relativePath>../mr/pom.xml</relativePath>
+    <artifactId>mahout-mr</artifactId>
+    <version>0.14.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>mahout-integration</artifactId>
-  <name>Mahout Integration</name>
+  <name>-- Mahout Classic Integration</name>
   <description>Optional components of Mahout which generally support interaction with third party systems,
     formats, APIs, etc.</description>
 
@@ -41,7 +41,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
         <configuration>
-          <appendedResourcesDirectory>../community/mahout-mr/src/appended-resources</appendedResourcesDirectory>
+          <appendedResourcesDirectory>../mr/src/appended-resources</appendedResourcesDirectory>
           <resourceBundles>
             <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
           </resourceBundles>
@@ -66,36 +66,61 @@
   <dependencies>
 
     <!-- own modules -->
+
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-hdfs</artifactId>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>core_2.11</artifactId>
+      <version>${project.version}</version>
     </dependency>
+
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-mr</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-hdfs</artifactId>
-      <type>test-jar</type>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>core_${scala.compat.version}</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>${project.groupId}</groupId>-->
+      <!--<artifactId>mahout-hdfs</artifactId>-->
+      <!--<version>${project.version}</version>-->
+    <!--</dependency>-->
+
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-mr</artifactId>
+      <artifactId>mr</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>${project.groupId}</groupId>-->
+      <!--<artifactId>mahout-hdfs</artifactId>-->
+      <!--<type>test-jar</type>-->
+      <!--<scope>test</scope>-->
+      <!--<version>${project.version}</version>-->
+    <!--</dependency>-->
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mr</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
+      <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-math</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-math</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>${project.groupId}</groupId>-->
+      <!--<artifactId>mahout-math</artifactId>-->
+
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>${project.groupId}</groupId>-->
+      <!--<artifactId>mahout-math</artifactId>-->
+      <!--<type>test-jar</type>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
 
     <!-- 3rd party -->
 
@@ -103,17 +128,20 @@
       <groupId>commons-dbcp</groupId>
       <artifactId>commons-dbcp</artifactId>
       <optional>true</optional>
+      <version>1.4</version>
     </dependency>
 
     <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
       <optional>true</optional>
+      <version>1.6</version>
     </dependency>
 
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+      <version>2.4</version>
     </dependency>
 
     <dependency>
@@ -121,22 +149,22 @@
       <artifactId>guava</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-commons-csv</artifactId>
-      <version>3.5.0</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.solr</groupId>-->
+      <!--<artifactId>solr-commons-csv</artifactId>-->
+      <!--<version>3.5.0</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-benchmark</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers-common</artifactId>
-      <optional>true</optional>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.lucene</groupId>-->
+      <!--<artifactId>lucene-benchmark</artifactId>-->
+      <!--<optional>true</optional>-->
+    <!--</dependency>-->
+    <!--<dependency>-->
+      <!--<groupId>org.apache.lucene</groupId>-->
+      <!--<artifactId>lucene-analyzers-common</artifactId>-->
+      <!--<optional>true</optional>-->
+    <!--</dependency>-->
 
     <dependency>
       <groupId>org.mongodb</groupId>
@@ -155,6 +183,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-client</artifactId>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
@@ -164,16 +193,16 @@
       <optional>true</optional>
     </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-api</artifactId>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jcl</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-jcl</artifactId>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
 
     <dependency>
       <groupId>junit</groupId>
@@ -181,17 +210,19 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.carrotsearch.randomizedtesting</groupId>
-      <artifactId>randomizedtesting-runner</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>com.carrotsearch.randomizedtesting</groupId>-->
+      <!--<artifactId>randomizedtesting-runner</artifactId>-->
+      <!--<scope>test</scope>-->
 
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>org.easymock</groupId>-->
+      <!--<artifactId>easymock</artifactId>-->
+      <!--<scope>test</scope>-->
+      <!--<version>3.2</version>-->
+    <!--</dependency>-->
 
   </dependencies>
 

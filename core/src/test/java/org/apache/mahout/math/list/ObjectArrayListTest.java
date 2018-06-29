@@ -19,7 +19,6 @@ package org.apache.mahout.math.list;
 
 import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /** tests for {@link ObjectArrayList}*/
 public class ObjectArrayListTest extends MahoutTestCase {

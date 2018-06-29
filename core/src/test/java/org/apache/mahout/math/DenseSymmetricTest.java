@@ -18,10 +18,8 @@
 package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.Functions;
-//import org.apache.mahout.math.solver.EigenDecomposition;
+import org.apache.mahout.math.solver.EigenDecomposition;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class DenseSymmetricTest extends MahoutTestCase {
   @Test
@@ -46,22 +44,22 @@ public class DenseSymmetricTest extends MahoutTestCase {
     assertEquals(0, m.plus(m).minus(a.plus(a)).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
   }
 
-//  @Test
-//  public void testEigen() {
-//    Matrix a = new DenseSymmetricMatrix(new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, false);
-//    Matrix b = new DenseMatrix(a.numRows(), a.numCols());
-//    b.assign(a);
-//
-//    assertEquals(0, a.minus(b).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
-//
-//    EigenDecomposition edA = new EigenDecomposition(a);
-//    EigenDecomposition edB = new EigenDecomposition(b);
-//
-//    System.out.println(edA.getV());
-//
-//    assertEquals(0, edA.getV().minus(edB.getV()).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
-//    assertEquals(0, edA.getRealEigenvalues().minus(edA.getRealEigenvalues()).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
-//
-//  }
+  @Test
+  public void testEigen() {
+    Matrix a = new DenseSymmetricMatrix(new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, false);
+    Matrix b = new DenseMatrix(a.numRows(), a.numCols());
+    b.assign(a);
+
+    assertEquals(0, a.minus(b).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
+
+    EigenDecomposition edA = new EigenDecomposition(a);
+    EigenDecomposition edB = new EigenDecomposition(b);
+
+    System.out.println(edA.getV());
+
+    assertEquals(0, edA.getV().minus(edB.getV()).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
+    assertEquals(0, edA.getRealEigenvalues().minus(edA.getRealEigenvalues()).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
+
+  }
 
 }
