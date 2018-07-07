@@ -138,15 +138,17 @@ object TrainHMMDriver extends MahoutSparkDriver {
     val pathToModel = parser.opts("pathToInitialModel").asInstanceOf[String]
     val numberOfHiddenStates = parser.opts("numberOfHiddenStates").asInstanceOf[Int]
     val numberOfObservableSymbols = parser.opts("numberOfObservableSymbols").asInstanceOf[Int]
-    var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
-    var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
-    var initialProbabilities = new DenseVector(numberOfHiddenStates)
+
     if (pathToModel != "")
     {
         var rddA = mc.textFile(pathToModel)
     		.map ( line => line.split(" ") )
 		.map(n => new DenseVector(n.map(_.toDouble)))
-		.collect
+	  .collect
+
+      var transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
+      var emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfObservableSymbols)
+      var initialProbabilities = new DenseVector(numberOfHiddenStates)
 
 	initialProbabilities = rddA(0)
 	for (index <- 1 to numberOfHiddenStates) {
@@ -162,7 +164,7 @@ object TrainHMMDriver extends MahoutSparkDriver {
     else
     {
       // create random initial model
-      var model:HMMModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols, transitionMatrix, emissionMatrix, initialProbabilities)
+      var model:HMMModel = new HMMModel(numberOfHiddenStates, numberOfObservableSymbols)
       model.initModelWithRandomParameters(System.currentTimeMillis().toInt)
       model
     }

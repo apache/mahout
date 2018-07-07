@@ -36,16 +36,33 @@ import org.apache.mahout.common.RandomUtils
  */
 class HMMModel(val numberOfHiddenStates: Int,
                val numberOfOutputSymbols: Int,
-	       val transitionMatrix: Matrix = null,
-	       val emissionMatrix: Matrix = null,
-  	       val initialProbabilities: Vector = null)  extends java.io.Serializable {
+	       var transitionMatrix: Matrix = null,
+	       var emissionMatrix: Matrix = null,
+  	       var initialProbabilities: Vector = null)  extends java.io.Serializable {
 
   var cumulativesInitialized = false
   var cumulativeTransitionMatrix:Matrix = _
   var cumulativeEmissionMatrix:Matrix = _
   var cumulativeInitialProbabilities:Vector = _
+  var validateModel:Boolean = false
 
-  validate()
+  if (initialProbabilities == null) {
+    initialProbabilities = new DenseVector(numberOfHiddenStates)
+  } else {
+    validateModel = true
+  }
+
+  if (transitionMatrix == null ) {
+    transitionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfHiddenStates)
+  }
+
+  if (emissionMatrix == null) {
+    emissionMatrix = new DenseMatrix(numberOfHiddenStates, numberOfOutputSymbols)
+  }
+
+  if (validateModel) {
+    validate()
+  }
 
   def getNumberOfHiddenStates: Int = {
     numberOfHiddenStates
