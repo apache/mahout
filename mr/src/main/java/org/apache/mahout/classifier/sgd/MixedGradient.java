@@ -49,11 +49,8 @@ public class MixedGradient implements Gradient {
 
   @Override
   public Vector apply(String groupKey, int actual, Vector instance, AbstractVectorClassifier classifier) {
-    if (random.nextDouble() < alpha) {
+    if (hasZero && hasOne && random.nextDouble() < alpha) {
       // one option is to apply a ranking update relative to our recent history
-      if (!hasZero || !hasOne) {
-        throw new IllegalStateException();
-      }
       return rank.apply(groupKey, actual, instance, classifier);
     } else {
       hasZero |= actual == 0;
