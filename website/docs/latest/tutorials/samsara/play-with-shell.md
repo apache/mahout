@@ -41,10 +41,12 @@ We describe how to do a quick toy setup of Spark & Mahout on your local machine,
 
  1. Goto the directory where you unpacked Spark and type ```sbin/start-all.sh``` to locally start Spark
  1. Open a browser, point it to [http://localhost:8080/](http://localhost:8080/) to check whether Spark successfully started. Copy the url of the spark master at the top of the page (it starts with **spark://**)
- 1. Define the following environment variables: <div class="codehilite"><pre>export MAHOUT_HOME=[directory into which you checked out Mahout]
-export SPARK_HOME=[directory where you unpacked Spark]
-export MASTER=[url of the Spark master]
-</pre></div>
+ 1. Define the following environment variables: 
+    <pre class="codehilite">
+    export MAHOUT_HOME=[directory into which you checked out Mahout]
+    export SPARK_HOME=[directory where you unpacked Spark]
+    export MASTER=[url of the Spark master]
+    </pre>
  1. Finally, change to the directory where you unpacked Mahout and type ```bin/mahout spark-shell```, 
 you should see the shell starting and get the prompt ```mahout> ```. Check 
 [FAQ](http://mahout.apache.org/users/sparkbindings/faq.html) for further troubleshooting.
