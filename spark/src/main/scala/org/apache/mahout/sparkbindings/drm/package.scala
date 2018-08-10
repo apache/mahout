@@ -66,7 +66,11 @@ package object drm {
         // Test the density of the data. If the matrix does meets the
         // requirements for density, convert the Vectors to a DenseMatrix.
         val resBlock = if (densityAnalysis(block)) {
-          val dBlock = new DenseMatrix(Array.ofDim[Double](vectors.length, blockncol), true)
+          var values = Array.ofDim[Array[Double]](vectors.length)
+          for (index <- 0 until vectors.length) {
+            values(index) = Array.ofDim[Double](vectors(index).length)
+          }
+          val dBlock = new DenseMatrix(values, true)
           var row = 0
           while (row < vectors.length) {
             dBlock(row, ::) := vectors(row)

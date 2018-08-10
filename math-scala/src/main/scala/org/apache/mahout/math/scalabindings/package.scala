@@ -439,7 +439,11 @@ package object scalabindings {
     val pq = threshold * (1 - threshold)
 
     for (s ← 0 until minSamples) {
-      if (mx(rnd.nextInt(dimm), rnd.nextInt(dimn)) != 0.0) mean += 1
+      try {
+        if (mx(rnd.nextInt(dimm), rnd.nextInt(dimn)) != 0.0) mean += 1
+      } catch {
+        case aob: ArrayIndexOutOfBoundsException =>;
+      }
     }
     mean /= minSamples
     val iv = z80 * math.sqrt(pq / n)
@@ -457,7 +461,11 @@ package object scalabindings {
 
       var meanNext = 0.0
       for (s ← 0 until nNeeded) {
-        if (mx(rnd.nextInt(dimm), rnd.nextInt(dimn)) != 0.0) meanNext += 1
+        try {
+          if (mx(rnd.nextInt(dimm), rnd.nextInt(dimn)) != 0.0) meanNext += 1
+        } catch {
+          case aob: ArrayIndexOutOfBoundsException =>;
+        }
       }
       mean = (n * mean + meanNext) / (n + nNeeded)
       n += nNeeded
