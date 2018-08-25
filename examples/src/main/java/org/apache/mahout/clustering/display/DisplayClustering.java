@@ -119,11 +119,14 @@ public class DisplayClustering extends Frame {
   
   protected static void plotClusters(Graphics2D g2) {
     int cx = CLUSTERS.size() - 1;
+    Vector dv = new DenseVector(2).assign(SIZE / 2.0);
+    dv.assign(0.03);
     for (List<Cluster> clusters : CLUSTERS) {
       g2.setStroke(new BasicStroke(cx == 0 ? 3 : 1));
       g2.setColor(COLORS[Math.min(COLORS.length - 1, cx--)]);
       for (Cluster cluster : clusters) {
         plotEllipse(g2, cluster.getCenter(), cluster.getRadius().times(3));
+        plotRectangle(g2, cluster.getCenter(), dv);
       }
     }
   }
