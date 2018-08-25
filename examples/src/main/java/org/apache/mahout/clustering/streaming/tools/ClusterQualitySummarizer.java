@@ -85,7 +85,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
               summarizer.getQuartile(4), summarizer.getCount(), type);
         }
       } else {
-        System.out.printf("Cluster %d is has %d data point. Need atleast 2 data points in a cluster for" +
+        System.out.printf("Cluster %d is has %d data point. Need at least 2 data points in a cluster for" +
             " OnlineSummarizer.\n", i, summarizer.getCount());
       }
     }
