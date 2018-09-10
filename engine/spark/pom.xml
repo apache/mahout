@@ -141,7 +141,8 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/spark_${scala.compat.version}-${project.version}-spark_${spark.compat.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-spark_${spark.compat.version}.jar" />
+                <!--<copy file="target/spark_${scala.compat.version}-${project.version}-spark_${spark.compat.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-spark_${spark.compat.version}.jar" />-->
+                <copy file="target/spark_${scala.compat.version}-${project.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}.jar" />
                 <copy file="target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
@@ -171,9 +172,9 @@
             <goals>
               <goal>jar</goal>
             </goals>
-            <configuration>
-              <classifier>spark_${spark.compat.version}</classifier>
-            </configuration>
+            <!--<configuration>-->
+              <!--<classifier>spark_${spark.compat.version}</classifier>-->
+            <!--</configuration>-->
           </execution>
         </executions>
       </plugin>
