@@ -312,7 +312,16 @@ class HiddenMarkovModel(val numberOfHiddenStates: Int,
 
     (observationSeq, hiddenSeq)
   }
-  
+
+  def printModel(): Unit = {
+    println("Transition Matrix:")
+    println(getTransitionMatrix)
+    println("Emission Matrix:")
+    println(getEmissionMatrix)
+    println("Initial Probabilities Vector:")
+    println(getInitialProbabilities)
+  }
+
   def validate() {
     assert(numberOfHiddenStates > 0, "number of hidden states has to be greater than 0.")
     assert(numberOfOutputSymbols > 0, "number of output symbols has to be greater than 0.")
@@ -487,17 +496,14 @@ class HiddenMarkovModel(val numberOfHiddenStates: Int,
   }
 }
 
-class HiddenMarkovModelFitter extends UnsupervisedFitter {
-  var maxNumberOfIterations:Int = _
-  var scale:Boolean = _
-  var epsilon:Double = _
-  var initModel:HiddenMarkovModel = _
+class HiddenMarkovModelFitter extends UnsupervisedFitter with Serializable {
 
-  def setHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
-    initModel = hyperparameters.asInstanceOf[Map[Symbol, HiddenMarkovModel]]('initModel)
-    maxNumberOfIterations = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('iterations, 1)
-    epsilon = hyperparameters.asInstanceOf[Map[Symbol, Double]].getOrElse('epsilon, 0.1)
-    scale = hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('scale, true)
+  def setHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): (HiddenMarkovModel, Int, Double, Boolean) = {
+    val initModel:HiddenMarkovModel = hyperparameters.asInstanceOf[Map[Symbol, HiddenMarkovModel]]('initModel)
+    val maxNumberOfIterations:Int = hyperparameters.asInstanceOf[Map[Symbol, Int]].getOrElse('iterations, 1)
+    val epsilon:Double = hyperparameters.asInstanceOf[Map[Symbol, Double]].getOrElse('epsilon, 0.1)
+    val scale:Boolean = hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('scale, true)
+    (initModel, maxNumberOfIterations, epsilon, scale)
   }
 
   
@@ -570,16 +576,10 @@ class HiddenMarkovModelFitter extends UnsupervisedFitter {
     norm < epsilon
   }
 
-/*def fit(observations: DrmLike[Long],
-  hyperparameters: (Symbol, Any)*): HiddenMarkovModel = {
-  val newModel:HiddenMarkovModel = new HiddenMarkovModel(4, 3)
-  newModel
-}*/
-
   def fit[K](observations: DrmLike[K],
     hyperparameters: (Symbol, Any)*): HiddenMarkovModel = {
     
-    setHyperparameters(hyperparameters.toMap)
+    val (initModel, maxNumberOfIterations, epsilon, scale) = setHyperparameters(hyperparameters.toMap)
     implicit val ctx = observations.context
     implicit val ktag =  observations.keyClassTag
 

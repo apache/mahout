@@ -49,9 +49,6 @@ trait HMMSuiteBase extends DistributedMahoutSuite with Matchers {
 
   val initialProbabilities = dvec(0.2, 0.1, 0.4, 0.3)
   val observations = dense((1, 0, 2, 2, 0, 0, 1, 1, 1, 0, 2, 0, 1, 0, 0))
-  /*val multipleObservations = sparse(
-    (0, 1) :: (1, 0) :: (2, 2) :: (3, 2) :: (4, 0) :: (5, 0) :: (6, 1) :: (7, 1) :: (8, 1) ::  (9, 0) :: (10, 2) :: (11, 0) :: (12, 1) :: (13, 0) :: (14, 0) :: Nil,
-   (0, 1) :: (1, 2) :: (2, 0) :: (3, 1) :: (4, 0) :: (5, 0) :: (6, 1) :: (7, 2) :: (8, 1) ::  (9, 2) :: (10, 0) :: (11, 2) :: (12, 1) ::  Nil)*/
   val multipleObservations = dense((1, 0, 2, 2, 0, 0, 1, 1, 1, 0, 2, 0, 1, 0, 0),
   (1, 2, 0, 1, 0, 0, 1, 2, 1, 2, 0, 2, 1))
    
