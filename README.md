@@ -28,7 +28,7 @@ export MAHOUT_HOME=/path/to/mahout
 export MAHOUT_LOCAL=true # for running standalone on your dev machine, 
 # unset MAHOUT_LOCAL for running on a cluster
 ```
-You will need a `$JAVA_HOME`, and if you are running on Spark, you will also need `$SPARK_HOME`
+You will need `$JAVA_HOME`, and if you are running on Spark, you will also need `$SPARK_HOME`.
 
 #### Using Mahout as a Library
 Running any application that uses Mahout will require installing a binary or source version and setting the environment.
