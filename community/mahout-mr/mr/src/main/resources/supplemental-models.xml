@@ -1,0 +1,279 @@
+<supplementalDataModels>
+  <!-- missing: Maven Profile Model -->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>maven-profile</artifactId>
+    <name>Maven Profile Model</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://maven.apache.org/ref/2.1.0/maven-profile/license.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- missing: Maven Project Builder -->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>maven-project</artifactId>
+    <name>Maven Project Builder</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://maven.apache.org/ref/2.1.0/maven-project/license.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- missing: Maven Local Settings  -->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>maven-settings</artifactId>
+    <name>Maven Local Settings</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://maven.apache.org/ref/2.1.0/maven-settings/license.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Maven Repository Metadata Model -->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>maven-repository-metadata</artifactId>
+    <name>Maven Repository Metadata Model</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://maven.apache.org/ref/2.1.0/maven-repository-metadata/license.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Maven Model -->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>maven-model</artifactId>
+    <name>Maven Model</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://maven.apache.org/ref/2.0.8/maven-model/license.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Maven Artifact -->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>maven-artifact</artifactId>
+    <name>Maven Artifact</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Maven Artifact Manager-->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>maven-artifact-manager</artifactId>
+    <name>Maven Artifact Manager</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Maven Artifact Manager-->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>maven-plugin-api</artifactId>
+    <name>Maven Plugin API</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Maven Wagon API-->
+  <supplement>
+    <project>
+    <groupId>org.apache.maven</groupId>
+    <artifactId>wagon-provider-api</artifactId>
+    <name>Maven Wagon API</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Shade Maven Plugin -->
+  <supplement>
+    <project>
+    <groupId>org.codehouse.mojo</groupId>
+    <artifactId>shade-maven-plugin</artifactId>
+    <name>Shade Maven Plugin</name>
+    <licenses>
+      <license>
+        <name>UNKNOWN</name>
+        <url>UNKNOWN</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+ <!-- junit -->
+  <supplement>
+    <project>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <name>Junit Unit testing library</name>
+    <licenses>
+      <license>
+        <name>Common Public License - v 1.0</name>
+        <url>http://junit.sourceforge.net/cpl-v10.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- jdom -->
+  <supplement>
+    <project>
+    <groupId>jdom</groupId>
+    <artifactId>jdom</artifactId>
+    <name>JDom</name>
+    <licenses>
+      <license>
+        <name>UNKOWN</name>
+        <url>UNKOWN</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- asm -->
+  <supplement>
+    <project>
+    <groupId>asm</groupId>
+    <artifactId>asm-all</artifactId>
+    <name>ASM ALL</name>
+    <licenses>
+      <license>
+        <name>UNKOWN</name>
+        <url>http://asm.ow2.org/license.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Default Plexus Container -->
+  <supplement>
+    <project>
+    <groupId>org.codehaus.plexus</groupId>
+    <artifactId>plexus-container-default</artifactId>
+    <name>Default Plexus Container</name>
+    <licenses>
+      <license>
+        <name>UNKNOWN</name>
+        <url>UNKNOWN</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Classworlds -->
+  <supplement>
+    <project>
+    <groupId>org.codehouse.classworlds</groupId>
+    <artifactId>classworlds</artifactId>
+    <name>Classworlds</name>
+    <licenses>
+      <license>
+        <name></name>
+        <url>http://classworlds.codehaus.org/license.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Plexus Common Utilities -->
+  <supplement>
+    <project>
+    <groupId>org.codehouse.plexus</groupId>
+    <artifactId>plexus-utils</artifactId>
+    <name>Plexus Common Utilities</name>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://plexus.codehaus.org/plexus-utils/license.html</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Commons Codec  -->
+  <supplement>
+    <project>
+    <groupId>commons-codec</groupId>
+    <artifactId>commons-codec</artifactId>
+    <name>Commons Codec</name>
+    <url>http://commons.apache.org/codec/</url>
+    <organization>
+          <name>Apache Software Foundation</name>
+          <url>http://www.apache.org/</url>
+    </organization>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Commons CLI  -->
+  <supplement>
+    <project>
+    <groupId>org.apache.mahout.commons</groupId>
+    <artifactId>commons-cli</artifactId>
+    <name>Commons CLI</name>
+    <url>http://commons.apache.org/cli/</url>
+    <organization>
+          <name>Apache Software Foundation</name>
+          <url>http://www.apache.org/</url>
+    </organization>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      </license>
+    </licenses>
+    </project>
+  </supplement>
+  <!-- Xpp3  -->
+  <supplement>
+    <project>
+    <name>Xml Pull Parser 3rd Edition</name>
+    <groupId>xpp3</groupId>
+    <artifactId>xpp3_min</artifactId>
+    <url>http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/</url>
+    <licenses>
+      <license>
+        <name>Public Domain</name>
+        <url>http://www.xmlpull.org/</url>
+      </license>
+    </licenses>
+    </project>
+ </supplement>
+</supplementalDataModels>

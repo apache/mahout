@@ -12,11 +12,11 @@ output-asf-email-examples/
 target/
 examples/bin/tmp
 output
-mr/build/
-mr/input/
-mr/output/
-mr/testdata/
-mr/temp
+community/mr/build/
+community/mr/input/
+community/mr/output/
+community/mr/testdata/
+community/mr/temp
 temp
 foo
 math-tests/

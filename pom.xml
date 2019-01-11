@@ -28,7 +28,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>0.13.1-SNAPSHOT</version>
+  <version>0.14.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -95,38 +95,53 @@
       </otherArchives>
     </mailingList>
   </mailingLists>
-  <prerequisites>
-    <maven>3.3.3</maven>
-  </prerequisites>
+
+  <!-- Required for Release Plugin -->
   <scm>
     <connection>scm:git:git@github.com:apache/mahout.git</connection>
     <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/mahout.git</developerConnection>
     <url>https://git-wip-us.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>master</tag>
+    <tag>mahout-0.14.0</tag>
   </scm>
+  <!-- -->
+
   <properties>
-    <skipTests>false</skipTests>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <!--<skipTests>false</skipTests>-->
+    <apache-rat.plugin.version>0.12</apache-rat.plugin.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <mjavadoc.version>2.10.3</mjavadoc.version>
+    <slf4j.version>1.7.22</slf4j.version>
+    <scala.version>2.11.6</scala.version>
+    <scala.compat.version>2.11</scala.compat.version>
+
+    <spark.version>2.3.0</spark.version>
+    <spark.compat.version>2.3</spark.compat.version>
+
+    <!-- `mvn site` throws a hissy fit searching no longer existing repos if this is not set false -->
+    <dependency.locations.enabled>false</dependency.locations.enabled>
+
+    <!--
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <msurefire.version>2.18.1</msurefire.version>
     <mpmd.version>3.4</mpmd.version>
     <mcheckstyle.version>2.15</mcheckstyle.version>
     <mfindbugs.version>3.0.1</mfindbugs.version>
-    <mjavadoc.version>2.10.3</mjavadoc.version>
+
     <mscala.version>3.2.0</mscala.version>
     <hbase.version>1.0.0</hbase.version>
-    <lucene.version>5.5.2</lucene.version>
-    <slf4j.version>1.7.22</slf4j.version>
+
+
     <scala.compat.version>2.10</scala.compat.version>
     <scala.version>2.10.4</scala.version>
-    <spark.version>1.6.3</spark.version> <!-- 1.6.3, 2.0.2, 2.1.0 all tested -->
+    <spark.version>1.6.3</spark.version>
     <flink.version>1.1.4</flink.version>
     <h2o.version>0.1.25</h2o.version>
     <jackson.version>2.7.4</jackson.version>
     <hadoop.version>2.4.1</hadoop.version>
     <hadoop.classifier>hadoop2</hadoop.classifier>
+    -->
   </properties>
   <issueManagement>
     <system>Jira</system>
@@ -142,21 +157,72 @@
         <enabled>false</enabled>
       </releases>
     </repository>
-    <repository>
-      <id>cloudera</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-    </repository>
-    <repository>
-      <id>mapr</id>
-      <url>http://repository.mapr.com/maven</url>
-    </repository>
+
   </repositories>
+
+  <modules>
+    <module>core</module>
+    <module>engine</module>
+    <module>community</module>
+    <!-- <module>examples</module> -->
+  </modules>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>14.0.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-math3</artifactId>
+        <version>3.2</version>
+      </dependency>
+
+      <!-- scala stuff -->
+      <dependency>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest_${scala.compat.version}</artifactId>
+        <version>3.0.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-reflect</artifactId>
+        <version>${scala.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala.version}</version>
+      </dependency>
+
+      <!-- TODO Move to ONE logging framework... -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- used in Core -->
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.17</version>
+      </dependency>
 
       <!-- our modules -->
-
+      <!--
       <dependency>
         <artifactId>mahout-hdfs</artifactId>
         <groupId>${project.groupId}</groupId>
@@ -251,9 +317,10 @@
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
-
+      -->
 
       <!-- 3rd party  -->
+      <!--
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-client</artifactId>
@@ -345,18 +412,8 @@
         <version>1.3</version>
         <scope>test</scope>
       </dependency>
-      <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymock</artifactId>
-        <version>3.2</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.carrotsearch.randomizedtesting</groupId>
-        <artifactId>randomizedtesting-runner</artifactId>
-        <version>2.0.15</version>
-        <scope>test</scope>
-      </dependency>
+
+
       <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-test-framework</artifactId>
@@ -423,11 +480,7 @@
         <version>${slf4j.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>commons-logging</groupId>
-        <artifactId>commons-logging</artifactId>
-        <version>1.1.3</version>
-      </dependency>
+
 
       <dependency>
         <groupId>log4j</groupId>
@@ -494,759 +547,918 @@
         <version>2.5</version>
         <scope>provided</scope>
       </dependency>
+      -->
     </dependencies>
   </dependencyManagement>
+
   <build>
-    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <!-- encoding, source and target are explicitly defined until MNGECLIPSE-966 is fixed -->
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+          <optimize>true</optimize>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.2</version>
+        <configuration>
+          <goals>deploy</goals>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <arguments>${arguments}</arguments>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <versionRange>2.8</versionRange>
-                    <goals>
-                      <goal>copy-dependencies</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.apache.mahout</groupId>
-                    <artifactId>mahout-collection-codegen-plugin</artifactId>
-                    <versionRange>[1.0,)</versionRange>
-                    <goals>
-                      <goal>generate</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <execute>
-                      <runOnIncremental>false</runOnIncremental>
-                      <runOnConfiguration>true</runOnConfiguration>
-                    </execute>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-eclipse-plugin</artifactId>
-          <version>2.9</version>
-          <configuration>
-            <outputDirectory>${eclipse.outputDirectory}</outputDirectory>
-            <buildcommands>
-              <java.lang.String>org.eclipse.jdt.core.javabuilder</java.lang.String>
-              <java.lang.String>com.atlassw.tools.eclipse.checkstyle.CheckstyleBuilder</java.lang.String>
-              <java.lang.String>net.sourceforge.pmd.eclipse.plugin.pmdBuilder</java.lang.String>
-            </buildcommands>
-            <projectnatures>
-              <nature>org.eclipse.jdt.core.javanature</nature>
-              <nature>com.atlassw.tools.eclipse.checkstyle.CheckstyleNature</nature>
-              <nature>net.sourceforge.pmd.eclipse.plugin.pmdNature</nature>
-            </projectnatures>
-            <additionalConfig>
-              <file>
-                <name>.checkstyle</name>
-                <location>/mahout-eclipse-checkstyle</location>
-              </file>
-              <file>
-                <name>.pmd</name>
-                <location>/mahout-eclipse-pmd</location>
-              </file>
-              <file>
-                <name>.ruleset</name>
-                <location>/mahout-pmd-ruleset.xml</location>
-              </file>
-            </additionalConfig>
-          </configuration>
-          <!-- the 'location' elements above refer to classpath -->
-          <dependencies>
-            <dependency>
-              <groupId>org.apache.mahout</groupId>
-              <artifactId>mahout-buildtools</artifactId>
-              <version>${project.version}</version>
-            </dependency>
-          </dependencies>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>2.5.2</version>
-          <configuration>
-            <useReleaseProfile>true</useReleaseProfile>
-            <releaseProfiles>viennacl,viennacl-omp,distribution,mahout-release,apache-release</releaseProfiles>
-            <goals>deploy</goals>
-            <autoVersionSubmodules>true</autoVersionSubmodules>
-            <arguments>${arguments}</arguments>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.3</version>
-          <configuration>
-            <!-- encoding, source and target are explicitly defined until MNGECLIPSE-966 is fixed -->
-            <encoding>${project.build.sourceEncoding}</encoding>
-            <source>${maven.compiler.source}</source>
-            <target>${maven.compiler.target}</target>
-            <optimize>true</optimize>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.mahout</groupId>
-          <artifactId>mahout-collection-codegen-plugin</artifactId>
-          <version>1.0</version>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.9.1</version>
-        </plugin>
-        <plugin>
-          <groupId>net.alchim31.maven</groupId>
-          <artifactId>scala-maven-plugin</artifactId>
-          <version>${mscala.version}</version>
-          <configuration>
-            <jvmArgs>
-              <jvmArg>-Xms64m</jvmArg>
-              <jvmArg>-Xmx1024m</jvmArg>
-            </jvmArgs>
-            <args>
-              <arg>-target:jvm-${maven.compiler.target}</arg>
-              <arg>-deprecation</arg>
-              <arg>-feature</arg>
-              <arg>-language:existentials</arg>
-              <arg>-language:implicitConversions</arg>
-              <arg>-language:postfixOps</arg>
-            </args>
-            <sourceDir>src/main/scala</sourceDir>
-            <testSourceDir>src/test/scala</testSourceDir>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.scalatest</groupId>
-          <artifactId>scalatest-maven-plugin</artifactId>
-          <version>1.0</version>
-          <configuration>
-            <reportsDirectory>${project.build.directory}/scalatest-reports</reportsDirectory>
-            <junitxml>.</junitxml>
-            <filereports>WDF TestSuite.txt</filereports>
-            <argLine>-Xmx1024m</argLine>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>versions-maven-plugin</artifactId>
-          <version>2.2</version>
-        </plugin>
-
-        <!-- Coverage analysis for tests -->
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.7.7.201606060606</version>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <version>${apache-rat.plugin.version}</version>
           <executions>
             <execution>
+              <phase>validate</phase>
               <goals>
-                <goal>prepare-agent</goal>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <licenses>
+              <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+                <patterns>
+                  <note>CERN license for Colt -- basically only requires attribution</note>
+                  <pattern>1999 CERN - European Organization for Nuclear Research</pattern>
+                </patterns>
+              </license>
+              <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+                <patterns>
+                  <pattern>public domain</pattern>
+                </patterns>
+              </license>
+            </licenses>
+            <excludes>
+              <exclude>**/*.conf</exclude>
+              <exclude>**/*.iml</exclude>
+              <exclude>**/*.md</exclude>
+              <exclude>**/*.props</exclude>
+              <exclude>**/gen/**</exclude>
+              <exclude>**/resources/**</exclude>
+              <exclude>**/images/**</exclude>
+              <exclude>**/target/**</exclude>
+              <exclude>**/testdata/**</exclude>
+              <exclude>**/.idea/**</exclude>
+              <exclude>**/package-info.java</exclude>
+              <exclude>**/.git/**</exclude>
+              <exclude>**/.classpath</exclude>
+              <exclude>**/.project</exclude>
+              <exclude>**/.settings/**</exclude>
+              <exclude>**/*.patch</exclude>
+              <exclude>website/**</exclude>
+              <exclude>.github/*</exclude>
+              <exclude>**/*.properties</exclude>
+            </excludes>
+            <excludeSubProjects>false</excludeSubProjects>
+          </configuration>
+        </plugin>
+
+        <!-- delete jars on claen in top directory, which is lib/ -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+          <configuration>
+            <filesets>
+              <fileset>
+                <directory>lib/</directory>
+                <includes>
+                  <include>*.jar</include>
+                </includes>
+                <followSymlinks>false</followSymlinks>
+              </fileset>
+            </filesets>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>1.4</version>
+          <executions>
+            <execution>
+              <id>enforce-versions</id>
+              <goals>
+                <goal>enforce</goal>
               </goals>
               <configuration>
-                <output>file</output>
-                <dumpOnExit>true</dumpOnExit>
+                <rules>
+                  <requireJavaVersion>
+                    <version>[1.8,)</version>
+                  </requireJavaVersion>
+                  <requireMavenVersion>
+                    <version>[3.3.3,)</version>
+                  </requireMavenVersion>
+                </rules>
               </configuration>
-            </execution>
-            <execution>
-              <id>report</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>report</goal>
-              </goals>
             </execution>
           </executions>
         </plugin>
 
-        <!-- Report jacoco coverage to coveralls.io -->
         <plugin>
-          <groupId>org.eluder.coveralls</groupId>
-          <artifactId>coveralls-maven-plugin</artifactId>
-          <version>4.2.0</version>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <forkCount>2</forkCount>
+            <reuseForks>false</reuseForks>
+            <argLine>-Xmx768m -Djava.security.manager
+              -Djava.security.policy=${project.build.directory}/../../buildtools/src/test/resources/java.policy</argLine>
+            <argLine>-Djava.security.auth.login.config=${project.build.directory}/../../buildtools/src/test/resources/jaas.config</argLine>
+            <testFailureIgnore>false</testFailureIgnore>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <systemPropertyVariables>
+              <mahout.test.directory>${project.build.directory}</mahout.test.directory>
+            </systemPropertyVariables>
+          </configuration>
         </plugin>
+
 
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>enforce-versions</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>[1.7,)</version>
-                </requireJavaVersion>
-                  <requireMavenVersion>
-                    <version>[3.3.3,)</version>
-                  </requireMavenVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <forkCount>2</forkCount>
-          <reuseForks>false</reuseForks>
-          <argLine>-Xmx768m -Djava.security.manager -Djava.library.path=${env.HADOOP_HOME}\bin
-            -Djava.security.policy=${project.build.directory}/../../buildtools/src/test/resources/java.policy</argLine>
-          <argLine>-Djava.security.auth.login.config=${project.build.directory}/../../buildtools/src/test/resources/jaas.config</argLine>
-          <testFailureIgnore>false</testFailureIgnore>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <systemPropertyVariables>
-            <mahout.test.directory>${project.build.directory}</mahout.test.directory>
-          </systemPropertyVariables>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.atlassian.maven.plugins</groupId>
-        <artifactId>maven-clover2-plugin</artifactId>
-        <version>4.0.4</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${mcheckstyle.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-buildtools</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>${mpmd.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-buildtools</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <rulesets>
-            <!-- classpath -->
-            <ruleset>mahout-pmd-ruleset.xml</ruleset>
-          </rulesets>
-          <!-- targetJdk is explicitly set until MPMD-170 is resolved -->
-          <targetJdk>${maven.compiler.target}</targetJdk>
-          <linkXRef>false</linkXRef>
-          <includeTests>true</includeTests>
-          <verbose>true</verbose>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>${mfindbugs.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-buildtools</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <xmlOutput>true</xmlOutput>
-          <threshold>Low</threshold>
-          <effort>Default</effort>
-          <!--visitors>FindDeadLocalStores,UnreadFields</visitors-->
-          <!--omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors-->
-          <relaxed>true</relaxed>
-          <!-- classpath -->
-          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
-          <failOnError>false</failOnError>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <configuration>
-          <licenses>
-            <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
-              <patterns>
-                <note>CERN license for Colt -- basically only requires attribution</note>
-                <pattern>1999 CERN - European Organization for Nuclear Research</pattern>
-              </patterns>
-            </license>
-            <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
-              <patterns>
-                <pattern>public domain</pattern>
-              </patterns>
-            </license>
-          </licenses>
-          <excludes>
-            <exclude>**/*.conf</exclude>
-            <exclude>**/*.iml</exclude>
-            <exclude>**/*.md</exclude>
-            <exclude>**/*.props</exclude>
-            <exclude>**/gen/**</exclude>
-            <exclude>**/resources/**</exclude>
-            <exclude>**/images/**</exclude>
-            <exclude>**/target/**</exclude>
-            <exclude>**/testdata/**</exclude>
-            <exclude>**/.idea/**</exclude>
-            <exclude>**/package-info.java</exclude>
-            <exclude>**/.git/**</exclude>
-            <exclude>**/.classpath</exclude>
-            <exclude>**/.project</exclude>
-            <exclude>**/.settings/**</exclude>
-            <exclude>**/*.patch</exclude>
-          </excludes>
-          <excludeSubProjects>false</excludeSubProjects>
-        </configuration>
-      </plugin>
-      <!--
-      <plugin>
-        <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId>
-      </plugin>
-      -->
-    </plugins>
-  </build>
-  <modules>
-    <module>buildtools</module>
-    <module>math</module>
-    <module>hdfs</module>
-    <module>mr</module>
-    <module>integration</module>
-    <module>examples</module>
 
-    <module>math-scala</module>
-    <module>spark</module>
-    <module>h2o</module>
-  </modules>
+  </build>
 
   <profiles>
     <profile>
-      <id>distribution</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
+      <id>all</id>
       <modules>
-        <module>distribution</module>
+        <module>community/community-engines</module>
+        <module>community/community-engines/flink-batch</module>
+        <module>community/community-engines/h2o</module>
+        <module>community/mahout-mr</module>
+        <module>experimental</module>
+        <module>experimental/viennacl</module>
+        <module>experimental/viennacl-omp</module>
       </modules>
     </profile>
-
     <profile>
-      <id>flink</id>
-    <modules>
-      <module>flink</module>
-    </modules>
+      <id>apache-release</id>
+      <properties>
+        <skipTests>false</skipTests>
+      </properties>
+      <build>
+        <plugins>
+          <!--maven source-->
+          <!--maven jar-->
+          <!--maven assembly-->
+          <plugin>
+            <artifactId>maven-release-plugin</artifactId>
+            <configuration>
+              <releaseProfiles>apache-release</releaseProfiles>
+              <preparationGoals>clean install</preparationGoals>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
-
     <profile>
       <id>viennacl</id>
-    <modules>
-      <module>viennacl</module>
-      <module>viennacl-omp</module>
-    </modules>
+      <modules>
+        <module>experimental/viennacl</module>
+      </modules>
     </profile>
-
     <profile>
       <id>viennacl-omp</id>
       <modules>
-        <module>viennacl-omp</module>
+        <module>experimental/viennacl-omp</module>
       </modules>
     </profile>
+    <profile>
+      <id>docs</id>
+      <reporting>
+        <plugins>
+          <!-- generate java doc -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${mjavadoc.version}</version>
+          </plugin>
+        </plugins>
+      </reporting>
+      <build>
+        <plugins>
 
-    <profile>
-      <id>hadoop2</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <hadoop.classifier>hadoop2</hadoop.classifier>
-        <hadoop.version>2.4.1</hadoop.version>
-      </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${hadoop.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-auth</artifactId>
-            <version>${hadoop.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-core</artifactId>
-            <version>${hadoop.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-common</artifactId>
-            <version>${hadoop.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-    <profile>
-      <id>fastinstall</id>
-      <properties>
-        <skipTests>true</skipTests>
-        <pmd.skip>true</pmd.skip>
-        <checkstyle.skip>true</checkstyle.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>nochecks</id>
-      <properties>
-        <pmd.skip>true</pmd.skip>
-        <checkstyle.skip>true</checkstyle.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>scala-2.10</id>
-      <activation>
-        <property><name>!scala-2.11</name></property>
-      </activation>
-      <properties>
-        <scala.compat.version>2.10</scala.compat.version>
-        <scala.version>2.10.4</scala.version>
-      </properties>
-    </profile>
-    <profile>
-      <id>scala-2.11</id>
-      <activation>
-        <property><name>scala-2.11</name></property>
-      </activation>
-      <properties>
-        <scala.compat.version>2.11</scala.compat.version>
-        <scala.version>2.11.8</scala.version>
-      </properties>
-    </profile>
-    <profile>
-      <id>spark-1.6</id>
-      <activation>
-        <property><name>!spark-2.*</name></property>
-      </activation>
-      <properties>
-        <spark.version>1.6.3</spark.version>
-        <spark.compat.version>1.6</spark.compat.version>
-      </properties>
-    </profile>
-    <profile>
-      <id>spark-2.0</id>
-      <activation>
-        <property><name>spark-2.0</name></property>
-      </activation>
-      <properties>
-        <spark.version>2.0.2</spark.version>
-        <spark.compat.version>2.0</spark.compat.version>
-      </properties>
-    </profile>
-    <profile>
-      <id>spark-2.1</id>
-      <activation>
-        <property><name>spark-2.1</name></property>
-      </activation>
-      <properties>
-        <spark.version>2.1.0</spark.version>
-        <spark.compat.version>2.1</spark.compat.version>
-      </properties>
-    </profile>
-    <profile>
-      <!-- most of this profile lives in other places, like distribution -->
-      <id>release.prepare</id>
-      <properties>
-        <skipTests>true</skipTests>
-        <pmd.skip>true</pmd.skip>
-        <checkstyle.skip>true</checkstyle.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>mahout-release</id>
-      <properties>
-        <skipTests>true</skipTests>
-        <pmd.skip>true</pmd.skip>
-        <checkstyle.skip>true</checkstyle.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>sourcecheck</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <showDeprecation>true</showDeprecation>
-              <showWarnings>true</showWarnings>
-              <compilerArgument>${compile.flags}</compilerArgument>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-checkstyle-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sourcecheck</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>checkstyle</goal>
-                </goals>
-                <configuration>
-                  <failsOnError>false</failsOnError>
-                  <!-- classpath -->
-                  <configLocation>mahout-checkstyle.xml</configLocation>
-                  <consoleOutput>true</consoleOutput>
-                  <linkXRef>false</linkXRef>
-                  <sourceDirectory>${basedir}/src</sourceDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-pmd-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sourcecheck</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>check</goal>
-                  <goal>cpd-check</goal>
-                </goals>
-                <configuration>
-                  <failOnViolation>false</failOnViolation>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>findbugs-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sourcecheck</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>check</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>set.eclipse.output</id>
-      <properties>
-        <eclipse.outputDirectory>${basedir}/eclipse-classes</eclipse.outputDirectory>
-      </properties>
-    </profile>
-    <profile>
-      <id>setup.eclipse</id>
-      <build>
-        <defaultGoal>process-test-sources</defaultGoal>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-eclipse-plugin</artifactId>
-            <version>2.10</version>
-            <executions>
-              <execution>
-                <id>setup.eclipse.project</id>
-                <phase>process-test-sources</phase>
-                <goals>
-                  <goal>eclipse</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>ci</id>
-      <activation>
-        <property>
-          <name>env.JENKINS_URL</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>remove-old-mahout-artifacts</id>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>remove-project-artifact</goal>
-                </goals>
-                <configuration>
-                  <failOnError>false</failOnError>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
   </profiles>
+
   <reporting>
     <plugins>
-      <!-- surefire runs unit tests -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>${msurefire.version}</version>
-      </plugin>
-      <!-- checkstyle -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${mcheckstyle.version}</version>
+        <version>3.0.0</version>
         <configuration>
-          <!-- classpath -->
-          <configLocation>mahout-checkstyle.xml</configLocation>
-          <consoleOutput>true</consoleOutput>
+          <configLocation>buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
         </configuration>
       </plugin>
-      <!-- test coverage plugin -->
-      <plugin>
-        <groupId>com.atlassian.maven.plugins</groupId>
-        <artifactId>maven-clover2-plugin</artifactId>
-        <version>3.1.12</version>
-        <configuration>
-          <generateHistorical>true</generateHistorical>
-          <licenseLocation>buildtools/clover.license</licenseLocation>
-          <generatePdf>false</generatePdf>
-          <generateXml>true</generateXml>
-          <generateHtml>true</generateHtml>
-        </configuration>
-      </plugin>
-      <!-- generate java doc -->
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${mjavadoc.version}</version>
-      </plugin>
-      <!-- code duplication - copy and paste detection -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>${mpmd.version}</version>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.7.1</version>
         <configuration>
-          <rulesets>
-            <!-- classpath -->
-            <ruleset>mahout-pmd-ruleset.xml</ruleset>
-          </rulesets>
-          <targetJdk>${maven.compiler.target}</targetJdk>
-          <linkXRef>false</linkXRef>
-          <includeTests>true</includeTests>
-          <verbose>true</verbose>
+          <reportPlugins>
+            <plugin>
+              <artifactId>maven-project-info-reports-plugin</artifactId>
+              <!--<version>2.2</version>-->
+            </plugin>
+            <plugin>
+              <groupId>net.alchim31.maven</groupId>
+              <artifactId>scala-maven-plugin</artifactId>
+              <!--<version>3.4.1</version>-->
+              <configuration>
+                <jvmArgs>
+                  <jvmArg>-Xms64m</jvmArg>
+                  <jvmArg>-Xmx1024m</jvmArg>
+                </jvmArgs>
+              </configuration>
+            </plugin>
+          </reportPlugins>
         </configuration>
       </plugin>
-      <!-- catch code tags -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>taglist-maven-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <tags>
-            <tag>TODO</tag>
-            <tag>todo</tag>
-          </tags>
-        </configuration>
-      </plugin>
-      <!-- findbugs -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>${mfindbugs.version}</version>
-        <configuration>
-          <xmlOutput>true</xmlOutput>
-          <threshold>Low</threshold>
-          <effort>Default</effort>
-          <!--visitors>FindDeadLocalStores,UnreadFields</visitors-->
-          <!--omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors-->
-          <debug>true</debug>
-          <relaxed>true</relaxed>
-          <!-- classpath -->
-          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-changes-plugin</artifactId>
-        <version>2.9</version>
-        <configuration>
-          <onlyCurrentVersion>true</onlyCurrentVersion>
-          <columnNames>Type,Key,Summary,Status,Resolution,Assignee</columnNames>
-          <sortColumnNames>Type,Key</sortColumnNames>
-        </configuration>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>jira-report</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.8</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>index</report>
-              <report>dependencies</report>
-              <report>dependency-convergence</report>
-              <report>dependency-management</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>taglist-maven-plugin</artifactId>
-        <version>2.4</version>
-      </plugin>
-      <plugin>
-        <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId>
-        <version>${mscala.version}</version>
-      </plugin>
+
+
+
     </plugins>
   </reporting>
+
+
+    <!--<defaultGoal>install</defaultGoal>-->
+    <!--<pluginManagement>-->
+      <!--<plugins>-->
+        <!--&lt;!&ndash;-->
+        <!--<plugin>-->
+          <!--<groupId>org.eclipse.m2e</groupId>-->
+          <!--<artifactId>lifecycle-mapping</artifactId>-->
+          <!--<version>1.0.0</version>-->
+          <!--<configuration>-->
+            <!--<lifecycleMappingMetadata>-->
+              <!--<pluginExecutions>-->
+                <!--<pluginExecution>-->
+                  <!--<pluginExecutionFilter>-->
+                    <!--<groupId>org.apache.maven.plugins</groupId>-->
+                    <!--<artifactId>maven-dependency-plugin</artifactId>-->
+                    <!--<versionRange>2.8</versionRange>-->
+                    <!--<goals>-->
+                      <!--<goal>copy-dependencies</goal>-->
+                    <!--</goals>-->
+                  <!--</pluginExecutionFilter>-->
+                  <!--<action>-->
+                    <!--<ignore />-->
+                  <!--</action>-->
+                <!--</pluginExecution>-->
+                <!--<pluginExecution>-->
+                  <!--<pluginExecutionFilter>-->
+                    <!--<groupId>org.apache.mahout</groupId>-->
+                    <!--<artifactId>mahout-collection-codegen-plugin</artifactId>-->
+                    <!--<versionRange>[1.0,)</versionRange>-->
+                    <!--<goals>-->
+                      <!--<goal>generate</goal>-->
+                    <!--</goals>-->
+                  <!--</pluginExecutionFilter>-->
+                  <!--<action>-->
+                    <!--<execute>-->
+                      <!--<runOnIncremental>false</runOnIncremental>-->
+                      <!--<runOnConfiguration>true</runOnConfiguration>-->
+                    <!--</execute>-->
+                  <!--</action>-->
+                <!--</pluginExecution>-->
+              <!--</pluginExecutions>-->
+            <!--</lifecycleMappingMetadata>-->
+          <!--</configuration>-->
+        <!--</plugin>-->
+        <!--&ndash;&gt;-->
+        <!--&lt;!&ndash;-->
+        <!--<plugin>-->
+          <!--<groupId>org.apache.maven.plugins</groupId>-->
+          <!--<artifactId>maven-eclipse-plugin</artifactId>-->
+          <!--<version>2.9</version>-->
+          <!--<configuration>-->
+            <!--<outputDirectory>${eclipse.outputDirectory}</outputDirectory>-->
+            <!--<buildcommands>-->
+              <!--<java.lang.String>org.eclipse.jdt.core.javabuilder</java.lang.String>-->
+              <!--<java.lang.String>com.atlassw.tools.eclipse.checkstyle.CheckstyleBuilder</java.lang.String>-->
+              <!--<java.lang.String>net.sourceforge.pmd.eclipse.plugin.pmdBuilder</java.lang.String>-->
+            <!--</buildcommands>-->
+            <!--<projectnatures>-->
+              <!--<nature>org.eclipse.jdt.core.javanature</nature>-->
+              <!--<nature>com.atlassw.tools.eclipse.checkstyle.CheckstyleNature</nature>-->
+              <!--<nature>net.sourceforge.pmd.eclipse.plugin.pmdNature</nature>-->
+            <!--</projectnatures>-->
+            <!--<additionalConfig>-->
+              <!--<file>-->
+                <!--<name>.checkstyle</name>-->
+                <!--<location>/mahout-eclipse-checkstyle</location>-->
+              <!--</file>-->
+              <!--<file>-->
+                <!--<name>.pmd</name>-->
+                <!--<location>/mahout-eclipse-pmd</location>-->
+              <!--</file>-->
+              <!--<file>-->
+                <!--<name>.ruleset</name>-->
+                <!--<location>/mahout-pmd-ruleset.xml</location>-->
+              <!--</file>-->
+            <!--</additionalConfig>-->
+          <!--</configuration>-->
+
+
+
+          <!--<dependencies>-->
+            <!--<dependency>-->
+              <!--<groupId>org.apache.mahout</groupId>-->
+              <!--<artifactId>mahout-buildtools</artifactId>-->
+              <!--<version>${project.version}</version>-->
+            <!--</dependency>-->
+          <!--</dependencies>-->
+        <!--</plugin>-->
+        <!--&ndash;&gt;-->
+        <!--<plugin>-->
+          <!--<groupId>org.apache.maven.plugins</groupId>-->
+          <!--<artifactId>maven-release-plugin</artifactId>-->
+          <!--<version>2.5.2</version>-->
+          <!--<configuration>-->
+            <!--<useReleaseProfile>true</useReleaseProfile>-->
+            <!--<releaseProfiles>viennacl,viennacl-omp,distribution,mahout-release,apache-release</releaseProfiles>-->
+            <!--<goals>deploy</goals>-->
+            <!--<autoVersionSubmodules>true</autoVersionSubmodules>-->
+            <!--<arguments>${arguments}</arguments>-->
+          <!--</configuration>-->
+        <!--</plugin>-->
+        <!--<plugin>-->
+          <!--<groupId>org.apache.maven.plugins</groupId>-->
+          <!--<artifactId>maven-compiler-plugin</artifactId>-->
+          <!--<version>3.3</version>-->
+          <!--<configuration>-->
+            <!--&lt;!&ndash; encoding, source and target are explicitly defined until MNGECLIPSE-966 is fixed &ndash;&gt;-->
+            <!--<encoding>${project.build.sourceEncoding}</encoding>-->
+            <!--<source>${maven.compiler.source}</source>-->
+            <!--<target>${maven.compiler.target}</target>-->
+            <!--<optimize>true</optimize>-->
+          <!--</configuration>-->
+        <!--</plugin>-->
+        <!--<plugin>-->
+          <!--<groupId>org.apache.mahout</groupId>-->
+          <!--<artifactId>mahout-collection-codegen-plugin</artifactId>-->
+          <!--<version>1.0</version>-->
+        <!--</plugin>-->
+        <!--<plugin>-->
+          <!--<groupId>org.codehaus.mojo</groupId>-->
+          <!--<artifactId>build-helper-maven-plugin</artifactId>-->
+          <!--<version>1.9.1</version>-->
+        <!--</plugin>-->
+        <!--<plugin>-->
+          <!--<groupId>net.alchim31.maven</groupId>-->
+          <!--<artifactId>scala-maven-plugin</artifactId>-->
+          <!--<version>${mscala.version}</version>-->
+          <!--<configuration>-->
+            <!--<jvmArgs>-->
+              <!--<jvmArg>-Xms64m</jvmArg>-->
+              <!--<jvmArg>-Xmx1024m</jvmArg>-->
+            <!--</jvmArgs>-->
+            <!--<args>-->
+              <!--<arg>-target:jvm-${maven.compiler.target}</arg>-->
+              <!--<arg>-deprecation</arg>-->
+              <!--<arg>-feature</arg>-->
+              <!--<arg>-language:existentials</arg>-->
+              <!--<arg>-language:implicitConversions</arg>-->
+              <!--<arg>-language:postfixOps</arg>-->
+            <!--</args>-->
+            <!--<sourceDir>src/main/scala</sourceDir>-->
+            <!--<testSourceDir>src/test/scala</testSourceDir>-->
+          <!--</configuration>-->
+        <!--</plugin>-->
+        <!--<plugin>-->
+          <!--<groupId>org.scalatest</groupId>-->
+          <!--<artifactId>scalatest-maven-plugin</artifactId>-->
+          <!--<version>1.0</version>-->
+          <!--<configuration>-->
+            <!--<reportsDirectory>${project.build.directory}/scalatest-reports</reportsDirectory>-->
+            <!--<junitxml>.</junitxml>-->
+            <!--<filereports>WDF TestSuite.txt</filereports>-->
+            <!--<argLine>-Xmx1024m</argLine>-->
+          <!--</configuration>-->
+        <!--</plugin>-->
+        <!--<plugin>-->
+          <!--<groupId>org.codehaus.mojo</groupId>-->
+          <!--<artifactId>versions-maven-plugin</artifactId>-->
+          <!--<version>2.2</version>-->
+        <!--</plugin>-->
+
+      <!--<plugin>-->
+        <!--<groupId>com.atlassian.maven.plugins</groupId>-->
+        <!--<artifactId>maven-clover2-plugin</artifactId>-->
+        <!--<version>4.0.4</version>-->
+      <!--</plugin>-->
+       <!--&lt;!&ndash; Coverage analysis for tests &ndash;&gt;-->
+        <!--<plugin>-->
+          <!--<groupId>org.jacoco</groupId>-->
+          <!--<artifactId>jacoco-maven-plugin</artifactId>-->
+          <!--<version>0.7.7.201606060606</version>-->
+          <!--<executions>-->
+            <!--<execution>-->
+              <!--<goals>-->
+                <!--<goal>prepare-agent</goal>-->
+              <!--</goals>-->
+              <!--<configuration>-->
+                <!--<output>file</output>-->
+                <!--<dumpOnExit>true</dumpOnExit>-->
+              <!--</configuration>-->
+            <!--</execution>-->
+            <!--<execution>-->
+              <!--<id>report</id>-->
+              <!--<phase>verify</phase>-->
+              <!--<goals>-->
+                <!--<goal>report</goal>-->
+              <!--</goals>-->
+            <!--</execution>-->
+          <!--</executions>-->
+        <!--</plugin>-->
+
+        <!--&lt;!&ndash; Report jacoco coverage to coveralls.io &ndash;&gt;-->
+        <!--<plugin>-->
+          <!--<groupId>org.eluder.coveralls</groupId>-->
+          <!--<artifactId>coveralls-maven-plugin</artifactId>-->
+          <!--<version>4.2.0</version>-->
+        <!--</plugin>-->
+
+      <!--</plugins>-->
+    <!--</pluginManagement>-->
+
+
+
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-pmd-plugin</artifactId>-->
+        <!--<version>${mpmd.version}</version>-->
+        <!--<dependencies>-->
+          <!--<dependency>-->
+            <!--<groupId>org.apache.mahout</groupId>-->
+            <!--<artifactId>mahout-buildtools</artifactId>-->
+            <!--<version>${project.version}</version>-->
+          <!--</dependency>-->
+        <!--</dependencies>-->
+        <!--<configuration>-->
+          <!--<rulesets>-->
+            <!--&lt;!&ndash; classpath &ndash;&gt;-->
+            <!--<ruleset>mahout-pmd-ruleset.xml</ruleset>-->
+          <!--</rulesets>-->
+          <!--&lt;!&ndash; targetJdk is explicitly set until MPMD-170 is resolved &ndash;&gt;-->
+          <!--<targetJdk>${maven.compiler.target}</targetJdk>-->
+          <!--<linkXRef>false</linkXRef>-->
+          <!--<includeTests>true</includeTests>-->
+          <!--<verbose>true</verbose>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>findbugs-maven-plugin</artifactId>-->
+        <!--<version>${mfindbugs.version}</version>-->
+        <!--<dependencies>-->
+          <!--<dependency>-->
+            <!--<groupId>org.apache.mahout</groupId>-->
+            <!--<artifactId>mahout-buildtools</artifactId>-->
+            <!--<version>${project.version}</version>-->
+          <!--</dependency>-->
+        <!--</dependencies>-->
+        <!--<configuration>-->
+          <!--<xmlOutput>true</xmlOutput>-->
+          <!--<threshold>Low</threshold>-->
+          <!--<effort>Default</effort>-->
+          <!--&lt;!&ndash;visitors>FindDeadLocalStores,UnreadFields</visitors&ndash;&gt;-->
+          <!--&lt;!&ndash;omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors&ndash;&gt;-->
+          <!--<relaxed>true</relaxed>-->
+          <!--&lt;!&ndash; classpath &ndash;&gt;-->
+          <!--<excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>-->
+          <!--<failOnError>false</failOnError>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+
+      <!--&lt;!&ndash;-->
+      <!--<plugin>-->
+        <!--<groupId>net.alchim31.maven</groupId>-->
+        <!--<artifactId>scala-maven-plugin</artifactId>-->
+      <!--</plugin>-->
+      <!--&ndash;&gt;-->
+    <!--</plugins>-->
+  <!--</build>-->
+
+  <!--<profiles>-->
+    <!--<profile>-->
+      <!--<id>distribution</id>-->
+      <!--<activation>-->
+        <!--<activeByDefault>false</activeByDefault>-->
+      <!--</activation>-->
+      <!--<modules>-->
+        <!--<module>distribution</module>-->
+      <!--</modules>-->
+    <!--</profile>-->
+
+    <!--<profile>-->
+      <!--<id>flink</id>-->
+    <!--<modules>-->
+      <!--<module>flink</module>-->
+    <!--</modules>-->
+    <!--</profile>-->
+
+    <!--<profile>-->
+      <!--<id>viennacl</id>-->
+    <!--<modules>-->
+      <!--<module>viennacl</module>-->
+      <!--<module>viennacl-omp</module>-->
+    <!--</modules>-->
+    <!--</profile>-->
+
+    <!--<profile>-->
+      <!--<id>viennacl-omp</id>-->
+      <!--<modules>-->
+        <!--<module>viennacl-omp</module>-->
+      <!--</modules>-->
+    <!--</profile>-->
+
+    <!--<profile>-->
+      <!--<id>hadoop2</id>-->
+      <!--<activation>-->
+        <!--<activeByDefault>true</activeByDefault>-->
+      <!--</activation>-->
+      <!--<properties>-->
+        <!--<hadoop.classifier>hadoop2</hadoop.classifier>-->
+        <!--<hadoop.version>2.4.1</hadoop.version>-->
+      <!--</properties>-->
+      <!--<dependencyManagement>-->
+        <!--<dependencies>-->
+          <!--<dependency>-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-common</artifactId>-->
+            <!--<version>${hadoop.version}</version>-->
+          <!--</dependency>-->
+          <!--<dependency>-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-auth</artifactId>-->
+            <!--<version>${hadoop.version}</version>-->
+          <!--</dependency>-->
+          <!--<dependency>-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-mapreduce-client-core</artifactId>-->
+            <!--<version>${hadoop.version}</version>-->
+          <!--</dependency>-->
+          <!--<dependency>-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-yarn-common</artifactId>-->
+            <!--<version>${hadoop.version}</version>-->
+          <!--</dependency>-->
+        <!--</dependencies>-->
+      <!--</dependencyManagement>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>fastinstall</id>-->
+      <!--<properties>-->
+        <!--<skipTests>true</skipTests>-->
+        <!--<pmd.skip>true</pmd.skip>-->
+        <!--<checkstyle.skip>true</checkstyle.skip>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>nochecks</id>-->
+      <!--<properties>-->
+        <!--<pmd.skip>true</pmd.skip>-->
+        <!--<checkstyle.skip>true</checkstyle.skip>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>scala-2.10</id>-->
+      <!--<activation>-->
+        <!--<property><name>!scala-2.11</name></property>-->
+      <!--</activation>-->
+      <!--<properties>-->
+        <!--<scala.compat.version>2.10</scala.compat.version>-->
+        <!--<scala.version>2.10.4</scala.version>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>scala-2.11</id>-->
+      <!--<activation>-->
+        <!--<property><name>scala-2.11</name></property>-->
+      <!--</activation>-->
+      <!--<properties>-->
+        <!--<scala.compat.version>2.11</scala.compat.version>-->
+        <!--<scala.version>2.11.8</scala.version>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>spark-1.6</id>-->
+      <!--<activation>-->
+        <!--<property><name>!spark-2.*</name></property>-->
+      <!--</activation>-->
+      <!--<properties>-->
+        <!--<spark.version>1.6.3</spark.version>-->
+        <!--<spark.compat.version>1.6</spark.compat.version>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>spark-2.0</id>-->
+      <!--<activation>-->
+        <!--<property><name>spark-2.0</name></property>-->
+      <!--</activation>-->
+      <!--<properties>-->
+        <!--<spark.version>2.0.2</spark.version>-->
+        <!--<spark.compat.version>2.0</spark.compat.version>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>spark-2.1</id>-->
+      <!--<activation>-->
+        <!--<property><name>spark-2.1</name></property>-->
+      <!--</activation>-->
+      <!--<properties>-->
+        <!--<spark.version>2.1.0</spark.version>-->
+        <!--<spark.compat.version>2.1</spark.compat.version>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--&lt;!&ndash; most of this profile lives in other places, like distribution &ndash;&gt;-->
+      <!--<id>release.prepare</id>-->
+      <!--<properties>-->
+        <!--<skipTests>true</skipTests>-->
+        <!--<pmd.skip>true</pmd.skip>-->
+        <!--<checkstyle.skip>true</checkstyle.skip>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>mahout-release</id>-->
+      <!--<properties>-->
+        <!--<skipTests>true</skipTests>-->
+        <!--<pmd.skip>true</pmd.skip>-->
+        <!--<checkstyle.skip>true</checkstyle.skip>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>sourcecheck</id>-->
+      <!--<build>-->
+        <!--<plugins>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-compiler-plugin</artifactId>-->
+            <!--<configuration>-->
+              <!--<showDeprecation>true</showDeprecation>-->
+              <!--<showWarnings>true</showWarnings>-->
+              <!--<compilerArgument>${compile.flags}</compilerArgument>-->
+            <!--</configuration>-->
+          <!--</plugin>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>sourcecheck</id>-->
+                <!--<phase>verify</phase>-->
+                <!--<goals>-->
+                  <!--<goal>checkstyle</goal>-->
+                <!--</goals>-->
+                <!--<configuration>-->
+                  <!--<failsOnError>false</failsOnError>-->
+                  <!--&lt;!&ndash; classpath &ndash;&gt;-->
+                  <!--<configLocation>mahout-checkstyle.xml</configLocation>-->
+                  <!--<consoleOutput>true</consoleOutput>-->
+                  <!--<linkXRef>false</linkXRef>-->
+                  <!--<sourceDirectory>${basedir}/src</sourceDirectory>-->
+                <!--</configuration>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-pmd-plugin</artifactId>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>sourcecheck</id>-->
+                <!--<phase>verify</phase>-->
+                <!--<goals>-->
+                  <!--<goal>check</goal>-->
+                  <!--<goal>cpd-check</goal>-->
+                <!--</goals>-->
+                <!--<configuration>-->
+                  <!--<failOnViolation>false</failOnViolation>-->
+                <!--</configuration>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+          <!--<plugin>-->
+            <!--<groupId>org.codehaus.mojo</groupId>-->
+            <!--<artifactId>findbugs-maven-plugin</artifactId>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>sourcecheck</id>-->
+                <!--<phase>verify</phase>-->
+                <!--<goals>-->
+                  <!--<goal>check</goal>-->
+                <!--</goals>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+        <!--</plugins>-->
+      <!--</build>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>set.eclipse.output</id>-->
+      <!--<properties>-->
+        <!--<eclipse.outputDirectory>${basedir}/eclipse-classes</eclipse.outputDirectory>-->
+      <!--</properties>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>setup.eclipse</id>-->
+      <!--<build>-->
+        <!--<defaultGoal>process-test-sources</defaultGoal>-->
+        <!--<plugins>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-eclipse-plugin</artifactId>-->
+            <!--<version>2.10</version>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>setup.eclipse.project</id>-->
+                <!--<phase>process-test-sources</phase>-->
+                <!--<goals>-->
+                  <!--<goal>eclipse</goal>-->
+                <!--</goals>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+        <!--</plugins>-->
+      <!--</build>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>ci</id>-->
+      <!--<activation>-->
+        <!--<property>-->
+          <!--<name>env.JENKINS_URL</name>-->
+        <!--</property>-->
+      <!--</activation>-->
+      <!--<build>-->
+        <!--<plugins>-->
+          <!--<plugin>-->
+            <!--<groupId>org.codehaus.mojo</groupId>-->
+            <!--<artifactId>build-helper-maven-plugin</artifactId>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>remove-old-mahout-artifacts</id>-->
+                <!--<phase>prepare-package</phase>-->
+                <!--<goals>-->
+                  <!--<goal>remove-project-artifact</goal>-->
+                <!--</goals>-->
+                <!--<configuration>-->
+                  <!--<failOnError>false</failOnError>-->
+                <!--</configuration>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+        <!--</plugins>-->
+      <!--</build>-->
+    <!--</profile>-->
+
+  <!--</profiles>-->
+  <!--<reporting>-->
+    <!--<plugins>-->
+      <!--&lt;!&ndash; surefire runs unit tests &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-surefire-report-plugin</artifactId>-->
+        <!--<version>${msurefire.version}</version>-->
+      <!--</plugin>-->
+      <!--&lt;!&ndash; checkstyle &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
+        <!--<version>${mcheckstyle.version}</version>-->
+        <!--<configuration>-->
+          <!--&lt;!&ndash; classpath &ndash;&gt;-->
+          <!--<configLocation>mahout-checkstyle.xml</configLocation>-->
+          <!--<consoleOutput>true</consoleOutput>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+      <!--&lt;!&ndash; test coverage plugin &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<groupId>com.atlassian.maven.plugins</groupId>-->
+        <!--<artifactId>maven-clover2-plugin</artifactId>-->
+        <!--<version>3.1.12</version>-->
+        <!--<configuration>-->
+          <!--<generateHistorical>true</generateHistorical>-->
+          <!--<licenseLocation>buildtools/clover.license</licenseLocation>-->
+          <!--<generatePdf>false</generatePdf>-->
+          <!--<generateXml>true</generateXml>-->
+          <!--<generateHtml>true</generateHtml>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+
+      <!--&lt;!&ndash; code duplication - copy and paste detection &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-pmd-plugin</artifactId>-->
+        <!--<version>${mpmd.version}</version>-->
+        <!--<configuration>-->
+          <!--<rulesets>-->
+            <!--&lt;!&ndash; classpath &ndash;&gt;-->
+            <!--<ruleset>mahout-pmd-ruleset.xml</ruleset>-->
+          <!--</rulesets>-->
+          <!--<targetJdk>${maven.compiler.target}</targetJdk>-->
+          <!--<linkXRef>false</linkXRef>-->
+          <!--<includeTests>true</includeTests>-->
+          <!--<verbose>true</verbose>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+      <!--&lt;!&ndash; catch code tags &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>taglist-maven-plugin</artifactId>-->
+        <!--<version>2.4</version>-->
+        <!--<configuration>-->
+          <!--<tags>-->
+            <!--<tag>TODO</tag>-->
+            <!--<tag>todo</tag>-->
+          <!--</tags>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+      <!--&lt;!&ndash; findbugs &ndash;&gt;-->
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>findbugs-maven-plugin</artifactId>-->
+        <!--<version>${mfindbugs.version}</version>-->
+        <!--<configuration>-->
+          <!--<xmlOutput>true</xmlOutput>-->
+          <!--<threshold>Low</threshold>-->
+          <!--<effort>Default</effort>-->
+          <!--&lt;!&ndash;visitors>FindDeadLocalStores,UnreadFields</visitors&ndash;&gt;-->
+          <!--&lt;!&ndash;omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors&ndash;&gt;-->
+          <!--<debug>true</debug>-->
+          <!--<relaxed>true</relaxed>-->
+          <!--&lt;!&ndash; classpath &ndash;&gt;-->
+          <!--<excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-changes-plugin</artifactId>-->
+        <!--<version>2.9</version>-->
+        <!--<configuration>-->
+          <!--<onlyCurrentVersion>true</onlyCurrentVersion>-->
+          <!--<columnNames>Type,Key,Summary,Status,Resolution,Assignee</columnNames>-->
+          <!--<sortColumnNames>Type,Key</sortColumnNames>-->
+        <!--</configuration>-->
+        <!--<reportSets>-->
+          <!--<reportSet>-->
+            <!--<reports>-->
+              <!--<report>jira-report</report>-->
+            <!--</reports>-->
+          <!--</reportSet>-->
+        <!--</reportSets>-->
+      <!--</plugin>-->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
+        <!--<version>2.8</version>-->
+        <!--<reportSets>-->
+          <!--<reportSet>-->
+            <!--<reports>-->
+              <!--<report>index</report>-->
+              <!--<report>dependencies</report>-->
+              <!--<report>dependency-convergence</report>-->
+              <!--<report>dependency-management</report>-->
+            <!--</reports>-->
+          <!--</reportSet>-->
+        <!--</reportSets>-->
+      <!--</plugin>-->
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>taglist-maven-plugin</artifactId>-->
+        <!--<version>2.4</version>-->
+      <!--</plugin>-->
+      <!--<plugin>-->
+        <!--<groupId>net.alchim31.maven</groupId>-->
+        <!--<artifactId>scala-maven-plugin</artifactId>-->
+        <!--<version>${mscala.version}</version>-->
+      <!--</plugin>-->
+    <!--</plugins>-->
+  <!--</reporting>-->
+
+
 </project>
+

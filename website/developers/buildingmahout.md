@@ -1,8 +1,7 @@
 ---
 layout: page
 title: Building Mahout
-
-    
+   
 ---
 
 
@@ -126,60 +125,91 @@ JVM with native OpenMP and OpenCL for Level 2 and level 3 matrix/vector Multipli
 mvn clean install -Pviennacl -DskipTests
 ```
 
-### Changing Scala Version
+### Profiles Reference
 
+Apache Maven encourages users to make use of build profiles for selectively building modules.
 
-A convenience script for updating maven dependencies is included in `buildtools`
-
+The command 
 ```bash
-cd $MAHOUT_HOME/buildtools
-./change-scala-version.sh 2.11
+mvn clean package
 ```
 
-Now go back to `$MAHOUT_HOME` and execute
+Is the basic build command. This default will build the following packages.
 
 ```bash
-mvn clean install 
+[INFO] Apache Mahout 
+[INFO] Mahout Core 
+[INFO] Mahout Engine 
+[INFO] - Mahout HDFS Support 
+[INFO] - Mahout Spark Engine 
+[INFO] Mahout Community 
+[INFO] - Mahout Spark CLI Drivers 
 ```
 
+The following profiles are available for building optional components:
+<center>
+	<table>
+		<tr>
+			<th>Profile</th>
+			<th colspan="5">Description</th>
+		</tr>
+		<tr>
+			<td><code>all</code></td>
+			<td>Build all modules</td>
+		<tr>
+			<td><code>apache-release</code></td>
+			<td>Used for releasing Apache Mahout. See <a href="http://mahout.apache.org/developers/how-to-release">How To Release</a> for more information.</td>
+		</tr>
+		<tr>
+			<td><code>flink-batch</code></td>
+			<td>Build Community Engine of Mahout for Apache Flink (Batch)</td>
+		</tr>
+		<tr>
+			<td><code>h2o</code></td>
+			<td>Build Community Engine of Mahout for H2o</td>
+		</tr>
+		<tr>
+			<td><code>mahout-mr</code></td>
+			<td>Build Community maintained Mahout for Map Reduce</td>
+		<tr>
+			<td><code>viennacl</code></td>
+			<td>Build Experimental ViennaCL (GPU) BLAS Pack</td>
+		</tr>
+		<tr>
+			<td><code>viennacl-omp</code></td>
+			<td>Build Experimental ViennaCL-OpenMP (CPU) BLAS Pack</td>
+		<tr>
+		<tr>
+			<td><code>docs</code></td>
+			<td>Profile for building Java/Scala Docs</td>
+		<tr>
+			<th>Mahout Specific Option</th>
+			<th>Description</th>
+		</tr>
+		<tr>
+			<td><code>skipCli</code></td>
+			<td>Skip building the command line drivers for Mahout on Apache Spark</td>
+		</tr>
+	</table>
+</center>
 
-### The Distribution Profile
+#### Example
 
-The distribution profile, among other things, will produce the same artifact for multiple Scala and Spark versions.
-
-Specifically, in addition to creating all of the
-
-Default Targets:
-- Spark 1.6 Bindings, Scala-2.10
-- Mahout-Math Scala-2.10
-- ViennaCL Scala-2.10*
-- ViennaCL-OMP Scala-2.10*
-- H2O Scala-2.10
-
-It will also create:
-- Spark 2.0 Bindings, Scala-2.11
-- Spark 2.1 Bindings, Scala-2.11
-- Mahout-Math Scala-2.11
-- ViennaCL Scala-2.11*
-- ViennaCL-OMP Scala-2.11*
-- H2O Scala-2.11
-
-Note: * ViennaCLs are only created if the `viennacl` or `viennacl-omp` profiles are activated.
-
-By default, this phase will execute the `package` lifecycle goal on all built "extra" varients.
-
-E.g. if you were to run
+If you want to build Apache Mahout with ViennaCL OpenMP support but skip the command line Spark drivers you would use this 
+command to build:
 
 ```bash
-mvn clean install -Pdistribution
+mvn clean package -Pviennacl-omp -DskipCli
 ```
 
-You will `install` all of the "Default Targets" but only `package` the "Also created".
+#### Building Java/Scala Docs
 
-If you wish to `install` all of the above, you can set the `lifecycle.target` switch as follows:
+To build the Java/Scala docs use the maven `site` goal and the `docs` profile. 
 
+Additionally, passing the `-Ddependency.locations.enabled=false` option will skip checking the dependency location and allow a much faster build.
+  
 ```bash
-mvn clean install -Pdistribution -Dlifecycle.target=install
+mvn clean site -Pall,docs -Ddependency.locations.enabled=false
 ```
 
 

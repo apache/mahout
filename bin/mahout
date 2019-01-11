@@ -57,6 +57,8 @@ case "`uname`" in
 CYGWIN*) cygwin=true;;
 esac
 
+# Check that mahout home is set, if not set it to one dir up.
+
 # resolve links - $0 may be a softlink
 THIS="$0"
 while [ -h "$THIS" ]; do
@@ -123,6 +125,13 @@ if [ "$JAVA_HOME" = "" ]; then
   exit 1
 fi
 
+if [ "$SPARK" = "1" ]; then
+	if [ "$SPARK_HOME" = "" ]; then
+		echo "Error: SPARK_HOME is not set."
+		exit 1
+	fi
+fi
+
 JAVA=$JAVA_HOME/bin/java
 JAVA_HEAP_MAX=-Xmx4g
 
@@ -133,53 +142,57 @@ if [ "$MAHOUT_HEAPSIZE" != "" ]; then
   #echo $JAVA_HEAP_MAX
 fi
 
-if [ "x$MAHOUT_CONF_DIR" = "x" ]; then
-  if [ -d $MAHOUT_HOME/src/conf ]; then
-    MAHOUT_CONF_DIR=$MAHOUT_HOME/src/conf
-  else
-    if [ -d $MAHOUT_HOME/conf ]; then
-      MAHOUT_CONF_DIR=$MAHOUT_HOME/conf
-    else
-      echo No MAHOUT_CONF_DIR found
-    fi
-  fi
-fi
+#if [ "x$MAHOUT_CONF_DIR" = "x" ]; then
+#  if [ -d $MAHOUT_HOME/src/conf ]; then
+#    MAHOUT_CONF_DIR=$MAHOUT_HOME/src/conf
+#  else
+#    if [ -d $MAHOUT_HOME/conf ]; then
+#      MAHOUT_CONF_DIR=$MAHOUT_HOME/conf
+#    else
+#      echo No MAHOUT_CONF_DIR found
+#    fi
+#  fi
+#fi
 
 
 # CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/src/conf
-CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
+#CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
 
-if [ "$MAHOUT_LOCAL" != "" ]; then
-  echo "MAHOUT_LOCAL is set, so we don't add HADOOP_CONF_DIR to classpath."
-elif [ -n "$HADOOP_CONF_DIR"  ] ; then
-  echo "MAHOUT_LOCAL is not set; adding HADOOP_CONF_DIR to classpath."
-  CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
-fi
+#if [ "$MAHOUT_LOCAL" != "" ]; then
+#  echo "MAHOUT_LOCAL is set, so we don't add HADOOP_CONF_DIR to classpath."
+#elif [ -n "$HADOOP_CONF_DIR"  ] ; then
+#  echo "MAHOUT_LOCAL is not set; adding HADOOP_CONF_DIR to classpath."
+#  CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
+#fi
 
-CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
+#CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
 
 # so that filenames w/ spaces are handled correctly in loops below
 IFS=
 
+
 if [ $IS_CORE == 0 ]
 then
   # add release dependencies to CLASSPATH
-  for f in $MAHOUT_HOME/mahout-*.jar; do
+  echo "Adding lib/ to CLASSPATH"
+  for f in $MAHOUT_HOME/lib/*.jar; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
-  if [ "$SPARK" != "1" ]; then
+  CLASSPATH="${CLASSPATH}:${SPARK_HOME}/jars/*"
 
-    # add dev targets if they exist
-    for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
-      CLASSPATH=${CLASSPATH}:$f;
-    done
-  fi
+
+#  if [ "$SPARK" != "1" ]; then
+#    # add dev targets if they exist
+#    for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
+#      CLASSPATH=${CLASSPATH}:$f;
+#    done
+#  fi
 
   # add scala dev target
-  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala_*.jar ; do
-    CLASSPATH=${CLASSPATH}:$f;
-  done
+#  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala_*.jar ; do
+#    CLASSPATH=${CLASSPATH}:$f;
+#  done
 
   if [ "$H2O" == "1" ]; then
     for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar; do
@@ -193,38 +206,34 @@ then
   fi
 
   # add jars for running from the command line if we requested shell or spark CLI driver
-  if [ "$SPARK" == "1" ]; then
+#  if [ "$SPARK" == "1" ]; then
+#
+#    for f in $MAHOUT_HOME/lib/mahout-hdfs-*.jar ; do
+#      CLASSPATH=${CLASSPATH}:$f;
+#    done
+#
+#    for f in $MAHOUT_HOME/lib/mahout-core-*.jar ; do
+#      CLASSPATH=${CLASSPATH}:$f;
+#    done
+#
+#    for f in $MAHOUT_HOME/lib/spark_*.jar ; do
+#      CLASSPATH=${CLASSPATH}:$f;
+#    done
+#
+#    for f in $MAHOUT_HOME/lib/spark-cli_*.jar ; do
+#       CLASSPATH=${CLASSPATH}:$f;
+#    done
+#
+#    # viennacl jars- may or may not be available depending on build profile
+#    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
+#          CLASSPATH=${CLASSPATH}:$f;
+#    done
+#
+#    # viennacl jars- may or may not be available depending on build profile
+#    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+#         CLASSPATH=${CLASSPATH}:$f;
+#    done
 
-    for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar ; do
-      CLASSPATH=${CLASSPATH}:$f;
-    done
-
-    for f in $MAHOUT_HOME/math/target/mahout-math-*.jar ; do
-      CLASSPATH=${CLASSPATH}:$f;
-    done
-
-    for f in $MAHOUT_HOME/spark/target/mahout-spark_*.jar ; do
-      CLASSPATH=${CLASSPATH}:$f;
-    done
-
-    for f in $MAHOUT_HOME/spark-shell/target/mahout-spark-shell_*.jar ; do
-       CLASSPATH=${CLASSPATH}:$f;
-    done
-
-    # viennacl jars- may or may not be available depending on build profile
-    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
-          CLASSPATH=${CLASSPATH}:$f;
-    done
-
-     # viennacl jars- may or may not be available depending on build profile
-     for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
-           CLASSPATH=${CLASSPATH}:$f;
-      done
-
-    # viennacl jars- may or may not be available depending on build profile
-    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
-          CLASSPATH=${CLASSPATH}:$f;
-    done
 
     SPARK_CP_BIN="${MAHOUT_HOME}/bin/compute-classpath.sh"
     if [ -x "${SPARK_CP_BIN}" ]; then
@@ -245,39 +254,39 @@ then
     fi
   fi
 
-   # add vcl jars at any point.
-   # viennacl jars- may or may not be available depending on build profile
-    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
-          CLASSPATH=${CLASSPATH}:$f;
-    done
-
-    # viennacl jars- may or may not be available depending on build profile
-    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
-          CLASSPATH=${CLASSPATH}:$f;
-    done
-
-  # add release dependencies to CLASSPATH
-  for f in $MAHOUT_HOME/lib/*.jar; do
-    CLASSPATH=${CLASSPATH}:$f;
-  done
-else
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/hdfs/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mr/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/integration/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math-scala/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes
-fi
+	 # add vcl jars at any point.
+	 # viennacl jars- may or may not be available depending on build profile
+#	  for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
+#	        CLASSPATH=${CLASSPATH}:$f;
+#	  done
+#
+#	  # viennacl jars- may or may not be available depending on build profile
+#	  for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+#	        CLASSPATH=${CLASSPATH}:$f;
+#	  done
+#
+#  # add release dependencies to CLASSPATH
+#  for f in $MAHOUT_HOME/lib/*.jar; do
+#    CLASSPATH=${CLASSPATH}:$f;
+#  done
+#else
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/hdfs/target/classes
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mr/target/classes
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/integration/target/classes
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math-scala/target/classes
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
+#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes
+#fi
 
 # add development dependencies to CLASSPATH
-if [ "$SPARK" != "1" ]; then
-  for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
-    CLASSPATH=${CLASSPATH}:$f;
-  done
-fi
+#if [ "$SPARK" != "1" ]; then
+#  for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
+#    CLASSPATH=${CLASSPATH}:$f;
+#  done
+#fi
 
 
 # cygwin path translation
@@ -287,7 +296,7 @@ fi
 
 # restore ordinary behaviour
 unset IFS
-JARS=$(echo "$MAHOUT_HOME"/*.jar | tr ' ' ',')
+JARS=$(echo "$MAHOUT_HOME"/lib/*.jar | tr ' ' ',')
 case "$1" in
   (spark-shell)
     save_stty=$(stty -g 2>/dev/null);
@@ -297,6 +306,7 @@ case "$1" in
   # Spark CLI drivers go here
   (spark-itemsimilarity)
     shift
+    echo $CLASSPATH
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.ItemSimilarityDriver" "$@"
     ;;
   (spark-rowsimilarity)
@@ -333,7 +343,7 @@ case "$1" in
 
     MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.dir=$MAHOUT_LOG_DIR"
     MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.file=$MAHOUT_LOGFILE"
-   
+
 
     if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
       MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"

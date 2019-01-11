@@ -1,0 +1,395 @@
+#!/bin/bash
+#
+# The Mahout command script
+#
+# Environment Variables
+#
+#   MAHOUT_JAVA_HOME   The java implementation to use.  Overrides JAVA_HOME.
+#
+#   MAHOUT_HEAPSIZE    The maximum amount of heap to use, in MB.
+#                      Default is 4000.
+#
+#   HADOOP_CONF_DIR  The location of a hadoop config directory
+#
+#   MAHOUT_OPTS        Extra Java runtime options.
+#
+#   MAHOUT_CONF_DIR    The location of the program short-name to class name
+#                      mappings and the default properties files
+#                      defaults to "$MAHOUT_HOME/src/conf"
+#
+#   MAHOUT_LOCAL       set to anything other than an empty string to force
+#                      mahout to run locally even if
+#                      HADOOP_CONF_DIR and HADOOP_HOME are set
+#
+#   MAHOUT_CORE        set to anything other than an empty string to force
+#                      mahout to run in developer 'core' mode, just as if the
+#                      -core option was presented on the command-line
+# Command-line Options
+#
+#   -core              -core is used to switch into 'developer mode' when
+#                      running mahout locally. If specified, the classes
+#                      from the 'target/classes' directories in each project
+#                      are used. Otherwise classes will be retrieved from
+#                      jars in the binary release collection or *-job.jar files
+#                      found in build directories. When running on hadoop
+#                      the job files will always be used.
+
+#
+#/**
+# * Licensed to the Apache Software Foundation (ASF) under one or more
+# * contributor license agreements.  See the NOTICE file distributed with
+# * this work for additional information regarding copyright ownership.
+# * The ASF licenses this file to You under the Apache License, Version 2.0
+# * (the "License"); you may not use this file except in compliance with
+# * the License.  You may obtain a copy of the License at
+# *
+# *     http://www.apache.org/licenses/LICENSE-2.0
+# *
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS,
+# * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# * See the License for the specific language governing permissions and
+# * limitations under the License.
+# */
+
+cygwin=false
+case "`uname`" in
+CYGWIN*) cygwin=true;;
+esac
+
+# resolve links - $0 may be a softlink
+THIS="$0"
+while [ -h "$THIS" ]; do
+  ls=`ls -ld "$THIS"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '.*/.*' > /dev/null; then
+    THIS="$link"
+  else
+    THIS=`dirname "$THIS"`/"$link"
+  fi
+done
+
+IS_CORE=0
+if [ "$1" == "-core" ] ; then
+  IS_CORE=1
+  shift
+fi
+
+if [ "$1" == "-spark" ]; then
+  SPARK=1
+  shift
+fi
+
+if [ "$1" == "spark-shell" ]; then
+  SPARK=1
+fi
+
+if [ "$1" == "spark-itemsimilarity" ]; then
+  SPARK=1
+fi
+
+if [ "$1" == "spark-rowsimilarity" ]; then
+  SPARK=1
+fi
+
+if [ "$1" == "spark-trainnb" ]; then
+  SPARK=1
+fi
+
+if [ "$1" == "spark-testnb" ]; then
+  SPARK=1
+fi
+
+if [ "$MAHOUT_CORE" != "" ]; then
+  IS_CORE=1
+fi
+
+if [ "$1" == "h2o-node" ]; then
+  H2O=1
+fi
+
+# some directories
+THIS_DIR=`dirname "$THIS"`
+MAHOUT_HOME=`cd "$THIS_DIR/.." ; pwd`
+
+# some Java parameters
+if [ "$MAHOUT_JAVA_HOME" != "" ]; then
+  #echo "run java in $MAHOUT_JAVA_HOME"
+  JAVA_HOME=$MAHOUT_JAVA_HOME
+fi
+
+if [ "$JAVA_HOME" = "" ]; then
+  echo "Error: JAVA_HOME is not set."
+  exit 1
+fi
+
+JAVA=$JAVA_HOME/bin/java
+JAVA_HEAP_MAX=-Xmx4g
+
+# check envvars which might override default args
+if [ "$MAHOUT_HEAPSIZE" != "" ]; then
+  #echo "run with heapsize $MAHOUT_HEAPSIZE"
+  JAVA_HEAP_MAX="-Xmx""$MAHOUT_HEAPSIZE""m"
+  #echo $JAVA_HEAP_MAX
+fi
+
+if [ "x$MAHOUT_CONF_DIR" = "x" ]; then
+  if [ -d $MAHOUT_HOME/src/conf ]; then
+    MAHOUT_CONF_DIR=$MAHOUT_HOME/src/conf
+  else
+    if [ -d $MAHOUT_HOME/conf ]; then
+      MAHOUT_CONF_DIR=$MAHOUT_HOME/conf
+    else
+      echo No MAHOUT_CONF_DIR found
+    fi
+  fi
+fi
+
+
+# CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/src/conf
+CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
+
+if [ "$MAHOUT_LOCAL" != "" ]; then
+  echo "MAHOUT_LOCAL is set, so we don't add HADOOP_CONF_DIR to classpath."
+elif [ -n "$HADOOP_CONF_DIR"  ] ; then
+  echo "MAHOUT_LOCAL is not set; adding HADOOP_CONF_DIR to classpath."
+  CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
+fi
+
+CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
+
+# so that filenames w/ spaces are handled correctly in loops below
+IFS=
+
+if [ $IS_CORE == 0 ]
+then
+  # add release dependencies to CLASSPATH
+  for f in $MAHOUT_HOME/mahout-*.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+
+  if [ "$SPARK" != "1" ]; then
+
+    # add dev targets if they exist
+    for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+  fi
+
+  # add scala dev target
+  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala_*.jar ; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+
+  if [ "$H2O" == "1" ]; then
+    for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/h2o/target/mahout-h2o*.jar; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
+
+  fi
+
+  # add jars for running from the command line if we requested shell or spark CLI driver
+  if [ "$SPARK" == "1" ]; then
+
+    for f in $MAHOUT_HOME/hdfs/target/mahout-hdfs-*.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/math/target/mahout-math-*.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/spark/target/mahout-spark_*.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/spark-shell/target/mahout-spark-shell_*.jar ; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
+     # viennacl jars- may or may not be available depending on build profile
+     for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+           CLASSPATH=${CLASSPATH}:$f;
+      done
+
+    # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    SPARK_CP_BIN="${MAHOUT_HOME}/bin/compute-classpath.sh"
+    if [ -x "${SPARK_CP_BIN}" ]; then
+       SPARK_CLASSPATH=$("${SPARK_CP_BIN}" 2>/dev/null)
+       CLASSPATH="${CLASSPATH}:${SPARK_CLASSPATH}"
+    else
+      echo "Cannot find Spark classpath. Is 'SPARK_HOME' set?"
+      exit -1
+    fi
+
+    SPARK_ASSEMBLY_BIN="${MAHOUT_HOME}/bin/mahout-spark-class.sh"
+    if [ -x "${SPARK_ASSEMBLY_BIN}" ]; then
+       SPARK_ASSEMBLY_CLASSPATH=$("${SPARK_ASSEMBLY_BIN}" 2>/dev/null)
+       CLASSPATH="${CLASSPATH}:${SPARK_ASSEMBLY_BIN}"
+    else
+      echo "Cannot find Spark assembly classpath. Is 'SPARK_HOME' set?"
+      exit -1
+    fi
+  fi
+
+   # add vcl jars at any point.
+   # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    # viennacl jars- may or may not be available depending on build profile
+    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
+          CLASSPATH=${CLASSPATH}:$f;
+    done
+
+  # add release dependencies to CLASSPATH
+  for f in $MAHOUT_HOME/lib/*.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+else
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/hdfs/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mr/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/integration/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math-scala/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes
+fi
+
+# add development dependencies to CLASSPATH
+if [ "$SPARK" != "1" ]; then
+  for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+fi
+
+
+# cygwin path translation
+if $cygwin; then
+  CLASSPATH=`cygpath -p -w "$CLASSPATH"`
+fi
+
+# restore ordinary behaviour
+unset IFS
+JARS=$(echo "$MAHOUT_HOME"/*.jar | tr ' ' ',')
+case "$1" in
+  (spark-shell)
+    save_stty=$(stty -g 2>/dev/null);
+    $SPARK_HOME/bin/spark-shell --jars "$JARS" -i $MAHOUT_HOME/bin/load-shell.scala --conf spark.kryo.referenceTracking=false --conf spark.kryo.registrator=org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator --conf spark.kryoserializer.buffer=32k --conf spark.kryoserializer.buffer.max=600m --conf spark.serializer=org.apache.spark.serializer.KryoSerializer $@
+    stty sane; stty $save_stty
+    ;;
+  # Spark CLI drivers go here
+  (spark-itemsimilarity)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.ItemSimilarityDriver" "$@"
+    ;;
+  (spark-rowsimilarity)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.RowSimilarityDriver" "$@"
+    ;;
+  (spark-trainnb)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.TrainNBDriver" "$@"
+    ;;
+  (spark-testnb)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.TestNBDriver" "$@"
+    ;;
+
+  (h2o-node)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "water.H2O" -md5skip "$@" -name mah2out
+    ;;
+  (*)
+
+    # default log directory & file
+    if [ "$MAHOUT_LOG_DIR" = "" ]; then
+      MAHOUT_LOG_DIR="$MAHOUT_HOME/logs"
+    fi
+    if [ "$MAHOUT_LOGFILE" = "" ]; then
+      MAHOUT_LOGFILE='mahout.log'
+    fi
+
+    #Fix log path under cygwin
+    if $cygwin; then
+      MAHOUT_LOG_DIR=`cygpath -p -w "$MAHOUT_LOG_DIR"`
+    fi
+
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.dir=$MAHOUT_LOG_DIR"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.file=$MAHOUT_LOGFILE"
+   
+
+    if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
+      MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
+    fi
+
+    CLASS=org.apache.mahout.driver.MahoutDriver
+
+    for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
+      if [ -e "$f" ]; then
+        MAHOUT_JOB=$f
+      fi
+    done
+
+    # run it
+
+    HADOOP_BINARY=$(PATH="${HADOOP_HOME:-${HADOOP_PREFIX}}/bin:$PATH" which hadoop 2>/dev/null)
+    if [ -x "$HADOOP_BINARY" ] ; then
+      HADOOP_BINARY_CLASSPATH=$("$HADOOP_BINARY" classpath)
+    fi
+    if [ ! -x "$HADOOP_BINARY" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
+      if [ ! -x "$HADOOP_BINARY" ] ; then
+        echo "hadoop binary is not in PATH,HADOOP_HOME/bin,HADOOP_PREFIX/bin, running locally"
+      elif [ "$MAHOUT_LOCAL" != "" ] ; then
+        echo "MAHOUT_LOCAL is set, running locally"
+      fi
+      CLASSPATH="${CLASSPATH}:${MAHOUT_HOME}/lib/hadoop/*"
+      case $1 in
+      (classpath)
+        echo $CLASSPATH
+        ;;
+      (*)
+        exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
+      esac
+    else
+      echo "Running on hadoop, using $HADOOP_BINARY and HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
+
+      if [ "$MAHOUT_JOB" = "" ] ; then
+        echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
+        exit 1
+      else
+        case "$1" in
+        (hadoop)
+          shift
+          export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}:$CLASSPATH
+          exec "$HADOOP_BINARY" "$@"
+          ;;
+        (classpath)
+          echo $CLASSPATH
+          ;;
+        (*)
+          echo "MAHOUT-JOB: $MAHOUT_JOB"
+          export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
+          exec "$HADOOP_BINARY" jar $MAHOUT_JOB $CLASS "$@"
+        esac
+      fi
+    fi
+    ;;
+esac
+

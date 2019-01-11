@@ -68,7 +68,7 @@ echo "Removing old output file if it exists"
 echo
 rm -r $MAHOUT_HOME$OUT_DIR
 
-mahout spark-itemsimilarity -i $PURCHASE -i2 $VIEW -o $FS_OUPUT -ma local
+$MAHOUT_HOME/bin/mahout spark-itemsimilarity -i $PURCHASE -i2 $VIEW -o $FS_OUPUT -ma local
 
 export MAHOUT_LOCAL=$LOCAL #restore state
 
@@ -77,9 +77,9 @@ echo "Look in " $FS_OUPUT " for spark-itemsimilarity indicator data."
 echo ""
 echo "Purchase cooccurrence indicators (itemid<tab>simliar items by purchase)"
 echo ""
-cat .$OUTPUT1
+cat ../..$OUTPUT1
 echo ""
 echo "View cross-cooccurrence indicators (items<tab>similar items where views led to purchases)"
 echo ""
-cat .$OUTPUT2
+cat ../..$OUTPUT2
 echo ""
