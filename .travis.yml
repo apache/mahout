@@ -55,12 +55,12 @@ matrix:
     #  env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11" SPARK_BIN=$SPARK_2_1 SCALA_VERSION="2.11"
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL
-    #- jdk: "openjdk7"
-    #  env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl" SPARK_BIN=$SPARK_1_6 SCALA_VERSION="2.10"
+    - jdk: "openjdk7"
+      env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl" SPARK_BIN=$SPARK_1_6 SCALA_VERSION="2.10"
 
     # Build Spark 2.0.2 , Scala 2.11, ViennaCL - replace -D... with profiles when available
-    - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_0 SCALA_VERSION="2.11"
+    #- jdk: "openjdk7"
+    #  env: PROFILES="${PROFILES} -Pspark-2.0 -Pscala-2.11 -Pviennacl" SPARK_BIN=$SPARK_2_0 SCALA_VERSION="2.11"
 
     # Build Spark 2.1.0 , Scala 2.11, ViennaCL - replace -D... with profiles when available
     #- jdk: "openjdk7"
