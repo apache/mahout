@@ -114,7 +114,8 @@ before_install:
 script:
   # - buildtools/change-scala-version.sh $SCALA_VERSION
   # Build Mahout
-  - mvn clean package $PROFILES $STANDARD_BUILD_OPTS -DskipTests -DskipCli
+  # - mvn clean package $PROFILES $STANDARD_BUILD_OPTS -DskipTests -DskipCli
+  - mvn clean package $STANDARD_BUILD_OPTS -DskipTests -DskipCli
   # Start Spark
   - echo $SPARK_BIN
   - wget $SPARK_BIN
