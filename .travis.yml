@@ -44,7 +44,7 @@ env:
 matrix:
   include:
     # Default Build: Spark 2.3.0, Scala 2.11
-    - jdk: "openjdk7"
+    - jdk: "openjdk8"
       env: PROFILES="${PROFILES}" SPARK_BIN=$SPARK_2_3 SCALA_VERSION="2.11"
       
     # Build Spark 1.6.3 , Scala 2.10
