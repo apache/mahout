@@ -32,16 +32,21 @@ branches:
 env:
   global:
     - JAVA_OPTS=-Xmx3g
-    - TEST_MODULES="hdfs,math,math-scala,spark"
+    - TEST_MODULES="core,engine"
     - STANDARD_BUILD_OPTS="-Dmaven.javadoc.skip=true -B -V"
     - PROFILES="-Ptravis"
     - SPARK_1_6=http://d3kbcqa49mib13.cloudfront.net/spark-1.6.3-bin-hadoop2.6.tgz
     - SPARK_2_0=http://d3kbcqa49mib13.cloudfront.net/spark-2.0.2-bin-hadoop2.7.tgz
     - SPARK_2_1=http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
+    - SPARK_2_3=https://archive.apache.org/dist/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz
 
 # The file assumes a certain build order for the maven / nightly build deployments.
 matrix:
   include:
+    # Default Build: Spark 2.3.0, Scala 2.11
+    - jdk: "openjdk7"
+      env: PROFILES="${PROFILES} SPARK_BIN=$SPARK_2_3 SCALA_VERSION="2.11"
+      
     # Build Spark 1.6.3 , Scala 2.10
     #- jdk: "openjdk7"
     #  env: PROFILES="${PROFILES} -Pscala-2.10 -Pspark-1.6" SPARK_BIN=$SPARK_1_6 SCALA_VERSION="2.10"
@@ -55,8 +60,8 @@ matrix:
     #  env: PROFILES="${PROFILES} -Pspark-2.1 -Pscala-2.11" SPARK_BIN=$SPARK_2_1 SCALA_VERSION="2.11"
 
     # Build Spark 1.6.3 , Scala 2.10, ViennaCL
-    - jdk: "openjdk7"
-      env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl" SPARK_BIN=$SPARK_1_6 SCALA_VERSION="2.10"
+    #- jdk: "openjdk7"
+    #  env: PROFILES="${PROFILES} -Pscala-2.10 -Pviennacl" SPARK_BIN=$SPARK_1_6 SCALA_VERSION="2.10"
 
     # Build Spark 2.0.2 , Scala 2.11, ViennaCL - replace -D... with profiles when available
     #- jdk: "openjdk7"
@@ -109,7 +114,7 @@ before_install:
 script:
   - buildtools/change-scala-version.sh $SCALA_VERSION
   # Build Mahout
-  - mvn clean package $PROFILES $STANDARD_BUILD_OPTS -DskipTests
+  - mvn clean package $PROFILES $STANDARD_BUILD_OPTS -DskipTests -DskipCli
   # Start Spark
   - echo $SPARK_BIN
   - wget $SPARK_BIN
