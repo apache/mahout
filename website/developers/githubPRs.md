@@ -8,6 +8,7 @@ title:
 
 ----------
 
+Hit the merge button.
 
 ## how to create a PR (for contributers)
 
