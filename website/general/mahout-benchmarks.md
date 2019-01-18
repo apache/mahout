@@ -141,7 +141,7 @@ processing -- that's really the appropriate solution.
 
 This shows you can still tackle fairly impressive scale with a
 non-distributed solution. These results suggest that the largest instances
-available from EC2 would accomodate almost 1 billion ratings in memory.
+available from EC2 would accommodate almost 1 billion ratings in memory.
 However at that scale running a user's full recommendations would easily be
 measured in seconds, not milliseconds.
 
