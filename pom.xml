@@ -718,7 +718,42 @@
         <plugins>
           <!--maven source-->
           <!--maven jar-->
-          <!--maven assembly-->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>bin-assembly</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <!--<skipAssembly>${mahout.skip.distribution}</skipAssembly>-->
+                  <descriptors>
+                    <descriptor>buildtools/assembly/bin.xml</descriptor>
+                  </descriptors>
+                  <tarLongFileMode>gnu</tarLongFileMode>
+                  <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+              </execution>
+              <execution>
+                <id>src-assembly</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <!--<skipAssembly>${mahout.skip.distribution}</skipAssembly>-->
+                  <descriptors>
+                    <descriptor>buildtools/assembly/src.xml</descriptor>
+                  </descriptors>
+                  <tarLongFileMode>gnu</tarLongFileMode>
+                  <appendAssemblyId>true</appendAssemblyId>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
           <plugin>
             <artifactId>maven-release-plugin</artifactId>
             <configuration>
