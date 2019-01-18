@@ -48,9 +48,7 @@
       </plugin>
 
       <!-- Pre-refactor plugins start here -->
-      <!--<plugin>-->
-        <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-      <!--</plugin>-->
+
 
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
@@ -131,6 +129,7 @@
         </executions>
       </plugin>
 
+
       <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -144,6 +143,18 @@
                 <!--<copy file="target/spark_${scala.compat.version}-${project.version}-spark_${spark.compat.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-spark_${spark.compat.version}.jar" />-->
                 <copy file="target/spark_${scala.compat.version}-${project.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}.jar" />
                 <copy file="target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>copy-javadocs</id>
+            <phase>install</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/spark_${scala.compat.version}-${project.version}-javadoc.jar" tofile="../../docs/spark_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
