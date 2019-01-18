@@ -577,6 +577,41 @@
         </configuration>
       </plugin>
 
+      <!-- generate java doc -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${mjavadoc.version}</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+
+        </executions>
+      </plugin>
+
+
+      <!-- Create Scala Docs -->
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.4.4</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>doc-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+
+      </plugin>
+
     </plugins>
 
     <pluginManagement>
@@ -645,6 +680,13 @@
                 </includes>
                 <followSymlinks>false</followSymlinks>
               </fileset>
+              <fileset>
+                <directory>doc/</directory>
+                <includes>
+                  <include>*.jar</include>
+                </includes>
+                <followSymlinks>false</followSymlinks>
+              </fileset>
             </filesets>
           </configuration>
         </plugin>
@@ -689,7 +731,6 @@
             </systemPropertyVariables>
           </configuration>
         </plugin>
-
 
       </plugins>
     </pluginManagement>
@@ -776,24 +817,10 @@
         <module>experimental/viennacl-omp</module>
       </modules>
     </profile>
-    <profile>
-      <id>docs</id>
-      <reporting>
-        <plugins>
-          <!-- generate java doc -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>${mjavadoc.version}</version>
-          </plugin>
-        </plugins>
-      </reporting>
-      <build>
-        <plugins>
-
-        </plugins>
-      </build>
-    </profile>
+    <!--<profile>-->
+      <!--<id>docs</id>-->
+      <!---->
+    <!--</profile>-->
   </profiles>
 
   <reporting>

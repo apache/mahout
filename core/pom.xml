@@ -280,6 +280,18 @@
               <goal>run</goal>
             </goals>
           </execution>
+          <execution>
+            <id>copy-javadocs</id>
+            <phase>install</phase>
+            <configuration>
+              <tasks>
+                <copy file="target/core_${scala.compat.version}-${project.version}-javadoc.jar" tofile="../docs/core_${scala.compat.version}-${project.version}-javadoc.jar" />
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
 
