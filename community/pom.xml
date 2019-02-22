@@ -67,12 +67,6 @@
     </profile>
     <profile>
       <id>spark-cli-drivers</id>
-      <activation>
-        <property>
-          <name>skipCli</name>
-          <value>!true</value>
-        </property>
-      </activation>
       <modules>
         <module>spark-cli-drivers</module>
       </modules>

@@ -415,6 +415,7 @@
     <profile>
       <id>all</id>
       <modules>
+        <module>community/spark-cli-drivers</module>
         <module>community/community-engines</module>
         <module>community/community-engines/flink-batch</module>
         <module>community/community-engines/h2o</module>
@@ -549,6 +550,12 @@
           </plugin>
         </plugins>
       </reporting>
+    </profile>
+    <profile>
+      <id>spark-cli-drivers</id>
+      <modules>
+        <module>community/spark-cli-drivers</module>
+      </modules>
     </profile>
     <profile>
       <id>viennacl</id>
