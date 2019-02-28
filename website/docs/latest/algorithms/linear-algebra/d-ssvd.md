@@ -11,40 +11,40 @@ Mahout has a distributed implementation of Stochastic Singular Value Decompositi
 
 ## Modified SSVD Algorithm
 
-Given an `\(m\times n\)`
-matrix `\(\mathbf{A}\)`, a target rank `\(k\in\mathbb{N}_{1}\)`
-, an oversampling parameter `\(p\in\mathbb{N}_{1}\)`, 
-and the number of additional power iterations `\(q\in\mathbb{N}_{0}\)`, 
-this procedure computes an `\(m\times\left(k+p\right)\)`
-SVD `\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)`:
+Given an <foo>\(m\times n\)</foo>
+matrix <foo>\(\mathbf{A}\)</foo>, a target rank <foo>\(k\in\mathbb{N}_{1}\)</foo>
+, an oversampling parameter <foo>\(p\in\mathbb{N}_{1}\)</foo>, 
+and the number of additional power iterations <foo>\(q\in\mathbb{N}_{0}\)</foo>, 
+this procedure computes an <foo>\(m\times\left(k+p\right)\)</foo>
+SVD <foo>\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)</foo>:
 
-  1. Create seed for random `\(n\times\left(k+p\right)\)`
-  matrix `\(\boldsymbol{\Omega}\)`. The seed defines matrix `\(\mathbf{\Omega}\)`
+  1. Create seed for random <foo>\(n\times\left(k+p\right)\)</foo>
+  matrix <foo>\(\boldsymbol{\Omega}\)</foo>. The seed defines matrix <foo>\(\mathbf{\Omega}\)</foo>
   using Gaussian unit vectors per one of suggestions in [Halko, Martinsson, Tropp].
 
-  2. `\(\mathbf{Y=A\boldsymbol{\Omega}},\,\mathbf{Y}\in\mathbb{R}^{m\times\left(k+p\right)}\)`
+  2. <foo>\(\mathbf{Y=A\boldsymbol{\Omega}},\,\mathbf{Y}\in\mathbb{R}^{m\times\left(k+p\right)}\)</foo>
  
-  3. Column-orthonormalize `\(\mathbf{Y}\rightarrow\mathbf{Q}\)`
-  by computing thin decomposition `\(\mathbf{Y}=\mathbf{Q}\mathbf{R}\)`.
-  Also, `\(\mathbf{Q}\in\mathbb{R}^{m\times\left(k+p\right)},\,\mathbf{R}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)`; denoted as `\(\mathbf{Q}=\mbox{qr}\left(\mathbf{Y}\right).\mathbf{Q}\)`
+  3. Column-orthonormalize <foo>\(\mathbf{Y}\rightarrow\mathbf{Q}\)</foo>
+  by computing thin decomposition <foo>\(\mathbf{Y}=\mathbf{Q}\mathbf{R}\)</foo>.
+  Also, <foo>\(\mathbf{Q}\in\mathbb{R}^{m\times\left(k+p\right)},\,\mathbf{R}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)</foo>; denoted as <foo>\(\mathbf{Q}=\mbox{qr}\left(\mathbf{Y}\right).\mathbf{Q}\)</foo>
 
-  4. `\(\mathbf{B}_{0}=\mathbf{Q}^{\top}\mathbf{A}:\,\,\mathbf{B}\in\mathbb{R}^{\left(k+p\right)\times n}\)`.
+  4. <foo>\(\mathbf{B}_{0}=\mathbf{Q}^{\top}\mathbf{A}:\,\,\mathbf{B}\in\mathbb{R}^{\left(k+p\right)\times n}\)</foo>.
  
-  5. If `\(q>0\)`
-  repeat: for `\(i=1..q\)`: 
-  `\(\mathbf{B}_{i}^{\top}=\mathbf{A}^{\top}\mbox{qr}\left(\mathbf{A}\mathbf{B}_{i-1}^{\top}\right).\mathbf{Q}\)`
+  5. If <foo>\(q>0\)</foo>
+  repeat: for <foo>\(i=1..q\)</foo>: 
+  <foo>\(\mathbf{B}_{i}^{\top}=\mathbf{A}^{\top}\mbox{qr}\left(\mathbf{A}\mathbf{B}_{i-1}^{\top}\right).\mathbf{Q}\)</foo>
   (power iterations step).
 
-  6. Compute Eigensolution of a small Hermitian `\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}=\mathbf{\hat{U}}\boldsymbol{\Lambda}\mathbf{\hat{U}}^{\top}\)`,
-  `\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)`.
+  6. Compute Eigensolution of a small Hermitian <foo>\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}=\mathbf{\hat{U}}\boldsymbol{\Lambda}\mathbf{\hat{U}}^{\top}\)</foo>,
+  <foo>\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)</foo>.
  
-  7. Singular values `\(\mathbf{\boldsymbol{\Sigma}}=\boldsymbol{\Lambda}^{0.5}\)`,
-  or, in other words, `\(s_{i}=\sqrt{\sigma_{i}}\)`.
+  7. Singular values <foo>\(\mathbf{\boldsymbol{\Sigma}}=\boldsymbol{\Lambda}^{0.5}\)</foo>,
+  or, in other words, <foo>\(s_{i}=\sqrt{\sigma_{i}}\)</foo>.
  
-  8. If needed, compute `\(\mathbf{U}=\mathbf{Q}\hat{\mathbf{U}}\)`.
+  8. If needed, compute <foo>\(\mathbf{U}=\mathbf{Q}\hat{\mathbf{U}}\)</foo>.
 
-  9. If needed, compute `\(\mathbf{V}=\mathbf{B}_{q}^{\top}\hat{\mathbf{U}}\boldsymbol{\Sigma}^{-1}\)`.
-Another way is `\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^{-1}\)`.
+  9. If needed, compute <foo>\(\mathbf{V}=\mathbf{B}_{q}^{\top}\hat{\mathbf{U}}\boldsymbol{\Sigma}^{-1}\)</foo>.
+Another way is <foo>\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^{-1}\)</foo>.
 
 
 
@@ -110,7 +110,7 @@ Mahout `dssvd(...)` is implemented in the mahout `math-scala` algebraic optimize
         (drmU(::, 0 until k), drmV(::, 0 until k), s(0 until k))
     }
 
-Note: As a side effect of checkpointing, U and V values are returned as logical operators (i.e. they are neither checkpointed nor computed).  Therefore there is no physical work actually done to compute `\(\mathbf{U}\)` or `\(\mathbf{V}\)` until they are used in a subsequent expression.
+Note: As a side effect of checkpointing, U and V values are returned as logical operators (i.e. they are neither checkpointed nor computed).  Therefore there is no physical work actually done to compute <foo>\(\mathbf{U}\)</foo> or <foo>\(\mathbf{V}\)</foo> until they are used in a subsequent expression.
 
 
 ## Usage
