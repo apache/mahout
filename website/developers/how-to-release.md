@@ -81,7 +81,7 @@ warnings)
 
 
 * If you are outside the US, then svn.apache.org may not resolve to the main US-based Subversion servers. (Compare the IP address you get for svn.apache.org with svn.us.apache.org to see if they are different.) This will cause problems during the release since it will create a revision and then immediately access, but, there is a replication lag of perhaps a minute to the non-US servers. To temporarily force using the US-based server, edit your equivalent of /etc/hosts and map the IP address of svn.us.apache.org to svn.apache.org.
-* Create the release candidate: `mvn -Pmahout-release,apache-release release:prepare release:perform`
+* Create the release candidate: `mvn -Pmahout-release,apache-release release:prepare release:perform`; to add credentials for source control use `mvn -Dusername=myusername -Dpassword='mypassword' -Papache-release release:prepare release:perform`
 
 * If you have problems authenticating to svn.apache.org, try adding to the command line `-Dusername=USERNAME -Dpassword=PASSWORD`
 * If there is an issue first try doing: 
@@ -110,28 +110,17 @@ git tag -d tagname (deletes the local tag)
 ```
 
 * Release the artifact in the Nexus Repository in the same way you closed it earlier.
-* Add your key to the KEYS file at http://www.apache.org/dist/mahout/<version>/
-* Copy the assemblies and their supporting files (tar.gz, zip, tar.bz2, plus .asc, .md5, .pom, .sha1 files) to the ASF mirrors at: people.apache.org:/www/www.apache.org/dist/mahout/<version>/. You should make sure the group "mahout" owns the files and that they are read only (-r--r--r-- in UNIX-speak). See [Guide To Distributing Existing Releases Through The ASF Mirrors|http://jakarta.apache.org/site/convert-to-mirror.html?Step-By-Step] and the links that are there.
-     * cd /www/www.apache.org/dist/mahout
-     * mkdir <VERSION>
-     * cd <VERSION>
-     * wget -e robots=off --no-check-certificate -np -r
-https://repository.apache.org/content/groups/public/org/apache/mahout/apache-mahout-distribution/<VERSION>/
-     * mv
-repository.apache.org/content/groups/public/org/apache/mahout/mahout-distribution/0.8/*
-.
-     * rm -rf repository.apache.org/
-     * rm index.html
+* Per http://www.apache.org/dev/release-publishing.html#distribution_dist move artifacts over to dist.apache.org
+* Get the Subversion (SVN) repo for Mahout at https://dist.apache.org/repos/dist/release/mahout
+* Make sure to add your key to KEYS if it's not there already: https://dist.apache.org/repos/dist/release/mahout/KEYS
+* Copy the assemblies and their supporting files (tar.gz, zip, tar.bz2, plus .asc, .md5, .pom, .sha1 files) to a new directory and check in the new directory and the edited KEYS file if you changed it
 * Wait 24 hours for release to propagate to mirrors.
 * Clean up JIRA: Bulk close all X.Y JIRA issues.  Mark the Version
 number as being released (see Manage Versions.)  Add the next version
 (X.Y+1) if necessary.
 * Update release version on http://mahout.apache.org/ and
 http://en.wikipedia.org/wiki/Apache_Mahout
-*
-https://cwiki.apache.org/confluence/display/MAHOUT/How+To+Update+The+Website
 * Send announcements to the user and developer lists.
-    
 
 
 See also:
@@ -140,30 +129,30 @@ See also:
 *
 http://www.sonatype.com/books/nexus-book/reference/staging-sect-deployment.html
 * http://www.sonatype.com/books/nexus-book/reference/index.html
-    
+
 
 ### Post Release
 ## Versioning
-* Create the next version in JIRA (if it doesn't already exist)   
+* Create the next version in JIRA (if it doesn't already exist)
 * Mark the version as "released" in JIRA (noting the release date)
-    
+
 ## Documentation
 * Change wiki to match current best practices (remove/change deprecations,
 etc)
-    
+
 ## Publicity
 * update freshmeat
 * blog away
 * Update MLOSS entry: http://mloss.org/revision/view/387/.  See Grant for
 details.
-    
+
 ## Related Resources
-    
+
 * http://www.apache.org/dev/#releases
 * http://www.apache.org/dev/#mirror
-    
+
 # TODO: Things To Cleanup in this document
-         
+
 * more specifics about things to test before starting or after packaging
 (RAT, run scripts against example, etc...)
 * include info about [Voting | http://www.apache.org/foundation/voting.html#ReleaseVotes]
