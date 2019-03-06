@@ -201,7 +201,7 @@ Which will load a matrix multiplication timer function definition. To run the ma
         scala> timeSparseDRMMMul(1000,1000,1000,1,.02,1234L)
             {...} res3: Long = 16321
 ```
-We can see that the JVM only version is rather slow, thus our motive for GPU and Native Multithreading support.
+Note the 0.14.0 release is missing a class required for this; will be fixed in 0.14.1. We can see that the JVM only version is rather slow, thus our motive for GPU and Native Multithreading support.
 
 To get an idea of what’s going on under the hood of the timer, we may examine the .mscala (mahout scala) code which is both fully functional scala and the Mahout R-Like DSL for tensor algebra:    
 ```
