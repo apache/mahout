@@ -10,8 +10,14 @@ title: Downloads
 Apache Mahout is an official Apache project and thus available from any of
 the Apache mirrors. The latest Mahout release is available for download at: 
 
-* [Download Latest](http://www.apache.org/dyn/closer.cgi/mahout/)
-* [Release Archive](http://archive.apache.org/dist/mahout/)
+* [Download Latest](http://www.apache.org/dist/mahout)
+* [Release Archive](http://archive.apache.org/dist/mahout)
+  * To validate artifacts:
+    * (From KEYS file: `gpg --import KEYS`
+    * ```$ gpg mahout-0.14.0-source-release.zip.asc
+       gpg: assuming signed data in `mahout-0.14.0-source-release.zip'
+       gpg: Signature made Fri 01 Mar 2019 09:59:00 AM PST using RSA key ID 140A5BE9
+       gpg: Good signature from "Carol Roberts (ASF Signing Key) <cba@apache.org>"```
 
 
 # Source code for the current snapshot
