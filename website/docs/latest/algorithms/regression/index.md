@@ -1,7 +1,7 @@
 ---
 layout: doc-page
 
-title: Regressoin Algorithms
+title: Regression Algorithms
 
     
 ---
