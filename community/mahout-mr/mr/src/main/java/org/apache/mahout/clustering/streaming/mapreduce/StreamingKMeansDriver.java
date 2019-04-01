@@ -424,7 +424,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
     throws IOException, ExecutionException, InterruptedException {
     long start = System.currentTimeMillis();
     // Run StreamingKMeans step in parallel by spawning 1 thread per input path to process.
-    ExecutorService pool = Executors.newCachedThreadPool();
+    ExecutorService pool = Executors.newFixedThreadPool(10);
     List<Future<Iterable<Centroid>>> intermediateCentroidFutures = new ArrayList<>();
     for (FileStatus status : HadoopUtil.listStatus(FileSystem.get(conf), input, PathFilters.logsCRCFilter())) {
       intermediateCentroidFutures.add(pool.submit(new StreamingKMeansThread(status.getPath(), conf)));
