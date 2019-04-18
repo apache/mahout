@@ -17,7 +17,6 @@ Apache Mahout is maintained by a team of volunteer developers.
 
 Name                    | Mail              | PMC | Comment 
 ------------------------|------------------:|------:|---:|
-Abdel Hakim Deneche     | adeneche@...      | No  | 
 Anand Avati             | avati@...         | No  | @anandavati
 Andrew Musselman        | akm@...           | Yes | PMC Chair @akm
 Andrew Palumbo          | apalumbo@...      | Yes | 
@@ -56,7 +55,8 @@ Trevor Grant            | rawkintrevo@...   | Yes | @rawkintrevo
 * Ozgur Yilmazel (oyilmazel@...)
 * Dawid Weiss (dweiss@...)
 * Karl Wettin (kalle@...)
-* AbdelHakim Deneche (adeneche@...)
+* Abdel Hakim Deneche (adeneche@...)
+* Benson Margulies (bimargulies@...)
 
 Note that the email addresses above end with @apache.org.
 
