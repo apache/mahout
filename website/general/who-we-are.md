@@ -21,7 +21,6 @@ Abdel Hakim Deneche     | adeneche@...      | No  |
 Anand Avati             | avati@...         | No  | @anandavati
 Andrew Musselman        | akm@...           | Yes | PMC Chair @akm
 Andrew Palumbo          | apalumbo@...      | Yes | 
-Benson Margulies        | bimargulies@...   | No  | (Emeritus PMC)
 Dan Filimon             | dfilimon@...      | No  | 
 Dmitriy Lyubimov        | dlyubimov@...     | No  | (Emeritus PMC)
 Drew Farris             | drew@...          | Yes | 
