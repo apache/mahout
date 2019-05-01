@@ -101,9 +101,9 @@
     <connection>scm:git:git@github.com:apache/mahout.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
     <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout-0.14.0</tag>
+    <tag>mahout-0.14.1
+    </tag>
   </scm>
-  <!-- -->
 
   <properties>
     <!--<skipTests>false</skipTests>-->
@@ -121,6 +121,11 @@
 
     <!-- `mvn site` throws a hissy fit searching no longer existing repos if this is not set false -->
     <dependency.locations.enabled>false</dependency.locations.enabled>
+
+    <!--hack to turn off linting og generated Javadocs.  this is an error in Oracle Java8 and should be fixed in java9
+     http://openjdk.java.net/jeps/212-->
+    <additionalparam>-Xdoclint:-html</additionalparam>
+    <!--EndHack-->
 
     <!--
     <maven.clover.multiproject>true</maven.clover.multiproject>
@@ -341,7 +346,7 @@
           </configuration>
         </plugin>
 
-        <!-- delete jars on claen in top directory, which is lib/ -->
+        <!-- delete jars on clean in top directory, which is lib/ -->
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.0.0</version>
