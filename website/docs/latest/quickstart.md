@@ -27,7 +27,7 @@ If you would like to import the latest release of mahout into a java project, ad
     <dependency>
         <groupId>org.apache.mahout</groupId>
         <artifactId>mahout-mr</artifactId>
-        <version>0.13.0</version>
+        <version>0.14.0</version>
     </dependency>
  
 

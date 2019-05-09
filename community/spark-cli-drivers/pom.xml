@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>community</artifactId>
-    <version>0.14.0-SNAPSHOT</version>
+   <version>14.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -49,14 +49,14 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>spark_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+     <version>14.0-SNAPSHOT</version>
 
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+     <version>14.0-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
@@ -64,7 +64,7 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>spark_2.11</artifactId>
-      <version>${project.version}</version>
+     <version>14.0-SNAPSHOT</version>
       <classifier>tests</classifier>
     </dependency>
   </dependencies>
@@ -99,6 +99,28 @@
         <artifactId>apache-rat-plugin</artifactId>
       </plugin>
 
+<!--      <plugin>-->
+<!--        <groupId>org.codehaus.mojo</groupId>-->
+<!--        <artifactId>exec-maven-plugin</artifactId>-->
+<!--        <version>${org.codehaus.mojo.version}</version>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <id>script-chmod</id>-->
+<!--            <phase>package</phase>-->
+<!--            <configuration>-->
+<!--              <executable>chmod</executable>-->
+<!--              <arguments>-->
+<!--                <argument>+x</argument>-->
+<!--                <argument>"target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar"</argument>-->
+<!--                <argument>"target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar"</argument>-->
+<!--              </arguments>-->
+<!--            </configuration>-->
+<!--            <goals>-->
+<!--              <goal>run</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
 
       <!-- copy jars to lib/ -->
       <plugin>
@@ -109,11 +131,11 @@
             <id>copy</id>
             <phase>package</phase>
             <configuration>
-              <tasks>
-                <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" tofile="../../lib/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" />
-                <copy file="target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
-              </tasks>
-            </configuration>
+                <tasks>
+                  <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" tofile="${project.basedir}/../../../../lib/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" />
+                  <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="${project.basedir}/../../../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
+                </tasks>
+              </configuration>
             <goals>
               <goal>run</goal>
             </goals>
@@ -128,9 +150,18 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>../../lib/</directory>
+              <directory>${project.basedir}/lib/</directory>
               <includes>
-                <include>spark_cli-drivers_*.jar</include>
+                <include>spark-cli*</include>
+                <include>spark_*-dependency-reduced.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+            <fileset>
+              <directory>${project.basedir}/community/spark-cli-drivers/target/</directory>
+              <includes>
+                <include>spark_*</include>
+                <include>spark_*-dependency-reduced.jar</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
@@ -207,4 +238,8 @@
 
   <packaging>jar</packaging>
 
+
+  <scm>
+    <tag>spark-cli-drivers_2.11-0.14.1</tag>
+  </scm>
 </project>
