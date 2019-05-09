@@ -4,7 +4,7 @@ Please give a short description of what this PR is for.
 
 ### Important ToDos
 Please mark each with an "x"
-- [ ] A JIRA ticket exists (if not, please create this first)[https://issues.apache.org/jira/browse/ZEPPELIN/]
+- [ ] A JIRA ticket exists (if not, please create this first)[https://issues.apache.org/jira/browse/mahout/]
 - [ ] Title of PR is "MAHOUT-XXXX Brief Description of Changes" where XXXX is the JIRA number.
 - [ ] Created unit tests where appropriate
 - [ ] Added licenses correct on newly added files
