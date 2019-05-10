@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>community</artifactId>
-   <version>14.0</version>
+    <version>14.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -49,14 +49,13 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>spark_${scala.compat.version}</artifactId>
-     <version>14.0</version>
-
+      <version>14.1</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>core_${scala.compat.version}</artifactId>
-     <version>14.0</version>
+      <version>14.1</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
@@ -64,7 +63,7 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>spark_2.11</artifactId>
-     <version>14.0</version>
+      <version>14.1</version>
       <classifier>tests</classifier>
     </dependency>
   </dependencies>
