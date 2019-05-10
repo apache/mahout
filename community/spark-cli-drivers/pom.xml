@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>community</artifactId>
-    <version>14.1</version>
+    <version>14.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -239,6 +239,6 @@
 
 
   <scm>
-    <tag>mahout-14.1</tag>
+    <tag>spark-cli-drivers_2.11-0.14</tag>
   </scm>
 </project>
