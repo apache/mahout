@@ -482,16 +482,10 @@
             </executions>
           </plugin>
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
-            <dependencies>
-              <dependency>
-                <groupId>org.apache.apache.resources</groupId>
-                <artifactId>apache-source-release-assembly-descriptor</artifactId>
-                <version>1.0.6</version>
-              </dependency>
-            </dependencies>
             <executions>
-              <!--execution>
+              <execution>
                 <id>bin-assembly</id>
                 <phase>package</phase>
                 <goals>
@@ -505,7 +499,7 @@
                   <tarLongFileMode>gnu</tarLongFileMode>
                   <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
-              </execution-->
+              </execution>
               <execution>
                 <id>src-assembly</id>
                 <phase>package</phase>
