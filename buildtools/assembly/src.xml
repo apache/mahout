@@ -23,7 +23,7 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}/..</directory>
+      <directory>${project.basedir}</directory>
       <outputDirectory/>
       <useDefaultExcludes>true</useDefaultExcludes>
       <includes>
@@ -41,14 +41,14 @@
       </excludes>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../bin</directory>
+      <directory>${project.basedir}/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../examples/bin</directory>
+      <directory>${project.basedir}/examples/bin</directory>
       <outputDirectory>examples/bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>

@@ -36,7 +36,7 @@
     </fileSet>
 
     <fileSet>
-      <directory>${project.basedir}/..</directory>
+      <directory>${project.basedir}</directory>
       <outputDirectory/>
       <useDefaultExcludes>true</useDefaultExcludes>
       <includes>
@@ -50,7 +50,7 @@
       </excludes>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../bin</directory>
+      <directory>${project.basedir}/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
