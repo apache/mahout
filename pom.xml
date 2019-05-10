@@ -248,7 +248,7 @@
         <version>2.5.2</version>
         <configuration>
           <useReleaseProfile>true</useReleaseProfile>
-          <releaseProfiles>mahout-release,apache-release</releaseProfiles>
+          <releaseProfiles>apache-release</releaseProfiles>
           <goals>deploy</goals>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <arguments>${arguments}</arguments>
@@ -492,17 +492,33 @@
             </dependencies>
             <executions>
               <execution>
-                <id>source-release-assembly</id>
+                <id>bin-assembly</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                  <descriptorRefs>
-                    <descriptorRef>source-release</descriptorRef>
-                  </descriptorRefs>
+                  <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                  <descriptors>
+                    <descriptor>buildtools/assembly/bin.xml</descriptor>
+                  </descriptors>
                   <tarLongFileMode>gnu</tarLongFileMode>
+                  <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+              </execution>
+              <execution>
+                <id>src-assembly</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                  <descriptors>
+                    <descriptor>buildtools/assembly/src.xml</descriptor>
+                  </descriptors>
+                  <tarLongFileMode>gnu</tarLongFileMode>
+                  <appendAssemblyId>true</appendAssemblyId>
                 </configuration>
               </execution>
             </executions>
@@ -511,7 +527,7 @@
             <artifactId>maven-release-plugin</artifactId>
             <configuration>
               <releaseProfiles>apache-release</releaseProfiles>
-              <preparationGoals>clean install</preparationGoals>
+              <preparationGoals>clean package</preparationGoals>
             </configuration>
           </plugin>
           <plugin>
