@@ -491,7 +491,7 @@
               </dependency>
             </dependencies>
             <executions>
-              <execution>
+              <!--execution>
                 <id>bin-assembly</id>
                 <phase>package</phase>
                 <goals>
@@ -505,7 +505,7 @@
                   <tarLongFileMode>gnu</tarLongFileMode>
                   <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
-              </execution>
+              </execution-->
               <execution>
                 <id>src-assembly</id>
                 <phase>package</phase>
