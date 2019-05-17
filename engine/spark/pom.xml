@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>engine</artifactId>
-    <version>14.1-SNAPSHOT</version>
+    <version>14.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -83,6 +83,7 @@
         </executions>
       </plugin>
 
+
       <!--this is what scalatest recommends to do to enable scala tests -->
 
       <!-- disable surefire -->
@@ -108,6 +109,26 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>dependency-reduced</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+
       <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -119,6 +140,7 @@
             <configuration>
               <tasks>
                 <copy file="target/spark_${scala.compat.version}-${project.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
             <goals>
