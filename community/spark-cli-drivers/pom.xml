@@ -84,7 +84,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+                <descriptor>"src/main/assembly/dependency-reduced.xml"</descriptor>
               </descriptors>
             </configuration>
           </execution>
@@ -131,8 +131,8 @@
             <phase>package</phase>
             <configuration>
                 <tasks>
-                  <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" tofile="${project.basedir}/../../../../lib/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" />
-                  <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="${project.basedir}/../../../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
+                  <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" tofile="${project.basedir}/../../lib/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" />
+                  <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="${project.basedir}/../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
                 </tasks>
               </configuration>
             <goals>
