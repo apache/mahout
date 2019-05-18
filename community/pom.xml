@@ -71,12 +71,7 @@
         <module>spark-cli-drivers</module>
       </modules>
     </profile>
-   <profile>
-    <id>apache-release</id>
-    <modules>
-      <module>spark-cli-drivers</module>
-    </modules>
-  </profile>
+
   </profiles>
 
 </project>
