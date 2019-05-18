@@ -24,7 +24,15 @@
 
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}/lib</directory>
+      <directory>${project.basedir}/../lib</directory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+      <outputDirectory>lib</outputDirectory>
+    </fileSet>
+    <!--      hack for modules like hdfs/engine-->
+    <fileSet>
+      <directory>${project.basedir}/../../lib</directory>
       <includes>
         <include>*.jar</include>
       </includes>
@@ -50,7 +58,7 @@
       </excludes>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/bin</directory>
+      <directory>${project.basedir}/../bin</directory>
       <outputDirectory>bin</outputDirectory>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>

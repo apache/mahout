@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>engine</artifactId>
-    <version>14.1</version>
+    <version>14.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -140,7 +140,7 @@
             <configuration>
               <tasks>
                 <copy file="target/spark_${scala.compat.version}-${project.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}.jar" />
-                <copy file="target/spark_${scala.compat.version}-${version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${version}-dependency-reduced.jar" />
+                <copy file="target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
             <goals>
