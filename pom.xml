@@ -105,7 +105,7 @@
 
   <properties>
     <!--<skipTests>false</skipTests>-->
-    <apache-rat.plugin.version>0.12</apache-rat.plugin.version>
+    <apache-rat.plugin.version>0.13</apache-rat.plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <mjavadoc.version>2.10.3</mjavadoc.version>
@@ -156,7 +156,7 @@
     <repository>
       <id>apache.snapshots</id>
       <name>Apache Snapshot Repository</name>
-      <url>http://repository.apache.org/snapshots</url>
+      <url>https://repository.apache.org/snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
