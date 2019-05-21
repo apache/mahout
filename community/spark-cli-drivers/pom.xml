@@ -70,8 +70,8 @@
 
 
   <build>
-    <plugins>
-      <!-- create fat jar -->
+    <plugins><!--
+      &lt;!&ndash; create fat jar &ndash;&gt;
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -89,7 +89,7 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
+      </plugin>-->
 
 
       <!-- ensure licenses -->
@@ -132,7 +132,7 @@
             <configuration>
                 <tasks>
                   <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" tofile="${project.basedir}/../../lib/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" />
-                  <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="${project.basedir}/../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
+                 <!-- <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="${project.basedir}/../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" /> -->
                 </tasks>
               </configuration>
             <goals>
