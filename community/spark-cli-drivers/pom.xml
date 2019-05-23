@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>community</artifactId>
-    <version>14.1-SNAPSHOT</version>
+    <version>14.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -70,10 +70,10 @@
 
 
   <build>
-    <plugins><!--
-      &lt;!&ndash; create fat jar &ndash;&gt;
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+    <plugins>
+      <!-- create fat jar -->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
@@ -89,7 +89,7 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>-->
+      <plugin> -->
 
 
       <!-- ensure licenses -->
