@@ -16,6 +16,13 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+
+  <!--NOTE, ${project.basedir} has been overwritten due to multi module build
+  ${project.basedir} == `pwd` (in this case), == $MAHOUT_HOME/buildtools/assembly;
+  we cant always assume a $MAHOUT_HOME environment variable, so current workaround
+  will use relative paths in this case we are 2 levels deep from $MAHOUT_HOME-->
+
+
   <id>src</id>
   <formats>
     <format>dir</format>
@@ -23,7 +30,7 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}</directory>
+      <directory>${project.basedir}/../../</directory>
       <outputDirectory/>
       <useDefaultExcludes>true</useDefaultExcludes>
       <includes>
@@ -41,14 +48,14 @@
       </excludes>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/bin</directory>
+      <directory>${project.basedir}/../..//bin</directory>
       <outputDirectory>bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/examples/bin</directory>
+      <directory>${project.basedir}/../../examples/bin</directory>
       <outputDirectory>examples/bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>

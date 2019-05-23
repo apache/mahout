@@ -69,5 +69,16 @@
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
     </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../../examples/bin</directory>
+      <outputDirectory>examples/bin</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
+      <excludes>
+        <exclude>work</exclude>
+        <exclude>work/**</exclude>
+      </excludes>
+    </fileSet>
   </fileSets>
 </assembly>
