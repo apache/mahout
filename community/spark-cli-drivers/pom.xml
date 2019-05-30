@@ -69,11 +69,13 @@
   </dependencies>
 
 
+
   <build>
     <plugins>
-      <!-- create fat jar -->
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>
+<!--
+      &lt;!&ndash; create fat jar &ndash;&gt;
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
@@ -84,12 +86,13 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>"src/main/assembly/dependency-reduced.xml"</descriptor>
+                <descriptor>"${project.home}/src/main/assembly/dependency-reduced.xml"</descriptor>
               </descriptors>
             </configuration>
           </execution>
         </executions>
-      <plugin> -->
+      </plugin>
+-->
 
 
       <!-- ensure licenses -->
