@@ -110,10 +110,10 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <mjavadoc.version>2.10.3</mjavadoc.version>
     <slf4j.version>1.7.22</slf4j.version>
-    <scala.version>2.11.6</scala.version>
-    <scala.compat.version>2.11</scala.compat.version>
+    <scala.version>2.12.5</scala.version>
+    <scala.compat.version>2.12</scala.compat.version>
     <source.plugin.version>3.0.1</source.plugin.version>
-    <spark.version>2.3.0</spark.version>
+    <spark.version>2.4.3</spark.version>
     <spark.compat.version>2.3</spark.compat.version>
     <depgraph.plugin.version>3.3.0</depgraph.plugin.version>
 
@@ -276,7 +276,7 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>3.4.4</version>
+        <version>4.0.2</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -623,7 +623,7 @@
             <plugin>
               <groupId>net.alchim31.maven</groupId>
               <artifactId>scala-maven-plugin</artifactId>
-              <!--<version>3.4.1</version>-->
+              <version>4.0.2</version>
               <configuration>
                 <jvmArgs>
                   <jvmArg>-Xms64m</jvmArg>

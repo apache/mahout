@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark-cli-drivers_2.11</artifactId>
+  <artifactId>spark-cli-drivers_2.12</artifactId>
   <name>- Mahout Spark CLI Drivers</name>
   <description>These drivers will allow you to compile a handy Apache Spark App which utilizes Apache Mahout.
   </description>
@@ -39,11 +39,19 @@
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
 
+<!--    <dependency>-->
+<!--      <groupId>com.github.scopt</groupId>-->
+<!--      <artifactId>scopt_${scala.compat.version}</artifactId>-->
+<!--      <version>3.3.0</version>-->
+<!--    </dependency>-->
+
+    <!-- https://mvnrepository.com/artifact/com.github.scopt/scopt -->
     <dependency>
       <groupId>com.github.scopt</groupId>
       <artifactId>scopt_${scala.compat.version}</artifactId>
-      <version>3.3.0</version>
+      <version>3.7.1</version>
     </dependency>
+
 
     <!-- our stuff -->
     <dependency>
@@ -62,7 +70,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>spark_2.11</artifactId>
+      <artifactId>spark_2.12</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
     </dependency>

@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark_2.11</artifactId>
+  <artifactId>spark_2.12</artifactId>
   <name>- Mahout Spark Engine</name>
   <description>
     Mahout Bindings for Apache Spark
@@ -57,10 +57,20 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>3.2.2</version>
+        <version>4.0.2</version>
         <executions>
           <execution>
-            <id>add-scala-sources</id>
+            <id>attach-javadocs</id>
+            <phase>dont-execute</phase>
+            <goals>
+              <goal>doc-jar</goal>
+            </goals>
+            <configuration> <!-- add this to disable checking -->
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </execution>
+          <execution>
+          <id>add-scala-sources</id>
             <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
@@ -149,7 +159,9 @@
           </execution>
           <execution>
             <id>copy-javadocs</id>
-            <phase>install</phase>
+            <!-- DO not not producing generated java/scaladocs right until Java 8+ tag bug has been fixed
+            or javadoc generation is fixed to generate intrepretable  doc tags  -->
+            <phase>dont-execute</phase>
             <configuration>
               <tasks>
                 <copy file="target/spark_${scala.compat.version}-${project.version}-javadoc.jar" tofile="../../docs/spark_${scala.compat.version}-${project.version}.jar" />
