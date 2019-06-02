@@ -47,7 +47,7 @@ case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: 
       }
       if (files.length > 0 && files.endsWith(",")) files = files.dropRight(1) // drop the last comma
       files
-    }else{
+    } else {
       pathURI
     }
   }

@@ -102,7 +102,7 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>3.2</version>
+      <version>4.0.2</version>
       <scope>test</scope>
     </dependency>
 
@@ -193,9 +193,6 @@
             <goals>
             <goal>doc-jar</goal>
           </goals>
-          <configuration> <!-- add this to disable checking -->
-            <additionalparam>-Xdoclint:none</additionalparam>
-          </configuration>
         </execution>
           <execution>
             <id>add-scala-sources</id>

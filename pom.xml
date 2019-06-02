@@ -110,7 +110,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <mjavadoc.version>2.10.3</mjavadoc.version>
     <slf4j.version>1.7.22</slf4j.version>
-    <scala.version>2.12.5</scala.version>
+    <scala.version>2.12.8</scala.version>
     <scala.compat.version>2.12</scala.compat.version>
     <source.plugin.version>3.0.1</source.plugin.version>
     <spark.version>2.4.3</spark.version>
