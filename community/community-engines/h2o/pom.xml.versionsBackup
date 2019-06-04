@@ -27,18 +27,21 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-flink-batch_${scala.compat.version}</artifactId>
-  <name>-- Mahout Flink Engine (Community)</name>
+  <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
+  <name>-- Mahout H2O Engine (Community)</name>
   <description>
-    Mahout Bindings for Apache Flink
+    H2O Backend for Mahout DSL
   </description>
 
-  <properties>
-    <flink.version>1.1.4</flink.version>
-  </properties>
   <packaging>jar</packaging>
 
+  <properties>
+    <h2o.version>0.1.25</h2o.version>
+  </properties>
+
+
   <build>
+
     <plugins>
       <!-- ensure licenses -->
       <plugin>
@@ -56,7 +59,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-flink-batch_${scala.compat.version}-${version}.jar" tofile="../../../lib/mahout-flink-batch_${scala.compat.version}-${version}.jar" />
+                <copy file="target/mahout-h2o_${scala.compat.version}-${version}.jar" tofile="../../../lib/mahout-h2o_${scala.compat.version}-${version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -65,6 +68,25 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>dependency-reduced</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
@@ -102,22 +124,18 @@
       </plugin>
 
       <!--this is what scalatest recommends to do to enable scala tests -->
+
       <!-- disable surefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <systemPropertyVariables>
-            <mahout.home>${project.build.directory}</mahout.home>
-          </systemPropertyVariables>
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
-
       <!-- enable scalatest -->
       <plugin>
-        <groupId>org.scalatest_2.12</groupId>
-        <scope>test</scope>
+        <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>
@@ -127,12 +145,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <systemProperties>
-            <mahout.home>${project.build.directory}</mahout.home>
-          </systemProperties>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
       </plugin>
       <!-- remove jars from top directory on clean -->
       <plugin>
@@ -143,7 +155,7 @@
             <fileset>
               <directory>../../../lib</directory>
               <includes>
-                <include>mahout-flink*.jar</include>
+                <include>mahout-h2o*.jar</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
@@ -155,91 +167,90 @@
 
   <dependencies>
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-runtime_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-scala_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-java</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-core</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-clients_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-test-utils_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-tests_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-    </dependency>
 
     <!--<dependency>-->
-      <!--<groupId>org.bytedeco</groupId>-->
-      <!--<artifactId>javacpp</artifactId>-->
-      <!--<version>1.2.2</version>-->
+      <!--<groupId>org.apache.mahout</groupId>-->
+      <!--&lt;!&ndash;<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>&ndash;&gt;-->
+      <!--<artifactId>a</artifactId>-->
+      <!--<version>${project.version}</version>-->
     <!--</dependency>-->
 
-
+    <!-- for MatrixWritable and VectorWritable -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>asm</groupId>
-          <artifactId>asm</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
-    <dependency>
+   <dependency>
       <groupId>org.apache.mahout</groupId>
       <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
       <artifactId>core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
+   </dependency>
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <!--<artifactId>mahout-math</artifactId>-->
+      <artifactId>core_${scala.compat.version}</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <!--  3rd-party -->
+
+    <!-- H2O -->
+
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
+      <groupId>ai.h2o</groupId>
+      <artifactId>h2o-core</artifactId>
+      <version>${h2o.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
-    <!-- tests -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
+    <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+    </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>mahout-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>generate-scaladoc</id>
+                <goals>
+                  <goal>doc</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>attach-scaladoc-jar</id>
+                <goals>
+                  <goal>doc-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

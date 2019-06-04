@@ -52,9 +52,16 @@
 
     <!-- scala stuff -->
     <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <groupId>org.scalactic</groupId>
+      <artifactId>scalactic_2.12</artifactId>
       <version>3.0.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.12</artifactId>
+      <version>3.2.0-SNAP10</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
