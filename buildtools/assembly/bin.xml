@@ -42,7 +42,7 @@
     </fileSet>
 
     <fileSet>
-      <directory>${project.basedir}/../</directory>
+      <directory>${project.build.directory}/</directory>
       <outputDirectory/>
       <useDefaultExcludes>true</useDefaultExcludes>
       <includes>
