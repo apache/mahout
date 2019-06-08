@@ -24,7 +24,7 @@ ARG spark_uid=185
 # If this docker file is being used in the context of building your images from a Spark
 # distribution, the docker build command should be invoked from the top level directory
 # of the Spark distribution. E.g.:
-# docker build -t spark:latest -f kubernetes/docker/src/dockerfiles/spark/Dockerfile .
+# docker build -t spark:latest -f kubernetes/dockerfiles/spark/Dockerfile .
 
 RUN set -ex && \
     apk upgrade --no-cache && \
@@ -38,7 +38,6 @@ RUN set -ex && \
     ln -sv /bin/bash /bin/sh && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd
-    mkdir -p /opt/mahout
 
 COPY jars /opt/spark/jars
 COPY bin /opt/spark/bin
@@ -47,12 +46,8 @@ COPY kubernetes/dockerfiles/spark/entrypoint.sh /opt/
 COPY examples /opt/spark/examples
 COPY kubernetes/tests /opt/spark/tests
 COPY data /opt/spark/data
-# Copy Mahout files to both directories. (for starters // todo FIXME!!)
-COPY lib /opt/spark/jars
-COPY lib /opt/mahout/jars
 
 ENV SPARK_HOME /opt/spark
-ENV MAHOUT_HOME /opt/mahout
 
 WORKDIR /opt/spark/work-dir
 RUN chmod g+w /opt/spark/work-dir

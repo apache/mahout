@@ -69,7 +69,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_2.12</artifactId>
+      <artifactId>core_2.11</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -27,24 +27,20 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark-cli-drivers_2.12</artifactId>
+  <artifactId>spark-cli-drivers_{scala.compat.version}</artifactId>
   <name>- Mahout Spark CLI Drivers</name>
   <description>These drivers will allow you to compile a handy Apache Spark App which utilizes Apache Mahout.
   </description>
 
   <dependencies>
 
-<!--    <dependency>-->
-<!--      <groupId>org.scalactic</groupId>-->
-<!--      <artifactId>scalactic_2.12</artifactId>-->
-<!--      <version>3.0.5</version>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_2.12</artifactId>
       <version>3.0.5</version>
       <scope>test</scope>
     </dependency>
+
 <!--    <dependency>-->
 <!--      <groupId>com.github.scopt</groupId>-->
 <!--      <artifactId>scopt_${scala.compat.version}</artifactId>-->
@@ -76,7 +72,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>spark_2.12</artifactId>
+      <artifactId>spark_{scala.compat.version}</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
     </dependency>
@@ -229,18 +225,10 @@
       </plugin>
 
       <!-- enable scalatest -->
-      <!-- <dependency>
-        <groupId>org.scalactic</groupId>
-        <artifactId>scalactic_${scala.compat.version}</artifactId>
-        <version>3.0.5</version>
-      </dependency> -->
-
-
-
       <plugin>
         <groupId>org.scalatest</groupId>
-        <artifactId>scalatest_${scala.compat.version}</artifactId>
-          <version>3.0.5</version>
+        <artifactId>scalatest-maven-plugin</artifactId>
+        <version>3.0.5</version>
         <executions>
           <execution>
             <id>test</id>

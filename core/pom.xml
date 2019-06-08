@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>core_2.12</artifactId>
+  <artifactId>core_{scala.compat.version}</artifactId>
   <name>Mahout Core</name>
   <description>High performance scientific and technical computing data structures and methods,
     mostly based on CERN's Colt Java API
@@ -51,23 +51,15 @@
 
 
     <!-- scala stuff -->
-    <!-- <dependency>
-      <groupId>org.scalactic</groupId>
-      <artifactId>scalactic_2.12</artifactId>
-      <version>3.0.5</version>
-    </dependency> -->
-
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.12</artifactId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
       <version>3.0.5</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-reflect</artifactId>
-      <version>${scala.version}</version>
     </dependency>
 
     <!-- TODO look into factoring this away (or to BLAS package)-->
@@ -110,7 +102,7 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>4.0.2</version>
+      <version>3.2</version>
       <scope>test</scope>
     </dependency>
 
@@ -192,7 +184,8 @@
 
       <plugin>
         <groupId>net.alchim31.maven</groupId>
-        <artifactId>2.15.2</artifactId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>4.0.2</version>
         <executions>
           <execution>
           <id>attach-javadocs</id>
@@ -235,13 +228,10 @@
         </configuration>
       </plugin>
       <!-- enable scalatest -->
-
-
       <plugin>
         <groupId>org.scalatest</groupId>
-        <artifactId>scalatest_${scala.compat.version}</artifactId>
-        <version>3.0.5</version>
-
+        <artifactId>scalatest-maven-plugin</artifactId>
+        <version>2.0.0</version>
         <executions>
           <execution>
             <id>test</id>
@@ -250,8 +240,10 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <argLine>-Xmx4g</argLine>
+        </configuration>
       </plugin>
-
 
       <!-- create test jar so other modules can reuse the math test utility classes. -->
       <plugin>

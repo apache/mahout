@@ -186,16 +186,10 @@
       </dependency>
 
       <!-- scala stuff -->
-<!--      <dependency>-->
-<!--        <groupId>org.scalactic</groupId>-->
-<!--        <artifactId>scalactic_${scala.compat.version}</artifactId>-->
-<!--        <version>3.0.5</version>-->
-<!--      </dependency>-->
       <dependency>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest_${scala.compat.version}</artifactId>
         <version>3.0.5</version>
-        <scope>test</scope>
       </dependency>
 
       <dependency>
@@ -282,7 +276,7 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>4.0.2</version>
+        <version>3.4.4</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -647,3 +641,4 @@
   </reporting>
 
 </project>
+

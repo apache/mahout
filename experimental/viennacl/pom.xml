@@ -68,7 +68,6 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>4.0.2</version>
         <executions>
           <execution>
             <id>add-scala-sources</id>
@@ -267,7 +266,6 @@
           <plugin>
             <groupId>net.alchim31.maven</groupId>
             <artifactId>scala-maven-plugin</artifactId>
-            <version>4.0.2</version>
             <executions>
               <execution>
                 <id>generate-scaladoc</id>
