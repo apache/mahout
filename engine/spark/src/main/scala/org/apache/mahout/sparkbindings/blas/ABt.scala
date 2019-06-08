@@ -110,7 +110,7 @@ object ABt {
     val blockwiseMmulRdd =
 
     // Combine blocks pairwise.
-      pairwiseApply(blocksA, blocksB, mmulFunc)
+      pairwiseApply(blocksA, blocksB, ABt_mmulFuncs.mmulFunc[K])
 
         // Now reduce proper product blocks.
         .combineByKey(
@@ -336,4 +336,26 @@ object ABt {
   }
 
 
+}
+
+object ABt_mmulFuncs {// blockwise multiplication functions
+
+  def mmulFunc[K:ClassTag](tupleA: BlockifiedDrmTuple[K], tupleB: BlockifiedDrmTuple[Int]): (Array[K], Array[Int], Matrix) = {
+    val (keysA, blockA) = tupleA
+    val (keysB, blockB) = tupleB
+
+//    var ms = traceDo(System.currentTimeMillis())
+
+    // We need to send keysB to the aggregator in order to know which columns are being updated.
+    val result = (keysA, keysB, blockA %*% blockB.t)
+
+//    ms = traceDo(System.currentTimeMillis() - ms.get)
+//    trace(
+//      s"block multiplication of(${blockA.nrow}x${blockA.ncol} x ${blockB.ncol}x${blockB.nrow} is completed in $ms " +
+//        "ms.")
+//    trace(s"block multiplication types: blockA: ${blockA.getClass.getName}(${blockA.t.getClass.getName}); " +
+//      s"blockB: ${blockB.getClass.getName}.")
+
+    result
+  }
 }
