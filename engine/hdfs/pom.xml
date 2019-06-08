@@ -23,12 +23,12 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>engine</artifactId>
-    <version>14.1-SNAPSHOT</version>
+    <version>14.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <!-- modules inherit parent's group id and version. -->
-  <artifactId>mahout-hdfs</artifactId>
+  <artifactId>mahout-hdfs_2.12</artifactId>
   <name>- Mahout HDFS Support</name>
   <description>Scalable machine learning libraries</description>
 
@@ -66,7 +66,7 @@
           </execution>
           <execution>
             <id>copy-javadocs</id>
-            <phase>install</phase>
+            <phase>package</phase>
             <configuration>
               <tasks>
                 <copy file="target/mahout-hdfs-${project.version}-javadoc.jar" tofile="../../docs/mahout-hdfs-${project.version}-javadoc.jar" />
@@ -108,62 +108,60 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-remote-resources-plugin</artifactId>-->
+<!--        <configuration>-->
+<!--          <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>-->
+<!--          <resourceBundles>-->
+<!--            <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>-->
+<!--          </resourceBundles>-->
+<!--          <supplementalModels>-->
+<!--            <supplementalModel>supplemental-models.xml</supplementalModel>-->
+<!--          </supplementalModels>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
+      <!-- remove jars from top directory on clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../</directory>
+              <includes>
+                <include>mahout-hdfs*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins>
+
+
+<!--    <resources>-->
+<!--      <resource>-->
+<!--        <directory>src/main/resources</directory>-->
+<!--      </resource>-->
+<!--      <resource>-->
+<!--        <directory>../src/conf</directory>-->
+<!--        <includes>-->
+<!--          <include>driver.classes.default.props</include>-->
+<!--        </includes>-->
+<!--      </resource>-->
+<!--    </resources>-->
+
   </build>
-  <!--<build>-->
-    <!--<resources>-->
-      <!--<resource>-->
-        <!--<directory>src/main/resources</directory>-->
-      <!--</resource>-->
-      <!--<resource>-->
-        <!--<directory>../src/conf</directory>-->
-        <!--<includes>-->
-          <!--<include>driver.classes.default.props</include>-->
-        <!--</includes>-->
-      <!--</resource>-->
-    <!--</resources>-->
-
-
-
-      <!--<plugin>-->
-        <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-      <!--</plugin>-->
-
-      <!--<plugin>-->
-        <!--<artifactId>maven-source-plugin</artifactId>-->
-      <!--</plugin>-->
-
-      <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-remote-resources-plugin</artifactId>-->
-        <!--<configuration>-->
-          <!--<appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>-->
-          <!--<resourceBundles>-->
-            <!--<resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>-->
-          <!--</resourceBundles>-->
-          <!--<supplementalModels>-->
-            <!--<supplementalModel>supplemental-models.xml</supplementalModel>-->
-          <!--</supplementalModels>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
-      <!--&lt;!&ndash; remove jars from top directory on clean &ndash;&gt;-->
-      <!--<plugin>-->
-        <!--<artifactId>maven-clean-plugin</artifactId>-->
-        <!--<version>3.0.0</version>-->
-        <!--<configuration>-->
-          <!--<filesets>-->
-            <!--<fileset>-->
-              <!--<directory>../</directory>-->
-              <!--<includes>-->
-                <!--<include>mahout-hdfs*.jar</include>-->
-              <!--</includes>-->
-              <!--<followSymlinks>false</followSymlinks>-->
-            <!--</fileset>-->
-          <!--</filesets>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
-    <!--</plugins>-->
-  <!--</build>-->
 
   <dependencies>
 

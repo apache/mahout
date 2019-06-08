@@ -58,7 +58,7 @@
     <!-- our stuff -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>spark_2.12}</artifactId>
+      <artifactId>spark_2.12</artifactId>
       <version>${project.version}</version>
     </dependency>
 
