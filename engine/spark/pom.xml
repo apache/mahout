@@ -56,8 +56,8 @@
 
       <plugin>
         <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId>
-        <version>4.0.2</version>
+        <artifactId>maven-scala-plugin</artifactId>
+        <version>2.15.2</version>
         <executions>
 
           <execution>
@@ -103,16 +103,12 @@
         </configuration>
       </plugin>
       <!-- enable scalatest -->
-      <dependency>
-        <groupId>org.scalactic</groupId>
-        <artifactId>scalactic_2.12</artifactId>
-        <version>3.0.5</version>
-      </dependency>
+
 
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest_${scala.compat.version}</artifactId>
-        <version>3.2.0-SNAP10</version>
+        <version>3.0.5</version>
         <executions>
           <execution>
             <id>test</id>
@@ -238,6 +234,13 @@
     </dependency>
 
     <!-- mahout stuff -->
+
+    <!-- <dependency>
+      <groupId>org.scalactic</groupId>
+      <artifactId>scalactic_2.12</artifactId>
+      <version>3.0.5</version>
+    </dependency> -->
+
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>core_${scala.compat.version}</artifactId>
@@ -270,10 +273,17 @@
   <!--  3rd-party -->
 
     <!-- scala stuff -->
+    <!-- should help with some of the lambdas-->
+    <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-java8-compat_${scala.compat.version}</artifactId>
+      <version>0.9.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
-      <version>3.2.0-SNAP10</version>
+      <version>3.0.5</version>
     </dependency>
 
   </dependencies>

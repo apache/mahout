@@ -51,22 +51,23 @@
 
 
     <!-- scala stuff -->
-    <dependency>
+    <!-- <dependency>
       <groupId>org.scalactic</groupId>
       <artifactId>scalactic_2.12</artifactId>
       <version>3.0.5</version>
-    </dependency>
+    </dependency> -->
 
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_2.12</artifactId>
-      <version>3.2.0-SNAP10</version>
+      <version>3.0.5</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-reflect</artifactId>
+      <version>${scala.version}</version>
     </dependency>
 
     <!-- TODO look into factoring this away (or to BLAS package)-->
@@ -191,8 +192,7 @@
 
       <plugin>
         <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId>
-        <version>4.0.2</version>
+        <artifactId>2.15.2</artifactId>
         <executions>
           <execution>
           <id>attach-javadocs</id>
@@ -235,10 +235,13 @@
         </configuration>
       </plugin>
       <!-- enable scalatest -->
+
+
       <plugin>
         <groupId>org.scalatest</groupId>
-        <artifactId>scalatest-maven-plugin</artifactId>
-        <version>2.0.0</version>
+        <artifactId>scalatest_${scala.compat.version}</artifactId>
+        <version>3.0.5</version>
+
         <executions>
           <execution>
             <id>test</id>
@@ -247,10 +250,8 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
       </plugin>
+
 
       <!-- create test jar so other modules can reuse the math test utility classes. -->
       <plugin>

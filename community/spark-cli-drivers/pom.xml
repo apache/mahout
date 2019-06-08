@@ -34,11 +34,11 @@
 
   <dependencies>
 
-    <dependency>
-      <groupId>org.scalactic</groupId>
-      <artifactId>scalactic_2.12</artifactId>
-      <version>3.0.5</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.scalactic</groupId>-->
+<!--      <artifactId>scalactic_2.12</artifactId>-->
+<!--      <version>3.0.5</version>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_2.12</artifactId>
@@ -229,18 +229,18 @@
       </plugin>
 
       <!-- enable scalatest -->
-      <dependency>
+      <!-- <dependency>
         <groupId>org.scalactic</groupId>
         <artifactId>scalactic_${scala.compat.version}</artifactId>
         <version>3.0.5</version>
-      </dependency>
+      </dependency> -->
 
 
 
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest_${scala.compat.version}</artifactId>
-          <version>3.2.0-SNAP10</version>
+          <version>3.0.5</version>
         <executions>
           <execution>
             <id>test</id>
