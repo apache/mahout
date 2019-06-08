@@ -173,24 +173,26 @@ IFS=
 
 if [ $IS_CORE == 0 ]
 then
-  # add release dependencies to CLASSPATH
+  # add release (deprecated mr) dependencies to CLASSPATH
   echo "Adding lib/ to CLASSPATH"
   for f in $MAHOUT_HOME/lib/*.jar; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
   CLASSPATH="${CLASSPATH}:${SPARK_HOME}/jars/*"
+fi
 
+  # add spafk  dependencies to CLASSPATH
 
-#  if [ "$SPARK" != "1" ]; then
-#    # add dev targets if they exist
-#    for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
-#      CLASSPATH=${CLASSPATH}:$f;
-#    done
-#  fi
+if [ "$SPARK" != "1" ]; then
+  echo "Adding lib/ to CLASSPATH"
+  for f in $MAHOUT_HOME/lib/*.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+fi
 
   # add scala dev target
-#  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala_*.jar ; do
+#  for f in $MAHOUT_HOME/core/target/core_*.jar ; do
 #    CLASSPATH=${CLASSPATH}:$f;
 #  done
 

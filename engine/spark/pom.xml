@@ -67,7 +67,7 @@
             </goals>
           </execution>
           <execution>
-          <id>add-scala-sources</id>
+            <id>add-scala-sources</id>
             <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
@@ -90,9 +90,7 @@
         </executions>
       </plugin>
 
-
       <!--this is what scalatest recommends to do to enable scala tests -->
-
       <!-- disable surefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -114,6 +112,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <argLine>-Xmx4g</argLine>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -216,6 +217,12 @@
   </build>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+    </dependency>
+
 
     <!-- spark stuff - need to put this first to use spark's mahout dependencies in tests -->
     <dependency>

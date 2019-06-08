@@ -24,7 +24,7 @@
 #FWDIR="$(cd "`dirname "$0"`"/..; pwd)"
 FWDIR="$SPARK_HOME"
 
-#. "$FWDIR"/bin/load-spark-env.sh # not executable by defult in $SPARK_HOME/bin
+#. "$FWDIR"/bin/load-spark-env.sh # not executable by default in $SPARK_HOME/bin
 
 "$MAHOUT_HOME"/bin/mahout-load-spark-env.sh
 
@@ -33,19 +33,24 @@ FWDIR="$SPARK_HOME"
 
 if [ -z "$SPARK_SCALA_VERSION" ]; then
 
-    ASSEMBLY_DIR2="$FWDIR/assembly/target/scala-2.11"
     ASSEMBLY_DIR1="$FWDIR/assembly/target/scala-2.10"
+    ASSEMBLY_DIR2="$FWDIR/assembly/target/scala-2.11"
+    ASSEMBLY_DIR3="$FWDIR/assembly/target/scala-2.12"
 
-    if [[ -d "$ASSEMBLY_DIR2" && -d "$ASSEMBLY_DIR1" ]]; then
-        echo -e "Presence of build for both scala versions(SCALA 2.10 and SCALA 2.11) detected." 1>&2
-        echo -e 'Either clean one of them or, export SPARK_SCALA_VERSION=2.11 in spark-env.sh.' 1>&2
+
+    # lazily check for all three scala versions 2.10, 2.11, 2.12.  TODO: use xors later
+    if [[ -d "$ASSEMBLY_DIR2" && -d "$ASSEMBLY_DIR1"  && -d "$ASSEMBLY_DIR3" ]]; then
+        echo -e "Presence of build for scala versions(SCALA 2.10 and SCALA 2.11 and scala 2.12) detected." 1>&2
+        echo -e 'Either clean one of them or, export SPARK_SCALA_VERSION=2.12 in spark-env.sh.' 1>&2
         exit 1
     fi
 
-    if [ -d "$ASSEMBLY_DIR2" ]; then
+    if [[ -d "$ASSEMBLY_DIR1" ]]; then
+        export SPARK_SCALA_VERSION="2.10"
+    elif [[ -d "$ASSEMBLY_DIR1" ]]; then
         export SPARK_SCALA_VERSION="2.11"
     else
-        export SPARK_SCALA_VERSION="2.10"
+        export SPARK_SCALA_VERSION="2.12"
     fi
 fi
 

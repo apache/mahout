@@ -17,7 +17,7 @@
 
 package org.apache.mahout
 
-import org.apache.log4j.{Level, Priority, Logger}
+import org.apache.log4j.{Level, Logger}
 
 package object logging {
 

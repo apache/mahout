@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark-cli-drivers_{scala.compat.version}</artifactId>
+  <artifactId>spark-cli-drivers_2.12</artifactId>
   <name>- Mahout Spark CLI Drivers</name>
   <description>These drivers will allow you to compile a handy Apache Spark App which utilizes Apache Mahout.
   </description>
@@ -58,13 +58,13 @@
     <!-- our stuff -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>spark_${scala.compat.version}</artifactId>
+      <artifactId>spark_2.12}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>core_2.12</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
@@ -72,7 +72,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>spark_{scala.compat.version}</artifactId>
+      <artifactId>spark_2.12</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
     </dependency>

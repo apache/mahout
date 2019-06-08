@@ -19,6 +19,7 @@ package org.apache.mahout
 
 import java.io._
 
+import org.apache.log4j.Logger
 import org.apache.mahout.logging._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.{Matrix, MatrixWritable, Vector, VectorWritable}
@@ -28,17 +29,17 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.mllib.regression.LabeledPoint
-import org.apache.spark.mllib.linalg.{Vector => SparkVector, SparseVector => SparseSparkVector, DenseVector => DenseSparkVector}
+import org.apache.spark.mllib.linalg.{DenseVector => DenseSparkVector, SparseVector => SparseSparkVector, Vector => SparkVector}
 import org.apache.spark.sql.DataFrame
 
 import collection._
 import collection.generic.Growable
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag,classTag}
 
 /** Public api for Spark-specific operators */
 package object sparkbindings {
 
-  private final implicit val log = getLog(`package`.getClass)
+  private final implicit val log: Logger  = getLog(getClass)
 
   /** Row-wise organized DRM rdd type */
   type DrmRdd[K] = RDD[DrmTuple[K]]
@@ -46,16 +47,18 @@ package object sparkbindings {
   /**
    * Blockifed DRM rdd (keys of original DRM are grouped into array corresponding to rows of Matrix
    * object value
-   */
+  */
   type BlockifiedDrmRdd[K] = RDD[BlockifiedDrmTuple[K]]
 
   /**
    * Create proper spark context that includes local Mahout jars
-   * @param masterUrl
-   * @param appName
-   * @param customJars
-   * @return
-   */
+   * @param masterUrl Url of the spark master.
+   * @param appName Applicatin name to launch.
+   * @param customJars Custom Jars to ship with applicatiom.
+   * @param sparkConf A SparkConf class to configure and create a SparkContext with.  Default is new SparkConf()
+   * @param addMahoutJars Flag to aff mahout jars or not.  Defaults to true.
+   * @return a SparkDistributedContext with the above attributes.
+  */
   def mahoutSparkContext(masterUrl: String, appName: String, customJars: TraversableOnce[String] = Nil,
                          sparkConf: SparkConf = new SparkConf(), addMahoutJars: Boolean = true):
   SparkDistributedContext = {
@@ -222,6 +225,7 @@ package object sparkbindings {
     if (!exec.canExecute)
       throw new IllegalArgumentException("Cannot execute %s.".format(exec.getAbsolutePath))
 
+    // find out where we our spark jars are.
     val p = Runtime.getRuntime.exec(Array(exec.getAbsolutePath, "-spark", "classpath"))
 
     closeables += new Closeable {
@@ -252,15 +256,15 @@ package object sparkbindings {
       }
     } while (continue)
 
-    //    jars.foreach(j => log.info(j))
+    // jars.foreach(j => log.info(j))
     // context specific jars
     val mcjars = jars.filter(j =>
-      j.matches(".*mahout-math-\\d.*\\.jar") ||
+      j.matches(".*core-\\d.*\\.jar") ||
       j.matches(".*mahout-math-scala_\\d.*\\.jar") ||
       j.matches(".*mahout-hdfs-\\d.*\\.jar") ||
       // no need for mapreduce jar in Spark
       // j.matches(".*mahout-mr-\\d.*\\.jar") ||
-      j.matches(".*mahout-spark_\\d.*\\.jar") ||
+      j.matches(".*spark_\\d.*\\.jar") ||
       // vcl jars: mahout-native-viennacl_2.10.jar,
       //           mahout-native-viennacl-omp_2.10.jar
 //      j.matches(".*mahout-native-viennacl_\\d.*\\\\.jar") ||
@@ -268,7 +272,7 @@ package object sparkbindings {
         j.matches(".*mahout-native-viennacl*.jar")||
         // while WIP on MAHOUT-1894, use single wildcard
         // TODO: remove after 1894 is closed out
-        j.matches(".mahout-spark*-dependency-reduced.jar")
+        j.matches(".*spark*-dependency-reduced.jar")
 
     )
         // Tune out "bad" classifiers

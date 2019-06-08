@@ -25,7 +25,7 @@ FWDIR="$SPARK_HOME"
 if [ -z "$SPARK_ENV_LOADED" ]; then
   export SPARK_ENV_LOADED=1
 
-  # Returns the parent of the directory this script lives in.
+  # Returns the parent of the directory this script lives in. I.e. $MAHOUT_HOME.
   parent_dir="$(cd "`dirname "$0"`"/..; pwd)"
 
   user_conf_dir="${SPARK_CONF_DIR:-"$parent_dir"/conf}"
