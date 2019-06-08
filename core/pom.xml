@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>core_{scala.compat.version}</artifactId>
+  <artifactId>core_2.12</artifactId>
   <name>Mahout Core</name>
   <description>High performance scientific and technical computing data structures and methods,
     mostly based on CERN's Colt Java API
