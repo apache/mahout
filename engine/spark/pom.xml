@@ -59,7 +59,16 @@
         <artifactId>maven-scala-plugin</artifactId>
         <version>2.15.2</version>
         <executions>
-
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>dont-execute</phase>
+            <goals>
+              <goal>doc-jar</goal>
+            </goals>
+            <configuration> <!-- add this to disable checking -->
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </execution>
           <execution>
           <id>add-scala-sources</id>
             <phase>initialize</phase>
@@ -79,13 +88,6 @@
             <phase>process-test-resources</phase>
             <goals>
               <goal>testCompile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>attach-javadocs</id>
-            <phase>dont-execute</phase>
-            <goals>
-              <goal>doc-jar</goal>
             </goals>
           </execution>
         </executions>
