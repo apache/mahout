@@ -71,6 +71,12 @@
         <exclude>work</exclude>
         <exclude>work/**</exclude>
       </excludes>
+      <fileSet>
+      <directory>${project.build.directory}/examples/bin/resources</directory>
+      <outputDirectory>examples/bin</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
     </fileSet>
   </fileSets>
 </binaries>
