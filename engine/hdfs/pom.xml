@@ -57,7 +57,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfs-${project.version}.jar" tofile="../../lib/mahout-hdfs-${project.version}.jar" />
+                <copy file="target/mahout-hdfs-*.jar" tofile="{project.build.directory}/lib/mahout-hdfs-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -69,7 +69,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfs-${project.version}-javadoc.jar" tofile="../../docs/mahout-hdfs-${project.version}-javadoc.jar" />
+                <copy file="target/mahout-hdfs*-javadoc.jar" tofile="${project.build.directory}/docs/mahout-hdfs-${project.version}-javadoc.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -86,9 +86,9 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>../../lib/</directory>
+              <directory>$project.build.directory}/lib</directory>
               <includes>
-                <include>mahout-hdfs_*.jar</include>
+                <include>mahout-hdfs*.jar</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
