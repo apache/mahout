@@ -22,7 +22,7 @@
   ${project.basedir} == `pwd` (in this case), == $MAHOUT_HOME/buildtools/assembly;
   we cant always assume a $MAHOUT_HOME environment variable, so current workaround
   will use relative paths in this case we are 2 levels deep from $MAHOUT_HOME-->
-
+<binaries>
   <id>bin</id>
   <formats>
     <format>dir</format>
@@ -30,22 +30,14 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}/../lib</directory>
+      <directory>${project.build.directory}/lib</directory>
       <includes>
         <include>*.jar</include>
       </includes>
-      <outputDirectory>lib</outputDirectory>
+      <outputDirectory>${project.build.directory}/</outputDirectory>
     </fileSet>
-    <!--      hack for modules like hdfs/engine-->
-    <!--<fileSet>
-      <directory>${project.basedir}/../../lib</directory>
-      <includes>
-        <include>*.jar</include>
-      </includes>
-      <outputDirectory>lib</outputDirectory>
-    </fileSet>-->
     <fileSet>
-      <directory>${project.basedir}/../../docs</directory>
+      <directory>${project.build.directory}/docs</directory>
       <outputDirectory>docs</outputDirectory>
     </fileSet>
 
@@ -64,13 +56,13 @@
       </excludes>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../bin</directory>
+      <directory>${project.build.directory}/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../../examples/bin</directory>
+      <directory>${project.build.directory}/examples/bin</directory>
       <outputDirectory>examples/bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>
@@ -81,4 +73,5 @@
       </excludes>
     </fileSet>
   </fileSets>
+</binaries>
 </assembly>

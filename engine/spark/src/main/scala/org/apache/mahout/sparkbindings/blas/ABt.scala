@@ -344,17 +344,8 @@ object ABt_mmulFuncs {// blockwise multiplication functions
     val (keysA, blockA) = tupleA
     val (keysB, blockB) = tupleB
 
-//    var ms = traceDo(System.currentTimeMillis())
-
-    // We need to send keysB to the aggregator in order to know which columns are being updated.
     val result = (keysA, keysB, blockA %*% blockB.t)
 
-//    ms = traceDo(System.currentTimeMillis() - ms.get)
-//    trace(
-//      s"block multiplication of(${blockA.nrow}x${blockA.ncol} x ${blockB.ncol}x${blockB.nrow} is completed in $ms " +
-//        "ms.")
-//    trace(s"block multiplication types: blockA: ${blockA.getClass.getName}(${blockA.t.getClass.getName}); " +
-//      s"blockB: ${blockB.getClass.getName}.")
 
     result
   }
