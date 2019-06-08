@@ -218,9 +218,11 @@
 
   <dependencies>
 
+    <!-- https://mvnrepository.com/artifact/org.scala-lang/scala-reflect -->
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-reflect</artifactId>
+      <version>${scala.version}</version>
     </dependency>
 
 
@@ -246,7 +248,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-hdfs</artifactId>
+      <artifactId>mahout-hdfs_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 

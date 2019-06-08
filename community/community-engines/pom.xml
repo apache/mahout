@@ -22,8 +22,8 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>community</artifactId>
-    <version>14.1-SNAPSHOT</version>
+    <artifactId>community_2.12</artifactId>
+    <version>14.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 

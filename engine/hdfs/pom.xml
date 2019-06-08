@@ -45,6 +45,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+
       </plugin>
 
       <!-- copy jars to lib/ -->
@@ -57,7 +58,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfs_2.12-14.1.jar" tofile="{project.build.directory}/lib/mahout-hdfs_2.12-14.1.jar" />
+                <copy file="target/mahout-hdfs_2.12-14.1.jar" tofile="${project.build.directory}/lib/mahout-hdfs_2.12-14.1.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -66,10 +67,10 @@
           </execution>
           <execution>
             <id>copy-javadocs</id>
-            <phase>package</phase>
+            <phase>run</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfshdfs_2.12-14.1.jar" tofile="${project.build.directory}/docs/mahout-hdfs_2.12-14.1r-javadoc.jar" />
+                <copy file="target/mahout-hdfs_2.12-14.1.jar" tofile="${project.build.directory}/docs/mahout-hdfs_2.12-14.1r-javadoc.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -140,6 +141,7 @@
               <directory>../</directory>
               <includes>
                 <include>mahout-hdfs*.jar</include>
+                <version>${project.version}</version>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
@@ -175,7 +177,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <version>${version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

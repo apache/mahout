@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>community</artifactId>
+  <artifactId>community_${scala.compat.version}</artifactId>
   <name>Mahout Community</name>
   <description>Not officially maintained, but still very useful scripts to use Mahout with.
   </description>

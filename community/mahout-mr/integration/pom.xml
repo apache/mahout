@@ -24,11 +24,11 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-mr</artifactId>
-    <version>14.1-SNAPSHOT</version>
+    <version>14.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-integration</artifactId>
+  <artifactId>mahout-integration_${scala.compat.version}</artifactId>
   <name>-- Mahout Classic Integration</name>
   <description>Optional components of Mahout which generally support interaction with third party systems,
     formats, APIs, etc.</description>
@@ -69,7 +69,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_2.11</artifactId>
+      <artifactId>core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
