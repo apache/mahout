@@ -22,7 +22,6 @@
   ${project.basedir} == `pwd` (in this case), == $MAHOUT_HOME/buildtools/assembly;
   we cant always assume a $MAHOUT_HOME environment variable, so current workaround
   will use relative paths in this case we are 2 levels deep from $MAHOUT_HOME-->
-<binaries>
   <id>bin</id>
   <formats>
     <format>dir</format>
@@ -79,5 +78,4 @@
       <directoryMode>0755</directoryMode>
     </fileSet>
   </fileSets>
-</binaries>
 </assembly>
