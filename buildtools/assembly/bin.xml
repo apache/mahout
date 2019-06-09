@@ -100,7 +100,7 @@
       </excludes>
       <outputDirectory>${project.build.directory}/lib</outputDirectory>
     </fileSet>
-    
+
     <fileSet>
       <directory>${project.build.directory}/</directory>
       <outputDirectory>${project.build.directory}/lib</outputDirectory>
@@ -111,10 +111,10 @@
         <include>NOTICE*</include>
         <include>*.properties</include>
       </includes>
+
       <excludes>
         <exclude>**/target/**</exclude>
       </excludes>
-      <outputDirectory>${project.build.directory}/lib</outputDirectory>
     </fileSet>
 
     <fileSet>
