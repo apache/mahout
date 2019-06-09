@@ -34,7 +34,6 @@
 
   <packaging>jar</packaging>
 
-
   <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
   <scm>
     <connection>scm:git:git@github.com:apache/mahout.git</connection>
@@ -45,7 +44,6 @@
   </scm>
 
   <dependencies>
-
 
     <dependency>
       <groupId>org.scalatest</groupId>
@@ -258,10 +256,4 @@
     </plugins>
   </build>
 
-  <packaging>jar</packaging>
-
-
-  <scm>
-    <tag>mahout-14.1</tag>
-  </scm>
 </project>
