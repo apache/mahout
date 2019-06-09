@@ -495,7 +495,7 @@
                <configuration>
                   <skipAssembly>${mahout.skip.distribution}</skipAssembly>
                   <descriptors>
-                    <descriptor>buildtools/assembly/bin.xml</descriptor>
+                    <descriptor>buildtools/assembly/bin_old.xml</descriptor>
                   </descriptors>
                   <tarLongFileMode>gnu</tarLongFileMode>
 		          <appendAssemblyId>true</appendAssemblyId>
