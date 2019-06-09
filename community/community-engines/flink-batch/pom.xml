@@ -117,7 +117,6 @@
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest_2.12</groupId>
-        <scope>test</scope>
         <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>

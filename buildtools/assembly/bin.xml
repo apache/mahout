@@ -26,23 +26,140 @@
   <formats>
     <format>dir</format>
     <format>tar.gz</format>
+    <format>bz2</format>
   </formats>
+
   <fileSets>
     <fileSet>
-      <directory>${project.build.directory}/lib</directory>
+      <directory>${project.build.directory}/examples</directory>
       <includes>
         <include>*.jar</include>
       </includes>
-      <outputDirectory>${project.build.directory}/</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>${project.build.directory}/docs</directory>
-      <outputDirectory>docs</outputDirectory>
+      <excludes>
+        <exclude>mahout-*</exclude>
+        <exclude>junit-*</exclude>
+      </excludes>
+      <outputDirectory>lib</outputDirectory>
     </fileSet>
 
     <fileSet>
-      <directory>${project.build.directory}/</directory>
+      <directory>${project.build.directory}/core/target</directory>
+      <includes>
+        <include>core*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+     <outputDirectory>${project.build.directory}/lib</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>${project.build.directory}/community/hdfs/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory>${project.build.directory}/lib/</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>${project.build.directory}/community/community/mr/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
       <outputDirectory/>
+    </fileSet>
+
+    <fileSet>
+      <directory>${project.basedir}/../integration/target</directory>
+      <includes>
+        <include>mahout-*.job</include>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../examples/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+        <include>mahout-*.job</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../math-scala/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+        <include>mahout-*.job</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/engine/spark/target/</directory>
+      <includes>
+        <include>spark*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory>${project.build.directory}/lib/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/community/spark-cli-drivers/target/</directory>
+      <includes>
+        <include>spark*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory>${project.build.directory}/lib</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>${project.build.directory}/engine/hdfs/target/</directory>
+      <includes>
+        <include>hdfs*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory>${project.build.directory}/lib</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/</directory>
+      <outputDirectory>${project.build.directory}/lib</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <includes>
         <include>README*</include>
@@ -53,16 +170,26 @@
       <excludes>
         <exclude>**/target/**</exclude>
       </excludes>
+      <outputDirectory>${project.build.directory}/lib</outputDirectory>
     </fileSet>
+
     <fileSet>
-      <directory>${project.build.directory}/bin</directory>
+      <directory>${project.build.directory}/bin/*</directory>
       <outputDirectory>bin</outputDirectory>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
     </fileSet>
+
     <fileSet>
-      <directory>${project.build.directory}/examples/bin</directory>
-      <outputDirectory>examples/bin</outputDirectory>
+      <directory>${project.build.directory}/lib/*</directory>
+      <outputDirectory>lib</outputDirectory>
+      <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
+    </fileSet>
+
+    <fileSet>
+      <directory>${project.build.directory}/examples/bin/**/**</directory>
+      <outputDirectory>examples/bin/**/**</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>
       <directoryMode>0755</directoryMode>
@@ -70,7 +197,8 @@
         <exclude>work</exclude>
         <exclude>work/**</exclude>
       </excludes>
-      <fileSet>
+    </fileSet>
+    <fileSet>
       <directory>${project.build.directory}/examples/bin/resources</directory>
       <outputDirectory>examples/bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
