@@ -1,6 +1,6 @@
 <assembly>
 <id>bin</id>
-<version>2.5.5</version>
+<!--<version>3.0.1</version>-->
 
 <formats>
     <format>dir</format>
@@ -34,12 +34,14 @@
     </fileSet>
     </fileSets>
     <moduleSets>
+<!--        <useAllReactorProjects>true</useAllReactorProjects>-->
         <moduleSet>
+
+            
          <binaries>
             <unpack>false</unpack>
                 <dependencySets>
                     <dependencySet>
-                        <useAllReactorProjects>true</useAllReactorProjects>
                         <unpack>false</unpack>
                         <scope>compile</scope>
                         <outputDirectory>lib</outputDirectory>

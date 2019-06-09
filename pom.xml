@@ -487,7 +487,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                 <id>bin-assembly</id>
+                 <id>-assembly</id>
                  <phase>package</phase>
                  <goals>
                    <goal>single</goal>
@@ -495,7 +495,7 @@
                <configuration>
                   <skipAssembly>${mahout.skip.distribution}</skipAssembly>
                   <descriptors>
-                    <descriptor>buildtools/assembly/bin_old.xml</descriptor>
+                    <descriptor>buildtools/assembly/bin.xml</descriptor>
                   </descriptors>
                   <tarLongFileMode>gnu</tarLongFileMode>
 		          <appendAssemblyId>true</appendAssemblyId>
