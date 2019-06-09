@@ -170,6 +170,7 @@
     <!-- our modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
+
       <artifactId>core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>

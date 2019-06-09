@@ -13,20 +13,15 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
 
-  <!--NOTE, ${project.basedir} has been overwritten due to multi module build
-  ${project.basedir} == `pwd` (in this case), == $MAHOUT_HOME/buildtools/assembly;
-  we cant always assume a $MAHOUT_HOME environment variable, so current workaround
-  will use relative paths in this case we are 2 levels deep from $MAHOUT_HOME-->
   <id>bin</id>
   <formats>
     <format>dir</format>
     <format>tar.gz</format>
-    <format>bz2</format>
+    <format>tar.bz2</format>
   </formats>
 
   <fileSets>
@@ -69,58 +64,6 @@
     </fileSet>
 
     <fileSet>
-      <directory>${project.build.directory}/community/community/mr/target</directory>
-      <includes>
-        <include>mahout-*.jar</include>
-      </includes>
-      <excludes>
-        <exclude>*sources.jar</exclude>
-        <exclude>*javadoc.jar</exclude>
-        <exclude>*tests.jar</exclude>
-      </excludes>
-      <outputDirectory/>
-    </fileSet>
-
-    <fileSet>
-      <directory>${project.basedir}/../integration/target</directory>
-      <includes>
-        <include>mahout-*.job</include>
-        <include>mahout-*.jar</include>
-      </includes>
-      <excludes>
-        <exclude>*sources.jar</exclude>
-        <exclude>*javadoc.jar</exclude>
-        <exclude>*tests.jar</exclude>
-      </excludes>
-      <outputDirectory/>
-    </fileSet>
-    <fileSet>
-      <directory>${project.basedir}/../examples/target</directory>
-      <includes>
-        <include>mahout-*.jar</include>
-        <include>mahout-*.job</include>
-      </includes>
-      <excludes>
-        <exclude>*sources.jar</exclude>
-        <exclude>*javadoc.jar</exclude>
-        <exclude>*tests.jar</exclude>
-      </excludes>
-      <outputDirectory/>
-    </fileSet>
-    <fileSet>
-      <directory>${project.basedir}/../math-scala/target</directory>
-      <includes>
-        <include>mahout-*.jar</include>
-        <include>mahout-*.job</include>
-      </includes>
-      <excludes>
-        <exclude>*sources.jar</exclude>
-        <exclude>*javadoc.jar</exclude>
-        <exclude>*tests.jar</exclude>
-      </excludes>
-      <outputDirectory/>
-    </fileSet>
-    <fileSet>
       <directory>${project.build.directory}/engine/spark/target/</directory>
       <includes>
         <include>spark*.jar</include>
@@ -157,6 +100,7 @@
       </excludes>
       <outputDirectory>${project.build.directory}/lib</outputDirectory>
     </fileSet>
+    
     <fileSet>
       <directory>${project.build.directory}/</directory>
       <outputDirectory>${project.build.directory}/lib</outputDirectory>
@@ -206,4 +150,22 @@
       <directoryMode>0755</directoryMode>
     </fileSet>
   </fileSets>
+
+  <dependencySets>
+    <dependencySet>
+      <includes>
+        <include>org.apache.mahout:*:jar</include>
+      </includes>
+      <excludes>
+        <exclude>org.apache.mahout:dependency-reduced*:jar</exclude>
+      </excludes>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+      <unpack>false</unpack>
+      <scope>runtime</scope>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+  </dependencySets>
 </assembly>
