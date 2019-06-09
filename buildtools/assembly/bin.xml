@@ -37,7 +37,7 @@
 <!--        <useAllReactorProjects>true</useAllReactorProjects>-->
         <moduleSet>
 
-            
+
          <binaries>
             <unpack>false</unpack>
                 <dependencySets>
