@@ -1,3 +1,4 @@
+
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -36,8 +37,12 @@ RUN set -ex && \
     touch /opt/spark/RELEASE && \
     rm /bin/sh && \
     ln -sv /bin/bash /bin/sh && \
+    mkdir -p /opt/mahout && \
+    git clone https://github.com/andrewpalumbo/mahout.git /opt/mahout && \
+    cd opt/mahout && git fetch && git checkout -b branch-2.3 && \
+    mvn clean package install && cp lib/*.jar /opt/spark/jars && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
-    chgrp root /etc/passwd && chmod ug+rw /etc/passwd
+    chgrp root /etc/passwd && chmod ug+rw /etc/passwd \
 
 COPY jars /opt/spark/jars
 COPY bin /opt/spark/bin
@@ -56,4 +61,6 @@ ENTRYPOINT [ "/opt/entrypoint.sh" ]
 
 # Specify the User that the actual main process will run as
 USER ${spark_uid}
+
+
 

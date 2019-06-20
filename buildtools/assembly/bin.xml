@@ -21,23 +21,26 @@
         </includes>
     </fileSet>
     <fileSet>
-        <directory>${project.build.directory}/lib</directory>
-        <outputDirectory>lib</outputDirectory>
+        <directory>${project.basedir}/lib</directory>
+        <outputDirectory>lib/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
+        <includes>
+           <include>*.jar</include>
+        </includes>
         <excludes>
             <exclude>work</exclude>
             <exclude>work/**</exclude>
         </excludes>
     </fileSet>
     <fileSet>
-        <directory>${project.build.directory}/site</directory>
+        <directory>${pproject.basedir}/site</directory>
         <outputDirectory>docs</outputDirectory>
     </fileSet>
 
     <fileSet>
-        <directory>${project.build.directory}/bin</directory>
+        <directory>${project.basedir}/bin</directory>
         <fileMode>755</fileMode>
         <directoryMode>755</directoryMode>
         <outputDirectory>bin</outputDirectory>
@@ -49,7 +52,7 @@
     </fileSet>
 
     <fileSet>
-        <directory>${project.build.directory}/examples/bin</directory>
+        <directory>${project.basedir}/examples/bin</directory>
         <outputDirectory>examples/bin/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
@@ -62,7 +65,7 @@
 
 
     <fileSet>
-        <directory>examples/bin/resources</directory>
+        <directory>${project.basedir}/examples/bin/resources</directory>
         <outputDirectory>examples/bin/resources</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
