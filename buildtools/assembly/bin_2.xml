@@ -170,6 +170,12 @@
         </include>
 <!--        <include>org.apache.mahout:dependency-reduced*:jar</include>-->
       </includes>
+      <excludes>
+        <exclude>
+        org.apache.mahout:*dependency-reduced*
+      </exclude>
+      </excludes>
+
     </dependencySet>
     <dependencySet>
       <outputDirectory>lib</outputDirectory>

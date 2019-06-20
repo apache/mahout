@@ -66,21 +66,21 @@
         </fileSet>
 
         <fileSet>
-            <directory>src/main/bin</directory>
+            <directory>bin</directory>
             <fileMode>755</fileMode>
             <directoryMode>755</directoryMode>
             <outputDirectory>bin</outputDirectory>
         </fileSet>
 
         <fileSet>
-            <directory>${project.build.directory}/lib/*</directory>
+            <directory>lib/*</directory>
             <outputDirectory>lib</outputDirectory>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
         </fileSet>
 
         <fileSet>
-            <directory>${project.build.directory}/examples/bin/**/**</directory>
+            <directory>examples/bin/**/**</directory>
             <outputDirectory>examples/bin/**/**</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <fileMode>0755</fileMode>

@@ -486,6 +486,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
+
               <execution>
                  <id>bin-assembly</id>
                  <phase>package</phase>
@@ -494,13 +495,13 @@
                  </goals>
                  <configuration>
                    <skipAssembly>${mahout.skip.distribution}</skipAssembly>
-                   <descriptors>
-                     <descriptor>buildtools/assembly/bin_old.xml</descriptor>
-                   </descriptors>
+                     <descriptor>buildtools/assembly/bin.xml</descriptor>
+<!--                     <descriptor>mahout/engine/spark/src/main/assembly/dependency-reduced.xml</descriptor>-->
                    <tarLongFileMode>gnu</tarLongFileMode>
                    <appendAssemblyId>true</appendAssemblyId>
                  </configuration>
               </execution>
+
               <execution>
                 <id>src-assembly</id>
                 <phase>package</phase>
@@ -516,7 +517,21 @@
                   <appendAssemblyId>true</appendAssemblyId>
                 </configuration>
               </execution>
+
+              <execution>
+              <id>dependency-reduced</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              <configuration>
+                <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                <descriptor>engine/spark/src/main/assembly/dependency-reduced.xml</descriptor>
+                </configuration>
+             </execution>
+
             </executions>
+
           </plugin>
 
           <plugin>
