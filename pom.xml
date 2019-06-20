@@ -114,7 +114,7 @@
     <scala.compat.version>2.12</scala.compat.version>
     <source.plugin.version>3.0.1</source.plugin.version>
     <spark.version>2.4.3</spark.version>
-    <spark.compat.version>2.3</spark.compat.version>
+    <spark.compat.version>2.4</spark.compat.version>
     <depgraph.plugin.version>3.3.0</depgraph.plugin.version>
 
     <!-- `mvn site` throws a hissy fit searching no longer existing repos if this is not set false -->
@@ -487,7 +487,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                 <id>-assembly</id>
+                 <id>bin-assembly</id>
                  <phase>package</phase>
                  <goals>
                    <goal>single</goal>
