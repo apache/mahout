@@ -66,45 +66,10 @@
         </fileSet>
 
         <fileSet>
-            <directory>target/issuesFixed</directory>
-            <fileMode>644</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>issuesFixed</outputDirectory>
-        </fileSet>
-
-        <fileSet>
             <directory>src/main/bin</directory>
             <fileMode>755</fileMode>
             <directoryMode>755</directoryMode>
             <outputDirectory>bin</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>../opennlp-morfologik-addon/src/main/bin</directory>
-            <fileMode>755</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>bin</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>../opennlp-brat-annotator/src/main/bin</directory>
-            <fileMode>755</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>bin</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>../opennlp-tools/lang</directory>
-            <fileMode>644</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>lang</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>../opennlp-docs/target/docbkx/html</directory>
-            <fileMode>644</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>docs/manual</outputDirectory>
         </fileSet>
 
         <fileSet>

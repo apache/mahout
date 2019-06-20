@@ -492,14 +492,14 @@
                  <goals>
                    <goal>single</goal>
                  </goals>
-               <configuration>
-                  <skipAssembly>${mahout.skip.distribution}</skipAssembly>
-                  <descriptors>
-                    <descriptor>buildtools/assembly/bin.xml</descriptor>
-                  </descriptors>
-                  <tarLongFileMode>gnu</tarLongFileMode>
-		          <appendAssemblyId>true</appendAssemblyId>
-             </configuration>
+                 <configuration>
+                   <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                   <descriptors>
+                     <descriptor>buildtools/assembly/bin_old.xml</descriptor>
+                   </descriptors>
+                   <tarLongFileMode>gnu</tarLongFileMode>
+                   <appendAssemblyId>true</appendAssemblyId>
+                 </configuration>
               </execution>
               <execution>
                 <id>src-assembly</id>
