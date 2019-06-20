@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>core_2.12</artifactId>
+  <artifactId>mahout-core_2.12</artifactId>
   <name>Mahout Core</name>
   <description>High performance scientific and technical computing data structures and methods,
     mostly based on CERN's Colt Java API
@@ -283,7 +283,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/core_${scala.compat.version}-${project.version}.jar" tofile="../lib/core_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/mahout-core_${scala.compat.version}-${project.version}.jar" tofile="../lib/mahout-core_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -314,7 +314,7 @@
             <fileset>
               <directory>../lib/</directory>
               <includes>
-                <include>core_*.jar</include>
+                <include>mahout-core_*.jar</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>

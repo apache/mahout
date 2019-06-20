@@ -166,8 +166,9 @@
   <dependencySets>
     <dependencySet>
       <includes>
-        <include>org.apache.mahout:*:jar</include>
-        <include>org.apache.mahout:dependency-reduced*:jar</include>
+        <include>org.apache.mahout:*:*:14.0-SNAPSHOT
+        </include>
+<!--        <include>org.apache.mahout:dependency-reduced*:jar</include>-->
       </includes>
     </dependencySet>
     <dependencySet>

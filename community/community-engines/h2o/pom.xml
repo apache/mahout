@@ -22,12 +22,12 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>community-engines</artifactId>
-    <version>14.1</version>
+    <artifactId>mahout-community-engines_2.12</artifactId>
+    <version>14.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
+  <artifactId>mahout-h2o_2.12</artifactId>
   <name>-- Mahout H2O Engine (Community)</name>
   <description>
     H2O Backend for Mahout DSL

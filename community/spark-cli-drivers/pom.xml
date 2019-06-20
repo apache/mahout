@@ -22,12 +22,12 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>community</artifactId>
+    <artifactId>mahout-community</artifactId>
     <version>14.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark-cli-drivers_2.12</artifactId>
+  <artifactId>mahout-spark-cli-drivers_2.12</artifactId>
   <name>- Mahout Spark CLI Drivers</name>
   <description>These drivers will allow you to compile a handy Apache Spark App which utilizes Apache Mahout.
   </description>
@@ -67,13 +67,13 @@
     <!-- our stuff -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>spark_2.12</artifactId>
+      <artifactId>mahout-spark_2.12</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_2.12</artifactId>
+      <artifactId>mahout-core_2.12</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
@@ -81,7 +81,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>spark_2.12</artifactId>
+      <artifactId>mahout-spark_2.12</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
     </dependency>
@@ -153,7 +153,7 @@
             <phase>package</phase>
             <configuration>
                 <tasks>
-                  <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" tofile="${project.basedir}/../../lib/spark-cli-drivers_${scala.compat.version}-${project.version}.jar" />
+                  <copy file="target/mahout-spark-cli-drivers_${scala.compat.version}-${project.version}.jar" tofile="${project.basedir}/../../lib/mahout-spark-cli-drivers_${scala.compat.version}-${project.version}.jar" />
                  <!-- <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="${project.basedir}/../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" /> -->
                 </tasks>
               </configuration>

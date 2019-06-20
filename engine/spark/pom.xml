@@ -22,12 +22,12 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>engine</artifactId>
+    <artifactId>mahout-engine</artifactId>
     <version>14.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>spark_2.12</artifactId>
+  <artifactId>mahout-spark_2.12</artifactId>
   <name>- Mahout Spark Engine</name>
   <description>
     Mahout Bindings for Apache Spark
@@ -155,8 +155,8 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/spark_${scala.compat.version}-${project.version}.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}.jar" />
-                <copy file="target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
+                <copy file="target/mahout-spark_${scala.compat.version}-${project.version}.jar" tofile="../../lib/mahout-spark_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/mahout-spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="../../lib/mahout-spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -170,7 +170,7 @@
             <phase>dont-execute</phase>
             <configuration>
               <tasks>
-                <copy file="target/spark_${scala.compat.version}-${project.version}-javadoc.jar" tofile="../../docs/spark_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/mahout-spark_${scala.compat.version}-${project.version}-javadoc.jar" tofile="../../docs/mahout-spark_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -214,7 +214,7 @@
             <fileset>
               <directory>../../lib/</directory>
               <includes>
-                <include>spark_*.jar</include>
+                <include>mahout-spark_*.jar</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
@@ -250,7 +250,7 @@
     <!-- mahout stuff -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>mahout-core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -269,7 +269,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>mahout-core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>

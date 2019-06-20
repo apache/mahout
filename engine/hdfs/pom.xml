@@ -22,7 +22,7 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>engine</artifactId>
+    <artifactId>mahout-engine</artifactId>
     <version>14.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
@@ -68,7 +68,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfs_2.12-14.0-SNAPSHOT.jar" tofile="${project.build.directory}/lib/mahout-hdfs_2.12-14.0-SNAPSHOT.jar" />
+                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="${project.build.directory}/lib/mahout-hdfs_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -77,10 +77,10 @@
           </execution>
           <execution>
             <id>copy-javadocs</id>
-            <phase>run</phase>
+            <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfs_2.12-14.1.jar" tofile="${project.build.directory}/docs/mahout-hdfs_2.12-14.1r-javadoc.jar" />
+                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="${project.build.directory}/docs/mahout-hdfs_2.12-${scala.compat.version}-${project.version}-javadoc.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -180,14 +180,13 @@
     <!-- our modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>mahout-core_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>mahout-core_${scala.compat.version}</artifactId>
       <version>${version}</version>
       <type>test-jar</type>
       <scope>test</scope>
