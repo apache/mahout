@@ -59,6 +59,7 @@
       </plugin>
 
       <!-- copy jars to lib/ -->
+      <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.4</version>
@@ -68,7 +69,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="${project.build.directory}/lib/mahout-hdfs_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="../../ib/mahout-hdfs_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
@@ -80,7 +81,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="${project.build.directory}/docs/mahout-hdfs_2.12-${scala.compat.version}-${project.version}-javadoc.jar" />
+                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="../../docs/mahout-hdfs_${scala.compat.version}-${project.version}-javadoc.jar" />
               </tasks>
             </configuration>
             <goals>

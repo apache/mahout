@@ -43,6 +43,10 @@
     </tag>
   </scm>
 
+  <properties>
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+  </properties>
+
   <dependencies>
 
     <dependency>
@@ -171,7 +175,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>${project.basedir}/lib/</directory>
+              <directory>${project.build.directory}/lib/</directory>
               <includes>
                 <include>spark-cli*</include>
                 <include>spark_*-dependency-reduced.jar</include>
@@ -179,7 +183,7 @@
               <followSymlinks>false</followSymlinks>
             </fileset>
             <fileset>
-              <directory>${project.basedir}/community/spark-cli-drivers/target/</directory>
+              <directory>${project.build.directory}/community/spark-cli-drivers/target/</directory>
               <includes>
                 <include>spark_*</include>
                 <include>spark_*-dependency-reduced.jar</include>
