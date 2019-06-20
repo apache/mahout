@@ -36,23 +36,23 @@
 <!--    </dependencySet>-->
 <!--  </dependencySets>-->
 
-<!--  <fileSets>-->
-<!--    <fileSet>-->
-<!--      <directory>examples</directory>-->
-<!--      <includes>-->
-<!--        <include>*.jar</include>-->
-<!--      </includes>-->
-<!--      <excludes>-->
-<!--        <exclude>mahout-*</exclude>-->
-<!--        <exclude>junit-*</exclude>-->
-<!--      </excludes>-->
-<!--      <outputDirectory>lib</outputDirectory>-->
-<!--    </fileSet>-->
+  <fileSets>
+    <fileSet>
+      <directory>examples</directory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>mahout-*</exclude>
+        <exclude>junit-*</exclude>
+      </excludes>
+      <outputDirectory>lib</outputDirectory>
+    </fileSet>
 
 <!--    <fileSet>-->
 <!--      <directory>core/target</directory>-->
 <!--      <includes>-->
-<!--        <include>core*.jar</include>-->
+<!--        <include>mahout-core*.jar</include>-->
 <!--      </includes>-->
 <!--      <excludes>-->
 <!--        <exclude>*sources.jar</exclude>-->
@@ -90,7 +90,7 @@
 <!--    <fileSet>-->
 <!--      <directory>community/spark-cli-drivers/target/</directory>-->
 <!--      <includes>-->
-<!--        <include>spark*.jar</include>-->
+<!--        <include>mahout-spark*.jar</include>-->
 <!--      </includes>-->
 <!--      <excludes>-->
 <!--        <exclude>*sources.jar</exclude>-->
@@ -103,7 +103,7 @@
 <!--    <fileSet>-->
 <!--      <directory>/engine/hdfs/target/</directory>-->
 <!--      <includes>-->
-<!--        <include>hdfs*.jar</include>-->
+<!--        <include>mahout-hdfs*.jar</include>-->
 <!--      </includes>-->
 <!--      <excludes>-->
 <!--        <exclude>*sources.jar</exclude>-->
@@ -129,44 +129,44 @@
 <!--      </excludes>-->
 <!--    </fileSet>-->
 <!--  <fileSets>-->
-<!--    <fileSet>-->
-<!--      <directory>bin/*</directory>-->
-<!--      <outputDirectory>bin</outputDirectory>-->
-<!--      <fileMode>0755</fileMode>-->
-<!--      <directoryMode>0755</directoryMode>-->
-<!--    </fileSet>-->
+    <fileSet>
+      <directory>bin/*</directory>
+      <outputDirectory>bin</outputDirectory>
+      <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
+    </fileSet>
 
-<!--    <fileSet>-->
-<!--      <directory>lib/*.jar</directory>-->
-<!--      <outputDirectory>lib</outputDirectory>-->
-<!--      <fileMode>0755</fileMode>-->
-<!--      <directoryMode>0755</directoryMode>-->
-<!--    </fileSet>-->
+    <fileSet>
+      <directory>lib/mahout-*.jar</directory>
+      <outputDirectory>lib</outputDirectory>
+      <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
+    </fileSet>
 
-<!--    <fileSet>-->
-<!--      <directory>examples/bin/</directory>-->
-<!--      <outputDirectory>examples/bin/</outputDirectory>-->
-<!--      <useDefaultExcludes>true</useDefaultExcludes>-->
-<!--      <fileMode>0755</fileMode>-->
-<!--      <directoryMode>0755</directoryMode>-->
-<!--      <excludes>-->
-<!--        <exclude>work</exclude>-->
-<!--        <exclude>work/**</exclude>-->
-<!--      </excludes>-->
-<!--    </fileSet>-->
-<!--    <fileSet>-->
-<!--      <directory>examples/bin/resources</directory>-->
-<!--      <outputDirectory>examples/bin/resources</outputDirectory>-->
-<!--      <useDefaultExcludes>true</useDefaultExcludes>-->
-<!--      <fileMode>0755</fileMode>-->
-<!--      <directoryMode>0755</directoryMode>-->
-<!--    </fileSet>-->
-<!--  </fileSets>-->
+    <fileSet>
+      <directory>examples/bin/</directory>
+      <outputDirectory>examples/bin/</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
+      <excludes>
+        <exclude>work</exclude>
+        <exclude>work/**</exclude>
+      </excludes>
+    </fileSet>
+    <fileSet>
+      <directory>examples/bin/resources</directory>
+      <outputDirectory>examples/bin/resources</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
+    </fileSet>
+  </fileSets>
 
   <dependencySets>
     <dependencySet>
       <includes>
-        <include>org.apache.mahout:*:*:14.0-SNAPSHOT
+        <include>org.apache.mahout:mahout*
         </include>
 <!--        <include>org.apache.mahout:dependency-reduced*:jar</include>-->
       </includes>
