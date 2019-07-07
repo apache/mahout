@@ -1,9 +1,9 @@
 
 
-<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
 <id>bin</id>
+
 <formats>
     <format>tar.gz</format>
     <format>tar.bz2</format>
@@ -20,6 +20,7 @@
             <include>pom.xml</include>
         </includes>
     </fileSet>
+
     <fileSet>
         <directory>${project.basedir}/lib</directory>
         <outputDirectory>lib/</outputDirectory>
@@ -61,6 +62,21 @@
             <exclude>work</exclude>
             <exclude>work/**</exclude>
         </excludes>
+    </fileSet>
+    <fileSet>
+        <directory>${project.basedir}/**/**/target/</directory>
+        <outputDirectory>examples/bin/</outputDirectory>
+        <useDefaultExcludes>true</useDefaultExcludes>
+        <fileMode>0755</fileMode>
+        <directoryMode>0755</directoryMode>
+        <includes>
+            <include>*.jar</include>
+        </includes>
+        <excludes>
+            <exclude>work</exclude>
+            <exclude>work/**</exclude>
+        </excludes>
+
     </fileSet>
 
 

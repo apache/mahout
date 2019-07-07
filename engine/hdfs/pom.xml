@@ -69,7 +69,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="../../ib/mahout-hdfs_${scala.compat.version}-${project.version}.jar" />
+                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="../../lib/mahout-hdfs_${scala.compat.version}-${project.version}.jar" />
               </tasks>
             </configuration>
             <goals>
