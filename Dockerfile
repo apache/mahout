@@ -33,6 +33,7 @@ RUN set -ex && \
     mkdir -p /opt/mahout/examples && \
     mkdir -p /opt/mahout/work-dir && \
     mkdir -p /opt/spark && \
+    export $MAHOUT_HOME=. && \
     mkdir -p $MAHOUT_HOME/spark-build && \
     export MAVEN_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=512m" && \
     export SPARK_HOME=$MAHOUT_HOME/spark-build/ && \
