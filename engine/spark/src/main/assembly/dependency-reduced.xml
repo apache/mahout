@@ -33,7 +33,7 @@
         </excludes>
       </unpackOptions>
       <scope>runtime</scope>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>./</outputDirectory>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <includes>
         <!-- guava only included to get Preconditions in mahout-math and mahout-hdfs -->
