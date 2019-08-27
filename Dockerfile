@@ -25,6 +25,7 @@ ARG spark_uid=185
 # this Dockerfile will build the Spark version 2.4.3 against Scala 2.12.
 # docker build -t mahout:latest -f resource_managers/docker/kubernetes/src/main/dockerfiles/Dockerfile .
 
+
 RUN set -ex && \
     apk upgrade --no-cache && \
     ln -s /lib /lib64 && \
@@ -33,15 +34,15 @@ RUN set -ex && \
     mkdir -p /opt/mahout/examples && \
     mkdir -p /opt/mahout/work-dir && \
     mkdir -p /opt/spark && \
-    export $MAHOUT_HOME=. && \
+    export MAHOUT_HOME=. && \
     mkdir -p $MAHOUT_HOME/spark-build && \
     export MAVEN_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=512m" && \
     export SPARK_HOME=$MAHOUT_HOME/spark-build/ && \
     export SPARK_SRC_URL="https://www.apache.org/dyn/closer.lua/spark/spark-2.4.3/spark-2.4.3.tgz" && \
     export SPARK_SRC_SHA256="3EAEA3B0A81A717BB43CE6EE0BB2C3B8351EF080DB9499AF66F9F22C8A18D38C5E1426CBFEF04AFD2A4002ACE5B28A6BEACBCE4E5E42506F4FD270B05D0DB379" && \
     curl  -LfsS $SPARK_SRC_URL -o $SPARK_HOME/spark-2.4.3.tgz  && \
-    echo "${SPARK_SRC_SHA256} ${SPARK_HOME}/spark-2.4.3.tgz" | sha512sum -c - \
-    $SPARK_HOME/dev/change-scala-version.sh 2.12
+    echo "${SPARK_SRC_SHA256} ${SPARK_HOME}/spark-2.4.3.tgz" | sha512sum -c - && \
+    $SPARK_HOME/dev/change-scala-version.sh 2.12 && \
     $SPARK_HOME/build/mvn -Pkubernetes -Pscala-2.12 -DskipTests clean package && \
     touch /opt/mahout/RELEASE && \
     rm /bin/sh && \
