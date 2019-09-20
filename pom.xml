@@ -437,13 +437,13 @@
         <module>core</module>
         <module>engine</module>
         <module>community/spark-cli-drivers</module>
+        <module>experimental/viennacl-omp</module>
         <!--<module>community/community-engines</module>-->
         <!--<module>community/community-engines/flink-batch</module>-->
         <!--<module>community/community-engines/h2o</module>-->
         <!--<module>community/mahout-mr</module>-->
         <!--<module>experimental</module>-->
         <!--<module>experimental/viennacl</module>-->
-        <!--<module>experimental/viennacl-omp</module>-->
       </modules>
       <properties>
         <skipTests>false</skipTests>
@@ -490,7 +490,7 @@
                  <id>bin-assembly</id>
                  <phase>package</phase>
                  <goals>
-                   <goal>single</goal>
+                   <goal>jar</goal>
                  </goals>
                  <configuration>
                    <skipAssembly>${mahout.skip.distribution}</skipAssembly>
