@@ -166,9 +166,9 @@
 
   <modules>
     <module>core</module>
-    <module>engine</module>
-    <module>community</module>
-    <!-- <module>examples</module> -->
+    <module>engine/hdfs</module>
+    <module>engine/spark</module>
+    <module>community/spark-cli-drivers</module>
   </modules>
 
   <dependencyManagement>
@@ -420,7 +420,8 @@
       <id>all</id>
       <modules>
         <module>core</module>
-        <module>engine</module>
+        <module>engine/hdfs</module>
+        <module>engine/spark</module>
         <module>community/spark-cli-drivers</module>
         <!--<module>community/community-engines</module>-->
         <!--<module>community/community-engines/flink-batch</module>-->
@@ -428,16 +429,21 @@
         <!--<module>community/mahout-mr</module>-->
         <!--<module>experimental</module>-->
         <!--<module>experimental/viennacl</module>-->
+<!--
         <module>experimental/viennacl-omp</module>
+-->
       </modules>
     </profile>
     <profile>
       <id>apache-release</id>
       <modules>
         <module>core</module>
-        <module>engine</module>
+        <module>engine/hdfs</module>
+        <module>engine/spark</module>
         <module>community/spark-cli-drivers</module>
+<!--
         <module>experimental/viennacl-omp</module>
+-->
         <!--<module>community/community-engines</module>-->
         <!--<module>community/community-engines/flink-batch</module>-->
         <!--<module>community/community-engines/h2o</module>-->
