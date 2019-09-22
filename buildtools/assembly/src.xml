@@ -59,5 +59,16 @@
           <exclude>work/**</exclude>
         </excludes>
       </fileSet>
+      <fileSet>
+        <directory>${project.basedir}/resource-managers/kubernetes/docker/src/main/dockerfiles</directory>
+        <outputDirectory>${project.basedir}</outputDirectory>
+        <includes>
+          <include>*.*</include>
+          <include>*</include>
+        </includes>
+        <useDefaultExcludes>true</useDefaultExcludes>
+        <fileMode>0755</fileMode>
+        <directoryMode>0755</directoryMode>
+      </fileSet>
     </fileSets>
 </assembly>
