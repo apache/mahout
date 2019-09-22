@@ -116,7 +116,7 @@
     <spark.version>2.4.3</spark.version>
     <spark.compat.version>2.4</spark.compat.version>
     <depgraph.plugin.version>3.3.0</depgraph.plugin.version>
-
+    <mahout.skip.distribution>true</mahout.skip.distribution>
     <!-- `mvn site` throws a hissy fit searching no longer existing repos if this is not set false -->
     <dependency.locations.enabled>false</dependency.locations.enabled>
 
@@ -428,7 +428,7 @@
         <!--<module>community/mahout-mr</module>-->
         <!--<module>experimental</module>-->
         <!--<module>experimental/viennacl</module>-->
-        <!--<module>experimental/viennacl-omp</module>-->
+        <module>experimental/viennacl-omp</module>
       </modules>
     </profile>
     <profile>
@@ -448,6 +448,7 @@
       <properties>
         <skipTests>false</skipTests>
         <maven.test.skip>false</maven.test.skip>
+        <mahout.skip.distribution>false</mahout.skip.distribution>
       </properties>
       <build>
         <plugins>
@@ -490,11 +491,13 @@
                  <id>bin-assembly</id>
                  <phase>package</phase>
                  <goals>
-                   <goal>jar</goal>
+                   <goal>single</goal>
                  </goals>
                  <configuration>
                    <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                   <descriptors>
                      <descriptor>buildtools/assembly/bin.xml</descriptor>
+                   </descriptors>
                    <tarLongFileMode>gnu</tarLongFileMode>
                    <appendAssemblyId>true</appendAssemblyId>
                  </configuration>
