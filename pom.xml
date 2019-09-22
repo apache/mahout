@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>14.1-SNAPSHOT</version>
+  <version>14.1</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -166,8 +166,10 @@
 
   <modules>
     <module>core</module>
+    <module>engine</module>
     <module>engine/hdfs</module>
     <module>engine/spark</module>
+    <module>community</module>
     <module>community/spark-cli-drivers</module>
   </modules>
 
@@ -438,8 +440,10 @@
       <id>apache-release</id>
       <modules>
         <module>core</module>
+        <module>engine</module>
         <module>engine/hdfs</module>
         <module>engine/spark</module>
+        <module>community</module>
         <module>community/spark-cli-drivers</module>
 <!--
         <module>experimental/viennacl-omp</module>
