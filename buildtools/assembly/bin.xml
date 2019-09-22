@@ -9,6 +9,7 @@
     <format>tar.bz2</format>
     <format>zip</format>
 </formats>
+
 <fileSets>
     <fileSet>
         <directory>${project.basedir}</directory>
@@ -20,7 +21,6 @@
             <include>pom.xml</include>
         </includes>
     </fileSet>
-
     <fileSet>
         <directory>${project.basedir}/lib</directory>
         <outputDirectory>lib/</outputDirectory>
@@ -39,7 +39,6 @@
         <directory>${pproject.basedir}/site</directory>
         <outputDirectory>docs</outputDirectory>
     </fileSet>
-
     <fileSet>
         <directory>${project.basedir}/bin</directory>
         <fileMode>755</fileMode>
@@ -52,17 +51,6 @@
         </excludes>
     </fileSet>
 
-    <fileSet>
-        <directory>${project.basedir}/examples/bin</directory>
-        <outputDirectory>examples/bin/</outputDirectory>
-        <useDefaultExcludes>true</useDefaultExcludes>
-        <fileMode>0755</fileMode>
-        <directoryMode>0755</directoryMode>
-        <excludes>
-            <exclude>work</exclude>
-            <exclude>work/**</exclude>
-        </excludes>
-    </fileSet>
     <fileSet>
         <directory>${project.basedir}/**/**/target/</directory>
         <outputDirectory>examples/bin/</outputDirectory>
@@ -79,10 +67,31 @@
 
     </fileSet>
 
-
+    <fileSet>
+        <directory>${project.basedir}/examples/bin</directory>
+        <outputDirectory>examples/bin/</outputDirectory>
+        <useDefaultExcludes>true</useDefaultExcludes>
+        <fileMode>0755</fileMode>
+        <directoryMode>0755</directoryMode>
+        <excludes>
+            <exclude>work</exclude>
+            <exclude>work/**</exclude>
+        </excludes>
+    </fileSet>
     <fileSet>
         <directory>${project.basedir}/examples/bin/resources</directory>
         <outputDirectory>examples/bin/resources</outputDirectory>
+        <useDefaultExcludes>true</useDefaultExcludes>
+        <fileMode>0755</fileMode>
+        <directoryMode>0755</directoryMode>
+    </fileSet>
+    <fileSet>
+        <directory>${project.basedir}/resource-managers/kubernetes/docker/src/main/dockerfiles</directory>
+        <outputDirectory>${project.basedir}</outputDirectory>
+        <includes>
+            <include>*.*</include>
+            <include>*</include>
+        </includes>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
