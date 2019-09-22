@@ -36,6 +36,8 @@
           <include>src/conf/**</include>
           <include>**/build.xml</include>
           <include>**/*.properties</include>
+          <include>**/Dockerfile</include>
+          <include>**/entrypoint.sh</include>
         </includes>
         <excludes>
           <exclude>**/target/**</exclude>
@@ -60,15 +62,15 @@
         </excludes>
       </fileSet>
       <fileSet>
-        <directory>${project.basedir}/resource-managers/kubernetes/docker/src/main/dockerfiles</directory>
-        <outputDirectory>${project.basedir}</outputDirectory>
-        <includes>
-          <include>*.*</include>
-          <include>*</include>
-        </includes>
+        <directory>${project.build.directory}/examples/bin/resources</directory>
+        <outputDirectory>examples/bin</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
+        <excludes>
+          <exclude>work</exclude>
+          <exclude>work/**</exclude>
+        </excludes>
       </fileSet>
     </fileSets>
 </assembly>
