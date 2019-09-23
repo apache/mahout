@@ -252,8 +252,9 @@
        <artifactId>maven-release-plugin</artifactId>
         <version>2.5.2</version>
         <configuration>
+          <preparationGoals>clean package install</preparationGoals>
           <useReleaseProfile>true</useReleaseProfile>
-          <releaseProfiles>apache-release</releaseProfiles>
+          <releaseProfiles>mahout-release,apache-release</releaseProfiles>
           <goals>deploy</goals>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <arguments>${arguments}</arguments>
@@ -539,7 +540,7 @@
           <plugin>
             <artifactId>maven-release-plugin</artifactId>
             <configuration>
-              <releaseProfiles>mahout-release</releaseProfiles>
+              <releaseProfiles>apache-release</releaseProfiles>
               <preparationGoals>clean package install</preparationGoals>
             </configuration>
           </plugin>
@@ -617,14 +618,14 @@
         <checkstyle.skip>true</checkstyle.skip>
       </properties>
     </profile>
-    <profile>
-      <id>mahout-release</id>
-      <properties>
-        <skipTests>true</skipTests>
-        <pmd.skip>true</pmd.skip>
-        <checkstyle.skip>true</checkstyle.skip>
-      </properties>
-    </profile>
+<!--    <profile>-->
+<!--      <id>-release</id>-->
+<!--      <properties>-->
+<!--        <skipTests>true</skipTests>-->
+<!--        <pmd.skip>true</pmd.skip>-->
+<!--        <checkstyle.skip>true</checkstyle.skip>-->
+<!--      </properties>-->
+<!--    </profile>-->
   </profiles>
 
   <reporting>

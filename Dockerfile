@@ -38,10 +38,10 @@ RUN set -ex && \
     mkdir -p $MAHOUT_HOME/spark-build && \
     export MAVEN_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=512m" && \
     export SPARK_HOME=$MAHOUT_HOME/spark-build/ && \
-    export SPARK_SRC_URL="https://www.apache.org/dyn/closer.lua/spark/spark-2.4.3/spark-2.4.3.tgz" && \
-    export SPARK_SRC_SHA256="3EAEA3B0A81A717BB43CE6EE0BB2C3B8351EF080DB9499AF66F9F22C8A18D38C5E1426CBFEF04AFD2A4002ACE5B28A6BEACBCE4E5E42506F4FD270B05D0DB379" && \
-    curl  -LfsS $SPARK_SRC_URL -o $SPARK_HOME/spark-2.4.3.tgz  && \
-    echo "${SPARK_SRC_SHA256} ${SPARK_HOME}/spark-2.4.3.tgz" | sha512sum -c - && \
+    export SPARK_SRC_URL="http://apache.cs.utah.edu/spark/spark-2.4.4/" && \
+    export SPARK_SRC_SHA256="D33096E7EFBC4B131004C85FB5833AC3BAB8F097644CBE68D89ADC81F5144B5535337FD0082FA04A19C2870BD7D84758E8AE9C6EC1C7F3DF9FED35325EEA8928" && \
+    curl  -LfsS $SPARK_SRC_URL -o $SPARK_HOME/spark-2.4.4.tgz  && \
+    echo "${SPARK_SRC_SHA256} ${SPARK_HOME}/spark-2.4.4.tgz" | sha512sum -c - && \
     $SPARK_HOME/dev/change-scala-version.sh 2.12 && \
     $SPARK_HOME/build/mvn -Pkubernetes -Pscala-2.12 -DskipTests clean package && \
     touch /opt/mahout/RELEASE && \
