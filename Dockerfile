@@ -48,7 +48,10 @@ RUN set -ex && \
     tar -xzvf ${SPARK_BASE}/${SPARK_VERSION}.tgz -C ${SPARK_BASE}/&& \
     echo ${SPARK_BASE}/${SPARK_VERSION}
     sh ${SPARK_HOME}/dev/change-scala-version.sh 2.12 && \
-    sh ${SPARK_HOME}/build/mvn -Pkubernetes -Pscala-2.12 -DskipTests clean package
+    sh ${SPARK_HOME}/dev/make-distribution.sh --name ${DATE}-${REVISION} --pip --tgz -DzincPort=${ZINC_PORT} \
+         -Phadoop-2.7 -Pkubernetes -Pkinesis-asl -Phive -Phive-thriftserver
+
+    #sh ${SPARK_HOME}/build/mvn -Pkubernetes -Pscala-2.12 -DskipTests clean package
     touch /opt/mahout/RELEASE && \
     # below is for nodes.  for the moment lets get a master up
     # rm /bin/sh && \

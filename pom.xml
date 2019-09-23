@@ -511,6 +511,7 @@
                  <configuration>
                    <skipAssembly>${mahout.skip.distribution}</skipAssembly>
                    <descriptors>
+                     <sourceReleaseAssemblyDescriptor>buildtools/assembly/src.xml</sourceReleaseAssemblyDescriptor>
                      <descriptor>buildtools/assembly/bin.xml</descriptor>
                    </descriptors>
                    <tarLongFileMode>gnu</tarLongFileMode>
@@ -616,6 +617,7 @@
         <skipTests>true</skipTests>
         <pmd.skip>true</pmd.skip>
         <checkstyle.skip>true</checkstyle.skip>
+        <sourceReleaseAssemblyDescriptor>buildtools/assembly/src.xml</sourceReleaseAssemblyDescriptor>
       </properties>
     </profile>
 <!--    <profile>-->
