@@ -25,7 +25,7 @@
     </fileSet>
     <fileSet>
         <directory>${project.build.directory}/lib</directory>
-        <outputDirectory>lib/</outputDirectory>
+        <outputDirectory>${project.build.directory}lib/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
@@ -55,7 +55,7 @@
 
     <fileSet>
         <directory>${project.build.directory}/**/**/target/</directory>
-        <outputDirectory>/lib</outputDirectory>
+        <outputDirectory>${project.build.directory}/lib</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
@@ -71,7 +71,7 @@
 
     <fileSet>
         <directory>${project.build.directory}/examples/bin</directory>
-        <outputDirectory>examples/bin/</outputDirectory>
+        <outputDirectory>${project.build.directory}examples/bin/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
@@ -82,7 +82,7 @@
     </fileSet>
     <fileSet>
         <directory>${project.build.directory}/examples/bin/resources</directory>
-        <outputDirectory>examples/bin/resources</outputDirectory>
+        <outputDirectory>${project.build.directory}examples/bin/resources</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
