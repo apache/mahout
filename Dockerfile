@@ -22,7 +22,7 @@ ARG spark_uid=185
 
 # Before building the mahout docker image, we must build a spark distrobution following
 # the instructions in http://spark.apache.org/docs/latest/building-spark.html.
-# this Dockerfile will build the Spark version 2.4.3 against Scala 2.12.
+# this Dockerfile will build Spark version 2.4.4 against Scala 2.12.
 # docker build -t mahout:latest -f resource_managers/docker/kubernetes/src/main/dockerfiles/Dockerfile .
 
 
@@ -34,21 +34,27 @@ RUN set -ex && \
     mkdir -p /opt/mahout/examples && \
     mkdir -p /opt/mahout/work-dir && \
     mkdir -p /opt/spark && \
-    export MAHOUT_HOME=. && \
-    mkdir -p $MAHOUT_HOME/spark-build && \
+    export MAHOUT_DOCKER_HOME=/opt/mahout && \
+    export SPARK_VERSION=spark-2.4.4
+    export SPARK_BASE=/opt/spark && \
+    export SPARK_HOME=${SPARK_BASE}/${SPARK_VERSION}
     export MAVEN_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=512m" && \
-    export SPARK_HOME=$MAHOUT_HOME/spark-build/ && \
-    export SPARK_SRC_URL="http://apache.cs.utah.edu/spark/spark-2.4.4/" && \
-    export SPARK_SRC_SHA256="D33096E7EFBC4B131004C85FB5833AC3BAB8F097644CBE68D89ADC81F5144B5535337FD0082FA04A19C2870BD7D84758E8AE9C6EC1C7F3DF9FED35325EEA8928" && \
-    curl  -LfsS $SPARK_SRC_URL -o $SPARK_HOME/spark-2.4.4.tgz  && \
-    echo "${SPARK_SRC_SHA256} ${SPARK_HOME}/spark-2.4.4.tgz" | sha512sum -c - && \
-    $SPARK_HOME/dev/change-scala-version.sh 2.12 && \
-    $SPARK_HOME/build/mvn -Pkubernetes -Pscala-2.12 -DskipTests clean package && \
+    export SPARK_SRC_URL="https://archive.apache.org/dist/spark/${SPARK_VERSION}/${SPARK_VERSION}.tgz" && \
+    export SPARK_SRC_SHA512_URL="https://archive.apache.org/dist/spark/${SPARK_VERSION}/${SPARK_VERSION}.tgz.sha512" && \
+    export SPARK_SRC_SHA512="D33096E7EFBC4B131004C85FB5833AC3BAB8F097644CBE68D89ADC81F5144B5535337FD0082FA04A19C2870BD7D84758E8AE9C6EC1C7F3DF9FED35325EEA8928" && \
+    curl  -LfsS $SPARK_SRC_URL -o ${SPARK_BASE}/${SPARK_VERSION}.tgz  && \
+    curl  -LfsS $SPARK_SRC_SHA512_URL -o ${SPARK_BASE}/${SPARK_VERSION}.tgz.sha512
+    #$SPARK_HOME/$SPARK_VERSION.sha512 ${SPARK_HOME}/$SPARK_VERSION.tgz | shasum -a 512 -c - && \
+    tar -xzvf ${SPARK_BASE}/${SPARK_VERSION}.tgz -C ${SPARK_BASE}/&& \
+    echo ${SPARK_BASE}/${SPARK_VERSION}
+    sh ${SPARK_HOME}/dev/change-scala-version.sh 2.12 && \
+    sh ${SPARK_HOME}/build/mvn -Pkubernetes -Pscala-2.12 -DskipTests clean package
     touch /opt/mahout/RELEASE && \
-    rm /bin/sh && \
-    ln -sv /bin/bash /bin/sh && \
-    echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
-    chgrp root /etc/passwd && chmod ug+rw /etc/passwd
+    # below is for nodes.  for the moment lets get a master up
+    # rm /bin/sh && \
+    # ln -sv /bin/bash /bin/sh && \
+    # echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
+    # chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
 
 COPY lib /opt/mahout/lib
