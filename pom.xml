@@ -441,7 +441,7 @@
       </modules>
     </profile>
     <profile>
-      <id>apache-release</id>
+      <id>mahout-release</id>
       <modules>
         <module>core</module>
         <module>engine</module>
@@ -539,20 +539,13 @@
           <plugin>
             <artifactId>maven-release-plugin</artifactId>
             <configuration>
-              <releaseProfiles>apache-release</releaseProfiles>
+              <releaseProfiles>mahout-release</releaseProfiles>
               <preparationGoals>clean package install</preparationGoals>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>false</skipTests>
-              <skipExec>true</skipExec>
             </configuration>
           </plugin>
         </plugins>
       </build>
+
       <reporting>
         <plugins>
           <plugin>
