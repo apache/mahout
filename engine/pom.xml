@@ -42,10 +42,10 @@
   </scm>
 
 
-  <modules>
-    <module>hdfs</module>
-    <module>spark</module>
-  </modules>
+<!--  <modules>-->
+<!--    <module>hdfs</module>-->
+<!--    <module>spark</module>-->
+<!--  </modules>-->
 
   <dependencies>
 

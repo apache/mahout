@@ -167,10 +167,12 @@
   <modules>
     <module>core</module>
     <module>engine</module>
-    <module>engine/hdfs</module>
     <module>engine/spark</module>
+    <module>engine/hdfs</module>
     <module>community</module>
     <module>community/spark-cli-drivers</module>
+
+
   </modules>
 
   <dependencyManagement>
@@ -422,8 +424,10 @@
       <id>all</id>
       <modules>
         <module>core</module>
+        <module>engine</module>
         <module>engine/hdfs</module>
         <module>engine/spark</module>
+        <module>community</module>
         <module>community/spark-cli-drivers</module>
         <!--<module>community/community-engines</module>-->
         <!--<module>community/community-engines/flink-batch</module>-->
