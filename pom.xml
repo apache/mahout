@@ -120,10 +120,13 @@
     <!-- `mvn site` throws a hissy fit searching no longer existing repos if this is not set false -->
     <dependency.locations.enabled>false</dependency.locations.enabled>
 
-    <!--hack to turn off linting og generated Javadocs.  this is an error in Oracle Java8 and should be fixed in java9
-     http://openjdk.java.net/jeps/212-->
+    <!--hack to turn off linting og generated Javadocs.
+      this is an error in Oracle Java8 and should be fixed in > java8
+     http://openjdk.java.net/jeps/212 -->
     <additionalparam>-Xdoclint:-html</additionalparam>
     <!--EndHack-->
+    <compile.flags></compile.flags>
+
 
 
     <maven.clover.multiproject>true</maven.clover.multiproject>
@@ -452,6 +455,14 @@
   </profile>
   <profile>
     <id>mahout-release</id>
+    <modules>
+      <module>core</module>
+      <module>engine</module>
+      <module>engine/hdfs</module>
+      <module>engine/spark</module>
+      <module>community</module>
+      <module>community/spark-cli-drivers</module>
+    </modules>
     <properties>
       <skipTests>true</skipTests>
       <pmd.skip>true</pmd.skip>
@@ -703,50 +714,39 @@
     <artifactId>taglist-maven-plugin</artifactId>
     <version>2.4</version>
   </plugin>
-  <plugin>
-    <groupId>net.alchim31.maven</groupId>
-    <artifactId>scala-maven-plugin</artifactId>
-    <version>${mscala.version}</version>
-  </plugin>
-</plugins>
-</reporting>
-        </project>
-  </profiles>
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <configLocation>buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
-        </configuration>
-      </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <version>3.7.1</version>
-        <configuration>
-          <reportPlugins>
-            <plugin>
-              <artifactId>maven-project-info-reports-plugin</artifactId>
-              <!--<version>2.2</version>-->
-            </plugin>
-            <plugin>
-              <groupId>net.alchim31.maven</groupId>
-              <artifactId>scala-maven-plugin</artifactId>
-              <version>4.0.2</version>
+  <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-site-plugin</artifactId>
+    <version>3.7.1</version>
+    <configuration>
+      <reportPlugins>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <!--<version>2.2</version>-->
+        </plugin>
+         <plugin>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <version>4.0.2</version>
               <configuration>
-                <jvmArgs>
+               <jvmArgs>
                   <jvmArg>-Xms64m</jvmArg>
                   <jvmArg>-Xmx1024m</jvmArg>
                 </jvmArgs>
               </configuration>
-            </plugin>
-          </reportPlugins>
+         </plugin>
+       </reportPlugins>
+     </configuration>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-checkstyle-plugin</artifactId>
+      <version>3.0.0</version>
+        <configuration>
+          <configLocation>buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
         </configuration>
-      </plugin>
+       </plugin>
     </plugins>
   </reporting>
 </project>
