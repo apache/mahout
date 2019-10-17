@@ -526,7 +526,7 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                  <skipAssembly>true</skipAssembly>
                   <descriptors>
                     <descriptor>buildtools/assembly/src.xml</descriptor>
                   </descriptors>
@@ -618,6 +618,7 @@
         <pmd.skip>true</pmd.skip>
         <checkstyle.skip>true</checkstyle.skip>
         <sourceReleaseAssemblyDescriptor>buildtools/assembly/src.xml</sourceReleaseAssemblyDescriptor>
+        <binaryReleaseAssemblyDescriptor>buildtools/assembly/bin.xml</binaryReleaseAssemblyDescriptor>
       </properties>
     </profile>
 <!--    <profile>-->
