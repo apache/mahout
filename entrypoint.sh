@@ -32,13 +32,14 @@ set -e
 # If there is no passwd entry for the container UID, attempt to create one
 if [ -z "$uidentry" ] ; then
     if [ -w /etc/passwd ] ; then
-        echo "$myuid:x:$myuid:$mygid:${SPARK_USER_NAME:-anonymous uid}:$SPARK_HOME:/bin/false" >> /etc/passwd
+        echo "$myuid:x:$myuid:$mygid:${SPARK_USER_NAME:-anonymous uid}:${SPARK_HOME}:/bin/false" >> /etc/passwd
     else
         echo "Container ENTRYPOINT failed to add passwd entry for anonymous UID"
     fi
 fi
 
-SPARK_CLASSPATH="$SPARK_CLASSPATH:${SPARK_HOME}/jars/*"
+###Todo: ensure that MAHOUT_HOME is properly established as an env var.
+SPARK_CLASSPATH="$SPARK_CLASSPATH:${SPARK_HOME}/jars/*:${$MAHOUT_HOME}/lib/*"
 env | grep SPARK_JAVA_OPT_ | sort -t_ -k4 -n | sed 's/[^=]*=\(.*\)/\1/g' > /tmp/java_opts.txt
 readarray -t SPARK_EXECUTOR_JAVA_OPTS < /tmp/java_opts.txt
 
@@ -58,8 +59,8 @@ case "$1" in
     CMD=(
       "$SPARK_HOME/bin/spark-submit"
       --conf "spark.driver.bindAddress=$SPARK_DRIVER_BIND_ADDRESS"
-      -conf spark.executor.extraLibraryPath=\
-        "$MAHOUT_HOME/lib/mahout-spark_*-dependency-reduced.jar"
+      --conf "spark.executor.extraLibraryPath"=\
+         "${MAHOUT_HOME}/lib/mahout-spark_*-dependency-reduced.jar"
       --deploy-mode client
       "$@"
     )

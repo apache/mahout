@@ -183,13 +183,13 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>14.1</version>
+      <version>14.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>14.1</version>
+      <version>14.2-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

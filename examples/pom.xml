@@ -27,8 +27,8 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>examples</artifactId>
-  <name>Mahout Engine</name>
+  <artifactId>mahout-examples</artifactId>
+  <name>Mahout Eexamples</name>
   <description>Apache Mahout Examples.</description>
 
   <packaging>jar</packaging>
