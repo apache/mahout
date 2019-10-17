@@ -444,8 +444,17 @@
 -->
       </modules>
     </profile>
-    <profile>
-
+  </profiles>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <configLocation>buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
+        </configuration>
+      </plugin>
     <id>release.prepare</id>
     <properties>
       <skipTests>true</skipTests>
