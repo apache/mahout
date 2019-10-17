@@ -161,7 +161,7 @@
       <name>Apache Snapshot Repository</name>
       <url>https://repository.apache.org/snapshots</url>
       <releases>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
       </releases>
     </repository>
 
