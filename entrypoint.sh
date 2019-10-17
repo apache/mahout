@@ -38,6 +38,7 @@ if [ -z "$uidentry" ] ; then
     fi
 fi
 
+###Todo: ensure that MAHOUT_HOME is properly established as an env var.
 SPARK_CLASSPATH="$SPARK_CLASSPATH:${SPARK_HOME}/jars/*:${$MAHOUT_HOME}/lib/*"
 env | grep SPARK_JAVA_OPT_ | sort -t_ -k4 -n | sed 's/[^=]*=\(.*\)/\1/g' > /tmp/java_opts.txt
 readarray -t SPARK_EXECUTOR_JAVA_OPTS < /tmp/java_opts.txt
