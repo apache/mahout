@@ -11,16 +11,21 @@
 </formats>
 
 <fileSets>
+
+    <!-- copy files from the base directory, including the base
+    Dockerfile, which prepares builds Mahout and downloads builds and installs
+    the appropriate spark version Spark. No version of Hadoop is currently included.-->
+
     <fileSet>
         <directory>${project.base.directory}</directory>
         <outputDirectory>${project.base.directory}</outputDirectory>
         <includes>
-            <include>README*</include>
-            <include>LICENSE*</include>
-            <include>NOTICE*</include>
-            <include>pom.xml</include>
-            <include>Dockerfile</include>
-            <include>entrypoint.sh</include>
+            <include>**README*</include>
+            <include>**LICENSE*</include>
+            <include>**NOTICE*</include>
+            <include>**pom.xml*</include>
+            <include>**Dockerfile*</include>
+            <include>**entrypoint.sh*</include>
         </includes>
     </fileSet>
     <fileSet>
@@ -32,27 +37,25 @@
         <includes>
            <include>*.jar</include>
         </includes>
-        <excludes>
-            <exclude>work</exclude>
-            <exclude>work/**</exclude>
-        </excludes>
     </fileSet>
+
+    <!-- copy aggregated documentation into docs-->
     <fileSet>
         <directory>${project.base.directory}/site</directory>
         <outputDirectory>docs</outputDirectory>
     </fileSet>
+
+    <!--copy bin/mahout.sh -->
     <fileSet>
         <directory>${project.base.directory}/bin</directory>
         <fileMode>755</fileMode>
         <directoryMode>755</directoryMode>
         <outputDirectory>bin</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
-        <excludes>
-            <exclude>work</exclude>
-            <exclude>work/**</exclude>
-        </excludes>
     </fileSet>
 
+    <!-- copy and include the jars from e.g. $MAHOUT_HOME/engine/spark/target/-->
+    <!-- copy and include the jars from e.g. $MAHOUT_HOME/community/spark-cli-drivers/target/-->
     <fileSet>
         <directory>${project.base.directory}/**/**/target/</directory>
         <outputDirectory>${project.base.directory}/lib</outputDirectory>
@@ -62,23 +65,25 @@
         <includes>
             <include>*.jar</include>
         </includes>
-        <excludes>
-            <exclude>work</exclude>
-            <exclude>work/**</exclude>
-        </excludes>
-
     </fileSet>
 
+    <!-- copy and include the jars from e.g. $MAHOUT_HOME/core/target/-->
+    <fileSet>
+        <directory>${project.base.directory}/**/target/</directory>
+        <outputDirectory>${project.base.directory}/lib</outputDirectory>
+        <useDefaultExcludes>true</useDefaultExcludes>
+        <fileMode>0755</fileMode>
+        <directoryMode>0755</directoryMode>
+        <includes>
+            <include>*.jar</include>
+        </includes>
+    </fileSet>
     <fileSet>
         <directory>${project.base.directory}/examples/bin</directory>
         <outputDirectory>${project.base.directory}/examples/bin/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
-        <excludes>
-            <exclude>work</exclude>
-            <exclude>work/**</exclude>
-        </excludes>
     </fileSet>
     <fileSet>
         <directory>${project.base.directory}/examples/bin/resources</directory>
