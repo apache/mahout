@@ -125,7 +125,7 @@
      http://openjdk.java.net/jeps/212 -->
     <additionalparam>-Xdoclint:-html</additionalparam>
     <!--EndHack-->
-    <compile.flags />
+    <compile.flags/>
 
 
 
@@ -161,7 +161,7 @@
       <name>Apache Snapshot Repository</name>
       <url>https://repository.apache.org/snapshots</url>
       <releases>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
       </releases>
     </repository>
 
@@ -393,7 +393,7 @@
                     <version>[1.8,)</version>
                   </requireJavaVersion>
                   <requireMavenVersion>
-                    <version>[3.3.3,)</version>
+                    <version>[3.3.9,)</version>
                   </requireMavenVersion>
                 </rules>
               </configuration>
