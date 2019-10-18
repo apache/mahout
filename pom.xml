@@ -461,6 +461,8 @@
       <skipTests>true</skipTests>
       <pmd.skip>true</pmd.skip>
       <checkstyle.skip>true</checkstyle.skip>
+      <skipAssembly>false</skipAssembly>
+
     </properties>
   </profile>
   <profile>
@@ -612,6 +614,48 @@
 </profiles>
 <reporting>
 <plugins>
+
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version></version>
+        <executions>
+          <execution>
+            <id>bin-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+              <descriptors>
+                <descriptor>${project.basedir}/src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+              <tarLongFileMode>gnu</tarLongFileMode>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+          <execution>
+            <id>src-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+              <descriptors>
+                <descriptor>${project.basedir}/src/main/assembly/src.xml</descriptor>
+              </descriptors>
+              <tarLongFileMode>gnu</tarLongFileMode>
+              <appendAssemblyId>true</appendAssemblyId>
+            </configuration>
+           </execution>
+          </executions>
+      </plugin>
+
+
+
   <!-- surefire runs unit tests -->
   <plugin>
     <groupId>org.apache.maven.plugins</groupId>
