@@ -444,16 +444,25 @@
 -->
       </modules>
     </profile>
-    <profile>
+
+     <profile>
 
     <id>release.prepare</id>
+       <modules>
+         <module>core</module>
+         <module>engine</module>
+         <module>engine/hdfs</module>
+         <module>engine/spark</module>
+         <module>community</module>
+         <module>community/spark-cli-drivers</module>
+       </modules>
     <properties>
       <skipTests>true</skipTests>
       <pmd.skip>true</pmd.skip>
       <checkstyle.skip>true</checkstyle.skip>
     </properties>
   </profile>
-  <profile>
+ <!-- <profile>
     <id>mahout-release</id>
     <modules>
       <module>core</module>
@@ -467,8 +476,8 @@
       <skipTests>true</skipTests>
       <pmd.skip>true</pmd.skip>
       <checkstyle.skip>true</checkstyle.skip>
-    </properties>
-  </profile>
+    </properties>-->
+ <!-- </profile>-->
   <profile>
     <id>sourcecheck</id>
     <build>
