@@ -35,6 +35,7 @@
                     <execution>
                         <id>bin-assembly</id>
                         <phase>package</phase>
+
                         <goals>
                             <goal>single</goal>
                         </goals>
