@@ -25,9 +25,6 @@
     <name>Mahout Release Package</name>
     <description>Distribution Package</description>
     <packaging>pom</packaging>
-    <properties>
-        <mahout.skip.distribution>true</mahout.skip.distribution>
-    </properties>
     <build>
         <defaultGoal>install</defaultGoal>
         <plugins>
@@ -44,7 +41,7 @@
                         <configuration>
                             <skipAssembly>${mahout.skip.distribution}</skipAssembly>
                             <descriptors>
-                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                                <descriptor>${project.basedir}/src/main/assembly/bin.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>false</appendAssemblyId>
@@ -59,7 +56,7 @@
                         <configuration>
                             <skipAssembly>${mahout.skip.distribution}</skipAssembly>
                             <descriptors>
-                                <descriptor>src/main/assembly/src.xml</descriptor>
+                                <descriptor>${project.basedir}/src/main/assembly/src.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>true</appendAssemblyId>

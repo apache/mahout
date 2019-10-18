@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>14.2-SNAPSHOT</version>
+  <version>14.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -119,7 +119,7 @@
     <mahout.skip.distribution>true</mahout.skip.distribution>
     <!-- `mvn site` throws a hissy fit searching no longer existing repos if this is not set false -->
     <dependency.locations.enabled>false</dependency.locations.enabled>
-
+    <mahout.skip.distribution>true</mahout.skip.distribution>
     <!--hack to turn off linting og generated Javadocs.
       this is an error in Oracle Java8 and should be fixed in > java8
      http://openjdk.java.net/jeps/212 -->
@@ -169,10 +169,12 @@
 
   <modules>
     <module>core</module>
+<!--
     <module>engine</module>
+-->
     <module>engine/spark</module>
     <module>engine/hdfs</module>
-    <module>community</module>
+<!--    <module>community</module>-->
     <module>community/spark-cli-drivers</module>
 
 
@@ -231,6 +233,13 @@
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
         <version>1.2.17</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.1.1</version>
+        <type>maven-plugin</type>
       </dependency>
 
     </dependencies>
@@ -458,16 +467,22 @@
     <id>mahout-release</id>
     <modules>
       <module>core</module>
+<!--
       <module>engine</module>
+-->
       <module>engine/hdfs</module>
       <module>engine/spark</module>
+<!--
       <module>community</module>
+-->
       <module>community/spark-cli-drivers</module>
     </modules>
     <properties>
       <skipTests>true</skipTests>
       <pmd.skip>true</pmd.skip>
       <checkstyle.skip>true</checkstyle.skip>
+      <mahout.skip.distribution>false</mahout.skip.distribution>
+
     </properties>
   </profile>
   <profile>
