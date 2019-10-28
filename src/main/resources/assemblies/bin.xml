@@ -1,7 +1,8 @@
 
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
 
-<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0">
 <id>bin</id>
 
 <formats>
@@ -18,7 +19,7 @@
 
     <fileSet>
         <directory>${project.base.directory}</directory>
-        <outputDirectory>${project.base.directory}</outputDirectory>
+        <outputDirectory>${project.base.directory}/lib/</outputDirectory>
         <includes>
             <include>**README*</include>
             <include>**LICENSE*</include>
@@ -45,7 +46,7 @@
         <outputDirectory>docs</outputDirectory>
     </fileSet>
 
-    <!--copy bin/mahout.sh -->
+    <!--copy bin/mahout.sh and other scripts -->
     <fileSet>
         <directory>${project.base.directory}/bin</directory>
         <fileMode>755</fileMode>

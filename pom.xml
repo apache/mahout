@@ -616,19 +616,20 @@
 <plugins>
 
 
-      <plugin>
+    <!--  <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version></version>
-        <executions>
-          <execution>
+
             <id>bin-assembly</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
             <configuration>
+
               <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+            <executions>
+              <execution>
               <descriptors>
                 <descriptor>${project.basedir}/src/main/assembly/bin.xml</descriptor>
               </descriptors>
@@ -652,7 +653,7 @@
             </configuration>
            </execution>
           </executions>
-      </plugin>
+      </plugin>-->
 
 
 

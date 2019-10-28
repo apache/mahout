@@ -19,54 +19,56 @@
         <groupId>org.apache.mahout</groupId>
         <artifactId>mahout</artifactId>
         <version>14.1-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>./../pom.xml</relativePath>
     </parent>
     <artifactId>apache-mahout-distribution</artifactId>
     <name>Mahout Release Package</name>
     <description>Distribution Package</description>
     <packaging>pom</packaging>
-    <build>
-        <defaultGoal>install</defaultGoal>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-
-                <id>bin-assembly</id>
+      <build>
+      <plugins>
+        <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.1.1</version>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache</groupId>
+                    <artifactId>mahout</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+            <executions>
+              <execution>
+                <id>bin</id>
                 <phase>package</phase>
-                     <executions>
-                     <execution>
-
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <skipAssembly>${mahout.skip.distribution}</skipAssembly>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/main/assembly/bin.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                     </execution>
-
-                    <execution>
-                        <id>src-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <skipAssembly>${mahout.skip.distribution}</skipAssembly>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/main/assembly/src.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                            <appendAssemblyId>true</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                     </executions>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                    <descriptors>
+                        <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
+                    </descriptors>
+                    <tarLongFileMode>gnu</tarLongFileMode>
+                  <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                </execution>
+                <execution>
+                  <id>srcy</id>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>single</goal>
+                  </goals>
+                  <configuration>
+                      <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                      <descriptors>
+                          <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
+                      </descriptors>
+                      <tarLongFileMode>gnu</tarLongFileMode>
+                      <appendAssemblyId>true</appendAssemblyId>
+                  </configuration>
+                 </execution>
+            </executions>
             </plugin>
         </plugins>
     </build>
@@ -77,6 +79,29 @@
             <properties>
                 <mahout.skip.distribution>false</mahout.skip.distribution>
             </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.mahout</groupId>
+                    <artifactId>mahout-core_${scala.compat.version}</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.mahout</groupId>
+                    <artifactId>mahout-hdfs_${scala.compat.version}</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.mahout</groupId>
+                    <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.mahout</groupId>
+                    <artifactId>mahout-spark-cli-drivers_${scala.compat.version}</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+
+            </dependencies>
         </profile>
         <profile>
             <id>viennacl</id>
@@ -151,11 +176,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-math</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-integration</artifactId>
+            <artifactId>mahout-core_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.mahout</groupId>
