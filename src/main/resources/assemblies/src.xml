@@ -18,7 +18,6 @@
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0">
     <id>src</id>
     <formats>
-      <format>zip</format>
       <format>tar.gz</format>
       <format>tar.bz2</format>
     </formats>
@@ -39,8 +38,8 @@
           <include>*Dockerfile*</include>
           <include>*entrypoint.sh*</include>
           <include>src/pom.xml</include>
-          <include>src/main/assembly/bin.xml</include>
-          <include>src/main/assembly/src.xml</include>
+          <include>src/main/assemblies/bin.xml</include>
+          <include>src/main/assemblies/src.xml</include>
         </includes>
         <excludes>
           <exclude>**/target/**</exclude>

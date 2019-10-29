@@ -32,37 +32,37 @@
             <version>3.1.1</version>
             <dependencies>
                 <dependency>
-                    <groupId>org.apache</groupId>
-                    <artifactId>mahout</artifactId>
+                    <groupId>org.apache.mahout</groupId>
+                    <artifactId>apache-mahout-distribution</artifactId>
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>
             <executions>
               <execution>
-                <id>bin</id>
+                <id>bin-assembly</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                  <skipAssembly>false</skipAssembly>
                     <descriptors>
-                        <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
+                        <descriptor>${project.basedir}/src/main/resources/assemblies/bin.xml</descriptor>
                     </descriptors>
                     <tarLongFileMode>gnu</tarLongFileMode>
                   <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 </execution>
                 <execution>
-                  <id>srcy</id>
+                  <id>src-assembly</id>
                   <phase>package</phase>
                   <goals>
                       <goal>single</goal>
                   </goals>
                   <configuration>
-                      <skipAssembly>${mahout.skip.distribution}</skipAssembly>
+                      <skipAssembly>false</skipAssembly>
                       <descriptors>
-                          <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
+                          <descriptor>${project.basedir}/src/main/resources/assemblies/src.xml</descriptor>
                       </descriptors>
                       <tarLongFileMode>gnu</tarLongFileMode>
                       <appendAssemblyId>true</appendAssemblyId>
