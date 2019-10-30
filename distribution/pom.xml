@@ -72,32 +72,17 @@
                 <executions>
                     <execution>
                         <id>distro-assembly</id>
-                        <attach>true</attach>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <attach>true</attach>
                             <finalName>apache-mahout-${project.version}</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
-                                <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                            <appendAssemblyId>true</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>src-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>apache-mahout-${project.version}</finalName>
-                            <skipAssembly>false</skipAssembly>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
+                              <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
+                              <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>true</appendAssemblyId>
