@@ -10,6 +10,9 @@
     <format>tar.bz2</format>
 </formats>
 
+<includeBaseDirectory>false</includeBaseDirectory>
+
+
 <fileSets>
 
     <!-- copy files from the base directory, including the base
@@ -17,8 +20,8 @@
     the appropriate spark version Spark. No version of Hadoop is currently included.-->
 
     <fileSet>
-        <directory>${project.base.directory}</directory>
-        <outputDirectory>${project.base.directory}/lib/</outputDirectory>
+        <directory>${basedir}/../../</directory>
+        <outputDirectory></outputDirectory>
         <includes>
             <include>**README*</include>
             <include>**LICENSE*</include>
@@ -29,8 +32,8 @@
         </includes>
     </fileSet>
     <fileSet>
-        <directory>${project.base.directory}/lib</directory>
-        <outputDirectory>${project.base.directory}/lib/</outputDirectory>
+        <directory>${basedir}/../../lib</directory>
+        <outputDirectory>lib/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
@@ -41,13 +44,13 @@
 
     <!-- copy aggregated documentation into docs-->
     <fileSet>
-        <directory>${project.base.directory}/site</directory>
+        <directory>${basedir}/../../site</directory>
         <outputDirectory>docs</outputDirectory>
     </fileSet>
 
     <!--copy bin/mahout.sh and other scripts -->
     <fileSet>
-        <directory>${project.base.directory}/bin</directory>
+        <directory>${basedir}/../../bin</directory>
         <fileMode>755</fileMode>
         <directoryMode>755</directoryMode>
         <outputDirectory>bin</outputDirectory>
@@ -57,11 +60,11 @@
     <!-- copy and include the jars from e.g. $MAHOUT_HOME/engine/spark/target/-->
     <!-- copy and include the jars from e.g. $MAHOUT_HOME/community/spark-cli-drivers/target/-->
     <fileSet>
-        <directory>${project.base.directory}/**/**/target/</directory>
-        <outputDirectory>${project.base.directory}/lib</outputDirectory>
+        <directory>${basedir}/../../**/**/target/*.jar</directory>
+        <outputDirectory>lib</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
-        <fileMode>0755</fileMode>
-        <directoryMode>0755</directoryMode>
+        <fileMode>755</fileMode>
+        <directoryMode>755</directoryMode>
         <includes>
             <include>*.jar</include>
         </includes>
@@ -69,28 +72,28 @@
 
     <!-- copy and include the jars from e.g. $MAHOUT_HOME/core/target/-->
     <fileSet>
-        <directory>${project.base.directory}/**/target/</directory>
-        <outputDirectory>${project.base.directory}/lib</outputDirectory>
+        <directory>${basedir}/../../**/target/*.jar</directory>
+        <outputDirectory>lib</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
-        <fileMode>0755</fileMode>
-        <directoryMode>0755</directoryMode>
+        <fileMode>755</fileMode>
+        <directoryMode>755</directoryMode>
         <includes>
             <include>*.jar</include>
         </includes>
     </fileSet>
     <fileSet>
-        <directory>${project.base.directory}/examples/bin</directory>
-        <outputDirectory>${project.base.directory}/examples/bin/</outputDirectory>
+        <directory>${basedir}/../../examples/bin</directory>
+        <outputDirectory>examples/bin/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
-        <fileMode>0755</fileMode>
-        <directoryMode>0755</directoryMode>
+        <fileMode>755</fileMode>
+        <directoryMode>755</directoryMode>
     </fileSet>
     <fileSet>
-        <directory>${project.base.directory}/examples/bin/resources</directory>
-        <outputDirectory>${project.base.directory}/examples/bin/resources</outputDirectory>
+        <directory>${basedir}/../../examples/bin/resources</directory>
+        <outputDirectory>examples/bin/resources</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
-        <fileMode>0755</fileMode>
-        <directoryMode>0755</directoryMode>
+        <fileMode>755</fileMode>
+        <directoryMode>755</directoryMode>
     </fileSet>
   </fileSets>
 </assembly>

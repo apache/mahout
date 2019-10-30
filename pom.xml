@@ -177,7 +177,6 @@
     <module>engine/hdfs</module>
 <!--    <module>community</module>-->
     <module>community/spark-cli-drivers</module>
-    <module>distribution</module>
 
 
   </modules>
@@ -240,7 +239,9 @@
       <dependency>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
+<!--
         <version>3.1.1</version>
+-->
         <type>maven-plugin</type>
       </dependency>
 
@@ -268,7 +269,7 @@
         <configuration>
           <preparationGoals>clean package install</preparationGoals>
           <useReleaseProfile>true</useReleaseProfile>
-          <releaseProfiles>apache-release</releaseProfiles>
+          <releaseProfiles>apache-release,mahout-release</releaseProfiles>
           <goals>deploy</goals>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <arguments>${arguments}</arguments>

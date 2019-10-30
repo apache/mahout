@@ -66,10 +66,13 @@
           <plugins>
             <plugin>
               <artifactId>maven-assembly-plugin</artifactId>
+<!--
               <version>3.1.1</version>
+-->
                 <executions>
                     <execution>
-                        <id>bin-assembly</id>
+                        <id>distro-assembly</id>
+                        <attach>true</attach>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -78,7 +81,7 @@
                             <finalName>apache-mahout-${project.version}</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
-                                <descriptor>${project.basedir}/distribution/src/main/resources/assembly/bin.xml</descriptor>
+                                <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>true</appendAssemblyId>
@@ -94,7 +97,7 @@
                             <finalName>apache-mahout-${project.version}</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
-                                <descriptor>${project.basedir}/distribution/src/main/resources/assembly/src.xml</descriptor>
+                                <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>true</appendAssemblyId>
