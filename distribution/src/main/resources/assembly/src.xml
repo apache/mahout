@@ -23,37 +23,34 @@
     </formats>
     <fileSets>
       <fileSet>
-        <directory>${project.base.directory}/</directory>
-        <outputDirectory>${project.base.directory}/</outputDirectory>
+        <directory>${project.base.directory}/../../</directory>
+        <outputDirectory></outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <includes>
-          <include>**README*</include>
-          <include>**LICENSE*</include>
-          <include>**NOTICE*</include>
+          <include>README*</include>
+          <include>LICENSE*</include>
+          <include>NOTICE*</include>
           <include>**pom.xml</include>
           <include>**src/**</include>
           <include>src/conf/**</include>
           <include>**/build.xml</include>
           <include>**/*.properties</include>
-          <include>*Dockerfile*</include>
-          <include>*entrypoint.sh*</include>
-          <include>src/pom.xml</include>
-          <include>src/main/assemblies/bin.xml</include>
-          <include>src/main/assemblies/src.xml</include>
+          <include>Dockerfile*</include>
+          <include>entrypoint.sh*</include>
         </includes>
         <excludes>
           <exclude>**/target/**</exclude>
         </excludes>
       </fileSet>
       <fileSet>
-        <directory>${project.base.directory}/bin</directory>
+        <directory>${project.base.directory}/../../bin</directory>
         <outputDirectory>bin</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
         <directoryMode>0755</directoryMode>
       </fileSet>
       <fileSet>
-        <directory>${project.base.directory}/examples/bin</directory>
+        <directory>${project.base.directory}/../../examples/bin</directory>
         <outputDirectory>examples/bin</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
@@ -64,7 +61,7 @@
         </excludes>
       </fileSet>
       <fileSet>
-        <directory>${project.base.directory}/examples/bin/resources</directory>
+        <directory>${project.base.directory}/../../examples/bin/resources</directory>
         <outputDirectory>examples/bin</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
