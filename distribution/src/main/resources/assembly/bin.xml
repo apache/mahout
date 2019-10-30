@@ -20,19 +20,19 @@
     the appropriate spark version Spark. No version of Hadoop is currently included.-->
 
     <fileSet>
-        <directory>${basedir}/../../</directory>
+        <directory>${basedir}/../</directory>
         <outputDirectory></outputDirectory>
         <includes>
-            <include>**README*</include>
-            <include>**LICENSE*</include>
-            <include>**NOTICE*</include>
-            <include>**pom.xml*</include>
-            <include>**Dockerfile*</include>
-            <include>**entrypoint.sh*</include>
+            <include>README*</include>
+            <include>LICENSE*</include>
+            <include>NOTICE*</include>
+            <include>pom.xml*</include>
+            <include>Dockerfile*</include>
+            <include>entrypoint.sh*</include>
         </includes>
     </fileSet>
     <fileSet>
-        <directory>${basedir}/../../lib</directory>
+        <directory>${basedir}/../lib</directory>
         <outputDirectory>lib/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>0755</fileMode>
@@ -44,13 +44,13 @@
 
     <!-- copy aggregated documentation into docs-->
     <fileSet>
-        <directory>${basedir}/../../site</directory>
+        <directory>${basedir}/../site</directory>
         <outputDirectory>docs</outputDirectory>
     </fileSet>
 
     <!--copy bin/mahout.sh and other scripts -->
     <fileSet>
-        <directory>${basedir}/../../bin</directory>
+        <directory>${basedir}/../bin</directory>
         <fileMode>755</fileMode>
         <directoryMode>755</directoryMode>
         <outputDirectory>bin</outputDirectory>
@@ -60,7 +60,7 @@
     <!-- copy and include the jars from e.g. $MAHOUT_HOME/engine/spark/target/-->
     <!-- copy and include the jars from e.g. $MAHOUT_HOME/community/spark-cli-drivers/target/-->
     <fileSet>
-        <directory>${basedir}/../../**/**/target/*.jar</directory>
+        <directory>${basedir}/../**/**/target/*.jar</directory>
         <outputDirectory>lib</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>755</fileMode>
@@ -72,7 +72,7 @@
 
     <!-- copy and include the jars from e.g. $MAHOUT_HOME/core/target/-->
     <fileSet>
-        <directory>${basedir}/../../**/target/*.jar</directory>
+        <directory>${basedir}/../**/target/*.jar</directory>
         <outputDirectory>lib</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>755</fileMode>
@@ -82,14 +82,14 @@
         </includes>
     </fileSet>
     <fileSet>
-        <directory>${basedir}/../../examples/bin</directory>
+        <directory>${basedir}/../examples/bin</directory>
         <outputDirectory>examples/bin/</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>755</fileMode>
         <directoryMode>755</directoryMode>
     </fileSet>
     <fileSet>
-        <directory>${basedir}/../../examples/bin/resources</directory>
+        <directory>${basedir}/../examples/bin/resources</directory>
         <outputDirectory>examples/bin/resources</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>755</fileMode>
