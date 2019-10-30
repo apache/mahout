@@ -15,8 +15,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
- <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache</groupId>
@@ -176,6 +177,7 @@
     <module>engine/hdfs</module>
 <!--    <module>community</module>-->
     <module>community/spark-cli-drivers</module>
+    <module>distribution</module>
 
 
   </modules>
@@ -454,7 +456,7 @@
       </modules>
     </profile>
 
-     <profile>
+    <profile>
 
     <id>release.prepare</id>
     <properties>
@@ -462,9 +464,9 @@
       <pmd.skip>true</pmd.skip>
       <checkstyle.skip>true</checkstyle.skip>
       <skipAssembly>false</skipAssembly>
-
     </properties>
   </profile>
+
   <profile>
     <id>mahout-release</id>
     <modules>
@@ -478,59 +480,12 @@
       <module>community</module>
 -->
       <module>community/spark-cli-drivers</module>
+      <module>distribution</module>
     </modules>
-    <properties>
-      <skipTests>true</skipTests>
-      <pmd.skip>true</pmd.skip>
-      <checkstyle.skip>true</checkstyle.skip>
-      <mahout.skip.distribution>false</mahout.skip.distribution>
-      <plugins>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.1.1</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>apache-mahout-distribution</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <id>bin-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <skipAssembly>false</skipAssembly>
-              <descriptors>
-                <descriptor>${project.basedir}/src/main/resources/assemblies/bin.xml</descriptor>
-              </descriptors>
-              <tarLongFileMode>gnu</tarLongFileMode>
-              <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
-          </execution>
-          <execution>
-            <id>src-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <skipAssembly>false</skipAssembly>
-              <descriptors>
-                <descriptor>${project.basedir}/src/main/resources/assemblies/src.xml</descriptor>
-              </descriptors>
-              <tarLongFileMode>gnu</tarLongFileMode>
-              <appendAssemblyId>true</appendAssemblyId>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-    </properties>
+
+
   </profile>
+
   <profile>
     <id>sourcecheck</id>
     <build>
@@ -560,7 +515,7 @@
                 <configLocation>mahout-checkstyle.xml</configLocation>
                 <consoleOutput>true</consoleOutput>
                 <linkXRef>false</linkXRef>
-                <sourceDirectory>${basedir}/src</sourceDirectory>
+                <sourceDirectory>distribution/src</sourceDirectory>
               </configuration>
             </execution>
           </executions>
