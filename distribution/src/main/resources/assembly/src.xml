@@ -58,9 +58,9 @@
         <excludes>
           <exclude>**/target/**</exclude>
           <exclude>**/**/target/**</exclude>
-          <exclude>${basedir}/target<exclude></exclude>
+          <exclude>${basedir}/target</exclude>
         </excludes>
       </fileSet>
-      
+
     </fileSets>
 </assembly>
