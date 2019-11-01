@@ -214,7 +214,7 @@
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.4.4</version>
+      <version>1.4.6</version>
     </dependency>
 
     <dependency>
