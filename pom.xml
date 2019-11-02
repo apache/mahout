@@ -231,15 +231,15 @@
         <artifactId>log4j</artifactId>
         <version>1.2.17</version>
       </dependency>
-
+<!--
       <dependency>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-<!--
+&lt;!&ndash;
         <version>3.1.1</version>
--->
+&ndash;&gt;
         <type>maven-plugin</type>
-      </dependency>
+      </dependency>-->
 
     </dependencies>
   </dependencyManagement>
@@ -258,14 +258,16 @@
           <optimize>true</optimize>
         </configuration>
       </plugin>
-      <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
+<!--
+      <plugin>&ndash;&gt;
+-->
+     <!-- <groupId>org.apache.maven.plugins</groupId>
        <artifactId>maven-release-plugin</artifactId>
         <version>2.5.2</version>
         <configuration>
-<!--
+&lt;!&ndash;
           <preparationGoals>clean package install</preparationGoals>
--->
+&ndash;&gt;
           <useReleaseProfile>true</useReleaseProfile>
           <releaseProfiles>apache-release</releaseProfiles>
           <goals>deploy</goals>
@@ -273,7 +275,7 @@
           <arguments>${arguments}</arguments>
         </configuration>
         </plugin>
-      <!-- generate java doc -->
+      &lt;!&ndash; generate java-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
