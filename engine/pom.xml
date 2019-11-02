@@ -21,12 +21,12 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>14.2-SNAPSHOT</version>
+    <version>14.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>mahout-engine</artifactId>
-  <version>14.2-SNAPSHOT</version>
+  <version>14.1-SNAPSHOT</version>
   <name>Mahout Engine</name>
   <description>Parent of Various Engines on which you can run Mahout.
   </description>
