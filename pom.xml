@@ -477,9 +477,9 @@
       <module>engine/spark</module>
       <module>community</module>
       <module>community/spark-cli-drivers</module>
-      <module>experimental</module>
-<!--      <module>experimental/viennacl-omp</module>
-      <module>distribution</module>-->
+<!--      <module>experimental</module>
+      <module>experimental/viennacl-omp</module>-->
+      <module>distribution</module>
     </modules>
 
 
