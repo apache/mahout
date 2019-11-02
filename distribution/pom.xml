@@ -65,7 +65,7 @@
 
     <profiles>
       <profile>
-        <id>mahout-release</id>
+        <id>apache-release,mahout-release</id>
         <build>
           <plugins>
             <plugin>

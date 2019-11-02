@@ -179,6 +179,8 @@
     &lt;!&ndash;<module>experimental/viennacl</module>&ndash;&gt;
     <module>experimental/viennacl-omp</module>
 -->
+    <module>distribution</module>
+
 
   </modules>
 
@@ -453,7 +455,8 @@
         <!--<module>experimental</module>
         &lt;!&ndash;<module>experimental/viennacl</module>&ndash;&gt;
         <module>experimental/viennacl-omp</module>
--->
+-->      <module>distribution</module>
+
       </modules>
     </profile>
 
