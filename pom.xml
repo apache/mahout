@@ -173,9 +173,12 @@
     <module>engine</module>
     <module>engine/spark</module>
     <module>engine/hdfs</module>
-   <module>community</module>
+    <module>community</module>
     <module>community/spark-cli-drivers</module>
-
+    <!--<module>experimental</module>
+    &lt;!&ndash;<module>experimental/viennacl</module>&ndash;&gt;
+    <module>experimental/viennacl-omp</module>
+-->
 
   </modules>
 

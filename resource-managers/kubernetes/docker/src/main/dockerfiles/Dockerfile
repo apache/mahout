@@ -22,8 +22,8 @@ ARG spark_uid=185
 
 # Before building the mahout docker image, we must build a spark distrobution following
 # the instructions in http://spark.apache.org/docs/latest/building-spark.html.
-# this Dockerfile will build the Spark version 2.4.3 against Scala 2.12.
-# docker build -t mahout:latest -f resource_managers/docker/kubernetes/src/main/dockerfiles/Dockerfile .
+# this Dockerfile.Spark will build the Spark version 2.4.3 against Scala 2.12.
+# docker build -t mahout:latest -f resource_managers/docker/kubernetes/src/main/dockerfiles/Dockerfile.Spark .
 
 
 RUN set -ex && \
