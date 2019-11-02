@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-engine</artifactId>
-    <version>14.1</version>
+    <version>14.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <!-- modules inherit parent's group id and version. -->
   <artifactId>mahout-hdfs_2.12</artifactId>
-  <version>14.1</version>
+  <version>14.2-SNAPSHOT</version>
   <name>- Mahout HDFS Support</name>
   <description>Scalable machine learning libraries</description>
 
