@@ -61,13 +61,16 @@ RUN set -ex && \
     # rm /bin/sh && \
     # ln -sv /bin/bash /bin/sh && \
     # echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
-    # chgrp root /etc/passwd && chmod ug+rw /etc/passwd
+    chgrp root /etc/passwd && chmod ug+rw /etc/passwd
+
+# build mahout
+RUN mvn clean package install
 
 ENV MAHOUT_HOME /opt/mahout
 COPY lib ${MAHPOUT_HOME}/lib
 COPY bin ${MAHPOUT_HOME}/bin
-COPY resource-managers/kubernetes/docker/src/main/dockerfiles/entrypoint.sh ${MAHPOUT_HOME}
-COPY resource-managers/kubernetes/docker/src/main/dockerfiles/Dockerfile ${MAHPOUT_HOME}
+COPY entrypoint.sh ${MAHPOUT_HOME}
+COPY Dockerfile ${MAHPOUT_HOME}
 COPY examples ${MAHPOUT_HOME}/examples
 
 ENV SPARK_HOME /opt/spark
