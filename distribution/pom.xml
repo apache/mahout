@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mahout</artifactId>
         <groupId>org.apache.mahout</groupId>
-        <version>14.2-SNAPSHOT</version>
+        <version>MAHOUT-14.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>distribution</artifactId>
@@ -63,9 +63,7 @@
 
 
 
-    <profiles>
-      <profile>
-        <id>apache-release,mahout-release</id>
+
         <build>
           <plugins>
             <plugin>
@@ -124,6 +122,5 @@
                 </plugins>
             </pluginManagement>
        </build>
-      </profile>
-    </profiles>
+
 </project>

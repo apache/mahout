@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>14.2-SNAPSHOT</version>
+  <version>MAHOUT-14.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -179,7 +179,6 @@
     &lt;!&ndash;<module>experimental/viennacl</module>&ndash;&gt;
     <module>experimental/viennacl-omp</module>
 -->
-    <module>distribution</module>
 
 
   </modules>
@@ -455,7 +454,7 @@
         <!--<module>experimental</module>
         &lt;!&ndash;<module>experimental/viennacl</module>&ndash;&gt;
         <module>experimental/viennacl-omp</module>
--->      <module>distribution</module>
+-->
 
       </modules>
     </profile>
