@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>MAHOUT-14.1-SNAPSHOT</version>
+  <version>14.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -169,18 +169,12 @@
 
   <modules>
     <module>core</module>
-
     <module>engine</module>
     <module>engine/spark</module>
     <module>engine/hdfs</module>
     <module>community</module>
     <module>community/spark-cli-drivers</module>
-    <!--<module>experimental</module>
-    &lt;!&ndash;<module>experimental/viennacl</module>&ndash;&gt;
-    <module>experimental/viennacl-omp</module>
--->
-
-
+    <module>distribution</module>
   </modules>
 
   <dependencyManagement>
@@ -273,7 +267,7 @@
           <preparationGoals>clean package install</preparationGoals>
 -->
           <useReleaseProfile>true</useReleaseProfile>
-          <releaseProfiles>apache-release,mahout-release</releaseProfiles>
+          <releaseProfiles>apache-release</releaseProfiles>
           <goals>deploy</goals>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <arguments>${arguments}</arguments>
@@ -441,28 +435,6 @@
 
   <profiles>
     <profile>
-      <id>all</id>
-      <modules>
-        <module>core</module>
-        <module>engine</module>
-        <module>engine/hdfs</module>
-        <module>engine/spark</module>
-        <module>community</module>
-        <module>community/spark-cli-drivers</module>
-        <!--<module>community/community-engines</module>-->
-        <!--<module>community/community-engines/flink-batch</module>-->
-        <!--<module>community/community-engines/h2o</module>-->
-        <!--<module>community/mahout-mr</module>-->
-        <!--<module>experimental</module>
-        &lt;!&ndash;<module>experimental/viennacl</module>&ndash;&gt;
-        <module>experimental/viennacl-omp</module>
--->
-
-      </modules>
-    </profile>
-
-    <profile>
-
     <id>release.prepare</id>
     <properties>
       <skipTests>true</skipTests>
@@ -470,23 +442,6 @@
       <checkstyle.skip>true</checkstyle.skip>
       <skipAssembly>false</skipAssembly>
     </properties>
-  </profile>
-
-  <profile>
-    <id>mahout-release</id>
-    <modules>
-      <module>core</module>
-      <module>engine</module>
-      <module>engine/hdfs</module>
-      <module>engine/spark</module>
-      <module>community</module>
-      <module>community/spark-cli-drivers</module>
-<!--      <module>experimental</module>
-      <module>experimental/viennacl-omp</module>-->
-      <module>distribution</module>
-    </modules>
-
-
   </profile>
 
   <profile>
