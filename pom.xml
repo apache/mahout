@@ -450,10 +450,10 @@
         <!--<module>community/community-engines/flink-batch</module>-->
         <!--<module>community/community-engines/h2o</module>-->
         <!--<module>community/mahout-mr</module>-->
-        <module>experimental</module>
-        <!--<module>experimental/viennacl</module>-->
+        <!--<module>experimental</module>
+        &lt;!&ndash;<module>experimental/viennacl</module>&ndash;&gt;
         <module>experimental/viennacl-omp</module>
-
+-->
       </modules>
     </profile>
 
