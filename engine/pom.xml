@@ -26,7 +26,6 @@
   </parent>
 
   <artifactId>mahout-engine</artifactId>
-  <version>${project.version}</version>
   <name>Mahout Engine</name>
   <description>Parent of Various Engines on which you can run Mahout.
   </description>

@@ -28,7 +28,6 @@
   </parent>
 
   <artifactId>mahout-spark_2.12</artifactId>
-  <version>${project.version</version>
   <name>- Mahout Spark Engine</name>
   <description>
     Mahout Bindings for Apache Spark
