@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>14.2-SNAPSHOT</version>
+  <version>14.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -554,7 +554,7 @@
             <useReleaseProfile>true</useReleaseProfile>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <preparationGoals>clean package install</preparationGoals>
-            <releaseProfiles>apache-release</releaseProfiles>
+            <releaseProfile>apache.releases.https</releaseProfile>
             <goals>deploy</goals>
             <arguments>-Papache-release ${arguments}</arguments>
             <waitBeforeTagging>10</waitBeforeTagging>
@@ -565,9 +565,6 @@
           <inherited>true</inherited>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <configuration>
-            <deployAtEnd>true</deployAtEnd>
-          </configuration>
           <executions>
             <execution>
               <id>apache.releases.https</id>
