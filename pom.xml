@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>14.2-SNAPSHOT</version>
+  <version>14.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -549,6 +549,7 @@
           <inherited>true</inherited>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
+
           <executions>
             <execution>
               <id>deploy-artifacts</id>
@@ -557,9 +558,7 @@
               </goals>
             </execution>
           </executions>
-          <configuration>
-            <updateReleaseInfo>true</updateReleaseInfo>
-          </configuration>
+
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
