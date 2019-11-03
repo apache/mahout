@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-  <version>14.2-SNAPSHOT</version>
+    <version>14.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -136,6 +136,7 @@
       <plugin>
         <groupId>org.apache.mahout</groupId>
         <artifactId>mahout-collection-codegen-plugin</artifactId>
+        <version>${mahout.collection.codegen.plugin.version}</version>
         <executions>
           <execution>
             <phase>generate-sources</phase>
@@ -162,6 +163,8 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${build.plugins.plugin.version}</version>
+
         <executions>
           <execution>
             <id>add-source</id>
@@ -240,6 +243,7 @@
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
+        <version>${scalatest.maven.plugin.version}</version>
         <executions>
           <execution>
             <id>test</id>

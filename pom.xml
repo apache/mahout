@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>14.2-SNAPSHOT</version>
+  <version>14.1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -138,17 +138,21 @@
 
     <mscala.version>3.2.0</mscala.version>
     <hbase.version>1.0.0</hbase.version>
-<!--
+    <hadoop.version>2.6.0</hadoop.version>
+    <build.plugins.plugin.version>3.0.0</build.plugins.plugin.version>
+    <scalatest.maven.plugin.version>2.0.0</scalatest.maven.plugin.version>
+    <mahout.collection.codegen.plugin.version>1.0</mahout.collection.codegen.plugin.version>
+    <!--
 
-    <scala.compat.version>2.10</scala.compat.version>
-    <scala.version>2.10.4</scala.version>
-    <spark.version>1.6.3</spark.version>
-    <flink.version>1.1.4</flink.version>
-    <h2o.version>0.1.25</h2o.version>
-    <jackson.version>2.7.4</jackson.version>
-    <hadoop.version>2.4.1</hadoop.version>
-    <hadoop.classifier>hadoop2</hadoop.classifier>
-    -->
+        <scala.compat.version>2.10</scala.compat.version>
+        <scala.version>2.10.4</scala.version>
+        <spark.version>1.6.3</spark.version>
+        <flink.version>1.1.4</flink.version>
+        <h2o.version>0.1.25</h2o.version>
+        <jackson.version>2.7.4</jackson.version>
+        <hadoop.version>2.4.1</hadoop.version>
+        <hadoop.classifier>hadoop2</hadoop.classifier>
+        -->
   </properties>
   <issueManagement>
     <system>Jira</system>
