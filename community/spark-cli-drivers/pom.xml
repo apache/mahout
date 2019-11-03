@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-community</artifactId>
-  <version>14.2-SNAPSHOT</version>
+  14.1
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -78,7 +78,7 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core_2.12</artifactId>
-    <version>14.2-SNAPSHOT</version>
+    14.1
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
