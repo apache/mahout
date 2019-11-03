@@ -559,8 +559,9 @@
             <arguments>-Papache-release ${arguments}</arguments>
             <waitBeforeTagging>10</waitBeforeTagging>
           </configuration>
+
         </plugin>
-        
+
         <plugin>
           <inherited>true</inherited>
           <groupId>org.apache.maven.plugins</groupId>
@@ -568,6 +569,7 @@
           <executions>
             <execution>
               <id>apache.releases.https</id>
+              <phase>deploy</phase>
               <goals>
                 <goal>deploy</goal>
               </goals>
