@@ -23,12 +23,12 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-  14.1
+  <version>14.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>mahout-community</artifactId>
-14.1
+<version>14.1</version>
   <name>Mahout Community</name>
   <description>Not officially maintained, but still very useful scripts to use Mahout with.
   </description>

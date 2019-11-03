@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-engine</artifactId>
-    14.1
+    <version>14.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 

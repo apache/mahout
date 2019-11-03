@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  14.1
+  <version>14.1</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
