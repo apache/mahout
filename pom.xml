@@ -444,6 +444,7 @@
     </properties>
   </profile>
 
+
   <profile>
     <id>sourcecheck</id>
     <build>
@@ -546,13 +547,30 @@
     <build>
       <plugins>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.5.3</version>
+          <configuration>
+            <useReleaseProfile>true</useReleaseProfile>
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+            <preparationGoals>clean package install</preparationGoals>
+            <releaseProfiles>apache-release</releaseProfiles>
+            <goals>deploy</goals>
+            <arguments>-Papache-release ${arguments}</arguments>
+            <waitBeforeTagging>10</waitBeforeTagging>
+          </configuration>
+        </plugin>
+        
+        <plugin>
           <inherited>true</inherited>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-
+          <configuration>
+            <deployAtEnd>true</deployAtEnd>
+          </configuration>
           <executions>
             <execution>
-              <id>deploy-artifacts</id>
+              <id>apache.releases.https</id>
               <goals>
                 <goal>deploy</goal>
               </goals>
