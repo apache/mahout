@@ -29,7 +29,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-buildtools</artifactId>
-  <version>14.1-SNAPSHOT</version>
+  <version>14.1</version>
   <name>Mahout Build Tools</name>
 
   <packaging>jar</packaging>
@@ -144,4 +144,10 @@
       </build>
     </profile>
   </profiles>
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/pom/tags/mahout-buildtools-14.1</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/pom/tags/mahout-buildtools-14.1</developerConnection>
+    <url>http://svn.apache.org/viewvc/maven/pom/tags/mahout-buildtools-14.1</url>
+  </scm>
 </project>

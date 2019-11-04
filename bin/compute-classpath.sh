@@ -50,7 +50,7 @@ if [ -z "$SPARK_SCALA_VERSION" ]; then
     elif [[ -d "$ASSEMBLY_DIR1" ]]; then
         export SPARK_SCALA_VERSION="2.11"
     else
-        export SPARK_SCALA_VERSION="2.12"
+        export SPARK_SCALA_VERSION="2.11"
     fi
 fi
 

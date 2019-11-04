@@ -19,7 +19,7 @@
 
 # A BIG Shoutout to the Bros and Bro-ettes at Apache Spark for this
 
-set -e
+set -ex
 
 VALID_VERSIONS=( 2.10 2.11 2.12 )
 
