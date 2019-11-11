@@ -2,7 +2,7 @@
 layout: page
 title: Downloads
 
-    
+
 ---
 
 <a name="Downloads-OfficialRelease"></a>
@@ -15,8 +15,8 @@ the Apache mirrors. The latest Mahout release is available for download at:
   * To validate artifacts:
     * (From KEYS file): `gpg --import KEYS`
 ```
-$ gpg mahout-0.14.2-source-release.zip.asc
-gpg: assuming signed data in `mahout-0.14.2-source-release.zip'
+$ gpg mahout-14.1-source-release.zip.asc
+gpg: assuming signed data in `mahout-14.1-source-release.zip'
 gpg: Signature made Fri 01 Mar 2019 09:59:00 AM PST using RSA key ID 140A5BE9
 gpg: Good signature from "Apache B. Committer (ASF Signing Key) <abc@apache.org>"
 ```
@@ -26,7 +26,7 @@ gpg: Good signature from "Apache B. Committer (ASF Signing Key) <abc@apache.org>
 Apache Mahout is mirrored to [Github](https://github.com/apache/mahout). To get all source:
 
     git clone https://github.com/apache/mahout.git mahout
-   
+
 # Environment
 
 Whether you are using Mahout's Shell, running command line jobs or using it as a library to build your own apps 
