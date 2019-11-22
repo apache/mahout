@@ -46,15 +46,15 @@
       <server>
         <id>apache.snapshots.https</id>
         <id>website</id>
-        <username>ASF_LDAP_USERNAME</username>                                 # EDIT THIS
-        <password>ASF_LDAP_PASSWORD</password>                                 # EDIT THIS
+        <username>ASF_LDAP_USERNAME</username>                               <!-- EDIT THIS -->
+        <password>ASF_LDAP_PASSWORD</password>                               <!-- EDIT THIS -->
      </server>
    
       <!-- To publish a website of some part of Maven -->
       <server>
         <id>apache.website</id>
-        <username>ASF_LDAP_USRNAME</username>                                   # EDIT THIS
-        <password>ASF_LDAP_PASSWORD</password>                                  # EDIT THIS
+        <username>ASF_LDAP_USRNAME</username>                                 <!-- EDIT THIS -->
+        <password>ASF_LDAP_PASSWORD</password>                                <!-- EDIT THIS -->
         <filePermissions>664</filePermissions>
         <directoryPermissions>775</directoryPermissions>
       </server>
@@ -63,9 +63,9 @@
       <server>
         <id>apache.releases.https</id>
         <username>ASF_LDAP_USERNAME</username>
-        <password>ASF_LDAP_PASSWORD</password>                                  # EDIT THIS
+        <password>ASF_LDAP_PASSWORD</password>                                <!-- EDIT THIS -->
         <privateKey>${user.home}/.ssh/id_rsa</privateKey>
-        <passphrase>PASSWORD_TO_YOUR_PRIVATE_SSH_KEY</passphrase>               # EDIT THIS
+        <passphrase>PASSWORD_TO_YOUR_PRIVATE_SSH_KEY</passphrase>             <!-- EDIT THIS -->
         <filePermissions>664</filePermissions>
         <directoryPermissions>775</directoryPermissions>
         <configuration></configuration>
@@ -73,13 +73,13 @@
       
       <server>
 	      <id>THE_EIGHT_DIGIT_GPG_SIGNING_KEY_NAME</id>
-	      <passphrase>PASSPHRASE_TO_YOUR_SIGNING_KEY</passphrase>              # EDIT THIS
+	      <passphrase>PASSPHRASE_TO_YOUR_SIGNING_KEY</passphrase>            <!-- EDIT THIS -->
       </server>	 
 
       <!-- To stage a website of some part of Maven -->
       <server>
         <id>apache.website</id> <!-- must match  repository identifier in site:stage-deploy -->
-        <username>ASF_LDAP_USERNAME</username>                                 # EDIT THIS
+        <username>ASF_LDAP_USERNAME</username>                               <!-- EDIT THIS -->
         <filePermissions>664</filePermissions>
         <directoryPermissions>775</directoryPermissions>
       </server>
