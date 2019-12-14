@@ -19,9 +19,9 @@
 
 # A BIG Shoutout to the Bros and Bro-ettes at Apache Spark for this
 
-set -ex
+set -e
 
-VALID_VERSIONS=( 2.10 2.11 2.12 )
+VALID_VERSIONS=( 2.12 2.13 )
 
 usage() {
   echo "Usage: $(basename $0) [-h|--help] <version>
@@ -46,12 +46,10 @@ check_scala_version() {
 
 check_scala_version "$TO_VERSION"
 
-if [[ $TO_VERSION != "2.10" && $TO_VERSION != "2.11" ]]; then
+if [ $TO_VERSION = "2.13" ]; then
   FROM_VERSION="2.12"
-elif [[ $TO_VERSION != "2.10" && $TO_VERSION !="2.12" ]]; then
-  FROM_VERSION="2.11"
-else [[ $TO_VERSION != "2.11" && $TO_VERSION != "2.12" ]];
-  FROM_VERSION="2.10"
+else
+  FROM_VERSION="2.13"
 fi
 
 sed_i() {
@@ -66,7 +64,7 @@ find "$BASEDIR" -name 'pom.xml' -not -path '*target*' -print \
 
 # Also update <scala.binary.version> in parent POM
 # Match any scala binary version to ensure idempotency
-sed_i '1,/<scala\.compat\.version>[0-9]*\.[0-9]*</s/<scala\.compat\.version>[0-9]*\.[0-9]*</<scala.compat.version>'$TO_VERSION'</' \
+sed_i '1,/<scala\.binary\.version>[0-9]*\.[0-9]*</s/<scala\.binary\.version>[0-9]*\.[0-9]*</<scala.binary.version>'$TO_VERSION'</' \
   "$BASEDIR/pom.xml"
 
 #
