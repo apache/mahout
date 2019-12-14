@@ -768,11 +768,12 @@
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-site-plugin</artifactId>
     <version>3.7.1</version>
-    <configuration>
+    <!-- below was not parsing -->
+    <!--<configuration>
       <reportPlugins>
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <!--<version>2.2</version>-->
+          &lt;!&ndash;<version>2.2</version>&ndash;&gt;
         </plugin>
          <plugin>
           <groupId>net.alchim31.maven</groupId>
@@ -786,7 +787,7 @@
               </configuration>
          </plugin>
        </reportPlugins>
-     </configuration>
+     </configuration>-->
     </plugin>
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
