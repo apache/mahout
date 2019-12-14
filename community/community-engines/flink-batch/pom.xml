@@ -22,12 +22,12 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-community-engines_2.11</artifactId>
+    <artifactId>mahout-community-engines_2.122.122.122.122.122.122.11</artifactId>
     <version>14.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-flink-batch_2.11</artifactId>
+  <artifactId>mahout-flink-batch_2.122.122.122.122.122.122.11</artifactId>
   <name>-- Mahout Flink Engine (Community)</name>
   <description>
     Mahout Bindings for Apache Flink
@@ -165,12 +165,12 @@
 
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-runtime_${scala.compat.version}</artifactId>
+      <artifactId>flink-runtime_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-scala_${scala.compat.version}</artifactId>
+      <artifactId>flink-scala_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>
@@ -185,24 +185,24 @@
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-clients_${scala.compat.version}</artifactId>
+      <artifactId>flink-clients_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-test-utils_${scala.compat.version}</artifactId>
+      <artifactId>flink-test-utils_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-tests_${scala.compat.version}</artifactId>
+      <artifactId>flink-tests_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <!--<artifactId>mahout-math-scala_2.122.122.122.122.122.12${scala.compat.version}</artifactId>-->
+      <artifactId>core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -227,8 +227,8 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <!--<artifactId>mahout-math-scala_2.122.122.122.122.122.12${scala.compat.version}</artifactId>-->
+      <artifactId>core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
@@ -247,7 +247,7 @@
     </dependency>
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <artifactId>scalatest_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
     </dependency>
   </dependencies>
 </project>

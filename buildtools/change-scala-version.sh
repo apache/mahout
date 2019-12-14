@@ -19,9 +19,9 @@
 
 # A BIG Shoutout to the Bros and Bro-ettes at Apache Spark for this
 
-set -e
+set -ex
 
-VALID_VERSIONS=( 2.12 2.13 )
+VALID_VERSIONS=( 2.11 2.12 2.13 )
 
 usage() {
   echo "Usage: $(basename $0) [-h|--help] <version>
@@ -46,10 +46,12 @@ check_scala_version() {
 
 check_scala_version "$TO_VERSION"
 
-if [ $TO_VERSION = "2.13" ]; then
-  FROM_VERSION="2.12"
-else
-  FROM_VERSION="2.13"
+if [[ $TO_VERSION -ne "2.13" && $TO_VERSION -ne "2.12" ]]; then
+  FROM_VERSION="2.11"
+elif [[ $TO_VERSION -ne "2.13" ]]; then
+  FROM_VERSION="2.12";  
+elif [[ $TO_VERSION -ne "2.11" && $TO_VERSION -ne "2.12" ]]; then
+   FROM_VERSION="2.13" 
 fi
 
 sed_i() {
@@ -66,6 +68,18 @@ find "$BASEDIR" -name 'pom.xml' -not -path '*target*' -print \
 # Match any scala binary version to ensure idempotency
 sed_i '1,/<scala\.binary\.version>[0-9]*\.[0-9]*</s/<scala\.binary\.version>[0-9]*\.[0-9]*</<scala.binary.version>'$TO_VERSION'</' \
   "$BASEDIR/pom.xml"
+
+# we'll want to hard codew the most recent full scala version in the root pom.xml's <properties/> to the latest.  As of the Mahout 14.1 
+# release it is 2.13.1 so hardcoding to '<scala.version>'$TO_VERSION'.1<scala.version>'
+
+if [[ $TO_VERSION = 2.12 || $TO_VERSION = 2.11 ]]; then 
+ sed_i '1,/<scala\.version>[0-9]*\.[0-9]*\.[0-9]*\</s/<scala\.version>[0-9]*\.[0-9]*</<scala.version>'$TO_VERSION'.8</' \
+  "$BASEDIR/pom.xml"
+elif [[ $TO_VERSION = 2.13 ]]; then
+ sed_i '1,/<scala\.version>[0-9]*\.[0-9]*\.[0-9]*\</s/<scala\.version>[0-9]*\.[0-9]*</<scala.version>'$TO_VERSION'.1</' \
+  "$BASEDIR/pom.xml"
+fi
+
 
 #
 # Mahout doesn't need this until we get our website acting right.

@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+  <artifactId>mahout-native-viennacl-omp_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
 
   <name>- Mahout ViennaCL OpenMP BLAS (Experimental)</name>
   <description>Native Structures and interfaces to be used from Mahout math-scala.
@@ -243,7 +243,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -257,7 +257,7 @@
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <artifactId>scalatest_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
     </dependency>
 
     <!-- scala-library for annotations at compile time-->

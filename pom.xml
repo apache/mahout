@@ -193,7 +193,7 @@
       <!-- set the scala version here only -->
       <dependency>
         <groupId>org.scalatest</groupId>
-        <artifactId>scalatest_${scala.compat.version}</artifactId>
+        <artifactId>scalatest_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
         <version>3.0.5</version>
       </dependency>
 

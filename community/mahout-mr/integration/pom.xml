@@ -28,7 +28,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-integration_${scala.compat.version}</artifactId>
+  <artifactId>mahout-integration_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
   <name>-- Mahout Classic Integration</name>
   <description>Optional components of Mahout which generally support interaction with third party systems,
     formats, APIs, etc.</description>
@@ -80,13 +80,13 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>

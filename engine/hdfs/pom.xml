@@ -28,7 +28,7 @@
   </parent>
 
   <!-- modules inherit parent's group id and version. -->
-  <artifactId>mahout-hdfs_2.11</artifactId>
+  <artifactId>mahout-hdfs_2.122.122.122.122.122.122.11</artifactId>
   <name>- Mahout HDFS Support</name>
   <description>Scalable machine learning libraries</description>
 
@@ -173,13 +173,13 @@
     <!-- our modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-core_${scala.compat.version}</artifactId>
+      <artifactId>mahout-core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-core_${scala.compat.version}</artifactId>
+      <artifactId>mahout-core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>

@@ -28,7 +28,7 @@
   </parent>
 
   <!-- modules inherit parent's group id and version. -->
-  <artifactId>mahout-mr_12</artifactId>
+  <artifactId>mahout-mr_2.122.122.122.122.122.1212</artifactId>
   <name>- Mahout Classic (Map-Reduce Based Machine Learning)</name>
   <description>Scalable machine learning libraries</description>
 
@@ -57,13 +57,13 @@
     <!-- our modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
+      <artifactId>core_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>

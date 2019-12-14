@@ -27,7 +27,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-core_2.11</artifactId>
+  <artifactId>mahout-core_2.122.122.122.122.122.122.11</artifactId>
   <name>Mahout Core</name>
   <description>High performance scientific and technical computing data structures and methods,
     mostly based on CERN's Colt Java API
@@ -62,7 +62,7 @@
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <artifactId>scalatest_2.122.122.122.122.122.12${scala.compat.version}</artifactId>
       <version>3.0.5</version>
     </dependency>
 
