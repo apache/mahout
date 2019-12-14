@@ -42,8 +42,8 @@
 <!--        <include>com.tdunning:t-digest</include>-->
         <include>org.apache.commons:commons-math3</include>
         <include>it.unimi.dsi:fastutil</include>
-        <include>org.apache.mahout:mahout-native-viennacl_2.10</include>
-        <include>org.apache.mahout:mahout-native-viennacl-omp_2.10</include>
+        <include>org.apache.mahout:mahout-native-viennacl_2.11</include>
+        <include>org.apache.mahout:mahout-native-viennacl-omp_2.11</include>
         <include>org.bytedeco:javacpp</include>
       </includes>
     </dependencySet>

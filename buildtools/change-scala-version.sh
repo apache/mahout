@@ -19,6 +19,9 @@
 
 # A BIG Shoutout to the Bros and Bro-ettes at Apache Spark for this
 
+## TODO post 14.1 fix this script ---- Idempotency is lost somewhere, and 
+## this script will mess an entire IntelliJ project structure up !!######
+
 set -ex
 
 VALID_VERSIONS=( 2.10 2.11 2.12 )

@@ -265,8 +265,8 @@ package object sparkbindings {
       // no need for mapreduce jar in Spark
       // j.matches(".*mahout-mr-\\d.*\\.jar") ||
       j.matches(".*spark_\\d.*\\.jar") ||
-      // vcl jars: mahout-native-viennacl_2.10.jar,
-      //           mahout-native-viennacl-omp_2.10.jar
+      // vcl jars: mahout-native-viennacl_2.11.jar,
+      //           mahout-native-viennacl-omp_2.11.jar
 //      j.matches(".*mahout-native-viennacl_\\d.*\\\\.jar") ||
 //      j.matches(".*mahout-native-viennacl-omp_\\d.*\\.jar")||
         j.matches(".*mahout-native-viennacl*.jar")||
