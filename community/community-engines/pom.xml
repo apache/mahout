@@ -22,8 +22,8 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-community_2.11</artifactId>
-    <version>14.1-SNAPSHOT</version>
+    <artifactId>mahout-community</artifactId>
+    <version>14.1_2.12-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -36,7 +36,7 @@
     </tag>
   </scm>-->
 
-  <artifactId>mahout-community-engines_2.11</artifactId>
+  <artifactId>mahout-community-engines</artifactId>
   <name>- Mahout Community Supported Engines</name>
   <description>Not officially maintained Mahout Engines
   </description>

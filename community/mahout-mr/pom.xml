@@ -23,12 +23,12 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>community</artifactId>
-    <version>14.1-SNAPSHOT</version>
+    <version>14.1_2.12-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <!-- modules inherit parent's group id and version. -->
-  <artifactId>mahout-mr_12</artifactId>
+  <artifactId>mahout-mr_2.12</artifactId>
   <name>- Mahout Classic (Map-Reduce Based Machine Learning)</name>
   <description>Scalable machine learning libraries</description>
 

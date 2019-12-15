@@ -26,7 +26,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
 
-  <version>14.1</version>
+  <version>14.1_2.12-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>Apache Mahout</name>
@@ -99,7 +99,7 @@
       <connection>scm:git:git@github.com:apache/mahout.git</connection>
       <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
       <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-      <tag>mahout-14.1_${scala.compat.version}
+      <tag>mahout-14.1_2.12
       </tag>
    </scm>
 
@@ -109,8 +109,8 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <mjavadoc.version>2.10.3</mjavadoc.version>
     <slf4j.version>1.7.22</slf4j.version>
-    <scala.version>2.11.8</scala.version>
-    <scala.compat.version>2.11</scala.compat.version>
+    <scala.version>2.12.8</scala.version>
+    <scala.compat.version>2.12</scala.compat.version>
     <source.plugin.version>3.0.1</source.plugin.version>
     <spark.version>2.4.3</spark.version>
     <spark.compat.version>2.4</spark.compat.version>
