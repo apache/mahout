@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mahout</artifactId>
         <groupId>org.apache.mahout</groupId>
-        <version>14.12-SNAPSHOT</version>
+        <version>14.1_2.12</version>
     </parent>
 
     <artifactId>distribution_2.12</artifactId>
