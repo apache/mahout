@@ -265,3 +265,4 @@ Please see the `NOTICE.txt` included in this directory for more information.
 <!--
 [![Coverage Status](https://coveralls.io/repos/github/apache/mahout/badge.svg?branch=master)](https://coveralls.io/github/apache/mahout?branch=master)
 -->
+[![Build Status](https://builds.apache.org/buildStatus/icon?job=mahout-nightly&build=2313)](https://builds.apache.org/job/mahout-nightly/2313/)
