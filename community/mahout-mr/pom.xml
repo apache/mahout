@@ -50,7 +50,7 @@
   </modules>
 
   <properties>
-      <lucene.version>5.5.2</lucene.version>
+      <lucene.version>8.3.0</lucene.version>
   </properties>
 
   <dependencies>
