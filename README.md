@@ -44,7 +44,7 @@ To use the Samsara environment you'll need to include both the engine neutral ma
 ```
 <dependency>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-math-scala_2.12</artifactId>
+    <artifactId>mahout-math-scala_2.11</artifactId>
     <version>${mahout.version}</version>
 </dependency>
 ```
@@ -52,7 +52,7 @@ and a dependency for back end engine translation, e.g:
 ```
 <dependency>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-spark_2.12</artifactId>
+    <artifactId>mahout-spark_2.11</artifactId>
     <version>${mahout.version}</version>
 </dependency>
 ```
@@ -265,4 +265,3 @@ Please see the `NOTICE.txt` included in this directory for more information.
 <!--
 [![Coverage Status](https://coveralls.io/repos/github/apache/mahout/badge.svg?branch=master)](https://coveralls.io/github/apache/mahout?branch=master)
 -->
-[![Build Status](https://builds.apache.org/buildStatus/icon?job=mahout-nightly&build=2313)](https://builds.apache.org/job/mahout-nightly/2313/)

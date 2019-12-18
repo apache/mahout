@@ -44,7 +44,7 @@
   </scm>-->
 
   <properties>
-    <lucene.version>8.3.0</lucene.version>
+    <lucene.version>5.5.2</lucene.version>
   </properties>
   <build>
     <resources>

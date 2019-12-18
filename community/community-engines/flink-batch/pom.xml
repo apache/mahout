@@ -22,12 +22,12 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-community-engines</artifactId>
-    <version>14.1_2.12</version>
+    <artifactId>mahout-community-engines_2.11</artifactId>
+    <version>14.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-flink-batch_2.12</artifactId>
+  <artifactId>mahout-flink-batch_2.11</artifactId>
   <name>-- Mahout Flink Engine (Community)</name>
   <description>
     Mahout Bindings for Apache Flink
