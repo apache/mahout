@@ -585,26 +585,6 @@
             </execution>
           </executions>
         </plugin>
-
-        <!-- We want to sign the artifact, the POM, and all attached artifacts -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.6</version>
-          <executions>
-            <execution>
-              <id>sign-release-artifacts</id>
-              <goals>
-                <goal>sign</goal>
-              </goals>
-              <configuration>
-                <keyname>${gpg.keyname}</keyname>
-                <passphraseServerId>${gpg.passphrase}</passphraseServerId>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
       </plugins>
     </build>
   </profile>
