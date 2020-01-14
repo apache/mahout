@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mahout</artifactId>
         <groupId>org.apache.mahout</groupId>
-        <version>14.1</version>
+        <version>14.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>distribution_2.12</artifactId>
@@ -37,22 +37,22 @@
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-core_${scala.compat.version}</artifactId>
-            <version>14.1</version>
+            <version>14.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-hdfs_${scala.compat.version}</artifactId>
-            <version>14.1</version>
+            <version>14.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-            <version>14.1</version>
+            <version>14.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-spark-cli-drivers_${scala.compat.version}</artifactId>
-            <version>14.1</version>
+            <version>14.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
