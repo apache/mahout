@@ -26,7 +26,7 @@
         <version>14.1</version>
     </parent>
 
-    <artifactId>distribution</artifactId>
+    <artifactId>distribution_2.11</artifactId>
 
     <name>Mahout Release Package</name>
     <description>Distribution Package</description>
