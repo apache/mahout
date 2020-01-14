@@ -34,7 +34,7 @@ FWDIR="$SPARK_HOME"
 if [ -z "$SPARK_SCALA_VERSION" ]; then
 
     ASSEMBLY_DIR1="$FWDIR/assembly/target/scala-2.10"
-    ASSEMBLY_DIR2="$FWDIR/assembly/target/scala-2.11"
+    ASSEMBLY_DIR2="$FWDIR/assembly/target/scala-2.12"
     ASSEMBLY_DIR3="$FWDIR/assembly/target/scala-2.12"
 
 
@@ -48,9 +48,9 @@ if [ -z "$SPARK_SCALA_VERSION" ]; then
     if [[ -d "$ASSEMBLY_DIR1" ]]; then
         export SPARK_SCALA_VERSION="2.10"
     elif [[ -d "$ASSEMBLY_DIR1" ]]; then
-        export SPARK_SCALA_VERSION="2.11"
+        export SPARK_SCALA_VERSION="2.12"
     else
-        export SPARK_SCALA_VERSION="2.11"
+        export SPARK_SCALA_VERSION="2.12"
     fi
 fi
 
