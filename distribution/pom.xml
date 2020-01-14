@@ -26,7 +26,7 @@
         <version>14.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>distribution</artifactId>
+    <artifactId>distribution_2.11</artifactId>
 
     <name>Mahout Release Package</name>
     <description>Distribution Package</description>
@@ -68,18 +68,34 @@
 -->
                 <executions>
                     <execution>
-                        <id>distro-assembly</id>
+                        <id>distro-assembly-bin</id>
                         <phase>deploy</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
                             <attach>true</attach>
-                            <finalName>apache-mahout-${project.version}-${scala.compat.version}</finalName>
+                            <finalName>apache-mahout-${project.version}_${scala.compat.version}</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
-                              <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
-                              <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
+                                <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
+                            </descriptors>
+                            <tarLongFileMode>gnu</tarLongFileMode>
+                            <appendAssemblyId>true</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>distro-assembly-src</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <attach>true</attach>
+                            <finalName>apache-mahout-${project.version}_${scala.compat.version}</finalName>
+                            <skipAssembly>false</skipAssembly>
+                            <descriptors>
+                                <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>true</appendAssemblyId>
