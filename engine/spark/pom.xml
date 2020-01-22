@@ -23,11 +23,11 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-engine</artifactId>
-    <version>14.2-SNAPSHOT</version>
+    <version>14.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-spark_2.12</artifactId>
+  <artifactId>mahout-spark_2.11</artifactId>
   <name>- Mahout Spark Engine</name>
   <description>
     Mahout Bindings for Apache Spark
@@ -252,13 +252,13 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>14.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs_${scala.compat.version}</artifactId>
-      <version>14.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
 
@@ -271,7 +271,7 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>14.2-SNAPSHOT</version>
+      <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
