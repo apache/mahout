@@ -24,7 +24,7 @@ yes distributed under the License is distributed on an "AS IS" BASIS,
       <format>tar.bz2</format>
     </formats>
 
-    <includeBaseDirectory>false</includeBaseDirectory>
+    <includeBaseDirectory>true</includeBaseDirectory>
 
     <fileSets>
       <fileSet>
@@ -42,8 +42,11 @@ yes distributed under the License is distributed on an "AS IS" BASIS,
           <include>entrypoint*.sh</include>
           <include>bin/**</include>
           <include>engine/***</include>
+          <include>engine/**/**</include>
           <include>core/**</include>
+          <include>core/**/**</include>
           <include>community/**</include>
+          <include>community/**/**</include>
           <include>conf/**</include>
           <include>bin/**</include>
           <include>website/**</include>
@@ -51,7 +54,9 @@ yes distributed under the License is distributed on an "AS IS" BASIS,
           <include>lib/**</include>
           <include>buildtools/**</include>
           <include>experimental/**</include>
-          <include>distribution/**</include>
+          <include>experimental/**/**</include>
+          <include>dist/**</include>
+          <include>examples/**</include>
           <include>examples/**</include>
           <include>resource-managers/**</include>
         </includes>

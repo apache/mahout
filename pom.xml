@@ -172,7 +172,7 @@
     <module>engine/hdfs</module>
     <module>community</module>
     <module>community/spark-cli-drivers</module>
-    <module>distribution</module>
+    <module>dist</module>
   </modules>
 
   <dependencyManagement>
@@ -612,6 +612,29 @@
             <waitBeforeTagging>10</waitBeforeTagging>
           </configuration>
 
+        </plugin>
+
+        <!-- Override pare t pom's assembly plugin for -Papache-release we have our assembly code and descriptors
+         in the /dist directory adhering to https://www.apache.org/dev/release-publishing#distribution  -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.apache.resources</groupId>
+              <artifactId>apache-source-release-assembly-descriptor</artifactId>
+              <version>1.0.6</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>source-release-assembly</id>
+              <phase>dont-exeute</phase>
+              <goals>
+                <goal>dont-execute</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>
