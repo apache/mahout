@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>14.1-SNAPSHOT</version>
+    <version>14.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -34,7 +34,7 @@
     <connection>scm:git:git@github.com:apache/mahout.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
     <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
+    <tag>mahout_2.11-14.1-RC4
     </tag>
   </scm>
 
