@@ -83,7 +83,7 @@
                         </goals>
                         <configuration>
                             <attach>true</attach>
-                            <finalName>apache-mahout-${project.version}_${scala.compat.version}</finalName>
+                            <finalName>apache-mahout_${scala.compat.version}-${project.version}</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
                                 <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
@@ -100,7 +100,7 @@
                         </goals>
                         <configuration>
                             <attach>true</attach>
-                            <finalName>apache-mahout-${project.version}_${scala.compat.version}</finalName>
+                            <finalName>apache-mahout_${scala.compat.version}-${project.version}</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
                                 <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
@@ -121,9 +121,9 @@
                       <configuration>
                           <tasks>
                               <copy todir="release">
-                                  <fileset dir="target">
-                                      <type type="file" />
-                                  </fileset>
+                                  <fileset dir="target"
+                                           includes="*.*"
+                                   />
                               </copy>
                           </tasks>
                       </configuration>
