@@ -33,6 +33,14 @@
 
     <packaging>pom</packaging>
 
+    <scm>
+        <connection>scm:git:git@github.com:apache/mahout.git</connection>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
+        <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
+        <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
+        </tag>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.mahout</groupId>
