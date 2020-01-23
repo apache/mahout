@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>17</version>
+    <version>18</version>
     <relativePath />
   </parent>
 
@@ -33,6 +33,14 @@
   <name>Mahout Build Tools</name>
 
   <packaging>jar</packaging>
+
+  <scm>
+    <connection>scm:git:git@github.com:apache/mahout.git</connection>
+    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
+    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
+    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
+    </tag>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -144,10 +152,4 @@
       </build>
     </profile>
   </profiles>
-
-  <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/pom/tags/mahout-buildtools-14.1</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/pom/tags/mahout-buildtools-14.1</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/pom/tags/mahout-buildtools-14.1</url>
-  </scm>
 </project>
