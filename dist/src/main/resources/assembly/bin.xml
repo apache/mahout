@@ -111,6 +111,13 @@
         <fileMode>755</fileMode>
         <directoryMode>755</directoryMode>
     </fileSet>
+    <fileSet>
+        <directory>release</directory>
+        <outputDirectory>dist/release</outputDirectory>
+        <useDefaultExcludes>true</useDefaultExcludes>
+        <fileMode>755</fileMode>
+        <directoryMode>755</directoryMode>
+    </fileSet>
   </fileSets>
 </assembly>
 

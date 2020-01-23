@@ -26,7 +26,7 @@
         <version>14.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>distribution_2.11</artifactId>
+    <artifactId>dist</artifactId>
 
     <name>Mahout Release Package</name>
     <description>Distribution Package</description>
@@ -69,13 +69,13 @@
                 <executions>
                     <execution>
                         <id>distro-assembly-bin</id>
-                        <phase>deploy</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
                             <attach>true</attach>
-                            <finalName>apache-mahout-${project.version}_${scala.compat.version}-bin</finalName>
+                            <finalName>apache-mahout-${project.version}_${scala.compat.version}</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
                                 <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
@@ -86,13 +86,13 @@
                     </execution>
                     <execution>
                         <id>distro-assembly-src</id>
-                        <phase>deploy</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
                             <attach>true</attach>
-                            <finalName>apache-mahout-${project.version}_${scala.compat.version}-src</finalName>
+                            <finalName>apache-mahout-${project.version}_${scala.compat.version}</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
                                 <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
@@ -103,35 +103,58 @@
                     </execution>
                 </executions>
             </plugin>
+              <plugin>
+              <artifactId>maven-antrun-plugin</artifactId>
+              <version>1.4</version>
+              <executions>
+                  <execution>
+                      <id>copy</id>
+                      <phase>package</phase>
+                      <configuration>
+                          <tasks>
+                              <copy todir="release">
+                                  <fileset dir="target">
+                                      <type type="file" />
+                                  </fileset>
+                              </copy>
+                          </tasks>
+                      </configuration>
+                      <goals>
+                          <goal>run</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>
         </plugins>
-            <pluginManagement>
-                <plugins>
-                    <plugin>
-                        <groupId>org.eclipse.m2e</groupId>
-                        <artifactId>lifecycle-mapping</artifactId>
-                        <version>1.0.0</version>
-                        <configuration>
-                            <lifecycleMappingMetadata>
-                                <pluginExecutions>
-                                    <pluginExecution>
-                                        <pluginExecutionFilter>
-                                            <groupId>org.apache.maven.plugins</groupId>
-                                            <artifactId>maven-dependency-plugin</artifactId>
-                                            <versionRange>[1.0,)</versionRange>
-                                            <goals>
-                                                <goal>build-classpath</goal>
-                                            </goals>
-                                        </pluginExecutionFilter>
-                                        <action>
-                                            <ignore />
-                                        </action>
-                                    </pluginExecution>
-                                </pluginExecutions>
-                            </lifecycleMappingMetadata>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </pluginManagement>
+<!--            <pluginManagement>-->
+<!--                <plugins>-->
+<!--                    <plugin>-->
+<!--                        <groupId>org.eclipse.m2e</groupId>-->
+<!--                        <artifactId>lifecycle-mapping</artifactId>-->
+<!--                        <version>1.0.0</version>-->
+<!--                        <configuration>-->
+<!--                            <lifecycleMappingMetadata>-->
+<!--                                <pluginExecutions>-->
+<!--                                    <pluginExecution>-->
+<!--                                        <pluginExecutionFilter>-->
+<!--                                            <groupId>org.apache.maven.plugins</groupId>-->
+<!--                                            <artifactId>maven-dependency-plugin</artifactId>-->
+<!--                                            <versionRange>[1.0,)</versionRange>-->
+<!--                                            <goals>-->
+<!--                                                <goal>build-classpath</goal>-->
+<!--                                            </goals>-->
+<!--                                        </pluginExecutionFilter>-->
+<!--                                        <action>-->
+<!--                                            <ignore />-->
+<!--                                        </action>-->
+<!--                                    </pluginExecution>-->
+<!--                                </pluginExecutions>-->
+<!--                            </lifecycleMappingMetadata>-->
+<!--                        </configuration>-->
+<!--                    </plugin>-->
+
+<!--                </plugins>-->
+<!--            </pluginManagement>-->
        </build>
 
 </project>
