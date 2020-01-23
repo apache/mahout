@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mahout</artifactId>
         <groupId>org.apache.mahout</groupId>
-        <version>14.2-SNAPSHOT</version>
+        <version>14.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>dist_2.11</artifactId>
@@ -126,35 +126,35 @@
               </executions>
           </plugin>
         </plugins>
-            <pluginManagement>
-                <plugins>
-                    <plugin>
-                        <groupId>org.eclipse.m2e</groupId>
-                        <artifactId>lifecycle-mapping</artifactId>
-                        <version>1.0.0</version>
-                        <configuration>
-                            <lifecycleMappingMetadata>
-                                <pluginExecutions>
-                                    <pluginExecution>
-                                        <pluginExecutionFilter>
-                                            <groupId>org.apache.maven.plugins</groupId>
-                                            <artifactId>maven-dependency-plugin</artifactId>
-                                            <versionRange>[1.0,)</versionRange>
-                                            <goals>
-                                                <goal>build-classpath</goal>
-                                            </goals>
-                                        </pluginExecutionFilter>
-                                        <action>
-                                            <ignore />
-                                        </action>
-                                    </pluginExecution>
-                                </pluginExecutions>
-                            </lifecycleMappingMetadata>
-                        </configuration>
-                    </plugin>
+<!--            <pluginManagement>-->
+<!--                <plugins>-->
+<!--                    <plugin>-->
+<!--                        <groupId>org.eclipse.m2e</groupId>-->
+<!--                        <artifactId>lifecycle-mapping</artifactId>-->
+<!--                        <version>1.0.0</version>-->
+<!--                        <configuration>-->
+<!--                            <lifecycleMappingMetadata>-->
+<!--                                <pluginExecutions>-->
+<!--                                    <pluginExecution>-->
+<!--                                        <pluginExecutionFilter>-->
+<!--                                            <groupId>org.apache.maven.plugins</groupId>-->
+<!--                                            <artifactId>maven-dependency-plugin</artifactId>-->
+<!--                                            <versionRange>[1.0,)</versionRange>-->
+<!--                                            <goals>-->
+<!--                                                <goal>build-classpath</goal>-->
+<!--                                            </goals>-->
+<!--                                        </pluginExecutionFilter>-->
+<!--                                        <action>-->
+<!--                                            <ignore />-->
+<!--                                        </action>-->
+<!--                                    </pluginExecution>-->
+<!--                                </pluginExecutions>-->
+<!--                            </lifecycleMappingMetadata>-->
+<!--                        </configuration>-->
+<!--                    </plugin>-->
 
-                </plugins>
-            </pluginManagement>
+<!--                </plugins>-->
+<!--            </pluginManagement>-->
        </build>
 
 </project>
