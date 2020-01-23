@@ -23,10 +23,10 @@
     <parent>
         <artifactId>mahout</artifactId>
         <groupId>org.apache.mahout</groupId>
-        <version>14.2-SNAPSHOT</version>
+        <version>14.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>distribution_2.12</artifactId>
+    <artifactId>distribution_2.11</artifactId>
 
     <name>Mahout Release Package</name>
     <description>Distribution Package</description>
@@ -37,22 +37,22 @@
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-core_${scala.compat.version}</artifactId>
-            <version>14.2-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-hdfs_${scala.compat.version}</artifactId>
-            <version>14.2-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-            <version>14.2-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-spark-cli-drivers_${scala.compat.version}</artifactId>
-            <version>14.2-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -75,7 +75,7 @@
                         </goals>
                         <configuration>
                             <attach>true</attach>
-                            <finalName>apache-mahout-${project.version}_${scala.compat.version}</finalName>
+                            <finalName>apache-mahout-${project.version}_${scala.compat.version}-bin</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
                                 <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
@@ -92,7 +92,7 @@
                         </goals>
                         <configuration>
                             <attach>true</attach>
-                            <finalName>apache-mahout-${project.version}_${scala.compat.version}</finalName>
+                            <finalName>apache-mahout-${project.version}_${scala.compat.version}-src</finalName>
                             <skipAssembly>false</skipAssembly>
                             <descriptors>
                                 <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
