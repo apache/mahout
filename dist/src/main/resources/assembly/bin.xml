@@ -31,10 +31,6 @@
 
 <fileSets>
 
-    <!-- copy files from the base directory, including the base
-    Dockerfile, which prepares builds Mahout and downloads builds and installs
-    the appropriate spark version Spark. No version of Hadoop is currently included.-->
-
     <fileSet>
         <directory>${basedir}/../</directory>
         <outputDirectory></outputDirectory>

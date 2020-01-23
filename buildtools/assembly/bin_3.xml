@@ -23,7 +23,7 @@
     </formats>
 
     <includeBaseDirectory>true</includeBaseDirectory>
-    <baseDirectory>apache-mahout-${project.version}</baseDirectory>
+    <baseDirectory>apache-mahout_${scala.compat.version}-${project.version}</baseDirectory>
 
     <dependencySets>
         <dependencySet>
