@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mahout</artifactId>
         <groupId>org.apache.mahout</groupId>
-        <version>14.1-SNAPSHOT</version>
+        <version>14.1</version>
     </parent>
 
     <artifactId>dist_2.11</artifactId>
@@ -114,7 +114,7 @@
                           <tasks>
                               <copy todir="release">
                                   <fileset dir="target">
-                                      <type type="file"/>
+                                      <type type="file" />
                                   </fileset>
                               </copy>
                           </tasks>
@@ -145,7 +145,7 @@
                                             </goals>
                                         </pluginExecutionFilter>
                                         <action>
-                                            <ignore/>
+                                            <ignore />
                                         </action>
                                     </pluginExecution>
                                 </pluginExecutions>
