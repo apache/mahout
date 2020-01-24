@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mahout</artifactId>
         <groupId>org.apache.mahout</groupId>
-        <version>14.2-SNAPSHOT</version>
+        <version>14.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>dist</artifactId>
@@ -121,7 +121,9 @@
                       <configuration>
                           <tasks>
                               <copy todir="release">
-                                  <fileset dir="target" includes="*.*" />
+                                  <fileset dir="target"
+                                           includes="*.*"
+                                   />
                               </copy>
                           </tasks>
                       </configuration>
