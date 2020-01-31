@@ -42,7 +42,8 @@
             <include>Dockerfile*</include>
             <include>entrypoint.sh*</include>
             <include>conf/**</include>
-
+            <include>**/*.properties</include>
+            <include>**/**/*.properties</include>
         </includes>
     </fileSet>
     <fileSet>

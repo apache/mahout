@@ -118,7 +118,7 @@
                       <phase>package</phase>
                       <configuration>
                           <tasks>
-                              <copy todir="release">
+                              <copy todir="${project.basedir}">
                                   <fileset dir="target"
                                            includes="*.*"
                                    />
