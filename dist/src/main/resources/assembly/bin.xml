@@ -41,6 +41,8 @@
             <include>pom.xml*</include>
             <include>Dockerfile*</include>
             <include>entrypoint.sh*</include>
+            <include>conf/**</include>
+
         </includes>
     </fileSet>
     <fileSet>

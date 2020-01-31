@@ -63,7 +63,7 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-    
+
         <build>
          <defaultGoal>install</defaultGoal>
           <plugins>

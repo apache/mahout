@@ -56,7 +56,7 @@ yes distributed under the License is distributed on an "AS IS" BASIS,
           <include>experimental/**</include>
           <include>experimental/**/**</include>
           <include>dist/**</include>
-          <include>examples/**</include>
+          <include>dist/**/**</include>
           <include>examples/**</include>
           <include>resource-managers/**</include>
         </includes>
