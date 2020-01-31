@@ -173,7 +173,7 @@
     <module>engine/hdfs</module>
     <module>community</module>
     <module>community/spark-cli-drivers</module>
-    <module>dist</module>
+    <module>distribution</module>
   </modules>
 
   <dependencyManagement>
