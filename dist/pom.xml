@@ -26,7 +26,7 @@
         <version>14.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>dist</artifactId>
+    <artifactId>apache-mahout-distribution_2.11</artifactId>
 
     <name>Mahout Release Package</name>
     <description>Distribution Package</description>
@@ -63,11 +63,9 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
-
-
-
+    
         <build>
+         <defaultGoal>install</defaultGoal>
           <plugins>
             <plugin>
               <artifactId>maven-assembly-plugin</artifactId>
@@ -89,7 +87,7 @@
                                 <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>gnu</tarLongFileMode>
-                            <appendAssemblyId>true</appendAssemblyId>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                     <execution>
