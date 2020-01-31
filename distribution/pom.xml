@@ -109,28 +109,6 @@
                     </execution>
                 </executions>
             </plugin>
-              <plugin>
-              <artifactId>maven-antrun-plugin</artifactId>
-              <version>1.4</version>
-              <executions>
-                  <execution>
-                      <id>copy</id>
-                      <phase>package</phase>
-                      <configuration>
-                          <tasks>
-                              <copy todir="${project.basedir}">
-                                  <fileset dir="target"
-                                           includes="*.*"
-                                   />
-                              </copy>
-                          </tasks>
-                      </configuration>
-                      <goals>
-                          <goal>run</goal>
-                      </goals>
-                  </execution>
-              </executions>
-          </plugin>
         </plugins>
 <!--            <pluginManagement>-->
 <!--                <plugins>-->

@@ -45,6 +45,9 @@
             <include>**/*.properties</include>
             <include>**/**/*.properties</include>
         </includes>
+        <excludes>
+            <exclude>target/**</exclude>
+        </excludes>
     </fileSet>
     <fileSet>
         <directory>${basedir}/../lib</directory>
