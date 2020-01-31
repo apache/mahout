@@ -40,7 +40,6 @@ yes distributed under the License is distributed on an "AS IS" BASIS,
           <include>src/conf/**</include>
           <include>Dockerfile*</include>
           <include>entrypoint*.sh</include>
-          <include>bin/**</include>
           <include>engine/***</include>
           <include>engine/**/**</include>
           <include>core/**</include>
@@ -57,7 +56,6 @@ yes distributed under the License is distributed on an "AS IS" BASIS,
           <include>experimental/**/**</include>
           <include>dist/**</include>
           <include>dist/**/**</include>
-          <include>examples/**</include>
           <include>resource-managers/**</include>
         </includes>
         <excludes>
@@ -66,6 +64,23 @@ yes distributed under the License is distributed on an "AS IS" BASIS,
           <exclude>${basedir}/target</exclude>
         </excludes>
       </fileSet>
-
+      <fileSet>
+          <directory>${project.basedir}/../bin</directory>
+          <outputDirectory>bin</outputDirectory>
+          <useDefaultExcludes>true</useDefaultExcludes>
+          <fileMode>0755</fileMode>
+          <directoryMode>0755</directoryMode>
+      </fileSet>
+      <fileSet>
+          <directory>${project.basedir}/../examples/bin</directory>
+          <outputDirectory>examples/bin</outputDirectory>
+          <useDefaultExcludes>true</useDefaultExcludes>
+          <fileMode>0755</fileMode>
+          <directoryMode>0755</directoryMode>
+          <excludes>
+            <exclude>work</exclude>
+            <exclude>work/**</exclude>
+          </excludes>
+      </fileSet>
     </fileSets>
 </assembly>
