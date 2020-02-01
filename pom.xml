@@ -631,9 +631,6 @@
             <execution>
               <id>source-release-assembly</id>
               <phase>dont-exeute</phase>
-              <goals>
-                <goal>dont-execute</goal>
-              </goals>
             </execution>
           </executions>
         </plugin>

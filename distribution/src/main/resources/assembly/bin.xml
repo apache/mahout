@@ -114,8 +114,8 @@
         <directoryMode>755</directoryMode>
     </fileSet>
     <fileSet>
-        <directory>release</directory>
-        <outputDirectory>dist/release</outputDirectory>
+        <directory>distribution</directory>
+        <outputDirectory>distribution</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <fileMode>755</fileMode>
         <directoryMode>755</directoryMode>
