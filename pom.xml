@@ -109,8 +109,8 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <mjavadoc.version>2.10.3</mjavadoc.version>
     <slf4j.version>1.7.22</slf4j.version>
-    <scala.version>2.11.8</scala.version>
-    <scala.compat.version>2.11</scala.compat.version>
+    <scala.version>2.12.8</scala.version>
+    <scala.compat.version>2.12</scala.compat.version>
     <source.plugin.version>3.0.1</source.plugin.version>
     <spark.version>2.4.3</spark.version>
     <spark.compat.version>2.4</spark.compat.version>
@@ -541,7 +541,6 @@
             </execution>
           </executions>
         </plugin>
-
         <plugin>
           <inherited>true</inherited>
           <groupId>org.apache.maven.plugins</groupId>
@@ -560,7 +559,6 @@
             </execution>
           </executions>
         </plugin>
-
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
@@ -606,7 +604,6 @@
               <releaseProfile>apache.releases.https</releaseProfile>
             </releaseProfiles>
               <goals>
-                  <goal>sign</goal>
                   <goal>deploy</goal>
               </goals>
             <arguments>-Papache-release ${arguments}</arguments>
@@ -630,7 +627,7 @@
           <executions>
             <execution>
               <id>source-release-assembly</id>
-              <phase>dont-exeute</phase>
+              <phase>none</phase>
             </execution>
           </executions>
         </plugin>

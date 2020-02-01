@@ -22,12 +22,12 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-community-engines_2.11</artifactId>
+    <artifactId>mahout-community-engines_2.12</artifactId>
     <version>14.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-flink-batch_2.11</artifactId>
+  <artifactId>mahout-flink-batch_2.12</artifactId>
   <name>-- Mahout Flink Engine (Community)</name>
   <description>
     Mahout Bindings for Apache Flink
@@ -125,7 +125,7 @@
 
       <!-- enable scalatest -->
       <plugin>
-        <groupId>org.scalatest_2.11</groupId>
+        <groupId>org.scalatest_2.12</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>
