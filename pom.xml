@@ -173,7 +173,6 @@
     <module>engine/hdfs</module>
     <module>community</module>
     <module>community/spark-cli-drivers</module>
-    <module>distribution</module>
   </modules>
 
   <dependencyManagement>
@@ -438,6 +437,15 @@
     <profile>
     <id>release.prepare</id>
     <properties>
+      <modules>
+        <module>core</module>
+        <module>engine</module>
+        <module>engine/spark</module>
+        <module>engine/hdfs</module>
+        <module>community</module>
+        <module>community/spark-cli-drivers</module>
+        <module>distribution</module>
+      </modules>
       <skipTests>true</skipTests>
       <pmd.skip>true</pmd.skip>
       <checkstyle.skip>true</checkstyle.skip>
@@ -448,6 +456,17 @@
 
   <profile>
     <id>sourcecheck</id>
+    <properties>
+      <modules>
+        <module>core</module>
+        <module>engine</module>
+        <module>engine/spark</module>
+        <module>engine/hdfs</module>
+        <module>community</module>
+        <module>community/spark-cli-drivers</module>
+        <module>distribution</module>
+      </modules>
+    </properties>
     <build>
       <plugins>
         <plugin>
@@ -517,11 +536,22 @@
 
     <profile>
     <id>ci</id>
-    <activation>
-      <activeByDefault>false</activeByDefault>
+    <properties>
+      <modules>
+        <module>core</module>
+        <module>engine</module>
+        <module>engine/spark</module>
+        <module>engine/hdfs</module>
+        <module>community</module>
+        <module>community/spark-cli-drivers</module>
+        <module>distribution</module>
+      </modules>
       <property>
         <name>env.JENKINS_URL</name>
       </property>
+    </properties>
+    <activation>
+      <activeByDefault>false</activeByDefault>
     </activation>
     <build>
       <plugins>
@@ -590,6 +620,17 @@
 
   <profile>
     <id>apache-release</id>
+    <properties>
+      <modules>
+        <module>core</module>
+        <module>engine</module>
+        <module>engine/spark</module>
+        <module>engine/hdfs</module>
+        <module>community</module>
+        <module>community/spark-cli-drivers</module>
+        <module>distribution</module>
+      </modules>
+    </properties>
     <build>
       <plugins>
         <plugin>
