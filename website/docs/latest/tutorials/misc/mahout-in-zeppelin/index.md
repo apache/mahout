@@ -118,19 +118,19 @@ Where `/path/to/mahout` is the path to the directory where you've built mahout.
         <th>exclude</th>
     </tr>
     <tr>
-        <td>/path/to/mahout/core_2.12-0.14.jar</td>
+        <td>/path/to/mahout/core_2.11-0.14.jar</td>
         <td></td>
     </tr>
      <tr>
-        <td>path/to/mahout/mahout-hdfs_2.12-0.14.jar</td>
+        <td>path/to/mahout/mahout-hdfs_2.11-0.14.jar</td>
         <td></td>
      </tr>
     <tr>
-        <td>/path/to/mahout/mahout-spark_2.12-0.14.jar</td>
+        <td>/path/to/mahout/mahout-spark_2.11-0.14.jar</td>
         <td></td>
     </tr>  
     <tr>
-        <td>/path/to/mahout/mahout-spark_2.12-0.14.jar-dependeny-reduced.jar</td>
+        <td>/path/to/mahout/mahout-spark_2.11-0.14.jar-dependeny-reduced.jar</td>
         <td></td>
     </tr>
 </table>
@@ -149,15 +149,15 @@ Where `/path/to/mahout` is the path to the directory where you've built mahout.
         <td></td>
     </tr>
     <tr>
-        <td>org.apache.mahout:mahout-hdfs-scala_2.12:0.14</td>
+        <td>org.apache.mahout:mahout-hdfs-scala_2.11:0.14</td>
         <td></td>
     </tr>
     <tr>
-        <td>org.apache.mahout:mahout-spark_2.12:0.14</td>
+        <td>org.apache.mahout:mahout-spark_2.11:0.14</td>
         <td></td>
     </tr>
      <tr>
-         <td>org.apache.mahout:mahout-native-viennacl-omp_2.12:0.14</td>
+         <td>org.apache.mahout:mahout-native-viennacl-omp_2.11:0.14</td>
          <td></td>
      </tr> 
 
@@ -175,12 +175,12 @@ _**OPTIONALLY**_ You can add **one** of the following artifacts for CPU/GPU acce
         <th>type of native solver</th>
     </tr>
      <tr>
-         <td>org.apache.mahout:mahout-native-viennacl_2.12:0.14</td>
+         <td>org.apache.mahout:mahout-native-viennacl_2.11:0.14</td>
          <td></td>
          <td>ViennaCL GPU Accelerated</td>
      </tr> 
      <tr>
-         <td>org.apache.mahout:mahout-native-viennacl-omp_2.12:0.14</td>
+         <td>org.apache.mahout:mahout-native-viennacl-omp_2.11:0.14</td>
          <td></td>
          <td>ViennaCL-OMP CPU Accelerated (use this if you don't have a good graphics card)</td>
      </tr> 
