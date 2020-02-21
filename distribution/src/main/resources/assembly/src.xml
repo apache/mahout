@@ -54,8 +54,8 @@ yes distributed under the License is distributed on an "AS IS" BASIS,
           <include>buildtools/**</include>
           <include>experimental/**</include>
           <include>experimental/**/**</include>
-          <include>dist/**</include>
-          <include>dist/**/**</include>
+          <include>distribution/**</include>
+          <include>distribution/**/**</include>
           <include>resource-managers/**</include>
         </includes>
         <excludes>
