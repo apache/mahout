@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>18</version>
+    <version>23</version>
   </parent>
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
@@ -411,7 +411,6 @@
             </execution>
           </executions>
         </plugin>
-
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -599,7 +598,7 @@
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
             <autoVersionSubmodules>true</autoVersionSubmodules>
-            <preparationGoals>clean package install</preparationGoals>
+            <preparationGoals>clean package </preparationGoals>
             <releaseProfiles>
               <releaseProfile>apache.releases.https</releaseProfile>
             </releaseProfiles>
@@ -693,18 +692,43 @@
             </executions>
           </plugin>
 
-        <!--<plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
+        <plugin>
+          <groupId>net.nicoulaj.maven.plugins</groupId>
+          <artifactId>checksum-maven-plugin</artifactId>
+          <version>1.7</version>
           <executions>
             <execution>
-              <id>sign-release-artifacts</id>
+              <id>source-release-checksum</id>
               <goals>
-                <goal>sign</goal>
+                <goal>files</goal>
               </goals>
             </execution>
           </executions>
-        </plugin>-->
+          <configuration>
+            <algorithms>
+              <algorithm>SHA-512</algorithm>
+            </algorithms>
+            <csvSummary>false</csvSummary>
+            <fileSets>
+              <fileSet>
+                <directory>${project.build.directory}</directory>
+                <includes>
+                  <include>${project.artifactId}-${project.version}*.*</include>
+                  <include>${project.artifactId}-${project.version}*</include>
+                </includes>
+                <directory>${project.build.directory}/**/target</directory>
+                <includes>
+                  <include>mahout-*</include>
+                </includes>
+                <directory>${project.build.directory}/**/**/target</directory>
+                <includes>
+                  <include>mahout-*</include>
+                </includes>
+              </fileSet>
+            </fileSets>
+            <failIfNoFiles>false</failIfNoFiles><!-- usually, no file to do checksum: don't consider error -->
+          </configuration>
+        </plugin>
       </plugins>
     </build>
   </profile>
