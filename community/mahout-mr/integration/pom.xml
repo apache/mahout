@@ -160,6 +160,12 @@
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-client</artifactId>
       <version>1.0.0</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>jdk.tools</artifactId>
+          <groupId>jdk.tools</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
