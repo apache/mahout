@@ -25,26 +25,13 @@
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-mr</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-integration_${scala.compat.version}</artifactId>
-  <name>-- Mahout Classic Integration</name>
-  <description>Optional components of Mahout which generally support interaction with third party systems,
-    formats, APIs, etc.</description>
-
+  <artifactId>mahout-integration</artifactId>
   <packaging>jar</packaging>
 
-  <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
--->
-
+  <name>-- Mahout Classic Integration</name>
+  <description>Optional components of Mahout which generally support interaction with third party systems, formats, APIs, etc.</description>
 
   <build>
     <plugins>
@@ -61,37 +48,10 @@
           </supplementalModels>
         </configuration>
       </plugin>
-
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-
     </plugins>
-
   </build>
 
   <dependencies>
-
-    <!-- own modules -->
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-    </dependency>
-
     <!--<dependency>-->
       <!--<groupId>${project.groupId}</groupId>-->
       <!--<artifactId>mahout-hdfs</artifactId>-->
@@ -99,9 +59,9 @@
     <!--</dependency>-->
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.apache.mahout</groupId>
       <artifactId>mr</artifactId>
-      <version>${project.version}</version>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
 
     <!--<dependency>-->
@@ -113,11 +73,11 @@
     <!--</dependency>-->
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.apache.mahout</groupId>
       <artifactId>mr</artifactId>
+      <version>14.1-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
-      <version>${project.version}</version>
     </dependency>
 
     <!--<dependency>-->
@@ -171,11 +131,16 @@
       <!--<artifactId>lucene-benchmark</artifactId>-->
       <!--<optional>true</optional>-->
     <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.lucene</groupId>-->
-      <!--<artifactId>lucene-analyzers-common</artifactId>-->
-      <!--<optional>true</optional>-->
-    <!--</dependency>-->
+    <!--dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${lucene.version}</version>
+    </dependency-->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.mongodb</groupId>
@@ -215,12 +180,6 @@
       <!--<scope>test</scope>-->
     <!--</dependency>-->
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <!--<dependency>-->
       <!--<groupId>com.carrotsearch.randomizedtesting</groupId>-->
       <!--<artifactId>randomizedtesting-runner</artifactId>-->
@@ -235,6 +194,12 @@
       <!--<version>3.2</version>-->
     <!--</dependency>-->
 
+    <dependency>
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
+      <version>1.4.01</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 </project>

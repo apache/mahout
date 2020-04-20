@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,11 +16,7 @@
  */
 package org.apache.mahout.text.doc;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.IntField;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
 
 /**
  * Document with numeric field.
@@ -43,12 +39,9 @@ public class NumericFieldDocument extends SingleFieldDocument {
 
     document.add(new StringField(ID_FIELD, getId(), Field.Store.YES));
     document.add(new TextField(FIELD, getField(), Field.Store.YES));
-    document.add(new IntField(NUMERIC_FIELD, numericField, Field.Store.YES));
+    document.add(new IntPoint(NUMERIC_FIELD, numericField));
 
     return document;
   }
 
-  public int getNumericField() {
-    return numericField;
-  }
 }

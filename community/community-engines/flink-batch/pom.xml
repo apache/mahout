@@ -22,64 +22,41 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-community-engines_2.11</artifactId>
+    <artifactId>mahout-community-engines</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-flink-batch_2.11</artifactId>
+  <artifactId>mahout-flink-batch</artifactId>
+  <packaging>jar</packaging>
+
   <name>-- Mahout Flink Engine (Community)</name>
-  <description>
-    Mahout Bindings for Apache Flink
-  </description>
+  <description>Mahout Bindings for Apache Flink</description>
 
   <properties>
     <flink.version>1.1.4</flink.version>
   </properties>
-  <packaging>jar</packaging>
-
-  <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
 
   <build>
     <plugins>
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-
       <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
         <executions>
           <execution>
             <id>copy</id>
             <phase>package</phase>
             <configuration>
-              <tasks>
-                <copy file="target/mahout-flink-batch_${scala.compat.version}-${version}.jar" tofile="../../../lib/mahout-flink-batch_${scala.compat.version}-${version}.jar" />
-              </tasks>
+              <target>
+                <copy file="target/mahout-flink-batch-${project.version}.jar"
+                      tofile="../../../lib/mahout-flink-batch-${project.version}.jar" />
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
       </plugin>
 
       <plugin>
@@ -125,7 +102,7 @@
 
       <!-- enable scalatest -->
       <plugin>
-        <groupId>org.scalatest_2.11</groupId>
+        <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>
@@ -133,15 +110,16 @@
             <goals>
               <goal>test</goal>
             </goals>
+            <configuration>
+              <systemProperties combine.children="append">
+                <mahout.home>${project.build.directory}</mahout.home>
+              </systemProperties>
+              <argLine>-Xmx4g</argLine>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <systemProperties>
-            <mahout.home>${project.build.directory}</mahout.home>
-          </systemProperties>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
       </plugin>
+
       <!-- remove jars from top directory on clean -->
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
@@ -162,7 +140,6 @@
   </build>
 
   <dependencies>
-
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-runtime_${scala.compat.version}</artifactId>
@@ -201,9 +178,8 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
 
     <!--<dependency>-->
@@ -212,11 +188,10 @@
       <!--<version>1.2.2</version>-->
     <!--</dependency>-->
 
-
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>
-      <version>${project.version}</version>
+      <version>14.1-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>asm</groupId>
@@ -228,8 +203,8 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
@@ -244,10 +219,14 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
+
 </project>

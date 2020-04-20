@@ -18,32 +18,25 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-mr</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>mr-examples</artifactId>
+  <packaging>jar</packaging>
+
   <name>-- Mahout Classic: Examples</name>
   <description>Scalable machine learning library examples</description>
-
-  <packaging>jar</packaging>
-  <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
-  <!--<scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout-14.1
-    </tag>
-  </scm>-->
 
   <properties>
     <mahout.skip.example>false</mahout.skip.example>
   </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -84,7 +77,6 @@
         </executions>
       </plugin>
 
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
@@ -100,38 +92,32 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-
-      <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
         <version>6.1.26</version>
       </plugin>
     </plugins>
-
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mr</artifactId>
+      <version>14.1-SNAPSHOT</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mr</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mr</artifactId>
+      <version>14.1-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-integration</artifactId>
-      <version>${project.version}</version>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -149,4 +135,5 @@
       </properties>
     </profile>
   </profiles>
+
 </project>

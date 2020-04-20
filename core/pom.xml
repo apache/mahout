@@ -18,34 +18,22 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-core_2.11</artifactId>
-  <name>Mahout Core</name>
-  <description>High performance scientific and technical computing data structures and methods,
-    mostly based on CERN's Colt Java API
-  </description>
-
+  <artifactId>mahout-core</artifactId>
   <packaging>jar</packaging>
 
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
-
+  <name>Mahout Core</name>
+  <description>High performance scientific and technical computing data structures and methods, mostly based on CERN's Colt Java API</description>
 
   <dependencies>
-
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -56,7 +44,6 @@
       <artifactId>kryo</artifactId>
       <version>2.24.0</version>
     </dependency>
-
 
     <!-- scala stuff -->
     <dependency>
@@ -87,10 +74,8 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
       <scope>test</scope>
     </dependency>
-
 
     <!-- Todo Factor this out-->
     <dependency>
@@ -124,18 +109,32 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
     </dependency>
-
   </dependencies>
-
 
   <build>
     <plugins>
+      <!-- delete files on mvn clean -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../lib/</directory>
+              <includes>
+                <include>mahout-core_*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
 
       <!-- Build templates into code for various old-school Vector fns -->
       <plugin>
         <groupId>org.apache.mahout</groupId>
         <artifactId>mahout-collection-codegen-plugin</artifactId>
-        <version>${mahout.collection.codegen.plugin.version}</version>
+        <version>1.0</version>
         <executions>
           <execution>
             <phase>generate-sources</phase>
@@ -159,11 +158,10 @@
       </plugin>
 
       <!-- add generated sources into build -->
-      <plugin>
+      <!-- REMARK CD: This is usally handled automatically today -->
+      <!--plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${build.plugins.plugin.version}</version>
-
         <executions>
           <execution>
             <id>add-source</id>
@@ -190,21 +188,20 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
+      </plugin-->
       <!-- End Generate Source -->
 
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>4.0.2</version>
         <executions>
           <execution>
-          <id>attach-javadocs</id>
+            <id>attach-javadocs</id>
             <phase>dont-execute</phase>
             <goals>
-            <goal>doc-jar</goal>
-          </goals>
-        </execution>
+              <goal>doc-jar</goal>
+            </goals>
+          </execution>
           <execution>
             <id>add-scala-sources</id>
             <phase>initialize</phase>
@@ -214,14 +211,14 @@
           </execution>
           <execution>
             <id>scala-compile</id>
-            <phase>process-resources</phase>
+            <phase>compile</phase>
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <phase>test-compile</phase>
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -238,22 +235,22 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <version>${scalatest.maven.plugin.version}</version>
         <executions>
           <execution>
             <id>test</id>
             <goals>
               <goal>test</goal>
             </goals>
+            <configuration>
+              <argLine>-Xmx4g</argLine>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
       </plugin>
 
       <!-- create test jar so other modules can reuse the math test utility classes. -->
@@ -262,43 +259,39 @@
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
           <execution>
+            <phase>package</phase>
             <goals>
               <goal>test-jar</goal>
             </goals>
-            <phase>package</phase>
           </execution>
         </executions>
       </plugin>
 
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-
       <!-- copy jars to lib/ -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
         <executions>
           <execution>
             <id>copy</id>
             <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-core_${scala.compat.version}-${project.version}.jar" tofile="../lib/mahout-core_${scala.compat.version}-${project.version}.jar" />
-              </tasks>
-            </configuration>
             <goals>
               <goal>run</goal>
             </goals>
+            <configuration>
+              <target>
+                <copy file="target/mahout-core-${project.version}.jar"
+                      tofile="../lib/mahout-core-${project.version}.jar" />
+              </target>
+            </configuration>
           </execution>
 <!--          <execution>-->
 <!--            <id>copy-javadocs</id>-->
 <!--            <phase>install</phase>-->
 <!--            <configuration>-->
 <!--              <tasks>-->
-<!--                <copy file="target/core_${scala.compat.version}-${project.version}-javadoc.jar" tofile="../docs/core_${scala.compat.version}-${project.version}-javadoc.jar" />-->
+<!--                <copy file="target/core-${project.version}-javadoc.jar"
+                          tofile="../docs/core-${project.version}-javadoc.jar" />-->
 <!--              </tasks>-->
 <!--            </configuration>-->
 <!--            <goals>-->
@@ -307,25 +300,7 @@
 <!--          </execution>-->
         </executions>
       </plugin>
-
-      <!-- delete files on mvn clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../lib/</directory>
-              <includes>
-                <include>mahout-core_*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
-
     </plugins>
   </build>
+
 </project>

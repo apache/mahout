@@ -22,85 +22,37 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-community-engines_2.11</artifactId>
+    <artifactId>mahout-community-engines</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-h2o_2.11</artifactId>
-  <name>-- Mahout H2O Engine (Community)</name>
-  <description>
-    H2O Backend for Mahout DSL
-  </description>
-
+  <artifactId>mahout-h2o</artifactId>
   <packaging>jar</packaging>
 
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
+  <name>-- Mahout H2O Engine (Community)</name>
+  <description>H2O Backend for Mahout DSL</description>
 
   <properties>
     <h2o.version>0.1.25</h2o.version>
   </properties>
 
-
   <build>
-
     <plugins>
-      <!-- ensure licenses -->
+      <!-- remove jars from top directory on clean -->
       <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-h2o_${scala.compat.version}-${version}.jar" tofile="../../../lib/mahout-h2o_${scala.compat.version}-${version}.jar" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>dependency-reduced</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../../../lib</directory>
+              <includes>
+                <include>mahout-h2o*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -141,11 +93,11 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <version>${scalatest.maven.plugin.version}</version>
         <executions>
           <execution>
             <id>test</id>
@@ -155,28 +107,50 @@
           </execution>
         </executions>
       </plugin>
-      <!-- remove jars from top directory on clean -->
+
+      <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../../lib</directory>
-              <includes>
-                <include>mahout-h2o*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                <copy file="target/mahout-h2o-${project.version}.jar"
+                      tofile="../../../lib/mahout-h2o-${project.version}.jar" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>dependency-reduced</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
 
   <dependencies>
-
-
     <!--<dependency>-->
       <!--<groupId>org.apache.mahout</groupId>-->
       <!--&lt;!&ndash;<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>&ndash;&gt;-->
@@ -188,23 +162,21 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>
-      <version>${project.version}</version>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
 
    <dependency>
       <groupId>org.apache.mahout</groupId>
-      <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+     <artifactId>mahout-core</artifactId>
+     <version>14.1-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
    </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <!--<artifactId>mahout-math</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
 
     <!--  3rd-party -->

@@ -18,82 +18,31 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-engine</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <!-- modules inherit parent's group id and version. -->
-  <artifactId>mahout-hdfs_2.11</artifactId>
+  <artifactId>mahout-hdfs</artifactId>
+  <packaging>jar</packaging>
+
   <name>- Mahout HDFS Support</name>
   <description>Scalable machine learning libraries</description>
 
-
-  <packaging>jar</packaging>
-
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
+  <properties>
+    <test-security-policy.path>${project.build.directory}/../../buildtools/src/test/resources/java.policy</test-security-policy.path>
+  </properties>
 
   <build>
     <plugins>
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-
-      </plugin>
-
-      <!-- copy jars to lib/ -->
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="../../lib/mahout-hdfs_${scala.compat.version}-${project.version}.jar" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>copy-javadocs</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-hdfs_${scala.compat.version}-${project.version}.jar" tofile="../../docs/mahout-hdfs_${scala.compat.version}-${project.version}-javadoc.jar" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- delete files on mvn clean -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
         <configuration>
           <filesets>
             <fileset>
@@ -114,6 +63,41 @@
         </configuration>
       </plugin>
 
+      <!-- copy jars to lib/ -->
+      <!-- copy jars to top directory, which is MAHOUT_HOME -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy file="target/mahout-hdfs-${project.version}.jar"
+                      tofile="../../lib/mahout-hdfs-${project.version}.jar" />
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-javadocs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy file="target/mahout-hdfs-${project.version}.jar"
+                      tofile="../../docs/mahout-hdfs-${project.version}-javadoc.jar" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- create test jar so other modules can reuse the core test utility classes. (currently only mr uses this, profile?)-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -126,32 +110,21 @@
           </execution>
         </executions>
       </plugin>
-
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-
     </plugins>
-
   </build>
 
   <dependencies>
-
     <!-- our modules -->
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -163,24 +136,18 @@
       <version>${hadoop.version} </version>
     </dependency>
 
-    <!--<dependency>-->
-      <!--<groupId>com.fasterxml.jackson.core</groupId>-->
-      <!--<artifactId>jackson-core</artifactId>-->
-    <!--</dependency>-->
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jcl</artifactId>
       <version>${slf4j.version}</version>
       <scope>test</scope>
-    </dependency>
-
+    </dependency-->
 
     <!-- Todo Factor this out, used by MahoutTest (also exists in core, remove it from there then you should be able delete here-->
     <dependency>
@@ -195,7 +162,6 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
 </project>

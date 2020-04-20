@@ -18,38 +18,52 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-native-viennacl_${scala.compat.version}</artifactId>
-
-  <name>- Mahout ViennaCL OpenCL BLAS (Experimental)</name>
-  <description>Native Structures and interfaces to be used from Mahout Core.
-  </description>
-
+  <artifactId>mahout-native-viennacl</artifactId>
   <packaging>jar</packaging>
 
-  <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
-  <!--<scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout-14.1
-    </tag>
-  </scm> -->
+  <name>- Mahout ViennaCL OpenCL BLAS (Experimental)</name>
+  <description>Native Structures and interfaces to be used from Mahout Core.</description>
 
   <build>
     <plugins>
-      <!-- ensure licenses -->
+      <!-- delete jars on claen in top directory, which is MAHOUT_HOME -->
       <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../../lib</directory>
+              <includes>
+                <include>mahout-native-viennacl_*.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- create test jar so other modules can reuse the native test utility classes. -->
@@ -64,14 +78,6 @@
             <phase>package</phase>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
       </plugin>
 
       <plugin>
@@ -112,6 +118,7 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
@@ -119,16 +126,16 @@
         <executions>
           <execution>
             <id>test</id>
+            <phase>test</phase>
             <goals>
               <goal>test</goal>
             </goals>
+            <configuration>
+              <argLine>-Xmx4g</argLine>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-            <argLine>-Xmx4g</argLine>
-        </configuration>
       </plugin>
-
 
       <!--JavaCPP native build plugin-->
       <!--  old-style way to get it to compile. -->
@@ -136,7 +143,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
         <executions>
           <execution>
             <id>javacpp</id>
@@ -180,36 +186,19 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.3</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>properties</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-      </plugin>
-
       <!-- copy jars to top directory, which is MAHOUT_HOME -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
         <executions>
           <execution>
             <id>copy</id>
             <phase>package</phase>
             <configuration>
-              <tasks>
-                <copy file="target/mahout-native-viennacl_${scala.compat.version}-${version}.jar" tofile="../../lib/mahout-native-viennacl_${scala.compat.version}-${version}.jar" />
-              </tasks>
+              <target>
+                <copy file="target/mahout-native-viennacl-${project.version}.jar"
+                      tofile="../../lib/mahout-native-viennacl-${project.version}.jar" />
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>
@@ -217,32 +206,14 @@
           </execution>
         </executions>
       </plugin>
-      <!-- delete jars on claen in top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../lib</directory>
-              <includes>
-                <include>mahout-native-viennacl_*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
     </plugins>
-
   </build>
 
   <dependencies>
-
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
 
     <!--  3rd-party -->
@@ -263,9 +234,7 @@
       <artifactId>javacpp</artifactId>
       <version>1.2.4</version>
     </dependency>
-
   </dependencies>
-
 
   <profiles>
     <profile>
@@ -293,6 +262,7 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>travis</id>
       <build>
@@ -306,6 +276,7 @@
               <!--<argLine>-Djava.library.path=${project.build.directory}/libs/natives/linux-x86_64:${project.build.directory}/libs/natives/linux:${project.build.directory}/libs/natives/maxosx</argLine>-->
             </configuration>
           </plugin>
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
@@ -319,4 +290,5 @@
       </build>
     </profile>
   </profiles>
+
 </project>

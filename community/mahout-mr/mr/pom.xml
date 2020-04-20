@@ -18,34 +18,26 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-mr</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <!-- modules inherit parent's group id and version. -->
   <artifactId>mr</artifactId>
-  <name>-- Mahout Classic: Algorithms and Code</name>
-  <description>Scalable machine learning libraries</description>
-
   <packaging>jar</packaging>
 
-  <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
+  <name>-- Mahout Classic: Algorithms and Code</name>
+  <description>Scalable machine learning libraries</description>
 
   <properties>
     <lucene.version>5.5.2</lucene.version>
   </properties>
+
   <build>
     <resources>
       <resource>
@@ -58,37 +50,12 @@
         </includes>
       </resource>
     </resources>
-    <plugins>
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-      
-      <!-- copy jars to lib/ -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mr-${version}.jar" tofile="../../../lib/mahout-mr-${version}.jar" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
 
+    <plugins>
       <!-- delete files on mvn clean -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
         <configuration>
           <filesets>
             <fileset>
@@ -101,6 +68,7 @@
           </filesets>
         </configuration>
       </plugin>
+
       <!-- create test jar so other modules can reuse the core test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -135,14 +103,6 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
         <configuration>
@@ -156,31 +116,31 @@
         </configuration>
       </plugin>
 
-      <!-- remove jars from top directory on clean -->
+      <!-- copy jars to lib/ -->
       <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../../lib</directory>
-              <includes>
-                <include>mahout-mr*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy file="target/mr-${project.version}.jar"
+                      tofile="../../../lib/mahout-mr-${project.version}.jar" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
 
   <dependencies>
-
-
-
     <!-- Third Party -->
-
     <dependency>
       <groupId>com.tdunning</groupId>
       <artifactId>t-digest</artifactId>
@@ -204,8 +164,6 @@
       <artifactId>jackson-core</artifactId>
       <version>2.7.4</version>
     </dependency>
-
-
 
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -252,7 +210,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
       <scope>test</scope>
     </dependency>
 
@@ -297,7 +254,6 @@
       <artifactId>solr-commons-csv</artifactId>
       <version>3.5.0</version>
     </dependency>
-
   </dependencies>
 
 </project>
