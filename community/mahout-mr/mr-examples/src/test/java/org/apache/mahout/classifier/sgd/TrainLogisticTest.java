@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static org.junit.Assert.*;
+
 public class TrainLogisticTest extends MahoutTestCase {
 
   @Test

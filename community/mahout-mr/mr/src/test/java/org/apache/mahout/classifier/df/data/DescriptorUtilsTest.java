@@ -23,6 +23,9 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.classifier.df.data.Dataset.Attribute;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class DescriptorUtilsTest extends MahoutTestCase {
 

@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 public final class StringUtilsTest extends MahoutTestCase {
 
   private static class DummyTest {

@@ -22,6 +22,8 @@ import java.util.Iterator;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class CountingIteratorTest extends MahoutTestCase {
 
   @Test

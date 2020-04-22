@@ -19,7 +19,10 @@ package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
+import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public final class OldQRDecompositionTest extends MahoutTestCase {
   @Test
@@ -31,7 +34,7 @@ public final class OldQRDecompositionTest extends MahoutTestCase {
 
     OldQRDecomposition qr = new OldQRDecomposition(x);
     assertFalse(qr.hasFullRank());
-    assertEquals(0, new DenseVector(new double[]{3.741657, 7.483315, 11.22497}).aggregate(qr.getR().viewRow(0), Functions.PLUS, new DoubleDoubleFunction() {
+    Assert.assertEquals(0, new DenseVector(new double[]{3.741657, 7.483315, 11.22497}).aggregate(qr.getR().viewRow(0), Functions.PLUS, new DoubleDoubleFunction() {
       @Override
       public double apply(double arg1, double arg2) {
         return Math.abs(arg1) - Math.abs(arg2);
@@ -136,7 +139,7 @@ public final class OldQRDecompositionTest extends MahoutTestCase {
   }
 
   private static void assertEquals(Matrix ref, Matrix actual, double epsilon) {
-    assertEquals(0, ref.minus(actual).aggregate(Functions.MAX, Functions.ABS), epsilon);
+    Assert.assertEquals(0, ref.minus(actual).aggregate(Functions.MAX, Functions.ABS), epsilon);
   }
 
   private static void printMatrix(String name, Matrix m) {

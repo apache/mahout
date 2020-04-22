@@ -37,6 +37,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 @ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
 

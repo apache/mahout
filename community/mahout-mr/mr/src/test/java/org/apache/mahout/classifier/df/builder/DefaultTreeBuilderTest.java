@@ -24,6 +24,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class DefaultTreeBuilderTest extends MahoutTestCase {
 

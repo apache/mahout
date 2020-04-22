@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class RegexUtilsTest extends MahoutTestCase {
 
   static final String[] TEST_STRS = {

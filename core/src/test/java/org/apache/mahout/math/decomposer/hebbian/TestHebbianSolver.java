@@ -24,6 +24,9 @@ import org.apache.mahout.math.decomposer.AsyncEigenVerifier;
 import org.apache.mahout.math.decomposer.SolverTest;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  * This test is woefully inadequate, and also requires tons of memory, because it's part
  * unit test, part performance test, and part comparison test (between the Hebbian and Lanczos

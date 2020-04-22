@@ -32,6 +32,8 @@ import org.apache.mahout.math.Vector;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class VectorHelperTest extends MahoutTestCase {
 
   private static final int NUM_DOCS = 100;

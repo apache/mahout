@@ -21,7 +21,9 @@ package org.apache.mahout.flinkbindings
 import java.util.concurrent.TimeUnit
 
 import org.apache.flink.api.scala.ExecutionEnvironment
-import org.apache.flink.test.util.{ForkableFlinkMiniCluster, TestBaseUtils}
+import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.test.util.MiniClusterWithClientResource
 import org.apache.mahout.math.drm.DistributedContext
 import org.apache.mahout.test.DistributedMahoutSuite
 import org.scalatest.{ConfigMap, Suite}
@@ -33,7 +35,11 @@ trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
   protected implicit var mahoutCtx: DistributedContext = _
   protected var env: ExecutionEnvironment = null
 
-  var cluster: Option[ForkableFlinkMiniCluster] = None
+  val cluster = new MiniClusterWithClientResource(new MiniClusterResourceConfiguration.Builder()
+    .setNumberSlotsPerTaskManager(1)
+    .setNumberTaskManagers(1)
+    .build)
+
   val parallelism = 4
   protected val DEFAULT_AKKA_ASK_TIMEOUT: Long = 1000
   protected var DEFAULT_TIMEOUT: FiniteDuration = new FiniteDuration(DEFAULT_AKKA_ASK_TIMEOUT, TimeUnit.SECONDS)
@@ -50,25 +56,22 @@ trait DistributedFlinkSuite extends DistributedMahoutSuite { this: Suite =>
     super.afterEach()
   }
 
-  override protected def afterAll(configMap: ConfigMap): Unit = {
-    super.afterAll(configMap)
-    cluster.foreach(c => TestBaseUtils.stopCluster(c, DEFAULT_TIMEOUT))
-  }
-
   override protected def beforeAll(configMap: ConfigMap): Unit = {
     super.beforeAll(configMap)
 
-    val cl = TestBaseUtils.startCluster(
-      1,
-      parallelism,
-      false,
-      false,
-      true)
+    env = ExecutionEnvironment.getExecutionEnvironment
+    // configure your test environment
+    env.setParallelism(parallelism)
 
-    env = ExecutionEnvironment.createLocalEnvironment(parallelism)
+    cluster.before()
 
-    cluster = Some(cl)
     initContext()
+  }
+
+  override protected def afterAll(configMap: ConfigMap): Unit = {
+    super.afterAll(configMap)
+
+    cluster.after()
   }
 
 }

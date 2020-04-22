@@ -40,6 +40,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
+import static org.junit.Assert.*;
+
 public final class TestEigenSeedGenerator extends MahoutTestCase {
 
   private

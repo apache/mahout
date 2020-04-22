@@ -33,6 +33,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * <p>The MatrixDiagonalize task is pretty simple: given a matrix,
  * it sums the elements of the row, and sticks the sum in position (i, i) 

@@ -34,6 +34,8 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * <p>Tests the affinity matrix input M/R task.</p>
  * 

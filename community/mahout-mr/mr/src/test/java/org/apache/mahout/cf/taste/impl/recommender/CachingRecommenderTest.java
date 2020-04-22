@@ -23,6 +23,8 @@ import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link CachingRecommender}.</p> */
 public final class CachingRecommenderTest extends TasteTestCase {
 

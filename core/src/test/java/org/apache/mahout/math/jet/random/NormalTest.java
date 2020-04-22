@@ -23,6 +23,8 @@ import org.junit.Test;
 
 import java.util.Random;
 
+import static org.junit.Assert.assertEquals;
+
 public final class NormalTest extends MahoutTestCase {
 
   private final double[] breaks =

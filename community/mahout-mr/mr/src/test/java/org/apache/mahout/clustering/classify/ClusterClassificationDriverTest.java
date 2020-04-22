@@ -48,6 +48,8 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import static org.junit.Assert.*;
+
 public class ClusterClassificationDriverTest extends MahoutTestCase {
 
   private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {4, 4},

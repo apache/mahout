@@ -24,6 +24,8 @@ import org.junit.Test;
 
 import java.util.Collection;
 
+import static org.junit.Assert.*;
+
 /** Tests {@link RefreshHelper} */
 public final class RefreshHelperTest extends TasteTestCase {
 

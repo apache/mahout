@@ -29,6 +29,8 @@ import java.io.DataOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static org.junit.Assert.*;
+
 public final class GramTest extends MahoutTestCase {
   
   @Test
@@ -75,10 +77,10 @@ public final class GramTest extends MahoutTestCase {
     
     Gram three = new Gram("foo", 4, Gram.Type.TAIL);
     Gram four = new Gram("foo", Gram.Type.UNIGRAM);
-    
-    assertTrue(!three.equals(two));
-    assertTrue(!four.equals(one));
-    assertTrue(!one.equals(four));
+
+    assertNotEquals(three, two);
+    assertNotEquals(four, one);
+    assertNotEquals(one, four);
     
     Gram five = new Gram("foo", 5, Gram.Type.UNIGRAM);
 
@@ -86,16 +88,16 @@ public final class GramTest extends MahoutTestCase {
     
     Gram six = new Gram("foo", 6, Gram.Type.NGRAM);
     Gram seven = new Gram("foo", 7, Gram.Type.NGRAM);
-    
-    assertTrue(!five.equals(six));
+
+    assertNotEquals(five, six);
     assertEquals(six, seven);
     
     Gram eight = new Gram("foobar", 4, Gram.Type.TAIL);
-    
-    assertTrue(!eight.equals(four));
-    assertTrue(!eight.equals(three));
-    assertTrue(!eight.equals(two));
-    assertTrue(!eight.equals(one));
+
+    assertNotEquals(eight, four);
+    assertNotEquals(eight, three);
+    assertNotEquals(eight, two);
+    assertNotEquals(eight, one);
   }
   
   @Test

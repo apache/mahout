@@ -26,6 +26,8 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 
+import static org.junit.Assert.*;
+
 /**
  * Tests {@link Varint}.
  */

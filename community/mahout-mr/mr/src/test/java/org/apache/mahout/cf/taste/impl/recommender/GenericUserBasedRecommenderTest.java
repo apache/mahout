@@ -31,6 +31,8 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link GenericUserBasedRecommender}.</p> */
 public final class GenericUserBasedRecommenderTest extends TasteTestCase {
 

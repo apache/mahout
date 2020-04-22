@@ -33,6 +33,8 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class ARFFVectorIterableTest extends MahoutTestCase {
 
   @Test

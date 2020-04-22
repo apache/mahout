@@ -30,6 +30,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class AbstractJobTest extends MahoutTestCase {
   
   interface AbstractJobFactory {

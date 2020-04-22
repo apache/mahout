@@ -62,16 +62,15 @@ class CheckpointedFlinkDrm[K: ClassTag:TypeInformation](val ds: DrmDataSet[K],
 
   // this is extra I/O for each cache call.  this needs to be moved somewhere where it is called
   // only once.  Possibly FlinkDistributedEngine.
-  GlobalConfiguration.loadConfiguration(mahoutHome + "/conf/flink-config.yaml")
+  GlobalConfiguration.loadConfiguration(mahoutHome + "/conf/")
 
-  val conf = GlobalConfiguration.getConfiguration
+  val conf = GlobalConfiguration.loadConfiguration()
 
   if (!(conf == null )) {
      persistanceRootDir = conf.getString("taskmanager.tmp.dirs", "/tmp")
   } else {
      persistanceRootDir = "/tmp"
   }
-
 
   private lazy val dim: (Long, Int) = {
     // combine computation of ncol and nrow in one pass

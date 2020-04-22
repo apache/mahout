@@ -26,6 +26,8 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class ConfusionMatrixTest extends MahoutTestCase {
 
   private static final int[][] VALUES = {{2, 3}, {10, 20}};

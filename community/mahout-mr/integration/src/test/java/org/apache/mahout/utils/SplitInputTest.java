@@ -44,6 +44,8 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class SplitInputTest extends MahoutTestCase {
 
   private OpenObjectIntHashMap<String> countMap;

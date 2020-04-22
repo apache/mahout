@@ -27,6 +27,8 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 public final class RegexMapperTest extends MahoutTestCase {
 
   @Test

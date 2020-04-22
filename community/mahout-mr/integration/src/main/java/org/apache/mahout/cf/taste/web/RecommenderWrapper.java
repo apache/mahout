@@ -17,8 +17,8 @@
 
 package org.apache.mahout.cf.taste.web;
 
+import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -108,18 +107,18 @@ public abstract class RecommenderWrapper implements Recommender {
   public static File readResourceToTempFile(String resourceName) throws IOException {
     String absoluteResource = resourceName.startsWith("/") ? resourceName : '/' + resourceName;
     log.info("Loading resource {}", absoluteResource);
-    InputSupplier<? extends InputStream> inSupplier;
+    ByteSource inSupplier;
     try {
       URL resourceURL = Resources.getResource(RecommenderWrapper.class, absoluteResource);
-      inSupplier = Resources.newInputStreamSupplier(resourceURL);
+      inSupplier = Resources.asByteSource(resourceURL);
     } catch (IllegalArgumentException iae) {
       File resourceFile = new File(resourceName);
       log.info("Falling back to load file {}", resourceFile.getAbsolutePath());
-      inSupplier = Files.newInputStreamSupplier(resourceFile);
+      inSupplier = Files.asByteSource(resourceFile);
     }
     File tempFile = File.createTempFile("taste", null);
     tempFile.deleteOnExit();
-    Files.copy(inSupplier, tempFile);
+    inSupplier.copyTo(Files.asByteSink(tempFile));
     return tempFile;
   }
 

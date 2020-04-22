@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Random;
 
+import static org.junit.Assert.assertTrue;
+
 public abstract class SolverTest extends MahoutTestCase {
   private static final Logger log = LoggerFactory.getLogger(SolverTest.class);
 

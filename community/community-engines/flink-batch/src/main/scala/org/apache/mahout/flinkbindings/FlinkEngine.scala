@@ -23,6 +23,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor
 import org.apache.flink.api.scala._
 import org.apache.flink.api.scala.utils.DataSetUtils
+import org.apache.flink.hadoopcompatibility.scala.HadoopInputs
 import org.apache.hadoop.io.{IntWritable, LongWritable, Text}
 import org.apache.mahout.flinkbindings.blas._
 import org.apache.mahout.flinkbindings.drm._
@@ -70,7 +71,7 @@ object FlinkEngine extends DistributedEngine {
 
     // Map to the correct DrmLike based on the metadata information
     if (metadata.keyClassTag == ClassTag.Int) {
-      val ds = env.readSequenceFile(classOf[IntWritable], classOf[VectorWritable], path)
+      val ds = env.createInput(HadoopInputs.readSequenceFile(classOf[IntWritable], classOf[VectorWritable], path))
 
       val res = ds.map(new MapFunction[(IntWritable, VectorWritable), (Int, Vector)] {
         def map(tuple: (IntWritable, VectorWritable)): (Int, Vector) = {
@@ -79,7 +80,7 @@ object FlinkEngine extends DistributedEngine {
       })
       datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Int]])
     } else if (metadata.keyClassTag == ClassTag.Long) {
-      val ds = env.readSequenceFile(classOf[LongWritable], classOf[VectorWritable], path)
+      val ds = env.createInput(HadoopInputs.readSequenceFile(classOf[LongWritable], classOf[VectorWritable], path))
 
       val res = ds.map(new MapFunction[(LongWritable, VectorWritable), (Long, Vector)] {
         def map(tuple: (LongWritable, VectorWritable)): (Long, Vector) = {
@@ -88,7 +89,7 @@ object FlinkEngine extends DistributedEngine {
       })
       datasetWrap(res)(metadata.keyClassTag.asInstanceOf[ClassTag[Long]])
     } else if (metadata.keyClassTag == ClassTag(classOf[String])) {
-      val ds = env.readSequenceFile(classOf[Text], classOf[VectorWritable], path)
+      val ds = env.createInput(HadoopInputs.readSequenceFile(classOf[Text], classOf[VectorWritable], path))
 
       val res = ds.map(new MapFunction[(Text, VectorWritable), (String, Vector)] {
         def map(tuple: (Text, VectorWritable)): (String, Vector) = {

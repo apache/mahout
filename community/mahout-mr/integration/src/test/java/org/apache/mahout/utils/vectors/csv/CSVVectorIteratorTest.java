@@ -29,6 +29,8 @@ import org.apache.mahout.utils.vectors.VectorHelper;
 import org.apache.mahout.utils.vectors.io.TextualVectorWriter;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class CSVVectorIteratorTest extends MahoutTestCase {
 
   @Test

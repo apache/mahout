@@ -23,6 +23,8 @@ import org.junit.Test;
 
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 public final class RunningAverageAndStdDevTest extends TasteTestCase {
 
   private static final double SMALL_EPSILON = 1.0;

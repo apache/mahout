@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import java.util.Date;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Tests the Mersenne Twister against the reference implementation 991029/mt19937-2.c which can be
  * found at

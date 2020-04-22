@@ -25,6 +25,8 @@ import org.junit.Test;
 
 import java.io.File;
 
+import static org.junit.Assert.*;
+
 public final class PathDirectoryTest extends MahoutTestCase {
   
   private final Path output = new Path("output");

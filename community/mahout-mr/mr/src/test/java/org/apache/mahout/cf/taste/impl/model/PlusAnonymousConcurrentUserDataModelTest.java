@@ -25,6 +25,8 @@ import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class PlusAnonymousConcurrentUserDataModelTest extends MahoutTestCase {
 
 	/**

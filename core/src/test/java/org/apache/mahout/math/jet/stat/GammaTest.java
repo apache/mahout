@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
 
+import static org.junit.Assert.assertEquals;
+
 public final class GammaTest extends MahoutTestCase {
 
   @Test

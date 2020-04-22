@@ -34,6 +34,8 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class VectorWriterTest extends MahoutTestCase {
 
   @Test

@@ -23,6 +23,7 @@ import org.junit.Test;
 import java.io.File;
 import java.net.URI;
 
+import static org.junit.Assert.*;
 
 public class DistributedCacheFileLocationTest extends MahoutTestCase {
 

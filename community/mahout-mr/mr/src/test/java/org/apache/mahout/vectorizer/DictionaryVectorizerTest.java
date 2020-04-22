@@ -48,6 +48,8 @@ import org.apache.mahout.vectorizer.tfidf.TFIDFConverter;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * Test the dictionary Vector
  */

@@ -26,6 +26,8 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link FileItemSimilarity}.</p> */
 public final class FileItemSimilarityTest extends TasteTestCase {
 

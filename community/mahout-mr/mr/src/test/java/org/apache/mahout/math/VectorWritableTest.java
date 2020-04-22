@@ -29,6 +29,8 @@ import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.Repeat;
 import com.google.common.io.Closeables;
 
+import static org.junit.Assert.*;
+
 public final class VectorWritableTest extends RandomizedTest {
   private static final int MAX_VECTOR_SIZE = 100;
 

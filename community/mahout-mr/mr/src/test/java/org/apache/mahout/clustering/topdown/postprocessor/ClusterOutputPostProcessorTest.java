@@ -52,6 +52,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
+import static org.junit.Assert.*;
+
 public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
 
   private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};

@@ -22,6 +22,9 @@ import java.util.Random;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class TreeIDTest extends MahoutTestCase {
 

@@ -38,6 +38,9 @@ import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Leaf;
 import org.apache.mahout.classifier.df.node.Node;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class PartialBuilderTest extends MahoutTestCase {
 

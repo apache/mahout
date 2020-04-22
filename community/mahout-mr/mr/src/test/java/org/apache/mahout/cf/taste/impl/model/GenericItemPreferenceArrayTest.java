@@ -21,6 +21,8 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class GenericItemPreferenceArrayTest extends TasteTestCase {
 
   @Test

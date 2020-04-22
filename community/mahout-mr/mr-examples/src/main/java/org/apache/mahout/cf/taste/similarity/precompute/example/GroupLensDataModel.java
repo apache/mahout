@@ -17,13 +17,12 @@
 
 package org.apache.mahout.cf.taste.similarity.precompute.example;
 
+import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URL;
@@ -74,17 +73,17 @@ public final class GroupLensDataModel extends FileDataModel {
   }
 
   public static File readResourceToTempFile(String resourceName) throws IOException {
-    InputSupplier<? extends InputStream> inSupplier;
+    ByteSource inSupplier;
     try {
       URL resourceURL = Resources.getResource(GroupLensDataModel.class, resourceName);
-      inSupplier = Resources.newInputStreamSupplier(resourceURL);
+      inSupplier = Resources.asByteSource(resourceURL);
     } catch (IllegalArgumentException iae) {
       File resourceFile = new File("src/main/java" + resourceName);
-      inSupplier = Files.newInputStreamSupplier(resourceFile);
+      inSupplier = Files.asByteSource(resourceFile);
     }
     File tempFile = File.createTempFile("taste", null);
     tempFile.deleteOnExit();
-    Files.copy(inSupplier, tempFile);
+    inSupplier.copyTo(Files.asByteSink(tempFile));
     return tempFile;
   }
 

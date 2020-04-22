@@ -29,6 +29,8 @@ import org.apache.mahout.math.random.MultiNormal;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * Makes sure that a vector under test acts the same as a DenseVector or RandomAccessSparseVector
  * (according to whether it is dense or sparse).  Most operations need to be done within a reasonable

@@ -31,6 +31,8 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static org.junit.Assert.assertEquals;
+
 //To launch this test only : mvn test -Dtest=org.apache.mahout.math.TestSingularValueDecomposition
 public final class TestSingularValueDecomposition extends MahoutTestCase {
   

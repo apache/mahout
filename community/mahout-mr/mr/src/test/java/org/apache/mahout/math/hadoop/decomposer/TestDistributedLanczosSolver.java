@@ -30,6 +30,8 @@ import org.junit.Before;
 import java.io.File;
 import java.io.IOException;
 
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class TestDistributedLanczosSolver extends MahoutTestCase {
 

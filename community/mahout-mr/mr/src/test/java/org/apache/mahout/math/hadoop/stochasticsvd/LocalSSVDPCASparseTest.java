@@ -44,6 +44,8 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 public class LocalSSVDPCASparseTest extends MahoutTestCase {
 
   private static final double s_epsilon = 1.0E-10d;

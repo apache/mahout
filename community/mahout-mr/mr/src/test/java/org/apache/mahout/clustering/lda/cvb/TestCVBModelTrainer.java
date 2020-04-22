@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 public final class TestCVBModelTrainer extends MahoutTestCase {
 
   private static final double ETA = 0.1;

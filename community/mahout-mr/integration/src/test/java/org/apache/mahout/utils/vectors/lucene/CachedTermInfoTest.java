@@ -17,7 +17,6 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-
 import java.io.IOException;
 
 import com.google.common.io.Closeables;
@@ -36,6 +35,8 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class CachedTermInfoTest extends MahoutTestCase {
   private RAMDirectory directory;

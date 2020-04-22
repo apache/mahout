@@ -24,6 +24,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class CsvRecordFactoryTest extends MahoutTestCase {
 
   @Test

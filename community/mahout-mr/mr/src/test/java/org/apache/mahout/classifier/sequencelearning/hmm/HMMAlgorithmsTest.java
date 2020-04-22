@@ -20,6 +20,8 @@ package org.apache.mahout.classifier.sequencelearning.hmm;
 import org.apache.mahout.math.Matrix;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class HMMAlgorithmsTest extends HMMTestBase {
 
   /**

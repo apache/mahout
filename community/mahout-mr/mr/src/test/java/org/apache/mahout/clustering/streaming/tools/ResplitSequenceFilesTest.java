@@ -33,6 +33,8 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class ResplitSequenceFilesTest extends MahoutTestCase {
 
   @Test

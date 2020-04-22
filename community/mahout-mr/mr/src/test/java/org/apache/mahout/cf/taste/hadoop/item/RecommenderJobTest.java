@@ -58,6 +58,8 @@ import org.easymock.IArgumentMatcher;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class RecommenderJobTest extends TasteTestCase {
 
   /**

@@ -23,6 +23,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link AveragingPreferenceInferrer}.</p> */
 public final class AveragingPreferenceInferrerTest extends TasteTestCase {
 

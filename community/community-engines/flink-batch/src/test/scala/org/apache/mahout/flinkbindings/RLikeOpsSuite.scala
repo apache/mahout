@@ -18,20 +18,16 @@
  */
 package org.apache.mahout.flinkbindings
 
-import org.apache.mahout.flinkbindings._
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.slf4j.Logger
+import org.scalatest.funsuite.AnyFunSuite
 import org.slf4j.LoggerFactory
 
 
-class RLikeOpsSuite extends FunSuite with DistributedFlinkSuite {
+class RLikeOpsSuite extends AnyFunSuite with DistributedFlinkSuite {
 
   val LOGGER = LoggerFactory.getLogger(getClass())
 

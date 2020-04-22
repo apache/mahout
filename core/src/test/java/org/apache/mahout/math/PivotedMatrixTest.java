@@ -19,6 +19,8 @@ package org.apache.mahout.math;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class PivotedMatrixTest extends MatrixTest {
   @Override
   public Matrix matrixFactory(double[][] values) {

@@ -37,6 +37,9 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Random;
 import java.util.ArrayList;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class VisualizerTest extends MahoutTestCase {
   

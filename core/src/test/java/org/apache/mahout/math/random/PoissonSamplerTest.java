@@ -24,6 +24,8 @@ import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public final class PoissonSamplerTest extends MahoutTestCase {
 
   @Override

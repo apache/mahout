@@ -133,6 +133,15 @@
       <artifactId>commons-cli</artifactId>
     </dependency>
 
+    <!--
+      This seems to be a commons-cli2 version which is still in the sandbox at
+      apache-commons but was manually released by the mahout team.
+    -->
+    <dependency>
+      <groupId>org.apache.mahout.commons</groupId>
+      <artifactId>commons-cli</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
@@ -141,11 +150,6 @@
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.mahout.commons</groupId>
-      <artifactId>commons-cli</artifactId>
     </dependency>
 
     <dependency>
@@ -160,7 +164,7 @@
 
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
+      <artifactId>hamcrest</artifactId>
       <scope>test</scope>
     </dependency>
 

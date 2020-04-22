@@ -25,6 +25,8 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.*;
+
 public class IDReaderTest extends TasteTestCase {
 
   static final String USER_ITEM_FILTER_FIELD = "userItemFilter";

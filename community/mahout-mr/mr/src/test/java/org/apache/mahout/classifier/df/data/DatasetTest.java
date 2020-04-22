@@ -18,6 +18,9 @@ package org.apache.mahout.classifier.df.data;
 
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class DatasetTest extends MahoutTestCase {
 

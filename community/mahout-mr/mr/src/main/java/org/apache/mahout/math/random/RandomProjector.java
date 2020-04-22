@@ -20,7 +20,7 @@ package org.apache.mahout.math.random;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -70,7 +70,7 @@ public final class RandomProjector {
     Matrix basisMatrix = new DenseMatrix(projectedVectorSize, vectorSize);
     for (int i = 0; i < projectedVectorSize; ++i) {
       for (int j = 0; j < vectorSize; ++j) {
-        basisMatrix.set(i, j, RandomUtils.nextInt(2) == 0 ? 1 : -1);
+        basisMatrix.set(i, j, RandomUtils.nextInt(0, 2) == 0 ? 1 : -1);
       }
     }
     for (MatrixSlice row : basisMatrix) {

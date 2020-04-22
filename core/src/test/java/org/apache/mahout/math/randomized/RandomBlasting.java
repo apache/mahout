@@ -39,6 +39,8 @@ import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.Repeat;
 import com.carrotsearch.randomizedtesting.annotations.Seed;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Some randomized tests against Java Util Collections.
  */

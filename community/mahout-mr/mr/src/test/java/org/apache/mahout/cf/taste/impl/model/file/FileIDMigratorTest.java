@@ -23,6 +23,8 @@ import org.apache.mahout.cf.taste.model.IDMigrator;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * Tests {@link FileIDMigrator}
  */

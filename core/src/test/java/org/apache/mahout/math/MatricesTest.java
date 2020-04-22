@@ -21,6 +21,9 @@ import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.IntIntFunction;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class MatricesTest extends MahoutTestCase {
 
   @Test
@@ -65,8 +68,8 @@ public class MatricesTest extends MahoutTestCase {
     m.set(1, 1, 33.0);
     Matrix mt = Matrices.transposedView(m);
 
-    assertTrue(mt.viewColumn(0).isDense() == m.viewRow(0).isDense());
-    assertTrue(mt.viewRow(0).isDense() == m.viewColumn(0).isDense());
+    assertEquals(mt.viewColumn(0).isDense(), m.viewRow(0).isDense());
+    assertEquals(mt.viewRow(0).isDense(), m.viewColumn(0).isDense());
 
     m = new DenseMatrix(10,10);
     m.set(1, 1, 33.0);

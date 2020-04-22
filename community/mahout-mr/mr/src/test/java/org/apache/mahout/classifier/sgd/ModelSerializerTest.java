@@ -38,6 +38,8 @@ import org.apache.mahout.math.stats.GlobalOnlineAuc;
 import org.apache.mahout.math.stats.OnlineAuc;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class ModelSerializerTest extends MahoutTestCase {
 
   private static <T extends Writable> T roundTrip(T m, Class<T> clazz) throws IOException {

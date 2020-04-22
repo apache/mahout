@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+import static org.junit.Assert.*;
+
 public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(ParallelALSFactorizationJobTest.class);

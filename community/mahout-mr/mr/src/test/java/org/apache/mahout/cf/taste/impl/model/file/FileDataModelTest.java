@@ -36,6 +36,8 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link FileDataModel}.</p> */
 public final class FileDataModelTest extends TasteTestCase {
 

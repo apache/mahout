@@ -34,6 +34,8 @@ import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Tests tokenizing of {@link SequenceFile}s containing document ID and text (both as {@link Text})
  * by the {@link DocumentProcessor} into {@link SequenceFile}s of document ID and tokens (as

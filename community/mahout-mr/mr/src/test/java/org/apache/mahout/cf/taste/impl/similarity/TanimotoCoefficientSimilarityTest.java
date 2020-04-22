@@ -20,6 +20,8 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link TanimotoCoefficientSimilarity}.</p> */
 public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase {
 

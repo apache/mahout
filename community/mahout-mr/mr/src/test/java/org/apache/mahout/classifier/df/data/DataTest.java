@@ -24,6 +24,9 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.classifier.df.data.conditions.Condition;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public class DataTest extends MahoutTestCase {
 

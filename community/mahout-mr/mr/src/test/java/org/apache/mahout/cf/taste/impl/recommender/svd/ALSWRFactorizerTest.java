@@ -43,6 +43,8 @@ import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import static org.junit.Assert.*;
+
 public class ALSWRFactorizerTest extends TasteTestCase {
 
   private ALSWRFactorizer factorizer;

@@ -175,7 +175,7 @@ public class BallKMeans implements Iterable<Centroid> {
     int numTest = (int) (testProbability * datapoints.size());
     Preconditions.checkArgument(numTest > 0 && numTest < datapoints.size(),
         "Must have nonzero number of training and test vectors. Asked for %.1f %% of %d vectors for test",
-        testProbability * 100, datapoints.size());
+        testProbability * 100, (Object) datapoints.size());
 
     Collections.shuffle(datapoints);
     return new Pair<List<? extends WeightedVector>, List<? extends WeightedVector>>(

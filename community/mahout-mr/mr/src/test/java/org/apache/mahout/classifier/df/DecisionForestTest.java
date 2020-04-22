@@ -32,6 +32,9 @@ import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class DecisionForestTest extends MahoutTestCase {
 

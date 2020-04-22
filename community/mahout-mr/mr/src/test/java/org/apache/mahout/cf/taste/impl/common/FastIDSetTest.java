@@ -25,6 +25,8 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link FastIDSet}.</p> */
 public final class FastIDSetTest extends TasteTestCase {
 

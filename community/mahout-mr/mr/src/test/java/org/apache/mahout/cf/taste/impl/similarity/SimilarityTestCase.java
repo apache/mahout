@@ -19,6 +19,8 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 
+import static org.junit.Assert.*;
+
 abstract class SimilarityTestCase extends TasteTestCase {
 
   static void assertCorrelationEquals(double expected, double actual) {

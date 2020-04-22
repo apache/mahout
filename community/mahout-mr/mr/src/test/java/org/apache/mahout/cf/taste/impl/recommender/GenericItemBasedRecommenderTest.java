@@ -38,6 +38,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link GenericItemBasedRecommender}.</p> */
 public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 

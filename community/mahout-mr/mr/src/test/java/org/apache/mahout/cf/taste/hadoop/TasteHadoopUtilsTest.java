@@ -20,6 +20,8 @@ package org.apache.mahout.cf.taste.hadoop;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link TasteHadoopUtils}.</p> */
 public class TasteHadoopUtilsTest extends TasteTestCase {
 	

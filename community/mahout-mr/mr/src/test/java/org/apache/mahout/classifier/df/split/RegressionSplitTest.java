@@ -24,6 +24,9 @@ import org.apache.mahout.classifier.df.data.DescriptorException;
 import org.apache.mahout.classifier.df.data.conditions.Condition;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class RegressionSplitTest extends MahoutTestCase {
 

@@ -26,6 +26,8 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * Unit tests for the MailArchivesClusteringAnalyzer text analyzer.
  */

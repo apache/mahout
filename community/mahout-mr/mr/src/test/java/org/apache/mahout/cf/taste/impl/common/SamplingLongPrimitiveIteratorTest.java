@@ -20,6 +20,8 @@ package org.apache.mahout.cf.taste.impl.common;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
 
   @Test

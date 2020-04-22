@@ -31,6 +31,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * <p>This test ensures that a Vector can be successfully multiplied
  * with a matrix.</p>

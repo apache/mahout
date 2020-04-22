@@ -19,6 +19,8 @@ package org.apache.mahout.utils.vectors.arff;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class ARFFTypeTest extends MahoutTestCase {
 
   @Test

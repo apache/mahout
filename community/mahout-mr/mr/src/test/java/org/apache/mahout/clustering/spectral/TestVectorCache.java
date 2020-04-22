@@ -35,6 +35,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class TestVectorCache extends MahoutTestCase {
 
   private static final double [] VECTOR = { 1, 2, 3, 4 };

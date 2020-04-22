@@ -24,6 +24,9 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class TestConjugateGradientSolver extends MahoutTestCase {
 
   @Test

@@ -29,6 +29,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
+import static org.junit.Assert.*;
+
 public final class VectorTest extends MahoutTestCase {
 
   @Test

@@ -21,6 +21,8 @@ import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.random.MultiNormal;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class CentroidTest extends AbstractVectorTest<Centroid> {
   @Test
   public void testUpdate() {

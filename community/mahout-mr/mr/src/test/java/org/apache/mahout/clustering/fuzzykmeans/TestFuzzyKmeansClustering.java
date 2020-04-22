@@ -39,6 +39,8 @@ import org.junit.Test;
 
 import com.google.common.io.Closeables;
 
+import static org.junit.Assert.*;
+
 public final class TestFuzzyKmeansClustering extends MahoutTestCase {
 
   private FileSystem fs;

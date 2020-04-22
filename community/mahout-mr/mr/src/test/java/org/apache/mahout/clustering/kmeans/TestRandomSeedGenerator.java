@@ -39,6 +39,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
+import static org.junit.Assert.*;
+
 public final class TestRandomSeedGenerator extends MahoutTestCase {
   
   private static final double[][] RAW = {{1, 1}, {2, 1}, {1, 2}, {2, 2},

@@ -28,6 +28,8 @@ import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
 
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
 
   @ThreadLeakLingering(linger=1000)

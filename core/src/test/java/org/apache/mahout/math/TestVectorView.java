@@ -23,6 +23,9 @@ import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.TimesFunction;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public final class TestVectorView extends MahoutTestCase {
 
   private static final int CARDINALITY = 3;

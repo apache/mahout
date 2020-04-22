@@ -24,6 +24,8 @@ import org.junit.Test;
 
 import java.util.Map;
 
+import static org.junit.Assert.*;
+
 public final class TestMatrixView extends MahoutTestCase {
 
   private final double[][] values = {{0.0, 1.1, 2.2}, {1.1, 2.2, 3.3},

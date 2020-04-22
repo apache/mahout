@@ -29,6 +29,8 @@ import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class MatrixWritableTest extends MahoutTestCase {
 
   @Test

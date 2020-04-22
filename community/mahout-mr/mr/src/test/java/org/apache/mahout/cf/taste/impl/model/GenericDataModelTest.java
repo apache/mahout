@@ -25,6 +25,8 @@ import java.io.ObjectOutputStream;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * Tests {@link GenericDataModel}.
  */

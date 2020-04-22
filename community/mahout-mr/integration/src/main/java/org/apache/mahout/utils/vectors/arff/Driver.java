@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.io.FileWriteMode;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -155,7 +156,7 @@ public final class Driver {
 
   protected static void writeLabelBindings(File dictOut, ARFFModel arffModel, String delimiter, boolean jsonDictonary)
       throws IOException {
-    try (Writer writer = Files.newWriterSupplier(dictOut, Charsets.UTF_8, true).getOutput()) {
+    try (Writer writer = Files.asCharSink(dictOut, Charsets.UTF_8, FileWriteMode.APPEND).openBufferedStream()) {
       if (jsonDictonary) {
         writeLabelBindingsJSON(writer, arffModel);
       } else {

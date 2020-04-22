@@ -28,6 +28,8 @@ import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.TestDistributedRowMatrix;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class TestDistributedConjugateGradientSolver extends MahoutTestCase {
 
   private static Vector randomVector(int size, double entryMean) {

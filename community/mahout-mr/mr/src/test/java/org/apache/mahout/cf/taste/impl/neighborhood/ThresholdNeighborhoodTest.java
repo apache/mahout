@@ -21,6 +21,8 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link ThresholdUserNeighborhood}.</p> */
 public final class ThresholdNeighborhoodTest extends TasteTestCase {
 

@@ -21,6 +21,8 @@ import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class ModelDissectorTest extends MahoutTestCase {
   @Test
   public void testCategoryOrdering() {

@@ -25,6 +25,8 @@ import java.util.List;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public abstract class SamplerCase extends MahoutTestCase {
   // these provide access to the underlying implementation
   protected abstract Iterator<Integer> createSampler(int n, Iterator<Integer> source);

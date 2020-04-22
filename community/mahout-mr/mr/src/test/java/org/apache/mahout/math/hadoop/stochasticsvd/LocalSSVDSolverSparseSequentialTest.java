@@ -44,6 +44,8 @@ import org.junit.Test;
 
 import com.google.common.io.Closeables;
 
+import static org.junit.Assert.*;
+
 /**
  * 
  * Tests SSVD solver with a made-up data running hadoop solver in a local mode.

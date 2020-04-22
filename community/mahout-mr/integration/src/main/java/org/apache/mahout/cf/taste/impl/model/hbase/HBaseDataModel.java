@@ -18,20 +18,8 @@
 package org.apache.mahout.cf.taste.impl.model.hbase;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTableFactory;
-import org.apache.hadoop.hbase.client.HTableInterface;
-import org.apache.hadoop.hbase.client.HTablePool;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.*;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.FirstKeyOnlyFilter;
 import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
@@ -52,12 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.*;
 
 /**
  * <p>Naive approach of storing one preference as one value in the table.
@@ -90,7 +73,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   private static final byte[] USERS_CF = Bytes.toBytes("users");
   private static final byte[] ITEMS_CF = Bytes.toBytes("items");
 
-  private final HTablePool pool;
+  private final Connection connection;
   private final String tableName;
 
   // Cache of user and item ids
@@ -105,8 +88,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
     log.info("Using HBase table {}", tableName);
     Configuration conf = HBaseConfiguration.create();
     conf.set("hbase.zookeeper.quorum", zkConnect);
-    HTableFactory tableFactory = new HTableFactory();
-    this.pool = new HTablePool(conf, 8, tableFactory);
+    connection = ConnectionFactory.createConnection(conf);
     this.tableName = tableName;
 
     bootstrap(conf);
@@ -114,9 +96,9 @@ public final class HBaseDataModel implements DataModel, Closeable {
     refresh(null);
   }
 
-  public HBaseDataModel(HTablePool pool, String tableName, Configuration conf) throws IOException {
+  public HBaseDataModel(Connection connection, String tableName, Configuration conf) throws IOException {
     log.info("Using HBase table {}", tableName);
-    this.pool = pool;
+    this.connection = connection;
     this.tableName = tableName;
 
     bootstrap(conf);
@@ -133,10 +115,13 @@ public final class HBaseDataModel implements DataModel, Closeable {
    * Create the table if it doesn't exist
    */
   private void bootstrap(Configuration conf) throws IOException {
-    HTableDescriptor tDesc = new HTableDescriptor(Bytes.toBytes(tableName));
-    tDesc.addFamily(new HColumnDescriptor(USERS_CF));
-    tDesc.addFamily(new HColumnDescriptor(ITEMS_CF));
-    try (HBaseAdmin admin = new HBaseAdmin(conf)) {
+    TableName tableName = TableName.valueOf(this.tableName);
+    TableDescriptor tDesc = TableDescriptorBuilder.newBuilder(tableName)
+            .setColumnFamilies(Arrays.asList(
+                    ColumnFamilyDescriptorBuilder.of(USERS_CF),
+                    ColumnFamilyDescriptorBuilder.of(ITEMS_CF)))
+            .build();
+    try (Admin admin = connection.getAdmin()) {
       admin.createTable(tDesc);
       log.info("Created table {}", tableName);
     }
@@ -181,7 +166,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   public PreferenceArray getPreferencesFromUser(long userID) throws TasteException {
     Result result;
     try {
-      HTableInterface table = pool.getTable(tableName);
+      Table table = connection.getTable(TableName.valueOf(tableName));
       Get get = new Get(userToBytes(userID));
       get.addFamily(ITEMS_CF);
       result = table.get(get);
@@ -210,7 +195,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
     Result result;
     try {
-      HTableInterface table = pool.getTable(tableName);
+      Table table = connection.getTable(TableName.valueOf(tableName));
       Get get = new Get(userToBytes(userID));
       get.addFamily(ITEMS_CF);
       result = table.get(get);
@@ -240,7 +225,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
     Result result;
     try {
-      HTableInterface table = pool.getTable(tableName);
+      Table table = connection.getTable(TableName.valueOf(tableName));
       Get get = new Get(itemToBytes(itemID));
       get.addFamily(USERS_CF);
       result = table.get(get);
@@ -269,7 +254,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
     Result result;
     try {
-      HTableInterface table = pool.getTable(tableName);
+      Table table = connection.getTable(TableName.valueOf(tableName));
       Get get = new Get(userToBytes(userID));
       get.addColumn(ITEMS_CF, Bytes.toBytes(itemID));
       result = table.get(get);
@@ -293,7 +278,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
     Result result;
     try {
-      HTableInterface table = pool.getTable(tableName);
+      Table table = connection.getTable(TableName.valueOf(tableName));
       Get get = new Get(userToBytes(userID));
       get.addColumn(ITEMS_CF, Bytes.toBytes(itemID));
       result = table.get(get);
@@ -307,7 +292,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
     }
 
     if (result.containsColumn(ITEMS_CF, Bytes.toBytes(itemID))) {
-      KeyValue kv = result.getColumnLatest(ITEMS_CF, Bytes.toBytes(itemID));
+      Cell kv = result.getColumnLatestCell(ITEMS_CF, Bytes.toBytes(itemID));
       return kv.getTimestamp();
     } else {
       return null;
@@ -334,7 +319,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException {
     Result[] results;
     try {
-      HTableInterface table = pool.getTable(tableName);
+      Table table = connection.getTable(TableName.valueOf(tableName));
       List<Get> gets = new ArrayList<>(2);
       gets.add(new Get(itemToBytes(itemID1)));
       gets.add(new Get(itemToBytes(itemID2)));
@@ -375,12 +360,12 @@ public final class HBaseDataModel implements DataModel, Closeable {
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     try {
-      HTableInterface table = pool.getTable(tableName);
+      Table table = connection.getTable(TableName.valueOf(tableName));
       List<Put> puts = new ArrayList<>(2);
       puts.add(new Put(userToBytes(userID)));
       puts.add(new Put(itemToBytes(itemID)));
-      puts.get(0).add(ITEMS_CF, Bytes.toBytes(itemID), Bytes.toBytes(value));
-      puts.get(1).add(USERS_CF, Bytes.toBytes(userID), Bytes.toBytes(value));
+      puts.get(0).addColumn(ITEMS_CF, Bytes.toBytes(itemID), Bytes.toBytes(value));
+      puts.get(1).addColumn(USERS_CF, Bytes.toBytes(userID), Bytes.toBytes(value));
       table.put(puts);
       table.close();
     } catch (IOException e) {
@@ -391,12 +376,12 @@ public final class HBaseDataModel implements DataModel, Closeable {
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
     try {
-      HTableInterface table = pool.getTable(tableName);
+      Table table = connection.getTable(TableName.valueOf(tableName));
       List<Delete> deletes = new ArrayList<>(2);
       deletes.add(new Delete(userToBytes(userID)));
       deletes.add(new Delete(itemToBytes(itemID)));
-      deletes.get(0).deleteColumns(ITEMS_CF, Bytes.toBytes(itemID));
-      deletes.get(1).deleteColumns(USERS_CF, Bytes.toBytes(userID));
+      deletes.get(0).addColumns(ITEMS_CF, Bytes.toBytes(itemID));
+      deletes.get(1).addColumns(USERS_CF, Bytes.toBytes(userID));
       table.delete(deletes);
       table.close();
     } catch (IOException e) {
@@ -423,7 +408,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
 
   @Override
   public void close() throws IOException {
-    pool.close();
+    connection.close();
   }
 
   /* Refreshable interface */
@@ -449,7 +434,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
    */
   private synchronized void refreshItemIDs() throws IOException {
     // Get the list of item ids
-    HTableInterface table = pool.getTable(tableName);
+    Table table = connection.getTable(TableName.valueOf(tableName));
     Scan scan = new Scan(new byte[]{0x69}, new byte[]{0x70});
     scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL, new KeyOnlyFilter(), new FirstKeyOnlyFilter()));
     ResultScanner scanner = table.getScanner(scan);
@@ -474,7 +459,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
    */
   private synchronized void refreshUserIDs() throws IOException {
     // Get the list of user ids
-    HTableInterface table = pool.getTable(tableName);
+    Table table = connection.getTable(TableName.valueOf(tableName));
     Scan scan = new Scan(new byte[]{0x75}, new byte[]{0x76});
     scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL, new KeyOnlyFilter(), new FirstKeyOnlyFilter()));
     ResultScanner scanner = table.getScanner(scan);

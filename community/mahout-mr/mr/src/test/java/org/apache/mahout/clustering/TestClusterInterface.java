@@ -25,6 +25,8 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class TestClusterInterface extends MahoutTestCase {
 
   private static final DistanceMeasure measure = new ManhattanDistanceMeasure();

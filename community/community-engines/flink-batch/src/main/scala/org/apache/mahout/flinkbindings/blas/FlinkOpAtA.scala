@@ -20,10 +20,10 @@ package org.apache.mahout.flinkbindings.blas
 
 import java.lang.Iterable
 
+import com.google.common.collect.Lists
 import org.apache.flink.api.common.functions._
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.shaded.com.google.common.collect.Lists
 import org.apache.flink.util.Collector
 import org.apache.mahout.flinkbindings._
 import org.apache.mahout.flinkbindings.drm._

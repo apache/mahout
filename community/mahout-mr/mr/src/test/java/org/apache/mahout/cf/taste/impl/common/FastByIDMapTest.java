@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link FastByIDMap}.</p> */
 public final class FastByIDMapTest extends TasteTestCase {
 

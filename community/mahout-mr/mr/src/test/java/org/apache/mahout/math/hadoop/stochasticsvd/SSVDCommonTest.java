@@ -28,6 +28,8 @@ import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.hadoop.stochasticsvd.qr.GivensThinSolver;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * Shared ssvd test code
  */

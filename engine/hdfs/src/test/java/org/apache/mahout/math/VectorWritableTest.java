@@ -28,6 +28,9 @@ import org.junit.Test;
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.Repeat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public final class VectorWritableTest extends RandomizedTest {
   private static final int MAX_VECTOR_SIZE = 100;
 

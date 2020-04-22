@@ -153,14 +153,6 @@
       <version>14.1-SNAPSHOT</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-core</artifactId>
-      <version>14.1-SNAPSHOT</version>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-    </dependency>
-
     <!--  3rd-party -->
     <dependency>
       <groupId>org.scala-lang</groupId>
@@ -177,7 +169,14 @@
       <artifactId>spark-mllib_${scala.compat.version}</artifactId>
     </dependency>
 
-    <!-- scala stuff -->
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>

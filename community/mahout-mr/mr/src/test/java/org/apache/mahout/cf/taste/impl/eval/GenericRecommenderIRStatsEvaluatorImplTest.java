@@ -31,6 +31,8 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class GenericRecommenderIRStatsEvaluatorImplTest extends TasteTestCase {
 
   @Test

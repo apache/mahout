@@ -35,6 +35,8 @@ import org.apache.mahout.math.hadoop.MathHelper;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class NaiveBayesTest extends MahoutTestCase {
 
   private Configuration conf;

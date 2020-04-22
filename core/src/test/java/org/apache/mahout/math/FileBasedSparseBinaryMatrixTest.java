@@ -24,6 +24,8 @@ import java.util.Random;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class FileBasedSparseBinaryMatrixTest extends MahoutTestCase {
 
   /*

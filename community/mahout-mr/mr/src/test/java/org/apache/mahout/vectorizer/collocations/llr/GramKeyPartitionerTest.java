@@ -21,6 +21,8 @@ import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public final class GramKeyPartitionerTest extends MahoutTestCase {
 
   @Test

@@ -23,6 +23,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link EuclideanDistanceSimilarity}.</p> */
 public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
 

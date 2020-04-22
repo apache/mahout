@@ -52,6 +52,8 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class TestCanopyCreation extends MahoutTestCase {
 

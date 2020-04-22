@@ -114,7 +114,7 @@ public final class IndianBuffet<T> implements Sampler<List<T>> {
    * to a token like w_92463 for big integers.
    */
   public static final class WordConverter implements WordFunction<String> {
-    private final Splitter onSpace = Splitter.on(CharMatcher.WHITESPACE).omitEmptyStrings().trimResults();
+    private final Splitter onSpace = Splitter.on(CharMatcher.whitespace()).omitEmptyStrings().trimResults();
     private final List<String> words;
 
     public WordConverter() {

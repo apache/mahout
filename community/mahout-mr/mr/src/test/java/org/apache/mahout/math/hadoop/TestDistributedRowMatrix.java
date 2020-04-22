@@ -39,11 +39,14 @@ import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.decomposer.SolverTest;
 import org.apache.mahout.math.function.Functions;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
+
+import static org.junit.Assert.*;
 
 public final class TestDistributedRowMatrix extends MahoutTestCase {
   public static final String TEST_PROPERTY_KEY = "test.property.key";
@@ -103,7 +106,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     }
     expected.assign(Functions.DIV, m.numRows());
     Vector actual = dm.columnMeans("DenseVector");
-    assertEquals(0.0, expected.getDistanceSquared(actual), EPSILON);
+    Assert.assertEquals(0.0, expected.getDistanceSquared(actual), EPSILON);
   }
 
   @Test
@@ -120,7 +123,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     }
     expected.assign(Functions.DIV, m.numRows());
     Vector actual = dm.columnMeans();
-    assertEquals(0.0, expected.getDistanceSquared(actual), EPSILON);
+    Assert.assertEquals(0.0, expected.getDistanceSquared(actual), EPSILON);
   }
 
   @Test
@@ -133,7 +136,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
     Vector expected = m.times(v);
     Vector actual = dm.times(v);
-    assertEquals(0.0, expected.getDistanceSquared(actual), EPSILON);
+    Assert.assertEquals(0.0, expected.getDistanceSquared(actual), EPSILON);
   }
 
   @Test
@@ -146,7 +149,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
     Vector expected = m.timesSquared(v);
     Vector actual = dm.timesSquared(v);
-    assertEquals(0.0, expected.getDistanceSquared(actual), 1.0e-9);
+    Assert.assertEquals(0.0, expected.getDistanceSquared(actual), 1.0e-9);
   }
 
   @Test
@@ -181,7 +184,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
                                                                                         10);
 
     assertNull(mmJobConf.get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, mmCustomJobConf.get(TEST_PROPERTY_KEY));
+    Assert.assertEquals(TEST_PROPERTY_VALUE, mmCustomJobConf.get(TEST_PROPERTY_KEY));
   }
 
   @Test
@@ -198,7 +201,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
                                                        .getConfiguration();
 
     assertNull(transposeJobConf.get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, transposeCustomJobConf.get(TEST_PROPERTY_KEY));
+    Assert.assertEquals(TEST_PROPERTY_VALUE, transposeCustomJobConf.get(TEST_PROPERTY_KEY));
   }
 
   @Test public void testTimesSquaredJobConfBuilders() throws Exception {
@@ -215,13 +218,13 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Job customTimesSquaredJob1 = TimesSquaredJob.createTimesSquaredJob(initialConf, v, inputPath, outputPath);
 
     assertNull(timesSquaredJob1.getConfiguration().get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob1.getConfiguration().get(TEST_PROPERTY_KEY));
+    Assert.assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob1.getConfiguration().get(TEST_PROPERTY_KEY));
 
     Job timesJob = TimesSquaredJob.createTimesJob(v, 50, inputPath, outputPath);
     Job customTimesJob = TimesSquaredJob.createTimesJob(initialConf, v, 50, inputPath, outputPath);
 
     assertNull(timesJob.getConfiguration().get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, customTimesJob.getConfiguration().get(TEST_PROPERTY_KEY));
+    Assert.assertEquals(TEST_PROPERTY_VALUE, customTimesJob.getConfiguration().get(TEST_PROPERTY_KEY));
 
     Job timesSquaredJob2 = TimesSquaredJob.createTimesSquaredJob(v, inputPath, outputPath,
         TimesSquaredJob.TimesSquaredMapper.class, TimesSquaredJob.VectorSummingReducer.class);
@@ -230,7 +233,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
         outputPath, TimesSquaredJob.TimesSquaredMapper.class, TimesSquaredJob.VectorSummingReducer.class);
 
     assertNull(timesSquaredJob2.getConfiguration().get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob2.getConfiguration().get(TEST_PROPERTY_KEY));
+    Assert.assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob2.getConfiguration().get(TEST_PROPERTY_KEY));
 
     Job timesSquaredJob3 = TimesSquaredJob.createTimesSquaredJob(v, 50, inputPath, outputPath,
         TimesSquaredJob.TimesSquaredMapper.class, TimesSquaredJob.VectorSummingReducer.class);
@@ -240,7 +243,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
         TimesSquaredJob.VectorSummingReducer.class);
 
     assertNull(timesSquaredJob3.getConfiguration().get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob3.getConfiguration().get(TEST_PROPERTY_KEY));
+    Assert.assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob3.getConfiguration().get(TEST_PROPERTY_KEY));
   }
 
   @Test
@@ -256,14 +259,14 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
     deleteContentsOfPath(conf, outputPath);
 
-    assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
+    Assert.assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
 
     Vector result1 = dm.times(v);
 
-    assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
+    Assert.assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
 
     deleteContentsOfPath(conf, outputPath);
-    assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
+    Assert.assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
 
     conf.setBoolean(DistributedRowMatrix.KEEP_TEMP_FILES, true);
     dm.setConf(conf);
@@ -271,14 +274,14 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Vector result2 = dm.times(v);
 
     FileStatus[] outputStatuses = fs.listStatus(outputPath);
-    assertEquals(1, outputStatuses.length);
+    Assert.assertEquals(1, outputStatuses.length);
     Path outputTempPath = outputStatuses[0].getPath();
     Path inputVectorPath = new Path(outputTempPath, TimesSquaredJob.INPUT_VECTOR);
     Path outputVectorPath = new Path(outputTempPath, TimesSquaredJob.OUTPUT_VECTOR_FILENAME);
-    assertEquals(1, fs.listStatus(inputVectorPath, PathFilters.logsCRCFilter()).length);
-    assertEquals(1, fs.listStatus(outputVectorPath, PathFilters.logsCRCFilter()).length);
+    Assert.assertEquals(1, fs.listStatus(inputVectorPath, PathFilters.logsCRCFilter()).length);
+    Assert.assertEquals(1, fs.listStatus(outputVectorPath, PathFilters.logsCRCFilter()).length);
 
-    assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
+    Assert.assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
   }
 
   @Test
@@ -294,14 +297,14 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
     deleteContentsOfPath(conf, outputPath);
 
-    assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
+    Assert.assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
 
     Vector result1 = dm.timesSquared(v);
 
-    assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
+    Assert.assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
 
     deleteContentsOfPath(conf, outputPath);
-    assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
+    Assert.assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
 
     conf.setBoolean(DistributedRowMatrix.KEEP_TEMP_FILES, true);
     dm.setConf(conf);
@@ -309,14 +312,14 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Vector result2 = dm.timesSquared(v);
 
     FileStatus[] outputStatuses = fs.listStatus(outputPath);
-    assertEquals(1, outputStatuses.length);
+    Assert.assertEquals(1, outputStatuses.length);
     Path outputTempPath = outputStatuses[0].getPath();
     Path inputVectorPath = new Path(outputTempPath, TimesSquaredJob.INPUT_VECTOR);
     Path outputVectorPath = new Path(outputTempPath, TimesSquaredJob.OUTPUT_VECTOR_FILENAME);
-    assertEquals(1, fs.listStatus(inputVectorPath, PathFilters.logsCRCFilter()).length);
-    assertEquals(1, fs.listStatus(outputVectorPath, PathFilters.logsCRCFilter()).length);
+    Assert.assertEquals(1, fs.listStatus(inputVectorPath, PathFilters.logsCRCFilter()).length);
+    Assert.assertEquals(1, fs.listStatus(outputVectorPath, PathFilters.logsCRCFilter()).length);
 
-    assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
+    Assert.assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
   }
 
   public Configuration createInitialConf() throws IOException {

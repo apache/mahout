@@ -22,6 +22,8 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class ContinuousValueEncoderTest extends MahoutTestCase {
   
   @Test

@@ -128,25 +128,51 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
 
-    <slf4j.version>1.7.22</slf4j.version>
     <scala.version>2.11.12</scala.version>
     <scala.compat.version>2.11</scala.compat.version>
-    <scalatest.version>3.0.5</scalatest.version>
+
+    <compile.flags/>
+
+    <!--test-security-policy.path>${project.build.directory}/buildtools/src/test/resources/java.policy</test-security-policy.path-->
+
+    <!-- Direct dependency versions -->
+    <commons-cli.version>1.4</commons-cli.version>
+    <commons-cli.mahout.version>2.0-mahout</commons-cli.mahout.version>
+    <commons-dbcp.version>1.4</commons-dbcp.version>
+    <commons-httpclient.version>3.1</commons-httpclient.version>
+    <commons-lang3.version>3.10</commons-lang3.version>
+    <commons-math3.version>3.6.1</commons-math3.version>
+    <commons-pool.version>1.6</commons-pool.version>
+    <commons-io.version>2.6</commons-io.version>
+    <commons-logging.version>1.2</commons-logging.version>
+    <!-- TODO: 4.2 is the latest version, however there were some errors in the tests, when updating to that -->
+    <easymock.version>3.6</easymock.version>
+    <fastutil.version>8.3.1</fastutil.version>
+    <flink.version>1.10.0</flink.version>
+    <flink-tests.version>1.8.3</flink-tests.version>
+    <guava.version>27.0-jre</guava.version>
+    <javacpp.version>1.5.3</javacpp.version>
+    <kryo.version>4.0.2</kryo.version>
+    <mongodb.version>3.12.3</mongodb.version>
+    <mrunit.version>1.1.0</mrunit.version>
+    <hadoop.version>3.2.1</hadoop.version>
+    <hamcrest.version>2.2</hamcrest.version>
+    <hector.version>2.0-0</hector.version>
+    <hbase.version>2.2.4</hbase.version>
+    <jackson.version>2.10.3</jackson.version>
+    <lucene.version>8.5.1</lucene.version>
+    <randomizedtesting.version>2.7.7</randomizedtesting.version>
+    <scalatest.version>3.1.1</scalatest.version>
+    <scopt.version>3.7.1</scopt.version>
+    <slf4j.version>1.7.30</slf4j.version>
+    <solr.version>3.5.0</solr.version>
     <spark.version>2.4.5</spark.version>
     <spark.compat.version>2.4</spark.compat.version>
+    <t-digest.version>3.2</t-digest.version>
+    <xml-apis.version>1.4.01</xml-apis.version>
+    <xstream.version>1.4.12</xstream.version>
 
-    <lucene.version>8.5.1</lucene.version>
-
-    <mahout.skip.distribution>true</mahout.skip.distribution>
-    <!-- `mvn site` throws a hissy fit searching no longer existing repos if this is not set false -->
-    <dependency.locations.enabled>false</dependency.locations.enabled>
-    <mahout.skip.distribution>true</mahout.skip.distribution>
-    <release.candidate>RC4</release.candidate>
-    <compile.flags/>
-    <maven.clover.multiproject>true</maven.clover.multiproject>
-    <hadoop.version>2.10.0</hadoop.version>
-
-    <test-security-policy.path>${project.build.directory}/buildtools/src/test/resources/java.policy</test-security-policy.path>
+    <!-- Transitive dependency versions -->
   </properties>
 
   <modules>
@@ -161,16 +187,19 @@
 
   <dependencyManagement>
     <dependencies>
+      <!--
+        Direct dependencies
+      -->
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>14.0.1</version>
+        <version>${guava.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-math3</artifactId>
-        <version>3.2</version>
+        <version>${commons-math3.version}</version>
       </dependency>
 
       <dependency>
@@ -310,8 +339,6 @@
         <version>${lucene.version}</version>
       </dependency>
 
-      <!-- scala stuff -->
-      <!-- set the scala version here only -->
       <dependency>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest_${scala.compat.version}</artifactId>
@@ -330,10 +357,19 @@
         <version>${scala.version}</version>
       </dependency>
 
-      <!-- TODO Move to ONE logging framework... -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
 
@@ -343,7 +379,6 @@
         <version>4.13</version>
       </dependency>
 
-      <!-- used in Core -->
       <dependency>
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
@@ -352,37 +387,42 @@
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-runtime_${scala.compat.version}</artifactId>
-        <version>1.1.4</version>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-java</artifactId>
-        <version>1.1.4</version>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-core</artifactId>
-        <version>1.1.4</version>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-clients_${scala.compat.version}</artifactId>
-        <version>1.1.4</version>
+        <version>${flink.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-hadoop-compatibility_${scala.compat.version}</artifactId>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-scala_${scala.compat.version}</artifactId>
-        <version>1.1.4</version>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-test-utils_${scala.compat.version}</artifactId>
-        <version>1.1.4</version>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-tests_${scala.compat.version}</artifactId>
-        <version>1.1.4</version>
+        <version>${flink-tests.version}</version>
       </dependency>
       <dependency>
         <groupId>ai.h2o</groupId>
@@ -392,213 +432,153 @@
       <dependency>
         <groupId>commons-dbcp</groupId>
         <artifactId>commons-dbcp</artifactId>
-        <version>1.4</version>
+        <version>${commons-dbcp.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-pool</groupId>
         <artifactId>commons-pool</artifactId>
-        <version>1.6</version>
+        <version>${commons-pool.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.4</version>
+        <version>${commons-io.version}</version>
       </dependency>
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongo-java-driver</artifactId>
-        <version>2.11.2</version>
+        <version>${mongodb.version}</version>
       </dependency>
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>bson</artifactId>
-        <version>2.11.2</version>
+        <version>${mongodb.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.hbase</groupId>
         <artifactId>hbase-client</artifactId>
-        <version>1.0.0</version>
+        <version>${hbase.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hectorclient</groupId>
         <artifactId>hector-core</artifactId>
-        <version>1.1-4</version>
+        <version>${hector.version}</version>
       </dependency>
       <dependency>
         <groupId>xml-apis</groupId>
         <artifactId>xml-apis</artifactId>
-        <version>1.4.01</version>
+        <version>${xml-apis.version}</version>
       </dependency>
       <dependency>
         <groupId>com.tdunning</groupId>
         <artifactId>t-digest</artifactId>
-        <version>3.1</version>
+        <version>${t-digest.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
-        <version>2.7.4</version>
+        <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.1</version>
+        <version>${commons-lang3.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-cli</groupId>
         <artifactId>commons-cli</artifactId>
-        <version>1.2</version>
+        <version>${commons-cli.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
-        <version>1.1.3</version>
+        <version>${commons-logging.version}</version>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.4.6</version>
-      </dependency>
-      <!-- TODO: Check this dependency -->
-      <dependency>
-        <groupId>org.apache.mahout.commons</groupId>
-        <artifactId>commons-cli</artifactId>
-        <version>2.0-mahout</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.flink</groupId>
-        <artifactId>flink-scala_2${scala.compat.version}</artifactId>
-        <version>1.1.4</version>
+        <version>${xstream.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-commons-csv</artifactId>
-        <version>3.5.0</version>
+        <version>${solr.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
-        <artifactId>hamcrest-all</artifactId>
-        <version>1.3</version>
+        <artifactId>hamcrest</artifactId>
+        <version>${hamcrest.version}</version>
       </dependency>
       <dependency>
         <groupId>com.carrotsearch.randomizedtesting</groupId>
         <artifactId>randomizedtesting-runner</artifactId>
-        <version>2.0.15</version>
+        <version>${randomizedtesting.version}</version>
       </dependency>
       <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>3.2</version>
+        <version>${easymock.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.mrunit</groupId>
         <artifactId>mrunit</artifactId>
-        <version>1.0.0</version>
+        <version>${mrunit.version}</version>
         <classifier>hadoop2</classifier>
       </dependency>
       <dependency>
         <groupId>commons-httpclient</groupId>
         <artifactId>commons-httpclient</artifactId>
-        <version>3.0.1</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>1.7.22</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>jcl-over-slf4j</artifactId>
-        <version>1.7.22</version>
+        <version>${commons-httpclient.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.scopt</groupId>
         <artifactId>scopt_${scala.compat.version}</artifactId>
-        <version>3.7.1</version>
+        <version>${scopt.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.esotericsoftware.kryo</groupId>
+        <groupId>com.esotericsoftware</groupId>
         <artifactId>kryo</artifactId>
-        <version>2.24.0</version>
+        <version>${kryo.version}</version>
       </dependency>
       <dependency>
         <groupId>it.unimi.dsi</groupId>
         <artifactId>fastutil</artifactId>
-        <version>7.0.12</version>
+        <version>${fastutil.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-core_${scala.compat.version}</artifactId>
-        <version>2.4.5</version>
+        <version>${spark.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-mllib_${scala.compat.version}</artifactId>
-        <version>2.4.5</version>
+        <version>${spark.version}</version>
       </dependency>
       <dependency>
         <groupId>org.bytedeco</groupId>
         <artifactId>javacpp</artifactId>
-        <version>1.5.3</version>
+        <version>${javacpp.version}</version>
+      </dependency>
+      <!--
+        This seems to be a release of the 2.0 branch of the commons-cli module.
+        Unfortunately it hasn't been released yet.
+      -->
+      <dependency>
+        <groupId>org.apache.mahout.commons</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>${commons-cli.mahout.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-hcatalog_2.11</artifactId>
+        <version>1.10.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
     <plugins>
-      <!--plugin>
-        <groupId>org.codehaus.gmaven</groupId>
-        <artifactId>groovy-maven-plugin</artifactId>
-        <version>2.1.1</version>
-        <executions>
-          <!-
-            Hack the current JVM's java.home into the JAVA_HOME environment variable
-            to ensure the scala-compiler-plugin is using the same JVM version.
-          ->
-          <execution>
-            <id>update-environment-variables</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>execute</goal>
-            </goals>
-            <configuration>
-              <source>
-                <![CDATA[
-                import java.lang.reflect.Field
-
-                private static void injectEnvironmentVariable(String key, String value) throws Exception {
-                  Class<?> processEnvironment = Class.forName("java.lang.ProcessEnvironment")
-                  Field unmodifiableMapField = getAccessibleField(processEnvironment, "theUnmodifiableEnvironment")
-                  Object unmodifiableMap = unmodifiableMapField.get(null)
-                  injectIntoUnmodifiableMap(key, value, unmodifiableMap)
-                  Field mapField = getAccessibleField(processEnvironment, "theEnvironment")
-                  Map<String, String> map = (Map<String, String>) mapField.get(null)
-                  map.put(key, value)
-                }
-
-                private static Field getAccessibleField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
-                  Field field = clazz.getDeclaredField(fieldName)
-                  field.setAccessible(true)
-                  return field
-                }
-
-                private static void injectIntoUnmodifiableMap(String key, String value, Object map) throws ReflectiveOperationException {
-                  Class unmodifiableMap = Class.forName("java.util.Collections\$UnmodifiableMap")
-                  Field field = getAccessibleField(unmodifiableMap, "m")
-                  Object obj = field.get(map)
-                  ((Map<String, String>) obj).put(key, value)
-                }
-
-                injectEnvironmentVariable("JAVA_HOME", System.getProperty("java.home"))
-
-                print "\nJAVA_HOME set to current JVM home (" + System.getenv("JAVA_HOME") + ")\n\n"
-                ]]>
-              </source>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin-->
-
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>

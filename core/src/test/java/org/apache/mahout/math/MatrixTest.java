@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 public abstract class MatrixTest extends MahoutTestCase {
 
   protected static final int ROW = AbstractMatrix.ROW;

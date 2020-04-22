@@ -18,12 +18,7 @@
 package org.apache.mahout.cf.taste.impl.model.mongodb;
 
 import com.google.common.base.Preconditions;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
+import com.mongodb.*;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
@@ -45,12 +40,7 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
@@ -547,37 +537,43 @@ public final class MongoDBDataModel implements DataModel {
     itemIsObject = false;
     idCounter = 0;
     preferenceIsString = true;
-    Mongo mongoDDBB = new Mongo(mongoHost, mongoPort);
+    MongoClient mongoDDBB;
+    if(mongoAuth) {
+      MongoCredential credential = MongoCredential.createCredential(
+              mongoUsername, "$external", mongoPassword.toCharArray());
+      mongoDDBB=new MongoClient(new ServerAddress(mongoHost, mongoPort),
+              Collections.singletonList(credential));
+    } else {
+      mongoDDBB=new MongoClient(new ServerAddress(mongoHost, mongoPort));
+    }
     DB db = mongoDDBB.getDB(mongoDB);
     mongoTimestamp = new Date(0);
     FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<>();
-    if (!mongoAuth || db.authenticate(mongoUsername, mongoPassword.toCharArray())) {
-      collection = db.getCollection(mongoCollection);
-      collectionMap = db.getCollection(mongoMapCollection);
-      DBObject indexObj = new BasicDBObject();
-      indexObj.put("element_id", 1);
-      collectionMap.ensureIndex(indexObj);
-      indexObj = new BasicDBObject();
-      indexObj.put("long_value", 1);
-      collectionMap.ensureIndex(indexObj);
-      collectionMap.remove(new BasicDBObject());
-      DBCursor cursor = collection.find();
-      while (cursor.hasNext()) {
-        Map<String,Object> user = (Map<String,Object>) cursor.next().toMap();
-        if (!user.containsKey("deleted_at")) {
-          long userID = Long.parseLong(fromIdToLong(getID(user.get(mongoUserID), true), true));
-          long itemID = Long.parseLong(fromIdToLong(getID(user.get(mongoItemID), false), false));
-          float ratingValue = getPreference(user.get(mongoPreference));
-          Collection<Preference> userPrefs = userIDPrefMap.get(userID);
-          if (userPrefs == null) {
-            userPrefs = new ArrayList<>(2);
-            userIDPrefMap.put(userID, userPrefs);
-          }
-          userPrefs.add(new GenericPreference(userID, itemID, ratingValue));
-          if (user.containsKey("created_at")
-              && mongoTimestamp.compareTo(getDate(user.get("created_at"))) < 0) {
-            mongoTimestamp = getDate(user.get("created_at"));
-          }
+    collection = db.getCollection(mongoCollection);
+    collectionMap = db.getCollection(mongoMapCollection);
+    DBObject indexObj = new BasicDBObject();
+    indexObj.put("element_id", 1);
+    collectionMap.createIndex(indexObj);
+    indexObj = new BasicDBObject();
+    indexObj.put("long_value", 1);
+    collectionMap.createIndex(indexObj);
+    collectionMap.remove(new BasicDBObject());
+    DBCursor cursor = collection.find();
+    while (cursor.hasNext()) {
+      Map<String, Object> user = (Map<String, Object>) cursor.next().toMap();
+      if (!user.containsKey("deleted_at")) {
+        long userID = Long.parseLong(fromIdToLong(getID(user.get(mongoUserID), true), true));
+        long itemID = Long.parseLong(fromIdToLong(getID(user.get(mongoItemID), false), false));
+        float ratingValue = getPreference(user.get(mongoPreference));
+        Collection<Preference> userPrefs = userIDPrefMap.get(userID);
+        if (userPrefs == null) {
+          userPrefs = new ArrayList<>(2);
+          userIDPrefMap.put(userID, userPrefs);
+        }
+        userPrefs.add(new GenericPreference(userID, itemID, ratingValue));
+        if (user.containsKey("created_at")
+                && mongoTimestamp.compareTo(getDate(user.get("created_at"))) < 0) {
+          mongoTimestamp = getDate(user.get("created_at"));
         }
       }
     }

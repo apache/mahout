@@ -30,6 +30,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.*;
+
 public final class TestGaussianAccumulators extends MahoutTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(TestGaussianAccumulators.class);

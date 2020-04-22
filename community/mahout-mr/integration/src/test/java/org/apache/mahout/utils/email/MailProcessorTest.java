@@ -26,6 +26,8 @@ import org.apache.commons.io.Charsets;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class MailProcessorTest extends MahoutTestCase {
 
   @Test

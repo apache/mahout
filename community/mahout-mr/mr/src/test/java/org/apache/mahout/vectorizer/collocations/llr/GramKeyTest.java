@@ -27,6 +27,8 @@ import com.google.common.io.Closeables;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class GramKeyTest extends MahoutTestCase {
 
   @Test
@@ -99,7 +101,7 @@ public final class GramKeyTest extends MahoutTestCase {
       Closeables.close(din, true);
     }
 
-    assertTrue(Arrays.equals(two.getBytes(), one.getBytes()));
+    assertArrayEquals(two.getBytes(), one.getBytes());
     assertEquals(Gram.Type.UNIGRAM, one.getType());
     
   }

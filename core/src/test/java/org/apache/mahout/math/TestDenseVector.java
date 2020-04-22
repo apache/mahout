@@ -20,6 +20,8 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public final class TestDenseVector extends AbstractVectorTest<DenseVector> {
 
   @Override

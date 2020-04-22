@@ -25,6 +25,7 @@ import org.apache.mahout.math.RandomTrinaryMatrix;
 import org.apache.mahout.math.SingularValueDecomposition;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
+import org.junit.Assert;
 import org.junit.Test;
 
 public final class SequentialBigSvdTest extends MahoutTestCase {
@@ -53,15 +54,15 @@ public final class SequentialBigSvdTest extends MahoutTestCase {
     // go to zero, the singular vectors are not uniquely determined
     Matrix u1 = svd.getU().viewPart(0, 20, 0, 4).assign(Functions.ABS);
     Matrix u2 = s.getU().viewPart(0, 20, 0, 4).assign(Functions.ABS);
-    assertEquals(0, u1.minus(u2).aggregate(Functions.PLUS, Functions.ABS), 1.0e-9);
+    Assert.assertEquals(0, u1.minus(u2).aggregate(Functions.PLUS, Functions.ABS), 1.0e-9);
   }
 
   private static void assertEquals(Matrix u1, Matrix u2) {
-    assertEquals(0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
+    Assert.assertEquals(0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
   }
 
   private static void assertEquals(Vector u1, Vector u2) {
-    assertEquals(0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
+    Assert.assertEquals(0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
   }
 
   @Test

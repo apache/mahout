@@ -30,6 +30,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class TestUnitVectorizerJob extends MahoutTestCase {
 
   private static final double [][] RAW = { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} };

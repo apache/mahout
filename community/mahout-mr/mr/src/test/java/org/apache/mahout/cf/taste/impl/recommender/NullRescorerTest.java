@@ -21,6 +21,8 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link NullRescorer}.</p> */
 public final class NullRescorerTest extends TasteTestCase {
 

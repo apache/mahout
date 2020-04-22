@@ -28,6 +28,7 @@ import org.apache.mahout.math.RandomTrinaryMatrix;
 import org.apache.mahout.math.SingularValueDecomposition;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +42,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
 
@@ -71,7 +74,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
 
     Vector reference = new DenseVector(svd.getSingularValues()).viewPart(0, 6);
     Vector actual = s.getSingularValues().viewPart(0, 6);
-    assertEquals(0, reference.minus(actual).maxValue(), 1.0e-9);
+    Assert.assertEquals(0, reference.minus(actual).maxValue(), 1.0e-9);
 
     s.computeU(partsOfA, tmpDir);
     Matrix u = readBlockMatrix(Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
@@ -90,7 +93,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
     })));
 
     // The values in A are pretty big so this is a pretty tight relative tolerance
-    assertEquals(0, A.minus(u.times(new DiagonalMatrix(s.getSingularValues())).times(v.transpose())).aggregate(Functions.PLUS, Functions.ABS), 1.0e-7);
+    Assert.assertEquals(0, A.minus(u.times(new DiagonalMatrix(s.getSingularValues())).times(v.transpose())).aggregate(Functions.PLUS, Functions.ABS), 1.0e-7);
   }
 
   /**
@@ -153,7 +156,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
   }
 
   private static void assertEquals(Matrix u1, Matrix u2) {
-    assertEquals(0.0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
+    Assert.assertEquals(0.0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
   }
 
   @Test

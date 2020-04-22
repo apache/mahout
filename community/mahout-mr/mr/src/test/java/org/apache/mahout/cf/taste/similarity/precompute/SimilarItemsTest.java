@@ -26,6 +26,8 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class SimilarItemsTest extends TasteTestCase {
 
   @Test

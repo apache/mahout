@@ -38,6 +38,9 @@ import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
 
   private static final int NUM_DOCS = 100;

@@ -27,6 +27,8 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class IntPairWritableTest extends MahoutTestCase {
 
   @Test

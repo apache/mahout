@@ -43,7 +43,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.runners.Parameterized.Parameters;
 
-
 @RunWith(Parameterized.class)
 public class StreamingKMeansTest {
   private static final int NUM_DATA_POINTS = 1 << 16;

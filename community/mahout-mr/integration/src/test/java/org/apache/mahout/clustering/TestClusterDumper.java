@@ -55,6 +55,8 @@ import org.apache.mahout.vectorizer.Weight;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotNull;
+
 public final class TestClusterDumper extends MahoutTestCase {
 
   private static final String[] DOCS = {

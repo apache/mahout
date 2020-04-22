@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import static org.junit.Assert.*;
+
 /** <p>Tests {@link FastMap}.</p> */
 public final class FastMapTest extends TasteTestCase {
 

@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import java.util.Locale;
 
+import static org.junit.Assert.assertEquals;
+
 public final class ProbabilityTest extends MahoutTestCase {
 
   @Test

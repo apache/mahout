@@ -29,6 +29,8 @@ import org.junit.Test;
 
 import java.io.InputStreamReader;
 
+import static org.junit.Assert.assertEquals;
+
 public final class NegativeBinomialTest extends MahoutTestCase {
 
   private static final Splitter onComma = Splitter.on(",").trimResults();

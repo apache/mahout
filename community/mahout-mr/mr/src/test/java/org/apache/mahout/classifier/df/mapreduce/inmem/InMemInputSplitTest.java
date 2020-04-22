@@ -31,6 +31,9 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.classifier.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 @Deprecated
 public final class InMemInputSplitTest extends MahoutTestCase {
 

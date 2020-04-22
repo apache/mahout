@@ -41,6 +41,8 @@ import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * Unit tests for the mappers and reducers in org.apache.mahout.cf.taste.hadoop.similarity.item
  * some integration tests with tiny data sets at the end

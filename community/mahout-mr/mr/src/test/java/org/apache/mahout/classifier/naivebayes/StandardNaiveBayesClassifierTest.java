@@ -22,6 +22,7 @@ import org.apache.mahout.math.DenseVector;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
 
 public final class StandardNaiveBayesClassifierTest extends NaiveBayesTestBase {
 

@@ -27,6 +27,8 @@ import org.junit.Test;
 import java.util.Iterator;
 import java.util.Locale;
 
+import static org.junit.Assert.*;
+
 public final class WordLikeValueEncoderTest extends MahoutTestCase {
 
   @Test

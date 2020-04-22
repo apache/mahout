@@ -24,6 +24,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import static org.junit.Assert.*;
+
 public final class EvolutionaryProcessTest extends MahoutTestCase {
 
   @Test

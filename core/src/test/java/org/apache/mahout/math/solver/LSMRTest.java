@@ -26,6 +26,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public final class LSMRTest extends MahoutTestCase {
   @Test
   public void basics() {

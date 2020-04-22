@@ -21,6 +21,8 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class HMMTrainerTest extends HMMTestBase {
 
   @Test

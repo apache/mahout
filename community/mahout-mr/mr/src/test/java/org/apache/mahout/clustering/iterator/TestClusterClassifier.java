@@ -40,6 +40,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
+import static org.junit.Assert.*;
+
 public final class TestClusterClassifier extends MahoutTestCase {
   
   private static ClusterClassifier newDMClassifier() {

@@ -24,6 +24,8 @@ import java.util.Collections;
 import org.apache.mahout.cf.taste.model.UpdatableIDMigrator;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public final class MemoryIDMigratorTest extends TasteTestCase {
 
   private static final String DUMMY_STRING = "Mahout";

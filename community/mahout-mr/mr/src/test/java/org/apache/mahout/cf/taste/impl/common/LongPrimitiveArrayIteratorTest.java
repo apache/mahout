@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import java.util.NoSuchElementException;
 
+import static org.junit.Assert.*;
+
 public final class LongPrimitiveArrayIteratorTest extends TasteTestCase {
 
   @Test(expected = NoSuchElementException.class)

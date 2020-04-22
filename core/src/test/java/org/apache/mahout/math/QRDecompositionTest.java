@@ -23,8 +23,11 @@ import com.google.common.collect.Lists;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.stats.OnlineSummarizer;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public final class QRDecompositionTest extends MahoutTestCase {
   @Test
@@ -34,12 +37,12 @@ public final class QRDecompositionTest extends MahoutTestCase {
 
     // how close is Q to actually being orthornormal?
     double maxIdent = qr.getQ().transpose().times(qr.getQ()).viewDiagonal().assign(Functions.plus(-1)).norm(1);
-    assertEquals(0, maxIdent, 1.0e-13);
+    Assert.assertEquals(0, maxIdent, 1.0e-13);
 
     // how close is Q R to the original value of A?
     Matrix z = qr.getQ().times(qr.getR()).minus(a);
     double maxError = z.aggregate(Functions.MIN, Functions.ABS);
-    assertEquals(0, maxError, 1.0e-13);
+    Assert.assertEquals(0, maxError, 1.0e-13);
   }
 
   @Test
@@ -51,7 +54,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
 
     QRDecomposition qr = new QRDecomposition(x);
     assertFalse(qr.hasFullRank());
-    assertEquals(0, new DenseVector(new double[]{3.741657, 7.483315, 11.22497}).aggregate(qr.getR().viewRow(0), Functions.PLUS, new DoubleDoubleFunction() {
+    Assert.assertEquals(0, new DenseVector(new double[]{3.741657, 7.483315, 11.22497}).aggregate(qr.getR().viewRow(0), Functions.PLUS, new DoubleDoubleFunction() {
       @Override
       public double apply(double arg1, double arg2) {
         return Math.abs(arg1) - Math.abs(arg2);
@@ -74,7 +77,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     Matrix r = qr.getR();
 
     // check identity down to sign
-    assertEquals(0, r.clone().assign(Functions.ABS).minus(rRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
+    Assert.assertEquals(0, r.clone().assign(Functions.ABS).minus(rRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
 
     Matrix qRef = reshape(new double[]{
       -0.165178287646573, 0.0510035857637869, 0.13985915987379, -0.120173729496501,
@@ -94,7 +97,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     Matrix q = qr.getQ();
     printMatrix("q", q);
 
-    assertEquals(0, q.clone().assign(Functions.ABS).minus(qRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
+    Assert.assertEquals(0, q.clone().assign(Functions.ABS).minus(qRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
 
     Matrix x1 = qr.solve(reshape(new double[]{
       -0.0178247686747641, 0.68631714634098, -0.335464858468858, 1.50249941751569,
@@ -130,7 +133,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     }, 5, 8);
     printMatrix("rRef", rRef);
     printMatrix("rActual", rActual);
-    assertEquals(0, rActual.clone().assign(Functions.ABS).minus(rRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
+    Assert.assertEquals(0, rActual.clone().assign(Functions.ABS).minus(rRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
 //    assertEquals(rRef, rActual, 1.0e-8);
 
     Matrix qRef = reshape(new double[]{
@@ -146,7 +149,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     printMatrix("qRef", qRef);
     printMatrix("q", q);
 
-    assertEquals(0, q.clone().assign(Functions.ABS).minus(qRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
+    Assert.assertEquals(0, q.clone().assign(Functions.ABS).minus(qRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
 //    assertEquals(qRef, q, 1.0e-8);
 
     Matrix x1 = qr.solve(b());
@@ -228,7 +231,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
   }
 
   private static void assertEquals(Matrix ref, Matrix actual, double epsilon) {
-    assertEquals(0, ref.minus(actual).aggregate(Functions.MAX, Functions.ABS), epsilon);
+    Assert.assertEquals(0, ref.minus(actual).aggregate(Functions.MAX, Functions.ABS), epsilon);
   }
 
   private static void printMatrix(String name, Matrix m) {

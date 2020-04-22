@@ -13,6 +13,8 @@ package org.apache.mahout.math;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public final class MurmurHash3Test extends MahoutTestCase {
 
   private static final int[] ANSWERS =

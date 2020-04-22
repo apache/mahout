@@ -23,6 +23,8 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
+import static org.junit.Assert.*;
+
 public class DiagonalMatrixTest extends MahoutTestCase {
   @Test
   public void testBasics() {

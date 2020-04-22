@@ -27,9 +27,9 @@ class FlinkDistributedContext(val env: ExecutionEnvironment) extends Distributed
 
   val mahoutHome = getMahoutHome()
 
-  GlobalConfiguration.loadConfiguration(mahoutHome + "/src/conf/flink-config.yaml")
+  GlobalConfiguration.loadConfiguration(mahoutHome + "/conf")
 
-  val conf = GlobalConfiguration.getConfiguration
+  val conf = GlobalConfiguration.loadConfiguration()
 
   var degreeOfParallelism: Int = 0
 

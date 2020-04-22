@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class RegressionResultAnalyzerTest extends MahoutTestCase {
 
   private static final Pattern p1 = Pattern.compile("Correlation coefficient *: *(.*)\n");

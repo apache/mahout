@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
+import static org.junit.Assert.assertEquals;
+
 public class FileBasedMatrixTest extends MahoutTestCase {
   // 10 million rows x 40 columns x 8 bytes = 3.2GB of data
   // we need >2GB to stress the file based matrix implementation

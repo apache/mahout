@@ -84,7 +84,7 @@
             </goals>
             <configuration>
               <systemProperties combine.children="append">
-                <mahout.home>${project.build.directory}</mahout.home>
+                <mahout.home>${project.build.testOutputDirectory}</mahout.home>
               </systemProperties>
               <argLine>-Xmx4g</argLine>
             </configuration>
@@ -118,34 +118,30 @@
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-runtime_${scala.compat.version}</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-scala_${scala.compat.version}</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-hadoop-compatibility_${scala.compat.version}</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-java</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-core</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-clients_${scala.compat.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-test-utils_${scala.compat.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-tests_${scala.compat.version}</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
     </dependency>
 
     <!-- tests -->
@@ -163,9 +159,22 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-test-utils_${scala.compat.version}</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-tests_${scala.compat.version}</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
