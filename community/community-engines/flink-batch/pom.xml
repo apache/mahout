@@ -32,54 +32,29 @@
   <name>-- Mahout Flink Engine (Community)</name>
   <description>Mahout Bindings for Apache Flink</description>
 
-  <properties>
-    <flink.version>1.1.4</flink.version>
-  </properties>
-
   <build>
     <plugins>
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <target>
-                <copy file="target/mahout-flink-batch-${project.version}.jar"
-                      tofile="../../../lib/mahout-flink-batch-${project.version}.jar" />
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
         <executions>
-          <execution>
+          <!--execution>
             <id>add-scala-sources</id>
             <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
-          </execution>
+          </execution-->
           <execution>
             <id>scala-compile</id>
-            <phase>process-resources</phase>
+            <phase>compile</phase>
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <phase>test-compile</phase>
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -93,9 +68,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <systemPropertyVariables>
-            <mahout.home>${project.build.directory}</mahout.home>
-          </systemPropertyVariables>
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
@@ -106,7 +78,7 @@
         <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>test</id>
+            <id>scala-test</id>
             <goals>
               <goal>test</goal>
             </goals>
@@ -119,74 +91,15 @@
           </execution>
         </executions>
       </plugin>
-
-      <!-- remove jars from top directory on clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../../lib</directory>
-              <includes>
-                <include>mahout-flink*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-runtime_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-scala_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-java</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-core</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-clients_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-test-utils_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-tests_${scala.compat.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
     </dependency>
-
-    <!--<dependency>-->
-      <!--<groupId>org.bytedeco</groupId>-->
-      <!--<artifactId>javacpp</artifactId>-->
-      <!--<version>1.2.2</version>-->
-    <!--</dependency>-->
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
@@ -200,6 +113,42 @@
       </exclusions>
     </dependency>
 
+    <!--  3rd-party -->
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-runtime_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-scala_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-clients_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-test-utils_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-tests_${scala.compat.version}</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+
+    <!-- tests -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
@@ -209,24 +158,63 @@
       <scope>test</scope>
     </dependency>
 
-    <!--  3rd-party -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-
-    <!-- tests -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>development</id>
+      <build>
+        <plugins>
+          <!-- remove jars from top directory on clean -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>../../../lib</directory>
+                  <includes>
+                    <include>mahout-flink*.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+
+          <!-- copy jars to top directory, which is MAHOUT_HOME -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy</id>
+                <phase>package</phase>
+                <configuration>
+                  <target>
+                    <copy file="target/mahout-flink-batch-${project.version}.jar"
+                          tofile="../../../lib/mahout-flink-batch-${project.version}.jar" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

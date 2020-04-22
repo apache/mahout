@@ -37,31 +37,81 @@
     <maven.javadoc.skip>true</maven.javadoc.skip>
   </properties>
 
+  <build>
+    <plugins>
+      <!-- scala stuff -->
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <executions>
+          <!--execution>
+            <id>add-scala-sources</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+          </execution-->
+          <execution>
+            <id>scala-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--this is what scalatest recommends to do to enable scala tests -->
+      <!-- disable surefire -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+
+      <!-- enable scalatest -->
+      <plugin>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>scala-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <systemProperties combine.children="append">
+                <mahout.home>${project.build.directory}</mahout.home>
+              </systemProperties>
+              <argLine>-Xmx4g</argLine>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
-    <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
-      <version>3.0.5</version>
-    </dependency>
-
-<!--    <dependency>-->
-<!--      <groupId>com.github.scopt</groupId>-->
-<!--      <artifactId>scopt_${scala.compat.version}</artifactId>-->
-<!--      <version>3.3.0</version>-->
-<!--    </dependency>-->
-
-    <!-- https://mvnrepository.com/artifact/com.github.scopt/scopt -->
-    <dependency>
-      <groupId>com.github.scopt</groupId>
-      <artifactId>scopt_${scala.compat.version}</artifactId>
-      <version>3.7.1</version>
-    </dependency>
-
     <!-- our stuff -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark</artifactId>
       <version>14.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.scopt</groupId>
+      <artifactId>scopt_${scala.compat.version}</artifactId>
     </dependency>
 
     <dependency>
@@ -78,143 +128,68 @@
       <version>14.1-SNAPSHOT</version>
       <classifier>tests</classifier>
     </dependency>
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-<!--      <plugin>-->
-<!--        <groupId>org.codehaus.mojo</groupId>-->
-<!--        <artifactId>exec-maven-plugin</artifactId>-->
-<!--        <version>${org.codehaus.mojo.version}</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>script-chmod</id>-->
-<!--            <phase>package</phase>-->
-<!--            <configuration>-->
-<!--              <executable>chmod</executable>-->
-<!--              <arguments>-->
-<!--                <argument>+x</argument>-->
-<!--                <argument>"target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar"</argument>-->
-<!--                <argument>"target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar"</argument>-->
-<!--              </arguments>-->
-<!--            </configuration>-->
-<!--            <goals>-->
-<!--              <goal>run</goal>-->
-<!--            </goals>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
-
-      <!-- delete files on mvn clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${project.build.directory}/lib/</directory>
-              <includes>
-                <include>spark-cli*</include>
-                <include>spark_*-dependency-reduced.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-            <fileset>
-              <directory>${project.build.directory}/community/spark-cli-drivers/target/</directory>
-              <includes>
-                <include>spark_*</include>
-                <include>spark_*-dependency-reduced.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
-      <!-- copy jars to lib/ -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
+  <profiles>
+    <profile>
+      <id>development</id>
+      <build>
+        <plugins>
+          <!-- delete files on mvn clean -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
             <configuration>
-                <target>
-                  <copy file="target/mahout-spark-cli-drivers-${project.version}.jar"
-                        tofile="${project.basedir}/../../lib/mahout-spark-cli-drivers-${project.version}.jar" />
-                </target>
-              </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+              <filesets>
+                <fileset>
+                  <directory>${project.build.directory}/lib/</directory>
+                  <includes>
+                    <include>spark-cli*</include>
+                    <include>spark_*-dependency-reduced.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+                <fileset>
+                  <directory>${project.build.directory}/community/spark-cli-drivers/target/</directory>
+                  <includes>
+                    <include>spark_*</include>
+                    <include>spark_*-dependency-reduced.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
 
-      <!-- scala stuff -->
-      <plugin>
-        <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId>
-        <version>4.0.2</version>
-        <executions>
-          <execution>
-            <id>add-scala-sources</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>scala-compile</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!--this is what scalatest recommends to do to enable scala tests -->
-      <!-- disable surefire -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemPropertyVariables>
-            <mahout.home>${project.build.directory}</mahout.home>
-          </systemPropertyVariables>
-          <skipTests>true</skipTests>
-        </configuration>
-      </plugin>
-
-      <!-- enable scalatest -->
-      <plugin>
-        <groupId>org.scalatest</groupId>
-        <artifactId>scalatest-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>test</id>
-            <goals>
-              <goal>test</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <systemProperties combine.children="append">
-            <mahout.home>${project.build.directory}</mahout.home>
-          </systemProperties>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+          <!-- copy jars to lib/ -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy</id>
+                <phase>package</phase>
+                <configuration>
+                  <target>
+                    <copy file="target/mahout-spark-cli-drivers-${project.version}.jar"
+                          tofile="${project.basedir}/../../lib/mahout-spark-cli-drivers-${project.version}.jar" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

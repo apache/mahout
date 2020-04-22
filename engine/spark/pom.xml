@@ -38,28 +38,11 @@
   </properties>
   <build>
     <plugins>
-      <!-- delete files on mvn clean -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../lib/</directory>
-              <includes>
-                <include>mahout-spark_*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
         <executions>
-          <execution>
+          <!--execution>
             <id>attach-javadocs</id>
             <phase>dont-execute</phase>
             <goals>
@@ -72,7 +55,7 @@
             <goals>
               <goal>add-source</goal>
             </goals>
-          </execution>
+          </execution-->
           <execution>
             <id>scala-compile</id>
             <phase>compile</phase>
@@ -101,13 +84,12 @@
       </plugin>
 
       <!-- enable scalatest -->
-      <!-- TODO: scalatest uses the JVM which is set in the path and not the one that is running the maven plugin -->
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>test</id>
+            <id>scala-test</id>
             <phase>test</phase>
             <goals>
               <goal>test</goal>
@@ -115,6 +97,23 @@
             <configuration>
               <argLine>-Xmx4g</argLine>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- create test jar so other modules can reuse the math test utility classes.
+        DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
+        Please contact @dlyubimov.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -137,94 +136,10 @@
           </execution>
         </executions>
       </plugin>
-
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <copy file="target/mahout-spark-${project.version}.jar"
-                      tofile="../../lib/mahout-spark-${project.version}.jar"/>
-                <copy file="target/mahout-spark-${project.version}-dependency-reduced.jar"
-                      tofile="../../lib/mahout-spark-${project.version}-dependency-reduced.jar"/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-javadocs</id>
-            <!-- DO not not producing generated java/scaladocs right until Java 8+ tag bug has been fixed
-            or javadoc generation is fixed to generate intrepretable  doc tags  -->
-            <phase>dont-execute</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <copy file="target/mahout-spark-${project.version}-javadoc.jar"
-                      tofile="../../docs/mahout-spark-${project.version}.jar"/>
-              </target>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- create test jar so other modules can reuse the math test utility classes.
-        DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
-        Please contact @dlyubimov.
-      -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>default-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <!--<configuration>-->
-            <!--<classifier>spark_${spark.compat.version}</classifier>-->
-            <!--</configuration>-->
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-reflect</artifactId>
-      <version>${scala.version}</version>
-    </dependency>
-
-    <!-- spark stuff - need to put this first to use spark's mahout dependencies in tests -->
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_${scala.compat.version}</artifactId>
-      <version>${spark.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-mllib_${scala.compat.version}</artifactId>
-      <version>${spark.version}</version>
-    </dependency>
-
     <!-- mahout stuff -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
@@ -238,12 +153,6 @@
       <version>14.1-SNAPSHOT</version>
     </dependency>
 
-    <!--<dependency>-->
-    <!--<groupId>org.bytedeco</groupId>-->
-    <!--<artifactId>javacpp</artifactId>-->
-    <!--<version>1.2.2</version>-->
-    <!--</dependency>-->
-
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
@@ -253,13 +162,91 @@
     </dependency>
 
     <!--  3rd-party -->
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_${scala.compat.version}</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-mllib_${scala.compat.version}</artifactId>
+    </dependency>
 
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
-      <version>3.0.5</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>development</id>
+      <build>
+        <plugins>
+          <!-- delete files on mvn clean -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>../../lib/</directory>
+                  <includes>
+                    <include>mahout-spark_*.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+
+          <!-- copy jars to top directory, which is MAHOUT_HOME -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <copy file="target/mahout-spark-${project.version}.jar"
+                          tofile="../../lib/mahout-spark-${project.version}.jar"/>
+                    <copy file="target/mahout-spark-${project.version}-dependency-reduced.jar"
+                          tofile="../../lib/mahout-spark-${project.version}-dependency-reduced.jar"/>
+                  </target>
+                </configuration>
+              </execution>
+              <!--execution>
+                <id>copy-javadocs</id>
+                <!- DO not not producing generated java/scaladocs right until Java 8+ tag bug has been fixed
+                or javadoc generation is fixed to generate intrepretable  doc tags  ->
+                <phase>dont-execute</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <copy file="target/mahout-spark-${project.version}-javadoc.jar"
+                          tofile="../../docs/mahout-spark-${project.version}.jar"/>
+                  </target>
+                </configuration>
+              </execution-->
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

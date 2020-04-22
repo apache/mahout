@@ -32,42 +32,22 @@
   <name>-- Mahout H2O Engine (Community)</name>
   <description>H2O Backend for Mahout DSL</description>
 
-  <properties>
-    <h2o.version>0.1.25</h2o.version>
-  </properties>
-
   <build>
     <plugins>
-      <!-- remove jars from top directory on clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../../lib</directory>
-              <includes>
-                <include>mahout-h2o*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
         <executions>
-          <execution>
+          <!--execution>
             <id>add-scala-sources</id>
             <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
-          </execution>
+          </execution-->
           <execution>
             <id>scala-compile</id>
+            <!-- Intentionally not using 'compile' as the java code depends on some scala classes -->
             <phase>process-resources</phase>
             <goals>
               <goal>compile</goal>
@@ -75,7 +55,7 @@
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <phase>test-compile</phase>
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -84,7 +64,6 @@
       </plugin>
 
       <!--this is what scalatest recommends to do to enable scala tests -->
-
       <!-- disable surefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -100,30 +79,9 @@
         <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>test</id>
+            <id>scala-test</id>
             <goals>
               <goal>test</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <target>
-                <copy file="target/mahout-h2o-${project.version}.jar"
-                      tofile="../../../lib/mahout-h2o-${project.version}.jar" />
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
             </goals>
           </execution>
         </executions>
@@ -151,27 +109,12 @@
   </build>
 
   <dependencies>
-    <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--&lt;!&ndash;<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>&ndash;&gt;-->
-      <!--<artifactId>a</artifactId>-->
-      <!--<version>${project.version}</version>-->
-    <!--</dependency>-->
-
     <!-- for MatrixWritable and VectorWritable -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>
       <version>14.1-SNAPSHOT</version>
     </dependency>
-
-   <dependency>
-      <groupId>org.apache.mahout</groupId>
-     <artifactId>mahout-core</artifactId>
-     <version>14.1-SNAPSHOT</version>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-   </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
@@ -186,7 +129,6 @@
     <dependency>
       <groupId>ai.h2o</groupId>
       <artifactId>h2o-core</artifactId>
-      <version>${h2o.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.hadoop</groupId>
@@ -197,35 +139,63 @@
 
     <!-- scala stuff -->
     <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-library</artifactId>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
   <profiles>
     <profile>
-      <id>mahout-release</id>
+      <id>development</id>
       <build>
         <plugins>
+          <!-- remove jars from top directory on clean -->
           <plugin>
-            <groupId>net.alchim31.maven</groupId>
-            <artifactId>scala-maven-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>../../../lib</directory>
+                  <includes>
+                    <include>mahout-h2o*.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+
+          <!-- copy jars to top directory, which is MAHOUT_HOME -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
             <executions>
               <execution>
-                <id>generate-scaladoc</id>
+                <id>copy</id>
+                <phase>package</phase>
+                <configuration>
+                  <target>
+                    <copy file="target/mahout-h2o-${project.version}.jar"
+                          tofile="../../../lib/mahout-h2o-${project.version}.jar" />
+                  </target>
+                </configuration>
                 <goals>
-                  <goal>doc</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>attach-scaladoc-jar</id>
-                <goals>
-                  <goal>doc-jar</goal>
+                  <goal>run</goal>
                 </goals>
               </execution>
             </executions>
@@ -234,4 +204,5 @@
       </build>
     </profile>
   </profiles>
+
 </project>

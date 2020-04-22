@@ -131,6 +131,7 @@
     <slf4j.version>1.7.22</slf4j.version>
     <scala.version>2.11.12</scala.version>
     <scala.compat.version>2.11</scala.compat.version>
+    <scalatest.version>3.0.5</scalatest.version>
     <spark.version>2.4.5</spark.version>
     <spark.compat.version>2.4</spark.compat.version>
 
@@ -153,6 +154,9 @@
     <module>engine</module>
     <module>community</module>
     <module>distribution</module>
+    <module>examples</module>
+    <!-- The javacpp stuff doesn't seem to work correctly on Macs -->
+    <!--module>experimental</module-->
   </modules>
 
   <dependencyManagement>
@@ -311,7 +315,7 @@
       <dependency>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest_${scala.compat.version}</artifactId>
-        <version>3.0.5</version>
+        <version>${scalatest.version}</version>
       </dependency>
 
       <dependency>
@@ -344,6 +348,198 @@
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
         <version>1.2.17</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-runtime_${scala.compat.version}</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-java</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-core</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-clients_${scala.compat.version}</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-scala_${scala.compat.version}</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-test-utils_${scala.compat.version}</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-tests_${scala.compat.version}</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.h2o</groupId>
+        <artifactId>h2o-core</artifactId>
+        <version>0.1.25</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-dbcp</groupId>
+        <artifactId>commons-dbcp</artifactId>
+        <version>1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-pool</groupId>
+        <artifactId>commons-pool</artifactId>
+        <version>1.6</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>mongo-java-driver</artifactId>
+        <version>2.11.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>bson</artifactId>
+        <version>2.11.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hbase</groupId>
+        <artifactId>hbase-client</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hectorclient</groupId>
+        <artifactId>hector-core</artifactId>
+        <version>1.1-4</version>
+      </dependency>
+      <dependency>
+        <groupId>xml-apis</groupId>
+        <artifactId>xml-apis</artifactId>
+        <version>1.4.01</version>
+      </dependency>
+      <dependency>
+        <groupId>com.tdunning</groupId>
+        <artifactId>t-digest</artifactId>
+        <version>3.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.7.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.1</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-cli</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>1.2</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>1.1.3</version>
+      </dependency>
+      <dependency>
+        <groupId>com.thoughtworks.xstream</groupId>
+        <artifactId>xstream</artifactId>
+        <version>1.4.6</version>
+      </dependency>
+      <!-- TODO: Check this dependency -->
+      <dependency>
+        <groupId>org.apache.mahout.commons</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>2.0-mahout</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-scala_2${scala.compat.version}</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-commons-csv</artifactId>
+        <version>3.5.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-all</artifactId>
+        <version>1.3</version>
+      </dependency>
+      <dependency>
+        <groupId>com.carrotsearch.randomizedtesting</groupId>
+        <artifactId>randomizedtesting-runner</artifactId>
+        <version>2.0.15</version>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>3.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.mrunit</groupId>
+        <artifactId>mrunit</artifactId>
+        <version>1.0.0</version>
+        <classifier>hadoop2</classifier>
+      </dependency>
+      <dependency>
+        <groupId>commons-httpclient</groupId>
+        <artifactId>commons-httpclient</artifactId>
+        <version>3.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>1.7.22</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>1.7.22</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.scopt</groupId>
+        <artifactId>scopt_${scala.compat.version}</artifactId>
+        <version>3.7.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.esotericsoftware.kryo</groupId>
+        <artifactId>kryo</artifactId>
+        <version>2.24.0</version>
+      </dependency>
+      <dependency>
+        <groupId>it.unimi.dsi</groupId>
+        <artifactId>fastutil</artifactId>
+        <version>7.0.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-core_${scala.compat.version}</artifactId>
+        <version>2.4.5</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-mllib_${scala.compat.version}</artifactId>
+        <version>2.4.5</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bytedeco</groupId>
+        <artifactId>javacpp</artifactId>
+        <version>1.5.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -402,30 +598,6 @@
           </execution>
         </executions>
       </plugin-->
-
-      <!-- delete jars on clean in top directory, which is lib/ -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>lib/</directory>
-              <includes>
-                <include>*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-            <fileset>
-              <directory>doc/</directory>
-              <includes>
-                <include>*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.rat</groupId>
@@ -562,7 +734,6 @@
 
     <pluginManagement>
       <plugins>
-        <!-- delete jars on clean in top directory, which is lib/ -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
@@ -616,6 +787,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0-M4</version>
         </plugin>
+
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-report-plugin</artifactId>
@@ -636,8 +808,10 @@
               <jdk.lang.Process.launchMechanism>FORK</jdk.lang.Process.launchMechanism>
             </systemProperties>
             <logForkedProcessCommand>true</logForkedProcessCommand>
-            <!--reporters></reporters>
-            <reportingOutputDirectory></reportingOutputDirectory-->
+            <!-- Make scalatest output to the usual surefire directory -->
+            <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+            <junitxml>.</junitxml>
+            <filereports>WDF TestSuite.txt</filereports>
           </configuration>
         </plugin>
 
@@ -711,6 +885,40 @@
   </build>
 
   <profiles>
+
+    <!-- Development profile taking care of the cleaning and copying of jars to the lib directory -->
+    <profile>
+      <id>development</id>
+      <build>
+        <plugins>
+          <!-- delete jars on clean in top directory, which is lib/ -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <!-- Just execute this in the root and don't inherit the execution to child-modules -->
+            <inherited>false</inherited>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>lib/</directory>
+                  <includes>
+                    <include>*.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+                <fileset>
+                  <directory>doc/</directory>
+                  <includes>
+                    <include>*.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
     <!-- Profile for some detailed source checks -->
     <profile>
@@ -830,6 +1038,11 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-release-plugin</artifactId>
             <configuration>
+              <!--
+                Make the release plugin release all modules in the reactor with the same version.
+                Without this, a release- and development version would have to be provided for
+                every single module.
+              -->
               <autoVersionSubmodules>true</autoVersionSubmodules>
             </configuration>
           </plugin>

@@ -39,65 +39,6 @@
 
   <build>
     <plugins>
-      <!-- delete files on mvn clean -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>$project.build.directory}/lib</directory>
-              <includes>
-                <include>mahout-hdfs*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-            <fileset>
-              <directory>../</directory>
-              <includes>
-                <include>mahout-hdfs*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
-      <!-- copy jars to lib/ -->
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <copy file="target/mahout-hdfs-${project.version}.jar"
-                      tofile="../../lib/mahout-hdfs-${project.version}.jar" />
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-javadocs</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <copy file="target/mahout-hdfs-${project.version}.jar"
-                      tofile="../../docs/mahout-hdfs-${project.version}-javadoc.jar" />
-              </target>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- create test jar so other modules can reuse the core test utility classes. (currently only mr uses this, profile?)-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -121,6 +62,17 @@
       <version>14.1-SNAPSHOT</version>
     </dependency>
 
+    <!-- Third Party -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
@@ -129,31 +81,10 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Third Party -->
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <version>${hadoop.version} </version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
-
-    <!--dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jcl</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency-->
-
     <!-- Todo Factor this out, used by MahoutTest (also exists in core, remove it from there then you should be able delete here-->
     <dependency>
       <groupId>com.carrotsearch.randomizedtesting</groupId>
       <artifactId>randomizedtesting-runner</artifactId>
-      <version>2.0.15</version>
       <scope>test</scope>
     </dependency>
 
@@ -163,5 +94,73 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>development</id>
+      <build>
+        <plugins>
+          <!-- delete files on mvn clean -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>$project.build.directory}/lib</directory>
+                  <includes>
+                    <include>mahout-hdfs*.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+                <fileset>
+                  <directory>../</directory>
+                  <includes>
+                    <include>mahout-hdfs*.jar</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+
+          <!-- copy jars to lib/ -->
+          <!-- copy jars to top directory, which is MAHOUT_HOME -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <copy file="target/mahout-hdfs-${project.version}.jar"
+                          tofile="../../lib/mahout-hdfs-${project.version}.jar" />
+                  </target>
+                </configuration>
+              </execution>
+              <!--execution>
+                <id>copy-javadocs</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <copy file="target/mahout-hdfs-${project.version}.jar"
+                          tofile="../../docs/mahout-hdfs-${project.version}-javadoc.jar" />
+                  </target>
+                </configuration>
+              </execution-->
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
