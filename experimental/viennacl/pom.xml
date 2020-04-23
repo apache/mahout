@@ -49,20 +49,6 @@
         </executions>
       </plugin>
 
-      <!-- create test jar so other modules can reuse the native test utility classes. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
@@ -116,6 +102,28 @@
             <configuration>
               <argLine>-Xmx4g</argLine>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- create test jar so other modules can reuse the native test utility classes. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+          <!-- create test jar so other modules can reuse the math test utility classes. -->
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -185,6 +193,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <!--  3rd-party -->

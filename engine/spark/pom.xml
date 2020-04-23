@@ -101,19 +101,29 @@
         </executions>
       </plugin>
 
-      <!-- create test jar so other modules can reuse the math test utility classes.
-        DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
-        Please contact @dlyubimov.
-      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
+          <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+          <!-- create test jar so other modules can reuse the math test utility classes.
+             DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
+             Please contact @dlyubimov.
+           -->
           <execution>
             <phase>package</phase>
             <goals>
               <goal>test-jar</goal>
             </goals>
+            <configuration>
+              <classifier>test_scala_${scala.compat.version}</classifier>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -145,6 +155,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <dependency>
@@ -173,7 +184,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
-      <classifier>tests</classifier>
+      <classifier>test_scala_${scala.compat.version}</classifier>
       <scope>test</scope>
     </dependency>
 

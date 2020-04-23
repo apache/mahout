@@ -17,17 +17,18 @@
 
 package org.apache.mahout.math.jet.random;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import com.google.common.io.ByteSource;
 import com.google.common.io.CharStreams;
-import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
+import org.apache.mahout.math.jet.stat.GammaTest;
 import org.junit.Test;
 
 import java.io.InputStreamReader;
+import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,10 +39,10 @@ public final class NegativeBinomialTest extends MahoutTestCase {
 
   @Test
   public void testDistributionFunctions() throws Exception {
-    InputSupplier<InputStreamReader> input =
-        Resources.newReaderSupplier(Resources.getResource("negative-binomial-test-data.csv"), Charsets.UTF_8);
+    URL resourceURL = Resources.getResource(GammaTest.class, "negative-binomial-test-data.csv");
+    ByteSource input = Resources.asByteSource(resourceURL);
     boolean header = true;
-    for (String line : CharStreams.readLines(input)) {
+    for (String line : CharStreams.readLines(new InputStreamReader(input.openBufferedStream()))) {
       if (header) {
         // skip
         header = false;

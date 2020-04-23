@@ -87,6 +87,21 @@
         </executions>
       </plugin>
 
+      <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -120,6 +135,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <!--  3rd-party -->
@@ -153,7 +169,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
-      <classifier>tests</classifier>
+      <classifier>test_scala_${scala.compat.version}</classifier>
       <scope>test</scope>
     </dependency>
   </dependencies>

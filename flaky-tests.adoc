@@ -15,6 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+== Flaky tests
+
+Here comes a list of tests I have seen randomly fail where usually a re-run solved the problem.
+
+It might be worth investigating the reason and perhaps fixing it.
+
 == community/mahout-mr/mr
 
 [ERROR]   TestDistributedRowMatrix.testTranspose:88 » IllegalState transposition failed

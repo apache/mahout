@@ -17,11 +17,10 @@
 
 package org.apache.mahout.math.jet.stat;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import com.google.common.io.ByteSource;
 import com.google.common.io.CharStreams;
-import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
@@ -29,6 +28,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
@@ -117,10 +117,10 @@ public final class GammaTest extends MahoutTestCase {
   public void incompleteBeta() throws IOException {
     Splitter onComma = Splitter.on(",").trimResults();
 
-    InputSupplier<InputStreamReader> input =
-        Resources.newReaderSupplier(Resources.getResource("beta-test-data.csv"), Charsets.UTF_8);
+    URL resourceURL = Resources.getResource(GammaTest.class, "beta-test-data.csv");
+    ByteSource input = Resources.asByteSource(resourceURL);
     boolean header = true;
-    for (String line : CharStreams.readLines(input)) {
+    for (String line : CharStreams.readLines(new InputStreamReader(input.openBufferedStream()))) {
       if (header) {
         // skip
         header = false;

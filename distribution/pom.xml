@@ -33,29 +33,6 @@
   <name>Mahout Release Package</name>
   <description>Distribution Package</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-core</artifactId>
-      <version>14.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-hdfs</artifactId>
-      <version>14.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark</artifactId>
-      <version>14.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark-cli-drivers</artifactId>
-      <version>14.1-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -100,5 +77,30 @@
       </plugin>
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-hdfs</artifactId>
+      <version>14.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark</artifactId>
+      <version>14.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark-cli-drivers</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
+  </dependencies>
 
 </project>

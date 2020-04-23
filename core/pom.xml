@@ -158,16 +158,27 @@
         </executions>
       </plugin>
 
-      <!-- create test jar so other modules can reuse the math test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
+          <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
           <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+          <!-- create test jar so other modules can reuse the math test utility classes. -->
+          <execution>
+            <id>default-test-jar</id>
             <phase>package</phase>
             <goals>
               <goal>test-jar</goal>
             </goals>
+            <configuration>
+              <classifier>test_scala_${scala.compat.version}</classifier>
+            </configuration>
           </execution>
         </executions>
       </plugin>

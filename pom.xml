@@ -853,19 +853,35 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.2.0</version>
+          <configuration>
+            <finalName>apache-mahout-${project.version}</finalName>
+          </configuration>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <version>3.0.0-M1</version>
+          <configuration>
+            <!--
+              Make the release plugin release all modules in the reactor with the same version.
+              Without this, a release- and development version would have to be provided for
+              every single module.
+            -->
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>net.nicoulaj.maven.plugins</groupId>
+          <artifactId>checksum-maven-plugin</artifactId>
+          <version>1.8</version>
         </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
   <profiles>
-
     <!-- Development profile taking care of the cleaning and copying of jars to the lib directory -->
     <profile>
       <id>development</id>
@@ -972,6 +988,11 @@
       </build>
     </profile>
 
+    <!--
+      rofile that ensures that when building on the CI server also the source
+      and javadoc jars are being built and attached so they are available as
+      SNAPSHOT versions
+    -->
     <profile>
       <id>ci</id>
       <activation>
@@ -1010,142 +1031,42 @@
       </build>
     </profile>
 
+    <!--
+      Finetuning of the default apache-release profile.
+      In general we only have it additionally create the SHA512 checksum which is needed
+      to stage a release candidate.
+    -->
     <profile>
       <id>apache-release</id>
       <build>
         <plugins>
+          <!--
+            Create MD5 and SHA512 checksum files for the release artifacts.
+          -->
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-release-plugin</artifactId>
-            <configuration>
-              <!--
-                Make the release plugin release all modules in the reactor with the same version.
-                Without this, a release- and development version would have to be provided for
-                every single module.
-              -->
-              <autoVersionSubmodules>true</autoVersionSubmodules>
-            </configuration>
-          </plugin>
-
-          <!-- Override pare t pom's assembly plugin for -Papache-release we have our assembly code and descriptors
-           in the /dist directory adhering to https://www.apache.org/dev/release-publishing#distribution  -->
-          <!--plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.2.0</version>
-            <executions>
-              <execution>
-                <id>source-release-assembly</id>
-                <phase>none</phase>
-              </execution>
-            </executions>
-            <dependencies>
-              <dependency>
-                <groupId>org.apache.apache.resources</groupId>
-                <artifactId>apache-source-release-assembly-descriptor</artifactId>
-                <version>1.0.6</version>
-              </dependency>
-            </dependencies>
-          </plugin-->
-
-          <!--plugin>
-            <inherited>true</inherited>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-deploy-plugin</artifactId>
-            <version>2.8.2</version>
-            <executions>
-              <execution>
-                <id>apache.releases.https</id>  <!- release first to staging then to nexus ->
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin-->
-
-          <!--plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin-->
-
-          <!--plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin-->
-
-          <!-- We want to sign the artifact, the POM, and all attached artifacts -->
-          <!--plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <id>sign-release-artifacts</id>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-                <configuration>
-                  <keyname>${gpg.keyname}</keyname>
-                  <passphraseServerId>${gpg.passphrase}</passphraseServerId>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin-->
-
-          <!--plugin>
             <groupId>net.nicoulaj.maven.plugins</groupId>
             <artifactId>checksum-maven-plugin</artifactId>
-            <version>1.7</version>
             <executions>
               <execution>
-                <id>source-release-checksum</id>
                 <goals>
                   <goal>files</goal>
                 </goals>
-                <configuration>
-                  <algorithms>
-                    <algorithm>SHA-512</algorithm>
-                  </algorithms>
-                  <csvSummary>false</csvSummary>
-                  <fileSets>
-                    <fileSet>
-                      <directory>${project.build.directory}</directory>
-                      <includes>
-                        <include>${project.artifactId}-${project.version}*.*</include>
-                        <include>${project.artifactId}-${project.version}*</include>
-                      </includes>
-                      <directory>${project.build.directory}/**/target</directory>
-                      <includes>
-                        <include>mahout-*</include>
-                      </includes>
-                      <directory>${project.build.directory}/**/**/target</directory>
-                      <includes>
-                        <include>mahout-*</include>
-                      </includes>
-                    </fileSet>
-                  </fileSets>
-                  <failIfNoFiles>false</failIfNoFiles><!- usually, no file to do checksum: don't consider error ->
-                </configuration>
               </execution>
             </executions>
-          </plugin-->
+            <configuration>
+              <algorithms>
+                <algorithm>SHA-512</algorithm>
+              </algorithms>
+              <fileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>apache-mahout-${project.version}-source-release.zip</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>

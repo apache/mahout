@@ -60,6 +60,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <!-- Third Party -->
@@ -77,7 +78,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
-      <type>test-jar</type>
+      <classifier>test_scala_${scala.compat.version}</classifier>
       <scope>test</scope>
     </dependency>
 
