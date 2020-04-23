@@ -624,6 +624,8 @@
                 <exclude>website/**</exclude>
                 <exclude>.github/*</exclude>
                 <exclude>**/*.properties</exclude>
+                <!-- This directory onyl exists on travis -->
+                <exclude>viennacl-dev-release-1.7.1/**</exclude>
               </excludes>
             </configuration>
           </execution>
