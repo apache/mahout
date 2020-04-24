@@ -23,4 +23,5 @@ It might be worth investigating the reason and perhaps fixing it.
 
 == community/mahout-mr/mr
 
-[ERROR]   TestDistributedRowMatrix.testTranspose:88 » IllegalState transposition failed
+- TestDistributedRowMatrix.testTranspose:88 » IllegalState transposition failed
+- SparseVectorsFromSequenceFilesTest
