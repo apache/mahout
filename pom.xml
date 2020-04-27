@@ -180,7 +180,6 @@
     <module>engine</module>
     <module>community</module>
     <module>distribution</module>
-    <module>examples</module>
     <!-- The javacpp stuff doesn't seem to work correctly on Macs -->
     <!--module>experimental</module-->
   </modules>
@@ -573,6 +572,16 @@
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-hcatalog_2.11</artifactId>
         <version>1.10.0</version>
+      </dependency>
+
+      <!--
+        Transitive dependencies
+      -->
+      <!-- Bump this as the versison that was pulled in keeps us stuck at max Java 10 -->
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>8.0.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -48,29 +48,11 @@
             <configuration>
               <attach>true</attach>
               <finalName>apache-mahout-${project.version}</finalName>
-              <skipAssembly>false</skipAssembly>
               <descriptors>
-                <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
               </descriptors>
               <tarLongFileMode>gnu</tarLongFileMode>
               <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
-          </execution>
-          <execution>
-            <id>distro-assembly-src</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <attach>true</attach>
-              <finalName>apache-mahout-${project.version}</finalName>
-              <skipAssembly>false</skipAssembly>
-              <descriptors>
-                <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
-              </descriptors>
-              <tarLongFileMode>gnu</tarLongFileMode>
-              <appendAssemblyId>true</appendAssemblyId>
             </configuration>
           </execution>
         </executions>
@@ -79,12 +61,15 @@
   </build>
 
   <dependencies>
+    <!-- Mahout core -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
       <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
+
+    <!-- Engines -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>
@@ -94,13 +79,54 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
+
+    <!--
+        Community Artifacts
+    -->
+
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark-cli-drivers</artifactId>
       <version>14.1-SNAPSHOT</version>
       <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
+
+    <!-- Community Engines -->
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-flink-batch</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-h2o</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
+
+    <!-- Mahout  MR -->
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-integration</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mr</artifactId>
+      <version>14.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mr-examples</artifactId>
+      <version>14.1-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
 
 </project>
