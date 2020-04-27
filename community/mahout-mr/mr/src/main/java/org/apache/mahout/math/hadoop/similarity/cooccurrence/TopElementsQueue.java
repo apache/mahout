@@ -48,12 +48,8 @@ public class TopElementsQueue extends PriorityQueue<MutableElement> {
   }
 
   @Override
-  protected MutableElement getSentinelObject() {
-    return new MutableElement(SENTINEL_INDEX, Double.MIN_VALUE);
-  }
-
-  @Override
   protected boolean lessThan(MutableElement e1, MutableElement e2) {
     return e1.get() < e2.get();
   }
+
 }

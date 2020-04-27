@@ -902,40 +902,6 @@
   </build>
 
   <profiles>
-    <!-- Development profile taking care of the cleaning and copying of jars to the lib directory -->
-    <profile>
-      <id>development</id>
-      <build>
-        <plugins>
-          <!-- delete jars on clean in top directory, which is lib/ -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <!-- Just execute this in the root and don't inherit the execution to child-modules -->
-            <inherited>false</inherited>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>lib/</directory>
-                  <includes>
-                    <include>*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-                <fileset>
-                  <directory>doc/</directory>
-                  <includes>
-                    <include>*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
     <!-- Profile for some detailed source checks -->
     <profile>
       <id>sourcecheck</id>

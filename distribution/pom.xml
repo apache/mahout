@@ -30,7 +30,7 @@
   <artifactId>apache-mahout-distribution</artifactId>
   <packaging>pom</packaging>
 
-  <name>Mahout Release Package</name>
+  <name>Mahout Distribution</name>
   <description>Distribution Package</description>
 
   <build>
@@ -81,6 +81,13 @@
       <version>14.1-SNAPSHOT</version>
       <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <!-- This needs the scala_2.11 addition -->
+      <classifier>dependency-reduced</classifier>
+    </dependency>
 
     <!--
         Community Artifacts
@@ -126,7 +133,18 @@
       <artifactId>mr-examples</artifactId>
       <version>14.1-SNAPSHOT</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mr</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>job</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mr-examples</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>job</classifier>
+    </dependency>
   </dependencies>
 
 </project>
