@@ -25,3 +25,8 @@ It might be worth investigating the reason and perhaps fixing it.
 
 - TestDistributedRowMatrix.testTranspose:88 » IllegalState transposition failed
 - SparseVectorsFromSequenceFilesTest
+
+== community/community-engines/flink-batch
+
+org.apache.mahout.math.algorithms.regression.tests.AutocorrelationTests$.DurbinWatson (MiniCluster is not yet running.)
+org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares.fit (MiniCluster is not yet running.)
