@@ -21,6 +21,11 @@ Here comes a list of tests I have seen randomly fail where usually a re-run solv
 
 It might be worth investigating the reason and perhaps fixing it.
 
+== core
+
+- org.apache.mahout.math.algorithms.PreprocessorSuiteBase.(asfactor test)
+Mini-Cluster doesn't start fast enough.
+
 == community/mahout-mr/mr
 
 - TestDistributedRowMatrix.testTranspose:88 » IllegalState transposition failed
@@ -30,3 +35,4 @@ It might be worth investigating the reason and perhaps fixing it.
 
 org.apache.mahout.math.algorithms.regression.tests.AutocorrelationTests$.DurbinWatson (MiniCluster is not yet running.)
 org.apache.mahout.math.algorithms.regression.OrdinaryLeastSquares.fit (MiniCluster is not yet running.)
+

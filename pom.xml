@@ -577,7 +577,7 @@
       <!--
         Transitive dependencies
       -->
-      <!-- Bump this as the versison that was pulled in keeps us stuck at max Java 10 -->
+      <!-- Bump this as the version that was pulled in keeps us stuck at max Java 10 -->
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>

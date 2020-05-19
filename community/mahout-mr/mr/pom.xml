@@ -159,6 +159,12 @@
     </dependency>
 
     <dependency>
+      <!-- TODO: Check if this should rather be a test-dependency -->
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
       <scope>test</scope>

@@ -106,14 +106,14 @@
             <goals>
               <goal>doc-jar</goal>
             </goals>
-          </execution>
+          </execution-->
           <execution>
             <id>add-scala-sources</id>
             <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
-          </execution-->
+          </execution>
           <execution>
             <id>scala-compile</id>
             <phase>compile</phase>
@@ -211,6 +211,12 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- TODO: Check if this should rather be a test-dependency -->
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
     </dependency>
 
     <!-- TODO ONE Logging framework... -->
