@@ -18,197 +18,45 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-community</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-spark-cli-drivers_2.11</artifactId>
-  <name>- Mahout Spark CLI Drivers</name>
-  <description>These drivers will allow you to compile a handy Apache Spark App which utilizes Apache Mahout.
-  </description>
-
+  <artifactId>mahout-spark-cli-drivers</artifactId>
   <packaging>jar</packaging>
 
-  <properties>
-    <maven.javadoc.skip>true</maven.javadoc.skip>
-  </properties>
-
-  <dependencies>
-
-    <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
-      <version>3.0.5</version>
-    </dependency>
-
-<!--    <dependency>-->
-<!--      <groupId>com.github.scopt</groupId>-->
-<!--      <artifactId>scopt_${scala.compat.version}</artifactId>-->
-<!--      <version>3.3.0</version>-->
-<!--    </dependency>-->
-
-    <!-- https://mvnrepository.com/artifact/com.github.scopt/scopt -->
-    <dependency>
-      <groupId>com.github.scopt</groupId>
-      <artifactId>scopt_${scala.compat.version}</artifactId>
-      <version>3.7.1</version>
-    </dependency>
-
-
-    <!-- our stuff -->
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-      <classifier>tests</classifier>
-    </dependency>
-  </dependencies>
-
-
+  <name>- Mahout Spark CLI Drivers</name>
+  <description>These drivers will allow you to compile a handy Apache Spark App which utilizes Apache Mahout.</description>
 
   <build>
     <plugins>
-<!--
-      &lt;!&ndash; create fat jar &ndash;&gt;
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>dependency-reduced</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>"${project.home}/src/main/assembly/dependency-reduced.xml"</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
--->
-
-
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-
-<!--      <plugin>-->
-<!--        <groupId>org.codehaus.mojo</groupId>-->
-<!--        <artifactId>exec-maven-plugin</artifactId>-->
-<!--        <version>${org.codehaus.mojo.version}</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>script-chmod</id>-->
-<!--            <phase>package</phase>-->
-<!--            <configuration>-->
-<!--              <executable>chmod</executable>-->
-<!--              <arguments>-->
-<!--                <argument>+x</argument>-->
-<!--                <argument>"target/spark-cli-drivers_${scala.compat.version}-${project.version}.jar"</argument>-->
-<!--                <argument>"target/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar"</argument>-->
-<!--              </arguments>-->
-<!--            </configuration>-->
-<!--            <goals>-->
-<!--              <goal>run</goal>-->
-<!--            </goals>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
-
-      <!-- copy jars to lib/ -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-                <tasks>
-                  <copy file="target/mahout-spark-cli-drivers_${scala.compat.version}-${project.version}.jar" tofile="${project.basedir}/../../lib/mahout-spark-cli-drivers_${scala.compat.version}-${project.version}.jar" />
-                 <!-- <copy file="target/spark-cli-drivers_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="${project.basedir}/../../lib/spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" /> -->
-                </tasks>
-              </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- delete files on mvn clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${project.build.directory}/lib/</directory>
-              <includes>
-                <include>spark-cli*</include>
-                <include>spark_*-dependency-reduced.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-            <fileset>
-              <directory>${project.build.directory}/community/spark-cli-drivers/target/</directory>
-              <includes>
-                <include>spark_*</include>
-                <include>spark_*-dependency-reduced.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
       <!-- scala stuff -->
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>4.0.2</version>
         <executions>
-          <execution>
+          <!--execution>
             <id>add-scala-sources</id>
             <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
-          </execution>
+          </execution-->
           <execution>
             <id>scala-compile</id>
-            <phase>process-resources</phase>
+            <phase>compile</phase>
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <phase>test-compile</phase>
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -222,9 +70,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <systemPropertyVariables>
-            <mahout.home>${project.build.directory}</mahout.home>
-          </systemPropertyVariables>
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
@@ -233,24 +78,74 @@
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <version>${scalatest.maven.plugin.version}</version>
         <executions>
           <execution>
-            <id>test</id>
+            <id>scala-test</id>
+            <phase>test</phase>
             <goals>
               <goal>test</goal>
             </goals>
+            <configuration>
+              <systemProperties combine.children="append">
+                <mahout.home>${project.build.directory}</mahout.home>
+              </systemProperties>
+              <argLine>-Xmx4g</argLine>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <systemProperties>
-            <mahout.home>${project.build.directory}</mahout.home>
-          </systemProperties>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
       </plugin>
 
+      <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
+
+  <dependencies>
+    <!-- our stuff -->
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.scopt</groupId>
+      <artifactId>scopt_${scala.compat.version}</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>test_scala_${scala.compat.version}</classifier>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>test_scala_${scala.compat.version}</classifier>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
 </project>
