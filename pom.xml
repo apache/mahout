@@ -134,6 +134,7 @@
     <scalatest.version>3.0.5</scalatest.version>
     <spark.version>2.4.5</spark.version>
     <spark.compat.version>2.4</spark.compat.version>
+    <compile.flags/>
 
     <lucene.version>8.5.1</lucene.version>
 
@@ -154,7 +155,6 @@
     <module>engine</module>
     <module>community</module>
     <module>distribution</module>
-    <module>examples</module>
     <!-- The javacpp stuff doesn't seem to work correctly on Macs -->
     <!--module>experimental</module-->
   </modules>
@@ -546,59 +546,6 @@
 
   <build>
     <plugins>
-      <!--plugin>
-        <groupId>org.codehaus.gmaven</groupId>
-        <artifactId>groovy-maven-plugin</artifactId>
-        <version>2.1.1</version>
-        <executions>
-          <!-
-            Hack the current JVM's java.home into the JAVA_HOME environment variable
-            to ensure the scala-compiler-plugin is using the same JVM version.
-          ->
-          <execution>
-            <id>update-environment-variables</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>execute</goal>
-            </goals>
-            <configuration>
-              <source>
-                <![CDATA[
-                import java.lang.reflect.Field
-
-                private static void injectEnvironmentVariable(String key, String value) throws Exception {
-                  Class<?> processEnvironment = Class.forName("java.lang.ProcessEnvironment")
-                  Field unmodifiableMapField = getAccessibleField(processEnvironment, "theUnmodifiableEnvironment")
-                  Object unmodifiableMap = unmodifiableMapField.get(null)
-                  injectIntoUnmodifiableMap(key, value, unmodifiableMap)
-                  Field mapField = getAccessibleField(processEnvironment, "theEnvironment")
-                  Map<String, String> map = (Map<String, String>) mapField.get(null)
-                  map.put(key, value)
-                }
-
-                private static Field getAccessibleField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
-                  Field field = clazz.getDeclaredField(fieldName)
-                  field.setAccessible(true)
-                  return field
-                }
-
-                private static void injectIntoUnmodifiableMap(String key, String value, Object map) throws ReflectiveOperationException {
-                  Class unmodifiableMap = Class.forName("java.util.Collections\$UnmodifiableMap")
-                  Field field = getAccessibleField(unmodifiableMap, "m")
-                  Object obj = field.get(map)
-                  ((Map<String, String>) obj).put(key, value)
-                }
-
-                injectEnvironmentVariable("JAVA_HOME", System.getProperty("java.home"))
-
-                print "\nJAVA_HOME set to current JVM home (" + System.getenv("JAVA_HOME") + ")\n\n"
-                ]]>
-              </source>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin-->
-
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
@@ -644,6 +591,8 @@
                 <exclude>website/**</exclude>
                 <exclude>.github/*</exclude>
                 <exclude>**/*.properties</exclude>
+                <!-- This directory onyl exists on travis -->
+                <exclude>viennacl-dev-release-1.7.1/**</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -825,6 +774,15 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.2.0</version>
+          <configuration>
+            <!--
+              TODO: The JavaDoc comments quite commonly have invalid content throughout the
+              project. The best solution would be to enable the fail-on settings and to fix
+              them, but I've disabled them for now.
+            -->
+            <failOnWarnings>false</failOnWarnings>
+            <failOnError>false</failOnError>
+          </configuration>
         </plugin>
 
         <plugin>
@@ -873,53 +831,35 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.2.0</version>
+          <configuration>
+            <finalName>apache-mahout-${project.version}</finalName>
+          </configuration>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <version>3.0.0-M1</version>
+          <configuration>
+            <!--
+              Make the release plugin release all modules in the reactor with the same version.
+              Without this, a release- and development version would have to be provided for
+              every single module.
+            -->
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>net.nicoulaj.maven.plugins</groupId>
+          <artifactId>checksum-maven-plugin</artifactId>
+          <version>1.8</version>
         </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
   <profiles>
-
-    <!-- Development profile taking care of the cleaning and copying of jars to the lib directory -->
-    <profile>
-      <id>development</id>
-      <build>
-        <plugins>
-          <!-- delete jars on clean in top directory, which is lib/ -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <!-- Just execute this in the root and don't inherit the execution to child-modules -->
-            <inherited>false</inherited>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>lib/</directory>
-                  <includes>
-                    <include>*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-                <fileset>
-                  <directory>doc/</directory>
-                  <includes>
-                    <include>*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
     <!-- Profile for some detailed source checks -->
     <profile>
       <id>sourcecheck</id>
@@ -992,6 +932,11 @@
       </build>
     </profile>
 
+    <!--
+      Profile that ensures that when building on the CI server also the source
+      and javadoc jars are being built and attached so they are available as
+      SNAPSHOT versions
+    -->
     <profile>
       <id>ci</id>
       <activation>
@@ -1030,142 +975,42 @@
       </build>
     </profile>
 
+    <!--
+      Finetuning of the default apache-release profile.
+      In general we only have it additionally create the SHA512 checksum which is needed
+      to stage a release candidate.
+    -->
     <profile>
       <id>apache-release</id>
       <build>
         <plugins>
+          <!--
+            Create MD5 and SHA512 checksum files for the release artifacts.
+          -->
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-release-plugin</artifactId>
-            <configuration>
-              <!--
-                Make the release plugin release all modules in the reactor with the same version.
-                Without this, a release- and development version would have to be provided for
-                every single module.
-              -->
-              <autoVersionSubmodules>true</autoVersionSubmodules>
-            </configuration>
-          </plugin>
-
-          <!-- Override pare t pom's assembly plugin for -Papache-release we have our assembly code and descriptors
-           in the /dist directory adhering to https://www.apache.org/dev/release-publishing#distribution  -->
-          <!--plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.2.0</version>
-            <executions>
-              <execution>
-                <id>source-release-assembly</id>
-                <phase>none</phase>
-              </execution>
-            </executions>
-            <dependencies>
-              <dependency>
-                <groupId>org.apache.apache.resources</groupId>
-                <artifactId>apache-source-release-assembly-descriptor</artifactId>
-                <version>1.0.6</version>
-              </dependency>
-            </dependencies>
-          </plugin-->
-
-          <!--plugin>
-            <inherited>true</inherited>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-deploy-plugin</artifactId>
-            <version>2.8.2</version>
-            <executions>
-              <execution>
-                <id>apache.releases.https</id>  <!- release first to staging then to nexus ->
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin-->
-
-          <!--plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin-->
-
-          <!--plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin-->
-
-          <!-- We want to sign the artifact, the POM, and all attached artifacts -->
-          <!--plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <id>sign-release-artifacts</id>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-                <configuration>
-                  <keyname>${gpg.keyname}</keyname>
-                  <passphraseServerId>${gpg.passphrase}</passphraseServerId>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin-->
-
-          <!--plugin>
             <groupId>net.nicoulaj.maven.plugins</groupId>
             <artifactId>checksum-maven-plugin</artifactId>
-            <version>1.7</version>
             <executions>
               <execution>
-                <id>source-release-checksum</id>
                 <goals>
                   <goal>files</goal>
                 </goals>
-                <configuration>
-                  <algorithms>
-                    <algorithm>SHA-512</algorithm>
-                  </algorithms>
-                  <csvSummary>false</csvSummary>
-                  <fileSets>
-                    <fileSet>
-                      <directory>${project.build.directory}</directory>
-                      <includes>
-                        <include>${project.artifactId}-${project.version}*.*</include>
-                        <include>${project.artifactId}-${project.version}*</include>
-                      </includes>
-                      <directory>${project.build.directory}/**/target</directory>
-                      <includes>
-                        <include>mahout-*</include>
-                      </includes>
-                      <directory>${project.build.directory}/**/**/target</directory>
-                      <includes>
-                        <include>mahout-*</include>
-                      </includes>
-                    </fileSet>
-                  </fileSets>
-                  <failIfNoFiles>false</failIfNoFiles><!- usually, no file to do checksum: don't consider error ->
-                </configuration>
               </execution>
             </executions>
-          </plugin-->
+            <configuration>
+              <algorithms>
+                <algorithm>SHA-512</algorithm>
+              </algorithms>
+              <fileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>apache-mahout-${project.version}-source-release.zip</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>

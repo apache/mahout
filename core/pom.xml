@@ -106,14 +106,14 @@
             <goals>
               <goal>doc-jar</goal>
             </goals>
-          </execution>
+          </execution-->
           <execution>
             <id>add-scala-sources</id>
             <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
-          </execution-->
+          </execution>
           <execution>
             <id>scala-compile</id>
             <phase>compile</phase>
@@ -158,16 +158,27 @@
         </executions>
       </plugin>
 
-      <!-- create test jar so other modules can reuse the math test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
+          <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
           <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+          <!-- create test jar so other modules can reuse the math test utility classes. -->
+          <execution>
+            <id>default-test-jar</id>
             <phase>package</phase>
             <goals>
               <goal>test-jar</goal>
             </goals>
+            <configuration>
+              <classifier>test_scala_${scala.compat.version}</classifier>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -246,52 +257,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>development</id>
-      <build>
-        <plugins>
-          <!-- delete files on mvn clean -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>../lib/</directory>
-                  <includes>
-                    <include>mahout-core_*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-
-          <!-- copy jars to lib/ -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copy</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <target>
-                    <copy file="target/mahout-core-${project.version}.jar"
-                          tofile="../lib/mahout-core-${project.version}.jar" />
-                  </target>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>

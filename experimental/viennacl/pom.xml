@@ -49,20 +49,6 @@
         </executions>
       </plugin>
 
-      <!-- create test jar so other modules can reuse the native test utility classes. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
@@ -116,6 +102,28 @@
             <configuration>
               <argLine>-Xmx4g</argLine>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- create test jar so other modules can reuse the native test utility classes. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+          <!-- create test jar so other modules can reuse the math test utility classes. -->
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -185,6 +193,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <!--  3rd-party -->
@@ -211,52 +220,5 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>development</id>
-      <build>
-        <plugins>
-          <!-- delete jars on claen in top directory, which is MAHOUT_HOME -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>../../lib</directory>
-                  <includes>
-                    <include>mahout-native-viennacl_*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-
-          <!-- copy jars to top directory, which is MAHOUT_HOME -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copy</id>
-                <phase>package</phase>
-                <configuration>
-                  <target>
-                    <copy file="target/mahout-native-viennacl-${project.version}.jar"
-                          tofile="../../lib/mahout-native-viennacl-${project.version}.jar" />
-                  </target>
-                </configuration>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>

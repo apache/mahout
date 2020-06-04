@@ -60,6 +60,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <!-- Third Party -->
@@ -77,7 +78,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
-      <type>test-jar</type>
+      <classifier>test_scala_${scala.compat.version}</classifier>
       <scope>test</scope>
     </dependency>
 
@@ -94,73 +95,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>development</id>
-      <build>
-        <plugins>
-          <!-- delete files on mvn clean -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>$project.build.directory}/lib</directory>
-                  <includes>
-                    <include>mahout-hdfs*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-                <fileset>
-                  <directory>../</directory>
-                  <includes>
-                    <include>mahout-hdfs*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-
-          <!-- copy jars to lib/ -->
-          <!-- copy jars to top directory, which is MAHOUT_HOME -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copy</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <target>
-                    <copy file="target/mahout-hdfs-${project.version}.jar"
-                          tofile="../../lib/mahout-hdfs-${project.version}.jar" />
-                  </target>
-                </configuration>
-              </execution>
-              <!--execution>
-                <id>copy-javadocs</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <target>
-                    <copy file="target/mahout-hdfs-${project.version}.jar"
-                          tofile="../../docs/mahout-hdfs-${project.version}-javadoc.jar" />
-                  </target>
-                </configuration>
-              </execution-->
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>

@@ -106,6 +106,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-integration</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <dependency>

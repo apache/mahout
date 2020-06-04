@@ -84,9 +84,23 @@
             </goals>
             <configuration>
               <systemProperties combine.children="append">
-                <mahout.home>${project.build.directory}</mahout.home>
+                <mahout.home>${project.build.testOutputDirectory}</mahout.home>
               </systemProperties>
               <argLine>-Xmx4g</argLine>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
             </configuration>
           </execution>
         </executions>
@@ -99,6 +113,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <dependency>
@@ -154,7 +169,7 @@
       <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
       <artifactId>mahout-core</artifactId>
       <version>14.1-SNAPSHOT</version>
-      <classifier>tests</classifier>
+      <classifier>test_scala_${scala.compat.version}</classifier>
       <scope>test</scope>
     </dependency>
 
@@ -169,52 +184,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>development</id>
-      <build>
-        <plugins>
-          <!-- remove jars from top directory on clean -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>../../../lib</directory>
-                  <includes>
-                    <include>mahout-flink*.jar</include>
-                  </includes>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-
-          <!-- copy jars to top directory, which is MAHOUT_HOME -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copy</id>
-                <phase>package</phase>
-                <configuration>
-                  <target>
-                    <copy file="target/mahout-flink-batch-${project.version}.jar"
-                          tofile="../../../lib/mahout-flink-batch-${project.version}.jar" />
-                  </target>
-                </configuration>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>

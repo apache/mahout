@@ -49,6 +49,20 @@
           </supplementalModels>
         </configuration>
       </plugin-->
+
+      <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
