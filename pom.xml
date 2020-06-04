@@ -153,7 +153,6 @@
   <modules>
     <module>core</module>
     <module>engine</module>
-    <module>community</module>
     <module>distribution</module>
     <!-- The javacpp stuff doesn't seem to work correctly on Macs -->
     <!--module>experimental</module-->
@@ -860,6 +859,15 @@
   </build>
 
   <profiles>
+    <!-- Enable the community supported modules -->
+    <!-- Beware ... build at own risk -->
+    <profile>
+      <id>with-community-modules</id>
+      <modules>
+        <module>community</module>
+      </modules>
+    </profile>
+
     <!-- Profile for some detailed source checks -->
     <profile>
       <id>sourcecheck</id>

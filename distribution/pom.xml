@@ -99,52 +99,59 @@
       <version>14.1-SNAPSHOT</version>
       <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
-
-    <!-- Community Engines -->
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-flink-batch</artifactId>
-      <version>14.1-SNAPSHOT</version>
-      <classifier>scala_${scala.compat.version}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-h2o</artifactId>
-      <version>14.1-SNAPSHOT</version>
-      <classifier>scala_${scala.compat.version}</classifier>
-    </dependency>
-
-    <!-- Mahout  MR -->
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-integration</artifactId>
-      <version>14.1-SNAPSHOT</version>
-      <classifier>scala_${scala.compat.version}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mr</artifactId>
-      <version>14.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mr-examples</artifactId>
-      <version>14.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mr</artifactId>
-      <version>14.1-SNAPSHOT</version>
-      <classifier>job</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mr-examples</artifactId>
-      <version>14.1-SNAPSHOT</version>
-      <classifier>job</classifier>
-    </dependency>
   </dependencies>
+
+  <profiles>
+    <!-- Pull in the community modules, if the profile is enabled -->
+    <profile>
+      <id>with-community-modules</id>
+      <dependencies>
+        <!-- Community Engines -->
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-flink-batch</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>scala_${scala.compat.version}</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-h2o</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>scala_${scala.compat.version}</classifier>
+        </dependency>
+
+        <!-- Mahout  MR -->
+
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-integration</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>scala_${scala.compat.version}</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mr</artifactId>
+          <version>14.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mr-examples</artifactId>
+          <version>14.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mr</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>job</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mr-examples</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>job</classifier>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
 </project>
