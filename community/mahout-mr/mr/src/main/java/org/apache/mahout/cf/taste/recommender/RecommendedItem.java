@@ -26,6 +26,7 @@ package org.apache.mahout.cf.taste.recommender;
 public interface RecommendedItem {
   
   /** @return the recommended item ID */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   long getItemID();
   
   /**

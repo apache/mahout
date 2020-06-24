@@ -40,6 +40,7 @@ package org.apache.mahout.cf.taste.hadoop;
 public final class ToItemPrefsMapper extends ToEntityPrefsMapper {
 
   public ToItemPrefsMapper() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-362
     super(false);
   }
   

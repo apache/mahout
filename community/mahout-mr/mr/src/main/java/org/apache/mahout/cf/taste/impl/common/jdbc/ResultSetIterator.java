@@ -32,8 +32,10 @@ public abstract class ResultSetIterator<T> extends ForwardingIterator<T> {
   private final EachRowIterator rowDelegate;
 
   protected ResultSetIterator(DataSource dataSource, String sqlQuery) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this.rowDelegate = new EachRowIterator(dataSource, sqlQuery);
     delegate = Iterators.transform(rowDelegate,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       new Function<ResultSet, T>() {
         @Override
         public T apply(ResultSet from) {
@@ -56,6 +58,7 @@ public abstract class ResultSetIterator<T> extends ForwardingIterator<T> {
   public void skip(int n) {
     if (n >= 1) {
       try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
         rowDelegate.skip(n);
       } catch (SQLException sqle) {
         throw new IllegalStateException(sqle);

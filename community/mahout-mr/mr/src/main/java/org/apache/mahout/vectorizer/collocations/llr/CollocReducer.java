@@ -37,6 +37,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
   public static final int DEFAULT_MIN_SUPPORT = 2;
 
   public enum Skipped {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     LESS_THAN_MIN_SUPPORT, MALFORMED_KEY_TUPLE, MALFORMED_TUPLE, MALFORMED_TYPES, MALFORMED_UNIGRAM
   }
 
@@ -73,6 +74,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
 
     if (keyType == Gram.Type.UNIGRAM) {
       // sum frequencies for unigrams.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       processUnigram(values.iterator(), context);
     } else if (keyType == Gram.Type.HEAD || keyType == Gram.Type.TAIL) {
       // sum frequencies for subgrams, ngram and collect for each ngram.
@@ -110,6 +112,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
     }
 
     if (freq < minSupport) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
       context.getCounter(Skipped.LESS_THAN_MIN_SUPPORT).increment(1);
       return;
     }
@@ -132,6 +135,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
   protected void processSubgram(Iterator<Gram> values, Context context)
     throws IOException, InterruptedException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     Gram subgram = null;
     Gram currentNgram = null;
 
@@ -151,6 +155,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
         // create the new ngram.
         if (currentNgram != null) {
           if (currentNgram.getFrequency() < minSupport) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
             context.getCounter(Skipped.LESS_THAN_MIN_SUPPORT).increment(1);
           } else {
             context.write(currentNgram, subgram);
@@ -166,6 +171,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
     // collect last ngram.
     if (currentNgram != null) {
       if (currentNgram.getFrequency() < minSupport) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
         context.getCounter(Skipped.LESS_THAN_MIN_SUPPORT).increment(1);
         return;
       }

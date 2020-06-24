@@ -30,6 +30,7 @@ public class VectorSumReducer
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context ctx)
     throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     ctx.write(key, new VectorWritable(Vectors.sum(values.iterator())));
   }
 }

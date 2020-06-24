@@ -44,11 +44,13 @@ public final class VectorHelperTest extends MahoutTestCase {
   @Override
   @Before
   public void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1349
     super.setUp();
     conf = getConfiguration();
 
     inputPathOne = getTestTempFilePath("documents/docs-one.file");
     FileSystem fs = FileSystem.get(inputPathOne.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer =
              new SequenceFile.Writer(fs, conf, inputPathOne, Text.class, IntWritable.class)) {
       Random rd = RandomUtils.getRandom();
@@ -72,6 +74,7 @@ public final class VectorHelperTest extends MahoutTestCase {
 
   @Test
   public void testJsonFormatting() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-897
     Vector v = new SequentialAccessSparseVector(10);
     v.set(2, 3.1);
     v.set(4, 1.0);
@@ -87,6 +90,7 @@ public final class VectorHelperTest extends MahoutTestCase {
         VectorHelper.vectorToJson(v, dictionary, 3, true));
     assertEquals("unsorted form incorrect: ", "{two:3.1,four:1.0}",
         VectorHelper.vectorToJson(v, dictionary, 2, false));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1064
     assertEquals("sorted json form incorrect: ", "{nine:12.2,six:8.1,two:3.1,four:1.0}",
         VectorHelper.vectorToJson(v, dictionary, 4, true));
     assertEquals("sorted json form incorrect: ", "{nine:12.2,six:8.1,two:3.1,four:1.0,seven:-100.0}",
@@ -99,6 +103,7 @@ public final class VectorHelperTest extends MahoutTestCase {
 
   @Test
   public void testTopEntries() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1232
     Vector v = new SequentialAccessSparseVector(10);
     v.set(2, 3.1);
     v.set(4, 1.0);
@@ -113,11 +118,13 @@ public final class VectorHelperTest extends MahoutTestCase {
     // check if sizeOfNonZeroElementsInVector < maxEntries
     assertTrue(VectorHelper.topEntries(v, 9).size() < 9);
     // check if sizeOfNonZeroElementsInVector > maxEntries
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     assertTrue(VectorHelper.topEntries(v, 5).size() < v.getNumNonZeroElements());
   }
 
   @Test
   public void testTopEntriesWhenAllZeros() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1232
     Vector v = new SequentialAccessSparseVector(10);
     v.set(2, 0.0);
     v.set(4, 0.0);
@@ -133,6 +140,7 @@ public final class VectorHelperTest extends MahoutTestCase {
   @Test
   public void testLoadTermDictionary() throws Exception {
     // With indices higher than dictionary size
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1349
     VectorHelper.loadTermDictionary(conf, inputPathOne.toString());
     // With dictionary size higher than indices
     VectorHelper.loadTermDictionary(conf, inputPathTwo.toString());

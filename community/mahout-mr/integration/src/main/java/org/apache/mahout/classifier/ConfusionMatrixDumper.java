@@ -53,6 +53,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
 
   // HTML wrapper - default CSS
   private static final String HEADER = "<html>"
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
                                        + "<head>\n"
                                        + "<title>TITLE</title>\n"
                                        + "</head>"
@@ -64,6 +65,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
                                        + "}\n"
                                        + "th.normalHeader\n"
                                        + "{\n"
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
                                        + "border:1px solid black;border-collapse:collapse;text-align:center;"
                                        + "background-color:white\n"
                                        + "}\n"
@@ -144,6 +146,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
     addOption(DefaultOptionCreator.overwriteOption().create());
     addFlag("html", null, "Create complete HTML page");
     addFlag("text", null, "Dump simple text");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -172,6 +175,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
     readSeqFile(inputPath, key, mw);
     Matrix m = mw.get();
     ConfusionMatrix cm = new ConfusionMatrix(m);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
     out.println(String.format("%-40s", "Label") + TAB_SEPARATOR + String.format("%-10s", "Total")
                 + TAB_SEPARATOR + String.format("%-10s", "Correct") + TAB_SEPARATOR
                 + String.format("%-6s", "%") + TAB_SEPARATOR);
@@ -215,6 +219,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
   }
   
   private static List<String> stripDefault(ConfusionMatrix cm) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
     List<String> stripped = Lists.newArrayList(cm.getLabels().iterator());
     String defaultLabel = cm.getDefaultLabel();
     int unclassified = cm.getTotal(defaultLabel);
@@ -238,11 +243,13 @@ public final class ConfusionMatrixDumper extends AbstractJob {
   private static PrintStream getPrintStream(String outputFilename) throws IOException {
     if (outputFilename != null) {
       File outputFile = new File(outputFilename);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
       if (outputFile.exists()) {
         outputFile.delete();
       }
       outputFile.createNewFile();
       OutputStream os = new FileOutputStream(outputFile);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
       return new PrintStream(os, false, Charsets.UTF_8.displayName());
     } else {
       return System.out;
@@ -252,6 +259,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
   private static int getLabelTotal(ConfusionMatrix cm, String rowLabel) {
     Iterator<String> iter = cm.getLabels().iterator();
     int count = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
     while (iter.hasNext()) {
       count += cm.getCount(rowLabel, iter.next());
     }
@@ -274,6 +282,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
     out.println("<td>Label</td><td>Total</td><td>Correct</td><td>%</td>");
     out.println("</tr>");
     List<String> labels = stripDefault(cm);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
     for (String label : labels) {
       printSummaryRow(cm, out, label);
     }
@@ -285,6 +294,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
     int correct = cm.getCorrect(label);
     double accuracy = cm.getAccuracy(label);
     int count = getCount(cm, label);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
     format("<td class='%s'>%s</td><td>%d</td><td>%d</td><td>%d</td>", out, CSS_CELL, label, count, correct,
       (int) Math.round(accuracy));
     out.println("</tr>");
@@ -311,6 +321,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
    */
   private static void printGrayRows(ConfusionMatrix cm, PrintStream out) {
     List<String> labels = stripDefault(cm);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
     for (String label : labels) {
       printGrayRow(cm, out, labels, label);
     }
@@ -358,6 +369,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
   
   private static void printCountsRows(ConfusionMatrix cm, PrintStream out) {
     List<String> labels = stripDefault(cm);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
     for (String label : labels) {
       printCountsRow(cm, out, labels, label);
     }
@@ -386,6 +398,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
     int longest = getLongestHeader(labels);
     if (vertical) {
       // do vertical - rotation is a bitch
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
       out.format("<tr class='%s' style='height:%dem'><th>&nbsp;</th>%n", CSS_TALL_HEADER, longest / 2);
       for (String label : labels) {
         out.format("<th><div class='%s'>%s</div></th>", CSS_VERTICAL, label);
@@ -403,6 +416,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
   
   private static int getLongestHeader(Iterable<String> labels) {
     int max = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-784
     for (String label : labels) {
       max = Math.max(label.length(), max);
     }

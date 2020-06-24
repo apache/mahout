@@ -47,6 +47,7 @@ public class TextParagraphSplittingJob extends AbstractJob {
                          SequenceFileOutputFormat.class);
     job.setNumReduceTasks(0);
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     return succeeded ? 0 : -1;
   }
 

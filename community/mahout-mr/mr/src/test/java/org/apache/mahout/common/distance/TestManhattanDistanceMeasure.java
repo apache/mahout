@@ -21,6 +21,7 @@ public final class TestManhattanDistanceMeasure extends DefaultDistanceMeasureTe
 
   @Override
   public DistanceMeasure distanceMeasureFactory() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-36
     return new ManhattanDistanceMeasure();
   }
 }

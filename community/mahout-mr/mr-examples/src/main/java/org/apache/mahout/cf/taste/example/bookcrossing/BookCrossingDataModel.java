@@ -59,6 +59,7 @@ public final class BookCrossingDataModel extends FileDataModel {
     }
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")), "taste.bookcrossing.txt");
     resultFile.delete();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     Writer writer = null;
     try {
       writer = new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8);
@@ -78,6 +79,7 @@ public final class BookCrossingDataModel extends FileDataModel {
           // drop rating
           convertedLine = convertedLine.substring(0, convertedLine.lastIndexOf(','));
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
         writer.write(convertedLine);
         writer.write('\n');
       }
@@ -86,6 +88,7 @@ public final class BookCrossingDataModel extends FileDataModel {
       resultFile.delete();
       throw ioe;
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
     return resultFile;

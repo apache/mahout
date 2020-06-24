@@ -41,6 +41,7 @@ public class DisplayCanopy extends DisplayClustering {
 
   DisplayCanopy() {
     initialize();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     this.setTitle("Canopy Clusters (>" + (int) (significance * 100) + "% of population)");
   }
 
@@ -52,8 +53,10 @@ public class DisplayCanopy extends DisplayClustering {
 
   protected static void plotClusters(Graphics2D g2) {
     int cx = CLUSTERS.size() - 1;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     for (List<Cluster> clusters : CLUSTERS) {
       for (Cluster cluster : clusters) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-414
         if (isSignificant(cluster)) {
           g2.setStroke(new BasicStroke(1));
           g2.setColor(Color.BLUE);
@@ -76,11 +79,14 @@ public class DisplayCanopy extends DisplayClustering {
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, samples);
     HadoopUtil.delete(conf, output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-174
     RandomUtils.useTestSeed();
     generateSamples();
     writeSampleData(samples);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
     CanopyDriver.buildClusters(conf, samples, output, new ManhattanDistanceMeasure(), T1, T2, 0, true);
     loadClustersWritable(output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
 
     new DisplayCanopy();
   }

@@ -30,6 +30,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
     this.similarity = similarity;
   }
   
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   long getUserID() {
     return userID;
   }
@@ -40,6 +41,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
   
   @Override
   public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     return (int) userID ^ RandomUtils.hashDouble(similarity);
   }
   
@@ -49,6 +51,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
       return false;
     }
     SimilarUser other = (SimilarUser) o;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     return userID == other.getUserID() && similarity == other.getSimilarity();
   }
   
@@ -61,6 +64,8 @@ public final class SimilarUser implements Comparable<SimilarUser> {
   @Override
   public int compareTo(SimilarUser other) {
     double otherSimilarity = other.getSimilarity();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-882
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-881
     if (similarity > otherSimilarity) {
       return -1;
     }

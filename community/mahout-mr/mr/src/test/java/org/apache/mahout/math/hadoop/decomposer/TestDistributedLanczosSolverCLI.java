@@ -45,8 +45,10 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
   public void testDistributedLanczosSolverCLI() throws Exception {
     Path testData = getTestTempDirPath("testdata");
     DistributedRowMatrix corpus =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
         new TestDistributedRowMatrix().randomDenseHierarchicalDistributedMatrix(10, 9, false,
             testData.toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     corpus.setConf(getConfiguration());
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
@@ -55,6 +57,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "-i", new Path(testData, "distMatrix").toString(),
         "-o", output.toString(),
         "--tempDir", tmp.toString(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
         "--numRows", "10",
         "--numCols", "9",
         "--rank", "6",
@@ -69,6 +72,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "-i", new Path(testData, "distMatrix").toString(),
         "-o", output.toString(),
         "--tempDir", tmp.toString(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
         "--numRows", "10",
         "--numCols", "9",
         "--rank", "7",
@@ -76,17 +80,20 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "--workingDir", workingDir.toString()
     };
     ToolRunner.run(getConfiguration(), new DistributedLanczosSolver().new DistributedLanczosSolverJob(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     Path rawEigenvectors = new Path(output, DistributedLanczosSolver.RAW_EIGENVECTORS);
     Matrix eigenVectors = new DenseMatrix(7, corpus.numCols());
     Configuration conf = getConfiguration();
 
     int i = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(rawEigenvectors, conf)) {
       Vector v = value.get();
       eigenVectors.assignRow(i, v);
       i++;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
     assertEquals("number of eigenvectors", 7, i);
   }
 
@@ -95,6 +102,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     Path testData = getTestTempDirPath("testdata");
     DistributedRowMatrix corpus = new TestDistributedRowMatrix()
         .randomDenseHierarchicalDistributedMatrix(10, 9, false, testData.toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     corpus.setConf(getConfiguration());
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
@@ -102,17 +110,21 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "-i", new Path(testData, "distMatrix").toString(),
         "-o", output.toString(),
         "--tempDir", tmp.toString(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
         "--numRows", "10",
         "--numCols", "9",
         "--rank", "6",
         "--symmetric", "false",
         "--cleansvd", "true"
     };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     ToolRunner.run(getConfiguration(), new DistributedLanczosSolver().new DistributedLanczosSolverJob(), args);
   
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors = new DenseMatrix(6, corpus.numCols());
     Collection<Double> eigenvalues = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
 
     output = getTestTempDirPath("output2");
     tmp = getTestTempDirPath("tmp2");
@@ -120,29 +132,34 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "-i", new Path(testData, "distMatrix").toString(),
         "-o", output.toString(),
         "--tempDir", tmp.toString(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
         "--numRows", "10",
         "--numCols", "9",
         "--rank", "7",
         "--symmetric", "false",
         "--cleansvd", "true"
     };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     ToolRunner.run(getConfiguration(), new DistributedLanczosSolver().new DistributedLanczosSolverJob(), args);
     Path cleanEigenvectors2 = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors2 = new DenseMatrix(7, corpus.numCols());
     Configuration conf = getConfiguration();
     Collection<Double> newEigenValues = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
 
     int i = 0;
     for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(cleanEigenvectors, conf)) {
       NamedVector v = (NamedVector) value.get();
       eigenVectors.assignRow(i, v);
       log.info(v.getName());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (EigenVector.getCosAngleError(v.getName()) < 1.0e-3) {
         eigenvalues.add(EigenVector.getEigenValue(v.getName()));
       }
       i++;
     }
     assertEquals("number of clean eigenvectors", 3, i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
 
     i = 0;
     for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(cleanEigenvectors2, conf)) {
@@ -153,8 +170,10 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       i++;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Integer> oldEigensFound = Lists.newArrayList();
     for (int row = 0; row < eigenVectors.numRows(); row++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       Vector oldEigen = eigenVectors.viewRow(row);
       if (oldEigen == null) {
         break;
@@ -168,8 +187,11 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       }
     }
     assertEquals("the number of new eigenvectors", 5, i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Double> oldEigenValuesNotFound = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (double d : eigenvalues) {
       boolean found = false;
       for (double newD : newEigenValues) {
@@ -182,8 +204,11 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       }
     }
     assertEquals("number of old eigenvalues not found: "
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-683
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-682
                  + Arrays.toString(oldEigenValuesNotFound.toArray(new Double[oldEigenValuesNotFound.size()])),
                 0, oldEigenValuesNotFound.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
     assertEquals("did not find enough old eigenvectors", 3, oldEigensFound.size());
   }
 

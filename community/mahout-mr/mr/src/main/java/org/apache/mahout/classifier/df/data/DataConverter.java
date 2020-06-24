@@ -44,6 +44,7 @@ public class DataConverter {
     String[] tokens = COMMA_SPACE.split(string);
     Preconditions.checkArgument(tokens.length == nball,
         "Wrong number of attributes in the string: " + tokens.length + ". Must be " + nball);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
 
     int nbattrs = dataset.nbAttributes();
     DenseVector vector = new DenseVector(nbattrs);
@@ -60,6 +61,7 @@ public class DataConverter {
 
         if (dataset.isNumerical(aId)) {
           vector.set(aId++, Double.parseDouble(token));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         } else { // CATEGORICAL
           vector.set(aId, dataset.valueOf(aId, token));
           aId++;

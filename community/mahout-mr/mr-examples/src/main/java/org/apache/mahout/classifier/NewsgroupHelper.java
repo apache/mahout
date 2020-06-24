@@ -47,6 +47,8 @@ import java.util.Random;
 public final class NewsgroupHelper {
   
   private static final SimpleDateFormat[] DATE_FORMATS = {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-857
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     new SimpleDateFormat("", Locale.ENGLISH),
     new SimpleDateFormat("MMM-yyyy", Locale.ENGLISH),
     new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH)
@@ -80,12 +82,15 @@ public final class NewsgroupHelper {
     long date = (long) (1000 * (DATE_REFERENCE + actual * MONTH + 1 * WEEK * rand.nextDouble()));
     Multiset<String> words = ConcurrentHashMultiset.create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (BufferedReader reader = Files.newReader(file, Charsets.UTF_8)) {
       String line = reader.readLine();
       Reader dateString = new StringReader(DATE_FORMATS[leakType % 3].format(new Date(date)));
       countWords(analyzer, words, dateString, overallCounts);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       while (line != null && !line.isEmpty()) {
         boolean countHeader = (
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
                 line.startsWith("From:") || line.startsWith("Subject:")
                         || line.startsWith("Keywords:") || line.startsWith("Summary:")) && leakType < 6;
         do {
@@ -114,6 +119,7 @@ public final class NewsgroupHelper {
                                  Collection<String> words,
                                  Reader in,
                                  Multiset<String> overallCounts) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     TokenStream ts = analyzer.tokenStream("text", in);
     ts.addAttribute(CharTermAttribute.class);
     ts.reset();
@@ -123,6 +129,7 @@ public final class NewsgroupHelper {
     }
     overallCounts.addAll(words);
     ts.end();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     Closeables.close(ts, true);
   }
 }

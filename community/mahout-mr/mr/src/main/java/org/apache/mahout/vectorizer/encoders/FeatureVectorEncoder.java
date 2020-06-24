@@ -257,6 +257,7 @@ public abstract class FeatureVectorEncoder {
       }
       Set<Integer> trace = traceDictionary.get(key);
       if (trace == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
         trace = Sets.newHashSet(n);
         traceDictionary.put(key, trace);
       } else {

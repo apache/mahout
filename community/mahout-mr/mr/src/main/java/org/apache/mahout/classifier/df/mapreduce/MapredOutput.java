@@ -90,6 +90,7 @@ public class MapredOutput implements Writable, Cloneable {
 
   @Override
   public boolean equals(Object obj) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (this == obj) {
       return true;
     }
@@ -106,6 +107,7 @@ public class MapredOutput implements Writable, Cloneable {
   @Override
   public int hashCode() {
     int hashCode = tree == null ? 1 : tree.hashCode();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     for (int prediction : predictions) {
       hashCode = 31 * hashCode + prediction;
     }

@@ -50,9 +50,11 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
@@ -63,6 +65,7 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
   }
@@ -92,6 +95,7 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
     Path tmpPath = getTestTempDirPath();
     Path outputPath = new Path(tmpPath, "output");
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     List<String> argList = Lists.newLinkedList();;
     argList.add("-i");
     argList.add(inputPath.toString());
@@ -109,11 +113,13 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
     String[] args = argList.toArray(new String[argList.size()]);
 
     ToolRunner.run(getConfiguration(), new EncodedVectorsFromSequenceFiles(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<>(outputPath, PathType.LIST, PathFilters.partFilter(), null, true, conf);
     int seen = 0;
     while (iter.hasNext()) {
       Pair<Text, VectorWritable> next = iter.next();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (sequential && !named) {
         assertTrue(next.getSecond().get() instanceof SequentialAccessSparseVector);
       } else if (named) {

@@ -64,6 +64,7 @@ public final class Track1Runner {
     log.info("Loaded model in {}s", (end - start) / 1000);
     start = end;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Track1Callable> callables = new ArrayList<>();
     for (Pair<PreferenceArray,long[]> tests : new DataFileIterable(KDDCupDataModel.getTestFile(dataFileDirectory))) {
       PreferenceArray userTest = tests.getFirst();
@@ -80,6 +81,7 @@ public final class Track1Runner {
     log.info("Ran recommendations in {}s", (end - start) / 1000);
     start = end;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(args[1])))){
       for (Future<byte[]> result : results) {
         for (byte estimate : result.get()) {

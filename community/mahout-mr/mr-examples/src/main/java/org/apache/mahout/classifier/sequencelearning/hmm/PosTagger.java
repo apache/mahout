@@ -113,6 +113,7 @@ public final class PosTagger {
    */
   private static void readFromURL(String url, boolean assignIDs) throws IOException {
     // initialize the data structure
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     hiddenSequences = new LinkedList<>();
     observedSequences = new LinkedList<>();
     readLines = 0;
@@ -121,6 +122,7 @@ public final class PosTagger {
     List<Integer> observedSequence = new LinkedList<>();
     List<Integer> hiddenSequence = new LinkedList<>();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     for (String line :Resources.readLines(new URL(url), Charsets.UTF_8)) {
       if (line.isEmpty()) {
         // new sentence starts
@@ -154,6 +156,7 @@ public final class PosTagger {
       Integer wordID = wordIDs.get(tags[0]);
       Integer tagID = tagIDs.get(tags[1]);
       // now construct the current sequence
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       if (wordID == null) {
         observedSequence.add(0);
       } else {
@@ -182,6 +185,7 @@ public final class PosTagger {
   }
 
   private static void trainModel(String trainingURL) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     tagIDs = new HashMap<>(44); // we expect 44 distinct tags
     wordIDs = new HashMap<>(19122); // we expect 19122
     // distinct words

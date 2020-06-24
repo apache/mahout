@@ -53,6 +53,7 @@ public final class YtYJob {
 
   public static class YtYMapper extends
     Mapper<Writable, VectorWritable, IntWritable, VectorWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1280
 
     private int kp;
     private Omega omega;
@@ -114,6 +115,7 @@ public final class YtYJob {
          * are creating some short-lived references) here is that we obviously
          * do two times more iterations then necessary if y row is pretty dense.
          */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
         for (Vector.Element eli : yRow.nonZeroes()) {
           int i = eli.index();
           for (Vector.Element elj : yRow.nonZeroes()) {
@@ -131,6 +133,7 @@ public final class YtYJob {
     protected void cleanup(Context context) throws IOException,
       InterruptedException {
       context.write(new IntWritable(context.getTaskAttemptID().getTaskID()
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1280
                                       .getId()),
                     new VectorWritable(new DenseVector(mYtY.getData())));
     }

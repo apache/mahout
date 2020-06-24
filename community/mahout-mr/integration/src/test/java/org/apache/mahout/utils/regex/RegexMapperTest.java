@@ -46,6 +46,7 @@ public final class RegexMapperTest extends MahoutTestCase {
       LongWritable key = new LongWritable(i);
       mapper.map(key, new Text(testStr), mapContext);
       List<Text> value = mapWriter.getValue(key);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       if (!RegexUtilsTest.GOLD[i].isEmpty()) {
         assertEquals(1, value.size());
         assertEquals(RegexUtilsTest.GOLD[i], value.get(0).toString());
@@ -56,6 +57,7 @@ public final class RegexMapperTest extends MahoutTestCase {
   @Test
   public void testGroups() throws Exception {
     RegexMapper mapper = new RegexMapper();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     conf.set(RegexMapper.REGEX, "(\\d+)\\.(\\d+)\\.(\\d+)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
@@ -72,6 +74,7 @@ public final class RegexMapperTest extends MahoutTestCase {
       mapper.map(key, new Text(testStr), mapContext);
       List<Text> value = mapWriter.getValue(key);
       assertEquals(1, value.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       assertEquals("127 0", value.get(0).toString());
     }
   }
@@ -79,15 +82,20 @@ public final class RegexMapperTest extends MahoutTestCase {
   @Test
   public void testFPGFormatter() throws Exception {
     RegexMapper mapper = new RegexMapper();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     conf.set(RegexMapper.REGEX, "(?<=(\\?|&)q=).*?(?=&|$)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
     conf.set(RegexMapper.FORMATTER_CLASS, FPGFormatter.class.getName());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<>();
     Mapper<LongWritable, Text, LongWritable, Text>.Context mapContext = DummyRecordWriter
             .build(mapper, conf, mapWriter);
 
     mapper.setup(mapContext);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     RegexFormatter formatter = new FPGFormatter();
     for (int i = 0; i < RegexUtilsTest.TEST_STRS.length; i++) {
       String testStr = RegexUtilsTest.TEST_STRS[i];

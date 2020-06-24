@@ -59,8 +59,10 @@ public final class UnitVectorizerJob {
     FileOutputFormat.setOutputPath(job, output);
 
     job.setJarByClass(UnitVectorizerJob.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
 
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }
@@ -72,6 +74,7 @@ public final class UnitVectorizerJob {
     @Override
     protected void map(IntWritable row, VectorWritable vector, Context context) 
       throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       context.write(row, new VectorWritable(vector.get().normalize(2)));
     }
 

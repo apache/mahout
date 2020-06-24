@@ -79,9 +79,11 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
 
   public GenericItemBasedRecommender(DataModel dataModel,
                                      ItemSimilarity similarity,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-570
                                      CandidateItemsStrategy candidateItemsStrategy,
                                      MostSimilarItemsCandidateItemsStrategy mostSimilarItemsCandidateItemsStrategy) {
     super(dataModel, candidateItemsStrategy);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
     Preconditions.checkArgument(mostSimilarItemsCandidateItemsStrategy != null,
@@ -96,8 +98,10 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     });
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(similarity);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1057
     refreshHelper.addDependency(candidateItemsStrategy);
     refreshHelper.addDependency(mostSimilarItemsCandidateItemsStrategy);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     capper = buildCapper();
   }
 
@@ -105,6 +109,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     this(dataModel,
          similarity,
          AbstractRecommender.getDefaultCandidateItemsStrategy(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-570
          getDefaultMostSimilarItemsCandidateItemsStrategy());
   }
 
@@ -113,14 +118,18 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   }
 
   public ItemSimilarity getSimilarity() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-115
     return similarity;
   }
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
     if (preferencesFromUser.length() == 0) {
@@ -128,18 +137,21 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     }
 
     FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser, includeKnownItems);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
 
     TopItems.Estimator<Long> estimator = new Estimator(userID, preferencesFromUser);
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
   
   @Override
   public float estimatePreference(long userID, long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
     Float actualPref = getPreferenceForItem(preferencesFromUser, itemID);
     if (actualPref != null) {
@@ -165,6 +177,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public List<RecommendedItem> mostSimilarItems(long itemID, int howMany,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
                                                 Rescorer<LongPair> rescorer) throws TasteException {
     TopItems.Estimator<Long> estimator = new MostSimilarEstimator(itemID, similarity, rescorer);
     return doMostSimilarItems(new long[] {itemID}, howMany, estimator);
@@ -172,6 +185,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-558
     TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, null,
         EXCLUDE_ITEM_IF_NOT_SIMILAR_TO_ALL_BY_DEFAULT);
     return doMostSimilarItems(itemIDs, howMany, estimator);
@@ -179,6 +193,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
                                                 Rescorer<LongPair> rescorer) throws TasteException {
     TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, rescorer,
         EXCLUDE_ITEM_IF_NOT_SIMILAR_TO_ALL_BY_DEFAULT);
@@ -206,12 +221,14 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   @Override
   public List<RecommendedItem> recommendedBecause(long userID, long itemID, int howMany) throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     DataModel model = getDataModel();
     TopItems.Estimator<Long> estimator = new RecommendedBecauseEstimator(userID, itemID);
 
     PreferenceArray prefs = model.getPreferencesFromUser(userID);
     int size = prefs.length();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     FastIDSet allUserItems = new FastIDSet(size);
     for (int i = 0; i < size; i++) {
       allUserItems.add(prefs.getItemID(i));
@@ -224,11 +241,13 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   private List<RecommendedItem> doMostSimilarItems(long[] itemIDs,
                                                    int howMany,
                                                    TopItems.Estimator<Long> estimator) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-570
     FastIDSet possibleItemIDs = mostSimilarItemsCandidateItemsStrategy.getCandidateItems(itemIDs, getDataModel());
     return TopItems.getTopItems(howMany, possibleItemIDs.iterator(), null, estimator);
   }
   
   protected float doEstimatePreference(long userID, PreferenceArray preferencesFromUser, long itemID)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     throws TasteException {
     double preference = 0.0;
     double totalSimilarity = 0.0;
@@ -248,6 +267,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     // The reason is that in this case the estimate is, simply, the user's rating for one item
     // that happened to have a defined similarity. The similarity score doesn't matter, and that
     // seems like a bad situation.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     if (count <= 1) {
       return Float.NaN;
     }
@@ -269,6 +289,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   }
 
   private EstimatedPreferenceCapper buildCapper() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     DataModel dataModel = getDataModel();
     if (Float.isNaN(dataModel.getMinPreference()) && Float.isNaN(dataModel.getMaxPreference())) {
       return null;
@@ -307,6 +328,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     
     private Estimator(long userID, PreferenceArray preferencesFromUser) {
       this.userID = userID;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
       this.preferencesFromUser = preferencesFromUser;
     }
     
@@ -328,6 +350,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
       this.toItemIDs = toItemIDs;
       this.similarity = similarity;
       this.rescorer = rescorer;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-558
       this.excludeItemIfNotSimilarToAll = excludeItemIfNotSimilarToAll;
     }
     
@@ -345,6 +368,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
         if (rescorer != null) {
           estimate = rescorer.rescore(pair, estimate);
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-558
         if (excludeItemIfNotSimilarToAll || !Double.isNaN(estimate)) {
           average.addDatum(estimate);
         }

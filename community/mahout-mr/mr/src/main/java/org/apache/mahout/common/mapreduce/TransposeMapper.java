@@ -33,12 +33,14 @@ public class TransposeMapper extends Mapper<IntWritable,VectorWritable,IntWritab
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
     newNumCols = ctx.getConfiguration().getInt(NEW_NUM_COLS_PARAM, Integer.MAX_VALUE);
   }
 
   @Override
   protected void map(IntWritable r, VectorWritable v, Context ctx) throws IOException, InterruptedException {
     int row = r.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element e : v.get().nonZeroes()) {
       RandomAccessSparseVector tmp = new RandomAccessSparseVector(newNumCols, 1);
       tmp.setQuick(row, e.get());

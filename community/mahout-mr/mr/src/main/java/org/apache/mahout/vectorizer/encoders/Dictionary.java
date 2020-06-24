@@ -37,6 +37,8 @@ public class Dictionary {
 
   public List<String> values() {
     // order of keySet is guaranteed to be insertion order
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1906
     return new ArrayList<>(dict.keySet());
   }
 

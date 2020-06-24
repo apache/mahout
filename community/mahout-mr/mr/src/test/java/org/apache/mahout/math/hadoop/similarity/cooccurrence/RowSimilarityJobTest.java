@@ -75,6 +75,7 @@ public class RowSimilarityJobTest extends MahoutTestCase {
         "--tempDir", tmpDir.getAbsolutePath() });
 
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     OpenIntIntHashMap observationsPerColumn =
         Vectors.readAsIntMap(new Path(tmpDir.getAbsolutePath(), "observationsPerColumn.bin"), conf);
     assertEquals(4, observationsPerColumn.size());
@@ -193,7 +194,12 @@ public class RowSimilarityJobTest extends MahoutTestCase {
   public void testVectorDimensions() throws Exception {
 
     File inputFile = getTestTempFile("rows");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-979
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     Path inputPath = new Path(inputFile.getAbsolutePath());
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);

@@ -119,6 +119,7 @@ public final class ABtJob {
           aCols[i].setQuick(aRowCount, vec.getQuick(i));
         }
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
         for (Vector.Element vecEl : vec.nonZeroes()) {
           int i = vecEl.index();
           extendAColIfNeeded(i, aRowCount + 1);
@@ -131,6 +132,8 @@ public final class ABtJob {
     private void extendAColIfNeeded(int col, int rowCount) {
       if (aCols[col] == null) {
         aCols[col] =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
           new SequentialAccessSparseVector(rowCount < 10000 ? 10000 : rowCount,
                                            1);
       } else if (aCols[col].size() < rowCount) {
@@ -159,6 +162,7 @@ public final class ABtJob {
             continue;
           }
           int j = -1;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
           for (Vector.Element aEl : aCol.nonZeroes()) {
             j = aEl.index();
 
@@ -178,6 +182,8 @@ public final class ABtJob {
         // this happens in sparse matrices when last rows are all zeros
         // and is subsequently causing shorter Q matrix row count which we
         // probably don't want to repair there but rather here.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
         Vector yDummy = new SequentialAccessSparseVector(kp);
         // outValue.set(yDummy);
         for (lastRowIndex += 1; lastRowIndex < aRowCount; lastRowIndex++) {
@@ -213,6 +219,7 @@ public final class ABtJob {
       if (distributedBt) {
 
         Path[] btFiles = HadoopUtil.getCachedFiles(context.getConfiguration());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
 
         // DEBUG: stdout
         //System.out.printf("list of files: " + btFiles);
@@ -226,6 +233,7 @@ public final class ABtJob {
         }
 
         btInput =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           new SequenceFileDirIterator<>(new Path(btLocalPath.toString()),
                                                                    PathType.LIST,
                                                                    null,
@@ -236,6 +244,7 @@ public final class ABtJob {
       } else {
 
         btInput =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           new SequenceFileDirIterator<>(btPath, PathType.GLOB, null, null, true, context.getConfiguration());
       }
       // TODO: how do i release all that stuff??
@@ -282,6 +291,8 @@ public final class ABtJob {
     // completely and bypass MultipleOutputs entirely.
 
     private static final NumberFormat NUMBER_FORMAT =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
       NumberFormat.getInstance();
     static {
       NUMBER_FORMAT.setMinimumIntegerDigits(5);
@@ -361,6 +372,8 @@ public final class ABtJob {
       String uniqueFileName = FileOutputFormat.getUniqueFile(context, name, "");
       uniqueFileName = uniqueFileName.replaceFirst("-r-", "-m-");
       uniqueFileName =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
         uniqueFileName.replaceFirst("\\d+$",
                                     Matcher.quoteReplacement(NUMBER_FORMAT.format(spw.getTaskId())));
       return new Path(FileOutputFormat.getWorkOutputPath(context),
@@ -378,6 +391,7 @@ public final class ABtJob {
       throws IOException, InterruptedException {
       Path outputPath = getSplitFilePath(name, spw, ctx);
       final SequenceFile.Writer w =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
         SequenceFile.createWriter(FileSystem.get(outputPath.toUri(), ctx.getConfiguration()),
                                   ctx.getConfiguration(),
                                   outputPath,
@@ -411,6 +425,8 @@ public final class ABtJob {
                          int numReduceTasks,
                          boolean broadcastBInput)
     throws ClassNotFoundException, InterruptedException, IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
 
     JobConf oldApiJob = new JobConf(conf);
 
@@ -466,9 +482,12 @@ public final class ABtJob {
     job.setNumReduceTasks(numReduceTasks);
 
     // broadcast Bt files if required.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     if (broadcastBInput) {
       job.getConfiguration().set(PROP_BT_BROADCAST, "y");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
       FileSystem fs = FileSystem.get(inputBtGlob.toUri(), conf);
       FileStatus[] fstats = fs.globStatus(inputBtGlob);
       if (fstats != null) {

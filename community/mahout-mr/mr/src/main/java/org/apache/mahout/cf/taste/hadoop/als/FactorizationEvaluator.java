@@ -66,6 +66,7 @@ public class FactorizationEvaluator extends AbstractJob {
   private static final String ITEM_FEATURES_PATH = RecommenderJob.class.getName() + ".itemFeatures";
 
   public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-872
     ToolRunner.run(new FactorizationEvaluator(), args);
   }
 
@@ -73,11 +74,14 @@ public class FactorizationEvaluator extends AbstractJob {
   public int run(String[] args) throws Exception {
 
     addInputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
     addOption("userFeatures", null, "path to the user feature matrix", true);
     addOption("itemFeatures", null, "path to the item feature matrix", true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
     addOption("usesLongIDs", null, "input contains long IDs that need to be translated");
     addOutputOption();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -88,6 +92,7 @@ public class FactorizationEvaluator extends AbstractJob {
     Job predictRatings = prepareJob(getInputPath(), errors, TextInputFormat.class, PredictRatingsMapper.class,
         DoubleWritable.class, NullWritable.class, SequenceFileOutputFormat.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
     Configuration conf = predictRatings.getConfiguration();
     conf.set(USER_FEATURES_PATH, getOption("userFeatures"));
     conf.set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
@@ -103,6 +108,7 @@ public class FactorizationEvaluator extends AbstractJob {
       return -1;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FileSystem fs = FileSystem.get(getOutputPath().toUri(), getConf());
     FSDataOutputStream outputStream = fs.create(getOutputPath("rmse.txt"));
     try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8))){
@@ -114,6 +120,7 @@ public class FactorizationEvaluator extends AbstractJob {
 
   private double computeRmse(Path errors) {
     RunningAverage average = new FullRunningAverage();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     for (Pair<DoubleWritable,NullWritable> entry
         : new SequenceFileDirIterable<DoubleWritable, NullWritable>(errors, PathType.LIST, PathFilters.logsCRCFilter(),
           getConf())) {
@@ -136,6 +143,7 @@ public class FactorizationEvaluator extends AbstractJob {
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
       Configuration conf = ctx.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
 
       Path pathToU = new Path(conf.get(USER_FEATURES_PATH));
       Path pathToM = new Path(conf.get(ITEM_FEATURES_PATH));

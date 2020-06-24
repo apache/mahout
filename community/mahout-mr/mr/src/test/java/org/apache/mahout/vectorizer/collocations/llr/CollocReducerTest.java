@@ -70,11 +70,13 @@ public final class CollocReducerTest extends MahoutTestCase {
     CollocReducer c = new CollocReducer();
     
     GramKey key = new GramKey();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-317
 
     byte[] empty = new byte[0];
     for (Gram[] ii : input) {
       key.set(ii[0], empty);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       Collection<Gram> vv = Lists.newLinkedList();
       vv.addAll(Arrays.asList(ii));
       c.reduce(key, vv, context);

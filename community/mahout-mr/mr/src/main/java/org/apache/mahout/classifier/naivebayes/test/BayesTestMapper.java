@@ -48,6 +48,7 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
     Path modelPath = HadoopUtil.getSingleCachedFile(conf);
     NaiveBayesModel model = NaiveBayesModel.materialize(modelPath, conf);
     boolean isComplementary = Boolean.parseBoolean(conf.get(TestNaiveBayesDriver.COMPLEMENTARY));
@@ -55,7 +56,9 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
     // ensure that if we are testing in complementary mode, the model has been
     // trained complementary. a complementarty model will work for standard classification
     // a standard model will not work for complementary classification
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     if (isComplementary) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Preconditions.checkArgument((model.isComplemtary()),
           "Complementary mode in model is different than test mode");
     }
@@ -69,6 +72,7 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
 
   @Override
   protected void map(Text key, VectorWritable value, Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
     Vector result = classifier.classifyFull(value.get());
     //the key is the expected value
     context.write(new Text(SLASH.split(key.toString())[1]), new VectorWritable(result));

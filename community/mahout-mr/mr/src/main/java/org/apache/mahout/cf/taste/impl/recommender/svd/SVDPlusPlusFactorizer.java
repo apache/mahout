@@ -80,6 +80,7 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
     }
 
     /* get internal item IDs which we will need several times */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     itemsByUser = new HashMap<>();
     LongPrimitiveIterator userIDs = dataModel.getUserIDs();
     while (userIDs.hasNext()) {
@@ -128,6 +129,7 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
 
     double[] pPlusY = new double[numFeatures];
     for (int i2 : itemsByUser.get(userIndex)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       for (int f = FEATURE_OFFSET; f < numFeatures; f++) {
         pPlusY[f] += y[i2][f];
       }

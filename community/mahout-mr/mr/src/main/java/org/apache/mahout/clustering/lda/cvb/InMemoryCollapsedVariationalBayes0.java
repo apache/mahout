@@ -111,6 +111,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     this.terms = terms;
     this.initialModelCorpusFraction = modelCorpusFraction;
     numTerms = terms != null ? terms.length : corpus.numCols();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, Integer> termIdMap = new HashMap<>();
     if (terms != null) {
       for (int t = 0; t < terms.length; t++) {
@@ -154,6 +155,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
 
   /*
   private void inferDocuments(double convergence, int maxIter, boolean recalculate) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int docId = 0; docId < corpusWeights.numRows() ; docId++) {
       Vector inferredDocument = topicModel.infer(corpusWeights.viewRow(docId),
           docTopicCounts.viewRow(docId));
@@ -182,6 +184,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
   /*
   private double error(int docId) {
     Vector docTermCounts = corpusWeights.viewRow(docId);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (docTermCounts == null) {
       return 0;
     } else {
@@ -196,6 +199,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
   private double error() {
     long time = System.nanoTime();
     double error = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int docId = 0; docId < numDocuments; docId++) {
       error += error(docId);
     }
@@ -213,6 +217,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       int maxIterations, int minIter, double testFraction) {
     int iter = 0;
     double oldPerplexity = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (iter < minIter) {
       trainDocuments(testFraction);
       if (verbose) {
@@ -226,6 +231,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     }
     double newPerplexity = 0;
     double fractionalChange = Double.MAX_VALUE;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (iter < maxIterations && fractionalChange > minFractionalErrorChange) {
       trainDocuments();
       if (verbose) {
@@ -239,6 +245,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       log.info("{} = fractionalChange", fractionalChange);
       oldPerplexity = newPerplexity;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (iter < maxIterations) {
       log.info(String.format("Converged! fractional error change: %f, error %f",
           fractionalChange, newPerplexity));
@@ -298,6 +305,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
         .withDescription("Smoothing parameter for p(term | topic)").withShortName("e").create();
 
     Option maxIterOpt = obuilder.withLongName("maxIterations").withRequired(false).withArgument(abuilder
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1141
         .withName("maxIterations").withMinimum(1).withMaximum(1).withDefault("10").create())
         .withDescription("Maximum number of training passes").withShortName("m").create();
 
@@ -375,6 +383,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
 
       long start = System.nanoTime();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (conf.get("fs.default.name") == null) {
         String dfsNameNode = (String)cmdLine.getValue(dfsOpt);
         conf.set("fs.default.name", dfsNameNode);
@@ -398,6 +407,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       /*
       if ("randstart".equalsIgnoreCase(reInferDocTopics)) {
         cvb0.inferDocuments(0.0, 100, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       } else if ("continue".equalsIgnoreCase(reInferDocTopics)) {
         cvb0.inferDocuments(0.0, 100, false);
       }
@@ -415,20 +425,24 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
   }
 
   private static String[] loadDictionary(String dictionaryPath, Configuration conf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (dictionaryPath == null) {
       return null;
     }
     Path dictionaryFile = new Path(dictionaryPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Pair<Integer, String>> termList = new ArrayList<>();
     int maxTermId = 0;
      // key is word value is id
     for (Pair<Writable, IntWritable> record
             : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       termList.add(new Pair<>(record.getSecond().get(),
           record.getFirst().toString()));
       maxTermId = Math.max(maxTermId, record.getSecond().get());
     }
     String[] terms = new String[maxTermId + 1];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (Pair<Integer, String> pair : termList) {
       terms[pair.getFirst()] = pair.getSecond();
     }
@@ -444,7 +458,9 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     throws IOException {
     Path vectorPath = new Path(vectorPathString);
     FileSystem fs = vectorPath.getFileSystem(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Path> subPaths = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (fs.isFile(vectorPath)) {
       subPaths.add(vectorPath);
     } else {
@@ -452,6 +468,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
         subPaths.add(fileStatus.getPath());
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Pair<Integer, Vector>> rowList = new ArrayList<>();
     int numRows = Integer.MIN_VALUE;
     int numCols = -1;
@@ -460,6 +477,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       for (Pair<IntWritable, VectorWritable> record
           : new SequenceFileIterable<IntWritable, VectorWritable>(subPath, true, conf)) {
         int id = record.getFirst().get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1051
         Vector vector = record.getSecond().get();
         if (vector instanceof NamedVector) {
           vector = ((NamedVector)vector).getDelegate();

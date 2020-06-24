@@ -68,11 +68,13 @@ public class BruteSearch extends UpdatableSearcher {
    */
   @Override
   public List<WeightedThing<Vector>> search(Vector query, int limit) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(limit > 0, "limit must be greater then 0!");
     limit = Math.min(limit, referenceVectors.size());
     // A priority queue of the best @limit elements, ordered from worst to best so that the worst
     // element is always on top and can easily be removed.
     PriorityQueue<WeightedThing<Integer>> bestNeighbors =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new PriorityQueue<>(limit, Ordering.natural().reverse());
     // The resulting list of weighted WeightedVectors (the weight is the distance from the query).
     List<WeightedThing<Vector>> results =
@@ -83,6 +85,7 @@ public class BruteSearch extends UpdatableSearcher {
       // Only add a new neighbor if the result is better than the worst element
       // in the queue or the queue isn't full.
       if (bestNeighbors.size() < limit || bestNeighbors.peek().getWeight() > distance) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         bestNeighbors.add(new WeightedThing<>(rowNumber, distance));
         if (bestNeighbors.size() > limit) {
           bestNeighbors.poll();
@@ -96,6 +99,7 @@ public class BruteSearch extends UpdatableSearcher {
     }
     for (int i = limit - 1; i >= 0; --i) {
       WeightedThing<Integer> neighbor = bestNeighbors.poll();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       results.set(i, new WeightedThing<>(
           referenceVectors.get(neighbor.getValue()), neighbor.getWeight()));
     }
@@ -124,6 +128,7 @@ public class BruteSearch extends UpdatableSearcher {
         bestVector = row;
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new WeightedThing<>(bestVector, bestDistance);
   }
 

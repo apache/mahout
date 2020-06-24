@@ -64,6 +64,7 @@ public class InMemBuilder extends Builder {
     FileOutputFormat.setOutputPath(job, getOutputPath(conf));
     
     // put the data in the DistributedCache
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     DistributedCache.addCacheFile(getDataPath().toUri(), conf);
     
     job.setOutputKeyClass(IntWritable.class);
@@ -81,6 +82,7 @@ public class InMemBuilder extends Builder {
   protected DecisionForest parseOutput(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Integer,MapredOutput> output = new HashMap<>();
     
     Path outputPath = getOutputPath(conf);
@@ -90,11 +92,13 @@ public class InMemBuilder extends Builder {
     
     // import the InMemOutputs
     for (Path path : outfiles) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       for (Pair<IntWritable,MapredOutput> record : new SequenceFileIterable<IntWritable,MapredOutput>(path, conf)) {
         output.put(record.getFirst().get(), record.getSecond());
       }
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-835
     return processOutput(output);
   }
   
@@ -102,6 +106,7 @@ public class InMemBuilder extends Builder {
    * Process the output, extracting the trees
    */
   private static DecisionForest processOutput(Map<Integer,MapredOutput> output) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Node> trees = new ArrayList<>();
     
     for (Map.Entry<Integer,MapredOutput> entry : output.entrySet()) {

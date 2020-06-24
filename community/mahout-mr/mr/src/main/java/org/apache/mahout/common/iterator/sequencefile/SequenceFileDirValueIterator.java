@@ -63,6 +63,7 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
                                       boolean reuseKeyValueInstances,
                                       Configuration conf) throws IOException {
     FileStatus[] statuses;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(path.toUri(), conf);
     if (filter == null) {
       statuses = pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
@@ -86,6 +87,7 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
     /*
      * we assume all files should exist, otherwise we will bail out.
      */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(path[0].toUri(), conf);
     FileStatus[] statuses = new FileStatus[path.length];
     for (int i = 0; i < statuses.length; i++) {
@@ -112,20 +114,24 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
       Arrays.sort(statuses, ordering);
     }
     Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
 
     try {
 
       Iterator<Iterator<V>> fsIterators =
         Iterators.transform(fileStatusIterator,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
           new Function<FileStatus, Iterator<V>>() {
             @Override
             public Iterator<V> apply(FileStatus from) {
               try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
                 SequenceFileValueIterator<V> iterator = new SequenceFileValueIterator<>(from.getPath(),
                     reuseKeyValueInstances, conf);
                 iterators.add(iterator);
                 return iterator;
               } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-708
                 throw new IllegalStateException(from.getPath().toString(), ioe);
               }
             }

@@ -53,6 +53,7 @@ public interface GaussianAccumulator {
    * @param weight the double observation weight (usually 1.0)
    */
   void observe(Vector x, double weight);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-533
 
   /**
    * Compute the mean, variance and standard deviation

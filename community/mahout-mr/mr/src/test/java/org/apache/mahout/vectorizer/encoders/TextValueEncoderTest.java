@@ -40,6 +40,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
 
     // now some fancy weighting
     StaticWordValueEncoder w = new StaticWordValueEncoder("text");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     w.setDictionary(ImmutableMap.<String, Double>of("word1", 3.0, "word2", 1.5));
     enc.setWordEncoder(w);
 
@@ -68,7 +69,11 @@ public final class TextValueEncoderTest extends MahoutTestCase {
 
   @Test
   public void testLuceneEncoding() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-855
     LuceneTextValueEncoder enc = new LuceneTextValueEncoder("text");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     enc.setAnalyzer(new WhitespaceAnalyzer());
     Vector v1 = new DenseVector(200);
     enc.addToVector("test1 and more", v1);
@@ -87,6 +92,8 @@ public final class TextValueEncoderTest extends MahoutTestCase {
 
     v1 = new DenseVector(200);
     StringBuilder builder = new StringBuilder(5000);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     for (int i = 0; i < 1000; i++) {//lucene's internal buffer length request is 4096, so let's make sure we can handle larger size
       builder.append("token_").append(i).append(' ');
     }

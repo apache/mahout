@@ -32,6 +32,7 @@ public final class CachingRecommenderTest extends TasteTestCase {
     Recommender mockRecommender = new MockRecommender(recommendCount);
 
     Recommender cachingRecommender = new CachingRecommender(mockRecommender);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     cachingRecommender.recommend(1, 1);
     assertEquals(1, recommendCount.intValue());
     cachingRecommender.recommend(2, 1);

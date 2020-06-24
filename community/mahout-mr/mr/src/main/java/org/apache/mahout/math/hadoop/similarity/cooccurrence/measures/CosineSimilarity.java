@@ -44,6 +44,7 @@ public class CosineSimilarity implements VectorSimilarityMeasure {
   @Override
   public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double maxValueB,
       double threshold) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     return numNonZeroEntriesB >= threshold / maxValueA
         && numNonZeroEntriesA >= threshold / maxValueB;
   }

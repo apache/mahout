@@ -33,6 +33,7 @@ public final class BenchmarkRunner {
   private final long leadTimeUsec;
 
   public BenchmarkRunner(long leadTimeMs, long maxTimeMs) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     maxTimeUsec = TimeUnit.MILLISECONDS.toNanos(maxTimeMs);
     leadTimeUsec = TimeUnit.MILLISECONDS.toNanos(leadTimeMs);
   }

@@ -45,12 +45,14 @@ public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> 
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     groupsToKeep = new ArrayList<>();
     Configuration config = context.getConfiguration();
     String regexStr = config.get(REGEX);
     regex = Pattern.compile(regexStr);
     String[] groups = config.getStrings(GROUP_MATCHERS);
     if (groups != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       for (String group : groups) {
         groupsToKeep.add(Integer.parseInt(group));
       }
@@ -72,6 +74,7 @@ public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> 
   @Override
   protected void map(LongWritable key, Text text, Context context) throws IOException, InterruptedException {
     String result = RegexUtils.extract(text.toString(), regex, groupsToKeep, " ", transformer);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     if (!result.isEmpty()) {
       String format = formatter.format(result);
       context.write(key, new Text(format));

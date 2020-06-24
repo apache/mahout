@@ -56,6 +56,7 @@ public final class MatrixColumnMeansJob {
   public static Vector run(Configuration conf,
                            Path inputPath,
                            Path outputVectorTmpPath) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1098
     return run(conf, inputPath, outputVectorTmpPath, null);
   }
 
@@ -82,6 +83,7 @@ public final class MatrixColumnMeansJob {
                       vectorClass == null ? DenseVector.class.getName()
                           : vectorClass);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1098
       Job job = new Job(initialConf, "MatrixColumnMeansJob");
       job.setJarByClass(MatrixColumnMeansJob.class);
 
@@ -107,6 +109,7 @@ public final class MatrixColumnMeansJob {
 
       Path tmpFile = new Path(outputVectorTmpPath, "part-r-00000");
       SequenceFileValueIterator<VectorWritable> iterator =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new SequenceFileValueIterator<>(tmpFile, true, initialConf);
       try {
         if (iterator.hasNext()) {
@@ -116,6 +119,7 @@ public final class MatrixColumnMeansJob {
                                .newInstance(0);
         }
       } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(iterator, true);
       }
     } catch (IOException ioe) {
@@ -130,6 +134,7 @@ public final class MatrixColumnMeansJob {
    */
   public static class MatrixColumnMeansMapper extends
       Mapper<Writable, VectorWritable, NullWritable, VectorWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1098
 
     private Vector runningSum;
     private String vectorClass;

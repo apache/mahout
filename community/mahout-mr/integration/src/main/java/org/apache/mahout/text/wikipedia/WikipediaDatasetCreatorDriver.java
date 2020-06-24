@@ -154,6 +154,7 @@ public final class WikipediaDatasetCreatorDriver {
     // Dont ever forget this. People should keep track of how hadoop conf
     // parameters can make or break a piece of code
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Set<String> categories = new HashSet<>();
     for (String line : new FileLineIterable(new File(catFile))) {
       categories.add(line.trim().toLowerCase(Locale.ENGLISH));

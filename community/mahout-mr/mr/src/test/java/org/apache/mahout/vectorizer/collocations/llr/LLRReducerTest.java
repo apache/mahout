@@ -64,6 +64,8 @@ public final class LLRReducerTest extends MahoutTestCase {
   
   @Test
   public void testReduce() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
     LLRReducer reducer = new LLRReducer(ll);
     
     // test input, input[*][0] is the key,
@@ -90,7 +92,10 @@ public final class LLRReducerTest extends MahoutTestCase {
                             {1, 0, 1, 5}  // worst of
     };
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration config = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
     config.set(LLRReducer.NGRAM_TOTAL, "7");
     EasyMock.expect(context.getConfiguration()).andReturn(config);
     
@@ -106,6 +111,7 @@ public final class LLRReducerTest extends MahoutTestCase {
     reducer.setup(context);
     
     for (Gram[] ii: input) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       Collection<Gram> vv = Lists.newLinkedList();
       vv.addAll(Arrays.asList(ii).subList(1, ii.length));
       reducer.reduce(ii[0], vv, context);

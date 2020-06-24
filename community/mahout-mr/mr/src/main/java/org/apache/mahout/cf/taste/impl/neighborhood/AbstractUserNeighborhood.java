@@ -39,7 +39,9 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
   private final double samplingRate;
   private final RefreshHelper refreshHelper;
   
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
   AbstractUserNeighborhood(UserSimilarity userSimilarity, DataModel dataModel, double samplingRate) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(userSimilarity != null, "userSimilarity is null");
     Preconditions.checkArgument(dataModel != null, "dataModel is null");
     Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0, "samplingRate must be in (0,1]");

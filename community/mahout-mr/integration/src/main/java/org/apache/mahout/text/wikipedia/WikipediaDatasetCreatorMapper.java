@@ -62,11 +62,13 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     String document = value.toString();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1187
     document = StringEscapeUtils.unescapeHtml4(CLOSE_TEXT_TAG_PATTERN.matcher(
         OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
     String catMatch = findMatchingCategory(document);
     if (!"Unknown".equals(catMatch)) {
       StringBuilder contents = new StringBuilder(1000);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
       TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
       CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
       stream.reset();
@@ -77,6 +79,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
           new Text(SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")),
           new Text(contents.toString()));
       stream.end();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(stream, true);
     }
   }
@@ -88,6 +91,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     Configuration conf = context.getConfiguration();
 
     if (inputCategories == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Set<String> newCategories = new HashSet<>();
       DefaultStringifier<Set<String>> setStringifier =
           new DefaultStringifier<>(conf, GenericsUtil.getClass(newCategories));

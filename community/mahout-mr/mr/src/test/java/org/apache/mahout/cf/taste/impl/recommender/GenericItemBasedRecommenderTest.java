@@ -44,11 +44,13 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   @Test
   public void testRecommender() throws Exception {
     Recommender recommender = buildRecommender();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     List<RecommendedItem> recommended = recommender.recommend(1, 1);
     assertNotNull(recommended);
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     assertEquals(2, firstRecommended.getItemID());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     assertEquals(0.1f, firstRecommended.getValue(), EPSILON);
     recommender.refresh(null);
     recommended = recommender.recommend(1, 1);
@@ -70,6 +72,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
                     {0.2, 0.3, 0.6, 0.7, 0.1, 0.2},
             });
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
     for (int i = 0; i < 6; i++) {
       for (int j = i + 1; j < 6; j++) {
@@ -82,6 +85,8 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     List<RecommendedItem> fewRecommended = recommender.recommend(1, 2);
     List<RecommendedItem> moreRecommended = recommender.recommend(1, 4);
     for (int i = 0; i < fewRecommended.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
     recommender.refresh(null);
@@ -94,6 +99,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   public void testRescorer() throws Exception {
 
     DataModel dataModel = getDataModel(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
             new long[] {1, 2, 3},
             new Double[][] {
                     {0.1, 0.2},
@@ -101,6 +107,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
                     {0.4, 0.4, 0.5, 0.9},
             });
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 1, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 2, 0.5));
@@ -124,6 +131,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   @Test
   public void testIncludeKnownItems() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
             new Double[][] {
@@ -154,6 +162,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   @Test
   public void testEstimatePref() throws Exception {
     Recommender recommender = buildRecommender();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     assertEquals(0.1f, recommender.estimatePreference(1, 2), EPSILON);
   }
 
@@ -165,12 +174,14 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   @Test
   public void testBestRating() throws Exception {
     Recommender recommender = buildRecommender();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     List<RecommendedItem> recommended = recommender.recommend(1, 1);
     assertNotNull(recommended);
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
     assertEquals(2, firstRecommended.getItemID());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     assertEquals(0.1f, firstRecommended.getValue(), EPSILON);
   }
 
@@ -183,6 +194,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem first = similar.get(0);
     RecommendedItem second = similar.get(1);
     assertEquals(1, first.getItemID());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     assertEquals(1.0f, first.getValue(), EPSILON);
     assertEquals(2, second.getItemID());
     assertEquals(0.5f, second.getValue(), EPSILON);
@@ -197,6 +209,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem first = similar.get(0);
     RecommendedItem second = similar.get(1);
     assertEquals(2, first.getItemID());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     assertEquals(0.85f, first.getValue(), EPSILON);
     assertEquals(3, second.getItemID());
     assertEquals(-0.3f, second.getValue(), EPSILON);
@@ -204,6 +217,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 
   @Test
   public void testMostSimilarToMultipleExcludeIfNotSimilarToAll() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-558
     ItemBasedRecommender recommender = buildRecommender2();
     List<RecommendedItem> similar = recommender.mostSimilarItems(new long[] {3, 4}, 2);
     assertNotNull(similar);
@@ -238,6 +252,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem second = recommendedBecause.get(1);
     RecommendedItem third = recommendedBecause.get(2);
     assertEquals(2, first.getItemID());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     assertEquals(0.99f, first.getValue(), EPSILON);
     assertEquals(3, second.getItemID());
     assertEquals(0.4f, second.getValue(), EPSILON);
@@ -247,7 +262,9 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 
   private static ItemBasedRecommender buildRecommender() {
     DataModel dataModel = getDataModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 1, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 2, 0.5));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 2, 0.0));
@@ -258,6 +275,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   private static ItemBasedRecommender buildRecommender2() {
 
     DataModel dataModel = getDataModel(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
         new long[] {1, 2, 3, 4},
         new Double[][] {
                 {0.1, 0.3, 0.9, 0.8},
@@ -266,7 +284,9 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
                 {0.7, 0.3, 0.8, 0.5, 0.6},
         });
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 1, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 2, 0.8));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 3, -0.6));
@@ -291,6 +311,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   @Test
   public void preferencesFetchedOnlyOnce() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     DataModel dataModel = EasyMock.createMock(DataModel.class);
     ItemSimilarity itemSimilarity = EasyMock.createMock(ItemSimilarity.class);
     CandidateItemsStrategy candidateItemsStrategy = EasyMock.createMock(CandidateItemsStrategy.class);
@@ -304,6 +325,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     EasyMock.expect(dataModel.getMaxPreference()).andReturn(Float.NaN);
 
     EasyMock.expect(dataModel.getPreferencesFromUser(1L)).andReturn(preferencesFromUser);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     EasyMock.expect(candidateItemsStrategy.getCandidateItems(1L, preferencesFromUser, dataModel, false))
         .andReturn(new FastIDSet(new long[] { 3L, 4L }));
 

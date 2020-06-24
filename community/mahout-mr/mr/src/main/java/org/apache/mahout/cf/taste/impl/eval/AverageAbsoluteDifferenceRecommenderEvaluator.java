@@ -32,6 +32,7 @@ import org.apache.mahout.cf.taste.model.Preference;
  * </p>
  */
 public final class AverageAbsoluteDifferenceRecommenderEvaluator extends
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     AbstractDifferenceRecommenderEvaluator {
   
   private RunningAverage average;

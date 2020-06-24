@@ -37,6 +37,7 @@ public class SolveExplicitFeedbackMapper
   private final VectorWritable uiOrmj = new VectorWritable();
 
   @Override
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1205
   OpenIntObjectHashMap<Vector> createSharedInstance(Context ctx) throws IOException {
     Configuration conf = ctx.getConfiguration();
     int numEntities = Integer.parseInt(conf.get(ParallelALSFactorizationJob.NUM_ENTITIES));
@@ -47,11 +48,13 @@ public class SolveExplicitFeedbackMapper
   protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
     lambda = Double.parseDouble(ctx.getConfiguration().get(ParallelALSFactorizationJob.LAMBDA));
     numFeatures = ctx.getConfiguration().getInt(ParallelALSFactorizationJob.NUM_FEATURES, -1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(numFeatures > 0, "numFeatures must be greater then 0!");
   }
 
   @Override
   protected void map(IntWritable userOrItemID, VectorWritable ratingsWritable, Context ctx)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
     OpenIntObjectHashMap<Vector> uOrM = getSharedInstance();
     uiOrmj.set(ALS.solveExplicit(ratingsWritable, uOrM, lambda, numFeatures));

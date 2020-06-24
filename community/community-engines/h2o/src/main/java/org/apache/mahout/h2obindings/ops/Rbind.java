@@ -47,6 +47,7 @@ public class Rbind {
     // Create new frame and copy A's data at the top, and B's data below.
     // Create the frame in the same VectorGroup as A, so A's data does not
     // cross the wire during copy. B's data could potentially cross the wire.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     Frame frbind = H2OHelper.emptyFrame(fra.numRows() + frb.numRows(), fra.numCols(),
             -1, -1, fra.anyVec().group());
     Vec keys = null;
@@ -61,9 +62,11 @@ public class Rbind {
           int chunkSize = chks[0].len();
           ValueString vstr = new ValueString();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
           for (int r = 0; r < chunkSize; r++) {
             for (int c = 0; c < chks.length; c++) {
               if (r + start < A_rows) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
                 chks[c].set(r, A_vecs[c].at(r + start));
                 if (keysa != null) {
                   nc.addStr(keysa.atStr(vstr, r + start));

@@ -46,6 +46,7 @@ public final class StringUtilsTest extends MahoutTestCase {
     }
 
     public int getField() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
       return field;
     }
   }
@@ -53,6 +54,7 @@ public final class StringUtilsTest extends MahoutTestCase {
   @Test
   public void testStringConversion() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1610
     List<String> expected = Lists.newArrayList("A", "B", "C");
     assertEquals(expected, StringUtils.fromString(StringUtils
         .toString(expected)));
@@ -64,6 +66,7 @@ public final class StringUtilsTest extends MahoutTestCase {
 
   @Test
   public void testEscape() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-899
     String res = StringUtils.escapeXML("\",\',&,>,<");
     assertEquals("_,_,_,_,_", res);
   }

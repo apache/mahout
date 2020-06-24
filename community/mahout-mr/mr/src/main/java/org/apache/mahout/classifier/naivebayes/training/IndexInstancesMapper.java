@@ -32,12 +32,15 @@ public class IndexInstancesMapper extends Mapper<Text, VectorWritable, IntWritab
   private static final Pattern SLASH = Pattern.compile("/");
 
   enum Counter { SKIPPED_INSTANCES }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1865
 
   private OpenObjectIntHashMap<String> labelIndex;
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
     super.setup(ctx);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     labelIndex = BayesUtils.readIndexFromCache(ctx.getConfiguration());
   }
 

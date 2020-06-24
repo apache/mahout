@@ -48,6 +48,7 @@ public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
   public EuclideanDistanceSimilarity(DataModel dataModel) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-387
     this(dataModel, Weighting.UNWEIGHTED);
   }
 
@@ -56,11 +57,13 @@ public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
    */
   public EuclideanDistanceSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(dataModel.hasPreferenceValues(), "DataModel doesn't have preference values");
   }
   
   @Override
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     return 1.0 / (1.0 + Math.sqrt(sumXYdiff2) / Math.sqrt(n));
   }
   

@@ -33,6 +33,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
   private double average;
   
   public FullRunningAverage() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-824
     this(0, Double.NaN);
   }
 
@@ -50,6 +51,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
     if (++count == 1) {
       average = datum;
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       average = average * (count - 1) / count + datum / count;
     }
   }
@@ -68,6 +70,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
     if (--count == 0) {
       average = Double.NaN;
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       average = average * (count + 1) / count - datum / count;
     }
   }
@@ -98,6 +101,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
 
   @Override
   public RunningAverage inverse() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return new InvertedRunningAverage(this);
   }
   

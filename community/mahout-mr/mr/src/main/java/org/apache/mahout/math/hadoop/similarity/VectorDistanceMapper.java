@@ -33,6 +33,7 @@ import java.util.List;
 
 public final class VectorDistanceMapper
     extends Mapper<WritableComparable<?>, VectorWritable, StringTuple, DoubleWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
 
   private DistanceMeasure measure;
   private List<NamedVector> seedVectors;
@@ -52,7 +53,9 @@ public final class VectorDistanceMapper
     
     for (NamedVector seedVector : seedVectors) {
       double distance = measure.distance(seedVector, valVec);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1019
       if (!usesThreshold || distance <= maxDistance) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         StringTuple outKey = new StringTuple();
         outKey.add(seedVector.getName());
         outKey.add(keyName);
@@ -66,6 +69,7 @@ public final class VectorDistanceMapper
     super.setup(context);
     Configuration conf = context.getConfiguration();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1019
     String maxDistanceParam = conf.get(VectorDistanceSimilarityJob.MAX_DISTANCE);
     if (maxDistanceParam != null) {
       usesThreshold = true;
@@ -75,6 +79,7 @@ public final class VectorDistanceMapper
     measure = ClassUtils.instantiateAs(conf.get(VectorDistanceSimilarityJob.DISTANCE_MEASURE_KEY),
         DistanceMeasure.class);
     measure.configure(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
     seedVectors = SeedVectorUtil.loadSeedVectors(conf);
   }
 }

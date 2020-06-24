@@ -68,6 +68,7 @@ public class Classifier {
   private double[][] results;
   
   public double[][] getResults() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     return results;
   }
 
@@ -92,6 +93,7 @@ public class Classifier {
     FileInputFormat.setInputPaths(job, inputPath);
     FileOutputFormat.setOutputPath(job, mappersOutputPath);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     job.setOutputKeyClass(DoubleWritable.class);
     job.setOutputValueClass(Text.class);
 
@@ -125,6 +127,7 @@ public class Classifier {
 
     log.info("Running the job...");
     if (!job.waitForCompletion(true)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
       throw new IllegalStateException("Job failed!");
     }
 
@@ -145,6 +148,7 @@ public class Classifier {
     Path[] outfiles = DFUtils.listOutputFiles(fs, mappersOutputPath);
 
     // read all the output
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<double[]> resList = new ArrayList<>();
     for (Path path : outfiles) {
       FSDataOutputStream ofile = null;
@@ -160,10 +164,12 @@ public class Classifier {
             ofile.writeChars(value); // write the prediction
             ofile.writeChar('\n');
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
             resList.add(new double[]{key, Double.valueOf(value)});
           }
         }
       } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(ofile, false);
       }
     }
@@ -200,6 +206,7 @@ public class Classifier {
       Configuration conf = context.getConfiguration();
 
       Path[] files = HadoopUtil.getCachedFiles(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
 
       if (files.length < 2) {
         throw new IOException("not enough paths in the DistributedCache");
@@ -219,6 +226,7 @@ public class Classifier {
         FileSplit split = (FileSplit) context.getInputSplit();
         Path path = split.getPath(); // current split path
         lvalue.set(path.getName());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         lkey.set(key.get());
         context.write(lkey, lvalue);
 
@@ -227,8 +235,10 @@ public class Classifier {
 
       String line = value.toString();
       if (!line.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         Instance instance = converter.convert(line);
         double prediction = forest.classify(dataset, rng, instance);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         lkey.set(dataset.getLabel(instance));
         lvalue.set(Double.toString(prediction));
         context.write(lkey, lvalue);

@@ -46,6 +46,7 @@ public class SequenceFileVectorWriter implements VectorWriter {
         break;
       }
       if (point != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
         writer.append(new LongWritable(recNum++), new VectorWritable(point));
       }
       
@@ -56,6 +57,7 @@ public class SequenceFileVectorWriter implements VectorWriter {
   @Override
   public void write(Vector vector) throws IOException {
     writer.append(new LongWritable(recNum++), new VectorWritable(vector));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-548
 
   }
 
@@ -66,6 +68,7 @@ public class SequenceFileVectorWriter implements VectorWriter {
   
   @Override
   public void close() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     Closeables.close(writer, false);
   }
   

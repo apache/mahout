@@ -35,6 +35,7 @@ public final class FixedRunningAverageAndStdDev extends FixedRunningAverage impl
 
   @Override
   public RunningAverageAndStdDev inverse() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return new InvertedRunningAverageAndStdDev(this);
   }
 

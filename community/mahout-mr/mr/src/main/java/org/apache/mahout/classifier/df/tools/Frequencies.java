@@ -81,6 +81,8 @@ public final class Frequencies extends Configured implements Tool {
       String dataPath = cmdLine.getValue(dataOpt).toString();
       String datasetPath = cmdLine.getValue(datasetOpt).toString();
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Data path : {}", dataPath);
       log.debug("Dataset path : {}", datasetPath);
       
@@ -103,6 +105,7 @@ public final class Frequencies extends Configured implements Tool {
     Path dataPath = new Path(data);
     Path datasetPath = new Path(dataset);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.info("Computing the frequencies...");
     FrequenciesJob job = new FrequenciesJob(new Path(workingDir, "output"), dataPath, datasetPath);
     

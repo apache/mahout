@@ -37,6 +37,7 @@ public final class GenericBooleanPrefItemBasedRecommender extends GenericItemBas
   }
 
   public GenericBooleanPrefItemBasedRecommender(DataModel dataModel, ItemSimilarity similarity,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-570
       CandidateItemsStrategy candidateItemsStrategy, MostSimilarItemsCandidateItemsStrategy
       mostSimilarItemsCandidateItemsStrategy) {
     super(dataModel, similarity, candidateItemsStrategy, mostSimilarItemsCandidateItemsStrategy);
@@ -50,6 +51,7 @@ public final class GenericBooleanPrefItemBasedRecommender extends GenericItemBas
    */
   @Override
   protected float doEstimatePreference(long userID, PreferenceArray preferencesFromUser, long itemID)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     throws TasteException {
     double[] similarities = getSimilarity().itemSimilarities(itemID, preferencesFromUser.getIDs());
     boolean foundAPref = false;

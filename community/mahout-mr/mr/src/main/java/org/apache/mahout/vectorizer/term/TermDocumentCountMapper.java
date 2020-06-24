@@ -41,6 +41,7 @@ public class TermDocumentCountMapper extends Mapper<WritableComparable<?>, Vecto
   protected void map(WritableComparable<?> key, VectorWritable value, Context context)
     throws IOException, InterruptedException {
     Vector vector = value.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element e : vector.nonZeroes()) {
       out.set(e.index());
       context.write(out, ONE);

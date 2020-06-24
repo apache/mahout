@@ -142,6 +142,7 @@ public final class FastMapTest extends TasteTestCase {
   @Test
   public void testValues() {
     FastMap<String, String> map = buildTestFastMap();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1171
     Collection<String> expected = Sets.newHashSetWithExpectedSize(3);
     expected.add("bar");
     expected.add("bang");
@@ -185,6 +186,7 @@ public final class FastMapTest extends TasteTestCase {
   @Test
   public void testVersusHashMap() {
     Map<Integer, String> actual = new FastMap<>(1, 1000000);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Map<Integer, String> expected = Maps.newHashMapWithExpectedSize(1000000);
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 1000000; i++) {

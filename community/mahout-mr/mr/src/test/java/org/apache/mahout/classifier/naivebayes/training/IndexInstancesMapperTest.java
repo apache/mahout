@@ -42,6 +42,7 @@ public class IndexInstancesMapperTest extends MahoutTestCase {
 
     ctx = EasyMock.createMock(Mapper.Context.class);
     instance = new VectorWritable(new DenseVector(new double[] { 1, 0, 1, 1, 0 }));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
 
     labelIndex = new OpenObjectIntHashMap<>();
     labelIndex.put("bird", 0);
@@ -60,6 +61,7 @@ public class IndexInstancesMapperTest extends MahoutTestCase {
     setField(indexInstances, "labelIndex", labelIndex);
 
     indexInstances.map(new Text("/bird/"), instance, ctx);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1006
 
     EasyMock.verify(ctx);
   }
@@ -78,6 +80,7 @@ public class IndexInstancesMapperTest extends MahoutTestCase {
     setField(indexInstances, "labelIndex", labelIndex);
 
     indexInstances.map(new Text("/fish/"), instance, ctx);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1006
 
     EasyMock.verify(ctx, skippedInstances);
   }

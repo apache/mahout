@@ -54,6 +54,7 @@ public final class TreeVisualizer {
         CategoricalNode cnode = (CategoricalNode) node;
         int attr = (Integer) fields.get("CategoricalNode.attr").get(cnode);
         double[] values = (double[]) fields.get("CategoricalNode.values").get(cnode);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1163
         Node[] childs = (Node[]) fields.get("CategoricalNode.childs").get(cnode);
         String[][] attrValues = (String[][]) fields.get("Dataset.values").get(dataset);
         for (int i = 0; i < attrValues[attr].length; i++) {
@@ -67,6 +68,7 @@ public final class TreeVisualizer {
           }
           buff.append(attrNames == null ? attr : attrNames[attr]).append(" = ")
               .append(attrValues[attr][i]);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1163
           buff.append(toStringNode(childs[index], dataset, attrNames, fields, layer + 1));
         }
       } else if (node instanceof NumericalNode) {
@@ -79,6 +81,7 @@ public final class TreeVisualizer {
         for (int j = 0; j < layer; j++) {
           buff.append("|   ");
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-961
         buff.append(attrNames == null ? attr : attrNames[attr]).append(" < ")
             .append(doubleToString(split));
         buff.append(toStringNode(loChild, dataset, attrNames, fields, layer + 1));
@@ -95,6 +98,7 @@ public final class TreeVisualizer {
         if (dataset.isNumerical(dataset.getLabelId())) {
           buff.append(" : ").append(doubleToString(label));
         } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-961
           buff.append(" : ").append(dataset.getLabelString(label));
         }
       }
@@ -168,6 +172,7 @@ public final class TreeVisualizer {
   }
   
   private static String toStringPredict(Node node, Instance instance,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-961
       Dataset dataset, String[] attrNames, Map<String,Field> fields) {
     StringBuilder buff = new StringBuilder();
     
@@ -198,6 +203,7 @@ public final class TreeVisualizer {
         Node hiChild = (Node) fields.get("NumericalNode.hiChild").get(nnode);
         
         if (instance.get(attr) < split) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-961
           buff.append('(').append(attrNames == null ? attr : attrNames[attr])
               .append(" = ").append(doubleToString(instance.get(attr)))
               .append(") < ").append(doubleToString(split));
@@ -218,6 +224,7 @@ public final class TreeVisualizer {
         if (dataset.isNumerical(dataset.getLabelId())) {
           buff.append(doubleToString(label));
         } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-961
           buff.append(dataset.getLabelString(label));
         }
       }

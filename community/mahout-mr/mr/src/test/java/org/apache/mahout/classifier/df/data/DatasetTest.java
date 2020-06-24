@@ -34,6 +34,7 @@ public final class DatasetTest extends MahoutTestCase {
     assertTrue(to.isNumerical(0));
 
     // from JSON
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1610
     Dataset fromJson = Dataset.fromJSON(to.toJSON());
     assertEquals(3, fromJson.nbAttributes());
     assertEquals(1, fromJson.getIgnored().length);

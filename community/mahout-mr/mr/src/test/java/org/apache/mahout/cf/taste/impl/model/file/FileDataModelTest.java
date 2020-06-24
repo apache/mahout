@@ -40,11 +40,13 @@ import org.junit.Test;
 public final class FileDataModelTest extends TasteTestCase {
 
   private static final String[] DATA = {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       "123,456,0.1",
       "123,789,0.6",
       "123,654,0.7",
       "234,123,0.5",
       "234,234,1.0",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
       "234,999,0.9",
       "345,789,0.6",
       "345,654,0.7",
@@ -57,6 +59,7 @@ public final class FileDataModelTest extends TasteTestCase {
       "456,999,0.2",};
   
   private static final String[] DATA_SPLITTED_WITH_TWO_SPACES = {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1398
       "123  456  0.1",
       "123  789  0.6",
       "123  654  0.7",
@@ -80,13 +83,16 @@ public final class FileDataModelTest extends TasteTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
     testFile = getTestTempFile("test.txt");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-412
     writeLines(testFile, DATA);
     model = new FileDataModel(testFile);
   }
   
   @Test
   public void testReadRegexSplittedFile() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1398
     File testFile = getTestTempFile("testRegex.txt");
     writeLines(testFile, DATA_SPLITTED_WITH_TWO_SPACES);
     FileDataModel model = new FileDataModel(testFile,"\\s+");
@@ -97,6 +103,7 @@ public final class FileDataModelTest extends TasteTestCase {
   @Test
   public void testFile() throws Exception {
     UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, model);
     Recommender recommender = new GenericUserBasedRecommender(model, neighborhood, userSimilarity);
     assertEquals(1, recommender.recommend(123, 3).size());
@@ -109,7 +116,9 @@ public final class FileDataModelTest extends TasteTestCase {
 
   @Test
   public void testTranspose() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-411
     FileDataModel tModel = new FileDataModel(testFile, true, FileDataModel.DEFAULT_MIN_RELOAD_INTERVAL_MS);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     PreferenceArray userPrefs = tModel.getPreferencesFromUser(456);
     assertNotNull("user prefs are null and it shouldn't be", userPrefs);
     PreferenceArray pref = tModel.getPreferencesForItem(123);
@@ -131,6 +140,7 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals(654, it.nextLong());
     assertTrue(it.hasNext());
     assertEquals(789, it.nextLong());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     assertTrue(it.hasNext());
     assertEquals(999, it.nextLong());
     assertFalse(it.hasNext());
@@ -139,6 +149,7 @@ public final class FileDataModelTest extends TasteTestCase {
 
   @Test
   public void testPreferencesForItem() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     PreferenceArray prefs = model.getPreferencesForItem(456);
     assertNotNull(prefs);
     Preference pref1 = prefs.get(0);
@@ -157,6 +168,7 @@ public final class FileDataModelTest extends TasteTestCase {
 
   @Test
   public void testNumUsersPreferring() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     assertEquals(2, model.getNumUsersWithPreferenceFor(456));
     assertEquals(0, model.getNumUsersWithPreferenceFor(111));
     assertEquals(0, model.getNumUsersWithPreferenceFor(111, 456));
@@ -188,6 +200,7 @@ public final class FileDataModelTest extends TasteTestCase {
   public void testExplicitRefreshAfterCompleteFileUpdate() throws Exception {
     File file = getTestTempFile("refresh");
     writeLines(file, "123,456,3.0");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-412
 
     /* create a FileDataModel that always reloads when the underlying file has changed */
     FileDataModel dataModel = new FileDataModel(file, false, 0L);
@@ -196,6 +209,7 @@ public final class FileDataModelTest extends TasteTestCase {
     /* change the underlying file,
      * we have to wait at least a second to see the change in the file's lastModified timestamp */
     Thread.sleep(2000L);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-412
     writeLines(file, "123,456,5.0");
     dataModel.refresh(null);
 

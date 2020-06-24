@@ -61,6 +61,7 @@ public class VectorSimilarityMeasuresTest extends MahoutTestCase {
   }
 
   static Vector asVector(double[] values, Vector like) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1190
     Vector vector = like.like();
     for (int dim = 0; dim < values.length; dim++) {
       vector.set(dim, values[dim]);
@@ -128,6 +129,7 @@ public class VectorSimilarityMeasuresTest extends MahoutTestCase {
         new double[] { 0, 2, 0, 0, 8, 3, 0, 6, 0, 1, 1, 2, 1 },
         new double[] { 3, 0, 0, 0, 7, 0, 2, 2, 1, 3, 2, 4, 4 }, EuclideanDistanceSimilarity.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     assertEquals(0.11268865367232477, similarity, EPSILON);
   }
 }

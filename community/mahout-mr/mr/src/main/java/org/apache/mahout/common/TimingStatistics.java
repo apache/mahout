@@ -66,6 +66,7 @@ public final class TimingStatistics implements Serializable {
   }
 
   public synchronized long getStdDevTime() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (nCalls == 0) {
       return 0;
     }
@@ -81,6 +82,7 @@ public final class TimingStatistics implements Serializable {
 
   @Override
   public synchronized String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     return '\n'
         + "nCalls = " + nCalls + ";\n"
         + "sum    = " + DF.format(sumTime / 1000000000.0) + "s;\n"
@@ -147,6 +149,7 @@ public final class TimingStatistics implements Serializable {
      * Returns true if the sumTime as reached this limit;
      */
     public boolean end(long sumMaxUsec) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
       end();
       return sumMaxUsec < sumTime;
     }

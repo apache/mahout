@@ -71,6 +71,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
   public void testAffinityMatrixInputMapper() throws Exception {
     AffinityMatrixInputMapper mapper = new AffinityMatrixInputMapper();
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
     conf.setInt(Keys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writer and the M/R context
@@ -97,7 +98,10 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
   @Test
   public void testAffinitymatrixInputReducer() throws Exception {
     AffinityMatrixInputMapper mapper = new AffinityMatrixInputMapper();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
     conf.setInt(Keys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writer and the M/R context
@@ -132,6 +136,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
       assertEquals("Should only be one vector", 1, list.size());
       // check that the elements in the array are correctly ordered
       Vector v = list.get(0).get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element e : v.all()) {
         // find this value in the original map
         MatrixEntryWritable toCompare = new MatrixEntryWritable();

@@ -57,6 +57,7 @@ public class TopItemsQueueTest extends TasteTestCase {
 
   private static List<RecommendedItem> findTop(float[] ratings, int k) {
     TopItemsQueue queue = new TopItemsQueue(k);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
 
     for (int item = 0; item < ratings.length; item++) {
       MutableRecommendedItem top = queue.top();

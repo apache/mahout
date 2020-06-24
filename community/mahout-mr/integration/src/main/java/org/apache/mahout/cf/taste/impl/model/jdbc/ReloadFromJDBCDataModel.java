@@ -48,6 +48,7 @@ public final class ReloadFromJDBCDataModel implements DataModel {
   private final RefreshHelper refreshHelper;
 
   public ReloadFromJDBCDataModel(JDBCDataModel delegate) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     this.delegate = Preconditions.checkNotNull(delegate);
     refreshHelper = new RefreshHelper(new Callable<Void>() {
       @Override
@@ -142,6 +143,7 @@ public final class ReloadFromJDBCDataModel implements DataModel {
 
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-764
     return delegateInMemory.getNumUsersWithPreferenceFor(itemID);
   }
 

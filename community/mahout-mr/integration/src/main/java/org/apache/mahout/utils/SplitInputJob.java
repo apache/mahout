@@ -79,6 +79,7 @@ public final class SplitInputJob {
   public static void run(Configuration initialConf, Path inputPath,
       Path outputPath, int keepPct, float randomSelectionPercent)
     throws IOException, ClassNotFoundException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
 
     int downsamplingFactor = (int) (100.0 / keepPct);
     initialConf.setInt(DOWNSAMPLING_FACTOR, downsamplingFactor);
@@ -88,6 +89,7 @@ public final class SplitInputJob {
     FileSystem fs = FileSystem.get(initialConf);
 
     SequenceFileDirIterator<? extends WritableComparable, Writable> iterator =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new SequenceFileDirIterator<>(inputPath,
             PathType.LIST, PathFilters.partFilter(), null, false, fs.getConf());
     Class<? extends WritableComparable> keyClass;
@@ -101,9 +103,11 @@ public final class SplitInputJob {
     }
 
     Job job = new Job(new Configuration(initialConf));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
 
     MultipleOutputs.addNamedOutput(job, TRAINING_TAG, SequenceFileOutputFormat.class, keyClass, valueClass);
     MultipleOutputs.addNamedOutput(job, TEST_TAG, SequenceFileOutputFormat.class, keyClass, valueClass);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1061
     job.setJarByClass(SplitInputJob.class);
     FileInputFormat.addInputPath(job, inputPath);
     FileOutputFormat.setOutputPath(job, outputPath);
@@ -117,6 +121,7 @@ public final class SplitInputJob {
     job.setOutputValueClass(valueClass);
     job.submit();
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }
@@ -130,6 +135,7 @@ public final class SplitInputJob {
 
     @Override
     public void setup(Context ctx) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
       downsamplingFactor = ctx.getConfiguration().getInt(DOWNSAMPLING_FACTOR, 1);
     }
 
@@ -159,6 +165,7 @@ public final class SplitInputJob {
 
     @Override
     protected void setup(Context ctx) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
       randomSelectionPercent = ctx.getConfiguration().getFloat(RANDOM_SELECTION_PCT, 0);
       multipleOutputs = new MultipleOutputs(ctx);
     }
@@ -172,6 +179,7 @@ public final class SplitInputJob {
         Context context) throws IOException, InterruptedException {
       for (Writable value : values) {
         if (rnd.nextInt(100) < randomSelectionPercent) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
           multipleOutputs.write(TEST_TAG, key, value);
         } else {
           multipleOutputs.write(TRAINING_TAG, key, value);
@@ -182,6 +190,7 @@ public final class SplitInputJob {
 
     @Override
     protected void cleanup(Context context) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
       try {
         multipleOutputs.close();
       } catch (InterruptedException e) {

@@ -20,5 +20,6 @@ package org.apache.mahout.utils.regex;
 public interface RegexFormatter {
 
   String format(String toFormat);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
 
 }

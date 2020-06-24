@@ -31,12 +31,14 @@ import java.util.Map;
  */
 public class ClusterOutputPostProcessorReducer
     extends Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
 
   private Map<Integer, Integer> reverseClusterMappings;
 
   //read the current cluster ids, and populate the hash cluster mapping hash table
   @Override
   public void setup(Context context) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
     Configuration conf = context.getConfiguration();
     Path clusterOutputPath = new Path(conf.get("clusterOutputPath"));
     //we want to the key to be the index, the value to be the cluster id

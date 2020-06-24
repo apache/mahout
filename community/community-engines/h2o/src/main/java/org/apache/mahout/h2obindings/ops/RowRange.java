@@ -49,6 +49,7 @@ public class RowRange {
         public void map(Chunk chks[], NewChunk ncs[]) {
           int chunkSize = chks[0].len();
           long chunkStart = chks[0].start();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
 
           // First check if the entire chunk even overlaps with R
           if (chunkStart > R.end() || (chunkStart + chunkSize) < R.start()) {
@@ -62,6 +63,7 @@ public class RowRange {
             }
 
             for (int c = 0; c < chks.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
               ncs[c].addNum(chks[c].atd(r));
             }
           }
@@ -73,6 +75,7 @@ public class RowRange {
         // but this time just one column of Strings.
         public void map(Chunk chk, NewChunk nc) {
           int chunkSize = chk.len();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
           long chunkStart = chk.start();
           ValueString vstr = new ValueString();
 
@@ -85,6 +88,7 @@ public class RowRange {
               continue;
             }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
             nc.addStr(chk.atStr(vstr, r));
           }
         }

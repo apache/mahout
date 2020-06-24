@@ -33,6 +33,7 @@ public class DefaultIgSplit extends IgSplit {
   
   @Override
   public Split computeSplit(Data data, int attr) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     if (data.getDataset().isNumerical(attr)) {
       double[] values = data.values(attr);
       double bestIg = -1;
@@ -79,6 +80,7 @@ public class DefaultIgSplit extends IgSplit {
     double invDataSize = 1.0 / data.size();
     
     // LO subset
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     Data subset = data.subset(Condition.lesser(attr, split));
     hy -= subset.size() * invDataSize * entropy(subset);
     
@@ -95,7 +97,9 @@ public class DefaultIgSplit extends IgSplit {
   protected double entropy(Data data) {
     double invDataSize = 1.0 / data.size();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (counts == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       counts = new int[data.getDataset().nblabels()];
     }
     

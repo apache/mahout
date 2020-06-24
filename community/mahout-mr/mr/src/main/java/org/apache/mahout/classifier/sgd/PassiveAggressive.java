@@ -171,6 +171,7 @@ public class PassiveAggressive extends AbstractVectorClassifier implements Onlin
     // Find the highest score that is not actual.
     int otherIndex = result.maxValueIndex();
     double otherValue = result.get(otherIndex);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
     if (otherIndex == actual) {
       result.setQuick(otherIndex, Double.NEGATIVE_INFINITY);
       otherIndex = result.maxValueIndex();

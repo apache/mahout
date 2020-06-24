@@ -63,8 +63,10 @@ public class CachedTermInfoTest extends MahoutTestCase {
   public void before() throws IOException {
     directory = new RAMDirectory();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1343
     FieldType fieldType = new FieldType();
     fieldType.setStored(false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
     fieldType.setTokenized(true);
     fieldType.setStoreTermVectors(false);
@@ -101,12 +103,14 @@ public class CachedTermInfoTest extends MahoutTestCase {
                                       RAMDirectory directory,
                                       int startingId) throws IOException {
     IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(new WhitespaceAnalyzer()));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
 
     try {
       for (int i = 0; i < DOCS.length; i++) {
         Document doc = new Document();
         Field id = new StringField("id", "doc_" + (i + startingId), Field.Store.YES);
         doc.add(id);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1343
         Field text = new Field("content", DOCS[i], fieldType);
         doc.add(text);
         Field text2 = new Field("content2", DOCS2[i], fieldType);
@@ -114,6 +118,7 @@ public class CachedTermInfoTest extends MahoutTestCase {
         writer.addDocument(doc);
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
     return directory;

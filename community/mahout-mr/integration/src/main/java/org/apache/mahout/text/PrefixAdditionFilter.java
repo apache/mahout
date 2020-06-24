@@ -35,9 +35,11 @@ import java.util.Map;
 public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter {
 
   public PrefixAdditionFilter(Configuration conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-700
                               String keyPrefix,
                               Map<String, String> options, 
                               ChunkedWriter writer,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-799
                               Charset charset,
                               FileSystem fs) {
     super(conf, keyPrefix, options, writer, charset, fs);
@@ -47,11 +49,14 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
   protected void process(FileStatus fst, Path current) throws IOException {
     FileSystem fs = getFs();
     ChunkedWriter writer = getWriter();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
     if (fst.isDir()) {
       String dirPath = getPrefix() + Path.SEPARATOR + current.getName() + Path.SEPARATOR + fst.getPath().getName();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-799
       fs.listStatus(fst.getPath(),
                     new PrefixAdditionFilter(getConf(), dirPath, getOptions(), writer, getCharset(), fs));
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (InputStream in = fs.open(fst.getPath())){
         StringBuilder file = new StringBuilder();
         for (String aFit : new FileLineIterable(in, getCharset(), false)) {

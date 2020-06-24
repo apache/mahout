@@ -112,6 +112,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   private Group group;
 
   protected AbstractJob() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     options = new LinkedList<>();
   }
 
@@ -134,6 +135,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   }
 
   protected Path getOutputPath(String path) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     return new Path(outputPath, path);
   }
 
@@ -147,6 +149,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
 
   protected Path getTempPath() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     return tempPath;
   }
 
@@ -156,6 +159,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   
   @Override
   public Configuration getConf() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
     Configuration result = super.getConf();
     if (result == null) {
       return new Configuration();
@@ -167,6 +171,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  {@code containsKey} method on the map returned by {@link #parseArguments(String[])};
    */
   protected void addFlag(String name, String shortName, String description) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
     options.add(buildOption(name, shortName, description, false, false, null));
   }
 
@@ -248,12 +253,14 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @return the option.
    */
   protected static Option buildOption(String name,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
                                       String shortName,
                                       String description,
                                       boolean hasArg,
                                       boolean required,
                                       String defaultValue) {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     return buildOption(name, shortName, description, hasArg, 1, 1, required, defaultValue);
   }
 
@@ -273,6 +280,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     if (hasArg) {
       ArgumentBuilder argBuilder = new ArgumentBuilder().withName(name).withMinimum(min).withMaximum(max);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
 
       if (defaultValue != null) {
         argBuilder = argBuilder.withDefault(defaultValue);
@@ -290,6 +298,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    */
   protected Option getCLIOption(String name) {
     for (Option option : options) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (option.getPreferredName().equals(name)) {
         return option;
       }
@@ -339,11 +348,13 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
 
     group = gBuilder.create();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
 
     CommandLine cmdLine;
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-408
       parser.setHelpOption(helpOpt);
       cmdLine = parser.parse(args);
 
@@ -359,8 +370,10 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
 
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
       parseDirectories(cmdLine, inputOptional, outputOptional);
     } catch (IllegalArgumentException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.error(e.getMessage());
       CommandLineUtil.printHelpWithGenericOptions(group);
       return null;
@@ -371,6 +384,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     this.tempPath = new Path(getOption("tempDir"));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (!hasOption("quiet")) {
       log.info("Command line arguments: {}", argMap);
     }
@@ -388,6 +402,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @return the requested option, or null if it has not been specified
    */
   public String getOption(String optionName) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     List<String> list = argMap.get(keyFor(optionName));
     if (list != null && !list.isEmpty()) {
       return list.get(0);
@@ -402,6 +417,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @return The requested option, else the default value if it doesn't exist
    */
   public String getOption(String optionName, String defaultVal) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-939
     String res = getOption(optionName);
     if (res == null) {
       res = defaultVal;
@@ -450,6 +466,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @return the cardinality of the vector
    */
   public int getDimensions(Path matrix) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(getConf()), matrix, getConf())){
       Writable row = ClassUtils.instantiateAs(reader.getKeyClass().asSubclass(Writable.class), Writable.class);
       Preconditions.checkArgument(reader.getValueClass().equals(VectorWritable.class),
@@ -480,8 +497,10 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     Configuration conf = getConf();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
     if (inputOption != null && cmdLine.hasOption(inputOption)) {
       this.inputPath = new Path(cmdLine.getValue(inputOption).toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
       this.inputFile = new File(cmdLine.getValue(inputOption).toString());
     }
     if (inputPath == null && conf.get("mapred.input.dir") != null) {
@@ -490,6 +509,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     if (outputOption != null && cmdLine.hasOption(outputOption)) {
       this.outputPath = new Path(cmdLine.getValue(outputOption).toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
       this.outputFile = new File(cmdLine.getValue(outputOption).toString());
     }
     if (outputPath == null && conf.get("mapred.output.dir") != null) {
@@ -507,13 +527,16 @@ public abstract class AbstractJob extends Configured implements Tool {
 
       // the option appeared on the command-line, or it has a value
       // (which is likely a default value). 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null
           || (cmdLine.getValues(o) != null && !cmdLine.getValues(o).isEmpty())) {
 
         // nulls are ok, for cases where options are simple flags.
         List<?> vo = cmdLine.getValues(o);
         if (vo != null && !vo.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           List<String> vals = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
           for (Object o1 : vo) {
             vals.add(o1.toString());
           }
@@ -560,6 +583,7 @@ public abstract class AbstractJob extends Configured implements Tool {
                            Class<? extends Writable> mapperValue,
                            Class<? extends OutputFormat> outputFormat) throws IOException {
     return prepareJob(inputPath, outputPath, inputFormat, mapper, mapperKey, mapperValue, outputFormat, null);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1166
 
   }
   protected Job prepareJob(Path inputPath,
@@ -571,6 +595,7 @@ public abstract class AbstractJob extends Configured implements Tool {
                            Class<? extends OutputFormat> outputFormat,
                            String jobname) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-873
     Job job = HadoopUtil.prepareJob(inputPath, outputPath,
             inputFormat, mapper, mapperKey, mapperValue, outputFormat, getConf());
 
@@ -599,6 +624,7 @@ public abstract class AbstractJob extends Configured implements Tool {
                            Class<? extends Writable> reducerKey,
                            Class<? extends Writable> reducerValue,
                            Class<? extends OutputFormat> outputFormat) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-873
     Job job = HadoopUtil.prepareJob(inputPath, outputPath,
             inputFormat, mapper, mapperKey, mapperValue, reducer, reducerKey, reducerValue, outputFormat, getConf());
     job.setJobName(HadoopUtil.getCustomJobName(getClass().getSimpleName(), job, mapper, Reducer.class));
@@ -610,14 +636,17 @@ public abstract class AbstractJob extends Configured implements Tool {
    * obsolete when MultipleInputs is available again
    */
   public static void setS3SafeCombinedInputPath(Job job, Path referencePath, Path inputPathOne, Path inputPathTwo)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException {
     FileSystem fs = FileSystem.get(referencePath.toUri(), job.getConfiguration());
     FileInputFormat.setInputPaths(job, inputPathOne.makeQualified(fs), inputPathTwo.makeQualified(fs));
   }
 
   protected Class<? extends Analyzer> getAnalyzerClassFromOption() throws ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
     if (hasOption(DefaultOptionCreator.ANALYZER_NAME_OPTION)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       String className = getOption(DefaultOptionCreator.ANALYZER_NAME_OPTION);
       analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
       // try instantiating it, b/c there isn't any point in setting it if
@@ -635,11 +664,13 @@ public abstract class AbstractJob extends Configured implements Tool {
    */
   @Override
   public void setConf(Configuration conf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-848
     super.setConf(conf);
       
     // If running in an Oozie workflow as a Java action, need to add the
     // Configuration resource provided by Oozie to this job's config.
     String oozieActionConfXml = System.getProperty("oozie.action.conf.xml");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1033
     if (oozieActionConfXml != null && conf != null) {
       conf.addResource(new Path("file:///", oozieActionConfXml));
       log.info("Added Oozie action Configuration resource {} to the Hadoop Configuration", oozieActionConfXml);

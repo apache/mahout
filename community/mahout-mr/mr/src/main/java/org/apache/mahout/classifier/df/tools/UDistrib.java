@@ -72,6 +72,7 @@ public final class UDistrib {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     Option dataOpt = obuilder.withLongName("data").withShortName("d").withRequired(true).withArgument(
       abuilder.withName("data").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();
     
@@ -108,6 +109,7 @@ public final class UDistrib {
       
       runTool(data, dataset, output, numPartitions);
     } catch (OptionException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
@@ -116,6 +118,7 @@ public final class UDistrib {
   
   private static void runTool(String dataStr, String datasetStr, String output, int numPartitions) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(numPartitions > 0, "numPartitions <= 0");
     
     // make sure the output file does not exist
@@ -164,7 +167,9 @@ public final class UDistrib {
     
     int id = 0;
     while (scanner.hasNextLine()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       if (id % 1000 == 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1163
         log.info("progress : {}", id);
       }
       
@@ -174,6 +179,7 @@ public final class UDistrib {
       }
       
       // write the tuple in files[tuple.label]
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       Instance instance = converter.convert(line);
       int label = (int) dataset.getLabel(instance);
       files[currents[label]].writeBytes(line);
@@ -189,6 +195,7 @@ public final class UDistrib {
     // close all the files.
     scanner.close();
     for (FSDataOutputStream file : files) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(file, false);
     }
     

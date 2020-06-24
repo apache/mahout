@@ -41,9 +41,11 @@ public class MapBackedARFFModelTest extends MahoutTestCase {
 
   @Test
   public void processBadNumeric() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1285
     ARFFModel model = new MapBackedARFFModel();
     model.addLabel("b1shkt70694difsmmmdv0ikmoh", 77);
     model.addType(77, ARFFType.REAL);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1285
     assertTrue(Double.isNaN(model.getValue("b1shkt70694difsmmmdv0ikmoh", 77)));
   }
 

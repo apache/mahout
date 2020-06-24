@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class SequenceFileIterator<K extends Writable,V extends Writable>
   extends AbstractIterator<Pair<K,V>> implements Closeable {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
 
   private final SequenceFile.Reader reader;
   private final Configuration conf;
@@ -81,7 +82,9 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
     key = null;
     value = null;
     Closeables.close(reader, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     endOfData();
   }
 
@@ -104,11 +107,14 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
         close();
         return null;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       return new Pair<>(key, value);
     } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       try {
         close();
       } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         log.error(e.getMessage(), e);
       }
       throw new IllegalStateException(ioe);

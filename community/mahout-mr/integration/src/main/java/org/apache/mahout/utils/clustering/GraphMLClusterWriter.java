@@ -52,6 +52,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   private final int subString;
 
   public GraphMLClusterWriter(Writer writer, Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
                               DistanceMeasure measure, int numTopFeatures, String[] dictionary, int subString)
     throws IOException {
     super(writer, clusterIdToPoints, measure);
@@ -63,6 +64,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
 
   private void init(Writer writer) throws IOException {
     writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     writer.append("<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n"
                 + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
                 + "xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns\n"
@@ -98,8 +100,10 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   @Override
   public void write(ClusterWritable clusterWritable) throws IOException {
     StringBuilder line = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
     Cluster cluster = clusterWritable.getValue();
     Color rgb = getColor(cluster.getId());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
 
     String topTerms = "";
     if (dictionary != null) {
@@ -116,6 +120,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
     }
 
     line.append(createNode(clusterLabel, rgb, x, y));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
     List<WeightedPropertyVectorWritable> points = clusterIdToPoints.get(cluster.getId());
     if (points != null) {
       for (WeightedVectorWritable point : points) {
@@ -184,12 +189,14 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   private static String createEdge(String left, String right, double distance) {
     left = StringUtils.escapeXML(left);
     right = StringUtils.escapeXML(right);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     return "<edge id=\"" + left + '_' + right + "\" source=\"" + left + "\" target=\"" + right + "\">" 
             + "<data key=\"weight\">" + distance + "</data></edge>";
   }
 
   private static String createNode(String s, Color rgb, float x, float y) {
     return "<node id=\"" + StringUtils.escapeXML(s) + "\"><data key=\"r\">" + rgb.r 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
             + "</data>"
             + "<data key=\"g\">" + rgb.g
             + "</data>"

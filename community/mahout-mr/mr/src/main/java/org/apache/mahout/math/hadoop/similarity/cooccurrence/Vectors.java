@@ -45,8 +45,10 @@ public final class Vectors {
     if (original.getNumNondefaultElements() <= sampleSize) {
       return original;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1035
     Vector sample = new RandomAccessSparseVector(original.size(), sampleSize);
     Iterator<Element> sampledElements =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new FixedSizeSamplingIterator<>(sampleSize, original.nonZeroes().iterator());
     while (sampledElements.hasNext()) {
       Element elem = sampledElements.next();
@@ -60,7 +62,9 @@ public final class Vectors {
       return original;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
     TopElementsQueue topKQueue = new TopElementsQueue(k);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element nonZeroElement : original.nonZeroes()) {
       MutableElement top = topKQueue.top();
       double candidateValue = nonZeroElement.get();
@@ -71,6 +75,7 @@ public final class Vectors {
       }
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1035
     Vector topKSimilarities = new RandomAccessSparseVector(original.size(), k);
     for (Vector.Element topKSimilarity : topKQueue.getTopElements()) {
       topKSimilarities.setQuick(topKSimilarity.index(), topKSimilarity.get());
@@ -84,6 +89,7 @@ public final class Vectors {
     while (vectors.hasNext()) {
       VectorWritable v = vectors.next();
       if (v != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
         for (Element nonZeroElement : v.get().nonZeroes()) {
           accumulator.setQuick(nonZeroElement.index(), nonZeroElement.get());
         }
@@ -93,6 +99,7 @@ public final class Vectors {
   }
 
   public static Vector sum(Iterator<VectorWritable> vectors) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     Vector sum = vectors.next().get();
     while (vectors.hasNext()) {
       sum.assign(vectors.next().get(), Functions.PLUS);
@@ -133,6 +140,7 @@ public final class Vectors {
   public static Vector.Element[] toArray(VectorWritable vectorWritable) {
     Vector.Element[] elements = new Vector.Element[vectorWritable.get().getNumNondefaultElements()];
     int k = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element nonZeroElement : vectorWritable.get().nonZeroes()) {
       elements[k++] = new TemporaryElement(nonZeroElement.index(), nonZeroElement.get());
     }
@@ -151,6 +159,7 @@ public final class Vectors {
       vectorWritable.setWritesLaxPrecision(laxPrecision);
       vectorWritable.write(out);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(out, false);
     }
   }
@@ -161,6 +170,7 @@ public final class Vectors {
     try {
       return readAsIntMap(in);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(in, true);
     }
   }
@@ -193,6 +203,7 @@ public final class Vectors {
     try {
       return VectorWritable.readVector(in);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(in, true);
     }
   }

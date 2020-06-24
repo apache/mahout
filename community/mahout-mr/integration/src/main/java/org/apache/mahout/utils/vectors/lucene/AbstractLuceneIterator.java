@@ -52,6 +52,7 @@ public abstract class AbstractLuceneIterator extends AbstractIterator<Vector> {
 
   public AbstractLuceneIterator(TermInfo terminfo, double normPower, IndexReader indexReader, Weight weight,
       double maxPercentErrorDocs, String field) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     this.terminfo = terminfo;
     this.normPower = normPower;
     this.indexReader = indexReader;
@@ -113,6 +114,7 @@ public abstract class AbstractLuceneIterator extends AbstractIterator<Vector> {
 
       // The loop exits with termFreqVector and name set.
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
       TermsEnum te = termFreqVector.iterator();
       BytesRef term;
       TFDFMapper mapper = new TFDFMapper(indexReader.numDocs(), weight, this.terminfo);

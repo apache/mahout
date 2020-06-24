@@ -53,6 +53,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(SparseVectorsFromSequenceFiles.class);
 
   public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
     ToolRunner.run(new SparseVectorsFromSequenceFiles(), args);
   }
 
@@ -63,10 +64,12 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option inputDirOpt = DefaultOptionCreator.inputOption().create();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
 
     Option outputDirOpt = DefaultOptionCreator.outputOption().create();
 
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
             abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create()).withDescription(
             "(Optional) Minimum Support. Default Value: 2").withShortName("s").create();
 
@@ -96,6 +99,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
             abuilder.withName("maxDFSigma").withMinimum(1).withMaximum(1).create()).withDescription(
             "What portion of the tf (tf-idf) vectors to be used, expressed in times the standard deviation (sigma) "
                     + "of the document frequencies of these vectors. Can be used to remove really high frequency terms."
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
                     + " Expressed as a double value. Good value to be specified is 3.0. In case the value is less "
                     + "than 0 no vectors will be filtered out. Default is -1.0.  Overrides maxDFPercent")
             .withShortName("xs").create();
@@ -114,6 +118,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
             "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
                     + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-287
     Option logNormalizeOpt = obuilder.withLongName("logNormalize").withRequired(false)
             .withDescription(
                     "(Optional) Whether output vectors should be logNormalize. If set true else false")
@@ -124,12 +129,16 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
             .withDescription(
                     "(Optional) The maximum size of ngrams to create"
                             + " (2 = bigrams, 3 = trigrams, etc) Default Value:1").withShortName("ng").create();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-398
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-397
 
     Option sequentialAccessVectorOpt = obuilder.withLongName("sequentialAccessVector").withRequired(false)
             .withDescription(
                     "(Optional) Whether output vectors should be SequentialAccessVectors. If set true else false")
             .withShortName("seq").create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     Option namedVectorOpt = obuilder.withLongName("namedVector").withRequired(false)
             .withDescription(
                     "(Optional) Whether output vectors should be NamedVectors. If set true else false")
@@ -150,14 +159,17 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-408
       parser.setHelpOption(helpOpt);
       CommandLine cmdLine = parser.parse(args);
 
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
         return -1;
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
       Path inputDir = new Path((String) cmdLine.getValue(inputDirOpt));
       Path outputDir = new Path((String) cmdLine.getValue(outputDirOpt));
 
@@ -175,6 +187,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
 
       if (cmdLine.hasOption(maxNGramSizeOpt)) {
         try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
           maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt).toString());
         } catch (NumberFormatException ex) {
           log.warn("Could not parse ngram size option");
@@ -183,6 +196,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       log.info("Maximum n-gram size is: {}", maxNGramSize);
 
       if (cmdLine.hasOption(overwriteOutput)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
         HadoopUtil.delete(getConf(), outputDir);
       }
 
@@ -194,10 +208,15 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
 
       int reduceTasks = 1;
       if (cmdLine.hasOption(numReduceTasksOpt)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
       }
       log.info("Number of reduce tasks: {}", reduceTasks);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-398
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-397
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
       Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
       if (cmdLine.hasOption(analyzerNameOpt)) {
         String className = cmdLine.getValue(analyzerNameOpt).toString();
@@ -227,10 +246,13 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
         minDf = Integer.parseInt(cmdLine.getValue(minDFOpt).toString());
       }
       int maxDFPercent = 99;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
       if (cmdLine.hasOption(maxDFPercentOpt)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         maxDFPercent = Integer.parseInt(cmdLine.getValue(maxDFPercentOpt).toString());
       }
       double maxDFSigma = -1.0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
       if (cmdLine.hasOption(maxDFSigmaOpt)) {
         maxDFSigma = Double.parseDouble(cmdLine.getValue(maxDFSigmaOpt).toString());
       }
@@ -246,11 +268,15 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       }
 
       boolean logNormalize = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-287
       if (cmdLine.hasOption(logNormalizeOpt)) {
         logNormalize = true;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
       log.info("Tokenizing documents in {}", inputDir);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
       Configuration conf = getConf();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
       Path tokenizedPath = new Path(outputDir, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
       //TODO: move this into DictionaryVectorizer , and then fold SparseVectorsFrom with EncodedVectorsFrom
       // to have one framework for all of this.
@@ -262,11 +288,13 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       }
 
       boolean namedVectors = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
       if (cmdLine.hasOption(namedVectorOpt)) {
         namedVectors = true;
       }
       boolean shouldPrune = maxDFSigma >= 0.0 || maxDFPercent > 0.00;
       String tfDirName = shouldPrune
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
               ? DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER + "-toprune"
               : DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER;
       log.info("Creating Term Frequency Vectors");
@@ -308,8 +336,10 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
                 TFIDFConverter.calculateDF(new Path(outputDir, tfDirName), outputDir, conf, chunkSize);
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       long maxDF = maxDFPercent; //if we are pruning by std dev, then this will get changed
       if (shouldPrune) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
         long vectorCount = docFrequenciesFeatures.getFirst()[1];
         if (maxDFSigma >= 0.0) {
           Path dfDir = new Path(outputDir, TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
@@ -332,6 +362,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
           HighDFWordsPruner.pruneVectors(tfDir,
                   prunedTFDir,
                   prunedPartialTFDir,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
                   maxDFThreshold,
                   minDf,
                   conf,
@@ -343,6 +374,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
           HighDFWordsPruner.pruneVectors(tfDir,
                   prunedTFDir,
                   prunedPartialTFDir,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
                   maxDFThreshold,
                   minDf,
                   conf,
@@ -353,6 +385,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
         }
         HadoopUtil.delete(new Configuration(conf), tfDir);
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (processIdf) {
         TFIDFConverter.processTfIdf(
                 new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),

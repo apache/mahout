@@ -71,9 +71,11 @@ public final class TrainLogistic {
       CsvRecordFactory csv = lmp.getCsvRecordFactory();
       OnlineLogisticRegression lr = lmp.createRegression();
       for (int pass = 0; pass < passes; pass++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         try (BufferedReader in = open(inputFile)) {
           // read variable names
           csv.firstLine(in.readLine());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
 
           String line = in.readLine();
           while (line != null) {
@@ -93,6 +95,7 @@ public final class TrainLogistic {
             }
             double p = lr.classifyScalar(input);
             if (scores) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
               output.printf(Locale.ENGLISH, "%10d %2d %10.2f %2.4f %10.4f %10.4f%n",
                 samples, targetValue, lr.currentLearningRate(), p, logP, logPEstimate);
             }
@@ -105,6 +108,7 @@ public final class TrainLogistic {
         }
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (OutputStream modelOutput = new FileOutputStream(outputFile)) {
         lmp.saveTo(modelOutput);
       }
@@ -112,6 +116,7 @@ public final class TrainLogistic {
       output.println(lmp.getNumFeatures());
       output.println(lmp.getTargetVariable() + " ~ ");
       String sep = "";
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-674
       for (String v : csv.getTraceDictionary().keySet()) {
         double weight = predictorWeight(lr, 0, csv, v);
         if (weight != 0) {
@@ -119,7 +124,9 @@ public final class TrainLogistic {
           sep = " + ";
         }
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
       output.printf("%n");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-511
       model = lr;
       for (int row = 0; row < lr.getBeta().numRows(); row++) {
         for (String key : csv.getTraceDictionary().keySet()) {
@@ -249,6 +256,7 @@ public final class TrainLogistic {
     TrainLogistic.inputFile = getStringArgument(cmdLine, inputFile);
     TrainLogistic.outputFile = getStringArgument(cmdLine, outputFile);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> typeList = new ArrayList<>();
     for (Object x : cmdLine.getValues(types)) {
       typeList.add(x.toString());
@@ -292,6 +300,7 @@ public final class TrainLogistic {
   }
 
   public static OnlineLogisticRegression getModel() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-511
     return model;
   }
 
@@ -306,6 +315,7 @@ public final class TrainLogistic {
     } catch (IllegalArgumentException e) {
       in = new FileInputStream(new File(inputFile));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     return new BufferedReader(new InputStreamReader(in, Charsets.UTF_8));
   }
 }

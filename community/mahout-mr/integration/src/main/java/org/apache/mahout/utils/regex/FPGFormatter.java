@@ -28,6 +28,7 @@ public class FPGFormatter implements RegexFormatter {
 
   @Override
   public String format(String toFormat) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     return '\t' + WHITESPACE.matcher(toFormat).replaceAll("|");
   }
 

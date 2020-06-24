@@ -56,6 +56,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,L
 
   @Override
   Pair<OpenIntObjectHashMap<Vector>, OpenIntObjectHashMap<Vector>> createSharedInstance(Context ctx) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
     Configuration conf = ctx.getConfiguration();
     Path pathToU = new Path(conf.get(RecommenderJob.USER_FEATURES_PATH));
     Path pathToM = new Path(conf.get(RecommenderJob.ITEM_FEATURES_PATH));
@@ -63,6 +64,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,L
     OpenIntObjectHashMap<Vector> U = ALS.readMatrixByRows(pathToU, conf);
     OpenIntObjectHashMap<Vector> M = ALS.readMatrixByRows(pathToM, conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new Pair<>(U, M);
   }
 
@@ -83,6 +85,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,L
   @Override
   protected void map(IntWritable userIndexWritable, VectorWritable ratingsWritable, Context ctx)
     throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
 
     Pair<OpenIntObjectHashMap<Vector>, OpenIntObjectHashMap<Vector>> uAndM = getSharedInstance();
     OpenIntObjectHashMap<Vector> U = uAndM.getFirst();
@@ -92,12 +95,15 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,L
     int userIndex = userIndexWritable.get();
     final OpenIntHashSet alreadyRatedItems = new OpenIntHashSet(ratings.getNumNondefaultElements());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element e : ratings.nonZeroes()) {
       alreadyRatedItems.add(e.index());
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
     final TopItemsQueue topItemsQueue = new TopItemsQueue(recommendationsPerUser);
     final Vector userFeatures = U.get(userIndex);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
 
     M.forEachPair(new IntObjectProcedure<Vector>() {
       @Override
@@ -105,6 +111,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,L
         if (!alreadyRatedItems.contains(itemID)) {
           double predictedRating = userFeatures.dot(itemFeatures);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
           MutableRecommendedItem top = topItemsQueue.top();
           if (predictedRating > top.getValue()) {
             top.set(itemID, (float) predictedRating);
@@ -124,6 +131,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,L
         ((MutableRecommendedItem) topItem).capToMaxValue(maxRating);
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
       if (usesLongIDs) {
         long userID = userIDIndex.get(userIndex);
         userIDWritable.set(userID);

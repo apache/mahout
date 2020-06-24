@@ -68,6 +68,7 @@ public final class TrainAdaptiveLogistic {
 
       CsvRecordFactory csv = lmp.getCsvRecordFactory();
       model = lmp.createAdaptiveLogisticRegression();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
       State<Wrapper, CrossFoldLearner> best;
       CrossFoldLearner learner = null;
 
@@ -97,6 +98,7 @@ public final class TrainAdaptiveLogistic {
             if (learner != null) {
               double averageCorrect = learner.percentCorrect();
               double averageLL = learner.logLikelihood();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
               output.printf("%d\t%.3f\t%.2f%n",
                             k, averageLL, averageCorrect * 100);
             } else {
@@ -119,6 +121,7 @@ public final class TrainAdaptiveLogistic {
         return;
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (OutputStream modelOutput = new FileOutputStream(outputFile)) {
         lmp.saveTo(modelOutput);
       }
@@ -135,6 +138,7 @@ public final class TrainAdaptiveLogistic {
         }
       }
       output.printf("%n");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
 
       for (int row = 0; row < lr.getBeta().numRows(); row++) {
         for (String key : csv.getTraceDictionary().keySet()) {
@@ -222,6 +226,7 @@ public final class TrainAdaptiveLogistic {
          .create();
     
     Option targetCategories = builder
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       .withLongName("categories")
       .withDescription("the number of target categories to be considered")
       .withRequired(true)
@@ -307,6 +312,7 @@ public final class TrainAdaptiveLogistic {
     TrainAdaptiveLogistic.outputFile = getStringArgument(cmdLine,
                                                          outputFile);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> typeList = new ArrayList<>();
     for (Object x : cmdLine.getValues(types)) {
       typeList.add(x.toString());

@@ -51,6 +51,7 @@ public class MixedGradient implements Gradient {
   public Vector apply(String groupKey, int actual, Vector instance, AbstractVectorClassifier classifier) {
     if (random.nextDouble() < alpha) {
       // one option is to apply a ranking update relative to our recent history
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-678
       if (!hasZero || !hasOne) {
         throw new IllegalStateException();
       }

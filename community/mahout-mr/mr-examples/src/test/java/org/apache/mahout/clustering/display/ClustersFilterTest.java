@@ -35,6 +35,7 @@ public class ClustersFilterTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     configuration = getConfiguration();
     output = getTestTempDirPath();
   }
@@ -49,6 +50,7 @@ public class ClustersFilterTest extends MahoutTestCase {
 
     PathFilter clustersFilter = new ClustersFilter();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     assertTrue(clustersFilter.accept(path0));
     assertTrue(clustersFilter.accept(path1));
   }
@@ -67,6 +69,7 @@ public class ClustersFilterTest extends MahoutTestCase {
 
     PathFilter clustersFilter = new ClustersFilter();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     assertTrue(clustersFilter.accept(path0));
     assertTrue(clustersFilter.accept(path1));
     assertTrue(clustersFilter.accept(path2));

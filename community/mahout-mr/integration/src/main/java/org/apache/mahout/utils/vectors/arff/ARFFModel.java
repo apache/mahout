@@ -26,7 +26,9 @@ import java.util.Map;
  * ones may require a better implementation.
  */
 public interface ARFFModel {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
   String ARFF_SPARSE = "{"; //indicates the vector is sparse
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-985
   String ARFF_SPARSE_END = "}";
   String ARFF_COMMENT = "%";
   String ATTRIBUTE = "@attribute";
@@ -44,6 +46,7 @@ public interface ARFFModel {
    */
   Map<String, Integer> getLabelBindings();
   
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
   Integer getNominalValue(String label, String nominal);
   
   void addNominal(String label, String nominal, int idx);
@@ -68,6 +71,7 @@ public interface ARFFModel {
   
   double getValue(String data, int idx);
   
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
   Map<String, Map<String, Integer>> getNominalMap();
   
   int getLabelSize();

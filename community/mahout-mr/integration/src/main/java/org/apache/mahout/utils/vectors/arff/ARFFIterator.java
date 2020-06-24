@@ -51,6 +51,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
     try {
       while ((line = reader.readLine()) != null) {
         line = line.trim();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
         if (!line.isEmpty() && !line.startsWith(ARFFModel.ARFF_COMMENT)) {
           break;
         }
@@ -59,6 +60,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
       throw new IllegalStateException(ioe);
     }
     if (line == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       try {
         Closeables.close(reader, true);
       } catch (IOException e) {
@@ -67,6 +69,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
       return endOfData();
     }
     Vector result;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1371
     Matcher contents = DATA_PATTERN.matcher(line);
     if (contents.find()) {
       line = contents.group(1);
@@ -75,13 +78,16 @@ final class ARFFIterator extends AbstractIterator<Vector> {
       for (String split : splits) {
         int idIndex = split.indexOf(' ');
         int idx = Integer.parseInt(split.substring(0, idIndex).trim());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
         String data = split.substring(idIndex).trim();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-985
         if (!"?".equals(data)) {
           result.setQuick(idx, model.getValue(data, idx));
         }
       }
     } else {
       result = new DenseVector(model.getLabelSize());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1371
       String[] splits = splitCSV(line);
       for (int i = 0; i < splits.length; i++) {
         String split = splits[i];
@@ -102,7 +108,9 @@ final class ARFFIterator extends AbstractIterator<Vector> {
    * @return String[]
    */
   public static String[] splitCSV(String line) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1371
     StringBuilder sb = new StringBuilder(128);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> tokens = new ArrayList<>();
     char escapeChar = '\0';
     for (int i = 0; i < line.length(); i++) {

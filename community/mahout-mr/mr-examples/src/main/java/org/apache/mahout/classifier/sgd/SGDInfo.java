@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.sgd;
 
 final class SGDInfo {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
 
   private double averageLL;
   private double averageCorrect;

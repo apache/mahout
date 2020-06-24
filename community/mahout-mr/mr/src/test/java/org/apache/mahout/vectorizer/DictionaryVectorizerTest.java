@@ -64,9 +64,11 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
@@ -82,6 +84,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
                 new Text(SECOND_TEXT_BLOCK_IDENTIFIER));
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
   }
@@ -107,8 +110,10 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
   }
   
   private void runTest(boolean sequential, boolean named)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     throws IOException, ClassNotFoundException, InterruptedException {
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     Class<? extends Analyzer> analyzer = StandardAnalyzer.class;
     
     Path tokenizedDocuments = getTestTempDirPath("output/tokenized-documents");
@@ -117,16 +122,19 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     Path tfidf = getTestTempDirPath("output/tfidf");
     Path tfidfVectors = new Path(tfidf, "tfidf-vectors");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     DocumentProcessor.tokenizeDocuments(inputPath, analyzer, tokenizedDocuments, conf);
     
     DictionaryVectorizer.createTermFrequencyVectors(tokenizedDocuments,
                                                     wordCount,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
                                                     DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
                                                     conf,
                                                     2,
                                                     1,
                                                     0.0f,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-287
                                                     -1.0f,
                                                     true,
                                                     1,
@@ -134,17 +142,21 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
                                                     sequential,
                                                     named);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     validateVectors(conf, NUM_DOCS, tfVectors, sequential, named);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
     Pair<Long[], List<Path>> docFrequenciesFeatures = TFIDFConverter.calculateDF(tfVectors, 
     		tfidf, conf, 100);
 
     TFIDFConverter.processTfIdf(tfVectors,
                                 tfidf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
                                 conf,
                                 docFrequenciesFeatures,
                                 1,
                                 -1,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-287
                                 2.0f,
                                 false,
                                 sequential,
@@ -153,6 +165,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     
     
     validateVectors(conf, NUM_DOCS, tfidfVectors, sequential, named);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
     Integer secondTextBlockIdentifierDimensionId = validateDictionary(wordCount, conf);
 

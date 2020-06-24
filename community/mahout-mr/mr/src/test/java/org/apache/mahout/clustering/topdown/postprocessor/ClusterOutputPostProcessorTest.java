@@ -66,6 +66,7 @@ public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
   }
@@ -89,6 +90,7 @@ public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
 
     Path pointsPath = getTestTempDirPath("points");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
@@ -123,6 +125,7 @@ public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
   private void assertPointsInFirstTopLevelCluster(Path clusterPath) throws IOException {
     List<Vector> vectorsInCluster = getVectorsInCluster(clusterPath);
     for (Vector vector : vectorsInCluster) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1190
       Assert.assertTrue(ArrayUtils.contains(new String[] {"{0:1.0,1:1.0}", "{0:2.0,1:1.0}", "{0:1.0,1:2.0}"},
         vector.asFormatString()));
     }
@@ -160,6 +163,7 @@ public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
 
       Path bottomLevelCluster = PathDirectory.getBottomLevelClusterPath(outputPath, clusterId);
       CanopyDriver.run(conf, topLevelclusterPath, bottomLevelCluster, new ManhattanDistanceMeasure(), 2.1,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
         2.0, true, 0.0, true);
       assertBottomLevelCluster(bottomLevelCluster);
     }
@@ -199,6 +203,7 @@ public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
   private void topLevelClustering(Path pointsPath, Configuration conf) throws IOException,
                                                                       InterruptedException,
                                                                       ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, true, 0.0, true);
   }
 

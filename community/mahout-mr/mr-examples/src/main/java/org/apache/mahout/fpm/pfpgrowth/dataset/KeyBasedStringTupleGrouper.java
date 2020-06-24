@@ -36,6 +36,7 @@ public final class KeyBasedStringTupleGrouper {
   private KeyBasedStringTupleGrouper() { }
   
   public static void startJob(Parameters params) throws IOException,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
                                                 InterruptedException,
                                                 ClassNotFoundException {
     Configuration conf = new Configuration();
@@ -62,6 +63,7 @@ public final class KeyBasedStringTupleGrouper {
     FileOutputFormat.setOutputPath(job, outPath);
     
     HadoopUtil.delete(conf, outPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
     job.setInputFormatClass(TextInputFormat.class);
     job.setMapperClass(KeyBasedStringTupleMapper.class);
@@ -70,6 +72,7 @@ public final class KeyBasedStringTupleGrouper {
     job.setOutputFormatClass(TextOutputFormat.class);
     
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }

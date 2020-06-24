@@ -41,6 +41,7 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
   }
   
   public LongPair swap() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-174
     return new LongPair(second, first);
   }
   
@@ -50,6 +51,7 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
       return false;
     }
     LongPair otherPair = (LongPair) obj;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     return first == otherPair.getFirst() && second == otherPair.getSecond();
   }
   
@@ -68,6 +70,7 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
   
   @Override
   public int compareTo(LongPair o) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     if (first < o.getFirst()) {
       return -1;
     } else if (first > o.getFirst()) {

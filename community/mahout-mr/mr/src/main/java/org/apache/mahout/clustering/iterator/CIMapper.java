@@ -38,11 +38,13 @@ public class CIMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWri
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
     Configuration conf = context.getConfiguration();
     String priorClustersPath = conf.get(ClusterIterator.PRIOR_PATH_KEY);
     classifier = new ClusterClassifier();
     classifier.readFromSeqFiles(conf, new Path(priorClustersPath));
     policy = classifier.getPolicy();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     policy.update(classifier);
     super.setup(context);
   }
@@ -52,6 +54,7 @@ public class CIMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWri
       InterruptedException {
     Vector probabilities = classifier.classify(value.get());
     Vector selections = policy.select(probabilities);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element el : selections.nonZeroes()) {
       classifier.train(el.index(), value.get(), el.get());
     }
@@ -60,6 +63,7 @@ public class CIMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWri
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     List<Cluster> clusters = classifier.getModels();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     ClusterWritable cw = new ClusterWritable();
     for (int index = 0; index < clusters.size(); index++) {
       cw.setValue(clusters.get(index));

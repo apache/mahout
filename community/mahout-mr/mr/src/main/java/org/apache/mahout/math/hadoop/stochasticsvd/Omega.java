@@ -78,7 +78,9 @@ public class Omega {
         accumDots(j, aRow.getQuick(j), yRow);
       }
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element el : aRow.nonZeroes()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-638
         accumDots(el.index(), el.get(), yRow);
       }
     }
@@ -92,6 +94,7 @@ public class Omega {
    * @param yRowOut
    */
   public void computeYRow(Vector aRow, Vector yRowOut) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
     yRowOut.assign(0.0);
     if (aRow.isDense()) {
       int n = aRow.size();
@@ -99,6 +102,7 @@ public class Omega {
         accumDots(j, aRow.getQuick(j), yRowOut);
       }
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element el : aRow.nonZeroes()) {
         accumDots(el.index(), el.get(), yRowOut);
       }
@@ -136,6 +140,7 @@ public class Omega {
               }
 
             } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
               for (Element el : v.nonZeroes()) {
                 int k = el.index();
                 result += getQuick(k, index) * el.get();

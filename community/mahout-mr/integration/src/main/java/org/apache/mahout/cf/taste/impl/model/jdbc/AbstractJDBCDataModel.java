@@ -119,6 +119,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String getNumPreferenceForItemsSQL,
                                   String getMaxPreferenceSQL,
                                   String getMinPreferenceSQL) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-100
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     this(dataSource,
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
@@ -147,6 +149,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String itemIDColumn,
                                   String preferenceColumn,
                                   String getPreferenceSQL,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
                                   String getPreferenceTimeSQL,
                                   String getUserSQL,
                                   String getAllUsersSQL,
@@ -158,12 +161,15 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String getItemsSQL,
                                   String getPrefsForItemSQL,
                                   String getNumPreferenceForItemSQL,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
                                   String getNumPreferenceForItemsSQL,
                                   String getMaxPreferenceSQL,
                                   String getMinPreferenceSQL) {
 
     log.debug("Creating AbstractJDBCModel...");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     AbstractJDBCComponent.checkNotNullAndLog("preferenceTable", preferenceTable);
     AbstractJDBCComponent.checkNotNullAndLog("userIDColumn", userIDColumn);
     AbstractJDBCComponent.checkNotNullAndLog("itemIDColumn", itemIDColumn);
@@ -183,6 +189,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     AbstractJDBCComponent.checkNotNullAndLog("getPrefsForItemSQL", getPrefsForItemSQL);
     AbstractJDBCComponent.checkNotNullAndLog("getNumPreferenceForItemSQL", getNumPreferenceForItemSQL);
     AbstractJDBCComponent.checkNotNullAndLog("getNumPreferenceForItemsSQL", getNumPreferenceForItemsSQL);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     AbstractJDBCComponent.checkNotNullAndLog("getMaxPreferenceSQL", getMaxPreferenceSQL);
     AbstractJDBCComponent.checkNotNullAndLog("getMinPreferenceSQL", getMinPreferenceSQL);
 
@@ -191,6 +198,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                 + "to the database itself, or database performance will be severely reduced.");
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-100
     this.preferenceTable = preferenceTable;
     this.userIDColumn = userIDColumn;
     this.itemIDColumn = itemIDColumn;
@@ -198,6 +206,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
     this.dataSource = dataSource;
     this.getPreferenceSQL = getPreferenceSQL;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     this.getPreferenceTimeSQL = getPreferenceTimeSQL;
     this.getUserSQL = getUserSQL;
     this.getAllUsersSQL = getAllUsersSQL;
@@ -210,12 +219,14 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     this.getPrefsForItemSQL = getPrefsForItemSQL;
     //this.getNumPreferenceForItemSQL = getNumPreferenceForItemSQL;
     this.getNumPreferenceForItemsSQL = getNumPreferenceForItemsSQL;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     this.getMaxPreferenceSQL = getMaxPreferenceSQL;
     this.getMinPreferenceSQL = getMinPreferenceSQL;
 
     this.cachedNumUsers = -1;
     this.cachedNumItems = -1;
     this.itemPrefCounts = new Cache<>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     this.maxPreference = Float.NaN;
     this.minPreference = Float.NaN;
@@ -228,6 +239,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   public String getPreferenceTable() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-100
     return preferenceTable;
   }
 
@@ -249,6 +261,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   @Override
   public LongPrimitiveIterator getUserIDs() throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Retrieving all users...");
     try {
       return new ResultSetIDIterator(getUsersSQL);
@@ -292,6 +305,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       return new GenericUserPreferenceArray(prefs);
 
     } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.warn("Exception while retrieving user", sqle);
       throw new TasteException(sqle);
     } finally {
@@ -309,6 +323,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     ResultSet rs = null;
 
     FastByIDMap<PreferenceArray> result = new FastByIDMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     try {
       conn = dataSource.getConnection();
@@ -316,10 +331,12 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL query: {}", getAllUsersSQL);
       rs = stmt.executeQuery(getAllUsersSQL);
 
       Long currentUserID = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Preference> currentPrefs = new ArrayList<>();
       while (rs.next()) {
         long nextUserID = getLongColumn(rs, 1);
@@ -348,12 +365,15 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   @Override
   public FastByIDMap<FastIDSet> exportWithIDsOnly() throws TasteException {
     log.debug("Exporting all data");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     Connection conn = null;
     Statement stmt = null;
     ResultSet rs = null;
 
     FastByIDMap<FastIDSet> result = new FastByIDMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     try {
       conn = dataSource.getConnection();
@@ -361,6 +381,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL query: {}", getAllUsersSQL);
       rs = stmt.executeQuery(getAllUsersSQL);
 
@@ -384,6 +405,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       return result;
 
     } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.warn("Exception while exporting all data", sqle);
       throw new TasteException(sqle);
     } finally {
@@ -412,6 +435,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchSize(getFetchSize());
       setLongParameter(stmt, 1, userID);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
 
@@ -427,6 +452,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       return result;
 
     } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.warn("Exception while retrieving item s", sqle);
       throw new TasteException(sqle);
     } finally {
@@ -449,6 +475,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       setLongParameter(stmt, 1, userID);
       setLongParameter(stmt, 2, itemID);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL query: {}", getPreferenceSQL);
       rs = stmt.executeQuery();
       if (rs.next()) {
@@ -466,6 +493,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   @Override
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     if (getPreferenceTimeSQL == null) {
       return null;
     }
@@ -475,6 +503,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1038
       stmt = conn.prepareStatement(getPreferenceTimeSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(1);
@@ -498,8 +527,10 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   @Override
   public LongPrimitiveIterator getItemIDs() throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Retrieving all items...");
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       return new ResultSetIDIterator(getItemsSQL);
     } catch (SQLException sqle) {
       throw new TasteException(sqle);
@@ -516,6 +547,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   protected List<Preference> doGetPreferencesForItem(long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Retrieving preferences for item ID '{}'", itemID);
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -528,14 +561,19 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchSize(getFetchSize());
       setLongParameter(stmt, 1, itemID);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL query: {}", getPrefsForItemSQL);
       rs = stmt.executeQuery();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Preference> prefs = new ArrayList<>();
       while (rs.next()) {
         prefs.add(buildPreference(rs));
       }
       return prefs;
     } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.warn("Exception while retrieving prefs for item", sqle);
       throw new TasteException(sqle);
     } finally {
@@ -561,6 +599,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-764
     return itemPrefCounts.get(itemID);
   }
 
@@ -570,6 +609,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   private int getNumThings(String name, String sql, long... args) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Retrieving number of {} in model", name);
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -584,11 +624,14 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
           setLongParameter(stmt, i, args[i - 1]);
         }
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL query: {}", sql);
       rs = stmt.executeQuery();
       rs.next();
       return rs.getInt(1);
     } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
       log.warn("Exception while retrieving number of {}", name, sqle);
       throw new TasteException(sqle);
     } finally {
@@ -601,6 +644,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     Preconditions.checkArgument(!Float.isNaN(value), "NaN value");
 
     log.debug("Setting preference for user {}, item {}", userID, itemID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -613,6 +657,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setDouble(3, value);
       stmt.setDouble(4, value);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
 
@@ -628,6 +673,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   public void removePreference(long userID, long itemID) throws TasteException {
 
     log.debug("Removing preference for user '{}', item '{}'", userID, itemID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -638,6 +684,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       setLongParameter(stmt, 1, userID);
       setLongParameter(stmt, 2, itemID);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL update: {}", removePreferenceSQL);
       stmt.executeUpdate();
 
@@ -653,6 +700,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     cachedNumUsers = -1;
     cachedNumItems = -1;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     minPreference = Float.NaN;
     maxPreference = Float.NaN;
     itemPrefCounts.clear();
@@ -665,6 +713,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   @Override
   public float getMaxPreference() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     if (Float.isNaN(maxPreference)) {
       Connection conn = null;
       PreparedStatement stmt = null;

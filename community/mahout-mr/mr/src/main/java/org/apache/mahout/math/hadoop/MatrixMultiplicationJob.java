@@ -55,6 +55,7 @@ public class MatrixMultiplicationJob extends AbstractJob {
   private static final String OUT_CARD = "output.vector.cardinality";
 
   public static Configuration createMatrixMultiplyJobConf(Path aPath, 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-641
                                                           Path bPath, 
                                                           Path outPath, 
                                                           int outCardinality) {
@@ -98,7 +99,9 @@ public class MatrixMultiplicationJob extends AbstractJob {
     addOption("inputPathB", "ib", "Path to the second input matrix", true);
 
     addOption("outputPath", "op", "Path to the output matrix", false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1076
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String, List<String>> argMap = parseArguments(strings);
     if (argMap == null) {
       return -1;
@@ -116,6 +119,7 @@ public class MatrixMultiplicationJob extends AbstractJob {
     a.setConf(new Configuration(getConf()));
     b.setConf(new Configuration(getConf()));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1076
     if (hasOption("outputPath")) {
       a.times(b, new Path(getOption("outputPath")));
     } else {
@@ -145,7 +149,9 @@ public class MatrixMultiplicationJob extends AbstractJob {
       Vector outFrag = firstIsOutFrag ? ((VectorWritable)v.get(0)).get() : ((VectorWritable)v.get(1)).get();
       Vector multiplier = firstIsOutFrag ? ((VectorWritable)v.get(1)).get() : ((VectorWritable)v.get(0)).get();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-639
       VectorWritable outVector = new VectorWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element e : multiplier.nonZeroes()) {
         row.set(e.index());
         outVector.set(outFrag.times(e.get()));
@@ -168,6 +174,7 @@ public class MatrixMultiplicationJob extends AbstractJob {
       Vector accumulator = new RandomAccessSparseVector(it.next().get());
       while (it.hasNext()) {
         Vector row = it.next().get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
         accumulator.assign(row, Functions.PLUS);
       }
       out.collect(rowNum, new VectorWritable(new SequentialAccessSparseVector(accumulator)));

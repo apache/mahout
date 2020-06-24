@@ -36,6 +36,7 @@ public final class MatrixUtils {
   }
 
   public static void write(Path outputDir, Configuration conf, VectorIterable matrix)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException {
     FileSystem fs = outputDir.getFileSystem(conf);
     fs.delete(outputDir, true);
@@ -43,6 +44,7 @@ public final class MatrixUtils {
         IntWritable.class, VectorWritable.class);
     IntWritable topic = new IntWritable();
     VectorWritable vector = new VectorWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (MatrixSlice slice : matrix) {
       topic.set(slice.index());
       vector.set(slice.vector());
@@ -56,7 +58,9 @@ public final class MatrixUtils {
     int numCols = -1;
     boolean sparse = false;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (Path modelPath : modelPaths) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       for (Pair<IntWritable, VectorWritable> row
           : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
@@ -88,7 +92,9 @@ public final class MatrixUtils {
   }
 
   public static OpenObjectIntHashMap<String> readDictionary(Configuration conf, Path... dictPath) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (Path dictionaryFile : dictPath) {
       for (Pair<Writable, IntWritable> record
               : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
@@ -100,6 +106,7 @@ public final class MatrixUtils {
 
   public static String[] invertDictionary(OpenObjectIntHashMap<String> termIdMap) {
     int maxTermId = -1;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (String term : termIdMap.keys()) {
       maxTermId = Math.max(maxTermId, termIdMap.get(term));
     }

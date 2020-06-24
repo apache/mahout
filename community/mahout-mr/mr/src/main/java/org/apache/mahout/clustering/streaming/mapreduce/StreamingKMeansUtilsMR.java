@@ -69,11 +69,14 @@ public final class StreamingKMeansUtilsMR {
     if (searcherClass.equals(BruteSearch.class.getName())) {
       return ClassUtils.instantiateAs(searcherClass, UpdatableSearcher.class,
           new Class[]{DistanceMeasure.class}, new Object[]{distanceMeasure});
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     } else if (searcherClass.equals(FastProjectionSearch.class.getName())
         || searcherClass.equals(ProjectionSearch.class.getName())) {
       return ClassUtils.instantiateAs(searcherClass, UpdatableSearcher.class,
           new Class[]{DistanceMeasure.class, int.class, int.class},
           new Object[]{distanceMeasure, numProjections, searchSize});
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1216
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1156
     } else if (searcherClass.equals(LocalitySensitiveHashSearch.class.getName())) {
       return ClassUtils.instantiateAs(searcherClass, LocalitySensitiveHashSearch.class,
           new Class[]{DistanceMeasure.class, int.class},
@@ -132,6 +135,7 @@ public final class StreamingKMeansUtilsMR {
    */
   public static void writeCentroidsToSequenceFile(Iterable<Centroid> centroids, Path path, Configuration conf)
     throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer = SequenceFile.createWriter(FileSystem.get(conf), conf,
         path, IntWritable.class, CentroidWritable.class)) {
       int i = 0;
@@ -142,6 +146,8 @@ public final class StreamingKMeansUtilsMR {
   }
 
   public static void writeVectorsToSequenceFile(Iterable<? extends Vector> datapoints, Path path, Configuration conf)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     throws IOException {
     try (SequenceFile.Writer writer = SequenceFile.createWriter(FileSystem.get(conf), conf,
         path, IntWritable.class, VectorWritable.class)){

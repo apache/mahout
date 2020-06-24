@@ -62,6 +62,7 @@ public final class GenericRelevantItemsDataSplitter implements RelevantItemsData
     // If we're dealing with the very user that we're evaluating for precision/recall,
     if (userID == otherUserID) {
       // then must remove all the test IDs, the "relevant" item IDs
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Preference> prefs2 = new ArrayList<>(prefs2Array.length());
       for (Preference pref : prefs2Array) {
         prefs2.add(pref);

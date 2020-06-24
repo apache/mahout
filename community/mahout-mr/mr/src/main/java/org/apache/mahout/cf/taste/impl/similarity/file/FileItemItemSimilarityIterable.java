@@ -39,6 +39,7 @@ final class FileItemItemSimilarityIterable implements Iterable<GenericItemSimila
     try {
       return new FileItemItemSimilarityIterator(similaritiesFile);
     } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
       throw new IllegalStateException("Can't read " + similaritiesFile, ioe);
     }
   }

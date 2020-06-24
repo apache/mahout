@@ -29,11 +29,14 @@ public final class ErrorEstimate {
   }
   
   public static double errorRate(double[] labels, double[] predictions) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(labels.length == predictions.length, "labels.length != predictions.length");
     double nberrors = 0; // number of instance that got bad predictions
     double datasize = 0; // number of classified instances
 
     for (int index = 0; index < labels.length; index++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       if (predictions[index] == -1) {
         continue; // instance not classified
       }

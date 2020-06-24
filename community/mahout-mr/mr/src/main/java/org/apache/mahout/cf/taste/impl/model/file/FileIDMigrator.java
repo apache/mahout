@@ -61,7 +61,9 @@ public class FileIDMigrator extends AbstractIDMigrator {
   }
 
   public FileIDMigrator(File dataFile, long minReloadIntervalMS) throws FileNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     longToString = new FastByIDMap<>(100);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     this.dataFile = Preconditions.checkNotNull(dataFile);
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
@@ -94,6 +96,7 @@ public class FileIDMigrator extends AbstractIDMigrator {
   }
 
   private FastByIDMap<String> buildMapping() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FastByIDMap<String> mapping = new FastByIDMap<>();
     for (String line : new FileLineIterable(dataFile)) {
       mapping.put(toLongID(line), line);

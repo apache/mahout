@@ -40,6 +40,7 @@ public final class DefaultIgSplitTest extends MahoutTestCase {
     // all the vectors have the same label (0)
     double[][] temp = Utils.randomDoublesWithSameLabel(rng, descriptor, false, 100, 0);
     String[] sData = Utils.double2String(temp);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data data = DataLoader.loadData(dataset, sData);
     DefaultIgSplit iG = new DefaultIgSplit();
@@ -66,7 +67,11 @@ public final class DefaultIgSplitTest extends MahoutTestCase {
     for (int index = 0; index < 15; index++) {
       temp[index][label] = 2.0;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     sData = Utils.double2String(temp);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     dataset = DataLoader.generateDataset(descriptor, false, sData);
     data = DataLoader.loadData(dataset, sData);
     iG = new DefaultIgSplit();

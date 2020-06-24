@@ -55,6 +55,7 @@ public class StreamingKMeansTest {
 
   @Before
   public void setUp() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1320
     RandomUtils.useTestSeed();
     syntheticData =
       DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS);

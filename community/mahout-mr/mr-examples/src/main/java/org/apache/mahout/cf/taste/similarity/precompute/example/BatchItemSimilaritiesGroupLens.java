@@ -59,6 +59,7 @@ public final class BatchItemSimilaritiesGroupLens {
         new FileSimilarItemsWriter(resultFile));
 
     System.out.println("Computed " + numSimilarities + " similarities for " + dataModel.getNumItems() + " items "
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         + "and saved them to " + resultFile.getAbsolutePath());
   }
 

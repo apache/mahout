@@ -58,9 +58,11 @@ public class Atx {
         long start = chks[0].start();
 
         atx = new double[chks.length];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
         for (int r = 0; r < chunkSize; r++) {
           double d = x.getQuick((int)start + r);
           for (int c = 0; c < chks.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
             atx[c] += (chks[c].atd(r) * d);
           }
         }
@@ -76,6 +78,7 @@ public class Atx {
     Vector v = new DenseVector(new MRTaskAtx().doAll(A).atx);
     Matrix m = new DenseMatrix(A.numCols(), 1);
     m.assignColumn(0, v);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     return H2OHelper.drmFromMatrix(m, -1, -1);
   }
 }

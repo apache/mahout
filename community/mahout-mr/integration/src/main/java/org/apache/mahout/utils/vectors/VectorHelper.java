@@ -55,6 +55,7 @@ public final class VectorHelper {
   }
 
   public static String vectorToCSVString(Vector vector, boolean namesAsComments) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     Appendable bldr = new StringBuilder(2048);
     vectorToCSVString(vector, namesAsComments, bldr);
     return bldr.toString();
@@ -66,12 +67,14 @@ public final class VectorHelper {
 
   public static String buildJson(Iterable<Pair<String, Double>> iterable, StringBuilder bldr) {
     bldr.append('{');
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     for (Pair<String, Double> p : iterable) {
       bldr.append(p.getFirst());
       bldr.append(':');
       bldr.append(p.getSecond());
       bldr.append(',');
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (bldr.length() > 1) {
       bldr.setCharAt(bldr.length() - 1, '}');
     }
@@ -87,13 +90,17 @@ public final class VectorHelper {
     // otherwise the call to queue.pop() returns a Pair(null, null) and the subsequent call
     // to pair.getFirst() throws a NullPointerException
     if (sizeOfNonZeroElementsInVector < maxEntries) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1232
       maxEntries = sizeOfNonZeroElementsInVector;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     PriorityQueue<Pair<Integer, Double>> queue = new TDoublePQ<>(-1, maxEntries);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : vector.nonZeroes()) {
       queue.insertWithOverflow(Pair.of(e.index(), e.get()));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Pair<Integer, Double>> entries = new ArrayList<>();
     Pair<Integer, Double> pair;
     while ((pair = queue.pop()) != null) {
@@ -101,9 +108,11 @@ public final class VectorHelper {
         entries.add(pair);
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1064
     Collections.sort(entries, new Comparator<Pair<Integer, Double>>() {
       @Override
       public int compare(Pair<Integer, Double> a, Pair<Integer, Double> b) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         return b.getSecond().compareTo(a.getSecond());
       }
     });
@@ -111,9 +120,12 @@ public final class VectorHelper {
   }
 
   public static List<Pair<Integer, Double>> firstEntries(Vector vector, int maxEntries) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Pair<Integer, Double>> entries = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     Iterator<Vector.Element> it = vector.nonZeroes().iterator();
     int i = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (it.hasNext() && i++ < maxEntries) {
       Vector.Element e = it.next();
       entries.add(Pair.of(e.index(), e.get()));
@@ -122,9 +134,11 @@ public final class VectorHelper {
   }
 
   public static List<Pair<String, Double>> toWeightedTerms(Collection<Pair<Integer, Double>> entries,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
                                                            final String[] dictionary) {
     if (dictionary != null) {
       return new ArrayList<>(Collections2.transform(entries,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         new Function<Pair<Integer, Double>, Pair<String, Double>>() {
           @Override
           public Pair<String, Double> apply(Pair<Integer, Double> p) {
@@ -132,6 +146,8 @@ public final class VectorHelper {
           }
         }));
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       return new ArrayList<>(Collections2.transform(entries,
         new Function<Pair<Integer, Double>, Pair<String, Double>>() {
           @Override
@@ -151,17 +167,23 @@ public final class VectorHelper {
   public static void vectorToCSVString(Vector vector,
                                        boolean namesAsComments,
                                        Appendable bldr) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (namesAsComments && vector instanceof NamedVector) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
       bldr.append('#').append(((NamedVector) vector).getName()).append('\n');
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     Iterator<Vector.Element> iter = vector.all().iterator();
     boolean first = true;
     while (iter.hasNext()) {
       if (first) {
         first = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-402
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
         bldr.append(',');
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       Vector.Element elt = iter.next();
       bldr.append(String.valueOf(elt.get()));
     }
@@ -176,6 +198,7 @@ public final class VectorHelper {
    * </pre>
    */
   public static String[] loadTermDictionary(File dictFile) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (InputStream in = new FileInputStream(dictFile)) {
       return loadTermDictionary(in);
     }
@@ -188,12 +211,15 @@ public final class VectorHelper {
    * @param filePattern <PATH TO DICTIONARY>/dictionary.file-*
    */
   public static String[] loadTermDictionary(Configuration conf, String filePattern) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     OpenObjectIntHashMap<String> dict = new OpenObjectIntHashMap<>();
     int maxIndexValue = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     for (Pair<Text, IntWritable> record
         : new SequenceFileDirIterable<Text, IntWritable>(new Path(filePattern), PathType.GLOB, null, null, true,
                                                          conf)) {
       dict.put(record.getFirst().toString(), record.getSecond().get());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1349
       if (record.getSecond().get() > maxIndexValue) {
         maxIndexValue = record.getSecond().get();
       }
@@ -239,6 +265,7 @@ public final class VectorHelper {
     private final T sentinel;
 
     private TDoublePQ(T sentinel, int size) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
       super(size);
       this.sentinel = sentinel;
     }

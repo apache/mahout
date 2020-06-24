@@ -261,6 +261,7 @@ public class StreamingKMeans implements Iterable<Centroid> {
    * @return the UpdatableSearcher containing the resulting centroids.
    */
   private UpdatableSearcher clusterInternal(Iterable<Centroid> datapoints, boolean collapseClusters) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1223
     Iterator<Centroid> datapointsIterator = datapoints.iterator();
     if (!datapointsIterator.hasNext()) {
       return centroids;
@@ -278,6 +279,7 @@ public class StreamingKMeans implements Iterable<Centroid> {
       // Assign the first datapoint to the first cluster.
       // Adding a vector to a searcher would normally just reference the copy,
       // but we could potentially mutate it and so we need to make a clone.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1223
       centroids.add(datapointsIterator.next().clone());
       ++numProcessedDatapoints;
     }
@@ -323,6 +325,7 @@ public class StreamingKMeans implements Iterable<Centroid> {
       if (!collapseClusters && centroids.size() > clusterOvershoot * numClusters) {
         numClusters = (int) Math.max(numClusters, clusterLogFactor * Math.log(numProcessedDatapoints));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         List<Centroid> shuffled = new ArrayList<>();
         for (Vector vector : centroids) {
           shuffled.add((Centroid) vector);
@@ -359,6 +362,7 @@ public class StreamingKMeans implements Iterable<Centroid> {
   }
 
   public void setDistanceCutoff(double distanceCutoff) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1254
     this.distanceCutoff = distanceCutoff;
   }
 

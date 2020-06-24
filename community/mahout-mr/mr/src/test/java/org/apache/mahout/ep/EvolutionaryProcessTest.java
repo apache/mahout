@@ -32,6 +32,7 @@ public final class EvolutionaryProcessTest extends MahoutTestCase {
     s0.setPayload(new Foo());
     EvolutionaryProcess<Foo, Double> ep = new EvolutionaryProcess<>(10, 100, s0);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     State<Foo, Double> best = null;
     for (int i = 0; i < 20; i++) {
       best = ep.parallelDo(new EvolutionaryProcess.Function<Payload<Double>>() {
@@ -52,6 +53,7 @@ public final class EvolutionaryProcessTest extends MahoutTestCase {
       System.out.printf("%10.3f %.3f\n", best.getValue(), best.getOmni());
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     ep.close();
     assertNotNull(best);
     assertEquals(0.0, best.getValue(), 0.02);

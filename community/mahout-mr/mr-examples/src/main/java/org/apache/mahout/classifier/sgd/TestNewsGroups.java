@@ -71,6 +71,7 @@ public final class TestNewsGroups {
     Dictionary newsGroups = new Dictionary();
     Multiset<String> overallCounts = HashMultiset.create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<File> files = new ArrayList<>();
     for (File newsgroup : base.listFiles()) {
       if (newsgroup.isDirectory()) {
@@ -91,6 +92,7 @@ public final class TestNewsGroups {
       int cat = result.maxValueIndex();
       double score = result.maxValue();
       double ll = classifier.logLikelihood(actual, input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-857
       ClassifierResult cr = new ClassifierResult(newsGroups.values().get(cat), score, ll);
       ra.addInstance(newsGroups.values().get(actual), cr);
 

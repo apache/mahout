@@ -54,9 +54,11 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
@@ -90,6 +92,7 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
   private void runTest(boolean prune) throws Exception {
     Path outputPath = getTestTempFilePath("output");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     List<String> argList = Lists.newLinkedList();
     argList.add("-i");
     argList.add(inputPath.toString());
@@ -98,6 +101,7 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
     if (prune) {
       argList.add("-xs");
       argList.add("3"); // we prune all words that are outside 3*sigma
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
     } else {
       argList.add("--maxDFPercent");
       argList.add("100"); // the default if, -xs is not specified is to use maxDFPercent, which defaults to 99%
@@ -109,6 +113,7 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
     String[] args = argList.toArray(new String[argList.size()]);
 
     ToolRunner.run(conf, new SparseVectorsFromSequenceFiles(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
 
     Path dictionary = new Path(outputPath, "dictionary.file-0");
     Path tfVectors = new Path(outputPath, "tf-vectors");
@@ -123,6 +128,7 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
     int[] highDFWordsDictionaryIndices = new int[HIGH_DF_WORDS.length];
 
     List<String> highDFWordsList = Arrays.asList(HIGH_DF_WORDS);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
 
     for (Pair<Text, IntWritable> record : new SequenceFileDirIterable<Text, IntWritable>(dictionaryPath, PathType.GLOB,
             null, null, true, conf)) {
@@ -136,6 +142,7 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
   }
 
   private void validateVectors(Path vectorPath, int[] highDFWordsDictionaryIndices, boolean prune) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     assertTrue("Path does not exist", vectorPath.getFileSystem(conf).exists(vectorPath));
     for (VectorWritable value : new SequenceFileDirValueIterable<VectorWritable>(vectorPath, PathType.LIST, PathFilters
             .partFilter(), null, true, conf)) {

@@ -157,6 +157,7 @@ public class OptIgSplit extends IgSplit {
       }
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-189
     if (best == -1) {
       throw new IllegalStateException("no best split found !");
     }
@@ -219,6 +220,7 @@ public class OptIgSplit extends IgSplit {
 
     double entropy = 0.0;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     for (int count : counts) {
       if (count > 0) {
         double p = count / (double) dataSize;

@@ -38,6 +38,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
   private final FastByIDMap<FastByIDMap<Double>> similarityMaps = new FastByIDMap<>();
   
   public GenericUserSimilarity(Iterable<UserUserSimilarity> similarities) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     initSimilarityMaps(similarities.iterator());
   }
   
@@ -83,6 +84,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
   private void initSimilarityMaps(Iterator<UserUserSimilarity> similarities) {
     while (similarities.hasNext()) {
       UserUserSimilarity uuc = similarities.next();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       long similarityUser1 = uuc.getUserID1();
       long similarityUser2 = uuc.getUserID2();
       if (similarityUser1 != similarityUser2) {
@@ -98,6 +100,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
         }
         FastByIDMap<Double> map = similarityMaps.get(user1);
         if (map == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           map = new FastByIDMap<>();
           similarityMaps.put(user1, map);
         }
@@ -109,6 +112,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
   
   @Override
   public double userSimilarity(long userID1, long userID2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     if (userID1 == userID2) {
       return 1.0;
     }
@@ -146,6 +150,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
     private final double value;
     
     public UserUserSimilarity(long userID1, long userID2, double value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       Preconditions.checkArgument(value >= -1.0 && value <= 1.0, "Illegal value: " + value + ". Must be: -1.0 <= value <= 1.0");
       this.userID1 = userID1;
       this.userID2 = userID2;
@@ -204,6 +209,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
 
     private DataModelSimilaritiesIterator(UserSimilarity otherSimilarity, long[] itemIDs) {
       this.otherSimilarity = otherSimilarity;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
       this.itemIDs = itemIDs;
       i = 0;
       itemID1 = itemIDs[0];
@@ -220,6 +226,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
           similarity = otherSimilarity.userSimilarity(itemID1, itemID2);
         } catch (TasteException te) {
           // ugly:
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
           throw new IllegalStateException(te);
         }
         if (!Double.isNaN(similarity)) {

@@ -25,6 +25,7 @@ public final class ClassUtils {
 
   public static <T> T instantiateAs(String classname, Class<T> asSubclassOfClass) {
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-873
       return instantiateAs(Class.forName(classname).asSubclass(asSubclassOfClass), asSubclassOfClass);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -45,6 +46,7 @@ public final class ClassUtils {
                                     Object[] args) {
     try {
       return clazz.asSubclass(asSubclassOfClass).getConstructor(params).newInstance(args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ie) {
       throw new IllegalStateException(ie);
     }
@@ -54,6 +56,7 @@ public final class ClassUtils {
   public static <T> T instantiateAs(Class<? extends T> clazz, Class<T> asSubclassOfClass) {
     try {
       return clazz.asSubclass(asSubclassOfClass).getConstructor().newInstance();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ie) {
       throw new IllegalStateException(ie);
     }

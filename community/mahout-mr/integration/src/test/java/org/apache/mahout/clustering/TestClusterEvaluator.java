@@ -71,7 +71,9 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     fs = FileSystem.get(conf);
     testdata = getTestTempDirPath("testdata");
     output = getTestTempDirPath("output");
@@ -108,6 +110,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   }
   
   private void printRepPoints(int numIterations) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
     RepresentativePointsDriver.printRepresentativePoints(output, numIterations);
   }
   
@@ -122,11 +125,13 @@ public final class TestClusterEvaluator extends MahoutTestCase {
    *          the DistanceMeasure
    */
   private void initData(double dC, double dP, DistanceMeasure measure) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     clusters = Lists.newArrayList();
     clusters.add(new Canopy(new DenseVector(new double[] {-dC, -dC}), 1, measure));
     clusters.add(new Canopy(new DenseVector(new double[] {-dC, dC}), 3, measure));
     clusters.add(new Canopy(new DenseVector(new double[] {dC, dC}), 5, measure));
     clusters.add(new Canopy(new DenseVector(new double[] {dC, -dC}), 7, measure));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     representativePoints = Maps.newHashMap();
     for (Cluster cluster : clusters) {
       List<VectorWritable> points = Lists.newArrayList();
@@ -143,17 +148,22 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   public void testRepresentativePoints() throws Exception {
     ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     // run using MR reference point calculation
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, 0.0, true);
     int numIterations = 2;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-843
     Path clustersIn = new Path(output, "clusters-0-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure,
         numIterations, false);
     printRepPoints(numIterations);
     ClusterEvaluator evaluatorMR = new ClusterEvaluator(conf, clustersIn);
     // now run again using sequential reference point calculation
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     HadoopUtil.delete(conf, output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, 0.0, true);
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure,
         numIterations, true);
@@ -176,6 +186,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   
   @Test
   public void testCluster1() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.5, measure);
@@ -186,6 +197,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   
   @Test
   public void testCluster2() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.75, measure);
@@ -210,6 +222,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     List<VectorWritable> points = Lists.newArrayList();
     representativePoints.put(cluster.getId(), points);
     ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
     assertEquals("inter cluster density", 0.371534146934532, evaluator.interClusterDensity(), EPSILON);
     assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
   }
@@ -231,6 +244,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] {1, 1}))));
     representativePoints.put(cluster.getId(), points);
     ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
     assertEquals("inter cluster density", 0.3656854249492381, evaluator.interClusterDensity(), EPSILON);
     assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
   }
@@ -243,17 +257,25 @@ public final class TestClusterEvaluator extends MahoutTestCase {
    */
   @Test
   public void testAllSameValueCluster() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19, measure);
     clusters.add(cluster);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<VectorWritable> points = Lists.newArrayList();
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
     representativePoints.put(cluster.getId(), points);
     ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
     assertEquals("inter cluster density", 0.3656854249492381, evaluator.interClusterDensity(), EPSILON);
     assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
   }
@@ -262,11 +284,15 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   public void testCanopy() throws Exception {
     ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, 0.0, true);
     int numIterations = 10;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-843
     Path clustersIn = new Path(output, "clusters-0-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
         numIterations, true);
     //printRepPoints(numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
@@ -280,15 +306,18 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, 0.0, true);
     // now run the KMeans job
     Path kmeansOutput = new Path(output, "kmeans");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     KMeansDriver.run(testdata, new Path(output, "clusters-0-final"), kmeansOutput, 0.001, 10, true, 0.0, true);
     int numIterations = 10;
     Path clustersIn = new Path(kmeansOutput, "clusters-2");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(kmeansOutput, "clusteredPoints"), kmeansOutput, measure,
         numIterations, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
     RepresentativePointsDriver.printRepresentativePoints(kmeansOutput, numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
@@ -301,16 +330,21 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, 0.0, true);
     Path fuzzyKMeansOutput = new Path(output, "fuzzyk");
     // now run the KMeans job
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), fuzzyKMeansOutput, 0.001, 10, 2,
         true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(fuzzyKMeansOutput, "clusters-4");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(fuzzyKMeansOutput, "clusteredPoints"), fuzzyKMeansOutput,
         measure, numIterations, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
     RepresentativePointsDriver.printRepresentativePoints(fuzzyKMeansOutput, numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results

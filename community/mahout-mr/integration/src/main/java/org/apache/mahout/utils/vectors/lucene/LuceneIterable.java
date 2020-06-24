@@ -40,6 +40,7 @@ public final class LuceneIterable implements Iterable<Vector> {
   private final Weight weight;
 
   public LuceneIterable(IndexReader reader, String idField, String field, TermInfo terminfo, Weight weight) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     this(reader, idField, field, terminfo, weight, NO_NORMALIZING);
   }
 

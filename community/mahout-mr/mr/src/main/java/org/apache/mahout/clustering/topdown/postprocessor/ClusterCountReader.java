@@ -49,9 +49,11 @@ public final class ClusterCountReader {
    */
   public static int getNumberOfClusters(Path clusterOutputPath, Configuration conf) throws IOException {
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-929
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     int numberOfClusters = 0;
     Iterator<?> it = new SequenceFileDirValueIterator<>(clusterFiles[0].getPath(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
             PathType.LIST,
             PathFilters.partFilter(),
             null,
@@ -72,8 +74,11 @@ public final class ClusterCountReader {
    * @return An ArrayList containing the final cluster ids.
    */
   public static Map<Integer, Integer> getClusterIDs(Path clusterOutputPath, Configuration conf, boolean keyIsClusterId)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Integer, Integer> clusterIds = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     //System.out.println("LOOK HERE: " + clusterOutputPath);
@@ -87,6 +92,7 @@ public final class ClusterCountReader {
     while (it.hasNext()) {
       Integer key;
       Integer value;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       if (keyIsClusterId) { // key is the cluster id, value is i, the index we will use
         key = it.next().getValue().getId();
         value = i;

@@ -54,9 +54,11 @@ public class RowIdJob extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-757
     addInputOption();
     addOutputOption();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -69,6 +71,7 @@ public class RowIdJob extends AbstractJob {
     Path indexPath = new Path(outputPath, "docIndex");
     Path matrixPath = new Path(outputPath, "matrix");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer indexWriter = SequenceFile.createWriter(fs, conf, indexPath,
         IntWritable.class, Text.class);
          SequenceFile.Writer matrixWriter = SequenceFile.createWriter(fs, conf, matrixPath, IntWritable.class,

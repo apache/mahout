@@ -90,6 +90,7 @@ public final class MemoryUtil {
    * {@link #startMemoryLogger()}.
    */
   public static void stopMemoryLogger() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     if (scheduler != null) {
       scheduler.shutdownNow();
       scheduler = null;

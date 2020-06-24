@@ -47,6 +47,7 @@ public final class RefreshHelper implements Refreshable {
    *          encapsulates the containing object's own refresh logic
    */
   public RefreshHelper(Callable<?> refreshRunnable) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     this.dependencies = new ArrayList<>(3);
     this.refreshLock = new ReentrantLock();
     this.refreshRunnable = refreshRunnable;
@@ -81,6 +82,7 @@ public final class RefreshHelper implements Refreshable {
           try {
             refreshRunnable.call();
           } catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
             log.warn("Unexpected exception while refreshing", e);
           }
         }
@@ -99,6 +101,7 @@ public final class RefreshHelper implements Refreshable {
    *         param.
    */
   public static Collection<Refreshable> buildRefreshed(Collection<Refreshable> currentAlreadyRefreshed) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return currentAlreadyRefreshed == null ? new HashSet<Refreshable>(3) : currentAlreadyRefreshed;
   }
   
@@ -114,6 +117,7 @@ public final class RefreshHelper implements Refreshable {
   public static void maybeRefresh(Collection<Refreshable> alreadyRefreshed, Refreshable refreshable) {
     if (!alreadyRefreshed.contains(refreshable)) {
       alreadyRefreshed.add(refreshable);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.info("Added refreshable: {}", refreshable);
       refreshable.refresh(alreadyRefreshed);
       log.info("Refreshed: {}", alreadyRefreshed);

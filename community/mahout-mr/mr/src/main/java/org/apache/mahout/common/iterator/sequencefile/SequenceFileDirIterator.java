@@ -61,6 +61,7 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
 
     iterators = Lists.newArrayList();
     // we assume all files should exist, otherwise we will bail out.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(path[0].toUri(), conf);
     FileStatus[] statuses = new FileStatus[path.length];
     for (int i = 0; i < statuses.length; i++) {
@@ -81,6 +82,7 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
                                  boolean reuseKeyValueInstances,
                                  Configuration conf) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     FileStatus[] statuses = HadoopUtil.getFileStatus(path, pathType, filter, ordering, conf);
     iterators = Lists.newArrayList();
     init(statuses, reuseKeyValueInstances, conf);
@@ -89,6 +91,7 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
   private void init(FileStatus[] statuses,
                     final boolean reuseKeyValueInstances,
                     final Configuration conf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
 
     /*
      * prevent NPEs. Unfortunately, Hadoop would return null for list if nothing
@@ -100,18 +103,23 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
     }
 
     Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
 
     Iterator<Iterator<Pair<K, V>>> fsIterators =
       Iterators.transform(fileStatusIterator,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         new Function<FileStatus, Iterator<Pair<K, V>>>() {
           @Override
           public Iterator<Pair<K, V>> apply(FileStatus from) {
             try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
               SequenceFileIterator<K, V> iterator = new SequenceFileIterator<>(from.getPath(),
                   reuseKeyValueInstances, conf);
               iterators.add(iterator);
               return iterator;
             } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-708
               throw new IllegalStateException(from.getPath().toString(), ioe);
             }
           }

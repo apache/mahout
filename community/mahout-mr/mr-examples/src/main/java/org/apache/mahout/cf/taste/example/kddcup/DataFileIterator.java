@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * to be relative to the epoch, time 0, or January 1 1970, for purposes here.</p>
  */
 public final class DataFileIterator
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     extends AbstractIterator<Pair<PreferenceArray,long[]>>
     implements SkippingIterator<Pair<PreferenceArray,long[]>>, Closeable {
 
@@ -63,6 +64,7 @@ public final class DataFileIterator
   @Override
   protected Pair<PreferenceArray, long[]> computeNext() {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     if (!lineIterator.hasNext()) {
       return endOfData();
     }
@@ -112,6 +114,7 @@ public final class DataFileIterator
       ratingsLeftToRead--;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new Pair<>(currentUserPrefs, timestamps);
   }
 
@@ -132,10 +135,13 @@ public final class DataFileIterator
 
   @Override
   public void close() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     endOfData();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     try {
       Closeables.close(lineIterator, true);
     } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       log.error(e.getMessage(), e);
     }
   }

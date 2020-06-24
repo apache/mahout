@@ -135,11 +135,14 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
     
     while (true) {
       int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-430
       if (hasInferrer || compare == 0) {
         double x;
         double y;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
         if (xIndex == yIndex) {
           // Both users expressed a preference for the item
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
           x = xPrefs.getValue(xPrefIndex);
           y = yPrefs.getValue(yPrefIndex);
         } else {
@@ -167,6 +170,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
       }
       if (compare <= 0) {
         if (++xPrefIndex >= xLength) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-430
           if (hasInferrer) {
             // Must count other Ys; pretend next X is far away
             if (yIndex == Long.MAX_VALUE) {
@@ -278,6 +282,8 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
     }
 
     double result;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-387
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-421
     if (centerData) {
       // See comments above on these computations
       double n = (double) count;
@@ -331,6 +337,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
   
   @Override
   public final void refresh(Collection<Refreshable> alreadyRefreshed) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     super.refresh(alreadyRefreshed);
     refreshHelper.refresh(alreadyRefreshed);
   }

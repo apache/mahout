@@ -25,6 +25,7 @@ final class ClustersFilter implements PathFilter {
   @Override
   public boolean accept(Path path) {
     String pathString = path.toString();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     return pathString.contains("/clusters-");
   }
 

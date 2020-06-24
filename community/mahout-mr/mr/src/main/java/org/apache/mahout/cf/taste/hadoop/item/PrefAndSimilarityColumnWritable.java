@@ -35,6 +35,7 @@ public final class PrefAndSimilarityColumnWritable implements Writable {
   }
 
   public PrefAndSimilarityColumnWritable(float prefValue, Vector similarityColumn) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-420
     set(prefValue, similarityColumn);
   }
 

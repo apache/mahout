@@ -40,6 +40,7 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
   private final int numTopFeatures;
   
   public ClusterDumperWriter(Writer writer, Map<Integer,List<WeightedPropertyVectorWritable>> clusterIdToPoints,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
       DistanceMeasure measure, int numTopFeatures, String[] dictionary, int subString) {
     super(writer, clusterIdToPoints, measure);
     this.numTopFeatures = numTopFeatures;
@@ -49,6 +50,7 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
   
   @Override
   public void write(ClusterWritable clusterWritable) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
     Cluster cluster = clusterWritable.getValue();
     String fmtStr = cluster.asFormatString(dictionary);
     Writer writer = getWriter();
@@ -68,6 +70,7 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
       writer.write('\n');
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
     Map<Integer,List<WeightedPropertyVectorWritable>> clusterIdToPoints = getClusterIdToPoints();
     List<WeightedPropertyVectorWritable> points = clusterIdToPoints.get(clusterWritable.getValue().getId());
     if (points != null) {
@@ -77,7 +80,9 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
         writer.write(String.valueOf(point.getWeight()));
         Map<Text,Text> map = point.getProperties();
         // map can be null since empty maps when written are returned as null
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
         writer.write(" : [");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
         if (map != null) {
           for (Map.Entry<Text,Text> entry : map.entrySet()) {
             writer.write(entry.getKey().toString());

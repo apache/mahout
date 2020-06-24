@@ -41,6 +41,7 @@ public final class DescriptorUtils {
    *           if a bad token is encountered
    */
   public static Attribute[] parseDescriptor(CharSequence descriptor) throws DescriptorException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Attribute> attributes = new ArrayList<>();
     for (String token : SPACE.split(descriptor)) {
       token = token.toUpperCase(Locale.ENGLISH);
@@ -74,6 +75,7 @@ public final class DescriptorUtils {
    * @throws DescriptorException
    */
   public static String generateDescriptor(Iterable<String> tokens) throws DescriptorException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     StringBuilder descriptor = new StringBuilder();
     
     int multiplicator = 0;
@@ -84,6 +86,7 @@ public final class DescriptorUtils {
         int number = Integer.parseInt(token);
         
         if (number <= 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
           throw new DescriptorException("Multiplicator (" + number + ") must be > 0");
         }
         if (multiplicator > 0) {
@@ -97,6 +100,7 @@ public final class DescriptorUtils {
           multiplicator = 1;
         }
         
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         for (int index = 0; index < multiplicator; index++) {
           descriptor.append(token).append(' ');
         }

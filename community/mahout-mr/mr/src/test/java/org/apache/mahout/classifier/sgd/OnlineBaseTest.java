@@ -67,6 +67,7 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
 
     // train on samples in random order (but only one pass)
     for (int row : permute(gen, 60)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       lr.train((int) target.get(row), input.viewRow(row));
     }
     lr.close();
@@ -88,6 +89,7 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
 
     // convenience methods should give the same results
     Vector v = lr.classifyScalar(input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
     assertEquals(0, v.minus(tmp.viewColumn(0)).norm(1), 1.0e-5);
     v = lr.classifyFull(input).viewColumn(1);
     assertEquals(0, v.minus(tmp.viewColumn(0)).norm(1), 1.0e-4);

@@ -30,6 +30,7 @@ public final class RunningAverageAndStdDevTest extends TasteTestCase {
   @Test
   public void testFull() {
     RunningAverageAndStdDev average = new FullRunningAverageAndStdDev();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-636
 
     assertEquals(0, average.getCount());
     assertTrue(Double.isNaN(average.getAverage()));
@@ -65,6 +66,7 @@ public final class RunningAverageAndStdDevTest extends TasteTestCase {
   @Test
   public void testFullBig() {
     RunningAverageAndStdDev average = new FullRunningAverageAndStdDev();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-636
 
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 100000; i++) {
@@ -79,6 +81,7 @@ public final class RunningAverageAndStdDevTest extends TasteTestCase {
   public void testStddev() {
     
     RunningAverageAndStdDev runningAverage = new FullRunningAverageAndStdDev();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-824
 
     assertEquals(0, runningAverage.getCount());
     assertTrue(Double.isNaN(runningAverage.getAverage()));

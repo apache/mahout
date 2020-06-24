@@ -34,6 +34,7 @@ public class IDReaderTest extends TasteTestCase {
     Configuration conf = getConfiguration();
     IDReader idReader = new IDReader(conf);
     Map<Long, FastIDSet> userItemFilter = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1906
 
     long user1 = 1;
     long user2 = 2;

@@ -123,7 +123,9 @@ public final class DFUtils {
    * @throws IOException if no file is found
    */
   public static Path[] listOutputFiles(FileSystem fs, Path outputPath) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Path> outputFiles = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1012
     for (FileStatus s : fs.listStatus(outputPath, PathFilters.logsCRCFilter())) {
       if (!s.isDir() && !s.getPath().getName().startsWith("_")) {
         outputFiles.add(s.getPath());
@@ -154,6 +156,7 @@ public final class DFUtils {
   public static void storeWritable(Configuration conf, Path path, Writable writable) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (FSDataOutputStream out = fs.create(path)) {
       writable.write(out);
     }
@@ -167,6 +170,7 @@ public final class DFUtils {
    * @throws IOException if things go poorly
    */
   public static void storeString(Configuration conf, Path path, String string) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (DataOutputStream out = path.getFileSystem(conf).create(path)) {
       out.write(string.getBytes(Charset.defaultCharset()));
     }

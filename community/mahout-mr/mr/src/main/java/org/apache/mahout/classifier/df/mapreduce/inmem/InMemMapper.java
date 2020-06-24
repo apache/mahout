@@ -55,6 +55,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
    * Load the training data
    */
   private static Data loadData(Configuration conf, Dataset dataset) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     Path dataPath = Builder.getDistributedCacheFile(conf, 1);
     FileSystem fs = FileSystem.get(dataPath.toUri(), conf);
     return DataLoader.loadData(dataset, fs, dataPath);
@@ -66,8 +67,10 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     
     Configuration conf = context.getConfiguration();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.info("Loading the data...");
     Data data = loadData(conf, getDataset());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
     log.info("Data loaded : {} instances", data.size());
     
     bagging = new Bagging(getTreeBuilder(), data);
@@ -80,11 +83,14 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     map(key, context);
   }
   
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
   void map(IntWritable key, Context context) throws IOException, InterruptedException {
     
     initRandom((InMemInputSplit) context.getInputSplit());
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Building...");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     Node tree = bagging.build(rng);
     
     if (isOutput()) {
@@ -95,9 +101,12 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     }
   }
   
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
   void initRandom(InMemInputSplit split) {
     if (rng == null) { // first execution of this mapper
       Long seed = split.getSeed();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Initialising rng with seed : {}", seed);
       rng = seed == null ? RandomUtils.getRandom() : RandomUtils.getRandom(seed);
     }

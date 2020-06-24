@@ -82,6 +82,8 @@ public class SpectralKMeansDriver extends AbstractJob {
     addOption("oversampling", "p", "Oversampling parameter for SSVD", String.valueOf(OVERSAMPLING));
     addOption("powerIter", "q", "Additional power iterations for SSVD", String.valueOf(POWERITERS));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
     Map<String, List<String>> parsedArgs = parseArguments(arg0);
     if (parsedArgs == null) {
       return 0;
@@ -90,6 +92,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1491
       HadoopUtil.delete(conf, getTempPath());
       HadoopUtil.delete(conf, getOutputPath());
     }
@@ -105,6 +108,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     int blockheight = Integer.parseInt(getOption("outerProdBlockHeight"));
     int oversampling = Integer.parseInt(getOption("oversampling"));
     int poweriters = Integer.parseInt(getOption("powerIter"));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
     run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempdir, reducers,
         blockheight, oversampling, poweriters);
 
@@ -146,10 +150,14 @@ public class SpectralKMeansDriver extends AbstractJob {
    * @param poweriters
    */
   public static void run(Configuration conf, Path input, Path output, int numDims, int clusters,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
                          DistanceMeasure measure, double convergenceDelta, int maxIterations, Path tempDir,
                          int numReducers, int blockHeight, int oversampling, int poweriters)
       throws IOException, InterruptedException, ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1491
     HadoopUtil.delete(conf, tempDir);
     Path outputCalc = new Path(tempDir, "calculations");
     Path outputTmp = new Path(tempDir, "temporary");
@@ -162,6 +170,7 @@ public class SpectralKMeansDriver extends AbstractJob {
 
     // Construct the affinity matrix using the newly-created sequence files
     DistributedRowMatrix A = new DistributedRowMatrix(affSeqFiles, new Path(outputTmp, "afftmp"), numDims, numDims);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
 
     Configuration depConf = new Configuration(conf);
     A.setConf(depConf);
@@ -170,6 +179,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     Vector D = MatrixDiagonalizeJob.runJob(affSeqFiles, numDims);
 
     // Calculate the normalized Laplacian of the form: L = D^(-0.5)AD^(-0.5)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
     DistributedRowMatrix L = VectorMatrixMultiplicationJob.runJob(affSeqFiles, D, new Path(outputCalc, "laplacian"),
         new Path(outputCalc, outputCalc));
     L.setConf(depConf);
@@ -177,6 +187,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     Path data;
 
     // SSVD requires an array of Paths to function. So we pass in an array of length one
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
     Path[] LPath = new Path[1];
     LPath[0] = L.getRowPath();
 
@@ -198,6 +209,7 @@ public class SpectralKMeansDriver extends AbstractJob {
 
     UnitVectorizerJob.runJob(data, unitVectors);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
     DistributedRowMatrix Wt = new DistributedRowMatrix(unitVectors, new Path(unitVectors, "tmp"), clusters, numDims);
     Wt.setConf(depConf);
     data = Wt.getRowPath();
@@ -210,9 +222,11 @@ public class SpectralKMeansDriver extends AbstractJob {
     // Run the KMeansDriver
     Path answer = new Path(output, "kmeans_out");
     KMeansDriver.run(conf, data, initialclusters, answer, convergenceDelta, maxIterations, true, 0.0, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
 
     // Restore name to id mapping and read through the cluster assignments
     Path mappingPath = new Path(new Path(conf.get("hadoop.tmp.dir")), "generic_input_mapping");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
     List<String> mapping = new ArrayList<>();
     FileSystem fs = FileSystem.get(mappingPath.toUri(), conf);
     if (fs.exists(mappingPath)) {
@@ -220,6 +234,7 @@ public class SpectralKMeansDriver extends AbstractJob {
       Text mappingValue = new Text();
       IntWritable mappingIndex = new IntWritable();
       while (reader.next(mappingIndex, mappingValue)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
         String s = mappingValue.toString();
         mapping.add(s);
       }
@@ -232,6 +247,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     Path inputPath = new Path(clusteredPointsPath, "part-m-00000");
     int id = 0;
     for (Pair<IntWritable, WeightedVectorWritable> record :
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
         new SequenceFileIterable<IntWritable, WeightedVectorWritable>(inputPath, conf)) {
       if (!mapping.isEmpty()) {
         log.info("{}: {}", mapping.get(id++), record.getFirst().get());

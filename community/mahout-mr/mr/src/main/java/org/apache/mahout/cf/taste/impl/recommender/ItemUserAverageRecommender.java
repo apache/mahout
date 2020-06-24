@@ -61,6 +61,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
   
   public ItemUserAverageRecommender(DataModel dataModel) throws TasteException {
     super(dataModel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     this.itemAverages = new FastByIDMap<>();
     this.userAverages = new FastByIDMap<>();
     this.overallAveragePrefValue = new FullRunningAverage();
@@ -78,9 +79,12 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
     FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser, includeKnownItems);
@@ -90,6 +94,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
@@ -126,6 +131,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     try {
       buildAveragesLock.writeLock().lock();
       DataModel dataModel = getDataModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       LongPrimitiveIterator it = dataModel.getUserIDs();
       while (it.hasNext()) {
         long userID = it.nextLong();

@@ -64,6 +64,7 @@ public final class GenericDataModel extends AbstractDataModel {
    * @param userData users to include; (see also {@link #toDataMap(FastByIDMap, boolean)})
    */
   public GenericDataModel(FastByIDMap<PreferenceArray> userData) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     this(userData, null);
   }
 
@@ -79,9 +80,12 @@ public final class GenericDataModel extends AbstractDataModel {
    */
   public GenericDataModel(FastByIDMap<PreferenceArray> userData, FastByIDMap<FastByIDMap<Long>> timestamps) {
     Preconditions.checkArgument(userData != null, "userData is null");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     this.preferenceFromUsers = userData;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FastByIDMap<Collection<Preference>> prefsForItems = new FastByIDMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     FastIDSet itemIDSet = new FastIDSet();
     int currentCount = 0;
     float maxPrefValue = Float.NEGATIVE_INFINITY;
@@ -94,11 +98,13 @@ public final class GenericDataModel extends AbstractDataModel {
         itemIDSet.add(itemID);
         Collection<Preference> prefsForItem = prefsForItems.get(itemID);
         if (prefsForItem == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
           prefsForItem = Lists.newArrayListWithCapacity(2);
           prefsForItems.put(itemID, prefsForItem);
         }
         prefsForItem.add(preference);
         float value = preference.getValue();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
         if (value > maxPrefValue) {
           maxPrefValue = value;
         }
@@ -106,7 +112,9 @@ public final class GenericDataModel extends AbstractDataModel {
           minPrefValue = value;
         }
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       if (++currentCount % 10000 == 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         log.info("Processed {} users", currentCount);
       }
     }
@@ -121,6 +129,7 @@ public final class GenericDataModel extends AbstractDataModel {
 
     this.preferenceForItems = toDataMap(prefsForItems, false);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     for (Map.Entry<Long, PreferenceArray> entry : preferenceForItems.entrySet()) {
       entry.getValue().sortByUser();
     }
@@ -133,6 +142,7 @@ public final class GenericDataModel extends AbstractDataModel {
     }
     Arrays.sort(userIDs);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     this.timestamps = timestamps;
   }
 
@@ -174,6 +184,7 @@ public final class GenericDataModel extends AbstractDataModel {
    *  that user's preferences
    */
   public static FastByIDMap<PreferenceArray> toDataMap(DataModel dataModel) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FastByIDMap<PreferenceArray> data = new FastByIDMap<>(dataModel.getNumUsers());
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
@@ -219,6 +230,7 @@ public final class GenericDataModel extends AbstractDataModel {
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
     PreferenceArray prefs = getPreferencesFromUser(userID);
     int size = prefs.length();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     FastIDSet result = new FastIDSet(size);
     for (int i = 0; i < size; i++) {
       result.add(prefs.getItemID(i));
@@ -228,6 +240,7 @@ public final class GenericDataModel extends AbstractDataModel {
   
   @Override
   public LongPrimitiveArrayIterator getItemIDs() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     return new LongPrimitiveArrayIterator(itemIDs);
   }
   
@@ -245,6 +258,7 @@ public final class GenericDataModel extends AbstractDataModel {
     PreferenceArray prefs = getPreferencesFromUser(userID);
     int size = prefs.length();
     for (int i = 0; i < size; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       if (prefs.getItemID(i) == itemID) {
         return prefs.getValue(i);
       }
@@ -254,6 +268,7 @@ public final class GenericDataModel extends AbstractDataModel {
 
   @Override
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     if (timestamps == null) {
       return null;
     }
@@ -276,6 +291,7 @@ public final class GenericDataModel extends AbstractDataModel {
 
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-764
     PreferenceArray prefs1 = preferenceForItems.get(itemID);
     return prefs1 == null ? 0 : prefs1.length();
   }
@@ -343,6 +359,7 @@ public final class GenericDataModel extends AbstractDataModel {
   
   @Override
   public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     StringBuilder result = new StringBuilder(200);
     result.append("GenericDataModel[users:");
     for (int i = 0; i < Math.min(3, userIDs.length); i++) {

@@ -36,6 +36,7 @@ public class TextualVectorWriter implements VectorWriter {
   }
 
   protected Writer getWriter() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
     return writer;
   }
   
@@ -51,6 +52,7 @@ public class TextualVectorWriter implements VectorWriter {
       if (result >= maxDocs) {
         break;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
       write(vector);
       result++;
     }
@@ -60,11 +62,13 @@ public class TextualVectorWriter implements VectorWriter {
   @Override
   public void write(Vector vector) throws IOException {
     writer.write(vector.asFormatString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-203
     writer.write('\n');
   }
 
   @Override
   public void close() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     Closeables.close(writer, false);
   }
 }

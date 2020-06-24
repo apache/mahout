@@ -49,6 +49,7 @@ public class DataModelFactorizablePreferences implements FactorizablePreferences
       userIDs = new FastIDSet(dataModel.getNumUsers());
       itemIDs = new FastIDSet(dataModel.getNumItems());
       preferences = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
       LongPrimitiveIterator userIDsIterator = dataModel.getUserIDs();
       while (userIDsIterator.hasNext()) {

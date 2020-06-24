@@ -93,6 +93,7 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
       options.setCharset(charset);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     List<Pattern> patterns = Lists.newArrayListWithCapacity(5);
     // patternOrder is used downstream so that we can know what order the
     // text is in instead
@@ -150,6 +151,7 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
       Matcher messageIdMatcher = MESSAGE_ID_PREFIX.matcher("");
       Matcher messageBoundaryMatcher = MESSAGE_START.matcher("");
       String[] patternResults = new String[options.getPatternsToMatch().length];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
       Matcher[] matches = new Matcher[options.getPatternsToMatch().length];
       for (int i = 0; i < matches.length; i++) {
         matches[i] = options.getPatternsToMatch()[i].matcher("");
@@ -225,6 +227,7 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
   }
 
   protected static String generateKey(String mboxFilename, String prefix, String messageId) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     return Joiner.on(Path.SEPARATOR).join(Lists.newArrayList(prefix, mboxFilename, messageId).iterator());
   }
 
@@ -237,8 +240,10 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
     throws IOException, InterruptedException {
     Configuration configuration = context.getConfiguration();
     Path filePath = ((CombineFileSplit) context.getInputSplit()).getPath(key.get());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     String relativeFilePath = HadoopUtil.calcRelativeFilePath(configuration, filePath);
     ByteArrayInputStream is = new ByteArrayInputStream(value.getBytes());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     parseMailboxLineByLine(relativeFilePath, is, context);
   }
 }

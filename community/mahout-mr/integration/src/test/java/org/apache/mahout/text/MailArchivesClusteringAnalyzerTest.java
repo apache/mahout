@@ -35,6 +35,7 @@ public class MailArchivesClusteringAnalyzerTest extends MahoutTestCase {
   public void testAnalysis() throws Exception {
     Analyzer analyzer = new MailArchivesClusteringAnalyzer();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
     String text = "A test message\n"
                   + "atokenthatistoolongtobeusefulforclustertextanalysis\n"
                   + "Mahout is a scalable, machine-learning LIBRARY\n"
@@ -48,10 +49,12 @@ public class MailArchivesClusteringAnalyzerTest extends MahoutTestCase {
     // order matters too
     String[] expectedTokens = {
         "test", "mahout", "scalabl", "machin", "learn", "librari", "weve", "ad",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-686
         "stopword", "apache_hadoop","provid", "foundat", "scalabl"
     };
         
     TokenStream tokenStream = analyzer.tokenStream("test", reader);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     assertNotNull(tokenStream);
     tokenStream.reset();
     CharTermAttribute termAtt = tokenStream.addAttribute(CharTermAttribute.class);

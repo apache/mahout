@@ -72,6 +72,7 @@ public class FixedRunningAverage implements RunningAverage, Serializable {
 
   @Override
   public RunningAverage inverse() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return new InvertedRunningAverage(this);
   }
 

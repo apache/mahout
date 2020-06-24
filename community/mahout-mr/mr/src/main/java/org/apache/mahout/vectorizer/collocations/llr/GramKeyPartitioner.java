@@ -28,6 +28,7 @@ public final class GramKeyPartitioner extends Partitioner<GramKey, Gram> {
   @Override
   public int getPartition(GramKey key, Gram value, int numPartitions) {
     int hash = 1;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-937
     byte[] bytes = key.getBytes();
     int length = key.getPrimaryLength();
     // Copied from WritableComparator.hashBytes(); skips first byte, type byte

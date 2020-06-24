@@ -149,6 +149,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
       value
         .setBlock(GivensThinSolver.computeQtHat(value.getBlock(),
                                                 qCnt,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
                                                 new CopyConstructorIterator<>(rSubseq.iterator())));
       if (qCnt == 1) {
         /*
@@ -190,6 +191,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
       }
     } else {
       Arrays.fill(yRow, 0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element yEl : incomingYRow.nonZeroes()) {
         yRow[yEl.index()] = yEl.get();
       }
@@ -238,6 +240,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
         flushSolver();
         assert tempQw != null;
         closeables.remove(tempQw);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(tempQw, false);
       }
       flushQBlocks();
@@ -259,6 +262,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
       String taskTmpDir = System.getProperty("java.io.tmpdir");
 
       FileSystem localFs = FileSystem.getLocal(jobConf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
       Path parent = new Path(taskTmpDir);
       Path sub = new Path(parent, "qw_" + System.currentTimeMillis());
       tempQPath = new Path(sub, "q-temp.seq");
@@ -278,6 +282,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
 
   @Override
   public void collect(Writable key, Vector vw) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     map(vw);
   }
 

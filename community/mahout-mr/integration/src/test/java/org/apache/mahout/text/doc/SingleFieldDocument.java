@@ -34,6 +34,7 @@ public class SingleFieldDocument implements TestDocument {
   private String field;
 
   public SingleFieldDocument(String id, String field) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-944
     this.id = id;
     this.field = field;
   }

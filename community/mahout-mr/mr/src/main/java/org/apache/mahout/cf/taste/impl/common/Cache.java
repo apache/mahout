@@ -94,6 +94,7 @@ public final class Cache<K,V> implements Retriever<K,V> {
     if (value == null) {
       return getAndCacheValue(key);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-353
     return value == NULL ? null : value;
   }
   

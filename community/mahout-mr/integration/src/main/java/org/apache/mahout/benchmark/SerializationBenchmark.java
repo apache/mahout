@@ -39,6 +39,7 @@ public class SerializationBenchmark {
   private final VectorBenchmarks mark;
 
   public SerializationBenchmark(VectorBenchmarks mark) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     this.mark = mark;
   }
 
@@ -55,6 +56,7 @@ public class SerializationBenchmark {
     VectorWritable vec = new VectorWritable();
     TimingStatistics stats = new TimingStatistics();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer =
              new SequenceFile.Writer(fs, conf, new Path("/tmp/dense-vector"),
                  IntWritable.class, VectorWritable.class)){
@@ -70,6 +72,7 @@ public class SerializationBenchmark {
     mark.printStats(stats, SERIALIZE, DENSE_VECTOR);
 
     stats = new TimingStatistics();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer =
              new SequenceFile.Writer(fs, conf,
                  new Path("/tmp/randsparse-vector"), IntWritable.class, VectorWritable.class)){
@@ -85,6 +88,7 @@ public class SerializationBenchmark {
     mark.printStats(stats, SERIALIZE, RAND_SPARSE_VECTOR);
 
     stats = new TimingStatistics();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer =
              new SequenceFile.Writer(fs, conf,
                  new Path("/tmp/seqsparse-vector"), IntWritable.class, VectorWritable.class)) {
@@ -110,6 +114,7 @@ public class SerializationBenchmark {
   private void doDeserializeBenchmark(String name, String pathString) throws IOException {
     TimingStatistics stats = new TimingStatistics();
     TimingStatistics.Call call = stats.newCall(mark.leadTimeUsec);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     SequenceFileValueIterator<Writable> iterator = new SequenceFileValueIterator<>(new Path(pathString), true,
         new Configuration());
     while (iterator.hasNext()) {

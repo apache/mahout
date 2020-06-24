@@ -29,6 +29,7 @@ public class ClusterWritable implements Writable {
   private Cluster value;
   
   public ClusterWritable(Cluster first) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1083
     value = first;
   }
 

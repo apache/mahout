@@ -91,6 +91,7 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
       GivensThinSolver
         .computeQtHat(v.getBlock(),
                       blockNum == 0 ? 0 : 1,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
                       new CopyConstructorIterator<>(mRs.iterator()));
     r = mQt[0].length;
     kp = mQt.length;

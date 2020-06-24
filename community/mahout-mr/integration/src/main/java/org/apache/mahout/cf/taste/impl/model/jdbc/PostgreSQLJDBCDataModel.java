@@ -82,6 +82,7 @@ public class PostgreSQLJDBCDataModel extends SQL92JDBCDataModel {
    *          if {@link javax.sql.DataSource} can't be found
    */
   public PostgreSQLJDBCDataModel(String dataSourceName) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-731
     super(dataSourceName);
   }
 
@@ -93,6 +94,7 @@ public class PostgreSQLJDBCDataModel extends SQL92JDBCDataModel {
    * @param dataSource {@link javax.sql.DataSource} to use
    */
   public PostgreSQLJDBCDataModel(DataSource dataSource) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-731
     super(dataSource);
   }
 
@@ -114,6 +116,7 @@ public class PostgreSQLJDBCDataModel extends SQL92JDBCDataModel {
                                  String itemIDColumn,
                                  String preferenceColumn,
                                  String timestampColumn) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-731
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn, preferenceColumn, timestampColumn);
   }
 
@@ -151,6 +154,7 @@ public class PostgreSQLJDBCDataModel extends SQL92JDBCDataModel {
 
       // Continue with update; just found the key already exists
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-731
       stmt2 = conn.prepareStatement(getUpdatePreferenceSQL());
       stmt2.setDouble(1, value);
       setLongParameter(stmt2, 2, userID);

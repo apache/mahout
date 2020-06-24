@@ -33,6 +33,7 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 public final class CityBlockSimilarity extends AbstractItemSimilarity implements UserSimilarity {
 
   public CityBlockSimilarity(DataModel dataModel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     super(dataModel);
   }
 

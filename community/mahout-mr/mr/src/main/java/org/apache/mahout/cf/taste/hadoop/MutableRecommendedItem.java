@@ -31,6 +31,7 @@ public class MutableRecommendedItem implements RecommendedItem {
   public MutableRecommendedItem() {}
 
   public MutableRecommendedItem(long itemID, float value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
     this.itemID = itemID;
     this.value = value;
   }
@@ -46,6 +47,7 @@ public class MutableRecommendedItem implements RecommendedItem {
   }
 
   public void setItemID(long itemID) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
     this.itemID = itemID;
   }
 
@@ -72,6 +74,7 @@ public class MutableRecommendedItem implements RecommendedItem {
 
   @Override
   public boolean equals(Object o) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1151
     if (!(o instanceof MutableRecommendedItem)) {
       return false;
     }

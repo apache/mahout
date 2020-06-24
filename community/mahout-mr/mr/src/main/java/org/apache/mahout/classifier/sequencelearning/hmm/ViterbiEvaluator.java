@@ -52,6 +52,7 @@ public final class ViterbiEvaluator {
     ArgumentBuilder argumentBuilder = new ArgumentBuilder();
 
     Option inputOption = DefaultOptionCreator.inputOption().create();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
 
     Option outputOption = DefaultOptionCreator.outputOption().create();
 
@@ -83,12 +84,14 @@ public final class ViterbiEvaluator {
       //reading serialized HMM
       ;
       HmmModel model;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (DataInputStream modelStream = new DataInputStream(new FileInputStream(modelPath))) {
         model = LossyHmmSerializer.deserialize(modelStream);
       }
 
       //reading observations
       List<Integer> observations = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8")) {
         while (scanner.hasNextInt()) {
           observations.add(scanner.nextInt());
@@ -104,6 +107,7 @@ public final class ViterbiEvaluator {
       int[] hiddenStates = HmmEvaluator.decode(model, observationsArray, true);
 
       //writing output
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (PrintWriter writer =
                new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), Charsets.UTF_8), true)) {
         for (int hiddenState : hiddenStates) {

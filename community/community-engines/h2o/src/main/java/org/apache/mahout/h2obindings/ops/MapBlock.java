@@ -101,6 +101,7 @@ public class MapBlock {
       //
       public void map(Chunk chks[], NewChunk ncs[]) {
         long start = chks[0].start();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
         NewChunk nclabel = isRstr ? ncs[ncs.length - 1] : null;
         deblockify(MapBlockHelper.exec(bmf, blockify(chks), start, labels, nclabel, k, r), ncs);
         // assert chks[i]._len == ncs[j]._len

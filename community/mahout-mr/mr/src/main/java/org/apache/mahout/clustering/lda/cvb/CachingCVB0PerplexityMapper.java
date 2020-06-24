@@ -38,6 +38,7 @@ public class CachingCVB0PerplexityMapper extends
    * Hadoop counters for {@link CachingCVB0PerplexityMapper}, to aid in debugging.
    */
   public enum Counters {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     SAMPLED_DOCUMENTS
   }
 
@@ -62,6 +63,7 @@ public class CachingCVB0PerplexityMapper extends
     float eta = conf.getFloat(CVB0Driver.TERM_TOPIC_SMOOTHING, Float.NaN);
     float alpha = conf.getFloat(CVB0Driver.DOC_TOPIC_SMOOTHING, Float.NaN);
     long seed = conf.getLong(CVB0Driver.RANDOM_SEED, 1234L);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     random = RandomUtils.getRandom(seed);
     numTopics = conf.getInt(CVB0Driver.NUM_TOPICS, -1);
     int numTerms = conf.getInt(CVB0Driver.NUM_TERMS, -1);
@@ -73,10 +75,12 @@ public class CachingCVB0PerplexityMapper extends
 
     log.info("Initializing read model");
     Path[] modelPaths = CVB0Driver.getModelPaths(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new TopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
     } else {
       log.info("No model files found");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       readModel = new TopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
           numTrainThreads, modelWeight);
     }
@@ -90,12 +94,14 @@ public class CachingCVB0PerplexityMapper extends
 
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     readModel.stop();
     MemoryUtil.stopMemoryLogger();
   }
 
   @Override
   public void map(IntWritable docId, VectorWritable document, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
     if (testFraction < 1.0f && random.nextFloat() >= testFraction) {
       return;

@@ -85,6 +85,7 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
 
   @Override
   public int run(String[] strings) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Path inputPath = new Path(AbstractJob.getOption(parsedArgs, "--input"));
     Path outputPath = new Path(AbstractJob.getOption(parsedArgs, "--output"));
     Path tempPath = new Path(AbstractJob.getOption(parsedArgs, "--tempDir"));
@@ -93,6 +94,7 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
     int numCols = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--numCols"));
     int maxIterations = parsedArgs.containsKey("--maxIter")
         ? Integer.parseInt(AbstractJob.getOption(parsedArgs, "--maxIter"))
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1575
         : numCols + 2;
     double maxError = parsedArgs.containsKey("--maxError") 
         ? Double.parseDouble(AbstractJob.getOption(parsedArgs, "--maxError"))
@@ -112,6 +114,7 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
   
   private Vector loadInputVector(Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf)) {
       VectorWritable value = new VectorWritable();
       if (!reader.next(new IntWritable(), value)) {

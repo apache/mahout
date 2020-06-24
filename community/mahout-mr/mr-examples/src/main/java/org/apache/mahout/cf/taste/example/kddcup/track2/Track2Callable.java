@@ -55,6 +55,7 @@ final class Track2Callable implements Callable<UserResult> {
     }
     long userID = userTest.get(0).getUserID();
     TreeMap<Double,Long> estimateToItemID = new TreeMap<>(Collections.reverseOrder());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     for (int i = 0; i < testSize; i++) {
       long itemID = userTest.getItemID(i);
@@ -73,6 +74,7 @@ final class Track2Callable implements Callable<UserResult> {
     }
 
     Collection<Long> itemIDs = estimateToItemID.values();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Long> topThree = new ArrayList<>(itemIDs);
     if (topThree.size() > 3) {
       topThree = topThree.subList(0, 3);

@@ -130,6 +130,7 @@ public class SplitInput extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
     if (parseArgs(args)) {
       splitDirectory();
     }
@@ -150,11 +151,13 @@ public class SplitInput extends AbstractJob {
    */
   private boolean parseArgs(String[] args) throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
     addInputOption();
     addOption("trainingOutput", "tr", "The training data output directory", false);
     addOption("testOutput", "te", "The test data output directory", false);
     addOption("testSplitSize", "ss", "The number of documents held back as test data for each category", false);
     addOption("testSplitPct", "sp", "The % of documents held back as test data for each category", false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     addOption("splitLocation", "sl", "Location for start of test data expressed as a percentage of the input file "
         + "size (0=start, 50=middle, 100=end", false);
     addOption("randomSelectionSize", "rs", "The number of items to be randomly selected as test data ", false);
@@ -226,6 +229,7 @@ public class SplitInput extends AbstractJob {
       }
 
       if (hasOption("testSplitSize") && hasOption("testSplitPct")) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         throw new OptionException(getCLIOption("testSplitPct"), "must have either split size or split percentage "
             + "option, not BOTH");
       }
@@ -276,6 +280,7 @@ public class SplitInput extends AbstractJob {
    */
   public void splitDirectory(Path inputDir) throws IOException, ClassNotFoundException, InterruptedException {
     Configuration conf = getConf();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     splitDirectory(conf, inputDir);
   }
 
@@ -283,22 +288,27 @@ public class SplitInput extends AbstractJob {
    * See also splitDirectory(Path inputDir)
    * */
   public void splitDirectory(Configuration conf, Path inputDir)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     throws IOException, ClassNotFoundException, InterruptedException {
     FileSystem fs = inputDir.getFileSystem(conf);
     if (fs.getFileStatus(inputDir) == null) {
       throw new IOException(inputDir + " does not exist");
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
     if (!fs.getFileStatus(inputDir).isDir()) {
       throw new IOException(inputDir + " is not a directory");
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
     if (useMapRed) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
       SplitInputJob.run(conf, inputDir, mapRedOutputDirectory,
             keepPct, testRandomSelectionPct);
     } else {
       // input dir contains one file per category.
       FileStatus[] fileStats = fs.listStatus(inputDir, PathFilters.logsCRCFilter());
       for (FileStatus inputFile : fileStats) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1667
         if (!inputFile.isDir()) {
           splitFile(inputFile.getPath());
         }
@@ -316,6 +326,7 @@ public class SplitInput extends AbstractJob {
     if (fs.getFileStatus(inputFile) == null) {
       throw new IOException(inputFile + " does not exist");
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
     if (fs.getFileStatus(inputFile).isDir()) {
       throw new IOException(inputFile + " is a directory");
     }
@@ -378,6 +389,7 @@ public class SplitInput extends AbstractJob {
     int trainCount = 0;
     int testCount = 0;
     if (!useSequence) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
            Writer trainingWriter = new OutputStreamWriter(fs.create(trainingOutputFile), charset);
            Writer testWriter = new OutputStreamWriter(fs.create(testOutputFile), charset)){
@@ -410,7 +422,9 @@ public class SplitInput extends AbstractJob {
 
       }
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (SequenceFileIterator<Writable, Writable> iterator =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
                new SequenceFileIterator<>(inputFile, false, fs.getConf());
            SequenceFile.Writer trainingWriter = SequenceFile.createWriter(fs, fs.getConf(), trainingOutputFile,
                iterator.getKeyClass(), iterator.getValueClass());
@@ -437,6 +451,7 @@ public class SplitInput extends AbstractJob {
           if (writer == trainingWriter) {
             trainCount++;
           }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
           Pair<Writable, Writable> pair = iterator.next();
           writer.append(pair.getFirst(), pair.getSecond());
         }
@@ -479,6 +494,7 @@ public class SplitInput extends AbstractJob {
    * @param keepPct a value between 0 and 100 inclusive.
    */
   public void setKeepPct(int keepPct) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
     this.keepPct = keepPct;
   }
 
@@ -602,6 +618,7 @@ public class SplitInput extends AbstractJob {
    */
   public void validate() throws IOException {
     Preconditions.checkArgument(testSplitSize >= 1 || testSplitSize == -1,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
         "Invalid testSplitSize: " + testSplitSize + ". Must be: testSplitSize >= 1 or testSplitSize = -1");
     Preconditions.checkArgument(splitLocation >= 0 && splitLocation <= 100 || splitLocation == -1,
         "Invalid splitLocation percentage: " + splitLocation + ". Must be: 0 <= splitLocation <= 100 or splitLocation = -1");
@@ -630,6 +647,7 @@ public class SplitInput extends AbstractJob {
       count++;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     Preconditions.checkArgument(count == 1, "Exactly one of testSplitSize, testSplitPct, testRandomSelectionSize, "
         + "testRandomSelectionPct should be set");
 
@@ -637,7 +655,9 @@ public class SplitInput extends AbstractJob {
       Configuration conf = getConf();
       FileSystem fs = trainingOutputDirectory.getFileSystem(conf);
       FileStatus trainingOutputDirStatus = fs.getFileStatus(trainingOutputDirectory);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
       Preconditions.checkArgument(trainingOutputDirStatus != null && trainingOutputDirStatus.isDir(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
           "%s is not a directory", trainingOutputDirectory);
       FileStatus testOutputDirStatus = fs.getFileStatus(testOutputDirectory);
       Preconditions.checkArgument(testOutputDirStatus != null && testOutputDirStatus.isDir(),
@@ -655,6 +675,7 @@ public class SplitInput extends AbstractJob {
    */
   public static int countLines(FileSystem fs, Path inputFile, Charset charset) throws IOException {
     int lineCount = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset))){
       while (reader.readLine() != null) {
         lineCount++;

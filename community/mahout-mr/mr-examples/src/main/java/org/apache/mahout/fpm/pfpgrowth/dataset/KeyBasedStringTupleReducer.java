@@ -32,7 +32,9 @@ public class KeyBasedStringTupleReducer extends Reducer<Text,StringTuple,Text,Te
   
   @Override
   protected void reduce(Text key, Iterable<StringTuple> values, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-580
     throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<String> items = new HashSet<>();
     
     for (StringTuple value : values) {
@@ -68,6 +70,7 @@ public class KeyBasedStringTupleReducer extends Reducer<Text,StringTuple,Text,Te
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-580
     Parameters params = new Parameters(context.getConfiguration().get("job.parameters", ""));
     maxTransactionLength = Integer.valueOf(params.get("maxTransactionLength", "100"));
   }

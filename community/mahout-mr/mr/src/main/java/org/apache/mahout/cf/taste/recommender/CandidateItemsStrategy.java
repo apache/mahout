@@ -31,6 +31,7 @@ public interface CandidateItemsStrategy extends Refreshable {
   /**
    * @return IDs of all items that could be recommended to the user
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
   FastIDSet getCandidateItems(long userID, PreferenceArray preferencesFromUser, DataModel dataModel,
      boolean includeKnownItems) throws TasteException;
   

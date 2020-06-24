@@ -55,6 +55,7 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.methodOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
 
     if (parseArguments(args) == null) {
       return -1;
@@ -109,6 +110,7 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
    */
   private static void postProcessSeq(Path input, Path output) throws IOException {
     ClusterOutputPostProcessor clusterOutputPostProcessor = new ClusterOutputPostProcessor(input, output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
             new Configuration());
     clusterOutputPostProcessor.process();
   }
@@ -126,6 +128,7 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
           InterruptedException,
           ClassNotFoundException {
     System.out.println("WARNING: If you are running in Hadoop local mode, please use the --sequential option, "
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         + "as the MapReduce option will not work properly");
     int numberOfClusters = ClusterCountReader.getNumberOfClusters(input, conf);
     conf.set("clusterOutputPath", input.toString());
@@ -159,6 +162,7 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
     FileSystem fileSystem = output.getFileSystem(conf);
     for (FileStatus fileStatus : fileSystem.listStatus(output, PathFilters.partFilter())) {
       SequenceFileIterator<Writable, Writable> it =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
               new SequenceFileIterator<>(fileStatus.getPath(), true, conf);
       if (it.hasNext()) {
         renameFile(it.next().getFirst(), fileStatus, conf);

@@ -85,11 +85,13 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
    * Deep copies a state, useful in mutation.
    */
   public State<T, U> copy() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     State<T, U> r = new State<>();
     r.params = Arrays.copyOf(this.params, this.params.length);
     r.omni = this.omni;
     r.step = Arrays.copyOf(this.step, this.step.length);
     r.maps = Arrays.copyOf(this.maps, this.maps.length);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-228
     if (this.payload != null) {
       r.payload = (T) this.payload.copy();
     }
@@ -111,6 +113,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
     sum = Math.sqrt(sum);
     double lambda = 1 + gen.nextGaussian();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     State<T, U> r = this.copy();
     double magnitude = 0.9 * omni + sum / 10;
     r.omni = magnitude * -Math.log1p(-gen.nextDouble());
@@ -145,6 +148,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
   }
 
   public int getId() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
     return id;
   }
 
@@ -189,6 +193,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
   }
 
   public void setId(int id) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
     this.id = id;
   }
 
@@ -218,6 +223,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
     if (!(o instanceof State)) {
       return false;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     State<?,?> other = (State<?,?>) o;
     return id == other.id && value == other.value;
   }
@@ -260,6 +266,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     out.writeInt(id);
     out.writeInt(params.length);
     for (double v : params) {

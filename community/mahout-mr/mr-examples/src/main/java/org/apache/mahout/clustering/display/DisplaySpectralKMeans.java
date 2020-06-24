@@ -46,9 +46,11 @@ public class DisplaySpectralKMeans extends DisplayClustering {
 
   public static void main(String[] args) throws Exception {
     DistanceMeasure measure = new ManhattanDistanceMeasure();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
     Path samples = new Path(SAMPLES);
     Path output = new Path(OUTPUT);
     Path tempDir = new Path(TEMP);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, samples);
     HadoopUtil.delete(conf, output);
@@ -56,12 +58,14 @@ public class DisplaySpectralKMeans extends DisplayClustering {
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
     Path affinities = new Path(output, AFFINITIES);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     if (!fs.exists(output)) {
       fs.mkdirs(output);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
     try (Writer writer = new BufferedWriter(new FileWriter(affinities.toString()))){
       for (int i = 0; i < SAMPLE_DATA.size(); i++) {
         for (int j = 0; j < SAMPLE_DATA.size(); j++) {
@@ -80,6 +84,7 @@ public class DisplaySpectralKMeans extends DisplayClustering {
 
   @Override
   public void paint(Graphics g) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1488
     plotClusteredSampleData((Graphics2D) g, new Path(new Path(OUTPUT), "kmeans_out"));
   }
 }

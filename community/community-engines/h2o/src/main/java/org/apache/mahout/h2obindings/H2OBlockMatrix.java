@@ -48,6 +48,7 @@ public class H2OBlockMatrix extends AbstractMatrix {
   /** Class constructor. */
   public H2OBlockMatrix(Chunk chks[]) {
     super(chks[0].len(), chks.length);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     this.chks = chks;
   }
 
@@ -69,6 +70,7 @@ public class H2OBlockMatrix extends AbstractMatrix {
 
     for (int c = 0; c < chks.length; c++) {
       for (int r = 0; r < chks[0].len(); r++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
         cow.setQuick(r, c, chks[c].atd(r));
       }
     }
@@ -103,6 +105,7 @@ public class H2OBlockMatrix extends AbstractMatrix {
     if (cow != null) {
       return cow.getQuick(row, col);
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
       return chks[col].atd(row);
     }
   }
@@ -123,6 +126,7 @@ public class H2OBlockMatrix extends AbstractMatrix {
 
   @Override
   public MatrixFlavor getFlavor() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1738
     if (cow != null) {
       return cow.getFlavor();
     } else if (chks[0].isSparse()) {

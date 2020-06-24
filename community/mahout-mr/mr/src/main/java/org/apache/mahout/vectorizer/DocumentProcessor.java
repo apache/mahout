@@ -65,8 +65,10 @@ public final class DocumentProcessor {
    *          The Lucene {@link Analyzer} for tokenizing the UTF-8 text
    */
   public static void tokenizeDocuments(Path input,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
                                        Class<? extends Analyzer> analyzerClass,
                                        Path output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
                                        Configuration baseConf)
     throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration(baseConf);
@@ -77,6 +79,8 @@ public final class DocumentProcessor {
     
     Job job = new Job(conf);
     job.setJobName("DocumentProcessor::DocumentTokenizer: input-folder: " + input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     job.setJarByClass(DocumentProcessor.class);
     
     job.setOutputKeyClass(Text.class);
@@ -89,6 +93,7 @@ public final class DocumentProcessor {
     job.setNumReduceTasks(0);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     HadoopUtil.delete(conf, output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
     boolean succeeded = job.waitForCompletion(true);
     if (!succeeded) {

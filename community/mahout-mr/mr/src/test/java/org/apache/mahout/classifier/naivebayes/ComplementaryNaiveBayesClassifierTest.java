@@ -37,6 +37,7 @@ public final class ComplementaryNaiveBayesClassifierTest extends NaiveBayesTestB
   @Test
   public void testNaiveBayes() throws Exception {
     assertEquals(4, classifier.numCategories());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
     assertEquals(0, maxIndex(classifier.classifyFull(new DenseVector(new double[] { 1.0, 0.0, 0.0, 0.0 }))));
     assertEquals(1, maxIndex(classifier.classifyFull(new DenseVector(new double[] { 0.0, 1.0, 0.0, 0.0 }))));
     assertEquals(2, maxIndex(classifier.classifyFull(new DenseVector(new double[] { 0.0, 0.0, 1.0, 0.0 }))));

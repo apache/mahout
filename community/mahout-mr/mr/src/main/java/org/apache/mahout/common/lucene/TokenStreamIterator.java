@@ -45,6 +45,7 @@ public final class TokenStreamIterator extends AbstractIterator<String> {
       if (tokenStream.incrementToken()) {
         return tokenStream.getAttribute(CharTermAttribute.class).toString();
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1364
         tokenStream.end();
         tokenStream.close();
         return endOfData();

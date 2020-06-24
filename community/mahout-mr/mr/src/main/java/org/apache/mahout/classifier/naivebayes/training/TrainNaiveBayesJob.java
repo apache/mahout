@@ -70,6 +70,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     addOption(LABEL_INDEX, "li", "The path to store the label index in", false);
     addOption(DefaultOptionCreator.overwriteOption().create());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -78,6 +79,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
       HadoopUtil.delete(getConf(), getOutputPath());
       HadoopUtil.delete(getConf(), getTempPath());
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
     Path labPath;
     String labPathStr = getOption(LABEL_INDEX);
     if (labPathStr != null) {
@@ -105,6 +107,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
                                     SequenceFileOutputFormat.class);
     indexInstances.setCombinerClass(VectorSumReducer.class);
     boolean succeeded = indexInstances.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       return -1;
     }
@@ -119,6 +122,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
                                   Text.class,
                                   VectorWritable.class,
                                   SequenceFileOutputFormat.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     weightSummer.getConfiguration().set(WeightsMapper.NUM_LABELS, String.valueOf(labelSize));
     weightSummer.setCombinerClass(VectorSumReducer.class);
     succeeded = weightSummer.waitForCompletion(true);
@@ -129,6 +133,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     // Put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     if (trainComplementary){
       // Calculate the per label theta normalizers, write out to LABEL_THETA_NORMALIZER vector
       // see http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.2, Weight Magnitude Errors
@@ -145,6 +150,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
       thetaSummer.setCombinerClass(VectorSumReducer.class);
       thetaSummer.getConfiguration().setFloat(ThetaMapper.ALPHA_I, alphaI);
       thetaSummer.getConfiguration().setBoolean(ThetaMapper.TRAIN_COMPLEMENTARY, trainComplementary);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
       succeeded = thetaSummer.waitForCompletion(true);
       if (!succeeded) {
         return -1;
@@ -152,10 +158,13 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     }
     
     // Put the per label theta normalizers into the cache
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1504
     HadoopUtil.cacheFiles(getTempPath(THETAS), getConf());
     
     // Validate our model and then write it out to the official output
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1062
     getConf().setFloat(ThetaMapper.ALPHA_I, alphaI);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     getConf().setBoolean(NaiveBayesModel.COMPLEMENTARY_MODEL, trainComplementary);
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
     naiveBayesModel.validate();
@@ -166,6 +175,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
 
   private long createLabelIndex(Path labPath) throws IOException {
     long labelSize = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1635
     Iterable<Pair<Text,IntWritable>> iterable =
       new SequenceFileDirIterable<>(getInputPath(),
                                                      PathType.LIST,

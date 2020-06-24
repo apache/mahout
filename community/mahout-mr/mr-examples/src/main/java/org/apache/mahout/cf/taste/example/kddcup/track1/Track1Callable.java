@@ -54,6 +54,7 @@ final class Track1Callable implements Callable<byte[]> {
         log.warn("Unknown item {}; OK unless this is the real contest data", itemID);
         continue;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-657
       result[i] = EstimateConverter.convert(estimate, userID, itemID);
     }
 

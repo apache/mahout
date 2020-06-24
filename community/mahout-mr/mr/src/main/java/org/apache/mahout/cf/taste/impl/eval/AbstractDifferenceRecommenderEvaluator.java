@@ -65,6 +65,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   
   protected AbstractDifferenceRecommenderEvaluator() {
     random = RandomUtils.getRandom();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-196
     maxPreference = Float.NaN;
     minPreference = Float.NaN;
   }
@@ -91,20 +92,25 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   
   @Override
   public double evaluate(RecommenderBuilder recommenderBuilder,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
                          DataModelBuilder dataModelBuilder,
                          DataModel dataModel,
                          double trainingPercentage,
                          double evaluationPercentage) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Preconditions.checkNotNull(recommenderBuilder);
     Preconditions.checkNotNull(dataModel);
     Preconditions.checkArgument(trainingPercentage >= 0.0 && trainingPercentage <= 1.0,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       "Invalid trainingPercentage: " + trainingPercentage + ". Must be: 0.0 <= trainingPercentage <= 1.0");
     Preconditions.checkArgument(evaluationPercentage >= 0.0 && evaluationPercentage <= 1.0,
       "Invalid evaluationPercentage: " + evaluationPercentage + ". Must be: 0.0 <= evaluationPercentage <= 1.0");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
     log.info("Beginning evaluation using {} of {}", trainingPercentage, dataModel);
     
     int numUsers = dataModel.getNumUsers();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FastByIDMap<PreferenceArray> trainingPrefs = new FastByIDMap<>(
         1 + (int) (evaluationPercentage * numUsers));
     FastByIDMap<PreferenceArray> testPrefs = new FastByIDMap<>(
@@ -114,6 +120,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
     while (it.hasNext()) {
       long userID = it.nextLong();
       if (random.nextDouble() < evaluationPercentage) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-896
         splitOneUsersPrefs(trainingPercentage, trainingPrefs, testPrefs, userID, dataModel);
       }
     }
@@ -124,6 +131,8 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
     Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
     
     double result = getEvaluation(testPrefs, recommender);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.info("Evaluation result: {}", result);
     return result;
   }
@@ -141,6 +150,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
       Preference newPref = new GenericPreference(userID, prefs.getItemID(i), prefs.getValue(i));
       if (random.nextDouble() < trainingPercentage) {
         if (oneUserTrainingPrefs == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           oneUserTrainingPrefs = new ArrayList<>(3);
         }
         oneUserTrainingPrefs.add(newPref);
@@ -160,6 +170,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   }
 
   private float capEstimatedPreference(float estimate) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-196
     if (estimate > maxPreference) {
       return maxPreference;
     }
@@ -172,13 +183,16 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   private double getEvaluation(FastByIDMap<PreferenceArray> testPrefs, Recommender recommender)
     throws TasteException {
     reset();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Callable<Void>> estimateCallables = new ArrayList<>();
     AtomicInteger noEstimateCounter = new AtomicInteger();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-896
     for (Map.Entry<Long,PreferenceArray> entry : testPrefs.entrySet()) {
       estimateCallables.add(
           new PreferenceEstimateCallable(recommender, entry.getKey(), entry.getValue(), noEstimateCounter));
     }
     log.info("Beginning evaluation of {} users", estimateCallables.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-891
     RunningAverageAndStdDev timing = new FullRunningAverageAndStdDev();
     execute(estimateCallables, noEstimateCounter, timing);
     return computeFinalEvaluation();
@@ -206,6 +220,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
     }
     
     executor.shutdown();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     try {
       executor.awaitTermination(10, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
@@ -214,8 +229,10 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   }
   
   private static Collection<Callable<Void>> wrapWithStatsCallables(Iterable<Callable<Void>> callables,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-891
                                                                    AtomicInteger noEstimateCounter,
                                                                    RunningAverageAndStdDev timing) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Callable<Void>> wrapped = new ArrayList<>();
     int count = 0;
     for (Callable<Void> callable : callables) {

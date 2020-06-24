@@ -71,6 +71,7 @@ public class ResplitSequenceFiles {
   private void run(PrintWriter printWriter) throws IOException {
     conf = new Configuration();
     SequenceFileDirIterable<Writable, Writable> inputIterable = new
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         SequenceFileDirIterable<>(new Path(inputFile), PathType.LIST, conf);
     fs = FileSystem.get(conf);
 
@@ -105,6 +106,7 @@ public class ResplitSequenceFiles {
         .withShortName("o")
         .withRequired(true)
         .withArgument(argumentBuilder.withName("output").withMaximum(1).create())
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         .withDescription("the base name of the file split that the files will be split it; the i'th split has the "
             + "suffix -i")
         .create();

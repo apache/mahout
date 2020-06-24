@@ -68,6 +68,7 @@ public class PartialBuilder extends Builder {
     
     job.setJarByClass(PartialBuilder.class);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     FileInputFormat.setInputPaths(job, getDataPath());
     FileOutputFormat.setOutputPath(job, getOutputPath(conf));
     
@@ -82,6 +83,7 @@ public class PartialBuilder extends Builder {
 
     // For this implementation to work, mapred.map.tasks needs to be set to the actual
     // number of mappers Hadoop will use:
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1417
     TextInputFormat inputFormat = new TextInputFormat();
     List<?> splits = inputFormat.getSplits(job);
     if (splits == null || splits.isEmpty()) {
@@ -104,6 +106,7 @@ public class PartialBuilder extends Builder {
     TreeID[] keys = new TreeID[numTrees];
     Node[] trees = new Node[numTrees];
         
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     processOutput(job, outputPath, keys, trees);
     
     return new DecisionForest(Arrays.asList(trees));
@@ -123,6 +126,7 @@ public class PartialBuilder extends Builder {
   protected static void processOutput(JobContext job,
                                       Path outputPath,
                                       TreeID[] keys,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-835
                                       Node[] trees) throws IOException {
     Preconditions.checkArgument(keys == null && trees == null || keys != null && trees != null,
         "if keys is null, trees should also be null");
@@ -137,6 +141,7 @@ public class PartialBuilder extends Builder {
     // read all the outputs
     int index = 0;
     for (Path path : outfiles) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       for (Pair<TreeID,MapredOutput> record : new SequenceFileIterable<TreeID, MapredOutput>(path, conf)) {
         TreeID key = record.getFirst();
         MapredOutput value = record.getSecond();
@@ -151,6 +156,7 @@ public class PartialBuilder extends Builder {
     }
 
     // make sure we got all the keys/values
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-126
     if (keys != null && index != keys.length) {
       throw new IllegalStateException("Some key/values are missing from the output");
     }

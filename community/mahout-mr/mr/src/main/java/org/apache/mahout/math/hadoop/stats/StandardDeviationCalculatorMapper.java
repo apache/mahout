@@ -33,12 +33,14 @@ public class StandardDeviationCalculatorMapper extends
 
   @Override
   protected void map(IntWritable key, Writable value, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
     if (key.get() == -1) {
       return;
     }
     //Kind of ugly, but such is life
     double df = Double.NaN;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (value instanceof LongWritable) {
       df = ((LongWritable)value).get();
     } else if (value instanceof DoubleWritable) {

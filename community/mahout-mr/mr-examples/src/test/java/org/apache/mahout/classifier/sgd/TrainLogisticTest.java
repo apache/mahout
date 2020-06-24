@@ -43,10 +43,12 @@ public class TrainLogisticTest extends MahoutTestCase {
   public void example131() throws Exception {
     String outputFile = getTestTempFile("model").getAbsolutePath();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw, true);
     TrainLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-496
         "--output", outputFile,
         "--target", "color", "--categories", "2",
         "--predictors", "x", "y",
@@ -65,6 +67,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     assertTrue(lmp.useBias());
     assertEquals("color", lmp.getTargetVariable());
     CsvRecordFactory csv = lmp.getCsvRecordFactory();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     assertEquals("[1, 2]", new TreeSet<>(csv.getTargetCategories()).toString());
     assertEquals("[Intercept Term, x, y]", Sets.newTreeSet(csv.getPredictors()).toString());
 
@@ -75,6 +78,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     verifyModel(lmp, csv, data, model, expectedValues);
 
     // test saved model
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (InputStream in = new FileInputStream(new File(outputFile))){
       LogisticModelParameters lmpOut = LogisticModelParameters.loadFrom(in);
       CsvRecordFactory csvOut = lmpOut.getCsvRecordFactory();
@@ -83,6 +87,7 @@ public class TrainLogisticTest extends MahoutTestCase {
       verifyModel(lmpOut, csvOut, data, lrOut, expectedValues);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     sw = new StringWriter();
     pw = new PrintWriter(sw, true);
     RunLogistic.mainToOutput(new String[]{
@@ -101,6 +106,8 @@ public class TrainLogisticTest extends MahoutTestCase {
     String outputFile = getTestTempFile("model").getAbsolutePath();
 
     StringWriter sw = new StringWriter();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     PrintWriter pw = new PrintWriter(sw, true);
     TrainLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
@@ -113,6 +120,7 @@ public class TrainLogisticTest extends MahoutTestCase {
         "--passes", "100",
         "--rate", "50"
     }, pw);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
 
     String trainOut = sw.toString();
     assertTrue(trainOut.contains("a 0."));
@@ -120,6 +128,8 @@ public class TrainLogisticTest extends MahoutTestCase {
     assertTrue(trainOut.contains("c -25."));
 
     sw = new StringWriter();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     pw = new PrintWriter(sw, true);
     RunLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
@@ -131,6 +141,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     assertTrue(trainOut.contains("AUC = 1.00"));
 
     sw = new StringWriter();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     pw = new PrintWriter(sw, true);
     RunLogistic.mainToOutput(new String[]{
         "--input", "donut-test.csv",
@@ -143,6 +154,7 @@ public class TrainLogisticTest extends MahoutTestCase {
   }
 
   private static void verifyModel(LogisticModelParameters lmp,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-594
                                   RecordFactory csv,
                                   List<String> data,
                                   AbstractVectorClassifier model,
@@ -157,6 +169,7 @@ public class TrainLogisticTest extends MahoutTestCase {
 
     // check right variables are present
     List<ModelDissector.Weight> weights = md.summary(10);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-496
     Set<String> expected = Sets.newHashSet(expectedValues.keySet());
     for (ModelDissector.Weight weight : weights) {
       assertTrue(expected.remove(weight.getFeature()));

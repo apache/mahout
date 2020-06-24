@@ -31,6 +31,7 @@ public class ToItemVectorsReducer extends Reducer<IntWritable,VectorWritable,Int
   protected void reduce(IntWritable row, Iterable<VectorWritable> vectors, Context ctx)
     throws IOException, InterruptedException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
     merged.setWritesLaxPrecision(true);
     merged.set(VectorWritable.mergeToVector(vectors.iterator()));
     ctx.write(row, merged);

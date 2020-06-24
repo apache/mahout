@@ -32,6 +32,7 @@ import java.util.Arrays;
  */
 public final class IntPairWritable extends BinaryComparable
     implements WritableComparable<BinaryComparable>, Cloneable {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1138
 
   static final int INT_BYTE_LENGTH = 4;
   static final int INT_PAIR_BYTE_LENGTH = 2 * INT_BYTE_LENGTH;
@@ -48,6 +49,7 @@ public final class IntPairWritable extends BinaryComparable
   
   public IntPairWritable(int x, int y) {
     putInt(x, b, 0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-320
     putInt(y, b, INT_BYTE_LENGTH);
   }
   
@@ -65,6 +67,7 @@ public final class IntPairWritable extends BinaryComparable
   }
   
   public void setSecond(int y) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-320
     putInt(y, b, INT_BYTE_LENGTH);
   }
   
@@ -84,6 +87,7 @@ public final class IntPairWritable extends BinaryComparable
   
   @Override
   public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-320
     return Arrays.hashCode(b);
   }
   
@@ -128,6 +132,7 @@ public final class IntPairWritable extends BinaryComparable
   }
   
   private static void putInt(int value, byte[] b, int offset) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-320
     for (int i = offset, j = 24; j >= 0; i++, j -= 8) {
       b[i] = (byte) (value >> j);
     }
@@ -152,6 +157,7 @@ public final class IntPairWritable extends BinaryComparable
     
     @Override
     public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-320
       return doCompare(b1, s1, b2, s2);
     }
 
@@ -194,6 +200,7 @@ public final class IntPairWritable extends BinaryComparable
     public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
       int firstb1 = WritableComparator.readInt(b1, s1);
       int firstb2 = WritableComparator.readInt(b2, s2);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-320
       if (firstb1 < firstb2) {
         return -1;
       } else if (firstb1 > firstb2) {
@@ -239,6 +246,7 @@ public final class IntPairWritable extends BinaryComparable
 
     @Override
     public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-320
       return pair.hashCode() + RandomUtils.hashDouble(frequency);
     }
     

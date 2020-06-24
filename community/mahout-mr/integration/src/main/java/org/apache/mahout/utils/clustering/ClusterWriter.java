@@ -35,11 +35,13 @@ public interface ClusterWriter extends Closeable {
    * @throws java.io.IOException if there was a problem writing
    */
   long write(Iterable<ClusterWritable> iterable) throws IOException;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
 
   /**
    * Write out a Cluster
    */
   void write(ClusterWritable clusterWritable) throws IOException;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
 
   /**
    * Write the first {@code maxDocs} to the output.
@@ -49,5 +51,6 @@ public interface ClusterWriter extends Closeable {
    * @return The number of docs written
    * @throws IOException if there was a problem writing
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
   long write(Iterable<ClusterWritable> iterable, long maxDocs) throws IOException;
 }

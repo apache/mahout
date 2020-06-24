@@ -39,6 +39,7 @@ public class PrepEmailReducer extends Reducer<Text, VectorWritable, Text, Vector
     //TODO: support randomization?  Likely not needed due to the SplitInput utility which does random selection
     long i = 0;
     Iterator<VectorWritable> iterator = values.iterator();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (i < maxItemsPerLabel && iterator.hasNext()) {
       context.write(key, iterator.next());
       i++;

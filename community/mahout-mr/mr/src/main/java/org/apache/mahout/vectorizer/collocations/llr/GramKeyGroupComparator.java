@@ -26,6 +26,7 @@ import java.io.Serializable;
  *  to the same call of the reduce method, sorted in natural order (for GramKeys).
  */
 class GramKeyGroupComparator extends WritableComparator implements Serializable {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
 
   GramKeyGroupComparator() {
     super(GramKey.class, true);

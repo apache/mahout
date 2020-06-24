@@ -73,6 +73,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
     addOption(addOption(DefaultOptionCreator.overwriteOption().create()));
     addOption("model", "m", "The path to the model built during training", true);
     addOption(buildOption("testComplementary", "c", "test complementary?", false, false, String.valueOf(false)));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1006
     addOption(buildOption("runSequential", "seq", "run sequential?", false, false, String.valueOf(false)));
     addOption("labelIndex", "l", "The path to the location of the label index", true);
     Map<String, List<String>> parsedArgs = parseArguments(args);
@@ -86,6 +87,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
     boolean sequential = hasOption("runSequential");
     boolean succeeded;
     if (sequential) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1503
        runSequential();
     } else {
       succeeded = runMapReduce();
@@ -99,6 +101,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
 
     //loop over the results and create the confusion matrix
     SequenceFileDirIterable<Text, VectorWritable> dirIterable =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new SequenceFileDirIterable<>(getOutputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
     ResultAnalyzer analyzer = new ResultAnalyzer(labelMap.values(), "DEFAULT");
     analyzeResults(labelMap, dirIterable, analyzer);
@@ -116,6 +119,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
     // trained complementary. a complementarty model will work for standard classification
     // a standard model will not work for complementary classification
     if (complementary){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         Preconditions.checkArgument((model.isComplemtary()),
             "Complementary mode in model is different from test mode");
     }
@@ -127,10 +131,12 @@ public class TestNaiveBayesDriver extends AbstractJob {
       classifier = new StandardNaiveBayesClassifier(model);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer =
              SequenceFile.createWriter(fs, getConf(), new Path(getOutputPath(), "part-r-00000"),
                  Text.class, VectorWritable.class)) {
       SequenceFileDirIterable<Text, VectorWritable> dirIterable =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           new SequenceFileDirIterable<>(getInputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
       // loop through the part-r-* files in getInputPath() and get classification scores for all entries
       for (Pair<Text, VectorWritable> pair : dirIterable) {
@@ -161,12 +167,14 @@ public class TestNaiveBayesDriver extends AbstractJob {
     for (Pair<Text, VectorWritable> pair : dirIterable) {
       int bestIdx = Integer.MIN_VALUE;
       double bestScore = Long.MIN_VALUE;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element element : pair.getSecond().get().all()) {
         if (element.get() > bestScore) {
           bestScore = element.get();
           bestIdx = element.index();
         }
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
       if (bestIdx != Integer.MIN_VALUE) {
         ClassifierResult classifierResult = new ClassifierResult(labelMap.get(bestIdx), bestScore);
         analyzer.addInstance(pair.getFirst().toString(), classifierResult);

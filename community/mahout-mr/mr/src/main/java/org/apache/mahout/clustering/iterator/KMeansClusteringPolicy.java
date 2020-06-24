@@ -41,17 +41,20 @@ public class KMeansClusteringPolicy extends AbstractClusteringPolicy {
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     out.writeDouble(convergenceDelta);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     this.convergenceDelta = in.readDouble();
   }
   
   @Override
   public void close(ClusterClassifier posterior) {
     boolean allConverged = true;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     for (Cluster cluster : posterior.getModels()) {
       org.apache.mahout.clustering.kmeans.Kluster kluster = (org.apache.mahout.clustering.kmeans.Kluster) cluster;
       boolean converged = kluster.calculateConvergence(convergenceDelta);

@@ -108,12 +108,15 @@ public class ClusterLabels {
 
   public void getLabels() throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (Writer writer = (this.output == null) ?
         new OutputStreamWriter(System.out, Charsets.UTF_8) : Files.newWriter(new File(this.output), Charsets.UTF_8)){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
       for (Map.Entry<Integer, List<WeightedPropertyVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
         List<WeightedPropertyVectorWritable> wpvws = integerListEntry.getValue();
         List<TermInfoClusterInOut> termInfos = getClusterLabels(integerListEntry.getKey(), wpvws);
         if (termInfos != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
           writer.write('\n');
           writer.write("Top labels for Cluster ");
           writer.write(String.valueOf(integerListEntry.getKey()));
@@ -143,6 +146,7 @@ public class ClusterLabels {
    */
   protected List<TermInfoClusterInOut> getClusterLabels(Integer integer,
                                                         Collection<WeightedPropertyVectorWritable> wpvws) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
 
     if (wpvws.size() < minNumIds) {
       log.info("Skipping small cluster {} with size: {}", integer, wpvws.size());
@@ -150,13 +154,17 @@ public class ClusterLabels {
     }
 
     log.info("Processing Cluster {} with {} documents", integer, wpvws.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     Directory dir = FSDirectory.open(Paths.get(this.indexDir));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     IndexReader reader = DirectoryReader.open(dir);
     
     
     log.info("# of documents in the index {}", reader.numDocs());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<String> idSet = new HashSet<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
     for (WeightedPropertyVectorWritable wpvw : wpvws) {
       Vector vector = wpvw.getVector();
       if (vector instanceof NamedVector) {
@@ -167,6 +175,7 @@ public class ClusterLabels {
     int numDocs = reader.numDocs();
 
     FixedBitSet clusterDocBitset = getClusterDocBitset(reader, idSet, this.idField);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
 
     log.info("Populating term infos from the index");
 
@@ -180,7 +189,9 @@ public class ClusterLabels {
      * frequency.
      */
     Terms t = MultiFields.getTerms(reader, contentField);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     TermsEnum te = t.iterator();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, TermEntry> termEntryMap = new LinkedHashMap<>();
     Bits liveDocs = MultiFields.getLiveDocs(reader); //WARNING: returns null if there are no deletions
 
@@ -188,6 +199,7 @@ public class ClusterLabels {
     int count = 0;
     BytesRef term;
     while ((term = te.next()) != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
       FixedBitSet termBitset = new FixedBitSet(reader.maxDoc());
       PostingsEnum docsEnum = MultiFields.getTermDocsEnum(reader, contentField, term);
       int docID;
@@ -209,6 +221,7 @@ public class ClusterLabels {
     }
 
     List<TermInfoClusterInOut> clusteredTermInfo = new LinkedList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     int clusterSize = wpvws.size();
 
@@ -225,6 +238,7 @@ public class ClusterLabels {
 
     Collections.sort(clusteredTermInfo);
     // Cleanup
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     Closeables.close(reader, true);
     termEntryMap.clear();
 
@@ -236,10 +250,12 @@ public class ClusterLabels {
                                                 String idField) throws IOException {
     int numDocs = reader.numDocs();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     FixedBitSet bitset = new FixedBitSet(numDocs);
     
     Set<String>  idFieldSelector = null;
     if (idField != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       idFieldSelector = new TreeSet<>();
       idFieldSelector.add(idField);
     }
@@ -257,11 +273,14 @@ public class ClusterLabels {
         bitset.set(i);
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.info("Created bitset for in-cluster documents : {}", bitset.cardinality());
     return bitset;
   }
 
   private static double scoreDocumentFrequencies(long inDF, long outDF, long clusterSize, long corpusSize) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-738
     long k12 = clusterSize - inDF;
     long k22 = corpusSize - clusterSize - outDF;
 
@@ -322,6 +341,7 @@ public class ClusterLabels {
         abuilder.withName("maxLabels").withMinimum(1).withMaximum(1).create()).withDescription(
         "The maximum number of labels to print per cluster").withShortName("x").create();
     Option helpOpt = DefaultOptionCreator.helpOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
 
     Group group = gbuilder.withName("Options").withOption(indexOpt).withOption(idFieldOpt).withOption(outputOpt)
         .withOption(fieldOpt).withOption(seqOpt).withOption(pointsOpt).withOption(helpOpt)
@@ -337,6 +357,7 @@ public class ClusterLabels {
         return;
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
       Path seqFileDir = new Path(cmdLine.getValue(seqOpt).toString());
       Path pointsDir = new Path(cmdLine.getValue(pointsOpt).toString());
       String indexDir = cmdLine.getValue(indexOpt).toString();
@@ -360,6 +381,7 @@ public class ClusterLabels {
         minSize = Integer.parseInt(cmdLine.getValue(minClusterSizeOpt).toString());
       }
       ClusterLabels clusterLabel = new ClusterLabels(seqFileDir, pointsDir, indexDir, contentField, minSize, maxLabels);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
 
       if (idField != null) {
         clusterLabel.setIdField(idField);
@@ -371,6 +393,7 @@ public class ClusterLabels {
       clusterLabel.getLabels();
 
     } catch (OptionException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     } catch (IOException e) {

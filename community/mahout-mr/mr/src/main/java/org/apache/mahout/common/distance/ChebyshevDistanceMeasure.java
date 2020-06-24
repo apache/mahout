@@ -52,6 +52,7 @@ public class ChebyshevDistanceMeasure implements DistanceMeasure {
     if (v1.size() != v2.size()) {
       throw new CardinalityException(v1.size(), v2.size());
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1202
     return v1.aggregate(v2, Functions.MAX_ABS, Functions.MINUS);
   }
   

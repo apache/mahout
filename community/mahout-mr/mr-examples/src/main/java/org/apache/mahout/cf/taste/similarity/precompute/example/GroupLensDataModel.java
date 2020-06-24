@@ -38,6 +38,9 @@ public final class GroupLensDataModel extends FileDataModel {
   private static final Pattern COLON_DELIMITER_PATTERN = Pattern.compile(COLON_DELIMTER);
   
   public GroupLensDataModel() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"));
   }
   
@@ -46,6 +49,7 @@ public final class GroupLensDataModel extends FileDataModel {
    * @throws IOException if an error occurs while reading or writing files
    */
   public GroupLensDataModel(File ratingsFile) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     super(convertGLFile(ratingsFile));
   }
   
@@ -55,6 +59,7 @@ public final class GroupLensDataModel extends FileDataModel {
     if (resultFile.exists()) {
       resultFile.delete();
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (Writer writer = new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8)){
       for (String line : new FileLineIterable(originalFile, false)) {
         int lastDelimiterStart = line.lastIndexOf(COLON_DELIMTER);
@@ -63,6 +68,7 @@ public final class GroupLensDataModel extends FileDataModel {
         }
         String subLine = line.substring(0, lastDelimiterStart);
         String convertedLine = COLON_DELIMITER_PATTERN.matcher(subLine).replaceAll(",");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
         writer.write(convertedLine);
         writer.write('\n');
       }
@@ -76,6 +82,7 @@ public final class GroupLensDataModel extends FileDataModel {
   public static File readResourceToTempFile(String resourceName) throws IOException {
     InputSupplier<? extends InputStream> inSupplier;
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
       URL resourceURL = Resources.getResource(GroupLensDataModel.class, resourceName);
       inSupplier = Resources.newInputStreamSupplier(resourceURL);
     } catch (IllegalArgumentException iae) {

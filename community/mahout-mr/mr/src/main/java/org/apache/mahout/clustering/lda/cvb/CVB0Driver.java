@@ -134,6 +134,7 @@ public class CVB0Driver extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.maxIterationsOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1262
     addOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION, "cd", "The convergence delta value",
               String.valueOf(DEFAULT_CONVERGENCE_DELTA));
     addOption(DefaultOptionCreator.overwriteOption().create());
@@ -163,6 +164,7 @@ public class CVB0Driver extends AbstractJob {
     addOption(buildOption(BACKFILL_PERPLEXITY, null, "enable backfilling of missing perplexity values", false, false,
               null));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -191,6 +193,7 @@ public class CVB0Driver extends AbstractJob {
               : System.nanoTime() % 10000;
     float testFraction = hasOption(TEST_SET_FRACTION)
                        ? Float.parseFloat(getOption(TEST_SET_FRACTION))
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
                        : 0.0f;
     int numReduceTasks = Integer.parseInt(getOption(NUM_REDUCE_TASKS));
     boolean backfillPerplexity = hasOption(BACKFILL_PERPLEXITY);
@@ -216,6 +219,8 @@ public class CVB0Driver extends AbstractJob {
   }
 
   public int run(Configuration conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1262
                  Path inputPath,
                  Path topicModelOutputPath,
                  int numTopics,
@@ -245,6 +250,7 @@ public class CVB0Driver extends AbstractJob {
     Preconditions.checkArgument(!backfillPerplexity || testFraction > 0.0,
         "Expected 'testFraction' value in range (0, 1] but found value '%s'", testFraction);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     String infoString = "Will run Collapsed Variational Bayes (0th-derivative approximation) " 
       + "learning for LDA on {} (numTerms: {}), finding {}-topics, with document/topic prior {}, " 
       + "topic/term prior {}.  Maximum iterations to run will be {}, unless the change in " 
@@ -254,11 +260,13 @@ public class CVB0Driver extends AbstractJob {
     log.info(infoString, inputPath, numTerms, numTopics, alpha, eta, maxIterations,
              convergenceDelta, topicModelOutputPath, randomSeed, testFraction);
     infoString = dictionaryPath == null
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
                ? "" : "Dictionary to be used located " + dictionaryPath.toString() + '\n';
     infoString += docTopicOutputPath == null
                ? "" : "p(topic|docId) will be stored " + docTopicOutputPath.toString() + '\n';
     log.info(infoString);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(topicModelStateTempPath.toUri(), conf);
     int iterationNumber = getCurrentIterationNumber(conf, topicModelStateTempPath, maxIterations);
     log.info("Current iteration number: {}", iterationNumber);
@@ -271,9 +279,11 @@ public class CVB0Driver extends AbstractJob {
     conf.set(NUM_TRAIN_THREADS, String.valueOf(numTrainThreads));
     conf.set(NUM_UPDATE_THREADS, String.valueOf(numUpdateThreads));
     conf.set(MAX_ITERATIONS_PER_DOC, String.valueOf(maxItersPerDoc));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     conf.set(MODEL_WEIGHT, "1"); // TODO
     conf.set(TEST_SET_FRACTION, String.valueOf(testFraction));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Double> perplexities = new ArrayList<>();
     for (int i = 1; i <= iterationNumber; i++) {
       // form path to model
@@ -300,8 +310,10 @@ public class CVB0Driver extends AbstractJob {
     }
 
     long startTime = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (iterationNumber < maxIterations) {
       // test convergence
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       if (convergenceDelta > 0.0) {
         double delta = rateOfChange(perplexities);
         if (delta < convergenceDelta) {
@@ -320,6 +332,7 @@ public class CVB0Driver extends AbstractJob {
           maxIterations, numReduceTasks);
 
       // calculate perplexity
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (testFraction > 0 && iterationNumber % iterationBlockSize == 0) {
         perplexities.add(calculatePerplexity(conf, inputPath, modelOutputPath, iterationNumber));
         log.info("Current perplexity = {}", perplexities.get(perplexities.size() - 1));
@@ -339,6 +352,7 @@ public class CVB0Driver extends AbstractJob {
     Job docInferenceJob = docTopicOutputPath != null
         ? writeDocTopicInference(conf, inputPath, finalIterationData, docTopicOutputPath)
         : null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (topicModelOutputJob != null && !topicModelOutputJob.waitForCompletion(true)) {
       return -1;
     }
@@ -350,6 +364,7 @@ public class CVB0Driver extends AbstractJob {
 
   private static double rateOfChange(List<Double> perplexities) {
     int sz = perplexities.size();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (sz < 2) {
       return Double.MAX_VALUE;
     }
@@ -362,6 +377,7 @@ public class CVB0Driver extends AbstractJob {
     log.info("About to run: {}", jobName);
 
     Path outputPath = perplexityPath(modelPath.getParent(), iteration);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1262
     Job job = prepareJob(corpusPath, outputPath, CachingCVB0PerplexityMapper.class, DoubleWritable.class,
         DoubleWritable.class, DualDoubleSumReducer.class, DoubleWritable.class, DoubleWritable.class);
 
@@ -370,6 +386,7 @@ public class CVB0Driver extends AbstractJob {
     job.setNumReduceTasks(1);
     setModelPaths(job, modelPath);
     HadoopUtil.delete(conf, outputPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (!job.waitForCompletion(true)) {
       throw new InterruptedException("Failed to calculate perplexity for: " + modelPath);
     }
@@ -412,6 +429,7 @@ public class CVB0Driver extends AbstractJob {
   public static double readPerplexity(Configuration conf, Path topicModelStateTemp, int iteration)
     throws IOException {
     Path perplexityPath = perplexityPath(topicModelStateTemp, iteration);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(perplexityPath.toUri(), conf);
     if (!fs.exists(perplexityPath)) {
       log.warn("Perplexity path {} does not exist, returning NaN", perplexityPath);
@@ -436,6 +454,7 @@ public class CVB0Driver extends AbstractJob {
     String jobName = String.format("Writing final topic/term distributions from %s to %s", modelInput, output);
     log.info("About to run: {}", jobName);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1262
     Job job = prepareJob(modelInput, output, SequenceFileInputFormat.class, CVB0TopicTermVectorNormalizerMapper.class,
         IntWritable.class, VectorWritable.class, SequenceFileOutputFormat.class, jobName);
     job.submit();
@@ -447,13 +466,16 @@ public class CVB0Driver extends AbstractJob {
     String jobName = String.format("Writing final document/topic inference from %s to %s", corpus, output);
     log.info("About to run: {}", jobName);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1268
     Job job = prepareJob(corpus, output, SequenceFileInputFormat.class, CVB0DocInferenceMapper.class,
         IntWritable.class, VectorWritable.class, SequenceFileOutputFormat.class, jobName);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(corpus.toUri(), conf);
     if (modelInput != null && fs.exists(modelInput)) {
       FileStatus[] statuses = fs.listStatus(modelInput, PathFilters.partFilter());
       URI[] modelUris = new URI[statuses.length];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       for (int i = 0; i < statuses.length; i++) {
         modelUris[i] = statuses[i].getPath().toUri();
       }
@@ -474,9 +496,11 @@ public class CVB0Driver extends AbstractJob {
 
   private static int getCurrentIterationNumber(Configuration config, Path modelTempDir, int maxIterations)
     throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(modelTempDir.toUri(), config);
     int iterationNumber = 1;
     Path iterationPath = modelPath(modelTempDir, iterationNumber);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (fs.exists(iterationPath) && iterationNumber <= maxIterations) {
       log.info("Found previous state: {}", iterationPath);
       iterationNumber++;
@@ -491,13 +515,16 @@ public class CVB0Driver extends AbstractJob {
     String jobName = String.format("Iteration %d of %d, input path: %s",
         iterationNumber, maxIterations, modelInput);
     log.info("About to run: {}", jobName);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1262
     Job job = prepareJob(corpusInput, modelOutput, CachingCVB0Mapper.class, IntWritable.class, VectorWritable.class,
         VectorSumReducer.class, IntWritable.class, VectorWritable.class);
     job.setCombinerClass(VectorSumReducer.class);
     job.setNumReduceTasks(numReduceTasks);
     job.setJobName(jobName);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1147
     setModelPaths(job, modelInput);
     HadoopUtil.delete(conf, modelOutput);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (!job.waitForCompletion(true)) {
       throw new InterruptedException(String.format("Failed to complete iteration %d stage 1",
           iterationNumber));
@@ -506,6 +533,7 @@ public class CVB0Driver extends AbstractJob {
 
   private static void setModelPaths(Job job, Path modelPath) throws IOException {
     Configuration conf = job.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     if (modelPath == null || !FileSystem.get(modelPath.toUri(), conf).exists(modelPath)) {
       return;
     }

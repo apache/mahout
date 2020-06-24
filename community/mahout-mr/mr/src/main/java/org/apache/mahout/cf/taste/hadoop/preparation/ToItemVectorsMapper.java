@@ -41,8 +41,10 @@ public class ToItemVectorsMapper
     int column = TasteHadoopUtils.idToIndex(rowIndex.get());
 
     itemVectorWritable.setWritesLaxPrecision(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
 
     Vector itemVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element elem : userRatings.nonZeroes()) {
       itemID.set(elem.index());
       itemVector.setQuick(column, elem.get());

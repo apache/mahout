@@ -56,6 +56,7 @@ public class WeightedPropertyVectorWritable extends WeightedVectorWritable {
     super.readFields(in);
     int size = in.readInt();
     if (size > 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       properties = new HashMap<>();
       for (int i = 0; i < size; i++) {
         Text key = new Text(in.readUTF());

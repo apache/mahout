@@ -81,7 +81,9 @@ public final class PartialVectorMerger {
    *          The number of reducers to spawn
    */
   public static void mergePartialVectors(Iterable<Path> partialVectorPaths,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
                                          Path output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
                                          Configuration baseConf,
                                          float normPower,
                                          boolean logNormalize,
@@ -90,6 +92,7 @@ public final class PartialVectorMerger {
                                          boolean namedVector,
                                          int numReducers)
     throws IOException, InterruptedException, ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(normPower == NO_NORMALIZING || normPower >= 0,
         "If specified normPower must be nonnegative", normPower);
     Preconditions.checkArgument(normPower == NO_NORMALIZING
@@ -97,18 +100,24 @@ public final class PartialVectorMerger {
                                 || !logNormalize,
         "normPower must be > 1 and not infinite if log normalization is chosen", normPower);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
     Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setBoolean(SEQUENTIAL_ACCESS, sequentialAccess);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     conf.setBoolean(NAMED_VECTOR, namedVector);
     conf.setInt(DIMENSION, dimension);
     conf.setFloat(NORMALIZATION_POWER, normPower);
     conf.setBoolean(LOG_NORMALIZE, logNormalize);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-287
 
     Job job = new Job(conf);
     job.setJobName("PartialVectorMerger::MergePartialVectors");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     job.setJarByClass(PartialVectorMerger.class);
     
     job.setOutputKeyClass(Text.class);
@@ -125,6 +134,7 @@ public final class PartialVectorMerger {
     job.setNumReduceTasks(numReducers);
 
     HadoopUtil.delete(conf, output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
     boolean succeeded = job.waitForCompletion(true);
     if (!succeeded) {

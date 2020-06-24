@@ -112,9 +112,11 @@ public class UJob {
     protected void map(Writable key, VectorWritable value, Context context)
       throws IOException, InterruptedException {
       Vector qRow = value.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-623
       if (sValues != null) {
         for (int i = 0; i < k; i++) {
           uRow.setQuick(i,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
                         qRow.dot(uHat.viewColumn(i)) * sValues.getQuick(i));
         }
       } else {
@@ -142,7 +144,9 @@ public class UJob {
       Path uHatPath = new Path(context.getConfiguration().get(PROP_UHAT_PATH));
       Path sigmaPath = new Path(context.getConfiguration().get(PROP_SIGMA_PATH));
       FileSystem fs = FileSystem.get(uHatPath.toUri(), context.getConfiguration());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
       uHat = SSVDHelper.drmLoadAsDense(fs, uHatPath, context.getConfiguration());
       // since uHat is (k+p) x (k+p)
       kp = uHat.columnSize();

@@ -35,6 +35,7 @@ public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
     Vector[] vectors = {
         new DenseVector(new double[]{1, 1, 1, 1, 1, 1}),
         new DenseVector(new double[]{2, 2, 2, 2, 2, 2}),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-181
         new DenseVector(new double[]{6, 6, 6, 6, 6, 6}),
         new DenseVector(new double[]{-1,-1,-1,-1,-1,-1})
     };
@@ -43,6 +44,7 @@ public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
 
     vectors = new Vector[4];
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
     vectors[0] = new RandomAccessSparseVector(5);
     vectors[0].setQuick(0, 1);
     vectors[0].setQuick(3, 1);
@@ -87,10 +89,12 @@ public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
     for (int a = 0; a < 4; a++) {
       for (int b = 0; b < 4; b++) {
         assertTrue("Distance between vectors less than zero: " 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
                    + distanceMatrix[a][b] + " = " + distanceMeasure 
                    + ".distance("+ vectors[a].asFormatString() + ", " 
                    + vectors[b].asFormatString() + ')',
                    distanceMatrix[a][b] >= 0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (vectors[a].plus(vectors[b]).norm(2) == 0 && vectors[a].norm(2) > 0) {
           assertTrue("Distance from v to -v is equal to zero" 
                      + vectors[a].asFormatString() + " = -" + vectors[b].asFormatString(), 

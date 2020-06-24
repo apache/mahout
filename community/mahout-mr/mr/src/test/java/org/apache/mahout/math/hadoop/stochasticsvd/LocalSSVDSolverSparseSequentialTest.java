@@ -60,6 +60,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
   /* 
   @Test
   public void testSSVDSolverSparse() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
     runSSVDSolver(0);
   }
    */
@@ -71,6 +72,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
 
   public void runSSVDSolver(int q) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     conf.set("mapred.job.tracker", "local");
     conf.set("fs.default.name", "file:///");
@@ -78,6 +80,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     // conf.set("mapred.job.tracker","localhost:11011");
     // conf.set("fs.default.name","hdfs://localhost:11010/");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     Deque<Closeable> closeables = Lists.newLinkedList();;
     Random rnd = RandomUtils.getRandom();
 
@@ -116,8 +119,10 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     }
     closeables.remove(w);
     Closeables.close(w, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
 
     FileSystem fs = FileSystem.get(aLocPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     Path tempDirPath = getTestTempDirPath("svd-proc");
     Path aPath = new Path(tempDirPath, "A/A.seq");
@@ -134,6 +139,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     int ablockRows = 867;
     int p = 60;
     int k = 40;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
     SSVDSolver ssvd =
       new SSVDSolver(conf,
                      new Path[] { aPath },
@@ -142,6 +148,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
                      k,
                      p,
                      3);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     ssvd.setOuterBlockHeight(500);
     ssvd.setAbtBlockHeight(251);
 
@@ -152,8 +159,11 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     ssvd.setComputeU(false);
     ssvd.setComputeV(false);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-623
     ssvd.setOverwrite(true);
     ssvd.setQ(q);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     ssvd.setBroadcast(true);
     ssvd.run();
 
@@ -164,6 +174,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
 
     // try to run the same thing without stochastic algo
     DenseMatrix a = SSVDHelper.drmLoadAsDense(fs, aPath, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
 
     // SingularValueDecompositionImpl svd=new SingularValueDecompositionImpl(new
     // Array2DRowRealMatrix(a));
@@ -177,6 +188,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
       assertTrue(Math.abs(svalues2.getQuick(i) - stochasticSValues.getQuick(i)) <= s_epsilon);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
     DenseMatrix mQ =
       SSVDHelper.drmLoadAsDense(fs, new Path(svdOutPath, "Bt-job/"
         + BtJob.OUTPUT_Q + "-*"), conf);
@@ -190,6 +202,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
 
   static void dumpSv(Vector s) {
     System.out.printf("svs: ");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element el : s.all()) {
       System.out.printf("%f  ", el.get());
     }

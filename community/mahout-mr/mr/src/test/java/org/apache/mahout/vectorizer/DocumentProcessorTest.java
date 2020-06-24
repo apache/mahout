@@ -44,14 +44,17 @@ public class DocumentProcessorTest extends MahoutTestCase {
 
   @Test
   public void testTokenizeDocuments() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration configuration = getConfiguration();
     Path input = new Path(getTestTempDirPath(), "inputDir");
     Path output = new Path(getTestTempDirPath(), "outputDir");
     FileSystem fs = FileSystem.get(input.toUri(), configuration);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     String documentId1 = "123";
     String documentId2 = "456";
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, configuration, input, Text.class, Text.class);
     try {
       String text1 = "A test for the document processor";
@@ -59,11 +62,14 @@ public class DocumentProcessorTest extends MahoutTestCase {
       String text2 = "and another one";
       writer.append(new Text(documentId2), new Text(text2));
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
 
     DocumentProcessor.tokenizeDocuments(input, StandardAnalyzer.class, output, configuration);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-708
     FileStatus[] statuses = fs.listStatus(output, PathFilters.logsCRCFilter());
     assertEquals(1, statuses.length);
     Path filePath = statuses[0].getPath();

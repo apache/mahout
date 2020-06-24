@@ -52,14 +52,17 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   private static void assertEquals(VectorIterable m, VectorIterable mtt, double errorTolerance) {
     Iterator<MatrixSlice> mIt = m.iterateAll();
     Iterator<MatrixSlice> mttIt = mtt.iterateAll();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Map<Integer, Vector> mMap = Maps.newHashMap();
     Map<Integer, Vector> mttMap = Maps.newHashMap();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-575
     while (mIt.hasNext() && mttIt.hasNext()) {
       MatrixSlice ms = mIt.next();
       mMap.put(ms.index(), ms.vector());
       MatrixSlice mtts = mttIt.next();
       mttMap.put(mtts.index(), mtts.vector());
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (Map.Entry<Integer, Vector> entry : mMap.entrySet()) {
       Integer key = entry.getKey();
       Vector value = entry.getValue();
@@ -76,6 +79,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   @Test
   public void testTranspose() throws Exception {
     DistributedRowMatrix m = randomDistributedMatrix(10, 9, 5, 4, 1.0, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     m.setConf(getConfiguration());
     DistributedRowMatrix mt = m.transpose();
     mt.setConf(getConfiguration());
@@ -96,6 +100,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     DistributedRowMatrix dm =
         randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
     dm.setConf(getConfiguration());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     Vector expected = new DenseVector(50);
     for (int i = 0; i < m.numRows(); i++) {
@@ -113,6 +118,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     DistributedRowMatrix dm =
         randomDistributedMatrix(100, 90, 0, 0, 1.0, false);
     dm.setConf(getConfiguration());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     Vector expected = new DenseVector(0);
     for (int i = 0; i < m.numRows(); i++) {
@@ -130,6 +136,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Matrix m = SolverTest.randomSequentialAccessSparseMatrix(100, 90, 50, 20, 1.0);
     DistributedRowMatrix dm = randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
     dm.setConf(getConfiguration());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     Vector expected = m.times(v);
     Vector actual = dm.times(v);
@@ -143,6 +150,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Matrix m = SolverTest.randomSequentialAccessSparseMatrix(100, 90, 50, 20, 1.0);
     DistributedRowMatrix dm = randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
     dm.setConf(getConfiguration());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     Vector expected = m.timesSquared(v);
     Vector actual = dm.timesSquared(v);
@@ -155,7 +163,9 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Matrix inputB = SolverTest.randomSequentialAccessSparseMatrix(20, 13, 25, 10, 5.0);
     Matrix expected = inputA.transpose().times(inputB);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
     DistributedRowMatrix distA = randomDistributedMatrix(20, 19, 15, 5, 10.0, false, "distA");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     distA.setConf(getConfiguration());
     DistributedRowMatrix distB = randomDistributedMatrix(20, 13, 25, 10, 5.0, false, "distB");
     distB.setConf(getConfiguration());
@@ -193,6 +203,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Path outputPath = new Path(baseTmpDirPath, "output");
 
     Configuration transposeJobConf = TransposeJob.buildTransposeJob(inputPath, outputPath, 10).getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
 
     Configuration transposeCustomJobConf = TransposeJob.buildTransposeJob(initialConf, inputPath, outputPath, 10)
                                                        .getConfiguration();
@@ -211,6 +222,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Vector v = new RandomAccessSparseVector(50);
     v.assign(1.0);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
     Job timesSquaredJob1 = TimesSquaredJob.createTimesSquaredJob(v, inputPath, outputPath);
     Job customTimesSquaredJob1 = TimesSquaredJob.createTimesSquaredJob(initialConf, v, inputPath, outputPath);
 
@@ -245,6 +257,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
   @Test
   public void testTimesVectorTempDirDeletion() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     Vector v = new RandomAccessSparseVector(50);
     v.assign(1.0);
@@ -257,6 +270,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     deleteContentsOfPath(conf, outputPath);
 
     assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
 
     Vector result1 = dm.times(v);
 
@@ -283,6 +297,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
   @Test
   public void testTimesSquaredVectorTempDirDeletion() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     Vector v = new RandomAccessSparseVector(50);
     v.assign(1.0);
@@ -295,6 +310,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     deleteContentsOfPath(conf, outputPath);
 
     assertEquals(0, HadoopUtil.listStatus(fs, outputPath).length);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
 
     Vector result1 = dm.timesSquared(v);
 
@@ -313,6 +329,8 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Path outputTempPath = outputStatuses[0].getPath();
     Path inputVectorPath = new Path(outputTempPath, TimesSquaredJob.INPUT_VECTOR);
     Path outputVectorPath = new Path(outputTempPath, TimesSquaredJob.OUTPUT_VECTOR_FILENAME);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-708
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-708
     assertEquals(1, fs.listStatus(inputVectorPath, PathFilters.logsCRCFilter()).length);
     assertEquals(1, fs.listStatus(outputVectorPath, PathFilters.logsCRCFilter()).length);
 
@@ -320,6 +338,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   }
 
   public Configuration createInitialConf() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration initialConf = getConfiguration();
     initialConf.set(TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
     return initialConf;
@@ -328,6 +347,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   private static void deleteContentsOfPath(Configuration conf, Path path) throws Exception {
     FileSystem fs = path.getFileSystem(conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
     FileStatus[] statuses = HadoopUtil.listStatus(fs, path);
     for (FileStatus status : statuses) {
       fs.delete(status.getPath(), true);
@@ -346,6 +366,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   public DistributedRowMatrix randomDenseHierarchicalDistributedMatrix(int numRows,
                                                                        int numCols,
                                                                        boolean isSymmetric,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
                                                                        String baseTmpDirSuffix)
     throws IOException {
     Path baseTmpDirPath = getTestTempDirPath(baseTmpDirSuffix);
@@ -362,6 +383,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
                                                       String baseTmpDirSuffix) throws IOException {
     Path baseTmpDirPath = getTestTempDirPath(baseTmpDirSuffix);
     Matrix c = SolverTest.randomSequentialAccessSparseMatrix(numRows, nonNullRows, numCols, entriesPerRow, entryMean);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (isSymmetric) {
       c = c.times(c.transpose());
     }
@@ -369,12 +391,15 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   }
 
   private DistributedRowMatrix saveToFs(final Matrix m, Path baseTmpDirPath) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(baseTmpDirPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     ClusteringTestUtils.writePointsToFile(new Iterable<VectorWritable>() {
       @Override
       public Iterator<VectorWritable> iterator() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-744
         return Iterators.transform(m.iterator(), new Function<MatrixSlice,VectorWritable>() {
           @Override
           public VectorWritable apply(MatrixSlice input) {
@@ -384,6 +409,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
       }
     }, true, new Path(baseTmpDirPath, "distMatrix/part-00000"), fs, conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
     DistributedRowMatrix distMatrix = new DistributedRowMatrix(new Path(baseTmpDirPath, "distMatrix"),
                                                                new Path(baseTmpDirPath, "tmpOut"),
                                                                m.numRows(),

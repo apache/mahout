@@ -141,6 +141,7 @@ public class RecommenderJobTest extends TasteTestCase {
       EasyMock.createMock(Reducer.Context.class);
     Counter userCounters = EasyMock.createMock(Counter.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     EasyMock.expect(context.getCounter(ToUserVectorsReducer.Counters.USERS)).andReturn(userCounters);
     userCounters.increment(1);
     context.write(EasyMock.eq(new VarLongWritable(12L)), MathHelper.vectorMatches(
@@ -148,11 +149,13 @@ public class RecommenderJobTest extends TasteTestCase {
 
     EasyMock.replay(context, userCounters);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     Collection<VarLongWritable> varLongWritables = Lists.newLinkedList();
     varLongWritables.add(new EntityPrefWritable(34L, 1.0f));
     varLongWritables.add(new EntityPrefWritable(56L, 2.0f));
 
     new ToUserVectorsReducer().reduce(new VarLongWritable(12L), varLongWritables, context);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
 
     EasyMock.verify(context, userCounters);
   }
@@ -165,7 +168,9 @@ public class RecommenderJobTest extends TasteTestCase {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
     Counter userCounters = EasyMock.createMock(Counter.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-736
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     EasyMock.expect(context.getCounter(ToUserVectorsReducer.Counters.USERS)).andReturn(userCounters);
     userCounters.increment(1);
     context.write(EasyMock.eq(new VarLongWritable(12L)), MathHelper.vectorMatches(
@@ -176,6 +181,7 @@ public class RecommenderJobTest extends TasteTestCase {
     new ToUserVectorsReducer().reduce(new VarLongWritable(12L), Arrays.asList(new VarLongWritable(34L),
         new VarLongWritable(56L)), context);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-736
     EasyMock.verify(context, userCounters);
   }
 
@@ -432,6 +438,7 @@ public class RecommenderJobTest extends TasteTestCase {
   @Test
   public void testItemFilterMapper() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-493
     Mapper<LongWritable,Text,VarLongWritable,VarLongWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
 
@@ -538,6 +545,7 @@ public class RecommenderJobTest extends TasteTestCase {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
     context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new MutableRecommendedItem(1L, 2.8f),
         new MutableRecommendedItem(2L, 2.0f)));
 
@@ -615,6 +623,8 @@ public class RecommenderJobTest extends TasteTestCase {
       EasyMock.createMock(Reducer.Context.class);
 
     context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new MutableRecommendedItem(1L, 2.8f)));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
 
     EasyMock.replay(context);
 
@@ -653,6 +663,7 @@ public class RecommenderJobTest extends TasteTestCase {
       public boolean matches(Object argument) {
         if (argument instanceof RecommendedItemsWritable) {
           RecommendedItemsWritable recommendedItemsWritable = (RecommendedItemsWritable) argument;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
           List<RecommendedItem> expectedItems = Arrays.asList(items);
           return expectedItems.equals(recommendedItemsWritable.getRecommendedItems());
         }
@@ -706,6 +717,7 @@ public class RecommenderJobTest extends TasteTestCase {
     File inputFile = getTestTempFile("prefs.txt");
     File outputDir = getTestTempDir("output");
     outputDir.delete();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-609
     File similaritiesOutputDir = getTestTempDir("outputSimilarities");
     similaritiesOutputDir.delete();
     File tmpDir = getTestTempDir("tmp");
@@ -732,6 +744,7 @@ public class RecommenderJobTest extends TasteTestCase {
     recommenderJob.setConf(conf);
 
     recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-609
        TanimotoCoefficientSimilarity.class.getName(), "--numRecommendations", "4",
         "--outputPathForSimilarityMatrix", similaritiesOutputDir.getAbsolutePath() });
 
@@ -789,6 +802,7 @@ public class RecommenderJobTest extends TasteTestCase {
   @Test
   public void testCompleteJobBoolean() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-463
     File inputFile = getTestTempFile("prefs.txt");
     File outputDir = getTestTempDir("output");
     outputDir.delete();
@@ -818,6 +832,7 @@ public class RecommenderJobTest extends TasteTestCase {
     recommenderJob.setConf(conf);
 
     recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
         CooccurrenceCountSimilarity.class.getName(), "--booleanData", "true",
         "--usersFile", usersFile.getAbsolutePath() });
 
@@ -826,6 +841,7 @@ public class RecommenderJobTest extends TasteTestCase {
     List<RecommendedItem> recommendedToCow = recommendations.get(3L);
     assertEquals(2, recommendedToCow.size());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-553
     RecommendedItem item1 = recommendedToCow.get(0);
     RecommendedItem item2 = recommendedToCow.get(1);
 
@@ -845,6 +861,7 @@ public class RecommenderJobTest extends TasteTestCase {
   @Test
   public void testCompleteJobWithFiltering() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-493
      File inputFile = getTestTempFile("prefs.txt");
      File userFile = getTestTempFile("users.txt");
      File filterFile = getTestTempFile("filter.txt");
@@ -871,6 +888,9 @@ public class RecommenderJobTest extends TasteTestCase {
 
      RecommenderJob recommenderJob = new RecommenderJob();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
      Configuration conf = getConfiguration();
      conf.set("mapred.input.dir", inputFile.getAbsolutePath());
      conf.set("mapred.output.dir", outputDir.getAbsolutePath());
@@ -879,6 +899,7 @@ public class RecommenderJobTest extends TasteTestCase {
      recommenderJob.setConf(conf);
 
      recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
         TanimotoCoefficientSimilarity.class.getName(), "--numRecommendations", "1",
         "--usersFile", userFile.getAbsolutePath(), "--filterFile", filterFile.getAbsolutePath() });
 
@@ -895,6 +916,7 @@ public class RecommenderJobTest extends TasteTestCase {
    }
 
   static Map<Pair<Long,Long>, Double> readSimilarities(File file) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-609
     Map<Pair<Long,Long>, Double> similarities = Maps.newHashMap();
     for (String line : new FileLineIterable(file)) {
       String[] parts = line.split("\t");
@@ -905,6 +927,7 @@ public class RecommenderJobTest extends TasteTestCase {
   }
 
   static Map<Long,List<RecommendedItem>> readRecommendations(File file) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Map<Long,List<RecommendedItem>> recommendations = Maps.newHashMap();
     for (String line : new FileLineIterable(file)) {
 
@@ -913,6 +936,7 @@ public class RecommenderJobTest extends TasteTestCase {
       String[] tokens = keyValue[1].replaceAll("\\[", "")
           .replaceAll("\\]", "").split(",");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       List<RecommendedItem> items = Lists.newLinkedList();
       for (String token : tokens) {
         String[] itemTokens = token.split(":");

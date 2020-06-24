@@ -42,11 +42,13 @@ final class MockRecommender implements Recommender {
   public List<RecommendedItem> recommend(long userID, int howMany) {
     recommendCount.increment();
     return Collections.<RecommendedItem>singletonList(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
         new GenericRecommendedItem(1, 1.0f));
   }
 
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     return recommend(userID, howMany);
   }
 

@@ -41,8 +41,10 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-403
     addOption(DefaultOptionCreator.analyzerOption().create());
     addOption(buildOption("sequentialAccessVector", "seq",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
                           "(Optional) Whether output vectors should be SequentialAccessVectors. "
                               + "If set true else false",
                           false, false, null));
@@ -71,6 +73,7 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
     }
 
     Class<? extends Analyzer> analyzerClass = getAnalyzerClassFromOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-403
 
     Configuration conf = getConf();
 
@@ -78,6 +81,7 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
 
     boolean namedVectors = hasOption("namedVector");
     int cardinality = 5000;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (hasOption("cardinality")) {
       cardinality = Integer.parseInt(getOption("cardinality"));
     }

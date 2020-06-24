@@ -43,10 +43,12 @@ public class CachedTermInfo implements TermInfo {
     this.field = field;
     Terms t = MultiFields.getTerms(reader, field);
     TermsEnum te = t.iterator();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
 
     int numDocs = reader.numDocs();
     double percent = numDocs * maxDfPercent / 100.0;
     //Should we use a linked hash map so that we know terms are in order?
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     termEntries = new LinkedHashMap<>();
     int count = 0;
     BytesRef text;

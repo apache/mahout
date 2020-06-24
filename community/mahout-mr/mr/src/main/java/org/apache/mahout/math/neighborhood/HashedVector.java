@@ -53,6 +53,7 @@ public class HashedVector extends WeightedVector {
 
   public static long computeHash64(Vector vector, Matrix projection) {
     long hash = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element element : projection.times(vector).nonZeroes()) {
       if (element.get() > 0) {
         hash += 1L << element.index();

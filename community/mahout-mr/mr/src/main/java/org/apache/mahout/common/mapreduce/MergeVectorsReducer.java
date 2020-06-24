@@ -32,6 +32,7 @@ public class MergeVectorsReducer extends
 
   @Override
   public void reduce(WritableComparable<?> key, Iterable<VectorWritable> vectors, Context ctx)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
     Vector merged = VectorWritable.merge(vectors.iterator()).get();
     result.set(new SequentialAccessSparseVector(merged));

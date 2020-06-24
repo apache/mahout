@@ -50,6 +50,7 @@ import org.apache.mahout.math.VectorWritable;
  * Mapper for classifying vectors into clusters.
  */
 public class ClusterClassificationMapper extends
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
     Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
   
   private double threshold;
@@ -67,10 +68,13 @@ public class ClusterClassificationMapper extends
     threshold = conf.getFloat(ClusterClassificationConfigKeys.OUTLIER_REMOVAL_THRESHOLD, 0.0f);
     emitMostLikely = conf.getBoolean(ClusterClassificationConfigKeys.EMIT_MOST_LIKELY, false);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     clusterModels = new ArrayList<>();
     
     if (clustersIn != null && !clustersIn.isEmpty()) {
       Path clustersInPath = new Path(clustersIn);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
       clusterModels = populateClusterModels(clustersInPath, conf);
       ClusteringPolicy policy = ClusterClassifier
           .readPolicy(finalClustersPath(clustersInPath));
@@ -84,6 +88,7 @@ public class ClusterClassificationMapper extends
    */
   @Override
   protected void map(WritableComparable<?> key, VectorWritable vw, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
     if (!clusterModels.isEmpty()) {
       // Converting to NamedVectors to preserve the vectorId else its not obvious as to which point
@@ -111,6 +116,7 @@ public class ClusterClassificationMapper extends
   
   private void writeAllAboveThreshold(VectorWritable vw, Context context,
       Vector pdfPerCluster) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element pdf : pdfPerCluster.nonZeroes()) {
       if (pdf.get() >= threshold) {
         int clusterIndex = pdf.index();
@@ -120,14 +126,17 @@ public class ClusterClassificationMapper extends
   }
   
   private void write(VectorWritable vw, Context context, int clusterIndex, double weight)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
     Cluster cluster = clusterModels.get(clusterIndex);
     clusterId.set(cluster.getId());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     DistanceMeasureCluster distanceMeasureCluster = (DistanceMeasureCluster) cluster;
     DistanceMeasure distanceMeasure = distanceMeasureCluster.getMeasure();
     double distance = distanceMeasure.distance(cluster.getCenter(), vw.get());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Text, Text> props = new HashMap<>();
     props.put(new Text("distance"), new Text(Double.toString(distance)));
     context.write(clusterId, new WeightedPropertyVectorWritable(weight, vw.get(), props));
@@ -143,6 +152,7 @@ public class ClusterClassificationMapper extends
     while (it.hasNext()) {
       ClusterWritable next = (ClusterWritable) it.next();
       Cluster cluster = next.getValue();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
       cluster.configure(conf);
       clusters.add(cluster);
     }

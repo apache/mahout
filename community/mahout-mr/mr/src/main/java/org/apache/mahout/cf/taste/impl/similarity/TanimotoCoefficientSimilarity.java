@@ -47,6 +47,7 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 public final class TanimotoCoefficientSimilarity extends AbstractItemSimilarity implements UserSimilarity {
 
   public TanimotoCoefficientSimilarity(DataModel dataModel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     super(dataModel);
   }
   
@@ -62,11 +63,13 @@ public final class TanimotoCoefficientSimilarity extends AbstractItemSimilarity 
   public double userSimilarity(long userID1, long userID2) throws TasteException {
 
     DataModel dataModel = getDataModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     FastIDSet xPrefs = dataModel.getItemIDsFromUser(userID1);
     FastIDSet yPrefs = dataModel.getItemIDsFromUser(userID2);
 
     int xPrefsSize = xPrefs.size();
     int yPrefsSize = yPrefs.size();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     if (xPrefsSize == 0 && yPrefsSize == 0) {
       return Double.NaN;
     }
@@ -76,6 +79,7 @@ public final class TanimotoCoefficientSimilarity extends AbstractItemSimilarity 
     
     int intersectionSize =
         xPrefsSize < yPrefsSize ? yPrefs.intersectionSize(xPrefs) : xPrefs.intersectionSize(yPrefs);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     if (intersectionSize == 0) {
       return Double.NaN;
     }
@@ -105,6 +109,7 @@ public final class TanimotoCoefficientSimilarity extends AbstractItemSimilarity 
   private double doItemSimilarity(long itemID1, long itemID2, int preferring1) throws TasteException {
     DataModel dataModel = getDataModel();
     int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-902
     if (preferring1and2 == 0) {
       return Double.NaN;
     }

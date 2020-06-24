@@ -85,6 +85,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
 
     seed = Builder.getRandomSeed(conf);
     isSingleSeed = isSingleSeed(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     if (rng != null && seed != null) {
       log.warn("getSplits() was called more than once and the 'seed' is set, "
@@ -96,6 +97,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     int id = 0;
 
     List<InputSplit> splits = new ArrayList<>(numSplits);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     for (int index = 0; index < numSplits - 1; index++) {
       splits.add(new InMemInputSplit(id, splitSize, nextSeed()));
@@ -220,6 +222,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
 
     @Override
     public String[] getLocations() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       return NO_LOCATIONS;
     }
 
@@ -247,6 +250,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
 
     @Override
     public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       return firstId + nbTrees + (seed == null ? 0 : seed.intValue());
     }
 

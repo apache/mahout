@@ -120,6 +120,8 @@ public final class HBaseDataModel implements DataModel, Closeable {
     this.tableName = tableName;
 
     bootstrap(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
 
     // Warm the cache
     refresh(null);
@@ -136,6 +138,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
     HTableDescriptor tDesc = new HTableDescriptor(Bytes.toBytes(tableName));
     tDesc.addFamily(new HColumnDescriptor(USERS_CF));
     tDesc.addFamily(new HColumnDescriptor(ITEMS_CF));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (HBaseAdmin admin = new HBaseAdmin(conf)) {
       admin.createTable(tDesc);
       log.info("Created table {}", tableName);
@@ -335,6 +338,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
     Result[] results;
     try {
       HTableInterface table = pool.getTable(tableName);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Get> gets = new ArrayList<>(2);
       gets.add(new Get(itemToBytes(itemID1)));
       gets.add(new Get(itemToBytes(itemID2)));
@@ -376,6 +380,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     try {
       HTableInterface table = pool.getTable(tableName);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Put> puts = new ArrayList<>(2);
       puts.add(new Put(userToBytes(userID)));
       puts.add(new Put(itemToBytes(itemID)));
@@ -392,6 +397,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   public void removePreference(long userID, long itemID) throws TasteException {
     try {
       HTableInterface table = pool.getTable(tableName);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Delete> deletes = new ArrayList<>(2);
       deletes.add(new Delete(userToBytes(userID)));
       deletes.add(new Delete(itemToBytes(itemID)));
@@ -478,6 +484,8 @@ public final class HBaseDataModel implements DataModel, Closeable {
     Scan scan = new Scan(new byte[]{0x75}, new byte[]{0x76});
     scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL, new KeyOnlyFilter(), new FirstKeyOnlyFilter()));
     ResultScanner scanner = table.getScanner(scan);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Long> ids = new LinkedList<>();
     for (Result result : scanner) {
       ids.add(bytesToUserOrItemID(result.getRow()));

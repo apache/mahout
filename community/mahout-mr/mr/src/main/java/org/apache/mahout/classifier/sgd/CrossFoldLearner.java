@@ -123,6 +123,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
     record++;
     int k = 0;
     for (OnlineLogisticRegression model : models) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1093
       if (k == mod(trackingKey, models.size())) {
         Vector v = model.classifyFull(instance);
         double score = Math.max(v.get(actual), MIN_SCORE);
@@ -141,6 +142,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   }
 
   private static long mod(long x, int y) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1093
     long r = x % y;
     return r < 0 ? r + y : r;
   }
@@ -169,6 +171,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   @Override
   public Vector classify(Vector instance) {
     Vector r = new DenseVector(numCategories() - 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-575
     DoubleDoubleFunction scale = Functions.plusMult(1.0 / models.size());
     for (OnlineLogisticRegression model : models) {
       r.assign(model.classify(instance), scale);
@@ -179,6 +182,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   @Override
   public Vector classifyNoLink(Vector instance) {
     Vector r = new DenseVector(numCategories() - 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-575
     DoubleDoubleFunction scale = Functions.plusMult(1.0 / models.size());
     for (OnlineLogisticRegression model : models) {
       r.assign(model.classifyNoLink(instance), scale);
@@ -232,6 +236,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   }
 
   public int getRecord() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
     return record;
   }
 
@@ -294,6 +299,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     out.writeInt(record);
     PolymorphicWritable.write(out, auc);
     out.writeDouble(logLikelihood);

@@ -67,20 +67,25 @@ public class RecommenderJob extends AbstractJob {
     addOption("numRecommendations", null, "number of recommendations per user",
         String.valueOf(DEFAULT_NUM_RECOMMENDATIONS));
     addOption("maxRating", null, "maximum rating available", true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1169
     addOption("numThreads", null, "threads per mapper", String.valueOf(1));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
     addOption("usesLongIDs", null, "input contains long IDs that need to be translated");
     addOption("userIDIndex", null, "index for user long IDs (necessary if usesLongIDs is true)");
     addOption("itemIDIndex", null, "index for user long IDs (necessary if usesLongIDs is true)");
     addOutputOption();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1169
     Job prediction = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class,
         MultithreadedSharingMapper.class, IntWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
     Configuration conf = prediction.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1151
 
     int numThreads = Integer.parseInt(getOption("numThreads"));
 
@@ -90,6 +95,7 @@ public class RecommenderJob extends AbstractJob {
     conf.set(MAX_RATING, getOption("maxRating"));
 
     boolean usesLongIDs = Boolean.parseBoolean(getOption("usesLongIDs"));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
     if (usesLongIDs) {
       conf.set(ParallelALSFactorizationJob.USES_LONG_IDS, String.valueOf(true));
       conf.set(USER_INDEX_PATH, getOption("userIDIndex"));

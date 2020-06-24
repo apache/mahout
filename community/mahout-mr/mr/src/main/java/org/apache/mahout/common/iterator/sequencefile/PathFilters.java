@@ -39,6 +39,7 @@ public final class PathFilters {
   private static final PathFilter CLUSTER_FINAL = new PathFilter() {
     @Override
     public boolean accept(Path path) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-929
       String name = path.getName();
       return name.startsWith("clusters-") && name.endsWith("-final");
     }
@@ -67,6 +68,7 @@ public final class PathFilters {
    * @return {@link PathFilter} that accepts paths whose file name starts with "part-" and ends with "-final".
    */
   public static PathFilter finalPartFilter() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-929
     return CLUSTER_FINAL;
   }
 

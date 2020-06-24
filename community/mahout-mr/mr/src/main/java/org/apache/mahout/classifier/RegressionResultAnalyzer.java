@@ -56,6 +56,7 @@ public class RegressionResultAnalyzer {
    */
   public void addInstance(double actual, double result) {
     if (results == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       results = new ArrayList<>();
     }
     results.add(new Result(actual, result));
@@ -87,6 +88,7 @@ public class RegressionResultAnalyzer {
     for (Result res : results) {
       double actual = res.getActual();
       double result = res.getResult();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-954
       if (Double.isNaN(result)) {
         unpredictable++;
       } else {
@@ -108,6 +110,7 @@ public class RegressionResultAnalyzer {
     returnString.append("Summary\n");
     returnString.append("-------------------------------------------------------\n");
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-954
     if (predictable > 0) {
       double varActual = sumActualSquared - sumActual * sumActual / predictable;
       double varResult = sumResultSquared - sumResult * sumResult / predictable;

@@ -52,6 +52,7 @@ public class ConfusionMatrix {
     this.defaultLabel = defaultLabel;
     int i = 0;
     for (String label : labels) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-838
       labelMap.put(label, i++);
     }
     labelMap.put(defaultLabel, i);
@@ -67,10 +68,12 @@ public class ConfusionMatrix {
   }
   
   public Collection<String> getLabels() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-569
     return Collections.unmodifiableCollection(labelMap.keySet());
   }
 
   private int numLabels() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1554
     return labelMap.size();
   }
 
@@ -81,6 +84,7 @@ public class ConfusionMatrix {
     for (int i = 0; i < numLabels(); i++) {
       labelTotal += confusionMatrix[labelId][i];
       if (i == labelId) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-941
         correct += confusionMatrix[labelId][i];
       }
     }
@@ -91,6 +95,7 @@ public class ConfusionMatrix {
   public double getAccuracy() {
     int total = 0;
     int correct = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1554
     for (int i = 0; i < numLabels(); i++) {
       for (int j = 0; j < numLabels(); j++) {
         total += confusionMatrix[i][j];
@@ -106,6 +111,7 @@ public class ConfusionMatrix {
   private int getActualNumberOfTestExamplesForClass(String label) {
     int labelId = labelMap.get(label);
     int sum = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1554
     for (int i = 0; i < numLabels(); i++) {
       sum += confusionMatrix[labelId][i];
     }
@@ -199,6 +205,7 @@ public class ConfusionMatrix {
     int count = 0;
     double accuracy = 0;
     for (String label: labelMap.keySet()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       if (!label.equals(defaultLabel)) {
         accuracy += getAccuracy(label);
       }
@@ -221,6 +228,7 @@ public class ConfusionMatrix {
   public double getKappa() {
     double a = 0.0;
     double b = 0.0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     for (int i = 0; i < confusionMatrix.length; i++) {
       a += confusionMatrix[i][i];
       double br = 0;
@@ -243,6 +251,7 @@ public class ConfusionMatrix {
    */
   public RunningAverageAndStdDev getNormalizedStats() {
     RunningAverageAndStdDev summer = new FullRunningAverageAndStdDev();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     for (int d = 0; d < confusionMatrix.length; d++) {
       double total = 0;
       for (int j = 0; j < confusionMatrix.length; j++) {
@@ -262,6 +271,7 @@ public class ConfusionMatrix {
   public int getTotal(String label) {
     int labelId = labelMap.get(label);
     int labelTotal = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-569
     for (int i = 0; i < labelMap.size(); i++) {
       labelTotal += confusionMatrix[labelId][i];
     }
@@ -269,6 +279,7 @@ public class ConfusionMatrix {
   }
   
   public void addInstance(String correctLabel, ClassifierResult classifiedResult) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-941
     samples++;
     incrementCount(correctLabel, classifiedResult.getLabel());
   }
@@ -279,6 +290,7 @@ public class ConfusionMatrix {
   }
   
   public int getCount(String correctLabel, String classifiedLabel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1555
     if(!labelMap.containsKey(correctLabel)) {
       LOG.warn("Label {} did not appear in the training examples", correctLabel);
       return 0;
@@ -290,6 +302,7 @@ public class ConfusionMatrix {
   }
   
   public void putCount(String correctLabel, String classifiedLabel, int count) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1555
     if(!labelMap.containsKey(correctLabel)) {
       LOG.warn("Label {} did not appear in the training examples", correctLabel);
       return;
@@ -297,6 +310,7 @@ public class ConfusionMatrix {
     Preconditions.checkArgument(labelMap.containsKey(classifiedLabel), "Label not found: " + classifiedLabel);
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-941
     if (confusionMatrix[correctId][classifiedId] == 0.0 && count != 0) {
       samples++;
     }
@@ -308,6 +322,7 @@ public class ConfusionMatrix {
   }
   
   public void incrementCount(String correctLabel, String classifiedLabel, int count) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     putCount(correctLabel, classifiedLabel, count + getCount(correctLabel, classifiedLabel));
   }
   
@@ -316,9 +331,11 @@ public class ConfusionMatrix {
   }
   
   public ConfusionMatrix merge(ConfusionMatrix b) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-569
     Preconditions.checkArgument(labelMap.size() == b.getLabels().size(), "The label sizes do not match");
     for (String correctLabel : this.labelMap.keySet()) {
       for (String classifiedLabel : this.labelMap.keySet()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         incrementCount(correctLabel, classifiedLabel, b.getCount(correctLabel, classifiedLabel));
       }
     }
@@ -327,13 +344,17 @@ public class ConfusionMatrix {
   
   public Matrix getMatrix() {
     int length = confusionMatrix.length;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-812
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-838
     Matrix m = new DenseMatrix(length, length);
     for (int r = 0; r < length; r++) {
       for (int c = 0; c < length; c++) {
         m.set(r, c, confusionMatrix[r][c]);
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String,Integer> labels = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (Map.Entry<String, Integer> entry : labelMap.entrySet()) {
       labels.put(entry.getKey(), entry.getValue());
     }
@@ -346,6 +367,7 @@ public class ConfusionMatrix {
     int length = confusionMatrix.length;
     if (m.numRows() != m.numCols()) {
       throw new IllegalArgumentException(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
           "ConfusionMatrix: matrix(" + m.numRows() + ',' + m.numCols() + ") must be square");
     }
     for (int r = 0; r < length; r++) {
@@ -361,6 +383,7 @@ public class ConfusionMatrix {
       String[] sorted = sortLabels(labels);
       verifyLabels(length, sorted);
       labelMap.clear();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       for (int i = 0; i < length; i++) {
         labelMap.put(sorted[i], i);
       }
@@ -377,6 +400,7 @@ public class ConfusionMatrix {
   
   private static void verifyLabels(int length, String[] sorted) {
     Preconditions.checkArgument(sorted.length == length, "One label, one row");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     for (int i = 0; i < length; i++) {
       if (sorted[i] == null) {
         Preconditions.checkArgument(false, "One label, one row");
@@ -397,6 +421,7 @@ public class ConfusionMatrix {
     
     int unclassified = getTotal(defaultLabel);
     for (Map.Entry<String,Integer> entry : this.labelMap.entrySet()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-838
       if (entry.getKey().equals(defaultLabel) && unclassified == 0) {
         continue;
       }
@@ -404,6 +429,7 @@ public class ConfusionMatrix {
       returnString.append(StringUtils.rightPad(getSmallLabel(entry.getValue()), 5)).append('\t');
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
     returnString.append("<--Classified as").append('\n');
     for (Map.Entry<String,Integer> entry : this.labelMap.entrySet()) {
       if (entry.getKey().equals(defaultLabel) && unclassified == 0) {
@@ -435,6 +461,7 @@ public class ConfusionMatrix {
     StringBuilder returnString = new StringBuilder();
     do {
       int n = val % 26;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
       returnString.insert(0, (char) ('a' + n));
       val /= 26;
     } while (val > 0);

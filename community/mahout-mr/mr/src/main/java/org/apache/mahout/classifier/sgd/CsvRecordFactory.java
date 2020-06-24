@@ -111,10 +111,12 @@ public class CsvRecordFactory implements RecordFactory {
    * @return List<String>
    */
   private List<String> parseCsvLine(String line) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1287
     try {
       return Arrays.asList(CSVUtils.parseLine(line));
 	   }
 	   catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<String> list = new ArrayList<>();
       list.add(line);
       return list;
@@ -137,6 +139,7 @@ public class CsvRecordFactory implements RecordFactory {
   }
 
   public CsvRecordFactory(String targetName, String idName, Map<String, String> typeMap) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     this(targetName, typeMap);
     this.idName = idName;
   }
@@ -188,7 +191,9 @@ public class CsvRecordFactory implements RecordFactory {
   @Override
   public void firstLine(String line) {
     // read variable names, build map of name -> column
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     final Map<String, Integer> vars = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1287
     variableNames = parseCsvLine(line);
     int column = 0;
     for (String var : variableNames) {
@@ -199,15 +204,19 @@ public class CsvRecordFactory implements RecordFactory {
     target = vars.get(targetName);
     
     // record id column
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (idName != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
       id = vars.get(idName);
     }
 
     // create list of predictor column numbers
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     predictors = new ArrayList<>(Collections2.transform(typeMap.keySet(), new Function<String, Integer>() {
       @Override
       public Integer apply(String from) {
         Integer r = vars.get(from);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
         Preconditions.checkArgument(r != null, "Can't find variable %s, only know about %s", from, vars);
         return r;
       }
@@ -219,6 +228,7 @@ public class CsvRecordFactory implements RecordFactory {
     Collections.sort(predictors);
 
     // and map from column number to type encoder for each column that is a predictor
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     predictorEncoders = new HashMap<>();
     for (Integer predictor : predictors) {
       String name;
@@ -264,6 +274,7 @@ public class CsvRecordFactory implements RecordFactory {
   @Override
   public int processLine(String line, Vector featureVector) {
     List<String> values = parseCsvLine(line);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1287
 
     int targetValue = targetDictionary.intern(values.get(target));
     if (targetValue >= maxTargetValue) {
@@ -294,8 +305,10 @@ public class CsvRecordFactory implements RecordFactory {
    * @return The value of the target variable.
    */
   public int processLine(CharSequence line, Vector featureVector, boolean returnTarget) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1287
     List<String> values = parseCsvLine(line);
     int targetValue = -1;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     if (returnTarget) {
       targetValue = targetDictionary.intern(values.get(target));
       if (targetValue >= maxTargetValue) {
@@ -316,6 +329,7 @@ public class CsvRecordFactory implements RecordFactory {
    * @return the raw target value in the corresponding column of CSV line 
    */
   public String getTargetString(CharSequence line) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1287
     List<String> values = parseCsvLine(line);
     return values.get(target);
 
@@ -341,6 +355,7 @@ public class CsvRecordFactory implements RecordFactory {
    * @return the id value of the CSV record
    */
   public String getIdString(CharSequence line) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1287
     List<String> values = parseCsvLine(line);
     return values.get(id);
   }
@@ -385,6 +400,7 @@ public class CsvRecordFactory implements RecordFactory {
   }
 
   public String getIdName() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     return idName;
   }
 

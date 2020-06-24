@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 abstract class SimilarityTestCase extends TasteTestCase {
 
   static void assertCorrelationEquals(double expected, double actual) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     if (Double.isNaN(expected)) {
       assertTrue("Correlation is not NaN", Double.isNaN(actual));
     } else {

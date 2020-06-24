@@ -32,6 +32,7 @@ public class EigenVector extends NamedVector {
   private static final Pattern PIPE_PATTERN = Pattern.compile("\\|");
 
   public EigenVector(Vector v, double eigenValue, double cosAngleError, int order) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
     super(v instanceof DenseVector ? (DenseVector) v : new DenseVector(v),
         "e|" + order + "| = |" + eigenValue + "|, err = " + cosAngleError);
   }
@@ -62,6 +63,7 @@ public class EigenVector extends NamedVector {
 
   public static double[] parseMetaData(CharSequence name) {
     double[] m = new double[3];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
     String[] s = EQUAL_PATTERN.split(name);
     m[0] = Double.parseDouble(PIPE_PATTERN.split(s[0])[1]);
     m[1] = Double.parseDouble(PIPE_PATTERN.split(s[1])[1]);
@@ -70,6 +72,7 @@ public class EigenVector extends NamedVector {
   }
 
   protected double[] parseMetaData() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
     return parseMetaData(getName());
   }
 

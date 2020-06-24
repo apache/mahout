@@ -63,6 +63,7 @@ public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
   public PearsonCorrelationSimilarity(DataModel dataModel) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-387
     this(dataModel, Weighting.UNWEIGHTED);
   }
 
@@ -71,6 +72,7 @@ public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
    */
   public PearsonCorrelationSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(dataModel.hasPreferenceValues(), "DataModel doesn't have preference values");
   }
   

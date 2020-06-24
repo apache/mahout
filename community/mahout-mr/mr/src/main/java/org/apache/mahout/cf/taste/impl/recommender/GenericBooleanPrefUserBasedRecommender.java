@@ -62,6 +62,7 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
   
   @Override
   protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
       throws TasteException {
     DataModel dataModel = getDataModel();
     FastIDSet possibleItemIDs = new FastIDSet();

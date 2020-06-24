@@ -104,6 +104,7 @@ public class EigenVerificationJob extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
     Map<String,List<String>> argMap = handleArgs(args);
     if (argMap == null) {
       return -1;
@@ -112,6 +113,7 @@ public class EigenVerificationJob extends AbstractJob {
       return 0;
     }
     // parse out the arguments
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
     runJob(getConf(), new Path(getOption("eigenInput")), new Path(getOption("corpusInput")), getOutputPath(),
         getOption("inMemory") != null, Double.parseDouble(getOption("maxError")),
         // Double.parseDouble(getOption("minEigenvalue")),
@@ -162,14 +164,17 @@ public class EigenVerificationJob extends AbstractJob {
     // VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
 
     Map<MatrixSlice,EigenStatus> eigenMetaData = verifyEigens();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
 
     List<Map.Entry<MatrixSlice,EigenStatus>> prunedEigenMeta = pruneEigens(eigenMetaData);
 
     saveCleanEigens(new Configuration(), prunedEigenMeta);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     return 0;
   }
 
   private Map<String,List<String>> handleArgs(String[] args) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
     addOutputOption();
     addOption("eigenInput", "ei",
         "The Path for purported eigenVector input files (SequenceFile<WritableComparable,VectorWritable>.", null);
@@ -185,8 +190,11 @@ public class EigenVerificationJob extends AbstractJob {
   }
 
   private void saveCleanEigens(Configuration conf, Collection<Map.Entry<MatrixSlice,EigenStatus>> prunedEigenMeta)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
       throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     Path path = new Path(outPath, CLEAN_EIGENVECTORS);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(path.toUri(), conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
     try {
@@ -205,6 +213,7 @@ public class EigenVerificationJob extends AbstractJob {
         // increment the number of eigenvectors written and see if we've
         // reached our specified limit, or if we wish to write all eigenvectors
         // (latter is built-in, since numEigensWritten will always be > 0
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-363
         numEigensWritten++;
         if (numEigensWritten == maxEigensToKeep) {
           log.info("{} of the {} total eigens have been written", maxEigensToKeep, prunedEigenMeta.size());
@@ -212,6 +221,7 @@ public class EigenVerificationJob extends AbstractJob {
         }
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(seqWriter, false);
     }
     cleanedEigensPath = path;
@@ -219,6 +229,7 @@ public class EigenVerificationJob extends AbstractJob {
 
   private List<Map.Entry<MatrixSlice,EigenStatus>> pruneEigens(Map<MatrixSlice,EigenStatus> eigenMetaData) {
     List<Map.Entry<MatrixSlice,EigenStatus>> prunedEigenMeta = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
 
     for (Map.Entry<MatrixSlice,EigenStatus> entry : eigenMetaData.entrySet()) {
       if (Math.abs(1 - entry.getValue().getCosAngle()) < maxError && entry.getValue().getEigenValue() > minEigenValue) {
@@ -230,6 +241,7 @@ public class EigenVerificationJob extends AbstractJob {
       @Override
       public int compare(Map.Entry<MatrixSlice,EigenStatus> e1, Map.Entry<MatrixSlice,EigenStatus> e2) {
         // sort eigens on eigenvalues in descending order
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
         Double eg1 = e1.getValue().getEigenValue();
         Double eg2 = e2.getValue().getEigenValue();
         return eg1.compareTo(eg2);
@@ -281,12 +293,16 @@ public class EigenVerificationJob extends AbstractJob {
     DistributedRowMatrix eigens = new DistributedRowMatrix(eigenInput, tmpOut, 1, 1);
     eigens.setConf(conf);
     if (inMemory) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
       List<Vector> eigenVectors = Lists.newArrayList();
       for (MatrixSlice slice : eigens) {
         eigenVectors.add(slice.vector());
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
       eigensToVerify = new SparseRowMatrix(eigenVectors.size(), eigenVectors.get(0).size(),
           eigenVectors.toArray(new Vector[eigenVectors.size()]), true, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
 
     } else {
       eigensToVerify = eigens;
@@ -326,6 +342,7 @@ public class EigenVerificationJob extends AbstractJob {
 
     eigenVerifier = new SimpleEigenVerifier();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
     Map<MatrixSlice,EigenStatus> eigenMetaData = verifyEigens();
     List<Map.Entry<MatrixSlice,EigenStatus>> prunedEigenMeta = pruneEigens(eigenMetaData);
     saveCleanEigens(conf, prunedEigenMeta);

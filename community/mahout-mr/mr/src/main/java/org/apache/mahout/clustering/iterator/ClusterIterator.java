@@ -69,6 +69,7 @@ public final class ClusterIterator {
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       for (Vector vector : data) {
         // update the policy based upon the prior
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
         policy.update(classifier);
         // classification yields probabilities
         Vector probabilities = classifier.classify(vector);
@@ -116,6 +117,8 @@ public final class ClusterIterator {
         // policy selects weights for models given those probabilities
         Vector weights = classifier.getPolicy().select(probabilities);
         // training causes all models to observe data
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
         for (Vector.Element e : weights.nonZeroes()) {
           int index = e.index();
           classifier.train(index, vector, weights.get(index));
@@ -124,6 +127,7 @@ public final class ClusterIterator {
       // compute the posterior models
       classifier.close();
       // update the policy
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       classifier.getPolicy().update(classifier);
       // output the classifier
       clustersOut = new Path(outPath, Cluster.CLUSTERS_DIR + iteration);
@@ -155,6 +159,7 @@ public final class ClusterIterator {
    */
   public static void iterateMR(Configuration conf, Path inPath, Path priorPath, Path outPath, int numIterations)
     throws IOException, InterruptedException, ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     ClusteringPolicy policy = ClusterClassifier.readPolicy(priorPath);
     Path clustersOut = null;
     int iteration = 1;
@@ -174,6 +179,7 @@ public final class ClusterIterator {
       job.setReducerClass(CIReducer.class);
       
       FileInputFormat.addInputPath(job, inPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       clustersOut = new Path(outPath, Cluster.CLUSTERS_DIR + iteration);
       priorPath = clustersOut;
       FileOutputFormat.setOutputPath(job, clustersOut);
@@ -182,8 +188,10 @@ public final class ClusterIterator {
       if (!job.waitForCompletion(true)) {
         throw new InterruptedException("Cluster Iteration " + iteration + " failed processing " + priorPath);
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       ClusterClassifier.writePolicy(policy, clustersOut);
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       iteration++;
       if (isConverged(clustersOut, conf, fs)) {
         break;
@@ -204,11 +212,13 @@ public final class ClusterIterator {
    */
   private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       SequenceFileValueIterator<ClusterWritable> iterator = new SequenceFileValueIterator<>(
           part.getPath(), true, conf);
       while (iterator.hasNext()) {
         ClusterWritable value = iterator.next();
         if (!value.getValue().isConverged()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
           Closeables.close(iterator, true);
           return false;
         }

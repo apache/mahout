@@ -57,6 +57,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
    * @param userData users to include
    */
   public GenericBooleanPrefDataModel(FastByIDMap<FastIDSet> userData) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     this(userData, null);
   }
 
@@ -72,9 +73,12 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
    */
   public GenericBooleanPrefDataModel(FastByIDMap<FastIDSet> userData, FastByIDMap<FastByIDMap<Long>> timestamps) {
     Preconditions.checkArgument(userData != null, "userData is null");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     this.preferenceFromUsers = userData;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     this.preferenceForItems = new FastByIDMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     FastIDSet itemIDSet = new FastIDSet();
     for (Map.Entry<Long, FastIDSet> entry : preferenceFromUsers.entrySet()) {
       long userID = entry.getKey();
@@ -104,6 +108,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
     }
     Arrays.sort(userIDs);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     this.timestamps = timestamps;
   }
   
@@ -132,7 +137,9 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
    *  that user's associated items
    */
   public static FastByIDMap<FastIDSet> toDataMap(DataModel dataModel) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FastByIDMap<FastIDSet> data = new FastByIDMap<>(dataModel.getNumUsers());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
       long userID = it.nextLong();
@@ -142,6 +149,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   }
 
   public static FastByIDMap<FastIDSet> toDataMap(FastByIDMap<PreferenceArray> data) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     for (Map.Entry<Long,Object> entry : ((FastByIDMap<Object>) (FastByIDMap<?>) data).entrySet()) {
       PreferenceArray prefArray = (PreferenceArray) entry.getValue();
       int size = prefArray.length();
@@ -205,6 +213,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   
   @Override
   public LongPrimitiveArrayIterator getItemIDs() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     return new LongPrimitiveArrayIterator(itemIDs);
   }
   
@@ -239,6 +248,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
 
   @Override
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     if (timestamps == null) {
       return null;
     }
@@ -261,6 +271,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-764
     FastIDSet userIDs1 = preferenceForItems.get(itemID);
     return userIDs1 == null ? 0 : userIDs1.size();
   }
@@ -302,6 +313,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   
   @Override
   public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     StringBuilder result = new StringBuilder(200);
     result.append("GenericBooleanPrefDataModel[users:");
     for (int i = 0; i < Math.min(3, userIDs.length); i++) {

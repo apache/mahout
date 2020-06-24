@@ -29,6 +29,7 @@ public class CollocCombiner extends Reducer<GramKey, Gram, GramKey, Gram> {
 
     int freq = 0;
     Gram value = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-486
 
     // accumulate frequencies from values, preserve the last value
     // to write to the context.

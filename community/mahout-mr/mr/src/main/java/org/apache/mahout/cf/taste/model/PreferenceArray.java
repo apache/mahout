@@ -50,6 +50,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    *          index
    * @return user ID from preference at i
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   long getUserID(int i);
   
   /**

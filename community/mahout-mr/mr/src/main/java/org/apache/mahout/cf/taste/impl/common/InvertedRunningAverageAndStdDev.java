@@ -57,6 +57,7 @@ public final class InvertedRunningAverageAndStdDev implements RunningAverageAndS
 
   @Override
   public RunningAverageAndStdDev inverse() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return delegate;
   }
   

@@ -35,6 +35,7 @@ public class CSVVectorIteratorTest extends MahoutTestCase {
   public void testCount() throws Exception {
 
     StringWriter sWriter = new StringWriter();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (TextualVectorWriter writer = new TextualVectorWriter(sWriter) {
       @Override
       public void write(Vector vector) throws IOException {
@@ -46,6 +47,7 @@ public class CSVVectorIteratorTest extends MahoutTestCase {
       writer.write(iter);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     Iterator<Vector> csvIter = new CSVVectorIterator(new StringReader(sWriter.getBuffer().toString()));
     int count = 0;
     while (csvIter.hasNext()) {

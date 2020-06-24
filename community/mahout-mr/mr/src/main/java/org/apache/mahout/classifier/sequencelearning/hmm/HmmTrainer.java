@@ -220,6 +220,7 @@ public final class HmmTrainer {
     pseudoCount = pseudoCount == 0 ? Double.MIN_VALUE : pseudoCount;
 
     // allocate space for iteration models
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-734
     HmmModel lastIteration = initialModel.clone();
     HmmModel iteration = initialModel.clone();
 
@@ -295,6 +296,7 @@ public final class HmmTrainer {
   public static HmmModel trainBaumWelch(HmmModel initialModel,
                                         int[] observedSequence, double epsilon, int maxIterations, boolean scaled) {
     // allocate space for the iterations
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-734
     HmmModel lastIteration = initialModel.clone();
     HmmModel iteration = initialModel.clone();
 

@@ -82,6 +82,7 @@ public class RowSimilarityJob extends AbstractJob {
   private static final int NUM_NON_ZERO_ENTRIES_VECTOR_MARKER = Integer.MIN_VALUE + 2;
 
   enum Counters { ROWS, USED_OBSERVATIONS, NEGLECTED_OBSERVATIONS, COOCCURRENCES, PRUNED_COOCCURRENCES }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new RowSimilarityJob(), args);
@@ -92,19 +93,23 @@ public class RowSimilarityJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-979
     addOption("numberOfColumns", "r", "Number of columns in the input matrix", false);
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use "
         + "one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')');
     addOption("maxSimilaritiesPerRow", "m", "Number of maximum similarities per row (default: "
         + DEFAULT_MAX_SIMILARITIES_PER_ROW + ')', String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ROW));
     addOption("excludeSelfSimilarity", "ess", "compute similarity of rows to themselves?", String.valueOf(false));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     addOption("threshold", "tr", "discard row pairs with a similarity value below this", false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     addOption("maxObservationsPerRow", null, "sample rows down to this number of entries",
         String.valueOf(DEFAULT_MAX_OBSERVATIONS_PER_ROW));
     addOption("maxObservationsPerColumn", null, "sample columns down to this number of entries",
         String.valueOf(DEFAULT_MAX_OBSERVATIONS_PER_COLUMN));
     addOption("randomSeed", null, "use this seed for sampling", false);
     addOption(DefaultOptionCreator.overwriteOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-834
 
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -113,6 +118,7 @@ public class RowSimilarityJob extends AbstractJob {
 
     int numberOfColumns;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-979
     if (hasOption("numberOfColumns")) {
       // Number of columns explicitly specified via CLI
       numberOfColumns = Integer.parseInt(getOption("numberOfColumns"));
@@ -130,6 +136,7 @@ public class RowSimilarityJob extends AbstractJob {
     }
 
     // Clear the output and temp paths if the overwrite option has been set
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-834
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       // Clear the temp path
       HadoopUtil.delete(getConf(), getTempPath());
@@ -140,7 +147,9 @@ public class RowSimilarityJob extends AbstractJob {
     int maxSimilaritiesPerRow = Integer.parseInt(getOption("maxSimilaritiesPerRow"));
     boolean excludeSelfSimilarity = Boolean.parseBoolean(getOption("excludeSelfSimilarity"));
     double threshold = hasOption("threshold")
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         ? Double.parseDouble(getOption("threshold")) : NO_THRESHOLD;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     long randomSeed = hasOption("randomSeed")
         ? Long.parseLong(getOption("randomSeed")) : NO_FIXED_RANDOM_SEED;
 
@@ -154,6 +163,7 @@ public class RowSimilarityJob extends AbstractJob {
     Path pairwiseSimilarityPath = getTempPath("pairwiseSimilarity");
 
     Path observationsPerColumnPath = getTempPath("observationsPerColumn.bin");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
 
     AtomicInteger currentPhase = new AtomicInteger();
 
@@ -175,6 +185,7 @@ public class RowSimilarityJob extends AbstractJob {
       normsAndTransposeConf.set(NUM_NON_ZERO_ENTRIES_PATH, numNonZeroEntriesPath.toString());
       normsAndTransposeConf.set(MAXVALUES_PATH, maxValuesPath.toString());
       normsAndTransposeConf.set(SIMILARITY_CLASSNAME, similarityClassname);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
       normsAndTransposeConf.set(OBSERVATIONS_PER_COLUMN_PATH, observationsPerColumnPath.toString());
       normsAndTransposeConf.set(MAX_OBSERVATIONS_PER_ROW, String.valueOf(maxObservationsPerRow));
       normsAndTransposeConf.set(MAX_OBSERVATIONS_PER_COLUMN, String.valueOf(maxObservationsPerColumn));
@@ -199,6 +210,8 @@ public class RowSimilarityJob extends AbstractJob {
       pairwiseConf.setInt(NUMBER_OF_COLUMNS, numberOfColumns);
       pairwiseConf.setBoolean(EXCLUDE_SELF_SIMILARITY, excludeSelfSimilarity);
       boolean succeeded = pairwiseSimilarity.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
       if (!succeeded) {
         return -1;
       }
@@ -211,6 +224,7 @@ public class RowSimilarityJob extends AbstractJob {
       asMatrix.setCombinerClass(MergeToTopKSimilaritiesReducer.class);
       asMatrix.getConfiguration().setInt(MAX_SIMILARITIES_PER_ROW, maxSimilaritiesPerRow);
       boolean succeeded = asMatrix.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
       if (!succeeded) {
         return -1;
       }
@@ -226,6 +240,7 @@ public class RowSimilarityJob extends AbstractJob {
     @Override
     protected void map(IntWritable rowIndex, VectorWritable rowVectorWritable, Context ctx)
       throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
 
       Vector row = rowVectorWritable.get();
       for (Vector.Element elem : row.nonZeroes()) {
@@ -266,6 +281,7 @@ public class RowSimilarityJob extends AbstractJob {
     protected void setup(Context ctx) throws IOException, InterruptedException {
 
       Configuration conf = ctx.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
 
       similarity = ClassUtils.instantiateAs(conf.get(SIMILARITY_CLASSNAME), VectorSimilarityMeasure.class);
       norms = new RandomAccessSparseVector(Integer.MAX_VALUE);
@@ -325,6 +341,7 @@ public class RowSimilarityJob extends AbstractJob {
       int numNonZeroEntries = 0;
       double maxValue = Double.MIN_VALUE;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element element : rowVector.nonZeroes()) {
         RandomAccessSparseVector partialColumnVector = new RandomAccessSparseVector(Integer.MAX_VALUE);
         partialColumnVector.setQuick(row.get(), element.get());
@@ -468,6 +485,7 @@ public class RowSimilarityJob extends AbstractJob {
       similarity = ClassUtils.instantiateAs(ctx.getConfiguration().get(SIMILARITY_CLASSNAME),
           VectorSimilarityMeasure.class);
       numberOfColumns = ctx.getConfiguration().getInt(NUMBER_OF_COLUMNS, -1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       Preconditions.checkArgument(numberOfColumns > 0, "Number of columns must be greater then 0! But numberOfColumns = " + numberOfColumns);
       excludeSelfSimilarity = ctx.getConfiguration().getBoolean(EXCLUDE_SELF_SIMILARITY, false);
       norms = Vectors.read(new Path(ctx.getConfiguration().get(NORMS_PATH)), ctx.getConfiguration());
@@ -481,6 +499,7 @@ public class RowSimilarityJob extends AbstractJob {
       Vector dots = partialDotsIterator.next().get();
       while (partialDotsIterator.hasNext()) {
         Vector toAdd = partialDotsIterator.next().get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
         for (Element nonZeroElement : toAdd.nonZeroes()) {
           dots.setQuick(nonZeroElement.index(), dots.getQuick(nonZeroElement.index()) + nonZeroElement.get());
         }
@@ -517,7 +536,9 @@ public class RowSimilarityJob extends AbstractJob {
       Vector similarities = similaritiesWritable.get();
       // For performance, the creation of transposedPartial is moved out of the while loop and it is reused inside
       Vector transposedPartial = new RandomAccessSparseVector(similarities.size(), 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
       TopElementsQueue topKQueue = new TopElementsQueue(maxSimilaritiesPerRow);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element nonZeroElement : similarities.nonZeroes()) {
         MutableElement top = topKQueue.top();
         double candidateValue = nonZeroElement.get();
@@ -531,6 +552,7 @@ public class RowSimilarityJob extends AbstractJob {
         ctx.write(new IntWritable(nonZeroElement.index()), new VectorWritable(transposedPartial));
         transposedPartial.setQuick(row.get(), 0.0);
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1035
       Vector topKSimilarities = new RandomAccessSparseVector(similarities.size(), maxSimilaritiesPerRow);
       for (Vector.Element topKSimilarity : topKQueue.getTopElements()) {
         topKSimilarities.setQuick(topKSimilarity.index(), topKSimilarity.get());
@@ -547,11 +569,14 @@ public class RowSimilarityJob extends AbstractJob {
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
       maxSimilaritiesPerRow = ctx.getConfiguration().getInt(MAX_SIMILARITIES_PER_ROW, 0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       Preconditions.checkArgument(maxSimilaritiesPerRow > 0, "Maximum number of similarities per row must be greater then 0!");
     }
 
     @Override
     protected void reduce(IntWritable row, Iterable<VectorWritable> partials, Context ctx)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       throws IOException, InterruptedException {
       Vector allSimilarities = Vectors.merge(partials);
       Vector topKSimilarities = Vectors.topKElements(maxSimilaritiesPerRow, allSimilarities);

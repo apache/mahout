@@ -82,9 +82,11 @@ public final class GramKeyTest extends MahoutTestCase {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     DataOutputStream out = new DataOutputStream(bout);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       two.write(out);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(out, false);
     }
     
@@ -96,6 +98,7 @@ public final class GramKeyTest extends MahoutTestCase {
     try {
       one.readFields(din);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(din, true);
     }
 

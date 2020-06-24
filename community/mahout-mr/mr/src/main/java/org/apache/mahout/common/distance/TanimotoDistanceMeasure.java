@@ -41,6 +41,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     double ab;
     double denominator;
     if (getWeights() != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1202
       ab = a.times(b).aggregate(getWeights(), Functions.PLUS, Functions.MULT);
       denominator = a.aggregate(getWeights(), Functions.PLUS, Functions.MULT_SQUARE_LEFT)
           + b.aggregate(getWeights(), Functions.PLUS, Functions.MULT_SQUARE_LEFT)
@@ -50,6 +51,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
       denominator = a.getLengthSquared() + b.getLengthSquared() - ab;
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (denominator < ab) { // correct for fp round-off: distance >= 0
       denominator = ab;
     }
@@ -63,6 +65,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
 
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-121
     return distance(centroid, v); // TODO
   }
   

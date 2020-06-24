@@ -57,6 +57,7 @@ public final class BayesUtils {
     boolean isComplementary = conf.getBoolean(NaiveBayesModel.COMPLEMENTARY_MODEL, true);
 
     // read feature sums and label sums
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
     Vector scoresPerLabel = null;
     Vector scoresPerFeature = null;
     for (Pair<Text,VectorWritable> record : new SequenceFileDirIterable<Text, VectorWritable>(
@@ -73,6 +74,8 @@ public final class BayesUtils {
     Preconditions.checkNotNull(scoresPerFeature);
     Preconditions.checkNotNull(scoresPerLabel);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
     Matrix scoresPerLabelAndFeature = new SparseMatrix(scoresPerLabel.size(), scoresPerFeature.size());
     for (Pair<IntWritable,VectorWritable> entry : new SequenceFileDirIterable<IntWritable,VectorWritable>(
         new Path(base, TrainNaiveBayesJob.SUMMED_OBSERVATIONS), PathType.LIST, PathFilters.partFilter(), conf)) {
@@ -80,9 +83,11 @@ public final class BayesUtils {
     }
     
     // perLabelThetaNormalizer is only used by the complementary model, we do not instantiate it for the standard model
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     Vector perLabelThetaNormalizer = null;
     if (isComplementary) {
       perLabelThetaNormalizer=scoresPerLabel.like();    
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1504
       for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(
           new Path(base, TrainNaiveBayesJob.THETAS), PathType.LIST, PathFilters.partFilter(), conf)) {
         if (entry.getFirst().toString().equals(TrainNaiveBayesJob.LABEL_THETA_NORMALIZER)) {
@@ -98,9 +103,11 @@ public final class BayesUtils {
 
   /** Write the list of labels into a map file */
   public static int writeLabelIndex(Configuration conf, Iterable<String> labels, Path indexPath)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
     int i = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1865
     try (SequenceFile.Writer writer =
            SequenceFile.createWriter(fs.getConf(), SequenceFile.Writer.file(indexPath),
              SequenceFile.Writer.keyClass(Text.class), SequenceFile.Writer.valueClass(IntWritable.class))) {
@@ -116,11 +123,13 @@ public final class BayesUtils {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
     Collection<String> seen = new HashSet<>();
     int i = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1865
     try (SequenceFile.Writer writer =
            SequenceFile.createWriter(fs.getConf(), SequenceFile.Writer.file(indexPath),
              SequenceFile.Writer.keyClass(Text.class), SequenceFile.Writer.valueClass(IntWritable.class))){
       for (Object label : labels) {
         String theLabel = SLASH.split(((Pair<?, ?>) label).getFirst().toString())[1];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (!seen.contains(theLabel)) {
           writer.append(new Text(theLabel), new IntWritable(i++));
           seen.add(theLabel);
@@ -131,6 +140,7 @@ public final class BayesUtils {
   }
 
   public static Map<Integer, String> readLabelIndex(Configuration conf, Path indexPath) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Integer, String> labelMap = new HashMap<>();
     for (Pair<Text, IntWritable> pair : new SequenceFileIterable<Text, IntWritable>(indexPath, true, conf)) {
       labelMap.put(pair.getSecond().get(), pair.getFirst().toString());
@@ -139,8 +149,10 @@ public final class BayesUtils {
   }
 
   public static OpenObjectIntHashMap<String> readIndexFromCache(Configuration conf) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     OpenObjectIntHashMap<String> index = new OpenObjectIntHashMap<>();
     for (Pair<Writable,IntWritable> entry
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
         : new SequenceFileIterable<Writable,IntWritable>(HadoopUtil.getSingleCachedFile(conf), conf)) {
       index.put(entry.getFirst().toString(), entry.getSecond().get());
     }
@@ -148,8 +160,10 @@ public final class BayesUtils {
   }
 
   public static Map<String,Vector> readScoresFromCache(Configuration conf) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String,Vector> sumVectors = new HashMap<>();
     for (Pair<Text,VectorWritable> entry
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
         : new SequenceFileDirIterable<Text,VectorWritable>(HadoopUtil.getSingleCachedFile(conf),
           PathType.LIST, PathFilters.partFilter(), conf)) {
       sumVectors.put(entry.getFirst().toString(), entry.getSecond().get());

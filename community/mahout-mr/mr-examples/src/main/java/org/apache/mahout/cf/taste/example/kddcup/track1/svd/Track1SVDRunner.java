@@ -84,6 +84,7 @@ public final class Track1SVDRunner {
     log.info("Estimating validation preferences...");
     int prefsProcessed = 0;
     RunningAverage average = new FullRunningAverage();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     for (Pair<PreferenceArray,long[]> validationPair
         : new DataFileIterable(KDDCupDataModel.getValidationFile(dataFileDirectory))) {
       for (Preference validationPref : validationPair.getFirst()) {
@@ -107,6 +108,7 @@ public final class Track1SVDRunner {
     try {
       out = new BufferedOutputStream(new FileOutputStream(resultFile));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       for (Pair<PreferenceArray,long[]> testPair
           : new DataFileIterable(KDDCupDataModel.getTestFile(dataFileDirectory))) {
         for (Preference testPref : testPair.getFirst()) {
@@ -117,6 +119,7 @@ public final class Track1SVDRunner {
         }
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(out, false);
     }
     log.info("wrote estimates to {}, done.", resultFile.getAbsolutePath());

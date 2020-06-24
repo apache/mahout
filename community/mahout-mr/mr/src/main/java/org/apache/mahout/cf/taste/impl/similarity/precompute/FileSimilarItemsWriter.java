@@ -44,6 +44,7 @@ public class FileSimilarItemsWriter implements SimilarItemsWriter {
 
   @Override
   public void open() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));
   }
 
@@ -62,6 +63,7 @@ public class FileSimilarItemsWriter implements SimilarItemsWriter {
 
   @Override
   public void close() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     Closeables.close(writer, false);
   }
 }

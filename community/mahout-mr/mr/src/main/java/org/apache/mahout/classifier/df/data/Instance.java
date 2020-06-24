@@ -64,6 +64,7 @@ public class Instance {
     
     Instance instance = (Instance) obj;
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     return /*id == instance.id &&*/ attrs.equals(instance.attrs);
     
   }

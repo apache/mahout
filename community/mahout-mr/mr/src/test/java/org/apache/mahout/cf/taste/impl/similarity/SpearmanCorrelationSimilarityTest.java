@@ -26,6 +26,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
   @Test
   public void testFullCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
             new long[] {1, 2},
             new Double[][] {
                     {1.0, 2.0, 3.0},

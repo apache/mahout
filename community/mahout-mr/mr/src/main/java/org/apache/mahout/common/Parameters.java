@@ -38,6 +38,7 @@ public class Parameters {
   }
 
   public Parameters(String serializedString) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-580
     this(parseParams(serializedString));
   }
 
@@ -51,6 +52,7 @@ public class Parameters {
   
   public String get(String key, String defaultValue) {
     String ret = params.get(key);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-178
     return ret == null ? defaultValue : ret;
   }
   
@@ -59,6 +61,7 @@ public class Parameters {
   }
 
   public int getInt(String key, int defaultValue) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-885
     String ret = params.get(key);
     return ret == null ? defaultValue : Integer.parseInt(ret);
   }
@@ -66,14 +69,17 @@ public class Parameters {
   @Override
   public String toString() {
     Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-580
     conf.set("io.serializations",
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<>(conf,
         GenericsUtil.getClass(params));
     try {
       return mapStringifier.toString(params);
     } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.info("Encountered IOException while deserializing returning empty string", e);
       return "";
     }
@@ -86,10 +92,13 @@ public class Parameters {
 
   public static Map<String,String> parseParams(String serializedString) throws IOException {
     Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-580
     conf.set("io.serializations",
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Map<String,String> params = Maps.newHashMap();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<>(conf,
         GenericsUtil.getClass(params));
     return mapStringifier.fromString(serializedString);

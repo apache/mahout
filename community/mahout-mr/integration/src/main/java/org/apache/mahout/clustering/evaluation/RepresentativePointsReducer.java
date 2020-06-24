@@ -60,6 +60,8 @@ public class RepresentativePointsReducer
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     representativePoints = RepresentativePointsMapper.getRepresentativePoints(conf);
   }
 

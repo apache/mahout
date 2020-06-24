@@ -72,6 +72,7 @@ public final class LDAPrintTopics {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
     Option inputOpt = DefaultOptionCreator.inputOption().create();
     
     Option dictOpt = obuilder.withLongName("dict").withRequired(true).withArgument(
@@ -119,6 +120,7 @@ public final class LDAPrintTopics {
       if ("text".equals(dictionaryType)) {
         wordList = Arrays.asList(VectorHelper.loadTermDictionary(new File(dictFile)));
       } else if ("sequencefile".equals(dictionaryType)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
         wordList = Arrays.asList(VectorHelper.loadTermDictionary(config, dictFile));
       } else {
         throw new IllegalArgumentException("Invalid dictionary format");
@@ -126,6 +128,8 @@ public final class LDAPrintTopics {
       
       List<Queue<Pair<String,Double>>> topWords = topWordsForTopics(input, config, wordList, numWords);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-683
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-682
       File output = null;
       if (cmdLine.hasOption(outOpt)) {
         output = new File(cmdLine.getValue(outOpt).toString());
@@ -136,6 +140,7 @@ public final class LDAPrintTopics {
       printTopWords(topWords, output);
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-164
       throw e;
     }
   }
@@ -146,6 +151,7 @@ public final class LDAPrintTopics {
       q.poll();
     }
     if (q.size() < numWordsToPrint) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       q.add(new Pair<>(word, score));
     }
   }
@@ -154,6 +160,7 @@ public final class LDAPrintTopics {
     throws IOException {
     for (int i = 0; i < topWords.size(); ++i) {
       Collection<Pair<String,Double>> topK = topWords.get(i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
       Writer out = null;
       boolean printingToSystemOut = false;
       try {
@@ -167,7 +174,9 @@ public final class LDAPrintTopics {
           out.write("===========");
           out.write('\n');
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         List<Pair<String,Double>> topKasList = new ArrayList<>(topK.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         for (Pair<String,Double> wordWithScore : topK) {
           topKasList.add(wordWithScore);
         }
@@ -177,13 +186,16 @@ public final class LDAPrintTopics {
             return pair2.getSecond().compareTo(pair1.getSecond());
           }
         });
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         for (Pair<String,Double> wordWithScore : topKasList) {
           out.write(wordWithScore.getFirst() + " [p(" + wordWithScore.getFirst() + "|topic_" + i + ") = "
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
             + wordWithScore.getSecond());
           out.write('\n');
         }
       } finally {
         if (!printingToSystemOut) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
           Closeables.close(out, false);
         } else {
           out.flush();
@@ -196,8 +208,10 @@ public final class LDAPrintTopics {
                                                                     Configuration job,
                                                                     List<String> wordList,
                                                                     int numWordsToPrint) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Queue<Pair<String,Double>>> queues = new ArrayList<>();
     Map<Integer,Double> expSums = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     for (Pair<IntPairWritable,DoubleWritable> record
         : new SequenceFileDirIterable<IntPairWritable, DoubleWritable>(
             new Path(dir, "part-*"), PathType.GLOB, null, null, true, job)) {
@@ -217,6 +231,7 @@ public final class LDAPrintTopics {
     }
     for (int i = 0; i < queues.size(); i++) {
       Queue<Pair<String,Double>> queue = queues.get(i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Queue<Pair<String,Double>> newQueue = new PriorityQueue<>(queue.size());
       double norm = expSums.get(i);
       for (Pair<String,Double> pair : queue) {

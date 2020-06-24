@@ -41,12 +41,14 @@ public abstract class AbstractJDBCComponent {
   protected static void checkNotNullAndLog(String argName, Object value) {
     Preconditions.checkArgument(value != null && !value.toString().isEmpty(),
       argName + " is null or empty");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("{}: {}", argName, value);
   }
   
   protected static void checkNotNullAndLog(String argName, Object[] values) {
     Preconditions.checkArgument(values != null && values.length != 0, argName + " is null or zero-length");
     for (Object value : values) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       checkNotNullAndLog(argName, value);
     }
   }
@@ -75,6 +77,7 @@ public abstract class AbstractJDBCComponent {
         try {
           context.close();
         } catch (NamingException ne) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
           log.warn("Error while closing Context; continuing...", ne);
         }
       }

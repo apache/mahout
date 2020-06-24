@@ -45,6 +45,7 @@ public final class DeliciousTagsExample {
     
     Option helpOpt = DefaultOptionCreator.helpOption();
     Option recordSplitterOpt = obuilder.withLongName("splitterPattern").withArgument(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       abuilder.withName("splitterPattern").withMinimum(1).withMaximum(1).create()).withDescription(
       "Regular Expression pattern used to split given line into fields."
           + " Default value splits comma or tab separated fields."

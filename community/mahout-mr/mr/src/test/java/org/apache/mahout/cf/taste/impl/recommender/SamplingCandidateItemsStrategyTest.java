@@ -40,6 +40,7 @@ public final class SamplingCandidateItemsStrategyTest extends TasteTestCase {
 
   @Test
   public void testStrategy() throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<Preference> prefsOfUser123 = Lists.newArrayList();
     prefsOfUser123.add(new GenericPreference(123L, 1L, 1.0f));
 
@@ -60,9 +61,11 @@ public final class SamplingCandidateItemsStrategyTest extends TasteTestCase {
 
     DataModel dataModel = new GenericDataModel(userData);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-910
     CandidateItemsStrategy strategy =
         new SamplingCandidateItemsStrategy(1, 1, 1, dataModel.getNumUsers(), dataModel.getNumItems());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel, false);
     /* result can be either item2 or item3 or empty */
     assertTrue(candidateItems.size() <= 1);

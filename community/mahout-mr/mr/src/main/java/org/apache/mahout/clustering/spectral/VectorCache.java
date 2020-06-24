@@ -53,12 +53,14 @@ public final class VectorCache {
    * @param vector Vector to save, to be wrapped as VectorWritable
    */
   public static void save(Writable key,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
                           Vector vector,
                           Path output,
                           Configuration conf,
                           boolean overwritePath,
                           boolean deleteOnExit) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     output = fs.makeQualified(output);
     if (overwritePath) {
@@ -69,6 +71,7 @@ public final class VectorCache {
     DistributedCache.setCacheFiles(new URI[]{output.toUri()}, conf);
 
     // set up the writer
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output,
         IntWritable.class, VectorWritable.class)){
       writer.append(key, new VectorWritable(vector));
@@ -92,12 +95,14 @@ public final class VectorCache {
    */
   public static Vector load(Configuration conf) throws IOException {
     Path[] files = HadoopUtil.getCachedFiles(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
 
     if (files.length != 1) {
       throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
     }
 
     if (log.isInfoEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
       log.info("Files are: {}", Arrays.toString(files));
     }
     return load(conf, files[0]);
@@ -107,7 +112,9 @@ public final class VectorCache {
    * Loads a Vector from the specified path. Returns null if no vector exists.
    */
   public static Vector load(Configuration conf, Path input) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
     log.info("Loading vector from: {}", input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFileValueIterator<VectorWritable> iterator =
              new SequenceFileValueIterator<>(input, true, conf)){
       return iterator.next().get();

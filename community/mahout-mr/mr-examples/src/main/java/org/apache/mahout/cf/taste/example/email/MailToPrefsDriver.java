@@ -85,6 +85,7 @@ public final class MailToPrefsDriver extends AbstractJob {
     addOption("chunkSize", "cs", "The size of chunks to write.  Default is 100 mb", "100");
     addOption("separator", "sep", "The separator used in the input file to separate to, from, subject.  Default is \\n",
         "\n");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     addOption("from", "f", "The position in the input text (value) where the from email is located, starting from "
         + "zero (0).", "0");
     addOption("refs", "r", "The position in the input text (value) where the reference ids are located, "
@@ -93,6 +94,7 @@ public final class MailToPrefsDriver extends AbstractJob {
         + "thread as an indication of their preference.  Otherwise, use boolean preferences.", false, false,
         String.valueOf(true)));
     Map<String, List<String>> parsedArgs = parseArguments(args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
 
     Path input = getInputPath();
     Path output = getOutputPath();
@@ -153,6 +155,8 @@ public final class MailToPrefsDriver extends AbstractJob {
               SequenceFileOutputFormat.class);
       createFromIdDictionary.getConfiguration().set(EmailUtility.SEPARATOR, separator);
       boolean succeeded = createFromIdDictionary.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
       if (!succeeded) {
         return -1;
       }
@@ -175,9 +179,11 @@ public final class MailToPrefsDriver extends AbstractJob {
       conf.set(EmailUtility.MSG_ID_DIMENSION, String.valueOf(msgDim[0]));
       conf.set(EmailUtility.FROM_PREFIX, "fromIds-dictionary-");
       conf.set(EmailUtility.MSG_IDS_PREFIX, "msgIds-dictionary-");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
       conf.set(EmailUtility.FROM_INDEX, getOption("from"));
       conf.set(EmailUtility.REFS_INDEX, getOption("refs"));
       conf.set(EmailUtility.SEPARATOR, separator);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
       conf.set(MailToRecReducer.USE_COUNTS_PREFERENCE, String.valueOf(useCounts));
       int j = 0;
       int i = 0;
@@ -190,6 +196,7 @@ public final class MailToPrefsDriver extends AbstractJob {
                   NullWritable.class, TextOutputFormat.class);
           createRecMatrix.getConfiguration().set("mapred.output.compress", "false");
           boolean succeeded = createRecMatrix.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
           if (!succeeded) {
             return -1;
           }
@@ -227,8 +234,10 @@ public final class MailToPrefsDriver extends AbstractJob {
                                                    String name,
                                                    Configuration baseConf,
                                                    int chunkSizeInMegabytes, int[] maxTermDimension)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException {
     List<Path> chunkPaths = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     Configuration conf = new Configuration(baseConf);
 
@@ -246,8 +255,10 @@ public final class MailToPrefsDriver extends AbstractJob {
       Path filesPattern = new Path(inputPath, OUTPUT_FILES_PATTERN);
       int i = 1; //start at 1, since a miss in the OpenObjectIntHashMap returns a 0
       for (Pair<Writable, Writable> record
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
               : new SequenceFileDirIterable<>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
           Closeables.close(dictWriter, false);
           chunkIndex++;
 
@@ -265,6 +276,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       }
       maxTermDimension[0] = i;
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(dictWriter, false);
     }
 

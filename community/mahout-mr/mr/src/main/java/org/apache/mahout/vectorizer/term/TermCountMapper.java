@@ -33,6 +33,7 @@ public class TermCountMapper extends Mapper<Text, StringTuple, Text, LongWritabl
 
   @Override
   protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     OpenObjectLongHashMap<String> wordCount = new OpenObjectLongHashMap<>();
     for (String word : value.getEntries()) {
       if (wordCount.containsKey(word)) {
@@ -45,6 +46,7 @@ public class TermCountMapper extends Mapper<Text, StringTuple, Text, LongWritabl
       @Override
       public boolean apply(String first, long second) {
         try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
           context.write(new Text(first), new LongWritable(second));
         } catch (IOException e) {
           context.getCounter("Exception", "Output IO Exception").increment(1);

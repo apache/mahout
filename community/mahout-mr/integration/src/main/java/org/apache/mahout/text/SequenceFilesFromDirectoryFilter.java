@@ -46,7 +46,9 @@ public abstract class SequenceFilesFromDirectoryFilter implements PathFilter {
   protected SequenceFilesFromDirectoryFilter(Configuration conf,
                                              String keyPrefix,
                                              Map<String, String> options,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-700
                                              ChunkedWriter writer,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-799
                                              Charset charset,
                                              FileSystem fs) {
     this.prefix = keyPrefix;
@@ -78,6 +80,7 @@ public abstract class SequenceFilesFromDirectoryFilter implements PathFilter {
   }
   
   protected final Configuration getConf() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-799
     return conf;
   }
 
@@ -85,6 +88,7 @@ public abstract class SequenceFilesFromDirectoryFilter implements PathFilter {
   public final boolean accept(Path current) {
     log.debug("CURRENT: {}", current.getName());
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       for (FileStatus fst : fs.listStatus(current)) {
         log.debug("CHILD: {}", fst.getPath().getName());
         process(fst, current);

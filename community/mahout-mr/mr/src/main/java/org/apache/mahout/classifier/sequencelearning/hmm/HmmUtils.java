@@ -175,6 +175,7 @@ public final class HmmUtils {
      * probability of the matrix is non-negative. The sum of each row is equal
      * to 1.
      */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Preconditions.checkNotNull(model.getEmissionMatrix(), "Error: The output state matrix is not initialized!");
     Preconditions.checkArgument(model.getEmissionMatrix().numRows() == model.getNrOfHiddenStates()
         && model.getEmissionMatrix().numCols() == model.getNrOfOutputStates(),
@@ -204,6 +205,7 @@ public final class HmmUtils {
       sum = 0;
       for (int j = 0; j < model.getTransitionMatrix().numCols(); j++) {
         Preconditions.checkArgument(model.getTransitionMatrix().get(i, j) >= 0,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
           "Error: The transition probability from hidden state %d to hidden state %d is negative", i, j);
         sum += model.getTransitionMatrix().get(i, j);
       }
@@ -256,6 +258,7 @@ public final class HmmUtils {
                                                  int[] sequence,
                                                  boolean observed,
                                                  String defaultValue) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> decoded = new ArrayList<>(sequence.length);
     for (int position : sequence) {
       String nextState;
@@ -325,6 +328,8 @@ public final class HmmUtils {
     // allocate the sparse data structures
     RandomAccessSparseVector sparseIp = new RandomAccessSparseVector(model
         .getNrOfHiddenStates());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
     SparseMatrix sparseEm = new SparseMatrix(model.getNrOfHiddenStates(), model.getNrOfOutputStates());
     SparseMatrix sparseTr = new SparseMatrix(model.getNrOfHiddenStates(), model.getNrOfHiddenStates());
     // now transfer the values

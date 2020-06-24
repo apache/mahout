@@ -63,12 +63,15 @@ public class SearchSanityTest extends MahoutTestCase {
 
   @Parameterized.Parameters
   public static List<Object[]> generateData() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1337
     RandomUtils.useTestSeed();
     Matrix dataPoints = multiNormalRandomData(NUM_DATA_POINTS, NUM_DIMENSIONS);
     return Arrays.asList(new Object[][]{
         {new ProjectionSearch(new EuclideanDistanceMeasure(), NUM_PROJECTIONS, SEARCH_SIZE), dataPoints},
         {new FastProjectionSearch(new EuclideanDistanceMeasure(), NUM_PROJECTIONS, SEARCH_SIZE),
             dataPoints},
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1216
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1156
         {new LocalitySensitiveHashSearch(new EuclideanDistanceMeasure(), SEARCH_SIZE), dataPoints},
     });
   }
@@ -197,6 +200,8 @@ public class SearchSanityTest extends MahoutTestCase {
 
   @Test
   public void testSearchFirst() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1216
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1156
     searcher.clear();
     searcher.addAll(dataPoints);
     for (Vector datapoint : dataPoints) {
@@ -207,12 +212,14 @@ public class SearchSanityTest extends MahoutTestCase {
       assertEquals("First isn't self", 0, first.getWeight(), 0);
       assertEquals("First isn't self", datapoint, first.getValue());
       assertEquals("First doesn't match", first, firstTwo.get(0));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1217
       assertEquals("Second doesn't match", second, firstTwo.get(1));
     }
   }
 
   @Test
   public void testSearchLimiting() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1312
     searcher.clear();
     searcher.addAll(dataPoints);
     for (Vector datapoint : dataPoints) {

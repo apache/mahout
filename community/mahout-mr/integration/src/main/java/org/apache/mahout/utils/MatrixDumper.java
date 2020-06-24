@@ -57,6 +57,7 @@ public final class MatrixDumper extends AbstractJob {
     
     addInputOption();
     addOption("output", "o", "Output path", null); // AbstractJob output feature requires param
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -68,6 +69,7 @@ public final class MatrixDumper extends AbstractJob {
   
   private static void exportCSV(Path inputPath, String outputFile, boolean doLabels) throws IOException {
     SequenceFileValueIterator<MatrixWritable> it =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new SequenceFileValueIterator<>(inputPath, true, new Configuration());
     Matrix m = it.next().get();
     it.close();
@@ -77,6 +79,7 @@ public final class MatrixDumper extends AbstractJob {
     if (doLabels) {
       ps.print("rowid,");
       ps.print(columnLabels[0]);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       for (int c = 1; c < m.numCols(); c++) {
         ps.print(',' + columnLabels[c]);
       }
@@ -108,6 +111,7 @@ public final class MatrixDumper extends AbstractJob {
     }
     outputFile.createNewFile();
     OutputStream os = new FileOutputStream(outputFile);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
     return new PrintStream(os, false, Charsets.UTF_8.displayName());
   }
   
@@ -121,6 +125,7 @@ public final class MatrixDumper extends AbstractJob {
       return sortLabels(labels);
     }
     String[] sorted = new String[length];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 1; i <= length; i++) {
       sorted[i] = start + i;
     }

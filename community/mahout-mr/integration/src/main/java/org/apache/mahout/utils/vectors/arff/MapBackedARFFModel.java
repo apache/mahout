@@ -48,12 +48,14 @@ public class MapBackedARFFModel implements ARFFModel {
   private final Map<String,Long> words;
   
   public MapBackedARFFModel() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     this(new HashMap<String,Long>(), 1, new HashMap<String,Map<String,Integer>>());
   }
   
   public MapBackedARFFModel(Map<String,Long> words, long wordCount, Map<String,Map<String,Integer>> nominalMap) {
     this.words = words;
     this.wordCount = wordCount;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     labelBindings = new HashMap<>();
     idxLabel = new HashMap<>();
     typeMap = new HashMap<>();
@@ -84,6 +86,7 @@ public class MapBackedARFFModel implements ARFFModel {
   @Override
   public double getValue(String data, int idx) {
     ARFFType type = typeMap.get(idx);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-948
     if (type == null) {
       throw new IllegalArgumentException("Attribute type cannot be NULL, attribute index was: " + idx);
     }
@@ -92,6 +95,7 @@ public class MapBackedARFFModel implements ARFFModel {
     double result;
     switch (type) {
       case NUMERIC:
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1063
       case INTEGER:
       case REAL:
         result = processNumeric(data);
@@ -104,6 +108,7 @@ public class MapBackedARFFModel implements ARFFModel {
         result = processString(data);
         break;
       case NOMINAL:
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
         String label = idxLabel.get(idx);
         result = processNominal(label, data);
         break;
@@ -117,6 +122,7 @@ public class MapBackedARFFModel implements ARFFModel {
     double result;
     Map<String,Integer> classes = nominalMap.get(label);
     if (classes != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1150
       Integer ord = classes.get(ARFFType.removeQuotes(data));
       if (ord != null) {
         result = ord;
@@ -143,9 +149,11 @@ public class MapBackedARFFModel implements ARFFModel {
   }
   
   protected static double processNumeric(String data) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1285
     if (isNumeric(data)) {
       return Double.parseDouble(data);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1285
     return Double.NaN;
   }
 
@@ -164,8 +172,10 @@ public class MapBackedARFFModel implements ARFFModel {
     double result;
     try {
       Date date = format.parse(data);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       result = date.getTime(); // hmmm, what kind of loss casting long to double?
     } catch (ParseException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       throw new IllegalArgumentException(e);
     }
     return result;
@@ -178,6 +188,7 @@ public class MapBackedARFFModel implements ARFFModel {
    */
   @Override
   public Map<String,Integer> getLabelBindings() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
     return Collections.unmodifiableMap(labelBindings);
   }
   
@@ -226,8 +237,10 @@ public class MapBackedARFFModel implements ARFFModel {
   
   @Override
   public void addNominal(String label, String nominal, int idx) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     Map<String,Integer> noms = nominalMap.get(label);
     if (noms == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       noms = new HashMap<>();
       nominalMap.put(label, noms);
     }
@@ -252,6 +265,7 @@ public class MapBackedARFFModel implements ARFFModel {
   @Override
   public void addLabel(String label, Integer idx) {
     labelBindings.put(label, idx);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
     idxLabel.put(idx, label);
   }
   

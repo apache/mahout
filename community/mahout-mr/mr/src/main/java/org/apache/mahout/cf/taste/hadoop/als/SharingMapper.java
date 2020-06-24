@@ -42,6 +42,7 @@ public abstract class SharingMapper<K1,V1,K2,V2,S> extends Mapper<K1,V1,K2,V2> {
    * @param context mapper's context
    */
   abstract S createSharedInstance(Context context) throws IOException;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1205
 
   final void setupSharedInstance(Context context) throws IOException {
     if (SHARED_INSTANCE == null) {

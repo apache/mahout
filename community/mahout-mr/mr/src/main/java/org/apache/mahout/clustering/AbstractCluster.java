@@ -63,6 +63,7 @@ public abstract class AbstractCluster implements Cluster {
   protected AbstractCluster() {}
   
   protected AbstractCluster(Vector point, int id2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1576
     this.numObservations = (long) 0;
     this.totalObservations = (long) 0;
     this.center = point.clone();
@@ -115,6 +116,7 @@ public abstract class AbstractCluster implements Cluster {
   
   @Override
   public Collection<Parameter<?>> getParameters() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-616
     return Collections.emptyList();
   }
   
@@ -125,6 +127,7 @@ public abstract class AbstractCluster implements Cluster {
   
   @Override
   public int getId() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     return id;
   }
 
@@ -138,6 +141,7 @@ public abstract class AbstractCluster implements Cluster {
   
   @Override
   public long getNumObservations() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     return numObservations;
   }
 
@@ -173,6 +177,7 @@ public abstract class AbstractCluster implements Cluster {
   
   @Override
   public Vector getRadius() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     return radius;
   }
 
@@ -192,6 +197,9 @@ public abstract class AbstractCluster implements Cluster {
   }
   
   protected void setS0(double s0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-846
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     this.s0 = s0;
   }
 
@@ -203,6 +211,7 @@ public abstract class AbstractCluster implements Cluster {
   }
   
   protected void setS1(Vector s1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     this.s1 = s1;
   }
 
@@ -214,6 +223,7 @@ public abstract class AbstractCluster implements Cluster {
   }
   
   protected void setS2(Vector s2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     this.s2 = s2;
   }
 
@@ -239,6 +249,8 @@ public abstract class AbstractCluster implements Cluster {
     if (weight == 1.0) {
       observe(x);
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-846
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       setS0(getS0() + weight);
       Vector weightedX = x.times(weight);
       if (getS1() == null) {
@@ -276,6 +288,7 @@ public abstract class AbstractCluster implements Cluster {
     if (getS0() == 0) {
       return;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     setNumObservations((long) getS0());
     setTotalObservations(getTotalObservations() + getNumObservations());
     setCenter(getS1().divide(getS0()));
@@ -290,6 +303,7 @@ public abstract class AbstractCluster implements Cluster {
 
   @Override
   public String asFormatString(String[] bindings) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
     String fmtString = "";
     try {
       fmtString = jxn.writeValueAsString(asJson(bindings));
@@ -300,6 +314,7 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   public Map<String,Object> asJson(String[] bindings) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String,Object> dict = new HashMap<>();
     dict.put("identifier", getIdentifier());
     dict.put("n", getNumObservations());
@@ -328,6 +343,8 @@ public abstract class AbstractCluster implements Cluster {
    * @return the new centroid
    */
   public Vector computeCentroid() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-846
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     return getS0() == 0 ? getCenter() : getS1().divide(getS0());
   }
 
@@ -336,6 +353,7 @@ public abstract class AbstractCluster implements Cluster {
    * intended to be complete nor usable as an input/output representation
    */
   public static String formatVector(Vector v, String[] bindings) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
     String fmtString = "";
     try {
       fmtString = jxn.writeValueAsString(formatVectorAsJson(v, bindings));
@@ -358,10 +376,12 @@ public abstract class AbstractCluster implements Cluster {
     // we assume sequential access in the output
     Vector provider = v.isSequentialAccess() ? v : new SequentialAccessSparseVector(v);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Object> terms = new LinkedList<>();
     String term = "";
 
     for (Element elem : provider.nonZeroes()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
 
       if (hasBindings && bindings.length >= elem.index() + 1 && bindings[elem.index()] != null) {
         term = bindings[elem.index()];
@@ -369,6 +389,7 @@ public abstract class AbstractCluster implements Cluster {
         term = String.valueOf(elem.index());
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Map<String, Object> term_entry = new HashMap<>();
       double roundedWeight = (double) Math.round(elem.get() * 1000) / 1000;
       if (hasBindings || isSparse) {

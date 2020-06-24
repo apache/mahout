@@ -44,8 +44,10 @@ public class DelimitedTermInfoWriter implements TermInfoWriter {
   public void write(TermInfo ti) throws IOException {
     
     Iterator<TermEntry> entIter = ti.getAllEntries();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       writer.write(String.valueOf(ti.totalTerms(field)));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
       writer.write('\n');
       writer.write("#term" + delimiter + "doc freq" + delimiter + "idx");
       writer.write('\n');
@@ -56,9 +58,11 @@ public class DelimitedTermInfoWriter implements TermInfoWriter {
         writer.write(String.valueOf(entry.getDocFreq()));
         writer.write(delimiter);
         writer.write(String.valueOf(entry.getTermIdx()));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
         writer.write('\n');
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
   }

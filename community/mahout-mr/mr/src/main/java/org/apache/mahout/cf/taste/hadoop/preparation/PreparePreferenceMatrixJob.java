@@ -61,6 +61,7 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("ratingShift", "rs", "shift ratings by this value", "0.0");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -75,6 +76,7 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
             VarIntWritable.class, VarLongWritable.class, SequenceFileOutputFormat.class);
     itemIDIndex.setCombinerClass(ItemIDIndexReducer.class);
     boolean succeeded = itemIDIndex.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       return -1;
     }
@@ -92,12 +94,14 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     toUserVectors.getConfiguration().setBoolean(RecommenderJob.BOOLEAN_DATA, booleanData);
     toUserVectors.getConfiguration().setInt(ToUserVectorsReducer.MIN_PREFERENCES_PER_USER, minPrefsPerUser);
     toUserVectors.getConfiguration().set(ToEntityPrefsMapper.RATING_SHIFT, String.valueOf(ratingShift));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     succeeded = toUserVectors.waitForCompletion(true);
     if (!succeeded) {
       return -1;
     }
     //we need the number of users later
     int numberOfUsers = (int) toUserVectors.getCounters().findCounter(ToUserVectorsReducer.Counters.USERS).getValue();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-879
     HadoopUtil.writeInt(numberOfUsers, getOutputPath(NUM_USERS), getConf());
     //build the rating matrix
     Job toItemVectors = prepareJob(getOutputPath(USER_VECTORS), getOutputPath(RATING_MATRIX),
@@ -105,6 +109,7 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
             IntWritable.class, VectorWritable.class);
     toItemVectors.setCombinerClass(ToItemVectorsReducer.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     succeeded = toItemVectors.waitForCompletion(true);
     if (!succeeded) {
       return -1;

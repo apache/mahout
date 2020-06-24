@@ -121,6 +121,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
     }
 
     if (data.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-954
       return new Leaf(Double.NaN);
     }
 
@@ -264,6 +265,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
       // tree is complemented
       Collection<Double> subsetValues = null;
       if (complemented) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         subsetValues = new HashSet<>();
         for (double value : values) {
           subsetValues.add(value);

@@ -56,9 +56,11 @@ public class StreamingKMeansMapper extends Mapper<Writable, VectorWritable, IntW
     UpdatableSearcher searcher = StreamingKMeansUtilsMR.searcherFromConfiguration(conf);
     int numClusters = conf.getInt(StreamingKMeansDriver.ESTIMATED_NUM_MAP_CLUSTERS, 1);
     double estimatedDistanceCutoff = conf.getFloat(StreamingKMeansDriver.ESTIMATED_DISTANCE_CUTOFF,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1254
         StreamingKMeansDriver.INVALID_DISTANCE_CUTOFF);
     if (estimatedDistanceCutoff == StreamingKMeansDriver.INVALID_DISTANCE_CUTOFF) {
       estimateDistanceCutoff = true;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       estimatePoints = new ArrayList<>();
     }
     // There is no way of estimating the distance cutoff unless we have some data.

@@ -126,6 +126,7 @@ public final class CassandraDataModel implements DataModel, Closeable {
   public CassandraDataModel(String host, int port, String keyspaceName) {
     
     Preconditions.checkNotNull(host);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(port > 0, "port must be greater then 0!");
     Preconditions.checkNotNull(keyspaceName);
 
@@ -133,6 +134,7 @@ public final class CassandraDataModel implements DataModel, Closeable {
     keyspace = HFactory.createKeyspace(keyspaceName, cluster);
     keyspace.setConsistencyLevelPolicy(new OneConsistencyLevelPolicy());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     userCache = new Cache<>(new UserPrefArrayRetriever(), 1 << 20);
     itemCache = new Cache<>(new ItemPrefArrayRetriever(), 1 << 20);
     itemIDsFromUserCache = new Cache<>(new ItemIDsFromUserRetriever(), 1 << 20);
@@ -246,6 +248,7 @@ public final class CassandraDataModel implements DataModel, Closeable {
   public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException {
     FastIDSet userIDs1 = userIDsFromItemCache.get(itemID1);
     FastIDSet userIDs2 = userIDsFromItemCache.get(itemID2);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     return userIDs1.size() < userIDs2.size()
         ? userIDs2.intersectionSize(userIDs1)
         : userIDs1.intersectionSize(userIDs2);
@@ -262,6 +265,7 @@ public final class CassandraDataModel implements DataModel, Closeable {
 
     Mutator<Long> mutator = HFactory.createMutator(keyspace, LongSerializer.get());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     HColumn<Long,Float> itemForUsers = new HColumnImpl<>(LongSerializer.get(), FloatSerializer.get());
     itemForUsers.setName(itemID);
     itemForUsers.setClock(now);

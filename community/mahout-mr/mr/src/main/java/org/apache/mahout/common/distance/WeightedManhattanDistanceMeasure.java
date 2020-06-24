@@ -31,13 +31,16 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
     double result = 0;
     
     Vector res = p2.minus(p1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     if (getWeights() == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element elt : res.nonZeroes()) {
         result += Math.abs(elt.get());
       }
       
     } else {
       for (Element elt : res.nonZeroes()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
         result += Math.abs(elt.get() * getWeights().get(elt.index()));
       }
     }
@@ -47,6 +50,7 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
   
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-121
     return distance(centroid, v); // TODO
   }
   

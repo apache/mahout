@@ -41,6 +41,7 @@ public final class SamplingIterator<T> extends AbstractIterator<T> {
 
   public SamplingIterator(RandomWrapper random, Iterator<? extends T> delegate, double samplingRate) {
     Preconditions.checkNotNull(delegate);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0,
         "Must be: 0.0 < samplingRate <= 1.0. But samplingRate = " + samplingRate);
     // Geometric distribution is special case of negative binomial (aka Pascal) with r=1:

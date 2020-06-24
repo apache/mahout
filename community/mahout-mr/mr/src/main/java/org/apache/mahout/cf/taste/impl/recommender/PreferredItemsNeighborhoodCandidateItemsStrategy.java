@@ -30,16 +30,20 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategy extends Abst
    */
   @Override
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
     FastIDSet possibleItemsIDs = new FastIDSet();
     for (long itemID : preferredItemIDs) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       PreferenceArray itemPreferences = dataModel.getPreferencesForItem(itemID);
       int numUsersPreferringItem = itemPreferences.length();
       for (int index = 0; index < numUsersPreferringItem; index++) {
         possibleItemsIDs.addAll(dataModel.getItemIDsFromUser(itemPreferences.getUserID(index)));
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     if (!includeKnownItems) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-570
       possibleItemsIDs.removeAll(preferredItemIDs);
     }
     return possibleItemsIDs;

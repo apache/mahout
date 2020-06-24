@@ -58,6 +58,7 @@ public class H2OHdfs {
   public static boolean isSeqfile(String filename) {
     try {
       Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Path path = new Path(filename);
       FileSystem fs = FileSystem.get(URI.create(filename), conf);
       FSDataInputStream fin = fs.open(path);
@@ -83,11 +84,13 @@ public class H2OHdfs {
    */
   public static H2ODrm drmFromFile(String filename, int parMin) {
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
       if (isSeqfile(filename)) {
         return drmFromSeqfile(filename, parMin);
       } else {
         return new H2ODrm(FrameUtils.parseFrame(null,new File(filename)));
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } catch (IOException e) {
       return null;
     }
@@ -105,6 +108,7 @@ public class H2OHdfs {
     SequenceFile.Reader reader = null;
     try {
       Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Path path = new Path(filename);
       FileSystem fs = FileSystem.get(URI.create(filename), conf);
       Vec.Writer writers[];
@@ -128,6 +132,7 @@ public class H2OHdfs {
       long start = reader.getPosition();
 
       if (reader.getKeyClass() == Text.class) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
         isStringKey = true;
       } else if (reader.getKeyClass() == LongWritable.class) {
         isLongKey = true;
@@ -140,6 +145,7 @@ public class H2OHdfs {
           Vector v = value.get();
           cols = Math.max(v.size(), cols);
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
         if (isLongKey) {
           rows = Math.max(((LongWritable)(key)).get()+1, rows);
         }
@@ -152,6 +158,7 @@ public class H2OHdfs {
       }
       reader.seek(start);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
       frame = H2OHelper.emptyFrame(rows, cols, parMin, -1);
       writers = new Vec.Writer[cols];
       for (int i = 0; i < writers.length; i++) {
@@ -159,6 +166,8 @@ public class H2OHdfs {
       }
 
       if (reader.getKeyClass() == Text.class) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1638
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1493
         labels = H2OHelper.makeEmptyStrVec(frame.anyVec());
         labelwriter = labels.open();
       }
@@ -166,6 +175,7 @@ public class H2OHdfs {
       long r = 0;
       while (reader.next(key, value)) {
         Vector v = value.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
         if (isLongKey) {
           r = ((LongWritable)(key)).get();
         }
@@ -176,8 +186,10 @@ public class H2OHdfs {
           writers[c].set(r, v.getQuick(c));
         }
         if (labels != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           labelwriter.set(r, (key).toString());
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
         if (isStringKey) {
           r++;
         }
@@ -206,9 +218,11 @@ public class H2OHdfs {
    * @param drm DRM object storing Matrix data in memory.
    */
   public static void drmToFile(String filename, H2ODrm drm) throws java.io.IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     Frame frame = drm.frame;
     Vec labels = drm.keys;
     Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Path path = new Path(filename);
     FileSystem fs = FileSystem.get(URI.create(filename), conf);
     SequenceFile.Writer writer;
@@ -222,7 +236,9 @@ public class H2OHdfs {
     }
 
     for (long r = 0; r < frame.anyVec().length(); r++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Vector v;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
       if (isSparse) {
         v = new SequentialAccessSparseVector(frame.numCols());
       } else {

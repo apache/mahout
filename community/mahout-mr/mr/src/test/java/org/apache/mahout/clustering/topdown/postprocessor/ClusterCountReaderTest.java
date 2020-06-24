@@ -56,6 +56,7 @@ public final class ClusterCountReaderTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
   }
@@ -79,6 +80,7 @@ public final class ClusterCountReaderTest extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     
     Path pointsPath = getTestTempDirPath("points");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
@@ -98,9 +100,11 @@ public final class ClusterCountReaderTest extends MahoutTestCase {
                                                                       InterruptedException,
                                                                       ClassNotFoundException {
     DistanceMeasure measure = new ManhattanDistanceMeasure();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     CanopyDriver.run(conf, pointsPath, outputPathForCanopy, measure, 4.0, 3.0, true, 0.0, true);
     Path clustersIn = new Path(outputPathForCanopy, new Path(Cluster.CLUSTERS_DIR + '0'
                                                                    + Cluster.FINAL_ITERATION_SUFFIX));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     KMeansDriver.run(conf, pointsPath, clustersIn, outputPathForKMeans, 1, 1, true, 0.0, true);
   }
   

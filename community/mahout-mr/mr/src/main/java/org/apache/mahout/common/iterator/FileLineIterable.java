@@ -40,6 +40,7 @@ public final class FileLineIterable implements Iterable<String> {
   
   /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this(file, Charsets.UTF_8, false);
   }
 
@@ -54,6 +55,7 @@ public final class FileLineIterable implements Iterable<String> {
   }
 
   public FileLineIterable(InputStream is) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this(is, Charsets.UTF_8, false);
   }
   
@@ -65,6 +67,7 @@ public final class FileLineIterable implements Iterable<String> {
     this.is = is;
     this.encoding = encoding;
     this.skipFirstLine = skipFirstLine;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     this.origFilename = "";
   }
 

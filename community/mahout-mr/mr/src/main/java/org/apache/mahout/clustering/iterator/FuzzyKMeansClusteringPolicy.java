@@ -54,8 +54,10 @@ public class FuzzyKMeansClusteringPolicy extends AbstractClusteringPolicy {
   
   @Override
   public Vector classify(Vector data, ClusterClassifier prior) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<SoftCluster> clusters = new ArrayList<>();
     List<Double> distances = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     for (Cluster model : prior.getModels()) {
       SoftCluster sc = (SoftCluster) model;
       clusters.add(sc);
@@ -80,6 +82,7 @@ public class FuzzyKMeansClusteringPolicy extends AbstractClusteringPolicy {
 
   @Override
   public void close(ClusterClassifier posterior) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     for (Cluster cluster : posterior.getModels()) {
       ((org.apache.mahout.clustering.kmeans.Kluster) cluster).calculateConvergence(convergenceDelta);
       cluster.computeParameters();

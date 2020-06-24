@@ -69,6 +69,7 @@ public class StreamingKMeansTestMR extends MahoutTestCase {
 
   @Before
   public void setUp() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1320
     RandomUtils.useTestSeed();
     syntheticData =
       DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS, 1.0e-4);
@@ -94,6 +95,7 @@ public class StreamingKMeansTestMR extends MahoutTestCase {
     configuration.setInt(StreamingKMeansDriver.MAX_NUM_ITERATIONS, MAX_NUM_ITERATIONS);
 
     // Collapse the Centroids in the reducer.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1224
     configuration.setBoolean(StreamingKMeansDriver.REDUCE_STREAMING_KMEANS, true);
   }
 
@@ -102,6 +104,8 @@ public class StreamingKMeansTestMR extends MahoutTestCase {
     return Arrays.asList(new Object[][]{
         {ProjectionSearch.class.getName(), SquaredEuclideanDistanceMeasure.class.getName()},
         {FastProjectionSearch.class.getName(), SquaredEuclideanDistanceMeasure.class.getName()},
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1216
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1156
         {LocalitySensitiveHashSearch.class.getName(), SquaredEuclideanDistanceMeasure.class.getName()},
     });
   }
@@ -232,6 +236,7 @@ public class StreamingKMeansTestMR extends MahoutTestCase {
 
   @Test
   public void testHypercubeMapReduceRunSequentially() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration configuration = getConfiguration();
     configure(configuration);
     configuration.set(DefaultOptionCreator.METHOD_OPTION, DefaultOptionCreator.SEQUENTIAL_METHOD);

@@ -70,6 +70,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
                                    DataModel dataModel,
                                    double samplingRate) {
     super(userSimilarity, dataModel, samplingRate);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(!Double.isNaN(threshold), "threshold must not be NaN");
     this.threshold = threshold;
   }
@@ -79,6 +80,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
     
     DataModel dataModel = getDataModel();
     FastIDSet neighborhood = new FastIDSet();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     LongPrimitiveIterator usersIterable = SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel
         .getUserIDs(), getSamplingRate());
     UserSimilarity userSimilarityImpl = getUserSimilarity();
@@ -93,6 +95,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
       }
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     return neighborhood.toArray();
   }
   

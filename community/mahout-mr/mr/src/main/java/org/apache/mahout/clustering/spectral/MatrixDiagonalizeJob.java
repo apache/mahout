@@ -50,7 +50,9 @@ public final class MatrixDiagonalizeJob {
     // set up all the job tasks
     Configuration conf = new Configuration();
     Path diagOutput = new Path(affInput.getParent(), "diagonal");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     HadoopUtil.delete(conf, diagOutput);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
     conf.setInt(Keys.AFFINITY_DIMENSIONS, dimensions);
     Job job = new Job(conf, "MatrixDiagonalizeJob");
     
@@ -67,13 +69,16 @@ public final class MatrixDiagonalizeJob {
     FileOutputFormat.setOutputPath(job, diagOutput);
     
     job.setJarByClass(MatrixDiagonalizeJob.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
 
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }
 
     // read the results back from the path
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     return VectorCache.load(conf, new Path(diagOutput, "part-r-00000"));
   }
   
@@ -96,6 +101,7 @@ public final class MatrixDiagonalizeJob {
     protected void reduce(NullWritable key, Iterable<IntDoublePairWritable> values,
       Context context) throws IOException, InterruptedException {
       // create the return vector
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
       Vector retval = new DenseVector(context.getConfiguration().getInt(Keys.AFFINITY_DIMENSIONS, Integer.MAX_VALUE));
       // put everything in its correct spot
       for (IntDoublePairWritable e : values) {

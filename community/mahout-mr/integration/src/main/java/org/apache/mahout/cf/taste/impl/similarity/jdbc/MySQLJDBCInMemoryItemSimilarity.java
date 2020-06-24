@@ -27,6 +27,7 @@ public class MySQLJDBCInMemoryItemSimilarity extends SQL92JDBCInMemoryItemSimila
   }
 
   public MySQLJDBCInMemoryItemSimilarity(String dataSourceName) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-740
     super(dataSourceName);
   }
 

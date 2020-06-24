@@ -51,6 +51,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
   private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
 
   public JsonClusterWriter(Writer writer,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
       Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints,
       DistanceMeasure measure, int numTopFeatures, String[] dictionary) {
     super(writer, clusterIdToPoints, measure);
@@ -66,6 +67,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
   @Override
   public void write(ClusterWritable clusterWritable) throws IOException {
     Map<String, Object> res = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1612
 
     // get top terms
     if (dictionary != null) {
@@ -81,6 +83,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
     res.put("cluster_id", cluster.getId());
 
     if (dictionary != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
       Map<String,Object> fmtStr = cluster.asJson(dictionary);
       res.put("cluster", fmtStr);
 
@@ -106,6 +109,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
       int numTerms) {
 
     List<TermIndexWeight> vectorTerms = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1612
 
     for (Vector.Element elt : vector.nonZeroes()) {
       vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
@@ -120,6 +124,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
     });
 
     List<Object> topTerms = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1612
 
     for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
       int index = vectorTerms.get(i).index;
@@ -128,7 +133,9 @@ public class JsonClusterWriter extends AbstractClusterWriter {
         log.error("Dictionary entry missing for {}", index);
         continue;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1612
       Map<String, Object> term_entry = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
       term_entry.put(dictTerm, vectorTerms.get(i).weight);
       topTerms.add(term_entry);
     }
@@ -142,7 +149,9 @@ public class JsonClusterWriter extends AbstractClusterWriter {
    * @return List<Object>
    */
   public List<Object> getPoints(Cluster cluster, String[] dictionary) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1612
     List<Object> vectorObjs = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
     List<WeightedPropertyVectorWritable> points = getClusterIdToPoints().get(
         cluster.getId());
 
@@ -159,6 +168,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
           entry.put("vector_name", vecStr);
         }
         entry.put("weight", String.valueOf(point.getWeight()));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
         try {
           entry.put("point",
                   AbstractCluster.formatVectorAsJson(point.getVector(), dictionary));

@@ -64,6 +64,7 @@ public class CachingCVB0Mapper
   private int numTopics;
 
   protected ModelTrainer getModelTrainer() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     return modelTrainer;
   }
 
@@ -91,15 +92,18 @@ public class CachingCVB0Mapper
 
     log.info("Initializing read model");
     Path[] modelPaths = CVB0Driver.getModelPaths(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new TopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
     } else {
       log.info("No model files found");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       readModel = new TopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
           numTrainThreads, modelWeight);
     }
 
     log.info("Initializing write model");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     writeModel = modelWeight == 1
         ? new TopicModel(numTopics, numTerms, eta, alpha, null, numUpdateThreads)
         : readModel;
@@ -111,8 +115,11 @@ public class CachingCVB0Mapper
 
   @Override
   public void map(IntWritable docId, VectorWritable document, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
       throws IOException, InterruptedException {
     /* where to get docTopics? */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1262
     Vector topicVector = new DenseVector(numTopics).assign(1.0 / numTopics);
     modelTrainer.train(document.get(), topicVector, true, maxIters);
   }
@@ -123,6 +130,7 @@ public class CachingCVB0Mapper
     modelTrainer.stop();
 
     log.info("Writing model");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     TopicModel readFrom = modelTrainer.getReadModel();
     for (MatrixSlice topic : readFrom) {
       context.write(new IntWritable(topic.index()), new VectorWritable(topic.vector()));

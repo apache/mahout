@@ -30,6 +30,7 @@ import org.apache.mahout.math.Vector;
  */
 public final class PartialMultiplyMapper extends
     Mapper<VarIntWritable,VectorAndPrefsWritable,VarLongWritable,PrefAndSimilarityColumnWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-420
 
   private final VarLongWritable userIDWritable = new VarLongWritable();
   private final PrefAndSimilarityColumnWritable prefAndSimilarityColumn = new PrefAndSimilarityColumnWritable();

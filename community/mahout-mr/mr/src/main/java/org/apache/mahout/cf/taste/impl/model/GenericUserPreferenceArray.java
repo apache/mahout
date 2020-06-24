@@ -152,6 +152,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
 
   @Override
   public void sortByItem() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-963
     lateralSort(ITEM);
   }
 
@@ -185,12 +186,14 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     int length = length();
     int gap = length;
     boolean swapped = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-963
     while (gap > 1 || swapped) {
       if (gap > 1) {
         gap /= 1.247330950103979; // = 1 / (1 - 1/e^phi)
       }
       swapped = false;
       int max = length - gap;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       for (int i = 0; i < max; i++) {
         int other = i + gap;
         if (isLess(other, i, type)) {
@@ -208,6 +211,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
       case VALUE:
         return values[i] < values[j];
       case VALUE_REVERSED:
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-963
         return values[i] > values[j];
       default:
         throw new IllegalStateException();
@@ -244,7 +248,9 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
 
   @Override
   public Iterator<Preference> iterator() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     return Iterators.transform(new CountingIterator(length()),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       new Function<Integer, Preference>() {
         @Override
         public Preference apply(Integer from) {

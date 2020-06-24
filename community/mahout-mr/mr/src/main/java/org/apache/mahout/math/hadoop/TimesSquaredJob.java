@@ -56,6 +56,7 @@ public final class TimesSquaredJob {
 
   public static Job createTimesSquaredJob(Vector v, Path matrixInputPath, Path outputVectorPath)
     throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
     return createTimesSquaredJob(new Configuration(), v, matrixInputPath, outputVectorPath);
   }
   
@@ -119,6 +120,7 @@ public final class TimesSquaredJob {
                                                       VectorWritable.class);
       inputVectorPathWriter.append(NullWritable.get(), new VectorWritable(v));
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       Closeables.close(inputVectorPathWriter, false);
     }
 
@@ -135,6 +137,9 @@ public final class TimesSquaredJob {
     conf.set(INPUT_VECTOR, ivpURI.toString());
     conf.setBoolean(IS_SPARSE_OUTPUT, !v.isDense());
     conf.setInt(OUTPUT_VECTOR_DIMENSION, outputVectorDim);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-312
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-313
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-314
 
     return job;
   }
@@ -143,7 +148,9 @@ public final class TimesSquaredJob {
     throws IOException {
     Path outputFile = new Path(outputVectorTmpPath, OUTPUT_VECTOR_FILENAME + "/part-r-00000");
     SequenceFileValueIterator<VectorWritable> iterator =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new SequenceFileValueIterator<>(outputFile, true, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       return iterator.next().get();
     } finally {
@@ -153,6 +160,7 @@ public final class TimesSquaredJob {
 
   public static class TimesSquaredMapper<T extends WritableComparable>
       extends Mapper<T,VectorWritable, NullWritable,VectorWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
 
     private Vector outputVector;
     private Vector inputVector;
@@ -170,17 +178,23 @@ public final class TimesSquaredJob {
             "missing paths from the DistributedCache");
 
         Path inputVectorPath = HadoopUtil.getSingleCachedFile(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
 
         SequenceFileValueIterator<VectorWritable> iterator =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             new SequenceFileValueIterator<>(inputVectorPath, true, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
         try {
           inputVector = iterator.next().get();
         } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
           Closeables.close(iterator, true);
         }
 
         int outDim = conf.getInt(OUTPUT_VECTOR_DIMENSION, Integer.MAX_VALUE);
         outputVector = conf.getBoolean(IS_SPARSE_OUTPUT, false)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
             ? new RandomAccessSparseVector(outDim, 10)
             : new DenseVector(outDim);
       } catch (IOException ioe) {
@@ -205,6 +219,7 @@ public final class TimesSquaredJob {
 
     @Override
     protected void cleanup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
       ctx.write(NullWritable.get(), new VectorWritable(outputVector));
     }
 
@@ -228,6 +243,7 @@ public final class TimesSquaredJob {
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
       Configuration conf = ctx.getConfiguration();
       int outputDimension = conf.getInt(OUTPUT_VECTOR_DIMENSION, Integer.MAX_VALUE);
       outputVector = conf.getBoolean(IS_SPARSE_OUTPUT, false)
@@ -238,9 +254,11 @@ public final class TimesSquaredJob {
     @Override
     protected void reduce(NullWritable key, Iterable<VectorWritable> vectors, Context ctx)
       throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
 
       for (VectorWritable v : vectors) {
         if (v != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
           outputVector.assign(v.get(), Functions.PLUS);
         }
       }

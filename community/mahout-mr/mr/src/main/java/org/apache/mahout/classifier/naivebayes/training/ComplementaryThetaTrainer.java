@@ -31,6 +31,7 @@ public class ComplementaryThetaTrainer {
   private final double numFeatures;
 
   public ComplementaryThetaTrainer(Vector weightsPerFeature, Vector weightsPerLabel, double alphaI) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     Preconditions.checkNotNull(weightsPerFeature);
     Preconditions.checkNotNull(weightsPerLabel);
     this.weightsPerFeature = weightsPerFeature;

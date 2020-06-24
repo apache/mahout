@@ -51,6 +51,7 @@ public class NumericalNode extends Node {
   
   @Override
   public double classify(Instance instance) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (instance.get(attr) < split) {
       return loChild.classify(instance);
     } else {
@@ -89,6 +90,7 @@ public class NumericalNode extends Node {
   
   @Override
   public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     return attr + (int) Double.doubleToLongBits(split) + loChild.hashCode() + hiChild.hashCode();
   }
   

@@ -44,6 +44,7 @@ public class Par {
     final Vec vin = drmA.keys;
 
     // First create a new empty Frame with the required partitioning
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     Frame frout = H2OHelper.emptyFrame(frin.numRows(), frin.numCols(), min, exact);
     Vec vout = null;
 
@@ -64,6 +65,7 @@ public class Par {
 
             for (int r = 0; r < chunkSize; r++) {
               for (int c = 0; c < chks.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
                 chks[c].set(r, vins[c].at(start + r));
               }
               nc.addStr(vin.atStr(vstr, start + r));
@@ -79,8 +81,11 @@ public class Par {
           Vec vins[] = frin.vecs();
           long start = chks[0].start();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
           for (int r = 0; r < chunkSize; r++) {
             for (int c = 0; c < chks.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
               chks[c].set(r, vins[c].at(start + r));
             }
           }

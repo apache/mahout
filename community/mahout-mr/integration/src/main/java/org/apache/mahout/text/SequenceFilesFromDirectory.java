@@ -69,6 +69,8 @@ public class SequenceFilesFromDirectory extends AbstractJob {
   */
   @Override
   public int run(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-590
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     addOptions();
     addOption(DefaultOptionCreator.methodOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
@@ -100,6 +102,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
     String keyPrefix = getOption(KEY_PREFIX_OPTION[0]);
     FileSystem fs = FileSystem.get(input.toUri(), conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (ChunkedWriter writer = new ChunkedWriter(conf, Integer.parseInt(options.get(CHUNK_SIZE_OPTION[0])), output)) {
       SequenceFilesFromDirectoryFilter pathFilter;
       String fileFilterClassName = options.get(FILE_FILTER_CLASS_OPTION[0]);
@@ -107,6 +110,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
         pathFilter = new PrefixAdditionFilter(conf, keyPrefix, options, writer, charset, fs);
       } else {
         pathFilter = ClassUtils.instantiateAs(fileFilterClassName, SequenceFilesFromDirectoryFilter.class,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
           new Class[] {Configuration.class, String.class, Map.class, ChunkedWriter.class, Charset.class, FileSystem.class},
           new Object[] {conf, keyPrefix, options, writer, charset, fs});
       }
@@ -118,6 +122,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
   private int runMapReduce(Path input, Path output) throws IOException, ClassNotFoundException, InterruptedException {
 
     int chunkSizeInMB = 64;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     if (hasOption(CHUNK_SIZE_OPTION[0])) {
       chunkSizeInMB = Integer.parseInt(getOption(CHUNK_SIZE_OPTION[0]));
     }
@@ -127,6 +132,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
       keyPrefix = getOption(KEY_PREFIX_OPTION[0]);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
     String fileFilterClassName = null;
     if (hasOption(FILE_FILTER_CLASS_OPTION[0])) {
       fileFilterClassName = getOption(FILE_FILTER_CLASS_OPTION[0]);
@@ -138,6 +144,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
     if (!StringUtils.isBlank(fileFilterClassName) && !PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
       try {
         pathFilter = (PathFilter) Class.forName(fileFilterClassName).newInstance();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       } catch (InstantiationException | IllegalAccessException e) {
         throw new IllegalStateException(e);
       }
@@ -149,11 +156,14 @@ public class SequenceFilesFromDirectory extends AbstractJob {
       SequenceFileOutputFormat.class, "SequenceFilesFromDirectory");
 
     Configuration jobConfig = job.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     jobConfig.set(KEY_PREFIX_OPTION[0], keyPrefix);
     jobConfig.set(FILE_FILTER_CLASS_OPTION[0], fileFilterClassName);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
 
     FileSystem fs = FileSystem.get(jobConfig);
     FileStatus fsFileStatus = fs.getFileStatus(input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     String inputDirList;
     if (pathFilter != null) {
@@ -205,7 +215,9 @@ public class SequenceFilesFromDirectory extends AbstractJob {
    * @return Map of options
    */
   protected Map<String, String> parseOptions() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, String> options = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-590
     options.put(CHUNK_SIZE_OPTION[0], getOption(CHUNK_SIZE_OPTION[0]));
     options.put(FILE_FILTER_CLASS_OPTION[0], getOption(FILE_FILTER_CLASS_OPTION[0]));
     options.put(CHARSET_OPTION[0], getOption(CHARSET_OPTION[0]));

@@ -31,6 +31,7 @@ import org.apache.hadoop.io.Writable;
  */
 public interface Payload<T> extends Writable {
   Payload<T> copy();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
 
   void update(double[] params);
 }

@@ -22,12 +22,14 @@ public class TanimotoCoefficientSimilarity extends CountbasedMeasure {
   @Override
   public double similarity(double dots, double normA, double normB, int numberOfColumns) {
     // Return 0 even when dots == 0 since this will cause it to be ignored -- not NaN
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-902
     return dots / (normA + normB - dots);
   }
 
   @Override
   public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double maxValueB,
       double threshold) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     return numNonZeroEntriesA >= numNonZeroEntriesB * threshold
         && numNonZeroEntriesB >= numNonZeroEntriesA * threshold;
   }

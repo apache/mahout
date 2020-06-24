@@ -75,6 +75,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
     StringBuilder sb = new StringBuilder(100);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1393
     for (Pair<String, Double> item : getTopPairs(vector, dictionary, numTerms)) {
       String term = item.getFirst();
       sb.append("\n\t\t");
@@ -89,6 +90,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
     StringBuilder sb = new StringBuilder(100);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1393
     for (Pair<String, Double> item : getTopPairs(vector, dictionary, numTerms)) {
       String term = item.getFirst();
       sb.append(term).append('_');
@@ -110,7 +112,9 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
   @Override
   public long write(Iterable<ClusterWritable> iterable, long maxDocs) throws IOException {
     long result = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
     Iterator<ClusterWritable> iterator = iterable.iterator();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (result < maxDocs && iterator.hasNext()) {
       write(iterator.next());
       result++;
@@ -120,7 +124,10 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
   private static Collection<Pair<String, Double>> getTopPairs(Vector vector, String[] dictionary, int numTerms) {
     List<TermIndexWeight> vectorTerms = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1393
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element elt : vector.nonZeroes()) {
       vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
     }
@@ -134,6 +141,8 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
     });
 
     Collection<Pair<String, Double>> topTerms = Lists.newLinkedList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
 
     for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
       int index = vectorTerms.get(i).index;
@@ -142,6 +151,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
         log.error("Dictionary entry missing for {}", index);
         continue;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       topTerms.add(new Pair<>(dictTerm, vectorTerms.get(i).weight));
     }
 

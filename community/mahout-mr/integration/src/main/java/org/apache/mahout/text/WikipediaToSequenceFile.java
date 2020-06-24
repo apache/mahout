@@ -89,6 +89,7 @@ public final class WikipediaToSequenceFile {
     Option allOpt = obuilder.withLongName("all")
         .withDescription("If set, Select all files. Default is false").withShortName("all").create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1608
     Option removeLabelOpt = obuilder.withLongName("removeLabels")
         .withDescription("If set, remove [[Category:labels]] from document text after extracting label."
           + "Default is false").withShortName("rl").create();
@@ -123,11 +124,13 @@ public final class WikipediaToSequenceFile {
       }
 
       boolean removeLabels = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1608
       if (cmdLine.hasOption(removeLabelOpt)) {
           removeLabels = true;
       }
 
       runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), all, removeLabels);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } catch (OptionException | InterruptedException | ClassNotFoundException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
@@ -163,12 +166,15 @@ public final class WikipediaToSequenceFile {
     conf.set("xmlinput.end", "</page>");
     conf.setBoolean("exact.match.only", exactMatchOnly);
     conf.setBoolean("all.files", all);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1608
     conf.setBoolean("remove.labels", removeLabels);
     conf.set("io.serializations",
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Set<String> categories = new HashSet<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1527
     if (!catFile.isEmpty()) {
       for (String line : new FileLineIterable(new File(catFile))) {
         categories.add(line.trim().toLowerCase(Locale.ENGLISH));
@@ -176,6 +182,7 @@ public final class WikipediaToSequenceFile {
     }
     
     Stringifier<Set<String>> setStringifier =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new DefaultStringifier<>(conf, GenericsUtil.getClass(categories));
     
     String categoriesStr = setStringifier.toString(categories);    

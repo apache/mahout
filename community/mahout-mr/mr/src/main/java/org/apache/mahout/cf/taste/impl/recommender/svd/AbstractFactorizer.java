@@ -38,6 +38,7 @@ public abstract class AbstractFactorizer implements Factorizer {
   private final RefreshHelper refreshHelper;
 
   protected AbstractFactorizer(DataModel dataModel) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-640
     this.dataModel = dataModel;
     buildMappings();
     refreshHelper = new RefreshHelper(new Callable<Object>() {
@@ -62,6 +63,7 @@ public abstract class AbstractFactorizer implements Factorizer {
   protected Integer userIndex(long userID) {
     Integer userIndex = userIDMapping.get(userID);
     if (userIndex == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-667
       userIndex = userIDMapping.size();
       userIDMapping.put(userID, userIndex);
     }
@@ -71,6 +73,7 @@ public abstract class AbstractFactorizer implements Factorizer {
   protected Integer itemIndex(long itemID) {
     Integer itemIndex = itemIDMapping.get(itemID);
     if (itemIndex == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-667
       itemIndex = itemIDMapping.size();
       itemIDMapping.put(itemID, itemIndex);
     }
@@ -78,6 +81,7 @@ public abstract class AbstractFactorizer implements Factorizer {
   }
 
   private static FastByIDMap<Integer> createIDMapping(int size, LongPrimitiveIterator idIterator) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1865
     FastByIDMap<Integer> mapping = new FastByIDMap<>(size);
     int index = 0;
     while (idIterator.hasNext()) {
@@ -88,6 +92,7 @@ public abstract class AbstractFactorizer implements Factorizer {
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-640
     refreshHelper.refresh(alreadyRefreshed);
   }
   

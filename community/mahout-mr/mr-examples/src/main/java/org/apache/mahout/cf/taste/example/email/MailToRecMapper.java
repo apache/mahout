@@ -48,6 +48,7 @@ public final class MailToRecMapper extends Mapper<Text, Text, Text, LongWritable
     Configuration conf = context.getConfiguration();
     String fromPrefix = conf.get(EmailUtility.FROM_PREFIX);
     String msgPrefix = conf.get(EmailUtility.MSG_IDS_PREFIX);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     fromIdx = conf.getInt(EmailUtility.FROM_INDEX, 0);
     refsIdx = conf.getInt(EmailUtility.REFS_INDEX, 1);
     EmailUtility.loadDictionaries(conf, fromPrefix, fromDictionary, msgPrefix, msgIdDictionary);
@@ -66,7 +67,9 @@ public final class MailToRecMapper extends Mapper<Text, Text, Text, LongWritable
     String[] splits = StringUtils.splitByWholeSeparatorPreserveAllTokens(valStr, separator);
 
     if (splits != null && splits.length > 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (splits.length > refsIdx) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
         String from = EmailUtility.cleanUpEmailAddress(splits[fromIdx]);
         fromKey = fromDictionary.get(from);
       }
@@ -93,6 +96,7 @@ public final class MailToRecMapper extends Mapper<Text, Text, Text, LongWritable
     }
 
     if (msgIdKey != Integer.MIN_VALUE && fromKey != Integer.MIN_VALUE) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
       context.write(new Text(fromKey + "," + msgIdKey), new LongWritable(1));
     }
   }

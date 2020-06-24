@@ -30,6 +30,9 @@ public class FuzzyKMeansClusterer {
   private double m = 2.0; // default value
   
   public Vector computePi(Collection<SoftCluster> clusters, List<Double> clusterDistanceList) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-988
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-989
     Vector pi = new DenseVector(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
       double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
@@ -54,6 +57,7 @@ public class FuzzyKMeansClusterer {
   }
 
   public void setM(double m) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     this.m = m;
   }
 }

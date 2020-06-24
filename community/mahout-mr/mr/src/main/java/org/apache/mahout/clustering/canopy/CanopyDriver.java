@@ -61,6 +61,7 @@ public class CanopyDriver extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(CanopyDriver.class);
 
   public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-414
     ToolRunner.run(new Configuration(), new CanopyDriver(), args);
   }
 
@@ -72,13 +73,17 @@ public class CanopyDriver extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.t1Option().create());
     addOption(DefaultOptionCreator.t2Option().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
     addOption(DefaultOptionCreator.t3Option().create());
     addOption(DefaultOptionCreator.t4Option().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
     addOption(DefaultOptionCreator.clusterFilterOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     addOption(DefaultOptionCreator.methodOption().create());
     addOption(DefaultOptionCreator.outlierThresholdOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
 
     if (parseArguments(args) == null) {
       return -1;
@@ -87,6 +92,7 @@ public class CanopyDriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     Configuration conf = getConf();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(conf, output);
     }
@@ -111,10 +117,12 @@ public class CanopyDriver extends AbstractJob {
         .equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
     double clusterClassificationThreshold = 0.0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (hasOption(DefaultOptionCreator.OUTLIER_THRESHOLD)) {
       clusterClassificationThreshold = Double.parseDouble(getOption(DefaultOptionCreator.OUTLIER_THRESHOLD));
     }
     run(conf, input, output, measure, t1, t2, t3, t4, clusterFilter,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         runClustering, clusterClassificationThreshold, runSequential);
     return 0;
   }
@@ -151,10 +159,13 @@ public class CanopyDriver extends AbstractJob {
   public static void run(Configuration conf, Path input, Path output,
       DistanceMeasure measure, double t1, double t2, double t3, double t4,
       int clusterFilter, boolean runClustering, double clusterClassificationThreshold, boolean runSequential)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException, ClassNotFoundException {
     Path clustersOut = buildClusters(conf, input, output, measure, t1, t2, t3,
         t4, clusterFilter, runSequential);
     if (runClustering) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
       clusterData(conf, input, clustersOut, output, clusterClassificationThreshold, runSequential);
     }
   }
@@ -192,8 +203,10 @@ public class CanopyDriver extends AbstractJob {
    */
   public static void run(Path input, Path output, DistanceMeasure measure,
       double t1, double t2, boolean runClustering, double clusterClassificationThreshold, boolean runSequential)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException, ClassNotFoundException {
     run(new Configuration(), input, output, measure, t1, t2, runClustering,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
         clusterClassificationThreshold, runSequential);
   }
 
@@ -236,6 +249,7 @@ public class CanopyDriver extends AbstractJob {
    * @return the canopy output directory Path
    */
   public static Path buildClusters(Configuration conf, Path input, Path output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
       DistanceMeasure measure, double t1, double t2, double t3, double t4,
       int clusterFilter, boolean runSequential) throws IOException,
       InterruptedException, ClassNotFoundException {
@@ -269,8 +283,10 @@ public class CanopyDriver extends AbstractJob {
    */
   private static Path buildClustersSeq(Path input, Path output,
       DistanceMeasure measure, double t1, double t2, int clusterFilter)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Canopy> canopies = Lists.newArrayList();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
@@ -283,6 +299,7 @@ public class CanopyDriver extends AbstractJob {
     Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0' + Cluster.FINAL_ITERATION_SUFFIX);
     Path path = new Path(canopyOutputDir, "part-r-00000");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
         Text.class, ClusterWritable.class);
     try {
       ClusterWritable clusterWritable = new ClusterWritable();
@@ -292,15 +309,18 @@ public class CanopyDriver extends AbstractJob {
           log.debug("Writing Canopy:{} center:{} numPoints:{} radius:{}",
                     canopy.getIdentifier(),
                     AbstractCluster.formatVector(canopy.getCenter(), null),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
                     canopy.getNumObservations(),
                     AbstractCluster.formatVector(canopy.getRadius(), null));
         }
         if (canopy.getNumObservations() > clusterFilter) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
           clusterWritable.setValue(canopy);
           writer.append(new Text(canopy.getIdentifier()), clusterWritable);
         }
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
     return canopyOutputDir;
@@ -331,6 +351,8 @@ public class CanopyDriver extends AbstractJob {
    * @return the canopy output directory Path
    */
   private static Path buildClustersMR(Configuration conf, Path input,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
       Path output, DistanceMeasure measure, double t1, double t2, double t3,
       double t4, int clusterFilter) throws IOException, InterruptedException,
       ClassNotFoundException {
@@ -351,11 +373,13 @@ public class CanopyDriver extends AbstractJob {
     job.setMapOutputValueClass(VectorWritable.class);
     job.setReducerClass(CanopyReducer.class);
     job.setOutputKeyClass(Text.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
     job.setOutputValueClass(ClusterWritable.class);
     job.setNumReduceTasks(1);
     job.setJarByClass(CanopyDriver.class);
 
     FileInputFormat.addInputPath(job, input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-843
     Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0' + Cluster.FINAL_ITERATION_SUFFIX);
     FileOutputFormat.setOutputPath(job, canopyOutputDir);
     if (!job.waitForCompletion(true)) {
@@ -370,8 +394,11 @@ public class CanopyDriver extends AbstractJob {
                                   Path output,
                                   double clusterClassificationThreshold,
                                   boolean runSequential)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException, ClassNotFoundException {
     ClusterClassifier.writePolicy(new CanopyClusteringPolicy(), canopies);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     ClusterClassificationDriver.run(conf, points, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
                                     clusterClassificationThreshold, true, runSequential);
   }

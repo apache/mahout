@@ -44,6 +44,8 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
   
   DisplayFuzzyKMeans() {
     initialize();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     this.setTitle("Fuzzy k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
   }
   
@@ -61,6 +63,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     Path output = new Path("output");
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
     HadoopUtil.delete(conf, samples);
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
@@ -70,6 +73,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     float threshold = 0.001F;
     float m = 1.1F;
     if (runClusterer) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       runSequentialFuzzyKClusterer(conf, samples, output, measure, maxIterations, m, threshold);
     } else {
       int numClusters = 3;
@@ -80,6 +84,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
   
   private static void runSequentialFuzzyKClassifier(Configuration conf, Path samples, Path output,
       DistanceMeasure measure, int numClusters, int maxIterations, float m, double threshold) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Vector> points = Lists.newArrayList();
     for (int i = 0; i < numClusters; i++) {
       points.add(SAMPLE_DATA.get(i).get());
@@ -102,6 +107,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
       ClassNotFoundException, InterruptedException {
     Path clustersIn = new Path(output, "random-seeds");
     RandomSeedGenerator.buildRandom(conf, samples, clustersIn, 3, measure);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     FuzzyKMeansDriver.run(samples, clustersIn, output, threshold, maxIterations, m, true, true, threshold,
         true);
     

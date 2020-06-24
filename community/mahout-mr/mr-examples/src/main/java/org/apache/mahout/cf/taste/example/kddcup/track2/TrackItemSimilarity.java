@@ -34,6 +34,7 @@ final class TrackItemSimilarity implements ItemSimilarity {
   private final FastByIDMap<TrackData> trackData;
 
   TrackItemSimilarity(File dataFileDirectory) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     trackData = new FastByIDMap<>();
     for (String line : new FileLineIterable(KDDCupDataModel.getTrackFile(dataFileDirectory))) {
       TrackData trackDatum = new TrackData(line);
@@ -87,6 +88,7 @@ final class TrackItemSimilarity implements ItemSimilarity {
 
   @Override
   public long[] allSimilarItemIDs(long itemID) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     FastIDSet allSimilarItemIDs = new FastIDSet();
     LongPrimitiveIterator allItemIDs = trackData.keySetIterator();
     while (allItemIDs.hasNext()) {

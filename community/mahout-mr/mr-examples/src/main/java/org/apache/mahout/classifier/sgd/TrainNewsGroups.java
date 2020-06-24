@@ -86,6 +86,7 @@ public final class TrainNewsGroups {
     File base = new File(args[0]);
 
     Multiset<String> overallCounts = HashMultiset.create();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
 
     int leakType = 0;
     if (args.length > 1) {
@@ -101,6 +102,7 @@ public final class TrainNewsGroups {
     learningAlgorithm.setInterval(800);
     learningAlgorithm.setAveragingWindow(500);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<File> files = new ArrayList<>();
     for (File newsgroup : base.listFiles()) {
       if (newsgroup.isDirectory()) {
@@ -123,17 +125,21 @@ public final class TrainNewsGroups {
 
       k++;
       State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> best = learningAlgorithm.getBest();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-851
       SGDHelper.analyzeState(info, leakType, k, best);
     }
     learningAlgorithm.close();
     SGDHelper.dissect(leakType, newsGroups, learningAlgorithm, files, overallCounts);
     System.out.println("exiting main");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     File modelFile = new File(System.getProperty("java.io.tmpdir"), "news-group.model");
     ModelSerializer.writeBinary(modelFile.getAbsolutePath(),
         learningAlgorithm.getBest().getPayload().getLearner().getModels().get(0));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Integer> counts = new ArrayList<>();
     System.out.println("Word counts");
     for (String count : overallCounts.elementSet()) {

@@ -28,6 +28,7 @@ public final class NearestNNeighborhoodTest extends TasteTestCase {
   public void testNeighborhood() throws Exception {
     DataModel dataModel = getDataModel();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     long[] neighborhood =
         new NearestNUserNeighborhood(1, new DummySimilarity(dataModel), dataModel).getUserNeighborhood(1);
     assertNotNull(neighborhood);

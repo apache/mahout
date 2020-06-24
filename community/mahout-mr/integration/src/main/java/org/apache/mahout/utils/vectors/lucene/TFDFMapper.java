@@ -41,17 +41,21 @@ public class TFDFMapper  {
   public TFDFMapper(int numDocs, Weight weight, TermInfo termInfo) {
     this.weight = weight;
     this.termInfo = termInfo;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     this.numDocs = numDocs;
   }
 
   public void setExpectations(String field, long numTerms) {
     this.field = field;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
     vector = new RandomAccessSparseVector(termInfo.totalTerms(field));
     this.numTerms = numTerms;
   }
   
   public void map(BytesRef term, int frequency) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     TermEntry entry = termInfo.getTermEntry(field, term.utf8ToString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
     if (entry != null) {
       vector.setQuick(entry.getTermIdx(), weight.calculate(frequency, entry.getDocFreq(), (int)numTerms, numDocs));
     }

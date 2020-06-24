@@ -28,6 +28,7 @@ public final class ThresholdNeighborhoodTest extends TasteTestCase {
   public void testNeighborhood() throws Exception {
     DataModel dataModel = getDataModel();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     long[] neighborhood =
         new ThresholdUserNeighborhood(1.0, new DummySimilarity(dataModel), dataModel).getUserNeighborhood(1);
     assertNotNull(neighborhood);

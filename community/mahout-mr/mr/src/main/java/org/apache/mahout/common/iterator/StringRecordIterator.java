@@ -36,12 +36,14 @@ public class StringRecordIterator extends ForwardingIterator<Pair<List<String>,L
 
   public StringRecordIterator(Iterable<String> stringIterator, String pattern) {
     this.splitter = Pattern.compile(pattern);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     delegate = Iterators.transform(
         stringIterator.iterator(),
         new Function<String,Pair<List<String>,Long>>() {
           @Override
           public Pair<List<String>,Long> apply(String from) {
             String[] items = splitter.split(from);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             return new Pair<>(Arrays.asList(items), ONE);
           }
         });

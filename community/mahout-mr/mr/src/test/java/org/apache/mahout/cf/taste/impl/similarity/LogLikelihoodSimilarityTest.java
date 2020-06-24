@@ -26,6 +26,7 @@ public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
   @Test
   public void testCorrelation() throws Exception {
     DataModel dataModel = getDataModel(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
             new long[] {1, 2, 3, 4, 5},
             new Double[][] {
                     {1.0, 1.0},
@@ -36,6 +37,7 @@ public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
             });
 
     LogLikelihoodSimilarity similarity = new LogLikelihoodSimilarity(dataModel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-603
 
     assertCorrelationEquals(0.12160727029227925, similarity.itemSimilarity(1, 0));
     assertCorrelationEquals(0.12160727029227925, similarity.itemSimilarity(0, 1));

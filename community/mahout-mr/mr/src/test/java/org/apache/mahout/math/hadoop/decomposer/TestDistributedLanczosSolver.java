@@ -40,9 +40,11 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
   @Override
   @Before
   public void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     super.setUp();
     File symTestData = getTestTempDir("symTestData");
     File asymTestData = getTestTempDir("asymTestData");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-690
     symCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(100,
         90, 80, 2, 10.0, true, symTestData.getAbsolutePath());
     asymCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(100,
@@ -73,7 +75,9 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Vector intitialVector = DistributedLanczosSolver.getInitialVector(corpus);
     LanczosState state;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (hdfsBackedState) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       HdfsBackedLanczosState hState = new HdfsBackedLanczosState(corpus,
           desiredRank, intitialVector, new Path(getTestTempDirPath(),
               "lanczosStateDir" + suf(symmetric) + counter));
@@ -84,6 +88,7 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     }
     solver.solve(state, desiredRank, symmetric);
     SolverTest.assertOrthonormal(state);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 0; i < desiredRank/2; i++) {
       SolverTest.assertEigen(i, state.getRightSingularVector(i), corpus, 0.1, symmetric);
     }
@@ -93,11 +98,14 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
 
   public void doTestResumeIteration(boolean symmetric) throws IOException {
     DistributedRowMatrix corpus = getCorpus(symmetric);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     corpus.setConf(conf);
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     int rank = 10;
     Vector intitialVector = DistributedLanczosSolver.getInitialVector(corpus);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     HdfsBackedLanczosState state = new HdfsBackedLanczosState(corpus, rank,
         intitialVector, new Path(getTestTempDirPath(), "lanczosStateDir" + suf(symmetric) + counter));
     solver.solve(state, rank, symmetric);
@@ -109,6 +117,7 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     solver.solve(state, rank, symmetric);
 
     LanczosState allAtOnceState = doTestDistributedLanczosSolver(symmetric, rank, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i=0; i<state.getIterationNumber(); i++) {
       Vector v = state.getBasisVector(i).normalize();
       Vector w = allAtOnceState.getBasisVector(i).normalize();

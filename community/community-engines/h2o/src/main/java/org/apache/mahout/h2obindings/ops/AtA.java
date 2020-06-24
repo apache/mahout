@@ -39,6 +39,7 @@ public class AtA {
     final Frame A = drmA.frame;
     // First create an empty Frame of the required dimensions
     Frame AtA = H2OHelper.emptyFrame(A.numCols(), A.numCols(), -1, -1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
 
     // Execute MRTask on the new Frame, and fill each cell (initially 0) by
     // computing appropriate values from A.
@@ -52,11 +53,13 @@ public class AtA {
         long A_rows = A.numRows();
 
         for (int c = 0; c < chks.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
           for (int r = 0; r < chunkSize; r++) {
             double v = 0;
             for (long i = 0; i < A_rows; i++) {
               v += (A_vecs[(int)(start + r)].at(i) * A_vecs[c].at(i));
             }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
             chks[c].set(r, v);
           }
         }

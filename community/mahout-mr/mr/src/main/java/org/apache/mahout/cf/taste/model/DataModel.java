@@ -77,6 +77,7 @@ public interface DataModel extends Refreshable, Serializable {
    * @throws TasteException
    *           if an error occurs while accessing the data
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   PreferenceArray getPreferencesForItem(long itemID) throws TasteException;
   
   /**
@@ -104,6 +105,7 @@ public interface DataModel extends Refreshable, Serializable {
    * @throws org.apache.mahout.cf.taste.common.NoSuchUserException if the user does not exist
    * @throws TasteException if an error occurs while accessing the data
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
   Long getPreferenceTime(long userID, long itemID) throws TasteException;
   
   /**
@@ -154,6 +156,7 @@ public interface DataModel extends Refreshable, Serializable {
    * @throws TasteException
    *           if an error occurs while accessing the data
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   void setPreference(long userID, long itemID, float value) throws TasteException;
   
   /**
@@ -173,6 +176,7 @@ public interface DataModel extends Refreshable, Serializable {
    *           if an error occurs while accessing the data
    */
   void removePreference(long userID, long itemID) throws TasteException;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
 
   /**
    * @return true if this implementation actually stores and returns distinct preference values;

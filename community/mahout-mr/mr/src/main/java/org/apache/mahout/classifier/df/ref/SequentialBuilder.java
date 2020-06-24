@@ -57,9 +57,11 @@ public class SequentialBuilder {
   }
   
   public DecisionForest build(int nbTrees) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Node> trees = new ArrayList<>();
     
     for (int treeId = 0; treeId < nbTrees; treeId++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       trees.add(bagging.build(rng));
       logProgress(((float) treeId + 1) / nbTrees);
     }
@@ -69,6 +71,7 @@ public class SequentialBuilder {
   
   private static void logProgress(float progress) {
     int percent = (int) (progress * 100);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (percent % 10 == 0) {
       log.info("Building {}%", percent);
     }

@@ -56,6 +56,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
    *           if the file cannot be read
    */
   public FileLineIterator(File file) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this(file, Charsets.UTF_8, false);
   }
 
@@ -66,6 +67,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
    * @throws IOException                   if the file cannot be read
    */
   public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this(file, Charsets.UTF_8, skipFirstLine);
   }
 
@@ -76,10 +78,12 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
    * @throws IOException                   if the file cannot be read
    */
   public FileLineIterator(File file, Charset encoding, boolean skipFirstLine) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-175
     this(getFileInputStream(file), encoding, skipFirstLine);
   }
 
   public FileLineIterator(InputStream is) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this(is, Charsets.UTF_8, false);
   }
 
@@ -95,6 +99,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
   }
 
   public FileLineIterator(InputStream is, Charset encoding, boolean skipFirstLine, String filename)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     throws IOException {
     InputStream compressedInputStream;
 
@@ -126,13 +131,16 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
 
   @Override
   protected String computeNext() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     String line;
     try {
       line = reader.readLine();
     } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       try {
         close();
       } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         log.error(e.getMessage(), e);
       }
       throw new IllegalStateException(ioe);
@@ -150,6 +158,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
         }
       }
     } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       try {
         close();
       } catch (IOException e) {
@@ -160,6 +169,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
 
   @Override
   public void close() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     endOfData();
     Closeables.close(reader, true);
   }

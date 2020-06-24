@@ -113,6 +113,7 @@ public final class StringTuple implements WritableComparable<StringTuple> {
   
   @Override
   public boolean equals(Object obj) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (this == obj) {
       return true;
     }
@@ -136,7 +137,9 @@ public final class StringTuple implements WritableComparable<StringTuple> {
   @Override
   public void readFields(DataInput in) throws IOException {
     int len = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     tuple = Lists.newArrayListWithCapacity(len);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-237
     Text value = new Text();
     for (int i = 0; i < len; i++) {
       value.readFields(in);

@@ -102,6 +102,7 @@ public final class PlusAnonymousConcurrentUserDataModel extends PlusAnonymousUse
   public PlusAnonymousConcurrentUserDataModel(DataModel delegate, int maxConcurrentUsers) {
     super(delegate);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     tempPrefs = new ConcurrentHashMap<>();
     prefItemIDs = new ConcurrentHashMap<>();
 
@@ -114,6 +115,7 @@ public final class PlusAnonymousConcurrentUserDataModel extends PlusAnonymousUse
    * @param usersPoolSize Maximum allowed number of concurrent anonymous user. Depends on the consumer system.
    */
   private void initializeUsersPools(int usersPoolSize) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     usersPool = new ConcurrentLinkedQueue<>();
     for (int i = 0; i < usersPoolSize; i++) {
       usersPool.add(TEMP_USER_ID + i);

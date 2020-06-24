@@ -39,13 +39,17 @@ public final class VectorWriterTest extends MahoutTestCase {
   @Test
   public void testSFVW() throws Exception {
     Path path = getTestTempFilePath("sfvw");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFileVectorWriter writer = new SequenceFileVectorWriter(seqWriter)) {
       writer.write(new RandomVectorIterable(50));
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     long count = HadoopUtil.countRecords(path, conf);
     assertEquals(50, count);
   }
@@ -53,6 +57,7 @@ public final class VectorWriterTest extends MahoutTestCase {
   @Test
   public void testTextOutputSize() throws Exception {
     StringWriter strWriter = new StringWriter();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (VectorWriter writer = new TextualVectorWriter(strWriter)) {
       Collection<Vector> vectors = new ArrayList<>();
       vectors.add(new DenseVector(new double[]{0.3, 1.5, 4.5}));

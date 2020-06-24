@@ -55,6 +55,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   
   /** Creates a new {@link FastByIDMap} with default capacity. */
   public FastByIDMap() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     this(2, NO_MAX_SIZE);
   }
   
@@ -81,6 +82,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
    *  loadFactor is less than 1
    */
   public FastByIDMap(int size, int maxSize, float loadFactor) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(size >= 0, "size must be at least 0");
     Preconditions.checkArgument(loadFactor >= 1.0f, "loadFactor must be at least 1.0");
     this.loadFactor = loadFactor;
@@ -140,6 +142,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   }
   
   public V get(long key) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (key == NULL) {
       return null;
     }
@@ -175,6 +178,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   }
   
   public V put(long key, V value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(key != NULL && key != REMOVED);
     Preconditions.checkNotNull(value);
     // If less than half the slots are open, let's clear it up
@@ -203,6 +207,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     keys[index] = key;
     values[index] = value;
     numEntries++;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (keyIndex == NULL) {
       numSlotsUsed++;
     }
@@ -253,6 +258,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   public void clear() {
     numEntries = 0;
     numSlotsUsed = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     Arrays.fill(keys, NULL);
     Arrays.fill(values, null);
     if (countingAccesses) {
@@ -269,6 +275,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   }
   
   public Collection<V> values() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1115
     return new ValueCollection();
   }
   
@@ -311,6 +318,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       throw new IllegalStateException();
     }
     values[lastNext] = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     keys[lastNext] = REMOVED;
     numEntries--;
   }
@@ -527,6 +535,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       @Override
       public V setValue(V value) {
         Preconditions.checkArgument(value != null);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
         V oldValue = values[index];
         values[index] = value;
@@ -574,6 +583,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     
     @Override
     public int size() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1115
       return FastByIDMap.this.size();
     }
     

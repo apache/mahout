@@ -56,6 +56,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
   private final String getAllSimilarItemIDsSQL;
 
   protected AbstractJDBCItemSimilarity(DataSource dataSource,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
                                        String getItemItemSimilaritySQL,
                                        String getAllSimilarItemIDsSQL) {
     this(dataSource,
@@ -72,6 +73,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
                                        String itemAIDColumn,
                                        String itemBIDColumn,
                                        String similarityColumn,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
                                        String getItemItemSimilaritySQL,
                                        String getAllSimilarItemIDsSQL) {
     AbstractJDBCComponent.checkNotNullAndLog("similarityTable", similarityTable);
@@ -83,6 +85,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
     AbstractJDBCComponent.checkNotNullAndLog("getAllSimilarItemIDsSQL", getAllSimilarItemIDsSQL);
 
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-406
       log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
                + "to the database itself, or database performance will be severely reduced.");
     }
@@ -93,6 +96,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
     this.itemBIDColumn = itemBIDColumn;
     this.similarityColumn = similarityColumn;
     this.getItemItemSimilaritySQL = getItemItemSimilaritySQL;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     this.getAllSimilarItemIDsSQL = getAllSimilarItemIDsSQL;
   }
   
@@ -114,6 +118,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
   
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     if (itemID1 == itemID2) {
       return 1.0;
     }
@@ -126,6 +131,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
       stmt.setFetchSize(getFetchSize());
       return doItemSimilarity(stmt, itemID1, itemID2);
     } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
       log.warn("Exception while retrieving similarity", sqle);
       throw new TasteException(sqle);
     } finally {
@@ -147,6 +153,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
         result[i] = doItemSimilarity(stmt, itemID1, itemID2s[i]);
       }
     } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
       log.warn("Exception while retrieving item similarities", sqle);
       throw new TasteException(sqle);
     } finally {
@@ -196,8 +203,10 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
       itemID1 = itemID2;
       itemID2 = temp;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     stmt.setLong(1, itemID1);
     stmt.setLong(2, itemID2);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Executing SQL query: {}", getItemItemSimilaritySQL);
     ResultSet rs = null;
     try {

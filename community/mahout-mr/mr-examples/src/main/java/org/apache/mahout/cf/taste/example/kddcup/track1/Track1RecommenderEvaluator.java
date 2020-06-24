@@ -69,8 +69,10 @@ public final class Track1RecommenderEvaluator extends AbstractDifferenceRecommen
 
     Recommender recommender = recommenderBuilder.buildRecommender(dataModel);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Callable<Void>> estimateCallables = Lists.newArrayList();
     AtomicInteger noEstimateCounter = new AtomicInteger();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     for (Pair<PreferenceArray,long[]> userData
         : new DataFileIterable(KDDCupDataModel.getValidationFile(dataFileDirectory))) {
       PreferenceArray validationPrefs = userData.getFirst();
@@ -79,6 +81,7 @@ public final class Track1RecommenderEvaluator extends AbstractDifferenceRecommen
           new PreferenceEstimateCallable(recommender, userID, validationPrefs, noEstimateCounter));
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-891
     RunningAverageAndStdDev timing = new FullRunningAverageAndStdDev();
     execute(estimateCallables, noEstimateCounter, timing);
 

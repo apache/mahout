@@ -48,8 +48,10 @@ public class KDDCupFactorizablePreferences implements FactorizablePreferences {
 
   @Override
   public Iterable<Preference> getPreferences() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     Iterable<Iterable<Preference>> prefIterators =
         Iterables.transform(new DataFileIterable(dataFile),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
           new Function<Pair<PreferenceArray,long[]>,Iterable<Preference>>() {
             @Override
             public Iterable<Preference> apply(Pair<PreferenceArray,long[]> from) {
@@ -89,6 +91,7 @@ public class KDDCupFactorizablePreferences implements FactorizablePreferences {
     private long currentValue;
     private final long maximum;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     FixedSizeLongIterator(long maximum) {
       this.maximum = maximum;
       currentValue = 0;

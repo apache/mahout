@@ -65,14 +65,17 @@ public final class RandomRecommender extends AbstractRecommender {
 
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
     DataModel dataModel = getDataModel();
     int numItems = dataModel.getNumItems();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<RecommendedItem> result = new ArrayList<>(howMany);
     while (result.size() < howMany) {
       LongPrimitiveIterator it = dataModel.getItemIDs();
       it.skip(random.nextInt(numItems));
       long itemID = it.next();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
       if (includeKnownItems || dataModel.getPreferenceValue(userID, itemID) == null) {
         result.add(new GenericRecommendedItem(itemID, randomPref()));
       }

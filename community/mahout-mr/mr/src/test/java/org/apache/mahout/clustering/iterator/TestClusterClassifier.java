@@ -48,6 +48,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     models.add(new DistanceMeasureCluster(new DenseVector(2).assign(1), 0, measure));
     models.add(new DistanceMeasureCluster(new DenseVector(2), 1, measure));
     models.add(new DistanceMeasureCluster(new DenseVector(2).assign(-1), 2, measure));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     return new ClusterClassifier(models, new KMeansClusteringPolicy());
   }
   
@@ -61,8 +62,10 @@ public final class TestClusterClassifier extends MahoutTestCase {
   }
   
   private static ClusterClassifier newCosineKlusterClassifier() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1028
     List<Cluster> models = Lists.newArrayList();
     DistanceMeasure measure = new CosineDistanceMeasure();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2).assign(1), 0, measure));
     models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2), 1, measure));
     models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2).assign(-1), 2, measure));
@@ -70,11 +73,18 @@ public final class TestClusterClassifier extends MahoutTestCase {
   }
 
   private static ClusterClassifier newSoftClusterClassifier() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<Cluster> models = Lists.newArrayList();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     models.add(new SoftCluster(new DenseVector(2).assign(1), 0, measure));
     models.add(new SoftCluster(new DenseVector(2), 1, measure));
     models.add(new SoftCluster(new DenseVector(2).assign(-1), 2, measure));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     return new ClusterClassifier(models, new FuzzyKMeansClusteringPolicy());
   }
   
@@ -82,6 +92,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Path path = new Path(getTestTempDirPath(), "output");
     classifier.writeToSeqFiles(path);
     ClusterClassifier newClassifier = new ClusterClassifier();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     newClassifier.readFromSeqFiles(getConfiguration(), path);
     return newClassifier;
   }
@@ -90,6 +101,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
   public void testDMClusterClassification() {
     ClusterClassifier classifier = newDMClassifier();
     Vector pdf = classifier.classify(new DenseVector(2));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
     assertEquals("[0,0]", "[0.2,0.6,0.2]", AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.493,0.296,0.211]", AbstractCluster.formatVector(pdf, null));
@@ -99,6 +111,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
   public void testClusterClassification() {
     ClusterClassifier classifier = newKlusterClassifier();
     Vector pdf = classifier.classify(new DenseVector(2));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
     assertEquals("[0,0]", "[0.2,0.6,0.2]", AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.493,0.296,0.211]", AbstractCluster.formatVector(pdf, null));
@@ -124,6 +137,8 @@ public final class TestClusterClassifier extends MahoutTestCase {
   
   @Test
   public void testClusterClassifierSerialization() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     ClusterClassifier classifier = newKlusterClassifier();
     ClusterClassifier classifierOut = writeAndRead(classifier);
     assertEquals(classifier.getModels().size(), classifierOut.getModels().size());
@@ -153,6 +168,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
   
   @Test
   public void testClusterIteratorDirichlet() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     List<Vector> data = TestKmeansClustering.getPoints(TestKmeansClustering.REFERENCE);
     ClusterClassifier prior = newKlusterClassifier();
     ClusterClassifier posterior = ClusterIterator.iterate(data, prior, 5);
@@ -199,11 +215,16 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Path pointsPath = getTestTempDirPath("points");
     Path priorPath = getTestTempDirPath("prior");
     Path outPath = getTestTempDirPath("output");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(pointsPath.toUri(), conf);
     List<VectorWritable> points = TestKmeansClustering.getPointsWritable(TestKmeansClustering.REFERENCE);
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
     Path path = new Path(priorPath, "priorClassifier");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     ClusterClassifier prior = newKlusterClassifier();
     prior.writeToSeqFiles(path);
     ClusteringPolicy policy = new KMeansClusteringPolicy();
@@ -229,8 +250,10 @@ public final class TestClusterClassifier extends MahoutTestCase {
   
   @Test
   public void testCosineKlusterClassification() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1028
     ClusterClassifier classifier = newCosineKlusterClassifier();
     Vector pdf = classifier.classify(new DenseVector(2));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
     assertEquals("[0,0]", "[0.333,0.333,0.333]", AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.429,0.429,0.143]", AbstractCluster.formatVector(pdf, null));

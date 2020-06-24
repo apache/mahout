@@ -33,6 +33,7 @@ public class MultipleFieldsDocument extends SingleFieldDocument {
   private String field2;
 
   public MultipleFieldsDocument(String id, String field, String field1, String field2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-944
     super(id, field);
     this.field1 = field1;
     this.field2 = field2;
@@ -50,6 +51,7 @@ public class MultipleFieldsDocument extends SingleFieldDocument {
   public Document asLuceneDocument() {
     Document document = super.asLuceneDocument();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1269
     document.add(new TextField(FIELD1, this.field1, Field.Store.YES));
     document.add(new TextField(FIELD2, this.field2, Field.Store.YES));
 

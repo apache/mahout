@@ -45,16 +45,19 @@ final class FuzzyKMeansUtil {
    *          a List<Cluster> to put values into
    */
   public static void configureWithClusterInfo(Configuration conf, Path clusterPath, List<Cluster> clusters) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     for (Writable value : new SequenceFileDirValueIterable<>(clusterPath, PathType.LIST,
         PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (valueClass.equals(ClusterWritable.class)) {
         ClusterWritable clusterWritable = (ClusterWritable) value;
         value = clusterWritable.getValue();
         valueClass = value.getClass();
       }
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       if (valueClass.equals(Kluster.class)) {
         // get the cluster info
         Kluster cluster = (Kluster) value;

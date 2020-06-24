@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
  * line into an {@link GenericItemSimilarity.ItemItemSimilarity}.
  */
 final class FileItemItemSimilarityIterator extends ForwardingIterator<GenericItemSimilarity.ItemItemSimilarity> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
 
   private static final Pattern SEPARATOR = Pattern.compile("[,\t]");
 

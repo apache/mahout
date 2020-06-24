@@ -74,8 +74,10 @@ public final class SequenceFileDirIterable<K extends Writable,V extends Writable
   @Override
   public Iterator<Pair<K,V>> iterator() {
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       return new SequenceFileDirIterator<>(path, pathType, filter, ordering, reuseKeyValueInstances, conf);
     } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-708
       throw new IllegalStateException(path.toString(), ioe);
     }
   }

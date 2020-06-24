@@ -52,6 +52,8 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
 
   private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {4, 4},
       {5, 4}, {4, 5}, {5, 5}, {9, 9}, {8, 8}};
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-931
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-929
 
   private FileSystem fs;
   private Path clusteringOutputPath;
@@ -66,6 +68,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
     firstCluster = Lists.newArrayList();
@@ -87,6 +90,8 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   @Test
   public void testVectorClassificationWithOutlierRemovalMR() throws Exception {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-929
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-931
 
     pointsPath = getTestTempDirPath("points");
     clusteringOutputPath = getTestTempDirPath("output");
@@ -94,7 +99,11 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     HadoopUtil.delete(conf, classifiedOutputPath);
 
     conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1190
     ClusteringTestUtils.writePointsToFile(points, true,
         new Path(pointsPath, "file1"), fs, conf);
     runClustering(pointsPath, conf, false);
@@ -115,6 +124,8 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
 
     ClusteringTestUtils.writePointsToFile(points,
         new Path(pointsPath, "file1"), fs, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-929
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-931
     runClustering(pointsPath, conf, true);
     runClassificationWithoutOutlierRemoval();
     collectVectorsForAssertion();
@@ -130,7 +141,11 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     classifiedOutputPath = getTestTempDirPath("classify");
 
     conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-931
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-929
     ClusteringTestUtils.writePointsToFile(points,
         new Path(pointsPath, "file1"), fs, conf);
     runClustering(pointsPath, conf, true);
@@ -143,6 +158,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
       Boolean runSequential) throws IOException, InterruptedException,
       ClassNotFoundException {
     CanopyDriver.run(conf, pointsPath, clusteringOutputPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
         new ManhattanDistanceMeasure(), 3.1, 2.1, false, 0.0, runSequential);
     Path finalClustersPath = new Path(clusteringOutputPath, "clusters-0-final");
     ClusterClassifier.writePolicy(new CanopyClusteringPolicy(),
@@ -151,6 +167,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
 
   private void runClassificationWithoutOutlierRemoval()
     throws IOException, InterruptedException, ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     ClusterClassificationDriver.run(getConfiguration(), pointsPath, clusteringOutputPath, classifiedOutputPath, 0.0, true, true);
   }
 
@@ -168,6 +185,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
       SequenceFile.Reader classifiedVectors = new SequenceFile.Reader(fs,
           partFile.getPath(), conf);
       Writable clusterIdAsKey = new IntWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
       WeightedPropertyVectorWritable point = new WeightedPropertyVectorWritable();
       while (classifiedVectors.next(clusterIdAsKey, point)) {
         collectVector(clusterIdAsKey.toString(), point.getVector());
@@ -186,6 +204,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   }
 
   private void assertVectorsWithOutlierRemoval() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
     checkClustersWithOutlierRemoval();
   }
 
@@ -198,6 +217,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   private void assertThirdClusterWithoutOutlierRemoval() {
     Assert.assertEquals(2, thirdCluster.size());
     for (Vector vector : thirdCluster) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1190
       Assert.assertTrue(ArrayUtils.contains(new String[] {"{0:9.0,1:9.0}",
           "{0:8.0,1:8.0}"}, vector.asFormatString()));
     }

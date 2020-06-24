@@ -108,6 +108,7 @@ public final class ValidateAdaptiveLogistic {
         cm.addInstance(csv.getTargetString(line), csv.getTargetLabel(target));        
 
         if (showScores) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
           output.printf(Locale.ENGLISH, "%8d, %.12f, %.13f, %.13f%n", target,
               score, learner.logLikelihood(target, v), slh.getMean());
         }
@@ -118,6 +119,7 @@ public final class ValidateAdaptiveLogistic {
       }
 
       output.printf(Locale.ENGLISH,"\nLog-likelihood:");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
       output.printf(Locale.ENGLISH, "Min=%.2f, Max=%.2f, Mean=%.2f, Median=%.2f%n",
           slh.getMin(), slh.getMax(), slh.getMean(), slh.getMedian());
 
@@ -128,6 +130,7 @@ public final class ValidateAdaptiveLogistic {
       if (showConfusion) {
         output.printf(Locale.ENGLISH, "%n%s%n%n", cm.toString());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (collector != null) {
           Matrix m = collector.entropy();
           output.printf(Locale.ENGLISH,

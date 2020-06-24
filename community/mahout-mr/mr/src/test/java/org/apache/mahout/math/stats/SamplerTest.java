@@ -27,6 +27,7 @@ public class SamplerTest extends MahoutTestCase {
   @Test
   public void testDiscreteSampler() {
     Vector distribution = new DenseVector(new double[] {1, 0, 2, 3, 5, 0});
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     Sampler sampler = new Sampler(RandomUtils.getRandom(), distribution);
     Vector sampledDistribution = distribution.like();
     int i = 0;

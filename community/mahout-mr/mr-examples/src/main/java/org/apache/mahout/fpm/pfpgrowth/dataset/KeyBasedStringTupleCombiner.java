@@ -31,6 +31,7 @@ public class KeyBasedStringTupleCombiner extends Reducer<Text,StringTuple,Text,S
   protected void reduce(Text key,
                         Iterable<StringTuple> values,
                         Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Set<String> outputValues = new HashSet<>();
     for (StringTuple value : values) {
       outputValues.addAll(value.getEntries());

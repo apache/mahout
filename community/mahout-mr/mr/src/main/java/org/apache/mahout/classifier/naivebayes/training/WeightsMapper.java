@@ -39,8 +39,10 @@ public class WeightsMapper extends Mapper<IntWritable, VectorWritable, Text, Vec
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
     super.setup(ctx);
     int numLabels = Integer.parseInt(ctx.getConfiguration().get(NUM_LABELS));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(numLabels > 0, "Wrong numLabels: " + numLabels + ". Must be > 0!");
     weightsPerLabel = new DenseVector(numLabels);
   }

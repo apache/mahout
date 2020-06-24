@@ -66,6 +66,7 @@ public final class Job extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-551
     addOption(DefaultOptionCreator.numClustersOption().create());
     addOption(DefaultOptionCreator.t1Option().create());
     addOption(DefaultOptionCreator.t2Option().create());
@@ -73,6 +74,7 @@ public final class Job extends AbstractJob {
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1017
     Map<String,List<String>> argMap = parseArguments(args);
     if (argMap == null) {
       return -1;
@@ -87,6 +89,7 @@ public final class Job extends AbstractJob {
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       HadoopUtil.delete(getConf(), output);
     }
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
@@ -96,6 +99,7 @@ public final class Job extends AbstractJob {
     } else {
       double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
       double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-504
       run(getConf(), input, output, measure, t1, t2, convergenceDelta, maxIterations);
     }
     return 0;
@@ -125,6 +129,7 @@ public final class Job extends AbstractJob {
    */
   public static void run(Configuration conf, Path input, Path output, DistanceMeasure measure, int k,
       double convergenceDelta, int maxIterations) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1017
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
@@ -132,6 +137,7 @@ public final class Job extends AbstractJob {
     Path clusters = new Path(output, "random-seeds");
     clusters = RandomSeedGenerator.buildRandom(conf, directoryContainingConvertedInput, clusters, k, measure);
     log.info("Running KMeans with k = {}", k);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     KMeansDriver.run(conf, directoryContainingConvertedInput, clusters, output, convergenceDelta,
         maxIterations, true, 0.0, false);
     // run ClusterDumper
@@ -169,8 +175,10 @@ public final class Job extends AbstractJob {
    */
   public static void run(Configuration conf, Path input, Path output, DistanceMeasure measure, double t1, double t2,
       double convergenceDelta, int maxIterations) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1017
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
     Path canopyOutput = new Path(output, "canopies");
@@ -178,6 +186,7 @@ public final class Job extends AbstractJob {
         false);
     log.info("Running KMeans");
     KMeansDriver.run(conf, directoryContainingConvertedInput, new Path(canopyOutput, Cluster.INITIAL_CLUSTERS_DIR
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
         + "-final"), output, convergenceDelta, maxIterations, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-*-final"), new Path(output,

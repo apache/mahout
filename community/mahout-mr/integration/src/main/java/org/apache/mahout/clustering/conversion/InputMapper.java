@@ -42,6 +42,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
 
     String[] numbers = SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Double> doubles = new ArrayList<>();
     for (String value : numbers) {
       if (!value.isEmpty()) {
@@ -56,9 +57,12 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
         for (Double d : doubles) {
           result.set(index++, d);
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
         VectorWritable vectorWritable = new VectorWritable(result);
         context.write(new Text(String.valueOf(index)), vectorWritable);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
         throw new IllegalStateException(e);
       }
@@ -73,6 +77,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
     try {
       Class<? extends Vector> outputClass = conf.getClassByName(vectorImplClassName).asSubclass(Vector.class);
       constructor = outputClass.getConstructor(int.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } catch (NoSuchMethodException | ClassNotFoundException e) {
       throw new IllegalStateException(e);
     }

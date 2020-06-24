@@ -91,6 +91,7 @@ public class Cbind {
         for (int r = 0; r < chunkSize; r++) {
           for (int c = 0; c < chks.length; c++) {
             // assert va.atStr(start+r) == vb.atStr(start+r)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
             chks[c].set(r, vecs[c].at(start + r));
           }
         }

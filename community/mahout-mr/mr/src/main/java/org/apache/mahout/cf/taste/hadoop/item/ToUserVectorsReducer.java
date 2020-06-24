@@ -49,6 +49,7 @@ public final class ToUserVectorsReducer extends
 
   public static final String MIN_PREFERENCES_PER_USER = ToUserVectorsReducer.class.getName() 
       + ".minPreferencesPerUser";
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
 
   private int minPreferences;
 
@@ -58,6 +59,7 @@ public final class ToUserVectorsReducer extends
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-628
     super.setup(ctx);
     minPreferences = ctx.getConfiguration().getInt(MIN_PREFERENCES_PER_USER, 1);
   }
@@ -74,8 +76,10 @@ public final class ToUserVectorsReducer extends
     }
 
     if (userVector.getNumNondefaultElements() >= minPreferences) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
       userVectorWritable.set(userVector);
       userVectorWritable.setWritesLaxPrecision(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-736
       context.getCounter(Counters.USERS).increment(1);
       context.write(userID, userVectorWritable);
     }

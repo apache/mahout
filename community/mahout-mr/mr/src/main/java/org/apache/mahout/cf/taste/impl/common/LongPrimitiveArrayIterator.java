@@ -39,6 +39,7 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
    *          array to iterate over
    */
   public LongPrimitiveArrayIterator(long[] array) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     this.array = Preconditions.checkNotNull(array); // yeah, not going to copy the array here, for performance
     this.position = 0;
     this.max = array.length;

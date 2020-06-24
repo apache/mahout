@@ -26,6 +26,7 @@ public final class RunningAverageTest extends TasteTestCase {
   @Test
   public void testFull() {
     RunningAverage runningAverage = new FullRunningAverage();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-636
 
     assertEquals(0, runningAverage.getCount());
     assertTrue(Double.isNaN(runningAverage.getAverage()));
@@ -60,6 +61,7 @@ public final class RunningAverageTest extends TasteTestCase {
   @Test
   public void testCopyConstructor() {
     RunningAverage runningAverage = new FullRunningAverage();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-824
 
     runningAverage.addDatum(1.0);
     runningAverage.addDatum(1.0);

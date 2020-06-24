@@ -41,9 +41,11 @@ import java.util.ArrayList;
 public final class VisualizerTest extends MahoutTestCase {
   
   private static final char DECIMAL_SEPARATOR =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1605
       ((DecimalFormat) DecimalFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
   
   private static final String[] TRAIN_DATA = {"sunny,85,85,FALSE,no",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-961
       "sunny,80,90,TRUE,no", "overcast,83,86,FALSE,yes",
       "rainy,70,96,FALSE,yes", "rainy,68,80,FALSE,yes", "rainy,65,70,TRUE,no",
       "overcast,64,65,TRUE,yes", "sunny,72,95,FALSE,no",
@@ -68,6 +70,7 @@ public final class VisualizerTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1605
     randomNumberGenerator = RandomUtils.getRandom(1);
     
     Dataset dataset = DataLoader
@@ -82,6 +85,7 @@ public final class VisualizerTest extends MahoutTestCase {
   public void testTreeVisualize() throws Exception {
     // build tree
     DecisionTreeBuilder builder = new DecisionTreeBuilder();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1605
     builder.setM(trainingData.getDataset().nbAttributes() - 1);
     Node tree = builder.build(randomNumberGenerator, trainingData);
 
@@ -127,12 +131,14 @@ public final class VisualizerTest extends MahoutTestCase {
         new CategoricalNode(0, new double[] {0, 1, 2}, new Node[] {
             new NumericalNode(1, 71, new Leaf(0), new Leaf(1)), new Leaf(1),
             new Leaf(0)}));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1605
     List<Node> trees = new ArrayList<>();
     trees.add(root);
 
     // Forest
     DecisionForest forest = new DecisionForest(trees);
     String visualization = ForestVisualizer.toString(forest, trainingData.getDataset(), null);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1610
     assertTrue(
         ("Tree[1]:\n2 < 90 : yes\n2 >= 90\n" +
             "|   0 = rainy\n" +
@@ -149,6 +155,7 @@ public final class VisualizerTest extends MahoutTestCase {
             "|   0 = overcast : yes\n" +
             "|   0 = sunny : no\n").equals(visualization));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1605
     visualization = ForestVisualizer.toString(forest, trainingData.getDataset(), ATTRIBUTE_NAMES);
     assertTrue(
         ("Tree[1]:\n" +
@@ -171,6 +178,7 @@ public final class VisualizerTest extends MahoutTestCase {
   
   @Test
   public void testLeafless() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1605
     List<Instance> instances = new ArrayList<>();
     for (int i = 0; i < trainingData.size(); i++) {
       if (trainingData.get(i).get(0) != 0.0d) {

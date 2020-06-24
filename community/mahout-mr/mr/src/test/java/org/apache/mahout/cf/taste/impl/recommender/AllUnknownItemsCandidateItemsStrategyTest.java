@@ -54,6 +54,7 @@ public final class AllUnknownItemsCandidateItemsStrategyTest extends TasteTestCa
 
     EasyMock.replay(dataModel);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel, false);
     assertEquals(2, candidateItems.size());
     assertTrue(candidateItems.contains(1L));

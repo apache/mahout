@@ -43,6 +43,7 @@ public final class NodeTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     rng = RandomUtils.getRandom();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
 
     byteOutStream = new ByteArrayOutputStream();
     out = new DataOutputStream(byteOutStream);
@@ -56,6 +57,7 @@ public final class NodeTest extends MahoutTestCase {
   public void testReadTree() throws Exception {
     Node node1 = new CategoricalNode(rng.nextInt(), 
         new double[] { rng.nextDouble(), rng.nextDouble() }, 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         new Node[] { new Leaf(rng.nextDouble()), new Leaf(rng.nextDouble()) });
     Node node2 = new NumericalNode(rng.nextInt(), rng.nextDouble(), 
         new Leaf(rng.nextDouble()), new Leaf(rng.nextDouble()));
@@ -80,6 +82,7 @@ public final class NodeTest extends MahoutTestCase {
   @Test
   public void testReadLeaf() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Node leaf = new Leaf(rng.nextDouble());
     leaf.write(out);
     assertEquals(leaf, readNode());
@@ -89,6 +92,7 @@ public final class NodeTest extends MahoutTestCase {
   public void testParseNumerical() throws Exception {
 
     Node node = new NumericalNode(rng.nextInt(), rng.nextDouble(), new Leaf(rng
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         .nextInt()), new Leaf(rng.nextDouble()));
     node.write(out);
     assertEquals(node, readNode());
@@ -99,6 +103,7 @@ public final class NodeTest extends MahoutTestCase {
 
     Node node = new CategoricalNode(rng.nextInt(), new double[]{rng.nextDouble(),
         rng.nextDouble(), rng.nextDouble()}, new Node[]{
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         new Leaf(rng.nextDouble()), new Leaf(rng.nextDouble()),
         new Leaf(rng.nextDouble())});
 

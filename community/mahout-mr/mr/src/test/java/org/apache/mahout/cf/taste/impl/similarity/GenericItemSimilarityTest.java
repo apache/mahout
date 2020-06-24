@@ -31,6 +31,7 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
 
   @Test
   public void testSimple() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 2, 0.5));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(2, 1, 0.6));
@@ -55,6 +56,7 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
             });
     ItemSimilarity otherSimilarity = new PearsonCorrelationSimilarity(dataModel);
     ItemSimilarity itemSimilarity = new GenericItemSimilarity(otherSimilarity, dataModel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     assertCorrelationEquals(1.0, itemSimilarity.itemSimilarity(0, 0));
     assertCorrelationEquals(0.960768922830523, itemSimilarity.itemSimilarity(0, 1));
   }
@@ -62,6 +64,7 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
   @Test
   public void testAllSimilaritiesWithoutIndex() throws TasteException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     List<GenericItemSimilarity.ItemItemSimilarity> itemItemSimilarities =
         Arrays.asList(new GenericItemSimilarity.ItemItemSimilarity(1L, 2L, 0.2),
                       new GenericItemSimilarity.ItemItemSimilarity(1L, 3L, 0.2),

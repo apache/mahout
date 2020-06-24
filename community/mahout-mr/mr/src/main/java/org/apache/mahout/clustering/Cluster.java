@@ -36,6 +36,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
   String CLUSTERS_DIR = "clusters-";
   
   // default suffix for output of clusters for final iteration
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-778
   String FINAL_ITERATION_SUFFIX = "-final";
   
   /**
@@ -80,6 +81,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    * @return a Map
    */
   Map<String,Object> asJson(String[] bindings);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1505
 
   /**
    * @return if the receiver has converged, or false if that has no meaning for

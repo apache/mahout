@@ -61,6 +61,7 @@ public final class InputDriver {
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option vectorOpt = obuilder.withLongName("vector").withRequired(false).withArgument(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
       "The vector implementation to use.").withShortName("v").create();
     
@@ -78,8 +79,10 @@ public final class InputDriver {
         return;
       }
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
       Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       String vectorClassName = cmdLine.getValue(vectorOpt,
          "org.apache.mahout.math.RandomAccessSparseVector").toString();
       runJob(input, output, vectorClassName);
@@ -100,12 +103,14 @@ public final class InputDriver {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setMapperClass(InputMapper.class);   
     job.setNumReduceTasks(0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     job.setJarByClass(InputDriver.class);
     
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, output);
     
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }

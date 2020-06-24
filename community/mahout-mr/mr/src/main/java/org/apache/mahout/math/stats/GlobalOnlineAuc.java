@@ -106,6 +106,7 @@ public class GlobalOnlineAuc implements OnlineAuc {
       Vector row = scores.viewRow(1 - category);
       double m = 0.0;
       double count = 0.0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element element : row.all()) {
         double v = element.get();
         if (Double.isNaN(v)) {
@@ -121,6 +122,7 @@ public class GlobalOnlineAuc implements OnlineAuc {
         }
       }
       averages.set(category, averages.get(category)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
         + (m / count - averages.get(category)) / Math.min(windowSize, samples.get(category)));
     }
     return auc();
@@ -148,6 +150,7 @@ public class GlobalOnlineAuc implements OnlineAuc {
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     out.writeInt(windowSize);
     out.writeInt(policy.ordinal());
     MatrixWritable.writeMatrix(out, scores);

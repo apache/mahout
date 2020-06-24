@@ -32,6 +32,7 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     standardModel = createStandardNaiveBayesModel();
     standardModel.validate();
     complementaryModel = createComplementaryNaiveBayesModel();
@@ -74,6 +75,8 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
       double lSum = labelSum.get(label);
       double numerator = score + alpha;
       double denominator = lSum + featureSum.size();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1504
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1504
       weight += Math.abs(Math.log(numerator / denominator));
     }
     return weight;
@@ -91,6 +94,7 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
     
     DenseMatrix weightMatrix = new DenseMatrix(matrix);
     DenseVector labelSum = new DenseVector(labelSumArray);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     DenseVector featureSum = new DenseVector(featureSumArray);    
     
     // now generate the model
@@ -118,12 +122,14 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
         complementaryNaiveBayesThetaWeight(3, weightMatrix, labelSum, featureSum) };
 
     // now generate the model
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     return new NaiveBayesModel(weightMatrix, featureSum, labelSum, new DenseVector(thetaNormalizerSum), 1.0f, true);
   }
   
   protected static int maxIndex(Vector instance) {
     int maxIndex = -1;
     double maxScore = Integer.MIN_VALUE;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element label : instance.all()) {
       if (label.get() >= maxScore) {
         maxIndex = label.index();

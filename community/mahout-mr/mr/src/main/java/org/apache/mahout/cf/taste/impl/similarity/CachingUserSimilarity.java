@@ -54,8 +54,10 @@ public final class CachingUserSimilarity implements UserSimilarity {
    * The cache size is capped by the given size.
    */
   public CachingUserSimilarity(UserSimilarity similarity, int maxCacheSize) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     this.similarityCache = new Cache<>(new SimilarityRetriever(similarity), maxCacheSize);
     this.refreshHelper = new RefreshHelper(new Callable<Void>() {
       @Override

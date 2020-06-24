@@ -86,6 +86,7 @@ public class FrequenciesJob {
     
     // check the output
     FileSystem fs = outputPath.getFileSystem(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (fs.exists(outputPath)) {
       throw new IOException("Output path already exists : " + outputPath);
     }
@@ -113,12 +114,14 @@ public class FrequenciesJob {
     
     // run the job
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }
     
     int[][] counts = parseOutput(job);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     HadoopUtil.delete(conf, outputPath);
     
     return counts;
@@ -133,6 +136,8 @@ public class FrequenciesJob {
     Configuration conf = job.getConfiguration();
     
     int numMaps = conf.getInt("mapred.map.tasks", -1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.info("mapred.map.tasks = {}", numMaps);
     
     FileSystem fs = outputPath.getFileSystem(conf);
@@ -144,6 +149,7 @@ public class FrequenciesJob {
     // read all the outputs
     int index = 0;
     for (Path path : outfiles) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       for (Frequencies value : new SequenceFileValueIterable<Frequencies>(path, conf)) {
         values[index++] = value;
       }
@@ -174,6 +180,7 @@ public class FrequenciesJob {
     protected void setup(Context context) throws IOException, InterruptedException {
       Configuration conf = context.getConfiguration();
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       dataset = Builder.loadDataset(conf);
       setup(dataset);
     }
@@ -181,19 +188,23 @@ public class FrequenciesJob {
     /**
      * Useful when testing
      */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     void setup(Dataset dataset) {
       converter = new DataConverter(dataset);
     }
     
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
                                                                      InterruptedException {
       if (firstId == null) {
         firstId = new LongWritable(key.get());
       }
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       Instance instance = converter.convert(value.toString());
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       context.write(firstId, new IntWritable((int) dataset.getLabel(instance)));
     }
     
@@ -213,12 +224,14 @@ public class FrequenciesJob {
     /**
      * Useful when testing
      */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     void setup(int nblabels) {
       this.nblabels = nblabels;
     }
     
     @Override
     protected void reduce(LongWritable key, Iterable<IntWritable> values, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       throws IOException, InterruptedException {
       int[] counts = new int[nblabels];
       for (IntWritable value : values) {

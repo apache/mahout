@@ -92,11 +92,13 @@ public final class CDbwEvaluator {
    *          a String path to the input clusters directory
    */
   public CDbwEvaluator(Configuration conf, Path clustersIn) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
     measure = ClassUtils
         .instantiateAs(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
     representativePoints = RepresentativePointsMapper.getRepresentativePoints(conf);
     clusters = loadClusters(conf, clustersIn);
     for (Integer cId : representativePoints.keySet()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
       computeStd(cId);
     }
   }
@@ -109,10 +111,12 @@ public final class CDbwEvaluator {
    * @return a List<Cluster> of the clusters
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Cluster> clusters = new ArrayList<>();
     for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST,
         PathFilters.logsCRCFilter(), conf)) {
       Cluster cluster = clusterWritable.getValue();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
       clusters.add(cluster);
     }
     return clusters;
@@ -127,8 +131,10 @@ public final class CDbwEvaluator {
    */
   private void computeStd(int cI) {
     List<VectorWritable> repPts = representativePoints.get(cI);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     GaussianAccumulator accumulator = new OnlineGaussianAccumulator();
     for (VectorWritable vw : repPts) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-533
       accumulator.observe(vw.get(), 1.0);
     }
     accumulator.compute();
@@ -157,6 +163,7 @@ public final class CDbwEvaluator {
     // count the number of representative points of the clusters which are within the
     // average std of the two clusters from the midpoint uIJ (eqn 3)
     for (VectorWritable vwI : repI) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
       if (uIJ != null && measure.distance(uIJ, vwI.get()) <= avgStd) {
         sum++;
       }
@@ -190,8 +197,10 @@ public final class CDbwEvaluator {
   public double intraClusterDensity() {
     double avgDensity = 0;
     int count = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element elem : intraClusterDensities().nonZeroes()) {
       double value = elem.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
       if (!Double.isNaN(value)) {
         avgDensity += value;
         count++;
@@ -214,6 +223,7 @@ public final class CDbwEvaluator {
     // find the closest representative points between the clusters
     for (int i = 0; i < clusters.size(); i++) {
       int cI = clusters.get(i).getId();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Map<Integer,Double> map = new TreeMap<>();
       interClusterDensities.put(cI, map);
       for (int j = i + 1; j < clusters.size(); j++) {
@@ -308,6 +318,7 @@ public final class CDbwEvaluator {
         // accumulate sumJ
         sumJ += densityIJ / stdev;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
       densities.set(cI, sumJ / r);
     }
     return densities;
@@ -323,6 +334,7 @@ public final class CDbwEvaluator {
     if (minimumDistances != null) {
       return minimumDistances;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     minimumDistances = new TreeMap<>();
     closestRepPointIndices = new TreeMap<>();
     for (int i = 0; i < clusters.size(); i++) {

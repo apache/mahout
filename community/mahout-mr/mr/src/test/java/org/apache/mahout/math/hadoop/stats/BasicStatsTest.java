@@ -39,6 +39,7 @@ public final class BasicStatsTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     conf = getConfiguration();
   }
 
@@ -63,6 +64,7 @@ public final class BasicStatsTest extends MahoutTestCase {
     
     double v = BasicStats.stdDev(input, output, conf);
     assertEquals(1.56, v, 0.01); //sample std dev is 1.563, std. dev from a discrete set is 1.48
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
 
   }
   
@@ -75,14 +77,17 @@ public final class BasicStatsTest extends MahoutTestCase {
     
     double v = BasicStats.stdDevForGivenMean(input, output, 0.0D, conf);
     assertEquals(10.65, v, 0.01); //sample std dev is 10.65
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
 
   }
   
   private void produceTestData(Path input) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 	  FileSystem fs = FileSystem.get(input.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, input, IntWritable.class, DoubleWritable.class);
     //Random random = new MersenneTwisterRNG();
     /*Normal normal = new Normal(5, 3, random);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 0; i < 10000; i++) {
       writer.append(new IntWritable(i), new DoubleWritable((long)normal.nextDouble()));
     }*/
@@ -105,6 +110,7 @@ public final class BasicStatsTest extends MahoutTestCase {
   public void testStdDev2() throws Exception {
     Path input = getTestTempFilePath("stdDev/counts.file");
     Path output = getTestTempFilePath("stdDev/output.file");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, input, IntWritable.class,
             DoubleWritable.class);

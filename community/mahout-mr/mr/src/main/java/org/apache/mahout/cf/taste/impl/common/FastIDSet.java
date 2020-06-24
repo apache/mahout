@@ -48,6 +48,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   }
 
   public FastIDSet(long[] initialKeys) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     this(initialKeys.length);
     addAll(initialKeys);
   }
@@ -57,6 +58,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   }
 
   public FastIDSet(int size, float loadFactor) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(size >= 0, "size must be at least 0");
     Preconditions.checkArgument(loadFactor >= 1.0f, "loadFactor must be at least 1.0");
     this.loadFactor = loadFactor;
@@ -124,6 +126,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   
   public boolean add(long key) {
     Preconditions.checkArgument(key != NULL && key != REMOVED);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     // If less than half the slots are open, let's clear it up
     if (numSlotsUsed * loadFactor >= keys.length) {

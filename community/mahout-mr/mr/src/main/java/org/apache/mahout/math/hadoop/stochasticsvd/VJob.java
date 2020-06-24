@@ -101,6 +101,7 @@ public class VJob {
 
       Path sigmaPath = new Path(conf.get(PROP_SIGMA_PATH));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
       uHat = SSVDHelper.drmLoadAsDense(fs, uHatPath, conf);
       // since uHat is (k+p) x (k+p)
       kp = uHat.columnSize();
@@ -166,6 +167,7 @@ public class VJob {
                   Path outputPath,
                   int k,
                   int numReduceTasks,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
                   SSVDSolver.OutputScalingEnum outputScaling) throws ClassNotFoundException,
     InterruptedException, IOException {
 

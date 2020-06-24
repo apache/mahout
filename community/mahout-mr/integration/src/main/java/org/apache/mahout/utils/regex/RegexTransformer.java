@@ -23,5 +23,6 @@ package org.apache.mahout.utils.regex;
 public interface RegexTransformer {
 
   String transformMatch(String match);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
 
 }

@@ -37,6 +37,7 @@ public class AllSimilarItemsCandidateItemsStrategy extends AbstractCandidateItem
 
   @Override
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
     FastIDSet candidateItemIDs = new FastIDSet();
     for (long itemID : preferredItemIDs) {

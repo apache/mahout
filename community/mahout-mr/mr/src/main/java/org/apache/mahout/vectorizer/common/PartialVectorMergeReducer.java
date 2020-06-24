@@ -49,11 +49,14 @@ public class PartialVectorMergeReducer extends
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context) throws IOException,
       InterruptedException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
     Vector vector = new RandomAccessSparseVector(dimension, 10);
     for (VectorWritable value : values) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       vector.assign(value.get(), Functions.PLUS);
     }
     if (normPower != PartialVectorMerger.NO_NORMALIZING) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-287
       if (logNormalize) {
         vector = vector.logNormalize(normPower);
       } else {
@@ -64,12 +67,15 @@ public class PartialVectorMergeReducer extends
       vector = new SequentialAccessSparseVector(vector);
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     if (namedVector) {
       vector = new NamedVector(vector, key.toString());
     }
 
     // drop empty vectors.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1031
     if (vector.getNumNondefaultElements() > 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
       VectorWritable vectorWritable = new VectorWritable(vector);
       context.write(key, vectorWritable);
     }
@@ -82,7 +88,9 @@ public class PartialVectorMergeReducer extends
     normPower = conf.getFloat(PartialVectorMerger.NORMALIZATION_POWER, PartialVectorMerger.NO_NORMALIZING);
     dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-287
     logNormalize = conf.getBoolean(PartialVectorMerger.LOG_NORMALIZE, false);
   }
 

@@ -38,13 +38,16 @@ public class StableFixedSizeSamplingIterator<T> extends ForwardingIterator<T> {
   private final Iterator<T> delegate;
   
   public StableFixedSizeSamplingIterator(int size, Iterator<T> source) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<Pair<Integer,T>> buf = Lists.newArrayListWithCapacity(size);
     int sofar = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     Random random = RandomUtils.getRandom();
     while (source.hasNext()) {
       T v = source.next();
       sofar++;
       if (buf.size() < size) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         buf.add(new Pair<>(sofar, v));
       } else {
         int position = random.nextInt(sofar);
@@ -56,6 +59,7 @@ public class StableFixedSizeSamplingIterator<T> extends ForwardingIterator<T> {
 
     Collections.sort(buf);
     delegate = Iterators.transform(buf.iterator(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       new Function<Pair<Integer,T>,T>() {
         @Override
         public T apply(Pair<Integer,T> from) {

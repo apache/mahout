@@ -69,6 +69,7 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
    *           if anything goes wrong during initialization
    */
   public GenericJDBCDataModel(Properties props) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     super(AbstractJDBCComponent.lookupDataSource(props.getProperty(DATA_SOURCE_KEY)),
           props.getProperty(GET_PREFERENCE_SQL_KEY),
           props.getProperty(GET_PREFERENCE_TIME_SQL_KEY),
@@ -82,6 +83,7 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
           props.getProperty(GET_ITEMS_SQL_KEY),
           props.getProperty(GET_PREFS_FOR_ITEM_SQL_KEY),
           props.getProperty(GET_NUM_PREFERENCE_FOR_ITEM_KEY),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
           props.getProperty(GET_NUM_PREFERENCE_FOR_ITEMS_KEY),
           props.getProperty(GET_MAX_PREFERENCE_KEY),
           props.getProperty(GET_MIN_PREFERENCE_KEY));
@@ -136,6 +138,7 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
         props.load(is);
         return props;
       } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(is, true);
       }
     } catch (IOException ioe) {

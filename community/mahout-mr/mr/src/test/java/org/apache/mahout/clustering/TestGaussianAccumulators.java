@@ -43,11 +43,13 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     sampleData = Lists.newArrayList();
     generateSamples();
     sampleN = 0;
     Vector sum = new DenseVector(2);
     for (VectorWritable v : sampleData) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       sum.assign(v.get(), Functions.PLUS);
       sampleN++;
     }
@@ -56,6 +58,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
     Vector sampleVar = new DenseVector(2);
     for (VectorWritable v : sampleData) {
       Vector delta = v.get().minus(sampleMean);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       sampleVar.assign(delta.times(delta), Functions.PLUS);
     }
     sampleVar = sampleVar.divide(sampleN - 1);
@@ -88,6 +91,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
   }
 
   private void generateSamples() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-533
     generate2dSamples(50000, 1, 2, 3, 4);
   }
 
@@ -104,6 +108,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
 
   @Test
   public void testAccumulatorOneSample() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-533
     GaussianAccumulator accumulator0 = new RunningSumsGaussianAccumulator();
     GaussianAccumulator accumulator1 = new OnlineGaussianAccumulator();
     Vector sample = new DenseVector(2);

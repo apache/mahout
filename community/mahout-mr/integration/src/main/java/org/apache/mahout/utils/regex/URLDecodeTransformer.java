@@ -37,6 +37,7 @@ public final class URLDecodeTransformer implements RegexTransformer {
     try {
       return URLDecoder.decode(match, enc);
     } catch (UnsupportedEncodingException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       throw new IllegalStateException(e);
     }
   }

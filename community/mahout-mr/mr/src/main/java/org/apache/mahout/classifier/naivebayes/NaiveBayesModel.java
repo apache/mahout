@@ -55,6 +55,7 @@ public class NaiveBayesModel {
     this.numFeatures = weightsPerFeature.getNumNondefaultElements();
     this.totalWeightSum = weightsPerLabel.zSum();
     this.alphaI = alphaI;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     this.isComplementary=isComplementary;
   }
 
@@ -63,6 +64,7 @@ public class NaiveBayesModel {
   }
 
   public double thetaNormalizer(int label) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1504
     return perlabelThetaNormalizer.get(label); 
   }
 
@@ -95,12 +97,14 @@ public class NaiveBayesModel {
   }
   
   public boolean isComplemtary(){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
       return isComplementary;
   }
   
   public static NaiveBayesModel materialize(Path output, Configuration conf) throws IOException {
     FileSystem fs = output.getFileSystem(conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Vector weightsPerLabel;
     Vector perLabelThetaNormalizer = null;
     Vector weightsPerFeature;
@@ -110,12 +114,14 @@ public class NaiveBayesModel {
 
     try (FSDataInputStream in = fs.open(new Path(output, "naiveBayesModel.bin"))) {
       alphaI = in.readFloat();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
       isComplementary = in.readBoolean();
       weightsPerFeature = VectorWritable.readVector(in);
       weightsPerLabel = new DenseVector(VectorWritable.readVector(in));
       if (isComplementary){
         perLabelThetaNormalizer = new DenseVector(VectorWritable.readVector(in));
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       weightsPerLabelAndFeature = new SparseRowMatrix(weightsPerLabel.size(), weightsPerFeature.size());
       for (int label = 0; label < weightsPerLabelAndFeature.numRows(); label++) {
         weightsPerLabelAndFeature.assignRow(label, VectorWritable.readVector(in));
@@ -123,6 +129,7 @@ public class NaiveBayesModel {
     }
 
     NaiveBayesModel model = new NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature, weightsPerLabel,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
         perLabelThetaNormalizer, alphaI, isComplementary);
     model.validate();
     return model;
@@ -130,8 +137,10 @@ public class NaiveBayesModel {
 
   public void serialize(Path output, Configuration conf) throws IOException {
     FileSystem fs = output.getFileSystem(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (FSDataOutputStream out = fs.create(new Path(output, "naiveBayesModel.bin"))) {
       out.writeFloat(alphaI);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
       out.writeBoolean(isComplementary);
       VectorWritable.writeVector(out, weightsPerFeature);
       VectorWritable.writeVector(out, weightsPerLabel); 
@@ -139,6 +148,7 @@ public class NaiveBayesModel {
         VectorWritable.writeVector(out, perlabelThetaNormalizer);
       }
       for (int row = 0; row < weightsPerLabelAndFeature.numRows(); row++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
         VectorWritable.writeVector(out, weightsPerLabelAndFeature.viewRow(row));
       }
     }
@@ -154,7 +164,9 @@ public class NaiveBayesModel {
     Preconditions.checkNotNull(weightsPerFeature, "the feature sums have to be defined");
     Preconditions.checkArgument(weightsPerFeature.getNumNondefaultElements() > 0,
         "the feature sums have to be greater than 0!");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     if (isComplementary){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1504
         Preconditions.checkArgument(perlabelThetaNormalizer != null, "the theta normalizers have to be defined");
         Preconditions.checkArgument(perlabelThetaNormalizer.getNumNondefaultElements() > 0,
             "the number of theta normalizers has to be greater than 0!");    

@@ -61,6 +61,7 @@ public final class WeightedRunningAverageTest extends TasteTestCase {
     assertTrue(Double.isNaN(runningAverage.getAverage()));
     assertTrue(Double.isNaN(runningAverage.getStandardDeviation()));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-919
     runningAverage.addDatum(1.0);
     assertEquals(1.0, runningAverage.getAverage(), EPSILON);
     assertTrue(Double.isNaN(runningAverage.getStandardDeviation()));

@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * of the result.
  */
 final class EachRowIterator extends AbstractIterator<ResultSet> implements Closeable {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
 
   private static final Logger log = LoggerFactory.getLogger(EachRowIterator.class);
 
@@ -58,6 +59,7 @@ final class EachRowIterator extends AbstractIterator<ResultSet> implements Close
 
   @Override
   protected ResultSet computeNext() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     try {
       if (resultSet.next()) {
         return resultSet;
@@ -86,6 +88,7 @@ final class EachRowIterator extends AbstractIterator<ResultSet> implements Close
   @Override
   public void close() {
     IOUtils.quietClose(resultSet, statement, connection);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     endOfData();
   }
 

@@ -58,6 +58,7 @@ public final class VectorMatrixMultiplicationJob {
   public static DistributedRowMatrix runJob(Path markovPath, Vector diag, Path outputPath)
     throws IOException, ClassNotFoundException, InterruptedException {
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
     return runJob(markovPath, diag, outputPath, new Path(outputPath, "tmp"));
   }
 
@@ -66,11 +67,13 @@ public final class VectorMatrixMultiplicationJob {
 
     // set up the serialization of the diagonal vector
     Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(markovPath.toUri(), conf);
     markovPath = fs.makeQualified(markovPath);
     outputPath = fs.makeQualified(outputPath);
     Path vectorOutputPath = new Path(outputPath.getParent(), "vector");
     VectorCache.save(new IntWritable(Keys.DIAGONAL_CACHE_INDEX), diag, vectorOutputPath, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
 
     // set up the job itself
     Job job = new Job(conf, "VectorMatrixMultiplication");
@@ -85,13 +88,16 @@ public final class VectorMatrixMultiplicationJob {
     FileOutputFormat.setOutputPath(job, outputPath);
 
     job.setJarByClass(VectorMatrixMultiplicationJob.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
 
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }
 
     // build the resulting DRM from the results
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
     return new DistributedRowMatrix(outputPath, tmpPath,
         diag.size(), diag.size());
   }
@@ -106,6 +112,7 @@ public final class VectorMatrixMultiplicationJob {
       // read in the diagonal vector from the distributed cache
       super.setup(context);
       Configuration config = context.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       diagonal = VectorCache.load(config);
       if (diagonal == null) {
         throw new IOException("No vector loaded from cache!");
@@ -119,6 +126,7 @@ public final class VectorMatrixMultiplicationJob {
     protected void map(IntWritable key, VectorWritable row, Context ctx) 
       throws IOException, InterruptedException {
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element e : row.get().all()) {
         double dii = Functions.SQRT.apply(diagonal.get(key.get()));
         double djj = Functions.SQRT.apply(diagonal.get(e.index()));

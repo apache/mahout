@@ -51,7 +51,9 @@ public final class CollocMapperTest extends MahoutTestCase {
     Text key = new Text();
     key.set("dummy-key");
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-285
     String[] input = {"the", "best", "of", "times", "the", "worst", "of",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     "times"};
     StringTuple inputTuple = new StringTuple();
     for (String i : input) {
@@ -89,6 +91,8 @@ public final class CollocMapperTest extends MahoutTestCase {
       GramKey subgramKey = new GramKey(subgram, new byte[0]);
       GramKey subgramNgramKey = new GramKey(subgram, ngram.getBytes());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
       context.write(subgramKey, subgram);
       context.write(subgramNgramKey, ngram);
     }
@@ -111,6 +115,7 @@ public final class CollocMapperTest extends MahoutTestCase {
     key.set("dummy-key");
     
     String[] input = {"the", "best", "of", "times", "the", "worst", "of",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     "times"};
     StringTuple inputTuple = new StringTuple();
     for (String i : input) {
@@ -134,7 +139,13 @@ public final class CollocMapperTest extends MahoutTestCase {
                                          {"u_times", "times"},};
 
     // set up expectations for mocks. ngram max size = 2
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
     conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
     conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, true);
     EasyMock.expect(context.getConfiguration()).andReturn(conf);
@@ -150,9 +161,12 @@ public final class CollocMapperTest extends MahoutTestCase {
       
       
      
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-317
       if (p == Gram.Type.UNIGRAM) {
         Gram unigram = new Gram(v[1], frequency, Gram.Type.UNIGRAM);
         GramKey unigramKey = new GramKey(unigram, new byte[0]);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
         context.write(unigramKey, unigram);
       }
       else {
@@ -161,6 +175,8 @@ public final class CollocMapperTest extends MahoutTestCase {
         
         GramKey subgramKey = new GramKey(subgram, new byte[0]);
         GramKey subgramNgramKey = new GramKey(subgram, ngram.getBytes());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
         context.write(subgramKey, subgram);
         context.write(subgramNgramKey, ngram);
       }

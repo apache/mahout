@@ -57,8 +57,10 @@ public final class SequenceFileValueIterable<V extends Writable> implements Iter
   @Override
   public Iterator<V> iterator() {
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       return new SequenceFileValueIterator<>(path, reuseKeyValueInstances, conf);
     } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-708
       throw new IllegalStateException(path.toString(), ioe);
     }
   }

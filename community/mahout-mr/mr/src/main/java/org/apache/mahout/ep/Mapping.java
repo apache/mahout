@@ -44,6 +44,7 @@ public abstract class Mapping extends DoubleFunction implements Writable {
     }
 
     private SoftLimit(double min, double max, double scale) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
       this.min = min;
       this.max = max;
       this.scale = scale;
@@ -56,6 +57,7 @@ public abstract class Mapping extends DoubleFunction implements Writable {
 
     @Override
     public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
       out.writeDouble(min);
       out.writeDouble(max);
       out.writeDouble(scale);
@@ -86,6 +88,7 @@ public abstract class Mapping extends DoubleFunction implements Writable {
 
     @Override
     public void write(DataOutput dataOutput) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
       PolymorphicWritable.write(dataOutput, wrapped);
     }
 
@@ -112,6 +115,7 @@ public abstract class Mapping extends DoubleFunction implements Writable {
 
     @Override
     public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
       out.writeDouble(scale);
     }
 
@@ -149,6 +153,7 @@ public abstract class Mapping extends DoubleFunction implements Writable {
    * @return A mapping that satisfies the desired constraint.
    */
   public static Mapping softLimit(double min, double max, double scale) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
     return new SoftLimit(min, max, scale);
   }
 
@@ -174,8 +179,10 @@ public abstract class Mapping extends DoubleFunction implements Writable {
    * @return A mapped value.
    */
   public static Mapping logLimit(double low, double high) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(low > 0, "Lower bound for log limit must be > 0 but was %f", low);
     Preconditions.checkArgument(high > 0, "Upper bound for log limit must be > 0 but was %f", high);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
     return new LogLimit(low, high);
   }
 
@@ -193,6 +200,7 @@ public abstract class Mapping extends DoubleFunction implements Writable {
    * @return A positive value.
    */
   public static Mapping exponential(double scale) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
     return new Exponential(scale);
   }
 
@@ -201,6 +209,7 @@ public abstract class Mapping extends DoubleFunction implements Writable {
    * @return The original value.
    */
   public static Mapping identity() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
     return new Identity();
   }
 }

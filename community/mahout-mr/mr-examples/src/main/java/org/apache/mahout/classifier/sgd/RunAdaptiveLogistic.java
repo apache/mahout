@@ -77,8 +77,10 @@ public final class RunAdaptiveLogistic {
     BufferedReader in = TrainAdaptiveLogistic.open(inputFile);
     int k = 0;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile),
         Charsets.UTF_8))) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1577
       out.write(idColumn + ",target,score");
       out.newLine();
 
@@ -88,11 +90,13 @@ public final class RunAdaptiveLogistic {
       Map<String, Double> results = new HashMap<>();
       while (line != null) {
         Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
         csv.processLine(line, v, false);
         Vector scores = learner.classifyFull(v);
         results.clear();
         if (maxScoreOnly) {
           results.put(csv.getTargetLabel(scores.maxValueIndex()),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
               scores.maxValue());
         } else {
           for (int i = 0; i < scores.size(); i++) {

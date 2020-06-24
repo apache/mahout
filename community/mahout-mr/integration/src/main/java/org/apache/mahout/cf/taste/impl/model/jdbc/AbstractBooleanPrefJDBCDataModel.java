@@ -47,6 +47,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
                                              String itemIDColumn,
                                              String preferenceColumn,
                                              String getPreferenceSQL,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
                                              String getPreferenceTimeSQL,
                                              String getUserSQL,
                                              String getAllUsersSQL,
@@ -61,6 +62,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
                                              String getNumPreferenceForItemsSQL,
                                              String getMaxPreferenceSQL,
                                              String getMinPreferenceSQL) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     super(dataSource,
           preferenceTable,
           userIDColumn,
@@ -97,6 +99,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     Preconditions.checkArgument(!Float.isNaN(value), "NaN value");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Setting preference for user {}, item {}", userID, itemID);
     
     Connection conn = null;
@@ -108,6 +111,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       setLongParameter(stmt, 1, userID);
       setLongParameter(stmt, 2, itemID);
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
       
@@ -126,6 +130,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
 
   @Override
   public float getMaxPreference() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     return 1.0f;
   }
 

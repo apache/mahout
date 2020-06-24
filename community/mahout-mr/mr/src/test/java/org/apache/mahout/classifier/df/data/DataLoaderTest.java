@@ -36,6 +36,7 @@ public final class DataLoaderTest extends MahoutTestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     rng = RandomUtils.getRandom();
   }
 
@@ -50,8 +51,10 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] data = Utils.randomDoubles(rng, descriptor, false, datasize);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(data, attrs, missings);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data loaded = DataLoader.loadData(dataset, sData);
 
@@ -59,6 +62,7 @@ public final class DataLoaderTest extends MahoutTestCase {
     testLoadedDataset(data, attrs, missings, loaded);
 
     // regression
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     data = Utils.randomDoubles(rng, descriptor, true, datasize);
     missings = Lists.newArrayList();
     sData = prepareData(data, attrs, missings);
@@ -84,15 +88,18 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] data = Utils.randomDoubles(rng, descriptor, false, datasize);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(data, attrs, missings);
     Dataset expected = DataLoader.generateDataset(descriptor, false, sData);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
 
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     
     assertEquals(expected, dataset);
 
     // regression
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     data = Utils.randomDoubles(rng, descriptor, true, datasize);
     missings = Lists.newArrayList();
     sData = prepareData(data, attrs, missings);
@@ -129,6 +136,7 @@ public final class DataLoaderTest extends MahoutTestCase {
       }
 
       StringBuilder builder = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
 
       for (int attr = 0; attr < nbAttributes; attr++) {
         if (attr == missingAttr) {
@@ -173,6 +181,7 @@ public final class DataLoaderTest extends MahoutTestCase {
         }
 
         if (attrs[attr].isNumerical()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
           assertEquals(vector[attr], instance.get(aId), EPSILON);
           aId++;
         } else if (attrs[attr].isCategorical()) {
@@ -216,10 +225,12 @@ public final class DataLoaderTest extends MahoutTestCase {
 
       int aId = 0;
       for (int attr = 0; attr < nbAttributes; attr++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         if (attrs[attr].isIgnored()) {
           continue;
         }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         if (attrs[attr].isLabel()) {
           if (!loaded.getDataset().isNumerical(aId)) {
             double nValue = instance.get(aId);
@@ -255,20 +266,24 @@ public final class DataLoaderTest extends MahoutTestCase {
     Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(source, attrs, missings);
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
 
     Path dataPath = Utils.writeDataToTestFile(sData);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     FileSystem fs = dataPath.getFileSystem(getConfiguration());
     Data loaded = DataLoader.loadData(dataset, fs, dataPath);
 
     testLoadedData(source, attrs, missings, loaded);
 
     // regression
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     source = Utils.randomDoubles(rng, descriptor, true, datasize);
     missings = Lists.newArrayList();
     sData = prepareData(source, attrs, missings);
     dataset = DataLoader.generateDataset(descriptor, true, sData);
 
     dataPath = Utils.writeDataToTestFile(sData);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     fs = dataPath.getFileSystem(getConfiguration());
     loaded = DataLoader.loadData(dataset, fs, dataPath);
 
@@ -290,11 +305,15 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] source = Utils.randomDoubles(rng, descriptor, false, datasize);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(source, attrs, missings);
     Dataset expected = DataLoader.generateDataset(descriptor, false, sData);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
 
     Path path = Utils.writeDataToTestFile(sData);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     FileSystem fs = path.getFileSystem(getConfiguration());
     
     Dataset dataset = DataLoader.generateDataset(descriptor, false, fs, path);
@@ -302,12 +321,14 @@ public final class DataLoaderTest extends MahoutTestCase {
     assertEquals(expected, dataset);
 
     // regression
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     source = Utils.randomDoubles(rng, descriptor, false, datasize);
     missings = Lists.newArrayList();
     sData = prepareData(source, attrs, missings);
     expected = DataLoader.generateDataset(descriptor, false, sData);
 
     path = Utils.writeDataToTestFile(sData);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     fs = path.getFileSystem(getConfiguration());
     
     dataset = DataLoader.generateDataset(descriptor, false, fs, path);

@@ -100,6 +100,7 @@ public abstract class AbstractJDBCIDMigrator extends AbstractIDMigrator implemen
 
   @Override
   public void initialize(Iterable<String> stringIDs) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-441
     for (String stringID : stringIDs) {
       storeMapping(toLongID(stringID), stringID);
     }

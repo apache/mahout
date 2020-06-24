@@ -64,6 +64,7 @@ public final class HadoopUtil {
    * @see #getCustomJobName(String, org.apache.hadoop.mapreduce.JobContext, Class, Class)
    */
   public static Job prepareJob(Path inputPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-873
                            Path outputPath,
                            Class<? extends InputFormat> inputFormat,
                            Class<? extends Mapper> mapper,
@@ -135,6 +136,7 @@ public final class HadoopUtil {
 
     if (reducer.equals(Reducer.class)) {
       if (mapper.equals(Mapper.class)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
       }
       job.setJarByClass(mapper);
@@ -146,6 +148,7 @@ public final class HadoopUtil {
     jobConf.set("mapred.input.dir", inputPath.toString());
 
     job.setMapperClass(mapper);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
     if (mapperKey != null) {
       job.setMapOutputKeyClass(mapperKey);
     }
@@ -183,6 +186,7 @@ public final class HadoopUtil {
 
 
   public static void delete(Configuration conf, Iterable<Path> paths) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (conf == null) {
       conf = new Configuration();
     }
@@ -221,6 +225,7 @@ public final class HadoopUtil {
    * @throws IOException if there was an IO error
    */
   public static long countRecords(Path path, PathType pt, PathFilter filter, Configuration conf) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-802
     long count = 0;
     Iterator<?> iterator = new SequenceFileDirValueIterator<>(path, pt, filter, null, true, conf);
     while (iterator.hasNext()) {
@@ -231,7 +236,9 @@ public final class HadoopUtil {
   }
 
   public static InputStream openStream(Path path, Configuration conf) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     FileSystem fs = FileSystem.get(path.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return fs.open(path.makeQualified(path.toUri(), path));
   }
 
@@ -240,6 +247,7 @@ public final class HadoopUtil {
     FileStatus[] statuses;
     FileSystem fs = path.getFileSystem(conf);
     if (filter == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
       statuses = pathType == PathType.GLOB ? fs.globStatus(path) : listStatus(fs, path);
     } else {
       statuses = pathType == PathType.GLOB ? fs.globStatus(path, filter) : listStatus(fs, path, filter);
@@ -251,6 +259,7 @@ public final class HadoopUtil {
   }
 
   public static FileStatus[] listStatus(FileSystem fs, Path path) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
     try {
       return fs.listStatus(path);
     } catch (FileNotFoundException e) {
@@ -277,6 +286,7 @@ public final class HadoopUtil {
    * @throws IOException - IO Exception
    */
   public static Path getSingleCachedFile(Configuration conf) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
     return getCachedFiles(conf)[0];
   }
 
@@ -319,18 +329,21 @@ public final class HadoopUtil {
   }
 
   public static void setSerializations(Configuration configuration) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     configuration.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");
   }
 
   public static void writeInt(int value, Path path, Configuration configuration) throws IOException {
     FileSystem fs = FileSystem.get(path.toUri(), configuration);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (FSDataOutputStream out = fs.create(path)) {
       out.writeInt(value);
     }
   }
 
   public static int readInt(Path path, Configuration configuration) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     FileSystem fs = FileSystem.get(path.toUri(), configuration);
     try (FSDataInputStream in = fs.open(path)) {
       return in.readInt();
@@ -346,12 +359,14 @@ public final class HadoopUtil {
    */
   public static String buildDirList(FileSystem fs, FileStatus fileStatus) throws IOException {
     boolean containsFiles = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> directoriesList = new ArrayList<>();
     for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath())) {
       if (childFileStatus.isDir()) {
         String subDirectoryList = buildDirList(fs, childFileStatus);
         directoriesList.add(subDirectoryList);
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
         containsFiles = true;
       }
     }
@@ -372,10 +387,14 @@ public final class HadoopUtil {
    */
   public static String buildDirList(FileSystem fs, FileStatus fileStatus, PathFilter pathFilter) throws IOException {
     boolean containsFiles = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> directoriesList = new ArrayList<>();
     for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath(), pathFilter)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
       if (childFileStatus.isDir()) {
         String subDirectoryList = buildDirList(fs, childFileStatus);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
         directoriesList.add(subDirectoryList);
       } else {
         containsFiles = true;
@@ -423,6 +442,7 @@ public final class HadoopUtil {
    * @return Path to first matched file or null if nothing was found
    **/
   public static Path findInCacheByPartOfFilename(String partOfFilename, URI[] localFiles) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1498
     for (URI distCacheFile : localFiles) {
       log.info("trying find a file in distributed cache containing [{}] in its name", partOfFilename);
       if (distCacheFile != null && distCacheFile.toString().contains(partOfFilename)) {

@@ -40,7 +40,9 @@ public final class TestDistributedConjugateGradientSolverCLI extends MahoutTestC
 
   private static Vector randomVector(int size, double entryMean) {
     Vector v = new DenseVector(size);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     Random r = RandomUtils.getRandom();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-672
     for (int i = 0; i < size; ++i) {
       v.setQuick(i, r.nextGaussian() * entryMean);
     }
@@ -77,6 +79,7 @@ public final class TestDistributedConjugateGradientSolverCLI extends MahoutTestC
 
   @Test
   public void testSolver() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     Path testData = getTestTempDirPath("testdata");
     DistributedRowMatrix matrix = new TestDistributedRowMatrix().randomDistributedMatrix(
@@ -100,6 +103,7 @@ public final class TestDistributedConjugateGradientSolverCLI extends MahoutTestC
     };
     
     DistributedConjugateGradientSolver solver = new DistributedConjugateGradientSolver();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     ToolRunner.run(getConfiguration(), solver.job(), args);
     
     Vector x = loadVector(conf, output);

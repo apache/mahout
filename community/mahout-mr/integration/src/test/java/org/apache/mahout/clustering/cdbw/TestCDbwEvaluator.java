@@ -74,7 +74,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     fs = FileSystem.get(conf);
     testdata = getTestTempDirPath("testdata");
     output = getTestTempDirPath("output");
@@ -95,7 +97,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
    *          the DistanceMeasure
    */
   private void initData(double dC, double dP, DistanceMeasure measure) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     clusters = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
     clusters.add(new Canopy(new DenseVector(new double[] {-dC, -dC}), 1, measure));
     clusters.add(new Canopy(new DenseVector(new double[] {-dC, dC}), 3, measure));
     clusters.add(new Canopy(new DenseVector(new double[] {dC, dC}), 5, measure));
@@ -152,7 +156,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
   
   @Test
   public void testCDbw1() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.5, measure);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
@@ -164,7 +170,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
   
   @Test
   public void testCDbw2() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.75, measure);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
@@ -197,6 +205,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19, measure);
     clusters.add(cluster);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<VectorWritable> points = new ArrayList<>();
     points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] {1, 1}))));
     representativePoints.put(cluster.getId(), points);
@@ -219,7 +228,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19, measure);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     clusters.add(cluster);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<VectorWritable> points = new ArrayList<>();
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
@@ -240,11 +251,17 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
    */
   @Test
   public void testAlmostSameValueCluster() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19, measure);
     clusters.add(cluster);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<VectorWritable> points = new ArrayList<>();
     Vector delta = new DenseVector(new double[] {0, Double.MIN_NORMAL});
     points.add(new VectorWritable(delta.clone()));
@@ -264,8 +281,10 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
   public void testCanopy() throws Exception {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     CanopyDriver.run(getConfiguration(), testdata, output, measure, 3.1, 2.1, true, 0.0, true);
     int numIterations = 10;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-843
     Path clustersIn = new Path(output, "clusters-0-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure,
         numIterations, true);
@@ -283,15 +302,18 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     CanopyDriver.run(getConfiguration(), testdata, output, measure, 3.1, 2.1, false, 0.0, true);
     // now run the KMeans job
     Path kmeansOutput = new Path(output, "kmeans");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     KMeansDriver.run(testdata, new Path(output, "clusters-0-final"), kmeansOutput, 0.001, 10, true, 0.0, true);
     int numIterations = 10;
     Path clustersIn = new Path(kmeansOutput, "clusters-10-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(kmeansOutput, "clusteredPoints"), kmeansOutput, measure,
         numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
     RepresentativePointsDriver.printRepresentativePoints(kmeansOutput, numIterations);
     // now print out the Results
     System.out.println("K-Means CDbw = " + evaluator.getCDbw());
@@ -305,13 +327,16 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     CanopyDriver.run(getConfiguration(), testdata, output, measure, 3.1, 2.1, false, 0.0, true);
     Path fuzzyKMeansOutput = new Path(output, "fuzzyk");
     // now run the KMeans job
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), fuzzyKMeansOutput, 0.001, 10, 2,
         true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(fuzzyKMeansOutput, "clusters-4");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
     RepresentativePointsDriver.run(conf, clustersIn, new Path(fuzzyKMeansOutput, "clusteredPoints"), fuzzyKMeansOutput,
         measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);

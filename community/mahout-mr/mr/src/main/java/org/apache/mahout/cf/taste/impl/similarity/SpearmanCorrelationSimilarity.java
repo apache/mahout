@@ -41,6 +41,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
   private final DataModel dataModel;
   
   public SpearmanCorrelationSimilarity(DataModel dataModel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     this.dataModel = Preconditions.checkNotNull(dataModel);
   }
   
@@ -84,6 +85,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
     xPrefs.sortByItem();
     yPrefs.sortByItem();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     long xIndex = xPrefs.getItemID(0);
     long yIndex = yPrefs.getItemID(0);
     int xPrefIndex = 0;
@@ -118,6 +120,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
     }
     
     // When ranks are unique, this formula actually gives the Pearson correlation
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     return 1.0 - 6.0 * sumXYRankDiff2 / (count * (count * count - 1));
   }
   

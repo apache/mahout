@@ -51,10 +51,12 @@ public class PrepEmailVectorsDriver extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.overwriteOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     addOption("maxItemsPerLabel", "mipl", "The maximum number of items per label.  Can be useful for making the "
         + "training sets the same size", String.valueOf(100000));
     addOption(buildOption("useListName", "ul", "Use the name of the list as part of the label.  If not set, then "
         + "just use the project name", false, false, "false"));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -67,10 +69,12 @@ public class PrepEmailVectorsDriver extends AbstractJob {
     }
     Job convertJob = prepareJob(input, output, SequenceFileInputFormat.class, PrepEmailMapper.class, Text.class,
         VectorWritable.class, PrepEmailReducer.class, Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     convertJob.getConfiguration().set(ITEMS_PER_CLASS, getOption("maxItemsPerLabel"));
     convertJob.getConfiguration().set(USE_LIST_NAME, String.valueOf(hasOption("useListName")));
 
     boolean succeeded = convertJob.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     return succeeded ? 0 : -1;
   }
 }

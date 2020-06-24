@@ -24,6 +24,7 @@ public class MutableElement implements Vector.Element {
   private int index;
   private double value;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
   MutableElement(int index, double value) {
     this.index = index;
     this.value = value;

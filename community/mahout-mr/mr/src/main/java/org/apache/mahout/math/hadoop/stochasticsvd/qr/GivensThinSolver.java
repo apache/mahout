@@ -47,6 +47,7 @@ public class GivensThinSolver {
   private final double[] cs = new double[2];
 
   public GivensThinSolver(int m, int n) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (!(m >= n)) {
       throw new IllegalArgumentException("Givens thin QR: must be true: m>=n");
     }
@@ -77,7 +78,9 @@ public class GivensThinSolver {
 
     double[] aRow = new double[n];
     for (int i = 0; i < m; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       Vector aRowV = a.viewRow(i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       for (int j = 0; j < n; j++) {
         aRow[j] = aRowV.getQuick(j);
       }
@@ -102,8 +105,10 @@ public class GivensThinSolver {
   }
 
   public void adjust(int newM) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (newM == m) {
       // no adjustment is required.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
       return; 
     }
     if (newM < n) {
@@ -144,6 +149,7 @@ public class GivensThinSolver {
    * @param aRow
    */
   public void appendRow(double[] aRow) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (cnt >= m) {
       throw new IllegalStateException("thin QR solver fed more rows than initialized for");
     }
@@ -205,6 +211,7 @@ public class GivensThinSolver {
   }
 
   private double[] getRRow(int row) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
     row += rStartRow;
     return mR[row >= n ? row - n : row];
   }
@@ -223,7 +230,9 @@ public class GivensThinSolver {
    */
   public UpperTriangular getRTilde() {
     UpperTriangular packedR = new UpperTriangular(n);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     for (int i = 0; i < n; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       packedR.assignNonZeroElementsInRow(i, getRRow(i));
     }
     return packedR;
@@ -313,6 +322,7 @@ public class GivensThinSolver {
   }
 
   public static double toRho(double c, double s) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (c == 0) {
       return 1;
     }
@@ -412,6 +422,7 @@ public class GivensThinSolver {
     int r = qt1[0].length;
 
     double[][] qTilde = new double[kp][];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     for (int i = 0; i < kp; i++) {
       qTilde[i] = new double[r];
     }
@@ -461,6 +472,7 @@ public class GivensThinSolver {
   public static double[][] computeQtHat(double[][] qt, int i,
       Iterator<UpperTriangular> rIter) {
     UpperTriangular rTilde = rIter.next();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     for (int j = 1; j < i; j++) {
       mergeR(rTilde, rIter.next());
     }
@@ -484,6 +496,7 @@ public class GivensThinSolver {
 
       if (Math.abs(1.0 - norm) < epsilon) {
         rank++;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       } else if (Math.abs(norm) > epsilon) {
         return false; // not a rank deficiency, either
       }
@@ -504,8 +517,10 @@ public class GivensThinSolver {
     int n = qtHats.iterator().next().length;
     int rank = 0;
     for (int i = 0; i < n; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
       List<Vector> ei = Lists.newArrayList();
       // Vector e_i=new DenseVector (qt[i],true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       for (double[][] qtHat : qtHats) {
         ei.add(new DenseVector(qtHat[i], true));
       }
@@ -522,6 +537,7 @@ public class GivensThinSolver {
       }
 
       for (int j = 0; j <= i; j++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
         List<Vector> ej = Lists.newArrayList();
         for (double[][] qtHat : qtHats) {
           ej.add(new DenseVector(qtHat[j], true));
@@ -587,6 +603,27 @@ public class GivensThinSolver {
 
     @Override
     public Vector like(int cardinality) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1660
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1713
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1714
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1715
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1716
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1717
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1718
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1719
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1720
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1721
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1722
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1723
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1724
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1725
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1726
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1727
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1728
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1730
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1731
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1732
       throw new UnsupportedOperationException();
     }
 
@@ -603,6 +640,7 @@ public class GivensThinSolver {
 
     @Override
     public double getLookupCost() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1202
       return 1;
     }
 

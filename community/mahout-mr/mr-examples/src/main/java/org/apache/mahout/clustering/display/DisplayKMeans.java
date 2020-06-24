@@ -43,6 +43,9 @@ public class DisplayKMeans extends DisplayClustering {
   
   DisplayKMeans() {
     initialize();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-683
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-682
     this.setTitle("k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
   }
   
@@ -50,11 +53,13 @@ public class DisplayKMeans extends DisplayClustering {
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     Path samples = new Path("samples");
     Path output = new Path("output");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, samples);
     HadoopUtil.delete(conf, output);
     
     RandomUtils.useTestSeed();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
     generateSamples();
     writeSampleData(samples);
     boolean runClusterer = true;
@@ -62,6 +67,7 @@ public class DisplayKMeans extends DisplayClustering {
     int numClusters = 3;
     int maxIterations = 10;
     if (runClusterer) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1070
       runSequentialKMeansClusterer(conf, samples, output, measure, numClusters, maxIterations, convergenceDelta);
     } else {
       runSequentialKMeansClassifier(conf, samples, output, measure, numClusters, maxIterations, convergenceDelta);
@@ -71,6 +77,7 @@ public class DisplayKMeans extends DisplayClustering {
   
   private static void runSequentialKMeansClassifier(Configuration conf, Path samples, Path output,
       DistanceMeasure measure, int numClusters, int maxIterations, double convergenceDelta) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Collection<Vector> points = Lists.newArrayList();
     for (int i = 0; i < numClusters; i++) {
       points.add(SAMPLE_DATA.get(i).get());
@@ -89,10 +96,12 @@ public class DisplayKMeans extends DisplayClustering {
   }
   
   private static void runSequentialKMeansClusterer(Configuration conf, Path samples, Path output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     DistanceMeasure measure, int numClusters, int maxIterations, double convergenceDelta)
     throws IOException, InterruptedException, ClassNotFoundException {
     Path clustersIn = new Path(output, "random-seeds");
     RandomSeedGenerator.buildRandom(conf, samples, clustersIn, numClusters, measure);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     KMeansDriver.run(samples, clustersIn, output, convergenceDelta, maxIterations, true, 0.0, true);
     loadClustersWritable(output);
   }

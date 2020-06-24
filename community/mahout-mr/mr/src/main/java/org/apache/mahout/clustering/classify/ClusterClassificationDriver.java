@@ -93,6 +93,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
       clusterClassificationThreshold = Double.parseDouble(getOption(DefaultOptionCreator.OUTLIER_THRESHOLD));
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
     run(getConf(), input, clustersIn, output, clusterClassificationThreshold, true, runSequential);
     
     return 0;
@@ -142,6 +143,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
   private static void classifyClusterSeq(Configuration conf, Path input, Path clusters, Path output,
       Double clusterClassificationThreshold, boolean emitMostLikely) throws IOException {
     List<Cluster> clusterModels = populateClusterModels(clusters, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-984
     ClusteringPolicy policy = ClusterClassifier.readPolicy(finalClustersPath(conf, clusters));
     ClusterClassifier clusterClassifier = new ClusterClassifier(clusterModels, policy);
     selectCluster(input, clusterModels, clusterClassifier, output, clusterClassificationThreshold, emitMostLikely);
@@ -159,13 +161,16 @@ public final class ClusterClassificationDriver extends AbstractJob {
    * @throws IOException
    */
   private static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Cluster> clusterModels = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-984
     Path finalClustersPath = finalClustersPath(conf, clusterOutputPath);
     Iterator<?> it = new SequenceFileDirValueIterator<>(finalClustersPath, PathType.LIST,
         PathFilters.partFilter(), null, false, conf);
     while (it.hasNext()) {
       ClusterWritable next = (ClusterWritable) it.next();
       Cluster cluster = next.getValue();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
       cluster.configure(conf);
       clusterModels.add(cluster);
     }
@@ -173,6 +178,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
   }
   
   private static Path finalClustersPath(Configuration conf, Path clusterOutputPath) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-984
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     return clusterFiles[0].getPath();
@@ -201,6 +207,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
       Path output, Double clusterClassificationThreshold, boolean emitMostLikely) throws IOException {
     Configuration conf = new Configuration();
     SequenceFile.Writer writer = new SequenceFile.Writer(input.getFileSystem(conf), conf, new Path(output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
         "part-m-" + 0), IntWritable.class, WeightedPropertyVectorWritable.class);
     for (Pair<Writable, VectorWritable> vw : new SequenceFileDirIterable<Writable, VectorWritable>(input, PathType.LIST,
         PathFilters.logsCRCFilter(), conf)) {
@@ -225,6 +232,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
   
   private static void classifyAndWrite(List<Cluster> clusterModels, Double clusterClassificationThreshold,
       boolean emitMostLikely, SequenceFile.Writer writer, VectorWritable vw, Vector pdfPerCluster) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Text, Text> props = new HashMap<>();
     if (emitMostLikely) {
       int maxValueIndex = pdfPerCluster.maxValueIndex();
@@ -238,7 +246,9 @@ public final class ClusterClassificationDriver extends AbstractJob {
   
   private static void writeAllAboveThreshold(List<Cluster> clusterModels, Double clusterClassificationThreshold,
       SequenceFile.Writer writer, VectorWritable vw, Vector pdfPerCluster) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Text, Text> props = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element pdf : pdfPerCluster.nonZeroes()) {
       if (pdf.get() >= clusterClassificationThreshold) {
         WeightedPropertyVectorWritable wvw = new WeightedPropertyVectorWritable(pdf.get(), vw.get(), props);
@@ -253,6 +263,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
       int maxValueIndex) throws IOException {
     Cluster cluster = clusterModels.get(maxValueIndex);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     DistanceMeasureCluster distanceMeasureCluster = (DistanceMeasureCluster) cluster;
     DistanceMeasure distanceMeasure = distanceMeasureCluster.getMeasure();
     double distance = distanceMeasure.distance(cluster.getCenter(), weightedPropertyVectorWritable.getVector());
@@ -290,6 +301,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
     job.setNumReduceTasks(0);
     
     job.setOutputKeyClass(IntWritable.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
     job.setOutputValueClass(WeightedPropertyVectorWritable.class);
     
     FileInputFormat.addInputPath(job, input);
@@ -301,6 +313,8 @@ public final class ClusterClassificationDriver extends AbstractJob {
   
   public static void run(Configuration conf, Path input, Path clusteringOutputPath, Path output,
       double clusterClassificationThreshold, boolean emitMostLikely, boolean runSequential) throws IOException,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
       InterruptedException, ClassNotFoundException {
     if (runSequential) {
       classifyClusterSeq(conf, input, clusteringOutputPath, output, clusterClassificationThreshold, emitMostLikely);

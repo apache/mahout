@@ -90,6 +90,7 @@ public class GroupedOnlineAuc implements OnlineAuc {
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     out.writeInt(map.size());
     for (Map.Entry<String,OnlineAuc> entry : map.entrySet()) {
       out.writeUTF(entry.getKey());

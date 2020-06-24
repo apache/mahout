@@ -32,6 +32,7 @@ public class H2OContext {
    *                   members agree on.
    */
   public H2OContext(String masterURL) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     H2O.main(new String[]{"-md5skip", "-name", masterURL});
     H2O.joinOthers();
   }

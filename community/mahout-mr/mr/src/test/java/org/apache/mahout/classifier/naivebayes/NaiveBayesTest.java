@@ -59,16 +59,19 @@ public class NaiveBayesTest extends MahoutTestCase {
     super.setUp();
 
     conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     inputFile = getTestTempFile("trainingInstances.seq");
     outputDir = getTestTempDir("output");
     outputDir.delete();
     tempDir = getTestTempDir("tmp");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     SequenceFile.Writer writer = new SequenceFile.Writer(FileSystem.get(conf), conf,
         new Path(inputFile.getAbsolutePath()), Text.class, VectorWritable.class);
 
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1006
       writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
       writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
@@ -79,7 +82,9 @@ public class NaiveBayesTest extends MahoutTestCase {
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_DOMESTIC));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SUV, ORIGIN_IMPORTED));
       writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_IMPORTED));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
   }
@@ -107,9 +112,13 @@ public class NaiveBayesTest extends MahoutTestCase {
   public void toyDataComplementary() throws Exception {
     TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
     trainNaiveBayes.setConf(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     trainNaiveBayes.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1635
         "--trainComplementary",
         "--tempDir", tempDir.getAbsolutePath() });
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1635
 
     NaiveBayesModel naiveBayesModel = NaiveBayesModel.materialize(new Path(outputDir.getAbsolutePath()), conf);
 
@@ -118,6 +127,8 @@ public class NaiveBayesTest extends MahoutTestCase {
     assertEquals(2, classifier.numCategories());
 
     Vector prediction = classifier.classifyFull(trainingInstance(COLOR_RED, TYPE_SUV, ORIGIN_DOMESTIC).get());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
 
     // should be classified as not stolen
     assertTrue(prediction.get(0) < prediction.get(1));

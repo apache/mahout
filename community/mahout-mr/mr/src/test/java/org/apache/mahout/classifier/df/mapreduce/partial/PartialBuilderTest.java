@@ -50,10 +50,12 @@ public final class PartialBuilderTest extends MahoutTestCase {
 
   @Test
   public void testProcessOutput() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     conf.setInt("mapred.map.tasks", NUM_MAPS);
 
     Random rng = RandomUtils.getRandom();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
 
     // prepare the output
     TreeID[] keys = new TreeID[NUM_TREES];
@@ -62,18 +64,22 @@ public final class PartialBuilderTest extends MahoutTestCase {
     randomKeyValues(rng, keys, values, firstIds);
 
     // store the output in a sequence file
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
     Path base = getTestTempDirPath("testdata");
     FileSystem fs = base.getFileSystem(conf);
 
     Path outputFile = new Path(base, "PartialBuilderTest.seq");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     Writer writer = SequenceFile.createWriter(fs, conf, outputFile,
         TreeID.class, MapredOutput.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       for (int index = 0; index < NUM_TREES; index++) {
         writer.append(keys[index], values[index]);
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
 
@@ -82,6 +88,7 @@ public final class PartialBuilderTest extends MahoutTestCase {
     Node[] newTrees = new Node[NUM_TREES];
     
     PartialBuilder.processOutput(new Job(conf), base, newKeys, newTrees);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
 
     // check the forest
     for (int tree = 0; tree < NUM_TREES; tree++) {
@@ -117,6 +124,8 @@ public final class PartialBuilderTest extends MahoutTestCase {
     int index = 0;
     int firstId = 0;
     Collection<Integer> partitions = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
 
     for (int p = 0; p < NUM_MAPS; p++) {
       // select a random partition, not yet selected

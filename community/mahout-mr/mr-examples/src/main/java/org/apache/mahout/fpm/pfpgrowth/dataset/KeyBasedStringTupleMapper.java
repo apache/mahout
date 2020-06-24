@@ -49,11 +49,14 @@ public class KeyBasedStringTupleMapper extends Mapper<LongWritable,Text,Text,Str
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     String[] fields = splitter.split(value.toString());
     if (fields.length != 4) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.info("{} {}", fields.length, value.toString());
       context.getCounter("Map", "ERROR").increment(1);
       return;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<String> oKey = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     for (int groupingField : groupingFields) {
       oKey.add(fields[groupingField]);
       context.setStatus(fields[groupingField]);
@@ -71,6 +74,7 @@ public class KeyBasedStringTupleMapper extends Mapper<LongWritable,Text,Text,Str
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-580
     Parameters params = new Parameters(context.getConfiguration().get("job.parameters", ""));
     splitter = Pattern.compile(params.get("splitPattern", "[ \t]*\t[ \t]*"));
     

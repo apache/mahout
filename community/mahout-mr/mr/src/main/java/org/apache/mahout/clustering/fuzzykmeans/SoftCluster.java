@@ -41,12 +41,14 @@ public class SoftCluster extends Kluster {
   
   @Override
   public String asFormatString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     return this.getIdentifier() + ": "
         + this.computeCentroid().asFormatString();
   }
   
   @Override
   public String getIdentifier() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     return (isConverged() ? "SV-" : "SC-") + getId();
   }
   

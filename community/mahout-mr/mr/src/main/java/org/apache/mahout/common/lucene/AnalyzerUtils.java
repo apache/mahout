@@ -32,6 +32,7 @@ public final class AnalyzerUtils {
    * @throws ClassNotFoundException - {@link ClassNotFoundException}
    */
   public static Analyzer createAnalyzer(String analyzerClassName) throws ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     return createAnalyzer(analyzerClassName, Version.LUCENE_5_5_2);
   }
 
@@ -47,10 +48,12 @@ public final class AnalyzerUtils {
    * @return {@link Analyzer}
    */
   public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     return createAnalyzer(analyzerClass, Version.LUCENE_5_5_2);
   }
 
   public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass, Version version) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1161
     try {
       return ClassUtils.instantiateAs(analyzerClass, Analyzer.class,
           new Class<?>[] { Version.class }, new Object[] { version });

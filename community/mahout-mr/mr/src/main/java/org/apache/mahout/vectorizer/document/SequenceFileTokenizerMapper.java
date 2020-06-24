@@ -41,7 +41,9 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
 
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-686
     CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
     stream.reset();
     StringTuple document = new StringTuple();
@@ -50,7 +52,9 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
         document.add(new String(termAtt.buffer(), 0, termAtt.length()));
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     stream.end();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     Closeables.close(stream, true);
     context.write(key, document);
   }

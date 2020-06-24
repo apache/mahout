@@ -52,11 +52,13 @@ public final class SVDRecommender extends AbstractRecommender {
   private static final Logger log = LoggerFactory.getLogger(SVDRecommender.class);
 
   public SVDRecommender(DataModel dataModel, Factorizer factorizer) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1433
     this(dataModel, factorizer, new AllUnknownItemsCandidateItemsStrategy(), getDefaultPersistenceStrategy());
   }
 
   public SVDRecommender(DataModel dataModel, Factorizer factorizer, CandidateItemsStrategy candidateItemsStrategy)
     throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-667
     this(dataModel, factorizer, candidateItemsStrategy, getDefaultPersistenceStrategy());
   }
 
@@ -73,6 +75,7 @@ public final class SVDRecommender extends AbstractRecommender {
    * @throws IOException
    */
   public SVDRecommender(DataModel dataModel, Factorizer factorizer, PersistenceStrategy persistenceStrategy) 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-572
     throws TasteException {
     this(dataModel, factorizer, getDefaultCandidateItemsStrategy(), persistenceStrategy);
   }
@@ -102,6 +105,7 @@ public final class SVDRecommender extends AbstractRecommender {
     }
     
     if (factorization == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-640
       train();
     }
     
@@ -114,10 +118,12 @@ public final class SVDRecommender extends AbstractRecommender {
     });
     refreshHelper.addDependency(getDataModel());
     refreshHelper.addDependency(factorizer);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1057
     refreshHelper.addDependency(candidateItemsStrategy);
   }
 
   static PersistenceStrategy getDefaultPersistenceStrategy() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-667
     return new NoPersistenceStrategy();
   }
 
@@ -132,14 +138,18 @@ public final class SVDRecommender extends AbstractRecommender {
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
     FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser, includeKnownItems);
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-572
         new Estimator(userID));
     log.debug("Recommendations are: {}", topItems);
 

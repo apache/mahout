@@ -68,12 +68,14 @@ public class CosineDistanceMeasure implements DistanceMeasure {
       return 0;
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     return 1.0 - dotProduct / denominator;
   }
   
   @Override
   public double distance(Vector v1, Vector v2) {
     if (v1.size() != v2.size()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-316
       throw new CardinalityException(v1.size(), v2.size());
     }
     double lengthSquaredv1 = v1.getLengthSquared();
@@ -88,6 +90,7 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     }
     
     // correct for zero-vector corner case
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1028
     if (denominator == 0 && dotProduct == 0) {
       return 0;
     }
@@ -109,7 +112,12 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     }
     
     // correct for zero-vector corner case
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1028
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1028
     if (denominator == 0 && dotProduct == 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1189
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1189
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1189
       return 0;
     }
     

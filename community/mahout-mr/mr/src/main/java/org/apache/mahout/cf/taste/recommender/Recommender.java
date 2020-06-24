@@ -42,6 +42,7 @@ public interface Recommender extends Refreshable {
    *           if an error occurs while accessing the {@link DataModel}
    */
   List<RecommendedItem> recommend(long userID, int howMany) throws TasteException;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
 
   /**
    * @param userID
@@ -56,6 +57,7 @@ public interface Recommender extends Refreshable {
    *           if an error occurs while accessing the {@link DataModel}
    */
   List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) throws TasteException;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
 
   /**
    * @param userID
@@ -86,6 +88,7 @@ public interface Recommender extends Refreshable {
    *           if an error occurs while accessing the {@link DataModel}
    */
   
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
   List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
       throws TasteException;
   
@@ -112,6 +115,7 @@ public interface Recommender extends Refreshable {
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel}
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   void setPreference(long userID, long itemID, float value) throws TasteException;
   
   /**

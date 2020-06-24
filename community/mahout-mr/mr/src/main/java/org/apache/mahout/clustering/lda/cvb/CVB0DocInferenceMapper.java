@@ -31,12 +31,15 @@ public class CVB0DocInferenceMapper extends CachingCVB0Mapper {
 
   @Override
   public void map(IntWritable docId, VectorWritable doc, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
     int numTopics = getNumTopics();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1262
     Vector docTopics = new DenseVector(numTopics).assign(1.0 / numTopics);
     Matrix docModel = new SparseRowMatrix(numTopics, doc.get().size());
     int maxIters = getMaxIters();
     ModelTrainer modelTrainer = getModelTrainer();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 0; i < maxIters; i++) {
       modelTrainer.getReadModel().trainDocTopicModel(doc.get(), docTopics, docModel);
     }
@@ -46,6 +49,7 @@ public class CVB0DocInferenceMapper extends CachingCVB0Mapper {
 
   @Override
   protected void cleanup(Context context) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     getModelTrainer().stop();
   }
 }

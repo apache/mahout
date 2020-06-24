@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class AggregateAndRecommendReducer extends
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-420
 
   private static final Logger log = LoggerFactory.getLogger(AggregateAndRecommendReducer.class);
 
@@ -77,7 +78,9 @@ public final class AggregateAndRecommendReducer extends
     recommendationsPerUser = conf.getInt(NUM_RECOMMENDATIONS, DEFAULT_NUM_RECOMMENDATIONS);
     booleanData = conf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
     indexItemIDMap = TasteHadoopUtils.readIDIndexMap(conf.get(ITEMID_INDEX_PATH), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1374
     idReader = new IDReader(conf);
     idReader.readIDs();
     itemsToRecommendFor = idReader.getItemIds();
@@ -100,6 +103,7 @@ public final class AggregateAndRecommendReducer extends
     /* having boolean data, each estimated preference can only be 1,
      * however we can't use this to rank the recommended items,
      * so we use the sum of similarities for that. */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1042
     Iterator<PrefAndSimilarityColumnWritable> columns = values.iterator();
     Vector predictions = columns.next().getSimilarityColumn();
     while (columns.hasNext()) {
@@ -109,6 +113,7 @@ public final class AggregateAndRecommendReducer extends
   }
 
   private void reduceNonBooleanData(VarLongWritable userID,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1374
                                     Iterable<PrefAndSimilarityColumnWritable> values,
                                     Context context) throws IOException, InterruptedException {
     /* each entry here is the sum in the numerator of the prediction formula */
@@ -122,11 +127,13 @@ public final class AggregateAndRecommendReducer extends
       Vector simColumn = prefAndSimilarityColumn.getSimilarityColumn();
       float prefValue = prefAndSimilarityColumn.getPrefValue();
       /* count the number of items used for each prediction */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element e : simColumn.nonZeroes()) {
         int itemIDIndex = e.index();
         numberOfSimilarItemsUsed.setQuick(itemIDIndex, numberOfSimilarItemsUsed.getQuick(itemIDIndex) + 1);
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1042
       if (denominators == null) {
         denominators = simColumn.clone();
       } else {
@@ -152,6 +159,7 @@ public final class AggregateAndRecommendReducer extends
     }
 
     Vector recommendationVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element element : numerators.nonZeroes()) {
       int itemIDIndex = element.index();
       /* preference estimations must be based on at least 2 datapoints */
@@ -171,11 +179,13 @@ public final class AggregateAndRecommendReducer extends
     throws IOException, InterruptedException {
     TopItemsQueue topKItems = new TopItemsQueue(recommendationsPerUser);
     FastIDSet itemsForUser = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1374
 
     if (idReader != null && idReader.isUserItemFilterSpecified()) {
       itemsForUser = idReader.getItemsToRecommendForUser(userID.get());
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element element : recommendationVector.nonZeroes()) {
       int index = element.index();
       long itemID;
@@ -190,6 +200,7 @@ public final class AggregateAndRecommendReducer extends
         float value = (float) element.get();
         if (!Float.isNaN(value)) {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
           MutableRecommendedItem topItem = topKItems.top();
           if (value > topItem.getValue()) {
             topItem.set(itemID, value);
@@ -201,6 +212,7 @@ public final class AggregateAndRecommendReducer extends
 
     List<RecommendedItem> topItems = topKItems.getTopItems();
     if (!topItems.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
       recommendedItems.set(topItems);
       context.write(userID, recommendedItems);
     }
@@ -213,6 +225,7 @@ public final class AggregateAndRecommendReducer extends
     } else if (itemsForUser != null) {
       return itemsForUser.contains(itemID);
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       return allItemsToRecommendFor.contains(itemID);
     }
   }

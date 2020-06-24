@@ -47,8 +47,10 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
   private FileSystem fs;
   
   private static List<VectorWritable> getPoints() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : RAW) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
       Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
@@ -60,6 +62,7 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
   }
@@ -76,6 +79,7 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points, input, fs, conf);
     
     RandomSeedGenerator.buildRandom(conf, input, output, 4, new ManhattanDistanceMeasure());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-651
 
     int clusterCount = 0;
     Collection<Integer> set = Sets.newHashSet();
@@ -84,6 +88,7 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
       clusterCount++;
       Cluster cluster = clusterWritable.getValue();
       int id = cluster.getId();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
       assertTrue(set.add(id)); // Validate unique id's
       
       Vector v = cluster.getCenter();
@@ -108,6 +113,7 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
 
     int clusterCount = 0;
     Collection<Integer> set = Sets.newHashSet();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
     for (ClusterWritable clusterWritable :
          new SequenceFileValueIterable<ClusterWritable>(new Path(output, "part-randomSeed"), true, conf)) {
       clusterCount++;
@@ -125,9 +131,12 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
   /** Test that initial clusters built with same random seed are reproduced  */
  @Test
  public void testBuildRandomSeededSameInitalClusters() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
     List<VectorWritable> points = getPoints();
     Job job = new Job();
     Configuration conf = job.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
     job.setMapOutputValueClass(VectorWritable.class);
     Path input = getTestTempFilePath("random-input");
     Path output = getTestTempDirPath("random-output");

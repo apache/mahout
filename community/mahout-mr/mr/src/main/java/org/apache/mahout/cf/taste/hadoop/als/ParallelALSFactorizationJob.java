@@ -113,14 +113,19 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-877
     addOption("lambda", null, "regularization parameter", true);
     addOption("implicitFeedback", null, "data consists of implicit feedback?", String.valueOf(false));
     addOption("alpha", null, "confidence parameter (only used on implicit feedback)", String.valueOf(40));
     addOption("numFeatures", null, "dimension of the feature space", true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
     addOption("numIterations", null, "number of iterations", true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1166
     addOption("numThreadsPerSolver", null, "threads per solver mapper", String.valueOf(1));
     addOption("usesLongIDs", null, "input contains long IDs that need to be translated");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -132,6 +137,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     alpha = Double.parseDouble(getOption("alpha"));
     implicitFeedback = Boolean.parseBoolean(getOption("implicitFeedback"));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1166
     numThreadsPerSolver = Integer.parseInt(getOption("numThreadsPerSolver"));
     boolean usesLongIDs = Boolean.parseBoolean(getOption("usesLongIDs", String.valueOf(false)));
 
@@ -143,6 +149,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     *           M (items x features) is the representation of items in the feature space
     */
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
     if (usesLongIDs) {
       Job mapUsers = prepareJob(getInputPath(), getOutputPath("userIDIndex"), TextInputFormat.class,
           MapLongIDsMapper.class, VarIntWritable.class, VarLongWritable.class, IDMapReducer.class,
@@ -171,6 +178,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     /* create A */
     Job userRatings = prepareJob(pathToItemRatings(), pathToUserRatings(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1205
         TransposeMapper.class, IntWritable.class, VectorWritable.class, MergeUserVectorsReducer.class,
         IntWritable.class, VectorWritable.class);
     userRatings.setCombinerClass(MergeVectorsCombiner.class);
@@ -190,6 +198,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     }
 
     Vector averageRatings = ALS.readFirstRow(getTempPath("averageRatings"), getConf());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1166
 
     int numItems = averageRatings.getNumNondefaultElements();
     int numUsers = (int) userRatings.getCounters().findCounter(Stats.NUM_USERS).getValue();
@@ -201,8 +210,10 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     for (int currentIteration = 0; currentIteration < numIterations; currentIteration++) {
       /* broadcast M, read A row-wise, recompute U row-wise */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-878
       log.info("Recomputing U (iteration {}/{})", currentIteration, numIterations);
       runSolver(pathToUserRatings(), pathToU(currentIteration), pathToM(currentIteration - 1), currentIteration, "U",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           numItems);
       /* broadcast U, read A' row-wise, recompute M row-wise */
       log.info("Recomputing M (iteration {}/{})", currentIteration, numIterations);
@@ -217,18 +228,22 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     Random random = RandomUtils.getRandom();
 
     FileSystem fs = FileSystem.get(pathToM(-1).toUri(), getConf());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer =
              new SequenceFile.Writer(fs, getConf(), new Path(pathToM(-1), "part-m-00000"),
                  IntWritable.class, VectorWritable.class)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1169
       IntWritable index = new IntWritable();
       VectorWritable featureVector = new VectorWritable();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element e : averageRatings.nonZeroes()) {
         Vector row = new DenseVector(numFeatures);
         row.setQuick(0, e.get());
         for (int m = 1; m < numFeatures; m++) {
           row.setQuick(m, random.nextDouble());
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1169
         index.set(e.index());
         featureVector.set(row);
         writer.append(index, featureVector);
@@ -243,7 +258,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context ctx)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
       Vector sum = Vectors.sum(values.iterator());
       result.set(new SequentialAccessSparseVector(sum));
       ctx.write(key, result);
@@ -257,6 +274,8 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     public void reduce(WritableComparable<?> key, Iterable<VectorWritable> vectors, Context ctx)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       throws IOException, InterruptedException {
       Vector merged = VectorWritable.merge(vectors.iterator()).get();
       result.set(new SequentialAccessSparseVector(merged));
@@ -275,6 +294,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
       usesLongIDs = ctx.getConfiguration().getBoolean(USES_LONG_IDS, false);
     }
 
@@ -286,6 +306,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       float rating = Float.parseFloat(tokens[2]);
 
       ratings.setQuick(userID, rating);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1151
 
       itemIDWritable.set(itemID);
       ratingsWritable.set(ratings);
@@ -302,13 +323,16 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     // necessary for local execution in the same JVM only
     SharingMapper.reset();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1205
 
     Class<? extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable>> solverMapperClassInternal;
     String name;
 
     if (implicitFeedback) {
       solverMapperClassInternal = SolveImplicitFeedbackMapper.class;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1276
       name = "Recompute " + matrixName + ", iteration (" + currentIteration + '/' + numIterations + "), "
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
           + '(' + numThreadsPerSolver + " threads, " + numFeatures + " features, implicit feedback)";
     } else {
       solverMapperClassInternal = SolveExplicitFeedbackMapper.class;
@@ -323,6 +347,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     solverConf.set(ALPHA, String.valueOf(alpha));
     solverConf.setInt(NUM_FEATURES, numFeatures);
     solverConf.set(NUM_ENTITIES, String.valueOf(numEntities));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1205
 
     FileSystem fs = FileSystem.get(pathToUorM.toUri(), solverConf);
     FileStatus[] parts = fs.listStatus(pathToUorM, PathFilters.partFilter());
@@ -351,10 +376,12 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     @Override
     protected void map(IntWritable r, VectorWritable v, Context ctx) throws IOException, InterruptedException {
       RunningAverage avg = new FullRunningAverage();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element e : v.get().nonZeroes()) {
         avg.addDatum(e.get());
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1151
       featureVector.setQuick(r.get(), avg.getAverage());
       featureVectorWritable.set(featureVector);
       ctx.write(firstIndex, featureVectorWritable);
@@ -372,6 +399,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
       tokenPos = ctx.getConfiguration().getInt(TOKEN_POS, -1);
       Preconditions.checkState(tokenPos >= 0);
     }
@@ -391,6 +419,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   static class IDMapReducer extends Reducer<VarIntWritable,VarLongWritable,VarIntWritable,VarLongWritable> {
     @Override
     protected void reduce(VarIntWritable index, Iterable<VarLongWritable> ids, Context ctx)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       throws IOException, InterruptedException {
       ctx.write(index, ids.iterator().next());
     }

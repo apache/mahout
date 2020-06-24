@@ -34,6 +34,7 @@ public abstract class AbstractCandidateItemsStrategy implements CandidateItemsSt
     MostSimilarItemsCandidateItemsStrategy {
 
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException{
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
       return doGetCandidateItems(preferredItemIDs, dataModel, false);
   }
   

@@ -42,6 +42,7 @@ public final class IntegerTuple implements WritableComparable<IntegerTuple> {
   }
   
   public IntegerTuple(Iterable<Integer> entries) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     for (Integer entry : entries) {
       add(entry);
     }
@@ -114,6 +115,7 @@ public final class IntegerTuple implements WritableComparable<IntegerTuple> {
   
   @Override
   public boolean equals(Object obj) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (this == obj) {
       return true;
     }
@@ -137,6 +139,7 @@ public final class IntegerTuple implements WritableComparable<IntegerTuple> {
   @Override
   public void readFields(DataInput in) throws IOException {
     int len = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     tuple = Lists.newArrayListWithCapacity(len);
     for (int i = 0; i < len; i++) {
       int data = in.readInt();
@@ -147,6 +150,7 @@ public final class IntegerTuple implements WritableComparable<IntegerTuple> {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(tuple.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     for (Integer entry : tuple) {
       out.writeInt(entry);
     }
@@ -159,6 +163,7 @@ public final class IntegerTuple implements WritableComparable<IntegerTuple> {
     int min = Math.min(thisLength, otherLength);
     for (int i = 0; i < min; i++) {
       int ret = this.tuple.get(i).compareTo(otherTuple.integerAt(i));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       if (ret == 0) {
         continue;
       }

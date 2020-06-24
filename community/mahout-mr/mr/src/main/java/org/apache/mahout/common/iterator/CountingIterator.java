@@ -28,6 +28,7 @@ public final class CountingIterator extends AbstractIterator<Integer> {
   private final int to;
 
   public CountingIterator(int to) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this.to = to;
   }
 

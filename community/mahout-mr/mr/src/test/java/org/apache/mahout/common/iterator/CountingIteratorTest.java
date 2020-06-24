@@ -26,6 +26,7 @@ public final class CountingIteratorTest extends MahoutTestCase {
 
   @Test
   public void testEmptyCase() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     assertFalse(new CountingIterator(0).hasNext());
   }
 

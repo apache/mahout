@@ -27,6 +27,7 @@ import java.util.Iterator;
 public class Bump125Test extends MahoutTestCase {
   @Test
   public void testIncrement() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-672
     Iterator<Integer> ref = Lists.newArrayList(1, 2, 3, 4, 5, 6, 7,
             8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40, 50, 60,
             70, 80, 100, 120, 140, 160, 180, 200, 250, 300, 350,

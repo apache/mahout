@@ -49,7 +49,10 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
    */
   @Override
   protected Iterable<String> tokenize(CharSequence originalForm) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     TokenStream ts = analyzer.tokenStream(getName(), new CharSequenceReader(originalForm));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-686
     ts.addAttribute(CharTermAttribute.class);
     return new LuceneTokenIterable(ts, false);
   }
@@ -67,6 +70,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
       for (int i = 0; i < n; i++) {
         buf.put(input.charAt(i));
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-855
       buf.rewind();
     }
 
@@ -82,7 +86,9 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     @Override
     public int read(char[] cbuf, int off, int len) {
       int toRead = Math.min(len, buf.remaining());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (toRead > 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-855
         buf.get(cbuf, off, toRead);
         return toRead;
       } else {
@@ -101,6 +107,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     private final TokenStream tokenStream;
 
     private LuceneTokenIterable(TokenStream ts, boolean firstTime) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
       this.tokenStream = ts;
       this.firstTime = firstTime;
     }

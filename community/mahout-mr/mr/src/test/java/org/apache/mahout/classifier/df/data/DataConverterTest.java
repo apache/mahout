@@ -36,6 +36,7 @@ public final class DataConverterTest extends MahoutTestCase {
     String descriptor = Utils.randomDescriptor(rng, ATTRIBUTE_COUNT);
     double[][] source = Utils.randomDoubles(rng, descriptor, false, INSTANCE_COUNT);
     String[] sData = Utils.double2String(source);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data data = DataLoader.loadData(dataset, sData);
     
@@ -46,6 +47,7 @@ public final class DataConverterTest extends MahoutTestCase {
     }
 
     // regression
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     source = Utils.randomDoubles(rng, descriptor, true, INSTANCE_COUNT);
     sData = Utils.double2String(source);
     dataset = DataLoader.generateDataset(descriptor, true, sData);
@@ -54,6 +56,7 @@ public final class DataConverterTest extends MahoutTestCase {
     converter = new DataConverter(dataset);
     
     for (int index = 0; index < data.size(); index++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       assertEquals(data.get(index), converter.convert(sData[index]));
     }
   }

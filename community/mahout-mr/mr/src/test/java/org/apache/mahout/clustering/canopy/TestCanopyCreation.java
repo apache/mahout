@@ -57,6 +57,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
 
   private static final double[][] RAW = { { 1, 1 }, { 2, 1 }, { 1, 2 },
       { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
 
   private List<Canopy> referenceManhattan;
 
@@ -73,8 +74,10 @@ public final class TestCanopyCreation extends MahoutTestCase {
   private FileSystem fs;
 
   private static List<VectorWritable> getPointsWritable() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : RAW) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
       Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
@@ -83,6 +86,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
   }
 
   private static List<Vector> getPoints() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<Vector> points = Lists.newArrayList();
     for (double[] fr : RAW) {
       Vector vec = new RandomAccessSparseVector(fr.length);
@@ -108,9 +112,12 @@ public final class TestCanopyCreation extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     fs = FileSystem.get(getConfiguration());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
     referenceManhattan = CanopyClusterer.createCanopies(getPoints(),
         manhattanDistanceMeasure, 3.1, 2.1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     manhattanCentroids = CanopyClusterer.getCenters(referenceManhattan);
     referenceEuclidean = CanopyClusterer.createCanopies(getPoints(),
         euclideanDistanceMeasure, 3.1, 2.1);
@@ -130,6 +137,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
       Canopy testCanopy = referenceManhattan.get(canopyIx);
       int[] expectedNumPoints = { 4, 4, 3 };
       double[][] expectedCentroids = { { 1.5, 1.5 }, { 4.0, 4.0 },
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
           { 4.666666666666667, 4.6666666666666667 } };
       assertEquals("canopy points " + canopyIx, testCanopy.getNumObservations(),
                    expectedNumPoints[canopyIx]);
@@ -156,6 +164,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
         { 4.666666666666667, 4.666666666666667 } };
     for (int canopyIx = 0; canopyIx < referenceEuclidean.size(); canopyIx++) {
       Canopy testCanopy = referenceEuclidean.get(canopyIx);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
       assertEquals("canopy points " + canopyIx, testCanopy.getNumObservations(),
                    expectedNumPoints[canopyIx]);
       double[] refCentroid = expectedCentroids[canopyIx];
@@ -197,6 +207,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     List<VectorWritable> data = writer.getValue(new Text("centroid"));
     assertEquals("Number of centroids", 3, data.size());
     for (int i = 0; i < data.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
       assertEquals("Centroid error",
           manhattanCentroids.get(i).asFormatString(), data.get(i).get()
               .asFormatString());
@@ -211,6 +222,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
   @Test
   public void testCanopyMapperEuclidean() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, euclideanDistanceMeasure
         .getClass().getName());
@@ -228,11 +240,14 @@ public final class TestCanopyCreation extends MahoutTestCase {
       mapper.map(new Text(), point, context);
     }
     mapper.cleanup(context);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     assertEquals("Number of map results", 1, writer.getData().size());
     // now verify the output
     List<VectorWritable> data = writer.getValue(new Text("centroid"));
     assertEquals("Number of centroids", 3, data.size());
     for (int i = 0; i < data.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
       assertEquals("Centroid error",
           euclideanCentroids.get(i).asFormatString(), data.get(i).get()
               .asFormatString());
@@ -260,6 +275,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
 
     List<VectorWritable> points = getPointsWritable();
     reducer.reduce(new Text("centroid"), points, context);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1284
     Iterable<Text> keys = writer.getKeysInInsertionOrder();
     assertEquals("Number of centroids", 3, Iterables.size(keys));
     int i = 0;
@@ -283,6 +299,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
   public void testCanopyReducerEuclidean() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1284
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
@@ -324,6 +341,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(config, getTestTempDirPath("testdata"), output,
         manhattanDistanceMeasure, 3.1, 2.1, false, 0.0, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
 
     // verify output from sequence file
     Path path = new Path(output, "clusters-0-final/part-r-00000");
@@ -332,6 +350,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     try {
       Writable key = new Text();
       ClusterWritable clusterWritable = new ClusterWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1284
       assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("1st key", "C-0", key.toString());
 
@@ -379,8 +398,11 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(config, getTestTempDirPath("testdata"), output,
         euclideanDistanceMeasure, 3.1, 2.1, false, 0.0, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
 
     // verify output from sequence file
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-843
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-843
     Path path = new Path(output, "clusters-0-final/part-r-00000");
     FileSystem fs = FileSystem.get(path.toUri(), config);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
@@ -389,6 +411,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
       ClusterWritable clusterWritable = new ClusterWritable();
       assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("1st key", "C-0", key.toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
 
       List<Pair<Double,Double>> refCenters = Lists.newArrayList();
       refCenters.add(new Pair<>(1.8,1.8));
@@ -403,6 +428,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertFalse("more to come", reader.next(key, clusterWritable));
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(reader, true);
     }
   }
@@ -418,10 +445,12 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(config, getTestTempDirPath("testdata"), output,
         manhattanDistanceMeasure, 3.1, 2.1, true, 0.0, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
 
     // verify output from sequence file
     Path path = new Path(output, "clusters-0-final/part-r-00000");
     int ix = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
     for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(path, true,
         config)) {
       assertEquals("Center [" + ix + ']', manhattanCentroids.get(ix), clusterWritable.getValue()
@@ -438,6 +467,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
   @Test
   public void testClusteringEuclideanSeq() throws Exception {
     List<VectorWritable> points = getPointsWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration config = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points,
         getTestTempFilePath("testdata/file1"), fs, config);
@@ -475,8 +506,13 @@ public final class TestCanopyCreation extends MahoutTestCase {
   /** Story: User can remove outliers while clustering points using sequential execution */
   @Test
   public void testClusteringEuclideanWithOutlierRemovalSeq() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     List<VectorWritable> points = getPointsWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration config = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
     ClusteringTestUtils.writePointsToFile(points,
         getTestTempFilePath("testdata/file1"), fs, config);
     // now run the Canopy Driver in sequential mode
@@ -494,11 +530,17 @@ public final class TestCanopyCreation extends MahoutTestCase {
         optKey(DefaultOptionCreator.METHOD_OPTION),
         DefaultOptionCreator.SEQUENTIAL_METHOD };
     ToolRunner.run(config, new CanopyDriver(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     // verify output from sequence file
     Path path = new Path(output, "clusters-0-final/part-r-00000");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-843
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-843
 
     int ix = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
     for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(path, true,
         config)) {
       assertEquals("Center [" + ix + ']', euclideanCentroids.get(ix), clusterWritable.getValue()
@@ -521,6 +563,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
   public void testClusteringManhattanMR() throws Exception {
     List<VectorWritable> points = getPointsWritable();
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
     ClusteringTestUtils.writePointsToFile(points, true, 
         getTestTempFilePath("testdata/file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, true, 
@@ -528,6 +572,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     // now run the Job
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
         manhattanDistanceMeasure, 3.1, 2.1, true, 0.0, false);
     Path path = new Path(output, "clusteredPoints/part-m-00000");
     long count = HadoopUtil.countRecords(path, conf);
@@ -557,9 +602,14 @@ public final class TestCanopyCreation extends MahoutTestCase {
         optKey(DefaultOptionCreator.T2_OPTION), "2.1",
         optKey(DefaultOptionCreator.CLUSTERING_OPTION),
         optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     ToolRunner.run(getConfiguration(), new CanopyDriver(), args);
     Path path = new Path(output, "clusteredPoints/part-m-00000");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     long count = HadoopUtil.countRecords(path, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     assertEquals("number of points", points.size(), count);
   }
   
@@ -569,8 +619,16 @@ public final class TestCanopyCreation extends MahoutTestCase {
    */
   @Test
   public void testClusteringEuclideanWithOutlierRemovalMR() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     List<VectorWritable> points = getPointsWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
     ClusteringTestUtils.writePointsToFile(points, true, 
         getTestTempFilePath("testdata/file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, true, 
@@ -587,7 +645,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
         optKey(DefaultOptionCreator.OUTLIER_THRESHOLD), "0.7",
         optKey(DefaultOptionCreator.CLUSTERING_OPTION),
         optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     ToolRunner.run(getConfiguration(), new CanopyDriver(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     Path path = new Path(output, "clusteredPoints/part-m-00000");
     long count = HadoopUtil.countRecords(path, conf);
     int expectedPointsAfterOutlierRemoval = 8;
@@ -609,6 +669,11 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.T3_KEY, String.valueOf(1.1));
     conf.set(CanopyConfigKeys.T4_KEY, String.valueOf(0.1));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
     conf.set(CanopyConfigKeys.CF_KEY, "0");
     DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<>();
     Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
@@ -624,7 +689,10 @@ public final class TestCanopyCreation extends MahoutTestCase {
    */
   @Test
   public void testCanopyMapperClusterFilter() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
     CanopyMapper mapper = new CanopyMapper();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, manhattanDistanceMeasure
         .getClass().getName());
@@ -636,9 +704,17 @@ public final class TestCanopyCreation extends MahoutTestCase {
         .build(mapper, conf, writer);
     mapper.setup(context);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
     List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
       mapper.map(new Text(), point, context);
     }
     mapper.cleanup(context);
@@ -655,6 +731,10 @@ public final class TestCanopyCreation extends MahoutTestCase {
   @Test
   public void testCanopyReducerClusterFilter() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY,
         "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
@@ -666,6 +746,13 @@ public final class TestCanopyCreation extends MahoutTestCase {
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
     List<VectorWritable> points = getPointsWritable();
     reducer.reduce(new Text("centroid"), points, context);
     Set<Text> keys = writer.getKeys();

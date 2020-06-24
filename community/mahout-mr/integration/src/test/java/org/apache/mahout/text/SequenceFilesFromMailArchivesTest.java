@@ -54,11 +54,13 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     File subDir = new File(inputDir, "subdir");
     subDir.mkdir();
     File gzFile = new File(subDir, "mail-messages.gz");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (GZIPOutputStream gzOut = new GZIPOutputStream(new FileOutputStream(gzFile))) {
       gzOut.write(testMailMessages.getBytes("UTF-8"));
       gzOut.finish();
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     File subDir2 = new File(subDir, "subsubdir");
     subDir2.mkdir();
     File gzFile2 = new File(subDir2, "mail-messages-2.gz");
@@ -73,6 +75,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
 
     File outputDir = this.getTestTempDir("mail-archives-out");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     String[] args = {
       "--input", inputDir.getAbsolutePath(),
       "--output", outputDir.getAbsolutePath(),
@@ -90,11 +93,14 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     String expectedChunkPath = expectedChunkFile.getAbsolutePath();
     Assert.assertTrue("Expected chunk file " + expectedChunkPath + " not found!", expectedChunkFile.isFile());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<>(new Path(expectedChunkPath), true, conf);
     Assert.assertTrue("First key/value pair not found!", iterator.hasNext());
     Pair<Text, Text> record = iterator.next();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-649
     File parentFile = new File(new File(new File("TEST"), "subdir"), "mail-messages.gz");
     Assert.assertEquals(new File(parentFile, testVars[0][0]).toString(), record.getFirst().toString());
     Assert.assertEquals(testVars[0][1] + testVars[0][2], record.getSecond().toString());
@@ -121,18 +127,22 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
   @Test
   public void testMapReduce() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Path tmpDir = getTestTempDirPath();
     Path mrOutputDir = new Path(tmpDir, "mail-archives-out-mr");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration configuration = getConfiguration();
     FileSystem fs = FileSystem.get(configuration);
 
     File expectedInputFile = new File(inputDir.toString());
 
     String[] args = {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
       "-Dhadoop.tmp.dir=" + configuration.get("hadoop.tmp.dir"),
       "--input", expectedInputFile.getAbsolutePath(),
       "--output", mrOutputDir.toString(),
       "--charset", "UTF-8",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
       "--keyPrefix", "TEST",
       "--method", "mapreduce",
       "--body", "--subject", "--separator", ""
@@ -147,12 +157,14 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     assertEquals("part-m-00000", fileStatuses[0].getPath().getName());
     SequenceFileIterator<Text, Text> iterator =
       new SequenceFileIterator<>(mrOutputDir.suffix("/part-m-00000"), true, configuration);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     Assert.assertTrue("First key/value pair not found!", iterator.hasNext());
     Pair<Text, Text> record = iterator.next();
 
     File parentFileSubSubDir = new File(new File(new File(new File("TEST"), "subdir"), "subsubdir"), "mail-messages-2.gz");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     String expected = record.getFirst().toString();
     if (SystemUtils.IS_OS_WINDOWS) {
       expected = expected.replace("/", "\\");
@@ -205,7 +217,9 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
   };
 
   private static final String testMailMessages =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     "From user@example.com  Mon Jul 24 19:13:53 2000\n"
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
       + "Return-Path: <user@example.com>\n"
       + "Mailing-List: contact ant-user-help@jakarta.apache.org; run by ezmlm\n"
       + "Delivered-To: mailing list ant-user@jakarta.apache.org\n"

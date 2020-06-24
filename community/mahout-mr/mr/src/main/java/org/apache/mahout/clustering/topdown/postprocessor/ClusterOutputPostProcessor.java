@@ -63,6 +63,7 @@ public final class ClusterOutputPostProcessor {
     this.clusterPostProcessorOutput = output;
     this.clusteredPoints = PathDirectory.getClusterOutputClusteredPoints(clusterOutputToBeProcessed);
     this.conf = hadoopConfiguration;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     this.writersForClusters = new HashMap<>();
     fileSystem = clusteredPoints.getFileSystem(conf);
   }
@@ -74,6 +75,7 @@ public final class ClusterOutputPostProcessor {
   public void process() throws IOException {
     createPostProcessDirectory();
     for (Pair<?, WeightedVectorWritable> record
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         : new SequenceFileDirIterable<Writable, WeightedVectorWritable>(clusteredPoints, PathType.GLOB, PathFilters.partFilter(),
                                                                         null, false, conf)) {
       String clusterId = record.getFirst().toString().trim();
@@ -87,6 +89,7 @@ public final class ClusterOutputPostProcessor {
    * Creates the directory to put post processed clusters.
    */
   private void createPostProcessDirectory() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     if (!fileSystem.exists(clusterPostProcessorOutput)
             && !fileSystem.mkdirs(clusterPostProcessorOutput)) {
       throw new IOException("Error creating cluster post processor directory");

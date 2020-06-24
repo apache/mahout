@@ -87,6 +87,8 @@ public final class VectorOrPrefWritable implements Writable {
   public void readFields(DataInput in) throws IOException {
     boolean hasVector = in.readBoolean();
     if (hasVector) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-385
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-305
       VectorWritable writable = new VectorWritable();
       writable.readFields(in);
       set(writable.get());
@@ -99,6 +101,7 @@ public final class VectorOrPrefWritable implements Writable {
 
   @Override
   public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-721
     return vector == null ? userID + ":" + value : vector.toString();
   }
 }

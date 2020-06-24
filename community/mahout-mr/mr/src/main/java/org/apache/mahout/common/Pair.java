@@ -26,6 +26,7 @@ public final class Pair<A,B> implements Comparable<Pair<A,B>>, Serializable {
   private final B second;
   
   public Pair(A first, B second) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-174
     this.first = first;
     this.second = second;
   }
@@ -39,6 +40,7 @@ public final class Pair<A,B> implements Comparable<Pair<A,B>>, Serializable {
   }
   
   public Pair<B, A> swap() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new Pair<>(second, first);
   }
 
@@ -85,6 +87,7 @@ public final class Pair<A,B> implements Comparable<Pair<A,B>>, Serializable {
    */
   @Override
   public int compareTo(Pair<A,B> other) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     Comparable<A> thisFirst = (Comparable<A>) first;
     A thatFirst = other.getFirst();
     int compare = thisFirst.compareTo(thatFirst);

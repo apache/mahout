@@ -40,7 +40,9 @@ public class DataTest extends MahoutTestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     rng = RandomUtils.getRandom();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     classifierData = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
     regressionData = Utils.randomData(rng, ATTRIBUTE_COUNT, true, DATA_SIZE);
   }
@@ -59,6 +61,7 @@ public class DataTest extends MahoutTestCase {
       double[] values = classifierData.values(attr);
       double value = values[rng.nextInt(values.length)];
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       Data eSubset = classifierData.subset(Condition.equals(attr, value));
       Data lSubset = classifierData.subset(Condition.lesser(attr, value));
       Data gSubset = classifierData.subset(Condition.greaterOrEquals(attr, value));
@@ -113,6 +116,7 @@ public class DataTest extends MahoutTestCase {
 
   @Test
   public void testValues() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     for (int attr = 0; attr < classifierData.getDataset().nbAttributes(); attr++) {
       double[] values = classifierData.values(attr);
 
@@ -126,6 +130,7 @@ public class DataTest extends MahoutTestCase {
       double[] values = regressionData.values(attr);
 
       // each value of the attribute should appear exactly one time in values
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-470
       for (int index = 0; index < DATA_SIZE; index++) {
         assertEquals(1, count(values, regressionData.get(index).get(attr)));
       }
@@ -145,9 +150,11 @@ public class DataTest extends MahoutTestCase {
   @Test
   public void testIdenticalTrue() throws Exception {
     // generate a small data, only to get the dataset
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, false, 1).getDataset();
     
     // test empty data
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Data empty = new Data(dataset);
     assertTrue(empty.isIdentical());
 
@@ -155,6 +162,7 @@ public class DataTest extends MahoutTestCase {
     Data identical = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
     Instance model = identical.get(0);
     for (int index = 1; index < DATA_SIZE; index++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       for (int attr = 0; attr < identical.getDataset().nbAttributes(); attr++) {
         identical.get(index).set(attr, model.get(attr));
       }
@@ -169,6 +177,8 @@ public class DataTest extends MahoutTestCase {
 
     for (int nloop = 0; nloop < n; nloop++) {
       Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
 
       // choose a random instance
       int index = rng.nextInt(DATA_SIZE);
@@ -185,9 +195,11 @@ public class DataTest extends MahoutTestCase {
   @Test
   public void testIdenticalLabelTrue() throws Exception {
     // generate a small data, only to get a dataset
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, false, 1).getDataset();
     
     // test empty data
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Data empty = new Data(dataset);
     assertTrue(empty.identicalLabel());
 
@@ -197,6 +209,7 @@ public class DataTest extends MahoutTestCase {
             DATA_SIZE, rng.nextInt());
     String[] sData = Utils.double2String(source);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data data = DataLoader.loadData(dataset, sData);
     
@@ -208,6 +221,7 @@ public class DataTest extends MahoutTestCase {
     int n = 10;
 
     for (int nloop = 0; nloop < n; nloop++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-470
       String descriptor = Utils.randomDescriptor(rng, ATTRIBUTE_COUNT);
       int label = Utils.findLabel(descriptor);
       double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor, false,
@@ -218,6 +232,7 @@ public class DataTest extends MahoutTestCase {
 
       String[] sData = Utils.double2String(source);
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
       Data data = DataLoader.loadData(dataset, sData);
 
@@ -232,6 +247,7 @@ public class DataTest extends MahoutTestCase {
   @Test
   public void testBagging() {
     Data bag = classifierData.bagging(rng);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
 
     // the bag should have the same size as the data
     assertEquals(classifierData.size(), bag.size());
@@ -267,10 +283,12 @@ public class DataTest extends MahoutTestCase {
   public void testRsplit() {
 
     // rsplit should handle empty subsets
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Data source = classifierData.clone();
     Data subset = source.rsplit(rng, 0);
     assertTrue("subset should be empty", subset.isEmpty());
     assertEquals("source.size is incorrect", DATA_SIZE, source.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-470
 
     // rsplit should handle full size subsets
     source = classifierData.clone();
@@ -331,14 +349,17 @@ public class DataTest extends MahoutTestCase {
   public void testMajorityLabel() throws Exception {
 
     // all instances have the same label
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-470
     String descriptor = Utils.randomDescriptor(rng, ATTRIBUTE_COUNT);
     int label = Utils.findLabel(descriptor);
 
     int label1 = rng.nextInt();
     double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor, false, 100,
         label1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     String[] sData = Utils.double2String(source);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data data = DataLoader.loadData(dataset, sData);
 
@@ -356,7 +377,9 @@ public class DataTest extends MahoutTestCase {
         nblabel2--;
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     sData = Utils.double2String(source);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     dataset = DataLoader.generateDataset(descriptor, false, sData);
     data = DataLoader.loadData(dataset, sData);
     int code2 = dataset.labelCode(Double.toString(label2));
@@ -372,6 +395,7 @@ public class DataTest extends MahoutTestCase {
         break;
       }
     } while (true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     sData = Utils.double2String(source);
     
     data = DataLoader.loadData(dataset, sData);

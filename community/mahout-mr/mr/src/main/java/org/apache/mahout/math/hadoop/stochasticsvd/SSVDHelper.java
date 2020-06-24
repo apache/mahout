@@ -102,6 +102,7 @@ public final class SSVDHelper {
                                 Configuration conf) throws IOException {
     VectorWritable vw = new VectorWritable(v);
     FileSystem fs = FileSystem.get(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer w = new SequenceFile.Writer(fs,
         conf,
         vectorFilePath,
@@ -130,6 +131,7 @@ public final class SSVDHelper {
       }
 
       FileStatus firstSeqFile;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
       if (fstats[0].isDir()) {
         firstSeqFile = fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
       } else {
@@ -141,6 +143,7 @@ public final class SSVDHelper {
         r = new SequenceFile.Reader(fs, firstSeqFile.getPath(), conf);
         return r.getKeyClass().asSubclass(Writable.class);
       } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(r, true);
       }
     }
@@ -156,6 +159,7 @@ public final class SSVDHelper {
         matcher.reset(o1.getPath().getName());
         if (!matcher.matches()) {
           throw new IllegalArgumentException("Unexpected file name, unable to deduce partition #:"
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
                                                + o1.getPath());
         }
         int p1 = Integer.parseInt(matcher.group(3));
@@ -172,9 +176,11 @@ public final class SSVDHelper {
     };
 
   public static Iterator<Pair<Writable, Vector>> drmIterator(FileSystem fs, Path glob, Configuration conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
                                                              Deque<Closeable> closeables)
     throws IOException {
     SequenceFileDirIterator<Writable, VectorWritable> ret =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       new SequenceFileDirIterator<>(glob,
                                                             PathType.GLOB,
                                                             PathFilters.logsCRCFilter(),
@@ -201,6 +207,7 @@ public final class SSVDHelper {
    */
   public static DenseMatrix drmLoadAsDense(FileSystem fs, Path glob, Configuration conf) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Deque<Closeable> closeables = new ArrayDeque<>();
     try {
       List<double[]> denseData = new ArrayList<>();
@@ -237,6 +244,7 @@ public final class SSVDHelper {
    */
   public static DenseSymmetricMatrix loadAndSumUpperTriangularMatricesAsSymmetric(Path glob, Configuration conf) throws IOException {
     Vector v = loadAndSumUpVectors(glob, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1281
     return v == null ? null : new DenseSymmetricMatrix(v);
   }
 
@@ -247,6 +255,8 @@ public final class SSVDHelper {
     throws IOException {
 
     SequenceFileDirValueIterator<VectorWritable> iter =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       new SequenceFileDirValueIterator<>(glob,
                                                        PathType.GLOB,
                                                        null,
@@ -266,6 +276,8 @@ public final class SSVDHelper {
       return v;
 
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(iter, true);
     }
 
@@ -282,6 +294,7 @@ public final class SSVDHelper {
      * contain the matrix.
      */
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFileDirValueIterator<VectorWritable> iter = new SequenceFileDirValueIterator<>(glob,
         PathType.GLOB,
         null,

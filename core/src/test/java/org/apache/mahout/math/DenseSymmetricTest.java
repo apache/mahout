@@ -46,6 +46,7 @@ public class DenseSymmetricTest extends MahoutTestCase {
 
   @Test
   public void testEigen() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-2033
     Matrix a = new DenseSymmetricMatrix(new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, false);
     Matrix b = new DenseMatrix(a.numRows(), a.numCols());
     b.assign(a);

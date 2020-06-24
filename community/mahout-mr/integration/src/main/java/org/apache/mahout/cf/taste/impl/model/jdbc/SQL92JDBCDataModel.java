@@ -203,6 +203,7 @@ public class SQL92JDBCDataModel extends AbstractJDBCDataModel {
     PreparedStatement stmt1 = null;
     PreparedStatement stmt2 = null;
     PreparedStatement stmt3 = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
     ResultSet rs = null;
     try {
       conn = getDataSource().getConnection();
@@ -237,6 +238,7 @@ public class SQL92JDBCDataModel extends AbstractJDBCDataModel {
       log.warn("Exception while setting preference", sqle);
       throw new TasteException(sqle);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
       IOUtils.quietClose(rs);
       IOUtils.quietClose(stmt1);
       IOUtils.quietClose(stmt2);

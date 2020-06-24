@@ -44,6 +44,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   
   public BooleanUserPreferenceArray(int size) {
     this.ids = new long[size];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-367
     this.id = Long.MIN_VALUE; // as a sort of 'unspecified' value
   }
   
@@ -176,7 +177,9 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   
   @Override
   public Iterator<Preference> iterator() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     return Iterators.transform(new CountingIterator(length()),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         new Function<Integer, Preference>() {
         @Override
         public Preference apply(Integer from) {

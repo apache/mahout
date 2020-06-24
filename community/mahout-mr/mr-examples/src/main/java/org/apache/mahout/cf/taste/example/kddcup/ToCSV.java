@@ -52,7 +52,9 @@ public final class ToCSV {
 
     OutputStream outStream = new GZIPOutputStream(new FileOutputStream(outputFile));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (Writer outWriter = new BufferedWriter(new OutputStreamWriter(outStream, Charsets.UTF_8))){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       for (Pair<PreferenceArray,long[]> user : new DataFileIterable(inputFile)) {
         PreferenceArray prefs = user.getFirst();
         long[] timestamps = user.getSecond();

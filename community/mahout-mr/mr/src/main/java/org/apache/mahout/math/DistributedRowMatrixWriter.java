@@ -35,6 +35,7 @@ public final class DistributedRowMatrixWriter {
         IntWritable.class, VectorWritable.class);
     IntWritable topic = new IntWritable();
     VectorWritable vector = new VectorWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (MatrixSlice slice : matrix) {
       topic.set(slice.index());
       vector.set(slice.vector());

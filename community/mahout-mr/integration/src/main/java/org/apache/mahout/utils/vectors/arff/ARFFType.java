@@ -19,7 +19,9 @@ package org.apache.mahout.utils.vectors.arff;
 
 public enum ARFFType {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
   NUMERIC("numeric"),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1063
   INTEGER("integer"),
   REAL("real"),
   NOMINAL("{"),
@@ -38,6 +40,7 @@ public enum ARFFType {
   
   public String getLabel(String line) {
     int idx = line.lastIndexOf(indicator);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1150
     return removeQuotes(line.substring(ARFFModel.ATTRIBUTE.length(), idx));
   }
 
@@ -49,6 +52,7 @@ public enum ARFFType {
   public static String removeQuotes(String str) {
     String cleaned = str;
     if (cleaned != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       cleaned = cleaned.trim();
       boolean isQuoted = cleaned.length() > 1
           && (cleaned.startsWith("\"") &&  cleaned.endsWith("\"")

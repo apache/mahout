@@ -48,6 +48,7 @@ public final class AbstractJobTest extends MahoutTestCase {
           public int run(String[] args) throws IOException {
             addFlag("testFlag", "t", "a simple test flag");
             
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
             Map<String,List<String>> argMap = parseArguments(args);
             testMap.clear();
             testMap.putAll(argMap);
@@ -69,6 +70,8 @@ public final class AbstractJobTest extends MahoutTestCase {
   
   @Test
   public void testOptions() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     final Map<String,List<String>> testMap = Maps.newHashMap();
     
     AbstractJobFactory fact = new AbstractJobFactory() {
@@ -84,6 +87,7 @@ public final class AbstractJobTest extends MahoutTestCase {
             this.addOption("hasDefault", "hd", "option w/ default", "defaultValue");
 
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
             Map<String,List<String>> argMap = parseArguments(args);
             if (argMap == null) {
               return -1;
@@ -105,6 +109,7 @@ public final class AbstractJobTest extends MahoutTestCase {
       "--required", "requiredArg"
     });
     assertEquals("0 for no missing required options", 0, ret);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     assertEquals(Collections.singletonList("requiredArg"), testMap.get("--required"));
     assertEquals(Collections.singletonList("defaultValue"), testMap.get("--hasDefault"));
     assertNull(testMap.get("--option"));
@@ -131,6 +136,7 @@ public final class AbstractJobTest extends MahoutTestCase {
       "--notRequired", "notRequired"
     });
     assertEquals("0 for no missing required options", 0, ret);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     assertEquals(Collections.singletonList("requiredArg"), testMap.get("--required"));
     assertEquals(Collections.singletonList("nonDefault"), testMap.get("--hasDefault"));
     assertEquals(Collections.singletonList("optionValue"), testMap.get("--option"));
@@ -145,6 +151,7 @@ public final class AbstractJobTest extends MahoutTestCase {
       "-nr", "notRequired"
     });
     assertEquals("0 for no missing required options", 0, ret);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     assertEquals(Collections.singletonList("requiredArg"), testMap.get("--required"));
     assertEquals(Collections.singletonList("nonDefault"), testMap.get("--hasDefault"));
     assertEquals(Collections.singletonList("optionValue"), testMap.get("--option"));
@@ -166,6 +173,7 @@ public final class AbstractJobTest extends MahoutTestCase {
             addOutputOption();
             
             // arg map should be null if a required option is missing.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
             Map<String, List<String>> argMap = parseArguments(args);
             
             if (argMap == null) {

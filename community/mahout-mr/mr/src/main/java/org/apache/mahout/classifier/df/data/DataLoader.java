@@ -65,13 +65,16 @@ public final class DataLoader {
    */
   private static boolean parseString(Attribute[] attrs, Set<String>[] values, CharSequence string,
     boolean regression) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1448
     String[] tokens = SEPARATORS.split(string);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(tokens.length == attrs.length,
         "Wrong number of attributes in the string: " + tokens.length + ". Must be: " + attrs.length);
 
     // extract tokens and check is there is any missing value
     for (int attr = 0; attr < attrs.length; attr++) {
       if (!attrs[attr].isIgnored() && "?".equals(tokens[attr])) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         return false; // missing value
       }
     }
@@ -82,6 +85,7 @@ public final class DataLoader {
         if (attrs[attr].isCategorical() || (!regression && attrs[attr].isLabel())) {
           // update values
           if (values[attr] == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             values[attr] = new HashSet<>();
           }
           values[attr].add(token);
@@ -119,6 +123,7 @@ public final class DataLoader {
 
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       if (!line.isEmpty()) {
         Instance instance = converter.convert(line);
         if (instance != null) {
@@ -128,6 +133,10 @@ public final class DataLoader {
           log.warn("{}: missing values", instances.size());
         }
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         log.warn("{}: empty string", instances.size());
       }
     }
@@ -140,7 +149,9 @@ public final class DataLoader {
   /** Loads the data from multiple paths specified by pathes */
   public static Data loadData(Dataset dataset, FileSystem fs, Path[] pathes) throws IOException {
     List<Instance> instances = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1448
     for (Path path : pathes) {
       Data loadedData = loadData(dataset, fs, path);
       for (int index = 0; index <= loadedData.size(); index++) {
@@ -153,11 +164,16 @@ public final class DataLoader {
   /** Loads the data from a String array */
   public static Data loadData(Dataset dataset, String[] data) {
     List<Instance> instances = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     DataConverter converter = new DataConverter(dataset);
 
     for (String line : data) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       if (!line.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         Instance instance = converter.convert(line);
         if (instance != null) {
           instances.add(instance);
@@ -193,11 +209,14 @@ public final class DataLoader {
     // used to convert CATEGORICAL attribute to Integer
     @SuppressWarnings("unchecked")
     Set<String>[] valsets = new Set[attrs.length];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
 
     int size = 0;
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       if (!line.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         if (parseString(attrs, valsets, line, regression)) {
           size++;
         }
@@ -231,10 +250,13 @@ public final class DataLoader {
     // used to convert CATEGORICAL attributes to Integer
     @SuppressWarnings("unchecked")
     Set<String>[] valsets = new Set[attrs.length];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
 
     int size = 0;
     for (String aData : data) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       if (!aData.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         if (parseString(attrs, valsets, aData, regression)) {
           size++;
         }

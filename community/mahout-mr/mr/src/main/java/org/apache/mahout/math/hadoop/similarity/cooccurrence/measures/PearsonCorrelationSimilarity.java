@@ -29,6 +29,7 @@ public class PearsonCorrelationSimilarity extends CosineSimilarity {
 
     // center non-zero elements
     double average = vector.norm(1) / vector.getNumNonZeroElements();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element e : vector.nonZeroes()) {
       e.set(e.get() - average);
     }

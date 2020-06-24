@@ -47,6 +47,7 @@ public class StreamingKMeansThread implements Callable<Iterable<Centroid>> {
   }
 
   public StreamingKMeansThread(Iterable<Centroid> dataPoints, Configuration conf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1358
     this.dataPoints = dataPoints;
     this.conf = conf;
   }
@@ -61,6 +62,7 @@ public class StreamingKMeansThread implements Callable<Iterable<Centroid>> {
     Iterator<Centroid> dataPointsIterator = dataPoints.iterator();
 
     if (estimateDistanceCutoff == StreamingKMeansDriver.INVALID_DISTANCE_CUTOFF) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Centroid> estimatePoints = new ArrayList<>(NUM_ESTIMATE_POINTS);
       while (dataPointsIterator.hasNext() && estimatePoints.size() < NUM_ESTIMATE_POINTS) {
         Centroid centroid = dataPointsIterator.next();
@@ -77,6 +79,7 @@ public class StreamingKMeansThread implements Callable<Iterable<Centroid>> {
 
     // datapointsIterator could be empty if no estimate distance was initially provided
     // hence creating the iterator again here for the clustering
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1358
     if (!dataPointsIterator.hasNext()) {
       dataPointsIterator = dataPoints.iterator();
     }

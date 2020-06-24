@@ -38,11 +38,13 @@ public class CIReducer extends Reducer<IntWritable,ClusterWritable,IntWritable,C
   protected void reduce(IntWritable key, Iterable<ClusterWritable> values, Context context) throws IOException,
       InterruptedException {
     Iterator<ClusterWritable> iter = values.iterator();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1083
     Cluster first = iter.next().getValue(); // there must always be at least one
     while (iter.hasNext()) {
       Cluster cluster = iter.next().getValue();
       first.observe(cluster);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Cluster> models = new ArrayList<>();
     models.add(first);
     classifier = new ClusterClassifier(models, policy);
@@ -52,6 +54,7 @@ public class CIReducer extends Reducer<IntWritable,ClusterWritable,IntWritable,C
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
     Configuration conf = context.getConfiguration();
     String priorClustersPath = conf.get(ClusterIterator.PRIOR_PATH_KEY);
     classifier = new ClusterClassifier();

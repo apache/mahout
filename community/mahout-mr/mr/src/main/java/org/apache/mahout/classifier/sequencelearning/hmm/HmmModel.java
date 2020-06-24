@@ -81,6 +81,7 @@ public class HmmModel implements Cloneable {
   public HmmModel clone() {
     HmmModel model = new HmmModel(transitionMatrix.clone(), emissionMatrix.clone(), initialProbabilities.clone());
     if (hiddenStateNames != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       model.hiddenStateNames = HashBiMap.create(hiddenStateNames);
     }
     if (outputStateNames != null) {
@@ -258,6 +259,7 @@ public class HmmModel implements Cloneable {
    * @return hidden state names.
    */
   public Map<String, Integer> getHiddenStateNames() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     return hiddenStateNames;
   }
 
@@ -269,6 +271,7 @@ public class HmmModel implements Cloneable {
    */
   public void registerHiddenStateNames(String[] stateNames) {
     if (stateNames != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       hiddenStateNames = HashBiMap.create();
       for (int i = 0; i < stateNames.length; ++i) {
         hiddenStateNames.put(stateNames[i], i);
@@ -283,6 +286,7 @@ public class HmmModel implements Cloneable {
    */
   public void registerHiddenStateNames(Map<String, Integer> stateNames) {
     if (stateNames != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       hiddenStateNames = HashBiMap.create(stateNames);
     }
   }
@@ -298,6 +302,7 @@ public class HmmModel implements Cloneable {
     if (hiddenStateNames == null) {
       return null;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     return hiddenStateNames.inverse().get(id);
   }
 
@@ -312,6 +317,7 @@ public class HmmModel implements Cloneable {
     if (hiddenStateNames == null) {
       return -1;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     Integer tmp = hiddenStateNames.get(name);
     return tmp == null ? -1 : tmp;
   }
@@ -333,6 +339,7 @@ public class HmmModel implements Cloneable {
    */
   public void registerOutputStateNames(String[] stateNames) {
     if (stateNames != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       outputStateNames = HashBiMap.create();
       for (int i = 0; i < stateNames.length; ++i) {
         outputStateNames.put(stateNames[i], i);
@@ -347,6 +354,7 @@ public class HmmModel implements Cloneable {
    */
   public void registerOutputStateNames(Map<String, Integer> stateNames) {
     if (stateNames != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       outputStateNames = HashBiMap.create(stateNames);
     }
   }
@@ -362,6 +370,7 @@ public class HmmModel implements Cloneable {
     if (outputStateNames == null) {
       return null;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     return outputStateNames.inverse().get(id);
   }
 
@@ -376,6 +385,7 @@ public class HmmModel implements Cloneable {
     if (outputStateNames == null) {
       return -1;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     Integer tmp = outputStateNames.get(name);
     return tmp == null ? -1 : tmp;
   }

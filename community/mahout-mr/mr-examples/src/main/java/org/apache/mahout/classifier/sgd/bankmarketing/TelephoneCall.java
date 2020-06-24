@@ -44,6 +44,7 @@ public class TelephoneCall {
       String fieldValue = value.next();
       fields.put(name, fieldValue);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       switch (name) {
         case "age": {
           double v = Double.parseDouble(fieldValue);

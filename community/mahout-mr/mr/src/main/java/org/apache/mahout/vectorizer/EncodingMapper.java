@@ -52,10 +52,12 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1145
     sequentialVectors = conf.getBoolean(USE_SEQUENTIAL, false);
     namedVectors = conf.getBoolean(USE_NAMED_VECTORS, false);
     String analyzerName = conf.get(ANALYZER_NAME, StandardAnalyzer.class.getName());
     Analyzer analyzer;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
     try {
       analyzer = AnalyzerUtils.createAnalyzer(analyzerName);
     } catch (ClassNotFoundException e) {
@@ -66,10 +68,12 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
     String encoderName = conf.get(ENCODER_FIELD_NAME, "text");
     cardinality = conf.getInt(CARDINALITY, 5000);
     String encClass = conf.get(ENCODER_CLASS);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     encoder = ClassUtils.instantiateAs(encClass,
             FeatureVectorEncoder.class,
             new Class[]{String.class},
             new Object[]{encoderName});
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (encoder instanceof LuceneTextValueEncoder) {
       ((LuceneTextValueEncoder) encoder).setAnalyzer(analyzer);
     }
@@ -77,12 +81,15 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
 
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     Vector vector;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1145
     if (sequentialVectors) {
       vector = new SequentialAccessSparseVector(cardinality);
     } else {
       vector = new RandomAccessSparseVector(cardinality);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (namedVectors) {
       vector = new NamedVector(vector, key.toString());
     }

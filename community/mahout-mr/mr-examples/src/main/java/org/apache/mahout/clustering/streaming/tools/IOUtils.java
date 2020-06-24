@@ -36,6 +36,7 @@ public class IOUtils {
    * @return an Iterable<Centroid> with the converted vectors.
    */
   public static Iterable<Centroid> getCentroidsFromCentroidWritableIterable(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1253
       Iterable<CentroidWritable>  dirIterable) {
     return Iterables.transform(dirIterable, new Function<CentroidWritable, Centroid>() {
       @Override

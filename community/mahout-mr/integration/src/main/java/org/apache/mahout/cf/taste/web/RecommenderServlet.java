@@ -78,6 +78,7 @@ public final class RecommenderServlet extends HttpServlet {
   public void doGet(HttpServletRequest request,
                     HttpServletResponse response) throws ServletException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     String userIDString = request.getParameter("userID");
     if (userIDString == null) {
       throw new ServletException("userID was not specified");
@@ -102,6 +103,7 @@ public final class RecommenderServlet extends HttpServlet {
       } else {
         throw new ServletException("Bad format parameter: " + format);
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } catch (TasteException | IOException te) {
       throw new ServletException(te);
     }
@@ -109,6 +111,7 @@ public final class RecommenderServlet extends HttpServlet {
   }
 
   private static void writeXML(HttpServletResponse response, Iterable<RecommendedItem> items) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-755
     response.setContentType("application/xml");
     response.setCharacterEncoding("UTF-8");
     response.setHeader("Cache-Control", "no-cache");
@@ -118,6 +121,8 @@ public final class RecommenderServlet extends HttpServlet {
       writer.print("<item><value>");
       writer.print(recommendedItem.getValue());
       writer.print("</value><id>");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       writer.print(recommendedItem.getItemID());
       writer.print("</id></item>");
     }
@@ -125,6 +130,7 @@ public final class RecommenderServlet extends HttpServlet {
   }
 
   private static void writeJSON(HttpServletResponse response, Iterable<RecommendedItem> items) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-755
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
     response.setHeader("Cache-Control", "no-cache");
@@ -132,6 +138,7 @@ public final class RecommenderServlet extends HttpServlet {
     writer.print("{\"recommendedItems\":{\"item\":[");
     boolean first = true;
     for (RecommendedItem recommendedItem : items) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1101
       if (first) {
         first = false;
       } else {
@@ -140,6 +147,8 @@ public final class RecommenderServlet extends HttpServlet {
       writer.print("{\"value\":\"");
       writer.print(recommendedItem.getValue());
       writer.print("\",\"id\":\"");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       writer.print(recommendedItem.getItemID());
       writer.print("\"}");
     }
@@ -147,6 +156,7 @@ public final class RecommenderServlet extends HttpServlet {
   }
 
   private void writePlainText(HttpServletResponse response,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
                               long userID,
                               boolean debug,
                               Iterable<RecommendedItem> items) throws IOException, TasteException {
@@ -190,6 +200,8 @@ public final class RecommenderServlet extends HttpServlet {
       Preference pref = sortedPrefs.get(i);
       writer.print(pref.getValue());
       writer.print('\t');
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       writer.println(pref.getItemID());
     }
     writer.println();
@@ -197,6 +209,8 @@ public final class RecommenderServlet extends HttpServlet {
     for (RecommendedItem recommendedItem : items) {
       writer.print(recommendedItem.getValue());
       writer.print('\t');
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       writer.println(recommendedItem.getItemID());
     }
   }

@@ -71,6 +71,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
     vector.set(12, 0.2);
     vector.set(56, 0.9);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     ItemSimilarityJob.MostSimilarItemPairsMapper mapper = new ItemSimilarityJob.MostSimilarItemPairsMapper();
     setField(mapper, "indexItemIDMap", indexItemIDMap);
     setField(mapper, "maxSimilarItemsPerItem", 1);
@@ -92,6 +93,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     EasyMock.replay(context);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     new ItemSimilarityJob.MostSimilarItemPairsReducer().reduce(new EntityEntityWritable(123L, 456L),
         Arrays.asList(new DoubleWritable(0.5), new DoubleWritable(0.5)), context);
 
@@ -118,6 +120,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
     outputDir.delete();
     File tmpDir = getTestTempDir("tmp");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-418
     writeLines(inputFile,
         "2,1,1",
         "1,2,1",
@@ -127,6 +130,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     ItemSimilarityJob similarityJob = new ItemSimilarityJob();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     conf.set("mapred.input.dir", inputFile.getAbsolutePath());
     conf.set("mapred.output.dir", outputDir.getAbsolutePath());
@@ -134,6 +138,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     similarityJob.setConf(conf);
     similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
        CosineSimilarity.class.getName() });
     File outPart = outputDir.listFiles(new FilenameFilter() {
       @Override
@@ -154,6 +159,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
       double similarity = Double.parseDouble(tokens[2]);
 
       if (currentLine == 1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-362
         assertEquals(1L, itemAID);
         assertEquals(3L, itemBID);
         assertEquals(0.45, similarity, 0.01);
@@ -205,6 +211,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
     outputDir.delete();
     File tmpDir = getTestTempDir("tmp");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-418
     writeLines(inputFile,
         "1,1,1",
         "1,3,1",
@@ -221,6 +228,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     ItemSimilarityJob similarityJob =  new ItemSimilarityJob();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     conf.set("mapred.input.dir", inputFile.getAbsolutePath());
     conf.set("mapred.output.dir", outputDir.getAbsolutePath());
@@ -228,6 +236,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     similarityJob.setConf(conf);
     similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
         TanimotoCoefficientSimilarity.class.getName(), "--maxSimilaritiesPerItem", "1" });
     File outPart = outputDir.listFiles(new FilenameFilter() {
       @Override

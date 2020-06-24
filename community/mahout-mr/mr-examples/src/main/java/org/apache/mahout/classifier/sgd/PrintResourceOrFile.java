@@ -32,6 +32,7 @@ public final class PrintResourceOrFile {
 
   public static void main(String[] args) throws Exception {
     Preconditions.checkArgument(args.length == 1, "Must have a single argument that names a file or resource.");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (BufferedReader in = TrainLogistic.open(args[0])){
       String line;
       while ((line = in.readLine()) != null) {

@@ -34,6 +34,7 @@ public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
 
   private void initCaches() {
     this.caches = new OpenIntIntHashMap[getProbes()];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1385
     for (int probe = 0; probe < getProbes(); probe++) {
       caches[probe] = new OpenIntIntHashMap();
     }
@@ -54,6 +55,7 @@ public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
     Preconditions.checkArgument(dataSize == this.dataSize,
         "dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + ']');
     int originalHashcode = Arrays.hashCode(originalForm);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1385
     if (caches[probe].containsKey(originalHashcode)) {
       return caches[probe].get(originalHashcode);
     }

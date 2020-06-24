@@ -52,6 +52,8 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(byte[] originalForm, double w, Vector data) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     throw new UnsupportedOperationException("addToVector is not supported for InteractionVectorEncoder");
   }
 
@@ -87,7 +89,12 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
         for (Integer j : jValues) {
           int n = (k + j) % data.size();
           if (isTraceEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1357
             trace(String.format("%s:%s", new String(originalForm1, Charsets.UTF_8), new String(originalForm2,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
 		Charsets.UTF_8)), n);
           }
           data.set(n, data.get(n) + w);
@@ -114,6 +121,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-492
     return String.format(Locale.ENGLISH, "%s:%s", getName(), originalForm);
   }
 

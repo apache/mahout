@@ -64,12 +64,15 @@ public class TFIDFPartialVectorReducer extends
       return;
     }
     Vector value = it.next().get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
     Vector vector = new RandomAccessSparseVector((int) featureCount, value.getNumNondefaultElements());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element e : value.nonZeroes()) {
       if (!dictionary.containsKey(e.index())) {
         continue;
       }
       long df = dictionary.get(e.index());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-973
       if (maxDf > -1 && (100.0 * df) / vectorCount > maxDf) {
         continue;
       }
@@ -78,14 +81,17 @@ public class TFIDFPartialVectorReducer extends
       }
       vector.setQuick(e.index(), tfidf.calculate((int) e.get(), (int) df, (int) featureCount, (int) vectorCount));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     if (namedVector) {
       vector = new NamedVector(vector, key.toString());
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
     VectorWritable vectorWritable = new VectorWritable(vector);
     context.write(key, vectorWritable);
   }
@@ -98,10 +104,13 @@ public class TFIDFPartialVectorReducer extends
     vectorCount = conf.getLong(TFIDFConverter.VECTOR_COUNT, 1);
     featureCount = conf.getLong(TFIDFConverter.FEATURE_COUNT, 1);
     minDf = conf.getInt(TFIDFConverter.MIN_DF, 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
     maxDf = conf.getLong(TFIDFConverter.MAX_DF, -1);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1498
     URI[] localFiles = DistributedCache.getCacheFiles(conf);
     Path dictionaryFile = HadoopUtil.findInCacheByPartOfFilename(TFIDFConverter.FREQUENCY_FILE, localFiles);
     // key is feature, value is the document frequency

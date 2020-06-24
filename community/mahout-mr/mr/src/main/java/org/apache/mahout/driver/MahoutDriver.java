@@ -93,6 +93,7 @@ public final class MahoutDriver {
 
   public static void main(String[] args) throws Throwable {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-584
     Properties mainClasses = loadProperties("driver.classes.props");
     if (mainClasses == null) {
       mainClasses = loadProperties("driver.classes.default.props");
@@ -108,6 +109,7 @@ public final class MahoutDriver {
       if (args.length > 0 && shortName(mainClasses.getProperty(keyString)).equals(args[0])) {
         foundShortName = true;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1006
       if (args.length > 0 && keyString.equalsIgnoreCase(args[0]) && isDeprecated(mainClasses, keyString)) {
         log.error(desc(mainClasses.getProperty(keyString)));
         return;
@@ -120,6 +122,7 @@ public final class MahoutDriver {
 
     if (args.length < 1 || args[0] == null || "-h".equals(args[0]) || "--help".equals(args[0])) {
       programDriver.driver(args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1291
       return;
     }
 
@@ -129,18 +132,21 @@ public final class MahoutDriver {
     }
     shift(args);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-584
     Properties mainProps = loadProperties(progName + ".props");
     if (mainProps == null) {
       log.warn("No {}.props found on classpath, will use command-line arguments only", progName);
       mainProps = new Properties();
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String,String[]> argMap = new HashMap<>();
     int i = 0;
     while (i < args.length && args[i] != null) {
       List<String> argValues = new ArrayList<>();
       String arg = args[i];
       i++;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-566
       if (arg.startsWith("-D")) { // '-Dkey=value' or '-Dkey=value1,value2,etc' case
         String[] argSplit = arg.split("=");
         arg = argSplit[0];
@@ -149,6 +155,7 @@ public final class MahoutDriver {
         }
       } else {                                      // '-key [values]' or '--key [values]' case.
         while (i < args.length && args[i] != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-566
           if (args[i].startsWith("-")) {
             break;
           }
@@ -170,8 +177,10 @@ public final class MahoutDriver {
     }
 
     // Now add command-line args
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> argsList = new ArrayList<>();
     argsList.add(progName);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-566
     for (Map.Entry<String,String[]> entry : argMap.entrySet()) {
       String arg = entry.getKey();
       if (arg.startsWith("-D")) { // arg is -Dkey - if value for this !isEmpty(), then arg -> -Dkey + "=" + value
@@ -212,6 +221,7 @@ public final class MahoutDriver {
         properties.load(propsStream);
         return properties;
       } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(propsStream, true);
       }
     }

@@ -32,6 +32,7 @@ public abstract class AbstractParameter<T> implements Parameter<T> {
   private final String defaultValue;
 
   protected AbstractParameter(Class<T> type,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
                               String prefix,
                               String name,
                               Configuration jobConf,

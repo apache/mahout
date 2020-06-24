@@ -65,6 +65,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   private final List<Instance> instances = new ArrayList<>();
   
   public int getFirstTreeId() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     return firstTreeId;
   }
   
@@ -73,6 +74,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     super.setup(context);
     Configuration conf = context.getConfiguration();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     configure(Builder.getRandomSeed(conf), conf.getInt("mapred.task.partition", -1),
       Builder.getNumMaps(conf), Builder.getNbTrees(conf));
   }
@@ -91,14 +93,18 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     converter = new DataConverter(getDataset());
     
     // prepare random-numders generator
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("seed : {}", seed);
     if (seed == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       rng = RandomUtils.getRandom();
     } else {
       rng = RandomUtils.getRandom(seed);
     }
     
     // mapper's partition
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(partition >= 0, "Wrong partition ID: " + partition + ". Partition must be >= 0!");
     this.partition = partition;
     
@@ -111,6 +117,8 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
       firstTreeId += nbTrees(numMapTasks, numTrees, p);
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("partition : {}", partition);
     log.debug("nbTrees : {}", nbTrees);
     log.debug("firstTreeId : {}", firstTreeId);
@@ -130,17 +138,21 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   public static int nbTrees(int numMaps, int numTrees, int partition) {
     int treesPerMapper = numTrees / numMaps;
     int remainder = numTrees - numMaps * treesPerMapper;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1417
     return treesPerMapper + (partition < remainder ? 1 : 0);
   }
   
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     instances.add(converter.convert(value.toString()));
   }
   
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     // prepare the data
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("partition: {} numInstances: {}", partition, instances.size());
     
     Data data = new Data(getDataset(), instances);
@@ -152,6 +164,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       log.debug("Building tree number : {}", treeId);
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       Node tree = bagging.build(rng);
       
       key.set(partition, firstTreeId + treeId);
@@ -161,6 +174,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
         context.write(key, emOut);
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1417
       context.progress();
     }
   }

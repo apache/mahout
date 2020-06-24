@@ -166,10 +166,12 @@ public final class StreamingKMeansDriver extends AbstractJob {
     // There will be k final clusters, but in the Map phase to get a good approximation of the data, O(k log n)
     // clusters are needed. Since n is the number of data points and not knowable until reading all the vectors,
     // provide a decent estimate.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     addOption(ESTIMATED_NUM_MAP_CLUSTERS, "km", "The estimated number of clusters to use for the "
         + "Map phase of the job when running StreamingKMeans. This should be around k * log(n), "
         + "where k is the final number of clusters and n is the total number of data points to "
         + "cluster.", String.valueOf(1));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1639
 
     addOption(ESTIMATED_DISTANCE_CUTOFF, "e", "The initial estimated distance cutoff between two "
         + "points for forming new clusters. If no value is given, it's estimated from the data set",
@@ -210,6 +212,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
 
     // The default searcher should be something more efficient that BruteSearch (ProjectionSearch, ...). See
     // o.a.m.math.neighborhood.*
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     addOption(SEARCHER_CLASS_OPTION, "sc", "The type of searcher to be used when performing nearest "
         + "neighbor searches. Defaults to ProjectionSearch.", ProjectionSearch.class.getCanonicalName());
 
@@ -298,6 +301,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
         maxNumIterations, trimFraction, randomInit, ignoreWeights, testProbability, numBallKMeansRuns,
         /* Searcher */
         measureClass, searcherClass,  searchSize, numProjections,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1224
         method,
         reduceStreamingKMeans);
   }
@@ -334,13 +338,16 @@ public final class StreamingKMeansDriver extends AbstractJob {
                                                 /* Searcher */
                                                 String measureClass, String searcherClass,
                                                 int searchSize, int numProjections,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1224
                                                 String method,
                                                 boolean reduceStreamingKMeans) throws ClassNotFoundException {
     // Checking preconditions for the parameters.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(numClusters > 0, 
         "Invalid number of clusters requested: " + numClusters + ". Must be: numClusters > 0!");
 
     // StreamingKMeans
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     Preconditions.checkArgument(estimatedNumMapClusters > numClusters, "Invalid number of estimated map "
         + "clusters; There must be more than the final number of clusters (k log n vs k)");
     Preconditions.checkArgument(estimatedDistanceCutoff == INVALID_DISTANCE_CUTOFF || estimatedDistanceCutoff > 0,
@@ -388,7 +395,9 @@ public final class StreamingKMeansDriver extends AbstractJob {
     conf.set(DefaultOptionCreator.METHOD_OPTION, method);
 
     conf.setBoolean(REDUCE_STREAMING_KMEANS, reduceStreamingKMeans);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1224
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     log.info("Parameters are: [k] numClusters {}; "
         + "[SKM] estimatedNumMapClusters {}; estimatedDistanceCutoff {} "
         + "[BKM] maxNumIterations {}; trimFraction {}; randomInit {}; ignoreWeights {}; "
@@ -408,6 +417,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
    * @return 0 on success, -1 on failure.
    */
   public static int run(Configuration conf, Path input, Path output)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1254
       throws IOException, InterruptedException, ClassNotFoundException, ExecutionException {
     log.info("Starting StreamingKMeans clustering for vectors in {}; results are output to {}",
         input.toString(), output.toString());
@@ -421,11 +431,14 @@ public final class StreamingKMeansDriver extends AbstractJob {
   }
 
   private static int runSequentially(Configuration conf, Path input, Path output)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     throws IOException, ExecutionException, InterruptedException {
     long start = System.currentTimeMillis();
     // Run StreamingKMeans step in parallel by spawning 1 thread per input path to process.
     ExecutorService pool = Executors.newCachedThreadPool();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Future<Iterable<Centroid>>> intermediateCentroidFutures = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1380
     for (FileStatus status : HadoopUtil.listStatus(FileSystem.get(conf), input, PathFilters.logsCRCFilter())) {
       intermediateCentroidFutures.add(pool.submit(new StreamingKMeansThread(status.getPath(), conf)));
     }
@@ -440,6 +453,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
     pool.shutdown();
     pool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     log.info("Finished StreamingKMeans");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1392
     SequenceFile.Writer writer = SequenceFile.createWriter(FileSystem.get(conf), conf, new Path(output, "part-r-00000"), IntWritable.class,
         CentroidWritable.class);
     int numCentroids = 0;
@@ -455,6 +469,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
   }
 
   public static int runMapReduce(Configuration conf, Path input, Path output)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     throws IOException, ClassNotFoundException, InterruptedException {
     // Prepare Job for submission.
     Job job = HadoopUtil.prepareJob(input, output, SequenceFileInputFormat.class,

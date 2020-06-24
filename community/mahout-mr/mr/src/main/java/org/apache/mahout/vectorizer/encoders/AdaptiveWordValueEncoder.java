@@ -45,6 +45,7 @@ public class AdaptiveWordValueEncoder extends WordValueEncoder {
   @Override
   public void addToVector(String originalForm, double weight, Vector data) {
     dictionary.add(originalForm);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-492
     super.addToVector(originalForm, weight, data);
   }
 

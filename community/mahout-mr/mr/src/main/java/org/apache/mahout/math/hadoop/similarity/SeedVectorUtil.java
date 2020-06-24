@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 
 final class SeedVectorUtil {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
 
   private static final Logger log = LoggerFactory.getLogger(SeedVectorUtil.class);
 
@@ -52,11 +53,13 @@ final class SeedVectorUtil {
     List<NamedVector> seedVectors = Lists.newArrayList();
     long item = 0;
     for (Writable value
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         : new SequenceFileDirValueIterable<>(new Path(seedPathStr),
                                                     PathType.LIST,
                                                     PathFilters.partFilter(),
                                                     conf)) {
       Class<? extends Writable> valueClass = value.getClass();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       if (valueClass.equals(Kluster.class)) {
         // get the cluster info
         Kluster cluster = (Kluster) value;

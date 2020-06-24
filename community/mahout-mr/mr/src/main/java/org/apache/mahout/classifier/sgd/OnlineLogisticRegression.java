@@ -133,8 +133,10 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression i
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     out.writeInt(WRITABLE_VERSION);
     out.writeDouble(mu0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1263
     out.writeDouble(getLambda()); 
     out.writeDouble(decayFactor);
     out.writeInt(stepOffset);
@@ -153,6 +155,7 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression i
     int version = in.readInt();
     if (version == WRITABLE_VERSION) {
       mu0 = in.readDouble();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1263
       lambda(in.readDouble()); 
       decayFactor = in.readDouble();
       stepOffset = in.readInt();

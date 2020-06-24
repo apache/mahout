@@ -51,6 +51,7 @@ public class TPrior implements PriorFunction {
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     out.writeDouble(df);
   }
 

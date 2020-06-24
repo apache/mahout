@@ -63,6 +63,7 @@ public final class EigenSeedGenerator {
     if (newFile) {
       Path inputPathPattern;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
       if (fs.getFileStatus(input).isDir()) {
         inputPathPattern = new Path(input, "*");
       } else {
@@ -70,6 +71,7 @@ public final class EigenSeedGenerator {
       }
 
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Map<Integer,Double> maxEigens = new HashMap<>(k); // store
                                                                           // max
                                                                           // value
@@ -80,12 +82,15 @@ public final class EigenSeedGenerator {
       Map<Integer,ClusterWritable> chosenClusters = new HashMap<>(k);
 
       for (FileStatus fileStatus : inputFiles) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
         if (!fileStatus.isDir()) {
           for (Pair<Writable,VectorWritable> record : new SequenceFileIterable<Writable,VectorWritable>(
               fileStatus.getPath(), true, conf)) {
             Writable key = record.getFirst();
             VectorWritable value = record.getSecond();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
             for (Vector.Element e : value.get().nonZeroes()) {
               int index = e.index();
               double v = Math.abs(e.get());
@@ -105,8 +110,10 @@ public final class EigenSeedGenerator {
         }
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (SequenceFile.Writer writer =
                SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class)){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1214
         for (Integer key : maxEigens.keySet()) {
           writer.append(chosenTexts.get(key), chosenClusters.get(key));
         }

@@ -34,6 +34,7 @@ public class TelephoneCallParser implements Iterable<TelephoneCall> {
   private String resourceName;
 
   public TelephoneCallParser(String resourceName) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1425
     this.resourceName = resourceName;
   }
 

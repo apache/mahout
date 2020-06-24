@@ -40,6 +40,7 @@ public final class ItemIDIndexReducer extends
       }
     }
     if (minimumItemID != Long.MAX_VALUE) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
       minimumItemIDWritable.set(minimumItemID);
       context.write(index, minimumItemIDWritable);
     }

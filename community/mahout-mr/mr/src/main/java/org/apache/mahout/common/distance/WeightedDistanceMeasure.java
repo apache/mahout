@@ -45,7 +45,9 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
   
   @Override
   public void createParameters(String prefix, Configuration jobConf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     parameters = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null,
         "Path on DFS to a file containing the weights.");
     parameters.add(weightsFile);
@@ -66,15 +68,18 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
     }
     try {
       if (weightsFile.get() != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-118
         FileSystem fs = FileSystem.get(weightsFile.get().toUri(), jobConf);
         VectorWritable weights =
             ClassUtils.instantiateAs((Class<? extends VectorWritable>) vectorClass.get(), VectorWritable.class);
         if (!fs.exists(weightsFile.get())) {
           throw new FileNotFoundException(weightsFile.get().toString());
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         try (DataInputStream in = fs.open(weightsFile.get())){
           weights.readFields(in);
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
         this.weights = weights.get();
       }
     } catch (IOException e) {

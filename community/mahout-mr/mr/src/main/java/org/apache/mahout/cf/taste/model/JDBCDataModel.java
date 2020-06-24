@@ -36,6 +36,7 @@ public interface JDBCDataModel extends DataModel {
    * 
    * @return all user preference data
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   FastByIDMap<PreferenceArray> exportWithPrefs() throws TasteException;
   
   FastByIDMap<FastIDSet> exportWithIDsOnly() throws TasteException;

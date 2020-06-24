@@ -79,6 +79,7 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends SQL92BooleanPrefJDBCData
    *          if {@link javax.sql.DataSource} can't be found
    */
   public PostgreSQLBooleanPrefJDBCDataModel(String dataSourceName) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-731
     super(dataSourceName);
   }
 
@@ -91,6 +92,7 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends SQL92BooleanPrefJDBCData
    * @param dataSource {@link javax.sql.DataSource} to use
    */
   public PostgreSQLBooleanPrefJDBCDataModel(DataSource dataSource) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-731
     super(dataSource);
   }
 
@@ -111,6 +113,7 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends SQL92BooleanPrefJDBCData
                                             String userIDColumn,
                                             String itemIDColumn,
                                             String timestampColumn) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-731
       super(dataSource, preferenceTable, userIDColumn, itemIDColumn, timestampColumn);
   }
 

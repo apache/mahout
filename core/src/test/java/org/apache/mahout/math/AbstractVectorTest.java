@@ -46,6 +46,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
   private static void checkIterator(Iterator<Vector.Element> nzIter, double[] values) {
     while (nzIter.hasNext()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-2033
       Vector.Element elt = nzIter.next();
       assertEquals(elt.index() + " Value: " + values[elt.index()]
           + " does not equal: " + elt.get(), values[elt.index()], elt.get(), 0.0);
@@ -178,6 +179,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
     // getNumNondefaultElements
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-2033
     for (Vector.Element element : v1.all()) {
       assertEquals(dv1.get(element.index()), element.get(), 0);
       assertEquals(dv1.get(element.index()), v1.get(element.index()), 0);
@@ -210,6 +212,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
   @Test
   public void testIterator() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-2033
     Iterator<Vector.Element> iterator = test.nonZeroes().iterator();
     checkIterator(iterator, gold);
 
@@ -620,6 +623,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
   @Test
   public void testSmallDistances() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-2033
     for (double fuzz : new double[]{1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8, 1.0e-9, 1.0e-10}) {
       MultiNormal x = new MultiNormal(fuzz, new ConstantVector(0, 20));
       for (int i = 0; i < 10000; i++) {

@@ -86,6 +86,7 @@ public final class CollocDriver extends AbstractJob {
     addFlag("unigram", "u", "If set, unigrams will be emitted in the final output alongside collocations");
 
     Map<String, List<String>> argMap = parseArguments(args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
 
     if (argMap == null) {
       return -1;
@@ -95,16 +96,19 @@ public final class CollocDriver extends AbstractJob {
     Path output = getOutputPath();
 
     int maxNGramSize = DEFAULT_MAX_NGRAM_SIZE;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     if (hasOption("maxNGramSize")) {
       try {
         maxNGramSize = Integer.parseInt(getOption("maxNGramSize"));
       } catch (NumberFormatException ex) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         log.warn("Could not parse ngram size option");
       }
     }
     log.info("Maximum n-gram size is: {}", maxNGramSize);
 
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       HadoopUtil.delete(getConf(), output);
     }
 
@@ -113,6 +117,7 @@ public final class CollocDriver extends AbstractJob {
       minSupport = Integer.parseInt(getOption("minSupport"));
     }
     log.info("Minimum Support value: {}", minSupport);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
     if (getOption("minLLR") != null) {
@@ -130,6 +135,7 @@ public final class CollocDriver extends AbstractJob {
 
     if (argMap.containsKey("preprocess")) {
       log.info("Input will be preprocessed");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
       Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
       if (getOption("analyzerName") != null) {
         String className = getOption("analyzerName");
@@ -140,7 +146,9 @@ public final class CollocDriver extends AbstractJob {
       }
 
       Path tokenizedPath = new Path(output, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
       DocumentProcessor.tokenizeDocuments(input, analyzerClass, tokenizedPath, getConf());
       input = tokenizedPath;
     } else {
@@ -176,6 +184,7 @@ public final class CollocDriver extends AbstractJob {
    *          number of reducers used
    */
   public static void generateAllGrams(Path input,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
                                       Path output,
                                       Configuration baseConf,
                                       int maxNGramSize,
@@ -202,13 +211,18 @@ public final class CollocDriver extends AbstractJob {
                                            int minSupport)
     throws IOException, ClassNotFoundException, InterruptedException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
     Configuration con = new Configuration(baseConf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     con.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
     con.setInt(CollocMapper.MAX_SHINGLE_SIZE, maxNGramSize);
     con.setInt(CollocReducer.MIN_SUPPORT, minSupport);
     
     Job job = new Job(con);
     job.setJobName(CollocDriver.class.getSimpleName() + ".generateCollocations:" + input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     job.setJarByClass(CollocDriver.class);
     
     job.setMapOutputKeyClass(GramKey.class);
@@ -238,6 +252,7 @@ public final class CollocDriver extends AbstractJob {
       throw new IllegalStateException("Job failed!");
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     return job.getCounters().findCounter(CollocMapper.Count.NGRAM_TOTAL).getValue();
   }
 
@@ -251,13 +266,19 @@ public final class CollocDriver extends AbstractJob {
                                               float minLLRValue,
                                               int reduceTasks)
     throws IOException, InterruptedException, ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-417
     Configuration conf = new Configuration(baseConf);
     conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
     conf.setFloat(LLRReducer.MIN_LLR, minLLRValue);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-647
 
     Job job = new Job(conf);
     job.setJobName(CollocDriver.class.getSimpleName() + ".computeNGrams: " + output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     job.setJarByClass(CollocDriver.class);
     
     job.setMapOutputKeyClass(Gram.class);

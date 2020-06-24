@@ -70,6 +70,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
   
   /** Creates a new {@link FastMap} with default capacity. */
   public FastMap() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     this(2, NO_MAX_SIZE);
   }
   
@@ -100,6 +101,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
    *  loadFactor is less than 1
    */
   public FastMap(int size, int maxSize, float loadFactor) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(size >= 0, "size must be at least 0");
     Preconditions.checkArgument(loadFactor >= 1.0f, "loadFactor must be at least 1.0");
     this.loadFactor = loadFactor;
@@ -246,6 +248,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       }
     }
     // Delete the entry
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     ((Object[])keys)[index] = REMOVED;
     numEntries--;
     values[index] = null;
@@ -267,6 +270,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
     if (keys[index] == null) {
       return null;
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       ((Object[])keys)[index] = REMOVED;
       numEntries--;
       V oldValue = values[index];
@@ -341,6 +345,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       throw new IllegalStateException();
     }
     values[lastNext] = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     ((Object[])keys)[lastNext] = REMOVED;
     numEntries--;
   }
@@ -497,6 +502,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       
       @Override
       public K getKey() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
         return keys[index];
       }
       
@@ -507,8 +513,10 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       
       @Override
       public V setValue(V value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
         Preconditions.checkArgument(value != null);
         V oldValue = values[index];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
         values[index] = value;
         return oldValue;
       }
@@ -610,6 +618,8 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       @Override
       public boolean hasNext() {
         goToNext();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
         return position < keys.length;
       }
       
@@ -698,6 +708,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       @Override
       public boolean hasNext() {
         goToNext();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
         return position < values.length;
       }
       

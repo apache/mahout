@@ -34,6 +34,7 @@ public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
   }
 
   private void initCaches() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1385
     caches = new OpenIntIntHashMap[getProbes()];
     for (int probe = 0; probe < getProbes(); probe++) {
       caches[probe] = new OpenIntIntHashMap();
@@ -55,6 +56,7 @@ public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
     Preconditions.checkArgument(dataSize == this.dataSize,
         "dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + ']');
     int originalHashcode = Arrays.hashCode(originalForm);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1385
     if (caches[probe].containsKey(originalHashcode)) {
       return caches[probe].get(originalHashcode);
     }

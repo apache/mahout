@@ -44,6 +44,7 @@ public class KMeansDriver extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(KMeansDriver.class);
   
   public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-414
     ToolRunner.run(new Configuration(), new KMeansDriver(), args);
   }
   
@@ -53,6 +54,7 @@ public class KMeansDriver extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
     addOption(DefaultOptionCreator
         .clustersInOption()
         .withDescription(
@@ -64,12 +66,15 @@ public class KMeansDriver extends AbstractJob {
         .withDescription(
             "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
                 + " as the Centroid and written to the clusters input path.").create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
     addOption(DefaultOptionCreator.useSetRandomSeedOption().create());
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     addOption(DefaultOptionCreator.methodOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
     addOption(DefaultOptionCreator.outlierThresholdOption().create());
    
     if (parseArguments(args) == null) {
@@ -86,6 +91,7 @@ public class KMeansDriver extends AbstractJob {
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       HadoopUtil.delete(getConf(), output);
     }
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
@@ -93,6 +99,7 @@ public class KMeansDriver extends AbstractJob {
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       int numClusters = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
       Long seed = null;
       if (hasOption(DefaultOptionCreator.RANDOM_SEED)) {
         seed = Long.parseLong(getOption(DefaultOptionCreator.RANDOM_SEED));
@@ -107,6 +114,7 @@ public class KMeansDriver extends AbstractJob {
     if (hasOption(DefaultOptionCreator.OUTLIER_THRESHOLD)) {
       clusterClassificationThreshold = Double.parseDouble(getOption(DefaultOptionCreator.OUTLIER_THRESHOLD));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     run(getConf(), input, clusters, output, convergenceDelta, maxIterations, runClustering,
         clusterClassificationThreshold, runSequential);
     return 0;
@@ -141,6 +149,7 @@ public class KMeansDriver extends AbstractJob {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
       log.info("Input: {} Clusters In: {} Out: {}", input, clustersIn, output);
       log.info("convergence: {} max Iterations: {}", convergenceDelta, maxIterations);
     }
@@ -175,7 +184,12 @@ public class KMeansDriver extends AbstractJob {
    */
   public static void run(Path input, Path clustersIn, Path output, double convergenceDelta,
     int maxIterations, boolean runClustering, double clusterClassificationThreshold, boolean runSequential)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException, ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     run(new Configuration(), input, clustersIn, output, convergenceDelta, maxIterations, runClustering,
         clusterClassificationThreshold, runSequential);
   }
@@ -203,10 +217,13 @@ public class KMeansDriver extends AbstractJob {
    */
   public static Path buildClusters(Configuration conf, Path input, Path clustersIn, Path output,
     int maxIterations, String delta, boolean runSequential) throws IOException,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     InterruptedException, ClassNotFoundException {
     
     double convergenceDelta = Double.parseDouble(delta);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Cluster> clusters = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-651
     KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     
     if (clusters.isEmpty()) {
@@ -243,6 +260,7 @@ public class KMeansDriver extends AbstractJob {
    */
   public static void clusterData(Configuration conf, Path input, Path clustersIn, Path output,
     double clusterClassificationThreshold, boolean runSequential) throws IOException, InterruptedException,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     ClassNotFoundException {
     
     if (log.isInfoEnabled()) {
@@ -250,6 +268,7 @@ public class KMeansDriver extends AbstractJob {
       log.info("Input: {} Clusters In: {} Out: {}", input, clustersIn, output);
     }
     ClusterClassifier.writePolicy(new KMeansClusteringPolicy(), clustersIn);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
     ClusterClassificationDriver.run(conf, input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
         clusterClassificationThreshold, true, runSequential);
   }

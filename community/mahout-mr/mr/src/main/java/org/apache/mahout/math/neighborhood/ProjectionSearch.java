@@ -80,6 +80,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     super(distanceMeasure);
     Preconditions.checkArgument(numProjections > 0 && numProjections < 100,
         "Unreasonable value for number of projections. Must be: 0 < numProjections < 100");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
 
     this.searchSize = searchSize;
     this.numProjections = numProjections;
@@ -96,10 +97,12 @@ public class ProjectionSearch extends UpdatableSearcher {
     // Add the the new vector and the projected distance to each set separately.
     int i = 0;
     for (TreeMultiset<WeightedThing<Vector>> s : scalarProjections) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       s.add(new WeightedThing<>(vector, projection.get(i++)));
     }
     int numVectors = scalarProjections.get(0).size();
     for (TreeMultiset<WeightedThing<Vector>> s : scalarProjections) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       Preconditions.checkArgument(s.size() == numVectors, "Number of vectors in projection sets "
           + "differ");
       double firstWeight = s.firstEntry().getElement().getWeight();
@@ -138,6 +141,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     Iterator<? extends Vector> projections = basisMatrix.iterator();
     for (TreeMultiset<WeightedThing<Vector>> v : scalarProjections) {
       Vector basisVector = projections.next();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       WeightedThing<Vector> projectedQuery = new WeightedThing<>(query,
           query.dot(basisVector));
       for (WeightedThing<Vector> candidate : Iterables.concat(
@@ -151,6 +155,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     // this is probably just as fast as a priority queue here.
     List<WeightedThing<Vector>> top = Lists.newArrayList();
     for (Vector candidate : candidates) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       top.add(new WeightedThing<>(candidate, distanceMeasure.distance(query, candidate)));
     }
     Collections.sort(top);
@@ -176,6 +181,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     Iterator<? extends Vector> projections = basisMatrix.iterator();
     for (TreeMultiset<WeightedThing<Vector>> v : scalarProjections) {
       Vector basisVector = projections.next();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       WeightedThing<Vector> projectedQuery = new WeightedThing<>(query, query.dot(basisVector));
       for (WeightedThing<Vector> candidate : Iterables.concat(
           Iterables.limit(v.tailMultiset(projectedQuery, BoundType.CLOSED), searchSize),
@@ -188,6 +194,7 @@ public class ProjectionSearch extends UpdatableSearcher {
       }
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new WeightedThing<>(bestVector, bestDistance);
   }
 
@@ -211,6 +218,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     if (toRemove.getWeight() < epsilon) {
       Iterator<? extends Vector> basisVectors = basisMatrix.iterator();
       for (TreeMultiset<WeightedThing<Vector>> projection : scalarProjections) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         if (!projection.remove(new WeightedThing<>(vector, vector.dot(basisVectors.next())))) {
           throw new RuntimeException("Internal inconsistency in ProjectionSearch");
         }

@@ -65,6 +65,7 @@ public final class CachingRecommender implements Recommender {
     // Use "num users" as an upper limit on cache size. Rough guess.
     int numUsers = recommender.getDataModel().getNumUsers();
     recommendationsRetriever = new RecommendationRetriever();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     recommendationCache = new Cache<>(recommendationsRetriever, numUsers);
     estimatedPrefCache = new Cache<>(new EstimatedPrefRetriever(), numUsers);
     refreshHelper = new RefreshHelper(new Callable<Object>() {
@@ -92,6 +93,7 @@ public final class CachingRecommender implements Recommender {
   }
 
   public void setCurrentlyIncludeKnownItems(boolean currentlyIncludeKnownItems) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     this.currentlyIncludeKnownItems = currentlyIncludeKnownItems;
   }
 
@@ -113,8 +115,10 @@ public final class CachingRecommender implements Recommender {
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany,IDRescorer rescorer, boolean includeKnownItems)
     throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     synchronized (maxHowMany) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
       if (howMany > maxHowMany[0]) {
         maxHowMany[0] = howMany;
       }
@@ -127,6 +131,7 @@ public final class CachingRecommender implements Recommender {
 
     setCurrentRescorer(rescorer);
     setCurrentlyIncludeKnownItems(includeKnownItems);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
 
     Recommendations recommendations = recommendationCache.get(userID);
     if (recommendations.getItems().size() < howMany && !recommendations.isNoMoreRecommendableItems()) {
@@ -143,6 +148,7 @@ public final class CachingRecommender implements Recommender {
   
   @Override
   public float estimatePreference(long userID, long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     return estimatedPrefCache.get(new LongPair(userID, itemID));
   }
   
@@ -177,6 +183,7 @@ public final class CachingRecommender implements Recommender {
    *          clear cached data associated with this user ID
    */
   public void clear(final long userID) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Clearing recommendations for user ID '{}'", userID);
     recommendationCache.remove(userID);
     estimatedPrefCache.removeKeysMatching(new Cache.MatchPredicate<LongPair>() {
@@ -193,6 +200,7 @@ public final class CachingRecommender implements Recommender {
    * </p>
    */
   public void clear() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Clearing all recommendations...");
     recommendationCache.clear();
     estimatedPrefCache.clear();
@@ -206,10 +214,12 @@ public final class CachingRecommender implements Recommender {
   private final class RecommendationRetriever implements Retriever<Long,Recommendations> {
     @Override
     public Recommendations get(Long key) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Retrieving new recommendations for user ID '{}'", key);
       int howMany = maxHowMany[0];
       IDRescorer rescorer = currentRescorer;
       List<RecommendedItem> recommendations =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
           rescorer == null ? recommender.recommend(key, howMany, null, currentlyIncludeKnownItems) :
               recommender.recommend(key, howMany, rescorer, currentlyIncludeKnownItems);
       return new Recommendations(Collections.unmodifiableList(recommendations));
@@ -219,6 +229,7 @@ public final class CachingRecommender implements Recommender {
   private final class EstimatedPrefRetriever implements Retriever<LongPair,Float> {
     @Override
     public Float get(LongPair key) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       long userID = key.getFirst();
       long itemID = key.getSecond();
       log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'", userID, itemID);

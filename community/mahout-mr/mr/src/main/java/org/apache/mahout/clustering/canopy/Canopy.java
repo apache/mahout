@@ -40,16 +40,19 @@ public class Canopy extends DistanceMeasureCluster {
    * @param measure a DistanceMeasure to use
    */
   public Canopy(Vector center, int canopyId, DistanceMeasure measure) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     super(center, canopyId, measure);
     observe(center);
   }
 
   public String asFormatString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     return "C" + this.getId() + ": " + this.computeCentroid().asFormatString();
   }
 
   @Override
   public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     return getIdentifier() + ": " + getCenter().asFormatString();
   }
   

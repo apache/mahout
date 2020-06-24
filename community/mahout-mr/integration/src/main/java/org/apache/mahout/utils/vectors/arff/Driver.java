@@ -75,6 +75,7 @@ public final class Driver {
         .withRequired(true)
         .withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create())
         .withDescription(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             "The file or directory containing the ARFF files.  If it is a directory, all .arff files will be converted")
         .withShortName("d").create();
 
@@ -92,6 +93,7 @@ public final class Driver {
         abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
         "The file to output the label bindings").withShortName("t").create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
     Option jsonDictonaryOpt = obuilder.withLongName("json-dictonary").withRequired(false)
         .withDescription("Write dictonary in JSON format").withShortName("j").create();
 
@@ -102,6 +104,7 @@ public final class Driver {
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(maxOpt)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
         .withOption(helpOpt).withOption(dictOutOpt).withOption(jsonDictonaryOpt).withOption(delimiterOpt)
         .create();
 
@@ -115,6 +118,7 @@ public final class Driver {
         CommandLineUtil.printHelp(group);
         return;
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       if (cmdLine.hasOption(inputOpt)) { // Lucene case
         File input = new File(cmdLine.getValue(inputOpt).toString());
         long maxDocs = Long.MAX_VALUE;
@@ -126,6 +130,8 @@ public final class Driver {
         }
         String outDir = cmdLine.getValue(outputOpt).toString();
         log.info("Output Dir: {}", outDir);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
         String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
         File dictOut = new File(cmdLine.getValue(dictOutOpt).toString());
@@ -139,7 +145,9 @@ public final class Driver {
             }
           });
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
           for (File file : files) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
             writeFile(outDir, file, maxDocs, model, dictOut, delimiter, jsonDictonary);
           }
         } else {
@@ -154,6 +162,8 @@ public final class Driver {
   }
 
   protected static void writeLabelBindings(File dictOut, ARFFModel arffModel, String delimiter, boolean jsonDictonary)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       throws IOException {
     try (Writer writer = Files.newWriterSupplier(dictOut, Charsets.UTF_8, true).getOutput()) {
       if (jsonDictonary) {
@@ -169,6 +179,7 @@ public final class Driver {
     // Turn the map of labels into a list order by order of appearance
     List<Entry<String, Integer>> attributes = new ArrayList<>();
     attributes.addAll(arffModel.getLabelBindings().entrySet());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     Collections.sort(attributes, new Comparator<Map.Entry<String, Integer>>() {
       @Override
       public int compare(Entry<String, Integer> t, Entry<String, Integer> t1) {
@@ -177,6 +188,7 @@ public final class Driver {
     });
 
     // write a map for each object
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Map<String, Object>> jsonObjects = new LinkedList<>();
     for (int i = 0; i < attributes.size(); i++) {
 
@@ -204,6 +216,7 @@ public final class Driver {
   protected static void writeLabelBindings(Writer writer, ARFFModel arffModel, String delimiter) throws IOException {
 
     Map<String, Integer> labels = arffModel.getLabelBindings();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     writer.write("Label bindings for Relation " + arffModel.getRelation() + '\n');
     for (Map.Entry<String, Integer> entry : labels.entrySet()) {
       writer.write(entry.getKey());
@@ -218,6 +231,7 @@ public final class Driver {
     // how many nominal attributes
     writer.write(String.valueOf(nominalMap.size()) + "\n");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     for (Entry<String, Map<String, Integer>> entry : nominalMap.entrySet()) {
       // the label of this attribute
       writer.write(entry.getKey() + "\n");
@@ -232,21 +246,27 @@ public final class Driver {
   }
 
   protected static void writeFile(String outDir,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
                                   File file,
                                   long maxDocs,
                                   ARFFModel arffModel,
                                   File dictOut,
                                   String delimiter,
                                   boolean jsonDictonary) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
     log.info("Converting File: {}", file);
     ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1, arffModel
         .getNominalMap());
     Iterable<Vector> iteratable = new ARFFVectorIterable(file, model);
     String outFile = outDir + '/' + file.getName() + ".mvc";
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
 
     try (VectorWriter vectorWriter = getSeqFileWriter(outFile)) {
       long numDocs = vectorWriter.write(iteratable, maxDocs);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
       writeLabelBindings(dictOut, model, delimiter, jsonDictonary);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.info("Wrote: {} vectors", numDocs);
     }
   }

@@ -96,6 +96,7 @@ public final class ItemSimilarityJob extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
     addInputOption();
     addOutputOption();
     addOption("similarityClassname", "s", "Name of distributed similarity measures class to instantiate, " 
@@ -103,12 +104,14 @@ public final class ItemSimilarityJob extends AbstractJob {
     addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number "
         + "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')',
         String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     addOption("maxPrefs", "mppu", "max number of preferences to consider per user or item, " 
         + "users or items with more preferences will be sampled down (default: " + DEFAULT_MAX_PREFS + ')',
         String.valueOf(DEFAULT_MAX_PREFS));
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
         + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
     addOption("booleanData", "b", "Treat input as without pref values", String.valueOf(Boolean.FALSE));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
     addOption("randomSeed", null, "use this seed for sampling", false);
 
@@ -124,7 +127,9 @@ public final class ItemSimilarityJob extends AbstractJob {
     boolean booleanData = Boolean.valueOf(getOption("booleanData"));
 
     double threshold = hasOption("threshold")
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         ? Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     long randomSeed = hasOption("randomSeed")
         ? Long.parseLong(getOption("randomSeed")) : RowSimilarityJob.NO_FIXED_RANDOM_SEED;
 
@@ -151,6 +156,7 @@ public final class ItemSimilarityJob extends AbstractJob {
         "--output", similarityMatrixPath.toString(),
         "--numberOfColumns", String.valueOf(numberOfUsers),
         "--similarityClassname", similarityClassName,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
         "--maxObservationsPerRow", String.valueOf(maxPrefs),
         "--maxObservationsPerColumn", String.valueOf(maxPrefs),
         "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem),
@@ -166,10 +172,12 @@ public final class ItemSimilarityJob extends AbstractJob {
           MostSimilarItemPairsMapper.class, EntityEntityWritable.class, DoubleWritable.class,
           MostSimilarItemPairsReducer.class, EntityEntityWritable.class, DoubleWritable.class, TextOutputFormat.class);
       Configuration mostSimilarItemsConf = mostSimilarItems.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
       mostSimilarItemsConf.set(ITEM_ID_INDEX_PATH_STR,
           new Path(prepPath, PreparePreferenceMatrixJob.ITEMID_INDEX).toString());
       mostSimilarItemsConf.setInt(MAX_SIMILARITIES_PER_ITEM, maxSimilarItemsPerItem);
       boolean succeeded = mostSimilarItems.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
       if (!succeeded) {
         return -1;
       }
@@ -189,7 +197,9 @@ public final class ItemSimilarityJob extends AbstractJob {
       Configuration conf = ctx.getConfiguration();
       maxSimilarItemsPerItem = conf.getInt(MAX_SIMILARITIES_PER_ITEM, -1);
       indexItemIDMap = TasteHadoopUtils.readIDIndexMap(conf.get(ITEM_ID_INDEX_PATH_STR), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       Preconditions.checkArgument(maxSimilarItemsPerItem > 0, "maxSimilarItemsPerItem must be greater then 0!");
     }
 
@@ -200,7 +210,9 @@ public final class ItemSimilarityJob extends AbstractJob {
       int itemIDIndex = itemIDIndexWritable.get();
 
       TopSimilarItemsQueue topKMostSimilarItems = new TopSimilarItemsQueue(maxSimilarItemsPerItem);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element element : similarityVector.get().nonZeroes()) {
         SimilarItem top = topKMostSimilarItems.top();
         double candidateSimilarity = element.get();

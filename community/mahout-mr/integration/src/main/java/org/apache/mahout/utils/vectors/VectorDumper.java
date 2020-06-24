@@ -71,6 +71,7 @@ public final class VectorDumper extends AbstractJob {
      */
     addInputOption();
     addOutputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-993
     addOption("useKey", "u", "If the Key is a vector than dump that instead");
     addOption("printKey", "p", "Print out the key as well, delimited by tab (or the value if useKey is true");
     addOption("dictionary", "d", "The dictionary file.", false);
@@ -85,20 +86,27 @@ public final class VectorDumper extends AbstractJob {
     addOption("sizeOnly", "sz", "Dump only the size of the vector");
     addOption("numItems", "ni", "Output at most <n> vecors", false);
     addOption("vectorSize", "vs", "Truncate vectors to <vs> length when dumping (most useful when in"
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1690
         + " conjunction with -sort", false);
     addOption(buildOption("filter", "fi", "Only dump out those vectors whose name matches the filter."
         + "  Multiple items may be specified by repeating the argument.", true, 1, Integer.MAX_VALUE, false, null));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1003
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     if (parseArguments(args, false, true) == null) {
       return -1;
     }
 
     Path[] pathArr;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     Path input = getInputPath();
     FileStatus fileStatus = fs.getFileStatus(input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
     if (fileStatus.isDir()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
       pathArr = FileUtil.stat2Paths(fs.listStatus(input, PathFilters.logsCRCFilter()));
     } else {
       FileStatus[] inputPaths = fs.globStatus(input);
@@ -121,6 +129,7 @@ public final class VectorDumper extends AbstractJob {
     String[] dictionary = null;
     if (hasOption("dictionary")) {
       String dictFile = getOption("dictionary");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1690
       switch (dictionaryType) {
         case "text":
           dictionary = VectorHelper.loadTermDictionary(new File(dictFile));
@@ -147,21 +156,26 @@ public final class VectorDumper extends AbstractJob {
     boolean nameOnly = hasOption("nameOnly");
     boolean namesAsComments = hasOption("namesAsComments");
     boolean transposeKeyValue = hasOption("vectorAsKey");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
     Writer writer;
     boolean shouldClose;
     File output = getOutputFile();
     if (output != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-679
       shouldClose = true;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1370
       log.info("Output file: {}", output);
       Files.createParentDirs(output);
       writer = Files.newWriter(output, Charsets.UTF_8);
     } else {
       shouldClose = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
       writer = new OutputStreamWriter(System.out, Charsets.UTF_8);
     }
     try {
       boolean printKey = hasOption("printKey");
       if (useCSV && dictionary != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-548
         writer.write("#");
         for (int j = 0; j < dictionary.length; j++) {
           writer.write(dictionary[j]);
@@ -174,11 +188,13 @@ public final class VectorDumper extends AbstractJob {
       Long numItems = null;
       if (hasOption("numItems")) {
         numItems = Long.parseLong(getOption("numItems"));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (quiet) {
           writer.append("#Max Items to dump: ").append(String.valueOf(numItems)).append('\n');
         }
       }
       int maxIndexesPerVector = hasOption("vectorSize")
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1690
           ? Integer.parseInt(getOption("vectorSize"))
           : Integer.MAX_VALUE;
       long itemCount = 0;
@@ -190,6 +206,7 @@ public final class VectorDumper extends AbstractJob {
         if (quiet) {
           log.info("Processing file '{}' ({}/{})", path, ++fileCount, pathArr.length);
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         SequenceFileIterable<Writable, Writable> iterable = new SequenceFileIterable<>(path, true, conf);
         Iterator<Pair<Writable, Writable>> iterator = iterable.iterator();
         long i = 0;
@@ -205,6 +222,7 @@ public final class VectorDumper extends AbstractJob {
           Vector vector;
           try {
             vector = ((VectorWritable)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1690
                 (transposeKeyValue ? keyWritable : valueWritable)).get();
           } catch (ClassCastException e) {
             if ((transposeKeyValue ? keyWritable : valueWritable)
@@ -216,6 +234,7 @@ public final class VectorDumper extends AbstractJob {
               throw e;
             }
           }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1690
           if (filters == null
               || !(vector instanceof NamedVector)
               || filters.contains(((NamedVector) vector).getName())) {
@@ -252,6 +271,7 @@ public final class VectorDumper extends AbstractJob {
       writer.flush();
     } finally {
       if (shouldClose) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(writer, false);
       }
     }

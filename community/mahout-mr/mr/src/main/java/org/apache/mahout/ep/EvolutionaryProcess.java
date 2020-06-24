@@ -83,6 +83,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
   private int populationSize;
 
   public EvolutionaryProcess() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     population = new ArrayList<>();
   }
 
@@ -120,6 +121,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
     Collections.sort(population);
 
     // we copy here to avoid concurrent modification
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<State<T, U>> parents = new ArrayList<>(population.subList(0, survivors));
     population.subList(survivors, population.size()).clear();
 
@@ -141,7 +143,9 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
    * and rethrown nested in an ExecutionException.
    */
   public State<T, U> parallelDo(final Function<Payload<U>> fn) throws InterruptedException, ExecutionException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Callable<State<T, U>>> tasks = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     for (final State<T, U> state : population) {
       tasks.add(new Callable<State<T, U>>() {
         @Override
@@ -154,6 +158,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
     }
 
     List<Future<State<T, U>>> r = pool.invokeAll(tasks);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
 
     // zip through the results and find the best one
     double max = Double.NEGATIVE_INFINITY;
@@ -174,6 +179,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
   }
 
   public void setThreadCount(int threadCount) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
     this.threadCount = threadCount;
     pool = Executors.newFixedThreadPool(threadCount);
   }
@@ -193,6 +199,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
   @Override
   public void close() {
     List<Runnable> remainingTasks = pool.shutdownNow();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     try {
       pool.awaitTermination(10, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
@@ -209,6 +216,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     out.writeInt(threadCount);
     out.writeInt(population.size());
     for (State<T, U> state : population) {
@@ -220,6 +228,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
   public void readFields(DataInput input) throws IOException {
     setThreadCount(input.readInt());
     int n = input.readInt();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     population = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       State<T, U> state = (State<T, U>) PolymorphicWritable.read(input, State.class);

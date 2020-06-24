@@ -45,6 +45,8 @@ final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializ
       rescored1 = o1.getValue();
       rescored2 = o2.getValue();
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       rescored1 = rescorer.rescore(o1.getItemID(), o1.getValue());
       rescored2 = rescorer.rescore(o2.getItemID(), o2.getValue());
     }

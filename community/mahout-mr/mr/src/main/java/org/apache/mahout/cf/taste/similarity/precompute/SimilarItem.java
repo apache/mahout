@@ -29,6 +29,7 @@ public class SimilarItem {
   public static final Comparator<SimilarItem> COMPARE_BY_SIMILARITY = new Comparator<SimilarItem>() {
     @Override
     public int compare(SimilarItem s1, SimilarItem s2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1167
       return Doubles.compare(s1.similarity, s2.similarity);
     }
   };
@@ -37,6 +38,7 @@ public class SimilarItem {
   private double similarity;
 
   public SimilarItem(long itemID, double similarity) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
     set(itemID, similarity);
   }
 

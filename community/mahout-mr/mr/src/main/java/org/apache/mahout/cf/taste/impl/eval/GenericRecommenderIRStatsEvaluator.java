@@ -72,6 +72,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
   private final RelevantItemsDataSplitter dataSplitter;
 
   public GenericRecommenderIRStatsEvaluator() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-906
     this(new GenericRelevantItemsDataSplitter());
   }
 
@@ -90,11 +91,13 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
                                double relevanceThreshold,
                                double evaluationPercentage) throws TasteException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(recommenderBuilder != null, "recommenderBuilder is null");
     Preconditions.checkArgument(dataModel != null, "dataModel is null");
     Preconditions.checkArgument(at >= 1, "at must be at least 1");
     Preconditions.checkArgument(evaluationPercentage > 0.0 && evaluationPercentage <= 1.0,
         "Invalid evaluationPercentage: " + evaluationPercentage + ". Must be: 0.0 < evaluationPercentage <= 1.0");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
 
     int numItems = dataModel.getNumItems();
     RunningAverage precision = new FullRunningAverage();
@@ -121,15 +124,18 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       // List some most-preferred items that would count as (most) "relevant" results
       double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
       FastIDSet relevantItemIDs = dataSplitter.getRelevantItemsIDs(userID, at, theRelevanceThreshold, dataModel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-906
 
       int numRelevantItems = relevantItemIDs.size();
       if (numRelevantItems <= 0) {
         continue;
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<>(dataModel.getNumUsers());
       LongPrimitiveIterator it2 = dataModel.getUserIDs();
       while (it2.hasNext()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-906
         dataSplitter.processOtherUser(userID, relevantItemIDs, trainingUsers, it2.nextLong(), dataModel);
       }
 
@@ -152,6 +158,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       int intersectionSize = 0;
       List<RecommendedItem> recommendedItems = recommender.recommend(userID, at, rescorer);
       for (RecommendedItem recommendedItem : recommendedItems) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
         if (relevantItemIDs.contains(recommendedItem.getItemID())) {
           intersectionSize++;
         }
@@ -196,6 +204,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       }
 
       // Reach
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-925
       numUsersRecommendedFor++;
       if (numRecommendedItems > 0) {
         numUsersWithRecommendations++;
@@ -231,6 +240,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
   }
 
   private static double log2(double value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-619
     return Math.log(value) / LOG2;
   }
 

@@ -57,6 +57,7 @@ public final class Step1MapperTest extends MahoutTestCase {
         assertTrue(expected.contains(data.get(index)));
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-954
       return new Leaf(Double.NaN);
     }
   }
@@ -68,6 +69,7 @@ public final class Step1MapperTest extends MahoutTestCase {
   private static class MockStep1Mapper extends Step1Mapper {
     private MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
         int partition, int numMapTasks, int numTrees) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-835
       configure(false, treeBuilder, dataset);
       configure(seed, partition, numMapTasks, numTrees);
     }
@@ -76,6 +78,7 @@ public final class Step1MapperTest extends MahoutTestCase {
   private static class TreeIDCapture extends Capture<TreeID> {
 
     private TreeIDCapture() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
       super(CaptureType.ALL);
     }
 
@@ -106,6 +109,7 @@ public final class Step1MapperTest extends MahoutTestCase {
     String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
     double[][] source = Utils.randomDoubles(rng, descriptor, false, NUM_INSTANCES);
     String[] sData = Utils.double2String(source);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     String[][] splits = Utils.splitData(sData, NUM_MAPPERS);
 
@@ -123,6 +127,7 @@ public final class Step1MapperTest extends MahoutTestCase {
       // expected number of trees that this mapper will build
       int mapNbTrees = Step1Mapper.nbTrees(NUM_MAPPERS, NUM_TREES, partition);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1417
       Mapper.Context context = EasyMock.createNiceMock(Mapper.Context.class);
       Capture<TreeID> capturedKeys = new TreeIDCapture();
       context.write(EasyMock.capture(capturedKeys), EasyMock.anyObject());

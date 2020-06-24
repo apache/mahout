@@ -54,6 +54,7 @@ public final class TasteHadoopUtils {
    * Maps a long to an int with range of 0 to Integer.MAX_VALUE-1
    */
   public static int idToIndex(long id) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1261
     return 0x7FFFFFFF & Longs.hashCode(id) % 0x7FFFFFFE;
   }
 
@@ -74,6 +75,7 @@ public final class TasteHadoopUtils {
                                                                        null,
                                                                        true,
                                                                        conf)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
       indexIDMap.put(record.getFirst().get(), record.getSecond().get());
     }
     return indexIDMap;

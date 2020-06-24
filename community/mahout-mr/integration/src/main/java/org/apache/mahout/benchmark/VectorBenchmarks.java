@@ -141,6 +141,7 @@ public class VectorBenchmarks {
     }
   }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
   void printStats(TimingStatistics stats, String benchmarkName, String implName, String content) {
     printStats(stats, benchmarkName, implName, content, 1);
   }
@@ -161,12 +162,14 @@ public class VectorBenchmarks {
     }
     int implId = implType.get(implName);
     if (!statsMap.containsKey(benchmarkName)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       statsMap.put(benchmarkName, new ArrayList<String[]>());
     }
     List<String[]> implStats = statsMap.get(benchmarkName);
     while (implStats.size() < implId + 1) {
       implStats.add(EMPTY);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     implStats.set(
         implId,
         TAB_NEWLINE_PATTERN.split(stats + "\tSpeed  = " + DF.format(opsPerSec) + " /sec\tRate   = "
@@ -223,6 +226,7 @@ public class VectorBenchmarks {
   private boolean buildVectorIncrementally(TimingStatistics stats, int randomIndex, Vector v, boolean useSetQuick) {
     int[] indexes = randomVectorIndices.get(randomIndex);
     double[] values = randomVectorValues.get(randomIndex);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Integer> randomOrder = new ArrayList<>();
     for (int i = 0; i < indexes.length; i++) {
       randomOrder.add(i);
@@ -233,6 +237,7 @@ public class VectorBenchmarks {
       permutation[i] = randomOrder.get(i);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     TimingStatistics.Call call = stats.newCall(leadTimeUsec);
     if (useSetQuick) {
       for (int i : permutation) {
@@ -243,6 +248,7 @@ public class VectorBenchmarks {
         v.set(indexes[i], values[i]);
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     return call.end(maxTimeUsec);
   }
 
@@ -318,6 +324,7 @@ public class VectorBenchmarks {
         .withLongName("numClusters")
         .withRequired(false)
         .withArgument(abuilder.withName("nc").withDefault(0).create())
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         .withDescription("Number of clusters to create. Set to non zero to run cluster benchmark. Default: 0")
         .withShortName("nc").create();
     Option numOpsOpt = obuilder
@@ -351,6 +358,7 @@ public class VectorBenchmarks {
       }
 
       int numClusters = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-645
       if (cmdLine.hasOption(numClustersOpt)) {
         numClusters = Integer.parseInt((String) cmdLine.getValue(numClustersOpt));
       }
@@ -420,6 +428,7 @@ public class VectorBenchmarks {
   }
 
   private String asCsvString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> keys = new ArrayList<>(statsMap.keySet());
     Collections.sort(keys);
     Map<Integer,String> implMap = new HashMap<>();
@@ -452,12 +461,14 @@ public class VectorBenchmarks {
     for (int i = 0; i < implType.size(); i++) {
       for (Entry<String,Integer> e : implType.entrySet()) {
         if (e.getValue() == i) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-300
           sb.append(StringUtils.rightPad(e.getKey(), pad).substring(0, pad));
           break;
         }
       }
     }
     sb.append('\n');
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> keys = new ArrayList<>(statsMap.keySet());
     Collections.sort(keys);
     for (String benchmarkName : keys) {
@@ -492,6 +503,7 @@ public class VectorBenchmarks {
   }
 
   public BenchmarkRunner getRunner() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     return runner;
   }
 }

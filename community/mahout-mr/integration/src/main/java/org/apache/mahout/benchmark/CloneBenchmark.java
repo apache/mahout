@@ -28,6 +28,7 @@ public class CloneBenchmark {
   private final VectorBenchmarks mark;
 
   public CloneBenchmark(VectorBenchmarks mark) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     this.mark = mark;
   }
 

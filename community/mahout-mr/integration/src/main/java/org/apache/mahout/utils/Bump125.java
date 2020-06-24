@@ -35,7 +35,9 @@ public class Bump125 {
     double scale = value / base;
     // scan for correct step
     int i = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     while (i < BUMPS.length - 1 && BUMPS[i + 1] <= scale) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-672
       i++;
     }
     return BUMPS[i];

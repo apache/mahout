@@ -36,6 +36,7 @@ public abstract class TasteTestCase extends MahoutTestCase {
   public static DataModel getDataModel(long[] userIDs, Double[][] prefValues) {
     FastByIDMap<PreferenceArray> result = new FastByIDMap<>();
     for (int i = 0; i < userIDs.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
       List<Preference> prefsList = Lists.newArrayList();
       for (int j = 0; j < prefValues[i].length; j++) {
         if (prefValues[i][j] != null) {
@@ -67,6 +68,7 @@ public abstract class TasteTestCase extends MahoutTestCase {
 
   protected static DataModel getDataModel() {
     return getDataModel(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
             new long[] {1, 2, 3, 4},
             new Double[][] {
                     {0.1, 0.3},
@@ -87,6 +89,7 @@ public abstract class TasteTestCase extends MahoutTestCase {
   }
 
   protected static boolean arrayContains(long[] array, long value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     for (long l : array) {
       if (l == value) {
         return true;

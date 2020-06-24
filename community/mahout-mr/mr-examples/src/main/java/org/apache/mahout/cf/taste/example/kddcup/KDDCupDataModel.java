@@ -65,6 +65,7 @@ public final class KDDCupDataModel implements DataModel {
    */
   public KDDCupDataModel(File dataFile, boolean storeDates, double samplingRate) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(!Double.isNaN(samplingRate) && samplingRate > 0.0 && samplingRate <= 1.0,
         "Must be: 0.0 < samplingRate <= 1.0");
 
@@ -72,6 +73,7 @@ public final class KDDCupDataModel implements DataModel {
 
     Iterator<Pair<PreferenceArray,long[]>> dataIterator = new DataFileIterator(dataFile);
     if (samplingRate < 1.0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       dataIterator = new SamplingIterator<>(dataIterator, samplingRate);
     }
 
@@ -86,6 +88,7 @@ public final class KDDCupDataModel implements DataModel {
 
       userData.put(userPrefs.getUserID(0), userPrefs);
       if (storeDates) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         FastByIDMap<Long> itemTimestamps = new FastByIDMap<>();
         for (int i = 0; i < timestampsForPrefs.length; i++) {
           long timestamp = timestampsForPrefs[i];
@@ -190,6 +193,7 @@ public final class KDDCupDataModel implements DataModel {
 
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-764
     return delegate.getNumUsersWithPreferenceFor(itemID);
   }
 

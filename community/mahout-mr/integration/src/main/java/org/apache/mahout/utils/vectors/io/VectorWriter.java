@@ -48,5 +48,6 @@ public interface VectorWriter extends Closeable {
    * @throws IOException if there was a problem writing
    */
   long write(Iterable<Vector> iterable, long maxDocs) throws IOException;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-176
 
 }

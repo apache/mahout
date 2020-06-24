@@ -37,6 +37,7 @@ public final class RegexUtilsTest extends MahoutTestCase {
 
   @Test
   public void testExtract() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     Pattern pattern = Pattern.compile("(?<=(\\?|&)q=).*?(?=&|$)");
     String line = "127.0.0.1 -  -  [24/05/2010:01:19:22 +0000] \"GET /solr/select?q=import statement&start=1 HTTP/1.1\" 200 37571";
     String res = RegexUtils.extract(line, pattern, Collections.<Integer>emptyList(), " ", RegexUtils.IDENTITY_TRANSFORMER);
@@ -53,6 +54,7 @@ public final class RegexUtilsTest extends MahoutTestCase {
     assertEquals(res, "import statement 1", res);
 
     pattern = Pattern.compile("(start=1) HTTP");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Integer> groupsToKeep = new ArrayList<>();
     groupsToKeep.add(1);
     res = RegexUtils.extract(line, pattern, groupsToKeep, " ", RegexUtils.IDENTITY_TRANSFORMER);

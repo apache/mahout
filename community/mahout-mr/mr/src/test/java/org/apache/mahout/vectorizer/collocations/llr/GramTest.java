@@ -112,6 +112,7 @@ public final class GramTest extends MahoutTestCase {
      new Gram("bar", Gram.Type.UNIGRAM)
     };
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1906
     HashMap<Gram,Gram> map = new HashMap<>();
     for (Gram n : input) {
       Gram val = map.get(n);
@@ -128,6 +129,7 @@ public final class GramTest extends MahoutTestCase {
                   3,
                   9,
                   5,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-299
                   6,
                   7,
                   8,
@@ -142,6 +144,7 @@ public final class GramTest extends MahoutTestCase {
                       false,
                       true,
                       true,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-299
                       true,
                       true
     };
@@ -185,6 +188,7 @@ public final class GramTest extends MahoutTestCase {
  
  @Test
  public void testSorting() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-317
    Gram[] input =
    {
     new Gram("foo", 2, Gram.Type.HEAD),

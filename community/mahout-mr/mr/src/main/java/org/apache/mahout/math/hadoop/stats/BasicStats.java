@@ -49,6 +49,7 @@ public final class BasicStats {
    * @return The variance (based on sample estimation)
    */
   public static double variance(Path input, Path output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
                                 Configuration baseConf)
     throws IOException, InterruptedException, ClassNotFoundException {
     VarianceTotals varianceTotals = computeVarianceTotals(input, output, baseConf);
@@ -65,6 +66,7 @@ public final class BasicStats {
    * @return The variance (based on sample estimation)
    */
   public static double varianceForGivenMean(Path input, Path output, double mean,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
                                 Configuration baseConf)
     throws IOException, InterruptedException, ClassNotFoundException {
     VarianceTotals varianceTotals = computeVarianceTotals(input, output, baseConf);
@@ -85,6 +87,7 @@ public final class BasicStats {
     HadoopUtil.delete(conf, output);
     job.setCombinerClass(StandardDeviationCalculatorReducer.class);
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }
@@ -94,6 +97,7 @@ public final class BasicStats {
     double sumOfSquares = 0;
     double sum = 0;
     double totalCount = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     for (Pair<Writable, Writable> record : new SequenceFileDirIterable<>(
             filesPattern, PathType.GLOB, null, null, true, conf)) {
 

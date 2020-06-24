@@ -77,6 +77,7 @@ public final class RunLogistic {
 
         double score = lr.classifyScalar(v);
         if (showScores) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
           output.printf(Locale.ENGLISH, "%d,%.3f,%.6f%n", target, score, lr.logLikelihood(target, v));
         }
         collector.add(target, score);

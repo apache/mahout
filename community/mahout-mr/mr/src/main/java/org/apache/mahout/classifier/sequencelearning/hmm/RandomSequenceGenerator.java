@@ -80,6 +80,7 @@ public final class RandomSequenceGenerator {
 
       //reading serialized HMM
       HmmModel model;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (DataInputStream modelStream = new DataInputStream(new FileInputStream(modelPath))){
         model = LossyHmmSerializer.deserialize(modelStream);
       }

@@ -33,6 +33,7 @@ public class L2 implements PriorFunction {
   private double s;
 
   public L2(double scale) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     s = scale;
     s2 = scale * scale;
   }
@@ -54,6 +55,7 @@ public class L2 implements PriorFunction {
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     out.writeDouble(s2);
     out.writeDouble(s);
   }

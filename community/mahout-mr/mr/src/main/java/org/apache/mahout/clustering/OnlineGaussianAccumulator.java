@@ -42,6 +42,7 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
 
   @Override
   public Vector getStd() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     return variance.clone().assign(new SquareRootFunction());
   }
 
@@ -91,6 +92,7 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
 
   @Override
   public double getAverageStd() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-533
     if (sumWeight == 0.0) {
       return 0.0;
     } else {

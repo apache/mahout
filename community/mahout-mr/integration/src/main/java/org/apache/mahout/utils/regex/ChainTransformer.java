@@ -33,6 +33,7 @@ public class ChainTransformer implements RegexTransformer {
   }
 
   public ChainTransformer(List<RegexTransformer> chain) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-403
     this.chain = chain;
   }
 

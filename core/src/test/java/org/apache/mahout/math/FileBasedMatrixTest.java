@@ -66,6 +66,7 @@ public class FileBasedMatrixTest extends MahoutTestCase {
 
   @Test
   public void testSetData() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-2033
     File f = File.createTempFile("matrix", ".m", getTestTempDir());
     f.deleteOnExit();
 

@@ -56,6 +56,7 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
     obj = o;
     if (o instanceof Matrix) {
       buf = serialize(new MatrixWritable((Matrix)o));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
       isMatrix = true;
     } else if (o instanceof Vector) {
       buf = serialize(new VectorWritable((Vector)o));
@@ -88,6 +89,7 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
       ObjectOutputStream oos = new ObjectOutputStream(bos);
       w.write(oos);
       oos.close();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } catch (IOException e) {
       return null;
     }
@@ -102,8 +104,10 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
    */
   private T deserialize(byte buf[]) {
     T ret = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (ByteArrayInputStream bis = new ByteArrayInputStream(buf)){
       ObjectInputStream ois = new ObjectInputStream(bis);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
       if (isMatrix) {
         MatrixWritable w = new MatrixWritable();
         w.readFields(ois);
@@ -113,6 +117,7 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
         w.readFields(ois);
         ret = (T) w.get();
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } catch (IOException e) {
       e.printStackTrace();
     }

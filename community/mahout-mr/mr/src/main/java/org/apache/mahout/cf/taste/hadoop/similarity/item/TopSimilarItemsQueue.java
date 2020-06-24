@@ -31,11 +31,13 @@ public class TopSimilarItemsQueue extends PriorityQueue<SimilarItem> {
   private final int maxSize;
 
   public TopSimilarItemsQueue(int maxSize) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     super(maxSize);
     this.maxSize = maxSize;
   }
 
   public List<SimilarItem> getTopItems() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<SimilarItem> items = new ArrayList<>(maxSize);
     while (size() > 0) {
       SimilarItem topItem = pop();

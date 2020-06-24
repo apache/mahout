@@ -42,6 +42,7 @@ public final class InMemInputSplitTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     rng = RandomUtils.getRandom();
     byteOutStream = new ByteArrayOutputStream();
     out = new DataOutputStream(byteOutStream);

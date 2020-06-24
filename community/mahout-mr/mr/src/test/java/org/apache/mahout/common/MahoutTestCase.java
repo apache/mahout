@@ -45,6 +45,7 @@ public class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     RandomUtils.useTestSeed();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
     testTempDirPath = null;
     fs = null;
   }
@@ -53,6 +54,7 @@ public class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
   @After
   public void tearDown() throws Exception {
     if (testTempDirPath != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-470
       try {
         fs.delete(testTempDirPath, true);
       } catch (IOException e) {
@@ -65,6 +67,7 @@ public class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
   }
 
   public final Configuration getConfiguration() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = new Configuration();
     conf.set("hadoop.tmp.dir", getTestTempDir("hadoop" + Math.random()).getAbsolutePath());
     return conf;
@@ -72,6 +75,7 @@ public class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
 
   protected final Path getTestTempDirPath() throws IOException {
     if (testTempDirPath == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
       fs = FileSystem.get(getConfiguration());
       long simpleRandomLong = (long) (Long.MAX_VALUE * Math.random());
       testTempDirPath = fs.makeQualified(
@@ -116,6 +120,7 @@ public class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
    * Find a declared field in a class or one of it's super classes
    */
   private static Field findDeclaredField(Class<?> inClass, String fieldname) throws NoSuchFieldException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     while (!Object.class.equals(inClass)) {
       for (Field field : inClass.getDeclaredFields()) {
         if (field.getName().equalsIgnoreCase(fieldname)) {
@@ -135,6 +140,7 @@ public class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
   }
 
   protected static void writeLines(File file, String... lines) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
     try {
       for (String line : lines) {
@@ -142,6 +148,7 @@ public class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
         writer.write('\n');
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
   }

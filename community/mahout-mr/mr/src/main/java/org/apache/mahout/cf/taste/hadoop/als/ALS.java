@@ -44,6 +44,7 @@ final class ALS {
   private ALS() {}
 
   static Vector readFirstRow(Path dir, Configuration conf) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Iterator<VectorWritable> iterator = new SequenceFileDirValueIterator<>(dir, PathType.LIST,
         PathFilters.partFilter(), null, true, conf);
     return iterator.hasNext() ? iterator.next().get() : null;
@@ -63,6 +64,7 @@ final class ALS {
     LocalFileSystem localFs = FileSystem.getLocal(conf);
 
     for (Path cachedFile : cachedFiles) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1865
       try (SequenceFile.Reader reader = new SequenceFile.Reader(localFs.getConf(), SequenceFile.Reader.file(cachedFile))) {
         while (reader.next(rowIndex, row)) {
           featureMatrix.put(rowIndex.get(), row.get());
@@ -75,7 +77,9 @@ final class ALS {
   }
 
   public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     OpenIntObjectHashMap<Vector> matrix = new OpenIntObjectHashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     for (Pair<IntWritable,VectorWritable> pair
         : new SequenceFileDirIterable<IntWritable,VectorWritable>(dir, PathType.LIST, PathFilters.partFilter(), conf)) {
       int rowIndex = pair.getFirst().get();
@@ -89,7 +93,9 @@ final class ALS {
     double lambda, int numFeatures) {
     Vector ratings = ratingsWritable.get();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Vector> featureVectors = new ArrayList<>(ratings.getNumNondefaultElements());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element e : ratings.nonZeroes()) {
       int index = e.index();
       featureVectors.add(uOrM.get(index));

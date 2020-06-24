@@ -72,6 +72,7 @@ public final class TestASFEmail {
 
     Dictionary asfDictionary = new Dictionary();
     Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
     PathFilter testFilter = new PathFilter() {
       @Override
       public boolean accept(Path path) {
@@ -79,6 +80,7 @@ public final class TestASFEmail {
       }
     };
     SequenceFileDirIterator<Text, VectorWritable> iter =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new SequenceFileDirIterator<>(new Path(base.toString()), PathType.LIST, testFilter,
         null, true, conf);
 
@@ -91,6 +93,7 @@ public final class TestASFEmail {
 
     System.out.println(numItems + " test files");
     ResultAnalyzer ra = new ResultAnalyzer(asfDictionary.values(), "DEFAULT");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     iter = new SequenceFileDirIterator<>(new Path(base.toString()), PathType.LIST, testFilter,
             null, true, conf);
     while (iter.hasNext()) {

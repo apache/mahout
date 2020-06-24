@@ -53,9 +53,11 @@ public class ABt {
           Vec B_vecs[] = B.vecs();
 
           for (int c = 0; c < ncs.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
             for (int r = 0; r < chunkSize; r++) {
               double v = 0;
               for (int i = 0; i < chks.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
                 v += (chks[i].atd(r) * B_vecs[i].at(c));
               }
               ncs[c].addNum(v);

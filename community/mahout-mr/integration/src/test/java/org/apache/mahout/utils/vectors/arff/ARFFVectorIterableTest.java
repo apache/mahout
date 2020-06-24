@@ -38,6 +38,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
   @Test
   public void testValues() throws Exception {
     ARFFVectorIterable iterable = readModelFromResource("sample.arff");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
 
     assertEquals("Mahout", iterable.getModel().getRelation());
     Map<String, Integer> bindings = iterable.getModel().getLabelBindings();
@@ -60,6 +61,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     assertTrue(iter.hasNext());
     next = iter.next();
     assertNotNull(next);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
     assertTrue("Wrong instanceof", next instanceof RandomAccessSparseVector);
     assertEquals(5.0, next.get(0), EPSILON);
     assertEquals(23.0, next.get(1), EPSILON);
@@ -69,7 +71,9 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
 
   @Test
   public void testDense() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
     Iterable<Vector> iterable = readModelFromResource("sample-dense.arff");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-985
     Vector firstVector = iterable.iterator().next();
     assertEquals(1.0, firstVector.get(0), 0);
     assertEquals(65.0, firstVector.get(1), 0);
@@ -87,6 +91,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
   @Test
   public void testSparse() throws Exception {
     Iterable<Vector> iterable = readModelFromResource("sample-sparse.arff");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
 
     Vector firstVector = iterable.iterator().next();
     assertEquals(23.1, firstVector.get(1), 0);
@@ -104,6 +109,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
   @Test
   public void testNonNumeric() throws Exception {
     MapBackedARFFModel model = new MapBackedARFFModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
     ARFFVectorIterable iterable = getVectors("non-numeric-1.arff", model);
     int count = 0;
     for (Vector vector : iterable) {
@@ -112,17 +118,21 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     }
 
     iterable = getVectors("non-numeric-1.arff", model);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
     Iterator<Vector> iter = iterable.iterator();
     Vector firstVector = iter.next();
 
     assertEquals(1.0, firstVector.get(2), 0);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
     assertEquals(10, count);
     Map<String, Map<String, Integer>> nominalMap = iterable.getModel().getNominalMap();
     assertNotNull(nominalMap);
     assertEquals(1, nominalMap.size());
     Map<String, Integer> noms = nominalMap.get("bar");
     assertNotNull("nominals for bar are null", noms);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1371
     assertEquals(5, noms.size());
     Map<Integer, ARFFType> integerARFFTypeMap = model.getTypeMap();
     assertNotNull("Type map null", integerARFFTypeMap);
@@ -141,6 +151,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     Iterator<Vector> iter = iterable.iterator();
     Vector firstVector = iter.next();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
     DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
     Date date = format.parse("2001-07-04T12:08:56");
     long result = date.getTime();
@@ -179,15 +190,21 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     ARFFVectorIterable iterable = getVectors("non-numeric-1.arff", model);
     int count = 0;
     for (Vector vector : iterable) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
       assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
       count++;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
     assertEquals(10, count);
     Map<String,Map<String,Integer>> nominalMap = iterable.getModel().getNominalMap();
     assertNotNull(nominalMap);
     assertEquals(1, nominalMap.size());
     Map<String,Integer> noms = nominalMap.get("bar");
     assertNotNull("nominals for bar are null", noms);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1371
     assertEquals(5, noms.size());
     Map<Integer,ARFFType> integerARFFTypeMap = model.getTypeMap();
     assertNotNull("Type map null", integerARFFTypeMap);
@@ -201,9 +218,11 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     assertEquals(1, integerDateFormatMap.size());
 
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
     iterable = getVectors("non-numeric-2.arff", model);
     count = 0;
     for (Vector vector : iterable) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-206
       assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
       count++;
     }
@@ -217,6 +236,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
 
   @Test
   public void testNumerics() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1063
     String arff = "@RELATION numerics\n"
       + "@ATTRIBUTE theNumeric NUMERIC\n"
       + "@ATTRIBUTE theInteger INTEGER\n"
@@ -242,6 +262,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
   public void testQuotes() throws Exception {
     // ARFF allows quotes on identifiers
     ARFFModel model = new MapBackedARFFModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
     ARFFVectorIterable iterable = getVectors("quoted-id.arff", model);
     model = iterable.getModel();
     assertNotNull(model);
@@ -277,6 +298,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
   }
 
   static ARFFVectorIterable getVectors(String resourceName, ARFFModel model) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1164
     String sample = Resources.toString(Resources.getResource(resourceName), Charsets.UTF_8);
     return new ARFFVectorIterable(sample, model);
   }

@@ -31,6 +31,7 @@ import org.junit.Test;
 public final class TestDistributedConjugateGradientSolver extends MahoutTestCase {
 
   private static Vector randomVector(int size, double entryMean) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-672
     DenseVector v = new DenseVector(size);
     Random r = RandomUtils.getRandom();
     
@@ -46,6 +47,7 @@ public final class TestDistributedConjugateGradientSolver extends MahoutTestCase
     File testData = getTestTempDir("testdata");
     DistributedRowMatrix matrix = new TestDistributedRowMatrix().randomDistributedMatrix(
         10, 10, 10, 10, 10.0, true, testData.getAbsolutePath());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     matrix.setConf(getConfiguration());
     Vector vector = randomVector(matrix.numCols(), 10.0);
     

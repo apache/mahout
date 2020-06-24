@@ -38,6 +38,7 @@ import org.apache.mahout.math.Varint;
 public class Gram extends BinaryComparable implements WritableComparable<BinaryComparable> {
   
   public enum Type {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-299
     HEAD('h'),
     TAIL('t'),
     UNIGRAM('u'),
@@ -101,6 +102,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     try {  
       // extra character is used for storing type which is part 
       // of the sort key.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-317
       ByteBuffer bb = Text.encode('\0' + ngram, true);
       bytes = bb.array();
       length = bb.limit();
@@ -127,6 +129,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
    * @return the gram is at the head of its text unit or tail or unigram.
    */
   public Type getType() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-317
     return decodeType(bytes, 0);
   }
 
@@ -163,6 +166,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
   @Override
   public void readFields(DataInput in) throws IOException {
     int newLength = Varint.readUnsignedVarInt(in);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-299
     setCapacity(newLength, false);
     in.readFully(bytes, 0, newLength);
     int newFrequency = Varint.readUnsignedVarInt(in);

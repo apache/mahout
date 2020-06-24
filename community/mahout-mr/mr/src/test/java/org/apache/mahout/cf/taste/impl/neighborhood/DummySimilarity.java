@@ -27,6 +27,7 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import java.util.Collection;
 
 final class DummySimilarity extends AbstractItemSimilarity implements UserSimilarity {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
 
   DummySimilarity(DataModel dataModel) {
     super(dataModel);
@@ -35,6 +36,7 @@ final class DummySimilarity extends AbstractItemSimilarity implements UserSimila
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
     DataModel dataModel = getDataModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     return 1.0 / (1.0 + Math.abs(dataModel.getPreferencesFromUser(userID1).get(0).getValue()
                                  - dataModel.getPreferencesFromUser(userID2).get(0).getValue()));
   }

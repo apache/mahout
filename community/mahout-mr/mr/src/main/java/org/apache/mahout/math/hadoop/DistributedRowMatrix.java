@@ -79,6 +79,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   private boolean keepTempFiles;
 
   public DistributedRowMatrix(Path inputPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
                               Path outputTmpPath,
                               int numRows,
                               int numCols) {
@@ -106,9 +107,11 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   public void setConf(Configuration conf) {
     this.conf = conf;
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
       FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
       rowPath = fs.makeQualified(inputPath);
       outputTmpBasePath = fs.makeQualified(outputTmpPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-666
       keepTempFiles = conf.getBoolean(KEEP_TEMP_FILES, false);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
@@ -124,6 +127,9 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   }
 
   public void setOutputTempPathString(String outPathString) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-312
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-313
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-314
     try {
       outputTmpBasePath = FileSystem.get(conf).makeQualified(new Path(outPathString));
     } catch (IOException ioe) {
@@ -134,18 +140,42 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
 
   @Override
   public Iterator<MatrixSlice> iterateNonEmpty() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1660
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1713
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1714
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1715
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1716
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1717
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1718
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1719
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1720
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1721
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1722
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1723
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1724
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1725
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1726
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1727
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1728
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1730
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1731
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1732
     return iterator();
   }
 
   @Override
   public Iterator<MatrixSlice> iterateAll() {
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1142
       Path pathPattern = rowPath;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
       if (FileSystem.get(conf).getFileStatus(rowPath).isDir()) {
         pathPattern = new Path(rowPath, "*");
       }
       return Iterators.transform(
           new SequenceFileDirIterator<IntWritable,VectorWritable>(pathPattern,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-708
                                                                   PathType.GLOB,
                                                                   PathFilters.logsCRCFilter(),
                                                                   null,
@@ -184,6 +214,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
    * @return    a DistributedRowMatrix containing the product
    */
   public DistributedRowMatrix times(DistributedRowMatrix other) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1076
     return times(other, new Path(outputTmpBasePath.getParent(), "productWith-" + (System.nanoTime() & 0xFF)));
   }
 
@@ -198,6 +229,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       throw new CardinalityException(numRows, other.numRows());
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-641
     Configuration initialConf = getConf() == null ? new Configuration() : getConf();
     Configuration conf =
         MatrixMultiplicationJob.createMatrixMultiplyJobConf(initialConf,
@@ -238,9 +270,11 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   }
 
   public DistributedRowMatrix transpose() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
     Path outputPath = new Path(rowPath.getParent(), "transpose-" + (System.nanoTime() & 0xFF));
     Configuration initialConf = getConf() == null ? new Configuration() : getConf();
     Job transposeJob = TransposeJob.buildTransposeJob(initialConf, rowPath, outputPath, numRows);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
 
     try {
       transposeJob.waitForCompletion(true);
@@ -248,6 +282,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       throw new IllegalStateException("transposition failed", e);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
     DistributedRowMatrix m = new DistributedRowMatrix(outputPath, outputTmpPath, numCols, numRows);
     m.setConf(this.conf);
     return m;
@@ -258,6 +293,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     try {
       Configuration initialConf = getConf() == null ? new Configuration() : getConf();
       Path outputVectorTmpPath = new Path(outputTmpBasePath, new Path(Long.toString(System.nanoTime())));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
 
       Job job = TimesSquaredJob.createTimesJob(initialConf, v, numRows, rowPath, outputVectorTmpPath);
 
@@ -283,6 +319,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     try {
       Configuration initialConf = getConf() == null ? new Configuration() : getConf();
       Path outputVectorTmpPath = new Path(outputTmpBasePath, new Path(Long.toString(System.nanoTime())));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
 
       Job job = TimesSquaredJob.createTimesSquaredJob(initialConf, v, rowPath, outputVectorTmpPath);
 
@@ -293,6 +330,8 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       }
 
       Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(outputVectorTmpPath, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-666
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-666
       if (!keepTempFiles) {
         FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
         fs.delete(outputVectorTmpPath, true);
@@ -314,6 +353,9 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     private double val;
 
     public int getRow() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-312
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-313
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-314
       return row;
     }
 

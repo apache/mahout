@@ -39,6 +39,7 @@ final class BitSet implements Serializable, Cloneable {
   
   boolean get(int index) {
     // skipping range check for speed
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     return (bits[index >>> 6] & 1L << (index & 0x3F)) != 0L;
   }
   

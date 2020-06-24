@@ -31,6 +31,9 @@ import org.apache.lucene.analysis.wikipedia.WikipediaTokenizer;
 public class WikipediaAnalyzer extends StopwordAnalyzerBase {
   
   public WikipediaAnalyzer() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     super(StopAnalyzer.ENGLISH_STOP_WORDS_SET);
   }
   

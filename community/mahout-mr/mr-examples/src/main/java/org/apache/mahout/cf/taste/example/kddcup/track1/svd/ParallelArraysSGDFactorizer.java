@@ -107,6 +107,7 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     int numPrefs = factorizablePreferences.numPreferences();
 
     log.info("Mapping {} users...", numUsers);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     userIDMapping = new FastByIDMap<>(numUsers);
     int index = 0;
     LongPrimitiveIterator userIterator = factorizablePreferences.getUserIDs();
@@ -115,6 +116,7 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     }
 
     log.info("Mapping {} items", numItems);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     itemIDMapping = new FastByIDMap<>(numItems);
     index = 0;
     LongPrimitiveIterator itemIterator = factorizablePreferences.getItemIDs();
@@ -171,6 +173,7 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     for (int feature = 0; feature < numFeatures; feature++) {
       log.info("Shuffling preferences...");
       shufflePreferences();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       log.info("Starting training of feature {} ...", feature);
       for (int currentIteration = 0; currentIteration < numIterations; currentIteration++) {
         if (currentIteration == numIterations - 1) {

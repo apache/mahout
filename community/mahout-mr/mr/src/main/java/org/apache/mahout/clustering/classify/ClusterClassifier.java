@@ -94,6 +94,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
 
   @Override
   public Vector classify(Vector instance) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     return policy.classify(instance, this);
   }
 
@@ -116,6 +117,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   public void write(DataOutput out) throws IOException {
     out.writeInt(models.size());
     out.writeUTF(modelClass);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     new ClusteringPolicyWritable(policy).write(out);
     for (Cluster cluster : models) {
       cluster.write(out);
@@ -126,7 +128,9 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   public void readFields(DataInput in) throws IOException {
     int size = in.readInt();
     modelClass = in.readUTF();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     models = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     ClusteringPolicyWritable clusteringPolicyWritable = new ClusteringPolicyWritable();
     clusteringPolicyWritable.readFields(in);
     policy = clusteringPolicyWritable.getValue();
@@ -165,6 +169,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
 
   @Override
   public void close() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     policy.close(this);
   }
 
@@ -177,11 +182,13 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   }
 
   public void writeToSeqFiles(Path path) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     writePolicy(policy, path);
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(path.toUri(), config);
     ClusterWritable cw = new ClusterWritable();
     for (int i = 0; i < models.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, config,
           new Path(path, "part-" + String.format(Locale.ENGLISH, "%05d", i)), IntWritable.class,
           ClusterWritable.class)) {
@@ -198,6 +205,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     List<Cluster> clusters = new ArrayList<>();
     for (ClusterWritable cw : new SequenceFileDirValueIterable<ClusterWritable>(path, PathType.LIST,
         PathFilters.logsCRCFilter(), config)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-990
       Cluster cluster = cw.getValue();
       cluster.configure(conf);
       clusters.add(cluster);
@@ -208,6 +216,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   }
 
   public static ClusteringPolicy readPolicy(Path path) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     Path policyPath = new Path(path, POLICY_FILE_NAME);
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(policyPath.toUri(), config);
@@ -215,17 +224,21 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     Text key = new Text();
     ClusteringPolicyWritable cpw = new ClusteringPolicyWritable();
     reader.next(key, cpw);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1467
     Closeables.close(reader, true);
     return cpw.getValue();
   }
 
   public static void writePolicy(ClusteringPolicy policy, Path path) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     Path policyPath = new Path(path, POLICY_FILE_NAME);
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(policyPath.toUri(), config);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, policyPath, Text.class,
         ClusteringPolicyWritable.class);
     writer.append(new Text(), new ClusteringPolicyWritable(policy));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1467
     Closeables.close(writer, false);
   }
 }

@@ -37,10 +37,13 @@ public class ThetaMapper extends Mapper<IntWritable, VectorWritable, Text, Vecto
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
     super.setup(ctx);
     Configuration conf = ctx.getConfiguration();
 
     float alphaI = conf.getFloat(ALPHA_I, 1.0f);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1006
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     Map<String, Vector> scores = BayesUtils.readScoresFromCache(conf);    
     
     trainer = new ComplementaryThetaTrainer(scores.get(TrainNaiveBayesJob.WEIGHTS_PER_FEATURE),
@@ -56,6 +59,7 @@ public class ThetaMapper extends Mapper<IntWritable, VectorWritable, Text, Vecto
   protected void cleanup(Context ctx) throws IOException, InterruptedException {
     ctx.write(new Text(TrainNaiveBayesJob.LABEL_THETA_NORMALIZER),
         new VectorWritable(trainer.retrievePerLabelThetaNormalizer()));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1014
     super.cleanup(ctx);
   }
 }

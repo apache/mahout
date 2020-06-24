@@ -152,6 +152,7 @@ public class FileDataModel extends AbstractDataModel {
    * a custom regex pattern.
    */
   public FileDataModel(File dataFile, String delimiterRegex) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1398
     this(dataFile, false, DEFAULT_MIN_RELOAD_INTERVAL_MS, delimiterRegex);
   }
   
@@ -164,6 +165,7 @@ public class FileDataModel extends AbstractDataModel {
    * @see #FileDataModel(File)
    */
   public FileDataModel(File dataFile, boolean transpose, long minReloadIntervalMS) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1398
     this(dataFile, transpose, minReloadIntervalMS, null);
   }
   
@@ -175,14 +177,18 @@ public class FileDataModel extends AbstractDataModel {
   public FileDataModel(File dataFile, boolean transpose, long minReloadIntervalMS, String delimiterRegex)
     throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     this.dataFile = Preconditions.checkNotNull(dataFile.getAbsoluteFile());
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-582
     Preconditions.checkArgument(dataFile.length() > 0L, "dataFile is empty");
     Preconditions.checkArgument(minReloadIntervalMS >= 0L, "minReloadIntervalMs must be non-negative");
 
     log.info("Creating FileDataModel for file {}", dataFile);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     this.lastModified = dataFile.lastModified();
     this.lastUpdateFileModified = readLastUpdateFileModified();
@@ -194,8 +200,11 @@ public class FileDataModel extends AbstractDataModel {
       firstLine = iterator.peek();
     }
     Closeables.close(iterator, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     char delimiter;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1398
     if (delimiterRegex == null) {
       delimiter = determineDelimiter(firstLine);
       delimiterPattern = Splitter.on(delimiter);
@@ -206,16 +215,20 @@ public class FileDataModel extends AbstractDataModel {
         throw new IllegalArgumentException("Did not find a delimiter(pattern) in first line");
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> firstLineSplit = new ArrayList<>();
     for (String token : delimiterPattern.split(firstLine)) {
       firstLineSplit.add(token);
     }
     // If preference value exists and isn't empty then the file is specifying pref values
     hasPrefValues = firstLineSplit.size() >= 3 && !firstLineSplit.get(2).isEmpty();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
 
     this.reloadLock = new ReentrantLock();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-135
     this.transpose = transpose;
     this.minReloadIntervalMS = minReloadIntervalMS;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-411
 
     reload();
   }
@@ -229,6 +242,7 @@ public class FileDataModel extends AbstractDataModel {
       try {
         delegate = buildModel();
       } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         log.warn("Exception while reloading", ioe);
       } finally {
         reloadLock.unlock();
@@ -248,6 +262,7 @@ public class FileDataModel extends AbstractDataModel {
     lastUpdateFileModified = newLastUpdateFileModified;
 
     FastByIDMap<FastByIDMap<Long>> timestamps = new FastByIDMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     if (hasPrefValues) {
 
@@ -256,6 +271,7 @@ public class FileDataModel extends AbstractDataModel {
         FastByIDMap<Collection<Preference>> data = new FastByIDMap<>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         processFile(iterator, data, timestamps, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
 
         for (File updateFile : findUpdateFilesAfter(newLastModified)) {
           processFile(new FileLineIterator(updateFile, false), data, timestamps, false);
@@ -279,9 +295,11 @@ public class FileDataModel extends AbstractDataModel {
 
       if (loadFreshData) {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         FastByIDMap<FastIDSet> data = new FastByIDMap<>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         processFileWithoutID(iterator, data, timestamps);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
 
         for (File updateFile : findUpdateFilesAfter(newLastModified)) {
           processFileWithoutID(new FileLineIterator(updateFile, false), data, timestamps);
@@ -315,7 +333,9 @@ public class FileDataModel extends AbstractDataModel {
     int period = dataFileName.indexOf('.');
     String startName = period < 0 ? dataFileName : dataFileName.substring(0, period);
     File parentDir = dataFile.getParentFile();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Long, File> modTimeToUpdateFile = new TreeMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
     FileFilter onlyFiles = new FileFilter() {
       @Override
       public boolean accept(File file) {
@@ -486,6 +506,7 @@ public class FileDataModel extends AbstractDataModel {
       }
 
       addTimestamp(userID, itemID, timestampString, timestamps);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
 
     } else {
       // Data are Collection<Preference>
@@ -499,6 +520,7 @@ public class FileDataModel extends AbstractDataModel {
           Iterator<Preference> prefsIterator = prefs.iterator();
           while (prefsIterator.hasNext()) {
             Preference pref = prefsIterator.next();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
             if (pref.getItemID() == itemID) {
               prefsIterator.remove();
               break;
@@ -506,6 +528,8 @@ public class FileDataModel extends AbstractDataModel {
           }
         }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
         removeTimestamp(userID, itemID, timestamps);
         
       } else {
@@ -525,6 +549,7 @@ public class FileDataModel extends AbstractDataModel {
 
         if (!exists) {
           if (prefs == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             prefs = new ArrayList<>(2);
             ((FastByIDMap<Collection<Preference>>) data).put(userID, prefs);
           }
@@ -532,6 +557,7 @@ public class FileDataModel extends AbstractDataModel {
         }
 
         addTimestamp(userID, itemID, timestampString, timestamps);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
 
       }
 
@@ -539,8 +565,11 @@ public class FileDataModel extends AbstractDataModel {
   }
 
   protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
                                       FastByIDMap<FastIDSet> data,
                                       FastByIDMap<FastByIDMap<Long>> timestamps) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.info("Reading file info...");
     int count = 0;
     while (dataOrUpdateFileIterator.hasNext()) {
@@ -556,6 +585,7 @@ public class FileDataModel extends AbstractDataModel {
   }
 
   protected void processLineWithoutID(String line,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
                                       FastByIDMap<FastIDSet> data,
                                       FastByIDMap<FastByIDMap<Long>> timestamps) {
 
@@ -611,6 +641,7 @@ public class FileDataModel extends AbstractDataModel {
     if (timestampString != null) {
       FastByIDMap<Long> itemTimestamps = timestamps.get(userID);
       if (itemTimestamps == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         itemTimestamps = new FastByIDMap<>();
         timestamps.put(userID, itemTimestamps);
       }
@@ -651,6 +682,7 @@ public class FileDataModel extends AbstractDataModel {
    * By default they are expected to be numeric, expressing a time as milliseconds since the epoch.
    */
   protected long readTimestampFromString(String value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     return Long.parseLong(value);
   }
 
@@ -686,6 +718,7 @@ public class FileDataModel extends AbstractDataModel {
 
   @Override
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     return delegate.getPreferenceTime(userID, itemID);
   }
 
@@ -701,6 +734,7 @@ public class FileDataModel extends AbstractDataModel {
 
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-764
     return delegate.getNumUsersWithPreferenceFor(itemID);
   }
 
@@ -730,6 +764,7 @@ public class FileDataModel extends AbstractDataModel {
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     if (dataFile.lastModified() > lastModified + minReloadIntervalMS
         || readLastUpdateFileModified() > lastUpdateFileModified + minReloadIntervalMS) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("File has changed; reloading...");
       reload();
     }

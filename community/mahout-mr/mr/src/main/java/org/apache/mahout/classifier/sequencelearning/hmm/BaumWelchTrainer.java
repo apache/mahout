@@ -50,6 +50,7 @@ public final class BaumWelchTrainer {
     ArgumentBuilder argumentBuilder = new ArgumentBuilder();
 
     Option inputOption = DefaultOptionCreator.inputOption().create();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
 
     Option outputOption = DefaultOptionCreator.outputOption().create();
 
@@ -95,8 +96,10 @@ public final class BaumWelchTrainer {
       //constructing random-generated HMM
       HmmModel model = new HmmModel(nrOfHiddenStates, nrOfObservedStates, new Date().getTime());
       List<Integer> observations = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
       //reading observations
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8")) {
         while (scanner.hasNextInt()) {
           observations.add(scanner.nextInt());
@@ -113,6 +116,7 @@ public final class BaumWelchTrainer {
         observationsArray, epsilon, maxIterations, true);
 
       //serializing trained model
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (DataOutputStream stream = new DataOutputStream(new FileOutputStream(output))){
         LossyHmmSerializer.serialize(trainedModel, stream);
       }

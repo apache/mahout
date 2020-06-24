@@ -39,6 +39,7 @@ public class Data implements Cloneable {
 
   public Data(Dataset dataset) {
     this.dataset = dataset;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     this.instances = new ArrayList<>();
   }
 
@@ -87,6 +88,7 @@ public class Data implements Cloneable {
    * @return the subset from this data that matches the given condition
    */
   public Data subset(Condition condition) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Instance> subset = new ArrayList<>();
     
     for (Instance instance : instances) {
@@ -103,6 +105,7 @@ public class Data implements Cloneable {
    */
   public Data bagging(Random rng) {
     int datasize = size();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Instance> bag = new ArrayList<>(datasize);
     
     for (int i = 0; i < datasize; i++) {
@@ -122,6 +125,7 @@ public class Data implements Cloneable {
    */
   public Data bagging(Random rng, boolean[] sampled) {
     int datasize = size();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Instance> bag = new ArrayList<>(datasize);
     
     for (int i = 0; i < datasize; i++) {
@@ -137,6 +141,7 @@ public class Data implements Cloneable {
    * Splits the data in two, returns one part, and this gets the rest of the data. <b>VERY SLOW!</b>
    */
   public Data rsplit(Random rng, int subsize) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Instance> subset = new ArrayList<>(subsize);
     
     for (int i = 0; i < subsize; i++) {
@@ -153,6 +158,7 @@ public class Data implements Cloneable {
    *         false otherwise
    */
   public boolean isIdentical() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (isEmpty()) {
       return true;
     }
@@ -191,6 +197,7 @@ public class Data implements Cloneable {
    * finds all distinct values of a given attribute
    */
   public double[] values(int attr) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Double> result = new HashSet<>();
     
     for (Instance instance : instances) {
@@ -209,11 +216,13 @@ public class Data implements Cloneable {
   
   @Override
   public Data clone() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new Data(dataset, new ArrayList<>(instances));
   }
   
   @Override
   public boolean equals(Object obj) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (this == obj) {
       return true;
     }
@@ -228,6 +237,7 @@ public class Data implements Cloneable {
   
   @Override
   public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     return instances.hashCode() + dataset.hashCode();
   }
   
@@ -238,6 +248,7 @@ public class Data implements Cloneable {
     double[] labels = new double[size()];
     
     for (int index = 0; index < labels.length; index++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       labels[index] = dataset.getLabel(get(index));
     }
     
@@ -255,6 +266,7 @@ public class Data implements Cloneable {
     int[] counts = new int[dataset.nblabels()];
     
     for (int index = 0; index < size(); index++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       counts[(int) dataset.getLabel(get(index))]++;
     }
     
@@ -271,11 +283,13 @@ public class Data implements Cloneable {
    */
   public void countLabels(int[] counts) {
     for (int index = 0; index < size(); index++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       counts[(int) dataset.getLabel(get(index))]++;
     }
   }
   
   public Dataset getDataset() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     return dataset;
   }
 }

@@ -173,6 +173,8 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
          DEFAULT_ITEM_ID_COLUMN,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
          DEFAULT_PREFERENCE_COLUMN,
          DEFAULT_PREFERENCE_TIME_COLUMN);
   }
@@ -198,6 +200,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
                             String preferenceTable,
                             String userIDColumn,
                             String itemIDColumn,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
                             String preferenceColumn,
                             String timestampColumn) {
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn, preferenceColumn,
@@ -233,6 +236,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
         // getNumPreferenceForItemsSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " tp1 JOIN " + preferenceTable + " tp2 " + "USING ("
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
             + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?",
         "SELECT MAX(" + preferenceColumn + ") FROM " + preferenceTable,
         "SELECT MIN(" + preferenceColumn + ") FROM " + preferenceTable);

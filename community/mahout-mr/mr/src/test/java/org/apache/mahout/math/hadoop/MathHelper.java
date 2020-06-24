@@ -91,6 +91,7 @@ public final class MathHelper {
       public boolean matches(Object argument) {
         if (argument instanceof VectorWritable) {
           Vector v = ((VectorWritable) argument).get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-420
           return consistsOf(v, elements);
         }
         return false;
@@ -122,6 +123,7 @@ public final class MathHelper {
    */
   public static int numberOfNoNZeroNonNaNElements(Vector vector) {
     int elementsInVector = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element currentElement : vector.nonZeroes()) {
       if (!Double.isNaN(currentElement.get())) {
         elementsInVector++;
@@ -136,16 +138,21 @@ public final class MathHelper {
   public static Matrix readMatrix(Configuration conf, Path path, int rows, int columns) {
     boolean readOneRow = false;
     Matrix matrix = new DenseMatrix(rows, columns);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
     for (Pair<IntWritable,VectorWritable> record :
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
         new SequenceFileIterable<IntWritable,VectorWritable>(path, true, conf)) {
       IntWritable key = record.getFirst();
       VectorWritable value = record.getSecond();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-879
       readOneRow = true;
       int row = key.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element element : value.get().nonZeroes()) {
         matrix.set(row, element.index(), element.get());
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-879
     if (!readOneRow) {
       throw new IllegalStateException("Not a single row read!");
     }
@@ -186,6 +193,7 @@ public final class MathHelper {
         writer.append(new IntWritable(n), new VectorWritable(v));
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
   }
@@ -210,12 +218,14 @@ public final class MathHelper {
 
     StringBuilder buffer = new StringBuilder("[");
     String separator = "";
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element e : v.all()) {
       buffer.append(separator);
       if (Double.isNaN(e.get())) {
         buffer.append("  -  ");
       } else {
         if (e.get() >= 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
           buffer.append(' ');
         }
         buffer.append(df.format(e.get()));
@@ -229,6 +239,7 @@ public final class MathHelper {
   public static String nice(Matrix matrix) {
     StringBuilder info = new StringBuilder();
     for (int n = 0; n < matrix.numRows(); n++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       info.append(nice(matrix.viewRow(n))).append('\n');
     }
     return info.toString();

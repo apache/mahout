@@ -40,7 +40,9 @@ public final class TestCVBModelTrainer extends MahoutTestCase {
   @Test
   public void testInMemoryCVB0() throws Exception {
     String[] terms = new String[26];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i=0; i<terms.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       terms[i] = String.valueOf((char) (i + 'a'));
     }
     int numGeneratingTopics = 3;
@@ -62,6 +64,7 @@ public final class TestCVBModelTrainer extends MahoutTestCase {
     int numTrials = 1;
     for (int numTestTopics = 1; numTestTopics < 2 * numGeneratingTopics; numTestTopics++) {
       double[] perps = new double[numTrials];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       for (int trial = 0; trial < numTrials; trial++) {
         InMemoryCollapsedVariationalBayes0 cvb =
           new InMemoryCollapsedVariationalBayes0(sampledCorpus, terms, numTestTopics, ALPHA, ETA, 2, 1, 0);
@@ -80,6 +83,7 @@ public final class TestCVBModelTrainer extends MahoutTestCase {
   public void testRandomStructuredModelViaMR() throws Exception {
     int numGeneratingTopics = 3;
     int numTerms = 9;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     Matrix matrix = ClusteringTestUtils.randomStructuredModel(numGeneratingTopics, numTerms, new DoubleFunction() {
       @Override
       public double apply(double d) {
@@ -91,19 +95,23 @@ public final class TestCVBModelTrainer extends MahoutTestCase {
     int numSamples = 10;
     int numTopicsPerDoc = 1;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     Matrix sampledCorpus = ClusteringTestUtils.sampledCorpus(matrix, RandomUtils.getRandom(1234),
                                                              numDocs, numSamples, numTopicsPerDoc);
 
     Path sampleCorpusPath = getTestTempDirPath("corpus");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration configuration = getConfiguration();
     MatrixUtils.write(sampleCorpusPath, configuration, sampledCorpus);
     int numIterations = 5;
     List<Double> perplexities = Lists.newArrayList();
     int startTopic = numGeneratingTopics - 1;
     int numTestTopics = startTopic;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (numTestTopics < numGeneratingTopics + 2) {
       Path topicModelStateTempPath = getTestTempDirPath("topicTemp" + numTestTopics);
       Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1262
       CVB0Driver cvb0Driver = new CVB0Driver();
       cvb0Driver.run(conf, sampleCorpusPath, null, numTestTopics, numTerms,
           ALPHA, ETA, numIterations, 1, 0, null, null, topicModelStateTempPath, 1234, 0.2f, 2,
@@ -113,6 +121,7 @@ public final class TestCVBModelTrainer extends MahoutTestCase {
     }
     int bestTopic = -1;
     double lowestPerplexity = Double.MAX_VALUE;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int t = 0; t < perplexities.size(); t++) {
       if (perplexities.get(t) < lowestPerplexity) {
         lowestPerplexity = perplexities.get(t);
@@ -128,6 +137,7 @@ public final class TestCVBModelTrainer extends MahoutTestCase {
     double lowest = Double.MAX_VALUE;
     double current;
     int iteration = 2;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (!Double.isNaN(current = CVB0Driver.readPerplexity(conf, topicModelTemp, iteration))) {
       lowest = Math.min(current, lowest);
       iteration++;

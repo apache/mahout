@@ -44,11 +44,14 @@ public class TransposeJob extends AbstractJob {
 
   @Override
   public int run(String[] strings) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
     addInputOption();
     addOption("numRows", "nr", "Number of rows of the input matrix");
     addOption("numCols", "nc", "Number of columns of the input matrix");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String, List<String>> parsedArgs = parseArguments(strings);
     if (parsedArgs == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-777
       return -1;
     }
 
@@ -63,6 +66,7 @@ public class TransposeJob extends AbstractJob {
   }
 
   public static Job buildTransposeJob(Path matrixInputPath, Path matrixOutputPath, int numInputRows)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
     throws IOException {
     return buildTransposeJob(new Configuration(), matrixInputPath, matrixOutputPath, numInputRows);
   }

@@ -98,11 +98,14 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
                                         int candidatesPerUserFactor,
                                         int numUsers,
                                         int numItems) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(itemsFactor > 0, "itemsFactor must be greater then 0!");
     Preconditions.checkArgument(usersPerItemFactor > 0, "usersPerItemFactor must be greater then 0!");
     Preconditions.checkArgument(candidatesPerUserFactor > 0, "candidatesPerUserFactor must be greater then 0!");
     Preconditions.checkArgument(numUsers > 0, "numUsers must be greater then 0!");
     Preconditions.checkArgument(numItems > 0, "numItems must be greater then 0!");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-910
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-914
     maxItems = computeMaxFrom(itemsFactor, numItems);
     maxUsersPerItem = computeMaxFrom(usersPerItemFactor, numUsers);
     maxItemsPerUser = computeMaxFrom(candidatesPerUserFactor, numItems);
@@ -119,11 +122,13 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
 
   @Override
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
     LongPrimitiveIterator preferredItemIDsIterator = new LongPrimitiveArrayIterator(preferredItemIDs);
     if (preferredItemIDs.length > maxItems) {
       double samplingRate = (double) maxItems / preferredItemIDs.length;
 //      log.info("preferredItemIDs.length {}, samplingRate {}", preferredItemIDs.length, samplingRate);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       preferredItemIDsIterator = 
           new SamplingLongPrimitiveIterator(preferredItemIDsIterator, samplingRate);
     }
@@ -134,6 +139,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
       int prefsLength = prefs.length();
       if (prefsLength > maxUsersPerItem) {
         Iterator<Preference> sampledPrefs =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             new FixedSizeSamplingIterator<>(maxUsersPerItem, prefs.iterator());
         while (sampledPrefs.hasNext()) {
           addSomeOf(possibleItemsIDs, dataModel.getItemIDsFromUser(sampledPrefs.next().getUserID()));
@@ -144,7 +150,9 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
         }
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     if (!includeKnownItems) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-570
       possibleItemsIDs.removeAll(preferredItemIDs);
     }
     return possibleItemsIDs;

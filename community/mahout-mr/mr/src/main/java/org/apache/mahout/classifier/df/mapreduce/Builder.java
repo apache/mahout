@@ -103,6 +103,7 @@ public abstract class Builder {
    */
   public static Long getRandomSeed(Configuration conf) {
     String seed = conf.get("mahout.rf.random.seed");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (seed == null) {
       return null;
     }
@@ -158,6 +159,7 @@ public abstract class Builder {
    */
   public static void setNbTrees(Configuration conf, int nbTrees) {
     Preconditions.checkArgument(nbTrees > 0, "nbTrees should be greater than 0");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     conf.setInt("mahout.rf.nbtrees", nbTrees);
   }
@@ -200,6 +202,7 @@ public abstract class Builder {
    *           if no path is found
    */
   public static Path getDistributedCacheFile(Configuration conf, int index) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
     Path[] files = HadoopUtil.getCachedFiles(conf);
     
     if (files.length <= index) {
@@ -267,6 +270,7 @@ public abstract class Builder {
     
     // check the output
     if (fs.exists(outputPath)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       throw new IOException("Output path already exists : " + outputPath);
     }
     
@@ -281,7 +285,9 @@ public abstract class Builder {
     
     Job job = new Job(conf, "decision forest builder");
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Configuring the job...");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     configureJob(job);
     
     log.debug("Running the job...");
@@ -292,7 +298,9 @@ public abstract class Builder {
     
     if (isOutput(conf)) {
       log.debug("Parsing the output...");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-835
       DecisionForest forest = parseOutput(job);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       HadoopUtil.delete(conf, outputPath);
       return forest;
     }
@@ -321,6 +329,7 @@ public abstract class Builder {
           } else {
             return -1;
           }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
         } catch (IOException ie) {
           throw new IllegalStateException("Problem getting input split size", ie);
         } catch (InterruptedException ie) {

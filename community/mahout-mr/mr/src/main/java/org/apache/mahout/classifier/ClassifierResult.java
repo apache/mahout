@@ -38,6 +38,7 @@ public class ClassifierResult {
   }
 
   public ClassifierResult(String label, double score, double logLikelihood) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-857
     this.label = label;
     this.score = score;
     this.logLikelihood = logLikelihood;
@@ -69,6 +70,7 @@ public class ClassifierResult {
   
   @Override
   public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     return "ClassifierResult{" + "category='" + label + '\'' + ", score=" + score + '}';
   }
 }

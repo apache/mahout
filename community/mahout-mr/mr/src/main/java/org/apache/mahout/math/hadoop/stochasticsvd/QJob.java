@@ -72,6 +72,7 @@ public final class QJob {
   }
 
   public static class QMapper
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
       extends
       Mapper<Writable, VectorWritable, SplitPartitionedWritable, VectorWritable> {
 
@@ -100,6 +101,7 @@ public final class QJob {
       String sbPathStr = conf.get(PROP_SB_PATH);
       if (sbPathStr != null) {
         sb = SSVDHelper.loadAndSumUpVectors(new Path(sbPathStr), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
         if (sb == null)
           throw new IOException(String.format("Unable to load s_omega from path %s.", sbPathStr));
       }
@@ -112,6 +114,7 @@ public final class QJob {
         }
       });
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
       qHatKey = new SplitPartitionedWritable(context);
       rHatKey = new SplitPartitionedWritable(context);
 
@@ -140,6 +143,7 @@ public final class QJob {
         };
 
       qr = new QRFirstStep(conf, qhatCollector, rhatCollector);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       closeables.addFirst(qr); // important: qr closes first!!
       yRow = new DenseVector(kp);
     }
@@ -162,6 +166,7 @@ public final class QJob {
   }
 
   public static void run(Configuration conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
                          Path[] inputPaths,
                          Path sbPath,
                          Path outputPath,
@@ -191,6 +196,7 @@ public final class QJob {
 
     job.setInputFormatClass(SequenceFileInputFormat.class);
     FileInputFormat.setInputPaths(job, inputPaths);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (minSplitSize > 0) {
       FileInputFormat.setMinInputSplitSize(job, minSplitSize);
     }
@@ -199,6 +205,7 @@ public final class QJob {
 
     FileOutputFormat.setCompressOutput(job, true);
     FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
     SequenceFileOutputFormat.setOutputCompressionType(job,
                                                       CompressionType.BLOCK);
 
@@ -228,6 +235,7 @@ public final class QJob {
     job.submit();
     job.waitForCompletion(false);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (!job.isSuccessful()) {
       throw new IOException("Q job unsuccessful.");
     }

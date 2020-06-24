@@ -51,6 +51,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
   @Test
   public void testSSVDSolverDense() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
     runSSVDSolver(0);
   }
 
@@ -63,12 +64,14 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
   /* 
   @Test
   public void testSSVDSolverPowerIterations2() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-816
     runSSVDSolver(2);
   }
    */
 
   public void runSSVDSolver(int q) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     conf.set("mapred.job.tracker", "local");
     conf.set("fs.default.name", "file:///");
@@ -105,6 +108,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
                                        n);
 
     FileSystem fs = FileSystem.get(aLocPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     Path tempDirPath = getTestTempDirPath("svd-proc");
     Path aPath = new Path(tempDirPath, "A/A.seq");
@@ -130,10 +134,14 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
      * these are only tiny-test values to simulate high load cases, in reality
      * one needs much bigger
      */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     ssvd.setOuterBlockHeight(500);
     ssvd.setAbtBlockHeight(400);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-623
     ssvd.setOverwrite(true);
     ssvd.setQ(q);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     ssvd.setBroadcast(false);
     ssvd.run();
 
@@ -173,6 +181,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
           / singularValues.getQuick(i)) <= s_precisionPct / 100);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
     DenseMatrix mQ =
       SSVDHelper.drmLoadAsDense(fs, new Path(svdOutPath, "Bt-job/"
         + BtJob.OUTPUT_Q + "-*"), conf);
@@ -196,6 +205,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
   static void dumpSv(Vector s) {
     System.out.printf("svs: ");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element el : s.all()) {
       System.out.printf("%f  ", el.get());
     }

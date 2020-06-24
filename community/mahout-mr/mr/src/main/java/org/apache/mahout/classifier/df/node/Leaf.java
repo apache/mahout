@@ -32,6 +32,7 @@ public class Leaf extends Node {
 
   private double label;
   
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
   Leaf() { }
   
   public Leaf(double label) {
@@ -60,6 +61,7 @@ public class Leaf extends Node {
   
   @Override
   public boolean equals(Object obj) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (this == obj) {
       return true;
     }
@@ -69,6 +71,7 @@ public class Leaf extends Node {
     
     Leaf leaf = (Leaf) obj;
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     return Math.abs(label - leaf.label) < EPSILON;
   }
   
@@ -85,6 +88,7 @@ public class Leaf extends Node {
   
   @Override
   public void readFields(DataInput in) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     label = in.readDouble();
   }
   

@@ -102,6 +102,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
    * @see #AdaptiveLogisticRegression(int, int, org.apache.mahout.classifier.sgd.PriorFunction, int, int)
    */
   public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-939
     this(numCategories, numFeatures, prior, DEFAULT_THREAD_COUNT, DEFAULT_POOL_SIZE);
   }
 
@@ -118,6 +119,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     this.numFeatures = numFeatures;
     this.threadCount = threadCount;
     this.poolSize = poolSize;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     seed = new State<>(new double[2], 10);
     Wrapper w = new Wrapper(numCategories, numFeatures, prior);
     seed.setPayload(w);
@@ -150,6 +152,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
 
   private void trainWithBufferedExamples() {
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
       this.best = ep.parallelDo(new EvolutionaryProcess.Function<Payload<CrossFoldLearner>>() {
         @Override
         public double apply(Payload<CrossFoldLearner> z, double[] params) {
@@ -186,6 +189,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
         // now grossly hack the top survivors so they stick around.  Set their
         // mutation rates small and also hack their learning rate to be small
         // as well.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
         for (State<Wrapper, CrossFoldLearner> state : ep.getPopulation().subList(0, SURVIVORS)) {
           Wrapper.freeze(state);
         }
@@ -226,6 +230,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
   public void close() {
     trainWithBufferedExamples();
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
       ep.parallelDo(new EvolutionaryProcess.Function<Payload<CrossFoldLearner>>() {
         @Override
         public double apply(Payload<CrossFoldLearner> payload, double[] params) {
@@ -238,6 +243,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
       log.warn("Ignoring exception", e);
     } catch (ExecutionException e) {
       throw new IllegalStateException(e);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     } finally {
       ep.close();
     }
@@ -284,6 +290,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
   }
 
   private void setupOptimizer(int poolSize) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     ep = new EvolutionaryProcess<>(threadCount, poolSize, seed);
   }
 
@@ -307,6 +314,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     if (best == null) {
       return Double.NaN;
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
       Wrapper payload = best.getPayload();
       return payload.getLearner().auc();
     }
@@ -413,6 +421,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
       int i = 0;
       wrapped.lambda(params[i++]);
       wrapped.learningRate(params[i]);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-494
 
       wrapped.stepOffset(1);
       wrapped.alpha(1);
@@ -423,6 +432,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
       // radically decrease learning rate
       double[] params = s.getParams();
       params[1] -= 10;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
 
       // and cause evolution to hold (almost)
       s.setOmni(s.getOmni() / 20);
@@ -459,6 +469,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
 
     @Override
     public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
       wrapped.write(out);
     }
 
@@ -503,6 +514,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
 
     @Override
     public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
       out.writeLong(key);
       if (groupKey != null) {
         out.writeBoolean(true);
@@ -561,6 +573,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     bufferSize = in.readInt();
 
     int n = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     buffer = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       TrainingExample example = new TrainingExample();

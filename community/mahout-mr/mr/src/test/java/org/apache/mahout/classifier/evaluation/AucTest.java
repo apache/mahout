@@ -41,9 +41,12 @@ public final class AucTest extends MahoutTestCase {
 
   @Test
   public void testTies() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-557
     Auc auc = new Auc();
     Random gen = RandomUtils.getRandom();
     auc.setProbabilityScore(false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i=0; i<100000; i++) {
       auc.add(0, gen.nextGaussian());
       auc.add(1, gen.nextGaussian() + 1);
@@ -68,6 +71,7 @@ public final class AucTest extends MahoutTestCase {
     Random gen = RandomUtils.getRandom();
     Normal n0 = new Normal(-1, 1, gen);
     Normal n1 = new Normal(1, 1, gen);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i=0; i<100000; i++) {
       double score = n0.nextDouble();
       double p = n1.pdf(score) / (n0.pdf(score) + n1.pdf(score));

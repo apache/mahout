@@ -52,6 +52,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
   private final ARFFModel model;
 
   public ARFFVectorIterable(File file, ARFFModel model) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this(file, Charsets.UTF_8, model);
   }
 
@@ -76,6 +77,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
     String line;
     while ((line = buff.readLine()) != null) {
       line = line.trim();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1371
       if (!line.startsWith(ARFFModel.ARFF_COMMENT) && !line.isEmpty()) {
         Integer labelNumInt = labelNumber;
         String[] lineParts = line.split("[\\s\\t]+", 2);
@@ -110,6 +112,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
             // @ATTRIBUTE class        {Iris-setosa,'Iris versicolor',Iris-virginica}
             String[] classes = ARFFIterator.splitCSV(attrParts[1].substring(1, attrParts[1].length() - 1));
             for (int i = 0; i < classes.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1150
               model.addNominal(label, ARFFType.removeQuotes(classes[i]), i + 1);
             }
           } else if (attrParts[1].toLowerCase().startsWith(ARFFType.DATE.getIndicator())) {
@@ -126,12 +129,14 @@ public class ARFFVectorIterable implements Iterable<Vector> {
             model.addDateFormat(labelNumInt, format);
             //@attribute <name> date [<date-format>]
           } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1371
             throw new UnsupportedOperationException("Invalid attribute: " + attrParts[1]);
           }
           model.addLabel(label, labelNumInt);
           model.addType(labelNumInt, type);
           labelNumber++;
         } else if (lineParts[0].equalsIgnoreCase(ARFFModel.DATA)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
           break; //skip it
         }
       }
@@ -141,6 +146,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
 
   @Override
   public Iterator<Vector> iterator() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     return new ARFFIterator(buff, model);
   }
 

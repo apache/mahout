@@ -59,6 +59,7 @@ public class DriverTest extends MahoutTestCase {
     outputDir = getTestTempDir("output");
     outputDir.delete();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     conf = getConfiguration();
   }
 
@@ -74,6 +75,7 @@ public class DriverTest extends MahoutTestCase {
 
     static {
       TYPE.setOmitNorms(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
       TYPE.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
       TYPE.setStored(true);
       TYPE.setTokenized(true);
@@ -89,6 +91,7 @@ public class DriverTest extends MahoutTestCase {
   @Test
   public void sequenceFileDictionary() throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     Directory index = new SimpleFSDirectory(Paths.get(indexDir.getAbsolutePath()));
     Analyzer analyzer = new StandardAnalyzer();
     IndexWriterConfig config = new IndexWriterConfig(analyzer);
@@ -101,6 +104,7 @@ public class DriverTest extends MahoutTestCase {
       writer.addDocument(asDocument("One Ring to bring them all"));
       writer.addDocument(asDocument("and in the darkness bind them"));
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
       writer.close();
     }
 
@@ -125,6 +129,7 @@ public class DriverTest extends MahoutTestCase {
         indexTerms.add(term.toString());
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(reader, true);
     }
 

@@ -184,6 +184,7 @@ public final class WikipediaXmlSplitter {
     File dumpFile = new File(dumpFilePath);
 
     // If the specified path for the input file is incorrect, return immediately
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1367
     if (!dumpFile.exists()) {
       log.error("Input file path {} doesn't exist", dumpFilePath);
       return;
@@ -216,12 +217,15 @@ public final class WikipediaXmlSplitter {
 
         if (content.length() > chunkSize || end) {
           content.append("</mediawiki>");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1367
           fileNumber++;
           String filename = outputDirPath + "/chunk-" + decimalFormatter.format(fileNumber) + ".xml";
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           try (BufferedWriter chunkWriter =
                    new BufferedWriter(new OutputStreamWriter(fs.create(new Path(filename)), "UTF-8"))) {
             chunkWriter.write(content.toString(), 0, content.length());
           }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1367
           if (fileNumber >= numChunks) {
             break;
           }

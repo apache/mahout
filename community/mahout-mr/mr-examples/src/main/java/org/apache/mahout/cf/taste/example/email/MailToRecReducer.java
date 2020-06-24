@@ -39,7 +39,9 @@ public class MailToRecReducer extends Reducer<Text, LongWritable, Text, NullWrit
 
   @Override
   protected void reduce(Text key, Iterable<LongWritable> values, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     if (useCounts) {
       long sum = 0;
       for (LongWritable value : values) {

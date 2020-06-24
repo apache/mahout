@@ -80,6 +80,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
   public FastProjectionSearch(DistanceMeasure distanceMeasure, int numProjections, int searchSize) {
     super(distanceMeasure);
     Preconditions.checkArgument(numProjections > 0 && numProjections < 100,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
         "Unreasonable value for number of projections. Must be: 0 < numProjections < 100");
     this.numProjections = numProjections;
     this.searchSize = searchSize;
@@ -150,6 +151,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
     List<WeightedThing<Vector>> top =
         Lists.newArrayListWithCapacity(candidates.size() + pendingAdditions.size());
     for (Vector candidate : Iterables.concat(candidates, pendingAdditions)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       top.add(new WeightedThing<>(candidate, distanceMeasure.distance(candidate, query)));
     }
     Collections.sort(top);
@@ -197,6 +199,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
       }
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1217
     for (Vector vector : pendingAdditions) {
       double distance = distanceMeasure.distance(vector, query);
       if (distance < bestDistance && (!differentThanQuery || !vector.equals(query))) {
@@ -205,6 +208,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
       }
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new WeightedThing<>(bestVector, bestDistance);
   }
 
@@ -219,6 +223,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
     Vector projection = basisMatrix.times(vector);
     for (int i = 0; i < basisMatrix.numRows(); ++i) {
       List<WeightedThing<Vector>> currProjections = scalarProjections.get(i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       WeightedThing<Vector> searchedThing = new WeightedThing<>(projection.get(i));
       int middle = Collections.binarySearch(currProjections, searchedThing);
       if (middle < 0) {
@@ -235,6 +240,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
     }
 
     for (int i = 0; i < pendingAdditions.size(); ++i) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1222
       if (pendingAdditions.get(i).equals(vector)) {
         pendingAdditions.remove(i);
         break;
@@ -245,6 +251,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
 
   private void reindex(boolean force) {
     int numProjected = scalarProjections.get(0).size();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1222
     if (force || pendingAdditions.size() > ADDITION_THRESHOLD * numProjected
         || numPendingRemovals > REMOVAL_THRESHOLD * numProjected) {
 
@@ -264,6 +271,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
       for (Vector pending : pendingAdditions) {
         Vector projection = basisMatrix.times(pending);
         for (int i = 0; i < numProjections; ++i) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           scalarProjections.get(i).add(new WeightedThing<>(pending, projection.get(i)));
         }
       }

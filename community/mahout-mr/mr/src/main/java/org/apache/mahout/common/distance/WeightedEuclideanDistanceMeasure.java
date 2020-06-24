@@ -32,6 +32,7 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
     Vector res = p2.minus(p1);
     Vector theWeights = getWeights();
     if (theWeights == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element elt : res.nonZeroes()) {
         result += elt.get() * elt.get();
       }
@@ -45,6 +46,7 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
   
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-121
     return distance(centroid, v); // TODO
   }
   

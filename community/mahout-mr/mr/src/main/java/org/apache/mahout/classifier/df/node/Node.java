@@ -31,6 +31,7 @@ import java.io.IOException;
 public abstract class Node implements Writable {
   
   protected enum Type {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     LEAF,
     NUMERICAL,
     CATEGORICAL
@@ -70,6 +71,7 @@ public abstract class Node implements Writable {
         node = new CategoricalNode();
         break;
       default:
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         throw new IllegalStateException("This implementation is not currently supported");
     }
     

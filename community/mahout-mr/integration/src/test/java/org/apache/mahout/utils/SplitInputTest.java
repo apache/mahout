@@ -60,13 +60,17 @@ public final class SplitInputTest extends MahoutTestCase {
   @Override
   @Before
   public void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
 
     super.setUp();
 
     countMap = new OpenObjectIntHashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     charset = Charsets.UTF_8;
     tempSequenceDirectory = getTestTempFilePath("tmpsequence");
     tempInputFile = getTestTempFilePath("bayesinputfile");
@@ -75,6 +79,7 @@ public final class SplitInputTest extends MahoutTestCase {
     tempMapRedOutputDirectory = new Path(getTestTempDirPath(), "mapRedOutput");
     tempInputDirectory = getTestTempDirPath("bayesinputdir");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     si = new SplitInput();
     si.setTrainingOutputDirectory(tempTrainingDirectory);
     si.setTestOutputDirectory(tempTestDirectory);
@@ -84,11 +89,13 @@ public final class SplitInputTest extends MahoutTestCase {
   private void writeMultipleInputFiles() throws IOException {
     Writer writer = null;
     String currentLabel = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     try {
      for (String[] entry : ClassifierData.DATA) {
       if (!entry[0].equals(currentLabel)) {
         currentLabel = entry[0];
         Closeables.close(writer, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
 
         writer = new BufferedWriter(new OutputStreamWriter(fs.create(new Path(tempInputDirectory, currentLabel)),
             Charsets.UTF_8));
@@ -97,6 +104,7 @@ public final class SplitInputTest extends MahoutTestCase {
       writer.write(currentLabel + '\t' + entry[1] + '\n');
      }
     }finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
      Closeables.close(writer, false);
     }
   }
@@ -108,6 +116,7 @@ public final class SplitInputTest extends MahoutTestCase {
         writer.write(entry[0] + '\t' + entry[1] + '\n');
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, true);
     }
   }
@@ -119,10 +128,12 @@ public final class SplitInputTest extends MahoutTestCase {
 
     final int testSplitSize = 1;
     si.setTestSplitSize(testSplitSize);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     si.setCallback(new SplitInput.SplitCallback() {
           @Override
           public void splitComplete(Path inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
             int trainingLines = countMap.get(inputFile.getName()) - testSplitSize;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-451
             assertSplit(fs, inputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
           }
     });
@@ -191,9 +202,11 @@ public final class SplitInputTest extends MahoutTestCase {
    */
   private void writeVectorSequenceFile(Path path, int testPoints) throws IOException {
     Path tempSequenceFile = new Path(path, "part-00000");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     IntWritable key = new IntWritable();
     VectorWritable value = new VectorWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer =
              SequenceFile.createWriter(fs, conf, tempSequenceFile, IntWritable.class, VectorWritable.class)) {
       for (int i = 0; i < testPoints; i++) {
@@ -213,9 +226,11 @@ public final class SplitInputTest extends MahoutTestCase {
    */
   private void writeTextSequenceFile(Path path, int testPoints) throws IOException {
     Path tempSequenceFile = new Path(path, "part-00000");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     Text key = new Text();
     Text value = new Text();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, tempSequenceFile, Text.class, Text.class)){
       for (int i = 0; i < testPoints; i++) {
         key.set(Integer.toString(i));
@@ -230,6 +245,7 @@ public final class SplitInputTest extends MahoutTestCase {
    * @param sequenceFilePath path to SequenceFile
    */
   private void displaySequenceFile(Path sequenceFilePath) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     for (Pair<?,?> record : new SequenceFileIterable<>(sequenceFilePath, true, getConfiguration())) {
       System.out.println(record.getFirst() + "\t" + record.getSecond());
     }
@@ -242,6 +258,7 @@ public final class SplitInputTest extends MahoutTestCase {
    */
   private int getNumberRecords(Path sequenceFilePath) throws IOException {
     int numberRecords = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     for (Object value : new SequenceFileValueIterable<>(sequenceFilePath, true, getConfiguration())) {
       numberRecords++;
     }
@@ -296,6 +313,7 @@ public final class SplitInputTest extends MahoutTestCase {
             "--mapRedOutputDir", tempMapRedOutputDirectory.toString(),
             "--randomSelectionPct", Integer.toString(randomSelectionPct),
             "--keepPct", Integer.toString(keepPct), "-ow" };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     ToolRunner.run(getConfiguration(), new SplitInput(), args);
     validateSplitInputMapReduce(numPoints, randomSelectionPct, keepPct);
   }
@@ -311,6 +329,7 @@ public final class SplitInputTest extends MahoutTestCase {
     si.setMapRedOutputDirectory(tempMapRedOutputDirectory);
     si.setUseMapRed(true);
     si.splitDirectory(getConfiguration(), tempSequenceDirectory);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     validateSplitInputMapReduce(numPoints, randomSelectionPct, keepPct);
   }
@@ -337,6 +356,7 @@ public final class SplitInputTest extends MahoutTestCase {
 
   @Test
   public void testValidate() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     SplitInput st = new SplitInput();
     assertValidateException(st);
 
@@ -361,6 +381,8 @@ public final class SplitInputTest extends MahoutTestCase {
     st.setTestSplitPct(50);
     assertValidateException(st);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     st = new SplitInput();
     st.setTestRandomSelectionPct(50);
     st.setTestOutputDirectory(tempTestDirectory);
@@ -382,6 +404,7 @@ public final class SplitInputTest extends MahoutTestCase {
 
     @Override
     public void splitComplete(Path inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-451
       assertSplit(fs, tempInputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
     }
   }
@@ -396,6 +419,7 @@ public final class SplitInputTest extends MahoutTestCase {
   }
 
   private static void assertSplit(FileSystem fs,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-451
                                   Path tempInputFile,
                                   Charset charset,
                                   int testSplitSize,
@@ -407,6 +431,7 @@ public final class SplitInputTest extends MahoutTestCase {
       Path testFile = new Path(tempTestDirectory, tempInputFile.getName());
       //assertTrue("test file exists", testFile.isFile());
       assertEquals("test line count", testSplitSize, SplitInput.countLines(fs, testFile, charset));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
 
       Path trainingFile = new Path(tempTrainingDirectory, tempInputFile.getName());
       //assertTrue("training file exists", trainingFile.isFile());

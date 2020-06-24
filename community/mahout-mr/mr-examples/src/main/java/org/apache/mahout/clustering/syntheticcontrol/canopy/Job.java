@@ -48,10 +48,12 @@ public final class Job extends AbstractJob {
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
       log.info("Running with only user-supplied arguments");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-414
       ToolRunner.run(new Configuration(), new Job(), args);
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       HadoopUtil.delete(new Configuration(), output);
       run(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55);
     }
@@ -86,9 +88,11 @@ public final class Job extends AbstractJob {
     InputDriver.runJob(input, directoryContainingConvertedInput,
         "org.apache.mahout.math.RandomAccessSparseVector");
     CanopyDriver.run(new Configuration(), directoryContainingConvertedInput,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
         output, measure, t1, t2, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1017
         "clusters-0-final"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
@@ -103,6 +107,7 @@ public final class Job extends AbstractJob {
     addOption(DefaultOptionCreator.t2Option().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String, List<String>> argMap = parseArguments(args);
     if (argMap == null) {
       return -1;
@@ -110,7 +115,9 @@ public final class Job extends AbstractJob {
 
     Path input = getInputPath();
     Path output = getOutputPath();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       HadoopUtil.delete(new Configuration(), output);
     }
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
@@ -118,6 +125,7 @@ public final class Job extends AbstractJob {
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-414
     run(input, output, measure, t1, t2);
     return 0;
   }

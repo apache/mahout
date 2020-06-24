@@ -47,6 +47,7 @@ public class PrunedPartialVectorMergeReducer extends
       vector.assign(value.get(), Functions.PLUS);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     if (vector != null && normPower != PartialVectorMerger.NO_NORMALIZING) {
       vector = logNormalize ? vector.logNormalize(normPower) : vector.normalize(normPower);
     }

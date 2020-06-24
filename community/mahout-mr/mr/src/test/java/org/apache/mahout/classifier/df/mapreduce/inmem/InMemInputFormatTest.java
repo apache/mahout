@@ -81,11 +81,15 @@ public final class InMemInputFormatTest extends MahoutTestCase {
     int maxNbTrees = 1000;
 
     Random rng = RandomUtils.getRandom();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
 
     for (int nloop = 0; nloop < n; nloop++) {
       int numSplits = rng.nextInt(maxNumSplits) + 1;
       int nbTrees = rng.nextInt(maxNbTrees) + 1;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
       Configuration conf = getConfiguration();
       Builder.setNbTrees(conf, nbTrees);
 

@@ -29,6 +29,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 final class HybridSimilarity extends AbstractItemSimilarity {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
 
   private final ItemSimilarity cfSimilarity;
   private final ItemSimilarity contentSimilarity;

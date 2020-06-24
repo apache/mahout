@@ -43,6 +43,7 @@ public final class ConnectionPoolDataSource implements DataSource {
   private final DataSource delegate;
   
   public ConnectionPoolDataSource(DataSource underlyingDataSource) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     Preconditions.checkNotNull(underlyingDataSource);
     ConnectionFactory connectionFactory = new ConfiguringConnectionFactory(underlyingDataSource);
     GenericObjectPool objectPool = new GenericObjectPool();
@@ -99,6 +100,7 @@ public final class ConnectionPoolDataSource implements DataSource {
   // in Java 6. In Java 7 it would @Override, but not in 6.
   // @Override
   public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-782
     throw new SQLFeatureNotSupportedException();
   }
   

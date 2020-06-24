@@ -70,6 +70,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
     double maxDistance = 0;
     for (int i = 0; i < summarizers.size(); ++i) {
       OnlineSummarizer summarizer = summarizers.get(i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1379
       if (summarizer.getCount() > 1) {
         maxDistance = Math.max(maxDistance, summarizer.getMax());
         System.out.printf("Average distance in cluster %d [%d]: %f\n", i, summarizer.getCount(), summarizer.getMean());
@@ -108,6 +109,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
       List<Centroid> centroidsCompare = null;
       if (mahoutKMeansFormat) {
         SequenceFileDirValueIterable<ClusterWritable> clusterIterable =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             new SequenceFileDirValueIterable<>(new Path(centroidFile), PathType.GLOB, conf);
         centroids = Lists.newArrayList(IOUtils.getCentroidsFromClusterWritableIterable(clusterIterable));
       } else {
@@ -132,6 +134,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
 
       // Reading in the "training" set.
       SequenceFileDirValueIterable<VectorWritable> trainIterable =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           new SequenceFileDirValueIterable<>(new Path(trainFile), PathType.GLOB, conf);
       Iterable<Vector> trainDatapoints = IOUtils.getVectorsFromVectorWritableIterable(trainIterable);
       Iterable<Vector> datapoints = trainDatapoints;
@@ -142,6 +145,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
       // Also adding in the "test" set.
       if (testFile != null) {
         SequenceFileDirValueIterable<VectorWritable> testIterable =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             new SequenceFileDirValueIterable<>(new Path(testFile), PathType.GLOB, conf);
         Iterable<Vector> testDatapoints = IOUtils.getVectorsFromVectorWritableIterable(testIterable);
 
@@ -156,6 +160,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
           ClusteringUtils.summarizeClusterDistances(datapoints, centroids, distanceMeasure);
       List<OnlineSummarizer> compareSummaries = null;
       if (centroidsCompare != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         compareSummaries = ClusteringUtils.summarizeClusterDistances(datapoints, centroidsCompare, distanceMeasure);
       }
       System.out.printf("[Dunn Index] First: %f", ClusteringUtils.dunnIndex(centroids, distanceMeasure, summaries));
@@ -174,6 +179,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
       }
     } catch (IOException e) {
       System.out.println(e.getMessage());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1379
     } finally {
       Closeables.close(fileOut, false);
     }
@@ -210,6 +216,7 @@ public class ClusterQualitySummarizer extends AbstractJob {
         .withShortName("cc")
         .withRequired(false)
         .withArgument(argumentBuilder.withName("centroidsCompare").withMaximum(1).create())
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         .withDescription("where to get seq files with the second set of centroids (from Mahout KMeans or "
             + "StreamingKMeansDriver)")
         .create();

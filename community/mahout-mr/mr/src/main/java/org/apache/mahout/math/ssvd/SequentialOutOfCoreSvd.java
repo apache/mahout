@@ -142,11 +142,14 @@ public class SequentialOutOfCoreSvd {
     int ncols = 0;
     for (File file : partsOfA) {
       MatrixWritable m = new MatrixWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
         m.readFields(in);
       }
       Matrix aI = m.get();
       ncols = Math.max(ncols, aI.columnSize());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
 
       Matrix omega = new RandomTrinaryMatrix(seed, aI.numCols(), internalDimension, false);
       for (int j = 0; j < aI.numCols(); j += columnsPerSlice) {
@@ -162,6 +165,7 @@ public class SequentialOutOfCoreSvd {
     MatrixWritable bTmp = new MatrixWritable();
     for (int j = 0; j < ncols; j += columnsPerSlice) {
       if (bFile(tmpDir, j).exists()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         try (DataInputStream in = new DataInputStream(new FileInputStream(bFile(tmpDir, j)))) {
           bTmp.readFields(in);
         }
@@ -179,6 +183,7 @@ public class SequentialOutOfCoreSvd {
       File bPath = bFile(tmpDir, j);
       if (bPath.exists()) {
         MatrixWritable m = new MatrixWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         try (DataInputStream in = new DataInputStream(new FileInputStream(bPath))) {
           m.readFields(in);
         }
@@ -201,6 +206,7 @@ public class SequentialOutOfCoreSvd {
       Matrix y = aI.times(new RandomTrinaryMatrix(seed, aI.numCols(), dim, false));
       Matrix uI = r2.solveRight(y).times(svd.getU());
       m.set(uI);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (DataOutputStream out = new DataOutputStream(new FileOutputStream(
           new File(tmpDir, String.format("U-%s", file.getName().replaceAll(".*-", "")))))) {
         m.write(out);
@@ -211,6 +217,7 @@ public class SequentialOutOfCoreSvd {
   private static void addToSavedCopy(File file, Matrix matrix) throws IOException {
     MatrixWritable mw = new MatrixWritable();
     if (file.exists()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
         mw.readFields(in);
       }

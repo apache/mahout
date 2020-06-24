@@ -44,6 +44,7 @@ public final class TrainASFEmail extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-939
     addInputOption();
     addOutputOption();
     addOption("categories", "nc", "The number of categories to train on", true);
@@ -57,6 +58,7 @@ public final class TrainASFEmail extends AbstractJob {
 
     File base = new File(getInputPath().toString());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     Multiset<String> overallCounts = HashMultiset.create();
     File output = new File(getOutputPath().toString());
     output.mkdirs();
@@ -72,6 +74,7 @@ public final class TrainASFEmail extends AbstractJob {
 
     //We ran seq2encoded and split input already, so let's just build up the dictionary
     Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-904
     PathFilter trainFilter = new PathFilter() {
       @Override
       public boolean accept(Path path) {
@@ -79,6 +82,7 @@ public final class TrainASFEmail extends AbstractJob {
       }
     };
     SequenceFileDirIterator<Text, VectorWritable> iter =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new SequenceFileDirIterator<>(new Path(base.toString()), PathType.LIST, trainFilter, null, true, conf);
     long numItems = 0;
     while (iter.hasNext()) {
@@ -91,6 +95,7 @@ public final class TrainASFEmail extends AbstractJob {
 
     SGDInfo info = new SGDInfo();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     iter = new SequenceFileDirIterator<>(new Path(base.toString()), PathType.LIST, trainFilter,
             null, true, conf);
     int k = 0;
@@ -103,6 +108,7 @@ public final class TrainASFEmail extends AbstractJob {
       k++;
       State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> best = learningAlgorithm.getBest();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-939
       SGDHelper.analyzeState(info, 0, k, best);
     }
     learningAlgorithm.close();
@@ -113,6 +119,7 @@ public final class TrainASFEmail extends AbstractJob {
     ModelSerializer.writeBinary(output + "/asf.model",
             learningAlgorithm.getBest().getPayload().getLearner().getModels().get(0));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Integer> counts = new ArrayList<>();
     System.out.println("Word counts");
     for (String count : overallCounts.elementSet()) {
@@ -131,6 +138,7 @@ public final class TrainASFEmail extends AbstractJob {
   }
 
   public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-939
     TrainASFEmail trainer = new TrainASFEmail();
     trainer.run(args);
   }

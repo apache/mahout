@@ -54,6 +54,7 @@ public final class ChunkedWriter implements Closeable {
       chunkSizeInMB = 1984;
     }
     maxChunkSizeInBytes = chunkSizeInMB * 1024 * 1024;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-700
     fs = FileSystem.get(output.toUri(), conf);
     currentChunkID = 0;
     writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID), Text.class, Text.class);
@@ -66,7 +67,9 @@ public final class ChunkedWriter implements Closeable {
   /** Writes a new key-value pair, creating a new sequence file if necessary.*/
   public void write(String key, String value) throws IOException {
     if (currentChunkSize > maxChunkSizeInBytes) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-809
       currentChunkID++;
       writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID), Text.class, Text.class);
       currentChunkSize = 0;
@@ -80,6 +83,7 @@ public final class ChunkedWriter implements Closeable {
 
   @Override
   public void close() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     Closeables.close(writer, false);
   }
 }

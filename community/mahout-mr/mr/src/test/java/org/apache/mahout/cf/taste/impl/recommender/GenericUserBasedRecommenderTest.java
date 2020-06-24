@@ -37,6 +37,7 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
   @Test
   public void testRecommender() throws Exception {
     Recommender recommender = buildRecommender();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     List<RecommendedItem> recommended = recommender.recommend(1, 1);
     assertNotNull(recommended);
     assertEquals(1, recommended.size());
@@ -62,9 +63,12 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, dataModel);
     Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     List<RecommendedItem> fewRecommended = recommender.recommend(1, 2);
     List<RecommendedItem> moreRecommended = recommender.recommend(1, 4);
     for (int i = 0; i < fewRecommended.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
     recommender.refresh(null);
@@ -80,11 +84,13 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
             new Double[][] {
                     {0.1, 0.2},
                     {0.2, 0.3, 0.3, 0.6},
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
                     {0.4, 0.5, 0.5, 0.9},
             });
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, dataModel);
     Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     List<RecommendedItem> originalRecommended = recommender.recommend(1, 2);
     List<RecommendedItem> rescoredRecommended =
         recommender.recommend(1, 2, new ReversingRescorer<Long>());
@@ -98,7 +104,9 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
 
   @Test
   public void testIncludeKnownItems() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     DataModel dataModel = getDataModel(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
             new long[] {1, 2, 3},
             new Double[][] {
                     {0.1, 0.2},
@@ -133,6 +141,7 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
     assertEquals(2, firstRecommended.getItemID());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     assertEquals(0.1f, firstRecommended.getValue(), EPSILON);
   }
 
@@ -143,6 +152,8 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     assertNotNull(similar);
     assertEquals(2, similar.length);
     assertEquals(2, similar[0]);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-882
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-881
     assertEquals(3, similar[1]);
   }
 
@@ -159,6 +170,7 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, similarity, dataModel);
     UserBasedRecommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     long[] mostSimilar = recommender.mostSimilarUserIDs(4, 3);
     assertNotNull(mostSimilar);
     assertEquals(0, mostSimilar.length);
@@ -167,6 +179,7 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
   private static UserBasedRecommender buildRecommender() throws TasteException {
     DataModel dataModel = getDataModel();
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, dataModel);
     return new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
   }

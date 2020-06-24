@@ -47,14 +47,17 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
 
   private void setupDocs() throws IOException {
     conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
     RandomDocumentGenerator gen = new RandomDocumentGenerator();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       for (int i = 0; i < NUM_DOCS; i++) {
         writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
@@ -68,6 +71,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   @Test
   public void testCreateTermFrequencyVectors() throws Exception {
     setupDocs();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-957
     runTest(false, false, false, -1, NUM_DOCS);
   }
 
@@ -91,9 +95,11 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
 
   @Test
   public void testPruning() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     conf = getConfiguration();
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
 
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
@@ -104,8 +110,10 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(docs[i]));
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-957
     Path outPath = runTest(false, false, false, 2, docs.length);
     Path tfidfVectors = new Path(outPath, "tfidf-vectors");
     int count = 0;
@@ -128,8 +136,11 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
 
   @Test
   public void testPruningTF() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     conf = getConfiguration();
     FileSystem fs = FileSystem.get(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-957
 
     inputPath = getTestTempFilePath("documents/docs.file");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
@@ -141,6 +152,8 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(docs[i]));
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
     Path outPath = runTest(true, false, false, 2, docs.length);
@@ -166,6 +179,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   private Path runTest(boolean tfWeighting, boolean sequential, boolean named, double maxDFSigma, int numDocs) throws Exception {
     Path outputPath = getTestTempFilePath("output");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     List<String> argList = Lists.newLinkedList();
     argList.add("-i");
     argList.add(inputPath.toString());
@@ -179,6 +193,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     if (named) {
       argList.add("-nv");
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (maxDFSigma >= 0) {
       argList.add("--maxDFSigma");
       argList.add(String.valueOf(maxDFSigma));
@@ -190,10 +205,12 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     String[] args = argList.toArray(new String[argList.size()]);
     
     ToolRunner.run(getConfiguration(), new SparseVectorsFromSequenceFiles(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     Path tfVectors = new Path(outputPath, "tf-vectors");
     Path tfidfVectors = new Path(outputPath, "tfidf-vectors");
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
     DictionaryVectorizerTest.validateVectors(conf, numDocs, tfVectors, sequential, named);
     if (!tfWeighting) {
       DictionaryVectorizerTest.validateVectors(conf, numDocs, tfidfVectors, sequential, named);

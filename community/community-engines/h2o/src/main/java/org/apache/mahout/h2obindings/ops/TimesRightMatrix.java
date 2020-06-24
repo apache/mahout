@@ -46,6 +46,7 @@ public class TimesRightMatrix {
     Frame AinCoreB = null;
 
     if (B instanceof DiagonalMatrix) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
       AinCoreB = execDiagonal(A, B.viewDiagonal());
     } else {
       AinCoreB = execCommon(A, B);
@@ -91,9 +92,12 @@ public class TimesRightMatrix {
         int chunkSize = chks[0].len();
 
         for (int c = 0; c < ncs.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
           for (int r = 0; r < chunkSize; r++) {
             double v = 0;
             for (int i = 0; i < chks.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
               v += (chks[i].atd(r) * B.getQuick(i, c));
             }
             ncs[c].addNum(v);

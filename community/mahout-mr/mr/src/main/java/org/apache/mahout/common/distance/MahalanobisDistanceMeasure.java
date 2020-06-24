@@ -57,6 +57,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
   /*public MahalanobisDistanceMeasure(Vector meanVector,Matrix inputMatrix, boolean inversionNeeded)
   {
     this.meanVector=meanVector;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (inversionNeeded)
       setCovarianceMatrix(inputMatrix);
     else
@@ -76,10 +77,12 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
         if (!fs.exists(inverseCovarianceFile.get())) {
           throw new FileNotFoundException(inverseCovarianceFile.get().toString());
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         try (DataInputStream in = fs.open(inverseCovarianceFile.get())){
           inverseCovarianceMatrix.readFields(in);
         }
         this.inverseCovarianceMatrix = inverseCovarianceMatrix.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
         Preconditions.checkArgument(this.inverseCovarianceMatrix != null, "inverseCovarianceMatrix not initialized");
       }
 
@@ -90,10 +93,12 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
         if (!fs.exists(meanVectorFile.get())) {
           throw new FileNotFoundException(meanVectorFile.get().toString());
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         try (DataInputStream in = fs.open(meanVectorFile.get())){
           meanVector.readFields(in);
         }
         this.meanVector = meanVector.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
         Preconditions.checkArgument(this.meanVector != null, "meanVector not initialized");
       }
 
@@ -109,8 +114,10 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
 
   @Override
   public void createParameters(String prefix, Configuration jobConf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     parameters = new ArrayList<>();
     inverseCovarianceFile = new PathParameter(prefix, "inverseCovarianceFile", jobConf, null,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-866
             "Path on DFS to a file containing the inverse covariance matrix.");
     parameters.add(inverseCovarianceFile);
 
@@ -175,10 +182,12 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
       if (diagElem > 0.0) {
         sInv.set(i, i, 1 / diagElem);
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
         throw new IllegalStateException("Eigen Value equals to 0 found.");
       }
     }
     inverseCovarianceMatrix = svd.getU().times(sInv.times(svd.getU().transpose()));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-866
     Preconditions.checkArgument(inverseCovarianceMatrix != null, "inverseCovarianceMatrix not initialized");
   }
 

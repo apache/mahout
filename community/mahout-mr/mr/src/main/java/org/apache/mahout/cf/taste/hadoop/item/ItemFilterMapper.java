@@ -40,6 +40,7 @@ public class ItemFilterMapper extends Mapper<LongWritable,Text,VarLongWritable,V
     String[] tokens = SEPARATOR.split(line.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
     itemIDWritable.set(itemID);
     userIDWritable.set(userID);
     ctx.write(itemIDWritable, userIDWritable);

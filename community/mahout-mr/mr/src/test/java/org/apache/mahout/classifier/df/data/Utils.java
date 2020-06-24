@@ -82,6 +82,7 @@ public final class Utils {
   public static String generateDescriptor(char[] tokens) {
     StringBuilder builder = new StringBuilder();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1163
     for (char token : tokens) {
       builder.append(token).append(' ');
     }
@@ -109,6 +110,7 @@ public final class Utils {
    * @param number number of data lines to generate
    */
   public static double[][] randomDoubles(Random rng, CharSequence descriptor, boolean regression, int number)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1163
     throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
@@ -133,6 +135,7 @@ public final class Utils {
     String descriptor = randomDescriptor(rng, nbAttributes);
     double[][] source = randomDoubles(rng, descriptor, regression, size);
     String[] sData = double2String(source);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Dataset dataset = DataLoader.generateDataset(descriptor, regression, sData);
     
     return DataLoader.loadData(dataset, sData);
@@ -158,8 +161,10 @@ public final class Utils {
         vector[attr] = Double.NaN;
       } else if (attrs[attr].isNumerical()) {
         vector[attr] = rng.nextDouble();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       } else if (attrs[attr].isCategorical()) {
         vector[attr] = rng.nextInt(CATEGORICAL_RANGE);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       } else { // LABEL
       	if (regression) {
           vector[attr] = rng.nextDouble();
@@ -181,6 +186,7 @@ public final class Utils {
   private static String double2String(double[] v) {
     StringBuilder builder = new StringBuilder();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     for (double aV : v) {
       builder.append(aV).append(',');
     }
@@ -235,6 +241,8 @@ public final class Utils {
   }
 
   private static void writeDataToFile(String[] sData, Path path) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1163
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     BufferedWriter output = null;
     try {
       output = Files.newWriter(new File(path.toString()), Charsets.UTF_8);
@@ -243,6 +251,7 @@ public final class Utils {
         output.write('\n');
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(output, false);
     }
   
@@ -250,6 +259,7 @@ public final class Utils {
 
   public static Path writeDataToTestFile(String[] sData) throws IOException {
     Path testData = new Path("testdata/Data");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     MahoutTestCase ca = new MahoutTestCase();
     FileSystem fs = testData.getFileSystem(ca.getConfiguration());
     if (!fs.exists(testData)) {

@@ -55,8 +55,10 @@ public final class DummyStatusReporter extends StatusReporter {
   @Override
   public Counter getCounter(String group, String name) {
     if (!counterGroups.containsKey(group + name)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
       counterGroups.put(group + name, newCounter());
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     return counterGroups.get(group+name);
   }
 

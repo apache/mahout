@@ -37,6 +37,7 @@ import org.apache.mahout.math.stats.LogLikelihood;
 public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implements UserSimilarity {
 
   public LogLikelihoodSimilarity(DataModel dataModel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     super(dataModel);
   }
   
@@ -52,9 +53,11 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
   public double userSimilarity(long userID1, long userID2) throws TasteException {
 
     DataModel dataModel = getDataModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     FastIDSet prefs1 = dataModel.getItemIDsFromUser(userID1);
     FastIDSet prefs2 = dataModel.getItemIDsFromUser(userID2);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-738
     long prefs1Size = prefs1.size();
     long prefs2Size = prefs2.size();
     long intersectionSize =
@@ -64,8 +67,10 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
     }
     long numItems = dataModel.getNumItems();
     double logLikelihood =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-603
         LogLikelihood.logLikelihoodRatio(intersectionSize,
                                          prefs2Size - intersectionSize,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-643
                                          prefs1Size - intersectionSize,
                                          numItems - prefs1Size - prefs2Size + intersectionSize);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
@@ -74,6 +79,7 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     DataModel dataModel = getDataModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-738
     long preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     long numUsers = dataModel.getNumUsers();
     return doItemSimilarity(itemID1, itemID2, preferring1, numUsers);
@@ -94,14 +100,18 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
 
   private double doItemSimilarity(long itemID1, long itemID2, long preferring1, long numUsers) throws TasteException {
     DataModel dataModel = getDataModel();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-738
     long preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     if (preferring1and2 == 0) {
       return Double.NaN;
     }
     long preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     double logLikelihood =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-603
         LogLikelihood.logLikelihoodRatio(preferring1and2,
                                          preferring2 - preferring1and2,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-643
                                          preferring1 - preferring1and2,
                                          numUsers - preferring1 - preferring2 + preferring1and2);
     return 1.0 - 1.0 / (1.0 + logLikelihood);

@@ -96,6 +96,7 @@ public class MailProcessor {
       boolean inBody = false;
       Pattern quotedTextPattern = options.getQuotedTextPattern();
       for (String nextLine : new FileLineIterable(mboxFile, options.getCharset(), false)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (options.isStripQuotedText() && quotedTextPattern.matcher(nextLine).find()) {
           continue;
         }
@@ -172,9 +173,11 @@ public class MailProcessor {
 
   private static void writeContent(String separator, StringBuilder contents, CharSequence body, String[] matches) {
     for (String match : matches) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
       if (match != null) {
         contents.append(match).append(separator);
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1182
         contents.append(separator);
       }
     }

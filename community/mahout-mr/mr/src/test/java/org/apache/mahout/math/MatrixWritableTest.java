@@ -33,6 +33,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
 
   @Test
   public void testSparseMatrixWritable() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1508
     Matrix m = new SparseMatrix(5, 5);
     m.set(1, 2, 3.0);
     m.set(3, 4, 5.0);
@@ -68,6 +69,8 @@ public final class MatrixWritableTest extends MahoutTestCase {
     Matrix m = new DenseMatrix(5,5);
     m.set(1, 2, 3.0);
     m.set(3, 4, 5.0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-838
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-838
     Map<String, Integer> bindings = Maps.newHashMap();
     bindings.put("A", 0);
     bindings.put("B", 1);
@@ -84,6 +87,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
     MatrixWritable matrixWritable2 = new MatrixWritable();
     writeAndRead(matrixWritable, matrixWritable2);
     Matrix m2 = matrixWritable2.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-838
     compareMatrices(m, m2); 
     doCheckBindings(m2.getRowLabelBindings());
     doCheckBindings(m2.getColumnLabelBindings());    
@@ -92,6 +96,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
   private static void compareMatrices(Matrix m, Matrix m2) {
     assertEquals(m.numRows(), m2.numRows());
     assertEquals(m.numCols(), m2.numCols());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int r = 0; r < m.numRows(); r++) {
       for (int c = 0; c < m.numCols(); c++) {
         assertEquals(m.get(r, c), m2.get(r, c), EPSILON);
@@ -112,6 +117,8 @@ public final class MatrixWritableTest extends MahoutTestCase {
     assertEquals(bindings == null, bindings2 == null);
     if (bindings != null) {
       assertEquals(bindings.size(), bindings2.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       for (Map.Entry<String,Integer> entry : bindings.entrySet()) {
         assertEquals(entry.getValue(), bindings2.get(entry.getKey()));
       }
@@ -119,6 +126,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
   }
 
   private static void doCheckBindings(Map<String,Integer> labels) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-838
     assertTrue("Missing label", labels.keySet().contains("A"));
     assertTrue("Missing label", labels.keySet().contains("B"));
     assertTrue("Missing label", labels.keySet().contains("C"));
@@ -127,11 +135,13 @@ public final class MatrixWritableTest extends MahoutTestCase {
   }
 
   private static void writeAndRead(Writable toWrite, Writable toRead) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1508
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutputStream dos = new DataOutputStream(baos);
     try {
       toWrite.write(dos);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(dos, false);
     }
 
@@ -140,6 +150,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
     try {
       toRead.readFields(dis);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(dis, true);
     }
   }

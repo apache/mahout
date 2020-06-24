@@ -46,6 +46,7 @@ public final class CommandLineUtil {
    * @param group job-specific command-line options.
    */
   public static void printHelpWithGenericOptions(Group group) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1003
     new GenericOptionsParser(new Configuration(), new org.apache.commons.cli.Options(), new String[0]);
     PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true);
     HelpFormatter formatter = new HelpFormatter();

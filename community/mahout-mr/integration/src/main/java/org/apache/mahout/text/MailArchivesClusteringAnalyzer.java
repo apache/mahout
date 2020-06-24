@@ -104,6 +104,9 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   private static final Matcher MATCHER = ALPHA_NUMERIC.matcher("");
 
   public MailArchivesClusteringAnalyzer() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     super(STOP_SET);
   }
 
@@ -132,6 +135,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
 
     AlphaNumericMaxLengthFilter(TokenStream in) {
       super(in);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-686
       termAtt = addAttribute(CharTermAttribute.class);
     }
 
@@ -141,6 +145,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
       while (input.incrementToken()) {
         int length = termAtt.length();
         if (length >= 2 && length <= 28) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-686
           char[] buf = termAtt.buffer();
           int at = 0;
           for (int c = 0; c < length; c++) {
@@ -150,8 +155,10 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
             }
           }
           String term = new String(output, 0, at);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
           MATCHER.reset(term);
           if (MATCHER.matches() && !term.startsWith("a0")) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-686
             termAtt.setEmpty();
             termAtt.append(term);
             return true;

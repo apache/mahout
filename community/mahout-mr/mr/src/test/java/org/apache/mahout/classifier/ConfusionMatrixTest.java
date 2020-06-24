@@ -35,6 +35,7 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
   
   @Test
   public void testBuild() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1554
     ConfusionMatrix confusionMatrix = fillConfusionMatrix(VALUES, LABELS, DEFAULT_LABEL);
     checkValues(confusionMatrix);
     checkAccuracy(confusionMatrix);
@@ -85,6 +86,7 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
     assertEquals(VALUES[1][0], counts[1][0]);
     assertEquals(VALUES[1][1], counts[1][1]);
     assertTrue(Arrays.equals(new int[3], counts[2])); // zeros
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-941
     assertEquals(OTHER[0], counts[0][2]);
     assertEquals(OTHER[1], counts[1][2]);
     assertEquals(3, cm.getLabels().size());
@@ -96,16 +98,19 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
   private static void checkAccuracy(ConfusionMatrix cm) {
     Collection<String> labelstrs = cm.getLabels();
     assertEquals(3, labelstrs.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-941
     assertEquals(25.0, cm.getAccuracy("Label1"), EPSILON);
     assertEquals(55.5555555, cm.getAccuracy("Label2"), EPSILON);
     assertTrue(Double.isNaN(cm.getAccuracy("other")));
   }
   
   private static ConfusionMatrix fillConfusionMatrix(int[][] values, String[] labels, String defaultLabel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     Collection<String> labelList = Lists.newArrayList();
     labelList.add(labels[0]);
     labelList.add(labels[1]);
     ConfusionMatrix confusionMatrix = new ConfusionMatrix(labelList, defaultLabel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1554
 
     confusionMatrix.putCount("Label1", "Label1", values[0][0]);
     confusionMatrix.putCount("Label1", "Label2", values[0][1]);

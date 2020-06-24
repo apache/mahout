@@ -26,6 +26,7 @@ package org.apache.mahout.cf.taste.model;
 public interface Preference {
   
   /** @return ID of user who prefers the item */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   long getUserID();
   
   /** @return item ID that is preferred */

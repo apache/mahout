@@ -79,10 +79,12 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
   private static final int MAX_JOB_SPLIT_LOCATIONS = 1000000;
 
   public void createSequenceFiles(MailOptions options) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (ChunkedWriter writer =
              new ChunkedWriter(getConf(), options.getChunkSize(), new Path(options.getOutputDir()))){
       MailProcessor processor = new MailProcessor(options, options.getPrefix(), writer);
       if (options.getInput().isDirectory()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1302
         PrefixAdditionDirectoryWalker walker = new PrefixAdditionDirectoryWalker(processor, writer);
         walker.walk(options.getInput());
         log.info("Parsed {} messages from {}", walker.getMessageCount(), options.getInput().getAbsolutePath());
@@ -100,6 +102,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     @SuppressWarnings("unchecked")
     private static final Comparator<File> FILE_COMPARATOR = new CompositeFileComparator(
         DirectoryFileComparator.DIRECTORY_REVERSE, PathFileComparator.PATH_COMPARATOR);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1302
 
     private final Deque<MailProcessor> processors = new ArrayDeque<>();
     private final ChunkedWriter writer;
@@ -175,6 +178,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.methodOption().create());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     addOption(CHUNK_SIZE_OPTION[0], CHUNK_SIZE_OPTION[1], "The chunkSize in MegaBytes. Defaults to 64", "64");
     addOption(KEY_PREFIX_OPTION[0], KEY_PREFIX_OPTION[1], "The prefix to be prepended to the key", "");
     addOption(CHARSET_OPTION[0], CHARSET_OPTION[1],
@@ -205,6 +209,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     String outputDir = getOutputPath().toString();
 
     int chunkSize = 64;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     if (hasOption(CHUNK_SIZE_OPTION[0])) {
       chunkSize = Integer.parseInt(getOption(CHUNK_SIZE_OPTION[0]));
     }
@@ -222,12 +227,14 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     options.setChunkSize(chunkSize);
     options.setCharset(charset);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Pattern> patterns = new ArrayList<>(5);
     // patternOrder is used downstream so that we can know what order the text
     // is in instead of encoding it in the string, which
     // would require more processing later to remove it pre feature selection.
     Map<String, Integer> patternOrder = new HashMap<>();
     int order = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     if (hasOption(FROM_OPTION[0])) {
       patterns.add(MailProcessor.FROM_PREFIX);
       patternOrder.put(MailOptions.FROM, order++);
@@ -292,6 +299,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
 
     Configuration jobConfig = job.getConfiguration();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     if (hasOption(KEY_PREFIX_OPTION[0])) {
       jobConfig.set(KEY_PREFIX_OPTION[1], getOption(KEY_PREFIX_OPTION[0]));
     }
@@ -348,6 +356,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
 
     FileSystem fs = FileSystem.get(jobConfig);
     FileStatus fsFileStatus = fs.getFileStatus(inputPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     jobConfig.set(BASE_INPUT_PATH, inputPath.toString());
     String inputDirList = HadoopUtil.buildDirList(fs, fsFileStatus);
@@ -359,6 +368,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
 
     // set the max split locations, otherwise we get nasty debug stuff
     jobConfig.set("mapreduce.job.max.split.locations", String.valueOf(MAX_JOB_SPLIT_LOCATIONS));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     boolean succeeded = job.waitForCompletion(true);
     if (!succeeded) {

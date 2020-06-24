@@ -33,6 +33,7 @@ import org.apache.mahout.math.VectorWritable;
  */
 public final class SimilarityMatrixRowWrapperMapper extends
     Mapper<IntWritable,VectorWritable,VarIntWritable,VectorOrPrefWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-420
 
   private final VarIntWritable index = new VarIntWritable();
   private final VectorOrPrefWritable vectorOrPref = new VectorOrPrefWritable();
@@ -45,6 +46,7 @@ public final class SimilarityMatrixRowWrapperMapper extends
     /* remove self similarity */
     similarityMatrixRow.set(key.get(), Double.NaN);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
     index.set(key.get());
     vectorOrPref.set(similarityMatrixRow);
 

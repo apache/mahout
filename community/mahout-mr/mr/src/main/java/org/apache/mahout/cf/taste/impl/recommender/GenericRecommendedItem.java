@@ -39,6 +39,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
    *           if item is null or value is NaN
    */
   public GenericRecommendedItem(long itemID, float value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(!Float.isNaN(value), "value is NaN");
     this.itemID = itemID;
     this.value = value;
@@ -61,6 +62,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
   
   @Override
   public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     return (int) itemID ^ RandomUtils.hashFloat(value);
   }
   
@@ -70,6 +72,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
       return false;
     }
     RecommendedItem other = (RecommendedItem) o;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     return itemID == other.getItemID() && value == other.getValue();
   }
   

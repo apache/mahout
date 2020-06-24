@@ -53,6 +53,7 @@ public interface Model<O> extends Writable {
    * @param weight
    *          a double weighting factor
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
   void observe(O x, double weight);
   
   /**
@@ -61,6 +62,8 @@ public interface Model<O> extends Writable {
    * @param x
    *          a Model<0>
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-846
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
   void observe(Model<O> x);
   
   /**
@@ -75,6 +78,7 @@ public interface Model<O> extends Writable {
    * 
    * @return a long
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
   long getNumObservations();
   
   /**

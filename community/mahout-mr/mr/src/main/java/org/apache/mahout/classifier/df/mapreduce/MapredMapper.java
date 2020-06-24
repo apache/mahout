@@ -59,6 +59,7 @@ public class MapredMapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends Mapper<KEYIN,VA
     
     Configuration conf = context.getConfiguration();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-835
     configure(!Builder.isOutput(conf), Builder.getTreeBuilder(conf), Builder
         .loadDataset(conf));
   }
@@ -67,6 +68,7 @@ public class MapredMapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends Mapper<KEYIN,VA
    * Useful for testing
    */
   protected void configure(boolean noOutput, TreeBuilder treeBuilder, Dataset dataset) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(treeBuilder != null, "TreeBuilder not found in the Job parameters");
     this.noOutput = noOutput;
     this.treeBuilder = treeBuilder;

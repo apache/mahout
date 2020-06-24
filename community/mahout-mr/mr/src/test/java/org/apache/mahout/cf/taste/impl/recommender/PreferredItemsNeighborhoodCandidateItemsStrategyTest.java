@@ -48,6 +48,7 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategyTest extends 
     itemIDsFromUser456.add(1L);
     itemIDsFromUser456.add(2L);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<Preference> prefs = Lists.newArrayList();
     prefs.add(new GenericPreference(123L, 1L, 1.0f));
     prefs.add(new GenericPreference(456L, 1L, 1.0f));
@@ -65,6 +66,7 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategyTest extends 
 
     EasyMock.replay(dataModel);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel, false);
     assertEquals(1, candidateItems.size());
     assertTrue(candidateItems.contains(2L));

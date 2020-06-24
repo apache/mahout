@@ -43,7 +43,9 @@ public final class AffinityMatrixInputJob {
     throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
     conf.setInt(Keys.AFFINITY_DIMENSIONS, rows);
     Job job = new Job(conf, "AffinityMatrixInputJob: " + input + " -> M/R -> " + output);
 
@@ -59,8 +61,10 @@ public final class AffinityMatrixInputJob {
     FileOutputFormat.setOutputPath(job, output);
 
     job.setJarByClass(AffinityMatrixInputJob.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-524
 
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }

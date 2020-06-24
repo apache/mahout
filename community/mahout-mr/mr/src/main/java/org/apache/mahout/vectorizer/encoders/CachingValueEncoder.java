@@ -40,6 +40,7 @@ public abstract class CachingValueEncoder extends FeatureVectorEncoder {
   @Override
   public void setProbes(int probes) {
     super.setProbes(probes);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-539
     cacheProbeLocations(getSeed());
   }
 

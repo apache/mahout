@@ -29,6 +29,7 @@ public final class MockIterator implements RawKeyValueIterator {
 
   @Override
   public DataInputBuffer getKey() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     return null;
   }
 

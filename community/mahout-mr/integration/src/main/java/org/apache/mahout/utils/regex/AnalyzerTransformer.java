@@ -36,6 +36,7 @@ public class AnalyzerTransformer implements RegexTransformer {
   private static final Logger log = LoggerFactory.getLogger(AnalyzerTransformer.class);
 
   public AnalyzerTransformer() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     this(new StandardAnalyzer(), "text");
   }
 
@@ -51,11 +52,13 @@ public class AnalyzerTransformer implements RegexTransformer {
   @Override
   public String transformMatch(String match) {
     StringBuilder result = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (TokenStream ts = analyzer.tokenStream(fieldName, new StringReader(match))) {
       ts.addAttribute(CharTermAttribute.class);
       ts.reset();
       TokenStreamIterator iter = new TokenStreamIterator(ts);
       while (iter.hasNext()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
         result.append(iter.next()).append(' ');
       }
       ts.end();

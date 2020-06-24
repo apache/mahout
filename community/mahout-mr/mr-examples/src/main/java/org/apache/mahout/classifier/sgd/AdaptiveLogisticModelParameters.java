@@ -154,6 +154,7 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
     setNumFeatures(in.readInt());
     setMaxTargetCategories(in.readInt());
     int targetCategoriesSize = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> targetCategories = new ArrayList<>(targetCategoriesSize);
     for (int i = 0; i < targetCategoriesSize; i++) {
       targetCategories.add(in.readUTF());
@@ -179,6 +180,7 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
   }
 
   public static AdaptiveLogisticModelParameters loadFromFile(File in) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (InputStream input = new FileInputStream(in)) {
       return loadFromStream(input);
     }

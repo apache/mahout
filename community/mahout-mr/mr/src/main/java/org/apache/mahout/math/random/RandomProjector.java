@@ -60,7 +60,7 @@ public final class RandomProjector {
    * - -1 has probability 1/2
    *
    * See Achlioptas, D. (2003). Database-friendly random projections: Johnson-Lindenstrauss with binary coins.
-   * Journal of Computer and System Sciences, 66(4), 671â€“687. doi:10.1016/S0022-0000(03)00025-4
+   * Journal of Computer and System Sciences, 66(4), 671â€?687. doi:10.1016/S0022-0000(03)00025-4
    *
    * @param projectedVectorSize final projected size of a vector (number of projection vectors)
    * @param vectorSize initial vector size
@@ -89,7 +89,7 @@ public final class RandomProjector {
    * - -1 has probability 1/6
    *
    * See Achlioptas, D. (2003). Database-friendly random projections: Johnson-Lindenstrauss with binary coins.
-   * Journal of Computer and System Sciences, 66(4), 671â€“687. doi:10.1016/S0022-0000(03)00025-4
+   * Journal of Computer and System Sciences, 66(4), 671â€?687. doi:10.1016/S0022-0000(03)00025-4
    *
    * @param projectedVectorSize final projected size of a vector (number of projection vectors)
    * @param vectorSize initial vector size
@@ -97,7 +97,9 @@ public final class RandomProjector {
    */
   public static Matrix generateBasisZeroPlusMinusOne(int projectedVectorSize, int vectorSize) {
     Matrix basisMatrix = new DenseMatrix(projectedVectorSize, vectorSize);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Multinomial<Double> choice = new Multinomial<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     choice.add(0.0, 2 / 3.0);
     choice.add(Math.sqrt(3.0), 1 / 6.0);
     choice.add(-Math.sqrt(3.0), 1 / 6.0);

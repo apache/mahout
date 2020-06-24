@@ -89,11 +89,15 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
   @Override
   protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1619
     try (ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxShingleSize)){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
       sf.reset();
       int count = 0; // ngram count
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       OpenObjectIntHashMap<String> ngrams =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
               new OpenObjectIntHashMap<>(value.getEntries().size() * (maxShingleSize - 1));
       OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<>(value.getEntries().size());
 
@@ -119,6 +123,7 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
 
             try {
               Gram ngram = new Gram(term, frequency, Gram.Type.NGRAM);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
               Gram head = new Gram(term.substring(0, i), frequency, Gram.Type.HEAD);
               Gram tail = new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL);
 
@@ -149,6 +154,8 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
             Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
             gramKey.set(unigram, EMPTY);
             context.write(gramKey, unigram);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           } catch (IOException | InterruptedException e) {
             throw new IllegalStateException(e);
           }

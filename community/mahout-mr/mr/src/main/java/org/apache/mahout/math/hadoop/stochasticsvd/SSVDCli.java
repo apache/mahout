@@ -40,7 +40,10 @@ public class SSVDCli extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption("rank", "k", "decomposition rank", true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     addOption("oversampling", "p", "oversampling", String.valueOf(15));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     addOption("blockHeight",
               "r",
               "Y block height (must be > (k+p))",
@@ -59,6 +62,7 @@ public class SSVDCli extends AbstractJob {
               "uhs",
               "Compute U * Sigma^0.5",
               String.valueOf(false));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1097
     addOption("uSigma", "us", "Compute U * Sigma", String.valueOf(false));
     addOption("computeV", "V", "compute V (true/false)", String.valueOf(true));
     addOption("vHalfSigma",
@@ -68,11 +72,13 @@ public class SSVDCli extends AbstractJob {
     addOption("reduceTasks",
               "t",
               "number of reduce tasks (where applicable)",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
               true);
     addOption("powerIter",
               "q",
               "number of additional power iterations (0..2 is good)",
               String.valueOf(0));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     addOption("broadcast",
               "br",
               "whether use distributed cache to broadcast matrices wherever possible",
@@ -85,8 +91,11 @@ public class SSVDCli extends AbstractJob {
               "xi",
               "path(glob) of external pca mean (optional, dont compute, use external mean");
     addOption(DefaultOptionCreator.overwriteOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-623
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Map<String, List<String>> pargs = parseArguments(args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (pargs == null) {
       return -1;
     }
@@ -112,13 +121,16 @@ public class SSVDCli extends AbstractJob {
     boolean overwrite = hasOption(DefaultOptionCreator.OVERWRITE_OPTION);
 
     Configuration conf = getConf();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (conf == null) {
       throw new IOException("No Hadoop configuration present");
     }
 
     Path[] inputPaths = { getInputPath() };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1098
     Path tempPath = getTempPath();
     FileSystem fs = FileSystem.get(getTempPath().toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1213
 
     // housekeeping
     if (overwrite) {
@@ -133,6 +145,7 @@ public class SSVDCli extends AbstractJob {
     // MAHOUT-817
     if (pca && xiPath == null) {
       xiPath = new Path(tempPath, "xi");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1097
       if (overwrite) {
         fs.delete(xiPath, true);
       }
@@ -154,12 +167,17 @@ public class SSVDCli extends AbstractJob {
     solver.setcUHalfSigma(cUHalfSigma);
     solver.setcVHalfSigma(cVHalfSigma);
     solver.setcUSigma(cUSigma);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     solver.setOuterBlockHeight(h);
     solver.setAbtBlockHeight(abh);
     solver.setQ(q);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     solver.setBroadcast(broadcast);
     solver.setOverwrite(overwrite);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-623
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1098
     if (xiPath != null) {
       solver.setPcaMeanPath(new Path(xiPath, "part-*"));
     }
@@ -190,6 +208,7 @@ public class SSVDCli extends AbstractJob {
 
     // Delete the temp path on exit
     fs.deleteOnExit(getTempPath());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1213
 
     return 0;
   }

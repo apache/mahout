@@ -65,6 +65,7 @@ public class Sampler {
     double[] partition = new double[size];
     double norm = vectorDistribution.norm(1);
     double sum = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 0; i < size; i++) {
       sum += vectorDistribution.get(i) / norm;
       partition[i] = sum;

@@ -56,6 +56,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
       log.info("{} does not yet exist, no factorization found", file.getAbsolutePath());
       return null;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))){
       log.info("Reading factorization from {}...", file.getAbsolutePath());
       return readBinary(in);
@@ -109,6 +110,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
     int numUsers = in.readInt();
     int numItems = in.readInt();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FastByIDMap<Integer> userIDMapping = new FastByIDMap<>(numUsers);
     double[][] userFeatures = new double[numUsers][numFeatures];
 
@@ -121,6 +123,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
       }
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FastByIDMap<Integer> itemIDMapping = new FastByIDMap<>(numItems);
     double[][] itemFeatures = new double[numItems][numFeatures];
 

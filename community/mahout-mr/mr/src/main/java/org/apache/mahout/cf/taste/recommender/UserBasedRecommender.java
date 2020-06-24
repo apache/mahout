@@ -35,6 +35,7 @@ public interface UserBasedRecommender extends Recommender {
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   long[] mostSimilarUserIDs(long userID, int howMany) throws TasteException;
   
   /**
@@ -49,6 +50,7 @@ public interface UserBasedRecommender extends Recommender {
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   long[] mostSimilarUserIDs(long userID, int howMany, Rescorer<LongPair> rescorer) throws TasteException;
   
 }

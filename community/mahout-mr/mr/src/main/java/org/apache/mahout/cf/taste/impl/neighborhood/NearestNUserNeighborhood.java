@@ -55,6 +55,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   public NearestNUserNeighborhood(int n,
                                   double minSimilarity,
                                   UserSimilarity userSimilarity,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-455
                                   DataModel dataModel) throws TasteException {
     this(n, minSimilarity, userSimilarity, dataModel, 1.0);
   }
@@ -74,9 +75,12 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
                                   DataModel dataModel,
                                   double samplingRate) throws TasteException {
     super(userSimilarity, dataModel, samplingRate);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(n >= 1, "n must be at least 1");
     int numUsers = dataModel.getNumUsers();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-455
     this.n = n > numUsers ? numUsers : n;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-95
     this.minSimilarity = minSimilarity;
   }
   
@@ -88,6 +92,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     
     TopItems.Estimator<Long> estimator = new Estimator(userSimilarityImpl, userID, minSimilarity);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     LongPrimitiveIterator userIDs = SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(),
       getSamplingRate());
     
@@ -112,6 +117,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     
     @Override
     public double estimate(Long userID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       if (userID == theUserID) {
         return Double.NaN;
       }

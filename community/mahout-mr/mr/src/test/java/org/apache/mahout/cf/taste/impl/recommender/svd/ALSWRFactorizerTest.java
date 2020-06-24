@@ -86,6 +86,7 @@ public class ALSWRFactorizerTest extends TasteTestCase {
 
   @Test
   public void setFeatureColumn() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-606
     ALSWRFactorizer.Features features = new ALSWRFactorizer.Features(factorizer);
     Vector vector = new DenseVector(new double[] { 0.5, 2.0, 1.5 });
     int index = 1;
@@ -161,6 +162,7 @@ public class ALSWRFactorizerTest extends TasteTestCase {
   @Test
   public void toyExampleImplicit() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1056
     Matrix observations = new SparseRowMatrix(4, 4, new Vector[] {
         new DenseVector(new double[] { 5.0, 5.0, 2.0, 0 }),
         new DenseVector(new double[] { 2.0, 0,   3.0, 5.0 }),
@@ -184,6 +186,7 @@ public class ALSWRFactorizerTest extends TasteTestCase {
     while (sliceIterator.hasNext()) {
       MatrixSlice slice = sliceIterator.next();
       for (Vector.Element e : slice.vector().all()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
 
         long userID = slice.index() + 1;
         long itemID = e.index() + 1;

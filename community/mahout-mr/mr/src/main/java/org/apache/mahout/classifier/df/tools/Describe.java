@@ -54,6 +54,7 @@ public final class Describe implements Tool {
   private Describe() {}
 
   public static int main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1613
     return ToolRunner.run(new Describe(), args);
   }
 
@@ -74,6 +75,7 @@ public final class Describe implements Tool {
         abuilder.withName("file").withMinimum(1).withMaximum(1).create()).withDescription(
         "Path to generated descriptor file").create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     Option regOpt = obuilder.withLongName("regression").withDescription("Regression Problem").withShortName("r")
         .create();
 
@@ -90,14 +92,18 @@ public final class Describe implements Tool {
 
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1613
         return -1;
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       String dataPath = cmdLine.getValue(pathOpt).toString();
       String descPath = cmdLine.getValue(descPathOpt).toString();
       List<String> descriptor = convert(cmdLine.getValues(descriptorOpt));
       boolean regression = cmdLine.hasOption(regOpt);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.debug("Data path : {}", dataPath);
       log.debug("Descriptor path : {}", descPath);
       log.debug("Descriptor : {}", descriptor);
@@ -105,9 +111,11 @@ public final class Describe implements Tool {
 
       runTool(dataPath, descriptor, descPath, regression);
     } catch (OptionException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-323
       log.warn(e.toString());
       CommandLineUtil.printHelp(group);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1613
     return 0;
   }
 
@@ -123,6 +131,7 @@ public final class Describe implements Tool {
 
     log.info("storing the dataset description");
     String json = dataset.toJSON();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1613
     DFUtils.storeString(conf, fPath, json);
   }
 
@@ -145,6 +154,7 @@ public final class Describe implements Tool {
   }
 
   private static List<String> convert(Collection<?> values) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> list = new ArrayList<>(values.size());
     for (Object value : values) {
       list.add(value.toString());
@@ -156,6 +166,7 @@ public final class Describe implements Tool {
 
   @Override
   public void setConf(Configuration entries) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1613
     this.conf = entries;
   }
 

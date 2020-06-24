@@ -62,6 +62,7 @@ public final class TestEigenSeedGenerator extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
   }

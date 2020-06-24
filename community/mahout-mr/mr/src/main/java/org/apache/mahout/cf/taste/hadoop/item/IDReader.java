@@ -115,6 +115,7 @@ public class IDReader {
     } else if (isUserItemFileSpecified() && !isUsersFileSpecified()) {
       readUserItemFilterIfNeeded();
       userIds = extractAllUserIdsFromUserItemFilter(userItemFilter);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } else if (!isUsersFileSpecified()) {
       throw new IllegalStateException("Neither usersFile nor userItemFile options are specified");
     } else {
@@ -128,6 +129,7 @@ public class IDReader {
     } else if (isUserItemFileSpecified() && !isItemsFileSpecified()) {
       readUserItemFilterIfNeeded();
       itemIds = extractAllItemIdsFromUserItemFilter(userItemFilter);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     } else if (!isItemsFileSpecified()) {
       throw new IllegalStateException("Neither itemsFile nor userItemFile options are specified");
     } else {
@@ -143,10 +145,12 @@ public class IDReader {
 
   private Map<Long, FastIDSet> readUserItemFilter(String pathString) throws IOException {
     Map<Long, FastIDSet> result = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     try (InputStream in = openFile(pathString)) {
       for (String line : new FileLineIterable(in)) {
         try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           String[] tokens = SEPARATOR.split(line);
           Long userId = Long.parseLong(tokens[0]);
           Long itemId = Long.parseLong(tokens[1]);
@@ -200,6 +204,7 @@ public class IDReader {
     if (pathString != null) {
       result = new FastIDSet();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (InputStream in = openFile(pathString)){
         for (String line : new FileLineIterable(in)) {
           try {

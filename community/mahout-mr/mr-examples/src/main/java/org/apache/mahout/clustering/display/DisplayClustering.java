@@ -69,6 +69,7 @@ public class DisplayClustering extends Frame {
   protected static final List<List<Cluster>> CLUSTERS = new ArrayList<>();
   
   static final Color[] COLORS = { Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     Color.lightGray };
   
   protected static final double T1 = 3.0;
@@ -103,7 +104,9 @@ public class DisplayClustering extends Frame {
   }
   
   public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-174
     RandomUtils.useTestSeed();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     generateSamples();
     new DisplayClustering();
   }
@@ -179,6 +182,7 @@ public class DisplayClustering extends Frame {
    */
   protected static void plotClusteredSampleData(Graphics2D g2, Path data) {
     double sx = (double) res / DS;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
     
     g2.setColor(Color.BLACK);
@@ -191,6 +195,7 @@ public class DisplayClustering extends Frame {
     
     Path clusteredPointsPath = new Path(data, "clusteredPoints");
     Path inputPath = new Path(clusteredPointsPath, "part-m-00000");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
     Map<Integer,Color> colors = new HashMap<>();
     int point = 0;
     for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
@@ -229,6 +234,7 @@ public class DisplayClustering extends Frame {
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     g2.setStroke(new BasicStroke(1));
     g2.setColor(color);
     g2.draw(new Rectangle2D.Double(x * DS, y * DS, dv.get(0) * DS, dv.get(1) * DS));
@@ -266,6 +272,9 @@ public class DisplayClustering extends Frame {
    */
   protected static void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = {1, -1};
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-307
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-295
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-304
     Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
     int h = SIZE / 2;
@@ -275,6 +284,9 @@ public class DisplayClustering extends Frame {
   }
   
   protected static void generateSamples() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-307
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-295
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-304
     generateSamples(500, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);
@@ -303,6 +315,7 @@ public class DisplayClustering extends Frame {
     SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd={}", num, mx, my, sd);
     for (int i = 0; i < num; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
           UncommonDistributions.rNorm(my, sd)})));
     }
@@ -312,6 +325,7 @@ public class DisplayClustering extends Frame {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1659
     try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output, Text.class, VectorWritable.class)) {
       int i = 0;
       for (VectorWritable vw : SAMPLE_DATA) {
@@ -322,6 +336,7 @@ public class DisplayClustering extends Frame {
   
   protected static List<Cluster> readClustersWritable(Path clustersIn) {
     List<Cluster> clusters = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     Configuration conf = new Configuration();
     for (ClusterWritable value : new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST,
         PathFilters.logsCRCFilter(), conf)) {
@@ -336,6 +351,7 @@ public class DisplayClustering extends Frame {
   }
   
   protected static void loadClustersWritable(Path output) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (FileStatus s : fs.listStatus(output, new ClustersFilter())) {
@@ -363,6 +379,7 @@ public class DisplayClustering extends Frame {
     SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", num, mx, my, sdx, sdy);
     for (int i = 0; i < num; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sdx),
           UncommonDistributions.rNorm(my, sdy)})));
     }

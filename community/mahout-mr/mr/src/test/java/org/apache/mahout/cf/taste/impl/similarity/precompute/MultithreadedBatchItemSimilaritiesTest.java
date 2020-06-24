@@ -73,12 +73,15 @@ public class MultithreadedBatchItemSimilaritiesTest {
     BatchItemSimilarities batchSimilarities = new MultithreadedBatchItemSimilarities(recommender, 10);
 
     // Batch size is 100, so we only get 1 batch from 3 items, but we use a degreeOfParallelism of 2
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1622
     batchSimilarities.computeItemSimilarities(2, 1, mock(SimilarItemsWriter.class));
     fail();
   }
 
   @Test
   public void testCorrectNumberOfOutputSimilarities() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1622
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1622
     FastByIDMap<PreferenceArray> userData = new FastByIDMap<>();
     userData.put(1, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(1, 1, 1),
         new GenericPreference(1, 2, 1), new GenericPreference(1, 3, 1))));

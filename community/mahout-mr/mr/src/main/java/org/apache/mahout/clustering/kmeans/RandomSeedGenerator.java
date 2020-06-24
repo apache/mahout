@@ -57,17 +57,20 @@ public final class RandomSeedGenerator {
   private RandomSeedGenerator() {}
 
   public static Path buildRandom(Configuration conf, Path input, Path output, int k, DistanceMeasure measure)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
     throws IOException {
     return buildRandom(conf, input, output, k, measure, null);
   }
 
   public static Path buildRandom(Configuration conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-651
                                  Path input,
                                  Path output,
                                  int k,
                                  DistanceMeasure measure,
                                  Long seed) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(k > 0, "Must be: k > 0, but k = " + k);
     // delete the output directory
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -77,6 +80,7 @@ public final class RandomSeedGenerator {
     if (newFile) {
       Path inputPathPattern;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
       if (fs.getFileStatus(input).isDir()) {
         inputPathPattern = new Path(input, "*");
       } else {
@@ -84,29 +88,37 @@ public final class RandomSeedGenerator {
       }
       
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
       Random random = (seed != null) ? RandomUtils.getRandom(seed) : RandomUtils.getRandom();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Text> chosenTexts = new ArrayList<>(k);
       List<ClusterWritable> chosenClusters = new ArrayList<>(k);
       int nextClusterId = 0;
 
       int index = 0;
       for (FileStatus fileStatus : inputFiles) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
         if (!fileStatus.isDir()) {
           for (Pair<Writable, VectorWritable> record
               : new SequenceFileIterable<Writable, VectorWritable>(fileStatus.getPath(), true, conf)) {
             Writable key = record.getFirst();
             VectorWritable value = record.getSecond();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
             Kluster newCluster = new Kluster(value.get(), nextClusterId++, measure);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
             newCluster.observe(value.get(), 1);
             Text newText = new Text(key.toString());
             int currentSize = chosenTexts.size();
             if (currentSize < k) {
               chosenTexts.add(newText);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
               ClusterWritable clusterWritable = new ClusterWritable();
               clusterWritable.setValue(newCluster);
               chosenClusters.add(clusterWritable);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1130
             } else {
               int j = random.nextInt(index);
               if (j < k) {
@@ -121,8 +133,10 @@ public final class RandomSeedGenerator {
         }
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (SequenceFile.Writer writer =
                SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class)){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-900
         for (int i = 0; i < chosenTexts.size(); i++) {
           writer.append(chosenTexts.get(i), chosenClusters.get(i));
         }

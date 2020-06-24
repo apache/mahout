@@ -102,35 +102,44 @@ public final class RecommenderJob extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
     addInputOption();
     addOutputOption();
     addOption("numRecommendations", "n", "Number of recommendations per user",
             String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
     addOption("usersFile", null, "File of users to recommend for", null);
     addOption("itemsFile", null, "File of items to recommend for", null);
     addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from "
             + "the recommendations for that user (optional)", null);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1374
     addOption("userItemFile", "uif", "File containing comma-separated userID,itemID pairs (optional). "
             + "Used to include only these items into recommendations. "
             + "Cannot be used together with usersFile or itemsFile", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-754
     addOption("maxPrefsPerUser", "mxp",
             "Maximum number of preferences considered per user in final recommendation phase",
             String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-628
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this in the similarity computation "
             + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
     addOption("maxSimilaritiesPerItem", "m", "Maximum number of similarities considered per item ",
             String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     addOption("maxPrefsInItemSimilarity", "mpiis", "max number of preferences to consider per user or item in the "
             + "item similarity computation phase, users or items with more preferences will be sampled down (default: "
         + DEFAULT_MAX_PREFS + ')', String.valueOf(DEFAULT_MAX_PREFS));
     addOption("similarityClassname", "s", "Name of distributed similarity measures class to instantiate, " 
             + "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')', true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-609
     addOption("outputPathForSimilarityMatrix", "opfsm", "write the item similarity matrix to this path (optional)",
         false);
     addOption("randomSeed", null, "use this seed for sampling", false);
     addFlag("sequencefileOutput", null, "write the output into a SequenceFile instead of a text file");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1352
 
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -142,6 +151,7 @@ public final class RecommenderJob extends AbstractJob {
     String usersFile = getOption("usersFile");
     String itemsFile = getOption("itemsFile");
     String filterFile = getOption("filterFile");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1374
     String userItemFile = getOption("userItemFile");
     boolean booleanData = Boolean.valueOf(getOption("booleanData"));
     int maxPrefsPerUser = Integer.parseInt(getOption("maxPrefsPerUser"));
@@ -150,11 +160,14 @@ public final class RecommenderJob extends AbstractJob {
     int maxSimilaritiesPerItem = Integer.parseInt(getOption("maxSimilaritiesPerItem"));
     String similarityClassname = getOption("similarityClassname");
     double threshold = hasOption("threshold")
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         ? Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
     long randomSeed = hasOption("randomSeed")
         ? Long.parseLong(getOption("randomSeed")) : RowSimilarityJob.NO_FIXED_RANDOM_SEED;
 
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1353
     Path prepPath = getTempPath(DEFAULT_PREPARE_PATH);
     Path similarityMatrixPath = getTempPath("similarityMatrix");
     Path explicitFilterPath = getTempPath("explicitFilterPath");
@@ -173,6 +186,7 @@ public final class RecommenderJob extends AbstractJob {
         "--tempDir", getTempPath().toString(),
       });
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-879
       numberOfUsers = HadoopUtil.readInt(new Path(prepPath, PreparePreferenceMatrixJob.NUM_USERS), getConf());
     }
 
@@ -191,8 +205,10 @@ public final class RecommenderJob extends AbstractJob {
         "--output", similarityMatrixPath.toString(),
         "--numberOfColumns", String.valueOf(numberOfUsers),
         "--similarityClassname", similarityClassname,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1289
         "--maxObservationsPerRow", String.valueOf(maxPrefsInItemSimilarity),
         "--maxObservationsPerColumn", String.valueOf(maxPrefsInItemSimilarity),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
         "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem),
         "--excludeSelfSimilarity", String.valueOf(Boolean.TRUE),
         "--threshold", String.valueOf(threshold),
@@ -201,6 +217,7 @@ public final class RecommenderJob extends AbstractJob {
       });
 
       // write out the similarity matrix if the user specified that behavior
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-609
       if (hasOption("outputPathForSimilarityMatrix")) {
         Path outputPathForSimilarityMatrix = new Path(getOption("outputPathForSimilarityMatrix"));
 
@@ -219,8 +236,10 @@ public final class RecommenderJob extends AbstractJob {
 
     //start the multiplication of the co-occurrence matrix by the user vectors
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1865
       Job partialMultiply = Job.getInstance(getConf(), "partialMultiply");
       Configuration partialMultiplyConf = partialMultiply.getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
 
       MultipleInputs.addInputPath(partialMultiply, similarityMatrixPath, SequenceFileInputFormat.class,
                                   SimilarityMatrixRowWrapperMapper.class);
@@ -240,6 +259,7 @@ public final class RecommenderJob extends AbstractJob {
         partialMultiplyConf.set(UserVectorSplitterMapper.USERS_FILE, usersFile);
       }
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1374
       if (userItemFile != null) {
         partialMultiplyConf.set(IDReader.USER_ITEM_FILE, userItemFile);
       }
@@ -271,6 +291,7 @@ public final class RecommenderJob extends AbstractJob {
         aggregateAndRecommendInput += "," + explicitFilterPath;
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1352
       Class<? extends OutputFormat> outputFormat = parsedArgs.containsKey("--sequencefileOutput")
           ? SequenceFileOutputFormat.class : TextOutputFormat.class;
 
@@ -285,14 +306,17 @@ public final class RecommenderJob extends AbstractJob {
         aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
       }
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1374
       if (userItemFile != null) {
         aggregateAndRecommendConf.set(IDReader.USER_ITEM_FILE, userItemFile);
       }
 
       if (filterFile != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
         setS3SafeCombinedInputPath(aggregateAndRecommend, getTempPath(), partialMultiplyPath, explicitFilterPath);
       }
       setIOSort(aggregateAndRecommend);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
       aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH,
               new Path(prepPath, PreparePreferenceMatrixJob.ITEMID_INDEX).toString());
       aggregateAndRecommendConf.setInt(AggregateAndRecommendReducer.NUM_RECOMMENDATIONS, numRecommendations);

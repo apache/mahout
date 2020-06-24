@@ -35,8 +35,10 @@ public final class ToVectorAndPrefReducer extends
                         Iterable<VectorOrPrefWritable> values,
                         Context context) throws IOException, InterruptedException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Long> userIDs = new ArrayList<>();
     List<Float> prefValues = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-420
     Vector similarityMatrixColumn = null;
     for (VectorOrPrefWritable value : values) {
       if (value.getVector() == null) {
@@ -45,6 +47,7 @@ public final class ToVectorAndPrefReducer extends
         prefValues.add(value.getValue());
       } else {
         // Then this is the column vector
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-420
         if (similarityMatrixColumn != null) {
           throw new IllegalStateException("Found two similarity-matrix columns for item index " + key.get());
         }
@@ -56,6 +59,7 @@ public final class ToVectorAndPrefReducer extends
       return;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
     vectorAndPrefs.set(similarityMatrixColumn, userIDs, prefValues);
     context.write(key, vectorAndPrefs);
   }

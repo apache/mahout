@@ -33,6 +33,7 @@ public abstract class SamplerCase extends MahoutTestCase {
 
   @Test
   public void testEmptyCase() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     assertFalse(createSampler(100, new CountingIterator(0)).hasNext());
   }
 
@@ -51,6 +52,7 @@ public abstract class SamplerCase extends MahoutTestCase {
 
   @Test
   public void testAbsurdSize() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     Iterator<Integer> t = createSampler(0, new CountingIterator(2));
     assertFalse(t.hasNext());
   }
@@ -69,6 +71,7 @@ public abstract class SamplerCase extends MahoutTestCase {
   public void testSample() {
     Iterator<Integer> source = new CountingIterator(100);
     Iterator<Integer> t = createSampler(15, source);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
     // this is just a regression test, not a real test
     List<Integer> expectedValues = Arrays.asList(52,28,2,60,50,32,65,79,78,9,40,33,96,25,48);

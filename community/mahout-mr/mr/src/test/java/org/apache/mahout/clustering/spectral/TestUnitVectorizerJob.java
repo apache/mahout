@@ -37,6 +37,7 @@ public class TestUnitVectorizerJob extends MahoutTestCase {
   @Test
   public void testUnitVectorizerMapper() throws Exception {
     UnitVectorizerMapper mapper = new UnitVectorizerMapper();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     
     // set up the dummy writers

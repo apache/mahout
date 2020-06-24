@@ -61,6 +61,7 @@ public class RegressionSplit extends IgSplit {
    * Computes the split for a CATEGORICAL attribute
    */
   private static Split categoricalSplit(Data data, int attr) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-945
     FullRunningAverage[] ra = new FullRunningAverage[data.getDataset().nbValues(attr)];
     double[] sk = new double[data.getDataset().nbValues(attr)];
     for (int i = 0; i < ra.length; i++) {
@@ -107,6 +108,7 @@ public class RegressionSplit extends IgSplit {
    * Computes the best split for a NUMERICAL attribute
    */
   private static Split numericalSplit(Data data, int attr) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-945
     FullRunningAverage[] ra = new FullRunningAverage[2];
     for (int i = 0; i < ra.length; i++) {
       ra[i] = new FullRunningAverage();
@@ -122,6 +124,7 @@ public class RegressionSplit extends IgSplit {
     double[] sk = new double[2];
     for (Instance instance : instances) {
       double xk = data.getDataset().getLabel(instance);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-945
       if (ra[1].getCount() == 0) {
         ra[1].addDatum(xk);
         sk[1] = 0.0;

@@ -26,6 +26,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
   @Test
   public void testNoCorrelation() throws Exception {
     DataModel dataModel = getDataModel(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
             new long[] {1, 2},
             new Double[][] {
                     {null, 2.0, 3.0},
@@ -91,6 +92,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
 
   @Test
   public void testReturnNaNDoubleWhenNoSimilaritiesForTwoItems() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-902
 	  DataModel dataModel = getDataModel(
             new long[] {1, 2},
             new Double[][] {

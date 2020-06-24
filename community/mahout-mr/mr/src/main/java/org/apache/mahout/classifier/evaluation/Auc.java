@@ -113,6 +113,7 @@ public class Auc {
 
   public void add(int trueValue, int predictedClass) {
     hasScore = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(trueValue == 0 || trueValue == 1, "True value must be 0 or 1");
     confusion.set(trueValue, predictedClass, confusion.get(trueValue, predictedClass) + 1);
   }
@@ -124,6 +125,7 @@ public class Auc {
    * @return The value of the Area Under the receiver operating Curve.
    */
   public double auc() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(hasScore, "Can't compute AUC for classifier without a score");
     scores[0].sort();
     scores[1].sort();
@@ -158,6 +160,7 @@ public class Auc {
 
         // how many negatives are tied?
         int k0 = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-557
         while (i0 < n0 && scores[0].get(i0) == tieScore) {
           k0++;
           i0++;

@@ -46,6 +46,7 @@ public class Dataset {
    * Attributes type
    */
   public enum Attribute {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     IGNORED,
     NUMERICAL,
     CATEGORICAL,
@@ -68,7 +69,9 @@ public class Dataset {
     }
     
     private static Attribute fromString(String from) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1163
       Attribute toReturn = LABEL;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       if (NUMERICAL.toString().equalsIgnoreCase(from)) {
         toReturn = NUMERICAL;
       } else if (CATEGORICAL.toString().equalsIgnoreCase(from)) {
@@ -118,6 +121,7 @@ public class Dataset {
    * @param attrs  attributes description
    * @param values distinct values for all CATEGORICAL attributes
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
   Dataset(Attribute[] attrs, List<String>[] values, int nbInstances, boolean regression) {
     validateValues(attrs, values);
 
@@ -127,6 +131,7 @@ public class Dataset {
     attributes = new Attribute[nbattrs];
     this.values = new String[nbattrs][];
     ignored = new int[attrs.length - nbattrs]; // nbignored = total - nbattrs
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
 
     labelId = -1;
     int ignoredId = 0;
@@ -139,9 +144,12 @@ public class Dataset {
 
       if (attrs[attr].isLabel()) {
         if (labelId != -1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
           throw new IllegalStateException("Label found more than once");
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         labelId = ind;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
         if (regression) {
           attrs[attr] = Attribute.NUMERICAL;
         } else {
@@ -158,6 +166,7 @@ public class Dataset {
     }
 
     if (labelId == -1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       throw new IllegalStateException("Label not found");
     }
 
@@ -165,6 +174,7 @@ public class Dataset {
   }
 
   public int nbValues(int attr) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     return values[attr].length;
   }
 
@@ -181,10 +191,13 @@ public class Dataset {
   }
 
   public double getLabel(Instance instance) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     return instance.get(getLabelId());
   }
   
   public Attribute getAttribute(int attr) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1163
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     return attributes[attr];
   }
 
@@ -207,14 +220,17 @@ public class Dataset {
    */
   public String getLabelString(double code) {
     // handle the case (prediction is NaN)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-954
     if (Double.isNaN(code)) {
       return "unknown";
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     return values[labelId][(int) code];
   }
   
   @Override
   public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     return "attributes=" + Arrays.toString(attributes);
   }
 
@@ -225,6 +241,7 @@ public class Dataset {
    */
   public int valueOf(int attr, String token) {
     Preconditions.checkArgument(!isNumerical(attr), "Only for CATEGORICAL attributes");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(values != null, "Values not found (equals null)");
     return ArrayUtils.indexOf(values[attr], token);
   }
@@ -238,6 +255,7 @@ public class Dataset {
    */
   private static int countAttributes(Attribute[] attrs) {
     int nbattrs = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     for (Attribute attr : attrs) {
       if (!attr.isIgnored()) {
         nbattrs++;
@@ -249,6 +267,7 @@ public class Dataset {
   private static void validateValues(Attribute[] attrs, List<String>[] values) {
     Preconditions.checkArgument(attrs.length == values.length, "attrs.length != values.length");
     for (int attr = 0; attr < attrs.length; attr++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       Preconditions.checkArgument(!attrs[attr].isCategorical() || values[attr] != null,
           "values not found for attribute " + attr);
     }
@@ -298,6 +317,8 @@ public class Dataset {
   @Override
   public int hashCode() {
     int hashCode = labelId + 31 * nbInstances;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     for (Attribute attr : attributes) {
       hashCode = 31 * hashCode + attr.hashCode();
     }
@@ -320,11 +341,13 @@ public class Dataset {
   public static Dataset load(Configuration conf, Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
     long bytesToRead = fs.getFileStatus(path).getLen();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     byte[] buff = new byte[Long.valueOf(bytesToRead).intValue()];
     FSDataInputStream input = fs.open(path);
     try {
       input.readFully(buff);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(input, true);
     }
     String json = new String(buff, Charset.defaultCharset());
@@ -337,10 +360,12 @@ public class Dataset {
    * @return some JSON
    */
   public String toJSON() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Map<String, Object>> toWrite = new LinkedList<>();
     // attributes does not include ignored columns and it does include the class label
     int ignoredCount = 0;
     for (int i = 0; i < attributes.length + ignored.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1378
       Map<String, Object> attribute;
       int attributesIndex = i - ignoredCount;
       if (ignoredCount < ignored.length && i == ignored[ignoredCount]) {
@@ -357,6 +382,7 @@ public class Dataset {
       toWrite.add(attribute);
     }
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       return OBJECT_MAPPER.writeValueAsString(toWrite);
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -371,16 +397,19 @@ public class Dataset {
   public static Dataset fromJSON(String json) {
     List<Map<String, Object>> fromJSON;
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       fromJSON = OBJECT_MAPPER.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Attribute> attributes = new LinkedList<>();
     List<Integer> ignored = new LinkedList<>();
     String[][] nominalValues = new String[fromJSON.size()][];
     Dataset dataset = new Dataset();
     for (int i = 0; i < fromJSON.size(); i++) {
       Map<String, Object> attribute = fromJSON.get(i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       if (Attribute.fromString((String) attribute.get(TYPE)) == Attribute.IGNORED) {
         ignored.add(i);
       } else {
@@ -392,6 +421,7 @@ public class Dataset {
         if (attribute.get(VALUES) != null) {
           List<String> get = (List<String>) attribute.get(VALUES);
           String[] array = get.toArray(new String[get.size()]);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1378
           nominalValues[i - ignored.size()] = array;
         }
       }
@@ -399,6 +429,7 @@ public class Dataset {
     dataset.attributes = attributes.toArray(new Attribute[attributes.size()]);
     dataset.ignored = new int[ignored.size()];
     dataset.values = nominalValues;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     for (int i = 0; i < dataset.ignored.length; i++) {
       dataset.ignored[i] = ignored.get(i);
     }
@@ -413,6 +444,7 @@ public class Dataset {
    * @return map of (AttributeTypes, Values)
    */
   private Map<String, Object> getMap(Attribute type, String[] values, boolean isLabel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, Object> attribute = new HashMap<>();
     attribute.put(TYPE, type.toString().toLowerCase(Locale.getDefault()));
     attribute.put(VALUES, values);

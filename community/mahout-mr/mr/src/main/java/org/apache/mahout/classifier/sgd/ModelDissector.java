@@ -55,6 +55,7 @@ public class ModelDissector {
   private final Map<String,Vector> weightMap;
 
   public ModelDissector() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     weightMap = new HashMap<>();
   }
 
@@ -105,6 +106,7 @@ public class ModelDissector {
    * @return       A list of the top variables.
    */
   public List<Weight> summary(int n) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Queue<Weight> pq = new PriorityQueue<>();
     for (Map.Entry<String, Vector> entry : weightMap.entrySet()) {
       pq.add(new Weight(entry.getKey(), entry.getValue()));
@@ -170,7 +172,9 @@ public class ModelDissector {
     public Weight(String feature, Vector weights, int n) {
       this.feature = feature;
       // pick out the weight with the largest abs value, but don't forget the sign
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Queue<Category> biggest = new PriorityQueue<>(n + 1, Ordering.natural());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element element : weights.all()) {
         biggest.add(new Category(element.index(), element.get()));
         while (biggest.size() > n) {

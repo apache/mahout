@@ -46,6 +46,7 @@ public class CategoricalNode extends Node {
     int index = ArrayUtils.indexOf(values, instance.get(attr));
     if (index == -1) {
       // value not available, we cannot predict
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-954
       return Double.NaN;
     }
     return childs[index].classify(instance);
@@ -57,6 +58,7 @@ public class CategoricalNode extends Node {
     
     for (Node child : childs) {
       long depth = child.maxDepth();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       if (depth > max) {
         max = depth;
       }
@@ -98,6 +100,7 @@ public class CategoricalNode extends Node {
   @Override
   public int hashCode() {
     int hashCode = attr;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     for (double value : values) {
       hashCode = 31 * hashCode + (int) Double.doubleToLongBits(value);
     }
@@ -111,6 +114,7 @@ public class CategoricalNode extends Node {
   protected String getString() {
     StringBuilder buffer = new StringBuilder();
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     for (Node child : childs) {
       buffer.append(child).append(',');
     }

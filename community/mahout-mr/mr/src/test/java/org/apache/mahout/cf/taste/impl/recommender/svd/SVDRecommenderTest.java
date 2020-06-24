@@ -52,6 +52,7 @@ public class SVDRecommenderTest extends TasteTestCase {
   @Test
   public void recommend() throws Exception {
     DataModel dataModel = EasyMock.createMock(DataModel.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     PreferenceArray preferencesFromUser = EasyMock.createMock(PreferenceArray.class);
     CandidateItemsStrategy candidateItemsStrategy = EasyMock.createMock(CandidateItemsStrategy.class);
     Factorizer factorizer = EasyMock.createMock(Factorizer.class);
@@ -63,6 +64,7 @@ public class SVDRecommenderTest extends TasteTestCase {
 
     EasyMock.expect(factorizer.factorize()).andReturn(factorization);
     EasyMock.expect(dataModel.getPreferencesFromUser(1L)).andReturn(preferencesFromUser);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     EasyMock.expect(candidateItemsStrategy.getCandidateItems(1L, preferencesFromUser, dataModel, false))
         .andReturn(candidateItems);
     EasyMock.expect(factorization.getUserFeatures(1L)).andReturn(new double[] { 0.4, 2 });

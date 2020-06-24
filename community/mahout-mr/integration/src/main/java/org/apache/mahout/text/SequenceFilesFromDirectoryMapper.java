@@ -41,6 +41,7 @@ public class SequenceFilesFromDirectoryMapper extends Mapper<IntWritable, BytesW
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     this.keyPrefix = context.getConfiguration().get(KEY_PREFIX_OPTION[0], "");
   }
 
@@ -50,6 +51,7 @@ public class SequenceFilesFromDirectoryMapper extends Mapper<IntWritable, BytesW
     Configuration configuration = context.getConfiguration();
     Path filePath = ((CombineFileSplit) context.getInputSplit()).getPath(key.get());
     String relativeFilePath = HadoopUtil.calcRelativeFilePath(configuration, filePath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     String filename = this.keyPrefix.length() > 0 ?
       this.keyPrefix + Path.SEPARATOR + relativeFilePath :

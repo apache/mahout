@@ -80,6 +80,7 @@ public class FileItemSimilarity implements ItemSimilarity {
    * @see #FileItemSimilarity(File)
    */
   public FileItemSimilarity(File dataFile, long minReloadIntervalMS) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(dataFile != null, "dataFile is null");
     Preconditions.checkArgument(dataFile.exists() && !dataFile.isDirectory(),
       "dataFile is missing or a directory: %s", dataFile);
@@ -101,6 +102,7 @@ public class FileItemSimilarity implements ItemSimilarity {
 
   @Override
   public long[] allSimilarItemIDs(long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
     return delegate.allSimilarItemIDs(itemID);
   }
 

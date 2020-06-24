@@ -37,6 +37,7 @@ public interface TreeBuilder {
    *          training data
    * @return root Node
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
   Node build(Random rng, Data data);
   
 }

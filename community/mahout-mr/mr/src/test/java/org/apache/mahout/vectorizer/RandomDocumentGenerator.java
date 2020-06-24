@@ -33,6 +33,7 @@ public class RandomDocumentGenerator {
   private final Random random = RandomUtils.getRandom();
   
   private char getRandomDelimiter() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     return DELIM.charAt(random.nextInt(DELIM.length()));
   }
 

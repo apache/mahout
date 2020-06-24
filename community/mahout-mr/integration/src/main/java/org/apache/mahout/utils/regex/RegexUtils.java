@@ -37,6 +37,7 @@ public final class RegexUtils {
   }
 
   public static void extract(CharSequence line, StringBuilder outputBuffer,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
                              Pattern pattern, Collection<Integer> groupsToKeep, String separator,
                              RegexTransformer transformer) {
     if (transformer == null) {

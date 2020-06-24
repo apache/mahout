@@ -93,6 +93,7 @@ public class LogisticModelParameters implements Writable {
   public void saveTo(OutputStream out) throws IOException {
     Closeables.close(lr, false);
     targetCategories = getCsvRecordFactory().getTargetCategories();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
     write(new DataOutputStream(out));
   }
 
@@ -110,6 +111,7 @@ public class LogisticModelParameters implements Writable {
    * @throws IOException If there is an error opening or closing the file.
    */
   public static LogisticModelParameters loadFrom(File in) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (InputStream input = new FileInputStream(in)) {
       return loadFrom(input);
     }
@@ -118,6 +120,7 @@ public class LogisticModelParameters implements Writable {
 
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
     out.writeUTF(targetVariable);
     out.writeInt(typeMap.size());
     for (Map.Entry<String,String> entry : typeMap.entrySet()) {
@@ -146,6 +149,7 @@ public class LogisticModelParameters implements Writable {
   public void readFields(DataInput in) throws IOException {
     targetVariable = in.readUTF();
     int typeMapSize = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     typeMap = new HashMap<>(typeMapSize);
     for (int i = 0; i < typeMapSize; i++) {
       String key = in.readUTF();
@@ -156,6 +160,7 @@ public class LogisticModelParameters implements Writable {
     useBias = in.readBoolean();
     maxTargetCategories = in.readInt();
     int targetCategoriesSize = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     targetCategories = new ArrayList<>(targetCategoriesSize);
     for (int i = 0; i < targetCategoriesSize; i++) {
       targetCategories.add(in.readUTF());
@@ -175,7 +180,9 @@ public class LogisticModelParameters implements Writable {
    * @param typeList      The list of types in the format preferred by CsvRecordFactory.
    */
   public void setTypeMap(Iterable<String> predictorList, List<String> typeList) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(!typeList.isEmpty(), "Must have at least one type specifier");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     typeMap = new HashMap<>();
     Iterator<String> iTypes = typeList.iterator();
     String lastType = null;
@@ -216,6 +223,7 @@ public class LogisticModelParameters implements Writable {
   }
 
   public List<String> getTargetCategories() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     return this.targetCategories;
   }
 
@@ -236,6 +244,7 @@ public class LogisticModelParameters implements Writable {
   }
 
   public void setTypeMap(Map<String, String> map) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-696
     this.typeMap = map;
   }
 

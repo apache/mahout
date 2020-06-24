@@ -55,6 +55,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
   public void testMatrixDiagonalizeMapper() throws Exception {
     MatrixDiagonalizeMapper mapper = new MatrixDiagonalizeMapper();
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
     conf.setInt(Keys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writers
@@ -78,7 +79,10 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
   @Test
  public void testMatrixDiagonalizeReducer() throws Exception {
     MatrixDiagonalizeMapper mapper = new MatrixDiagonalizeMapper();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1296
     conf.setInt(Keys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writers

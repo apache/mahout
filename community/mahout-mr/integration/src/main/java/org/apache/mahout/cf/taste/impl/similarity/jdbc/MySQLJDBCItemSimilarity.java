@@ -78,6 +78,7 @@ public class MySQLJDBCItemSimilarity extends SQL92JDBCItemSimilarity {
   }
 
   public MySQLJDBCItemSimilarity(String dataSourceName) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-740
     super(dataSourceName);
   }
 

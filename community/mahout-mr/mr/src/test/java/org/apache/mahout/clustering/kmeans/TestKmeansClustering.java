@@ -55,6 +55,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
   public static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {2, 2}, {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
   
   private static final int[][] EXPECTED_NUM_POINTS = { {9}, {4, 5}, {4, 4, 1}, {1, 2, 1, 5}, {1, 1, 1, 2, 4},
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       {1, 1, 1, 1, 1, 4}, {1, 1, 1, 1, 1, 2, 2}, {1, 1, 1, 1, 1, 1, 2, 1}, {1, 1, 1, 1, 1, 1, 1, 1, 1}};
   
   private FileSystem fs;
@@ -63,11 +64,13 @@ public final class TestKmeansClustering extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
   }
   
   public static List<VectorWritable> getPointsWritable(double[][] raw) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : raw) {
       Vector vec = new RandomAccessSparseVector(fr.length);
@@ -78,6 +81,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
   }
   
   public static List<VectorWritable> getPointsWritableDenseVector(double[][] raw) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1351
     List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : raw) {
       Vector vec = new DenseVector(fr.length);
@@ -88,6 +92,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
   }
   
   public static List<Vector> getPoints(double[][] raw) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<Vector> points = Lists.newArrayList();
     for (double[] fr : raw) {
       Vector vec = new SequentialAccessSparseVector(fr.length);
@@ -108,6 +113,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     List<Vector> points = getPoints(rawPoints);
 
     ManhattanDistanceMeasure distanceMeasure = new ManhattanDistanceMeasure();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     List<Kluster> clusters = Arrays.asList(new Kluster(points.get(0), 0, distanceMeasure), new Kluster(points.get(3),
         3, distanceMeasure));
 
@@ -129,6 +135,8 @@ public final class TestKmeansClustering extends MahoutTestCase {
 
     assertTrue("KMeans iteration should be converged after a single run", converged);
   }*/
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-988
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-989
 
   /** Story: User wishes to run kmeans job on reference data */
   @Test
@@ -187,12 +195,16 @@ public final class TestKmeansClustering extends MahoutTestCase {
   /** Story: User wishes to run kmeans job on reference data (DenseVector test) */
   @Test
   public void testKMeansSeqJobDenseVector() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1351
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     List<VectorWritable> points = getPointsWritableDenseVector(REFERENCE);
     
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     for (int k = 1; k < points.size(); k++) {
@@ -215,6 +227,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
       }
       // now run the Job
       Path outputPath = getTestTempDirPath("output" + k);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
           optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
           optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),
@@ -223,6 +236,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", optKey(DefaultOptionCreator.CLUSTERING_OPTION),
           optKey(DefaultOptionCreator.OVERWRITE_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
           DefaultOptionCreator.SEQUENTIAL_METHOD};
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
       ToolRunner.run(conf, new KMeansDriver(), args);
       
       // now compare the expected clusters with actual
@@ -241,12 +255,17 @@ public final class TestKmeansClustering extends MahoutTestCase {
   /** Story: User wishes to run kmeans job on reference data */
   @Test
   public void testKMeansMRJob() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     for (int k = 1; k < points.size(); k += 3) {
@@ -254,21 +273,34 @@ public final class TestKmeansClustering extends MahoutTestCase {
       // pick k initial cluster centers at random
       Path path = new Path(clustersPath, "part-00000");
       FileSystem fs = FileSystem.get(path.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Kluster.class);
       
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       try {
         for (int i = 0; i < k + 1; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
           Vector vec = points.get(i).get();
           
           Kluster cluster = new Kluster(vec, i, measure);
           // add the center so the centroid will be correct upon output
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
           cluster.observe(cluster.getCenter(), 1);
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(writer, false);
       }
       // now run the Job
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
       Path outputPath = getTestTempDirPath("output" + k);
       String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
           optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
@@ -277,6 +309,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001",
           optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", optKey(DefaultOptionCreator.CLUSTERING_OPTION),
           optKey(DefaultOptionCreator.OVERWRITE_OPTION)};
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
       ToolRunner.run(getConfiguration(), new KMeansDriver(), args);
       
       // now compare the expected clusters with actual
@@ -302,17 +335,22 @@ public final class TestKmeansClustering extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     
     Path pointsPath = getTestTempDirPath("points");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-983
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     
     Path outputPath = getTestTempDirPath("output");
     // now run the Canopy job
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-982
     CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, 0.0, false);
     
     DummyOutputCollector<Text, ClusterWritable> collector1 =
         new DummyOutputCollector<>();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
     FileStatus[] outParts = FileSystem.get(conf).globStatus(
                     new Path(outputPath, "clusters-0-final/*-0*"));
     for (FileStatus outPartStat : outParts) {
@@ -328,6 +366,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     int count = 0;
     for (Text k : collector1.getKeys()) {
       count++;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
       List<ClusterWritable> vl = collector1.getValue(k);
       assertEquals("non-singleton centroid!", 1, vl.size());
       ClusterWritable clusterWritable = vl.get(0);
@@ -349,7 +388,9 @@ public final class TestKmeansClustering extends MahoutTestCase {
 
     // now run the KMeans job
     Path kmeansOutput = new Path(outputPath, "kmeans");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
 	  KMeansDriver.run(getConfiguration(), pointsPath, new Path(outputPath, "clusters-0-final"), kmeansOutput,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-981
       0.001, 10, true, 0.0, false);
     
     // now compare the expected clusters with actual
@@ -357,6 +398,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<>();
     
     // The key is the clusterId, the value is the weighted vector
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
     for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(
         new Path(clusteredPointsPath, "part-m-00000"), conf)) {
       collector.collect(record.getFirst(), record.getSecond());

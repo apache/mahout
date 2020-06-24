@@ -31,6 +31,7 @@ import org.junit.Test;
 public class InteractionValueEncoderTest extends MahoutTestCase {
   @Test
   public void testAddToVector() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-492
     WordValueEncoder wv = new StaticWordValueEncoder("word");
     ContinuousValueEncoder cv = new ContinuousValueEncoder("cont");
     InteractionValueEncoder enc = new InteractionValueEncoder("interactions", wv, cv);
@@ -70,6 +71,7 @@ public class InteractionValueEncoderTest extends MahoutTestCase {
 
   @Test
   public void testAddToVectorWithTextValueEncoder() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-492
     WordValueEncoder wv = new StaticWordValueEncoder("word");
     TextValueEncoder tv = new TextValueEncoder("text");
     InteractionValueEncoder enc = new InteractionValueEncoder("interactions", wv, tv);
@@ -82,6 +84,7 @@ public class InteractionValueEncoderTest extends MahoutTestCase {
   
   @Test
   public void testTraceDictionary() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1357
     StaticWordValueEncoder encoder1 = new StaticWordValueEncoder("first");
     StaticWordValueEncoder encoder2 = new StaticWordValueEncoder("second");
     

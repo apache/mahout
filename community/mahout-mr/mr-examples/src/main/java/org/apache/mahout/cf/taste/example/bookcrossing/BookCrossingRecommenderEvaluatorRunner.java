@@ -48,6 +48,7 @@ public final class BookCrossingRecommenderEvaluatorRunner {
       model,
       0.9,
       0.3);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.info(String.valueOf(evaluation));
   }
   

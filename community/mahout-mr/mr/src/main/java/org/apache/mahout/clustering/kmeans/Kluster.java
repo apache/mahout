@@ -59,11 +59,16 @@ public class Kluster extends DistanceMeasureCluster {
   }
   
   public String asFormatString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-139
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-137
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     return formatCluster(this);
   }
   
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-139
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-137
     super.write(out);
     out.writeBoolean(converged);
   }
@@ -76,6 +81,7 @@ public class Kluster extends DistanceMeasureCluster {
   
   @Override
   public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     return asFormatString(null);
   }
   
@@ -95,6 +101,8 @@ public class Kluster extends DistanceMeasureCluster {
    */
   public boolean computeConvergence(DistanceMeasure measure, double convergenceDelta) {
     Vector centroid = computeCentroid();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     converged = measure.distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
     return converged;
   }
@@ -109,6 +117,7 @@ public class Kluster extends DistanceMeasureCluster {
   }
   
   public boolean calculateConvergence(double convergenceDelta) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
     Vector centroid = computeCentroid();
     converged = getMeasure().distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
     return converged;

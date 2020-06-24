@@ -55,6 +55,7 @@ public final class BookCrossingBooleanRecommender implements Recommender {
 
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     return recommend(userID, howMany, null, includeKnownItems);
   }
 

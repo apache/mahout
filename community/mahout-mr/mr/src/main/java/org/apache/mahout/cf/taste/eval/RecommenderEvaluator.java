@@ -79,6 +79,7 @@ public interface RecommenderEvaluator {
    *           if an error occurs while accessing the {@link DataModel}
    */
   double evaluate(RecommenderBuilder recommenderBuilder,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
                   DataModelBuilder dataModelBuilder,
                   DataModel dataModel,
                   double trainingPercentage,

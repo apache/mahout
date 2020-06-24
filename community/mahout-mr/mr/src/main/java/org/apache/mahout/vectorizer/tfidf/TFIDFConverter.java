@@ -102,6 +102,7 @@ public final class TFIDFConverter {
   public static void processTfIdf(Path input,
                                   Path output,
                                   Configuration baseConf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
                                   Pair<Long[], List<Path>> datasetFeatures,
                                   int minDf,
                                   long maxDF,
@@ -110,6 +111,7 @@ public final class TFIDFConverter {
                                   boolean sequentialAccessOutput,
                                   boolean namedVector,
                                   int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(normPower == PartialVectorMerger.NO_NORMALIZING || normPower >= 0,
         "If specified normPower must be nonnegative", normPower);
     Preconditions.checkArgument(normPower == PartialVectorMerger.NO_NORMALIZING
@@ -118,27 +120,35 @@ public final class TFIDFConverter {
         "normPower must be > 1 and not infinite if log normalization is chosen", normPower);
 
     int partialVectorIndex = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     List<Path> partialVectorPaths = Lists.newArrayList();
     List<Path> dictionaryChunks = datasetFeatures.getSecond();
     for (Path dictionaryChunk : dictionaryChunks) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
       makePartialVectors(input,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
                          baseConf,
                          datasetFeatures.getFirst()[0],
                          datasetFeatures.getFirst()[1],
                          minDf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
                          maxDF,
                          dictionaryChunk,
                          partialVectorOutputPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
                          sequentialAccessOutput,
                          namedVector);
     }
 
     Configuration conf = new Configuration(baseConf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
 
     Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-287
     PartialVectorMerger.mergePartialVectors(partialVectorPaths,
                                             outputDir,
                                             baseConf,
@@ -146,9 +156,11 @@ public final class TFIDFConverter {
                                             logNormalize,
                                             datasetFeatures.getFirst()[0].intValue(),
                                             sequentialAccessOutput,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
                                             namedVector,
                                             numReducers);
     HadoopUtil.delete(conf, partialVectorPaths);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
   }
   
@@ -169,11 +181,13 @@ public final class TFIDFConverter {
    *          partial vectors without thrashing the system due to increased swapping
    */
   public static Pair<Long[],List<Path>> calculateDF(Path input,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
                                                     Path output,
                                                     Configuration baseConf,
                                                     int chunkSizeInMegabytes)
     throws IOException, InterruptedException, ClassNotFoundException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
@@ -192,9 +206,13 @@ public final class TFIDFConverter {
    * memory and will run at the speed of your disk read
    */
   private static Pair<Long[], List<Path>> createDictionaryChunks(Path featureCountPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
                                                                  Path dictionaryPathBase,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
                                                                  Configuration baseConf,
                                                                  int chunkSizeInMegabytes) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     List<Path> chunkPaths = Lists.newArrayList();
     Configuration conf = new Configuration(baseConf);
 
@@ -207,10 +225,12 @@ public final class TFIDFConverter {
     SequenceFile.Writer freqWriter =
       new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       long currentChunkSize = 0;
       long featureCount = 0;
       long vectorCount = Long.MAX_VALUE;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       Path filesPattern = new Path(featureCountPath, OUTPUT_FILES_PATTERN);
       for (Pair<IntWritable,LongWritable> record
            : new SequenceFileDirIterable<IntWritable,LongWritable>(filesPattern,
@@ -221,9 +241,11 @@ public final class TFIDFConverter {
                                                                    conf)) {
 
         if (currentChunkSize > chunkSizeLimit) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
           Closeables.close(freqWriter, false);
           chunkIndex++;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
           chunkPath = new Path(dictionaryPathBase, FREQUENCY_FILE + chunkIndex);
           chunkPaths.add(chunkPath);
 
@@ -245,8 +267,10 @@ public final class TFIDFConverter {
       }
       featureCount++;
       Long[] counts = {featureCount, vectorCount};
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       return new Pair<>(counts, chunkPaths);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(freqWriter, false);
     }
   }
@@ -276,10 +300,13 @@ public final class TFIDFConverter {
    *          output vectors should be named, retaining key (doc id) as a label
    */
   private static void makePartialVectors(Path input,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
                                          Configuration baseConf,
                                          Long featureCount,
                                          Long vectorCount,
                                          int minDf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
                                          long maxDF,
                                          Path dictionaryFilePath,
                                          Path output,
@@ -294,14 +321,19 @@ public final class TFIDFConverter {
     conf.setLong(FEATURE_COUNT, featureCount);
     conf.setLong(VECTOR_COUNT, vectorCount);
     conf.setInt(MIN_DF, minDf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
     conf.setLong(MAX_DF, maxDF);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     conf.setBoolean(PartialVectorMerger.NAMED_VECTOR, namedVector);
     DistributedCache.addCacheFile(dictionaryFilePath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1498
 
     Job job = new Job(conf);
     job.setJobName(": MakePartialVectors: input-folder: " + input + ", dictionary-file: "
         + dictionaryFilePath.toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     job.setJarByClass(TFIDFConverter.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(VectorWritable.class);
@@ -329,13 +361,18 @@ public final class TFIDFConverter {
   private static void startDFCounting(Path input, Path output, Configuration baseConf)
     throws IOException, InterruptedException, ClassNotFoundException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
     Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");
     
     Job job = new Job(conf);
     job.setJobName("VectorTfIdf Document Frequency Count running over input: " + input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     job.setJarByClass(TFIDFConverter.class);
     
     job.setOutputKeyClass(IntWritable.class);
@@ -352,6 +389,8 @@ public final class TFIDFConverter {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
     HadoopUtil.delete(conf, output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
     boolean succeeded = job.waitForCompletion(true);
     if (!succeeded) {

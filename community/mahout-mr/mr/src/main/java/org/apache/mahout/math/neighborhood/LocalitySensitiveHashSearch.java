@@ -188,9 +188,11 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher {
   @Override
   public List<WeightedThing<Vector>> search(Vector query, int limit) {
     PriorityQueue<WeightedThing<Vector>> top = searchInternal(query);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1312
     List<WeightedThing<Vector>> results = Lists.newArrayListWithExpectedSize(top.size());
     while (top.size() != 0) {
       WeightedThing<Vector> wv = top.pop();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       results.add(new WeightedThing<>(((HashedVector) wv.getValue()).getVector(), wv.getWeight()));
     }
     Collections.reverse(results);
@@ -235,6 +237,7 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher {
   }
 
   protected static WeightedThing<Vector> removeHash(WeightedThing<Vector> input) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new WeightedThing<>(((HashedVector) input.getValue()).getVector(), input.getWeight());
   }
 

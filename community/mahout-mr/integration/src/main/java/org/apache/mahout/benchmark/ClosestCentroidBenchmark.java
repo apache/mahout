@@ -30,6 +30,7 @@ public class ClosestCentroidBenchmark {
   private final VectorBenchmarks mark;
 
   public ClosestCentroidBenchmark(VectorBenchmarks mark) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1191
     this.mark = mark;
   }
 

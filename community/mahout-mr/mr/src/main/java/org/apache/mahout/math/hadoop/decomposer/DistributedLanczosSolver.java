@@ -71,6 +71,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   }
 
   public LanczosState runJob(Configuration originalConfig,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
                              LanczosState state,
                              int desiredRank,
                              boolean isSymmetric,
@@ -95,12 +96,14 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                              String outputEigenVectorPathString) throws IOException {
     DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
     matrix.setConf(new Configuration(originalConfig));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     LanczosState state = new LanczosState(matrix, desiredRank, getInitialVector(matrix));
     return runJob(originalConfig, state, desiredRank, isSymmetric, outputEigenVectorPathString);
   }
 
   @Override
   public int run(String[] strings) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     Path inputPath = new Path(AbstractJob.getOption(parsedArgs, "--input"));
     Path outputPath = new Path(AbstractJob.getOption(parsedArgs, "--output"));
     Path outputTmpPath = new Path(AbstractJob.getOption(parsedArgs, "--tempDir"));
@@ -112,6 +115,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     int desiredRank = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--rank"));
 
     boolean cleansvd = Boolean.parseBoolean(AbstractJob.getOption(parsedArgs, "--cleansvd"));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     if (cleansvd) {
       double maxError = Double.parseDouble(AbstractJob.getOption(parsedArgs, "--maxError"));
       double minEigenvalue = Double.parseDouble(AbstractJob.getOption(parsedArgs, "--minEigenvalue"));
@@ -119,6 +123,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
       return run(inputPath,
                  outputPath,
                  outputTmpPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
                  workingDirPath,
                  numRows,
                  numCols,
@@ -128,6 +133,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                  minEigenvalue,
                  inMemory);
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
     return run(inputPath, outputPath, outputTmpPath, workingDirPath, numRows, numCols, isSymmetric, desiredRank);
   }
 
@@ -158,6 +164,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                  double minEigenvalue,
                  boolean inMemory) throws Exception {
     int result = run(inputPath, outputPath, outputTmpPath, workingDirPath, numRows, numCols,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
         isSymmetric, desiredRank);
     if (result != 0) {
       return result;
@@ -188,6 +195,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   public int run(Path inputPath,
                  Path outputPath,
                  Path outputTmpPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
                  Path workingDirPath,
                  int numRows,
                  int numCols,
@@ -197,7 +205,9 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     matrix.setConf(new Configuration(getConf() != null ? getConf() : new Configuration()));
 
     LanczosState state;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (workingDirPath == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       state = new LanczosState(matrix, desiredRank, getInitialVector(matrix));
     } else {
       HdfsBackedLanczosState hState =
@@ -219,14 +229,18 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   public void serializeOutput(LanczosState state, Path outputPath) throws IOException {
     int numEigenVectors = state.getIterationNumber();
     log.info("Persisting {} eigenVectors and eigenValues to: {}", numEigenVectors, outputPath); 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     Configuration conf = getConf() != null ? getConf() : new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(outputPath.toUri(), conf);
     SequenceFile.Writer seqWriter =
         new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       IntWritable iw = new IntWritable();
       for (int i = 0; i < numEigenVectors; i++) {
         // Persist eigenvectors sorted by eigenvalues in descending order\
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
         NamedVector v = new NamedVector(state.getRightSingularVector(numEigenVectors - 1 - i),
             "eigenVector" + i + ", eigenvalue = " + state.getSingularValue(numEigenVectors - 1 - i));
         Writable vw = new VectorWritable(v);
@@ -234,6 +248,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
         seqWriter.append(iw, vw);
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(seqWriter, false);
     }
   }
@@ -269,13 +284,17 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
     @Override
     public int run(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-461
       addInputOption();
       addOutputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
       addOption("numRows", "nr", "Number of rows of the input matrix");
       addOption("numCols", "nc", "Number of columns of the input matrix");
       addOption("rank", "r", "Desired decomposition rank (note: only roughly 1/4 to 1/3 "
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
           + "of these will have the top portion of the spectrum)");
       addOption("symmetric", "sym", "Is the input matrix square and symmetric?");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-319
       addOption("workingDir", "wd", "Working directory path to store Lanczos basis vectors "
                                     + "(to be used on restarts, and to avoid too much RAM usage)");
       // options required to run cleansvd job

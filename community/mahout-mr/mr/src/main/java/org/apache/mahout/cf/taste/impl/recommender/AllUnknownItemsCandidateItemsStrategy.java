@@ -27,6 +27,7 @@ public final class AllUnknownItemsCandidateItemsStrategy extends AbstractCandida
   /** return all items the user has not yet seen */
   @Override
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
     FastIDSet possibleItemIDs = new FastIDSet(dataModel.getNumItems());
     LongPrimitiveIterator allItemIDs = dataModel.getItemIDs();

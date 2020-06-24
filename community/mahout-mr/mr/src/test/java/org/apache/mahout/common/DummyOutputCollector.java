@@ -36,6 +36,7 @@ public final class DummyOutputCollector<K extends WritableComparable, V extends 
   public void collect(K key,V values) {
     List<V> points = data.get(key);
     if (points == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
       points = Lists.newArrayList();
       data.put(key, points);
     }

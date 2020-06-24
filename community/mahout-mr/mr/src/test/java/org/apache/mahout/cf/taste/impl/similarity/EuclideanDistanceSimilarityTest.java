@@ -29,6 +29,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
   @Test
   public void testFullCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
             new long[] {1, 2},
             new Double[][] {
                     {3.0, -2.0},
@@ -83,6 +84,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {-3.0, 2.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(1, 2);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     assertCorrelationEquals(0.7213202601812372, correlation);
   }
 
@@ -170,6 +172,8 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     assertCorrelationEquals(0.1639607805437114, correlation);
   }
 
@@ -182,6 +186,8 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {null, null, 1.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).itemSimilarity(1, 2);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -196,6 +202,8 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     assertCorrelationEquals(0.05770363219029305, correlation);
   }
 
@@ -210,6 +218,8 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     assertCorrelationEquals(0.2843646522044218, correlation);
   }
 
@@ -224,6 +234,8 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     ItemSimilarity itemSimilarity = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED);
     double correlation = itemSimilarity.itemSimilarity(0, 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     assertCorrelationEquals(0.8210911630511055, correlation);
   }
 

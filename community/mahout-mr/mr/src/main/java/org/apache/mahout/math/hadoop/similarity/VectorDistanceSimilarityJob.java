@@ -63,6 +63,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(SEEDS, "s", "The set of vectors to compute distances against.  Must fit in memory on the mapper");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     addOption(MAX_DISTANCE, "mx", "set an upper-bound on distance (double) such that any pair of vectors with a"
         + " distance greater than this value is ignored in the output. Ignored for non pairwise output!");
     addOption(DefaultOptionCreator.overwriteOption().create());
@@ -85,6 +86,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
       HadoopUtil.delete(getConf(), output);
     }
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1019
     String outType = getOption(OUT_TYPE_KEY, "pw");
     
     Double maxDistance = null;
@@ -105,8 +107,11 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
                          Path input,
                          Path seeds,
                          Path output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
                          DistanceMeasure measure, String outType)
     throws IOException, ClassNotFoundException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1019
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     run(conf, input, seeds, output, measure, outType, null);
   }      
   
@@ -147,6 +152,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     job.setJarByClass(VectorDistanceSimilarityJob.class);
     HadoopUtil.delete(conf, output);
     if (!job.waitForCompletion(true)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
       throw new IllegalStateException("VectorDistance Similarity failed processing " + seeds);
     }
   }

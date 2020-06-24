@@ -32,6 +32,7 @@ import java.util.Map;
  */
 public class ClusterOutputPostProcessorMapper extends
         Mapper<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
 
   private Map<Integer, Integer> newClusterMappings;
   private VectorWritable outputVector;
@@ -49,6 +50,7 @@ public class ClusterOutputPostProcessorMapper extends
 
   @Override
   public void map(IntWritable key, WeightedVectorWritable val, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     throws IOException, InterruptedException {
     // by pivoting on the cluster mapping value, we can make sure that each unique cluster goes to it's own reducer,
     // since they are numbered from 0 to k-1, where k is the number of clusters

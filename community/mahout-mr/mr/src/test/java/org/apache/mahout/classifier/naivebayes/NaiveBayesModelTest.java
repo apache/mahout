@@ -24,6 +24,7 @@ public class NaiveBayesModelTest extends NaiveBayesTestBase {
   @Test
   public void testRandomModelGeneration() {
     // make sure we generate a valid random model
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
     NaiveBayesModel standardModel = getStandardModel();
     // check whether the model is valid
     standardModel.validate();

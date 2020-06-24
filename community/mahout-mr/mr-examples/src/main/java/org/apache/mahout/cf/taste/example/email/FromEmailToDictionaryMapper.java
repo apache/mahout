@@ -33,6 +33,7 @@ public final class FromEmailToDictionaryMapper extends Mapper<Text, Text, Text, 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     separator = context.getConfiguration().get(EmailUtility.SEPARATOR);
   }
 
@@ -41,6 +42,7 @@ public final class FromEmailToDictionaryMapper extends Mapper<Text, Text, Text, 
     //From is in the value
     String valStr = value.toString();
     int idx = valStr.indexOf(separator);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     if (idx == -1) {
       context.getCounter(EmailUtility.Counters.NO_FROM_ADDRESS).increment(1);
     } else {

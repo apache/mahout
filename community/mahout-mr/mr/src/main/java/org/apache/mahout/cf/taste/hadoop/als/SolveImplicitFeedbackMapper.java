@@ -42,13 +42,16 @@ public class SolveImplicitFeedbackMapper
     int numEntities = Integer.parseInt(conf.get(ParallelALSFactorizationJob.NUM_ENTITIES));
 
     Preconditions.checkArgument(numFeatures > 0, "numFeatures must be greater then 0!");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
 
     return new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1429
         ALS.readMatrixByRowsFromDistributedCache(numEntities, conf), 1);
   }
 
   @Override
   protected void map(IntWritable userOrItemID, VectorWritable ratingsWritable, Context ctx)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException, InterruptedException {
     ImplicitFeedbackAlternatingLeastSquaresSolver solver = getSharedInstance();
     uiOrmj.set(solver.solve(ratingsWritable.get()));

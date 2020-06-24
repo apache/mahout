@@ -62,7 +62,9 @@ public final class EmailUtility {
                                       String msgIdPrefix,
                                       OpenObjectIntHashMap<String> msgIdDictionary) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
     Path[] localFiles = HadoopUtil.getCachedFiles(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
     FileSystem fs = FileSystem.getLocal(conf);
     for (Path dictionaryFile : localFiles) {
 
@@ -75,6 +77,7 @@ public final class EmailUtility {
         dictionary = msgIdDictionary;
       }
       if (dictionary != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
         dictionaryFile = fs.makeQualified(dictionaryFile);
         for (Pair<Writable, IntWritable> record
             : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
@@ -99,6 +102,7 @@ public final class EmailUtility {
   }
 
   public enum Counters {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     NO_MESSAGE_ID, NO_FROM_ADDRESS
   }
 }

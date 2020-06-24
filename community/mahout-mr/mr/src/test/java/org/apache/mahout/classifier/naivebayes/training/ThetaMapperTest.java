@@ -34,6 +34,7 @@ public class ThetaMapperTest extends MahoutTestCase {
 
     Mapper.Context ctx = EasyMock.createMock(Mapper.Context.class);
     ComplementaryThetaTrainer trainer = EasyMock.createMock(ComplementaryThetaTrainer.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1519
 
     Vector instance1 = new DenseVector(new double[] { 1, 2, 3 });
     Vector instance2 = new DenseVector(new double[] { 4, 5, 6 });

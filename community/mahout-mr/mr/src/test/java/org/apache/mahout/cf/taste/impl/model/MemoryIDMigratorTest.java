@@ -38,6 +38,7 @@ public final class MemoryIDMigratorTest extends TasteTestCase {
 
   @Test
   public void testStore() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-441
     UpdatableIDMigrator migrator = new MemoryIDMigrator();
     long id = migrator.toLongID(DUMMY_STRING);
     assertNull(migrator.toStringID(id));
@@ -47,6 +48,7 @@ public final class MemoryIDMigratorTest extends TasteTestCase {
 
   @Test
   public void testInitialize() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-441
     UpdatableIDMigrator migrator = new MemoryIDMigrator();
     long id = migrator.toLongID(DUMMY_STRING);
     assertNull(migrator.toStringID(id));

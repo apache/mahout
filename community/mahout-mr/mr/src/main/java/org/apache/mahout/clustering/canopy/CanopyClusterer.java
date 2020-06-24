@@ -112,6 +112,7 @@ public class CanopyClusterer {
       if (log.isDebugEnabled()) {
         log.debug("Created new Canopy:{} at center:{}", nextCanopyId, AbstractCluster.formatVector(point, null));
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
       canopies.add(new Canopy(point, nextCanopyId++, measure));
     }
   }
@@ -144,6 +145,7 @@ public class CanopyClusterer {
                                             DistanceMeasure measure,
                                             double t1,
                                             double t2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<Canopy> canopies = Lists.newArrayList();
     /**
      * Reference Implementation: Given a distance metric, one can create
@@ -160,6 +162,7 @@ public class CanopyClusterer {
       Iterator<Vector> ptIter = points.iterator();
       Vector p1 = ptIter.next();
       ptIter.remove();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
       Canopy canopy = new Canopy(p1, nextCanopyId++, measure);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
@@ -168,6 +171,7 @@ public class CanopyClusterer {
         // Put all points that are within distance threshold T1 into the
         // canopy
         if (dist < t1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
           canopy.observe(p2);
         }
         // Remove from the list all points that are within distance
@@ -191,6 +195,7 @@ public class CanopyClusterer {
    * @return the List<Vector>
    */
   public static List<Vector> getCenters(Iterable<Canopy> canopies) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<Vector> result = Lists.newArrayList();
     for (Canopy canopy : canopies) {
       result.add(canopy.getCenter());
@@ -206,6 +211,7 @@ public class CanopyClusterer {
    */
   public static void updateCentroids(Iterable<Canopy> canopies) {
     for (Canopy canopy : canopies) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
       canopy.computeParameters();
     }
   }

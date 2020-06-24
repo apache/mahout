@@ -210,6 +210,7 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
     for (int i = 0; i < numHidden; i++) {
       activations.setQuick(i, hiddenWeights[i].dot(input));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
     activations.assign(hiddenBias, Functions.PLUS);
     activations.assign(Functions.min(40.0)).assign(Functions.max(-40));
     activations.assign(Functions.SIGMOID);
@@ -226,6 +227,7 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
     for (int i = 0; i < numOutput; i++) {
       activations.setQuick(i, outputWeights[i].dot(hiddenActivation));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
     activations.assign(outputBias, Functions.PLUS);
     return activations;
   }
@@ -276,6 +278,7 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
       gradGood.assign(Functions.NEGATE);
       Vector propHidden = gradGood.clone();
       Vector gradBad = outputWeights[bad].clone();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       propHidden.assign(gradBad, Functions.PLUS);
       gradGood.assign(Functions.mult(-learningRate * (1.0 - regularization)));
       outputWeights[good].assign(gradGood, Functions.PLUS);
@@ -387,6 +390,7 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
   public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     Vector hiddenActivation = inputToHidden(instance);
     hiddenToOutput(hiddenActivation);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Integer> goodLabels = new HashSet<>();
     goodLabels.add(actual);
     updateRanking(hiddenActivation, goodLabels, 2, rnd);

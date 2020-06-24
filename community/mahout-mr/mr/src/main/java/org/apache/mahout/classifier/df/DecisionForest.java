@@ -45,11 +45,13 @@ public class DecisionForest implements Writable {
   private final List<Node> trees;
   
   private DecisionForest() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     trees = new ArrayList<>();
   }
   
   public DecisionForest(List<Node> trees) {
     Preconditions.checkArgument(trees != null && !trees.isEmpty(), "trees argument must not be null or empty");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     this.trees = trees;
   }
@@ -64,6 +66,7 @@ public class DecisionForest implements Writable {
   public void classify(Data data, double[][] predictions) {
     Preconditions.checkArgument(data.size() == predictions.length, "predictions.length must be equal to data.size()");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (data.isEmpty()) {
       return; // nothing to classify
     }
@@ -71,6 +74,7 @@ public class DecisionForest implements Writable {
     int treeId = 0;
     for (Node tree : trees) {
       for (int index = 0; index < data.size(); index++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-954
         if (predictions[index] == null) {
           predictions[index] = new double[trees.size()];
         }
@@ -88,11 +92,13 @@ public class DecisionForest implements Writable {
    * @return NaN if the label cannot be predicted
    */
   public double classify(Dataset dataset, Random rng, Instance instance) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
     if (dataset.isNumerical(dataset.getLabelId())) {
       double sum = 0;
       int cnt = 0;
       for (Node tree : trees) {
         double prediction = tree.classify(instance);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-954
         if (!Double.isNaN(prediction)) {
           sum += prediction;
           cnt++;
@@ -162,6 +168,7 @@ public class DecisionForest implements Writable {
   
   @Override
   public boolean equals(Object obj) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     if (this == obj) {
       return true;
     }
@@ -171,16 +178,19 @@ public class DecisionForest implements Writable {
     
     DecisionForest rf = (DecisionForest) obj;
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     return trees.size() == rf.getTrees().size() && trees.containsAll(rf.getTrees());
   }
   
   @Override
   public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     return trees.hashCode();
   }
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-323
     dataOutput.writeInt(trees.size());
     for (Node tree : trees) {
       tree.write(dataOutput);
@@ -225,6 +235,7 @@ public class DecisionForest implements Writable {
 
     DecisionForest forest = null;
     for (Path path : files) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (FSDataInputStream dataInput = new FSDataInputStream(fs.open(path))) {
         if (forest == null) {
           forest = read(dataInput);

@@ -29,6 +29,7 @@ public class UnstoredFieldsDocument extends SingleFieldDocument {
   public static final String UNSTORED_FIELD = "unstored";
 
   public UnstoredFieldsDocument(String id, String field) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-944
     super(id, field);
   }
 
@@ -37,6 +38,7 @@ public class UnstoredFieldsDocument extends SingleFieldDocument {
     Document document = super.asLuceneDocument();
 
     document.add(new StringField(UNSTORED_FIELD, "", Field.Store.NO));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1269
 
     return document;
   }

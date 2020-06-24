@@ -31,6 +31,7 @@ public class TreeID extends LongWritable implements Cloneable {
   public TreeID() { }
   
   public TreeID(int partition, int treeId) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(partition >= 0, "Wrong partition: " + partition + ". Partition must be >= 0!");
     Preconditions.checkArgument(treeId >= 0, "Wrong treeId: " + treeId + ". TreeId must be >= 0!");
     set(partition, treeId);
@@ -44,6 +45,7 @@ public class TreeID extends LongWritable implements Cloneable {
    * Data partition (InputSplit's index) that was used to grow the tree
    */
   public int partition() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     return (int) (get() / MAX_TREEID);
   }
   

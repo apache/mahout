@@ -59,6 +59,7 @@ public class ClusterEvaluator {
    *          an appropriate DistanceMeasure
    */
   public ClusterEvaluator(Map<Integer,List<VectorWritable>> representativePoints, List<Cluster> clusters,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
       DistanceMeasure measure) {
     this.representativePoints = representativePoints;
     this.clusters = clusters;
@@ -88,6 +89,7 @@ public class ClusterEvaluator {
    * @return a List<Cluster> of the clusters
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Cluster> clusters = new ArrayList<>();
     for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST,
         PathFilters.logsCRCFilter(), conf)) {
@@ -109,6 +111,7 @@ public class ClusterEvaluator {
     int count = 0;
     Map<Integer,Vector> distances = interClusterDistances();
     for (Vector row : distances.values()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element element : row.nonZeroes()) {
         double d = element.get();
         min = Math.min(d, min);
@@ -118,6 +121,7 @@ public class ClusterEvaluator {
       }
     }
     double density = (sum / count - min) / (max - min);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
     log.info("Scaled Inter-Cluster Density = {}", density);
     return density;
   }
@@ -128,6 +132,7 @@ public class ClusterEvaluator {
    * @return a Map<Integer, Vector>
    */
   public Map<Integer,Vector> interClusterDistances() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Integer,Vector> distances = new TreeMap<>();
     for (int i = 0; i < clusters.size(); i++) {
       Cluster clusterI = clusters.get(i);
@@ -150,6 +155,7 @@ public class ClusterEvaluator {
   public double intraClusterDensity() {
     double avgDensity = 0;
     int count = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element elem : intraClusterDensities().nonZeroes()) {
       double value = elem.get();
       if (!Double.isNaN(value)) {
@@ -188,6 +194,7 @@ public class ClusterEvaluator {
         }
       }
       double density = (sum / count - min) / (max - min);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1045
       densities.set(cluster.getId(), density);
       log.info("Intra-Cluster Density[{}] = {}", cluster.getId(), density);
     }

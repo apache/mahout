@@ -344,6 +344,8 @@ public final class MongoDBDataModel implements DataModel {
     mongoUserID = userIDField;
     mongoItemID = itemIDField;
     mongoPreference = preferenceField;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-965
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-965
     mongoMapCollection = mappingCollection;
     this.reloadLock = new ReentrantLock();
     buildModel();
@@ -429,6 +431,8 @@ public final class MongoDBDataModel implements DataModel {
       Map<String,Object> user = (Map<String,Object>) cursor.next().toMap();
       if (!user.containsKey("deleted_at")) {
         String userID = getID(user.get(mongoUserID), true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         Collection<List<String>> items = new ArrayList<>();
         List<String> item = new ArrayList<>();
         item.add(getID(user.get(mongoItemID), false));
@@ -476,6 +480,7 @@ public final class MongoDBDataModel implements DataModel {
     DBObject objectIdLong = collectionMap.findOne(new BasicDBObject("element_id", id));
     if (objectIdLong != null) {
       Map<String,Object> idLong = (Map<String,Object>) objectIdLong.toMap();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-801
       Object value = idLong.get("long_value");
       return value == null ? null : value.toString();
     } else {
@@ -514,6 +519,7 @@ public final class MongoDBDataModel implements DataModel {
   public String fromLongToId(long id) {
     DBObject objectIdLong = collectionMap.findOne(new BasicDBObject("long_value", Long.toString(id)));
     Map<String,Object> idLong = (Map<String,Object>) objectIdLong.toMap();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-801
     Object value = idLong.get("element_id");
     return value == null ? null : value.toString();
   }
@@ -550,9 +556,11 @@ public final class MongoDBDataModel implements DataModel {
     Mongo mongoDDBB = new Mongo(mongoHost, mongoPort);
     DB db = mongoDDBB.getDB(mongoDB);
     mongoTimestamp = new Date(0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<>();
     if (!mongoAuth || db.authenticate(mongoUsername, mongoPassword.toCharArray())) {
       collection = db.getCollection(mongoCollection);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-965
       collectionMap = db.getCollection(mongoMapCollection);
       DBObject indexObj = new BasicDBObject();
       indexObj.put("element_id", 1);
@@ -570,10 +578,12 @@ public final class MongoDBDataModel implements DataModel {
           float ratingValue = getPreference(user.get(mongoPreference));
           Collection<Preference> userPrefs = userIDPrefMap.get(userID);
           if (userPrefs == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             userPrefs = new ArrayList<>(2);
             userIDPrefMap.put(userID, userPrefs);
           }
           userPrefs.add(new GenericPreference(userID, itemID, ratingValue));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
           if (user.containsKey("created_at")
               && mongoTimestamp.compareTo(getDate(user.get("created_at"))) < 0) {
             mongoTimestamp = getDate(user.get("created_at"));
@@ -714,6 +724,7 @@ public final class MongoDBDataModel implements DataModel {
     if (date.getClass().getName().contains("String")) {
       try {
         synchronized (dateFormat) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-801
           return dateFormat.parse(date.toString());
         }
       } catch (ParseException ioe) {
@@ -727,6 +738,7 @@ public final class MongoDBDataModel implements DataModel {
     if (value != null) {
       if (value.getClass().getName().contains("String")) {
         preferenceIsString = true;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-801
         return Float.parseFloat(value.toString());
       } else {
         preferenceIsString = false;
@@ -746,6 +758,7 @@ public final class MongoDBDataModel implements DataModel {
       }
       return ((ObjectId) id).toStringMongod();
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-801
       return id.toString();
     }
   }
@@ -755,6 +768,7 @@ public final class MongoDBDataModel implements DataModel {
                          boolean add) throws NoSuchUserException, NoSuchItemException {
     Preconditions.checkNotNull(userID);
     Preconditions.checkNotNull(items);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(!userID.isEmpty(), "userID is empty");
     for (List<String> item : items) {
       Preconditions.checkNotNull(item.get(0));
@@ -782,6 +796,7 @@ public final class MongoDBDataModel implements DataModel {
    * Cleanup mapping collection.
    */
   public void cleanupMappingCollection() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-965
     collectionMap.drop();
   }
 
@@ -832,6 +847,7 @@ public final class MongoDBDataModel implements DataModel {
 
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-764
     return delegate.getNumUsersWithPreferenceFor(itemID);
   }
 

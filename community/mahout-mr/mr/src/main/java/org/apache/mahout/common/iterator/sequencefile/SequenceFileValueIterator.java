@@ -52,6 +52,7 @@ public final class SequenceFileValueIterator<V extends Writable> extends Abstrac
   public SequenceFileValueIterator(Path path, boolean reuseKeyValueInstances, Configuration conf) throws IOException {
     value = null;
     FileSystem fs = path.getFileSystem(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1662
     path = fs.makeQualified(path);
     reader = new SequenceFile.Reader(fs, path, conf);
     this.conf = conf;
@@ -68,7 +69,9 @@ public final class SequenceFileValueIterator<V extends Writable> extends Abstrac
   @Override
   public void close() throws IOException {
     value = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
     Closeables.close(reader, true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     endOfData();
   }
 
@@ -85,9 +88,11 @@ public final class SequenceFileValueIterator<V extends Writable> extends Abstrac
       }
       return value;
     } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       try {
         close();
       } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         log.error(e.getMessage(), e);
       }
       throw new IllegalStateException(ioe);

@@ -181,6 +181,7 @@ public abstract class AbstractVectorClassifier {
   public Matrix classify(Matrix data) {
     Matrix r = new DenseMatrix(data.numRows(), numCategories() - 1);
     for (int row = 0; row < data.numRows(); row++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       r.assignRow(row, classify(data.viewRow(row)));
     }
     return r;
@@ -195,6 +196,7 @@ public abstract class AbstractVectorClassifier {
   public Matrix classifyFull(Matrix data) {
     Matrix r = new DenseMatrix(data.numRows(), numCategories());
     for (int row = 0; row < data.numRows(); row++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       classifyFull(r.viewRow(row), data.viewRow(row));
     }
     return r;
@@ -210,9 +212,11 @@ public abstract class AbstractVectorClassifier {
    */
   public Vector classifyScalar(Matrix data) {
     Preconditions.checkArgument(numCategories() == 2, "Can only call classifyScalar with two categories");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     Vector r = new DenseVector(data.numRows());
     for (int row = 0; row < data.numRows(); row++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       r.set(row, classifyScalar(data.viewRow(row)));
     }
     return r;
@@ -232,6 +236,7 @@ public abstract class AbstractVectorClassifier {
     if (numCategories() == 2) {
       double p = classifyScalar(data);
       if (actual > 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1104
         return Math.max(MIN_LOG_LIKELIHOOD, Math.log(p));
       } else {
         return Math.max(MIN_LOG_LIKELIHOOD, Math.log1p(-p));

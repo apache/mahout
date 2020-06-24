@@ -46,9 +46,11 @@ public final class ItemIDIndexMapper extends
   protected void map(LongWritable key,
                      Text value,
                      Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-420
     String[] tokens = TasteHadoopUtils.splitPrefTokens(value.toString());
     long itemID = Long.parseLong(tokens[transpose ? 0 : 1]);
     int index = TasteHadoopUtils.idToIndex(itemID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
     indexWritable.set(index);
     itemIDWritable.set(itemID);
     context.write(indexWritable, itemIDWritable);

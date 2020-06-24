@@ -77,6 +77,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     this.numFeatures = numFeatures;
     this.lambda = lambda;
     this.numIterations = numIterations;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1056
     this.usesImplicitFeedback = usesImplicitFeedback;
     this.alpha = alpha;
     this.numTrainingThreads = numTrainingThreads;
@@ -100,7 +101,9 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     private final double[][] M;
     private final double[][] U;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-606
     Features(ALSWRFactorizer factorizer) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-877
       dataModel = factorizer.dataModel;
       numFeatures = factorizer.numFeatures;
       Random random = RandomUtils.getRandom();
@@ -125,6 +128,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
       return U;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-877
     Vector getUserFeatureColumn(int index) {
       return new DenseVector(U[index]);
     }
@@ -163,6 +167,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     final Features features = new Features(this);
 
     /* feature maps necessary for solving for implicit feedback */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1056
     OpenIntObjectHashMap<Vector> userY = null;
     OpenIntObjectHashMap<Vector> itemY = null;
 
@@ -180,6 +185,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
       try {
 
         final ImplicitFeedbackAlternatingLeastSquaresSolver implicitFeedbackSolver = usesImplicitFeedback
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1429
             ? new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, itemY, numTrainingThreads)
             : null;
 
@@ -190,12 +196,14 @@ public class ALSWRFactorizer extends AbstractFactorizer {
           queue.execute(new Runnable() {
             @Override
             public void run() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
               List<Vector> featureVectors = new ArrayList<>();
               while (itemIDsFromUser.hasNext()) {
                 long itemID = itemIDsFromUser.nextLong();
                 featureVectors.add(features.getItemFeatureColumn(itemIndex(itemID)));
               }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
               Vector userFeatures = usesImplicitFeedback
                   ? implicitFeedbackSolver.solve(sparseUserRatingVector(userPrefs))
                   : AlternatingLeastSquaresSolver.solve(featureVectors, ratingVector(userPrefs), lambda, numFeatures);
@@ -209,6 +217,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
         try {
           queue.awaitTermination(dataModel.getNumUsers(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
           log.warn("Error when computing user features", e);
         }
       }
@@ -219,6 +228,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
       try {
 
         final ImplicitFeedbackAlternatingLeastSquaresSolver implicitFeedbackSolver = usesImplicitFeedback
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1429
             ? new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, userY, numTrainingThreads)
             : null;
 
@@ -228,12 +238,14 @@ public class ALSWRFactorizer extends AbstractFactorizer {
           queue.execute(new Runnable() {
             @Override
             public void run() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
               List<Vector> featureVectors = new ArrayList<>();
               for (Preference pref : itemPrefs) {
                 long userID = pref.getUserID();
                 featureVectors.add(features.getUserFeatureColumn(userIndex(userID)));
               }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
               Vector itemFeatures = usesImplicitFeedback
                   ? implicitFeedbackSolver.solve(sparseItemRatingVector(itemPrefs))
                   : AlternatingLeastSquaresSolver.solve(featureVectors, ratingVector(itemPrefs), lambda, numFeatures);
@@ -247,6 +259,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
         try {
           queue.awaitTermination(dataModel.getNumItems(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
           log.warn("Error when computing item features", e);
         }
       }
@@ -265,16 +278,19 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     for (int n = 0; n < prefs.length(); n++) {
       ratings[n] = prefs.get(n).getValue();
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1056
     return new DenseVector(ratings, true);
   }
 
   //TODO find a way to get rid of the object overhead here
   protected OpenIntObjectHashMap<Vector> itemFeaturesMapping(LongPrimitiveIterator itemIDs, int numItems,
       double[][] featureMatrix) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     OpenIntObjectHashMap<Vector> mapping = new OpenIntObjectHashMap<>(numItems);
     while (itemIDs.hasNext()) {
       long itemID = itemIDs.next();
       int itemIndex = itemIndex(itemID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1517
       mapping.put(itemIndex, new DenseVector(featureMatrix[itemIndex(itemID)], true));
     }
 
@@ -284,10 +300,12 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   protected OpenIntObjectHashMap<Vector> userFeaturesMapping(LongPrimitiveIterator userIDs, int numUsers,
       double[][] featureMatrix) {
     OpenIntObjectHashMap<Vector> mapping = new OpenIntObjectHashMap<>(numUsers);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     while (userIDs.hasNext()) {
       long userID = userIDs.next();
       int userIndex = userIndex(userID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1517
       mapping.put(userIndex, new DenseVector(featureMatrix[userIndex(userID)], true));
     }
 
@@ -297,6 +315,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   protected Vector sparseItemRatingVector(PreferenceArray prefs) {
     SequentialAccessSparseVector ratings = new SequentialAccessSparseVector(Integer.MAX_VALUE, prefs.length());
     for (Preference preference : prefs) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1517
       ratings.set(userIndex(preference.getUserID()), preference.getValue());
     }
     return ratings;
@@ -305,6 +324,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   protected Vector sparseUserRatingVector(PreferenceArray prefs) {
     SequentialAccessSparseVector ratings = new SequentialAccessSparseVector(Integer.MAX_VALUE, prefs.length());
     for (Preference preference : prefs) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1517
       ratings.set(itemIndex(preference.getItemID()), preference.getValue());
     }
     return ratings;

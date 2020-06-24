@@ -69,6 +69,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    *          set of {@link ItemItemSimilarity}s on which to base this instance
    */
   public GenericItemSimilarity(Iterable<ItemItemSimilarity> similarities) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     initSimilarityMaps(similarities.iterator());
   }
 
@@ -89,6 +90,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    *          maximum number of similarities to keep
    */
   public GenericItemSimilarity(Iterable<ItemItemSimilarity> similarities, int maxToKeep) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     Iterable<ItemItemSimilarity> keptSimilarities =
         TopItems.getTopItemItemSimilarities(maxToKeep, similarities.iterator());
     initSimilarityMaps(keptSimilarities.iterator());
@@ -115,6 +117,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    *           if an error occurs while accessing the {@link DataModel} items
    */
   public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     long[] itemIDs = GenericUserSimilarity.longIteratorToList(dataModel.getItemIDs());
     initSimilarityMaps(new DataModelSimilaritiesIterator(otherSimilarity, itemIDs));
   }
@@ -140,6 +143,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    *           if an error occurs while accessing the {@link DataModel} items
    */
   public GenericItemSimilarity(ItemSimilarity otherSimilarity,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
                                DataModel dataModel,
                                int maxToKeep) throws TasteException {
     long[] itemIDs = GenericUserSimilarity.longIteratorToList(dataModel.getItemIDs());
@@ -151,6 +155,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   private void initSimilarityMaps(Iterator<ItemItemSimilarity> similarities) {
     while (similarities.hasNext()) {
       ItemItemSimilarity iic = similarities.next();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       long similarityItemID1 = iic.getItemID1();
       long similarityItemID2 = iic.getItemID2();
       if (similarityItemID1 != similarityItemID2) {
@@ -166,11 +171,13 @@ public final class GenericItemSimilarity implements ItemSimilarity {
         }
         FastByIDMap<Double> map = similarityMaps.get(itemID1);
         if (map == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           map = new FastByIDMap<>();
           similarityMaps.put(itemID1, map);
         }
         map.put(itemID2, iic.getValue());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-648
         doIndex(itemID1, itemID2);
         doIndex(itemID2, itemID1);
       }
@@ -202,6 +209,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    */
   @Override
   public double itemSimilarity(long itemID1, long itemID2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     if (itemID1 == itemID2) {
       return 1.0;
     }
@@ -261,6 +269,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
      *           if value is NaN, less than -1.0 or greater than 1.0
      */
     public ItemItemSimilarity(long itemID1, long itemID2, double value) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       Preconditions.checkArgument(value >= -1.0 && value <= 1.0, "Illegal value: " + value + ". Must be: -1.0 <= value <= 1.0");
       this.itemID1 = itemID1;
       this.itemID2 = itemID2;
@@ -281,6 +290,8 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     
     @Override
     public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       return "ItemItemSimilarity[" + itemID1 + ',' + itemID2 + ':' + value + ']';
     }
     
@@ -321,6 +332,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       this.otherSimilarity = otherSimilarity;
       this.itemIDs = itemIDs;
       i = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
       itemID1 = itemIDs[0];
       j = 1;
     }
@@ -328,17 +340,21 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     @Override
     protected ItemItemSimilarity computeNext() {
       int size = itemIDs.length;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
       ItemItemSimilarity result = null;
       while (result == null && i < size - 1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
         long itemID2 = itemIDs[j];
         double similarity;
         try {
           similarity = otherSimilarity.itemSimilarity(itemID1, itemID2);
         } catch (TasteException te) {
           // ugly:
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
           throw new IllegalStateException(te);
         }
         if (!Double.isNaN(similarity)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
           result = new ItemItemSimilarity(itemID1, itemID2, similarity);
         }
         if (++j == size) {

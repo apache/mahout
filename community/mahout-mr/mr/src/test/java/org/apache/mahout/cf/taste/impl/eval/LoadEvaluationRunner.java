@@ -42,6 +42,7 @@ public final class LoadEvaluationRunner {
     DataModel model = new FileDataModel(new File(args[0]));
 
     int howMany = 10;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-891
     if (args.length > 1) {
       howMany = Integer.parseInt(args[1]);
     }
@@ -58,6 +59,8 @@ public final class LoadEvaluationRunner {
     UserSimilarity userSim = new EuclideanDistanceSimilarity(model);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, userSim, model);
     recommender = new GenericUserBasedRecommender(model, neighborhood, userSim);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 0; i < LOOPS; i++) {
       LoadStatistics loadStats = LoadEvaluator.runLoad(recommender, howMany);
       System.out.println(loadStats);

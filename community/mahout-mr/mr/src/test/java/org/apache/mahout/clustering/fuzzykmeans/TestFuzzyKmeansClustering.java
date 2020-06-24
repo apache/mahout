@@ -48,6 +48,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
   }
@@ -120,7 +121,9 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.METHOD_OPTION),
           DefaultOptionCreator.SEQUENTIAL_METHOD
       };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1023
       FuzzyKMeansDriver.main(args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       long count = HadoopUtil.countRecords(new Path(output, "clusteredPoints/part-m-0"), conf);
       assertTrue(count > 0);
     }
@@ -131,8 +134,11 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
   public void testFuzzyKMeansMRJob() throws Exception {
     List<VectorWritable> points = TestKmeansClustering.getPointsWritable(TestKmeansClustering.REFERENCE);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
 
@@ -143,23 +149,47 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
                                                            conf,
                                                            new Path(clustersPath, "part-00000"),
                                                            Text.class,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
                                                            SoftCluster.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
       try {
         for (int i = 0; i < k + 1; i++) {
           Vector vec = tweakValue(points.get(i).get());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-205
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
           SoftCluster cluster = new SoftCluster(vec, i, measure);
           /* add the center so the centroid will be correct upon output */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
           cluster.observe(cluster.getCenter(), 1);
           // writer.write(cluster.getIdentifier() + '\t' + SoftCluster.formatCluster(cluster) + '\n');
           writer.append(new Text(cluster.getIdentifier()), cluster);
 
         }
       } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(writer, false);
       }
 
       // now run the Job using the run() command line options.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
       Path output = getTestTempDirPath("output" + k);
       /*      FuzzyKMeansDriver.runJob(pointsPath,
                                      clustersPath,
@@ -192,7 +222,9 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION),
           optKey(DefaultOptionCreator.OVERWRITE_OPTION)
       };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
       ToolRunner.run(getConfiguration(), new FuzzyKMeansDriver(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       long count = HadoopUtil.countRecords(new Path(output, "clusteredPoints/part-m-00000"), conf);
       assertTrue(count > 0);
     }

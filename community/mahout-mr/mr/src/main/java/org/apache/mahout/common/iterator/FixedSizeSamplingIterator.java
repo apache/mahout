@@ -33,8 +33,10 @@ public final class FixedSizeSamplingIterator<T> extends ForwardingIterator<T> {
   private final Iterator<T> delegate;
   
   public FixedSizeSamplingIterator(int size, Iterator<T> source) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     List<T> buf = Lists.newArrayListWithCapacity(size);
     int sofar = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     Random random = RandomUtils.getRandom();
     while (source.hasNext()) {
       T v = source.next();

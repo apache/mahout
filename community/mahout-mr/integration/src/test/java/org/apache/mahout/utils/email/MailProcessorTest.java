@@ -46,6 +46,7 @@ public final class MailProcessorTest extends MahoutTestCase {
 
   @Test
   public void testStripQuoted() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-939
     StringWriter writer = new StringWriter();
     MailOptions options = new MailOptions();
     options.setSeparator(":::");

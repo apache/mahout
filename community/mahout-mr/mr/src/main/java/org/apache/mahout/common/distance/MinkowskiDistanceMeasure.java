@@ -50,6 +50,7 @@ public class MinkowskiDistanceMeasure implements DistanceMeasure {
 
   @Override
   public void createParameters(String prefix, Configuration conf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     parameters = new ArrayList<>();
     Parameter<?> param =
         new DoubleParameter(prefix, "exponent", conf, EXPONENT, "Exponent for Fractional Lagrange distance");
@@ -81,6 +82,7 @@ public class MinkowskiDistanceMeasure implements DistanceMeasure {
    */
   @Override
   public double distance(Vector v1, Vector v2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1202
     return Math.pow(v1.aggregate(v2, Functions.PLUS, Functions.minusAbsPow(exponent)), 1.0 / exponent);
   }
 

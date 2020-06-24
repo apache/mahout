@@ -78,17 +78,21 @@ public final class Driver {
 
   public void dumpVectors() throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-671
     File file = new File(luceneDir);
     Preconditions.checkArgument(file.isDirectory(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         "Lucene directory: " + file.getAbsolutePath()
             + " does not exist or is not a directory");
     Preconditions.checkArgument(maxDocs >= 0, "maxDocs must be >= 0");
     Preconditions.checkArgument(minDf >= 1, "minDf must be >= 1");
     Preconditions.checkArgument(maxDFPercent <= 99, "maxDFPercent must be <= 99");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     Directory dir = FSDirectory.open(Paths.get(file.getAbsolutePath()));
     IndexReader reader = DirectoryReader.open(dir);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
 
     Weight weight;
     if ("tf".equalsIgnoreCase(weightType)) {
@@ -101,8 +105,10 @@ public final class Driver {
 
     TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
     LuceneIterable iterable;
     if (norm == LuceneIterable.NO_NORMALIZING) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1243
       iterable = new LuceneIterable(reader, idField, field, termInfo, weight, LuceneIterable.NO_NORMALIZING,
           maxPercentErrorDocs);
     } else {
@@ -110,9 +116,15 @@ public final class Driver {
     }
 
     log.info("Output File: {}", outFile);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (VectorWriter vectorWriter = getSeqFileWriter(outFile)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-155
       long numDocs = vectorWriter.write(iterable, maxDocs);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.info("Wrote: {} vectors", numDocs);
     }
 
@@ -129,6 +141,7 @@ public final class Driver {
       Path path = new Path(seqDictOut);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, Text.class, IntWritable.class)) {
         Text term = new Text();
         IntWritable termIndex = new IntWritable();
@@ -150,6 +163,7 @@ public final class Driver {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option inputOpt = obuilder.withLongName("dir").withRequired(true).withArgument(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-671
         abuilder.withName("dir").withMinimum(1).withMaximum(1).create())
         .withDescription("The Lucene directory").withShortName("d").create();
 
@@ -165,15 +179,18 @@ public final class Driver {
         abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).withDescription(
         "The field in the index containing the index.  If null, then the Lucene internal doc "
             + "id is used which is prone to error if the underlying index changes").create();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-842
 
     Option dictOutOpt = obuilder.withLongName("dictOut").withRequired(true).withArgument(
         abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
         "The output of the dictionary").withShortName("t").create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1243
     Option seqDictOutOpt = obuilder.withLongName("seqDictOut").withRequired(false).withArgument(
         abuilder.withName("seqDictOut").withMinimum(1).withMaximum(1).create()).withDescription(
         "The output of the dictionary as sequence file").withShortName("st").create();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-126
     Option weightOpt = obuilder.withLongName("weight").withRequired(false).withArgument(
         abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
         "The kind of weight to use. Currently TF or TFIDF").withShortName("w").create();
@@ -203,7 +220,9 @@ public final class Driver {
 
     Option maxPercentErrorDocsOpt = obuilder.withLongName("maxPercentErrorDocs").withRequired(false).withArgument(
         abuilder.withName("maxPercentErrorDocs").withMinimum(1).withMaximum(1).create()).withDescription(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         "The max percentage of docs that can have a null term vector. These are noise document and can occur if the "
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
             + "analyzer used strips out all terms in the target field. This percentage is expressed as a value "
             + "between 0 and 1. The default is 0.").withShortName("err").create();
 
@@ -212,6 +231,7 @@ public final class Driver {
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(
         outputOpt).withOption(delimiterOpt).withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1243
         .withOption(dictOutOpt).withOption(seqDictOutOpt).withOption(powerOpt).withOption(maxDFPercentOpt)
         .withOption(weightOpt).withOption(minDFOpt).withOption(maxPercentErrorDocsOpt).create();
 
@@ -226,7 +246,9 @@ public final class Driver {
         return;
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       if (cmdLine.hasOption(inputOpt)) { // Lucene case
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-671
         Driver luceneDriver = new Driver();
         luceneDriver.setLuceneDir(cmdLine.getValue(inputOpt).toString());
 
@@ -249,6 +271,7 @@ public final class Driver {
         }
 
         if (cmdLine.hasOption(powerOpt)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
           String power = cmdLine.getValue(powerOpt).toString();
           if ("INF".equals(power)) {
             luceneDriver.setNorm(Double.POSITIVE_INFINITY);
@@ -257,6 +280,7 @@ public final class Driver {
           }
         }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-137
         if (cmdLine.hasOption(idFieldOpt)) {
           luceneDriver.setIdField(cmdLine.getValue(idFieldOpt).toString());
         }
@@ -271,6 +295,7 @@ public final class Driver {
 
         luceneDriver.setDictOut(cmdLine.getValue(dictOutOpt).toString());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1243
         if (cmdLine.hasOption(seqDictOutOpt)) {
           luceneDriver.setSeqDictOut(cmdLine.getValue(seqDictOutOpt).toString());
         }
@@ -278,6 +303,7 @@ public final class Driver {
         luceneDriver.dumpVectors();
       }
     } catch (OptionException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
@@ -291,7 +317,10 @@ public final class Driver {
 
     SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class,
         VectorWritable.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-671
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
     return new SequenceFileVectorWriter(seqWriter);
   }
 
@@ -340,6 +369,7 @@ public final class Driver {
   }
 
   public void setSeqDictOut(String seqDictOut) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1243
     this.seqDictOut = seqDictOut;
   }
 

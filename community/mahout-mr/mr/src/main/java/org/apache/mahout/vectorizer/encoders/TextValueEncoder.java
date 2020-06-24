@@ -66,6 +66,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    * @param originalForm  The original text encoded as UTF-8
    */
   public void addText(byte[] originalForm) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-575
     addText(new String(originalForm, Charsets.UTF_8));
   }
 
@@ -98,6 +99,8 @@ public class TextValueEncoder extends FeatureVectorEncoder {
 
   @Override
   protected Iterable<Integer> hashesForProbe(byte[] originalForm, int dataSize, String name, int probe) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     Collection<Integer> hashes = Lists.newArrayList();
     for (String word : tokenize(new String(originalForm, Charsets.UTF_8))) {
       hashes.add(hashForProbe(bytesForString(word), dataSize, name, probe));

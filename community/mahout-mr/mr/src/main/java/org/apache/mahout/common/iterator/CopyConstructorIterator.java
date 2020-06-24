@@ -34,6 +34,7 @@ public final class CopyConstructorIterator<T> extends ForwardingIterator<T> {
   private Constructor<T> constructor;
 
   public CopyConstructorIterator(Iterator<? extends T> copyFrom) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     this.delegate = Iterators.transform(
         copyFrom,
         new Function<T,T>() {
@@ -49,6 +50,7 @@ public final class CopyConstructorIterator<T> extends ForwardingIterator<T> {
             }
             try {
               return constructor.newInstance(from);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
               throw new IllegalStateException(e);
             }

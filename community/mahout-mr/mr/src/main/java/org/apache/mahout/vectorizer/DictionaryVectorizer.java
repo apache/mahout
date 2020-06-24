@@ -92,9 +92,11 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
 
   @Override
   public void createVectors(Path input, Path output, VectorizerConfig config)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     throws IOException, ClassNotFoundException, InterruptedException {
     createTermFrequencyVectors(input,
                                output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
                                config.getTfDirName(),
                                config.getConf(),
                                config.getMinSupport(),
@@ -147,8 +149,11 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
    *          
    */
   public static void createTermFrequencyVectors(Path input,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
                                                 Path output,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
                                                 String tfVectorsFolderName,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
                                                 Configuration baseConf,
                                                 int minSupport,
                                                 int maxNGramSize,
@@ -160,6 +165,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
                                                 boolean sequentialAccess,
                                                 boolean namedVectors)
     throws IOException, InterruptedException, ClassNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(normPower == PartialVectorMerger.NO_NORMALIZING || normPower >= 0,
         "If specified normPower must be nonnegative", normPower);
     Preconditions.checkArgument(normPower == PartialVectorMerger.NO_NORMALIZING 
@@ -175,6 +181,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
       minSupport = DEFAULT_MIN_SUPPORT;
     }
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
     Path dictionaryJobPath = new Path(output, DICTIONARY_JOB_FOLDER);
     
     log.info("Creating dictionary from {} and saving at {}", input, dictionaryJobPath);
@@ -183,9 +190,11 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     List<Path> dictionaryChunks;
     if (maxNGramSize == 1) {
       startWordCounting(input, dictionaryJobPath, baseConf, minSupport);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       dictionaryChunks =
           createDictionaryChunks(dictionaryJobPath, output, baseConf, chunkSizeInMegabytes, maxTermDimension);
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-404
       CollocDriver.generateAllGrams(input, dictionaryJobPath, baseConf, maxNGramSize,
         minSupport, minLLRValue, numReducers);
       dictionaryChunks =
@@ -198,19 +207,26 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     }
     
     int partialVectorIndex = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     Collection<Path> partialVectorPaths = Lists.newArrayList();
     for (Path dictionaryChunk : dictionaryChunks) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
       makePartialVectors(input, baseConf, maxNGramSize, dictionaryChunk, partialVectorOutputPath,
         maxTermDimension[0], sequentialAccess, namedVectors, numReducers);
     }
     
     Configuration conf = new Configuration(baseConf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
     Path outputDir = new Path(output, tfVectorsFolderName);
     PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, conf, normPower, logNormalize,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
       maxTermDimension[0], sequentialAccess, namedVectors, numReducers);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     HadoopUtil.delete(conf, partialVectorPaths);
   }
   
@@ -219,10 +235,14 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
    * This will use constant memory and will run at the speed of your disk read
    */
   private static List<Path> createDictionaryChunks(Path wordCountPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
                                                    Path dictionaryPathBase,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
                                                    Configuration baseConf,
                                                    int chunkSizeInMegabytes,
                                                    int[] maxTermDimension) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
     List<Path> chunkPaths = Lists.newArrayList();
     
     Configuration conf = new Configuration(baseConf);
@@ -231,21 +251,27 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
 
     long chunkSizeLimit = chunkSizeInMegabytes * 1024L * 1024L;
     int chunkIndex = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
     Path chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
     chunkPaths.add(chunkPath);
     
     SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class, IntWritable.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       long currentChunkSize = 0;
       Path filesPattern = new Path(wordCountPath, OUTPUT_FILES_PATTERN);
       int i = 0;
       for (Pair<Writable,Writable> record
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
            : new SequenceFileDirIterable<>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
           Closeables.close(dictWriter, false);
           chunkIndex++;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
           chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
           chunkPaths.add(chunkPath);
 
@@ -260,6 +286,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
       }
       maxTermDimension[0] = i;
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(dictWriter, false);
     }
     
@@ -289,6 +316,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
    *          the desired number of reducer tasks
    */
   private static void makePartialVectors(Path input,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
                                          Configuration baseConf,
                                          int maxNGramSize,
                                          Path dictionaryFilePath,
@@ -305,13 +333,19 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setInt(PartialVectorMerger.DIMENSION, dimension);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     conf.setBoolean(PartialVectorMerger.NAMED_VECTOR, namedVectors);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-285
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1498
     conf.setInt(MAX_NGRAMS, maxNGramSize);
     DistributedCache.addCacheFile(dictionaryFilePath.toUri(), conf);
     
     Job job = new Job(conf);
     job.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: " + input
                     + ", dictionary-file: " + dictionaryFilePath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     job.setJarByClass(DictionaryVectorizer.class);
     
     job.setMapOutputKeyClass(Text.class);
@@ -343,15 +377,21 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
   private static void startWordCounting(Path input, Path output, Configuration baseConf, int minSupport)
     throws IOException, InterruptedException, ClassNotFoundException {
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-587
     Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-285
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     conf.setInt(MIN_SUPPORT, minSupport);
     
     Job job = new Job(conf);
     
     job.setJobName("DictionaryVectorizer::WordCount: input-folder: " + input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     job.setJarByClass(DictionaryVectorizer.class);
     
     job.setOutputKeyClass(Text.class);
@@ -363,10 +403,13 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     job.setMapperClass(TermCountMapper.class);
     
     job.setInputFormatClass(SequenceFileInputFormat.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-808
     job.setCombinerClass(TermCountCombiner.class);
     job.setReducerClass(TermCountReducer.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     HadoopUtil.delete(conf, output);
     
     boolean succeeded = job.waitForCompletion(true);
@@ -377,12 +420,14 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
 
   @Override
   public int run(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1247
     addInputOption();
     addOutputOption();
     addOption("tfDirName", "tf", "The folder to store the TF calculations", "tfDirName");
     addOption("minSupport", "s", "(Optional) Minimum Support. Default Value: 2", "2");
     addOption("maxNGramSize", "ng", "(Optional) The maximum size of ngrams to create"
                             + " (2 = bigrams, 3 = trigrams, etc) Default Value:1");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     addOption("minLLR", "ml", "(Optional)The minimum Log Likelihood Ratio(Float)  Default is "
         + LLRReducer.DEFAULT_MIN_LLR);
     addOption("norm", "n", "The norm to use, expressed as either a float or \"INF\" "
@@ -398,6 +443,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     if (parseArguments(args) == null) {
       return -1;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
     String tfDirName = getOption("tfDirName", "tfDir");
     int minSupport = getInt("minSupport", 2);
     int maxNGramSize = getInt("maxNGramSize", 1);

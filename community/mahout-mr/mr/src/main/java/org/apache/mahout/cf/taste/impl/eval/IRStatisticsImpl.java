@@ -33,6 +33,7 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
 
   IRStatisticsImpl(double precision, double recall, double fallOut, double ndcg, double reach) {
     Preconditions.checkArgument(Double.isNaN(precision) || (precision >= 0.0 && precision <= 1.0),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
         "Illegal precision: " + precision + ". Must be: 0.0 <= precision <= 1.0 or NaN");
     Preconditions.checkArgument(Double.isNaN(recall) || (recall >= 0.0 && recall <= 1.0), 
         "Illegal recall: " + recall + ". Must be: 0.0 <= recall <= 1.0 or NaN");
@@ -78,11 +79,13 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
 
   @Override
   public double getNormalizedDiscountedCumulativeGain() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-619
     return ndcg;
   }
 
   @Override
   public double getReach() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-925
     return reach;
   }
 

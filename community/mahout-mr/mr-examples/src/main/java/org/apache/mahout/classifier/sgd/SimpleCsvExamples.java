@@ -84,6 +84,7 @@ public final class SimpleCsvExamples {
     long t0 = System.currentTimeMillis();
     Vector v = new DenseVector(1000);
     if ("--generate".equals(args[0])) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (PrintWriter out =
                new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File(args[2])), Charsets.UTF_8))) {
         int n = Integer.parseInt(args[1]);
@@ -111,6 +112,7 @@ public final class SimpleCsvExamples {
         separator = ",";
       }
     } else if ("--fast".equals(args[0])) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (FastLineReader in = new FastLineReader(new FileInputStream(args[1]))){
         FastLine line = in.read();
         while (line != null) {
@@ -118,6 +120,7 @@ public final class SimpleCsvExamples {
           for (int i = 0; i < FIELDS; i++) {
             double z = line.getDouble(i);
             s[i].add(z);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-539
             encoder[i].addToVector((byte[]) null, z, v);
           }
           line = in.read();
@@ -147,6 +150,7 @@ public final class SimpleCsvExamples {
     }
 
     private Line() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       data = new ArrayList<>();
     }
 
@@ -176,6 +180,7 @@ public final class SimpleCsvExamples {
      * @return random exponentially distributed integer with the specific mean
      */
     private static int randomValue(double mean) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       return (int) (-mean * Math.log1p(-RAND.nextDouble()));
     }
 
@@ -205,6 +210,7 @@ public final class SimpleCsvExamples {
       int offset = buf.position();
       while (offset < buf.limit()) {
         int ch = buf.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-677
         offset = buf.position();
         switch (ch) {
           case '\n':
@@ -232,6 +238,7 @@ public final class SimpleCsvExamples {
         default:
           double r = 0;
           for (int i = 0; i < size; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-677
             r = 10 * r + base.get(offset + i) - '0';
           }
           return r;
@@ -273,9 +280,11 @@ public final class SimpleCsvExamples {
 
     @Override
     public void close() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       try {
         Closeables.close(in, true);
       } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
         log.error(e.getMessage(), e);
       }
     }

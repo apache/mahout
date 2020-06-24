@@ -29,6 +29,7 @@ public class EuclideanDistanceSimilarity implements VectorSimilarityMeasure {
   @Override
   public double norm(Vector vector) {
     double norm = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element e : vector.nonZeroes()) {
       double value = e.get();
       norm += value * value;
@@ -46,6 +47,7 @@ public class EuclideanDistanceSimilarity implements VectorSimilarityMeasure {
     // Arg can't be negative in theory, but can in practice due to rounding, so cap it.
     // Also note that normA / normB are actually the squares of the norms.
     double euclideanDistance = Math.sqrt(Math.max(0.0, normA - 2 * dots + normB));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-847
     return 1.0 / (1.0 + euclideanDistance);
   }
 

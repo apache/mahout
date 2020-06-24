@@ -33,6 +33,7 @@ public class NumericFieldDocument extends SingleFieldDocument {
   private int numericField;
 
   public NumericFieldDocument(String id, String field, int numericField) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-944
     super(id, field);
     this.numericField = numericField;
   }

@@ -55,6 +55,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
 
   private static final double[][] REFERENCE = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 },
       { 4, 5 }, { 5, 5 } };
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1019
 
   private static final double[][] SEEDS = { { 1, 1 }, { 10, 10 } };
 
@@ -62,6 +63,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
     fs = FileSystem.get(getConfiguration());
   }
 
@@ -105,6 +107,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
 
   @Test
   public void testVectorDistanceInvertedMapper() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
      Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context =
             EasyMock.createMock(Mapper.Context.class);
     Vector expectVec = new DenseVector(new double[]{Math.sqrt(2.0), 1.0});
@@ -147,12 +150,14 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points, true, new Path(input, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(seeds, true, new Path(seedsPath, "part-seeds"), fs, conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1019
     String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), input.toString(),
         optKey(VectorDistanceSimilarityJob.SEEDS), seedsPath.toString(), optKey(DefaultOptionCreator.OUTPUT_OPTION),
         output.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION),
         EuclideanDistanceMeasure.class.getName() };
 
     ToolRunner.run(getConfiguration(), new VectorDistanceSimilarityJob(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     int expectedOutputSize = SEEDS.length * REFERENCE.length;
     int outputSize = Iterables.size(new SequenceFileIterable<StringTuple, DoubleWritable>(new Path(output,
@@ -183,6 +188,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
         optKey(VectorDistanceSimilarityJob.MAX_DISTANCE), String.valueOf(maxDistance) };
 
     ToolRunner.run(getConfiguration(), new VectorDistanceSimilarityJob(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     int outputSize = 0;
 
@@ -202,16 +208,21 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
     Path seedsPath = getTestTempDirPath("seeds");
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     List<VectorWritable> seeds = getPointsWritable(SEEDS);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, true, new Path(input, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(seeds, true, new Path(seedsPath, "part-seeds"), fs, conf);
     String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), input.toString(),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1019
         optKey(VectorDistanceSimilarityJob.SEEDS), seedsPath.toString(), optKey(DefaultOptionCreator.OUTPUT_OPTION),
         output.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION),
         EuclideanDistanceMeasure.class.getName(),
         optKey(VectorDistanceSimilarityJob.OUT_TYPE_KEY), "v"
     };
     ToolRunner.run(getConfiguration(), new VectorDistanceSimilarityJob(), args);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
 
     DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<>();
 

@@ -48,6 +48,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansDriver.class);
 
   public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-414
     ToolRunner.run(new Configuration(), new FuzzyKMeansDriver(), args);
   }
 
@@ -68,12 +69,15 @@ public class FuzzyKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     addOption(M_OPTION, M_OPTION, "coefficient normalization factor, must be greater than 1", true);
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     addOption(DefaultOptionCreator.methodOption().create());
     addOption(DefaultOptionCreator.useSetRandomSeedOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
 
     if (parseArguments(args) == null) {
       return -1;
@@ -91,6 +95,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
 
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       HadoopUtil.delete(getConf(), output);
     }
     boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
@@ -100,6 +105,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       int numClusters = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
       Long seed = null;
       if (hasOption(DefaultOptionCreator.RANDOM_SEED)) {
         seed = Long.parseLong(getOption(DefaultOptionCreator.RANDOM_SEED));
@@ -121,6 +127,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
         fuzziness,
         runClustering,
         emitMostLikely,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
         threshold,
         runSequential);
     return 0;
@@ -161,6 +168,9 @@ public class FuzzyKMeansDriver extends AbstractJob {
                          boolean emitMostLikely,
                          double threshold,
                          boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-778
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     Configuration conf = new Configuration();
     Path clustersOut = buildClusters(conf,
                                      input,
@@ -171,7 +181,9 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                      m,
                                      runSequential);
     if (runClustering) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.info("Clustering ");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
       clusterData(conf, input,
                   clustersOut,
                   output,
@@ -218,18 +230,25 @@ public class FuzzyKMeansDriver extends AbstractJob {
                          boolean emitMostLikely,
                          double threshold,
                          boolean runSequential)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     throws IOException, ClassNotFoundException, InterruptedException {
     Path clustersOut =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
         buildClusters(conf, input, clustersIn, output, convergenceDelta, maxIterations, m, runSequential);
     if (runClustering) {
       log.info("Clustering");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
       clusterData(conf, 
                   input,
                   clustersOut,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-984
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-984
                   output,
                   convergenceDelta,
                   m,
                   emitMostLikely,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
                   threshold,
                   runSequential);
     }
@@ -263,8 +282,10 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                    int maxIterations,
                                    float m,
                                    boolean runSequential)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     throws IOException, InterruptedException, ClassNotFoundException {
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Cluster> clusters = new ArrayList<>();
     FuzzyKMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     
@@ -273,6 +294,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
     
     if (clusters.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1017
       throw new IllegalStateException("No input clusters found in " + clustersIn + ". Check your -c argument.");
     }
     
@@ -307,6 +329,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
    * @param runSequential if true run in sequential execution mode
    */
   public static void clusterData(Configuration conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
                                  Path input,
                                  Path clustersIn,
                                  Path output,
@@ -318,6 +341,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     throws IOException, ClassNotFoundException, InterruptedException {
     
     ClusterClassifier.writePolicy(new FuzzyKMeansClusteringPolicy(m, convergenceDelta), clustersIn);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1201
     ClusterClassificationDriver.run(conf, input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
         threshold, emitMostLikely, runSequential);
   }

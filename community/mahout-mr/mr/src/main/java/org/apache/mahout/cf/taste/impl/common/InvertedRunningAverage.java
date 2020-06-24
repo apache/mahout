@@ -52,6 +52,7 @@ public final class InvertedRunningAverage implements RunningAverage {
 
   @Override
   public RunningAverage inverse() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return delegate;
   }
   

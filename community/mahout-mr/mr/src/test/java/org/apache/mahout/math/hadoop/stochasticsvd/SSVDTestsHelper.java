@@ -42,6 +42,7 @@ public final class SSVDTestsHelper {
   }
 
   static void generateDenseInput(Path outputPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
                                  FileSystem dfs,
                                  Vector svalues,
                                  int m,
@@ -64,6 +65,7 @@ public final class SSVDTestsHelper {
                                  int startRowKey) throws IOException {
 
     Random rnd = RandomUtils.getRandom();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
 
     int svCnt = svalues.size();
     Matrix v = generateDenseOrthonormalRandom(n, svCnt, rnd);
@@ -108,6 +110,7 @@ public final class SSVDTestsHelper {
         result.setQuick(i, j, rnd.nextDouble() - 0.5);
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     GramSchmidt.orthonormalizeColumns(result);
     SSVDCommonTest.assertOrthonormality(result, false, 1.0e-10);
     return result;
@@ -116,6 +119,7 @@ public final class SSVDTestsHelper {
   // do not use. for internal consumption only.
   public static void main(String[] args) throws Exception {
     // create 1Gb input for distributed tests.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     MahoutTestCase ca = new MahoutTestCase();
     Configuration conf = ca.getConfiguration();
     FileSystem dfs = FileSystem.getLocal(conf);
@@ -135,6 +139,7 @@ public final class SSVDTestsHelper {
      *   
      */
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     outputDir = new Path("/tmp/DRM-sparse");
     Random rnd = RandomUtils.getRandom();
 

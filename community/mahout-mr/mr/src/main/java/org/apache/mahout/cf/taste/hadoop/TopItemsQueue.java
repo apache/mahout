@@ -36,6 +36,7 @@ public class TopItemsQueue extends PriorityQueue<MutableRecommendedItem> {
   }
 
   public List<RecommendedItem> getTopItems() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<RecommendedItem> recommendedItems = new ArrayList<>(maxSize);
     while (size() > 0) {
       MutableRecommendedItem topItem = pop();
@@ -55,6 +56,7 @@ public class TopItemsQueue extends PriorityQueue<MutableRecommendedItem> {
 
   @Override
   protected MutableRecommendedItem getSentinelObject() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
     return new MutableRecommendedItem(SENTINEL_ID, Float.MIN_VALUE);
   }
 }

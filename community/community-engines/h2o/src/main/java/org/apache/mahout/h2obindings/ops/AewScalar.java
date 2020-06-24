@@ -65,7 +65,9 @@ public class AewScalar {
           long start = chks[0].start();
 
           for (int c = 0; c < chks.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
             for (int r = 0; r < chunkSize; r++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
               ncs[c].addNum(opfn(op, chks[c].atd(r), s));
             }
           }

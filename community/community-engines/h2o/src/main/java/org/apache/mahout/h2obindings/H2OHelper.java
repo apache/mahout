@@ -99,6 +99,7 @@ public class H2OHelper {
     Vec labels = drm.keys;
     Matrix m;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     if (isSparse(frame)) {
       m = new SparseMatrix((int)frame.numRows(), frame.numCols());
     } else {
@@ -119,6 +120,7 @@ public class H2OHelper {
 
     // If string keyed, set the stings as rowlabels.
     if (labels != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       Map<String,Integer> map = new HashMap<>();
       ValueString vstr = new ValueString();
       for (long i = 0; i < labels.length(); i++) {
@@ -166,6 +168,7 @@ public class H2OHelper {
 
         for (int c = 0; c < chks.length; c++) {
           for (int r = 0; r < chks[c].len(); r++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
             sums[c] += chks[c].atd(r);
           }
         }
@@ -195,6 +198,7 @@ public class H2OHelper {
       public double sumSqr;
       @Override
       public void map(Chunk chks[]) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         for (Chunk chk : chks) {
           for (int r = 0; r < chk.len(); r++) {
             sumSqr += (chk.atd(r) * chk.atd(r));
@@ -229,6 +233,7 @@ public class H2OHelper {
 
         for (int c = 0; c < chks.length; c++) {
           for (int r = 0; r < chks[c].len(); r++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
             if ((long)chks[c].atd(r) != 0) {
               sums[c] ++;
             }
@@ -250,6 +255,7 @@ public class H2OHelper {
     }
 
     Map<Integer,String> rmap = new HashMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     for(Map.Entry<String,Integer> entry : map.entrySet()) {
       rmap.put(entry.getValue(),entry.getKey());
@@ -272,6 +278,7 @@ public class H2OHelper {
     int chunkSz;
     int partsHint = Math.max(minHint, exactHint);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     if (partsHint < 1) {
       /* XXX: calculate based on cloud size and # of cpu */
       partsHint = 4;
@@ -332,8 +339,11 @@ public class H2OHelper {
     Map<String,Integer> map = m.getRowLabelBindings();
     if (map != null) {
       // label vector must be similarly partitioned like the Frame
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1638
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1493
       labels = makeEmptyStrVec(frame.anyVec());
       Vec.Writer writer = labels.open();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
       Map<Integer,String> rmap = reverseMap(map);
       for (int r = 0; r < m.rowSize(); r++) {
         writer.set(r, rmap.get(r));
@@ -363,6 +373,7 @@ public class H2OHelper {
   public static Frame emptyFrame(long nrow, int ncol, int minHint, int exactHint) {
     Vec.VectorGroup vg = new Vec.VectorGroup();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     return emptyFrame(nrow, ncol, minHint, exactHint, vg);
   }
 
@@ -403,6 +414,8 @@ public class H2OHelper {
    * are h2o-0.1.25 specific.
    */
   public static Vec makeEmptyStrVec(final Vec template) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1638
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1493
     final int nChunks = template.nChunks();
     Key<Vec> key = template.group().addVec();
     final Vec emptystr = new Vec(key, template._espc, null, Vec.T_NUM);
@@ -440,10 +453,12 @@ public class H2OHelper {
    * @return Created DRM.
    */
   public static H2ODrm emptyDrm(long nrow, int ncol, int minHint, int exactHint) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
     return new H2ODrm(emptyFrame(nrow, ncol, minHint, exactHint));
   }
 
   public static Matrix allreduceBlock(H2ODrm drmA, Object bmfn, Object rfn) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1736
     class MRTaskMR extends MRTask<MRTaskMR> {
       H2OBCast<Matrix> bmf_out;
       Serializable bmf;

@@ -24,6 +24,7 @@ import org.apache.mahout.math.Vector;
  */
 public class ConstantValueEncoder extends CachingValueEncoder {
   public ConstantValueEncoder(String name) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-539
     super(name, 0);
   }
 
@@ -52,6 +53,7 @@ public class ConstantValueEncoder extends CachingValueEncoder {
 
   @Override
   protected int getSeed() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-539
     return 0;
   }
 }

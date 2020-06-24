@@ -61,13 +61,16 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     outputDir.delete();
     tmpDir = getTestTempDir("tmp");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     conf = getConfiguration();
     // reset as we run all tests in the same JVM
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1205
     SharingMapper.reset();
   }
 
   @Test
   public void completeJobToyExample() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1166
     explicitExample(1);
   }
 
@@ -95,12 +98,14 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     Double na = Double.NaN;
     Matrix preferences = new SparseRowMatrix(4, 4, new Vector[] {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-872
         new DenseVector(new double[] { 5.0, 5.0, 2.0, na }),
         new DenseVector(new double[] { 2.0, na,  3.0, 5.0 }),
         new DenseVector(new double[] { na,  5.0, na,  3.0 }),
         new DenseVector(new double[] { 3.0, na,  na,  5.0 }) });
 
     writeLines(inputFile, preferencesAsText(preferences));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-877
 
     ParallelALSFactorizationJob alsFactorization = new ParallelALSFactorizationJob();
     alsFactorization.setConf(conf);
@@ -111,6 +116,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     alsFactorization.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
         "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1166
         "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations),
         "--numThreadsPerSolver", String.valueOf(numThreads) });
 
@@ -154,6 +160,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
   @Test
   public void completeJobImplicitToyExample() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1166
     implicitExample(1);
   }
 
@@ -169,6 +176,8 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
         new DenseVector(new double[] { 0,   5.0, 0,   3.0 }),
         new DenseVector(new double[] { 3.0, 0,   0,   5.0 }) });
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
     Matrix preferences = new SparseRowMatrix(4, 4, new Vector[] {
         new DenseVector(new double[] { 1.0, 1.0, 1.0, 0 }),
         new DenseVector(new double[] { 1.0, 0,   1.0, 1.0 }),
@@ -188,6 +197,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     alsFactorization.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
         "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
         "--implicitFeedback", String.valueOf(true), "--alpha", String.valueOf(alpha),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1166
         "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations),
         "--numThreadsPerSolver", String.valueOf(numThreads) });
 
@@ -198,8 +208,10 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     StringBuilder info = new StringBuilder();
     info.append("\nObservations - users x items\n");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-879
     info.append(MathHelper.nice(observations));
     info.append("\nA - users x items\n\n");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-879
     info.append(MathHelper.nice(preferences));
     info.append("\nU - users x features\n\n");
     info.append(MathHelper.nice(u));
@@ -209,10 +221,14 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     info.append("\nAk - users x items\n\n");
     info.append(MathHelper.nice(Ak));
     info.append('\n');
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
 
     log.info(info.toString());
 
     RunningAverage avg = new FullRunningAverage();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (MatrixSlice slice : preferences) {
       for (Element e : slice.nonZeroes()) {
         if (!Double.isNaN(e.get())) {
@@ -236,6 +252,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
   public void exampleWithIDMapping() throws Exception {
 
     String[] preferencesWithLongIDs = {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
         "5568227754922264005,-4758971626494767444,5.0",
         "5568227754922264005,3688396615879561990,5.0",
         "5568227754922264005,4594226737871995304,2.0",
@@ -303,6 +320,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
   protected static String preferencesAsText(Matrix preferences) {
     StringBuilder prefsAsText = new StringBuilder();
     String separator = "";
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (MatrixSlice slice : preferences) {
       for (Element e : slice.nonZeroes()) {
         if (!Double.isNaN(e.get())) {
@@ -320,6 +338,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
   public void recommenderJobWithIDMapping() throws Exception {
 
     String[] preferencesWithLongIDs = {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-974
         "5568227754922264005,-4758971626494767444,5.0",
         "5568227754922264005,3688396615879561990,5.0",
         "5568227754922264005,4594226737871995304,2.0",
@@ -341,6 +360,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     double lambda = 0.065;
 
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
 
     int success = ToolRunner.run(alsFactorization, new String[] {
         "-Dhadoop.tmp.dir=" + conf.get("hadoop.tmp.dir"),
@@ -360,6 +380,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     RecommenderJob recommender = new RecommenderJob();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     success = ToolRunner.run(recommender, new String[] {
         "-Dhadoop.tmp.dir=" + conf.get("hadoop.tmp.dir"),
         "--input", intermediateDir.getAbsolutePath() + "/userRatings/",

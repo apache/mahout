@@ -52,9 +52,11 @@ public class Ax {
           int chunkSize = chks[0].len();
           Vector x = bx.value();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1500
           for (int r = 0; r < chunkSize; r++) {
             double v = 0;
             for (int c = 0; c < chks.length; c++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
               v += (chks[c].atd(r) * x.getQuick(c));
             }
             nc.addNum(v);

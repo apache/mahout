@@ -39,6 +39,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public class RepresentativePointsMapper
   extends Mapper<IntWritable, WeightedVectorWritable, IntWritable, WeightedVectorWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
 
   private Map<Integer, List<VectorWritable>> representativePoints;
   private final Map<Integer, WeightedVectorWritable> mostDistantPoints = new HashMap<>();
@@ -54,7 +55,9 @@ public class RepresentativePointsMapper
 
   @Override
   protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     mapPoint(clusterId, point, measure, representativePoints, mostDistantPoints);
   }
 
@@ -93,11 +96,13 @@ public class RepresentativePointsMapper
   }
 
   public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     String statePath = conf.get(RepresentativePointsDriver.STATE_IN_KEY);
     return getRepresentativePoints(conf, new Path(statePath));
   }
 
   public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf, Path statePath) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<>();
     for (Pair<IntWritable,VectorWritable> record
          : new SequenceFileDirIterable<IntWritable,VectorWritable>(statePath,
@@ -107,6 +112,7 @@ public class RepresentativePointsMapper
       int keyValue = record.getFirst().get();
       List<VectorWritable> repPoints = representativePoints.get(keyValue);
       if (repPoints == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         repPoints = new ArrayList<>();
         representativePoints.put(keyValue, repPoints);
       }

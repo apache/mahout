@@ -43,6 +43,7 @@ public class SimpleTextEncodingVectorizer implements Vectorizer {
 
   @Override
   public void createVectors(Path input, Path output, VectorizerConfig config)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     throws IOException, ClassNotFoundException, InterruptedException {
     //do this for convenience of using prepareJob
     Job job = HadoopUtil.prepareJob(input, output,

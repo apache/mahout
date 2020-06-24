@@ -94,10 +94,12 @@ public class PlusAnonymousUserDataModel implements DataModel {
   }
 
   protected DataModel getDelegate() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-977
     return delegate;
   }
   
   public void setTempPrefs(PreferenceArray prefs) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(prefs != null && prefs.length() > 0, "prefs is null or empty");
     this.tempPrefs = prefs;
     this.prefItemIDs.clear();
@@ -222,6 +224,7 @@ public class PlusAnonymousUserDataModel implements DataModel {
 
   @Override
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
         throw new NoSuchUserException(TEMP_USER_ID);
@@ -244,6 +247,7 @@ public class PlusAnonymousUserDataModel implements DataModel {
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
     if (tempPrefs == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-764
       return delegate.getNumUsersWithPreferenceFor(itemID);
     }
     boolean found = false;
@@ -309,6 +313,7 @@ public class PlusAnonymousUserDataModel implements DataModel {
 
   @Override
   public float getMaxPreference() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     return delegate.getMaxPreference();
   }
 

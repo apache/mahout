@@ -45,6 +45,7 @@ public final class CacheTest extends TasteTestCase {
       if (r < 0.01) {
         cache.clear();
       } else if (r < 0.1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         cache.remove(r - 100);
       } else {
         assertEquals(i, cache.get(i));

@@ -78,6 +78,7 @@ public final class WeightedRunningAverageAndStdDev extends WeightedRunningAverag
 
   @Override
   public RunningAverageAndStdDev inverse() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return new InvertedRunningAverageAndStdDev(this);
   }
   

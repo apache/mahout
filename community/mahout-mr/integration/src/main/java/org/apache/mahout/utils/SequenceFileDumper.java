@@ -46,11 +46,13 @@ public final class SequenceFileDumper extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     addInputOption();
     addOutputOption();
     addOption("substring", "b", "The number of chars to print out per value", false);
     addOption(buildOption("count", "c", "Report the count only", false, false, null));
     addOption("numItems", "n", "Output at most <n> key value pairs", false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     addOption(buildOption("facets", "fa", "Output the counts per key.  Note, if there are a lot of unique keys, "
         + "this can take up a fair amount of memory", false, false, null));
     addOption(buildOption("quiet", "q", "Print only file contents.", false, false, null));
@@ -60,10 +62,13 @@ public final class SequenceFileDumper extends AbstractJob {
     }
 
     Path[] pathArr;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
     Configuration conf = new Configuration();
     Path input = getInputPath();
     FileSystem fs = input.getFileSystem(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1655
     if (fs.getFileStatus(input).isDir()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1427
       pathArr = FileUtil.stat2Paths(fs.listStatus(input, PathFilters.logsCRCFilter()));
     } else {
       pathArr = new Path[1];
@@ -71,18 +76,24 @@ public final class SequenceFileDumper extends AbstractJob {
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-166
     Writer writer;
     boolean shouldClose;
     if (hasOption("output")) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-679
       shouldClose = true;
       writer = Files.newWriter(new File(getOption("output")), Charsets.UTF_8);
     } else {
       shouldClose = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
       writer = new OutputStreamWriter(System.out, Charsets.UTF_8);
     }
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
       for (Path path : pathArr) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (!hasOption("quiet")) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
           writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
         }
 
@@ -91,12 +102,14 @@ public final class SequenceFileDumper extends AbstractJob {
           sub = Integer.parseInt(getOption("substring"));
         }
         boolean countOnly = hasOption("count");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         SequenceFileIterator<?, ?> iterator = new SequenceFileIterator<>(path, true, conf);
         if (!hasOption("quiet")) {
           writer.append("Key class: ").append(iterator.getKeyClass().toString());
           writer.append(" Value Class: ").append(iterator.getValueClass().toString()).append('\n');
         }
         OpenObjectIntHashMap<String> facets = null;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (hasOption("facets")) {
           facets = new OpenObjectIntHashMap<>();
         }
@@ -114,8 +127,10 @@ public final class SequenceFileDumper extends AbstractJob {
         } else {
           long numItems = Long.MAX_VALUE;
           if (hasOption("numItems")) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
             numItems = Long.parseLong(getOption("numItems"));
             if (!hasOption("quiet")) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
               writer.append("Max Items to dump: ").append(String.valueOf(numItems)).append("\n");
             }
           }
@@ -127,7 +142,11 @@ public final class SequenceFileDumper extends AbstractJob {
             writer.append(": Value: ").append(str.length() > sub 
                                               ? str.substring(0, sub) : str);
             writer.write('\n');
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
             if (facets != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
               facets.adjustOrPutValue(key, 1, 1); //either insert or add 1
             }
             count++;
@@ -138,6 +157,7 @@ public final class SequenceFileDumper extends AbstractJob {
         }
         if (facets != null) {
           List<String> keyList = new ArrayList<>(facets.size());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
           IntArrayList valueList = new IntArrayList(facets.size());
           facets.pairsSortedByKey(keyList, valueList);
@@ -150,9 +170,11 @@ public final class SequenceFileDumper extends AbstractJob {
         }
       }
       writer.flush();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-679
 
     } finally {
       if (shouldClose) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(writer, false);
       }
     }

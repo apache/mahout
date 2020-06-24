@@ -50,6 +50,7 @@ public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
 
   @Override
   public double getAverageStd() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-533
     if (s0 == 0.0) {
       return 0.0;
     } else {
@@ -64,11 +65,13 @@ public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
 
   @Override
   public void observe(Vector x, double weight) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-533
     s0 += weight;
     Vector weightedX = x.times(weight);
     if (s1 == null) {
       s1 = weightedX;
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
       s1.assign(weightedX, Functions.PLUS);
     }
     Vector x2 = x.times(x).times(weight);
@@ -81,6 +84,7 @@ public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
 
   @Override
   public void compute() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-533
     if (s0 != 0.0) {
       mean = s1.divide(s0);
       std = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);

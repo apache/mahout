@@ -57,6 +57,7 @@ public class BallKMeansTest {
 
   @BeforeClass
   public static void setUp() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1320
     RandomUtils.useTestSeed();
     syntheticData = DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS, DISTRIBUTION_RADIUS);
 
@@ -90,6 +91,7 @@ public class BallKMeansTest {
     BallKMeans clusterer = new BallKMeans(searcher, 1 << NUM_DIMENSIONS, NUM_ITERATIONS);
 
     long startTime = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1320
     Pair<List<Centroid>, List<Centroid>> data = syntheticData;
     clusterer.cluster(data.getFirst());
     long endTime = System.currentTimeMillis();

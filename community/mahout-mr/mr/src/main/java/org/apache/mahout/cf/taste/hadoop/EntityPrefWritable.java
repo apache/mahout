@@ -34,11 +34,13 @@ public final class EntityPrefWritable extends VarLongWritable implements Cloneab
   }
   
   public EntityPrefWritable(long itemID, float prefValue) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-359
     super(itemID);
     this.prefValue = prefValue;
   }
   
   public EntityPrefWritable(EntityPrefWritable other) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-362
     this(other.get(), other.getPrefValue());
   }
 
@@ -64,6 +66,7 @@ public final class EntityPrefWritable extends VarLongWritable implements Cloneab
 
   @Override
   public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-362
     return super.hashCode() ^ RandomUtils.hashFloat(prefValue);
   }
 
@@ -73,6 +76,7 @@ public final class EntityPrefWritable extends VarLongWritable implements Cloneab
       return false;
     }
     EntityPrefWritable other = (EntityPrefWritable) o;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-362
     return get() == other.get() && prefValue == other.getPrefValue();
   }
 

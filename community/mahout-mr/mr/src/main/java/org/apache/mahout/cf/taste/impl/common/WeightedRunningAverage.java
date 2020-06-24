@@ -40,8 +40,10 @@ public class WeightedRunningAverage implements RunningAverage, Serializable {
     double oldTotalWeight = totalWeight;
     totalWeight += weight;
     if (oldTotalWeight <= 0.0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-919
       average = datum;
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-630
       average = average * oldTotalWeight / totalWeight + datum * weight / totalWeight;
     }
   }
@@ -58,6 +60,7 @@ public class WeightedRunningAverage implements RunningAverage, Serializable {
       average = Double.NaN;
       totalWeight = 0.0;
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-630
       average = average * oldTotalWeight / totalWeight - datum * weight / totalWeight;
     }
   }
@@ -68,7 +71,9 @@ public class WeightedRunningAverage implements RunningAverage, Serializable {
   }
 
   public synchronized void changeDatum(double delta, double weight) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(weight <= totalWeight, "weight must be <= totalWeight");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     average += delta * weight / totalWeight;
   }
 
@@ -89,6 +94,7 @@ public class WeightedRunningAverage implements RunningAverage, Serializable {
 
   @Override
   public RunningAverage inverse() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return new InvertedRunningAverage(this);
   }
 

@@ -38,6 +38,7 @@ public final class VectorAndPrefsWritable implements Writable {
   }
 
   public VectorAndPrefsWritable(Vector vector, List<Long> userIDs, List<Float> values) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
     set(vector, userIDs, values);
   }
 
@@ -77,6 +78,7 @@ public final class VectorAndPrefsWritable implements Writable {
     writable.readFields(in);
     vector = writable.get();
     int size = Varint.readUnsignedVarInt(in);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     userIDs = new ArrayList<>(size);
     values = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {

@@ -30,12 +30,14 @@ public class ClassParameter extends AbstractParameter<Class> {
     try {
       set(Class.forName(stringValue));
     } catch (ClassNotFoundException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
       throw new IllegalStateException(e);
     }
   }
   
   @Override
   public String getStringValue() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-190
     if (get() == null) {
       return null;
     }

@@ -41,6 +41,7 @@ public final class VectorizerConfig {
   private int chunkSizeInMegabytes;
 
   public VectorizerConfig(Configuration conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
                           String analyzerClassName,
                           String encoderClass,
                           String encoderName,
@@ -57,6 +58,7 @@ public final class VectorizerConfig {
   }
 
   public Configuration getConf() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     return conf;
   }
 
@@ -90,6 +92,7 @@ public final class VectorizerConfig {
 
 
   public String getTfDirName() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-688
     return tfDirName;
   }
 

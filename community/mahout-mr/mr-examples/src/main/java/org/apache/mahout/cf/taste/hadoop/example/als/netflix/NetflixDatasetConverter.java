@@ -54,6 +54,7 @@ public final class NetflixDatasetConverter {
 
     if (args.length != 4) {
       System.err.println("Usage: NetflixDatasetConverter /path/to/training_set/ /path/to/qualifying.txt "
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
           + "/path/to/judging.txt /path/to/destination");
       return;
     }
@@ -66,6 +67,7 @@ public final class NetflixDatasetConverter {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(outputPath.toUri(), conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Preconditions.checkArgument(trainingDataDir != null, "Training Data location needs to be specified");
     log.info("Creating training set at {}/trainingSet/ratings.tsv ...", outputPath);
     try (BufferedWriter writer =
@@ -77,6 +79,7 @@ public final class NetflixDatasetConverter {
       for (File movieRatings : new File(trainingDataDir).listFiles()) {
         try (FileLineIterator lines = new FileLineIterator(movieRatings)) {
           boolean firstLineRead = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
           String movieID = null;
           while (lines.hasNext()) {
             String line = lines.next();
@@ -89,6 +92,7 @@ public final class NetflixDatasetConverter {
               if (ratingsProcessed % 1000000 == 0) {
                 log.info("{} ratings processed...", ratingsProcessed);
               }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
             } else {
               movieID = line.replaceAll(MOVIE_DENOTER, "");
               firstLineRead = true;
@@ -101,6 +105,7 @@ public final class NetflixDatasetConverter {
     }
 
     log.info("Reading probes...");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Preference> probes = new ArrayList<>(2817131);
     long currentMovieID = -1;
     for (String line : new FileLineIterable(new File(qualifyingTxt))) {
@@ -114,6 +119,7 @@ public final class NetflixDatasetConverter {
     log.info("{} probes read...", probes.size());
 
     log.info("Reading ratings, creating probe set at {}/probeSet/ratings.tsv ...", outputPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (BufferedWriter writer =
              new BufferedWriter(new OutputStreamWriter(
                  fs.create(new Path(outputPath, "probeSet/ratings.tsv")), Charsets.UTF_8))){

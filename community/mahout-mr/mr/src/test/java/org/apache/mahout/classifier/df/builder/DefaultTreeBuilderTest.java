@@ -33,10 +33,12 @@ public final class DefaultTreeBuilderTest extends MahoutTestCase {
    */
   @Test
   public void testRandomAttributes() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     Random rng = RandomUtils.getRandom();
     int nbAttributes = rng.nextInt(100) + 1;
     boolean[] selected = new boolean[nbAttributes];
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-245
     for (int nloop = 0; nloop < 100; nloop++) {
       Arrays.fill(selected, false);
 

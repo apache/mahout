@@ -47,6 +47,7 @@ public final class DataUtils {
    * foreach i : array1[i] += array2[i]
    */
   public static void add(int[] array1, int[] array2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(array1.length == array2.length, "array1.length != array2.length");
     for (int index = 0; index < array1.length; index++) {
       array1[index] += array2[index];
@@ -57,6 +58,7 @@ public final class DataUtils {
    * foreach i : array1[i] -= array2[i]
    */
   public static void dec(int[] array1, int[] array2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(array1.length == array2.length, "array1.length != array2.length");
     for (int index = 0; index < array1.length; index++) {
       array1[index] -= array2[index];
@@ -72,6 +74,7 @@ public final class DataUtils {
    */
   public static int maxindex(Random rng, int[] values) {
     int max = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Integer> maxindices = new ArrayList<>();
     
     for (int index = 0; index < values.length; index++) {

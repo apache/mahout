@@ -27,6 +27,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VectorWritable;
 
 @Deprecated
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
 class CanopyMapper extends
     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
@@ -39,6 +41,7 @@ class CanopyMapper extends
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point,
       Context context) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     canopyClusterer.addPointToCanopies(point.get(), canopies);
   }
 
@@ -56,6 +59,7 @@ class CanopyMapper extends
       InterruptedException {
     for (Canopy canopy : canopies) {
       canopy.computeParameters();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       if (canopy.getNumObservations() > clusterFilter) {
         context.write(new Text("centroid"), new VectorWritable(canopy
             .getCenter()));

@@ -122,6 +122,7 @@ public final class DefaultOptionCreator {
    * Used by all clustering jobs plus others
    */
   public static DefaultOptionBuilder outputOption() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-597
     return new DefaultOptionBuilder()
         .withLongName(OUTPUT_OPTION)
         .withRequired(false)
@@ -173,6 +174,7 @@ public final class DefaultOptionCreator {
         .withRequired(false)
         .withShortName("xm")
         .withArgument(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-597
             new ArgumentBuilder().withName(METHOD_OPTION)
                 .withDefault(MAPREDUCE_METHOD).withMinimum(1).withMaximum(1)
                 .create())
@@ -242,6 +244,7 @@ public final class DefaultOptionCreator {
  * @return a DefaultOptionBuilder for the clusterFilter option
  */
   public static DefaultOptionBuilder clusterFilterOption() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-818
     return new DefaultOptionBuilder()
         .withLongName(CLUSTER_FILTER_OPTION)
         .withShortName("cf")
@@ -284,6 +287,7 @@ public final class DefaultOptionCreator {
   }
 
   public static DefaultOptionBuilder useSetRandomSeedOption() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1440
     return new DefaultOptionBuilder()
         .withLongName(RANDOM_SEED)
         .withRequired(false)
@@ -315,6 +319,7 @@ public final class DefaultOptionCreator {
    */
   @Deprecated
   public static DefaultOptionBuilder numReducersOption() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-597
     return new DefaultOptionBuilder()
         .withLongName(MAX_REDUCERS_OPTION)
         .withRequired(false)
@@ -346,6 +351,7 @@ public final class DefaultOptionCreator {
     return new DefaultOptionBuilder()
         .withLongName(ANALYZER_NAME_OPTION)
         .withRequired(false)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         .withDescription("If present, the name of a Lucene analyzer class to use")
         .withArgument(new ArgumentBuilder().withName(ANALYZER_NAME_OPTION).withDefault(StandardAnalyzer.class.getName())
             .withMinimum(1).withMaximum(1).create())
@@ -405,6 +411,7 @@ public final class DefaultOptionCreator {
    * Cluster Classification.
    */
   public static DefaultOptionBuilder outlierThresholdOption() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-929
     return new DefaultOptionBuilder()
         .withLongName(OUTLIER_THRESHOLD)
         .withRequired(false)

@@ -28,8 +28,10 @@ public class ComplementaryNaiveBayesClassifier extends AbstractNaiveBayesClassif
   public double getScoreForLabelFeature(int label, int feature) {
     NaiveBayesModel model = getModel();
     double weight = computeWeight(model.featureWeight(feature), model.weight(label, feature),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1006
         model.totalWeightSum(), model.labelWeight(label), model.alphaI(), model.numFeatures());
     // see http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.2, Weight Magnitude Errors
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1504
     return weight / model.thetaNormalizer(label);
   }
 

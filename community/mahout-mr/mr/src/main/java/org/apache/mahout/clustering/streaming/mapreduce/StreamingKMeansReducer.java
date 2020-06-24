@@ -58,10 +58,12 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
     // of StreamingKMeans to collapse the clusters further.
     if (conf.getBoolean(StreamingKMeansDriver.REDUCE_STREAMING_KMEANS, false)) {
       intermediateCentroids = Lists.newArrayList(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1254
           new StreamingKMeansThread(Iterables.transform(centroids, new Function<CentroidWritable, Centroid>() {
             @Override
             public Centroid apply(CentroidWritable input) {
               Preconditions.checkNotNull(input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1314
               return input.getCentroid().clone();
             }
           }), conf).call());
@@ -71,6 +73,7 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
 
     int index = 0;
     for (Vector centroid : getBestCentroids(intermediateCentroids, conf)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1314
       context.write(new IntWritable(index), new CentroidWritable((Centroid) centroid));
       ++index;
     }
@@ -90,6 +93,7 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
 
   public static Iterable<Vector> getBestCentroids(List<Centroid> centroids, Configuration conf) {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1314
     if (log.isInfoEnabled()) {
       log.info("Number of Centroids: {}", centroids.size());
     }
@@ -102,6 +106,7 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
     float testProbability = conf.getFloat(StreamingKMeansDriver.TEST_PROBABILITY, 0.1f);
     int numRuns = conf.getInt(StreamingKMeansDriver.NUM_BALLKMEANS_RUNS, 3);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1314
     BallKMeans ballKMeansCluster = new BallKMeans(StreamingKMeansUtilsMR.searcherFromConfiguration(conf),
         numClusters, maxNumIterations, trimFraction, kMeansPlusPlusInit, correctWeights, testProbability, numRuns);
     return ballKMeansCluster.cluster(centroids);

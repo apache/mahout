@@ -73,6 +73,7 @@ public final class Job extends AbstractJob {
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.t1Option().create());
     addOption(DefaultOptionCreator.t2Option().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1017
     addOption(M_OPTION, M_OPTION, "coefficient normalization factor, must be greater than 1", true);
     
     Map<String,List<String>> argMap = parseArguments(args);
@@ -94,6 +95,7 @@ public final class Job extends AbstractJob {
         .withArgument(new ArgumentBuilder().withName(M_OPTION).withMinimum(1).withMaximum(1).create())
         .withDescription("coefficient normalization factor, must be greater than 1").withShortName(M_OPTION).create());
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       HadoopUtil.delete(getConf(), output);
     }
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
@@ -133,6 +135,7 @@ public final class Job extends AbstractJob {
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
     Path canopyOutput = new Path(output, "canopies");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
     CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, canopyOutput, measure, t1, t2, false, 0.0, false);
     log.info("Running FuzzyKMeans");
     FuzzyKMeansDriver.run(directoryContainingConvertedInput, new Path(canopyOutput, "clusters-0-final"), output,

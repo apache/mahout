@@ -28,6 +28,7 @@ public final class AveragingPreferenceInferrerTest extends TasteTestCase {
 
   @Test
   public void testInferrer() throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     DataModel model = getDataModel(new long[] {1}, new Double[][] {{3.0,-2.0,5.0}});
     PreferenceInferrer inferrer = new AveragingPreferenceInferrer(model);
     double inferred = inferrer.inferPreference(1, 3);

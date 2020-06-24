@@ -82,6 +82,7 @@ public class SSVDCommonTest extends MahoutTestCase {
     int rank = 0;
     for (int i = 0; i < n; i++) {
       Vector ei = mtx.viewColumn(i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
 
       double norm = ei.norm(2);
 
@@ -92,6 +93,7 @@ public class SSVDCommonTest extends MahoutTestCase {
       }
 
       for (int j = 0; j <= i; j++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
         Vector e_j = mtx.viewColumn(j);
         double dot = ei.dot(e_j);
         assertTrue(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon);

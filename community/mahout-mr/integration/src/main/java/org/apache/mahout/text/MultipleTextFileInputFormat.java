@@ -40,6 +40,7 @@ public class MultipleTextFileInputFormat extends CombineFileInputFormat<IntWrita
   public RecordReader<IntWritable, BytesWritable> createRecordReader(InputSplit inputSplit,
                                                                       TaskAttemptContext taskAttemptContext)
       throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     return new CombineFileRecordReader<>((CombineFileSplit) inputSplit,
         taskAttemptContext, WholeFileRecordReader.class);
   }

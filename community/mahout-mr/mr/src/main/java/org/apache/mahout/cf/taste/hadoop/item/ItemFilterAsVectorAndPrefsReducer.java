@@ -48,6 +48,7 @@ public class ItemFilterAsVectorAndPrefsReducer
     /* artificial NaN summand to exclude this item from the recommendations for all users specified in userIDs */
     vector.set(itemIDIndex, Double.NaN);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Long> userIDs = new ArrayList<>();
     List<Float> prefValues = new ArrayList<>();
     for (VarLongWritable userID : values) {
@@ -55,6 +56,7 @@ public class ItemFilterAsVectorAndPrefsReducer
       prefValues.add(1.0f);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1264
     itemIDIndexWritable.set(itemIDIndex);
     vectorAndPrefs.set(vector, userIDs, prefValues);
     ctx.write(itemIDIndexWritable, vectorAndPrefs);

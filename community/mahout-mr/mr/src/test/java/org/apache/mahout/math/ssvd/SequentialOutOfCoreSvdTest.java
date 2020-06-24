@@ -56,6 +56,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
   @Test
   public void testSingularValues() throws IOException {
     Matrix A = lowRankMatrix(tmpDir, "A", 200, 970, 1020);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
 
     List<File> partsOfA = Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
       @Override
@@ -65,6 +66,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
     }));
 
     // rearrange A to make sure we don't depend on lexical ordering.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
     partsOfA = Lists.reverse(partsOfA);
     SequentialOutOfCoreSvd s = new SequentialOutOfCoreSvd(partsOfA, tmpDir, 100, 210);
     SequentialBigSvd svd = new SequentialBigSvd(A, 100);
@@ -80,7 +82,9 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
         return fileName.matches("U-.*");
       }
     })));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
     s.computeV(tmpDir, A.columnSize());
     Matrix v = readBlockMatrix(Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
       @Override
@@ -118,6 +122,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
       DataInputStream in = new DataInputStream(new FileInputStream(file));
       m.readFields(in);
       in.close();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
       if (nrows == -1) {
         // now we can set an upper bound on how large our result will be
         nrows = m.get().rowSize() * files.size();
@@ -138,6 +143,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
   @Test
   public void testLeftVectors() throws IOException {
     Matrix A = lowRankMatrixInMemory(20, 20);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
 
     SequentialBigSvd s = new SequentialBigSvd(A, 6);
     SingularValueDecomposition svd = new SingularValueDecomposition(A);
@@ -170,6 +176,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
 
   private static Matrix lowRankMatrix(File tmpDir, String aBase, int rowsPerSlice, int rows, int columns) throws IOException {
     int rank = 10;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
     Matrix u = new RandomTrinaryMatrix(1, rows, rank, false);
     Matrix d = new DenseMatrix(rank, rank);
     d.set(0, 0, 5);
@@ -179,6 +186,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
     Matrix v = new RandomTrinaryMatrix(2, columns, rank, false);
     Matrix a = u.times(d).times(v.transpose());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-792
     if (tmpDir != null) {
       for (int i = 0; i < a.rowSize(); i += rowsPerSlice) {
         MatrixWritable m = new MatrixWritable(a.viewPart(i, Math.min(a.rowSize() - i, rowsPerSlice), 0, a.columnSize()));

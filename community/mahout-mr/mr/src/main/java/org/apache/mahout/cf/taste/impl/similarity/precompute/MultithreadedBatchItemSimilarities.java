@@ -74,6 +74,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
   @Override
   public int computeItemSimilarities(int degreeOfParallelism, int maxDurationInHours, SimilarItemsWriter writer)
     throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
 
     ExecutorService executorService = Executors.newFixedThreadPool(degreeOfParallelism + 1);
 
@@ -83,8 +84,10 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
       DataModel dataModel = getRecommender().getDataModel();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1560
       BlockingQueue<long[]> itemsIDsInBatches = queueItemIDsInBatches(dataModel, batchSize, degreeOfParallelism);
       BlockingQueue<List<SimilarItems>> results = new LinkedBlockingQueue<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
       AtomicInteger numActiveWorkers = new AtomicInteger(degreeOfParallelism);
       for (int n = 0; n < degreeOfParallelism; n++) {
@@ -106,6 +109,8 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1622
       Closeables.close(writer, false);
     }
 
@@ -120,10 +125,12 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     int numItems = dataModel.getNumItems();
 
     BlockingQueue<long[]> itemIDBatches = new LinkedBlockingQueue<>((numItems / batchSize) + 1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     long[] batch = new long[batchSize];
     int pos = 0;
     while (itemIDs.hasNext()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1560
       batch[pos] = itemIDs.nextLong();
       pos++;
       if (pos == batchSize) {
@@ -168,6 +175,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
     @Override
     public void run() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1622
       while (numActiveWorkers.get() != 0 || !results.isEmpty()) {
         try {
           List<SimilarItems> similarItemsOfABatch = results.poll(10, TimeUnit.MILLISECONDS);
@@ -207,6 +215,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
         try {
           long[] itemIDBatch = itemIDBatches.take();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1622
           List<SimilarItems> similarItemsOfBatch = new ArrayList<>(itemIDBatch.length);
           for (long itemID : itemIDBatch) {
             List<RecommendedItem> similarItems = getRecommender().mostSimilarItems(itemID, getSimilarItemsPerItem());

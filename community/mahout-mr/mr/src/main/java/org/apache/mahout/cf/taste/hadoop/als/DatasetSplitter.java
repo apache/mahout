@@ -69,11 +69,13 @@ public class DatasetSplitter extends AbstractJob {
 
     addInputOption();
     addOutputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     addOption("trainingPercentage", "t", "percentage of the data to use as training set (default: " 
         + DEFAULT_TRAINING_PERCENTAGE + ')', String.valueOf(DEFAULT_TRAINING_PERCENTAGE));
     addOption("probePercentage", "p", "percentage of the data to use as probe set (default: " 
         + DEFAULT_PROBE_PERCENTAGE + ')', String.valueOf(DEFAULT_PROBE_PERCENTAGE));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1125
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
@@ -88,6 +90,7 @@ public class DatasetSplitter extends AbstractJob {
     Path probeSetPath = new Path(getOutputPath(), "probeSet");
 
     Job markPreferences = prepareJob(getInputPath(), markedPrefs, TextInputFormat.class, MarkPreferencesMapper.class,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-872
         Text.class, Text.class, SequenceFileOutputFormat.class);
     markPreferences.getConfiguration().set(TRAINING_PERCENTAGE, String.valueOf(trainingPercentage));
     markPreferences.getConfiguration().set(PROBE_PERCENTAGE, String.valueOf(probePercentage));

@@ -41,6 +41,7 @@ public final class UncenteredCosineSimilarity extends AbstractSimilarity {
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
   public UncenteredCosineSimilarity(DataModel dataModel) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-387
     this(dataModel, Weighting.UNWEIGHTED);
   }
 
@@ -49,6 +50,7 @@ public final class UncenteredCosineSimilarity extends AbstractSimilarity {
    */
   public UncenteredCosineSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(dataModel.hasPreferenceValues(), "DataModel doesn't have preference values");
   }
 

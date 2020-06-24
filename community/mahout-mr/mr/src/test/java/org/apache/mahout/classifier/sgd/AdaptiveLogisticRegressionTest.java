@@ -57,6 +57,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     }
     assertEquals(1, cl.getLearner().auc(), 0.1);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     AdaptiveLogisticRegression adaptiveLogisticRegression = new AdaptiveLogisticRegression(2, 200, new L1());
     adaptiveLogisticRegression.setInterval(1000);
 
@@ -76,6 +77,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
   private static AdaptiveLogisticRegression.TrainingExample getExample(int i, Random gen, Vector beta) {
     Vector data = new DenseVector(200);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element element : data.all()) {
       element.set(gen.nextDouble() < 0.3 ? 1 : 0);
     }
@@ -93,6 +95,8 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     Random gen = RandomUtils.getRandom();
     Exponential exp = new Exponential(0.5, gen);
     Vector beta = new DenseVector(200);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Vector.Element element : beta.all()) {
         int sign = 1;
         if (gen.nextDouble() < 0.5) {
@@ -157,6 +161,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     assertEquals(20000, lr.nextStep(15001));
     assertEquals(20000, lr.nextStep(16500));
     assertEquals(20000, lr.nextStep(19999));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     lr.close(); 
   }
     
@@ -168,6 +173,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     lr.setInterval(2000, 10000);
 
     // start with minimum step size
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 2000; i < 20000; i+=2000) {
       assertEquals(i + 2000, lr.nextStep(i));
     }
@@ -181,6 +187,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     for (int i = 50000; i < 500000; i += 10000) {
       assertEquals(i + 10000, lr.nextStep(i));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     lr.close();
   }
 }

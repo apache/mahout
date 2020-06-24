@@ -161,6 +161,7 @@ public class MailOptions {
    * @return true if we should strip out quoted email text
    */
   public boolean isStripQuotedText() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-939
     return stripQuotedText;
   }
 

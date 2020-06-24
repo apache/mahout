@@ -40,6 +40,7 @@ public class ToUserVectorsReducerTest extends TasteTestCase {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     ToUserVectorsReducer reducer = new ToUserVectorsReducer();
     setField(reducer, "minPreferences", 2);
 
@@ -55,7 +56,9 @@ public class ToUserVectorsReducerTest extends TasteTestCase {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
     Counter userCounters = EasyMock.createMock(Counter.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-736
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-767
     ToUserVectorsReducer reducer = new ToUserVectorsReducer();
     setField(reducer, "minPreferences", 2);
 

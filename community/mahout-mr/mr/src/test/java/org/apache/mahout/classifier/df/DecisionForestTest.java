@@ -139,6 +139,7 @@ public final class DecisionForestTest extends MahoutTestCase {
     // Build Forest
     DecisionForest forest = buildForest(datas);
     // Test data
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1610
     Dataset dataset = datas[0].getDataset();
     Data testData = DataLoader.loadData(dataset, TEST_DATA);
 
@@ -157,6 +158,7 @@ public final class DecisionForestTest extends MahoutTestCase {
     // Build Forest
     DecisionForest forest = buildForest(datas);
     // Test data
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1610
     Dataset dataset = datas[0].getDataset();
     Data testData = DataLoader.loadData(dataset, TEST_DATA);
 

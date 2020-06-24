@@ -39,6 +39,7 @@ public class NGrams {
   }
   
   public Map<String,List<String>> generateNGrams() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
     Map<String,List<String>> returnDocument = Maps.newHashMap();
     
     Iterator<String> tokenizer = SPACE_TAB.split(line).iterator();

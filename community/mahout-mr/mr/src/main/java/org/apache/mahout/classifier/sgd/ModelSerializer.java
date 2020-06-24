@@ -37,6 +37,7 @@ public final class ModelSerializer {
   }
 
   public static void writeBinary(String path, CrossFoldLearner model) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (DataOutputStream out = new DataOutputStream(new FileOutputStream(path))) {
       PolymorphicWritable.write(out, model);
     }
@@ -59,6 +60,8 @@ public final class ModelSerializer {
     try {
       return PolymorphicWritable.read(dataIn, clazz);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(in, false);
     }
   }

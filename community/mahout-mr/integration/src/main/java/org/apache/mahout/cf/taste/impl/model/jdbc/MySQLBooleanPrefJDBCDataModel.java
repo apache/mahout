@@ -68,6 +68,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
    *           if {@link javax.sql.DataSource} can't be found
    */
   public MySQLBooleanPrefJDBCDataModel(String dataSourceName) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     this(AbstractJDBCComponent.lookupDataSource(dataSourceName),
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
@@ -88,6 +89,8 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
     this(dataSource,
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
          DEFAULT_ITEM_ID_COLUMN,
          DEFAULT_PREFERENCE_TIME_COLUMN);
   }
@@ -111,6 +114,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
   public MySQLBooleanPrefJDBCDataModel(DataSource dataSource,
                                        String preferenceTable,
                                        String userIDColumn,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-429
                                        String itemIDColumn,
                                        String timestampColumn) {
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn,
@@ -145,6 +149,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
         // getNumPreferenceForItemsSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " tp1 JOIN " + preferenceTable + " tp2 " + "USING ("
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-380
             + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?",
         // getMaxPreferenceSQL
         "SELECT 1.0",

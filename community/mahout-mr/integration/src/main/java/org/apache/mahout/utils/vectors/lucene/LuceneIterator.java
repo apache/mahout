@@ -48,6 +48,7 @@ public class LuceneIterator extends AbstractLuceneIterator {
    */
   public LuceneIterator(IndexReader indexReader, String idField, String field, TermInfo termInfo, Weight weight,
                         double normPower) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     this(indexReader, idField, field, termInfo, weight, normPower, 0.0);
   }
 
@@ -65,6 +66,7 @@ public class LuceneIterator extends AbstractLuceneIterator {
   public LuceneIterator(IndexReader indexReader,
                         String idField,
                         String field,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
                         TermInfo termInfo,
                         Weight weight,
                         double normPower,
@@ -77,10 +79,12 @@ public class LuceneIterator extends AbstractLuceneIterator {
         "Must be: 0.0 <= maxPercentErrorDocs <= 1.0");
     this.idField = idField;
     if (idField != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       idFieldSelector = new TreeSet<>();
       idFieldSelector.add(idField);
     } else {
       /*The field in the index  containing the index. If null, then the Lucene internal doc id is used
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       which is prone to error if the underlying index changes*/
       idFieldSelector = null;
     }

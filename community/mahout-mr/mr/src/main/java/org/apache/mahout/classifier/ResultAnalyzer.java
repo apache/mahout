@@ -43,7 +43,9 @@ public class ResultAnalyzer {
   private int incorrectlyClassified;
   
   public ResultAnalyzer(Collection<String> labelSet, String defaultLabel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-92
     confusionMatrix = new ConfusionMatrix(labelSet, defaultLabel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-857
     summarizer = new OnlineSummarizer();
   }
   
@@ -67,6 +69,7 @@ public class ResultAnalyzer {
       incorrectlyClassified++;
     }
     confusionMatrix.addInstance(correctLabel, classifiedResult);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (classifiedResult.getLogLikelihood() != Double.MAX_VALUE) {
       summarizer.add(classifiedResult.getLogLikelihood());
       hasLL = true;
@@ -79,6 +82,7 @@ public class ResultAnalyzer {
     StringBuilder returnString = new StringBuilder();
    
     returnString.append('\n'); 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     returnString.append("=======================================================\n");
     returnString.append("Summary\n");
     returnString.append("-------------------------------------------------------\n");
@@ -97,7 +101,9 @@ public class ResultAnalyzer {
       StringUtils.leftPad(Integer.toString(totalClassified), 10)).append('\n');
     returnString.append('\n');
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     returnString.append(confusionMatrix);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-941
     returnString.append("=======================================================\n");
     returnString.append("Statistics\n");
     returnString.append("-------------------------------------------------------\n");
@@ -110,6 +116,7 @@ public class ResultAnalyzer {
     returnString.append(StringUtils.rightPad("Reliability", 40)).append(
       StringUtils.leftPad(decimalFormatter.format(normStats.getAverage() * 100.00000001), 10)).append("%\n");
     returnString.append(StringUtils.rightPad("Reliability (standard deviation)", 40)).append(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1554
       StringUtils.leftPad(decimalFormatter.format(normStats.getStandardDeviation()), 10)).append('\n');
     returnString.append(StringUtils.rightPad("Weighted precision", 40)).append(
       StringUtils.leftPad(decimalFormatter.format(confusionMatrix.getWeightedPrecision()), 10)).append('\n');

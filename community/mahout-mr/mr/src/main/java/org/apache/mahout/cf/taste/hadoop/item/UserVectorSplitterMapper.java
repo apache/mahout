@@ -52,6 +52,7 @@ public final class UserVectorSplitterMapper extends
     Configuration jobConf = context.getConfiguration();
     maxPrefsPerUserConsidered = jobConf.getInt(MAX_PREFS_PER_USER_CONSIDERED, DEFAULT_MAX_PREFS_PER_USER_CONSIDERED);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1374
     IDReader idReader = new IDReader (jobConf);
     idReader.readIDs();
     usersToRecommendFor = idReader.getUserIds();    
@@ -59,17 +60,21 @@ public final class UserVectorSplitterMapper extends
 
   @Override
   protected void map(VarLongWritable key,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-385
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-305
                      VectorWritable value,
                      Context context) throws IOException, InterruptedException {
     long userID = key.get();
 
     log.info("UserID = {}", userID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
     if (usersToRecommendFor != null && !usersToRecommendFor.contains(userID)) {
       return;
     }
     Vector userVector = maybePruneUserVector(value.get());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : userVector.nonZeroes()) {
       itemIndexWritable.set(e.index());
       vectorOrPref.set(userID, (float) e.get());
@@ -78,6 +83,7 @@ public final class UserVectorSplitterMapper extends
   }
 
   private Vector maybePruneUserVector(Vector userVector) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-407
     if (userVector.getNumNondefaultElements() <= maxPrefsPerUserConsidered) {
       return userVector;
     }
@@ -87,6 +93,7 @@ public final class UserVectorSplitterMapper extends
     // "Blank out" small-sized prefs to reduce the amount of partial products
     // generated later. They're not zeroed, but NaN-ed, so they come through
     // and can be used to exclude these items from prefs.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : userVector.nonZeroes()) {
       float absValue = Math.abs((float) e.get());
       if (absValue < smallestLargeValue) {
@@ -99,6 +106,7 @@ public final class UserVectorSplitterMapper extends
 
   private float findSmallestLargeValue(Vector userVector) {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1172
     PriorityQueue<Float> topPrefValues = new PriorityQueue<Float>(maxPrefsPerUserConsidered) {
       @Override
       protected boolean lessThan(Float f1, Float f2) {
@@ -106,6 +114,7 @@ public final class UserVectorSplitterMapper extends
       }
     };
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : userVector.nonZeroes()) {
       float absValue = Math.abs((float) e.get());
       topPrefValues.insertWithOverflow(absValue);

@@ -30,6 +30,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   private double sk;
   
   public FullRunningAverageAndStdDev() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-824
     mk = 0.0;
     sk = 0.0;
     recomputeStdDev();
@@ -43,6 +44,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   }
 
   public double getMk() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return mk;
   }
   
@@ -91,11 +93,13 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   
   private synchronized void recomputeStdDev() {
     int count = getCount();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-824
     stdDev = count > 1 ? Math.sqrt(sk / (count - 1)) : Double.NaN;
   }
 
   @Override
   public RunningAverageAndStdDev inverse() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-903
     return new InvertedRunningAverageAndStdDev(this);
   }
   

@@ -39,6 +39,7 @@ public class MultithreadedSharingMapper<K1, V1, K2, V2> extends MultithreadedMap
 
   @Override
   public void run(Context ctx) throws IOException, InterruptedException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1335
     Class<Mapper<K1, V1, K2, V2>> mapperClass =
         MultithreadedSharingMapper.getMapperClass((JobContext) ctx);
     Preconditions.checkNotNull(mapperClass, "Could not find Multithreaded Mapper class.");

@@ -63,6 +63,7 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
 
     int[] gramFreq = {-1, -1};
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-299
     if (ngram.getType() == Gram.Type.UNIGRAM && emitUnigrams) {
       DoubleWritable dd = new DoubleWritable(ngram.getFrequency());
       Text t = new Text(ngram.getString());
@@ -77,7 +78,9 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
       int pos = value.getType() == Gram.Type.HEAD ? 0 : 1;
 
       if (gramFreq[pos] != -1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         log.warn("Extra {} for {}, skipping", value.getType(), ngram);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-299
         if (value.getType() == Gram.Type.HEAD) {
           context.getCounter(Skipped.EXTRA_HEAD).increment(1);
         } else {
@@ -91,10 +94,12 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
     }
 
     if (gramFreq[0] == -1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.warn("Missing head for {}, skipping.", ngram);
       context.getCounter(Skipped.MISSING_HEAD).increment(1);
       return;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-738
     if (gramFreq[1] == -1) {
       log.warn("Missing tail for {}, skipping", ngram);
       context.getCounter(Skipped.MISSING_TAIL).increment(1);

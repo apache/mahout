@@ -49,6 +49,7 @@ public final class SGDHelper {
     CrossFoldLearner model = learningAlgorithm.getBest().getPayload().getLearner();
     model.close();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, Set<Integer>> traceDictionary = new TreeMap<>();
     ModelDissector md = new ModelDissector();
 
@@ -65,6 +66,7 @@ public final class SGDHelper {
       md.update(v, traceDictionary, model);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<String> ngNames = new ArrayList<>(dictionary.values());
     List<ModelDissector.Weight> weights = md.summary(100);
     System.out.println("============");
@@ -77,6 +79,7 @@ public final class SGDHelper {
   }
 
   public static List<File> permute(Iterable<File> files, Random rand) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<File> r = new ArrayList<>();
     for (File file : files) {
       int i = rand.nextInt(r.size() + 1);
@@ -104,6 +107,7 @@ public final class SGDHelper {
 
     if (best != null) {
       CrossFoldLearner state = best.getPayload().getLearner();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       info.setAverageCorrect(state.percentCorrect());
       info.setAverageLL(state.logLikelihood());
 
@@ -137,10 +141,12 @@ public final class SGDHelper {
     }
     if (k % (bump * scale) == 0) {
       if (best != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1310
         File modelFile = new File(System.getProperty("java.io.tmpdir"), "news-group-" + k + ".model");
         ModelSerializer.writeBinary(modelFile.getAbsolutePath(), best.getPayload().getLearner().getModels().get(0));
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       info.setStep(info.getStep() + 0.25);
       System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%.8g\t%.8g\t", maxBeta, nonZeros, positive, norm, lambda, mu);
       System.out.printf("%d\t%.3f\t%.2f\t%s%n",

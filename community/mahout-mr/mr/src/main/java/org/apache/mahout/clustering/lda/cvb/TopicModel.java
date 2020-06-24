@@ -134,8 +134,10 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     this.numTerms = topicTermCounts.numCols();
     this.eta = eta;
     this.alpha = alpha;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     this.sampler = new Sampler(RandomUtils.getRandom());
     this.numThreads = numThreads;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (modelWeight != 1) {
       topicSums.assign(Functions.mult(modelWeight));
       for (int x = 0; x < numTopics; x++) {
@@ -147,6 +149,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private static Vector viewRowSums(Matrix m) {
     Vector v = new DenseVector(m.numRows());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (MatrixSlice slice : m) {
       v.set(slice.index(), slice.vector().norm(1));
     }
@@ -154,6 +157,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private synchronized void initializeThreadPool() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     if (threadPool != null) {
       threadPool.shutdown();
       try {
@@ -162,10 +166,12 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         log.error("Could not terminate all threads for TopicModel in time.", e);
       }
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1047
     threadPool = new ThreadPoolExecutor(numThreads, numThreads, 0, TimeUnit.SECONDS,
                                                            new ArrayBlockingQueue<Runnable>(numThreads * 10));
     threadPool.allowCoreThreadTimeOut(false);
     updaters = new Updater[numThreads];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 0; i < numThreads; i++) {
       updaters[i] = new Updater();
       threadPool.submit(updaters[i]);
@@ -188,6 +194,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   private static Pair<Matrix,Vector> randomMatrix(int numTopics, int numTerms, Random random) {
     Matrix topicTermCounts = new DenseMatrix(numTopics, numTerms);
     Vector topicSums = new DenseVector(numTopics);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (random != null) {
       for (int x = 0; x < numTopics; x++) {
         for (int term = 0; term < numTerms; term++) {
@@ -196,16 +203,20 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       }
     }
     for (int x = 0; x < numTopics; x++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       topicSums.set(x, random == null ? 1.0 : topicTermCounts.viewRow(x).norm(1));
     }
     return Pair.of(topicTermCounts, topicSums);
   }
 
   public static Pair<Matrix, Vector> loadModel(Configuration conf, Path... modelPaths)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     throws IOException {
     int numTopics = -1;
     int numTerms = -1;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Pair<Integer, Vector>> rows = new ArrayList<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (Path modelPath : modelPaths) {
       for (Pair<IntWritable, VectorWritable> row
           : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
@@ -232,7 +243,9 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   // NOTE: this is purely for debug purposes.  It is not performant to "toString()" a real model
   @Override
   public String toString() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     StringBuilder buf = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int x = 0; x < numTopics; x++) {
       String v = dictionary != null
           ? vectorToSortedString(topicTermCounts.viewRow(x).normalize(1), dictionary)
@@ -251,16 +264,20 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public synchronized void reset() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int x = 0; x < numTopics; x++) {
       topicTermCounts.assignRow(x, new SequentialAccessSparseVector(numTerms));
     }
     topicSums.assign(1.0);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     if (threadPool.isTerminated()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1047
       initializeThreadPool();
     }
   }
 
   public synchronized void stop() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (Updater updater : updaters) {
       updater.shutdown();
     }
@@ -270,6 +287,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         log.warn("Threadpool timed out on await termination - jobs still running!");
       }
     } catch (InterruptedException e) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
       log.error("Interrupted shutting down!", e);
     }
   }
@@ -288,6 +306,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     normalizeByTopic(docTopicModel);
     // now multiply, term-by-term, by the document, to get the weighted distribution of
     // term-topic pairs from this document.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : original.nonZeroes()) {
       for (int x = 0; x < numTopics; x++) {
         Vector docTopicModelRow = docTopicModel.viewRow(x);
@@ -305,6 +324,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public Vector infer(Vector original, Vector docTopics) {
     Vector pTerm = original.like();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : original.nonZeroes()) {
       int term = e.index();
       // p(a) = sum_x (p(a|x) * p(x|i))
@@ -318,6 +338,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void update(Matrix docTopicCounts) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int x = 0; x < numTopics; x++) {
       updaters[x % updaters.length].update(x, docTopicCounts.viewRow(x));
     }
@@ -329,6 +350,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void update(int termId, Vector topicCounts) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int x = 0; x < numTopics; x++) {
       Vector v = topicTermCounts.viewRow(x);
       v.set(termId, v.get(termId) + topicCounts.get(x));
@@ -338,6 +360,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public void persist(Path outputDir, boolean overwrite) throws IOException {
     FileSystem fs = outputDir.getFileSystem(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (overwrite) {
       fs.delete(outputDir, true); // CHECK second arg
     }
@@ -356,6 +379,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
    */
   private void pTopicGivenTerm(Vector document, Vector docTopics, Matrix termTopicDist) {
     // for each topic x
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int x = 0; x < numTopics; x++) {
       // get p(topic x | document i), or 1.0 if docTopics is null
       double topicWeight = docTopics == null ? 1.0 : docTopics.get(x);
@@ -367,11 +391,13 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       Vector termTopicRow = termTopicDist.viewRow(x);
 
       // for each term a in document i with non-zero weight
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element e : document.nonZeroes()) {
         int termIndex = e.index();
 
         // calc un-normalized p(topic x | term a, document i)
         double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
             / (topicSum + eta * numTerms);
         termTopicRow.set(termIndex, termTopicLikelihood);
       }
@@ -384,6 +410,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   public double perplexity(Vector document, Vector docTopics) {
     double perplexity = 0;
     double norm = docTopics.norm(1) + (docTopics.size() * alpha);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : document.nonZeroes()) {
       int term = e.index();
       double prob = 0;
@@ -400,6 +427,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private void normalizeByTopic(Matrix perTopicSparseDistributions) {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : perTopicSparseDistributions.viewRow(0).nonZeroes()) {
       int a = e.index();
       double sum = 0;
@@ -414,7 +442,9 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public static String vectorToSortedString(Vector vector, String[] dictionary) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Pair<String,Double>> vectorValues = new ArrayList<>(vector.getNumNondefaultElements());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : vector.nonZeroes()) {
       vectorValues.add(Pair.of(dictionary != null ? dictionary[e.index()] : String.valueOf(e.index()),
                                e.get()));
@@ -426,8 +456,10 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     });
     Iterator<Pair<String,Double>> listIt = vectorValues.iterator();
     StringBuilder bldr = new StringBuilder(2048);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     bldr.append('{');
     int i = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (listIt.hasNext() && i < 25) {
       i++;
       Pair<String,Double> p = listIt.next();
@@ -436,6 +468,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       bldr.append(p.getSecond());
       bldr.append(',');
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (bldr.length() > 1) {
       bldr.setCharAt(bldr.length() - 1, '}');
     }
@@ -454,6 +487,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private final class Updater implements Runnable {
     private final ArrayBlockingQueue<Pair<Integer, Vector>> queue =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new ArrayBlockingQueue<>(100);
     private boolean shutdown = false;
     private boolean shutdownComplete = false;
@@ -461,6 +495,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     public void shutdown() {
       try {
         synchronized (this) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
           while (!shutdownComplete) {
             shutdown = true;
             wait(10000L); // Arbitrarily, wait 10 seconds rather than forever for this
@@ -472,6 +507,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     }
 
     public boolean update(int topic, Vector v) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (shutdown) { // maybe don't do this?
         throw new IllegalStateException("In SHUTDOWN state: cannot submit tasks");
       }
@@ -489,6 +525,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
     @Override
     public void run() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       while (!shutdown) {
         try {
           Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
@@ -500,6 +537,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         }
       }
       // in shutdown mode, finish remaining tasks!
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       for (Pair<Integer, Vector> pair : queue) {
         updateTopic(pair.getFirst(), pair.getSecond());
       }

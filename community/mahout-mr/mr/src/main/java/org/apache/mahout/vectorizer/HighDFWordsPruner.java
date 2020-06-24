@@ -48,6 +48,7 @@ public final class HighDFWordsPruner {
   }
 
   public static void pruneVectors(Path tfDir, Path prunedTFDir, Path prunedPartialTFDir, long maxDF,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
                                   long minDF, Configuration baseConf,
                                   Pair<Long[], List<Path>> docFrequenciesFeatures,
                                   float normPower,
@@ -55,10 +56,12 @@ public final class HighDFWordsPruner {
                                   int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
 
     int partialVectorIndex = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1619
     List<Path> partialVectorPaths = new ArrayList<>();
     for (Path path : docFrequenciesFeatures.getSecond()) {
       Path partialVectorOutputPath = new Path(prunedPartialTFDir, "partial-" + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
       pruneVectorsPartial(tfDir, partialVectorOutputPath, path, maxDF, minDF, baseConf);
     }
 
@@ -67,6 +70,7 @@ public final class HighDFWordsPruner {
   }
 
   private static void pruneVectorsPartial(Path input, Path output, Path dictionaryFilePath, long maxDF,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
                                           long minDF, Configuration baseConf) throws IOException, InterruptedException,
           ClassNotFoundException {
 
@@ -77,8 +81,10 @@ public final class HighDFWordsPruner {
             "org.apache.hadoop.io.serializer.JavaSerialization,"
                     + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setLong(MAX_DF, maxDF);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
     conf.setLong(MIN_DF, minDF);
     DistributedCache.addCacheFile(dictionaryFilePath.toUri(), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1619
 
     Job job = HadoopUtil.prepareJob(input, output, SequenceFileInputFormat.class,
             Mapper.class, null, null, WordsPrunerReducer.class,

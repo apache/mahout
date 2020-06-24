@@ -35,6 +35,7 @@ public final class DescriptorUtilsTest extends MahoutTestCase {
     int n = 10;
     int maxnbAttributes = 100;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     Random rng = RandomUtils.getRandom();
     
     for (int nloop = 0; nloop < n; nloop++) {

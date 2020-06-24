@@ -78,6 +78,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     Analyzer analyzer = new WhitespaceAnalyzer();
     TokenStream ts = analyzer.tokenStream(null, reader);
     ts.reset();
@@ -90,6 +91,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testNonKeepdAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     Analyzer analyzer = new WhitespaceAnalyzer();
     TokenStream ts = analyzer.tokenStream(null, reader);
     ts.reset();
@@ -103,6 +105,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testKeepAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     Analyzer analyzer = new WhitespaceAnalyzer();
     TokenStream ts = analyzer.tokenStream(null, reader);
     ts.reset();
@@ -116,6 +119,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testShingleFilteredAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
     Analyzer analyzer = new WhitespaceAnalyzer();
     TokenStream ts = analyzer.tokenStream(null, reader);
     ts.reset();

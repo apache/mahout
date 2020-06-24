@@ -64,6 +64,7 @@ public final class ContinuousValueEncoderTest extends MahoutTestCase {
     assertEquals(30, v1.get(10), 0);
     assertEquals(30, v1.get(18), 0);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-539
     v2 = new DenseVector(20);
     v3 = new DenseVector(20);
     enc.setProbes(6);

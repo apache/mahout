@@ -28,6 +28,7 @@ public final class MemoryIDMigrator extends AbstractIDMigrator implements Updata
   private final FastByIDMap<String> longToString;
   
   public MemoryIDMigrator() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     this.longToString = new FastByIDMap<>(100);
   }
   
@@ -47,6 +48,7 @@ public final class MemoryIDMigrator extends AbstractIDMigrator implements Updata
 
   @Override
   public void initialize(Iterable<String> stringIDs) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-441
     for (String stringID : stringIDs) {
       storeMapping(toLongID(stringID), stringID);
     }

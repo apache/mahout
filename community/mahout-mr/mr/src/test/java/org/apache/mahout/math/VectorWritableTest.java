@@ -35,6 +35,7 @@ public final class VectorWritableTest extends RandomizedTest {
   public void createRandom(Vector v) {
     int size = randomInt(v.size() - 1);
     for (int i = 0; i < size; ++i) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1240
       v.set(randomInt(v.size() - 1), randomDouble());
     }
 
@@ -83,6 +84,7 @@ public final class VectorWritableTest extends RandomizedTest {
   @Repeat(iterations = 20)
   public void testNamedVectorWritable() throws Exception {
     Vector v = new DenseVector(MAX_VECTOR_SIZE);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-812
     v = new NamedVector(v, "Victor");
     createRandom(v);
     doTestVectorWritableEquals(v);
@@ -94,6 +96,7 @@ public final class VectorWritableTest extends RandomizedTest {
     writeAndRead(vectorWritable, vectorWritable2);
     Vector v2 = vectorWritable2.get();
     if (v instanceof NamedVector) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1240
       assertTrue(v2 instanceof NamedVector);
       NamedVector nv = (NamedVector) v;
       NamedVector nv2 = (NamedVector) v2;
@@ -105,10 +108,12 @@ public final class VectorWritableTest extends RandomizedTest {
 
   private static void writeAndRead(Writable toWrite, Writable toRead) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-575
     DataOutputStream dos = new DataOutputStream(baos);
     try {
       toWrite.write(dos);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(dos, false);
     }
 
@@ -117,6 +122,7 @@ public final class VectorWritableTest extends RandomizedTest {
     try {
       toRead.readFields(dis);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1240
       Closeables.close(dos, true);
     }
   }

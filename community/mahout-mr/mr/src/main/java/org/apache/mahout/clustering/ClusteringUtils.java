@@ -53,6 +53,7 @@ public final class ClusteringUtils {
                                                                  DistanceMeasure distanceMeasure) {
     UpdatableSearcher searcher = new ProjectionSearch(distanceMeasure, 3, 1);
     searcher.addAll(centroids);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<OnlineSummarizer> summarizers = new ArrayList<>();
     if (searcher.size() == 0) {
       return summarizers;
@@ -90,6 +91,7 @@ public final class ClusteringUtils {
   public static double totalClusterCost(Iterable<? extends Vector> datapoints, Searcher centroids) {
     double totalCost = 0;
     for (Vector vector : datapoints) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1237
       totalCost += centroids.searchFirst(vector, false).getWeight();
     }
     return totalCost;
@@ -110,6 +112,7 @@ public final class ClusteringUtils {
    * @see org.apache.mahout.clustering.streaming.cluster.StreamingKMeans#clusterInternal(Iterable, boolean)
    */
   public static double estimateDistanceCutoff(List<? extends Vector> data, DistanceMeasure distanceMeasure) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1254
     BruteSearch searcher = new BruteSearch(distanceMeasure);
     searcher.addAll(data);
     double minDistance = Double.POSITIVE_INFINITY;
@@ -124,6 +127,7 @@ public final class ClusteringUtils {
   }
 
   public static <T extends Vector> double estimateDistanceCutoff(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1610
       Iterable<T> data, DistanceMeasure distanceMeasure, int sampleLimit) {
     return estimateDistanceCutoff(Lists.newArrayList(Iterables.limit(data, sampleLimit)), distanceMeasure);
   }
@@ -155,6 +159,7 @@ public final class ClusteringUtils {
       for (int j = 0; j < n; ++j) {
         if (i != j) {
           double dbIndex = (averageDistanceI + clusterDistanceSummaries.get(j).getMean())
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
               / distanceMeasure.distance(centroids.get(i), centroids.get(j));
           if (dbIndex > maxDBIndex) {
             maxDBIndex = dbIndex;

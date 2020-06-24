@@ -53,6 +53,7 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
     // otherwise the Map content will be modified after the insert
     try {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1284
       K keyToUse = key instanceof NullWritable ? key : (K) cloneWritable(key);
       V valueToUse = (V) cloneWritable(value);
 
@@ -60,6 +61,7 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
 
       List<V> points = data.get(key);
       if (points == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-729
         points = Lists.newArrayList();
         data.put(keyToUse, points);
       }
@@ -103,6 +105,7 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
   }
 
   public Iterable<K> getKeysInInsertionOrder() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1284
     return keysInInsertionOrder;
   }
 
@@ -112,8 +115,10 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
 
     // Use reflection since the context types changed incompatibly between 0.20
     // and 0.23.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
     try {
       return buildNewMapperContext(configuration, output);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1667
     } catch (Exception|IncompatibleClassChangeError e) {
       try {
         return buildOldMapperContext(mapper, configuration, output);
@@ -131,8 +136,10 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
 
     // Use reflection since the context types changed incompatibly between 0.20
     // and 0.23.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-822
     try {
       return buildNewReducerContext(configuration, output, keyClass, valueClass);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1667
     } catch (Exception|IncompatibleClassChangeError e) {
       try {
         return buildOldReducerContext(reducer, configuration, output, keyClass, valueClass);
@@ -144,6 +151,7 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static <K1, V1, K2, V2> Mapper<K1, V1, K2, V2>.Context buildNewMapperContext(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1284
     Configuration configuration, RecordWriter<K2, V2> output) throws Exception {
     Class<?> mapContextImplClass = Class.forName("org.apache.hadoop.mapreduce.task.MapContextImpl");
     Constructor<?> cons = mapContextImplClass.getConstructors()[0];
@@ -158,6 +166,7 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static <K1, V1, K2, V2> Mapper<K1, V1, K2, V2>.Context buildOldMapperContext(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1284
     Mapper<K1, V1, K2, V2> mapper, Configuration configuration,
     RecordWriter<K2, V2> output) throws Exception {
     Constructor<?> cons = getNestedContextConstructor(mapper.getClass());
@@ -192,6 +201,7 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static <K1, V1, K2, V2> Reducer<K1, V1, K2, V2>.Context buildOldReducerContext(
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1284
     Reducer<K1, V1, K2, V2> reducer, Configuration configuration,
     RecordWriter<K2, V2> output, Class<K1> keyClass,
     Class<V1> valueClass) throws Exception {

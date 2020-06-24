@@ -45,12 +45,17 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, ClusterWr
       Context context) throws IOException, InterruptedException {
     for (VectorWritable value : values) {
       Vector point = value.get();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-11
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
       canopyClusterer.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
       canopy.computeParameters();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-933
       if (canopy.getNumObservations() > clusterFilter) {
         ClusterWritable clusterWritable = new ClusterWritable();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         clusterWritable.setValue(canopy);
         context.write(new Text(canopy.getIdentifier()), clusterWritable);
       }
@@ -59,6 +64,7 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, ClusterWr
 
   @Override
   protected void setup(Context context) throws IOException,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-626
       InterruptedException {
     super.setup(context);
     canopyClusterer = CanopyConfigKeys.configureCanopyClusterer(context.getConfiguration());

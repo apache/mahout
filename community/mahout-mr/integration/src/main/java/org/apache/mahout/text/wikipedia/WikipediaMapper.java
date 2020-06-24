@@ -78,6 +78,8 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       return;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1527
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1608
     String catMatch = findMatchingCategory(document);
     if (!all) {
       if ("Unknown".equals(catMatch)) {
@@ -85,6 +87,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       }
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1187
     document = StringEscapeUtils.unescapeHtml4(document);    
     if (removeLabels) {
       document = removeCategoriesFromText(document);
@@ -106,6 +109,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     super.setup(context);
     Configuration conf = context.getConfiguration();
  
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Set<String> newCategories = new HashSet<>();
     DefaultStringifier<Set<String>> setStringifier =
           new DefaultStringifier<>(conf, GenericsUtil.getClass(newCategories));
@@ -113,6 +117,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     String categoriesStr = conf.get("wikipedia.categories");
     inputCategories = setStringifier.fromString(categoriesStr);
     exactMatchOnly = conf.getBoolean("exact.match.only", false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1608
     all = conf.getBoolean("all.files", false);
     removeLabels = conf.getBoolean("remove.labels",false);
     log.info("Configure: Input Categories size: {} All: {} Exact Match: {} Remove Labels from Text: {}",
@@ -141,6 +146,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       }
       String category = document.substring(categoryIndex, endIndex).toLowerCase(Locale.ENGLISH).trim();
       if (exactMatchOnly && inputCategories.contains(category)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1527
         return category.toLowerCase(Locale.ENGLISH);
       }
       if (!exactMatchOnly) {
@@ -158,6 +164,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
   private String removeCategoriesFromText(String document) {
     int startIndex = 0;
     int categoryIndex;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1608
     try {
       while ((categoryIndex = document.indexOf("[[Category:", startIndex)) != -1) {
         int endIndex = document.indexOf("]]", categoryIndex);

@@ -43,6 +43,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   private static final Logger logger = LoggerFactory.getLogger(TestSequenceFilesFromDirectory.class);
 
   private static final String[][] DATA1 = {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     {"test1", "This is the first text."},
     {"test2", "This is the second text."},
     {"test3", "This is the third text."}
@@ -58,6 +59,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   public void testSequenceFileFromDirectoryBasic() throws Exception {
     // parameters
     Configuration configuration = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
 
     FileSystem fs = FileSystem.get(configuration);
 
@@ -74,6 +76,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
     // prepare input files
     createFilesFromArrays(configuration, inputDir, DATA1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     SequenceFilesFromDirectory.main(new String[]{
       "--input", inputDir.toString(),
@@ -85,11 +88,13 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
     // check output chunk files
     checkChunkFiles(configuration, outputDir, DATA1, "UID");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     createRecursiveDirFilesFromArrays(configuration, inputDirRecursive, DATA2);
 
     FileStatus fstInputPath = fs.getFileStatus(inputDirRecursive);
     String dirs = HadoopUtil.buildDirList(fs, fstInputPath);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     System.out.println("\n\n ----- recursive dirs: " + dirs);
     SequenceFilesFromDirectory.main(new String[]{
@@ -100,6 +105,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       "--keyPrefix", "UID",
       "--method", "sequential"});
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
     checkRecursiveChunkFiles(configuration, outputDirRecursive, DATA2, "UID");
   }
 
@@ -107,6 +113,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   public void testSequenceFileFromDirectoryMapReduce() throws Exception {
 
     Configuration conf = getConfiguration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
 
     FileSystem fs = FileSystem.get(conf);
 
@@ -124,6 +131,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     createFilesFromArrays(conf, inputDir, DATA1);
 
     SequenceFilesFromDirectory.main(new String[]{
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
       "-Dhadoop.tmp.dir=" + conf.get("hadoop.tmp.dir"),
       "--input", inputDir.toString(),
       "--output", mrOutputDir.toString(),
@@ -131,6 +139,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       "--charset", Charsets.UTF_8.name(),
       "--method", "mapreduce",
       "--keyPrefix", "UID",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
       "--fileFilterClass", "org.apache.mahout.text.TestPathFilter"
     });
 
@@ -140,16 +149,19 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
     FileStatus fst_input_path = fs.getFileStatus(inputDirRecur);
     String dirs = HadoopUtil.buildDirList(fs, fst_input_path);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     logger.info("\n\n ---- recursive dirs: {}", dirs);
 
     SequenceFilesFromDirectory.main(new String[]{
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
       "-Dhadoop.tmp.dir=" + conf.get("hadoop.tmp.dir"),
       "--input", inputDirRecur.toString(),
       "--output", mrOutputDirRecur.toString(),
       "--chunkSize", "64",
       "--charset", Charsets.UTF_8.name(),
       "--method", "mapreduce",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
       "--keyPrefix", "UID",
       "--fileFilterClass", "org.apache.mahout.text.TestPathFilter"
     });
@@ -161,6 +173,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   private static void createFilesFromArrays(Configuration conf, Path inputDir, String[][] data) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (String[] aData : data) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (OutputStreamWriter writer =
                new OutputStreamWriter(fs.create(new Path(inputDir, aData[0])), Charsets.UTF_8)){
         writer.write(aData[1]);
@@ -169,6 +182,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   }
 
   private static void createRecursiveDirFilesFromArrays(Configuration configuration, Path inputDir,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
                                                         String[][] data) throws IOException {
     FileSystem fs = FileSystem.get(configuration);
 
@@ -184,6 +198,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       curPath = new Path(subDir.toString(), "file.txt");
       logger.info("Created file: {}", curPath.toString());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       try (OutputStreamWriter writer = new OutputStreamWriter(fs.create(curPath), Charsets.UTF_8)){
         writer.write(aData[1]);
       }
@@ -201,6 +216,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("chunk-0", fileStatuses[0].getPath().getName());
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, String> fileToData = new HashMap<>();
     for (String[] aData : data) {
       fileToData.put(prefix + Path.SEPARATOR + aData[0], aData[1]);
@@ -221,12 +237,16 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   private static void checkRecursiveChunkFiles(Configuration configuration,
                                                Path outputDir,
                                                String[][] data,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-799
                                                String prefix) throws IOException {
     FileSystem fs = FileSystem.get(configuration);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     System.out.println(" ----------- check_Recursive_ChunkFiles ------------");
 
     // output exists?
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
     FileStatus[] fileStatuses = fs.listStatus(outputDir, PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("chunk-0", fileStatuses[0].getPath().getName());
@@ -240,6 +260,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFileIterator<Text, Text> iterator =
              new SequenceFileIterator<>(fileStatuses[0].getPath(), true, configuration)) {
       while (iterator.hasNext()) {
@@ -262,9 +283,11 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("part-m-00000", fileStatuses[0].getPath().getName());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, String> fileToData = new HashMap<>();
     for (String[] aData : data) {
       System.out.printf("map.put: %s %s\n", prefix + Path.SEPARATOR + aData[0], aData[1]);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-799
       fileToData.put(prefix + Path.SEPARATOR + aData[0], aData[1]);
     }
 
@@ -285,11 +308,17 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   private static void checkMRResultFilesRecursive(Configuration configuration, Path outputDir,
                                                   String[][] data, String prefix) throws IOException {
     FileSystem fs = FileSystem.get(configuration);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-833
 
     // output exists?
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
     FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("part-m-00000", fileStatuses[0].getPath().getName());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<String, String> fileToData = new HashMap<>();
     String currentPath = prefix;
 
@@ -299,6 +328,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<>(
         fileStatuses[0].getPath(), true, configuration)){
       while (iterator.hasNext()) {

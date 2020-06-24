@@ -129,6 +129,7 @@ public final class ABtDenseOutJob {
           aCols[i].setQuick(aRowCount, vec.getQuick(i));
         }
       } else if (vec.size() > 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
         for (Vector.Element vecEl : vec.nonZeroes()) {
           int i = vecEl.index();
           extendAColIfNeeded(i, aRowCount + 1);
@@ -146,6 +147,8 @@ public final class ABtDenseOutJob {
       } else if (aCols[col].size() < rowCount) {
         Vector newVec =
           new SequentialAccessSparseVector(rowCount + blockHeight,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
                                            aCols[col].getNumNondefaultElements() << 1);
         newVec.viewPart(0, aCols[col].size()).assign(aCols[col]);
         aCols[col] = newVec;
@@ -191,6 +194,7 @@ public final class ABtDenseOutJob {
 
             btInput =
               new SequenceFileDirIterator<>(btLocalPath, true, localFsConfig);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
 
           } else {
 
@@ -234,6 +238,7 @@ public final class ABtDenseOutJob {
               continue;
             }
             int j = -1;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
             for (Vector.Element aEl : aCol.nonZeroes()) {
               j = aEl.index();
 
@@ -316,6 +321,7 @@ public final class ABtDenseOutJob {
       blockHeight = conf.getInt(BtJob.PROP_OUTER_PROD_BLOCK_HEIGHT, -1);
       distributedBt = conf.get(PROP_BT_BROADCAST) != null;
       if (distributedBt) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
         btLocalPath = HadoopUtil.getCachedFiles(conf);
         localFsConfig = new Configuration();
         localFsConfig.set("fs.default.name", "file:///");
@@ -340,6 +346,7 @@ public final class ABtDenseOutJob {
    */
   public static class QRReducer
     extends Reducer<SplitPartitionedWritable, DenseBlockWritable, SplitPartitionedWritable, VectorWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
 
     /*
      * HACK: partition number formats in hadoop, copied. this may stop working
@@ -351,6 +358,8 @@ public final class ABtDenseOutJob {
      */
 
     private static final NumberFormat NUMBER_FORMAT =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
       NumberFormat.getInstance();
     static {
       NUMBER_FORMAT.setMinimumIntegerDigits(5);
@@ -453,6 +462,8 @@ public final class ABtDenseOutJob {
       String uniqueFileName = FileOutputFormat.getUniqueFile(context, name, "");
       uniqueFileName = uniqueFileName.replaceFirst("-r-", "-m-");
       uniqueFileName =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
         uniqueFileName.replaceFirst("\\d+$",
                                     Matcher.quoteReplacement(NUMBER_FORMAT.format(spw.getTaskId())));
       return new Path(FileOutputFormat.getWorkOutputPath(context),
@@ -469,9 +480,11 @@ public final class ABtDenseOutJob {
     private <K, V> OutputCollector<K, V> createOutputCollector(String name,
                               final SplitPartitionedWritable spw,
                               Context ctx,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
                               Class<V> valueClass) throws IOException, InterruptedException {
       Path outputPath = getSplitFilePath(name, spw, ctx);
       final SequenceFile.Writer w =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
         SequenceFile.createWriter(FileSystem.get(outputPath.toUri(), ctx.getConfiguration()),
                                   ctx.getConfiguration(),
                                   outputPath,
@@ -510,6 +523,8 @@ public final class ABtDenseOutJob {
                          int numReduceTasks,
                          boolean broadcastBInput)
     throws ClassNotFoundException, InterruptedException, IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
 
     JobConf oldApiJob = new JobConf(conf);
 
@@ -556,9 +571,12 @@ public final class ABtDenseOutJob {
     job.setNumReduceTasks(numReduceTasks);
 
     // broadcast Bt files if required.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     if (broadcastBInput) {
       job.getConfiguration().set(PROP_BT_BROADCAST, "y");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
       FileSystem fs = FileSystem.get(inputBtGlob.toUri(), conf);
       FileStatus[] fstats = fs.globStatus(inputBtGlob);
       if (fstats != null) {

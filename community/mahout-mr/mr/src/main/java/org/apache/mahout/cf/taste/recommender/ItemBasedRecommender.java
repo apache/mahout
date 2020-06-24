@@ -38,6 +38,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   List<RecommendedItem> mostSimilarItems(long itemID, int howMany) throws TasteException;
   
   /**
@@ -63,6 +64,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany) throws TasteException;
   
   /**
@@ -77,6 +79,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   List<RecommendedItem> mostSimilarItems(long[] itemIDs,
                                          int howMany,
                                          Rescorer<LongPair> rescorer) throws TasteException;
@@ -92,6 +95,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-558
   List<RecommendedItem> mostSimilarItems(long[] itemIDs,
                                          int howMany,
                                          boolean excludeItemIfNotSimilarToAll) throws TasteException;
@@ -140,6 +144,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
   List<RecommendedItem> recommendedBecause(long userID, long itemID, int howMany) throws TasteException;
   
 }

@@ -119,6 +119,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   }
 
   public double classifyScalarNoLink(Vector instance) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-790
     return beta.viewRow(0).dot(instance);
   }
 
@@ -146,6 +147,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   @Override
   public double classifyScalar(Vector instance) {
     Preconditions.checkArgument(numCategories() == 2, "Can only call classifyScalar with two categories");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     // apply pending regularization to whichever coefficients matter
     regularize(instance);
@@ -169,6 +171,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
       double gradientBase = gradient.get(i);
 
       // then we apply the gradientBase to the resulting element.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element updateLocation : instance.nonZeroes()) {
         int j = updateLocation.index();
 
@@ -178,9 +181,11 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     }
 
     // remember that these elements got updated
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element element : instance.nonZeroes()) {
       int j = element.index();
       updateSteps.setQuick(j, getStep());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1192
       updateCounts.incrementQuick(j, 1);
     }
     nextStep();
@@ -207,6 +212,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
 
     // here we lazily apply the prior to make up for our neglect
     for (int i = 0; i < numCategories - 1; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Element updateLocation : instance.nonZeroes()) {
         int j = updateLocation.index();
         double missingUpdates = getStep() - updateSteps.get(j);

@@ -43,7 +43,9 @@ public final class ClusteringTestUtils {
   }
 
   public static void writePointsToFile(Iterable<VectorWritable> points,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-302
                                        Path path,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-310
                                        FileSystem fs,
                                        Configuration conf) throws IOException {
     writePointsToFile(points, false, path, fs, conf);
@@ -65,15 +67,18 @@ public final class ClusteringTestUtils {
         writer.append(intWritable ? new IntWritable(recNum++) : new LongWritable(recNum++), point);
       }
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
   }
 
   public static Matrix sampledCorpus(Matrix matrix, Random random,
       int numDocs, int numSamples, int numTopicsPerDoc) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-897
     Matrix corpus = new SparseRowMatrix(numDocs, matrix.numCols());
     LDASampler modelSampler = new LDASampler(matrix, random);
     Vector topicVector = new DenseVector(matrix.numRows());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int i = 0; i < numTopicsPerDoc; i++) {
       int topic = random.nextInt(topicVector.size());
       topicVector.set(topic, topicVector.get(topic) + 1);
@@ -97,6 +102,7 @@ public final class ClusteringTestUtils {
   public static Matrix randomStructuredModel(int numTopics, int numTerms, DoubleFunction decay) {
     Matrix model = new DenseMatrix(numTopics, numTerms);
     int width = numTerms / numTopics;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (int topic = 0; topic < numTopics; topic++) {
       int topicCentroid = width * (1+topic);
       for (int i = 0; i < numTerms; i++) {
@@ -122,6 +128,7 @@ public final class ClusteringTestUtils {
       private final Sampler[] samplers;
 
       LDASampler(Matrix model, Random random) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-986
           this.random = random;
           samplers = new Sampler[model.numRows()];
           for (int i = 0; i < samplers.length; i++) {

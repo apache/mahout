@@ -41,11 +41,13 @@ public abstract class AbstractRecommender implements Recommender {
   private final CandidateItemsStrategy candidateItemsStrategy;
   
   protected AbstractRecommender(DataModel dataModel, CandidateItemsStrategy candidateItemsStrategy) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     this.dataModel = Preconditions.checkNotNull(dataModel);
     this.candidateItemsStrategy = Preconditions.checkNotNull(candidateItemsStrategy);
   }
 
   protected AbstractRecommender(DataModel dataModel) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-445
     this(dataModel, getDefaultCandidateItemsStrategy());
   }
 
@@ -63,6 +65,7 @@ public abstract class AbstractRecommender implements Recommender {
    */
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     return recommend(userID, howMany, null, false);
   }
 
@@ -97,6 +100,7 @@ public abstract class AbstractRecommender implements Recommender {
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     Preconditions.checkArgument(!Float.isNaN(value), "NaN value");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Setting preference for user {}, item {}", userID, itemID);
     dataModel.setPreference(userID, itemID, value);
   }
@@ -111,6 +115,7 @@ public abstract class AbstractRecommender implements Recommender {
    */
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Remove preference for user '{}', item '{}'", userID, itemID);
     dataModel.removePreference(userID, itemID);
   }
@@ -133,6 +138,7 @@ public abstract class AbstractRecommender implements Recommender {
    *           if an error occurs while listing items
    */
   protected FastIDSet getAllOtherItems(long userID, PreferenceArray preferencesFromUser, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
       throws TasteException {
     return candidateItemsStrategy.getCandidateItems(userID, preferencesFromUser, dataModel, includeKnownItems);
   }

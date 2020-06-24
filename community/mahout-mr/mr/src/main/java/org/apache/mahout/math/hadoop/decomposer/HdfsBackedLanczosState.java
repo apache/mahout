@@ -52,11 +52,13 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
   private FileSystem fs;
   
   public HdfsBackedLanczosState(VectorIterable corpus, int desiredRank, Vector initialVector, Path dir) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
     super(corpus, desiredRank, initialVector);
     baseDir = dir;
     //Path metadataPath = new Path(dir, METADATA_FILE);
     basisPath = new Path(dir, BASIS_PREFIX);
     singularVectorPath = new Path(dir, SINGULAR_PREFIX);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (corpus instanceof Configurable) {
       setConf(((Configurable)corpus).getConf());
     }
@@ -100,6 +102,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
   }
 
   protected void updateHdfsState() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (conf == null) {
       return;
     }
@@ -109,6 +112,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
       nextBasisVectorPath = new Path(basisPath, BASIS_PREFIX + '_' + ++numBasisVectorsOnDisk);
     }
     Vector nextVector;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     while (numBasisVectorsOnDisk < iterationNumber
         && (nextVector = getBasisVector(numBasisVectorsOnDisk)) != null) {
       persistVector(nextBasisVectorPath, numBasisVectorsOnDisk, nextVector);
@@ -130,6 +134,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
     persistVector(new Path(baseDir, "projections"), 0, projections);
     persistVector(new Path(baseDir, "norms"), 0, norms);
     persistVector(new Path(baseDir, "scaleFactor"), 0, new DenseVector(new double[] {scaleFactor}));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     for (Map.Entry<Integer, Vector> entry : singularVectors.entrySet()) {
       persistVector(new Path(singularVectorPath, SINGULAR_PREFIX + '_' + entry.getKey()),
           entry.getKey(), entry.getValue());
@@ -140,6 +145,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
   protected void persistVector(Path p, int key, Vector vector) throws IOException {
     SequenceFile.Writer writer = null;
     try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (fs.exists(p)) {
         log.warn("{} exists, will overwrite", p);
         fs.delete(p, true);
@@ -148,11 +154,13 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
           IntWritable.class, VectorWritable.class);
       writer.append(new IntWritable(key), new VectorWritable(vector));
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(writer, false);
     }
   }
 
   protected Vector fetchVector(Path p, int keyIndex) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (!fs.exists(p)) {
       return null;
     }
@@ -169,6 +177,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
 
   @Override
   public Vector getBasisVector(int i) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (!basis.containsKey(i)) {
       try {
         Vector v = fetchVector(new Path(basisPath, BASIS_PREFIX + '_' + i), i);
@@ -182,6 +191,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
 
   @Override
   public Vector getRightSingularVector(int i) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (!singularVectors.containsKey(i)) {
       try {
         Vector v = fetchVector(new Path(singularVectorPath, BASIS_PREFIX + '_' + i), i);
@@ -195,6 +205,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
 
   @Override
   public double getScaleFactor() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (scaleFactor <= 0) {
       try {
         Vector v = fetchVector(new Path(baseDir, "scaleFactor"), 0);

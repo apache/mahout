@@ -37,6 +37,7 @@ import java.util.List;
  */
 public final class VectorDistanceInvertedMapper
     extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
 
   private DistanceMeasure measure;
   private List<NamedVector> seedVectors;
@@ -66,6 +67,7 @@ public final class VectorDistanceInvertedMapper
     measure =
         ClassUtils.instantiateAs(conf.get(VectorDistanceSimilarityJob.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
     measure.configure(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-763
     seedVectors = SeedVectorUtil.loadSeedVectors(conf);
   }
 }

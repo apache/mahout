@@ -56,6 +56,7 @@ public class RegexConverterDriver extends AbstractJob {
 
     Configuration conf = getConf();
     //TODO: How to deal with command line escaping?
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     conf.set(RegexMapper.REGEX, getOption("regex")); //
     String gtk = getOption("groupsToKeep");
     if (gtk != null) {
@@ -63,6 +64,7 @@ public class RegexConverterDriver extends AbstractJob {
     }
     String trans = getOption("transformerClass");
     if (trans != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-913
       if ("url".equalsIgnoreCase(trans)) {
         trans = URLDecodeTransformer.class.getName();
       }
@@ -91,6 +93,7 @@ public class RegexConverterDriver extends AbstractJob {
             Text.class,
             TextOutputFormat.class);
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     return succeeded ? 0 : -1;
   }
 

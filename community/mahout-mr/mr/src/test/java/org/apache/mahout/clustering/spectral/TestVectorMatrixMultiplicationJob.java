@@ -43,6 +43,7 @@ public class TestVectorMatrixMultiplicationJob extends MahoutTestCase {
   @Test
   public void testVectorMatrixMultiplicationMapper() throws Exception {
     VectorMatrixMultiplicationMapper mapper = new VectorMatrixMultiplicationMapper();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     
     // set up all the parameters for the job

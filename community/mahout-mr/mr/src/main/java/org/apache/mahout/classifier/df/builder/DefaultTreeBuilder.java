@@ -72,8 +72,10 @@ public class DefaultTreeBuilder implements TreeBuilder {
   @Override
   public Node build(Random rng, Data data) {
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-245
     if (selected == null) {
       selected = new boolean[data.getDataset().nbAttributes()];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       selected[data.getDataset().getLabelId()] = true; // never select the label
     }
 
@@ -84,6 +86,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
       return new Leaf(data.majorityLabel(rng));
     }
     if (data.identicalLabel()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-840
       return new Leaf(data.getDataset().getLabel(data.get(0)));
     }
 
@@ -115,6 +118,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
       Data loSubset = data.subset(Condition.lesser(best.getAttr(), best.getSplit()));
       Data hiSubset = data.subset(Condition.greaterOrEquals(best.getAttr(), best.getSplit()));
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-526
       if (loSubset.isEmpty() || hiSubset.isEmpty()) {
         // the selected attribute did not change the data, avoid using it in the child notes
         selected[best.getAttr()] = true;
@@ -147,10 +151,12 @@ public class DefaultTreeBuilder implements TreeBuilder {
       }
 
       selected[best.getAttr()] = alreadySelected;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-526
 
       childNode = new CategoricalNode(best.getAttr(), values, children);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-245
     return childNode;
   }
 
@@ -215,6 +221,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     }
 
     if (nbNonSelected == 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       log.warn("All attributes are selected !");
       return NO_ATTRIBUTES;
     }

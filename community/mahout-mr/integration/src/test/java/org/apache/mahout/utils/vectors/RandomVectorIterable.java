@@ -37,6 +37,7 @@ public final class RandomVectorIterable implements Iterable<Vector> {
   private final VectorType type;
   
   public RandomVectorIterable() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     this(100, VectorType.SPARSE);
   }
   
@@ -51,6 +52,7 @@ public final class RandomVectorIterable implements Iterable<Vector> {
   
   @Override
   public Iterator<Vector> iterator() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     return Iterators.transform(
         new CountingIterator(numItems),
         new Function<Integer, Vector>() {
@@ -59,6 +61,7 @@ public final class RandomVectorIterable implements Iterable<Vector> {
           public Vector apply(Integer dummy) {
             Vector result =
                 type == VectorType.SPARSE ? new RandomAccessSparseVector(numItems) : new DenseVector(numItems);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
             result.assign(new DoubleFunction() {
               @Override
               public double apply(double ignored) {

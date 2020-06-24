@@ -103,6 +103,7 @@ public final class FastByIDMapTest extends TasteTestCase {
   @Test
   public void testVersusHashMap() {
     FastByIDMap<String> actual = new FastByIDMap<>();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1906
     Map<Long, String> expected = new HashMap<>(1000000);
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 1000000; i++) {

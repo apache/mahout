@@ -62,6 +62,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
   private RepresentativePointsDriver() {}
   
   public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     ToolRunner.run(new Configuration(), new RepresentativePointsDriver(), args);
   }
   
@@ -69,9 +70,11 @@ public final class RepresentativePointsDriver extends AbstractJob {
   public int run(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
     addInputOption();
     addOutputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-867
     addOption("clusteredPoints", "cp", "The path to the clustered points", true);
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
     addOption(DefaultOptionCreator.methodOption().create());
     if (parseArguments(args) == null) {
       return -1;
@@ -84,6 +87,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
         DefaultOptionCreator.SEQUENTIAL_METHOD);
     DistanceMeasure measure = ClassUtils.instantiateAs(distanceMeasureClass, DistanceMeasure.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-867
     Path clusteredPoints = new Path(getOption("clusteredPoints"));
     run(getConf(), input, clusteredPoints, output, measure, maxIterations, runSequential);
     return 0;
@@ -98,6 +102,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
    *          the int number of iterations to print
    */
   public static void printRepresentativePoints(Path output, int numIterations) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
     for (int i = 0; i <= numIterations; i++) {
       Path out = new Path(output, "representativePoints-" + i);
       System.out.println("Representative Points for iteration " + i);
@@ -117,9 +122,11 @@ public final class RepresentativePointsDriver extends AbstractJob {
     writeInitialState(stateIn, clustersIn);
     
     for (int iteration = 0; iteration < numIterations; iteration++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
       log.info("Representative Points Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path stateOut = new Path(output, "representativePoints-" + (iteration + 1));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-513
       runIteration(conf, clusteredPointsIn, stateIn, stateOut, measure, runSequential);
       // now point the input to the old output directory
       stateIn = stateOut;
@@ -137,11 +144,14 @@ public final class RepresentativePointsDriver extends AbstractJob {
       for (FileStatus part : fs.listStatus(inPath, PathFilters.logsCRCFilter())) {
         Path inPart = part.getPath();
         Path path = new Path(output, inPart.getName());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         try (SequenceFile.Writer writer =
                  new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class)){
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
           for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(inPart, true, conf)) {
             Cluster cluster = clusterWritable.getValue();
             if (log.isDebugEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
               log.debug("C-{}: {}", cluster.getId(), AbstractCluster.formatVector(cluster.getCenter(), null));
             }
             writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
@@ -152,6 +162,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
   }
   
   private static void runIteration(Configuration conf, Path clusteredPointsIn, Path stateIn, Path stateOut,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
       DistanceMeasure measure, boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
       runIterationSeq(conf, clusteredPointsIn, stateIn, stateOut, measure);
@@ -178,14 +189,17 @@ public final class RepresentativePointsDriver extends AbstractJob {
       DistanceMeasure measure) throws IOException {
     
     Map<Integer,List<VectorWritable>> repPoints = RepresentativePointsMapper.getRepresentativePoints(conf, stateIn);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Integer,WeightedVectorWritable> mostDistantPoints = new HashMap<>();
     FileSystem fs = FileSystem.get(clusteredPointsIn.toUri(), conf);
     for (Pair<IntWritable,WeightedVectorWritable> record
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         : new SequenceFileDirIterable<IntWritable,WeightedVectorWritable>(clusteredPointsIn, PathType.LIST,
             PathFilters.logsCRCFilter(), null, true, conf)) {
       RepresentativePointsMapper.mapPoint(record.getFirst(), record.getSecond(), measure, repPoints, mostDistantPoints);
     }
     int part = 0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(stateOut, "part-m-" + part++),
         IntWritable.class, VectorWritable.class)){
       for (Entry<Integer,List<VectorWritable>> entry : repPoints.entrySet()) {
@@ -217,10 +231,12 @@ public final class RepresentativePointsDriver extends AbstractJob {
    *          the DistanceMeasure to use
    */
   private static void runIterationMR(Configuration conf, Path input, Path stateIn, Path stateOut,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1020
       DistanceMeasure measure) throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     Job job = new Job(conf, "Representative Points Driver running over input: " + input);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     job.setJarByClass(RepresentativePointsDriver.class);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
@@ -230,12 +246,14 @@ public final class RepresentativePointsDriver extends AbstractJob {
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, stateOut);
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-236
     job.setMapperClass(RepresentativePointsMapper.class);
     job.setReducerClass(RepresentativePointsReducer.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
     boolean succeeded = job.waitForCompletion(true);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-946
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }

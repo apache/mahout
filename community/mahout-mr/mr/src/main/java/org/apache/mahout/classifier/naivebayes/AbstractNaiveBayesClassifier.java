@@ -44,9 +44,11 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
 
   protected double getScoreForLabelInstance(int label, Vector instance) {
     double result = 0.0;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
     for (Element e : instance.nonZeroes()) {
       result += e.get() * getScoreForLabelFeature(label, e.index());
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1006
     return result;
   }
   
@@ -57,6 +59,7 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
 
   @Override
   public Vector classifyFull(Vector instance) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1105
     return classifyFull(model.createScoringVector(), instance);
   }
   

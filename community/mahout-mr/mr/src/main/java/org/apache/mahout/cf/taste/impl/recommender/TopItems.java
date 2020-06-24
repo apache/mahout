@@ -49,9 +49,11 @@ public final class TopItems {
                                                   LongPrimitiveIterator possibleItemIDs,
                                                   IDRescorer rescorer,
                                                   Estimator<Long> estimator) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
     Preconditions.checkArgument(possibleItemIDs != null, "possibleItemIDs is null");
     Preconditions.checkArgument(estimator != null, "estimator is null");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Queue<RecommendedItem> topItems = new PriorityQueue<>(howMany + 1,
       Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
     boolean full = false;
@@ -60,6 +62,7 @@ public final class TopItems {
       long itemID = possibleItemIDs.next();
       if (rescorer == null || !rescorer.isFiltered(itemID)) {
         double preference;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-247
         try {
           preference = estimator.estimate(itemID);
         } catch (NoSuchItemException nsie) {
@@ -82,16 +85,20 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<RecommendedItem> result = new ArrayList<>(size);
     result.addAll(topItems);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-370
     Collections.sort(result, ByValueRecommendedItemComparator.getInstance());
     return result;
   }
   
   public static long[] getTopUsers(int howMany,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
                                    LongPrimitiveIterator allUserIDs,
                                    IDRescorer rescorer,
                                    Estimator<Long> estimator) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Queue<SimilarUser> topUsers = new PriorityQueue<>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
@@ -101,6 +108,7 @@ public final class TopItems {
         continue;
       }
       double similarity;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-247
       try {
         similarity = estimator.estimate(userID);
       } catch (NoSuchUserException nsue) {
@@ -108,6 +116,8 @@ public final class TopItems {
       }
       double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(userID, similarity);
       if (!Double.isNaN(rescoredSimilarity) && (!full || rescoredSimilarity > lowestTopValue)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-882
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-881
         topUsers.add(new SimilarUser(userID, rescoredSimilarity));
         if (full) {
           topUsers.poll();
@@ -122,6 +132,7 @@ public final class TopItems {
     if (size == 0) {
       return NO_IDS;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<SimilarUser> sorted = new ArrayList<>(size);
     sorted.addAll(topUsers);
     Collections.sort(sorted);
@@ -149,6 +160,7 @@ public final class TopItems {
       = new PriorityQueue<>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     while (allSimilarities.hasNext()) {
       GenericItemSimilarity.ItemItemSimilarity similarity = allSimilarities.next();
       double value = similarity.getValue();
@@ -167,6 +179,7 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<GenericItemSimilarity.ItemItemSimilarity> result = new ArrayList<>(size);
     result.addAll(topSimilarities);
     Collections.sort(result);
@@ -177,9 +190,12 @@ public final class TopItems {
     int howMany, Iterator<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
     
     Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       = new PriorityQueue<>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-661
     while (allSimilarities.hasNext()) {
       GenericUserSimilarity.UserUserSimilarity similarity = allSimilarities.next();
       double value = similarity.getValue();
@@ -198,6 +214,7 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<GenericUserSimilarity.UserUserSimilarity> result = new ArrayList<>(size);
     result.addAll(topSimilarities);
     Collections.sort(result);

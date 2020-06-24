@@ -61,6 +61,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
   @Override
   protected void reduce(Text key, Iterable<StringTuple> values, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1103
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     throws IOException, InterruptedException {
     Iterator<StringTuple> it = values.iterator();
 
@@ -69,6 +71,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     }
 
     List<String> value = Lists.newArrayList();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
 
     while (it.hasNext()) {
       value.addAll(it.next().getEntries());
@@ -77,7 +80,9 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     Vector vector = new RandomAccessSparseVector(dimension, value.size()); // guess at initial size
 
     if (maxNGramSize >= 2) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.iterator()), maxNGramSize);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
       sf.reset();
       try {
         do {
@@ -89,7 +94,9 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
         } while (sf.incrementToken());
 
         sf.end();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1649
       } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(sf, true);
       }
     } else {
@@ -104,15 +111,18 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       vector = new SequentialAccessSparseVector(vector);
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     if (namedVector) {
       vector = new NamedVector(vector, key.toString());
     }
 
     // if the vector has no nonZero entries (nothing in the dictionary), let's not waste space sending it to disk.
     if (vector.getNumNondefaultElements() > 0) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-379
       VectorWritable vectorWritable = new VectorWritable(vector);
       context.write(key, vectorWritable);
     } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       context.getCounter("TFPartialVectorReducer", "emptyVectorCount").increment(1);
     }
   }
@@ -124,12 +134,15 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
     dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-401
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
     maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1498
     URI[] localFiles = DistributedCache.getCacheFiles(conf);
     Path dictionaryFile = HadoopUtil.findInCacheByPartOfFilename(DictionaryVectorizer.DICTIONARY_FILE, localFiles);
     // key is word value is id
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-686
     for (Pair<Writable, IntWritable> record
             : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
       dictionary.put(record.getFirst().toString(), record.getSecond().get());

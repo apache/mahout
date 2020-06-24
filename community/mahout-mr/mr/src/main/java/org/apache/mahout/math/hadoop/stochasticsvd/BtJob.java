@@ -100,6 +100,7 @@ public final class BtJob {
 
   public static class BtMapper extends
     Mapper<Writable, VectorWritable, LongWritable, SparseRowBlockWritable> {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1280
 
     private QRLastStep qr;
     private final Deque<Closeable> closeables = new ArrayDeque<>();
@@ -148,6 +149,7 @@ public final class BtJob {
       }
 
       if (!aRow.isDense()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
         for (Vector.Element el : aRow.nonZeroes()) {
           double mul = el.get();
           for (int j = 0; j < kp; j++) {
@@ -155,10 +157,12 @@ public final class BtJob {
           }
           btCollector.collect((long) el.index(), btRow);
         }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-638
       } else {
         int n = aRow.size();
         for (int i = 0; i < n; i++) {
           double mul = aRow.getQuick(i);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
           for (int j = 0; j < kp; j++) {
             btRow.setQuick(j, mul * qRow.getQuick(j));
           }
@@ -188,6 +192,7 @@ public final class BtJob {
       blockNum = context.getTaskAttemptID().getTaskID().getId();
 
       SequenceFileValueIterator<DenseBlockWritable> qhatInput =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         new SequenceFileValueIterator<>(qInputPath,
                                                           true,
                                                           conf);
@@ -207,6 +212,7 @@ public final class BtJob {
       if (distributedRHat) {
 
         Path[] rFiles = HadoopUtil.getCachedFiles(conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
 
         Validate.notNull(rFiles,
                          "no RHat files in distributed cache job definition");
@@ -215,6 +221,7 @@ public final class BtJob {
         lconf.set("fs.default.name", "file:///");
 
         rhatInput =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           new SequenceFileDirValueIterator<>(rFiles,
                                                            SSVDHelper.PARTITION_COMPARATOR,
                                                            true,
@@ -223,6 +230,7 @@ public final class BtJob {
       } else {
         Path rPath = new Path(qJobPath, QJob.OUTPUT_RHAT + "-*");
         rhatInput =
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           new SequenceFileDirValueIterator<>(rPath,
                                                            PathType.GLOB,
                                                            null,
@@ -298,6 +306,7 @@ public final class BtJob {
     private void outputQRow(Writable key, Vector qRow, Vector aRow) throws IOException {
       if (nv && (aRow instanceof NamedVector)) {
         qRowValue.set(new NamedVector(qRow, ((NamedVector) aRow).getName()));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
       } else {
         qRowValue.set(qRow);
       }
@@ -306,6 +315,7 @@ public final class BtJob {
   }
 
   public static class OuterProductCombiner
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1280
     extends
     Reducer<Writable, SparseRowBlockWritable, Writable, SparseRowBlockWritable> {
 
@@ -341,6 +351,7 @@ public final class BtJob {
   }
 
   public static class OuterProductReducer
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1280
     extends
     Reducer<LongWritable, SparseRowBlockWritable, IntWritable, VectorWritable> {
 
@@ -381,6 +392,7 @@ public final class BtJob {
       String xiPathStr = conf.get(PROP_XI_PATH);
       if (xiPathStr != null) {
         xi = SSVDHelper.loadAndSumUpVectors(new Path(xiPathStr), conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1098
         if (xi == null) {
           throw new IOException(String.format("unable to load mean path xi from %s.",
                                               xiPathStr));
@@ -389,6 +401,7 @@ public final class BtJob {
 
       if (outputBBt || xi != null) {
         outputs = new MultipleOutputs(new JobConf(conf));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
         closeables.addFirst(new IOUtils.MultipleOutputsCloseableAdapter(outputs));
       }
 
@@ -473,6 +486,7 @@ public final class BtJob {
           OutputCollector<Writable, Writable> collector =
             outputs.getCollector(OUTPUT_BBT, null);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
           collector.collect(new IntWritable(),
                             new VectorWritable(new DenseVector(mBBt.getData())));
         }
@@ -510,6 +524,7 @@ public final class BtJob {
 
     JobConf oldApiJob = new JobConf(conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     MultipleOutputs.addNamedOutput(oldApiJob,
                                    OUTPUT_Q,
                                    org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
@@ -556,6 +571,7 @@ public final class BtJob {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     FileInputFormat.setInputPaths(job, inputPathA);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (minSplitSize > 0) {
       FileInputFormat.setMinInputSplitSize(job, minSplitSize);
     }
@@ -565,6 +581,7 @@ public final class BtJob {
     job.getConfiguration().set("mapreduce.output.basename", OUTPUT_BT);
 
     FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
     SequenceFileOutputFormat.setOutputCompressionType(job,
                                                       CompressionType.BLOCK);
 
@@ -581,6 +598,7 @@ public final class BtJob {
     job.getConfiguration().setInt(QJob.PROP_K, k);
     job.getConfiguration().setInt(QJob.PROP_P, p);
     job.getConfiguration().set(PROP_QJOB_PATH, inputPathQJob.toString());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
     job.getConfiguration().setBoolean(PROP_OUPTUT_BBT_PRODUCTS,
                                       outputBBtProducts);
     job.getConfiguration().setInt(PROP_OUTER_PROD_BLOCK_HEIGHT, btBlockHeight);
@@ -600,9 +618,11 @@ public final class BtJob {
      * require only particular Q file, each time different one).
      */
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     if (broadcast) {
       job.getConfiguration().set(PROP_RHAT_BROADCAST, "y");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
       FileSystem fs = FileSystem.get(inputPathQJob.toUri(), conf);
       FileStatus[] fstats =
         fs.globStatus(new Path(inputPathQJob, QJob.OUTPUT_RHAT + "-*"));
@@ -621,6 +641,7 @@ public final class BtJob {
     job.submit();
     job.waitForCompletion(false);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     if (!job.isSuccessful()) {
       throw new IOException("Bt job unsuccessful.");
     }

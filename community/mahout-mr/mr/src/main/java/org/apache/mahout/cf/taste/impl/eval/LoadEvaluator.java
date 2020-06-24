@@ -38,6 +38,7 @@ public final class LoadEvaluator {
   private LoadEvaluator() { }
 
   public static LoadStatistics runLoad(Recommender recommender) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-891
     return runLoad(recommender, 10);
   }
   
@@ -48,6 +49,7 @@ public final class LoadEvaluator {
     LongPrimitiveIterator userSampler =
         SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(), sampleRate);
     recommender.recommend(userSampler.next(), howMany); // Warm up
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Collection<Callable<Void>> callables = new ArrayList<>();
     while (userSampler.hasNext()) {
       callables.add(new LoadCallable(recommender, userSampler.next()));

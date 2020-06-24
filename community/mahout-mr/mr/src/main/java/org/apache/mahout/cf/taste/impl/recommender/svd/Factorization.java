@@ -43,6 +43,7 @@ public class Factorization {
 
   public Factorization(FastByIDMap<Integer> userIDMapping, FastByIDMap<Integer> itemIDMapping, double[][] userFeatures,
       double[][] itemFeatures) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-667
     this.userIDMapping = Preconditions.checkNotNull(userIDMapping);
     this.itemIDMapping = Preconditions.checkNotNull(itemIDMapping);
     this.userFeatures = userFeatures;
@@ -82,10 +83,12 @@ public class Factorization {
   }
 
   public Iterable<Map.Entry<Long,Integer>> getUserIDMappings() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-667
     return userIDMapping.entrySet();
   }
   
   public LongPrimitiveIterator getUserIDMappingKeys() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1447
     return userIDMapping.keySetIterator();
   }
 
@@ -102,6 +105,7 @@ public class Factorization {
   }
   
   public LongPrimitiveIterator getItemIDMappingKeys() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1447
     return itemIDMapping.keySetIterator();
   }
 
@@ -121,6 +125,7 @@ public class Factorization {
   public boolean equals(Object o) {
     if (o instanceof Factorization) {
       Factorization other = (Factorization) o;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
       return userIDMapping.equals(other.userIDMapping) && itemIDMapping.equals(other.itemIDMapping)
           && Arrays.deepEquals(userFeatures, other.userFeatures) && Arrays.deepEquals(itemFeatures, other.itemFeatures);
     }

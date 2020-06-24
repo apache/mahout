@@ -27,6 +27,7 @@ public final class TreeIDTest extends MahoutTestCase {
 
   @Test
   public void testTreeID() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-184
     Random rng = RandomUtils.getRandom();
     
     for (int nloop = 0; nloop < 1000000; nloop++) {

@@ -97,11 +97,13 @@ public class ModelTrainer {
 
   public void start() {
     log.info("Starting training threadpool with {} threads", numTrainThreads);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     workQueue = new ArrayBlockingQueue<>(numTrainThreads * 10);
     threadPool = new ThreadPoolExecutor(numTrainThreads, numTrainThreads, 0, TimeUnit.SECONDS,
         workQueue);
     threadPool.allowCoreThreadTimeOut(false);
     threadPool.prestartAllCoreThreads();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1047
     writeModel.reset();
   }
 
@@ -141,9 +143,11 @@ public class ModelTrainer {
     long startTime = System.nanoTime();
     int i = 0;
     double[] times = new double[100];
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Map<Vector, Vector> batch = new HashMap<>();
     int numTokensInBatch = 0;
     long batchStart = System.nanoTime();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (docIterator.hasNext() && docTopicIterator.hasNext()) {
       i++;
       Vector document = docIterator.next().vector();
@@ -165,6 +169,7 @@ public class ModelTrainer {
       } else {
         long start = System.nanoTime();
         train(document, topicDist, true, numDocTopicIters);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (log.isDebugEnabled()) {
           times[i % times.length] =
               (System.nanoTime() - start) / (1.0e6 * document.getNumNondefaultElements());
@@ -183,8 +188,10 @@ public class ModelTrainer {
   }
 
   public void batchTrain(Map<Vector, Vector> batch, boolean update, int numDocTopicsIters) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (true) {
       try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         List<TrainerRunnable> runnables = new ArrayList<>();
         for (Map.Entry<Vector, Vector> entry : batch.entrySet()) {
           runnables.add(new TrainerRunnable(readModel, null, entry.getKey(),
@@ -205,8 +212,10 @@ public class ModelTrainer {
   }
 
   public void train(Vector document, Vector docTopicCounts, boolean update, int numDocTopicIters) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     while (true) {
       try {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         workQueue.put(new TrainerRunnable(readModel, update
             ? writeModel
             : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters));
@@ -219,6 +228,7 @@ public class ModelTrainer {
 
   public void trainSync(Vector document, Vector docTopicCounts, boolean update,
       int numDocTopicIters) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     new TrainerRunnable(readModel, update
         ? writeModel
         : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters).run();
@@ -235,12 +245,14 @@ public class ModelTrainer {
     log.info("Initiating stopping of training threadpool");
     try {
       threadPool.shutdown();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
         log.warn("Threadpool timed out on await termination - jobs still running!");
       }
       long newTime = System.nanoTime();
       log.info("threadpool took: {}ms", (newTime - startTime) / 1.0e6);
       startTime = newTime;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1047
       readModel.stop();
       newTime = System.nanoTime();
       log.info("readModel.stop() took {}ms", (newTime - startTime) / 1.0e6);
@@ -280,6 +292,7 @@ public class ModelTrainer {
 
     @Override
     public void run() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       for (int i = 0; i < numDocTopicIters; i++) {
         // synchronous read-only call:
         readModel.trainDocTopicModel(document, docTopics, docTopicModel);

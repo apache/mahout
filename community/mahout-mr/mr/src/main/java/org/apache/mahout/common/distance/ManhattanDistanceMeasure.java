@@ -58,13 +58,16 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
   @Override
   public double distance(Vector v1, Vector v2) {
     if (v1.size() != v2.size()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-316
       throw new CardinalityException(v1.size(), v2.size());
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1202
     return v1.aggregate(v2, Functions.PLUS, Functions.MINUS_ABS);
   }
 
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-121
     return distance(centroid, v); // TODO
   }
 }

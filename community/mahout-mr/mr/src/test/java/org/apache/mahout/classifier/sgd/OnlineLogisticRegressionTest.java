@@ -57,11 +57,13 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     Vector target = readStandardData();
 
     CrossFoldLearner lr = new CrossFoldLearner(5, 2, 8, new L1())
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1113
       .lambda(1 * 1.0e-3)
       .learningRate(50);
 
 
     train(getInput(), target, lr);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-702
 
     System.out.printf("%.2f %.5f\n", lr.auc(), lr.logLikelihood());
     test(getInput(), target, lr, 0.05, 0.3);
@@ -75,6 +77,7 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
 
     Matrix data = readCsv("cancer.csv");
     CrossFoldLearner lr = new CrossFoldLearner(5, 2, 10, new L1())
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1113
       .stepOffset(10)
       .decayExponent(0.7)
       .lambda(1 * 1.0e-3)
@@ -173,8 +176,10 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     // This test uses a deterministic split that is neither outstandingly good nor bad
 
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1127
     RandomUtils.useTestSeed();
     Splitter onComma = Splitter.on(",");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1113
 
     // read the data
     List<String> raw = Resources.readLines(Resources.getResource("iris.csv"), Charsets.UTF_8);
@@ -191,6 +196,7 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     // for permuting data later
     List<Integer> order = Lists.newArrayList();
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1263
     for (String line : raw.subList(1, raw.size())) {
       // order gets a list of indexes
       order.add(order.size());
@@ -211,6 +217,7 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
 
     // randomize the order ... original data has each species all together
     // note that this randomization is deterministic
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1127
     Random random = RandomUtils.getRandom();
     Collections.shuffle(order, random);
 
@@ -262,9 +269,11 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     // --passes 1 --rate 50 --lambda 0.001 --input sgd-y.csv --features 21 --output model --noBias
     //   --target y --categories 2 --predictors  V2 V3 V4 V5 V6 V7 --types n
     OnlineLogisticRegression lr = new OnlineLogisticRegression(2, 8, new L1())
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1113
       .lambda(1 * 1.0e-3)
       .learningRate(50);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-702
     train(getInput(), target, lr);
     test(getInput(), target, lr, 0.05, 0.3);
   }
@@ -275,6 +284,7 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
    */
   @Test
   public void testSerializationAndDeSerialization() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1263
     OnlineLogisticRegression lr = new OnlineLogisticRegression(2, 8, new L1())
       .lambda(1 * 1.0e-3)
       .stepOffset(11)
@@ -286,6 +296,7 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
 
     byte[] output;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1590
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
          DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
       PolymorphicWritable.write(dataOutputStream, lr);

@@ -47,13 +47,17 @@ public class CSVClusterWriter extends AbstractClusterWriter {
   @Override
   public void write(ClusterWritable clusterWritable) throws IOException {
     StringBuilder line = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-991
     Cluster cluster = clusterWritable.getValue();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     line.append(cluster.getId());
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1030
     List<WeightedPropertyVectorWritable> points = getClusterIdToPoints().get(cluster.getId());
     if (points != null) {
       for (WeightedPropertyVectorWritable point : points) {
         Vector theVec = point.getVector();
         line.append(',');
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (theVec instanceof NamedVector) {
           line.append(((NamedVector)theVec).getName());
         } else {

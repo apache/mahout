@@ -43,9 +43,11 @@ public final class ModelSerializerTest extends MahoutTestCase {
   private static <T extends Writable> T roundTrip(T m, Class<T> clazz) throws IOException {
     ByteArrayOutputStream buf = new ByteArrayOutputStream(1000);
     DataOutputStream dos = new DataOutputStream(buf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       PolymorphicWritable.write(dos, m);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(dos, false);
     }
     return PolymorphicWritable.read(new DataInputStream(new ByteArrayInputStream(buf.toByteArray())), clazz);
@@ -63,6 +65,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     assertEquals(0.76, auc1.auc(), 0.01);
 
     OnlineAuc auc3 = roundTrip(auc1, OnlineAuc.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
 
     assertEquals(auc1.auc(), auc3.auc(), 0);
 
@@ -81,6 +84,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
   public void onlineLogisticRegressionRoundTrip() throws IOException {
     OnlineLogisticRegression olr = new OnlineLogisticRegression(2, 5, new L1());
     train(olr, 100);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-545
     OnlineLogisticRegression olr3 = roundTrip(olr, OnlineLogisticRegression.class);
     assertEquals(0, olr.getBeta().minus(olr3.getBeta()).aggregate(Functions.MAX, Functions.IDENTITY), 1.0e-6);
 
@@ -88,6 +92,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     train(olr3, 100);
 
     assertEquals(0, olr.getBeta().minus(olr3.getBeta()).aggregate(Functions.MAX, Functions.IDENTITY), 1.0e-6);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     olr.close();
     olr3.close();
   }
@@ -96,6 +101,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
   public void crossFoldLearnerRoundTrip() throws IOException {
     CrossFoldLearner learner = new CrossFoldLearner(5, 2, 5, new L1());
     train(learner, 100);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
     CrossFoldLearner olr3 = roundTrip(learner, CrossFoldLearner.class);
     double auc1 = learner.auc();
     assertTrue(auc1 > 0.85);
@@ -110,6 +116,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     assertEquals(learner.auc(), olr3.auc(), 0.02);
     double auc2 = learner.auc();
     assertTrue(auc2 > auc1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     learner.close();
     olr3.close();
   }
@@ -123,6 +130,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     AdaptiveLogisticRegression olr3 = roundTrip(learner, AdaptiveLogisticRegression.class);
     double auc1 = learner.auc();
     assertTrue(auc1 > 0.85);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
     assertEquals(auc1, learner.auc(), 1.0e-6);
     assertEquals(auc1, olr3.auc(), 1.0e-6);
 
@@ -134,6 +142,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     assertEquals(learner.auc(), olr3.auc(), 0.005);
     double auc2 = learner.auc();
     assertTrue(String.format("%.3f > %.3f", auc2, auc1), auc2 > auc1);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1345
     learner.close();
     olr3.close();
   }
@@ -151,6 +160,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
 
   private static Vector randomVector(final Random gen, int n) {
     Vector x = new DenseVector(n);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-575
     x.assign(new DoubleFunction() {
       @Override
       public double apply(double v) {

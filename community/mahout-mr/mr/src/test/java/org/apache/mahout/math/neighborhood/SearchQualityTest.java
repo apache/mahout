@@ -170,6 +170,7 @@ public class SearchQualityTest {
   static class StripWeight implements Function<WeightedThing<Vector>, Vector> {
     @Override
     public Vector apply(WeightedThing<Vector> input) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1317
       Preconditions.checkArgument(input != null, "input is null");
       //noinspection ConstantConditions
       return input.getValue();

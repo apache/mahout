@@ -48,9 +48,11 @@ final class KMeansUtil {
    *          a List<Cluster> to put values into
    */
   public static void configureWithClusterInfo(Configuration conf, Path clusterPath, Collection<Cluster> clusters) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     for (Writable value : new SequenceFileDirValueIterable<>(clusterPath, PathType.LIST,
         PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (valueClass.equals(ClusterWritable.class)) {
         ClusterWritable clusterWritable = (ClusterWritable) value;
         value = clusterWritable.getValue();

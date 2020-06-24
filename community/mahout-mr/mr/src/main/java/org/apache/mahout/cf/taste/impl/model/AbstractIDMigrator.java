@@ -49,6 +49,7 @@ public abstract class AbstractIDMigrator implements IDMigrator {
     }
     long hash = 0L;
     for (int i = 0; i < 8; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
       hash = hash << 8 | md5hash[i] & 0x00000000000000FFL;
     }
     return hash;

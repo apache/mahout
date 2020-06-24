@@ -103,6 +103,7 @@ public class XmlInputFormat extends TextInputFormat {
 
     @Override
     public void close() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
       Closeables.close(fsin, true);
     }
 

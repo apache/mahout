@@ -169,6 +169,7 @@ public class BallKMeans implements Iterable<Centroid> {
     // If there will be no points assigned to the test set, return now.
     if (testProbability == 0) {
       return new Pair<List<? extends WeightedVector>, List<? extends WeightedVector>>(datapoints,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
           new ArrayList<WeightedVector>());
     }
 
@@ -190,6 +191,7 @@ public class BallKMeans implements Iterable<Centroid> {
    */
   public UpdatableSearcher cluster(List<? extends WeightedVector> datapoints) {
     Pair<List<? extends WeightedVector>, List<? extends WeightedVector>> trainTestSplit = splitTrainTest(datapoints);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Vector> bestCentroids = new ArrayList<>();
     double cost = Double.POSITIVE_INFINITY;
     double bestCost = Double.POSITIVE_INFINITY;
@@ -250,6 +252,7 @@ public class BallKMeans implements Iterable<Centroid> {
     for (WeightedVector datapoint : datapoints) {
       totalWeight += datapoint.getWeight();
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Multinomial<Integer> seedSelector = new Multinomial<>();
     for (int i = 0; i < numDatapoints; ++i) {
       seedSelector.add(i, datapoints.get(i).getWeight() / totalWeight);
@@ -281,6 +284,7 @@ public class BallKMeans implements Iterable<Centroid> {
    * @param datapoints The datapoints to select from.  These datapoints should be WeightedVectors of some kind.
    */
   private void initializeSeedsKMeansPlusPlus(List<? extends WeightedVector> datapoints) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1255
     Preconditions.checkArgument(datapoints.size() > 1, "Must have at least two datapoints points to cluster " +
         "sensibly");
     Preconditions.checkArgument(datapoints.size() >= numClusters,
@@ -316,6 +320,7 @@ public class BallKMeans implements Iterable<Centroid> {
 
     // Multinomial distribution of vector indices for the selection seeds. These correspond to
     // the indices of the vectors in the original datapoints list.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     Multinomial<Integer> seedSelector = new Multinomial<>();
     for (int i = 0; i < datapoints.size(); ++i) {
       double selectionProbability =
@@ -377,6 +382,7 @@ public class BallKMeans implements Iterable<Centroid> {
     DistanceMeasure distanceMeasure = centroids.getDistanceMeasure();
     // closestClusterDistances.get(i) is the distance from the i'th cluster to its closest
     // neighboring cluster.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     List<Double> closestClusterDistances = new ArrayList<>(numClusters);
     // clusterAssignments[i] == j means that the i'th point is assigned to the j'th cluster. When
     // these don't change, we are done.
@@ -398,6 +404,7 @@ public class BallKMeans implements Iterable<Centroid> {
 
       // Copies the current cluster centroids to newClusters and sets their weights to 0. This is
       // so we calculate the new centroids as we go through the datapoints.
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       List<Centroid> newCentroids = new ArrayList<>();
       for (Vector centroid : centroids) {
         // need a deep copy because we will mutate these values
@@ -446,6 +453,7 @@ public class BallKMeans implements Iterable<Centroid> {
     return Iterators.transform(centroids.iterator(), new Function<Vector, Centroid>() {
       @Override
       public Centroid apply(Vector input) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1255
         Preconditions.checkArgument(input instanceof Centroid, "Non-centroid in centroids " +
             "searcher");
         //noinspection ConstantConditions

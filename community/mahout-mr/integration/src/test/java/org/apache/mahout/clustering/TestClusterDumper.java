@@ -58,6 +58,7 @@ import org.junit.Test;
 public final class TestClusterDumper extends MahoutTestCase {
 
   private static final String[] DOCS = {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-510
       "The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.",
       "The quick red cat jumped over the lazy brown dogs.",
@@ -73,6 +74,7 @@ public final class TestClusterDumper extends MahoutTestCase {
       "The robber wore a red fleece jacket and a baseball cap.",
       "The robber wore a white fleece jacket and a baseball cap.",
       "The English Springer Spaniel is the best of all dogs."};
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-597
 
   private List<VectorWritable> sampleData;
 
@@ -82,6 +84,7 @@ public final class TestClusterDumper extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(conf);
     // Create test data
@@ -94,14 +97,17 @@ public final class TestClusterDumper extends MahoutTestCase {
     sampleData = new ArrayList<>();
     RAMDirectory directory = new RAMDirectory();
     try (IndexWriter writer = new IndexWriter(directory,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
         new IndexWriterConfig(new StandardAnalyzer()))){
       for (int i = 0; i < docs2.length; i++) {
         Document doc = new Document();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1343
         Field id = new StringField("id", "doc_" + i, Field.Store.YES);
         doc.add(id);
         // Store both position and offset information
         FieldType fieldType = new FieldType();
         fieldType.setStored(false);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1876
         fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
         fieldType.setTokenized(true);
         fieldType.setStoreTermVectors(true);
@@ -132,8 +138,10 @@ public final class TestClusterDumper extends MahoutTestCase {
       System.out.println(i + " " + term);
       i++;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-597
     Iterable<Vector> iterable = new LuceneIterable(reader, "id", "content",
         termInfo,weight);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1112
 
     i = 0;
     for (Vector vector : iterable) {
@@ -161,6 +169,7 @@ public final class TestClusterDumper extends MahoutTestCase {
       int maxIterations) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (int i = maxIterations; i >= 0; i--) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-778
       Path clusters = new Path(output, "clusters-" + i + "-final");
       if (fs.exists(clusters)) {
         return clusters;
@@ -218,6 +227,8 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path input = getTestTempFilePath("input");
     Path output = getTestTempDirPath("output");
     Path initialPoints = new Path(output, Cluster.CLUSTERS_DIR + '0' + Cluster.FINAL_ITERATION_SUFFIX);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1200
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(conf);
     // Write test data to file

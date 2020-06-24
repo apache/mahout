@@ -52,8 +52,10 @@ public class WholeFileRecordReader extends RecordReader<IntWritable, BytesWritab
   private PathFilter pathFilter = null;
 
   public WholeFileRecordReader(CombineFileSplit fileSplit, TaskAttemptContext taskAttemptContext, Integer idx)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1319
       throws IOException {
     this.fileSplit = new FileSplit(fileSplit.getPath(idx), fileSplit.getOffset(idx),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         fileSplit.getLength(idx), fileSplit.getLocations());
     this.configuration = taskAttemptContext.getConfiguration();
     this.index = new IntWritable(idx);
@@ -77,11 +79,13 @@ public class WholeFileRecordReader extends RecordReader<IntWritable, BytesWritab
 
   @Override
   public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       throws IOException, InterruptedException {
     if (!StringUtils.isBlank(fileFilterClassName) &&
         !PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
       try {
         pathFilter = (PathFilter) Class.forName(fileFilterClassName).newInstance();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
       } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
         throw new IllegalStateException(e);
       }
@@ -107,6 +111,7 @@ public class WholeFileRecordReader extends RecordReader<IntWritable, BytesWritab
       }
 
       if (fileStatuses.length == 1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         try (FSDataInputStream in = fs.open(fileStatuses[0].getPath())) {
           IOUtils.readFully(in, contents, 0, contents.length);
           value.setCapacity(contents.length);

@@ -80,7 +80,9 @@ public interface Parametered {
     
     private static void configureParametersRecursively(Parametered parametered, String prefix, Configuration jobConf) {
       for (Parameter<?> parameter : parametered.getParameters()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
         if (log.isDebugEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-217
           log.debug("Configuring {}{}", prefix, parameter.name());
         }
         String name = prefix + parameter.name() + '.';

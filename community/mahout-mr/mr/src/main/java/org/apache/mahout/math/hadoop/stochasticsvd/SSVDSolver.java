@@ -131,6 +131,7 @@ public final class SSVDSolver {
    * @param reduceTasks Number of reduce tasks (where applicable)
    */
   public SSVDSolver(Configuration conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
                     Path[] inputPath,
                     Path outputPath,
                     int ablockRows,
@@ -147,6 +148,7 @@ public final class SSVDSolver {
   }
 
   public int getQ() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
     return q;
   }
 
@@ -262,6 +264,7 @@ public final class SSVDSolver {
   }
 
   public boolean isOverwrite() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-623
     return overwrite;
   }
 
@@ -275,6 +278,7 @@ public final class SSVDSolver {
   }
 
   public int getOuterBlockHeight() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     return outerBlockHeight;
   }
 
@@ -307,6 +311,8 @@ public final class SSVDSolver {
   }
 
   public boolean isBroadcast() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
     return broadcast;
   }
 
@@ -343,6 +349,7 @@ public final class SSVDSolver {
     this.pcaMeanPath = pcaMeanPath;
   }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
   long getOmegaSeed() {
     return omegaSeed;
   }
@@ -373,6 +380,8 @@ public final class SSVDSolver {
 
       Path pcaBasePath = new Path(outputPath, "pca");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-623
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
       if (overwrite) {
         fs.delete(outputPath, true);
       }
@@ -395,12 +404,14 @@ public final class SSVDSolver {
          */
 
         Vector xi = SSVDHelper.loadAndSumUpVectors(pcaMeanPath, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1098
         if (xi == null) {
           throw new IOException(String.format("unable to load mean path xi from %s.",
                                               pcaMeanPath.toString()));
         }
 
         xisquaredlen = xi.dot(xi);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
         Omega omega = new Omega(omegaSeed, k + p);
         Vector s_b0 = omega.mutlithreadedTRightMultiply(xi);
 
@@ -420,6 +431,7 @@ public final class SSVDSolver {
                minSplitSize,
                k,
                p,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1306
                omegaSeed,
                reduceTasks);
 
@@ -439,6 +451,7 @@ public final class SSVDSolver {
                 k,
                 p,
                 outerBlockHeight,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
                 q <= 0 ? Math.min(1000, reduceTasks) : reduceTasks,
                 broadcast,
                 labelType,
@@ -449,8 +462,10 @@ public final class SSVDSolver {
 
       // power iterations
       for (int i = 0; i < q; i++) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-816
 
         qPath = new Path(outputPath, String.format("ABt-job-%d", i + 1));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
         Path btPathGlob = new Path(btPath, BtJob.OUTPUT_BT + "-*");
         ABtDenseOutJob.run(conf,
                            inputPath,
@@ -464,6 +479,8 @@ public final class SSVDSolver {
                            k,
                            p,
                            abtBlockHeight,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
                            reduceTasks,
                            broadcast);
 
@@ -478,6 +495,7 @@ public final class SSVDSolver {
                   k,
                   p,
                   outerBlockHeight,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-922
                   i == q - 1 ? Math.min(1000, reduceTasks) : reduceTasks,
                   broadcast,
                   labelType,
@@ -486,6 +504,7 @@ public final class SSVDSolver {
         sqPath = new Path(btPath, BtJob.OUTPUT_SQ + "-*");
       }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1281
       DenseSymmetricMatrix bbt =
         SSVDHelper.loadAndSumUpperTriangularMatricesAsSymmetric(new Path(btPath,
                                                                          BtJob.OUTPUT_BBT
@@ -517,6 +536,7 @@ public final class SSVDSolver {
       }
 
       EigenDecomposition eigen = new EigenDecomposition(bbtSquare);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1281
 
       Matrix uHat = eigen.getV();
       svalues = eigen.getRealEigenvalues().clone();
@@ -538,6 +558,7 @@ public final class SSVDSolver {
         ujob = new UJob();
         ujob.run(conf,
                  new Path(btPath, BtJob.OUTPUT_Q + "-*"),
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
                  uHatPath,
                  svPath,
                  uPath,
@@ -552,6 +573,7 @@ public final class SSVDSolver {
       if (cUHalfSigma) {
         uhsjob = new UJob();
         uhsjob.run(conf,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1281
                    new Path(btPath, BtJob.OUTPUT_Q + "-*"),
                    uHatPath,
                    svPath,
@@ -583,6 +605,7 @@ public final class SSVDSolver {
                  new Path(btPath, BtJob.OUTPUT_BT + "-*"),
                  pcaMeanPath,
                  sqPath,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-796
                  uHatPath,
                  svPath,
                  vPath,

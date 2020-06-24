@@ -52,11 +52,13 @@ public class TestVectorCache extends MahoutTestCase {
     // can we read it from here?
     SequenceFileValueIterator<VectorWritable> iterator =
         new SequenceFileValueIterator<>(path, true, conf);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       VectorWritable old = iterator.next();
       // test if the values are identical
       assertEquals("Saved vector is identical to original", old.get(), value);
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
       Closeables.close(iterator, true);
     }
   }
@@ -64,20 +66,26 @@ public class TestVectorCache extends MahoutTestCase {
   @Test
   public void testLoad() throws Exception {
     // save a vector manually
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     Writable key = new IntWritable(0);
     Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-971
     FileSystem fs = FileSystem.get(path.toUri(), conf);
     // write the vector
     path = fs.makeQualified(path);
     fs.deleteOnExit(path);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     HadoopUtil.delete(conf, path);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-718
     try {
       writer.append(key, new VectorWritable(value));
     } finally {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
       Closeables.close(writer, false);
     }
     DistributedCache.setCacheFiles(new URI[] {path.toUri()}, conf);
@@ -92,9 +100,11 @@ public class TestVectorCache extends MahoutTestCase {
   
   @Test
   public void testAll() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1325
     Configuration conf = getConfiguration();
     Vector v = new DenseVector(VECTOR);
     Path toSave = getTestTempDirPath("output");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-633
     Writable key = new IntWritable(0);
     
     // save it
@@ -104,6 +114,7 @@ public class TestVectorCache extends MahoutTestCase {
     Vector v2 = VectorCache.load(conf);
     
     // are they the same?
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
     assertNotNull("Vector is null", v2);
     assertEquals("Vectors are not identical", v2, v);
   }

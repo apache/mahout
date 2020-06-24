@@ -62,6 +62,7 @@ public final class ClusterDumper extends AbstractJob {
     TEXT,
     CSV,
     GRAPH_ML,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1343
     JSON,
   }
 
@@ -102,15 +103,19 @@ public final class ClusterDumper extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     addInputOption();
     addOutputOption();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1343
     addOption(OUTPUT_FORMAT_OPT, "of", "The optional output format for the results.  Options: TEXT, CSV, JSON or GRAPH_ML",
         "TEXT");
     addOption(SUBSTRING_OPTION, "b", "The number of chars of the asFormatString() to print");
     addOption(NUM_WORDS_OPTION, "n", "The number of top terms to print");
     addOption(POINTS_DIR_OPTION, "p",
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-761
             "The directory containing points sequence files mapping input vectors to their cluster.  "
                     + "If specified, then the program will output the points associated with a cluster");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     addOption(SAMPLE_POINTS, "sp", "Specifies the maximum number of points to include _per_ cluster.  The default "
         + "is to include all points");
     addOption(DICTIONARY_OPTION, "d", "The dictionary file");
@@ -120,10 +125,12 @@ public final class ClusterDumper extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
 
     // output is optional, will print to System.out per default
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1075
     if (parseArguments(args, false, true) == null) {
       return -1;
     }
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
     seqFileDir = getInputPath();
     if (hasOption(POINTS_DIR_OPTION)) {
       pointsDir = new Path(getOption(POINTS_DIR_OPTION));
@@ -131,6 +138,7 @@ public final class ClusterDumper extends AbstractJob {
     outputFile = getOutputFile();
     if (hasOption(SUBSTRING_OPTION)) {
       int sub = Integer.parseInt(getOption(SUBSTRING_OPTION));
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-289
       if (sub >= 0) {
         subString = sub;
       }
@@ -140,18 +148,24 @@ public final class ClusterDumper extends AbstractJob {
     if (hasOption(NUM_WORDS_OPTION)) {
       numTopFeatures = Integer.parseInt(getOption(NUM_WORDS_OPTION));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-798
     if (hasOption(OUTPUT_FORMAT_OPT)) {
       outputFormat = OUTPUT_FORMAT.valueOf(getOption(OUTPUT_FORMAT_OPT));
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     if (hasOption(SAMPLE_POINTS)) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-899
       maxPointsPerCluster = Long.parseLong(getOption(SAMPLE_POINTS));
     } else {
       maxPointsPerCluster = Long.MAX_VALUE;
     }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-867
     runEvaluation = hasOption(EVALUATE_CLUSTERS);
     String distanceMeasureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     measure = ClassUtils.instantiateAs(distanceMeasureClass, DistanceMeasure.class);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-427
     init();
     printClusters(null);
     return 0;
@@ -159,6 +173,7 @@ public final class ClusterDumper extends AbstractJob {
 
   public void printClusters(String[] dictionary) throws Exception {
     Configuration conf = new Configuration();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
 
     if (this.termDictionary != null) {
       if ("text".equals(dictionaryFormat)) {
@@ -173,15 +188,20 @@ public final class ClusterDumper extends AbstractJob {
     Writer writer;
     boolean shouldClose;
     if (this.outputFile == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-679
       shouldClose = false;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1184
       writer = new OutputStreamWriter(System.out, Charsets.UTF_8);
     } else {
       shouldClose = true;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-947
       if (outputFile.getName().startsWith("s3n://")) {
         Path p = outputPath;
         FileSystem fs = FileSystem.get(p.toUri(), conf);
         writer = new OutputStreamWriter(fs.create(p), Charsets.UTF_8);
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1109
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
         Files.createParentDirs(outputFile);
         writer = Files.newWriter(this.outputFile, Charsets.UTF_8);
       }
@@ -192,10 +212,13 @@ public final class ClusterDumper extends AbstractJob {
           "part-*"), PathType.GLOB, conf));
 
       writer.flush();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (runEvaluation) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-867
         HadoopUtil.delete(conf, new Path("tmp/representative"));
         int numIters = 5;
         RepresentativePointsDriver.main(new String[]{
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
           "--input", seqFileDir.toString(),
           "--output", "tmp/representative",
           "--clusteredPoints", pointsDir.toString(),
@@ -217,8 +240,10 @@ public final class ClusterDumper extends AbstractJob {
       log.info("Wrote {} clusters", numWritten);
     } finally {
       if (shouldClose) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1211
         Closeables.close(clusterWriter, false);
       } else {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
         if (clusterWriter instanceof GraphMLClusterWriter) {
           clusterWriter.close();
         }
@@ -229,8 +254,10 @@ public final class ClusterDumper extends AbstractJob {
   ClusterWriter createClusterWriter(Writer writer, String[] dictionary) throws IOException {
     ClusterWriter result;
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
     switch (outputFormat) {
       case TEXT:
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-899
         result = new ClusterDumperWriter(writer, clusterIdToPoints, measure, numTopFeatures, dictionary, subString);
         break;
       case CSV:
@@ -239,6 +266,7 @@ public final class ClusterDumper extends AbstractJob {
       case GRAPH_ML:
         result = new GraphMLClusterWriter(writer, clusterIdToPoints, measure, numTopFeatures, dictionary, subString);
         break;
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1343
       case JSON:
         result = new JsonClusterWriter(writer, clusterIdToPoints, measure, numTopFeatures, dictionary);
         break;
@@ -256,9 +284,12 @@ public final class ClusterDumper extends AbstractJob {
   }
 
   private void init() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-294
     if (this.pointsDir != null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-167
       Configuration conf = new Configuration();
       // read in the points
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-899
       clusterIdToPoints = readPoints(this.pointsDir, maxPointsPerCluster, conf);
     } else {
       clusterIdToPoints = Collections.emptyMap();
@@ -296,6 +327,7 @@ public final class ClusterDumper extends AbstractJob {
   }
 
   public long getMaxPointsPerCluster() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-899
     return maxPointsPerCluster;
   }
 
@@ -304,6 +336,7 @@ public final class ClusterDumper extends AbstractJob {
   }
 
   public static Map<Integer, List<WeightedPropertyVectorWritable>> readPoints(Path pointsPathDir,
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
                                                                               long maxPointsPerCluster,
                                                                               Configuration conf) {
     Map<Integer, List<WeightedPropertyVectorWritable>> result = new TreeMap<>();
@@ -316,9 +349,11 @@ public final class ClusterDumper extends AbstractJob {
       int keyValue = record.getFirst().get();
       List<WeightedPropertyVectorWritable> pointList = result.get(keyValue);
       if (pointList == null) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
         pointList = new ArrayList<>();
         result.put(keyValue, pointList);
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-987
       if (pointList.size() < maxPointsPerCluster) {
         pointList.add(record.getSecond());
       }

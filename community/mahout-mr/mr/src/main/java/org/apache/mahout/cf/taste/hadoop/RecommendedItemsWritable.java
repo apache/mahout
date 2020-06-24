@@ -55,6 +55,7 @@ public final class RecommendedItemsWritable implements Writable {
   
   @Override
   public void write(DataOutput out) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-358
     out.writeInt(recommended.size());
     for (RecommendedItem item : recommended) {
       Varint.writeSignedVarLong(item.getItemID(), out);
@@ -65,10 +66,13 @@ public final class RecommendedItemsWritable implements Writable {
   @Override
   public void readFields(DataInput in) throws IOException {
     int size = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     recommended = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {
       long itemID = Varint.readSignedVarLong(in);
       float value = in.readFloat();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-149
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-150
       RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
       recommended.add(recommendedItem);
     }
@@ -85,6 +89,7 @@ public final class RecommendedItemsWritable implements Writable {
       } else {
         result.append(',');
       }
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-358
       result.append(String.valueOf(item.getItemID()));
       result.append(':');
       result.append(String.valueOf(item.getValue()));

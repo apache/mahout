@@ -36,9 +36,11 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
   private final Cache<Long,long[]> neighborhoodCache;
   
   public CachingUserNeighborhood(UserNeighborhood neighborhood, DataModel dataModel) throws TasteException {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(neighborhood != null, "neighborhood is null");
     this.neighborhood = neighborhood;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1652
     this.neighborhoodCache = new Cache<>(new NeighborhoodRetriever(neighborhood), maxCacheSize);
   }
   

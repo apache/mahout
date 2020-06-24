@@ -58,6 +58,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
                                      UserNeighborhood neighborhood,
                                      UserSimilarity similarity) {
     super(dataModel);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
     Preconditions.checkArgument(neighborhood != null, "neighborhood is null");
     this.neighborhood = neighborhood;
     this.similarity = similarity;
@@ -71,6 +72,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(similarity);
     refreshHelper.addDependency(neighborhood);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     capper = buildCapper();
   }
   
@@ -80,10 +82,13 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-480
 
     log.debug("Recommending items for user ID '{}'", userID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
 
     long[] theNeighborhood = neighborhood.getUserNeighborhood(userID);
 
@@ -92,12 +97,15 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     }
 
     FastIDSet allItemIDs = getAllOtherItems(theNeighborhood, userID, includeKnownItems);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
 
     TopItems.Estimator<Long> estimator = new Estimator(userID, theNeighborhood);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     List<RecommendedItem> topItems = TopItems
         .getTopItems(howMany, allItemIDs.iterator(), rescorer, estimator);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-291
     log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
@@ -143,6 +151,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
         Float pref = dataModel.getPreferenceValue(userID, itemID);
         if (pref != null) {
           double theSimilarity = similarity.userSimilarity(theUserID, userID);
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
           if (!Double.isNaN(theSimilarity)) {
             preference += theSimilarity * pref;
             totalSimilarity += theSimilarity;
@@ -167,6 +176,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   }
   
   protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID, boolean includeKnownItems)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1428
     throws TasteException {
     DataModel dataModel = getDataModel();
     FastIDSet possibleItemIDs = new FastIDSet();
@@ -190,6 +200,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   }
 
   private EstimatedPreferenceCapper buildCapper() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-321
     DataModel dataModel = getDataModel();
     if (Float.isNaN(dataModel.getMinPreference()) && Float.isNaN(dataModel.getMaxPreference())) {
       return null;
@@ -234,6 +245,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     private final long theUserID;
     private final long[] theNeighborhood;
     
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-158
     Estimator(long theUserID, long[] theNeighborhood) {
       this.theUserID = theUserID;
       this.theNeighborhood = theNeighborhood;

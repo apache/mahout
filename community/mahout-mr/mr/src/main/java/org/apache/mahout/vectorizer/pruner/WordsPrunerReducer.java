@@ -42,6 +42,9 @@ public class WordsPrunerReducer extends
 
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context)
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-992
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1258
     throws IOException, InterruptedException {
     Iterator<VectorWritable> it = values.iterator();
     if (!it.hasNext()) {
@@ -49,7 +52,9 @@ public class WordsPrunerReducer extends
     }
     Vector value = it.next().get();
     Vector vector = value.clone();
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
     if (maxDf != Long.MAX_VALUE || minDf > -1) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1227
       for (Vector.Element e : value.nonZeroes()) {
         if (!dictionary.containsKey(e.index())) {
           vector.setQuick(e.index(), 0.0);
@@ -72,12 +77,14 @@ public class WordsPrunerReducer extends
     Configuration conf = context.getConfiguration();
     //Path[] localFiles = HadoopUtil.getCachedFiles(conf);
 
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-962
     maxDf = conf.getLong(HighDFWordsPruner.MAX_DF, Long.MAX_VALUE);
     minDf = conf.getLong(HighDFWordsPruner.MIN_DF, -1);
 
     Path dictionaryFile = HadoopUtil.getSingleCachedFile(conf);
 
     // key is feature, value is the document frequency
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-1173
     for (Pair<IntWritable, LongWritable> record
             : new SequenceFileIterable<IntWritable, LongWritable>(dictionaryFile, true, conf)) {
       dictionary.put(record.getFirst().get(), record.getSecond().get());

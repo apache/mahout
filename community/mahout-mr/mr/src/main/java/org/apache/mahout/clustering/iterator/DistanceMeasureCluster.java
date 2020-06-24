@@ -34,6 +34,7 @@ public class DistanceMeasureCluster extends AbstractCluster {
   private DistanceMeasure measure;
 
   public DistanceMeasureCluster(Vector point, int id, DistanceMeasure measure) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     super(point, id);
     this.measure = measure;
   }
@@ -63,11 +64,13 @@ public class DistanceMeasureCluster extends AbstractCluster {
 
   @Override
   public double pdf(VectorWritable vw) {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-846
     return 1 / (1 + measure.distance(vw.get(), getCenter()));
   }
 
   @Override
   public Model<VectorWritable> sampleFromPosterior() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     return new DistanceMeasureCluster(getCenter(), getId(), measure);
   }
 
@@ -85,6 +88,7 @@ public class DistanceMeasureCluster extends AbstractCluster {
 
   @Override
   public String getIdentifier() {
+//IC see: https://issues.apache.org/jira/browse/MAHOUT-479
     return "DMC:" + getId();
   }
 
