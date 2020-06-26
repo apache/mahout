@@ -16,8 +16,7 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -105,6 +104,7 @@
     <connection>scm:git:git@github.com:apache/mahout.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
     <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
+    <tag>14.1</tag>
   </scm>
 
   <issueManagement>
@@ -134,7 +134,7 @@
     <scalatest.version>3.0.5</scalatest.version>
     <spark.version>2.4.5</spark.version>
     <spark.compat.version>2.4</spark.compat.version>
-    <compile.flags/>
+    <compile.flags />
 
     <lucene.version>8.5.1</lucene.version>
 
@@ -143,7 +143,7 @@
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <mahout.skip.distribution>true</mahout.skip.distribution>
     <release.candidate>RC4</release.candidate>
-    <compile.flags/>
+    <compile.flags />
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <hadoop.version>2.10.0</hadoop.version>
 
