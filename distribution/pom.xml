@@ -88,17 +88,6 @@
       <!-- This needs the scala_2.11 addition -->
       <classifier>dependency-reduced</classifier>
     </dependency>
-
-    <!--
-        Community Artifacts
-    -->
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark-cli-drivers</artifactId>
-      <version>14.1-SNAPSHOT</version>
-      <classifier>scala_${scala.compat.version}</classifier>
-    </dependency>
   </dependencies>
 
   <profiles>
@@ -106,6 +95,16 @@
     <profile>
       <id>with-community-modules</id>
       <dependencies>
+        <!--
+          Community Artifacts
+        -->
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-spark-cli-drivers</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>scala_${scala.compat.version}</classifier>
+        </dependency>
+
         <!-- Community Engines -->
         <dependency>
           <groupId>org.apache.mahout</groupId>
@@ -121,7 +120,6 @@
         </dependency>
 
         <!-- Mahout  MR -->
-
         <dependency>
           <groupId>org.apache.mahout</groupId>
           <artifactId>mahout-integration</artifactId>
