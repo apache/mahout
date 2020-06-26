@@ -46,8 +46,8 @@ public final class BloomTokenFilter extends TokenFilter {
   /** 
    * @param filter tokens will be checked for membership in this bloom filter
    * @param in the tokenstream to read.
-   * @param keepMembers keep memoers of the bloom filter? If true works like
-   *   a whitelist and members found in the list are kept and all others are
+   * @param keepMembers keep members of the bloom filter? If true works like
+   *   a keeplist and members found in the list are kept and all others are
    *   dropped. If false works like a stoplist and members found in the 
    *   filter are dropped all others are kept.
    */
