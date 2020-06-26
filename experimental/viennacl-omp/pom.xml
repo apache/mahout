@@ -18,74 +18,48 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout</artifactId>
+    <artifactId>experimental</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-native-viennacl-omp_${scala.compat.version}</artifactId>
+  <artifactId>mahout-native-viennacl-omp</artifactId>
+  <packaging>jar</packaging>
 
   <name>- Mahout ViennaCL OpenMP BLAS (Experimental)</name>
-  <description>Native Structures and interfaces to be used from Mahout math-scala.
-  </description>
-
-  <packaging>jar</packaging>
-  <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
-<!--
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout-14.1
-    </tag>
-  </scm>
--->
+  <description>Native Structures and interfaces to be used from Mahout math-scala.</description>
 
   <build>
     <plugins>
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-      
-      <!-- create test jar so other modules can reuse the native test utility classes. -->
+      <!-- Initialize properties referring to the jars of each dependency -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
+            <phase>initialize</phase>
             <goals>
-              <goal>test-jar</goal>
+              <goal>properties</goal>
             </goals>
-            <phase>package</phase>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
       </plugin>
 
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
         <executions>
-          <execution>
+          <!--execution>
             <id>add-scala-sources</id>
             <phase>initialize</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
-          </execution>
+          </execution-->
           <execution>
             <id>scala-compile</id>
             <phase>process-resources</phase>
@@ -104,8 +78,6 @@
       </plugin>
 
       <!--this is what scalatest recommends to do to enable scala tests -->
-
-      <!-- disable surefire -->
       <!-- disable surefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -114,23 +86,46 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>test</id>
+            <id>scala-test</id>
+            <phase>test</phase>
             <goals>
               <goal>test</goal>
             </goals>
+            <configuration>
+              <argLine>-Xmx4g</argLine>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
       </plugin>
 
+      <!-- create test jar so other modules can reuse the native test utility classes. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+          <!-- create test jar so other modules can reuse the math test utility classes. -->
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
       <!--JavaCPP native build plugin-->
       <!--  old-style way to get it to compile. -->
@@ -138,7 +133,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
         <executions>
           <execution>
             <id>javacpp</id>
@@ -154,10 +148,20 @@
               <executable>java</executable>
               <arguments>
                 <argument>-jar</argument>
+                <!--
+                  Don't worry if your IDE is marking the following line red.
+                  It's a property set automatically by the maven-dependency-plugin
+                  as part of the build.
+                -->
                 <argument>${org.bytedeco:javacpp:jar}</argument>
                 <argument>-propertyfile</argument>
                 <argument>linux-x86_64-viennacl.properties</argument>
                 <argument>-classpath</argument>
+                <!--
+                  Don't worry if your IDE is marking the following line red.
+                  It's a property set automatically by the maven-dependency-plugin
+                  as part of the build.
+                -->
                 <argument>${project.build.outputDirectory}:${org.scala-lang:scala-library:jar}</argument>
                 <argument>org.apache.mahout.viennacl.openmp.javacpp.CompressedMatrix</argument>
                 <argument>org.apache.mahout.viennacl.openmp.javacpp.Context</argument>
@@ -179,154 +183,40 @@
           </execution>
         </executions>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.3</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>properties</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-      </plugin>
-
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-native-viennacl-omp_${scala.compat.version}-${version}.jar" tofile="../../lib/mahout-native-viennacl-omp_${scala.compat.version}-${version}.jar" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- delete jars on cleen in top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../lib</directory>
-              <includes>
-                <include>mahout-native-viennacl-omp*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
     </plugins>
-
-
-
   </build>
 
   <dependencies>
-
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <!--  3rd-party -->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
     </dependency>
 
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <scope>test</scope>
     </dependency>
-
-    <!-- scala-library for annotations at compile time-->
-    <!--<dependency>-->
-    <!--<groupId>org.scala-lang</groupId>-->
-    <!--<artifactId>scala-library</artifactId>-->
-    <!--<version>${scala.version}</version>-->
-    <!--</dependency>-->
-
 
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacpp</artifactId>
-      <version>1.2.4</version>
+      <!--
+        We don't want this in the actual classpath, we just need to define it so
+        maven resolves it and the maven-dependency-plugin can set a property to
+        it's path as we need that in the exec-maven-plugin.
+      -->
+      <scope>provided</scope>
     </dependency>
-
   </dependencies>
 
-
-  <profiles>
-    <profile>
-      <id>mahout-release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>net.alchim31.maven</groupId>
-            <artifactId>scala-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>generate-scaladoc</id>
-                <goals>
-                  <goal>doc</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>attach-scaladoc-jar</id>
-                <goals>
-                  <goal>doc-jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>travis</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <!-- Limit memory for unit tests in Travis -->
-              <argLine>-Xmx3g</argLine>
-              <!--<argLine>-Djava.library.path=${project.build.directory}/libs/natives/linux-x86_64:${project.build.directory}/libs/natives/linux:${project.build.directory}/libs/natives/maxosx</argLine>-->
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <configuration>
-              <!-- Limit memory for integration tests in Travis -->
-              <argLine>-Xmx3g</argLine>
-              <!--<argLine>-Djava.library.path=${project.build.directory}/libs/natives/linux-x86_64:${project.build.directory}/libs/natives/linux:${project.build.directory}/libs/natives/maxosx</argLine>-->
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

@@ -247,10 +247,5 @@ public final class VectorHelper {
     protected boolean lessThan(Pair<T, Double> a, Pair<T, Double> b) {
       return a.getSecond().compareTo(b.getSecond()) < 0;
     }
-
-    @Override
-    protected Pair<T, Double> getSentinelObject() {
-      return Pair.of(sentinel, Double.NEGATIVE_INFINITY);
-    }
   }
 }

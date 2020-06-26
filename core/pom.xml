@@ -18,124 +18,28 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-core_2.11</artifactId>
-  <name>Mahout Core</name>
-  <description>High performance scientific and technical computing data structures and methods,
-    mostly based on CERN's Colt Java API
-  </description>
-
+  <artifactId>mahout-core</artifactId>
   <packaging>jar</packaging>
 
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
-
-
-  <dependencies>
-
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.esotericsoftware.kryo</groupId>
-      <artifactId>kryo</artifactId>
-      <version>2.24.0</version>
-    </dependency>
-
-
-    <!-- scala stuff -->
-    <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
-      <version>3.0.5</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-reflect</artifactId>
-    </dependency>
-
-    <!-- TODO look into factoring this away (or to BLAS package)-->
-    <dependency>
-      <groupId>it.unimi.dsi</groupId>
-      <artifactId>fastutil</artifactId>
-      <version>7.0.12</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-math3</artifactId>
-    </dependency>
-
-    <!-- TODO this is declared at top, fix this reimport -->
-    <!-- TODO fix all tests to stop using `com.carrotsearch.randomizedtesting.annotations` and `org.apache.lucene.util` and easymock -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
-
-
-    <!-- Todo Factor this out-->
-    <dependency>
-      <groupId>com.carrotsearch.randomizedtesting</groupId>
-      <artifactId>randomizedtesting-runner</artifactId>
-      <version>2.0.15</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-test-framework</artifactId>
-      <version>5.5.2</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-      <version>3.2</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- TODO ONE Logging framework... -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-    </dependency>
-
-  </dependencies>
-
+  <name>Mahout Core</name>
+  <description>High performance scientific and technical computing data structures and methods, mostly based on CERN's Colt Java API</description>
 
   <build>
     <plugins>
-
       <!-- Build templates into code for various old-school Vector fns -->
       <plugin>
         <groupId>org.apache.mahout</groupId>
         <artifactId>mahout-collection-codegen-plugin</artifactId>
-        <version>${mahout.collection.codegen.plugin.version}</version>
+        <version>1.0</version>
         <executions>
           <execution>
             <phase>generate-sources</phase>
@@ -159,11 +63,10 @@
       </plugin>
 
       <!-- add generated sources into build -->
-      <plugin>
+      <!-- REMARK CD: This is usally handled automatically today -->
+      <!--plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${build.plugins.plugin.version}</version>
-
         <executions>
           <execution>
             <id>add-source</id>
@@ -190,21 +93,20 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
+      </plugin-->
       <!-- End Generate Source -->
 
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>4.4.0</version>
         <executions>
-          <execution>
-          <id>attach-javadocs</id>
+          <!--execution>
+            <id>attach-javadocs</id>
             <phase>dont-execute</phase>
             <goals>
-            <goal>doc-jar</goal>
-          </goals>
-        </execution>
+              <goal>doc-jar</goal>
+            </goals>
+          </execution-->
           <execution>
             <id>add-scala-sources</id>
             <phase>initialize</phase>
@@ -214,14 +116,14 @@
           </execution>
           <execution>
             <id>scala-compile</id>
-            <phase>process-resources</phase>
+            <phase>compile</phase>
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <phase>test-compile</phase>
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -238,94 +140,122 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <version>${scalatest.maven.plugin.version}</version>
         <executions>
           <execution>
-            <id>test</id>
+            <id>scala-test</id>
             <goals>
               <goal>test</goal>
             </goals>
+            <configuration>
+              <argLine>-Xmx4g</argLine>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
       </plugin>
 
-      <!-- create test jar so other modules can reuse the math test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
+          <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
           <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+          <!-- create test jar so other modules can reuse the math test utility classes. -->
+          <execution>
+            <id>default-test-jar</id>
+            <phase>package</phase>
             <goals>
               <goal>test-jar</goal>
             </goals>
-            <phase>package</phase>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-
-      <!-- copy jars to lib/ -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
             <configuration>
-              <tasks>
-                <copy file="target/mahout-core_${scala.compat.version}-${project.version}.jar" tofile="../lib/mahout-core_${scala.compat.version}-${project.version}.jar" />
-              </tasks>
+              <classifier>test_scala_${scala.compat.version}</classifier>
             </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
           </execution>
-<!--          <execution>-->
-<!--            <id>copy-javadocs</id>-->
-<!--            <phase>install</phase>-->
-<!--            <configuration>-->
-<!--              <tasks>-->
-<!--                <copy file="target/core_${scala.compat.version}-${project.version}-javadoc.jar" tofile="../docs/core_${scala.compat.version}-${project.version}-javadoc.jar" />-->
-<!--              </tasks>-->
-<!--            </configuration>-->
-<!--            <goals>-->
-<!--              <goal>run</goal>-->
-<!--            </goals>-->
-<!--          </execution>-->
         </executions>
       </plugin>
-
-      <!-- delete files on mvn clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../lib/</directory>
-              <includes>
-                <include>mahout-core_*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
-
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.esotericsoftware.kryo</groupId>
+      <artifactId>kryo</artifactId>
+    </dependency>
+
+    <!-- scala stuff -->
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+    </dependency>
+
+    <!-- TODO look into factoring this away (or to BLAS package)-->
+    <dependency>
+      <groupId>it.unimi.dsi</groupId>
+      <artifactId>fastutil</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+    </dependency>
+
+    <!-- TODO ONE Logging framework... -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+
+    <!-- TODO this is declared at top, fix this reimport -->
+    <!-- TODO fix all tests to stop using `com.carrotsearch.randomizedtesting.annotations` and `org.apache.lucene.util` and easymock -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Todo Factor this out-->
+    <dependency>
+      <groupId>com.carrotsearch.randomizedtesting</groupId>
+      <artifactId>randomizedtesting-runner</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-test-framework</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
 </project>

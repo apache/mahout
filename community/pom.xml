@@ -18,69 +18,25 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>mahout-community</artifactId>
-  <version>14.1-SNAPSHOT</version>
-  <name>Mahout Community</name>
-  <description>Not officially maintained, but still very useful scripts to use Mahout with.
-  </description>
-
   <packaging>pom</packaging>
 
-  <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
+  <name>Mahout Community</name>
+  <description>Not officially maintained, but still very useful scripts to use Mahout with.</description>
 
-  <build>
-    <plugins>
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
-  
-  <profiles>
-    <profile>
-      <id>flink-batch</id>
-      <modules>
-        <module>community-engines</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>h2o</id>
-      <modules>
-        <module>community-engines</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>mahout-mr</id>
-      <modules>
-        <module>mahout-mr</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>spark-cli-drivers</id>
-      <modules>
-        <module>spark-cli-drivers</module>
-      </modules>
-    </profile>
-
-  </profiles>
+  <modules>
+    <module>community-engines</module>
+    <module>mahout-mr</module>
+    <module>spark-cli-drivers</module>
+  </modules>
 
 </project>
