@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>14.2-SNAPSHOT</version>
+    <version>14.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>apache-mahout-distribution</artifactId>
@@ -64,7 +64,7 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
-      <version>14.2-SNAPSHOT</version>
+      <version>14.1-SNAPSHOT</version>
       <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
@@ -72,18 +72,18 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>
-      <version>14.2-SNAPSHOT</version>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark</artifactId>
-      <version>14.2-SNAPSHOT</version>
+      <version>14.1-SNAPSHOT</version>
       <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-spark</artifactId>
-      <version>14.2-SNAPSHOT</version>
+      <version>14.1-SNAPSHOT</version>
       <!-- This needs the scala_2.11 addition -->
       <classifier>dependency-reduced</classifier>
     </dependency>
