@@ -392,7 +392,11 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     @Override
     protected void reduce(VarIntWritable index, Iterable<VarLongWritable> ids, Context ctx)
       throws IOException, InterruptedException {
-      ctx.write(index, ids.iterator().next());
+      if (ids.iterator().hasNext()) {
+        ctx.write(index, ids.iterator().next());
+      } else {
+        log.debug("Iterator is empty");
+      }
     }
   }
 
