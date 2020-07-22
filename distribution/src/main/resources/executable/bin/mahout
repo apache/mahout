@@ -208,34 +208,6 @@ fi
   fi
 
   # add jars for running from the command line if we requested shell or spark CLI driver
-#  if [ "$SPARK" == "1" ]; then
-#
-#    for f in $MAHOUT_HOME/lib/mahout-hdfs-*.jar ; do
-#      CLASSPATH=${CLASSPATH}:$f;
-#    done
-#
-#    for f in $MAHOUT_HOME/lib/mahout-core-*.jar ; do
-#      CLASSPATH=${CLASSPATH}:$f;
-#    done
-#
-#    for f in $MAHOUT_HOME/lib/spark_*.jar ; do
-#      CLASSPATH=${CLASSPATH}:$f;
-#    done
-#
-#    for f in $MAHOUT_HOME/lib/spark-cli_*.jar ; do
-#       CLASSPATH=${CLASSPATH}:$f;
-#    done
-#
-#    # viennacl jars- may or may not be available depending on build profile
-#    for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
-#          CLASSPATH=${CLASSPATH}:$f;
-#    done
-#
-#    # viennacl jars- may or may not be available depending on build profile
-#    for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
-#         CLASSPATH=${CLASSPATH}:$f;
-#    done
-
 
     SPARK_CP_BIN="${MAHOUT_HOME}/bin/compute-classpath.sh"
     if [ -x "${SPARK_CP_BIN}" ]; then
@@ -254,42 +226,6 @@ fi
       echo "Cannot find Spark assembly classpath. Is 'SPARK_HOME' set?"
       exit -1
     fi
-  fi
-
-	 # add vcl jars at any point.
-	 # viennacl jars- may or may not be available depending on build profile
-#	  for f in $MAHOUT_HOME/viennacl/target/mahout-native-viennacl_*.jar ; do
-#	        CLASSPATH=${CLASSPATH}:$f;
-#	  done
-#
-#	  # viennacl jars- may or may not be available depending on build profile
-#	  for f in $MAHOUT_HOME/viennacl-omp/target/mahout-native-viennacl-omp_*.jar ; do
-#	        CLASSPATH=${CLASSPATH}:$f;
-#	  done
-#
-#  # add release dependencies to CLASSPATH
-#  for f in $MAHOUT_HOME/lib/*.jar; do
-#    CLASSPATH=${CLASSPATH}:$f;
-#  done
-#else
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/hdfs/target/classes
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mr/target/classes
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/integration/target/classes
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math-scala/target/classes
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
-#  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes
-#fi
-
-# add development dependencies to CLASSPATH
-#if [ "$SPARK" != "1" ]; then
-#  for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
-#    CLASSPATH=${CLASSPATH}:$f;
-#  done
-#fi
-
 
 # cygwin path translation
 if $cygwin; then
