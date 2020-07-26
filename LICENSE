@@ -205,11 +205,18 @@
 ==========================================================
 CERN Colt Java Library
 ==========================================================
-NOTE: Can't find the license text as this URL doesn't work anymore: http://acs.lbl.gov/~hoschek/colt/license.html
+Copyright © 1999 CERN - European Organization for Nuclear Research.<br/><br/>
 
-Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose is hereby granted without fee, provided that the above copyright notice appear in all copies and that both that copyright notice and this permission notice appear in supporting documentation. CERN makes no representations about the suitability of this software for any purpose. It is provided "as is" without expressed or implied warranty. 
+Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose
+is hereby granted without fee, provided that the above copyright notice appear in all copies and
+that both that copyright notice and this permission notice appear in supporting documentation.
+CERN makes no representations about the suitability of this software for any purpose.
+It is provided "as is" without expressed or implied warranty.
 
-[Mahout note:  We have included, as source, parts of the CERN Colt Java Matrix library as a Module in the Mahout source tree.  The parts included are those in cern.colt* , cern.jet*, cern.clhep.  We have excluded the hep.aida* packages.]
+[Mahout note:  We have included, as source, parts of the CERN Colt Java Matrix library as a Module
+in the Mahout source tree. The parts included are those in cern.colt* , cern.jet*, cern.clhep.
+We have excluded the hep.aida* packages.]
+
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/Arrays.java
 * apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/OldQRDecomposition.java
 * apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/PersistentObject.java
