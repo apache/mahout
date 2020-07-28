@@ -218,62 +218,60 @@ in the Mahout source tree. The parts included are those in cern.colt* , cern.jet
 We have excluded the hep.aida* packages.]
 
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/Arrays.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/OldQRDecomposition.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/PersistentObject.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/QRDecomposition.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/SingularValueDecomposition.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/Swapper.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/collections/Arithmetic.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/collections/Constants.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/DoubleDoubleFunction.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/DoubleFunction.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/Functions.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/IntFunction.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/IntIntDoubleFunction.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/Mult.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/ObjectProcedure.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/PlusMult.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/math/Arithmetic.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/math/Constants.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/math/Polynomial.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/AbstractContinuousDistribution.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/OldQRDecomposition.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/PersistentObject.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/QRDecomposition.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/SingularValueDecomposition.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/Swapper.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/collections/Arithmetic.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/collections/Constants.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/DoubleDoubleFunction.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/DoubleFunction.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/Functions.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/IntFunction.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/IntIntDoubleFunction.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/Mult.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/ObjectProcedure.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/function/PlusMult.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/math/Arithmetic.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/math/Constants.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/math/Polynomial.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/AbstractContinuousDistribution.java
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/AbstractDiscreteDistribution.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/AbstractDistribution.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/AbstractDistribution.java
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/Exponential.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/Gamma.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/Gamma.java
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/NegativeBinomial.java
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/Normal.java
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/Poisson.java
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/Uniform.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/engine/MersenneTwister.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/engine/RandomEngine.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/engine/MersenneTwister.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/engine/RandomEngine.java
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/random/sampling/RandomSampler.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/stat/Gamma.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/stat/Portability.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/list/AbstractList.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/list/AbstractObjectList.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/list/ObjectArrayList.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/stat/Gamma.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/jet/stat/Probability.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/list/AbstractList.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/list/AbstractObjectList.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/list/ObjectArrayList.java
   apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/list/SimpleLongArrayList.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/map/HashFunctions.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/map/OpenHashMap.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/map/QuickOpenIntIntHashMap.java
-* apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/set/AbstractSet.java
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/buffer/ValueTypeBufferConsumer.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/KeyTypeObjectProcedure.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/KeyTypeProcedure.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/KeyTypeProcedure.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/ObjectValueTypeProcedure.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/ObjectValueTypeProcedure.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/list/AbstractValueTypeList.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/list/ValueTypeArrayList.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/AbstractKeyTypeObjectMap.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/AbstractKeyTypeValueTypeMap.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/AbstractObjectValueTypeMap.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/OpenKeyTypeObjectHashMap.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/OpenKeyTypeValueTypeHashMap.java.t
-* apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/OpenObjectValueTypeHashMap.java.t
-
-NOTE: Entries with a '*' have both Apache and CERN headers
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/map/HashFunctions.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/map/OpenHashMap.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/map/QuickOpenIntIntHashMap.java
+  apache-mahout-14.1/core/src/main/java/org/apache/mahout/math/set/AbstractSet.java
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/buffer/ValueTypeBufferConsumer.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/KeyTypeObjectProcedure.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/KeyTypeProcedure.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/KeyTypeProcedure.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/ObjectValueTypeProcedure.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/function/ObjectValueTypeProcedure.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/list/AbstractValueTypeList.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/list/ValueTypeArrayList.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/AbstractKeyTypeObjectMap.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/AbstractKeyTypeValueTypeMap.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/AbstractObjectValueTypeMap.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/OpenKeyTypeObjectHashMap.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/OpenKeyTypeValueTypeHashMap.java.t
+  apache-mahout-14.1/core/src/main/java-templates/org/apache/mahout/math/map/OpenObjectValueTypeHashMap.java.t
 
 ================================================================
 Austin Appleby's C algorithm implemented by Yonik Seeley under public domain
