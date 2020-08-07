@@ -17,12 +17,12 @@
 name: Quality Assurance
 
 on:
-  push:
-    branches: [ trunk ]
-  pull_request:
-    branches: [ trunk ]
+#  push:
+#    branches: [ trunk ]
+#  pull_request:
+#    branches: [ trunk ]
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 0 * *'
 
 jobs:
   build:

@@ -54,7 +54,7 @@ if [ ! -d "/docs/$MAHOUT_VERSION/api" ]; then
 	echo "Moving directory..."
 	mv $WORKDIR/apache-mahout-distribution-$MAHOUT_VERSION/docs $WORKDIR/docs/$MAHOUT_VERSION/api
 	rm -f $WORKDIR/$DISTFILE
-	"done."
+	echo "done."
 fi
 # rm -rf *
 #cp -a $WORKDIR/* .
