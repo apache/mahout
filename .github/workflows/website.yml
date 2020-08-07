@@ -39,6 +39,8 @@ jobs:
     # Runs a single command using the runners shell
     - name: Build Website
       run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
         ./website/build_site.sh
         cp -r $WORKDIR/* .
         git add .
