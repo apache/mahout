@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-name: CI
+name: Website
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the trunk branch
@@ -38,4 +38,14 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Build Website
-      run: ./website/build_site.sh
+      run: |
+        ./website/build_site.sh
+        cp -r $WORKDIR/* .
+        git add .
+        git commit -m "Automatic Site Publish by Buildbot"
+        git push origin asf-site
+      env:
+        WORKDIR: /tmp/mahout-site
+        RUBY_PATH: ~/shared/.rvm
+        GEM_HOME: ${RUBY_PATH}/gems
+

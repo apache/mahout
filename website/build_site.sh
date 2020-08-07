@@ -58,8 +58,8 @@ if [ ! -d "/docs/$MAHOUT_VERSION/api" ]; then
 fi
 # rm -rf *
 #cp -a $WORKDIR/* .
-cp -r $WORKDIR/* .
-git add .
-git commit -m "Automatic Site Publish by Buildbot"
-git push origin asf-site
+#cp -r $WORKDIR/* .
+#git add .
+#git commit -m "Automatic Site Publish by Buildbot"
+#git push origin asf-site
 
