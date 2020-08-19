@@ -19,7 +19,7 @@
 
 # A BIG Shoutout to the Bros and Bro-ettes at Apache Spark for this
 
-## TODO post 14.1 fix this script ---- Idempotency is lost somewhere, and 
+## TODO post 14.1 fix this script ---- Idempotency is lost somewhere, and
 ## this script will mess an entire IntelliJ project structure up !!######
 
 set -ex
@@ -51,7 +51,7 @@ check_scala_version "$TO_VERSION"
 
 if [[ $TO_VERSION != "2.10" && $TO_VERSION != "2.11" ]]; then
   FROM_VERSION="2.12"
-elif [[ $TO_VERSION != "2.10" && $TO_VERSION !="2.12" ]]; then
+elif [[ $TO_VERSION != "2.10" && $TO_VERSION != "2.12" ]]; then
   FROM_VERSION="2.11"
 else [[ $TO_VERSION != "2.11" && $TO_VERSION != "2.12" ]];
   FROM_VERSION="2.10"
