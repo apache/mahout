@@ -306,37 +306,26 @@ public class HebbianSolver {
   public static void main(String[] args) {
     Properties props = new Properties();
     String propertiesFile = args.length > 0 ? args[0] : "config/solver.properties";
-    //  props.load(new FileInputStream(propertiesFile));
-
     String corpusDir = props.getProperty("solver.input.dir");
     String outputDir = props.getProperty("solver.output.dir");
     if (corpusDir == null || corpusDir.isEmpty() || outputDir == null || outputDir.isEmpty()) {
       log.error("{} must contain values for solver.input.dir and solver.output.dir", propertiesFile);
       return;
     }
-    //int inBufferSize = Integer.parseInt(props.getProperty("solver.input.bufferSize"));
     int rank = Integer.parseInt(props.getProperty("solver.output.desiredRank"));
     double convergence = Double.parseDouble(props.getProperty("solver.convergence"));
     int maxPasses = Integer.parseInt(props.getProperty("solver.maxPasses"));
-    //int numThreads = Integer.parseInt(props.getProperty("solver.verifier.numThreads"));
-
     HebbianUpdater updater = new HebbianUpdater();
-    SingularVectorVerifier verifier = new AsyncEigenVerifier();
+    AsyncEigenVerifier verifier = new AsyncEigenVerifier();
     HebbianSolver solver = new HebbianSolver(updater, verifier, convergence, maxPasses);
     Matrix corpus = null;
-    /*
-    if (numThreads <= 1) {
-      //  corpus = new DiskBufferedDoubleMatrix(new File(corpusDir), inBufferSize);
-    } else {
-      //  corpus = new ParallelMultiplyingDiskBufferedDoubleMatrix(new File(corpusDir), inBufferSize, numThreads);
-    }
-     */
     long now = System.currentTimeMillis();
     TrainingState finalState = solver.solve(corpus, rank);
     long time = (System.currentTimeMillis() - now) / 1000;
+    verifier.close();
     log.info("Solved {} eigenVectors in {} seconds.  Persisted to {}",
              finalState.getCurrentEigens().rowSize(), time, outputDir);
   }
 
-  
+
 }
