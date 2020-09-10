@@ -17,40 +17,24 @@
  limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <version>14.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>mahout-engine</artifactId>
-  <name>Mahout Engine</name>
-  <description>Parent of Various Engines on which you can run Mahout.
-  </description>
-
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
-
   <packaging>pom</packaging>
 
-  <dependencies>
+  <name>Mahout Engine</name>
+  <description>Parent of Various Engines on which you can run Mahout.</description>
 
-  </dependencies>
+  <modules>
+    <module>hdfs</module>
+    <module>spark</module>
+  </modules>
 
-  <build>
-    <plugins>
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>

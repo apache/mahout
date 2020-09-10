@@ -18,126 +18,137 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <artifactId>mahout</artifactId>
-        <groupId>org.apache.mahout</groupId>
-        <version>14.1-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout</artifactId>
+    <version>14.2-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>apache-mahout-distribution_2.11</artifactId>
+  <artifactId>apache-mahout-distribution</artifactId>
+  <packaging>pom</packaging>
 
-    <name>Mahout Release Package</name>
-    <description>Distribution Package</description>
+  <name>Mahout Distribution</name>
+  <description>Distribution Package</description>
 
-    <packaging>pom</packaging>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>distro-assembly-bin</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <attach>true</attach>
+              <finalName>apache-mahout-${project.version}</finalName>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+              <tarLongFileMode>gnu</tarLongFileMode>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
-    <scm>
-        <connection>scm:git:git@github.com:apache/mahout.git</connection>
-        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-        <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-        <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-        </tag>
-    </scm>
+  <dependencies>
+    <!-- Mahout core -->
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.2-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
 
-    <dependencies>
+    <!-- Engines -->
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-hdfs</artifactId>
+      <version>14.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark</artifactId>
+      <version>14.2-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-spark</artifactId>
+      <version>14.2-SNAPSHOT</version>
+      <!-- This needs the scala_2.11 addition -->
+      <classifier>dependency-reduced</classifier>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <!-- Pull in the community modules, if the profile is enabled -->
+    <profile>
+      <id>with-community-modules</id>
+      <dependencies>
+        <!--
+          Community Artifacts
+        -->
         <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-core_${scala.compat.version}</artifactId>
-            <version>${project.version}</version>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-spark-cli-drivers</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>scala_${scala.compat.version}</classifier>
+        </dependency>
+
+        <!-- Community Engines -->
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-flink-batch</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>scala_${scala.compat.version}</classifier>
         </dependency>
         <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-hdfs_${scala.compat.version}</artifactId>
-            <version>${project.version}</version>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-h2o</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>scala_${scala.compat.version}</classifier>
+        </dependency>
+
+        <!-- Mahout  MR -->
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-integration</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>scala_${scala.compat.version}</classifier>
         </dependency>
         <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-spark_${scala.compat.version}</artifactId>
-            <version>${project.version}</version>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mr</artifactId>
+          <version>14.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-spark-cli-drivers_${scala.compat.version}</artifactId>
-            <version>${project.version}</version>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mr-examples</artifactId>
+          <version>14.1-SNAPSHOT</version>
         </dependency>
-    </dependencies>
-
-        <build>
-          <plugins>
-            <plugin>
-              <artifactId>maven-assembly-plugin</artifactId>
-<!--
-              <version>3.1.1</version>
--->
-                <executions>
-                    <execution>
-                        <id>distro-assembly-bin</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <attach>true</attach>
-                            <finalName>apache-mahout_${scala.compat.version}-${project.version}</finalName>
-                            <skipAssembly>false</skipAssembly>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/main/resources/assembly/bin.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>distro-assembly-src</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <attach>true</attach>
-                            <finalName>apache-mahout_${scala.compat.version}-${project.version}</finalName>
-                            <skipAssembly>false</skipAssembly>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/main/resources/assembly/src.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                            <appendAssemblyId>true</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-<!--            <pluginManagement>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.eclipse.m2e</groupId>-->
-<!--                        <artifactId>lifecycle-mapping</artifactId>-->
-<!--                        <version>1.0.0</version>-->
-<!--                        <configuration>-->
-<!--                            <lifecycleMappingMetadata>-->
-<!--                                <pluginExecutions>-->
-<!--                                    <pluginExecution>-->
-<!--                                        <pluginExecutionFilter>-->
-<!--                                            <groupId>org.apache.maven.plugins</groupId>-->
-<!--                                            <artifactId>maven-dependency-plugin</artifactId>-->
-<!--                                            <versionRange>[1.0,)</versionRange>-->
-<!--                                            <goals>-->
-<!--                                                <goal>build-classpath</goal>-->
-<!--                                            </goals>-->
-<!--                                        </pluginExecutionFilter>-->
-<!--                                        <action>-->
-<!--                                            <ignore />-->
-<!--                                        </action>-->
-<!--                                    </pluginExecution>-->
-<!--                                </pluginExecutions>-->
-<!--                            </lifecycleMappingMetadata>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
-
-<!--                </plugins>-->
-<!--            </pluginManagement>-->
-       </build>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mr</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>job</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mr-examples</artifactId>
+          <version>14.1-SNAPSHOT</version>
+          <classifier>job</classifier>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
 </project>
