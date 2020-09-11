@@ -571,6 +571,7 @@
                 </license>
               </licenses>
               <excludes>
+                <exclude>release/**</exclude>
                 <exclude>**/*.conf</exclude>
                 <exclude>**/*.iml</exclude>
                 <exclude>**/*.md</exclude>
