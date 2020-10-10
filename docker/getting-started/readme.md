@@ -19,4 +19,4 @@ docker build -t $CONTAINER_NAME:$VERSION .
 docker run -p 8080:8080 --rm --name whatever $CONTAINER_NAME:$VERSION
 ```
 
-Then surf to https://localhost:8080
+Then surf to http://localhost:8080

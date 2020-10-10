@@ -1,4 +1,3 @@
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -123,6 +122,7 @@ COPY log4j.properties ${Z_HOME}/conf/
 RUN apt-get install -y maven
 RUN git clone https://github.com/apache/mahout
 WORKDIR /mahout
+RUN git checkout 14.1
 RUN mvn clean install -DskipTests
 
 #includ interpreter custom
