@@ -44,12 +44,12 @@ jobs:
         cp -r $WORKDIR/* .
         git add .
         git commit -m "Automatic Site Publish by Buildbot"
-    - name: Push New Site
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.ASF_SITE_USER }}  
       env:
         WORKDIR: /tmp/mahout-site
         RUBY_PATH: ~/shared/.rvm
         GEM_HOME: ${RUBY_PATH}/gems
-
+    - name: Push New Site
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.ASF_SITE_USER }}  
+      
