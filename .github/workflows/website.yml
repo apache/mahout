@@ -51,6 +51,6 @@ jobs:
     - name: Push New Site
       uses: ad-m/github-push-action@master
       with:
+        github_token: ${{ secrets.ASF_SITE_USER }}
         branch: asf-site
-        force: true
-      
+        force: true     
