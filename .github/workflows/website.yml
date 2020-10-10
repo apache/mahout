@@ -35,7 +35,6 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-
     # Runs a single command using the runners shell
     - name: Build Website
       run: |
@@ -45,7 +44,10 @@ jobs:
         cp -r $WORKDIR/* .
         git add .
         git commit -m "Automatic Site Publish by Buildbot"
-        git push origin asf-site
+    - name: Push New Site
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.ASF_SITE_USER }}  
       env:
         WORKDIR: /tmp/mahout-site
         RUBY_PATH: ~/shared/.rvm
