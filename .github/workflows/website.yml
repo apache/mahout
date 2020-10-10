@@ -53,4 +53,5 @@ jobs:
       with:
         github_token: ${{ secrets.ASF_SITE_USER }}  
         branch: asf-site
+        force: true
       
