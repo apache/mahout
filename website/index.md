@@ -2,8 +2,6 @@
 layout: home
 ---
 
-
-
 Apache Mahout(TM) is a <strong>distributed linear algebra framework</strong> and <strong>mathematically expressive Scala DSL</strong> designed to let mathematicians, statisticians, and data scientists quickly <em>implement their own algorithms</em>. Apache Spark is the recommended out-of-the-box distributed back-end, <em>or can be extended to other distributed backends.</em>
 
 -   Mathematically Expressive Scala DSL

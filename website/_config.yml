@@ -20,7 +20,7 @@
 title : Apache Mahout
 description: Distributed Linear Algebra
 
-mahout-version: 0.14.0
+mahout-version: 14.1
 
 author :
   name : The Apache Software Foundation
