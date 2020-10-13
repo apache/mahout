@@ -27,3 +27,5 @@ bin/metastore_db
 *log
 website/_site
 website/Gemfile.lock
+website/.bundle
+website/.sass-cache

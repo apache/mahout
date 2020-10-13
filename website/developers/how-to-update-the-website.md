@@ -1,19 +1,3 @@
-<!--
- Licensed to the Apache Software Foundation (ASF) under one or more
- contributor license agreements.  See the NOTICE file distributed with
- this work for additional information regarding copyright ownership.
- The ASF licenses this file to You under the Apache License, Version 2.0
- (the "License"); you may not use this file except in compliance with
- the License.  You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
--->
 ---
 layout: page
 title: How To Update The Website
@@ -63,7 +47,7 @@ open your favorite browser and make sure your changes look the way you expect th
 
 #### Commit code and open a PR
 
-Once you're sure everything is right, you commit your code, push to your github.com account (preferably on a branch other than `master`
+Once you're sure everything is right, you commit your code, push to your github.com account (preferably on a branch other than `trunk`
 then click "OpenPR"). This process closely follows [How To Contribute- Making Changes](/developers/how-to-contribute/#HowToContribute-MakingChanges) with an exception that for _WEBSITE ONLY_ changes we relax the requirement to open a JIRA ticket. That is to say, small
 website changes such as fixing a broken link or typo, do not require a specific JIRA issues, and where you would normally 
 commit with a message like `MAHOUT-XXXX The thing I did` (where `XXXX` is the assosciated JIRA number), you can instead 
@@ -84,5 +68,5 @@ Once everything is confirmed to be in order, the committer will merge your pull 
 #### Committers ONLY
 
 No further action is needed, this section is here to deliniate from the old CMS system and Jekyll builds of other projects. Jenkins
-will execute [build_site.sh](https://github.com/apache/mahout/blob/master/website/build_site.sh) upon merging. This will build the website and
+will execute [build_site.sh](https://github.com/apache/mahout/blob/trunk/website/build_site.sh) upon merging. This will build the website and
 copy it to the `asf-site` branch, where [mahout.apache.org](http://mahout.apache.org) is served from. 
