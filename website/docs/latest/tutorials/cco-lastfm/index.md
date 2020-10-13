@@ -1,27 +1,9 @@
-<!--
- Licensed to the Apache Software Foundation (ASF) under one or more
- contributor license agreements.  See the NOTICE file distributed with
- this work for additional information regarding copyright ownership.
- The ASF licenses this file to You under the Apache License, Version 2.0
- (the "License"); you may not use this file except in compliance with
- the License.  You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
--->
 ---
 layout: doc-page
 title: CCOs with Last.fm
-
-    
 ---
 
-Most reccomender examples utilize the MovieLense dataset, but that relies only on ratings (which makes the recommender being demonstrated look less trivial).  Right next to the MovieLense dataset is the LastFM data set.  The LastFM dataset has ratings by user, friends of the user, bands listened to by user, and tags by user.  This is the kind of exciting data set we’d like to work with!
+Most recommender examples utilize the MovieLense dataset, but that relies only on ratings (which makes the recommender being demonstrated look less trivial).  Right next to the MovieLense dataset is the LastFM data set.  The LastFM dataset has ratings by user, friends of the user, bands listened to by user, and tags by user.  This is the kind of exciting data set we’d like to work with!
 
 Start by downloading the LastFM dataset from 
 http://files.grouplens.org/datasets/hetrec2011/hetrec2011-lastfm-2k.zip
