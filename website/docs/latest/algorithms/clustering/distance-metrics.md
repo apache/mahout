@@ -55,7 +55,7 @@ serialization of object and keeping the engine bindings as simple as possible.  
 that is serialized and sent to the workers is a number which specifies what distant metric to use- this is much more
 abstract and easier to maintain on the back end than making sure each function can be serialized by any arbitrary engine.
 We feel from the user perspective, it may seem quirky but causes no decrease in usability.  If a user wishes to use a 
-custom distance metric- simply add it to [math-scala/src/main/org/apache/mahout/math/common/DistanceMetrics.scala](https://github.com/apache/mahout/blob/master/math-scala/src/main/scala/org/apache/mahout/math/algorithms/common/DistanceMetrics.scala)
+custom distance metric- simply add it to [math-scala/src/main/org/apache/mahout/math/common/DistanceMetrics.scala](https://github.com/apache/mahout/blob/trunk/core/src/main/scala/org/apache/mahout/math/algorithms/common/distance/DistanceMetrics.scala)
 and recompile. 
 
 ### Examples
