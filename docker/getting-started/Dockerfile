@@ -118,6 +118,13 @@ RUN echo "$LOG_TAG Download Zeppelin binary" && \
 
 COPY log4j.properties ${Z_HOME}/conf/
 
+RUN rm -rf /zeppelin/notebook/'Flink Tutorial'
+RUN rm -rf /zeppelin/notebook/'Python Tutorial'
+RUN rm -rf /zeppelin/notebook/'R Tutorial'
+RUN rm -rf /zeppelin/notebook/'Spark Tutorial'
+RUN rm -rf /zeppelin/notebook/'Zeppelin Tutorial'
+ARG NOTEBOOK_NAME_WITH_SPACE="Using Mahout_2BYEZ5EVK.zpln"
+ADD ./${NOTEBOOK_NAME_WITH_SPACE} /zeppelin/notebook/${NOTEBOOK_NAME_WITH_SPACE}
 #
 RUN apt-get install -y maven
 RUN git clone https://github.com/apache/mahout
@@ -125,7 +132,7 @@ WORKDIR /mahout
 RUN git checkout 14.1
 RUN mvn clean install -DskipTests
 
-#includ interpreter custom
+#include Mahout interpreter
 USER 1000
 
 ADD interpreter.json /zeppelin/conf/interpreter.json

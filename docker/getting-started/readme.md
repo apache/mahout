@@ -3,8 +3,8 @@
 ## Setting Environment Variables
 
 ```
-export CONTAINER_NAME=rawkintrevo/mahoutgui
-export VERSION=14.2-SNAPSHOT
+export CONTAINER_NAME=$USER/mahoutgui
+export VERSION=14.3-SNAPSHOT
 ```
 
 ## Building Container
