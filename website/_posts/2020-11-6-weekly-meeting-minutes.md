@@ -1,9 +1,12 @@
 ---
 layout: post
-title: Weekly Meeting Minutes 2020-10-30
+title: Weekly Meeting Minutes 2020-11-06
 date:   2020-11-06 00:00:01 -0600
 category: minutes
 ---
+
+Weekly community meeting minutes.
+
 
 ### Topic: Apache Mahout Wikipedia Page
 
