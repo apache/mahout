@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang=" en ">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    Mahout Wiki
+    
+  </title>
+
+  <meta name="description" content="Distributed Linear Algebra">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
+
+  <link rel="canonical" href="http://mahout.apache.org//general/mahout-wiki.html">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
+
+
+</head>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-98314020-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
+
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+          <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ml-auto">
+
+                <!-- Download -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/general/downloads">Download</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/docs/latest/index.html">Overview</a>
+                </li>
+
+                <!-- Algorithms (Samsara / MR) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Algorithms</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/linear-algebra">Distributed Linear Algebra</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/preprocessors">Preprocessors</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/regression">Regression</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/clustering">Clustering</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders">Recommenders</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
+                    </div>
+                    <!--<a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                    <!--
+                    <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+                 -->
+                </li>
+
+
+                <!-- Developers -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Developers</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/developers/developer-resources.html">Developer Resources</a>
+                        <a class="dropdown-item" href="/developers/buildingmahout">Building Mahout from Source</a>
+                        <a class="dropdown-item" href="/developers/issue-tracker">Issues Tracking (JIRA)</a>
+                        <!-- <a class="dropdown-item" href="/developers/patch-check-list/">Patch Check List</a> going to github template -->
+                        <!-- <a class="dropdown-item" href="/developers/reference/">References</a> a lot of overlap with books, talks, etc. page -->
+                        <a class="dropdown-item" href="/developers/release-notes">Release Notes</a>
+                        <!-- <a class="dropdown-item" href="/developers/thirdparty-dependencies/">Third Party Dependencies</a> is our site the reasonable place for this? -->
+                        <!-- <a class="dropdown-item" href="/developers/version-control/">Version Control</a> -->
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">How To's</h6>
+                        <a class="dropdown-item" href="/developers/how-to-contribute">How to Contribute</a>
+                        <a class="dropdown-item" href="/developers/githubPRs">Github PRs</a>
+                        <a class="dropdown-item" href="/developers/how-to-become-a-committer">How to Become a Committer</a>
+                        <a class="dropdown-item" href="/developers/how-to-release">How to Release</a>
+                        <a class="dropdown-item" href="/developers/how-to-update-the-website">How to Update the Website</a>
+                    </div>
+                </li>
+
+                <!-- Docs -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Docs</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <h6 class="dropdown-header">Release</h6>
+                        <a class="dropdown-item" href="/docs/0.13.0">0.13.0</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Latest Snapshot (Development)</h6>
+                        <a class="dropdown-item" href="/docs/latest">0.13.1-SNAPSHOT</a>
+                    </div>
+                </li>
+
+                <!-- Community -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Community</a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <!--<a class="dropdown-item" href="/community/history/">History of the Apache Mahout Project</a>-->
+                        <!--<a class="dropdown-item" href="/community/blogs/">Blog Posts About Mahout</a>-->
+                        <!--<a class="dropdown-item" href="/community/recent-upcoming-talks/">Recent and Upcoming Talks</a>-->
+                        <!-- <a class="dropdown-item" href="/community/books-tutorials-and-talks/">Books Tutorials and Talks</a> -->
+                        <!-- <a class="dropdown-item" href="/community/faq/">FAQ</a> needs a lot of updating -->
+                        <a class="dropdown-item" href="/developers/gsoc">GSoC</a>
+                        <!-- Is OK- updated Map/Reduce verbage to reflect Samsara -->
+                        <!-- <a class="dropdown-item" href="/community/mahout-benchmarks/">Mahout Benchmarks</a> These are old, Keep them? -->
+                        <!-- <a class="dropdown-item" href="/community/mahout-wiki/">Mahout Wiki</a> at very least needs links cleanedup - do we still want this even?-->
+                        <a class="dropdown-item" href="/general/mailing-lists">Mailing Lists</a>
+                        <!-- Clean and pretty -->
+                        <!-- <a class="dropdown-item" href="/community/powered-by-mahout/">Powered By Mahout</a> needs update -->
+                        <a class="dropdown-item" href="/general/privacy-policy">Privacy Policy</a>
+                        <!-- <a class="dropdown-item" href="/community/professional-support/">Professional Support</a> update if we even want to keep -->
+                        <a class="dropdown-item" href="/general/who-we-are">Who We Are</a>
+                        <!-- nikolai needs to add himself -->
+                    </div>
+                </li>
+
+                <!-- GitHub -->
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
+                </li>
+
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+  <p>Apache Mahout is a new Apache TLP project to create scalable, machine
+learning algorithms under the Apache license.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>{toc:style=disc</td>
+      <td>minlevel=2}</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><a name="MahoutWiki-General"></a></p>
+<h2 id="general">General</h2>
+<p><a href="overview.html">Overview</a>
+ – Mahout? What’s that supposed to be?</p>
+
+<p><a href="quickstart.html">Quickstart</a>
+ – learn how to quickly setup Apache Mahout for your project.</p>
+
+<p><a href="faq.html">FAQ</a>
+ – Frequent questions encountered on the mailing lists.</p>
+
+<p><a href="developer-resources.html">Developer Resources</a>
+ – overview of the Mahout development infrastructure.</p>
+
+<p><a href="how-to-contribute.html">How To Contribute</a>
+ – get involved with the Mahout community.</p>
+
+<p><a href="how-to-become-a-committer.html">How To Become A Committer</a>
+ – become a member of the Mahout development community.</p>
+
+<p><a href="http://hadoop.apache.org">Hadoop</a>
+ – several of our implementations depend on Hadoop.</p>
+
+<p><a href="http://mloss.org/software/">Machine Learning Open Source Software</a>
+ – other projects implementing Open Source Machine Learning libraries.</p>
+
+<p><a href="mahoutname.html">Mahout – The name, history and its pronunciation</a></p>
+
+<p><a name="MahoutWiki-Community"></a></p>
+<h2 id="community">Community</h2>
+
+<p><a href="who-we-are.html">Who we are</a>
+ – who are the developers behind Apache Mahout?</p>
+
+<p><a href="books-tutorials-and-talks.html">Books, Tutorials, Talks, Articles, News, Background Reading, etc. on Mahout</a></p>
+
+<p><a href="issue-tracker.html">Issue Tracker</a>
+ – see what features people are working on, submit patches and file bugs.</p>
+
+<p><a href="https://svn.apache.org/repos/asf/mahout/">Source Code (SVN)</a>
+ – [Fisheye|http://fisheye6.atlassian.com/browse/mahout]
+ – download the Mahout source code from svn.</p>
+
+<p><a href="mailing-lists,-irc-and-archives.html">Mailing lists and IRC</a>
+ – links to our mailing lists, IRC channel and archived design and
+algorithm discussions, maybe your questions was answered there already?</p>
+
+<p><a href="version-control.html">Version Control</a>
+ – where we track our code.</p>
+
+<p><a href="powered-by-mahout.html">Powered By Mahout</a>
+ – who is using Mahout in production?</p>
+
+<p><a href="professional-support.html">Professional Support</a>
+ – who is offering professional support for Mahout?</p>
+
+<p><a href="gsoc.html">Mahout and Google Summer of Code</a>
+  – All you need to know about Mahout and GSoC.</p>
+
+<p><a href="glossary.html">Glossary of commonly used terms and abbreviations</a></p>
+
+<p><a name="MahoutWiki-Installation/Setup"></a></p>
+<h2 id="installationsetup">Installation/Setup</h2>
+
+<p><a href="system-requirements.html">System Requirements</a>
+ – what do you need to run Mahout?</p>
+
+<p><a href="quickstart.html">Quickstart</a>
+ – get started with Mahout, run the examples and get pointers to further
+resources.</p>
+
+<p><a href="downloads.html">Downloads</a>
+ – a list of Mahout releases.</p>
+
+<p><a href="buildingmahout.html">Download and installation</a>
+ – build Mahout from the sources.</p>
+
+<p><a href="mahout-on-amazon-ec2.html">Mahout on Amazon’s EC2 Service</a>
+ – run Mahout on Amazon’s EC2.</p>
+
+<p><a href="mahout-on-elastic-mapreduce.html">Mahout on Amazon’s EMR</a>
+ – Run Mahout on Amazon’s Elastic Map Reduce</p>
+
+<p><a href="mahoutintegration.html">Integrating Mahout into an Application</a>
+ – integrate Mahout’s capabilities in your application.</p>
+
+<p><a name="MahoutWiki-Examples"></a></p>
+<h2 id="examples">Examples</h2>
+
+<ol>
+  <li><a href="asfemail.html">ASF Email Examples</a>
+ – Examples of recommenders, clustering and classification all using a
+public domain collection of 7 million emails.</li>
+</ol>
+
+<p><a name="MahoutWiki-ImplementationBackground"></a></p>
+<h2 id="implementation-background">Implementation Background</h2>
+
+<p><a name="MahoutWiki-RequirementsandDesign"></a></p>
+<h3 id="requirements-and-design">Requirements and Design</h3>
+
+<p><a href="matrix-and-vector-needs.html">Matrix and Vector Needs</a>
+ – requirements for Mahout vectors.</p>
+
+<p><a href="collection(de-)serialization.html">Collection(De-)Serialization</a></p>
+
+<p><a name="MahoutWiki-CollectionsandAlgorithms"></a></p>
+<h3 id="collections-and-algorithms">Collections and Algorithms</h3>
+
+<p>Learn more about <a href="mahout-collections.html">mahout-collections</a>
+, containers for efficient storage of primitive-type data and open hash
+tables.</p>
+
+<p>Learn more about the <a href="algorithms.html">Algorithms</a>
+ discussed and employed by Mahout.</p>
+
+<p>Learn more about the <a href="recommender-documentation.html">Mahout recommender implementation</a>
+.</p>
+
+<p><a name="MahoutWiki-Utilities"></a></p>
+<h3 id="utilities">Utilities</h3>
+
+<p>This section describes tools that might be useful for working with Mahout.</p>
+
+<p><a href="converting-content.html">Converting Content</a>
+ – Mahout has some utilities for converting content such as logs to
+formats more amenable for consumption by Mahout.
+<a href="creating-vectors.html">Creating Vectors</a>
+ – Mahout’s algorithms operate on vectors. Learn more on how to generate
+these from raw data.
+<a href="viewing-result.html">Viewing Result</a>
+ – How to visualize the result of your trained algorithms.</p>
+
+<p><a name="MahoutWiki-Data"></a></p>
+<h3 id="data">Data</h3>
+
+<p><a href="collections.html">Collections</a>
+ – To try out and test Mahout’s algorithms you need training data. We are
+always looking for new training data collections.</p>
+
+<p><a name="MahoutWiki-Benchmarks"></a></p>
+<h3 id="benchmarks">Benchmarks</h3>
+
+<p><a href="mahout-benchmarks.html">Mahout Benchmarks</a></p>
+
+<p><a name="MahoutWiki-Committer'sResources"></a></p>
+<h2 id="committers-resources">Committer’s Resources</h2>
+
+<ul>
+  <li><a href="testing.html">Testing</a>
+ – Information on test plans and ideas for testing</li>
+</ul>
+
+<p><a name="MahoutWiki-ProjectResources"></a></p>
+<h3 id="project-resources">Project Resources</h3>
+
+<ul>
+  <li><a href="thirdparty-dependencies.html">Dealing with Third Party Dependencies not in Maven</a></li>
+  <li><a href="how-to-update-the-website.html">How To Update The Website</a></li>
+  <li><a href="patch-check-list.html">Patch Check List</a></li>
+  <li><a href="http://cwiki.apache.org/confluence/display/MAHOUT/How+to+release">How To Release</a></li>
+  <li><a href="release-planning.html">Release Planning</a></li>
+  <li><a href="https://analysis.apache.org/dashboard/index/63921">Sonar Code Quality Analysis</a></li>
+</ul>
+
+<p><a name="MahoutWiki-AdditionalResources"></a></p>
+<h3 id="additional-resources">Additional Resources</h3>
+
+<ul>
+  <li><a href="http://monitoring.apache.org/status/">Apache Machine Status</a>
+ - Check to see if SVN, other resources are available.</li>
+  <li><a href="http://www.apache.org/dev/committers.html">Committer’s FAQ</a></li>
+  <li><a href="http://www.apache.org/dev/">Apache Dev</a></li>
+</ul>
+
+<p><a name="MahoutWiki-HowToEditThisWiki"></a></p>
+<h2 id="how-to-edit-this-wiki">How To Edit This Wiki</h2>
+
+<p>How to edit this Wiki</p>
+
+<p>This Wiki is a collaborative site, anyone can contribute and share:</p>
+
+<ul>
+  <li>Create an account by clicking the “Login” link at the top of any page,
+and picking a username and password.</li>
+  <li>Edit any page by pressing Edit at the top of the page</li>
+</ul>
+
+<p>There are some conventions used on the Mahout wiki:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>* {noformat}+*TODO:*+{noformat} (+*TODO:*+ ) is used to denote sections that definitely need to be cleaned up.
+* {noformat}+*Mahout_(version)*+{noformat} (+*Mahout_0.2*+) is used to draw attention to which version of Mahout a feature was (or will be) added to Mahout.
+</code></pre>
+</div>
+
+
+
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2020 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+</body>
+
+</html>

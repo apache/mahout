@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang=" en ">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    Powered By Mahout
+    
+  </title>
+
+  <meta name="description" content="Distributed Linear Algebra">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
+
+  <link rel="canonical" href="http://mahout.apache.org//general/powered-by-mahout.html">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
+
+
+</head>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-98314020-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
+
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+          <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ml-auto">
+
+                <!-- Download -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/general/downloads">Download</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/docs/latest/index.html">Overview</a>
+                </li>
+
+                <!-- Algorithms (Samsara / MR) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Algorithms</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/linear-algebra">Distributed Linear Algebra</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/preprocessors">Preprocessors</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/regression">Regression</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/clustering">Clustering</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders">Recommenders</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
+                    </div>
+                    <!--<a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                    <!--
+                    <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+                 -->
+                </li>
+
+
+                <!-- Developers -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Developers</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/developers/developer-resources.html">Developer Resources</a>
+                        <a class="dropdown-item" href="/developers/buildingmahout">Building Mahout from Source</a>
+                        <a class="dropdown-item" href="/developers/issue-tracker">Issues Tracking (JIRA)</a>
+                        <!-- <a class="dropdown-item" href="/developers/patch-check-list/">Patch Check List</a> going to github template -->
+                        <!-- <a class="dropdown-item" href="/developers/reference/">References</a> a lot of overlap with books, talks, etc. page -->
+                        <a class="dropdown-item" href="/developers/release-notes">Release Notes</a>
+                        <!-- <a class="dropdown-item" href="/developers/thirdparty-dependencies/">Third Party Dependencies</a> is our site the reasonable place for this? -->
+                        <!-- <a class="dropdown-item" href="/developers/version-control/">Version Control</a> -->
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">How To's</h6>
+                        <a class="dropdown-item" href="/developers/how-to-contribute">How to Contribute</a>
+                        <a class="dropdown-item" href="/developers/githubPRs">Github PRs</a>
+                        <a class="dropdown-item" href="/developers/how-to-become-a-committer">How to Become a Committer</a>
+                        <a class="dropdown-item" href="/developers/how-to-release">How to Release</a>
+                        <a class="dropdown-item" href="/developers/how-to-update-the-website">How to Update the Website</a>
+                    </div>
+                </li>
+
+                <!-- Docs -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Docs</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <h6 class="dropdown-header">Release</h6>
+                        <a class="dropdown-item" href="/docs/0.13.0">0.13.0</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Latest Snapshot (Development)</h6>
+                        <a class="dropdown-item" href="/docs/latest">0.13.1-SNAPSHOT</a>
+                    </div>
+                </li>
+
+                <!-- Community -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Community</a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <!--<a class="dropdown-item" href="/community/history/">History of the Apache Mahout Project</a>-->
+                        <!--<a class="dropdown-item" href="/community/blogs/">Blog Posts About Mahout</a>-->
+                        <!--<a class="dropdown-item" href="/community/recent-upcoming-talks/">Recent and Upcoming Talks</a>-->
+                        <!-- <a class="dropdown-item" href="/community/books-tutorials-and-talks/">Books Tutorials and Talks</a> -->
+                        <!-- <a class="dropdown-item" href="/community/faq/">FAQ</a> needs a lot of updating -->
+                        <a class="dropdown-item" href="/developers/gsoc">GSoC</a>
+                        <!-- Is OK- updated Map/Reduce verbage to reflect Samsara -->
+                        <!-- <a class="dropdown-item" href="/community/mahout-benchmarks/">Mahout Benchmarks</a> These are old, Keep them? -->
+                        <!-- <a class="dropdown-item" href="/community/mahout-wiki/">Mahout Wiki</a> at very least needs links cleanedup - do we still want this even?-->
+                        <a class="dropdown-item" href="/general/mailing-lists">Mailing Lists</a>
+                        <!-- Clean and pretty -->
+                        <!-- <a class="dropdown-item" href="/community/powered-by-mahout/">Powered By Mahout</a> needs update -->
+                        <a class="dropdown-item" href="/general/privacy-policy">Privacy Policy</a>
+                        <!-- <a class="dropdown-item" href="/community/professional-support/">Professional Support</a> update if we even want to keep -->
+                        <a class="dropdown-item" href="/general/who-we-are">Who We Are</a>
+                        <!-- nikolai needs to add himself -->
+                    </div>
+                </li>
+
+                <!-- GitHub -->
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
+                </li>
+
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+  <h1 id="powered-by-mahout">Powered by Mahout</h1>
+
+<p>Are you using Mahout to do Machine Learning? <a href="https://mahout.apache.org/general/mailing-lists,-irc-and-archives.html">Care to share</a>? Developers of the project always are happy to learn about new happy users with interesting use cases.</p>
+
+<p><em>Links here do NOT imply
+endorsement by Mahout, its committers or the Apache Software Foundation and
+are for informational purposes only.</em></p>
+
+<p><a name="PoweredByMahout-CommercialUse"></a></p>
+<h2 id="commercial-use">Commercial Use</h2>
+
+<ul>
+  <li><a href="http://nosql.mypopescu.com/post/2082712431/hbase-and-hadoop-at-adobe">Adobe AMP</a> uses Mahout’s clustering algorithms to increase video
+consumption by better user targeting.</li>
+  <li>Accenture uses Mahout as typical example for their <a href="http://www.accenture.com/SiteCollectionDocuments/PDF/Accenture-Hadoop-Deployment-Comparison-Study.pdf">Hadoop Deployment Comparison Study</a></li>
+  <li><a href="http://www.aol.com">AOL</a>
+ use Mahout for shopping recommendations. See <a href="http://www.slideshare.net/kryton/the-data-layer">slide deck</a></li>
+  <li><a href="http://www.boozallen.com/">Booz Allen Hamilton</a>
+ uses Mahout’s clustering algorithms. See <a href="http://www.slideshare.net/ydn/3-biometric-hadoopsummit2010">slide deck</a></li>
+  <li><a href="http://www.buzzlogic.com">Buzzlogic</a>
+ uses Mahout’s clustering algorithms to improve ad targeting</li>
+  <li><a href="http://cull.tv/">Cull.tv</a>
+ uses modified Mahout algorithms for content recommendations</li>
+  <li><img src="http://cdn.dataminelab.com/favicon.ico" alt="DatamineLab" /> <a href="http://dataminelab.com">DataMine Lab</a>
+ uses Mahout’s recommendation and clustering algorithms to improve our
+clients’ ad targeting.</li>
+  <li><a href="http://drupal.org/project/recommender">Drupal</a>
+ uses Mahout to provide open source content recommendation solutions.</li>
+  <li><a href="http://www.evolvondemand.com">Evolv </a>
+ uses Mahout for its Workforce Predictive Analytics platform.</li>
+  <li><a href="http://www.foursquare.com">Foursquare</a>
+ uses Mahout for its <a href="http://engineering.foursquare.com/2011/03/22/building-a-recommendation-engine-foursquare-style/">recommendation engine</a>.</li>
+  <li><a href="http://www.idealo.de">Idealo</a>
+ uses Mahout’s recommendation engine.</li>
+  <li><a href="http://www.infoglutton.com">InfoGlutton</a>
+ uses Mahout’s clustering and classification for various consulting
+projects.</li>
+  <li><a href="http://mark.chmarny.com/2013/07/thinking-big-about-data-at-intel.html">Intel</a>
+ ships Mahout as part of their Distribution for Apache Hadoop Software.</li>
+  <li><a href="http://www.intela.com/">Intela</a>
+ has implementations of Mahout’s recommendation algorithms to select new
+offers to send tu customers, as well as to recommend potential customers to
+current offers. We are also working on enhancing our offer categories by
+using the clustering algorithms.</li>
+  <li><img src="http://ioffer.com/favicon.ico" alt="iOffer" /> <a href="http://www.ioffer.com">iOffer</a>
+ uses Mahout’s Frequent Pattern Mining and Collaborative Filtering to
+recommend items to users.</li>
+  <li><img src="http://kau.li/favicon.ico" alt="kau.li" /> <a href="http://kau.li/en">Kauli</a>
+, one of Japanese Adnetwork, uses Mahout’s clustering to handle clickstream
+data for predicting audience’s interests and intents.</li>
+  <li><a href="http://linkedin.com">Linked.In</a>
+ Historically, we have used R for model training. We have recently started
+experimenting with Mahout for model training and are excited about it - also see
+ <a href="https://www.quora.com/LinkedIn-Recommendations/How-does-LinkedIns-recommendation-system-work?srid=XoeG&amp;share=1">Hadoop World slides</a>
+.</li>
+  <li><a href="http://www.lucidworks.com/products/lucidworks-big-data">LucidWorks Big Data</a>
+ uses Mahout for clustering, duplicate document detection, phrase
+extraction and classification.</li>
+  <li><img src="http://mendeley.com/favicon.ico" alt="Mendeley" /> <a href="http://mendeley.com">Mendeley</a>
+ uses Mahout to power Mendeley Suggest, a research article recommendation
+service.</li>
+  <li><img src="http://mippin.com/web/favicon.ico" alt="Mippin" /> <a href="http://mippin.com">Mippin</a>
+ uses Mahout’s collaborative filtering engine to recommend news feeds</li>
+  <li><a href="http://www.slideshare.net/hamadakoichi/mobage-prmu-2011-mahout-hadoop">Mobage</a>
+ uses Mahout in their analysis pipeline</li>
+  <li><img src="http://myrrix.com/wp-content/uploads/2012/03/favicon.ico" alt="Myrrix" /> <a href="http://myrrix.com">Myrrix</a>
+ is a recommender system product built on Mahout.</li>
+  <li><img src="http://www.newscred.com/static/img/website/favicon.ico" alt="Newscred" /> <a href="http://platform.newscred.com">NewsCred</a>
+ uses Mahout to generate clusters of news articles and to surface the
+important stories of the day</li>
+  <li><a href="http://nextglass.co/">Next Glass</a>
+ uses Mahout</li>
+  <li><a href="http://predixionsoftware.com/">Predixion Software</a>
+ uses Mahout’s algorithms to build predictive models on big data</li>
+  <li>&lt;img src=”http://www.radoop.eu/wp-content/uploads/favicon.png” width=15&gt; <a href="http://radoop.eu">Radoop</a>
+ provides a drag-n-drop interface for big data analytics, including Mahout
+clustering and classification algorithms</li>
+  <li><img src="https://www.researchgate.net/favicon.ico" alt="Researchgate" /> <a href="http://www.researchgate.net/">ResearchGate</a>, the professional network for scientists and researchers, uses Mahout’s
+recommendation algorithms.</li>
+  <li><a href="http://www.sematext.com/">Sematext</a>
+ uses Mahout for its recommendation engine</li>
+  <li><a href="http://www.speeddate.com">SpeedDate.com</a>
+ uses Mahout’s collaborative filtering engine to recommend member profiles</li>
+  <li><a href="http://twitter.com">Twitter</a>
+ uses Mahout’s LDA implementation for user interest modeling</li>
+  <li><a href="http://www.yahoo.com">Yahoo!</a>
+ Mail uses Mahout’s Frequent Pattern Set Mining.  See <a href="http://www.slideshare.net/hadoopusergroup/mail-antispam">slides</a></li>
+  <li><a href="http://365media.com/">365Media </a>
+ uses <em>Mahout’s</em> Classification and Collaborative Filtering algorithms in
+its Real-time system named <a href="http://uptime.365media.com/">UPTIME</a>
+ and 365Media/Social</li>
+</ul>
+
+<p><a name="PoweredByMahout-AcademicUse"></a></p>
+<h2 id="academic-use">Academic Use</h2>
+
+<ul>
+  <li><a href="https://www.dicode-project.eu/">Dicode</a>
+ project uses Mahout’s clustering and classification algorithms on top of
+HBase.</li>
+  <li>The course <a href="http://www.dima.tu-berlin.de/menue/teaching/masterstudium/aim-3/">Large Scale Data Analysis and Data Mining</a>
+ at TU Berlin uses Mahout to teach students about the parallelization of data
+mining problems with Hadoop and Map/Reduce</li>
+  <li>
+    <p>Mahout is used at Carnegie Mellon University, as a comparable platform to <a href="http://www.graphlab.ml.cmu.edu/">GraphLab</a></p>
+  </li>
+  <li>The <a href="http://www.robust-project.eu/">ROBUST project</a>
+, co-funded by the European Commission, employs Mahout in the large scale
+analysis of online community data.</li>
+  <li>Mahout is used for research and data processing at <a href="http://www.nitech.ac.jp/eng/schools/grad/cse.html">Nagoya Institute of Technology</a>
+, in the context of a large-scale citizen participation platform project,
+funded by the Ministry of Interior of Japan.</li>
+  <li>Several researches within <a href="http://www.deri.ie">Digital Enterprise Research Institute</a>
+ <a href="http://www.nuigalway.ie">NUI Galway</a>
+ use Mahout for e.g. topic mining and modelling of large corpora.</li>
+  <li>Mahout is used in the NoTube EU project.</li>
+</ul>
+
+<p><a name="PoweredByMahout-PoweredByLogos"></a></p>
+<h2 id="powered-by-logos">Powered By Logos</h2>
+
+<p>Feel free to use our <strong>Powered By</strong> logos on your site:</p>
+
+<p><img src="https://mahout.apache.org/images/mahout-logo-poweredby-55.png" alt="powered by logo" /></p>
+
+<p><img src="https://mahout.apache.org/images/mahout-logo-poweredby-100.png" alt="powered by logo" /></p>
+
+
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2020 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+</body>
+
+</html>

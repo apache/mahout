@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.5.0">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2020-11-20T18:16:34+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Weekly Meeting Minutes 2020-11-20</title><link href="http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-20" /><published>2020-11-20T18:00:01+00:00</published><updated>2020-11-20T18:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes.html">&lt;p&gt;Weekly community meeting minutes.&lt;/p&gt;
+
+&lt;p&gt;No new issues.&lt;/p&gt;
+
+&lt;p&gt;Will propose idea of moving meeting time on dev@m.a.o&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Weekly community meeting minutes.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-13</title><link href="http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-13" /><published>2020-11-13T18:00:01+00:00</published><updated>2020-11-13T18:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes.html">&lt;p&gt;Weekly community meeting minutes.&lt;/p&gt;
+
+&lt;h3 id=&quot;collected-videos--conference-talks&quot;&gt;Collected Videos / Conference Talks&lt;/h3&gt;
+
+&lt;p&gt;Andrew Musselman is going to try to work on MAHOUT-2130 (Build talks page) this weekend. If you have / know of any 
+content, please send it to him or just add it after he launches the page.&lt;/p&gt;
+
+&lt;h3 id=&quot;issue-grooming&quot;&gt;Issue Grooming&lt;/h3&gt;
+
+&lt;p&gt;The following issues are all related&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;MAHOUT-2122 Create getting started on Docker page&lt;/li&gt;
+  &lt;li&gt;MAHOUT-2134 Update Mahout in Zeppelin page&lt;/li&gt;
+  &lt;li&gt;MAHOUT-2129 Rebuild website docs, add Getting started with Zeppelin to Nav&lt;/li&gt;
+  &lt;li&gt;MAHOUT-2126 Update Zeppelin Containers&lt;/li&gt;
+  &lt;li&gt;MAHOUT-2133 Update “Getting Started in Mahout” page.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The narrative is- we should update (or replace) the getting started in Mahout page with Getting Started with Mahout in 
+Zeppelin. The Zeppelin Docker should have some more “Getting Started” Notebooks. The current Mahout in Zeppelin page 
+should point to the new Mahout in Zeppelin on Docker page. The nav should be updated to reflect all of this.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Weekly community meeting minutes.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-06</title><link href="http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-06" /><published>2020-11-06T06:00:01+00:00</published><updated>2020-11-06T06:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes.html">&lt;p&gt;Weekly community meeting minutes.&lt;/p&gt;
+
+&lt;h3 id=&quot;topic-apache-mahout-wikipedia-page&quot;&gt;Topic: Apache Mahout Wikipedia Page&lt;/h3&gt;
+
+&lt;p&gt;Andrew Palumbo added to the Native solvers sections- thanks Andy!&lt;/p&gt;
+
+&lt;p&gt;Joe Olsen going to take some cracks at it next. (all are welcome to!)&lt;/p&gt;
+
+&lt;h3 id=&quot;topic-starting-on-python-bindings&quot;&gt;Topic: Starting on Python Bindings&lt;/h3&gt;
+
+&lt;p&gt;No progress to date- weather is unseasonably nice in Chicago.&lt;/p&gt;
+
+&lt;h3 id=&quot;topic-k8s-sparkdocker-container&quot;&gt;Topic: K8s Spark+Docker container&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Joe going to create some docs on Mahout + K8s based on Trevor’s Kubeflow book examples.&lt;/li&gt;
+  &lt;li&gt;Trevor’s going to create Kubeflow + Mahout example based on book. (Someday)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Created&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;MAHOUT-2133 Update Quickstart Page&lt;/li&gt;
+  &lt;li&gt;MAHOUT-2134 Update Zeppelin Tutorial&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Weekly community meeting minutes.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-10-30</title><link href="http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-10-30" /><published>2020-10-30T19:00:01+00:00</published><updated>2020-10-30T19:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes.html">&lt;h3 id=&quot;topic-apache-mahout-wikipedia-page&quot;&gt;Topic: Apache Mahout Wikipedia Page&lt;/h3&gt;
+
+&lt;p&gt;Trevor has been doing some serious overhauling on the Apache Mahout entry on Wikipedia.&lt;/p&gt;
+
+&lt;p&gt;However, he’d appreciate it if people could fill out sections, especially if they have expertise.&lt;/p&gt;
+
+&lt;p&gt;Further- we would like to add architecture diagrams- both the original and the one with the
+native solver- need to ask what the copyright it on those/if we can use them.&lt;/p&gt;
+
+&lt;h3 id=&quot;topic-zeppelin-docker-image&quot;&gt;Topic: Zeppelin Docker Image&lt;/h3&gt;
+
+&lt;p&gt;The Apache Zeppelin+Mahout docker image is live- you can get started with Mahout now by following the instructions
+&lt;a href=&quot;http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;topic-starting-on-python-bindings&quot;&gt;Topic: Starting on Python Bindings&lt;/h3&gt;
+
+&lt;p&gt;Trevor is going to start working on Python bindings. He thinks adding Mahout as a library for pyspark 
+will significantly increase adoption. If anyone has experience using py4j or is otherwise interested in 
+helping or wants to give words of encouragement reach out on dev or email him directly.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Topic: Apache Mahout Wikipedia Page</summary></entry><entry><title type="html">14.1 Is Released!</title><link href="http://mahout.apache.org//news/2020/10/18/version-14-1-released.html" rel="alternate" type="text/html" title="14.1 Is Released!" /><published>2020-10-18T22:16:01+00:00</published><updated>2020-10-18T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2020/10/18/version-14-1-released</id><content type="html" xml:base="http://mahout.apache.org//news/2020/10/18/version-14-1-released.html">&lt;p&gt;Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release 
+binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.&lt;/p&gt;
+
+&lt;p&gt;On another note, we had a really exciting “MahoutCon” track at ApacheCon@home this year. A special thanks to all of our 
+speakers, and we plan to post the videos here when we’re able.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.</summary></entry><entry><title type="html">Code Freeze and Wierd Numbering</title><link href="http://mahout.apache.org//news/2019/12/14/version-14-1.html" rel="alternate" type="text/html" title="Code Freeze and Wierd Numbering" /><published>2019-12-14T22:16:01+00:00</published><updated>2019-12-14T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2019/12/14/version-14-1</id><content type="html" xml:base="http://mahout.apache.org//news/2019/12/14/version-14-1.html">&lt;h3 id=&quot;on-wierd-version-numbering&quot;&gt;On wierd version numbering…&lt;/h3&gt;
+
+&lt;p&gt;We were under pressure to release a “version above 1.0” which seemed sort of arbitrary to us.&lt;/p&gt;
+
+&lt;p&gt;We decided to just stick with our original schema, but take it x10.  Our last release was 0.14.0, and thus this release
+is 14.1.  So if you’re wondering where versions 1.0-13.0 are, that’s what happened.&lt;/p&gt;
+
+&lt;p&gt;14.1 is a long overdue fix for us releasing binaries for to use, instead of having to build your own.  0.14.0 was us finally
+moving the old Map Reduce stuff out of the main trunk, because we haven’t been about that for quite some time.&lt;/p&gt;
+
+&lt;p&gt;If you would like to help us test the release candidate, send an email to &lt;code class=&quot;highlighter-rouge&quot;&gt;dev-subscribe@mahout.apache.org&lt;/code&gt; and reply to the
+confimration email to join our mailing list, and happy Mahouting!&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">On wierd version numbering…</summary></entry><entry><title type="html">Preparing for version 14.1</title><link href="http://mahout.apache.org//news/2019/06/18/preping-014.html" rel="alternate" type="text/html" title="Preparing for version 14.1" /><published>2019-06-18T22:16:01+00:00</published><updated>2019-06-18T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2019/06/18/preping-014</id><content type="html" xml:base="http://mahout.apache.org//news/2019/06/18/preping-014.html">&lt;p&gt;Hey all!  We’re preparing for Mahout version 14.1.&lt;/p&gt;
+
+&lt;p&gt;This release might not seem super exciting from a user perspective (except 
+we’re bumping Apache Spark to version 2.x and Scala to version 2.11) but
+it includes some very important ‘behind the scenes changes’.  We’re doing a 
+heavy refactoring which will combine &lt;code class=&quot;highlighter-rouge&quot;&gt;math&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;math-scala&lt;/code&gt; into a module 
+called &lt;code class=&quot;highlighter-rouge&quot;&gt;core&lt;/code&gt; (no change to code required!).&lt;/p&gt;
+
+&lt;p&gt;We will be moving H2o and Flink-batch engines into &lt;code class=&quot;highlighter-rouge&quot;&gt;community&lt;/code&gt; that is to 
+say the code will still be available, but we won’t be actively maintaining 
+it (we will accept PRs though).  We’re moving the Map Reduce code to community
+and have considered to once again accepting PRs against this code (if you have
+an open PR, we’ll hit you up after the release about rebasing and considering to
+resubmit the PR)&lt;/p&gt;
+
+&lt;p&gt;We’re going to be updating the Java dependency from 1.7 to 1.8.&lt;/p&gt;
+
+&lt;p&gt;There was a LOT of old junk in the POMs which we have clipped out.&lt;/p&gt;
+
+&lt;p&gt;Stay tuned and &lt;a href=&quot;https://issues.apache.org/jira/secure/RapidBoard.jspa?rapidView=80&amp;amp;projectKey=MAHOUT&amp;amp;view=detail&amp;amp;selectedIssue=MAHOUT-2047&quot;&gt;feel free to help out&lt;/a&gt;!&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">Hey all! We’re preparing for Mahout version 14.1.</summary></entry><entry><title type="html">New Website</title><link href="http://mahout.apache.org//news/2017/12/20/new-website.html" rel="alternate" type="text/html" title="New Website" /><published>2017-12-20T22:16:01+00:00</published><updated>2017-12-20T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2017/12/20/new-website</id><content type="html" xml:base="http://mahout.apache.org//news/2017/12/20/new-website.html">&lt;p&gt;We’ve launced a new website, (a HUUUGE special thanks to David Miller from &lt;a href=&quot;http://startbootstrap.com&quot;&gt;StartBootstrap.com&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;It looks great but there’s lots to do as we migrate and clean up content from the old site. If you see anything broken, 
+please let us know via either:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;send an email to dev@mahout.apache.org&lt;/li&gt;
+  &lt;li&gt;fix it yourself and &lt;a href=&quot;/developers/githubPRs&quot;&gt;open a PR&lt;/a&gt;!&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">We’ve launced a new website, (a HUUUGE special thanks to David Miller from StartBootstrap.com).</summary></entry></feed>

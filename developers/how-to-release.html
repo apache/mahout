@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang=" en ">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    How To Release
+    
+  </title>
+
+  <meta name="description" content="Distributed Linear Algebra">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
+
+  <link rel="canonical" href="http://mahout.apache.org//developers/how-to-release.html">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
+
+
+</head>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-98314020-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
+
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+          <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ml-auto">
+
+                <!-- Download -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/general/downloads">Download</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/docs/latest/index.html">Overview</a>
+                </li>
+
+                <!-- Algorithms (Samsara / MR) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Algorithms</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/linear-algebra">Distributed Linear Algebra</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/preprocessors">Preprocessors</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/regression">Regression</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/clustering">Clustering</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders">Recommenders</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
+                    </div>
+                    <!--<a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                    <!--
+                    <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+                 -->
+                </li>
+
+
+                <!-- Developers -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Developers</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/developers/developer-resources.html">Developer Resources</a>
+                        <a class="dropdown-item" href="/developers/buildingmahout">Building Mahout from Source</a>
+                        <a class="dropdown-item" href="/developers/issue-tracker">Issues Tracking (JIRA)</a>
+                        <!-- <a class="dropdown-item" href="/developers/patch-check-list/">Patch Check List</a> going to github template -->
+                        <!-- <a class="dropdown-item" href="/developers/reference/">References</a> a lot of overlap with books, talks, etc. page -->
+                        <a class="dropdown-item" href="/developers/release-notes">Release Notes</a>
+                        <!-- <a class="dropdown-item" href="/developers/thirdparty-dependencies/">Third Party Dependencies</a> is our site the reasonable place for this? -->
+                        <!-- <a class="dropdown-item" href="/developers/version-control/">Version Control</a> -->
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">How To's</h6>
+                        <a class="dropdown-item" href="/developers/how-to-contribute">How to Contribute</a>
+                        <a class="dropdown-item" href="/developers/githubPRs">Github PRs</a>
+                        <a class="dropdown-item" href="/developers/how-to-become-a-committer">How to Become a Committer</a>
+                        <a class="dropdown-item" href="/developers/how-to-release">How to Release</a>
+                        <a class="dropdown-item" href="/developers/how-to-update-the-website">How to Update the Website</a>
+                    </div>
+                </li>
+
+                <!-- Docs -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Docs</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <h6 class="dropdown-header">Release</h6>
+                        <a class="dropdown-item" href="/docs/0.13.0">0.13.0</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Latest Snapshot (Development)</h6>
+                        <a class="dropdown-item" href="/docs/latest">0.13.1-SNAPSHOT</a>
+                    </div>
+                </li>
+
+                <!-- Community -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Community</a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <!--<a class="dropdown-item" href="/community/history/">History of the Apache Mahout Project</a>-->
+                        <!--<a class="dropdown-item" href="/community/blogs/">Blog Posts About Mahout</a>-->
+                        <!--<a class="dropdown-item" href="/community/recent-upcoming-talks/">Recent and Upcoming Talks</a>-->
+                        <!-- <a class="dropdown-item" href="/community/books-tutorials-and-talks/">Books Tutorials and Talks</a> -->
+                        <!-- <a class="dropdown-item" href="/community/faq/">FAQ</a> needs a lot of updating -->
+                        <a class="dropdown-item" href="/developers/gsoc">GSoC</a>
+                        <!-- Is OK- updated Map/Reduce verbage to reflect Samsara -->
+                        <!-- <a class="dropdown-item" href="/community/mahout-benchmarks/">Mahout Benchmarks</a> These are old, Keep them? -->
+                        <!-- <a class="dropdown-item" href="/community/mahout-wiki/">Mahout Wiki</a> at very least needs links cleanedup - do we still want this even?-->
+                        <a class="dropdown-item" href="/general/mailing-lists">Mailing Lists</a>
+                        <!-- Clean and pretty -->
+                        <!-- <a class="dropdown-item" href="/community/powered-by-mahout/">Powered By Mahout</a> needs update -->
+                        <a class="dropdown-item" href="/general/privacy-policy">Privacy Policy</a>
+                        <!-- <a class="dropdown-item" href="/community/professional-support/">Professional Support</a> update if we even want to keep -->
+                        <a class="dropdown-item" href="/general/who-we-are">Who We Are</a>
+                        <!-- nikolai needs to add himself -->
+                    </div>
+                </li>
+
+                <!-- GitHub -->
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
+                </li>
+
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8">
+      <h1 id="how-to-release-mahout">How To Release Mahout</h1>
+
+<p><em>This page is prepared for Mahout committers. You need committer rights to
+create a new Mahout release.</em></p>
+
+<p><a name="HowToRelease-ReleasePlanning"></a></p>
+<h1 id="release-planning">Release Planning</h1>
+
+<p>Start a discussion on mahout-dev about having a release, questions to bring
+up include:</p>
+
+<ul>
+  <li>Any <a href="-https://issues.apache.org/jira/secure/issuenavigator!executeadvanced.jspa?jqlquery=project+%3d+mahout+and+resolution+%3d+unresolved+and+fixversion+%3d+%220.6%22&amp;runquery=true&amp;clear=true.html">Unresolved JIRA issues for the upcoming release </a></li>
+  <li>Any <a href="-https://issues.apache.org/jira/secure/issuenavigator!executeadvanced.jspa?jqlquery=project+%3d+mahout+and+%28status+%3d+resolved+or+status+%3d+closed%29+and+fixversion+is+null+and+resolution+%3d+fixed&amp;runquery=true&amp;clear=true.html">Resolved or Closed JIRA issues missing a “Fix Version” </a>
+ that should be marked as fixed in this release?</li>
+  <li>Does any documentation need an update?</li>
+  <li>Who is going to be the release engineer?</li>
+  <li>What day should be targeted for the release? Leave buffer time for a code freeze and release candidate testing; make sure at least a few people commit to having time to help test the release candidates around the target date.</li>
+</ul>
+
+<p><a name="HowToRelease-CodeFreeze"></a></p>
+<h1 id="code-freeze">Code Freeze</h1>
+
+<p>For 7-14 days prior to the release target date, have a “code freeze” where
+committers agree to only commit things if they:</p>
+
+<ul>
+  <li>Are documentation improvements (including fixes to eliminate Javadoc
+warnings)</li>
+  <li>Are new test cases that improve test coverage</li>
+  <li>Are bug fixes found because of improved test coverage</li>
+  <li>Are new tests and bug fixes for new bugs encountered by manually testing</li>
+</ul>
+
+<p><a name="HowToRelease-StepsForReleaseEngineer"></a></p>
+<h1 id="steps-for-release-engineer">Steps For Release Engineer</h1>
+
+<p><a name="HowToRelease-Beforebuildingrelease"></a></p>
+<h2 id="before-building-release">Before building release</h2>
+<ol>
+  <li>Check that all tests pass after a clean compile: <code class="highlighter-rouge">mvn clean test</code></li>
+  <li>Check that there are no remaining unresolved Jira issues with the upcoming version number listed as the “Fix” version</li>
+  <li>Publish any previously unpublished third-party dependenciess: <a href="thirdparty-dependencies.html">Thirdparty Dependencies</a></li>
+</ol>
+
+<p><a name="HowToRelease-Makingarelease"></a></p>
+<h2 id="making-a-release">Making a release</h2>
+<ul>
+  <li>If this is your first release, add your key to the KEYS file (located on GitHub at https://github.com/apache/mahout/master/distribution/KEYS) and copy it to the release directory.  Make sure you commit your change.  See http://www.apache.org/dev/release-signing.html.</li>
+  <li>Ensure you have set up standard Apache committer settings in
+ ~/.m2/settings.xml as per <a href="http://maven.apache.org/developers/committer-settings.html">this page</a>
+.</li>
+  <li>Add a profile to your <code class="highlighter-rouge">~/.m2/settings.xml</code> in the <code class="highlighter-rouge">&lt;profiles&gt;</code> section with:</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;profiles&gt;
+  &lt;profile&gt;
+    &lt;id&gt;mahout_release&lt;/id&gt;
+    &lt;properties&gt;
+      &lt;gpg.keyname&gt;1234BEEF&lt;/gpg.keyname&gt;
+      &lt;gpg.passphrase&gt;YOUR_SIGNING_PASSCODE_HERE&lt;/gpg.passphrase&gt;
+      &lt;deploy.altRepository&gt;mahout.releases::default::https://repository.apache.org/service/local/staging/deploy/maven2/&lt;/deploy.altRepository&gt;
+      &lt;username&gt;USERNAME&lt;/username&gt;
+      &lt;deploy.url&gt;https://repository.apache.org/service/local/staging/deploy/maven2/&lt;/deploy.url&gt;
+    &lt;/properties&gt;
+  &lt;/profile&gt;
+&lt;/profiles&gt;
+</code></pre>
+</div>
+
+<ul>
+  <li>You may also need to add the following to the <code class="highlighter-rouge">&lt;servers&gt;</code> section in <code class="highlighter-rouge">~/.m2/settings.xml</code> in order to upload artifacts (as the <code class="highlighter-rouge">-Dusername=</code> <code class="highlighter-rouge">-Dpassword=</code> didn’t work for gsingers for 0.8, but this did; n.b. it didn’t work for akm for the 0.13 release):</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;server&gt;
+  &lt;id&gt;apache.releases.https&lt;/id&gt;
+  &lt;username&gt;USERNAME&lt;/username&gt;
+  &lt;password&gt;PASSWORD&lt;/password&gt;
+&lt;/server&gt;
+</code></pre>
+</div>
+
+<ul>
+  <li>If you are outside the US, then svn.apache.org may not resolve to the main US-based Subversion servers. (Compare the IP address you get for svn.apache.org with svn.us.apache.org to see if they are different.) This will cause problems during the release since it will create a revision and then immediately access, but, there is a replication lag of perhaps a minute to the non-US servers. To temporarily force using the US-based server, edit your equivalent of /etc/hosts and map the IP address of svn.us.apache.org to svn.apache.org.</li>
+  <li>
+    <p>Create the release candidate: <code class="highlighter-rouge">mvn -Pmahout-release,apache-release release:prepare release:perform</code>; to add credentials for source control use <code class="highlighter-rouge">mvn -Dusername=myusername -Dpassword='mypassword' -Papache-release release:prepare release:perform</code></p>
+  </li>
+  <li>If you have problems authenticating to svn.apache.org, try adding to the command line <code class="highlighter-rouge">-Dusername=USERNAME -Dpassword=PASSWORD</code></li>
+  <li>If there is an issue first try doing:
+    <ol>
+      <li><code class="highlighter-rouge">mvn -Dmahout-release,apache-release release:rollback</code></li>
+      <li>followed by <code class="highlighter-rouge">mvn -Dmahout-release,apache-release release:clean</code> as this will likely save you time and do the right thing. You may also have to rollback the version numbers in the POM files.</li>
+      <li><em>Optional</em> If you want to skip test cases while rebuilding, use <code class="highlighter-rouge">mvn -DpreparationGoals="clean compile" release:prepare release:perform</code></li>
+    </ol>
+  </li>
+  <li>Review the artifacts, etc. on the Apache Repository (using Sonatype’s Nexus application) site: https://repository.apache.org/. You will need to login using your ASF SVN credentials and then browse to the staging area.</li>
+  <li>Once you have reviewed the artifacts, you will need to “Close” out
+the staging area under Nexus, which then makes the artifacts available for
+others to see.
+    <ol>
+      <li>Log in to Nexus</li>
+      <li>Click the Staging Repositories link in the left hand menu</li>
+      <li>Click the Mahout staged artifact that was just uploaded by the
+release:perform target</li>
+      <li>Click Close in the toolbar. See https://docs.sonatype.org/display/Repository/Closing+a+Staging+Repository for a picture</li>
+      <li>Copy the “Repository URL” link to your email; it should be formed like https://repository.apache.org/content/repositories/orgapachemahout-024/</li>
+    </ol>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Call a VOTE on dev@mahout.apache.org.  Votes require 3 days before passing.  See Apache [release policy</td>
+          <td>http://www.apache.org/foundation/voting.html#ReleaseVotes] for more info.</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>If there’s a problem, you need to unwind the release and start all over.</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>mvn -Pmahout-release,apache-release versions:set -DnewVersion=PREVIOUS_SNAPSHOT
+mvn -Pmahout-release,apache-release versions:commit
+git commit 
+git push --delete apache &lt;tagname&gt; (deletes the remote tag)
+git tag -d tagname (deletes the local tag)
+</code></pre>
+</div>
+
+<ul>
+  <li>Release the artifact in the Nexus Repository in the same way you closed it earlier.</li>
+  <li>Per http://www.apache.org/dev/release-publishing.html#distribution_dist move artifacts over to dist.apache.org</li>
+  <li>Get the Subversion (SVN) repo for Mahout at https://dist.apache.org/repos/dist/release/mahout</li>
+  <li>Make sure to add your key to KEYS if it’s not there already: https://dist.apache.org/repos/dist/release/mahout/KEYS</li>
+  <li>Copy the assemblies and their supporting files (tar.gz, zip, tar.bz2, plus .asc, .md5, .pom, .sha1 files) to a new directory and check in the new directory and the edited KEYS file if you changed it</li>
+  <li>Wait 24 hours for release to propagate to mirrors.</li>
+  <li>Clean up JIRA: Bulk close all X.Y JIRA issues.  Mark the Version
+number as being released (see Manage Versions.)  Add the next version
+(X.Y+1) if necessary.</li>
+  <li>Update release version on http://mahout.apache.org/ and
+http://en.wikipedia.org/wiki/Apache_Mahout</li>
+  <li>Send announcements to the user and developer lists.</li>
+</ul>
+
+<p>See also:</p>
+
+<ul>
+  <li>http://maven.apache.org/developers/release/releasing.html
+*
+http://www.sonatype.com/books/nexus-book/reference/staging-sect-deployment.html</li>
+  <li>http://www.sonatype.com/books/nexus-book/reference/index.html</li>
+</ul>
+
+<h3 id="post-release">Post Release</h3>
+<h2 id="versioning">Versioning</h2>
+<ul>
+  <li>Create the next version in JIRA (if it doesn’t already exist)</li>
+  <li>Mark the version as “released” in JIRA (noting the release date)</li>
+</ul>
+
+<h2 id="documentation">Documentation</h2>
+<ul>
+  <li>Change wiki to match current best practices (remove/change deprecations,
+etc)</li>
+</ul>
+
+<h2 id="publicity">Publicity</h2>
+<ul>
+  <li>update freshmeat</li>
+  <li>blog away</li>
+  <li>Update MLOSS entry: http://mloss.org/revision/view/387/.  See Grant for
+details.</li>
+</ul>
+
+<h2 id="related-resources">Related Resources</h2>
+
+<ul>
+  <li>http://www.apache.org/dev/#releases</li>
+  <li>http://www.apache.org/dev/#mirror</li>
+</ul>
+
+<h1 id="todo-things-to-cleanup-in-this-document">TODO: Things To Cleanup in this document</h1>
+
+<ul>
+  <li>more specifics about things to test before starting or after packaging
+(RAT, run scripts against example, etc…)</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>include info about [Voting</td>
+          <td>http://www.apache.org/foundation/voting.html#ReleaseVotes]</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Apache Software Foundation Links -->
+<div class="card mb-4">
+    <div class="card-header">
+        Apache Software Foundation
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li>
+                <a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/licenses/">Apache License</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Twitter Posts Widget -->
+<div class="card">
+    <div class="card-body">
+        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
+        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+</div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2020 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+</body>
+
+</html>

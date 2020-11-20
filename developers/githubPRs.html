@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang=" en ">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    Apache Mahout
+    
+  </title>
+
+  <meta name="description" content="Distributed Linear Algebra">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
+
+  <link rel="canonical" href="http://mahout.apache.org//developers/githubPRs.html">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
+
+
+</head>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-98314020-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
+
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+          <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ml-auto">
+
+                <!-- Download -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/general/downloads">Download</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/docs/latest/index.html">Overview</a>
+                </li>
+
+                <!-- Algorithms (Samsara / MR) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Algorithms</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/linear-algebra">Distributed Linear Algebra</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/preprocessors">Preprocessors</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/regression">Regression</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/clustering">Clustering</a>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders">Recommenders</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Deprecated</h6>
+                        <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
+                    </div>
+                    <!--<a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
+                    <!--
+                    <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
+                 -->
+                </li>
+
+
+                <!-- Developers -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Developers</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/developers/developer-resources.html">Developer Resources</a>
+                        <a class="dropdown-item" href="/developers/buildingmahout">Building Mahout from Source</a>
+                        <a class="dropdown-item" href="/developers/issue-tracker">Issues Tracking (JIRA)</a>
+                        <!-- <a class="dropdown-item" href="/developers/patch-check-list/">Patch Check List</a> going to github template -->
+                        <!-- <a class="dropdown-item" href="/developers/reference/">References</a> a lot of overlap with books, talks, etc. page -->
+                        <a class="dropdown-item" href="/developers/release-notes">Release Notes</a>
+                        <!-- <a class="dropdown-item" href="/developers/thirdparty-dependencies/">Third Party Dependencies</a> is our site the reasonable place for this? -->
+                        <!-- <a class="dropdown-item" href="/developers/version-control/">Version Control</a> -->
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">How To's</h6>
+                        <a class="dropdown-item" href="/developers/how-to-contribute">How to Contribute</a>
+                        <a class="dropdown-item" href="/developers/githubPRs">Github PRs</a>
+                        <a class="dropdown-item" href="/developers/how-to-become-a-committer">How to Become a Committer</a>
+                        <a class="dropdown-item" href="/developers/how-to-release">How to Release</a>
+                        <a class="dropdown-item" href="/developers/how-to-update-the-website">How to Update the Website</a>
+                    </div>
+                </li>
+
+                <!-- Docs -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Docs</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <h6 class="dropdown-header">Release</h6>
+                        <a class="dropdown-item" href="/docs/0.13.0">0.13.0</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Latest Snapshot (Development)</h6>
+                        <a class="dropdown-item" href="/docs/latest">0.13.1-SNAPSHOT</a>
+                    </div>
+                </li>
+
+                <!-- Community -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Community</a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <!--<a class="dropdown-item" href="/community/history/">History of the Apache Mahout Project</a>-->
+                        <!--<a class="dropdown-item" href="/community/blogs/">Blog Posts About Mahout</a>-->
+                        <!--<a class="dropdown-item" href="/community/recent-upcoming-talks/">Recent and Upcoming Talks</a>-->
+                        <!-- <a class="dropdown-item" href="/community/books-tutorials-and-talks/">Books Tutorials and Talks</a> -->
+                        <!-- <a class="dropdown-item" href="/community/faq/">FAQ</a> needs a lot of updating -->
+                        <a class="dropdown-item" href="/developers/gsoc">GSoC</a>
+                        <!-- Is OK- updated Map/Reduce verbage to reflect Samsara -->
+                        <!-- <a class="dropdown-item" href="/community/mahout-benchmarks/">Mahout Benchmarks</a> These are old, Keep them? -->
+                        <!-- <a class="dropdown-item" href="/community/mahout-wiki/">Mahout Wiki</a> at very least needs links cleanedup - do we still want this even?-->
+                        <a class="dropdown-item" href="/general/mailing-lists">Mailing Lists</a>
+                        <!-- Clean and pretty -->
+                        <!-- <a class="dropdown-item" href="/community/powered-by-mahout/">Powered By Mahout</a> needs update -->
+                        <a class="dropdown-item" href="/general/privacy-policy">Privacy Policy</a>
+                        <!-- <a class="dropdown-item" href="/community/professional-support/">Professional Support</a> update if we even want to keep -->
+                        <a class="dropdown-item" href="/general/who-we-are">Who We Are</a>
+                        <!-- nikolai needs to add himself -->
+                    </div>
+                </li>
+
+                <!-- GitHub -->
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
+                </li>
+
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8">
+      <h1 id="handling-github-prs">Handling Github PRs</h1>
+
+<hr />
+
+<p>Hit the merge button.</p>
+
+<h2 id="how-to-create-a-pr-for-contributers">how to create a PR (for contributers)</h2>
+
+<p>Read [<a href="https://help.github.com/articles/creating-a-pull-request">1</a>].</p>
+
+<p>Pull requests are made to apache/mahout repository on Github.</p>
+
+<h2 id="merging-a-pr-and-closing-it-for-committers">merging a PR and closing it (for committers).</h2>
+
+<p>Remember that pull requests are equivalent to a remote branch with potentially a multitude of commits. 
+In this case it is recommended to squash remote commit history to have one commit per issue, rather 
+than merging in a multitude of contributer’s commits. In order to do that, as well as close the PR at the 
+same time, it is recommended to use <strong>squash commits</strong>.</p>
+
+<p>Read [<a href="https://help.github.com/articles/merging-a-pull-request#merging-locally">2</a>] (merging locally). Merging pull requests are equivalent to merging contributor’s branch:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>git checkout master      # switch to local master branch
+git pull apache master   # fast-forward to current remote HEAD
+git pull --squash https://github.com/cuser/mahout cbranch  # merge to master 
+</code></pre>
+</div>
+
+<p>In this example we assume that contributor Github handle is “cuser” and the PR branch name is “cbranch” there. We also 
+assume that <em>apache</em> remote is configured as</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>apache  https://git-wip-us.apache.org/repos/asf/mahout.git (fetch)
+apache  https://git-wip-us.apache.org/repos/asf/mahout.git (push)
+</code></pre>
+</div>
+
+<p>Squash pull ensures all PR history is squashed into single commit. Also, it is not yet committed, even if 
+fast forward is possible, so you get chance to change things before committing.</p>
+
+<p>At this point resolve conflicts, if any, or ask contributor to rebase on top of master, if PR went out of sync.</p>
+
+<p>Also run regular patch checks and change CHANGELOG.</p>
+
+<p>Suppose everything is fine, you now can commit the squashed request</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>git commit -a
+</code></pre>
+</div>
+
+<p>edit message to contain “MAHOUT-YYYY description <strong>closes #ZZ</strong>”, where ZZ is the pull request number. 
+Including “closes #ZZ” will close PR automatically. More information [<a href="https://help.github.com/articles/closing-issues-via-commit-messages">3</a>].</p>
+
+<p>push apache master</p>
+
+<p>(this will require credentials).</p>
+
+<p>Note on squashing: Since squash discards remote branch history, repeated PRs from the same remote branch are 
+difficult for merging. The workflow implies that every new PR starts with a new rebased branch. This is more 
+important for contributors to know, rather than for committers, because if new PR is not mergeable, github
+would warn to begin with. Anyway, watch for dupe PRs (based on same source branches). This is a bad practice.</p>
+
+<h2 id="closing-a-pr-without-committing">Closing a PR without committing</h2>
+
+<p>When we want to reject a PR (close without committing), just do the following commit on master’s HEAD 
+<em>without merging the PR</em>:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>git commit --allow-empty -m "closes #ZZ *Won't fix*"
+git push apache master
+</code></pre>
+</div>
+
+<p>that should close PR without merging and any code modifications in the master repository.</p>
+
+<h2 id="apachegithub-integration-features">Apache/github integration features</h2>
+
+<p>Read [<a href="https://blogs.apache.org/infra/entry/improved_integration_between_apache_and">4</a>]. Issue handles mentioned in comments and PR name should post to mailing lists and Jira.</p>
+
+
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Apache Software Foundation Links -->
+<div class="card mb-4">
+    <div class="card-header">
+        Apache Software Foundation
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li>
+                <a href="http://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/licenses/">Apache License</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Twitter Posts Widget -->
+<div class="card">
+    <div class="card-body">
+        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
+        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+</div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2020 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+</body>
+
+</html>
