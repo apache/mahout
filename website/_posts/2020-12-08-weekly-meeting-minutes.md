@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Weekly Meeting Minutes 2020-12-8
-date:   2020-12-8 16:00:01 -0600
+title: Weekly Meeting Minutes 2020-12-08
+date:   2020-12-08 16:00:01 -0600
 category: minutes
 ---
 
