@@ -1,0 +1,60 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] Apache Mahout                                                      [pom]
+[INFO] Mahout Core                                                        [jar]
+[INFO] Mahout Engine                                                      [pom]
+[INFO] - Mahout HDFS Support                                              [jar]
+[INFO] - Mahout Spark Engine                                              [jar]
+[INFO] Mahout Distribution                                                [pom]
+[INFO] 
+[INFO] ----------------------< org.apache.mahout:mahout >----------------------
+[INFO] Building Apache Mahout 14.2-SNAPSHOT                               [1/6]
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.1.0:clean (default-clean) @ mahout ---
+[INFO] Deleting /Users/jfhernan/mahout/target
+[INFO] 
+[INFO] --- apache-rat-plugin:0.13:check (default) @ mahout ---
+[INFO] Added 2 additional default licenses.
+[INFO] Enabled default license matchers.
+[INFO] Will parse SCM ignores for exclusions...
+[INFO] Parsing exclusions from /Users/jfhernan/mahout/.gitignore
+[INFO] Finished adding exclusions from SCM ignore files.
+[INFO] 92 implicit excludes (use -debug for more details).
+[INFO] 21 explicit excludes (use -debug for more details).
+[INFO] 1190 resources included (use -debug for more details)
+[INFO] Rat check: Summary over all files. Unapproved: 1, unknown: 1, generated: 0, approved: 1182 licenses.
+[INFO] Added 2 additional default licenses.
+[INFO] Enabled default license matchers.
+[INFO] Will parse SCM ignores for exclusions...
+[INFO] Parsing exclusions from /Users/jfhernan/mahout/.gitignore
+[INFO] Finished adding exclusions from SCM ignore files.
+[INFO] 92 implicit excludes (use -debug for more details).
+[INFO] 21 explicit excludes (use -debug for more details).
+[INFO] 1190 resources included (use -debug for more details)
+[WARNING] Files with unapproved licenses:
+  mylogs.txt
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for Apache Mahout 14.2-SNAPSHOT:
+[INFO] 
+[INFO] Apache Mahout ...................................... FAILURE [  4.522 s]
+[INFO] Mahout Core ........................................ SKIPPED
+[INFO] Mahout Engine ...................................... SKIPPED
+[INFO] - Mahout HDFS Support .............................. SKIPPED
+[INFO] - Mahout Spark Engine .............................. SKIPPED
+[INFO] Mahout Distribution ................................ SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.772 s
+[INFO] Finished at: 2021-01-20T13:24:10-05:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.rat:apache-rat-plugin:0.13:check (default) on project mahout: Too many files with unapproved license: 1 See RAT report in: /Users/jfhernan/mahout/target/rat.txt -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
