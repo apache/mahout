@@ -29,33 +29,16 @@ import org.apache.mahout.math.drm.RLikeDrmOps._
 
 
 class RidgeRegressionModel[K] extends LinearRegressorModel[K]{
-  //var lambda: Double = _
+
   def predict(drmPredictors: DrmLike[K]): DrmLike[K] = {
-
-
-    //implicit val ktag =  drmPredictors.keyClassTag
-
-    //implicit val ctx = drmPredictors.context
-
-    //val bcGuess = drmBroadcast(dvec(lambda))
-
-
 
     var X = drmPredictors
     if (addIntercept) {
       X = X cbind 1
     }
     X %*% beta
-
   }
-
-
-
-
 }
-
-
-
 
 class RidgeRegression[K] extends LinearRegressorFitter[K] {
 
@@ -63,6 +46,7 @@ class RidgeRegression[K] extends LinearRegressorFitter[K] {
 
   override def setStandardHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     lambda = hyperparameters.asInstanceOf[Map[Symbol, Double]].getOrElse('lambda,1.0)
+    addIntercept = hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('addIntercept, true)
   }
 
   def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K], hyperparameters: (Symbol, Any)*): RidgeRegressionModel[K] = {//lambda: Double = 0.1) = {
@@ -77,7 +61,6 @@ class RidgeRegression[K] extends LinearRegressorFitter[K] {
       X = X cbind 1
     }
 
-
     val XTX = (X.t %*% X).collect
     val drmXtXinv = solve(XTX)
     val XTy = X.t %*% drmTarget
@@ -88,8 +71,6 @@ class RidgeRegression[K] extends LinearRegressorFitter[K] {
     model.beta = sol(::, 0)
 
     this.modelPostprocessing(model, X, drmTarget, drmXtXinv)
-
-    //model.lambda = lambda
 
     }
 }
