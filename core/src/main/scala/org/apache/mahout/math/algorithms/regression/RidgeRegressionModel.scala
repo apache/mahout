@@ -46,7 +46,6 @@ class RidgeRegression[K] extends LinearRegressorFitter[K] {
 
   override def setStandardHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     lambda = hyperparameters.asInstanceOf[Map[Symbol, Double]].getOrElse('lambda,1.0)
-    addIntercept = hyperparameters.asInstanceOf[Map[Symbol, Boolean]].getOrElse('addIntercept, true)
   }
 
   def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K], hyperparameters: (Symbol, Any)*): RidgeRegressionModel[K] = {//lambda: Double = 0.1) = {
