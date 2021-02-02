@@ -43,13 +43,15 @@ jobs:
         git config user.name "GitHub Actions Bot"
         git config user.email "<>"
         ./website/build_site.sh
+        rm -rf *
         git checkout asf-site
         cp -r $WORKDIR/* .
         git add .
         git commit -m "Automatic Site Publish by Buildbot"
-        git push
+        git push 
       env:
         WORKDIR: /tmp/mahout-site
+        
         RUBY_PATH: ~/shared/.rvm
         GEM_HOME: ${RUBY_PATH}/gems
   
