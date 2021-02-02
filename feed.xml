@@ -1,4 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.5.0">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2021-02-02T20:02:04+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Weekly Meeting Minutes 2021-01-05</title><link href="http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-01-05" /><published>2021-01-05T22:00:01+00:00</published><updated>2021-01-05T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes.html">&lt;p&gt;Andrew showed Trevor how to file his first board report.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.5.0">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2021-02-02T22:15:15+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Weekly Meeting Minutes 2021-02-02</title><link href="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-02-02" /><published>2021-02-02T22:00:01+00:00</published><updated>2021-02-02T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html">&lt;h3 id=&quot;recap-since-last-time&quot;&gt;Recap Since Last Time&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Website build working again&lt;/li&gt;
+  &lt;li&gt;josehernandezsc added Ridge Regression to &lt;code class=&quot;highlighter-rouge&quot;&gt;algorithms/&lt;/code&gt; framework.&lt;/li&gt;
+  &lt;li&gt;Trevor shared incore PyMahout git repo on mailing list- needs to POC for distributed.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;projects-going-forward&quot;&gt;Projects going forward&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Still need to do 5 related issues identified &lt;a href=&quot;http://mahout.apache.org/minutes/2020/11/13/weekly-meeting-minutes.html&quot;&gt;November 13th&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Trevor to POC distribute Mahout in Python&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Recap Since Last Time</summary></entry><entry><title type="html">Weekly Meeting Minutes 2021-01-05</title><link href="http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-01-05" /><published>2021-01-05T22:00:01+00:00</published><updated>2021-01-05T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes.html">&lt;p&gt;Andrew showed Trevor how to file his first board report.&lt;/p&gt;
 
 &lt;p&gt;Springer Publishing has shown interest in a second edition of the Encyclopedia of Big Data, and Musselman plans to update
 the chapter on Mahout.&lt;/p&gt;
@@ -101,23 +114,4 @@ is 14.1.  So if you’re wondering where versions 1.0-13.0 are, that’s what ha
 moving the old Map Reduce stuff out of the main trunk, because we haven’t been about that for quite some time.&lt;/p&gt;
 
 &lt;p&gt;If you would like to help us test the release candidate, send an email to &lt;code class=&quot;highlighter-rouge&quot;&gt;dev-subscribe@mahout.apache.org&lt;/code&gt; and reply to the
-confimration email to join our mailing list, and happy Mahouting!&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">On wierd version numbering…</summary></entry><entry><title type="html">Preparing for version 14.1</title><link href="http://mahout.apache.org//news/2019/06/18/preping-014.html" rel="alternate" type="text/html" title="Preparing for version 14.1" /><published>2019-06-18T22:16:01+00:00</published><updated>2019-06-18T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2019/06/18/preping-014</id><content type="html" xml:base="http://mahout.apache.org//news/2019/06/18/preping-014.html">&lt;p&gt;Hey all!  We’re preparing for Mahout version 14.1.&lt;/p&gt;
-
-&lt;p&gt;This release might not seem super exciting from a user perspective (except 
-we’re bumping Apache Spark to version 2.x and Scala to version 2.11) but
-it includes some very important ‘behind the scenes changes’.  We’re doing a 
-heavy refactoring which will combine &lt;code class=&quot;highlighter-rouge&quot;&gt;math&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;math-scala&lt;/code&gt; into a module 
-called &lt;code class=&quot;highlighter-rouge&quot;&gt;core&lt;/code&gt; (no change to code required!).&lt;/p&gt;
-
-&lt;p&gt;We will be moving H2o and Flink-batch engines into &lt;code class=&quot;highlighter-rouge&quot;&gt;community&lt;/code&gt; that is to 
-say the code will still be available, but we won’t be actively maintaining 
-it (we will accept PRs though).  We’re moving the Map Reduce code to community
-and have considered to once again accepting PRs against this code (if you have
-an open PR, we’ll hit you up after the release about rebasing and considering to
-resubmit the PR)&lt;/p&gt;
-
-&lt;p&gt;We’re going to be updating the Java dependency from 1.7 to 1.8.&lt;/p&gt;
-
-&lt;p&gt;There was a LOT of old junk in the POMs which we have clipped out.&lt;/p&gt;
-
-&lt;p&gt;Stay tuned and &lt;a href=&quot;https://issues.apache.org/jira/secure/RapidBoard.jspa?rapidView=80&amp;amp;projectKey=MAHOUT&amp;amp;view=detail&amp;amp;selectedIssue=MAHOUT-2047&quot;&gt;feel free to help out&lt;/a&gt;!&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">Hey all! We’re preparing for Mahout version 14.1.</summary></entry></feed>
+confimration email to join our mailing list, and happy Mahouting!&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">On wierd version numbering…</summary></entry></feed>
