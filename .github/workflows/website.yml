@@ -46,7 +46,7 @@ jobs:
         cp -r $WORKDIR/* .
         git add .
         git commit -m "Automatic Site Publish by Buildbot"
-        git push -u origin asf-site
+        git push -u origin trunk:asf-site
       env:
         WORKDIR: /tmp/mahout-site
         RUBY_PATH: ~/shared/.rvm
