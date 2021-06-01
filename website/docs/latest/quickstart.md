@@ -4,31 +4,11 @@ title: Quickstart
 ---
 
 # Mahout Quick Start 
-# TODO : Fill this in with the bare essential basics
 
+The quickest way to take Apache Mahout for a test drive is by downloading a Docker container which contains Apache 
+Zeppelin and is pre-loaded with a Spark-based, Mahout interpreter.
 
-
-# Mahout MapReduce Overview
-
-## Getting Mahout
-
-#### Download the latest release
-
-Download the latest release [here](http://www.apache.org/dyn/closer.cgi/mahout/).
-
-Or checkout the latest code from [here](http://mahout.apache.org/developers/version-control.html)
-
-#### Alternatively: Add Mahout 0.13.0 to a maven project
-
-Mahout is also available via a [maven repository](http://mvnrepository.com/artifact/org.apache.mahout) under the group id *org.apache.mahout*.
-If you would like to import the latest release of mahout into a java project, add the following dependency in your *pom.xml*:
-
-    <dependency>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-mr</artifactId>
-        <version>0.14.0</version>
-    </dependency>
- 
+See the instructions [here](http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/).
 
 ## Features
 
