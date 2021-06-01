@@ -35,7 +35,7 @@ export PATH=${GEM_HOME}/bin:$PATH
 (cd website && bundle exec jekyll build --destination $WORKDIR)
 
 # Set env for docs
-MAHOUT_VERSION=0.13.0
+MAHOUT_VERSION=0.14.1
 
 
 
