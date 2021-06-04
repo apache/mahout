@@ -1,4 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.5.0">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2021-06-04T15:31:49+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Weekly Meeting Minutes 2021-02-02</title><link href="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-02-02" /><published>2021-02-02T22:00:01+00:00</published><updated>2021-02-02T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html">&lt;h3 id=&quot;recap-since-last-time&quot;&gt;Recap Since Last Time&lt;/h3&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.5.0">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2021-06-04T15:39:45+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Zeppelin Quickstart</title><link href="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html" rel="alternate" type="text/html" title="Zeppelin Quickstart" /><published>2021-06-01T06:00:01+00:00</published><updated>2021-06-01T06:00:01+00:00</updated><id>http://mahout.apache.org//tutorial/2021/06/01/Zeppelin%20Quickstart</id><content type="html" xml:base="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html">&lt;h1 id=&quot;apache-zeppelin-quickstart&quot;&gt;Apache Zeppelin Quickstart&lt;/h1&gt;
+
+&lt;p&gt;Apache Mahout is for Mathematicians (or statisticians, or data scientists, etc.).  We understand not all users
+are up to cloning and building from source, working with command line interfaces, and other such engineering 
+tasks.&lt;/p&gt;
+
+&lt;p&gt;In that thread, we’ve created &lt;a href=&quot;http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/&quot;&gt;The Apache Zeppelin Quickstart Docker Container&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;We hope this will make it easier for users to dip their toes in the Mahout waters. Let us know what you think on&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;user at mahout dot apache dot org&lt;/li&gt;
+  &lt;li&gt;dev at mahout dot apache dot org&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;As always, we’re looking for users to get involved, and encourage any patches to be submitted to: https://github.com/apache/mahout&lt;/p&gt;
+
+&lt;p&gt;Thanks, and good Mahout-ing!&lt;/p&gt;
+
+&lt;p&gt;~ The Apache Mahout Team&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="tutorial" /><summary type="html">Apache Zeppelin Quickstart</summary></entry><entry><title type="html">Weekly Meeting Minutes 2021-02-02</title><link href="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-02-02" /><published>2021-02-02T22:00:01+00:00</published><updated>2021-02-02T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html">&lt;h3 id=&quot;recap-since-last-time&quot;&gt;Recap Since Last Time&lt;/h3&gt;
 
 &lt;ul&gt;
   &lt;li&gt;Website build working again&lt;/li&gt;
@@ -103,15 +122,4 @@ helping or wants to give words of encouragement reach out on dev or email him di
 binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.&lt;/p&gt;
 
 &lt;p&gt;On another note, we had a really exciting “MahoutCon” track at ApacheCon@home this year. A special thanks to all of our 
-speakers, and we plan to post the videos here when we’re able.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.</summary></entry><entry><title type="html">Code Freeze and Wierd Numbering</title><link href="http://mahout.apache.org//news/2019/12/14/version-14-1.html" rel="alternate" type="text/html" title="Code Freeze and Wierd Numbering" /><published>2019-12-14T22:16:01+00:00</published><updated>2019-12-14T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2019/12/14/version-14-1</id><content type="html" xml:base="http://mahout.apache.org//news/2019/12/14/version-14-1.html">&lt;h3 id=&quot;on-wierd-version-numbering&quot;&gt;On wierd version numbering…&lt;/h3&gt;
-
-&lt;p&gt;We were under pressure to release a “version above 1.0” which seemed sort of arbitrary to us.&lt;/p&gt;
-
-&lt;p&gt;We decided to just stick with our original schema, but take it x10.  Our last release was 0.14.0, and thus this release
-is 14.1.  So if you’re wondering where versions 1.0-13.0 are, that’s what happened.&lt;/p&gt;
-
-&lt;p&gt;14.1 is a long overdue fix for us releasing binaries for to use, instead of having to build your own.  0.14.0 was us finally
-moving the old Map Reduce stuff out of the main trunk, because we haven’t been about that for quite some time.&lt;/p&gt;
-
-&lt;p&gt;If you would like to help us test the release candidate, send an email to &lt;code class=&quot;highlighter-rouge&quot;&gt;dev-subscribe@mahout.apache.org&lt;/code&gt; and reply to the
-confimration email to join our mailing list, and happy Mahouting!&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">On wierd version numbering…</summary></entry></feed>
+speakers, and we plan to post the videos here when we’re able.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.</summary></entry></feed>
