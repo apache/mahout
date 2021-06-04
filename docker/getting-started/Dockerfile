@@ -89,7 +89,7 @@ RUN echo "$LOG_TAG Install R related packages" && \
     R -e "install.packages('ggplot2', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('googleVis', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('data.table', repos='http://cran.us.r-project.org')" && \
-    R -e "install.packages('IRkernel', repos = 'https://cloud.r-project.org');IRkernel::installspec()" && \
+#    R -e "install.packages('IRkernel', repos = 'https://cloud.r-project.org');IRkernel::installspec()" && \
     R -e "install.packages('shiny', repos = 'https://cloud.r-project.org')" && \
     # for devtools, Rcpp
     apt-get -y install libcurl4-gnutls-dev libssl-dev && \

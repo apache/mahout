@@ -38,3 +38,4 @@ How easy was that?! (If you have troubles, make sure to sign up to user@mahout.a
 
 Next, check out the notebooks- one gives a nice primer to Apache Mahout already loaded. Enjoy!
 
+**NOTE**: If you want to create your own Mahout on Zeppelin interpreter- please see [this page](http://mahout.apache.org/docs/latest/tutorials/misc/mahout-in-zeppelin/)
