@@ -37,7 +37,7 @@ then
   echo -e "\nYou have to download the Movielens 1M dataset from http://www.grouplens.org/node/73 before"
   echo -e "you can run this example. After that extract it and supply the path to the ratings.dat file.\n"
   echo -e "Syntax: $0 /path/to/ratings.dat\n"
-  exit -1
+  exit 255
 fi
 
 export MAHOUT_LOCAL=true

@@ -33,7 +33,7 @@ OUTPUT1=$MAHOUT$OUT_DIR/similarity-matrix/part-00000
 OUTPUT2=$MAHOUT$OUT_DIR/cross-similarity-matrix/part-00000
 
 #check to see if we can run with local fie system
-if [$MAHOUT_HOME == ""]; then
+if [ $MAHOUT_HOME == "" ]; then
   echo "MAHOUT_HOME is not set."
   exit
 fi

@@ -40,7 +40,7 @@ fi
 if [ $# -ne 3 ]
 then
   echo -e "Syntax: $0 /path/to/training_set/ /path/to/qualifying.txt /path/to/judging.txt\n"
-  exit -1
+  exit 255
 fi
 
 MAHOUT="../../bin/mahout"

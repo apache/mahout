@@ -104,7 +104,7 @@ public class MatrixWritable implements Writable {
   /** Reads a typed Matrix instance from the input stream */
   public static Matrix readMatrix(DataInput in) throws IOException {
     int flags = in.readInt();
-    Preconditions.checkArgument(flags >> NUM_FLAGS == 0, "Unknown flags set: %d", Integer.toString(flags, 2));
+    Preconditions.checkArgument(flags >> NUM_FLAGS == 0, "Unknown flags set: %s", Integer.toString(flags, 2));
     boolean dense = (flags & FLAG_DENSE) != 0;
     boolean sequential = (flags & FLAG_SEQUENTIAL) != 0;
     boolean hasLabels = (flags & FLAG_LABELS) != 0;
