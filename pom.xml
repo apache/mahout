@@ -145,7 +145,7 @@
     <release.candidate>RC4</release.candidate>
     <compile.flags />
     <maven.clover.multiproject>true</maven.clover.multiproject>
-    <hadoop.version>2.10.0</hadoop.version>
+    <hadoop.version>2.10.2</hadoop.version>
 
     <test-security-policy.path>${project.build.directory}/buildtools/src/test/resources/java.policy</test-security-policy.path>
   </properties>
