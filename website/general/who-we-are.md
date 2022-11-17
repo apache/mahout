@@ -18,7 +18,7 @@ Apache Mahout is maintained by a team of volunteer developers.
 Name                    | Mail              | PMC | Comment 
 ------------------------|------------------:|------:|---:|
 Anand Avati             | avati@...         | No  | @anandavati
-Andrew Musselman        | akm@...           | Yes | @akm
+Andrew Musselman        | akm@...           | Yes | PMC Chair @akm
 Andrew Palumbo          | apalumbo@...      | Yes | 
 Dan Filimon             | dfilimon@...      | No  | 
 Dmitriy Lyubimov        | dlyubimov@...     | No  | (Emeritus PMC)
@@ -43,7 +43,7 @@ Stevo Slavić            | sslavic@...       | Yes | @sslavic
 Suneel Marthi           | smarthi@...       | No  | (Emeritus PMC) @suneelmarthi
 Ted Dunning             | tdunning@...      | Yes | 
 Tom Pierce              | tcp@...           | No  | 
-Trevor Grant            | rawkintrevo@...   | Yes | PMC Chair @rawkintrevo 
+Trevor Grant            | rawkintrevo@...   | Yes | @rawkintrevo 
 
 <a name="WhoWeAre-EmeritusCommitters"></a>
 ## Emeritus Committers
