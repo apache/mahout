@@ -38,7 +38,7 @@ This step actually can be done _while you are editing_. Then you can see you cha
 In the terminal,
 
 ```bash
-cd wesite
+cd website
 bundle exec jekyll serve
 ```
 
