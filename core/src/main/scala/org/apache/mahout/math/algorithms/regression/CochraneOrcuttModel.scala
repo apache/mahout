@@ -46,9 +46,6 @@ class CochraneOrcuttModel[K](regressor: LinearRegressorModel[K]) extends LinearR
  * @param hyperparameters A sequence of hyperparameters in the form of symbol-value pairs.
  *                        Default values will be used if no hyperparameters are provided.
  * @tparam K The key type of the DRM.
- *
- * @author [Author Name]
- * @since [Release Date]
  */
 class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegressorFitter[K] {
 
