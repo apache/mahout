@@ -40,13 +40,36 @@ class CochraneOrcuttModel[K](regressor: LinearRegressorModel[K]) extends LinearR
 
 }
 
+/**
+ * A class for fitting a Cochrane-Orcutt regression model.
+ *
+ * @param hyperparameters A sequence of hyperparameters in the form of symbol-value pairs.
+ *                        Default values will be used if no hyperparameters are provided.
+ * @tparam K The key type of the DRM.
+ */
 class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegressorFitter[K] {
 
+  /**
+   * The regressor to use.
+   */
   var regressor: LinearRegressorFitter[K] = _
+ 
+ /**
+   * The number of iterations to use in the model fitting process.
+   */
   var iterations: Int = _
+ 
+  /**
+   * The cache hint to use for larger inputs.
+   */
   var cacheHint: CacheHint.CacheHint = _
   // For larger inputs, CacheHint.MEMORY_AND_DISK2 is reccomended.
 
+  /**
+   * Sets the hyperparameters for the model.
+   *
+   * @param hyperparameters A map of hyperparameters in the form of symbol-value pairs.
+   */
   def setHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     setStandardHyperparameters(hyperparameters.toMap)
     regressor = hyperparameters.asInstanceOf[Map[Symbol, LinearRegressorFitter[K]]].getOrElse('regressor, new OrdinaryLeastSquares())
@@ -58,6 +81,12 @@ class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegresso
 
   setHyperparameters(hyperparameters.toMap)
 
+ /**
+   * Calculates the value of rho for a given error matrix.
+   *
+   * @param errorDrm The error matrix.
+   * @return The calculated value of rho.
+   */
   def calculateRho(errorDrm: DrmLike[K]): Double ={
     val error = errorDrm.collect.viewColumn(0)
     val n = error.length - 1
@@ -67,6 +96,14 @@ class CochraneOrcutt[K](hyperparameters: (Symbol, Any)*)  extends LinearRegresso
     e3.times(e2).sum / e3.assign(Functions.SQUARE).sum
   }
 
+   /**
+   * Fits a Cochrane-Orcutt regression model to the input features and target data.
+   *
+   * @param drmFeatures The features matrix.
+   * @param drmTarget The target matrix.
+   * @param hyperparameters A sequence of hyperparameters in the form of symbol-value pairs.
+   * @return A `CochraneOrcuttModel` instance containing the fitted model.
+   */
   def fit(drmFeatures: DrmLike[K], drmTarget: DrmLike[K], hyperparameters: (Symbol, Any)*): CochraneOrcuttModel[K] = {
 
     setHyperparameters(hyperparameters.toMap[Symbol, Any])
