@@ -28,12 +28,28 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.{Matrix, Vector}
 
-
+/**
+ * CanopyClusteringModel extends ClusteringModel and stores the canopy centers and distance metric information.
+ *
+ * @param canopies The matrix storing the canopy centers.
+ * @param dm The symbol indicating the distance metric used for calculating distances.
+ *
+ * @constructor Creates a new instance of the CanopyClusteringModel.
+ *
+ * @property canopyCenters The matrix storing the canopy centers.
+ * @property distanceMetric The symbol indicating the distance metric used for calculating distances.
+ */
 class CanopyClusteringModel(canopies: Matrix, dm: Symbol) extends ClusteringModel {
 
   val canopyCenters = canopies
   val distanceMetric = dm
 
+ /**
+   * Assigns the input data points to their nearest canopy center.
+   *
+   * @param input The input data points to be assigned to canopies.
+   * @return The data points assigned to their nearest canopy centers.
+   */
   def cluster[K](input: DrmLike[K]): DrmLike[K] = {
 
     implicit val ctx = input.context
@@ -67,7 +83,17 @@ class CanopyClusteringModel(canopies: Matrix, dm: Symbol) extends ClusteringMode
   }
 }
 
-
+/**
+ * CanopyClustering extends ClusteringFitter and implements the fitting process for the Canopy Clustering algorithm.
+ *
+ * @constructor Creates a new instance of the CanopyClustering.
+ *
+ * @property t1 The loose distance used in the canopy clustering algorithm.
+ * @property t2 The tight distance used in the canopy clustering algorithm.
+ * @property t3 The loose distance used in merging canopy clusters.
+ * @property t4 The tight distance used in merging canopy clusters.
+ * @property distanceMeasure The symbol indicating the distance metric used for calculating distances.
+ */
 class CanopyClustering extends ClusteringFitter {
 
   var t1: Double = _  // loose distance
@@ -76,6 +102,11 @@ class CanopyClustering extends ClusteringFitter {
   var t4: Double = _
   var distanceMeasure: Symbol = _
 
+ /**
+   * Sets the standard hyperparameters for the Canopy Clustering algorithm.
+   *
+   * @param hyperparameters The hyperparameters to be set for the algorithm.
+   */
   def setStandardHyperparameters(hyperparameters: Map[Symbol, Any] = Map('foo -> None)): Unit = {
     t1 = hyperparameters.asInstanceOf[Map[Symbol, Double]].getOrElse('t1, 0.5)
     t2 = hyperparameters.asInstanceOf[Map[Symbol, Double]].getOrElse('t2, 0.1)
@@ -86,6 +117,13 @@ class CanopyClustering extends ClusteringFitter {
 
   }
 
+ /**
+   * Fits the Canopy Clustering algorithm to the input data.
+   *
+   * @param input The input data to be fit to the algorithm.
+   * @param hyperparameters The hyperparameters for the algorithm.
+   * @return The CanopyClusteringModel with the fitted results.
+   */
   def fit[K](input: DrmLike[K],
              hyperparameters: (Symbol, Any)*): CanopyClusteringModel = {
 
@@ -124,7 +162,21 @@ class CanopyClustering extends ClusteringFitter {
 
 }
 
+/**
+ * CanopyFn implements functions used in the Canopy Clustering algorithm.
+ */
 object CanopyFn extends Serializable {
+ 
+   /**
+    * findCenters method takes in a Matrix, a DistanceMetric and t1 and t2 parameters. 
+    * It returns a Matrix with the centers found.
+    *
+    * @param block The input matrix for which centers need to be found
+    * @param distanceMeasure The distance metric to be used for calculating the distance between vectors
+    * @param t1 The t1 parameter used in the Canopy algorithm
+    * @param t2 The t2 parameter used in the Canopy algorithm
+    * @return A matrix with the found centers
+    */
   def findCenters(block: Matrix, distanceMeasure: DistanceMetric, t1: Double, t2: Double): Matrix = {
     var rowAssignedToCanopy = Array.fill(block.nrow) { false }
     val clusterBuf = scala.collection.mutable.ListBuffer.empty[org.apache.mahout.math.Vector]
