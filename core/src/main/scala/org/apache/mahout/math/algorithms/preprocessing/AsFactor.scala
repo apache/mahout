@@ -30,8 +30,8 @@ import org.apache.mahout.math.scalabindings.RLikeOps._
 import MahoutCollections._
 
 /**
-  * AsFactor is a preprocessor that turns a vector of integers into a vector of one-hot encoded
-  * vectors
+  * AsFactor is a preprocessor that turns a column matrix of integers into a matrix of one-hot encoded row vectors.
+**/
 class AsFactor extends PreprocessorFitter {
 
   /**
