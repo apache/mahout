@@ -29,8 +29,18 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import MahoutCollections._
 
+/**
+  * AsFactor is a preprocessor that turns a vector of integers into a vector of one-hot encoded
+  * vectors
 class AsFactor extends PreprocessorFitter {
 
+  /**
+    * Fit the model to the data
+    *
+    * @param input
+    * @param hyperparameters
+    * @return a fitted AsFactorModel
+    */
   def fit[K](input: DrmLike[K],
              hyperparameters: (Symbol, Any)*): AsFactorModel = {
 
@@ -60,10 +70,23 @@ class AsFactor extends PreprocessorFitter {
 
 }
 
+/**
+  * AsFactorModel is a model that turns a vector of integers into a vector of one-hot encoded
+  * vectors
+  *
+  * @param cardinality number of features in the input vector
+  * @param factorVec
+  */
 class AsFactorModel(cardinality: Int, factorVec: MahoutVector) extends PreprocessorModel {
 
   val factorMap: MahoutVector = factorVec
 
+   /**
+    * Transform the input data - ie one-hot encode it
+    *
+    * @param input DrmLike[K]
+    * @return a one-hot encoded DrmLike[K]
+    */
   def transform[K](input: DrmLike[K]): DrmLike[K] ={
 
     implicit val ctx = input.context
@@ -92,6 +115,12 @@ class AsFactorModel(cardinality: Int, factorVec: MahoutVector) extends Preproces
     res
   }
 
+  /**
+    * Inverse transform the input data - ie transform a one-hot encoded DrmLike[K] into a
+    *
+    * @param input one-hot DrmLike[K]
+    * @return original DrmLike[K]
+    */
   override def invTransform[K](input: DrmLike[K]): DrmLike[K] = {
     implicit val ctx = input.context
 
