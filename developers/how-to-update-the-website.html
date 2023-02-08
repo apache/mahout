@@ -172,7 +172,7 @@
 
 <p>Committers and contributors are all welcomed and encouraged to update the Mahout website.
  Mahout uses Jekyll to build the website. A <a href="https://github.com/apache/mahout/blob/master/website/build_site.sh">script</a>
- is executed by Jenkins after any change is detected in the <code class="highlighter-rouge">master</code> branch of the official Apache repository (
+ is executed by Jenkins after any change is detected in the <code class="language-plaintext highlighter-rouge">master</code> branch of the official Apache repository (
  e.g. after any PR is merged ). As such it is important that you, and any reviewers stage site changes locally before
  committing.</p>
 
@@ -180,7 +180,7 @@
 
 <h4 id="clone-the-mahout-git-repository-locally">Clone the Mahout Git Repository Locally</h4>
 
-<p><code class="highlighter-rouge">git clone http://github.com/apache/mahout</code></p>
+<p><code class="language-plaintext highlighter-rouge">git clone http://github.com/apache/mahout</code></p>
 
 <p>See <a href="/developers/buildingmahout/#getting-code">Building from Source</a> for more details.</p>
 
@@ -192,8 +192,8 @@
 to the <a href="https://kramdown.gettalong.org/syntax.html">Kramdown syntax guide</a>.</p>
 
 <p>Mahout is a highly mathematical project, and contributors will often want to use <a href="https://en.wikibooks.org/wiki/LaTeX/Mathematics">LaTeX Mathematics</a>
-to explain concepts.  While in some environments this is signalled to the compiler with <code class="highlighter-rouge">\( ... \)</code> in Kramdown
-LaTeX portions are signalled with enclosing <code class="highlighter-rouge">$</code> characters, e.g. <code class="highlighter-rouge">$$ ... $$</code></p>
+to explain concepts.  While in some environments this is signalled to the compiler with <code class="language-plaintext highlighter-rouge">\( ... \)</code> in Kramdown
+LaTeX portions are signalled with enclosing <code class="language-plaintext highlighter-rouge">$</code> characters, e.g. <code class="language-plaintext highlighter-rouge">$$ ... $$</code></p>
 
 <h4 id="stage-changes-locally">Stage changes locally</h4>
 
@@ -202,24 +202,23 @@ LaTeX portions are signalled with enclosing <code class="highlighter-rouge">$</c
 
 <p>In the terminal,</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">cd </span>website
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>website
 bundle <span class="nb">exec </span>jekyll serve
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>By default this will serve the website locally at <a href="http://127.0.0.1:4000/">http://127.0.0.1:4000/</a>. You can
 open your favorite browser and make sure your changes look the way you expect them to.</p>
 
 <h4 id="commit-code-and-open-a-pr">Commit code and open a PR</h4>
 
-<p>Once you’re sure everything is right, you commit your code, push to your github.com account (preferably on a branch other than <code class="highlighter-rouge">trunk</code>
+<p>Once you’re sure everything is right, you commit your code, push to your github.com account (preferably on a branch other than <code class="language-plaintext highlighter-rouge">trunk</code>
 then click “OpenPR”). This process closely follows <a href="/developers/how-to-contribute/#HowToContribute-MakingChanges">How To Contribute- Making Changes</a> with an exception that for <em>WEBSITE ONLY</em> changes we relax the requirement to open a JIRA ticket. That is to say, small
 website changes such as fixing a broken link or typo, do not require a specific JIRA issues, and where you would normally 
-commit with a message like <code class="highlighter-rouge">MAHOUT-XXXX The thing I did</code> (where <code class="highlighter-rouge">XXXX</code> is the assosciated JIRA number), you can instead 
-simply create a message like <code class="highlighter-rouge">WEBSITE Typos in how-to-update-the-website.md</code>.  There’s nothing to stop you from making a 
+commit with a message like <code class="language-plaintext highlighter-rouge">MAHOUT-XXXX The thing I did</code> (where <code class="language-plaintext highlighter-rouge">XXXX</code> is the assosciated JIRA number), you can instead 
+simply create a message like <code class="language-plaintext highlighter-rouge">WEBSITE Typos in how-to-update-the-website.md</code>.  There’s nothing to stop you from making a 
 JIRA issue, it simply isn’t required.</p>
 
-<p>The same goes for when you open a PR (where conventionally one includes the JIRA issue, you can again title <code class="highlighter-rouge">WEBSITE</code> to indicate
+<p>The same goes for when you open a PR (where conventionally one includes the JIRA issue, you can again title <code class="language-plaintext highlighter-rouge">WEBSITE</code> to indicate
 there is no JIRA)</p>
 
 <h4 id="wait-for-review">Wait for review</h4>
@@ -234,7 +233,7 @@ as PR reviews is a big part of a committer’s job).</p>
 
 <p>No further action is needed, this section is here to deliniate from the old CMS system and Jekyll builds of other projects. Jenkins
 will execute <a href="https://github.com/apache/mahout/blob/trunk/website/build_site.sh">build_site.sh</a> upon merging. This will build the website and
-copy it to the <code class="highlighter-rouge">asf-site</code> branch, where <a href="http://mahout.apache.org">mahout.apache.org</a> is served from.</p>
+copy it to the <code class="language-plaintext highlighter-rouge">asf-site</code> branch, where <a href="http://mahout.apache.org">mahout.apache.org</a> is served from.</p>
 
     </div>
 
@@ -279,7 +278,7 @@ copy it to the <code class="highlighter-rouge">asf-site</code> branch, where <a 
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

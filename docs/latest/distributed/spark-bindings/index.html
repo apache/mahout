@@ -173,15 +173,14 @@
 
 <p>In short, Scala &amp; Spark Bindings for Mahout is Scala DSL and algebraic optimizer of something like this (actual formula from <strong>(d)spca</strong>)</p>
 
-<p><code class="highlighter-rouge">\[\mathbf{G}=\mathbf{B}\mathbf{B}^{\top}-\mathbf{C}-\mathbf{C}^{\top}+\mathbf{s}_{q}\mathbf{s}_{q}^{\top}\boldsymbol{\xi}^{\top}\boldsymbol{\xi}\]</code></p>
+<p><code class="language-plaintext highlighter-rouge">\[\mathbf{G}=\mathbf{B}\mathbf{B}^{\top}-\mathbf{C}-\mathbf{C}^{\top}+\mathbf{s}_{q}\mathbf{s}_{q}^{\top}\boldsymbol{\xi}^{\top}\boldsymbol{\xi}\]</code></p>
 
 <p>bound to in-core and distributed computations (currently, on Apache Spark).</p>
 
 <p>Mahout Scala &amp; Spark Bindings expression of the above:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    val g = bt.t %*% bt - c - c.t + (s_q cross s_q) * (xi dot xi)
-</code></pre>
-</div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    val g = bt.t %*% bt - c - c.t + (s_q cross s_q) * (xi dot xi)
+</code></pre></div></div>
 
 <p>The main idea is that a scientist writing algebraic expressions cannot care less of distributed 
 operation plans and works <strong>entirely on the logical level</strong> just like he or she would do with R.</p>
@@ -274,7 +273,7 @@ Spark, Flink and H20.</p>
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

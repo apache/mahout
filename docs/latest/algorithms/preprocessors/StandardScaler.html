@@ -168,38 +168,36 @@
     <div class="col-lg-8">
       <h3 id="about">About</h3>
 
-<p><code class="highlighter-rouge">StandardScaler</code> centers the values of each column to their mean, and scales them to unit variance.</p>
+<p><code class="language-plaintext highlighter-rouge">StandardScaler</code> centers the values of each column to their mean, and scales them to unit variance.</p>
 
-<h4 id="relation-to-the-scale-function-in-r-base">Relation to the <code class="highlighter-rouge">scale</code> function in R-base</h4>
-<p>The <code class="highlighter-rouge">StandardScaler</code> is the equivelent of the R-base function <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/scale.html"><code class="highlighter-rouge">scale</code></a> with
-one noteable tweek. R’s <code class="highlighter-rouge">scale</code> function (indeed all of R) calculates standard deviation with 1 degree of freedom, Mahout 
+<h4 id="relation-to-the-scale-function-in-r-base">Relation to the <code class="language-plaintext highlighter-rouge">scale</code> function in R-base</h4>
+<p>The <code class="language-plaintext highlighter-rouge">StandardScaler</code> is the equivelent of the R-base function <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/scale.html"><code class="language-plaintext highlighter-rouge">scale</code></a> with
+one noteable tweek. R’s <code class="language-plaintext highlighter-rouge">scale</code> function (indeed all of R) calculates standard deviation with 1 degree of freedom, Mahout 
 (like many other statistical packages aimed at larger data sets) does not make this adjustment.  In larger datasets the difference
 is trivial, however when testing the function on smaller datasets the practicioner may be confused by the discrepency.</p>
 
 <p>To verify this function against R on an arbitrary matrix, use the following form in R to “undo” the degrees of freedom correction.</p>
-<div class="language-R highlighter-rouge"><pre class="highlight"><code><span class="n">N</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">nrow</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w">
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">N</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">nrow</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w">
 </span><span class="n">scale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="o">=</span><span class="w"> </span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="m">2</span><span class="p">,</span><span class="w"> </span><span class="n">sd</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nf">sqrt</span><span class="p">(</span><span class="n">N</span><span class="m">-1</span><span class="o">/</span><span class="n">N</span><span class="p">))</span><span class="w">
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><code class="highlighter-rouge">StandardScaler</code> takes no parameters at this time.</p>
+<p><code class="language-plaintext highlighter-rouge">StandardScaler</code> takes no parameters at this time.</p>
 
 <h3 id="example">Example</h3>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.apache.mahout.math.algorithms.preprocessing.StandardScaler</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.apache.mahout.math.algorithms.preprocessing.StandardScaler</span>
 
-<span class="k">val</span> <span class="n">A</span> <span class="k">=</span> <span class="n">drmParallelize</span><span class="o">(</span><span class="n">dense</span><span class="o">(</span>
+<span class="k">val</span> <span class="nv">A</span> <span class="k">=</span> <span class="nf">drmParallelize</span><span class="o">(</span><span class="nf">dense</span><span class="o">(</span>
       <span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">5</span><span class="o">),</span>
       <span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="o">-</span><span class="mi">15</span><span class="o">),</span>
       <span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="mi">9</span><span class="o">,</span> <span class="o">-</span><span class="mi">2</span><span class="o">)),</span> <span class="n">numPartitions</span> <span class="k">=</span> <span class="mi">2</span><span class="o">)</span>
 
-<span class="k">val</span> <span class="n">scaler</span><span class="k">:</span> <span class="kt">StandardScalerModel</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StandardScaler</span><span class="o">().</span><span class="n">fit</span><span class="o">(</span><span class="n">A</span><span class="o">)</span>
+<span class="k">val</span> <span class="nv">scaler</span><span class="k">:</span> <span class="kt">StandardScalerModel</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StandardScaler</span><span class="o">().</span><span class="py">fit</span><span class="o">(</span><span class="n">A</span><span class="o">)</span>
 
-<span class="k">val</span> <span class="n">scaledA</span> <span class="k">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="o">(</span><span class="n">A</span><span class="o">)</span>
-</code></pre>
-</div>
+<span class="k">val</span> <span class="nv">scaledA</span> <span class="k">=</span> <span class="nv">scaler</span><span class="o">.</span><span class="py">transform</span><span class="o">(</span><span class="n">A</span><span class="o">)</span>
+</code></pre></div></div>
 
 
     </div>
@@ -212,7 +210,7 @@ is trivial, however when testing the function on smaller datasets the practicion
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

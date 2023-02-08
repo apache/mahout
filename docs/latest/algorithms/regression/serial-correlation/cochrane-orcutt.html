@@ -171,11 +171,11 @@
 <p>The <a href="https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation">Cochrane Orcutt</a> procedure is use in economics to 
 adjust a linear model for serial correlation in the error term.</p>
 
-<p>The cooresponding method in R is <a href="https://cran.r-project.org/web/packages/orcutt/orcutt.pdf"><code class="highlighter-rouge">cochrane.orcutt</code></a>
+<p>The cooresponding method in R is <a href="https://cran.r-project.org/web/packages/orcutt/orcutt.pdf"><code class="language-plaintext highlighter-rouge">cochrane.orcutt</code></a>
 however the implementation differes slightly.</p>
 
 <h4 id="r-prototype">R Prototype:</h4>
-<div class="highlighter-rouge"><pre class="highlight"><code>library(orcutt)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>library(orcutt)
 
 df = data.frame(t(data.frame(
     c(20.96,  127.3),
@@ -203,8 +203,7 @@ rownames(df) &lt;- NULL
 colnames(df) &lt;- c("y", "x")
 my_lm = lm(y ~ x, data=df)
 coch = cochrane.orcutt(my_lm)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The R-implementation is kind of…silly.</p>
 
@@ -277,7 +276,7 @@ Kunter et. al reccomend 3 iterations, if you don’t achieve desired results, us
 
 <h3 id="example">Example</h3>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>val alsmBlaisdellCo = drmParallelize( dense(
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>val alsmBlaisdellCo = drmParallelize( dense(
       (20.96,  127.3),
       (21.40,  130.0),
       (21.96,  132.7),
@@ -306,8 +305,7 @@ var coModel = new CochraneOrcutt[Int]().fit(drmX, drmY , ('iterations -&gt; 2))
 
 println(coModel.rhos)
 println(coModel.summary)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 
     </div>
@@ -320,7 +318,7 @@ println(coModel.summary)
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

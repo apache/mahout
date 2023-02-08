@@ -1,125 +1,125 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.5.0">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2022-11-29T20:41:05+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Zeppelin Quickstart</title><link href="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html" rel="alternate" type="text/html" title="Zeppelin Quickstart" /><published>2021-06-01T06:00:01+00:00</published><updated>2021-06-01T06:00:01+00:00</updated><id>http://mahout.apache.org//tutorial/2021/06/01/Zeppelin%20Quickstart</id><content type="html" xml:base="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html">&lt;h1 id=&quot;apache-zeppelin-quickstart&quot;&gt;Apache Zeppelin Quickstart&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-02-08T23:16:09+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Zeppelin Quickstart</title><link href="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html" rel="alternate" type="text/html" title="Zeppelin Quickstart" /><published>2021-06-01T06:00:01+00:00</published><updated>2021-06-01T06:00:01+00:00</updated><id>http://mahout.apache.org//tutorial/2021/06/01/Zeppelin%20Quickstart</id><content type="html" xml:base="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html"><![CDATA[<h1 id="apache-zeppelin-quickstart">Apache Zeppelin Quickstart</h1>
 
-&lt;p&gt;Apache Mahout is for Mathematicians (or statisticians, or data scientists, etc.).  We understand not all users
+<p>Apache Mahout is for Mathematicians (or statisticians, or data scientists, etc.).  We understand not all users
 are up to cloning and building from source, working with command line interfaces, and other such engineering 
-tasks.&lt;/p&gt;
+tasks.</p>
 
-&lt;p&gt;In that thread, we’ve created &lt;a href=&quot;http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/&quot;&gt;The Apache Zeppelin Quickstart Docker Container&lt;/a&gt;.&lt;/p&gt;
+<p>In that thread, we’ve created <a href="http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/">The Apache Zeppelin Quickstart Docker Container</a>.</p>
 
-&lt;p&gt;We hope this will make it easier for users to dip their toes in the Mahout waters. Let us know what you think on&lt;/p&gt;
+<p>We hope this will make it easier for users to dip their toes in the Mahout waters. Let us know what you think on</p>
 
-&lt;ul&gt;
-  &lt;li&gt;user at mahout dot apache dot org&lt;/li&gt;
-  &lt;li&gt;dev at mahout dot apache dot org&lt;/li&gt;
-&lt;/ul&gt;
+<ul>
+  <li>user at mahout dot apache dot org</li>
+  <li>dev at mahout dot apache dot org</li>
+</ul>
 
-&lt;p&gt;As always, we’re looking for users to get involved, and encourage any patches to be submitted to: https://github.com/apache/mahout&lt;/p&gt;
+<p>As always, we’re looking for users to get involved, and encourage any patches to be submitted to: https://github.com/apache/mahout</p>
 
-&lt;p&gt;Thanks, and good Mahout-ing!&lt;/p&gt;
+<p>Thanks, and good Mahout-ing!</p>
 
-&lt;p&gt;~ The Apache Mahout Team&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="tutorial" /><summary type="html">Apache Zeppelin Quickstart</summary></entry><entry><title type="html">Weekly Meeting Minutes 2021-02-02</title><link href="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-02-02" /><published>2021-02-02T22:00:01+00:00</published><updated>2021-02-02T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html">&lt;h3 id=&quot;recap-since-last-time&quot;&gt;Recap Since Last Time&lt;/h3&gt;
+<p>~ The Apache Mahout Team</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="tutorial" /><summary type="html"><![CDATA[Apache Zeppelin Quickstart]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2021-02-02</title><link href="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-02-02" /><published>2021-02-02T22:00:01+00:00</published><updated>2021-02-02T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html"><![CDATA[<h3 id="recap-since-last-time">Recap Since Last Time</h3>
 
-&lt;ul&gt;
-  &lt;li&gt;Website build working again&lt;/li&gt;
-  &lt;li&gt;josehernandezsc added Ridge Regression to &lt;code class=&quot;highlighter-rouge&quot;&gt;algorithms/&lt;/code&gt; framework.&lt;/li&gt;
-  &lt;li&gt;Trevor shared incore PyMahout git repo on mailing list- needs to POC for distributed.&lt;/li&gt;
-&lt;/ul&gt;
+<ul>
+  <li>Website build working again</li>
+  <li>josehernandezsc added Ridge Regression to <code class="language-plaintext highlighter-rouge">algorithms/</code> framework.</li>
+  <li>Trevor shared incore PyMahout git repo on mailing list- needs to POC for distributed.</li>
+</ul>
 
-&lt;h3 id=&quot;projects-going-forward&quot;&gt;Projects going forward&lt;/h3&gt;
+<h3 id="projects-going-forward">Projects going forward</h3>
 
-&lt;ul&gt;
-  &lt;li&gt;Still need to do 5 related issues identified &lt;a href=&quot;http://mahout.apache.org/minutes/2020/11/13/weekly-meeting-minutes.html&quot;&gt;November 13th&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Trevor to POC distribute Mahout in Python&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Recap Since Last Time</summary></entry><entry><title type="html">Weekly Meeting Minutes 2021-01-05</title><link href="http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-01-05" /><published>2021-01-05T22:00:01+00:00</published><updated>2021-01-05T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes.html">&lt;p&gt;Andrew showed Trevor how to file his first board report.&lt;/p&gt;
+<ul>
+  <li>Still need to do 5 related issues identified <a href="http://mahout.apache.org/minutes/2020/11/13/weekly-meeting-minutes.html">November 13th</a></li>
+  <li>Trevor to POC distribute Mahout in Python</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Recap Since Last Time]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2021-01-05</title><link href="http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-01-05" /><published>2021-01-05T22:00:01+00:00</published><updated>2021-01-05T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/01/05/weekly-meeting-minutes.html"><![CDATA[<p>Andrew showed Trevor how to file his first board report.</p>
 
-&lt;p&gt;Springer Publishing has shown interest in a second edition of the Encyclopedia of Big Data, and Musselman plans to update
-the chapter on Mahout.&lt;/p&gt;
+<p>Springer Publishing has shown interest in a second edition of the Encyclopedia of Big Data, and Musselman plans to update
+the chapter on Mahout.</p>
 
-&lt;p&gt;Trevor needs to make a git repo to share with his experiments of Python+Mahout.&lt;/p&gt;
+<p>Trevor needs to make a git repo to share with his experiments of Python+Mahout.</p>
 
-&lt;p&gt;Reminder- community calls are open to all. We’ll try to get a good link and post it to one of the minutes. In the mean
-time join dev@mahout.apache.org for the weekly link.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Andrew showed Trevor how to file his first board report.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-12-15</title><link href="http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-12-15" /><published>2020-12-15T22:00:01+00:00</published><updated>2020-12-15T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes.html">&lt;p&gt;Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want
-to see POC that DRMs will also “work” and then will sketch plan.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want to see POC that DRMs will also “work” and then will sketch plan.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-12-08</title><link href="http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-12-08" /><published>2020-12-08T22:00:01+00:00</published><updated>2020-12-08T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes.html">&lt;p&gt;New Meeting time is Tuesdays, still hammering down final time.&lt;/p&gt;
+<p>Reminder- community calls are open to all. We’ll try to get a good link and post it to one of the minutes. In the mean
+time join dev@mahout.apache.org for the weekly link.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Andrew showed Trevor how to file his first board report.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-12-15</title><link href="http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-12-15" /><published>2020-12-15T22:00:01+00:00</published><updated>2020-12-15T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes.html"><![CDATA[<p>Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want
+to see POC that DRMs will also “work” and then will sketch plan.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want to see POC that DRMs will also “work” and then will sketch plan.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-12-08</title><link href="http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-12-08" /><published>2020-12-08T22:00:01+00:00</published><updated>2020-12-08T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes.html"><![CDATA[<p>New Meeting time is Tuesdays, still hammering down final time.</p>
 
-&lt;p&gt;Musselman to continue work on 2130 (adding talks page).&lt;/p&gt;
+<p>Musselman to continue work on 2130 (adding talks page).</p>
 
-&lt;p&gt;Trevor making (slow) progress wtih Py4J / Numpy / Python bindings (life getting in the way, but seems doable).&lt;/p&gt;
+<p>Trevor making (slow) progress wtih Py4J / Numpy / Python bindings (life getting in the way, but seems doable).</p>
 
-&lt;p&gt;Palumbo interested in FPGA-&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;Investigation: FPGA4Mahout, Mahout BLAS Subroutines  on FPGA.  we are considering integration of the fBLAS library for FPGA acceleration of BLAS subroutines on mahout.  fBLAS accepts JSON expressions of algebraic subroutines and generates OpenCL code with Just In Time compilation and FPGA flashing.  We are first considering a Naive approach upon evaluation to convert the computation graph of a mahout expression into JSON, compile and Flash the FPGA and stream data through the FPGA in SIMD vectored fashion.&lt;/p&gt;
+<p>Palumbo interested in FPGA-</p>
+<blockquote>
+  <p>Investigation: FPGA4Mahout, Mahout BLAS Subroutines  on FPGA.  we are considering integration of the fBLAS library for FPGA acceleration of BLAS subroutines on mahout.  fBLAS accepts JSON expressions of algebraic subroutines and generates OpenCL code with Just In Time compilation and FPGA flashing.  We are first considering a Naive approach upon evaluation to convert the computation graph of a mahout expression into JSON, compile and Flash the FPGA and stream data through the FPGA in SIMD vectored fashion.</p>
 
-  &lt;p&gt;The fBLAS library shows significant speedups over CPU BLAS operations.  If we find significant performance gains,  In conjunction with the current and ongoing effort to implement Python Bindings for Mahout, this could attract HPC developers with needs for near-real-time computation, by providing Python and Java bindings for FPGA accelerated matrix algebra available for distributed and in-core math.&lt;/p&gt;
+  <p>The fBLAS library shows significant speedups over CPU BLAS operations.  If we find significant performance gains,  In conjunction with the current and ongoing effort to implement Python Bindings for Mahout, this could attract HPC developers with needs for near-real-time computation, by providing Python and Java bindings for FPGA accelerated matrix algebra available for distributed and in-core math.</p>
 
-  &lt;p&gt;An end goal of this effort would be to provide scientists,  engineers, and others with little to no Hardware experience a Zeppelin Notebook on which they could  can develop models or circuits, using the mahout DSL, while concurrntly programming the model onto an FPGA”&lt;/p&gt;
-&lt;/blockquote&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">New Meeting time is Tuesdays, still hammering down final time.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-20</title><link href="http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-20" /><published>2020-11-20T18:00:01+00:00</published><updated>2020-11-20T18:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes.html">&lt;p&gt;Weekly community meeting minutes.&lt;/p&gt;
+  <p>An end goal of this effort would be to provide scientists,  engineers, and others with little to no Hardware experience a Zeppelin Notebook on which they could  can develop models or circuits, using the mahout DSL, while concurrntly programming the model onto an FPGA”</p>
+</blockquote>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[New Meeting time is Tuesdays, still hammering down final time.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-20</title><link href="http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-20" /><published>2020-11-20T18:00:01+00:00</published><updated>2020-11-20T18:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/20/weekly-meeting-minutes.html"><![CDATA[<p>Weekly community meeting minutes.</p>
 
-&lt;p&gt;No new issues.&lt;/p&gt;
+<p>No new issues.</p>
 
-&lt;p&gt;Will propose idea of moving meeting time on dev@m.a.o&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Weekly community meeting minutes.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-13</title><link href="http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-13" /><published>2020-11-13T18:00:01+00:00</published><updated>2020-11-13T18:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes.html">&lt;p&gt;Weekly community meeting minutes.&lt;/p&gt;
+<p>Will propose idea of moving meeting time on dev@m.a.o</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting minutes.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-13</title><link href="http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-13" /><published>2020-11-13T18:00:01+00:00</published><updated>2020-11-13T18:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes.html"><![CDATA[<p>Weekly community meeting minutes.</p>
 
-&lt;h3 id=&quot;collected-videos--conference-talks&quot;&gt;Collected Videos / Conference Talks&lt;/h3&gt;
+<h3 id="collected-videos--conference-talks">Collected Videos / Conference Talks</h3>
 
-&lt;p&gt;Andrew Musselman is going to try to work on MAHOUT-2130 (Build talks page) this weekend. If you have / know of any 
-content, please send it to him or just add it after he launches the page.&lt;/p&gt;
+<p>Andrew Musselman is going to try to work on MAHOUT-2130 (Build talks page) this weekend. If you have / know of any 
+content, please send it to him or just add it after he launches the page.</p>
 
-&lt;h3 id=&quot;issue-grooming&quot;&gt;Issue Grooming&lt;/h3&gt;
+<h3 id="issue-grooming">Issue Grooming</h3>
 
-&lt;p&gt;The following issues are all related&lt;/p&gt;
+<p>The following issues are all related</p>
 
-&lt;ul&gt;
-  &lt;li&gt;MAHOUT-2122 Create getting started on Docker page&lt;/li&gt;
-  &lt;li&gt;MAHOUT-2134 Update Mahout in Zeppelin page&lt;/li&gt;
-  &lt;li&gt;MAHOUT-2129 Rebuild website docs, add Getting started with Zeppelin to Nav&lt;/li&gt;
-  &lt;li&gt;MAHOUT-2126 Update Zeppelin Containers&lt;/li&gt;
-  &lt;li&gt;MAHOUT-2133 Update “Getting Started in Mahout” page.&lt;/li&gt;
-&lt;/ul&gt;
+<ul>
+  <li>MAHOUT-2122 Create getting started on Docker page</li>
+  <li>MAHOUT-2134 Update Mahout in Zeppelin page</li>
+  <li>MAHOUT-2129 Rebuild website docs, add Getting started with Zeppelin to Nav</li>
+  <li>MAHOUT-2126 Update Zeppelin Containers</li>
+  <li>MAHOUT-2133 Update “Getting Started in Mahout” page.</li>
+</ul>
 
-&lt;p&gt;The narrative is- we should update (or replace) the getting started in Mahout page with Getting Started with Mahout in 
+<p>The narrative is- we should update (or replace) the getting started in Mahout page with Getting Started with Mahout in 
 Zeppelin. The Zeppelin Docker should have some more “Getting Started” Notebooks. The current Mahout in Zeppelin page 
-should point to the new Mahout in Zeppelin on Docker page. The nav should be updated to reflect all of this.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Weekly community meeting minutes.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-06</title><link href="http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-06" /><published>2020-11-06T06:00:01+00:00</published><updated>2020-11-06T06:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes.html">&lt;p&gt;Weekly community meeting minutes.&lt;/p&gt;
+should point to the new Mahout in Zeppelin on Docker page. The nav should be updated to reflect all of this.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting minutes.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-06</title><link href="http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-06" /><published>2020-11-06T06:00:01+00:00</published><updated>2020-11-06T06:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/06/weekly-meeting-minutes.html"><![CDATA[<p>Weekly community meeting minutes.</p>
 
-&lt;h3 id=&quot;topic-apache-mahout-wikipedia-page&quot;&gt;Topic: Apache Mahout Wikipedia Page&lt;/h3&gt;
+<h3 id="topic-apache-mahout-wikipedia-page">Topic: Apache Mahout Wikipedia Page</h3>
 
-&lt;p&gt;Andrew Palumbo added to the Native solvers sections- thanks Andy!&lt;/p&gt;
+<p>Andrew Palumbo added to the Native solvers sections- thanks Andy!</p>
 
-&lt;p&gt;Joe Olsen going to take some cracks at it next. (all are welcome to!)&lt;/p&gt;
+<p>Joe Olsen going to take some cracks at it next. (all are welcome to!)</p>
 
-&lt;h3 id=&quot;topic-starting-on-python-bindings&quot;&gt;Topic: Starting on Python Bindings&lt;/h3&gt;
+<h3 id="topic-starting-on-python-bindings">Topic: Starting on Python Bindings</h3>
 
-&lt;p&gt;No progress to date- weather is unseasonably nice in Chicago.&lt;/p&gt;
+<p>No progress to date- weather is unseasonably nice in Chicago.</p>
 
-&lt;h3 id=&quot;topic-k8s-sparkdocker-container&quot;&gt;Topic: K8s Spark+Docker container&lt;/h3&gt;
+<h3 id="topic-k8s-sparkdocker-container">Topic: K8s Spark+Docker container</h3>
 
-&lt;ul&gt;
-  &lt;li&gt;Joe going to create some docs on Mahout + K8s based on Trevor’s Kubeflow book examples.&lt;/li&gt;
-  &lt;li&gt;Trevor’s going to create Kubeflow + Mahout example based on book. (Someday)&lt;/li&gt;
-&lt;/ul&gt;
+<ul>
+  <li>Joe going to create some docs on Mahout + K8s based on Trevor’s Kubeflow book examples.</li>
+  <li>Trevor’s going to create Kubeflow + Mahout example based on book. (Someday)</li>
+</ul>
 
-&lt;p&gt;Created&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;MAHOUT-2133 Update Quickstart Page&lt;/li&gt;
-  &lt;li&gt;MAHOUT-2134 Update Zeppelin Tutorial&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Weekly community meeting minutes.</summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-10-30</title><link href="http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-10-30" /><published>2020-10-30T19:00:01+00:00</published><updated>2020-10-30T19:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes.html">&lt;h3 id=&quot;topic-apache-mahout-wikipedia-page&quot;&gt;Topic: Apache Mahout Wikipedia Page&lt;/h3&gt;
+<p>Created</p>
+<ul>
+  <li>MAHOUT-2133 Update Quickstart Page</li>
+  <li>MAHOUT-2134 Update Zeppelin Tutorial</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting minutes.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-10-30</title><link href="http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-10-30" /><published>2020-10-30T19:00:01+00:00</published><updated>2020-10-30T19:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/10/30/weekly-meeting-minutes.html"><![CDATA[<h3 id="topic-apache-mahout-wikipedia-page">Topic: Apache Mahout Wikipedia Page</h3>
 
-&lt;p&gt;Trevor has been doing some serious overhauling on the Apache Mahout entry on Wikipedia.&lt;/p&gt;
+<p>Trevor has been doing some serious overhauling on the Apache Mahout entry on Wikipedia.</p>
 
-&lt;p&gt;However, he’d appreciate it if people could fill out sections, especially if they have expertise.&lt;/p&gt;
+<p>However, he’d appreciate it if people could fill out sections, especially if they have expertise.</p>
 
-&lt;p&gt;Further- we would like to add architecture diagrams- both the original and the one with the
-native solver- need to ask what the copyright it on those/if we can use them.&lt;/p&gt;
+<p>Further- we would like to add architecture diagrams- both the original and the one with the
+native solver- need to ask what the copyright it on those/if we can use them.</p>
 
-&lt;h3 id=&quot;topic-zeppelin-docker-image&quot;&gt;Topic: Zeppelin Docker Image&lt;/h3&gt;
+<h3 id="topic-zeppelin-docker-image">Topic: Zeppelin Docker Image</h3>
 
-&lt;p&gt;The Apache Zeppelin+Mahout docker image is live- you can get started with Mahout now by following the instructions
-&lt;a href=&quot;http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+<p>The Apache Zeppelin+Mahout docker image is live- you can get started with Mahout now by following the instructions
+<a href="http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/">here</a></p>
 
-&lt;h3 id=&quot;topic-starting-on-python-bindings&quot;&gt;Topic: Starting on Python Bindings&lt;/h3&gt;
+<h3 id="topic-starting-on-python-bindings">Topic: Starting on Python Bindings</h3>
 
-&lt;p&gt;Trevor is going to start working on Python bindings. He thinks adding Mahout as a library for pyspark 
+<p>Trevor is going to start working on Python bindings. He thinks adding Mahout as a library for pyspark 
 will significantly increase adoption. If anyone has experience using py4j or is otherwise interested in 
-helping or wants to give words of encouragement reach out on dev or email him directly.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html">Topic: Apache Mahout Wikipedia Page</summary></entry><entry><title type="html">14.1 Is Released!</title><link href="http://mahout.apache.org//news/2020/10/18/version-14-1-released.html" rel="alternate" type="text/html" title="14.1 Is Released!" /><published>2020-10-18T22:16:01+00:00</published><updated>2020-10-18T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2020/10/18/version-14-1-released</id><content type="html" xml:base="http://mahout.apache.org//news/2020/10/18/version-14-1-released.html">&lt;p&gt;Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release 
-binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.&lt;/p&gt;
+helping or wants to give words of encouragement reach out on dev or email him directly.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Topic: Apache Mahout Wikipedia Page]]></summary></entry><entry><title type="html">14.1 Is Released!</title><link href="http://mahout.apache.org//news/2020/10/18/version-14-1-released.html" rel="alternate" type="text/html" title="14.1 Is Released!" /><published>2020-10-18T22:16:01+00:00</published><updated>2020-10-18T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2020/10/18/version-14-1-released</id><content type="html" xml:base="http://mahout.apache.org//news/2020/10/18/version-14-1-released.html"><![CDATA[<p>Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release 
+binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.</p>
 
-&lt;p&gt;On another note, we had a really exciting “MahoutCon” track at ApacheCon@home this year. A special thanks to all of our 
-speakers, and we plan to post the videos here when we’re able.&lt;/p&gt;</content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html">Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.</summary></entry></feed>
+<p>On another note, we had a really exciting “MahoutCon” track at ApacheCon@home this year. A special thanks to all of our 
+speakers, and we plan to post the videos here when we’re able.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html"><![CDATA[Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.]]></summary></entry></feed>

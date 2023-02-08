@@ -210,9 +210,8 @@ $HADOOP_HOME/bin/hadoop fs -put <PATH TO="" DATA=""> testdata{code}</PATH></li>
 <h2 id="generate-a-file-descriptor-for-the-dataset">Generate a file descriptor for the dataset:</h2>
 <p>run the following command:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>$HADOOP_HOME/bin/hadoop jar $MAHOUT_HOME/core/target/mahout-core-&lt;VERSION&gt;-job.jar org.apache.mahout.classifier.df.tools.Describe -p testdata/KDDTrain+.arff -f testdata/KDDTrain+.info -d N 3 C 2 N C 4 N C 8 N 2 C 19 N L
-</code></pre>
-</div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$HADOOP_HOME/bin/hadoop jar $MAHOUT_HOME/core/target/mahout-core-&lt;VERSION&gt;-job.jar org.apache.mahout.classifier.df.tools.Describe -p testdata/KDDTrain+.arff -f testdata/KDDTrain+.info -d N 3 C 2 N C 4 N C 8 N 2 C 19 N L
+</code></pre></div></div>
 
 <p>The “N 3 C 2 N C 4 N C 8 N 2 C 19 N L” string describes all the attributes
 of the data. In this cases, it means 1 numerical(N) attribute, followed by
@@ -222,9 +221,8 @@ to ignore some attributes</p>
 <p><a name="PartialImplementation-Runtheexample"></a></p>
 <h2 id="run-the-example">Run the example</h2>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>$HADOOP_HOME/bin/hadoop jar $MAHOUT_HOME/examples/target/mahout-examples-&lt;version&gt;-job.jar org.apache.mahout.classifier.df.mapreduce.BuildForest -Dmapred.max.split.size=1874231 -d testdata/KDDTrain+.arff -ds testdata/KDDTrain+.info -sl 5 -p -t 100 -o nsl-forest
-</code></pre>
-</div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$HADOOP_HOME/bin/hadoop jar $MAHOUT_HOME/examples/target/mahout-examples-&lt;version&gt;-job.jar org.apache.mahout.classifier.df.mapreduce.BuildForest -Dmapred.max.split.size=1874231 -d testdata/KDDTrain+.arff -ds testdata/KDDTrain+.info -sl 5 -p -t 100 -o nsl-forest
+</code></pre></div></div>
 
 <p>which builds 100 trees (-t argument) using the partial implementation (-p).
 Each tree is built using 5 random selected attribute per node (-sl
@@ -252,9 +250,8 @@ nsl-forest/forest.seq</p>
 <h2 id="using-the-decision-forest-to-classify-new-data">Using the Decision Forest to Classify new data</h2>
 <p>run the following command:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>$HADOOP_HOME/bin/hadoop jar $MAHOUT_HOME/examples/target/mahout-examples-&lt;version&gt;-job.jar org.apache.mahout.classifier.df.mapreduce.TestForest -i nsl-kdd/KDDTest+.arff -ds nsl-kdd/KDDTrain+.info -m nsl-forest -a -mr -o predictions
-</code></pre>
-</div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$HADOOP_HOME/bin/hadoop jar $MAHOUT_HOME/examples/target/mahout-examples-&lt;version&gt;-job.jar org.apache.mahout.classifier.df.mapreduce.TestForest -i nsl-kdd/KDDTest+.arff -ds nsl-kdd/KDDTrain+.info -m nsl-forest -a -mr -o predictions
+</code></pre></div></div>
 
 <p>This will compute the predictions of “KDDTest+.arff” dataset (-i argument)
 using the same data descriptor generated for the training dataset (-ds) and
@@ -319,7 +316,7 @@ dataset is big and you try to build a large number of trees.</li>
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

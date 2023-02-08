@@ -189,19 +189,17 @@ same time, it is recommended to use <strong>squash commits</strong>.</p>
 
 <p>Read [<a href="https://help.github.com/articles/merging-a-pull-request#merging-locally">2</a>] (merging locally). Merging pull requests are equivalent to merging contributor’s branch:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>git checkout master      # switch to local master branch
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout master      # switch to local master branch
 git pull apache master   # fast-forward to current remote HEAD
 git pull --squash https://github.com/cuser/mahout cbranch  # merge to master 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>In this example we assume that contributor Github handle is “cuser” and the PR branch name is “cbranch” there. We also 
 assume that <em>apache</em> remote is configured as</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>apache  https://git-wip-us.apache.org/repos/asf/mahout.git (fetch)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apache  https://git-wip-us.apache.org/repos/asf/mahout.git (fetch)
 apache  https://git-wip-us.apache.org/repos/asf/mahout.git (push)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Squash pull ensures all PR history is squashed into single commit. Also, it is not yet committed, even if 
 fast forward is possible, so you get chance to change things before committing.</p>
@@ -212,9 +210,8 @@ fast forward is possible, so you get chance to change things before committing.<
 
 <p>Suppose everything is fine, you now can commit the squashed request</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>git commit -a
-</code></pre>
-</div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit -a
+</code></pre></div></div>
 
 <p>edit message to contain “MAHOUT-YYYY description <strong>closes #ZZ</strong>”, where ZZ is the pull request number. 
 Including “closes #ZZ” will close PR automatically. More information [<a href="https://help.github.com/articles/closing-issues-via-commit-messages">3</a>].</p>
@@ -233,10 +230,9 @@ would warn to begin with. Anyway, watch for dupe PRs (based on same source branc
 <p>When we want to reject a PR (close without committing), just do the following commit on master’s HEAD 
 <em>without merging the PR</em>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>git commit --allow-empty -m "closes #ZZ *Won't fix*"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit --allow-empty -m "closes #ZZ *Won't fix*"
 git push apache master
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>that should close PR without merging and any code modifications in the master repository.</p>
 
@@ -288,7 +284,7 @@ git push apache master
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

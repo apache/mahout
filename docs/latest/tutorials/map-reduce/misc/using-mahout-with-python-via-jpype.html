@@ -199,15 +199,14 @@ python script. The result for me looks like the following</p>
 
 <p>Now we can create a function to start the jvm in python using jype</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>jvm=None
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jvm=None
 def start_jpype():
 global jvm
 if (jvm is None):
 cpopt="-Djava.class.path={cp}".format(cp=classpath)
 startJVM(jvmlib,"-ea",cpopt)
 jvm="started"
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><a name="UsingMahoutwithPythonviaJPype-WritingNamedVectorstoSequenceFilesfromPython"></a></p>
 <h1 id="writing-named-vectors-to-sequence-files-from-python">Writing Named Vectors to Sequence Files from Python</h1>
@@ -215,7 +214,7 @@ jvm="started"
 be used by Mahout for kmeans. The example below is a function which creates
 vectors from two Gaussian distributions with unit variance.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def create_inputs(ifile,*args,**param):
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def create_inputs(ifile,*args,**param):
  """Create a sequence file containing some normally distributed
 	ifile - path to the sequence file to create
  """
@@ -278,15 +277,14 @@ vectors from two Gaussian distributions with unit variance.</p>
   writer.append(wrapkey,wrapval)
   
  writer.close()
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><a name="UsingMahoutwithPythonviaJPype-ReadingtheKMeansClusteredPointsfromPython"></a></p>
 <h1 id="reading-the-kmeans-clustered-points-from-python">Reading the KMeans Clustered Points from Python</h1>
 <p>Similarly we can use JPype to easily read the clustered points outputted by
 mahout.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def read_clustered_pts(ifile,*args,**param):
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def read_clustered_pts(ifile,*args,**param):
  """Read the clustered points
  ifile - path to the sequence file containing the clustered points
  """ 
@@ -329,15 +327,14 @@ mahout.</p>
    print "cluster={key} Name={name} x={x}y={y}".format(key=key.toString(),name=nvec.getName(),x=nvec.get(0),y=nvec.get(1))
   else:
    raise NotImplementedError("Vector isn't a NamedVector. Need tomodify/test the code to handle this case.")
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><a name="UsingMahoutwithPythonviaJPype-ReadingtheKMeansCentroids"></a></p>
 <h1 id="reading-the-kmeans-centroids">Reading the KMeans Centroids</h1>
 <p>Finally we can create a function to print out the actual cluster centers
 found by mahout,</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def getClusters(ifile,*args,**param):
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def getClusters(ifile,*args,**param):
  """Read the centroids from the clusters outputted by kmenas
 	   ifile - Path to the sequence file containing the centroids
  """ 
@@ -376,8 +373,7 @@ found by mahout,</p>
   
   print "id={cid}center={center}".format(cid=vecwritable.getId(),center=center.values)
   pass
-</code></pre>
-</div>
+</code></pre></div></div>
 
 
     </div>
@@ -390,7 +386,7 @@ found by mahout,</p>
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

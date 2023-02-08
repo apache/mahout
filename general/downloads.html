@@ -179,13 +179,12 @@ the Apache mirrors. The latest Mahout release is available for download at:</p>
     <ul>
       <li>To validate artifacts:
         <ul>
-          <li>(From KEYS file): <code class="highlighter-rouge">gpg --import KEYS</code>
-            <div class="highlighter-rouge"><pre class="highlight"><code>$ gpg mahout-14.1-source-release.zip.asc
+          <li>(From KEYS file): <code class="language-plaintext highlighter-rouge">gpg --import KEYS</code>
+            <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gpg mahout-14.1-source-release.zip.asc
 gpg: assuming signed data in `mahout-14.1-source-release.zip'
 gpg: Signature made Fri 01 Mar 2019 09:59:00 AM PST using RSA key ID 140A5BE9
 gpg: Good signature from "Apache B. Committer (ASF Signing Key) &lt;abc@apache.org&gt;"
-</code></pre>
-            </div>
+</code></pre></div>            </div>
           </li>
         </ul>
       </li>
@@ -197,21 +196,19 @@ gpg: Good signature from "Apache B. Committer (ASF Signing Key) &lt;abc@apache.o
 
 <p>Apache Mahout is mirrored to <a href="https://github.com/apache/mahout">Github</a>. To get all source:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>git clone https://github.com/apache/mahout.git mahout
-</code></pre>
-</div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/apache/mahout.git mahout
+</code></pre></div></div>
 
 <h1 id="environment">Environment</h1>
 
 <p>Whether you are using Mahout’s Shell, running command line jobs or using it as a library to build your own apps 
 you’ll need to setup several environment variables. 
-Edit your environment in <code class="highlighter-rouge">~/.bash_profile</code> for Mac or <code class="highlighter-rouge">~/.bashrc</code> for many linux distributions. Add the following</p>
+Edit your environment in <code class="language-plaintext highlighter-rouge">~/.bash_profile</code> for Mac or <code class="language-plaintext highlighter-rouge">~/.bashrc</code> for many linux distributions. Add the following</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>export MAHOUT_HOME=/path/to/mahout
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export MAHOUT_HOME=/path/to/mahout
 export MAHOUT_LOCAL=true # for running standalone on your dev machine, 
 # unset MAHOUT_LOCAL for running on a cluster 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>If you are running on Spark you will also need $SPARK_HOME</p>
 
@@ -224,23 +221,21 @@ Then add the appropriate setting to your pom.xml or build.sbt following the temp
 
 <p>If you only need the math part of Mahout:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>&lt;dependency&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dependency&gt;
     &lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
     &lt;artifactId&gt;mahout-math&lt;/artifactId&gt;
     &lt;version&gt;${mahout.version}&lt;/version&gt;
 &lt;/dependency&gt;
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>In case you would like to use some of our integration tooling (e.g. for generating vectors from Lucene):</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>&lt;dependency&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dependency&gt;
     &lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
     &lt;artifactId&gt;mahout-hdfs&lt;/artifactId&gt;
     &lt;version&gt;${mahout.version}&lt;/version&gt;
 &lt;/dependency&gt;
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>In case you are using Ivy, Gradle, Buildr, Grape or SBT you might want to directly head over to the official <a href="http://mvnrepository.com/artifact/org.apache.mahout/mahout-core">Maven Repository search</a>.</p>
 
@@ -296,7 +291,7 @@ the <a href="https://mahout.apache.org/general/mailing-lists,-irc-and-archives.h
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

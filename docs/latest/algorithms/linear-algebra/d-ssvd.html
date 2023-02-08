@@ -225,9 +225,9 @@ Another way is <foo>\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^
 
 <h2 id="implementation">Implementation</h2>
 
-<p>Mahout <code class="highlighter-rouge">dssvd(...)</code> is implemented in the mahout <code class="highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
+<p>Mahout <code class="language-plaintext highlighter-rouge">dssvd(...)</code> is implemented in the mahout <code class="language-plaintext highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def dssvd[K: ClassTag](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dssvd[K: ClassTag](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
     (DrmLike[K], DrmLike[Int], Vector) = {
 
     val drmAcp = drmA.checkpoint()
@@ -283,23 +283,21 @@ Another way is <foo>\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^
 
     (drmU(::, 0 until k), drmV(::, 0 until k), s(0 until k))
 }
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Note: As a side effect of checkpointing, U and V values are returned as logical operators (i.e. they are neither checkpointed nor computed).  Therefore there is no physical work actually done to compute <foo>\(\mathbf{U}\)</foo> or <foo>\(\mathbf{V}\)</foo> until they are used in a subsequent expression.</p>
 
 <h2 id="usage">Usage</h2>
 
-<p>The scala <code class="highlighter-rouge">dssvd(...)</code> method can easily be called in any Spark or H2O application built with the <code class="highlighter-rouge">math-scala</code> library and the corresponding <code class="highlighter-rouge">Spark</code> or <code class="highlighter-rouge">H2O</code> engine module as follows:</p>
+<p>The scala <code class="language-plaintext highlighter-rouge">dssvd(...)</code> method can easily be called in any Spark or H2O application built with the <code class="language-plaintext highlighter-rouge">math-scala</code> library and the corresponding <code class="language-plaintext highlighter-rouge">Spark</code> or <code class="language-plaintext highlighter-rouge">H2O</code> engine module as follows:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>import org.apache.mahout.math._
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.mahout.math._
 import decompositions._
 import drm._
 
 
 val(drmU, drmV, s) = dssvd(drma, k = 40, q = 1)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="references">References</h2>
 
@@ -316,7 +314,7 @@ val(drmU, drmV, s) = dssvd(drma, k = 40, q = 1)
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

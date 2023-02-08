@@ -179,10 +179,9 @@ can be used for classification and regression tasks in a supervised learning app
 can be used with the following commands:</p>
 
 <h1 id="model-training">model training</h1>
-<div class="highlighter-rouge"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron  # model usage
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron  # model usage
 $ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>To train and use the model, a number of parameters can be specified. Parameters without default values have to be specified by the user. Consider that not all parameters can be used both for training and running the model. We give an example of the usage below.</p>
 
@@ -231,7 +230,7 @@ $ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron
     <tr>
       <td style="text-align: left">–layerSize -ls</td>
       <td style="text-align: right"> </td>
-      <td style="text-align: left">Number of units per layer, including input, hidden and ouput layers. This parameter specifies the topology of the network (see <a href="mlperceptron_structure.png" title="Architecture of a three-layer MLP">this image</a> for an example specified by <code class="highlighter-rouge">-ls 4 8 3</code>).</td>
+      <td style="text-align: left">Number of units per layer, including input, hidden and ouput layers. This parameter specifies the topology of the network (see <a href="mlperceptron_structure.png" title="Architecture of a three-layer MLP">this image</a> for an example specified by <code class="language-plaintext highlighter-rouge">-ls 4 8 3</code>).</td>
       <td style="text-align: left">training</td>
     </tr>
     <tr>
@@ -267,7 +266,7 @@ $ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron
     <tr>
       <td style="text-align: left">–columnRange -cr</td>
       <td style="text-align: right"> </td>
-      <td style="text-align: left">Range of the columns to use from the input file, starting with 0 (i.e. <code class="highlighter-rouge">-cr 0 5</code> for including the first six columns only)</td>
+      <td style="text-align: left">Range of the columns to use from the input file, starting with 0 (i.e. <code class="language-plaintext highlighter-rouge">-cr 0 5</code> for including the first six columns only)</td>
       <td style="text-align: left">testing</td>
     </tr>
     <tr>
@@ -288,24 +287,23 @@ The dimensions of the data set are given through some flower parameters (sepal l
 
 <p>To train our multilayer perceptron model from the command line, we call the following command</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron \
             -i ./mrlegacy/src/test/resources/iris.csv -sh \
             -labels setosa versicolor virginica \
             -mo /tmp/model.model -ls 4 8 3 -l 0.2 -m 0.35 -r 0.0001
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The individual parameters are explained in the following.</p>
 
 <ul>
-  <li><code class="highlighter-rouge">-i ./mrlegacy/src/test/resources/iris.csv</code> use the iris data set as input data</li>
-  <li><code class="highlighter-rouge">-sh</code> since the file <code class="highlighter-rouge">iris.csv</code> contains a header row, this row needs to be skipped</li>
-  <li><code class="highlighter-rouge">-labels setosa versicolor virginica</code> we specify, which class labels should be learnt (which are the flower species in this case)</li>
-  <li><code class="highlighter-rouge">-mo /tmp/model.model</code> specify where to store the model file</li>
-  <li><code class="highlighter-rouge">-ls 4 8 3</code> we specify the structure and depth of our layers. The actual network structure can be seen in the figure below.</li>
-  <li><code class="highlighter-rouge">-l 0.2</code> we set the learning rate to <code class="highlighter-rouge">0.2</code></li>
-  <li><code class="highlighter-rouge">-m 0.35</code> momemtum weight is set to <code class="highlighter-rouge">0.35</code></li>
-  <li><code class="highlighter-rouge">-r 0.0001</code> regularization weight is set to <code class="highlighter-rouge">0.0001</code></li>
+  <li><code class="language-plaintext highlighter-rouge">-i ./mrlegacy/src/test/resources/iris.csv</code> use the iris data set as input data</li>
+  <li><code class="language-plaintext highlighter-rouge">-sh</code> since the file <code class="language-plaintext highlighter-rouge">iris.csv</code> contains a header row, this row needs to be skipped</li>
+  <li><code class="language-plaintext highlighter-rouge">-labels setosa versicolor virginica</code> we specify, which class labels should be learnt (which are the flower species in this case)</li>
+  <li><code class="language-plaintext highlighter-rouge">-mo /tmp/model.model</code> specify where to store the model file</li>
+  <li><code class="language-plaintext highlighter-rouge">-ls 4 8 3</code> we specify the structure and depth of our layers. The actual network structure can be seen in the figure below.</li>
+  <li><code class="language-plaintext highlighter-rouge">-l 0.2</code> we set the learning rate to <code class="language-plaintext highlighter-rouge">0.2</code></li>
+  <li><code class="language-plaintext highlighter-rouge">-m 0.35</code> momemtum weight is set to <code class="language-plaintext highlighter-rouge">0.35</code></li>
+  <li><code class="language-plaintext highlighter-rouge">-r 0.0001</code> regularization weight is set to <code class="language-plaintext highlighter-rouge">0.0001</code></li>
 </ul>
 
 <table>
@@ -327,37 +325,36 @@ The dimensions of the data set are given through some flower parameters (sepal l
 
 <p>To test / run the multilayer perceptron classification on the trained model, we can use the following command</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron \
             -i ./mrlegacy/src/test/resources/iris.csv -sh -cr 0 3 \
             -mo /tmp/model.model -o /tmp/labelResult.txt
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The individual parameters are explained in the following.</p>
 
 <ul>
-  <li><code class="highlighter-rouge">-i ./mrlegacy/src/test/resources/iris.csv</code> use the iris data set as input data</li>
-  <li><code class="highlighter-rouge">-sh</code> since the file <code class="highlighter-rouge">iris.csv</code> contains a header row, this row needs to be skipped</li>
-  <li><code class="highlighter-rouge">-cr 0 3</code> we specify the column range of the input file</li>
-  <li><code class="highlighter-rouge">-mo /tmp/model.model</code> specify where the model file is stored</li>
-  <li><code class="highlighter-rouge">-o /tmp/labelResult.txt</code> specify where the labeled output file will be stored</li>
+  <li><code class="language-plaintext highlighter-rouge">-i ./mrlegacy/src/test/resources/iris.csv</code> use the iris data set as input data</li>
+  <li><code class="language-plaintext highlighter-rouge">-sh</code> since the file <code class="language-plaintext highlighter-rouge">iris.csv</code> contains a header row, this row needs to be skipped</li>
+  <li><code class="language-plaintext highlighter-rouge">-cr 0 3</code> we specify the column range of the input file</li>
+  <li><code class="language-plaintext highlighter-rouge">-mo /tmp/model.model</code> specify where the model file is stored</li>
+  <li><code class="language-plaintext highlighter-rouge">-o /tmp/labelResult.txt</code> specify where the labeled output file will be stored</li>
 </ul>
 
 <h2 id="implementation">Implementation</h2>
 
 <p>The Multilayer Perceptron implementation is based on a more general Neural Network class. Command line support was added later on and provides a simple usage of the MLP as shown in the example. It is implemented to run on a single machine using stochastic gradient descent where the weights are updated using one datapoint at a time, resulting in a weight update of the form:
-<script type="math/tex">\vec{w}^{(t + 1)} = \vec{w}^{(t)} - n \Delta E_n(\vec{w}^{(t)})</script></p>
+\(\vec{w}^{(t + 1)} = \vec{w}^{(t)} - n \Delta E_n(\vec{w}^{(t)})\)</p>
 
 <p>where <em>a</em> is the activation of the unit. It is not yet possible to change the learning to more advanced methods using adaptive learning rates yet.</p>
 
 <p>The number of layers and units per layer can be specified manually and determines the whole topology with each unit being fully connected to the previous layer. A bias unit is automatically added to the input of every layer. 
 Currently, the logistic sigmoid is used as a squashing function in every hidden and output layer. It is of the form:</p>
 
-<script type="math/tex; mode=display">\frac{1}{1 + exp(-a)}</script>
+\[\frac{1}{1 + exp(-a)}\]
 
 <p>The command line version <strong>does not perform iterations</strong> which leads to bad results on small datasets. Another restriction is, that the CLI version of the MLP only supports classification, since the labels have to be given explicitly when executing on the command line.</p>
 
-<p>A learned model can be stored and updated with new training instanced using the <code class="highlighter-rouge">--update</code> flag. Output of classification reults is saved as a .txt-file and only consists of the assigned labels. Apart from the command-line interface, it is possible to construct and compile more specialized neural networks using the API and interfaces in the mrlegacy package.</p>
+<p>A learned model can be stored and updated with new training instanced using the <code class="language-plaintext highlighter-rouge">--update</code> flag. Output of classification reults is saved as a .txt-file and only consists of the assigned labels. Apart from the command-line interface, it is possible to construct and compile more specialized neural networks using the API and interfaces in the mrlegacy package.</p>
 
 <h2 id="theoretical-background">Theoretical Background</h2>
 
@@ -365,27 +362,27 @@ Currently, the logistic sigmoid is used as a squashing function in every hidden 
 The term multilayer perceptron is a little misleading since the <em>perceptron</em> is a special case of a single <em>artificial neuron</em> that can be used for simple computations <a href="http://en.wikipedia.org/wiki/Perceptron" title="The perceptron in wikipedia">[1]</a>. The difference is that the perceptron uses a discontinous nonlinearity while for the MLP neurons that are implemented in mahout it is important to use continous nonlinearities. This is necessary for the implemented learning algorithm, where the error is propagated back from the output layer to the input layer and the weights of the connections are changed according to their contribution to the overall error. This algorithm is called backpropagation and uses gradient descent to update the weights. To compute the gradients we need continous nonlinearities. But let’s start from the beginning!</p>
 
 <p>The first layer of the MLP represents the input and has no other purpose than routing the input to every connected unit in a feed-forward fashion. Following layers are called hidden layers and the last layer serves the special purpose to determine the output. The activation of a unit <em>u</em> in a hidden layer is computed through a weighted sum of all inputs, resulting in 
-<script type="math/tex">a_j = \sum_{i=1}^{D} w_{ji}^{(l)} x_i + w_{j0}^{(l)}</script>
+\(a_j = \sum_{i=1}^{D} w_{ji}^{(l)} x_i + w_{j0}^{(l)}\)
 This computes the activation <em>a</em> for neuron <em>j</em> where <em>w</em> is the weight from neuron <em>i</em> to neuron <em>j</em> in layer <em>l</em>. The last part, where <em>i = 0</em> is called the bias and can be used as an offset, independent from the input.</p>
 
 <p>The activation is then transformed by the aforementioned differentiable, nonlinear <em>activation function</em> and serves as the input to the next layer. The activation function is usually chosen from the family of sigmoidal functions such as <em>tanh</em> or <em>logistic sigmoidal</em> <a href="http://en.wikipedia.org/wiki/Sigmoid_function" title="Sigmoid function on wikipedia">[2]</a>. Often sigmoidal and logistic sigmoidal are used synonymous. Another word for the activation function is <em>squashing function</em> since the s-shape of this function class <em>squashes</em> the input.</p>
 
 <p>For different units or layers, different activation functions can be used to obtain different behaviors. Especially in the output layer, the activation function can be chosen to obtain the output value <em>y</em>, depending on the learning problem:
-<script type="math/tex">y_k = \sigma (a_k)</script></p>
+\(y_k = \sigma (a_k)\)</p>
 
 <p>If the learning problem is a linear regression task, sigma can be chosen to be the identity function. In case of classification problems, the choice of the squashing functions depends on the exact task at hand and often softmax activation functions are used.</p>
 
 <p>The equation for a MLP with three layers (one input, one hidden and one output) is then given by</p>
 
-<script type="math/tex; mode=display">y_k(\vec{x}, \vec{w}) = h \left( \sum_{j=1}^{M} w_{kj}^{(2)} h \left( \sum_{i=1}^{D} w_{ji}^{(1)} x_i + w_{j0}^{(1)} \right) + w_{k0}^{(2)} \right)</script>
+\[y_k(\vec{x}, \vec{w}) = h \left( \sum_{j=1}^{M} w_{kj}^{(2)} h \left( \sum_{i=1}^{D} w_{ji}^{(1)} x_i + w_{j0}^{(1)} \right) + w_{k0}^{(2)} \right)\]
 
 <p>where <em>h</em> indicates the respective squashing function that is used in the units of a layer. <em>M</em> and <em>D</em> specify the number of incoming connections to a unit and we can see that the input to the first layer (hidden layer) is just the original input <em>x</em> whereas the input into the second layer (output layer) is the transformed output of layer one. The output <em>y</em> of unit <em>k</em> is therefore given by the above equation and depends on the input <em>x</em> and the weight vector <em>w</em>. This shows us, that the parameter that we can optimize during learning is <em>w</em> since we can not do anything about the input <em>x</em>. To facilitate the following steps, we can include the bias-terms into the weight vector and correct for the indices by adding another dimension with the value 1 to the input vector. The bias is a constant factor that is added to the weighted sum and that serves as a scaling factor of the nonlinear transformation. Including it into the weight vector leads to:</p>
 
-<script type="math/tex; mode=display">y_k(\vec{x}, \vec{w}) = h \left( \sum_{j=0}^{M} w_{kj}^{(2)} h \left( \sum_{i=0}^{D} w_{ji}^{(1)} x_i \right) \right)</script>
+\[y_k(\vec{x}, \vec{w}) = h \left( \sum_{j=0}^{M} w_{kj}^{(2)} h \left( \sum_{i=0}^{D} w_{ji}^{(1)} x_i \right) \right)\]
 
 <p>The previous paragraphs described how the MLP transforms a given input into some output using a combination of different nonlinear functions. Of course what we really want is to learn the structure of our data so that we can feed data with unknown labels into the network and get the estimated target labels <em>t</em>. To achieve this, we have to train our network. In this context, training means optimizing some function such that the error between the real labels <em>y</em> and the network-output <em>t</em> becomes smallest. We have seen in the previous pragraph, that our only knob to change is the weight vector <em>w</em>, making the function to be optimized a function of <em>w</em>. For simplicitly and because it is widely used, we choose the so called <em>sum-of-squares</em> error function as an example that is given by</p>
 
-<script type="math/tex; mode=display">E(\vec{w}) = \frac{1}{2} \sum_{n=1}^N \left( y(\vec{x}_n, \vec{w}) - t_n \right)^2</script>
+\[E(\vec{w}) = \frac{1}{2} \sum_{n=1}^N \left( y(\vec{x}_n, \vec{w}) - t_n \right)^2\]
 
 <p>The goal is to minimize this function and thereby increase the performance of our model. A common method to achieve this is to use gradient descent and the so called technique of <em>backpropagation</em> where the goal is to compute the contribution of every unit to the overall error and changing the weight according to this contribution and into the direction of the gradient of the error function at this particular unit. In the following we try to give a short overview of the model training with gradient descent and backpropagation. A more detailed example can be found in <a href="http://research.microsoft.com/en-us/um/people/cmbishop/prml/" title="Christopher M. Bishop: Pattern Recognition and Machine Learning, Springer 2009">[3]</a> where much of this information is taken from.</p>
 
@@ -393,7 +390,7 @@ This computes the activation <em>a</em> for neuron <em>j</em> where <em>w</em> i
 
 <p>Weights are then updated with a small step in the direction of the negative gradient, regulated by the learning rate <em>n</em> such that we arrive at the formula for weight update:</p>
 
-<script type="math/tex; mode=display">\vec{w}^{(t + 1)} = \vec{w}^{(t)} - n \Delta E(\vec{w}^{(t)})</script>
+\[\vec{w}^{(t + 1)} = \vec{w}^{(t)} - n \Delta E(\vec{w}^{(t)})\]
 
 <p>A momentum weight can be set as a parameter of the gradient descent method to increase the probability of finding better local or global optima of the error function.</p>
 
@@ -416,7 +413,7 @@ This computes the activation <em>a</em> for neuron <em>j</em> where <em>w</em> i
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

@@ -168,43 +168,43 @@
     <div class="col-lg-8">
       <h2 id="intro">Intro</h2>
 
-<p>Mahout has a distributed implementation of Stochastic PCA<a href="Lyubimov and Palumbo, [&quot;Apache Mahout: Beyond MapReduce; Distributed Algorithm Design&quot;](https://www.amazon.com/Apache-Mahout-MapReduce-Dmitriy-Lyubimov/dp/1523775785)">1</a>. This algorithm computes the exact equivalent of Mahout’s dssvd(<code class="highlighter-rouge">\(\mathbf{A-1\mu^\top}\)</code>) by modifying the <code class="highlighter-rouge">dssvd</code> algorithm so as to avoid forming <code class="highlighter-rouge">\(\mathbf{A-1\mu^\top}\)</code>, which would densify a sparse input. Thus, it is suitable for work with both dense and sparse inputs.</p>
+<p>Mahout has a distributed implementation of Stochastic PCA<a href="Lyubimov and Palumbo, [&quot;Apache Mahout: Beyond MapReduce; Distributed Algorithm Design&quot;](https://www.amazon.com/Apache-Mahout-MapReduce-Dmitriy-Lyubimov/dp/1523775785)">1</a>. This algorithm computes the exact equivalent of Mahout’s dssvd(<code class="language-plaintext highlighter-rouge">\(\mathbf{A-1\mu^\top}\)</code>) by modifying the <code class="language-plaintext highlighter-rouge">dssvd</code> algorithm so as to avoid forming <code class="language-plaintext highlighter-rouge">\(\mathbf{A-1\mu^\top}\)</code>, which would densify a sparse input. Thus, it is suitable for work with both dense and sparse inputs.</p>
 
 <h2 id="algorithm">Algorithm</h2>
 
-<p>Given an <em>m</em> <code class="highlighter-rouge">\(\times\)</code> <em>n</em> matrix <code class="highlighter-rouge">\(\mathbf{A}\)</code>, a target rank <em>k</em>, and an oversampling parameter <em>p</em>, this procedure computes a <em>k</em>-rank PCA by finding the unknowns in <code class="highlighter-rouge">\(\mathbf{A−1\mu^\top \approx U\Sigma V^\top}\)</code>:</p>
+<p>Given an <em>m</em> <code class="language-plaintext highlighter-rouge">\(\times\)</code> <em>n</em> matrix <code class="language-plaintext highlighter-rouge">\(\mathbf{A}\)</code>, a target rank <em>k</em>, and an oversampling parameter <em>p</em>, this procedure computes a <em>k</em>-rank PCA by finding the unknowns in <code class="language-plaintext highlighter-rouge">\(\mathbf{A−1\mu^\top \approx U\Sigma V^\top}\)</code>:</p>
 
 <ol>
-  <li>Create seed for random <em>n</em> <code class="highlighter-rouge">\(\times\)</code> <em>(k+p)</em> matrix <code class="highlighter-rouge">\(\Omega\)</code>.</li>
-  <li><code class="highlighter-rouge">\(\mathbf{s_\Omega \leftarrow \Omega^\top \mu}\)</code>.</li>
-  <li><code class="highlighter-rouge">\(\mathbf{Y_0 \leftarrow A\Omega − 1 {s_\Omega}^\top, Y \in \mathbb{R}^{m\times(k+p)}}\)</code>.</li>
-  <li>Column-orthonormalize <code class="highlighter-rouge">\(\mathbf{Y_0} \rightarrow \mathbf{Q}\)</code> by computing thin decomposition <code class="highlighter-rouge">\(\mathbf{Y_0} = \mathbf{QR}\)</code>. Also, <code class="highlighter-rouge">\(\mathbf{Q}\in\mathbb{R}^{m\times(k+p)}, \mathbf{R}\in\mathbb{R}^{(k+p)\times(k+p)}\)</code>.</li>
-  <li><code class="highlighter-rouge">\(\mathbf{s_Q \leftarrow Q^\top 1}\)</code>.</li>
-  <li><code class="highlighter-rouge">\(\mathbf{B_0 \leftarrow Q^\top A: B \in \mathbb{R}^{(k+p)\times n}}\)</code>.</li>
-  <li><code class="highlighter-rouge">\(\mathbf{s_B \leftarrow {B_0}^\top \mu}\)</code>.</li>
+  <li>Create seed for random <em>n</em> <code class="language-plaintext highlighter-rouge">\(\times\)</code> <em>(k+p)</em> matrix <code class="language-plaintext highlighter-rouge">\(\Omega\)</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">\(\mathbf{s_\Omega \leftarrow \Omega^\top \mu}\)</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">\(\mathbf{Y_0 \leftarrow A\Omega − 1 {s_\Omega}^\top, Y \in \mathbb{R}^{m\times(k+p)}}\)</code>.</li>
+  <li>Column-orthonormalize <code class="language-plaintext highlighter-rouge">\(\mathbf{Y_0} \rightarrow \mathbf{Q}\)</code> by computing thin decomposition <code class="language-plaintext highlighter-rouge">\(\mathbf{Y_0} = \mathbf{QR}\)</code>. Also, <code class="language-plaintext highlighter-rouge">\(\mathbf{Q}\in\mathbb{R}^{m\times(k+p)}, \mathbf{R}\in\mathbb{R}^{(k+p)\times(k+p)}\)</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">\(\mathbf{s_Q \leftarrow Q^\top 1}\)</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">\(\mathbf{B_0 \leftarrow Q^\top A: B \in \mathbb{R}^{(k+p)\times n}}\)</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">\(\mathbf{s_B \leftarrow {B_0}^\top \mu}\)</code>.</li>
   <li>For <em>i</em> in 1..<em>q</em> repeat (power iterations):
     <ul>
-      <li>For <em>j</em> in 1..<em>n</em> apply <code class="highlighter-rouge">\(\mathbf{(B_{i−1})_{∗j} \leftarrow (B_{i−1})_{∗j}−\mu_j s_Q}\)</code>.</li>
-      <li><code class="highlighter-rouge">\(\mathbf{Y_i \leftarrow A{B_{i−1}}^\top−1(s_B−\mu^\top \mu s_Q)^\top}\)</code>.</li>
-      <li>Column-orthonormalize <code class="highlighter-rouge">\(\mathbf{Y_i} \rightarrow \mathbf{Q}\)</code> by computing thin decomposition <code class="highlighter-rouge">\(\mathbf{Y_i = QR}\)</code>.</li>
-      <li><code class="highlighter-rouge">\(\mathbf{s_Q \leftarrow Q^\top 1}\)</code>.</li>
-      <li><code class="highlighter-rouge">\(\mathbf{B_i \leftarrow Q^\top A}\)</code>.</li>
-      <li><code class="highlighter-rouge">\(\mathbf{s_B \leftarrow {B_i}^\top \mu}\)</code>.</li>
+      <li>For <em>j</em> in 1..<em>n</em> apply <code class="language-plaintext highlighter-rouge">\(\mathbf{(B_{i−1})_{∗j} \leftarrow (B_{i−1})_{∗j}−\mu_j s_Q}\)</code>.</li>
+      <li><code class="language-plaintext highlighter-rouge">\(\mathbf{Y_i \leftarrow A{B_{i−1}}^\top−1(s_B−\mu^\top \mu s_Q)^\top}\)</code>.</li>
+      <li>Column-orthonormalize <code class="language-plaintext highlighter-rouge">\(\mathbf{Y_i} \rightarrow \mathbf{Q}\)</code> by computing thin decomposition <code class="language-plaintext highlighter-rouge">\(\mathbf{Y_i = QR}\)</code>.</li>
+      <li><code class="language-plaintext highlighter-rouge">\(\mathbf{s_Q \leftarrow Q^\top 1}\)</code>.</li>
+      <li><code class="language-plaintext highlighter-rouge">\(\mathbf{B_i \leftarrow Q^\top A}\)</code>.</li>
+      <li><code class="language-plaintext highlighter-rouge">\(\mathbf{s_B \leftarrow {B_i}^\top \mu}\)</code>.</li>
     </ul>
   </li>
-  <li>Let <code class="highlighter-rouge">\(\mathbf{C \triangleq s_Q {s_B}^\top}\)</code>. <code class="highlighter-rouge">\(\mathbf{M \leftarrow B_q {B_q}^\top − C − C^\top + \mu^\top \mu s_Q {s_Q}^\top}\)</code>.</li>
-  <li>Compute an eigensolution of the small symmetric <code class="highlighter-rouge">\(\mathbf{M = \hat{U} \Lambda \hat{U}^\top: M \in \mathbb{R}^{(k+p)\times(k+p)}}\)</code>.</li>
-  <li>The singular values <code class="highlighter-rouge">\(\Sigma = \Lambda^{\circ 0.5}\)</code>, or, in other words, <code class="highlighter-rouge">\(\mathbf{\sigma_i= \sqrt{\lambda_i}}\)</code>.</li>
-  <li>If needed, compute <code class="highlighter-rouge">\(\mathbf{U = Q\hat{U}}\)</code>.</li>
-  <li>If needed, compute <code class="highlighter-rouge">\(\mathbf{V = B^\top \hat{U} \Sigma^{−1}}\)</code>.</li>
-  <li>If needed, items converted to the PCA space can be computed as <code class="highlighter-rouge">\(\mathbf{U\Sigma}\)</code>.</li>
+  <li>Let <code class="language-plaintext highlighter-rouge">\(\mathbf{C \triangleq s_Q {s_B}^\top}\)</code>. <code class="language-plaintext highlighter-rouge">\(\mathbf{M \leftarrow B_q {B_q}^\top − C − C^\top + \mu^\top \mu s_Q {s_Q}^\top}\)</code>.</li>
+  <li>Compute an eigensolution of the small symmetric <code class="language-plaintext highlighter-rouge">\(\mathbf{M = \hat{U} \Lambda \hat{U}^\top: M \in \mathbb{R}^{(k+p)\times(k+p)}}\)</code>.</li>
+  <li>The singular values <code class="language-plaintext highlighter-rouge">\(\Sigma = \Lambda^{\circ 0.5}\)</code>, or, in other words, <code class="language-plaintext highlighter-rouge">\(\mathbf{\sigma_i= \sqrt{\lambda_i}}\)</code>.</li>
+  <li>If needed, compute <code class="language-plaintext highlighter-rouge">\(\mathbf{U = Q\hat{U}}\)</code>.</li>
+  <li>If needed, compute <code class="language-plaintext highlighter-rouge">\(\mathbf{V = B^\top \hat{U} \Sigma^{−1}}\)</code>.</li>
+  <li>If needed, items converted to the PCA space can be computed as <code class="language-plaintext highlighter-rouge">\(\mathbf{U\Sigma}\)</code>.</li>
 </ol>
 
 <h2 id="implementation">Implementation</h2>
 
-<p>Mahout <code class="highlighter-rouge">dspca(...)</code> is implemented in the mahout <code class="highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
+<p>Mahout <code class="language-plaintext highlighter-rouge">dspca(...)</code> is implemented in the mahout <code class="language-plaintext highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def dspca[K](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0): 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dspca[K](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0): 
 (DrmLike[K], DrmLike[Int], Vector) = {
 
     // Some mapBlock() calls need it
@@ -321,20 +321,18 @@
 
     (drmU(::, 0 until k), drmV(::, 0 until k), s(0 until k))
 }
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="usage">Usage</h2>
 
-<p>The scala <code class="highlighter-rouge">dspca(...)</code> method can easily be called in any Spark, Flink, or H2O application built with the <code class="highlighter-rouge">math-scala</code> library and the corresponding <code class="highlighter-rouge">Spark</code>, <code class="highlighter-rouge">Flink</code>, or <code class="highlighter-rouge">H2O</code> engine module as follows:</p>
+<p>The scala <code class="language-plaintext highlighter-rouge">dspca(...)</code> method can easily be called in any Spark, Flink, or H2O application built with the <code class="language-plaintext highlighter-rouge">math-scala</code> library and the corresponding <code class="language-plaintext highlighter-rouge">Spark</code>, <code class="language-plaintext highlighter-rouge">Flink</code>, or <code class="language-plaintext highlighter-rouge">H2O</code> engine module as follows:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>import org.apache.mahout.math._
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.mahout.math._
 import decompositions._
 import drm._
 
 val (drmU, drmV, s) = dspca(drmA, k=200, q=1)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Note the parameter is optional and its default value is zero.</p>
 
@@ -351,7 +349,7 @@ val (drmU, drmV, s) = dspca(drmA, k=200, q=1)
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

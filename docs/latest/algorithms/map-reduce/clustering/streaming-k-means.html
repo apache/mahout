@@ -291,7 +291,7 @@ The algorithm can be instructed to take multiple independent runs (using the <em
 
 <p>##Usage of <em>StreamingKMeans</em></p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code> bin/mahout streamingkmeans  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bin/mahout streamingkmeans  
    -i &lt;input&gt;  
    -o &lt;output&gt; 
    -ow  
@@ -314,34 +314,33 @@ The algorithm can be instructed to take multiple independent runs (using the <em
    --tempDir &lt;tempDir&gt;   
    --startPhase &lt;startPhase&gt;   
    --endPhase &lt;endPhase&gt;                    
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>###Details on Job-Specific Options:</p>
 
 <ul>
-  <li><code class="highlighter-rouge">--input (-i) &lt;input&gt;</code>: Path to job input directory.</li>
-  <li><code class="highlighter-rouge">--output (-o) &lt;output&gt;</code>: The directory pathname for output.</li>
-  <li><code class="highlighter-rouge">--overwrite (-ow)</code>: If present, overwrite the output directory before running job.</li>
-  <li><code class="highlighter-rouge">--numClusters (-k) &lt;k&gt;</code>: The k in k-Means. Approximately this many clusters will be generated.</li>
-  <li><code class="highlighter-rouge">--estimatedNumMapClusters (-km) &lt;estimatedNumMapClusters&gt;</code>: The estimated number of clusters to use for the Map phase of the job when running StreamingKMeans. This should be around k * log(n), where k is the final number of clusters and n is the total number of data points to cluster.</li>
-  <li><code class="highlighter-rouge">--estimatedDistanceCutoff (-e) &lt;estimatedDistanceCutoff&gt;</code>: The initial estimated distance cutoff between two points for forming new clusters. If no value is given, it’s estimated from the data set</li>
-  <li><code class="highlighter-rouge">--maxNumIterations (-mi) &lt;maxNumIterations&gt;</code>: The maximum number of iterations to run for the BallKMeans algorithm used by the reducer. If no value is given, defaults to 10.</li>
-  <li><code class="highlighter-rouge">--trimFraction (-tf) &lt;trimFraction&gt;</code>: The ‘ball’ aspect of ball k-means means that only the closest points to the centroid will actually be used for updating. The fraction of the points to be used is those points whose distance to the center is within trimFraction * distance to the closest other center. If no value is given, defaults to 0.9.</li>
-  <li><code class="highlighter-rouge">--randomInit</code> (<code class="highlighter-rouge">-ri</code>) Whether to use k-means++ initialization or random initialization of the seed centroids. Essentially, k-means++ provides better clusters, but takes longer, whereas random initialization takes less time, but produces worse clusters, and tends to fail more often and needs multiple runs to compare to k-means++. If set, uses the random initialization.</li>
-  <li><code class="highlighter-rouge">--ignoreWeights (-iw)</code>: Whether to correct the weights of the centroids after the clustering is done. The weights end up being wrong because of the trimFraction and possible train/test splits. In some cases, especially in a pipeline, having an accurate count of the weights is useful. If set, ignores the final weights.</li>
-  <li><code class="highlighter-rouge">--testProbability (-testp) &lt;testProbability&gt;</code>: A double value  between 0 and 1  that represents  the percentage of  points to be used  for ‘testing’  different  clustering runs in  the final  BallKMeans step.  If no value is  given, defaults to  0.1</li>
-  <li><code class="highlighter-rouge">--numBallKMeansRuns (-nbkm) &lt;numBallKMeansRuns&gt;</code>: Number of  BallKMeans runs to  use at the end to  try to cluster the  points. If no  value is given,  defaults to 4</li>
-  <li><code class="highlighter-rouge">--distanceMeasure (-dm) &lt;distanceMeasure&gt;</code>: The classname of  the  DistanceMeasure.  Default is  SquaredEuclidean.</li>
-  <li><code class="highlighter-rouge">--searcherClass (-sc) &lt;searcherClass&gt;</code>: The type of  searcher to be  used when  performing nearest  neighbor searches.  Defaults to  ProjectionSearch.</li>
-  <li><code class="highlighter-rouge">--numProjections (-np) &lt;numProjections&gt;</code>: The number of  projections  considered in  estimating the  distances between  vectors. Only used  when the distance  measure requested is either ProjectionSearch or FastProjectionSearch. If no value is given, defaults to 3.</li>
-  <li><code class="highlighter-rouge">--searchSize (-s) &lt;searchSize&gt;</code>: In more efficient  searches (non  BruteSearch), not all distances are calculated for determining the nearest neighbors. The number of elements whose distances from the query vector is actually computer is proportional to searchSize. If no value is given, defaults to 1.</li>
-  <li><code class="highlighter-rouge">--reduceStreamingKMeans (-rskm)</code>: There might be too many intermediate clusters from the mapper to fit into memory, so the reducer can run  another pass of StreamingKMeans to collapse them down to a fewer clusters.</li>
-  <li><code class="highlighter-rouge">--method (-xm)</code> method The execution  method to use:  sequential or  mapreduce. Default  is mapreduce.</li>
-  <li><code class="highlighter-rouge">-- help (-h)</code>: Print out help</li>
-  <li><code class="highlighter-rouge">--tempDir &lt;tempDir&gt;</code>: Intermediate output directory.</li>
-  <li><code class="highlighter-rouge">--startPhase &lt;startPhase&gt;</code> First phase to run.</li>
-  <li><code class="highlighter-rouge">--endPhase &lt;endPhase&gt;</code> Last phase to run.</li>
+  <li><code class="language-plaintext highlighter-rouge">--input (-i) &lt;input&gt;</code>: Path to job input directory.</li>
+  <li><code class="language-plaintext highlighter-rouge">--output (-o) &lt;output&gt;</code>: The directory pathname for output.</li>
+  <li><code class="language-plaintext highlighter-rouge">--overwrite (-ow)</code>: If present, overwrite the output directory before running job.</li>
+  <li><code class="language-plaintext highlighter-rouge">--numClusters (-k) &lt;k&gt;</code>: The k in k-Means. Approximately this many clusters will be generated.</li>
+  <li><code class="language-plaintext highlighter-rouge">--estimatedNumMapClusters (-km) &lt;estimatedNumMapClusters&gt;</code>: The estimated number of clusters to use for the Map phase of the job when running StreamingKMeans. This should be around k * log(n), where k is the final number of clusters and n is the total number of data points to cluster.</li>
+  <li><code class="language-plaintext highlighter-rouge">--estimatedDistanceCutoff (-e) &lt;estimatedDistanceCutoff&gt;</code>: The initial estimated distance cutoff between two points for forming new clusters. If no value is given, it’s estimated from the data set</li>
+  <li><code class="language-plaintext highlighter-rouge">--maxNumIterations (-mi) &lt;maxNumIterations&gt;</code>: The maximum number of iterations to run for the BallKMeans algorithm used by the reducer. If no value is given, defaults to 10.</li>
+  <li><code class="language-plaintext highlighter-rouge">--trimFraction (-tf) &lt;trimFraction&gt;</code>: The ‘ball’ aspect of ball k-means means that only the closest points to the centroid will actually be used for updating. The fraction of the points to be used is those points whose distance to the center is within trimFraction * distance to the closest other center. If no value is given, defaults to 0.9.</li>
+  <li><code class="language-plaintext highlighter-rouge">--randomInit</code> (<code class="language-plaintext highlighter-rouge">-ri</code>) Whether to use k-means++ initialization or random initialization of the seed centroids. Essentially, k-means++ provides better clusters, but takes longer, whereas random initialization takes less time, but produces worse clusters, and tends to fail more often and needs multiple runs to compare to k-means++. If set, uses the random initialization.</li>
+  <li><code class="language-plaintext highlighter-rouge">--ignoreWeights (-iw)</code>: Whether to correct the weights of the centroids after the clustering is done. The weights end up being wrong because of the trimFraction and possible train/test splits. In some cases, especially in a pipeline, having an accurate count of the weights is useful. If set, ignores the final weights.</li>
+  <li><code class="language-plaintext highlighter-rouge">--testProbability (-testp) &lt;testProbability&gt;</code>: A double value  between 0 and 1  that represents  the percentage of  points to be used  for ‘testing’  different  clustering runs in  the final  BallKMeans step.  If no value is  given, defaults to  0.1</li>
+  <li><code class="language-plaintext highlighter-rouge">--numBallKMeansRuns (-nbkm) &lt;numBallKMeansRuns&gt;</code>: Number of  BallKMeans runs to  use at the end to  try to cluster the  points. If no  value is given,  defaults to 4</li>
+  <li><code class="language-plaintext highlighter-rouge">--distanceMeasure (-dm) &lt;distanceMeasure&gt;</code>: The classname of  the  DistanceMeasure.  Default is  SquaredEuclidean.</li>
+  <li><code class="language-plaintext highlighter-rouge">--searcherClass (-sc) &lt;searcherClass&gt;</code>: The type of  searcher to be  used when  performing nearest  neighbor searches.  Defaults to  ProjectionSearch.</li>
+  <li><code class="language-plaintext highlighter-rouge">--numProjections (-np) &lt;numProjections&gt;</code>: The number of  projections  considered in  estimating the  distances between  vectors. Only used  when the distance  measure requested is either ProjectionSearch or FastProjectionSearch. If no value is given, defaults to 3.</li>
+  <li><code class="language-plaintext highlighter-rouge">--searchSize (-s) &lt;searchSize&gt;</code>: In more efficient  searches (non  BruteSearch), not all distances are calculated for determining the nearest neighbors. The number of elements whose distances from the query vector is actually computer is proportional to searchSize. If no value is given, defaults to 1.</li>
+  <li><code class="language-plaintext highlighter-rouge">--reduceStreamingKMeans (-rskm)</code>: There might be too many intermediate clusters from the mapper to fit into memory, so the reducer can run  another pass of StreamingKMeans to collapse them down to a fewer clusters.</li>
+  <li><code class="language-plaintext highlighter-rouge">--method (-xm)</code> method The execution  method to use:  sequential or  mapreduce. Default  is mapreduce.</li>
+  <li><code class="language-plaintext highlighter-rouge">-- help (-h)</code>: Print out help</li>
+  <li><code class="language-plaintext highlighter-rouge">--tempDir &lt;tempDir&gt;</code>: Intermediate output directory.</li>
+  <li><code class="language-plaintext highlighter-rouge">--startPhase &lt;startPhase&gt;</code> First phase to run.</li>
+  <li><code class="language-plaintext highlighter-rouge">--endPhase &lt;endPhase&gt;</code> Last phase to run.</li>
 </ul>
 
 <p>##References</p>
@@ -362,7 +361,7 @@ The algorithm can be instructed to take multiple independent runs (using the <em
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

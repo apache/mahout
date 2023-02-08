@@ -175,45 +175,45 @@
 <p>Where Bayes has long been a standard in text classification, CBayes is an extension of Bayes that performs particularly well on datasets with skewed classes and has been shown to be competitive with algorithms of higher complexity such as Support Vector Machines.</p>
 
 <h2 id="implementations">Implementations</h2>
-<p>The mahout <code class="highlighter-rouge">math-scala</code> library has an implemetation of both Bayes and CBayes which is further optimized in the <code class="highlighter-rouge">spark</code> module. Currently the Spark optimized version provides CLI drivers for training and testing. Mahout Spark-Naive-Bayes models can also be trained, tested and saved to the filesystem from the Mahout Spark Shell.</p>
+<p>The mahout <code class="language-plaintext highlighter-rouge">math-scala</code> library has an implemetation of both Bayes and CBayes which is further optimized in the <code class="language-plaintext highlighter-rouge">spark</code> module. Currently the Spark optimized version provides CLI drivers for training and testing. Mahout Spark-Naive-Bayes models can also be trained, tested and saved to the filesystem from the Mahout Spark Shell.</p>
 
 <h2 id="preprocessing-and-algorithm">Preprocessing and Algorithm</h2>
 
 <p>As described in <a href="http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf">[1]</a> Mahout Naive Bayes is broken down into the following steps (assignments are over all possible index values):</p>
 
 <ul>
-  <li>Let <code class="highlighter-rouge">\(\vec{d}=(\vec{d_1},...,\vec{d_n})\)</code> be a set of documents; <code class="highlighter-rouge">\(d_{ij}\)</code> is the count of word <code class="highlighter-rouge">\(i\)</code> in document <code class="highlighter-rouge">\(j\)</code>.</li>
-  <li>Let <code class="highlighter-rouge">\(\vec{y}=(y_1,...,y_n)\)</code> be their labels.</li>
-  <li>Let <code class="highlighter-rouge">\(\alpha_i\)</code> be a smoothing parameter for all words in the vocabulary; let <code class="highlighter-rouge">\(\alpha=\sum_i{\alpha_i}\)</code>.</li>
-  <li><strong>Preprocessing</strong>(via seq2Sparse) TF-IDF transformation and L2 length normalization of <code class="highlighter-rouge">\(\vec{d}\)</code>
+  <li>Let <code class="language-plaintext highlighter-rouge">\(\vec{d}=(\vec{d_1},...,\vec{d_n})\)</code> be a set of documents; <code class="language-plaintext highlighter-rouge">\(d_{ij}\)</code> is the count of word <code class="language-plaintext highlighter-rouge">\(i\)</code> in document <code class="language-plaintext highlighter-rouge">\(j\)</code>.</li>
+  <li>Let <code class="language-plaintext highlighter-rouge">\(\vec{y}=(y_1,...,y_n)\)</code> be their labels.</li>
+  <li>Let <code class="language-plaintext highlighter-rouge">\(\alpha_i\)</code> be a smoothing parameter for all words in the vocabulary; let <code class="language-plaintext highlighter-rouge">\(\alpha=\sum_i{\alpha_i}\)</code>.</li>
+  <li><strong>Preprocessing</strong>(via seq2Sparse) TF-IDF transformation and L2 length normalization of <code class="language-plaintext highlighter-rouge">\(\vec{d}\)</code>
     <ol>
-      <li><code class="highlighter-rouge">\(d_{ij} = \sqrt{d_{ij}}\)</code></li>
-      <li><code class="highlighter-rouge">\(d_{ij} = d_{ij}\left(\log{\frac{\sum_k1}{\sum_k\delta_{ik}+1}}+1\right)\)</code></li>
-      <li><code class="highlighter-rouge">\(d_{ij} =\frac{d_{ij}}{\sqrt{\sum_k{d_{kj}^2}}}\)</code></li>
+      <li><code class="language-plaintext highlighter-rouge">\(d_{ij} = \sqrt{d_{ij}}\)</code></li>
+      <li><code class="language-plaintext highlighter-rouge">\(d_{ij} = d_{ij}\left(\log{\frac{\sum_k1}{\sum_k\delta_{ik}+1}}+1\right)\)</code></li>
+      <li><code class="language-plaintext highlighter-rouge">\(d_{ij} =\frac{d_{ij}}{\sqrt{\sum_k{d_{kj}^2}}}\)</code></li>
     </ol>
   </li>
-  <li><strong>Training: Bayes</strong><code class="highlighter-rouge">\((\vec{d},\vec{y})\)</code> calculate term weights <code class="highlighter-rouge">\(w_{ci}\)</code> as:
+  <li><strong>Training: Bayes</strong><code class="language-plaintext highlighter-rouge">\((\vec{d},\vec{y})\)</code> calculate term weights <code class="language-plaintext highlighter-rouge">\(w_{ci}\)</code> as:
     <ol>
-      <li><code class="highlighter-rouge">\(\hat\theta_{ci}=\frac{d_{ic}+\alpha_i}{\sum_k{d_{kc}}+\alpha}\)</code></li>
-      <li><code class="highlighter-rouge">\(w_{ci}=\log{\hat\theta_{ci}}\)</code></li>
+      <li><code class="language-plaintext highlighter-rouge">\(\hat\theta_{ci}=\frac{d_{ic}+\alpha_i}{\sum_k{d_{kc}}+\alpha}\)</code></li>
+      <li><code class="language-plaintext highlighter-rouge">\(w_{ci}=\log{\hat\theta_{ci}}\)</code></li>
     </ol>
   </li>
-  <li><strong>Training: CBayes</strong><code class="highlighter-rouge">\((\vec{d},\vec{y})\)</code> calculate term weights <code class="highlighter-rouge">\(w_{ci}\)</code> as:
+  <li><strong>Training: CBayes</strong><code class="language-plaintext highlighter-rouge">\((\vec{d},\vec{y})\)</code> calculate term weights <code class="language-plaintext highlighter-rouge">\(w_{ci}\)</code> as:
     <ol>
-      <li><code class="highlighter-rouge">\(\hat\theta_{ci} = \frac{\sum_{j:y_j\neq c}d_{ij}+\alpha_i}{\sum_{j:y_j\neq c}{\sum_k{d_{kj}}}+\alpha}\)</code></li>
-      <li><code class="highlighter-rouge">\(w_{ci}=-\log{\hat\theta_{ci}}\)</code></li>
-      <li><code class="highlighter-rouge">\(w_{ci}=\frac{w_{ci}}{\sum_i \lvert w_{ci}\rvert}\)</code></li>
+      <li><code class="language-plaintext highlighter-rouge">\(\hat\theta_{ci} = \frac{\sum_{j:y_j\neq c}d_{ij}+\alpha_i}{\sum_{j:y_j\neq c}{\sum_k{d_{kj}}}+\alpha}\)</code></li>
+      <li><code class="language-plaintext highlighter-rouge">\(w_{ci}=-\log{\hat\theta_{ci}}\)</code></li>
+      <li><code class="language-plaintext highlighter-rouge">\(w_{ci}=\frac{w_{ci}}{\sum_i \lvert w_{ci}\rvert}\)</code></li>
     </ol>
   </li>
   <li><strong>Label Assignment/Testing:</strong>
     <ol>
-      <li>Let <code class="highlighter-rouge">\(\vec{t}= (t_1,...,t_n)\)</code> be a test document; let <code class="highlighter-rouge">\(t_i\)</code> be the count of the word <code class="highlighter-rouge">\(t\)</code>.</li>
-      <li>Label the document according to <code class="highlighter-rouge">\(l(t)=\arg\max_c \sum\limits_{i} t_i w_{ci}\)</code></li>
+      <li>Let <code class="language-plaintext highlighter-rouge">\(\vec{t}= (t_1,...,t_n)\)</code> be a test document; let <code class="language-plaintext highlighter-rouge">\(t_i\)</code> be the count of the word <code class="language-plaintext highlighter-rouge">\(t\)</code>.</li>
+      <li>Label the document according to <code class="language-plaintext highlighter-rouge">\(l(t)=\arg\max_c \sum\limits_{i} t_i w_{ci}\)</code></li>
     </ol>
   </li>
 </ul>
 
-<p>As we can see, the main difference between Bayes and CBayes is the weight calculation step.  Where Bayes weighs terms more heavily based on the likelihood that they belong to class <code class="highlighter-rouge">\(c\)</code>, CBayes seeks to maximize term weights on the likelihood that they do not belong to any other class.</p>
+<p>As we can see, the main difference between Bayes and CBayes is the weight calculation step.  Where Bayes weighs terms more heavily based on the likelihood that they belong to class <code class="language-plaintext highlighter-rouge">\(c\)</code>, CBayes seeks to maximize term weights on the likelihood that they do not belong to any other class.</p>
 
 <h2 id="running-from-the-command-line">Running from the command line</h2>
 
@@ -224,37 +224,34 @@
     <p><strong>Preprocessing:</strong>
 For a set of Sequence File Formatted documents in PATH_TO_SEQUENCE_FILES the <a href="https://mahout.apache.org/users/basics/creating-vectors-from-text.html">mahout seq2sparse</a> command performs the TF-IDF transformations (-wt tfidf option) and L2 length normalization (-n 2 option) as follows:</p>
 
-    <div class="highlighter-rouge"><pre class="highlight"><code>  $ mahout seq2sparse 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout seq2sparse 
     -i ${PATH_TO_SEQUENCE_FILES} 
     -o ${PATH_TO_TFIDF_VECTORS} 
     -nv 
     -n 2
     -wt tfidf
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
   <li>
     <p><strong>Training:</strong>
-The model is then trained using <code class="highlighter-rouge">mahout spark-trainnb</code>.  The default is to train a Bayes model. The -c option is given to train a CBayes model:</p>
+The model is then trained using <code class="language-plaintext highlighter-rouge">mahout spark-trainnb</code>.  The default is to train a Bayes model. The -c option is given to train a CBayes model:</p>
 
-    <div class="highlighter-rouge"><pre class="highlight"><code>  $ mahout spark-trainnb
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-trainnb
     -i ${PATH_TO_TFIDF_VECTORS} 
     -o ${PATH_TO_MODEL}
     -ow 
     -c
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
   <li>
     <p><strong>Label Assignment/Testing:</strong>
-Classification and testing on a holdout set can then be performed via <code class="highlighter-rouge">mahout spark-testnb</code>. Again, the -c option indicates that the model is CBayes:</p>
+Classification and testing on a holdout set can then be performed via <code class="language-plaintext highlighter-rouge">mahout spark-testnb</code>. Again, the -c option indicates that the model is CBayes:</p>
 
-    <div class="highlighter-rouge"><pre class="highlight"><code>  $ mahout spark-testnb 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-testnb 
     -i ${PATH_TO_TFIDF_TEST_VECTORS}
     -m ${PATH_TO_MODEL} 
     -c 
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
 </ul>
 
@@ -264,9 +261,9 @@ Classification and testing on a holdout set can then be performed via <code clas
   <li>
     <p><strong>Preprocessing:</strong> <em>note: still reliant on MapReduce seq2sparse</em></p>
 
-    <p>Only relevant parameters used for Bayes/CBayes as detailed above are shown. Several other transformations can be performed by <code class="highlighter-rouge">mahout seq2sparse</code> and used as input to Bayes/CBayes.  For a full list of <code class="highlighter-rouge">mahout seq2Sparse</code> options see the <a href="https://mahout.apache.org/users/basics/creating-vectors-from-text.html">Creating vectors from text</a> page.</p>
+    <p>Only relevant parameters used for Bayes/CBayes as detailed above are shown. Several other transformations can be performed by <code class="language-plaintext highlighter-rouge">mahout seq2sparse</code> and used as input to Bayes/CBayes.  For a full list of <code class="language-plaintext highlighter-rouge">mahout seq2Sparse</code> options see the <a href="https://mahout.apache.org/users/basics/creating-vectors-from-text.html">Creating vectors from text</a> page.</p>
 
-    <div class="highlighter-rouge"><pre class="highlight"><code>  $ mahout seq2sparse                         
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout seq2sparse                         
     --output (-o) output             The directory pathname for output.        
     --input (-i) input               Path to job input directory.              
     --weight (-wt) weight            The kind of weight to use. Currently TF   
@@ -281,13 +278,12 @@ Classification and testing on a holdout set can then be performed via <code clas
                                          else false                                
     --namedVector (-nv)              (Optional) Whether output vectors should  
                                          be NamedVectors. If set true else false   
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
   <li>
     <p><strong>Training:</strong></p>
 
-    <div class="highlighter-rouge"><pre class="highlight"><code>  $ mahout spark-trainnb
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-trainnb
     --input (-i) input               Path to job input directory.                 
     --output (-o) output             The directory pathname for output.           
     --trainComplementary (-c)        Train complementary? Default is false.
@@ -296,13 +292,12 @@ Classification and testing on a holdout set can then be performed via <code clas
                                          cores to get a performance improvement, 
                                          for example "local[4]"
     --help (-h)                      Print out help                               
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
   <li>
     <p><strong>Testing:</strong></p>
 
-    <div class="highlighter-rouge"><pre class="highlight"><code>  $ mahout spark-testnb   
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-testnb   
     --input (-i) input               Path to job input directory.                  
     --model (-m) model               The path to the model built during training.   
     --testComplementary (-c)         Test complementary? Default is false.                          
@@ -311,8 +306,7 @@ Classification and testing on a holdout set can then be performed via <code clas
                                          cores to get a performance improvement, 
                                          for example "local[4]"                        
     --help (-h)                      Print out help                                
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
 </ul>
 
@@ -335,7 +329,7 @@ Classification and testing on a holdout set can then be performed via <code clas
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

@@ -237,7 +237,7 @@ vectors, it’s recommended that you follow the instructions in <a href="../basi
 
 <p>Invocation takes the form:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>bin/mahout cvb \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout cvb \
     -i &lt;input path for document vectors&gt; \
     -dict &lt;path to term-dictionary file(s) , glob expression supported&gt; \
     -o &lt;output path for topic-term distributions&gt;
@@ -252,8 +252,7 @@ vectors, it’s recommended that you follow the instructions in <a href="../basi
     -seed &lt;random seed&gt; \
     -tf &lt;fraction of data to hold for testing&gt; \
     -block &lt;number of iterations per perplexity check, ignored unless test_set_percentage&gt;0&gt; \
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Topic smoothing should generally be about 50/K, where K is the number of
 topics. The number of words in the vocabulary can be an upper bound, though
@@ -265,15 +264,14 @@ recommended that you try several values.</p>
 <p>After running LDA you can obtain an output of the computed topics using the
 LDAPrintTopics utility:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>bin/mahout ldatopics \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout ldatopics \
     -i &lt;input vectors directory&gt; \
     -d &lt;input dictionary file&gt; \
     -w &lt;optional number of words to print&gt; \
     -o &lt;optional output working directory. Default is to console&gt; \
     -h &lt;print out help&gt; \
     -dt &lt;optional dictionary type (text|sequencefile). Default is text&gt;
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><a name="LatentDirichletAllocation-Example"></a></p>
 <h1 id="example">Example</h1>
@@ -323,7 +321,7 @@ post-processing step.</p>
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

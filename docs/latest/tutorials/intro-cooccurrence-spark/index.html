@@ -206,7 +206,7 @@ For instance they might say an item-view is 0.2 of an item purchase. In practice
 cross-cooccurrence is a more principled way to handle this case. In effect it scrubs secondary actions with the action you want
 to recommend.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>spark-itemsimilarity Mahout 1.0
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>spark-itemsimilarity Mahout 1.0
 Usage: spark-itemsimilarity [options]
 
 Disconnected from the target VM, address: '127.0.0.1:64676', transport: 'socket'
@@ -270,8 +270,7 @@ Spark config options:
         
   -h | --help
         prints this usage text
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This looks daunting but defaults to simple fairly sane values to take exactly the same input as legacy code and is pretty flexible. It allows the user to point to a single text file, a directory full of files, or a tree of directories to be traversed recursively. The files included can be specified with either a regex-style pattern or filename. The schema for the file is defined by column numbers, which map to the important bits of data including IDs and values. The files can even contain filters, which allow unneeded rows to be discarded or used for cross-cooccurrence calculations.</p>
 
@@ -281,23 +280,20 @@ Spark config options:
 
 <p>If all defaults are used the input can be as simple as:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>userID1,itemID1
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>userID1,itemID1
 userID2,itemID2
 ...
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>With the command line:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity --input in-file --output out-dir
-</code></pre>
-</div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity --input in-file --output out-dir
+</code></pre></div></div>
 
 <p>This will use the “local” Spark context and will output the standard text version of a DRM</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>itemID1&lt;tab&gt;itemID2:value2&lt;space&gt;itemID10:value10...
-</code></pre>
-</div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>itemID1&lt;tab&gt;itemID2:value2&lt;space&gt;itemID10:value10...
+</code></pre></div></div>
 
 <h3 id="how-to-use-multiple-user-actions"><a name="multiple-actions">How To Use Multiple User Actions</a></h3>
 
@@ -313,7 +309,7 @@ to calculate the cross-cooccurrence indicator matrix.</p>
 <p><em>spark-itemsimilarity</em> can read separate actions from separate files or from a mixed action log by filtering certain lines. For a mixed 
 action log of the form:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>u1,purchase,iphone
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>u1,purchase,iphone
 u1,purchase,ipad
 u2,purchase,nexus
 u2,purchase,galaxy
@@ -333,14 +329,13 @@ u3,view,nexus
 u4,view,iphone
 u4,view,ipad
 u4,view,galaxy
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>###Command Line</p>
 
 <p>Use the following options:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity \
 	--input in-file \     # where to look for data
     --output out-path \   # root dir for output
     --master masterUrl \  # URL of the Spark master server
@@ -349,39 +344,35 @@ u4,view,galaxy
     --itemIDPosition 2 \  # column that has the item ID
     --rowIDPosition 0 \   # column that has the user ID
     --filterPosition 1    # column that has the filter word
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="output">Output</h3>
 
 <p>The output of the job will be the standard text version of two Mahout DRMs. This is a case where we are calculating 
 cross-cooccurrence so a primary indicator matrix and cross-cooccurrence indicator matrix will be created</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>out-path
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>out-path
   |-- similarity-matrix - TDF part files
   \-- cross-similarity-matrix - TDF part-files
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The similarity-matrix will contain the lines:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>galaxy\tnexus:1.7260924347106847
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>galaxy\tnexus:1.7260924347106847
 ipad\tiphone:1.7260924347106847
 nexus\tgalaxy:1.7260924347106847
 iphone\tipad:1.7260924347106847
 surface
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The cross-similarity-matrix will contain:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847
 ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897
 nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897
 galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847
 surface\tsurface:4.498681156950466 nexus:0.6795961471815897
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><strong>Note:</strong> You can run this multiple times to use more than two actions or you can use the underlying 
 SimilarityAnalysis.cooccurrence API, which will more efficiently calculate any number of cross-cooccurrence indicators.</p>
@@ -390,7 +381,7 @@ SimilarityAnalysis.cooccurrence API, which will more efficiently calculate any n
 
 <p>A common method of storing data is in log files. If they are written using some delimiter they can be consumed directly by spark-itemsimilarity. For instance input of the form:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tiphone
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tiphone
 2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tipad
 2014-06-23 14:46:53.115\tu2\tpurchase\trandom text\tnexus
 2014-06-23 14:46:53.115\tu2\tpurchase\trandom text\tgalaxy
@@ -410,12 +401,11 @@ SimilarityAnalysis.cooccurrence API, which will more efficiently calculate any n
 2014-06-23 14:46:53.115\tu4\tview\trandom text\tiphone
 2014-06-23 14:46:53.115\tu4\tview\trandom text\tipad
 2014-06-23 14:46:53.115\tu4\tview\trandom text\tgalaxy    
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Can be parsed with the following CLI and run on the cluster producing the same output as the above example.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bash$ mahout spark-itemsimilarity \
     --input in-file \
     --output out-path \
     --master spark://sparkmaster:4044 \
@@ -425,8 +415,7 @@ SimilarityAnalysis.cooccurrence API, which will more efficiently calculate any n
     --itemIDPosition 4 \
     --rowIDPosition 1 \
     --filterPosition 2
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="2-spark-rowsimilarity">2. spark-rowsimilarity</h2>
 
@@ -441,7 +430,7 @@ by a list of the most similar rows.</p>
 
 <p>The command line interface is:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>spark-rowsimilarity Mahout 1.0
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>spark-rowsimilarity Mahout 1.0
 Usage: spark-rowsimilarity [options]
 
 Input, output options
@@ -487,8 +476,7 @@ Spark config options:
         
   -h | --help
         prints this usage text
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>See RowSimilarityDriver.scala in Mahout’s spark module if you want to customize the code.</p>
 
@@ -570,36 +558,32 @@ content or metadata, not by which users interacted with them.</p>
 
 <p>For this we need input of the form:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>itemID&lt;tab&gt;list-of-tags
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>itemID&lt;tab&gt;list-of-tags
 ...
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The full collection will look like the tags column from a catalog DB. For our ecom example it might be:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>3459860b&lt;tab&gt;men long-sleeve chambray clothing casual
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>3459860b&lt;tab&gt;men long-sleeve chambray clothing casual
 9446577d&lt;tab&gt;women tops chambray clothing casual
 ...
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>We’ll use <em>spark-rowimilairity</em> because we are looking for similar rows, which encode items in this case. As with the 
 collaborative filtering indicators we use the –omitStrength option. The strengths created are 
 probabilistic log-likelihood ratios and so are used to filter unimportant similarities. Once the filtering or downsampling 
 is finished we no longer need the strengths. We will get an indicator matrix of the form:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>itemID&lt;tab&gt;list-of-item IDs
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>itemID&lt;tab&gt;list-of-item IDs
 ...
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This is a content indicator since it has found other items with similar content or metadata.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>3459860b&lt;tab&gt;3459860b 3459860b 6749860c 5959860a 3434860a 3477860a
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>3459860b&lt;tab&gt;3459860b 3459860b 6749860c 5959860a 3434860a 3477860a
 9446577d&lt;tab&gt;9446577d 9496577d 0943577d 8346577d 9442277d 9446577e
 ...  
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>We now have three indicators, two collaborative filtering type and one content type.</p>
 
@@ -610,12 +594,11 @@ is finished we no longer need the strengths. We will get an indicator matrix of 
 <p>We have 3 indicators, these are indexed by the search engine into 3 fields, we’ll call them “purchase”, “view”, and “tags”. 
 We take the user’s history that corresponds to each indicator and create a query of the form:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>Query:
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Query:
   field: purchase; q:user's-purchase-history
   field: view; q:user's view-history
   field: tags; q:user's-tags-associated-with-purchases
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The query will result in an ordered list of items recommended for purchase but skewed towards items with similar tags to 
 the ones the user has already purchased.</p>
@@ -627,12 +610,11 @@ by tagging items with some category of popularity (hot, warm, cold for instance)
 index that as a new indicator field and include the corresponding value in a query 
 on the popularity field. If we use the ecom example but use the query to get “hot” recommendations it might look like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>Query:
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Query:
   field: purchase; q:user's-purchase-history
   field: view; q:user's view-history
   field: popularity; q:"hot"
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This will return recommendations favoring ones that have the intrinsic indicator “hot”.</p>
 
@@ -654,7 +636,7 @@ on the popularity field. If we use the ecom example but use the query to get “
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

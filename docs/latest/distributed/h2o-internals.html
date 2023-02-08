@@ -168,7 +168,7 @@
     <div class="col-lg-8">
       <h1 id="introduction">Introduction</h1>
 
-<p>This document provides an overview of how the Mahout Samsara environment is implemented over the H2O backend engine. The document is aimed at Mahout developers, to give a high level description of the design so that one can explore the code inside <code class="highlighter-rouge">h2o/</code> with some context.</p>
+<p>This document provides an overview of how the Mahout Samsara environment is implemented over the H2O backend engine. The document is aimed at Mahout developers, to give a high level description of the design so that one can explore the code inside <code class="language-plaintext highlighter-rouge">h2o/</code> with some context.</p>
 
 <h2 id="h2o-overview">H2O Overview</h2>
 
@@ -184,13 +184,13 @@
 
 <h2 id="h2o-environment-engine">H2O Environment Engine</h2>
 
-<p>The H2O backend implements the abstract DRM as an H2O Frame. Each logical column in the DRM is an H2O Vector. All elements of a logical DRM row are guaranteed to be homed on the same server. A set of rows stored on a server are presented as a read-only virtual in-core Matrix (i.e BlockMatrix) for the closure method in the <code class="highlighter-rouge">mapBlock(...)</code> API.</p>
+<p>The H2O backend implements the abstract DRM as an H2O Frame. Each logical column in the DRM is an H2O Vector. All elements of a logical DRM row are guaranteed to be homed on the same server. A set of rows stored on a server are presented as a read-only virtual in-core Matrix (i.e BlockMatrix) for the closure method in the <code class="language-plaintext highlighter-rouge">mapBlock(...)</code> API.</p>
 
-<p>H2O provides a flexible execution framework called <code class="highlighter-rouge">MRTask</code>. The <code class="highlighter-rouge">MRTask</code> framework typically executes over a Frame (or even a Vector), supports various types of map() methods, can optionally modify the Frame or Vector (though this never happens in the Mahout integration), and optionally create a new Vector or set of Vectors (to combine them into a new Frame, and consequently a new DRM).</p>
+<p>H2O provides a flexible execution framework called <code class="language-plaintext highlighter-rouge">MRTask</code>. The <code class="language-plaintext highlighter-rouge">MRTask</code> framework typically executes over a Frame (or even a Vector), supports various types of map() methods, can optionally modify the Frame or Vector (though this never happens in the Mahout integration), and optionally create a new Vector or set of Vectors (to combine them into a new Frame, and consequently a new DRM).</p>
 
 <h2 id="source-layout">Source Layout</h2>
 
-<p>Within mahout.git, the top level directory, <code class="highlighter-rouge">h2o/</code> holds all the source code related to the H2O backend engine. Part of the code (that interfaces with the rest of the Mahout componenets) is in Scala, and part of the code (that interfaces with h2o-core and implements algebraic operators) is in Java. Here is a brief overview of what functionality can be found where within <code class="highlighter-rouge">h2o/</code>.</p>
+<p>Within mahout.git, the top level directory, <code class="language-plaintext highlighter-rouge">h2o/</code> holds all the source code related to the H2O backend engine. Part of the code (that interfaces with the rest of the Mahout componenets) is in Scala, and part of the code (that interfaces with h2o-core and implements algebraic operators) is in Java. Here is a brief overview of what functionality can be found where within <code class="language-plaintext highlighter-rouge">h2o/</code>.</p>
 
 <p>h2o/ - top level directory containing all H2O related code</p>
 
@@ -218,7 +218,7 @@
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

@@ -186,7 +186,7 @@ in error terms.  The Durbin Watson test statistic <foo>\(d\)</foo> can take valu
   </li>
 </ul>
 
-<p>Implementation is based off of the <code class="highlighter-rouge">durbinWatsonTest</code> function in the <a href="https://cran.r-project.org/web/packages/car/index.html"><code class="highlighter-rouge">car</code></a> package in R</p>
+<p>Implementation is based off of the <code class="language-plaintext highlighter-rouge">durbinWatsonTest</code> function in the <a href="https://cran.r-project.org/web/packages/car/index.html"><code class="language-plaintext highlighter-rouge">car</code></a> package in R</p>
 
 <h3 id="parameters">Parameters</h3>
 
@@ -194,16 +194,15 @@ in error terms.  The Durbin Watson test statistic <foo>\(d\)</foo> can take valu
 
 <h4 id="r-prototype">R Prototype</h4>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>library(car)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>library(car)
 residuals &lt;- seq(0, 4.9, 0.1)
 ## perform Durbin-Watson test
 durbinWatsonTest(residuals)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="in-apache-mahout">In Apache Mahout</h4>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>// A DurbinWatson Test must be performed on a model. The model does not matter.
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// A DurbinWatson Test must be performed on a model. The model does not matter.
 val drmX = drmParallelize( dense((0 until 50).toArray.map( t =&gt; Math.pow(-1.0, t)) ) ).t
 val drmY = drmX + err1 + 1
 var model = new OrdinaryLeastSquares[Int]().fit(drmX, drmY)
@@ -213,8 +212,7 @@ val err1 =  drmParallelize( dense((0.0 until 5.0 by 0.1).toArray) ).t
 val syntheticResiduals = err1
 model = AutocorrelationTests.DurbinWatson(model, syntheticResiduals)
 val myAnswer: Double = model.testResults.getOrElse('durbinWatsonTestStatistic, -1.0).asInstanceOf[Double]
-</code></pre>
-</div>
+</code></pre></div></div>
 
 
     </div>
@@ -227,7 +225,7 @@ val myAnswer: Double = model.testResults.getOrElse('durbinWatsonTestStatistic, -
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 

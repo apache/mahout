@@ -170,17 +170,16 @@
 
 <p>To get started, add the following dependency to the pom:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>&lt;dependency&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dependency&gt;
   &lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
   &lt;artifactId&gt;mahout-flink_2.10&lt;/artifactId&gt;
   &lt;version&gt;0.12.0&lt;/version&gt;
 &lt;/dependency&gt;
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Here is how to use the Flink backend:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>import org.apache.flink.api.scala._
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.flink.api.scala._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.flinkbindings._
@@ -199,8 +198,7 @@ object ReadCsvExample {
   }
 
 }
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="current-status">Current Status</h2>
 
@@ -210,18 +208,18 @@ object ReadCsvExample {
 
 <ul>
   <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1701">MAHOUT-1701</a> Mahout DSL for Flink: implement AtB ABt and AtA operators</li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1702">MAHOUT-1702</a> implement element-wise operators (like <code class="highlighter-rouge">A + 2</code> or <code class="highlighter-rouge">A + B</code>)</li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1703">MAHOUT-1703</a> implement <code class="highlighter-rouge">cbind</code> and <code class="highlighter-rouge">rbind</code></li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1709">MAHOUT-1709</a> implement slicing (like <code class="highlighter-rouge">A(1 to 10, ::)</code>)</li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1710">MAHOUT-1710</a> implement right in-core matrix multiplication (<code class="highlighter-rouge">A %*% B</code> when <code class="highlighter-rouge">B</code> is in-core)</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1702">MAHOUT-1702</a> implement element-wise operators (like <code class="language-plaintext highlighter-rouge">A + 2</code> or <code class="language-plaintext highlighter-rouge">A + B</code>)</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1703">MAHOUT-1703</a> implement <code class="language-plaintext highlighter-rouge">cbind</code> and <code class="language-plaintext highlighter-rouge">rbind</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1709">MAHOUT-1709</a> implement slicing (like <code class="language-plaintext highlighter-rouge">A(1 to 10, ::)</code>)</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1710">MAHOUT-1710</a> implement right in-core matrix multiplication (<code class="language-plaintext highlighter-rouge">A %*% B</code> when <code class="language-plaintext highlighter-rouge">B</code> is in-core)</li>
   <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1711">MAHOUT-1711</a> implement broadcasting</li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1712">MAHOUT-1712</a> implement operators <code class="highlighter-rouge">At</code>, <code class="highlighter-rouge">Ax</code>, <code class="highlighter-rouge">Atx</code> - <code class="highlighter-rouge">Ax</code> and <code class="highlighter-rouge">At</code> are implemented</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1712">MAHOUT-1712</a> implement operators <code class="language-plaintext highlighter-rouge">At</code>, <code class="language-plaintext highlighter-rouge">Ax</code>, <code class="language-plaintext highlighter-rouge">Atx</code> - <code class="language-plaintext highlighter-rouge">Ax</code> and <code class="language-plaintext highlighter-rouge">At</code> are implemented</li>
   <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1734">MAHOUT-1734</a> implement I/O - should be able to read results of Flink bindings</li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1747">MAHOUT-1747</a> add support for different types of indexes (String, long, etc) - now supports <code class="highlighter-rouge">Int</code>, <code class="highlighter-rouge">Long</code> and <code class="highlighter-rouge">String</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1747">MAHOUT-1747</a> add support for different types of indexes (String, long, etc) - now supports <code class="language-plaintext highlighter-rouge">Int</code>, <code class="language-plaintext highlighter-rouge">Long</code> and <code class="language-plaintext highlighter-rouge">String</code></li>
   <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1748">MAHOUT-1748</a> switch to Flink Scala API</li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1749">MAHOUT-1749</a> Implement <code class="highlighter-rouge">Atx</code></li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1750">MAHOUT-1750</a> Implement <code class="highlighter-rouge">ABt</code></li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1751">MAHOUT-1751</a> Implement <code class="highlighter-rouge">AtA</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1749">MAHOUT-1749</a> Implement <code class="language-plaintext highlighter-rouge">Atx</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1750">MAHOUT-1750</a> Implement <code class="language-plaintext highlighter-rouge">ABt</code></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1751">MAHOUT-1751</a> Implement <code class="language-plaintext highlighter-rouge">AtA</code></li>
   <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1755">MAHOUT-1755</a> Flush intermediate results to FS - Flink, unlike Spark, does not store intermediate results in memory.</li>
   <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1764">MAHOUT-1764</a> Add standard backend tests for Flink</li>
   <li><a href="https://issues.apache.org/jira/browse/MAHOUT-1765">MAHOUT-1765</a> Add documentation about Flink backend</li>
@@ -251,19 +249,19 @@ object ReadCsvExample {
 <p>There is a set of standard tests that all engines should pass (see <a href="https://issues.apache.org/jira/browse/MAHOUT-1764">MAHOUT-1764</a>).</p>
 
 <ul>
-  <li><code class="highlighter-rouge">DistributedDecompositionsSuite</code></li>
-  <li><code class="highlighter-rouge">DrmLikeOpsSuite</code></li>
-  <li><code class="highlighter-rouge">DrmLikeSuite</code></li>
-  <li><code class="highlighter-rouge">RLikeDrmOpsSuite</code></li>
+  <li><code class="language-plaintext highlighter-rouge">DistributedDecompositionsSuite</code></li>
+  <li><code class="language-plaintext highlighter-rouge">DrmLikeOpsSuite</code></li>
+  <li><code class="language-plaintext highlighter-rouge">DrmLikeSuite</code></li>
+  <li><code class="language-plaintext highlighter-rouge">RLikeDrmOpsSuite</code></li>
 </ul>
 
 <p>These are Flink-backend specific tests, e.g.</p>
 
 <ul>
-  <li><code class="highlighter-rouge">DrmLikeOpsSuite</code> for operations like <code class="highlighter-rouge">norm</code>, <code class="highlighter-rouge">rowSums</code>, <code class="highlighter-rouge">rowMeans</code></li>
-  <li><code class="highlighter-rouge">RLikeOpsSuite</code> for basic LA like <code class="highlighter-rouge">A.t %*% A</code>, <code class="highlighter-rouge">A.t %*% x</code>, etc</li>
-  <li><code class="highlighter-rouge">LATestSuite</code> tests for specific operators like <code class="highlighter-rouge">AtB</code>, <code class="highlighter-rouge">Ax</code>, etc</li>
-  <li><code class="highlighter-rouge">UseCasesSuite</code> has more complex examples, like power iteration, ridge regression, etc</li>
+  <li><code class="language-plaintext highlighter-rouge">DrmLikeOpsSuite</code> for operations like <code class="language-plaintext highlighter-rouge">norm</code>, <code class="language-plaintext highlighter-rouge">rowSums</code>, <code class="language-plaintext highlighter-rouge">rowMeans</code></li>
+  <li><code class="language-plaintext highlighter-rouge">RLikeOpsSuite</code> for basic LA like <code class="language-plaintext highlighter-rouge">A.t %*% A</code>, <code class="language-plaintext highlighter-rouge">A.t %*% x</code>, etc</li>
+  <li><code class="language-plaintext highlighter-rouge">LATestSuite</code> tests for specific operators like <code class="language-plaintext highlighter-rouge">AtB</code>, <code class="language-plaintext highlighter-rouge">Ax</code>, etc</li>
+  <li><code class="language-plaintext highlighter-rouge">UseCasesSuite</code> has more complex examples, like power iteration, ridge regression, etc</li>
 </ul>
 
 <h2 id="environment">Environment</h2>
@@ -278,9 +276,9 @@ object ReadCsvExample {
 <p>When using mahout, please import the following modules:</p>
 
 <ul>
-  <li><code class="highlighter-rouge">mahout-math</code></li>
-  <li><code class="highlighter-rouge">mahout-math-scala</code></li>
-  <li><code class="highlighter-rouge">mahout-flink_2.10</code>
+  <li><code class="language-plaintext highlighter-rouge">mahout-math</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mahout-math-scala</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mahout-flink_2.10</code>
 *</li>
 </ul>
 
@@ -294,7 +292,7 @@ object ReadCsvExample {
 
   <footer class="footer bg-light">
     <div class="container text-center small">
-        Copyright &copy; 2014-2022 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
+        Copyright &copy; 2014-2023 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
     </div>
 </footer>
 
