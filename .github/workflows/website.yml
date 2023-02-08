@@ -42,7 +42,6 @@ jobs:
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "<>"
-        git config pull.rebase false
         ./website/build_site.sh
         rm -rf *
         git checkout asf-site
