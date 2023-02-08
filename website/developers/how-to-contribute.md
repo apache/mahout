@@ -14,7 +14,7 @@ of ways to contribute!
 <a name="HowToContribute-BeInvolved"></a>
 ## Get Involved
 
-Discussions at Apache happen on the mailing list. To get involved, you should join the [Mahout mailing lists](/general/mailing-lists,-irc-and-archives.html).  In particular:
+Discussions at Apache happen on the mailing list. To get involved, you should join the [Mahout mailing lists](/general/mailing-lists.html).  In particular:
 
 * The **user list** (to help others)
 * The **development list** (to join discussions of changes)  -- This is the best place
