@@ -72,7 +72,23 @@ class AsFactor extends PreprocessorFitter {
 
 /**
   * AsFactorModel is a model that turns a vector of integers into a vector of one-hot encoded
-  * vectors
+  * vectors.
+  *
+  * For example a matrix:
+  * (0)
+  * (1)
+  * (0)
+  * (5)
+  * (7)
+  *
+  * Would be transformed into the matrix:
+  * (1, 0, 0, 0)
+  * (0, 1, 0, 0)
+  * (1, 0, 0, 0)
+  * (0, 0, 1, 0)
+  * (0, 0, 0, 1)
+  *
+  * NOTE: There is no correlation between the integer input and what column it is mapped to.
   *
   * @param cardinality number of features in the input vector
   * @param factorVec
@@ -116,7 +132,8 @@ class AsFactorModel(cardinality: Int, factorVec: MahoutVector) extends Preproces
   }
 
   /**
-    * Inverse transform the input data - ie transform a one-hot encoded DrmLike[K] into a
+    * Inverse transform the input data - ie transform a one-hot encoded DrmLike[K] into a columnar matrix of the
+    * original value. I.e. an Inverse of the Transform function.
     *
     * @param input one-hot DrmLike[K]
     * @return original DrmLike[K]
