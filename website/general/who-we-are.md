@@ -22,7 +22,7 @@ Andrew Musselman        | akm@...           | Yes | PMC Chair @akm
 Andrew Palumbo          | apalumbo@...      | Yes | 
 Dan Filimon             | dfilimon@...      | No  | 
 Dmitriy Lyubimov        | dlyubimov@...     | No  | (Emeritus PMC)
-Drew Farris             | drew@...          | Yes | 
+Drew Farris             | drew@...          | Yes | (Emeritus PMC)
 Dustin VanStee          | vanstee@...       | No  | 
 Ellen Friedman          | ellenf@...        | No  | @Ellen_Friedman
 Frank Scholten          | frankscholten@... | No  | 
