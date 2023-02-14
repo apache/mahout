@@ -79,11 +79,17 @@ public final class RandomWrapper extends Random {
     return random;
   }
 
-
+  /**
+   * This method is not supported. It will throw an {@link UnsupportedOperationException}.
+   * Reason: This method is protected in {@link Random} and cannot be delegated.
+   *
+   * Callers can't use this method and other methods are delegated, so shouldn't matter.
+   *
+   * @param bits - why are you still reading?
+   * @return An error, don't use it.
+   */
   @Override
   protected int next(int bits) {
-    // Ugh, can't delegate this method -- it's protected
-    // Callers can't use it and other methods are delegated, so shouldn't matter
     throw new UnsupportedOperationException();
   }
 
