@@ -1,43 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-02-17T01:21:04+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/02/16/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-02-16T06:00:01+00:00</published><updated>2023-02-16T06:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2023/02/16/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/02/16/Meeting-Minutes.html"><![CDATA[<h1 id="monthly-community-meeting">Monthly community meeting</h1>
-
-<h2 id="attendees">Attendees</h2>
-<ul>
-  <li>Andrew Musselman</li>
-  <li>Trevor Grant</li>
-</ul>
-
-<h2 id="intros">Intros</h2>
-<p>Round the room quick introductions</p>
-
-<h2 id="recap-from-last-month">Recap from last month</h2>
-<p>Notes from previous session</p>
-
-<h2 id="jira-focus">JIRA focus</h2>
-<p>and
-[Migrate off Travis]: (https://issues.apache.org/jira/browse/MAHOUT-2149) which is required now to roll a release out</p>
-
-<h2 id="release-plans">Release plans</h2>
-<ul>
-  <li>Mar: 14.2, point release with minor improvements and new build system</li>
-  <li>Apr-Jun: Docker images (Zeppelin + Mahout, e.g.)</li>
-</ul>
-
-<h2 id="ideas">Ideas</h2>
-<ul>
-  <li>Python bindings for DSL (XXXL)</li>
-  <li>Docker images (XL, including docs)</li>
-  <li>New parsing and processing modules
-    <ol>
-      <li>Proof of concept blockchain data and metadata (XXL)</li>
-      <li>Proof of concept GPL/BSD/ALv2/MIT classifier</li>
-    </ol>
-  </li>
-  <li>Live code environment (in-browser) to try DSL</li>
-</ul>
-
-<h2 id="plans">Plans</h2>
-
-<h2 id="summary-and-next-steps">Summary and next steps</h2>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Monthly community meeting]]></summary></entry><entry><title type="html">Zeppelin Quickstart</title><link href="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html" rel="alternate" type="text/html" title="Zeppelin Quickstart" /><published>2021-06-01T06:00:01+00:00</published><updated>2021-06-01T06:00:01+00:00</updated><id>http://mahout.apache.org//tutorial/2021/06/01/Zeppelin%20Quickstart</id><content type="html" xml:base="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html"><![CDATA[<h1 id="apache-zeppelin-quickstart">Apache Zeppelin Quickstart</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-02-17T01:23:14+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Zeppelin Quickstart</title><link href="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html" rel="alternate" type="text/html" title="Zeppelin Quickstart" /><published>2021-06-01T06:00:01+00:00</published><updated>2021-06-01T06:00:01+00:00</updated><id>http://mahout.apache.org//tutorial/2021/06/01/Zeppelin%20Quickstart</id><content type="html" xml:base="http://mahout.apache.org//tutorial/2021/06/01/Zeppelin-Quickstart.html"><![CDATA[<h1 id="apache-zeppelin-quickstart">Apache Zeppelin Quickstart</h1>
 
 <p>Apache Mahout is for Mathematicians (or statisticians, or data scientists, etc.).  We understand not all users
 are up to cloning and building from source, working with command line interfaces, and other such engineering 
@@ -157,4 +118,8 @@ native solver- need to ask what the copyright it on those/if we can use them.</p
 
 <p>Trevor is going to start working on Python bindings. He thinks adding Mahout as a library for pyspark 
 will significantly increase adoption. If anyone has experience using py4j or is otherwise interested in 
-helping or wants to give words of encouragement reach out on dev or email him directly.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Topic: Apache Mahout Wikipedia Page]]></summary></entry></feed>
+helping or wants to give words of encouragement reach out on dev or email him directly.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Topic: Apache Mahout Wikipedia Page]]></summary></entry><entry><title type="html">14.1 Is Released!</title><link href="http://mahout.apache.org//news/2020/10/18/version-14-1-released.html" rel="alternate" type="text/html" title="14.1 Is Released!" /><published>2020-10-18T22:16:01+00:00</published><updated>2020-10-18T22:16:01+00:00</updated><id>http://mahout.apache.org//news/2020/10/18/version-14-1-released</id><content type="html" xml:base="http://mahout.apache.org//news/2020/10/18/version-14-1-released.html"><![CDATA[<p>Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release 
+binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.</p>
+
+<p>On another note, we had a really exciting “MahoutCon” track at ApacheCon@home this year. A special thanks to all of our 
+speakers, and we plan to post the videos here when we’re able.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="news" /><summary type="html"><![CDATA[Oh happy day! A lot of work went into this release with getting the build system to work again so that we can release binaries. There really weren’t too many new features over 14.0, but binaries now exist in Maven.]]></summary></entry></feed>
