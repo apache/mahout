@@ -22,12 +22,25 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Random;
 
+/**
+ * A wrapper around a {@link RandomGenerator} that implements {@link Random} so that it can be
+ * used in places that expect a {@link Random} instance.
+ */
 public final class RandomWrapper extends Random {
 
+  /**
+   * A standard seed that can be used to ensure that tests are deterministic.
+   */
   private static final long STANDARD_SEED = 0xCAFEDEADBEEFBABEL;
 
+  /**
+   * The delegate random number generator.
+   */
   private final RandomGenerator random;
 
+  /**
+   * Creates a new random number generator.
+   */
   RandomWrapper() {
     random = new MersenneTwister();
     random.setSeed(System.currentTimeMillis() + System.identityHashCode(random));
@@ -37,6 +50,11 @@ public final class RandomWrapper extends Random {
     random = new MersenneTwister(seed);
   }
 
+  /**
+   * Creates a new random number generator.
+   *
+   * @param seed the seed for the random number generator.
+   */
   @Override
   public void setSeed(long seed) {
     // Since this will be called by the java.util.Random() constructor before we construct
@@ -47,18 +65,31 @@ public final class RandomWrapper extends Random {
     }
   }
 
+    /**
+     * Sets the seed to a standard value that can be used to ensure that tests are deterministic.
+     */
   void resetToTestSeed() {
     setSeed(STANDARD_SEED);
   }
 
+    /**
+     * @return the delegate random number generator.
+     */
   public RandomGenerator getRandomGenerator() {
     return random;
   }
 
+  /**
+   * This method is not supported. It will throw an {@link UnsupportedOperationException}.
+   * Reason: This method is protected in {@link Random} and cannot be delegated.
+   *
+   * Callers can't use this method and other methods are delegated, so shouldn't matter.
+   *
+   * @param bits - why are you still reading?
+   * @return An error, don't use it.
+   */
   @Override
   protected int next(int bits) {
-    // Ugh, can't delegate this method -- it's protected
-    // Callers can't use it and other methods are delegated, so shouldn't matter
     throw new UnsupportedOperationException();
   }
 
