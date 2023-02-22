@@ -20,7 +20,7 @@ Notes from previous session
 1. Assigned to Trevor to repro: [Build failed on AArch64, Fedora 33](https://issues.apache.org/jira/browse/MAHOUT-2139) (need a repro)
 1. Assigned: [Web site check](https://issues.apache.org/jira/browse/MAHOUT-2152)
 1. Assigned: [Download page improvements](https://issues.apache.org/jira/browse/MAHOUT-2153)
-1. Assigned: [Update NOTICE](https://issues.apache.org/jira/browse/MAHOUT-2154)
+1. [Update NOTICE](https://issues.apache.org/jira/browse/MAHOUT-2154)
 1. Assigned: [Migrate off Travis](https://issues.apache.org/jira/browse/MAHOUT-2149) which is required now to roll a release out
 1. Assigned: [Add "how to do your first JIRA" notes](https://issues.apache.org/jira/browse/MAHOUT-2156)
 1. Assigned: [Add "first ticket" tag or type in JIRA](https://issues.apache.org/jira/browse/MAHOUT-2157)
