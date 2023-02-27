@@ -575,6 +575,7 @@
                 <exclude>**/*.conf</exclude>
                 <exclude>**/*.iml</exclude>
                 <exclude>**/*.md</exclude>
+                <exclude>**/*.json</exclude>
                 <exclude>**/*.props</exclude>
                 <exclude>**/gen/**</exclude>
                 <exclude>**/resources/**</exclude>
