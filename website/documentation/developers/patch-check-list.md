@@ -26,4 +26,3 @@ After the above steps are verified and completed, and the contribution is ready 
  - Remember to update the issue status in JIRA when you have completed it.
 
 
-  

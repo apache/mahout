@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Cluster Dumper
-
-   
 ---
 
 <a name="ClusterDumper-Introduction"></a>

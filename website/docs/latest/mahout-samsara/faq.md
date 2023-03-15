@@ -1,9 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara
-
-    
 ---
+
 # FAQ for using Mahout with Spark
 
 **Q: Mahout Spark shell doesn't start; "ClassNotFound" problems or various classpath problems.**

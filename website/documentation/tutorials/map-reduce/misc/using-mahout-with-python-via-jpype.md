@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Using Mahout with Python via JPype
-
-    
 ---
 
 <a name="UsingMahoutwithPythonviaJPype-overview"></a>

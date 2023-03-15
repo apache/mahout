@@ -1,10 +1,11 @@
 ---
 layout: doc-page
 title: Visualizing Mahout in Zeppelin
-
-    
 ---
 
+
+** DEPRECATED : While this page is useful for learning how to set up Mahout in Zeppelin, we strongly reccomend using a 
+pre-built Docker container for trying out Mahout. See instructions [here](http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/) **
 
 The [Apache Zeppelin](http://zeppelin.apache.org) is an exciting notebooking tool, designed for working with Big Data
 applications.  It comes with great integration for graphing in R and Python, supports multiple langauges in a single 

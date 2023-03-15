@@ -1,9 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara In Core
-
-    
 ---
+
 # How to create and App using Mahout
 
 This is an example of how to create a simple app using Mahout as a Library. The source is available on Github in the [3-input-cooc project](https://github.com/pferrel/3-input-cooc) with more explanation about what it does (has to do with collaborative filtering). For this tutorial we'll concentrate on the app rather than the data science.

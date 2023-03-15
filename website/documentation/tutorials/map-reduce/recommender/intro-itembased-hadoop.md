@@ -1,6 +1,6 @@
 ---
 layout: doc-page
-title: (Deprecated)  Perceptron and Winnow
+title: (Deprecated)  Item Based Reccommenders in Hadoop
 
     
 ---

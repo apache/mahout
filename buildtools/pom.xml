@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>18</version>
+    <version>23</version>
     <relativePath />
   </parent>
 
@@ -38,8 +38,6 @@
     <connection>scm:git:git@github.com:apache/mahout.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
     <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
   </scm>
 
   <properties>

@@ -1,9 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Viewing Results
-
-   
 ---
+
 <a name="ViewingResults-Intro"></a>
 # Intro
 

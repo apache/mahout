@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  MR - Map Reduce
-
-   
 ---
 
 {excerpt}MapReduce is a framework for processing huge datasets on certain

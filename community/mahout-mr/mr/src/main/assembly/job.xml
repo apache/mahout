@@ -35,7 +35,7 @@
         </excludes>
       </unpackOptions>
       <scope>runtime</scope>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory/>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <excludes>
         <exclude>org.apache.hadoop:hadoop-core</exclude>
@@ -45,14 +45,14 @@
   <fileSets>
     <fileSet>
       <directory>${basedir}/target/classes</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory/>
       <excludes>
         <exclude>*.jar</exclude>
       </excludes>
     </fileSet>
     <fileSet>
       <directory>${basedir}/target/classes</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory/>
       <includes>
         <include>driver.classes.default.props</include>
       </includes>

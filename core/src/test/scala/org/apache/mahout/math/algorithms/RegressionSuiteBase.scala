@@ -177,4 +177,37 @@ trait RegressionSuiteBase extends DistributedMahoutSuite with Matchers {
     (coModel.se - correctSe).sum.abs < shortEpsilon
   }
 
+
+  import org.apache.mahout.math.algorithms.regression.RidgeRegressionModel
+
+  test("ridge") {
+
+    val drmData = drmParallelize(dense(
+      (2, 2, 10.5, 10, 29.509541),  // Apple Cinnamon Cheerios
+      (1, 2, 12,   12, 18.042851),  // Cap'n'Crunch
+      (1, 1, 12,   13, 22.736446),  // Cocoa Puffs
+      (2, 1, 11,   13, 32.207582),  // Froot Loops
+      (1, 2, 12,   11, 21.871292),  // Honey Graham Ohs
+      (2, 1, 16,   8,  36.187559),  // Wheaties Honey Gold
+      (6, 2, 17,   1,  50.764999),  // Cheerios
+      (3, 2, 13,   7,  40.400208),  // Clusters
+      (3, 3, 13,   4,  45.811716)), numPartitions = 2)
+
+
+    val drmX = drmData(::, 0 until 4)
+    val drmY = drmData(::, 4 until 5)
+
+    val model = new RidgeRegression().fit(drmX, drmY, 'lambda -> 1.0)
+
+    val myAnswer = model.predict(drmX).collect
+
+    val correctAnswer = dense((31.68751448),(22.45682198),(23.64287832),(26.69849935),(25.19628358),(33.43432478),(53.94603962),(38.08848251),(42.38134938))
+
+    val epsilon = 1E-4
+
+    (myAnswer-correctAnswer).sum should be < epsilon
+  }
+
+
+
 }

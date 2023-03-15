@@ -1,9 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Perceptron and Winnow
-
-    
 ---
+
 <a name="PerceptronandWinnow-ClassificationwithPerceptronorWinnow"></a>
 # Classification with Perceptron or Winnow
 

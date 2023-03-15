@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Independent Component Analysis
-
-    
 ---
 
 <a name="IndependentComponentAnalysis-IndependentComponentAnalysis"></a>

@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  User Based Recommender in 5 Minutes
-
-    
 ---
 
 # Creating a User-Based Recommender in 5 minutes

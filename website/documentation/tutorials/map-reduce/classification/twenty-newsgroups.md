@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Twenty Newsgroups
-
-    
 ---
 
 
@@ -176,4 +174,3 @@ If we wanted to use different parsing methods or transformations on the term fre
                 -c
 
  
-       

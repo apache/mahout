@@ -16,18 +16,14 @@
  */
 package org.apache.mahout.text;
 
-import org.apache.lucene.analysis.TokenFilter;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
-import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.standard.ClassicFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.util.CharArraySet;
-import org.apache.lucene.analysis.util.StopwordAnalyzerBase;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -114,7 +110,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   @Override
   protected TokenStreamComponents createComponents(String fieldName) {
     Tokenizer tokenizer = new StandardTokenizer();
-    TokenStream result = new StandardFilter(tokenizer);
+    TokenStream result = new ClassicFilter(tokenizer);
     result = new LowerCaseFilter(result);
     result = new ASCIIFoldingFilter(result);
     result = new AlphaNumericMaxLengthFilter(result);

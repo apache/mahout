@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Support Vector Machines
-
-    
 ---
 
 <a name="SupportVectorMachines-SupportVectorMachines"></a>

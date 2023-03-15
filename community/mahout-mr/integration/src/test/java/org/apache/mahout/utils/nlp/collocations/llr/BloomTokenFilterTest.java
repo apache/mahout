@@ -112,7 +112,7 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
     ts.close();
   }
   
-  /** shingles, keep those matching list */
+  /** shingles, keep those matching the keeplist */
   @Test
   public void testShingleFilteredAnalyzer() throws IOException {
     Reader reader = new StringReader(input);

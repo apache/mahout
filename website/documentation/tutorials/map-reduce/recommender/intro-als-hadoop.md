@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Perceptron and Winnow
-
-    
 ---
 
 # Introduction to ALS Recommendations with Hadoop

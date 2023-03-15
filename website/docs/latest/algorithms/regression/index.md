@@ -1,9 +1,6 @@
 ---
 layout: doc-page
-
 title: Regression Algorithms
-
-    
 ---
 
 Apache Mahout implements the following regression algorithms "off the shelf".
@@ -13,6 +10,8 @@ Apache Mahout implements the following regression algorithms "off the shelf".
 These methods used close form solutions (not stochastic) to solve regression problems
 
 [Ordinary Least Squares](ols.html)
+
+[Ridge Regression](ridge.html)
 
 ### Autocorrelation Regression
 

@@ -13,7 +13,7 @@ title: FAQ
 around classpath issues one way or another. 
 
 If you are getting method signature like errors, most probably you have mismatch between Mahout's Spark dependency 
-and actual Spark installed. (At the time of this writing the HEAD depends on Spark 1.1.0) but check mahout/pom.xml.
+and actual Spark installed. (At the time of this writing the HEAD depends on Spark 2.1.0) but check mahout/pom.xml.
 
 Troubleshooting general classpath issues is pretty straightforward. Since Mahout is using Spark's installation 
 and its classpath as reported by Spark itself for Spark-related dependencies, it is important to make sure 

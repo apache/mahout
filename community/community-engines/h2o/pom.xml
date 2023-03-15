@@ -22,60 +22,86 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-community-engines_2.11</artifactId>
+    <artifactId>mahout-community-engines</artifactId>
     <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-h2o_2.11</artifactId>
-  <name>-- Mahout H2O Engine (Community)</name>
-  <description>
-    H2O Backend for Mahout DSL
-  </description>
-
+  <artifactId>mahout-h2o</artifactId>
   <packaging>jar</packaging>
 
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
-
-  <properties>
-    <h2o.version>0.1.25</h2o.version>
-  </properties>
-
+  <name>-- Mahout H2O Engine (Community)</name>
+  <description>H2O Backend for Mahout DSL</description>
 
   <build>
-
     <plugins>
-      <!-- ensure licenses -->
       <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
         <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-h2o_${scala.compat.version}-${version}.jar" tofile="../../../lib/mahout-h2o_${scala.compat.version}-${version}.jar" />
-              </tasks>
-            </configuration>
+          <!--execution>
+            <id>add-scala-sources</id>
+            <phase>initialize</phase>
             <goals>
-              <goal>run</goal>
+              <goal>add-source</goal>
+            </goals>
+          </execution-->
+          <execution>
+            <id>scala-compile</id>
+            <!-- Intentionally not using 'compile' as the java code depends on some scala classes -->
+            <phase>process-resources</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>testCompile</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
+
+      <!--this is what scalatest recommends to do to enable scala tests -->
+      <!-- disable surefire -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+
+      <!-- enable scalatest -->
+      <plugin>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>scala-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -94,117 +120,22 @@
           </execution>
         </executions>
       </plugin>
-
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-scala-sources</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>scala-compile</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!--this is what scalatest recommends to do to enable scala tests -->
-
-      <!-- disable surefire -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skipTests>true</skipTests>
-        </configuration>
-      </plugin>
-      <!-- enable scalatest -->
-      <plugin>
-        <groupId>org.scalatest</groupId>
-        <artifactId>scalatest-maven-plugin</artifactId>
-        <version>${scalatest.maven.plugin.version}</version>
-        <executions>
-          <execution>
-            <id>test</id>
-            <goals>
-              <goal>test</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- remove jars from top directory on clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../../lib</directory>
-              <includes>
-                <include>mahout-h2o*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
   <dependencies>
-
-
-    <!--<dependency>-->
-      <!--<groupId>org.apache.mahout</groupId>-->
-      <!--&lt;!&ndash;<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>&ndash;&gt;-->
-      <!--<artifactId>a</artifactId>-->
-      <!--<version>${project.version}</version>-->
-    <!--</dependency>-->
-
     <!-- for MatrixWritable and VectorWritable -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-hdfs</artifactId>
-      <version>${project.version}</version>
+      <version>14.1-SNAPSHOT</version>
     </dependency>
-
-   <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <!--<artifactId>mahout-math-scala_${scala.compat.version}</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-   </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <!--<artifactId>mahout-math</artifactId>-->
-      <artifactId>core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
     </dependency>
 
     <!--  3rd-party -->
@@ -214,7 +145,6 @@
     <dependency>
       <groupId>ai.h2o</groupId>
       <artifactId>h2o-core</artifactId>
-      <version>${h2o.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.hadoop</groupId>
@@ -225,41 +155,23 @@
 
     <!-- scala stuff -->
     <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat.version}</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.1-SNAPSHOT</version>
+      <classifier>test_scala_${scala.compat.version}</classifier>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
-  <profiles>
-    <profile>
-      <id>mahout-release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>net.alchim31.maven</groupId>
-            <artifactId>scala-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>generate-scaladoc</id>
-                <goals>
-                  <goal>doc</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>attach-scaladoc-jar</id>
-                <goals>
-                  <goal>doc-jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

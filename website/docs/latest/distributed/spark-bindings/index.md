@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: Spark Bindings
-
-    
 ---
 
 # Scala & Spark Bindings:
@@ -101,4 +99,3 @@ TODO: Do we still want this? (I don't think so...)
 
 
 
-  

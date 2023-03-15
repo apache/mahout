@@ -1,8 +1,6 @@
 ---
 layout: doc-page
-title: (Deprecated)  Perceptron and Winnow
-
-    
+title: Co-Occurrence With Spark
 ---
 
 #Intro to Cooccurrence Recommenders with Spark

@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated) 
-
-    
 ---
 
 Notice:    Licensed to the Apache Software Foundation (ASF) under one

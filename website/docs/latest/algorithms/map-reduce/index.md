@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Deprecated Map Reduce Algorithms
-
-    
 ---
 
 ### Classification

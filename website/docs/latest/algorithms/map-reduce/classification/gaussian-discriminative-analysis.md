@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Gaussian Discriminative Analysis
-
-    
 ---
 
 <a name="GaussianDiscriminativeAnalysis-GaussianDiscriminativeAnalysis"></a>

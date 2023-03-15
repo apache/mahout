@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Class Discovery
-
-    
 ---
 <a name="ClassDiscovery-ClassDiscovery"></a>
 # Class Discovery

@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Fuzzy K-Means
-
-   
 ---
 
 Fuzzy K-Means (also called Fuzzy C-Means) is an extension of [K-Means](http://mahout.apache.org/users/clustering/k-means-clustering.html)

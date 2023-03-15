@@ -1,9 +1,8 @@
 ---
 layout: doc-page
-title: (Deprecated)  Perceptron and Winnow
-
-    
+title: Matrix Factorization
 ---
+
 <a name="MatrixFactorization-Intro"></a>
 # Introduction to Matrix Factorization for Recommendation Mining
 

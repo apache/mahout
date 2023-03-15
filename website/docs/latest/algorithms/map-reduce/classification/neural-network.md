@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Neural Network
-
-    
 ---
 
 <a name="NeuralNetwork-NeuralNetworks"></a>

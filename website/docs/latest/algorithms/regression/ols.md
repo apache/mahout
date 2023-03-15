@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: Ordinary Least Squares Regression
-
-    
 ---
 
 ### About

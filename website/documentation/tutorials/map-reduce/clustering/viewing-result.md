@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Viewing Result
-
-   
 ---
 * [Algorithm Viewing pages](#ViewingResult-AlgorithmViewingpages)
 

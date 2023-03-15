@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,10 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.MultiFields;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.index.*;
 import org.apache.lucene.util.BytesRef;
 import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
@@ -41,7 +38,7 @@ public class CachedTermInfo implements TermInfo {
 
   public CachedTermInfo(IndexReader reader, String field, int minDf, int maxDfPercent) throws IOException {
     this.field = field;
-    Terms t = MultiFields.getTerms(reader, field);
+    Terms t = MultiTerms.getTerms(reader, field);
     TermsEnum te = t.iterator();
 
     int numDocs = reader.numDocs();

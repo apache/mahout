@@ -1,9 +1,8 @@
 ---
 layout: doc-page
 title: (Deprecated)  Testing
-
-    
 ---
+
 <a name="Testing-Intro"></a>
 # Intro
 

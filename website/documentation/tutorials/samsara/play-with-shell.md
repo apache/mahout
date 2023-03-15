@@ -1,9 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara In Core
-
-    
 ---
+
 # Playing with Mahout's Spark Shell 
 
 This tutorial will show you how to play with Mahout's scala DSL for linear algebra and its Spark shell. **Please keep in mind that this code is still in a very early experimental stage**.

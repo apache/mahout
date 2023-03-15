@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  LLR - Log-likelihood Ratio
-
-   
 ---
 
 # Likelihood ratio test
@@ -43,4 +41,3 @@ number of training examples and where features are highly interdependent.
 * [G-Test](http://en.wikipedia.org/wiki/G-test)
 * [Likelihood Ratio Test](http://en.wikipedia.org/wiki/Likelihood-ratio_test)
 
-      

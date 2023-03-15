@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  fuzzy-k-means-commandline
-
-   
 ---
 
 <a name="fuzzy-k-means-commandline-RunningFuzzyk-MeansClusteringfromtheCommandLine"></a>

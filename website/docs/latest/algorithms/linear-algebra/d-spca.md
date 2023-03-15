@@ -1,9 +1,6 @@
 ---
 layout: doc-page
-
-title: Distributed Stochastic PCA
-
-    
+title: Distributed Stochastic PCA  
 ---
 
 

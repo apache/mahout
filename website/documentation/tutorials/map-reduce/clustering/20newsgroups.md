@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  20Newsgroups
-
-   
 ---
 
 <a name="20Newsgroups-NaiveBayesusing20NewsgroupsData"></a>

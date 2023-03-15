@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  canopy-commandline
-
-   
 ---
 
 <a name="canopy-commandline-RunningCanopyClusteringfromtheCommandLine"></a>

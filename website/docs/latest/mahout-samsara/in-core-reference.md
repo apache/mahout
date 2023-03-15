@@ -1,9 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara In Core
-
-    
 ---
+
 ## Mahout-Samsara's In-Core Linear Algebra DSL Reference
 
 #### Imports

@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: Mahout Samsara Flink Bindings
-
-    
 ---
 # Introduction
 

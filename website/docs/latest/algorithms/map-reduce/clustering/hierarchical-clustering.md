@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Hierarchical Clustering
-
-   
 ---
 Hierarchical clustering is the process or finding bigger clusters, and also
 the smaller clusters inside the bigger clusters.

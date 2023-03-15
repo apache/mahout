@@ -1,8 +1,6 @@
 ---
 layout: doc-page
-title: Distributed Stochastic Singular Value Decomposition
-
-    
+title: Distributed Stochastic Singular Value Decomposition  
 ---
 
 ## Intro

@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Hidden Markov Models
-
-    
 ---
 
 # Hidden Markov Models

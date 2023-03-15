@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  K-Means Clustering
-
-   
 ---
 
 # k-Means clustering - basics

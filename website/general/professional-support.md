@@ -19,7 +19,7 @@ committers.
 
 | Name | Contact details | Notes |
 |------|-----------------|-------|
-| Accenture | andrew.musselman@accenture.com | [Consulting services in big data analytics](http://accenture.com) |
+| Aboriginal Armadillo, LLC | trevor@aboriginal-armadillo.com | [Commercial Support](http://www.aboriginal-armadillo.com/)
 | Boston Predictive Analytics | sray@bostonpredictiveanalytics.com | [http://tutorteddy.com/site/free_statistics_help.php](http://tutorteddy.com/site/free_statistics_help.php) |
 | Frank Scholten | frank.scholten@orange11.nl | |
 | GridLine | [http://www.gridline.nl/contact](http://www.gridline.nl/contact) | Specialised in search and thesauri |

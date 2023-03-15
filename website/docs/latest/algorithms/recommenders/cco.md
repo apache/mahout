@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: Building a Mahout Recommender
-
-    
 ---
 
 # Building a Correlated Cross-Occurrence (CCO) Recommenders with the Mahout CLI

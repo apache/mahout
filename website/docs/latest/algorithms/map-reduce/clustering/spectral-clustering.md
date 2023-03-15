@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Spectral Clustering
-
-   
 ---
 
 # Spectral Clustering Overview

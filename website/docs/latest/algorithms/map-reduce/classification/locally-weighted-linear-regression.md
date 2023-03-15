@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Locally Weighted Linear Regression
-
-    
 ---
 
 <a name="LocallyWeightedLinearRegression-LocallyWeightedLinearRegression"></a>

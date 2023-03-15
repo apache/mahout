@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Visualizing Sample Clusters
-
-   
 ---
 
 <a name="VisualizingSampleClusters-Introduction"></a>

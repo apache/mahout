@@ -1,3 +1,8 @@
+---
+layout: doc-page
+title: Changelog
+---
+
 ## Changelog
 
 Public releases are all root nodes.  

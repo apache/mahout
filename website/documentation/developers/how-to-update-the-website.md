@@ -38,7 +38,7 @@ This step actually can be done _while you are editing_. Then you can see you cha
 In the terminal,
 
 ```bash
-cd wesite
+cd website
 bundle exec jekyll serve
 ```
 
@@ -47,7 +47,7 @@ open your favorite browser and make sure your changes look the way you expect th
 
 #### Commit code and open a PR
 
-Once you're sure everything is right, you commit your code, push to your github.com account (preferably on a branch other than `master`
+Once you're sure everything is right, you commit your code, push to your github.com account (preferably on a branch other than `trunk`
 then click "OpenPR"). This process closely follows [How To Contribute- Making Changes](/developers/how-to-contribute/#HowToContribute-MakingChanges) with an exception that for _WEBSITE ONLY_ changes we relax the requirement to open a JIRA ticket. That is to say, small
 website changes such as fixing a broken link or typo, do not require a specific JIRA issues, and where you would normally 
 commit with a message like `MAHOUT-XXXX The thing I did` (where `XXXX` is the assosciated JIRA number), you can instead 
@@ -68,5 +68,5 @@ Once everything is confirmed to be in order, the committer will merge your pull 
 #### Committers ONLY
 
 No further action is needed, this section is here to deliniate from the old CMS system and Jekyll builds of other projects. Jenkins
-will execute [build_site.sh](https://github.com/apache/mahout/blob/master/website/build_site.sh) upon merging. This will build the website and
+will execute [build_site.sh](https://github.com/apache/mahout/blob/trunk/website/build_site.sh) upon merging. This will build the website and
 copy it to the `asf-site` branch, where [mahout.apache.org](http://mahout.apache.org) is served from. 

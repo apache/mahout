@@ -1,9 +1,8 @@
 ---
 layout: doc-page
 title: Mahout Samsara Out of Core
-
-    
 ---
+
 # Mahout-Samsara's Distributed Linear Algebra DSL Reference
 
 **Note: this page is meant only as a quick reference to Mahout-Samsara's R-Like DSL semantics.  For more information, including information on Mahout-Samsara's Algebraic Optimizer please see: [Mahout Scala Bindings and Mahout Spark Bindings for Linear Algebra Subroutines](http://mahout.apache.org/users/sparkbindings/ScalaSparkBindings.pdf).**

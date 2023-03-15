@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Expectation Maximization
-
-   
 ---
 <a name="ExpectationMaximization-ExpectationMaximization"></a>
 # Expectation Maximization

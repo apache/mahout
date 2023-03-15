@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Restricted Boltzmann Machines
-
-    
 ---
 
 NOTE: This implementation is a Work-In-Progress, at least till September,

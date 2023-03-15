@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Random Forests
-
-    
 ---
 
 <a name="RandomForests-HowtogrowaDecisionTree"></a>

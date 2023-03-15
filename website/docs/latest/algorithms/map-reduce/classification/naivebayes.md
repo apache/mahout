@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  NaiveBayes
-
-    
 ---
 
 <a name="NaiveBayes-NaiveBayes"></a>

@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  k-means-commandline
-
-   
 ---
 
 <a name="k-means-commandline-Introduction"></a>

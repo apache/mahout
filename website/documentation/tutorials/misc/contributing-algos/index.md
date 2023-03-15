@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: Contributing new algorithms
-
-    
 ---
 
 The Mahout community is driven by user contribution.  If you have implemented an algorithm and are interested in 

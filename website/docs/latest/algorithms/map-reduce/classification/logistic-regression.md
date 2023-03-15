@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Logistic Regression
-
-    
 ---
 
 <a name="LogisticRegression-LogisticRegression(SGD)"></a>

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: GSOC
+title: Version Control
 
     
 ---

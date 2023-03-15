@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Latent Dirichlet Allocation
-
-   
 ---
 
 <a name="LatentDirichletAllocation-Overview"></a>

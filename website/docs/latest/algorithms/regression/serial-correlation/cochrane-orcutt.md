@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: Cochrane-Orcutt Procedure
-
-    
 ---
 
 ### About

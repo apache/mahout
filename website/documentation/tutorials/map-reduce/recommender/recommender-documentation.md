@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: (Deprecated)  Recommender Documentation
-
-    
 ---
 
 <a name="RecommenderDocumentation-Overview"></a>

@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: Spark Naive Bayes
-
-    
 ---
 
 # Spark Naive Bayes

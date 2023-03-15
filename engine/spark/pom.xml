@@ -18,55 +18,31 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-engine</artifactId>
-    <version>14.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <version>14.2-SNAPSHOT</version>
   </parent>
 
-  <artifactId>mahout-spark_2.11</artifactId>
-  <name>- Mahout Spark Engine</name>
-  <description>
-    Mahout Bindings for Apache Spark
-  </description>
-
+  <artifactId>mahout-spark</artifactId>
   <packaging>jar</packaging>
 
-  <!-- per http://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms ensure that all poms have SCM managment.-->
-  <scm>
-    <connection>scm:git:git@github.com:apache/mahout.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/mahout.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=mahout.git;a=tree;h=refs/heads/${project.scm.tag};hb=${project.scm.tag}</url>
-    <tag>mahout_${scala.compat.version}-${project.version}-${release.candidate}
-    </tag>
-  </scm>
+  <name>- Mahout Spark Engine</name>
+  <description>Mahout Bindings for Apache Spark</description>
 
   <properties>
-   </properties>
-    <build>
-     <plugins>
-      <!-- ensure licenses -->
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-
-      <!-- Pre-refactor plugins start here -->
-
-
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-
+  </properties>
+  <build>
+    <plugins>
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>4.0.2</version>
+        <version>4.4.0</version>
         <executions>
-          <execution>
+          <!--execution>
             <id>attach-javadocs</id>
             <phase>dont-execute</phase>
             <goals>
@@ -79,17 +55,17 @@
             <goals>
               <goal>add-source</goal>
             </goals>
-          </execution>
+          </execution-->
           <execution>
             <id>scala-compile</id>
-            <phase>process-resources</phase>
+            <phase>compile</phase>
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
+            <phase>test-compile</phase>
             <goals>
               <goal>testCompile</goal>
             </goals>
@@ -106,22 +82,50 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
+
       <!-- enable scalatest -->
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <version>${scalatest.maven.plugin.version}</version>
         <executions>
           <execution>
-            <id>test</id>
+            <id>scala-test</id>
+            <phase>test</phase>
             <goals>
               <goal>test</goal>
             </goals>
+            <configuration>
+              <argLine>-Xmx4g</argLine>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <argLine>-Xmx4g</argLine>
-        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <!-- Change the default configuration of the jar plugin to use a scala classifier to attach the jar. -->
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <classifier>scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+          <!-- create test jar so other modules can reuse the math test utility classes.
+             DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
+             Please contact @dlyubimov.
+           -->
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <configuration>
+              <classifier>test_scala_${scala.compat.version}</classifier>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -142,149 +146,53 @@
           </execution>
         </executions>
       </plugin>
-
-
-      <!-- copy jars to top directory, which is MAHOUT_HOME -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-spark_${scala.compat.version}-${project.version}.jar" tofile="../../lib/mahout-spark_${scala.compat.version}-${project.version}.jar" />
-                <copy file="target/mahout-spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" tofile="../../lib/mahout-spark_${scala.compat.version}-${project.version}-dependency-reduced.jar" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>copy-javadocs</id>
-            <!-- DO not not producing generated java/scaladocs right until Java 8+ tag bug has been fixed
-            or javadoc generation is fixed to generate intrepretable  doc tags  -->
-            <phase>dont-execute</phase>
-            <configuration>
-              <tasks>
-                <copy file="target/mahout-spark_${scala.compat.version}-${project.version}-javadoc.jar" tofile="../../docs/mahout-spark_${scala.compat.version}-${project.version}.jar" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- create test jar so other modules can reuse the math test utility classes.
-        DO NOT REMOVE! Testing framework is useful in subordinate/contrib projects!
-        Please contact @dlyubimov.
-      -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-            <phase>package</phase>
-          </execution>
-          <execution>
-            <id>default-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <!--<configuration>-->
-              <!--<classifier>spark_${spark.compat.version}</classifier>-->
-            <!--</configuration>-->
-          </execution>
-        </executions>
-      </plugin>
-      <!-- delete files on mvn clean -->
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../../lib/</directory>
-              <includes>
-                <include>mahout-spark_*.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
   <dependencies>
+    <!-- mahout stuff -->
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>14.2-SNAPSHOT</version>
+      <classifier>scala_${scala.compat.version}</classifier>
+    </dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.scala-lang/scala-reflect -->
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-hdfs</artifactId>
+      <version>14.2-SNAPSHOT</version>
+    </dependency>
+
+    <!--  3rd-party -->
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-reflect</artifactId>
-      <version>${scala.version}</version>
     </dependency>
 
-
-    <!-- spark stuff - need to put this first to use spark's mahout dependencies in tests -->
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-core_${scala.compat.version}</artifactId>
-      <version>${spark.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-mllib_${scala.compat.version}</artifactId>
-      <version>${spark.version}</version>
-    </dependency>
-
-    <!-- mahout stuff -->
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-hdfs_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-
-    <!--<dependency>-->
-      <!--<groupId>org.bytedeco</groupId>-->
-      <!--<artifactId>javacpp</artifactId>-->
-      <!--<version>1.2.2</version>-->
-    <!--</dependency>-->
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-core_${scala.compat.version}</artifactId>
-      <version>${project.version}</version>
-      <classifier>tests</classifier>
+      <artifactId>mahout-core</artifactId>
+      <version>14.2-SNAPSHOT</version>
+      <classifier>test_scala_${scala.compat.version}</classifier>
       <scope>test</scope>
     </dependency>
 
-
-
-  <!--  3rd-party -->
-
-    <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
-      <version>3.0.5</version>
+      <scope>test</scope>
     </dependency>
-
   </dependencies>
 
 </project>

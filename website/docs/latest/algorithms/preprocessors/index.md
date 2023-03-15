@@ -1,8 +1,6 @@
 ---
 layout: doc-page
 title: Preprocesors
-
-    
 ---
 
 [AsFactor](AsFactor.html) - For "one-hot-encoding"

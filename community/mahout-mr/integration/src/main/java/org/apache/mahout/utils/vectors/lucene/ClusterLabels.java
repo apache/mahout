@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -44,13 +44,7 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.io.Charsets;
 import org.apache.hadoop.fs.Path;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.MultiFields;
-import org.apache.lucene.index.PostingsEnum;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.index.*;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -179,17 +173,17 @@ public class ClusterLabels {
      * frequencies in each document. The number of results of this call will be the in-cluster document
      * frequency.
      */
-    Terms t = MultiFields.getTerms(reader, contentField);
+    Terms t = MultiTerms.getTerms(reader, contentField);
     TermsEnum te = t.iterator();
     Map<String, TermEntry> termEntryMap = new LinkedHashMap<>();
-    Bits liveDocs = MultiFields.getLiveDocs(reader); //WARNING: returns null if there are no deletions
+    Bits liveDocs = MultiBits.getLiveDocs(reader); //WARNING: returns null if there are no deletions
 
 
     int count = 0;
     BytesRef term;
     while ((term = te.next()) != null) {
       FixedBitSet termBitset = new FixedBitSet(reader.maxDoc());
-      PostingsEnum docsEnum = MultiFields.getTermDocsEnum(reader, contentField, term);
+      PostingsEnum docsEnum = MultiTerms.getTermPostingsEnum(reader, contentField, term);
       int docID;
       while ((docID = docsEnum.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS) {
         //check to see if we don't have an deletions (null) or if document is live
