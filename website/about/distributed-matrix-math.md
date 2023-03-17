@@ -53,7 +53,7 @@ Distributed Matrix Math has numerous applications in various fields, including:
 
 ## References
 
-[//]: # (TODO: Get real references for this section)
-- [1] Distributed Matrix Computations: A Survey. Y. Saad. SIAM Rev., 55(1), 3-53, 2013.
-- [2] Scalable and High-Performance Linear Algebra on Distributed Memory Systems. E. Solomonik and J. Demmel. The International Journal of High-Performance Computing Applications, 28(2), 155-185, 2014.
+
+- [1] Apache Mahout: Machine Learning on Distributed Dataflow Systems. R Anil, G Capan, I Drost-Fromm, T Dunning… - The Journal of Machine Learning Research, 2020
+- [2] Apache Mahout: Beyond MapReduce (1st. ed.). Dmitriy Lyubimov and Andrew Palumbo. 2016. CreateSpace Independent Publishing Platform, North Charleston, SC, USA.
 

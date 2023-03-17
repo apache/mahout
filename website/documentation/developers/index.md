@@ -28,3 +28,31 @@ Apache Mahout is an open-source, scalable machine learning library that provides
 - **Optimization**: Leverage Mahout's optimizations and parallelization techniques to ensure efficient and scalable processing of your data.
 
 By following this Developer's Guide, developers can quickly harness the power of Apache Mahout to build scalable and efficient machine learning solutions for their applications.
+
+## Index
+
+[Patch Check List](/developers/patch-check-list.html)
+
+[How To Release](/developers/how-to-release.html)
+
+[Version Control](/developers/version-control.html)
+
+[Gsoc](/developers/gsoc.html)
+
+[Github](/developers/github.html)
+
+[How To Update The Website](/developers/how-to-update-the-website.html)
+
+[Developer Resources](/developers/developer-resources.html)
+
+[Index](/developers/index.html)
+
+[Githubprs](/developers/githubPRs.html)
+
+[Buildingmahout](/developers/buildingmahout.html)
+
+[Thirdparty Dependencies](/developers/thirdparty-dependencies.html)
+
+[Issue Tracker](/developers/issue-tracker.html)
+
+[How To Become A Committer](/developers/how-to-become-a-committer.html)
