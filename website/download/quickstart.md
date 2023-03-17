@@ -15,7 +15,7 @@
  limitations under the License.
 -->
 ---
-layout: default
+layout: page
 title: Quickstart
 
     

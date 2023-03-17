@@ -63,3 +63,8 @@ h6 {
     height: $footer-height;
     line-height: $footer-height;
 }
+
+// fix thing where sidebar links aren't reachable
+.sidebar .nav li:first-child {
+  z-index: 9999;
+}

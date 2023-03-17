@@ -1,8 +1,6 @@
 ---
 layout: page
 title: How To Contribute
-
-    
 ---
 
 # How to contribute

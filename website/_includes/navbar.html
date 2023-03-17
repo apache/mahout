@@ -14,93 +14,103 @@
 
             <ul class="navbar-nav ml-auto">
 
+                <!-- About -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-about"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">About</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="https://www.apache.org/foundation/how-it-works.html">Overview of the Apache Software Foundation</a>
+                        <a class="dropdown-item"
+                           href="/about/distributed-matrix-math.html">Overview of Distributed Matrix Math</a>
+                        <a class="dropdown-item"
+                           href="/about/how-to-contribute.html">How to Contribute</a>
+                    </div>
+                </li>
+
+                <!-- Documentation -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-docs"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Documentation</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/documentation/users">User Guide</a>
+                        <a class="dropdown-item"
+                           href="/documentation/developers">Developer Guide</a>
+                        <a class="dropdown-item"
+                           href="/docs/0.13.0/api/docs/">API Reference</a>
+                        <a class="dropdown-item"
+                           href="/documentation/tutorials">Tutorials and Examples</a>
+                    </div>
+                </li>
+
                 <!-- Download -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/general/downloads">Download</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="/docs/latest/index.html">Overview</a>
-                </li>
-
-                <!-- Algorithms (Samsara / MR) -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Algorithms</a>
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-download"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Download</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/linear-algebra">Distributed Linear Algebra</a>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/preprocessors">Preprocessors</a>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/regression">Regression</a>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/clustering">Clustering</a>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders">Recommenders</a>
-                        <div class="dropdown-divider"></div>
-                        <h6 class="dropdown-header">Deprecated</h6>
-                        <a class="dropdown-item"  href="/docs/latest/algorithms/map-reduce">MapReduce <i>(deprecated)</i></a>
-                    </div>
-                    <!--<a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/recommender-overview.html">Reccomender Overview</a></li> Do we still need? seems like short version of next post-->
-                    <!--
-                    <a class="dropdown-item"  href="/docs/latest/algorithms/recommenders/intro-cooccurrence-spark.html">Intro to Coocurrence With Spark</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li><span>&nbsp;&nbsp;<a href="/docs/latest/algorithms/map-reduce"><b>MapReduce</b> (deprecated)</a><span></li>
-                 -->
-                </li>
-
-
-                <!-- Developers -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Developers</a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="/developers/developer-resources.html">Developer Resources</a>
-                        <a class="dropdown-item" href="/developers/buildingmahout">Building Mahout from Source</a>
-                        <a class="dropdown-item" href="/developers/issue-tracker">Issues Tracking (JIRA)</a>
-                        <!-- <a class="dropdown-item" href="/developers/patch-check-list/">Patch Check List</a> going to github template -->
-                        <!-- <a class="dropdown-item" href="/developers/reference/">References</a> a lot of overlap with books, talks, etc. page -->
-                        <a class="dropdown-item" href="/developers/release-notes">Release Notes</a>
-                        <!-- <a class="dropdown-item" href="/developers/thirdparty-dependencies/">Third Party Dependencies</a> is our site the reasonable place for this? -->
-                        <!-- <a class="dropdown-item" href="/developers/version-control/">Version Control</a> -->
-                        <div class="dropdown-divider"></div>
-                        <h6 class="dropdown-header">How To's</h6>
-                        <a class="dropdown-item" href="/developers/how-to-contribute">How to Contribute</a>
-                        <a class="dropdown-item" href="/developers/githubPRs">Github PRs</a>
-                        <a class="dropdown-item" href="/developers/how-to-become-a-committer">How to Become a Committer</a>
-                        <a class="dropdown-item" href="/developers/how-to-release">How to Release</a>
-                        <a class="dropdown-item" href="/developers/how-to-update-the-website">How to Update the Website</a>
-                    </div>
-                </li>
-
-                <!-- Docs -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Docs</a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <h6 class="dropdown-header">Release</h6>
-                        <a class="dropdown-item" href="/docs/0.13.0">0.13.0</a>
-                        <div class="dropdown-divider"></div>
-                        <h6 class="dropdown-header">Latest Snapshot (Development)</h6>
-                        <a class="dropdown-item" href="/docs/latest">14.1-SNAPSHOT</a>
+                        <a class="dropdown-item"
+                           href="/download/downloads/html">Latest Release</a>
+                        <a class="dropdown-item"
+                           href="https://github.com/apache/mahout/">Github Repository</a>
+                        <a class="dropdown-item"
+                           href="/download/quickstart">Quickstart</a>
                     </div>
                 </li>
 
                 <!-- Community -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Community</a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <!--<a class="dropdown-item" href="/community/history/">History of the Apache Mahout Project</a>-->
-                        <!--<a class="dropdown-item" href="/community/blogs/">Blog Posts About Mahout</a>-->
-                        <!--<a class="dropdown-item" href="/community/recent-upcoming-talks/">Recent and Upcoming Talks</a>-->
-                        <!-- <a class="dropdown-item" href="/community/books-tutorials-and-talks/">Books Tutorials and Talks</a> -->
-                        <!-- <a class="dropdown-item" href="/community/faq/">FAQ</a> needs a lot of updating -->
-                        <a class="dropdown-item" href="/developers/gsoc">GSoC</a>
-                        <!-- Is OK- updated Map/Reduce verbage to reflect Samsara -->
-                        <!-- <a class="dropdown-item" href="/community/mahout-benchmarks/">Mahout Benchmarks</a> These are old, Keep them? -->
-                        <!-- <a class="dropdown-item" href="/community/mahout-wiki/">Mahout Wiki</a> at very least needs links cleanedup - do we still want this even?-->
-                        <a class="dropdown-item" href="/general/mailing-lists">Mailing Lists</a>
-                        <!-- Clean and pretty -->
-                        <!-- <a class="dropdown-item" href="/community/powered-by-mahout/">Powered By Mahout</a> needs update -->
-                        <a class="dropdown-item" href="/general/privacy-policy">Privacy Policy</a>
-                        <!-- <a class="dropdown-item" href="/community/professional-support/">Professional Support</a> update if we even want to keep -->
-                        <a class="dropdown-item" href="/general/who-we-are">Who We Are</a>
-                        <!-- nikolai needs to add himself -->
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-community"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Community</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                        <a class="dropdown-item"
+                           href="/community/">Overview</a>
+                        <a class="dropdown-item"
+                           href="/community/who-we-are.html">Who We Are</a>
+                        <a class="dropdown-item"
+                           href="/community/mailing-lists.html">Mailing Lists</a>
+                        <a class="dropdown-item"
+                           href="https://issues.apache.org/jira/browse/MAHOUT">Issue Tracker</a>
+                        <a class="dropdown-item"
+                           href="/documentation/developers/">Developer Documentation</a>
+                        <a class="dropdown-item"
+                           href="/community/coc.html">Code of Conduct</a>
+                        <a class="dropdown-item"
+                           href="/404.html">Partners and Supporters</a>
+<!--                        Maybe make a new page that merges professional support and powered-by-mahout?-->
                     </div>
                 </li>
+
+                <!-- News and Events -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-news-events"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">News and Events</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/news-and-events/news.html">Latest Project News</a>
+                        <a class="dropdown-item"
+                           href="/news-and-events/events.html">Upcoming Events</a>
+                        <a class="dropdown-item"
+                           href="/news-and-events/announcements.html">Announcements</a>
+                    </div>
+                </li>
+
 
                 <!-- GitHub -->
                 <li class="nav-item">

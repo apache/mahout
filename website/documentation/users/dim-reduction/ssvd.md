@@ -17,8 +17,6 @@
 ---
 layout: default
 title:     Stochastic SVD
-
-   
 ---
 
 # Stochastic Singular Value Decomposition #
