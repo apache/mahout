@@ -7424,6 +7424,10 @@ h6 {
   line-height: 60px;
 }
 
+.sidebar .nav li:first-child {
+  z-index: 9999;
+}
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -7785,6 +7789,22 @@ header.mahout-header .mahout-header-lower .btn-download:hover {
 }
 .highlight .il {
   color: #099;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
 }
 
 /*# sourceMappingURL=main.css.map */

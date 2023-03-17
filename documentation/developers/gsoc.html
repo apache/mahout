@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang=" en ">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    GSOC
+    
+  </title>
+
+  <meta name="description" content="Distributed Linear Algebra">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
+
+  <link rel="canonical" href="http://mahout.apache.org//documentation/developers/gsoc.html">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
+
+
+</head>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-98314020-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
+
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+          <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ml-auto">
+
+                <!-- About -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-about"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">About</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="https://www.apache.org/foundation/how-it-works.html">Overview of the Apache Software Foundation</a>
+                        <a class="dropdown-item"
+                           href="/about/distributed-matrix-math.html">Overview of Distributed Matrix Math</a>
+                        <a class="dropdown-item"
+                           href="/about/how-to-contribute.html">How to Contribute</a>
+                    </div>
+                </li>
+
+                <!-- Documentation -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-docs"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Documentation</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/documentation/users">User Guide</a>
+                        <a class="dropdown-item"
+                           href="/documentation/developers">Developer Guide</a>
+                        <a class="dropdown-item"
+                           href="/docs/0.13.0/api/docs/">API Reference</a>
+                        <a class="dropdown-item"
+                           href="/documentation/tutorials">Tutorials and Examples</a>
+                    </div>
+                </li>
+
+                <!-- Download -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-download"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Download</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/download/downloads/html">Latest Release</a>
+                        <a class="dropdown-item"
+                           href="https://github.com/apache/mahout/">Github Repository</a>
+                        <a class="dropdown-item"
+                           href="/download/quickstart">Quickstart</a>
+                    </div>
+                </li>
+
+                <!-- Community -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-community"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Community</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                        <a class="dropdown-item"
+                           href="/community/">Overview</a>
+                        <a class="dropdown-item"
+                           href="/community/who-we-are.html">Who We Are</a>
+                        <a class="dropdown-item"
+                           href="/community/mailing-lists.html">Mailing Lists</a>
+                        <a class="dropdown-item"
+                           href="https://issues.apache.org/jira/browse/MAHOUT">Issue Tracker</a>
+                        <a class="dropdown-item"
+                           href="/documentation/developers/">Developer Documentation</a>
+                        <a class="dropdown-item"
+                           href="/community/coc.html">Code of Conduct</a>
+                        <a class="dropdown-item"
+                           href="/404.html">Partners and Supporters</a>
+<!--                        Maybe make a new page that merges professional support and powered-by-mahout?-->
+                    </div>
+                </li>
+
+                <!-- News and Events -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-news-events"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">News and Events</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/news-and-events/news.html">Latest Project News</a>
+                        <a class="dropdown-item"
+                           href="/news-and-events/events.html">Upcoming Events</a>
+                        <a class="dropdown-item"
+                           href="/news-and-events/announcements.html">Announcements</a>
+                    </div>
+                </li>
+
+
+                <!-- GitHub -->
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
+                </li>
+
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8">
+      <h1 id="google-summer-of-code">Google Summer of Code</h1>
+
+<p>Mahout has been mentoring students in Google Summer of Code (GSoC) for as long as
+the project has existed.  To help students better understand what is
+expected of them, this page lays out common advice, links and other tips
+and tricks for successfully creating a GSoC proposal for Mahout.</p>
+
+<p>Be warned, however, that GSoC, particularly at the Apache Software
+Foundation (ASF), is fairly competitive.  Not only are you competing
+against others within Mahout, but Mahout is competing with other projects
+in the ASF.  Therefore, it is very important that proposals be well
+referenced and well thought out.  Even if you don’t get selected, consider
+sticking around.  Open source is fun, a great career builder and can open up many
+opportunities for you.</p>
+
+<h2 id="tips-on-good-proposals">Tips on Good Proposals</h2>
+
+<ul>
+  <li>Interact with the community before proposal time.  This is actually part
+of how we rate proposals.  Having a good idea is just one part of the
+process.  You must show you can communicate and work within the community
+parameters.   You might even consider putting up a patch or two that shows
+you get how things work.  See <a href="how-to-contribute.html">How To Contribute</a>.</li>
+  <li>Since Machine Learning is fairly academic, be sure to cite your sources
+in your proposal.</li>
+  <li>Provide a realistic timeline.  Be sure you indicate what other
+obligations you have during the summer.  It may seem worthwhile to lie
+here, but we have failed students mid-term in the past because they did not
+participate as they said they would.  Failing mid-term means not getting
+paid.</li>
+  <li>Do not mail mentors off list privately unless it is something truly
+personal (most things are not).  This will likely decrease your chances of
+being selected, not increase them.</li>
+  <li>DO NOT BITE OFF MORE THAN YOU CAN CHEW.  Every year, there are a few
+students who propose to implement 3-5 machine learning algorithms on
+Map/Reduce, all in a two month period.	They NEVER get selected.   Be
+realistic.  All successful projects to date follow, more or less, the
+following formula:  Implement algorithm on Map/Reduce.	Write Unit Tests. 
+Do some bigger scale tests.  Write 1 or 2 examples.  Write Wiki
+documentation.	That’s it.  Trust us, it takes a summer to do these things.</li>
+</ul>
+
+<h2 id="what-to-expect-once-selected">What to expect once selected</h2>
+
+<ul>
+  <li>Just as in the proposals, almost all interaction should take place on the
+mailing lists.	Only personal matters related to your whereabouts or your
+evaluation will take place privately.</li>
+  <li>Show up.  Ask questions.  Be engaged.  We don’t care if you know it all
+about what you are implementing.  We care about you contributing to open
+source.  You learn.  We learn.	Win-win.</li>
+  <li>Enjoy it!  Contributing to open source can open some amazing doors for
+your career.</li>
+</ul>
+
+<p><a name="GSOC-References"></a></p>
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="http://code.google.com/soc/">GSoC Home</a> - official GSoC page</li>
+  <li><a href="http://socghop.appspot.com/document/show/gsoc_program/google/gsoc2010/faqs">GSoC FAQ</a> - official FAQ</li>
+  <li><a href="http://community.apache.org/gsoc.html">Apache GSoC coordination</a> - official Apache GSoC documentation, especially important  if you want to become a mentor</li>
+</ul>
+
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Apache Software Foundation Links -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        Apache Software Foundation
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li>
+                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/licenses/">Apache License</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Twitter Posts Widget -->
+<div class="card">
+    <div class="card-body">
+        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
+        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+</div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2023 <a href="http://www.apache.org/">The Apache Software Foundation</a>, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+</body>
+
+</html>

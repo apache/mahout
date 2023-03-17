@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang=" en ">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    Mailing Lists, IRC and Archives
+    
+  </title>
+
+  <meta name="description" content="Distributed Linear Algebra">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
+
+  <link rel="canonical" href="http://mahout.apache.org//community/mailing-lists.html">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
+
+
+</head>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-98314020-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
+
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+          <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ml-auto">
+
+                <!-- About -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-about"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">About</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="https://www.apache.org/foundation/how-it-works.html">Overview of the Apache Software Foundation</a>
+                        <a class="dropdown-item"
+                           href="/about/distributed-matrix-math.html">Overview of Distributed Matrix Math</a>
+                        <a class="dropdown-item"
+                           href="/about/how-to-contribute.html">How to Contribute</a>
+                    </div>
+                </li>
+
+                <!-- Documentation -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-docs"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Documentation</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/documentation/users">User Guide</a>
+                        <a class="dropdown-item"
+                           href="/documentation/developers">Developer Guide</a>
+                        <a class="dropdown-item"
+                           href="/docs/0.13.0/api/docs/">API Reference</a>
+                        <a class="dropdown-item"
+                           href="/documentation/tutorials">Tutorials and Examples</a>
+                    </div>
+                </li>
+
+                <!-- Download -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-download"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Download</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/download/downloads/html">Latest Release</a>
+                        <a class="dropdown-item"
+                           href="https://github.com/apache/mahout/">Github Repository</a>
+                        <a class="dropdown-item"
+                           href="/download/quickstart">Quickstart</a>
+                    </div>
+                </li>
+
+                <!-- Community -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-community"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Community</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                        <a class="dropdown-item"
+                           href="/community/">Overview</a>
+                        <a class="dropdown-item"
+                           href="/community/who-we-are.html">Who We Are</a>
+                        <a class="dropdown-item"
+                           href="/community/mailing-lists.html">Mailing Lists</a>
+                        <a class="dropdown-item"
+                           href="https://issues.apache.org/jira/browse/MAHOUT">Issue Tracker</a>
+                        <a class="dropdown-item"
+                           href="/documentation/developers/">Developer Documentation</a>
+                        <a class="dropdown-item"
+                           href="/community/coc.html">Code of Conduct</a>
+                        <a class="dropdown-item"
+                           href="/404.html">Partners and Supporters</a>
+<!--                        Maybe make a new page that merges professional support and powered-by-mahout?-->
+                    </div>
+                </li>
+
+                <!-- News and Events -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-news-events"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">News and Events</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/news-and-events/news.html">Latest Project News</a>
+                        <a class="dropdown-item"
+                           href="/news-and-events/events.html">Upcoming Events</a>
+                        <a class="dropdown-item"
+                           href="/news-and-events/announcements.html">Announcements</a>
+                    </div>
+                </li>
+
+
+                <!-- GitHub -->
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
+                </li>
+
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8">
+      <h1 id="general">General</h1>
+
+<p>Communication at Mahout happens primarily online via mailing lists. We have
+a user as well as a dev list for discussion. In addition there is a commit
+list so we are able to monitor what happens on the wiki and in svn.</p>
+
+<p><a name="MailingLists,IRCandArchives-Mailinglists"></a></p>
+<h1 id="mailing-lists">Mailing lists</h1>
+
+<p><a name="MailingLists,IRCandArchives-MahoutUserList"></a></p>
+<h2 id="mahout-user-list">Mahout User List</h2>
+
+<p>This list is for users of Mahout to ask questions, share knowledge, and
+discuss issues. Do send mail to this list with usage and configuration
+questions and problems. Also, please send questions to this list to verify
+your problem before filing issues in JIRA.</p>
+
+<ul>
+  <li><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a></li>
+  <li><a href="mailto:user-unsubscribe@mahout.apache.org">Unsubscribe</a></li>
+</ul>
+
+<p><a name="MailingLists,IRCandArchives-MahoutDeveloperList"></a></p>
+<h2 id="mahout-developer-list">Mahout Developer List</h2>
+
+<p>This is the list where participating developers of the Mahout project meet
+and discuss issues concerning Mahout internals, code changes/additions,
+etc. Do not send mail to this list with usage questions or configuration
+questions and problems.</p>
+
+<p>Discussion list:</p>
+
+<ul>
+  <li><a href="mailto:dev-subscribe@mahout.apache.org">Subscribe</a>
+ – Do not send mail to this list with usage questions or configuration
+questions and problems.</li>
+  <li><a href="mailto:dev-unsubscribe@mahout.apache.org">Unsubscribe</a></li>
+</ul>
+
+<p>Commit notifications:</p>
+
+<ul>
+  <li><a href="mailto:commits-subscribe@mahout.apache.org">Subscribe</a></li>
+  <li><a href="mailto:commits-unsubscribe@mahout.apache.org">Unsubscribe</a></li>
+</ul>
+
+<p><a name="MailingLists,IRCandArchives-IRC"></a></p>
+<h1 id="irc">IRC</h1>
+
+<p>Mahout’s IRC channel is <strong>#mahout</strong>.  It is a logged channel.  Please keep in
+mind that it is for discussion purposes only and that (pseudo)decisions
+should be brought back to the dev@ mailing list or JIRA and other people
+who are not on IRC should be given time to respond before any work is
+committed.</p>
+
+<p><a name="MailingLists,IRCandArchives-Archives"></a></p>
+<h1 id="archives">Archives</h1>
+
+<p><a name="MailingLists,IRCandArchives-OfficialApacheArchive"></a></p>
+<h2 id="official-apache-archive">Official Apache Archive</h2>
+
+<ul>
+  <li><a href="http://mail-archives.apache.org/mod_mbox/mahout-dev/">http://mail-archives.apache.org/mod_mbox/mahout-dev/</a></li>
+  <li><a href="http://mail-archives.apache.org/mod_mbox/mahout-user/">http://mail-archives.apache.org/mod_mbox/mahout-user/</a></li>
+</ul>
+
+<p><a name="MailingLists,IRCandArchives-ExternalArchives"></a></p>
+<h2 id="external-archives">External Archives</h2>
+
+<ul>
+  <li><a href="http://mahout.markmail.org/">MarkMail</a></li>
+  <li><a href="http://dir.gmane.org/gmane.comp.apache.mahout.user">Gmane</a></li>
+</ul>
+
+<p>Please note the inclusion of a link to an archive does not imply an
+endorsement of that company by any of the committers of Mahout the Lucene
+PMC or the Apache Software Foundation. Each archive owner is solely
+responsible for the contents and availability of their archive.</p>
+
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Apache Software Foundation Links -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        Apache Software Foundation
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li>
+                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/licenses/">Apache License</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Twitter Posts Widget -->
+<div class="card">
+    <div class="card-body">
+        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
+        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+</div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2023 <a href="http://www.apache.org/">The Apache Software Foundation</a>, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+</body>
+
+</html>
