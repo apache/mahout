@@ -1,4 +1,72 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-07-27T18:17:45+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/07/26/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-07-26T08:00:00+00:00</published><updated>2023-07-26T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/07/26/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/07/26/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-call">Monthly community call</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-08-30T22:08:03+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/08/30/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-08-30T08:00:00+00:00</published><updated>2023-08-30T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/08/30/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/08/30/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-call">Monthly community call</h2>
+
+<h3 id="attendees">Attendees</h3>
+<ul>
+  <li>Andrew Musselman</li>
+  <li>Jowanza Joseph</li>
+  <li>Trevor Grant</li>
+</ul>
+
+<h3 id="recap-from-last-meeting">Recap from last meeting</h3>
+<ol>
+  <li>No material progress</li>
+</ol>
+
+<h3 id="jira-focus">JIRA focus</h3>
+<ol>
+  <li>TBD: Simple spike for matrix math on the IBM quantum compute platform</li>
+  <li>TBD: Assess all quantum platforms vis-a-vis interop and portability</li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2152">Web site check</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2153">Download page improvements</a></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-2154">Update NOTICE</a></li>
+  <li>In progress: <a href="https://issues.apache.org/jira/browse/MAHOUT-2149">Migrate off Travis</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2156">Add “how to do your first JIRA” notes</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2157">Add “first ticket” tag or type in JIRA</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2159">Add Docker instructions to nav</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2165">Docker image for web site build</a></li>
+</ol>
+
+<h3 id="release-plans">Release plans</h3>
+<ul>
+  <li>Aug: 14.2, point release with minor improvements and new build system</li>
+</ul>
+
+<h3 id="ideas">Ideas</h3>
+<ul>
+  <li>Quantum computing (IBM and Honeywell have free-tier APIs) XXXL</li>
+  <li>Python bindings for DSL (XXXL)</li>
+  <li>Automating or maintaining Docker images (XL, including docs)</li>
+  <li>New parsing and processing modules
+    <ol>
+      <li>Proof of concept blockchain data and metadata (XXL)</li>
+      <li>Proof of concept GPL/BSD/ALv2/MIT classifier (start with small tutorial)</li>
+    </ol>
+  </li>
+  <li>Live code environment (in-browser) to try DSL (XXL for a real version, start with simple env)</li>
+  <li>Language modeling
+    <ol>
+      <li>Guaranteed ALv2-licensed training models</li>
+      <li>Blessed chat/code recs</li>
+    </ol>
+  </li>
+  <li>Look at OpenNLP for tokenizing and other processing</li>
+  <li>New embedding similarity job</li>
+</ul>
+
+<h3 id="project-management">Project management</h3>
+<ul>
+  <li>Previous vote on PMC involvement passed: https://lists.apache.org/thread/stv6jjjx72gmgs3pg7lvwf1wmngmtnbs</li>
+</ul>
+
+<h3 id="summary-and-next-steps">Summary and next steps</h3>
+<ul>
+  <li>Continue monthly community calls</li>
+  <li>Complete JIRA focus</li>
+  <li>Get travis migration done, nightlies running</li>
+  <li>Push 14.2 out</li>
+  <li>Reach out to formerly active project members</li>
+  <li>JIRA ranching</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Monthly community call]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/07/26/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-07-26T08:00:00+00:00</published><updated>2023-07-26T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/07/26/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/07/26/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-call">Monthly community call</h2>
 
 <h3 id="attendees">Attendees</h3>
 <ul>
@@ -246,25 +314,4 @@ to see POC that DRMs will also “work” and then will sketch plan.</p>]]></con
 
 <p>No new issues.</p>
 
-<p>Will propose idea of moving meeting time on dev@m.a.o</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting minutes.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-11-13</title><link href="http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-11-13" /><published>2020-11-13T18:00:01+00:00</published><updated>2020-11-13T18:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/11/13/weekly-meeting-minutes.html"><![CDATA[<p>Weekly community meeting minutes.</p>
-
-<h3 id="collected-videos--conference-talks">Collected Videos / Conference Talks</h3>
-
-<p>Andrew Musselman is going to try to work on MAHOUT-2130 (Build talks page) this weekend. If you have / know of any 
-content, please send it to him or just add it after he launches the page.</p>
-
-<h3 id="issue-grooming">Issue Grooming</h3>
-
-<p>The following issues are all related</p>
-
-<ul>
-  <li>MAHOUT-2122 Create getting started on Docker page</li>
-  <li>MAHOUT-2134 Update Mahout in Zeppelin page</li>
-  <li>MAHOUT-2129 Rebuild website docs, add Getting started with Zeppelin to Nav</li>
-  <li>MAHOUT-2126 Update Zeppelin Containers</li>
-  <li>MAHOUT-2133 Update “Getting Started in Mahout” page.</li>
-</ul>
-
-<p>The narrative is- we should update (or replace) the getting started in Mahout page with Getting Started with Mahout in 
-Zeppelin. The Zeppelin Docker should have some more “Getting Started” Notebooks. The current Mahout in Zeppelin page 
-should point to the new Mahout in Zeppelin on Docker page. The nav should be updated to reflect all of this.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting minutes.]]></summary></entry></feed>
+<p>Will propose idea of moving meeting time on dev@m.a.o</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting minutes.]]></summary></entry></feed>
