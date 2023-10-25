@@ -71,8 +71,8 @@ jobs:
 
     - name: Setup Spark
       run: |
-        echo $SPARK_BIN
-        wget $SPARK_BIN
+        echo $SPARK_2_3
+        wget $SPARK_2_3
         tar -xzf *tgz
         spark*/sbin/start-all.sh
 
