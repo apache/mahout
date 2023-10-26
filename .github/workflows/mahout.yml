@@ -19,7 +19,8 @@ on:
   push:
     branches:
       - trunk
-
+  schedule:
+    - cron: '0 20 * * *'
 jobs:
   build:
 
