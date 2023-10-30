@@ -1,4 +1,65 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-10-26T20:00:25+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/09/27/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-09-27T08:00:00+00:00</published><updated>2023-09-27T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/09/27/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/09/27/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-call">Monthly community call</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-10-30T22:22:02+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-10-25T08:00:00+00:00</published><updated>2023-10-25T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-meeting">Monthly community meeting</h2>
+
+<h3 id="attendees">Attendees</h3>
+<ul>
+  <li>Andrew Musselman</li>
+  <li>Shannon Quinn</li>
+  <li>Jowanza Joseph</li>
+  <li>Trevor Grant</li>
+</ul>
+
+<h3 id="jira-focus">JIRA focus</h3>
+<ol>
+  <li>TBD: Updating Docker images</li>
+  <li>TBD: Live in-browser code environment</li>
+  <li>TBD: Simple spike for matrix math on the IBM quantum compute platform</li>
+  <li>TBD: Assess all quantum platforms vis-a-vis interop and portability</li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2152">Web site check</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2153">Download page improvements</a></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-2154">Update NOTICE</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2156">Add “how to do your first JIRA” notes</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2157">Add “first ticket” tag or type in JIRA</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2159">Add Docker instructions to nav</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2165">Docker image for web site build</a></li>
+  <li>Complete: <a href="https://issues.apache.org/jira/browse/MAHOUT-2149">Migrate off Travis</a></li>
+</ol>
+
+<h3 id="release-plans">Release plans</h3>
+<ul>
+  <li>Building web site and library code in GitHub Actions now</li>
+  <li>Nightly builds working</li>
+  <li>Nov: 14.2, point release with minor improvements and new build system</li>
+</ul>
+
+<h3 id="ideas">Ideas</h3>
+<ul>
+  <li>Quantum computing (IBM and Honeywell have free-tier APIs) XXXL</li>
+  <li>Python bindings for DSL (XXXL)</li>
+  <li>Automating or maintaining Docker images (XL, including docs)</li>
+  <li>New parsing and processing modules
+    <ol>
+      <li>Proof of concept blockchain data and metadata (XXL)</li>
+      <li>Proof of concept GPL/BSD/ALv2/MIT classifier (start with small tutorial)</li>
+    </ol>
+  </li>
+  <li>Live code environment (in-browser) to try DSL (XXL for a real version, start with simple env)</li>
+  <li>Language modeling
+    <ol>
+      <li>Guaranteed ALv2-licensed training models</li>
+      <li>Blessed chat/code recs</li>
+    </ol>
+  </li>
+  <li>Look at OpenNLP for tokenizing and other processing</li>
+  <li>New embedding similarity job</li>
+</ul>
+
+<h3 id="summary-and-next-steps">Summary and next steps</h3>
+<ul>
+  <li>DONE: Get travis migration done, nightlies running</li>
+  <li>TODO in Nov: Push 14.2 out</li>
+  <li>Reach out to formerly active project members</li>
+  <li>JIRA ranching</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Monthly community meeting]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/09/27/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-09-27T08:00:00+00:00</published><updated>2023-09-27T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/09/27/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/09/27/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-call">Monthly community call</h2>
 
 <h3 id="attendees">Attendees</h3>
 <ul>
@@ -361,17 +422,4 @@ the chapter on Mahout.</p>
 
 <p>Reminder- community calls are open to all. We’ll try to get a good link and post it to one of the minutes. In the mean
 time join dev@mahout.apache.org for the weekly link.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Andrew showed Trevor how to file his first board report.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-12-15</title><link href="http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-12-15" /><published>2020-12-15T22:00:01+00:00</published><updated>2020-12-15T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes.html"><![CDATA[<p>Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want
-to see POC that DRMs will also “work” and then will sketch plan.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want to see POC that DRMs will also “work” and then will sketch plan.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-12-08</title><link href="http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-12-08" /><published>2020-12-08T22:00:01+00:00</published><updated>2020-12-08T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/12/08/weekly-meeting-minutes.html"><![CDATA[<p>New Meeting time is Tuesdays, still hammering down final time.</p>
-
-<p>Musselman to continue work on 2130 (adding talks page).</p>
-
-<p>Trevor making (slow) progress wtih Py4J / Numpy / Python bindings (life getting in the way, but seems doable).</p>
-
-<p>Palumbo interested in FPGA-</p>
-<blockquote>
-  <p>Investigation: FPGA4Mahout, Mahout BLAS Subroutines  on FPGA.  we are considering integration of the fBLAS library for FPGA acceleration of BLAS subroutines on mahout.  fBLAS accepts JSON expressions of algebraic subroutines and generates OpenCL code with Just In Time compilation and FPGA flashing.  We are first considering a Naive approach upon evaluation to convert the computation graph of a mahout expression into JSON, compile and Flash the FPGA and stream data through the FPGA in SIMD vectored fashion.</p>
-
-  <p>The fBLAS library shows significant speedups over CPU BLAS operations.  If we find significant performance gains,  In conjunction with the current and ongoing effort to implement Python Bindings for Mahout, this could attract HPC developers with needs for near-real-time computation, by providing Python and Java bindings for FPGA accelerated matrix algebra available for distributed and in-core math.</p>
-
-  <p>An end goal of this effort would be to provide scientists,  engineers, and others with little to no Hardware experience a Zeppelin Notebook on which they could  can develop models or circuits, using the mahout DSL, while concurrntly programming the model onto an FPGA”</p>
-</blockquote>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[New Meeting time is Tuesdays, still hammering down final time.]]></summary></entry></feed>
+to see POC that DRMs will also “work” and then will sketch plan.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want to see POC that DRMs will also “work” and then will sketch plan.]]></summary></entry></feed>
