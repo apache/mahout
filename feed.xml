@@ -1,4 +1,49 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-10-30T22:22:02+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-10-25T08:00:00+00:00</published><updated>2023-10-25T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-meeting">Monthly community meeting</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2023-11-29T22:17:57+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/11/29/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-11-29T08:00:00+00:00</published><updated>2023-11-29T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/11/29/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/11/29/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-meeting">Monthly community meeting</h2>
+
+<h3 id="attendees">Attendees</h3>
+<ul>
+  <li>Andrew Musselman</li>
+  <li>Shannon Quinn</li>
+  <li>Trevor Grant</li>
+</ul>
+
+<h3 id="jira-focus">JIRA focus</h3>
+<ol>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2166">Proof of concept of quantum front-end</a></li>
+  <li>TBD: Updating Docker images</li>
+  <li>TBD: Live in-browser code environment</li>
+  <li>TBD: Simple spike for matrix math on the IBM quantum compute platform</li>
+  <li>TBD: Assess all quantum platforms vis-a-vis interop and portability</li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2152">Web site check</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2153">Download page improvements</a></li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-2154">Update NOTICE</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2156">Add “how to do your first JIRA” notes</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2157">Add “first ticket” tag or type in JIRA</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2159">Add Docker instructions to nav</a></li>
+  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2165">Docker image for web site build</a></li>
+  <li>Complete: <a href="https://issues.apache.org/jira/browse/MAHOUT-2149">Migrate off Travis</a></li>
+</ol>
+
+<h3 id="release-plans">Release plans</h3>
+<ul>
+  <li>Nov: 14.2, point release with minor improvements and new build system</li>
+</ul>
+
+<h3 id="active-ideas">Active Ideas</h3>
+<ul>
+  <li>Quantum computing</li>
+  <li>Python bindings for DSL</li>
+</ul>
+
+<h3 id="summary-and-next-steps">Summary and next steps</h3>
+<ul>
+  <li>TODO in Dec: Push 14.2 out</li>
+  <li>TODO Dec 3: Pair work (Trevor/Andrew) on beta of <code class="language-plaintext highlighter-rouge">mahout-q</code> <a href="https://issues.apache.org/jira/browse/MAHOUT-2166">Proof of concept of quantum front-end</a></li>
+  <li>TODO in Q12024: Submit proposal to NSF <a href="https://new.nsf.gov/funding/opportunities/pathways-enable-open-source-ecosystems-pose">Pathways to Enable Open-Source Ecosystems (POSE)</a></li>
+  <li>Reach out to formerly active project members</li>
+  <li>Reach out to quantum compute people</li>
+  <li>JIRA ranching</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Monthly community meeting]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-10-25T08:00:00+00:00</published><updated>2023-10-25T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/10/25/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-meeting">Monthly community meeting</h2>
 
 <h3 id="attendees">Attendees</h3>
 <ul>
@@ -421,5 +466,4 @@ the chapter on Mahout.</p>
 <p>Trevor needs to make a git repo to share with his experiments of Python+Mahout.</p>
 
 <p>Reminder- community calls are open to all. We’ll try to get a good link and post it to one of the minutes. In the mean
-time join dev@mahout.apache.org for the weekly link.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Andrew showed Trevor how to file his first board report.]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2020-12-15</title><link href="http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2020-12-15" /><published>2020-12-15T22:00:01+00:00</published><updated>2020-12-15T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2020/12/15/weekly-meeting-minutes.html"><![CDATA[<p>Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want
-to see POC that DRMs will also “work” and then will sketch plan.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want to see POC that DRMs will also “work” and then will sketch plan.]]></summary></entry></feed>
+time join dev@mahout.apache.org for the weekly link.</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Andrew showed Trevor how to file his first board report.]]></summary></entry></feed>
