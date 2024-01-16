@@ -1,4 +1,4 @@
-![QuMat Logo](images/mascot.png)
+![QuMat Logo](assets/mascot.png)
 
 # QuMat
 
