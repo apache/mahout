@@ -11,3 +11,6 @@ we're trying to distance ourselves from that comparison :P
 Check out [basic gates](basic_gates.md) for a quick introduction to the 
 basic gates which are basically all that exist right now (and even those 
 only exist for `qiskit`).
+
+You can also check out examples in the [examples](examples) directory. The 
+cool one is [quantum teleportation](examples/quantum_teleportation.py).

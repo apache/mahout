@@ -277,7 +277,7 @@ the particularities of each backend, so that you may 'write once, run
 anywhere.' Like the Java of quantum computing, but Java is the new COBOL so
 we're trying to distance ourselves from that comparison :P
 
-Check out [basic gates](basic_gates.md) for a quick introduction to the
+Check out [basic gates](docs/basic_gates.md) for a quick introduction to the
 basic gates which are basically all that exist right now (and even those
 only exist for `qiskit`).
 >>>>>>> 94f6b12ef (fix image links)
