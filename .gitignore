@@ -1,3 +1,4 @@
+
 output-asf-email-examples/
 .checkstyle
 .ruleset
@@ -29,3 +30,8 @@ website/_site
 website/Gemfile.lock
 website/.bundle
 website/.sass-cache
+
+*.iml
+.idea
+venv
+
