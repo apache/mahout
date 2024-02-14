@@ -1,4 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2024-01-31T22:39:40+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-01-31T08:00:00+00:00</published><updated>2024-01-31T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-meeting">Monthly community meeting</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2024-02-14T23:11:26+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/02/14/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-02-14T08:00:00+00:00</published><updated>2024-02-14T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/02/14/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/02/14/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
+
+<h3 id="attendees">Attendees</h3>
+<ul>
+  <li>Andrew Musselman</li>
+  <li>Trevor Grant</li>
+  <li>Tommy Naugle</li>
+</ul>
+
+<h3 id="old-business">Old Business</h3>
+<ol>
+  <li>Ask INFRA again about boards (done)</li>
+  <li>Create new board or adapt one for current work</li>
+  <li>Start meeting agenda and minutes doc and share (done)</li>
+  <li>Share agenda for next week by Monday (done)</li>
+</ol>
+
+<h3 id="new-business">New Business</h3>
+<ol>
+  <li>Rebuild JIRA - now that we have wiped it clean, on the qumat side anyway, lets start grooming tasks into the appropirate components/releases/etc (todo)</li>
+  <li>Including adding filters to all boards so only those tickets show up (todo)</li>
+  <li>A more formal mechanism for proposing / posting agendas (done: Agreed we will chime in on the-asf#mahout channel when agenda is posted)</li>
+  <li>Create new board or adapt one for current work (done)</li>
+  <li>Coordinate on JIRA
+    <ul>
+      <li>Web site cleanup (akm and tommy to work off tommy’s spreadsheet)</li>
+      <li>Python packaging (jowanza tagged on https://issues.apache.org/jira/browse/MAHOUT-2174)</li>
+      <li>Continued qumat data structure work (tommy in flight, akm to review)</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="other-business">Other Business</h3>
+<ul>
+  <li>JIRA hygiene with Shashanka in monthly Classic meeting</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-01-31T08:00:00+00:00</published><updated>2024-01-31T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-meeting">Monthly community meeting</h2>
 
 <h3 id="attendees">Attendees</h3>
 <ul>
@@ -482,17 +517,4 @@ tasks.</p>
 
 <p>Thanks, and good Mahout-ing!</p>
 
-<p>~ The Apache Mahout Team</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="tutorial" /><summary type="html"><![CDATA[Apache Zeppelin Quickstart]]></summary></entry><entry><title type="html">Weekly Meeting Minutes 2021-02-02</title><link href="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html" rel="alternate" type="text/html" title="Weekly Meeting Minutes 2021-02-02" /><published>2021-02-02T22:00:01+00:00</published><updated>2021-02-02T22:00:01+00:00</updated><id>http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2021/02/02/weekly-meeting-minutes.html"><![CDATA[<h3 id="recap-since-last-time">Recap Since Last Time</h3>
-
-<ul>
-  <li>Website build working again</li>
-  <li>josehernandezsc added Ridge Regression to <code class="language-plaintext highlighter-rouge">algorithms/</code> framework.</li>
-  <li>Trevor shared incore PyMahout git repo on mailing list- needs to POC for distributed.</li>
-</ul>
-
-<h3 id="projects-going-forward">Projects going forward</h3>
-
-<ul>
-  <li>Still need to do 5 related issues identified <a href="http://mahout.apache.org/minutes/2020/11/13/weekly-meeting-minutes.html">November 13th</a></li>
-  <li>Trevor to POC distribute Mahout in Python</li>
-</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Recap Since Last Time]]></summary></entry></feed>
+<p>~ The Apache Mahout Team</p>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="tutorial" /><summary type="html"><![CDATA[Apache Zeppelin Quickstart]]></summary></entry></feed>
