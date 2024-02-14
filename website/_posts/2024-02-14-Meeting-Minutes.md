@@ -18,8 +18,8 @@ category: minutes
 1. Share agenda for next week by Monday (done)
 
 ### New Business
-1. Rebuild JIRA - now that we have wiped it clean, on the qumat side anyway, lets start grooming tasks into the appropirate components/releases/etc (todo)
-1. Including adding filters to all boards so only those tickets show up (todo)
+1. Rebuild JIRA - now that we have wiped it clean, on the qumat side anyway, let's start grooming tasks into the appropriate components/releases/etc (todo)
+  * Including adding filters to all boards so only those tickets show up (todo)
 1. A more formal mechanism for proposing / posting agendas (done: Agreed we will chime in on the-asf#mahout channel when agenda is posted)
 1. Create new board or adapt one for current work (done)
 1. Coordinate on JIRA
