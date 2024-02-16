@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Bank Marketing Example
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,230 +173,54 @@
 </nav>
 
 
-  <div>
-  <header class="mahout-header">
-    <div class="mahout-header-upper">
-      <div class="container mt-auto">
-        <div class="row">
-          <div class="col-12">
-            <img src="/assets/mahout-logo-white.svg" alt="Apache Mahout">
-            <img class="asf-logo float-right" src="/assets/asf_logo_white.svg" alt="Apache Software Foundation">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="mahout-header-lower">
-      <div class="container position-relative mb-auto">
-        <h2 class="mb-4">For Creating Scalable Performant Machine Learning Applications</h2>
-        <a class="btn btn-lg btn-light btn-download mb-3" href="https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=mahout/14.1/mahout-14.1-source-release.zip"><i class="fa fa-download"></i> Download Mahout</a>
-        <div class="small text-white mx-auto">Currently v14.1</div>
-      </div>
-    </div>
-    <canvas id="waves" style="position: absolute; z-index: 0;"></canvas>
-  </header>
+  <p>Notice:    Licensed to the Apache Software Foundation (ASF) under one
+           or more contributor license agreements.  See the NOTICE file
+           distributed with this work for additional information
+           regarding copyright ownership.  The ASF licenses this file
+           to you under the Apache License, Version 2.0 (the
+           “License”); you may not use this file except in compliance
+           with the License.  You may obtain a copy of the License at
+           .
+             http://www.apache.org/licenses/LICENSE-2.0
+           .
+           Unless required by applicable law or agreed to in writing,
+           software distributed under the License is distributed on an
+           “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+           KIND, either express or implied.  See the License for the
+           specific language governing permissions and limitations
+           under the License.</p>
 
-  <div class="container mt-5 pb-4">
-    <div class="row">
-      <div class="col-lg-8">
-        <p>Apache Mahout(TM) is a <strong>distributed linear algebra framework</strong> and <strong>mathematically expressive Scala DSL</strong> designed to let mathematicians, statisticians, and data scientists quickly <em>implement their own algorithms</em>. Apache Spark is the recommended out-of-the-box distributed back-end, <em>or can be extended to other distributed backends.</em></p>
+<p>#Bank Marketing Example</p>
+
+<h3 id="introduction">Introduction</h3>
+
+<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
+The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
+of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+
+<h3 id="code--data">Code &amp; Data</h3>
+
+<p>The bank marketing example code lives under</p>
+
+<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
+
+<p>The data can be found at</p>
+
+<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
+
+<h3 id="code-details">Code details</h3>
+
+<p>This example consists of 3 classes:</p>
 
 <ul>
-  <li>Mathematically Expressive Scala DSL</li>
-  <li>Support for Multiple Distributed Backends (including Apache Spark)</li>
-  <li>Modular Native Solvers for CPU/GPU/CUDA Acceleration</li>
+  <li>BankMarketingClassificationMain</li>
+  <li>TelephoneCall</li>
+  <li>TelephoneCallParser</li>
 </ul>
 
-<h2 class="section-heading">Recent News</h2>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">November 29, 2023</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2023/11/29/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Monthly community meeting
-</p>
-        <a href="/minutes/2023/11/29/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">October 25, 2023</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2023/10/25/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Monthly community meeting
-</p>
-        <a href="/minutes/2023/10/25/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">September 27, 2023</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2023/09/27/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Monthly community call
-</p>
-        <a href="/minutes/2023/09/27/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">August 30, 2023</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2023/08/30/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Monthly community call
-</p>
-        <a href="/minutes/2023/08/30/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">July 26, 2023</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2023/07/26/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Monthly community call
-</p>
-        <a href="/minutes/2023/07/26/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-      </div>
-      <div class="col-lg-4">
-        <h2 class="section-heading">Sidebar Home</h2>
-        <!-- Apache Software Foundation Links -->
-<div class="card mb-4 sidebar">
-    <div class="card-header">
-        Apache Software Foundation
-    </div>
-    <div class="card-body">
-        <ul class="list-unstyled mb-0">
-            <li>
-                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/licenses/">Apache License</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-<!-- Twitter Posts Widget -->
-<div class="card">
-    <div class="card-body">
-        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
-        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
-</div>
-
-      </div>
-    </div>
-  </div>
-</div>
+<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
+a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
+to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
 
 
   <footer class="footer bg-light">
