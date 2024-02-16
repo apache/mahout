@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Wikipedia XML parser and Naive Bayes Example
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/wikipedia-classifier-example.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,54 +173,58 @@
 </nav>
 
 
-  <p>Notice:    Licensed to the Apache Software Foundation (ASF) under one
-           or more contributor license agreements.  See the NOTICE file
-           distributed with this work for additional information
-           regarding copyright ownership.  The ASF licenses this file
-           to you under the Apache License, Version 2.0 (the
-           “License”); you may not use this file except in compliance
-           with the License.  You may obtain a copy of the License at
-           .
-             http://www.apache.org/licenses/LICENSE-2.0
-           .
-           Unless required by applicable law or agreed to in writing,
-           software distributed under the License is distributed on an
-           “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-           KIND, either express or implied.  See the License for the
-           specific language governing permissions and limitations
-           under the License.</p>
+  <h1 id="wikipedia-xml-parser-and-naive-bayes-classifier-example">Wikipedia XML parser and Naive Bayes Classifier Example</h1>
 
-<p>#Bank Marketing Example</p>
+<h2 id="introduction">Introduction</h2>
+<p>Mahout has an <a href="https://github.com/apache/mahout/blob/master/examples/bin/classify-wikipedia.sh">example script</a> [1] which will download a recent XML dump of the (entire if desired) <a href="http://dumps.wikimedia.org/enwiki/latest/">English Wikipedia database</a>. After running the classification script, you can use the <a href="https://github.com/apache/mahout/blob/master/examples/bin/spark-document-classifier.mscala">document classification script</a> from the Mahout <a href="http://mahout.apache.org/users/sparkbindings/play-with-shell.html">spark-shell</a> to vectorize and classify text from outside of the training and testing corpus using a modle built on the Wikipedia dataset.</p>
 
-<h3 id="introduction">Introduction</h3>
+<p>You can run this script to build and test a Naive Bayes classifier for option (1) 10 arbitrary countries or option (2) 2 countries (United States and United Kingdom).</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+<h2 id="oververview">Oververview</h2>
 
-<h3 id="code--data">Code &amp; Data</h3>
+<p>Tou run the example simply execute the <code class="language-plaintext highlighter-rouge">$MAHOUT_HOME/examples/bin/classify-wikipedia.sh</code> script.</p>
 
-<p>The bank marketing example code lives under</p>
+<p>By defult the script is set to run on a medium sized Wikipedia XML dump.  To run on the full set (the entire english Wikipedia) you can change the download by commenting out line 78, and uncommenting line 80  of <a href="https://github.com/apache/mahout/blob/master/examples/bin/classify-wikipedia.sh">classify-wikipedia.sh</a> [1]. However this is not recommended unless you have the resources to do so. <em>Be sure to clean your work directory when changing datasets- option (3).</em></p>
 
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
+<p>The step by step process for Creating a Naive Bayes Classifier for the Wikipedia XML dump is very similar to that for <a href="http://mahout.apache.org/users/classification/twenty-newsgroups.html">creating a 20 Newsgroups Classifier</a> [4].  The only difference being that instead of running <code class="language-plaintext highlighter-rouge">$mahout seqdirectory</code> on the unzipped 20 Newsgroups file, you’ll run <code class="language-plaintext highlighter-rouge">$mahout seqwiki</code> on the unzipped Wikipedia xml dump.</p>
 
-<p>The data can be found at</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mahout seqwiki 
+</code></pre></div></div>
 
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
+<p>The above command launches <code class="language-plaintext highlighter-rouge">WikipediaToSequenceFile.java</code> which accepts a text file of categories [3] and starts an MR job to parse the each document in the XML file.  This process will seek to extract documents with a wikipedia category tag which (exactly, if the <code class="language-plaintext highlighter-rouge">-exactMatchOnly</code> option is set) matches a line in the category file.  If no match is found and the <code class="language-plaintext highlighter-rouge">-all</code> option is set, the document will be dumped into an “unknown” category. The documents will then be written out as a <code class="language-plaintext highlighter-rouge">&lt;Text,Text&gt;</code> sequence file of the form (K:/category/document_title , V: document).</p>
 
-<h3 id="code-details">Code details</h3>
+<p>There are 3 different example category files available to in the /examples/src/test/resources
+directory:  country.txt, country10.txt and country2.txt.  You can edit these categories to extract a different corpus from the Wikipedia dataset.</p>
 
-<p>This example consists of 3 classes:</p>
+<p>The CLI options for <code class="language-plaintext highlighter-rouge">seqwiki</code> are as follows:</p>
 
-<ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
-</ul>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--input          (-i)         input pathname String
+--output         (-o)         the output pathname String
+--categories     (-c)         the file containing the Wikipedia categories
+--exactMatchOnly (-e)         if set, then the Wikipedia category must match
+                                exactly instead of simply containing the category string
+--all            (-all)       if set select all categories
+--removeLabels   (-rl)        if set, remove [[Category:labels]] from document text after extracting label.
+</code></pre></div></div>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<p>After <code class="language-plaintext highlighter-rouge">seqwiki</code>, the script runs <code class="language-plaintext highlighter-rouge">seq2sparse</code>, <code class="language-plaintext highlighter-rouge">split</code>, <code class="language-plaintext highlighter-rouge">trainnb</code> and <code class="language-plaintext highlighter-rouge">testnb</code> as in the <a href="http://mahout.apache.org/users/classification/twenty-newsgroups.html">step by step 20newsgroups example</a>.  When all of the jobs have finished, a confusion matrix will be displayed.</p>
+
+<p>#Resourcese</p>
+
+<p>[1] <a href="https://github.com/apache/mahout/blob/master/examples/bin/classify-wikipedia.sh">classify-wikipedia.sh</a></p>
+
+<p>[2] <a href="https://github.com/apache/mahout/blob/master/examples/bin/spark-document-classifier.mscala">Document classification script for the Mahout Spark Shell</a></p>
+
+<p>[3] <a href="https://github.com/apache/mahout/blob/master/examples/src/test/resources/country10.txt">Example category file</a></p>
+
+<p>[4] <a href="http://mahout.apache.org/users/classification/twenty-newsgroups.html">Step by step instructions for building a Naive Bayes classifier for 20newsgroups from the command line</a></p>
+
+<p>[5] <a href="http://mahout.apache.org/users/classification/bayesian.html">Mahout MapReduce Naive Bayes</a></p>
+
+<p>[6] <a href="http://mahout.apache.org/users/algorithms/spark-naive-bayes.html">Mahout Spark Naive Bayes</a></p>
+
+<p>[7] <a href="http://mahout.apache.org/users/sparkbindings/home.html">Mahout Scala Spark and H2O Bindings</a></p>
+
 
 
   <footer class="footer bg-light">

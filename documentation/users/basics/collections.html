@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Collections
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/basics/collections.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,54 +173,111 @@
 </nav>
 
 
-  <p>Notice:    Licensed to the Apache Software Foundation (ASF) under one
-           or more contributor license agreements.  See the NOTICE file
-           distributed with this work for additional information
-           regarding copyright ownership.  The ASF licenses this file
-           to you under the Apache License, Version 2.0 (the
-           “License”); you may not use this file except in compliance
-           with the License.  You may obtain a copy of the License at
-           .
-             http://www.apache.org/licenses/LICENSE-2.0
-           .
-           Unless required by applicable law or agreed to in writing,
-           software distributed under the License is distributed on an
-           “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-           KIND, either express or implied.  See the License for the
-           specific language governing permissions and limitations
-           under the License.</p>
+  <p>TODO: Organize these somehow, add one-line blurbs</p>
 
-<p>#Bank Marketing Example</p>
+<p>Organize by usage? (classification, recommendation etc.)</p>
 
-<h3 id="introduction">Introduction</h3>
-
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
-
-<h3 id="code--data">Code &amp; Data</h3>
-
-<p>The bank marketing example code lives under</p>
-
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
-
-<p>The data can be found at</p>
-
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
-
-<h3 id="code-details">Code details</h3>
-
-<p>This example consists of 3 classes:</p>
+<p><a name="Collections-CollectionsofCollections"></a></p>
+<h2 id="collections-of-collections">Collections of Collections</h2>
 
 <ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
+  <li><a href="http://mldata.org/about/">ML Data</a>
+ … repository supported by Pascal 2.</li>
+  <li><a href="http://wiki.dbpedia.org/Downloads30">DBPedia</a></li>
+  <li><a href="http://archive.ics.uci.edu/ml/">UCI Machine Learning Repo</a></li>
+  <li><a href="http://mloss.org/community/blog/2008/sep/19/data-sources/">http://mloss.org/community/blog/2008/sep/19/data-sources/</a></li>
+  <li><a href="http://ckan.net/group/lld">Linked Library Data</a>
+ via CKAN</li>
+  <li><a href="http://infochimps.com/">InfoChimps</a>
+ Free and purchasable datasets</li>
+  <li><a href="http://www.linkedin.com/groupItem?view=&amp;srchtype=discussedNews&amp;gid=3638279&amp;item=35736572&amp;type=member&amp;trk=EML_anet_ac_pst_ttle">http://www.linkedin.com/groupItem?view=&amp;srchtype=discussedNews&amp;gid=3638279&amp;item=35736572&amp;type=member&amp;trk=EML_anet_ac_pst_ttle</a>
+ LinkedIn discussion of lots of data sets</li>
 </ul>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<p><a name="Collections-CategorizationData"></a></p>
+<h2 id="categorization-data">Categorization Data</h2>
+
+<ul>
+  <li><a href="http://people.csail.mit.edu/jrennie/20Newsgroups/">20Newsgroups</a></li>
+  <li><a href="http://jmlr.csail.mit.edu/papers/volume5/lewis04a/lyrl2004_rcv1v2_README.htm">RCV1 data set</a></li>
+  <li><a href="http://direct.dei.unipd.it/">10 years of CLEF Data</a></li>
+  <li><a href="http://ece.ut.ac.ir/DBRG/Hamshahri/">http://ece.ut.ac.ir/DBRG/Hamshahri/</a>
+ (Approximately 160k categorized docs)
+There is a newer beta verson here:<a href="http://ece.ut.ac.ir/DBRG/Hamshahri/ham2/">http://ece.ut.ac.ir/DBRG/Hamshahri/ham2/</a>
+ (Approximately 320k categorized docs)</li>
+  <li>Lending Club load data <a href="https://www.lendingclub.com/info/download-data.action">https://www.lendingclub.com/info/download-data.action</a></li>
+</ul>
+
+<p><a name="Collections-RecommendationData"></a></p>
+<h2 id="recommendation-data">Recommendation Data</h2>
+
+<ul>
+  <li><a href="http://library.hud.ac.uk/data/usagedata/">Book usage and recommendation data from the University of Huddersfield</a></li>
+  <li><a href="http://denoiserthebetter.posterous.com/music-recommendation-datasets">Last.fm</a>
+ - Non-commercial use only</li>
+  <li><a href="http://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html">Amazon Product Review Data via Jindal and Liu</a>
+ – Scroll down</li>
+  <li><a href="http://www.grouplens.org/node/73">GroupLens/MovieLens Movie Review Dataset</a></li>
+</ul>
+
+<p><a name="Collections-MultilingualData"></a></p>
+<h2 id="multilingual-data">Multilingual Data</h2>
+
+<ul>
+  <li><a href="http://urd.let.rug.nl/tiedeman/OPUS/OpenSubtitles.php">http://urd.let.rug.nl/tiedeman/OPUS/OpenSubtitles.php</a>
+ - 308,000 subtitle files covering about 18,900 movies in 59 languages
+(July 2006 numbers). This is a curated collection of subtitles from an
+aggregation site, [http://www.openSubTitles.org]
+The original site, OpenSubtitles.org, is up to 1.6m subtitles files.</li>
+  <li><a href="http://www.statmt.org/">Statistical Machine Translation</a>
+ - devoted to all things language translation. Includes multilingual
+corpuses of European and Canadian legal tomes.</li>
+</ul>
+
+<p><a name="Collections-Geospatial"></a></p>
+<h2 id="geospatial">Geospatial</h2>
+
+<ul>
+  <li><a href="http://www.naturalearthdata.com/">Natural Earth Data</a></li>
+  <li><a href="http://wiki.openstreetmap.org/wiki/Main_Page">Open Street Maps</a>
+And other crowd-sourced mapping data sites.</li>
+</ul>
+
+<p><a name="Collections-Airline"></a></p>
+<h2 id="airline">Airline</h2>
+
+<ul>
+  <li><a href="http://openflights.org/">Open Flights</a>
+ - Crowd-sourced database of airlines, flights, airports, times, etc.</li>
+  <li><a href="http://stat-computing.org/dataexpo/2009/">Airline on-time information - 1987-2008</a>
+ - 120m CSV records, 12G uncompressed</li>
+</ul>
+
+<p><a name="Collections-GeneralResources"></a></p>
+<h2 id="general-resources">General Resources</h2>
+
+<ul>
+  <li><a href="http://theinfo.org/">theinfo</a></li>
+  <li><a href="http://wordnet.princeton.edu/obtain">WordNet</a></li>
+  <li><a href="http://www.commoncrawl.org/">Common Crawl</a>
+ - freely available web crawl on EC2</li>
+</ul>
+
+<p><a name="Collections-Stuff"></a></p>
+<h2 id="stuff">Stuff</h2>
+
+<ul>
+  <li><a href="http://www.cs.technion.ac.il/~gabr/resources/data/ne_datasets.html">http://www.cs.technion.ac.il/~gabr/resources/data/ne_datasets.html</a></li>
+  <li><a href="http://www-2.cs.cmu.edu/afs/cs.cmu.edu/project/theo-20/www/data/">4 Universities Data Set</a></li>
+  <li><a href="http://an.kaist.ac.kr/traces/WWW2010.html">Large crawl of Twitter</a></li>
+  <li><a href="http://beta.uniprot.org/">UniProt</a></li>
+  <li><a href="http://www.icwsm.org/2009/data/">http://www.icwsm.org/2009/data/</a></li>
+  <li><a href="http://data.gov">http://data.gov</a></li>
+  <li><a href="http://www.ckan.net/">http://www.ckan.net/</a></li>
+  <li><a href="http://www.guardian.co.uk/news/datablog/2010/jan/07/government-data-world">http://www.guardian.co.uk/news/datablog/2010/jan/07/government-data-world</a></li>
+  <li><a href="http://data.gov.uk/">http://data.gov.uk/</a></li>
+  <li><a href="http://www.ark.cs.cmu.edu/bills/">51,000 US Congressional Bills tagged</a></li>
+</ul>
 
 
   <footer class="footer bg-light">

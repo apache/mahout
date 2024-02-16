@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Principal Components Analysis
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/basics/principal-components-analysis.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,54 +173,30 @@
 </nav>
 
 
-  <p>Notice:    Licensed to the Apache Software Foundation (ASF) under one
-           or more contributor license agreements.  See the NOTICE file
-           distributed with this work for additional information
-           regarding copyright ownership.  The ASF licenses this file
-           to you under the Apache License, Version 2.0 (the
-           “License”); you may not use this file except in compliance
-           with the License.  You may obtain a copy of the License at
-           .
-             http://www.apache.org/licenses/LICENSE-2.0
-           .
-           Unless required by applicable law or agreed to in writing,
-           software distributed under the License is distributed on an
-           “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-           KIND, either express or implied.  See the License for the
-           specific language governing permissions and limitations
-           under the License.</p>
+  <p><a name="PrincipalComponentsAnalysis-PrincipalComponentsAnalysis"></a></p>
+<h1 id="principal-components-analysis">Principal Components Analysis</h1>
 
-<p>#Bank Marketing Example</p>
-
-<h3 id="introduction">Introduction</h3>
-
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
-
-<h3 id="code--data">Code &amp; Data</h3>
-
-<p>The bank marketing example code lives under</p>
-
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
-
-<p>The data can be found at</p>
-
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
-
-<h3 id="code-details">Code details</h3>
-
-<p>This example consists of 3 classes:</p>
+<p>PCA is used to reduce high dimensional data set to lower dimensions. PCA
+can be used to identify patterns in data, express the data in a lower
+dimensional space. That way, similarities and differences can be
+highlighted. It is mostly used in face recognition and image compression.
+There are several flaws one has to be aware of when working with PCA:</p>
 
 <ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
+  <li>Linearity assumption - data is assumed to be linear combinations of some
+basis. There exist non-linear methods such as kernel PCA that alleviate
+that problem.</li>
+  <li>Principal components are assumed to be orthogonal. ICA tries to cope with
+this limitation.</li>
+  <li>Mean and covariance are assumed to be statistically important.</li>
+  <li>Large variances are assumed to have important dynamics.</li>
 </ul>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<p><a name="PrincipalComponentsAnalysis-Parallelizationstrategy"></a></p>
+<h2 id="parallelization-strategy">Parallelization strategy</h2>
+
+<p><a name="PrincipalComponentsAnalysis-Designofpackages"></a></p>
+<h2 id="design-of-packages">Design of packages</h2>
 
 
   <footer class="footer bg-light">

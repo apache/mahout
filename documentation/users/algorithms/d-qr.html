@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Distributed Cholesky QR
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/algorithms/d-qr.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,54 +173,51 @@
 </nav>
 
 
-  <p>Notice:    Licensed to the Apache Software Foundation (ASF) under one
-           or more contributor license agreements.  See the NOTICE file
-           distributed with this work for additional information
-           regarding copyright ownership.  The ASF licenses this file
-           to you under the Apache License, Version 2.0 (the
-           “License”); you may not use this file except in compliance
-           with the License.  You may obtain a copy of the License at
-           .
-             http://www.apache.org/licenses/LICENSE-2.0
-           .
-           Unless required by applicable law or agreed to in writing,
-           software distributed under the License is distributed on an
-           “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-           KIND, either express or implied.  See the License for the
-           specific language governing permissions and limitations
-           under the License.</p>
+  <h1 id="distributed-cholesky-qr">Distributed Cholesky QR</h1>
 
-<p>#Bank Marketing Example</p>
+<h2 id="intro">Intro</h2>
 
-<h3 id="introduction">Introduction</h3>
+<p>Mahout has a distributed implementation of QR decomposition for tall thin matrices<a href="[Mahout Scala and Mahout Spark Bindings for Linear Algebra Subroutines](http://mahout.apache.org/users/sparkbindings/ScalaSparkBindings.pdf)">1</a>.</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+<h2 id="algorithm">Algorithm</h2>
 
-<h3 id="code--data">Code &amp; Data</h3>
+<p>For the classic QR decomposition of the form <code class="language-plaintext highlighter-rouge">\(\mathbf{A}=\mathbf{QR},\mathbf{A}\in\mathbb{R}^{m\times n}\)</code> a distributed version is fairly easily achieved if <code class="language-plaintext highlighter-rouge">\(\mathbf{A}\)</code> is tall and thin such that <code class="language-plaintext highlighter-rouge">\(\mathbf{A}^{\top}\mathbf{A}\)</code> fits in memory, i.e. <em>m</em> is large but <em>n</em> &lt; ~5000 Under such circumstances, only <code class="language-plaintext highlighter-rouge">\(\mathbf{A}\)</code> and <code class="language-plaintext highlighter-rouge">\(\mathbf{Q}\)</code> are distributed matrices and <code class="language-plaintext highlighter-rouge">\(\mathbf{A^{\top}A}\)</code> and <code class="language-plaintext highlighter-rouge">\(\mathbf{R}\)</code> are in-core products. We just compute the in-core version of the Cholesky decomposition in the form of <code class="language-plaintext highlighter-rouge">\(\mathbf{LL}^{\top}= \mathbf{A}^{\top}\mathbf{A}\)</code>.  After that we take <code class="language-plaintext highlighter-rouge">\(\mathbf{R}= \mathbf{L}^{\top}\)</code> and <code class="language-plaintext highlighter-rouge">\(\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}\)</code>.  The latter is easily achieved by multiplying each vertical block of <code class="language-plaintext highlighter-rouge">\(\mathbf{A}\)</code> by <code class="language-plaintext highlighter-rouge">\(\left(\mathbf{L}^{\top}\right)^{-1}\)</code>.  (There is no actual matrix inversion happening).</p>
 
-<p>The bank marketing example code lives under</p>
+<h2 id="implementation">Implementation</h2>
 
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
+<p>Mahout <code class="language-plaintext highlighter-rouge">dqrThin(...)</code> is implemented in the mahout <code class="language-plaintext highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<p>The data can be found at</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {        
+    if (drmA.ncol &gt; 5000)
+        log.warn("A is too fat. A'A must fit in memory and easily broadcasted.")
+    implicit val ctx = drmA.context
+    val AtA = (drmA.t %*% drmA).checkpoint()
+    val inCoreAtA = AtA.collect
+    val ch = chol(inCoreAtA)
+    val inCoreR = (ch.getL cloned) t
+    if (checkRankDeficiency &amp;&amp; !ch.isPositiveDefinite)
+        throw new IllegalArgumentException("R is rank-deficient.")
+    val bcastAtA = sc.broadcast(inCoreAtA)
+    val Q = A.mapBlock() {
+        case (keys, block) =&gt; keys -&gt; chol(bcastAtA).solveRight(block)
+    }
+    Q -&gt; inCoreR
+}
+</code></pre></div></div>
 
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
+<h2 id="usage">Usage</h2>
 
-<h3 id="code-details">Code details</h3>
+<p>The scala <code class="language-plaintext highlighter-rouge">dqrThin(...)</code> method can easily be called in any Spark or H2O application built with the <code class="language-plaintext highlighter-rouge">math-scala</code> library and the corresponding <code class="language-plaintext highlighter-rouge">Spark</code> or <code class="language-plaintext highlighter-rouge">H2O</code> engine module as follows:</p>
 
-<p>This example consists of 3 classes:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.mahout.math._
+import decompositions._
+import drm._
 
-<ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
-</ul>
+val(drmQ, inCoreR) = dqrThin(drma)
+</code></pre></div></div>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<h2 id="references">References</h2>
+
 
 
   <footer class="footer bg-light">

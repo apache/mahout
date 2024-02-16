@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    NaiveBayes
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/naivebayes.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,54 +173,45 @@
 </nav>
 
 
-  <p>Notice:    Licensed to the Apache Software Foundation (ASF) under one
-           or more contributor license agreements.  See the NOTICE file
-           distributed with this work for additional information
-           regarding copyright ownership.  The ASF licenses this file
-           to you under the Apache License, Version 2.0 (the
-           “License”); you may not use this file except in compliance
-           with the License.  You may obtain a copy of the License at
-           .
-             http://www.apache.org/licenses/LICENSE-2.0
-           .
-           Unless required by applicable law or agreed to in writing,
-           software distributed under the License is distributed on an
-           “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-           KIND, either express or implied.  See the License for the
-           specific language governing permissions and limitations
-           under the License.</p>
+  <p><a name="NaiveBayes-NaiveBayes"></a></p>
+<h1 id="naive-bayes">Naive Bayes</h1>
 
-<p>#Bank Marketing Example</p>
+<p>Naive Bayes is an algorithm that can be used to classify objects into
+usually binary categories. It is one of the most common learning algorithms
+in spam filters. Despite its simplicity and rather naive assumptions it has
+proven to work surprisingly well in practice.</p>
 
-<h3 id="introduction">Introduction</h3>
+<p>Before applying the algorithm, the objects to be classified need to be
+represented by numerical features. In the case of e-mail spam each feature
+might indicate whether some specific word is present or absent in the mail
+to classify. The algorithm comes in two phases: Learning and application.
+During learning, a set of feature vectors is given to the algorithm, each
+vector labeled with the class the object it represents, belongs to. From
+that it is deduced which combination of features appears with high
+probability in spam messages. Given this information, during application
+one can easily compute the probability of a new message being either spam
+or not.</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+<p>The algorithm does make several assumptions, that are not true for most
+datasets, but make computations easier. The worst probably being, that all
+features of an objects are considered independent. In practice, that means,
+given the phrase “Statue of Liberty” was already found in a text, does not
+influence the probability of seeing the phrase “New York” as well.</p>
 
-<h3 id="code--data">Code &amp; Data</h3>
+<p><a name="NaiveBayes-StrategyforaparallelNaiveBayes"></a></p>
+<h2 id="strategy-for-a-parallel-naive-bayes">Strategy for a parallel Naive Bayes</h2>
 
-<p>The bank marketing example code lives under</p>
+<p>See <a href="https://issues.apache.org/jira/browse/MAHOUT-9">https://issues.apache.org/jira/browse/MAHOUT-9</a>
+.</p>
 
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
+<p><a name="NaiveBayes-Examples"></a></p>
+<h2 id="examples">Examples</h2>
 
-<p>The data can be found at</p>
-
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
-
-<h3 id="code-details">Code details</h3>
-
-<p>This example consists of 3 classes:</p>
-
+<p><a href="20newsgroups.html">20Newsgroups</a></p>
 <ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
+  <li>Example code showing how to train and use the Naive Bayes classifier
+using the 20 Newsgroups data available at [http://people.csail.mit.edu/jrennie/20Newsgroups/]</li>
 </ul>
-
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
 
 
   <footer class="footer bg-light">
