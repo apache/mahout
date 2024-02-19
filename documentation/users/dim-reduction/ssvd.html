@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Stochastic SVD
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/dim-reduction/ssvd.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,37 +173,129 @@
 </nav>
 
 
-  <p>#Bank Marketing Example</p>
+  <h1 id="stochastic-singular-value-decomposition">Stochastic Singular Value Decomposition</h1>
 
-<h3 id="introduction">Introduction</h3>
+<p>Stochastic SVD method in Mahout produces reduced rank Singular Value Decomposition output in its 
+strict mathematical definition: ` (\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top})`.</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
-
-<h3 id="code--data">Code &amp; Data</h3>
-
-<p>The bank marketing example code lives under</p>
-
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
-
-<p>The data can be found at</p>
-
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
-
-<h3 id="code-details">Code details</h3>
-
-<p>This example consists of 3 classes:</p>
+<p>##The benefits over other methods are:</p>
 
 <ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
+  <li>
+    <p>reduced flops required compared to Krylov subspace methods</p>
+  </li>
+  <li>
+    <p>In map-reduce world, a fixed number of MR iterations required regardless of rank requested</p>
+  </li>
+  <li>
+    <p>Tweak precision/speed balance with options.</p>
+  </li>
+  <li>
+    <p>A is a Distributed Row Matrix where rows may be identified by any Writable (such as a document path). As such, it would work directly on the output of seq2sparse.</p>
+  </li>
+  <li>
+    <p>As of 0.7 trunk, includes PCA and dimensionality reduction workflow (EXPERIMENTAL! Feedback on performance/other PCA related issues/ blogs is greatly appreciated.)</p>
+  </li>
 </ul>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<h3 id="map-reduce-characteristics">Map-Reduce characteristics:</h3>
+<p>SSVD uses at most 3 MR sequential steps (map-only + map-reduce + 2 optional parallel map-reduce jobs) to produce reduced rank approximation of U, V and S matrices. Additionally, two more map-reduce steps are added for each power iteration step if requested.</p>
+
+<p>##Potential drawbacks:</p>
+
+<p>potentially less precise (but adding even one power iteration seems to fix that quite a bit).</p>
+
+<p>##Documentation</p>
+
+<p><a href="ssvd.page/SSVD-CLI.pdf">Overview and Usage</a></p>
+
+<p>Note: Please use 0.6 or later! for PCA workflow, please use 0.7 or later.</p>
+
+<p>##Publications</p>
+
+<p><a href="http://amath.colorado.edu/faculty/martinss/Pubs/2012_halko_dissertation.pdf">Nathan Halko’s dissertation</a> “Randomized methods for computing low-rank
+approximations of matrices” contains comprehensive definition of parallelization strategy taken in Mahout SSVD implementation and also some precision/scalability benchmarks, esp. w.r.t. Mahout Lanczos implementation on a typical corpus data set.</p>
+
+<p><a href="http://arxiv.org/abs/0909.4061">Halko, Martinsson, Tropp</a> paper discusses family of random projection-based algorithms and contains theoretical error estimates.</p>
+
+<p><strong>R simulation</strong></p>
+
+<p><a href="ssvd.page/ssvd.R">Non-parallel SSVD simulation in R</a> with power iterations and PCA options. Note that this implementation is not most optimal for sequential flow solver, but it is for demonstration purposes only.</p>
+
+<p>However, try this R code to simulate a meaningful input:</p>
+
+<p><strong>tests.R</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>n&lt;-1000
+m&lt;-2000
+k&lt;-10
+ 
+qi&lt;-1
+ 
+#simulated input
+svalsim&lt;-diag(k:1)
+ 
+usim&lt;- qr.Q(qr(matrix(rnorm(m*k, mean=3), nrow=m,ncol=k)))
+vsim&lt;- qr.Q(qr( matrix(rnorm(n*k,mean=5), nrow=n,ncol=k)))
+ 
+ 
+x&lt;- usim %*% svalsim %*% t(vsim)
+</code></pre></div></div>
+
+<p>and try to compare ssvd.svd(x) and stock svd(x) performance for the same rank k, notice the difference in the running time. Also play with power iterations (qIter) and compare accuracies of standard svd and SSVD.</p>
+
+<p>Note: numerical stability of R algorithms may differ from that of Mahout’s distributed version. We haven’t studied accuracy of the R simulation. For study of accuracy of Mahout’s version, please refer to Nathan’s dissertation as referenced above.</p>
+
+<h4 id="modified-ssvd-algorithm">Modified SSVD Algorithm.</h4>
+
+<p>Given an <code class="language-plaintext highlighter-rouge">\(m\times n\)</code>
+matrix <code class="language-plaintext highlighter-rouge">\(\mathbf{A}\)</code>, a target rank <code class="language-plaintext highlighter-rouge">\(k\in\mathbb{N}_{1}\)</code>
+, an oversampling parameter <code class="language-plaintext highlighter-rouge">\(p\in\mathbb{N}_{1}\)</code>, 
+and the number of additional power iterations <code class="language-plaintext highlighter-rouge">\(q\in\mathbb{N}_{0}\)</code>, 
+this procedure computes an <code class="language-plaintext highlighter-rouge">\(m\times\left(k+p\right)\)</code>
+SVD <code class="language-plaintext highlighter-rouge">\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)</code>:</p>
+
+<ol>
+  <li>
+    <p>Create seed for random <code class="language-plaintext highlighter-rouge">\(n\times\left(k+p\right)\)</code>
+  matrix <code class="language-plaintext highlighter-rouge">\(\boldsymbol{\Omega}\)</code>. The seed defines matrix <code class="language-plaintext highlighter-rouge">\(\mathbf{\Omega}\)</code>
+  using Gaussian unit vectors per one of suggestions in <a href="http://arxiv.org/abs/0909.4061">Halko, Martinsson, Tropp</a>.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">\(\mathbf{Y=A\boldsymbol{\Omega}},\,\mathbf{Y}\in\mathbb{R}^{m\times\left(k+p\right)}\)</code></p>
+  </li>
+  <li>
+    <p>Column-orthonormalize <code class="language-plaintext highlighter-rouge">\(\mathbf{Y}\rightarrow\mathbf{Q}\)</code>
+  by computing thin decomposition <code class="language-plaintext highlighter-rouge">\(\mathbf{Y}=\mathbf{Q}\mathbf{R}\)</code>.
+  Also, <code class="language-plaintext highlighter-rouge">\(\mathbf{Q}\in\mathbb{R}^{m\times\left(k+p\right)},\,\mathbf{R}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)</code>.
+  I denote this as <code class="language-plaintext highlighter-rouge">\(\mathbf{Q}=\mbox{qr}\left(\mathbf{Y}\right).\mathbf{Q}\)</code></p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">\(\mathbf{B}_{0}=\mathbf{Q}^{\top}\mathbf{A}:\,\,\mathbf{B}\in\mathbb{R}^{\left(k+p\right)\times n}\)</code>.</p>
+  </li>
+  <li>
+    <p>If <code class="language-plaintext highlighter-rouge">\(q&gt;0\)</code>
+  repeat: for <code class="language-plaintext highlighter-rouge">\(i=1..q\)</code>: 
+  <code class="language-plaintext highlighter-rouge">\(\mathbf{B}_{i}^{\top}=\mathbf{A}^{\top}\mbox{qr}\left(\mathbf{A}\mathbf{B}_{i-1}^{\top}\right).\mathbf{Q}\)</code>
+  (power iterations step).</p>
+  </li>
+  <li>
+    <p>Compute Eigensolution of a small Hermitian <code class="language-plaintext highlighter-rouge">\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}=\mathbf{\hat{U}}\boldsymbol{\Lambda}\mathbf{\hat{U}}^{\top}\)</code>,
+  <code class="language-plaintext highlighter-rouge">\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)</code>.</p>
+  </li>
+  <li>
+    <p>Singular values <code class="language-plaintext highlighter-rouge">\(\mathbf{\boldsymbol{\Sigma}}=\boldsymbol{\Lambda}^{0.5}\)</code>,
+  or, in other words, <code class="language-plaintext highlighter-rouge">\(s_{i}=\sqrt{\sigma_{i}}\)</code>.</p>
+  </li>
+  <li>
+    <p>If needed, compute <code class="language-plaintext highlighter-rouge">\(\mathbf{U}=\mathbf{Q}\hat{\mathbf{U}}\)</code>.</p>
+  </li>
+  <li>
+    <p>If needed, compute <code class="language-plaintext highlighter-rouge">\(\mathbf{V}=\mathbf{B}_{q}^{\top}\hat{\mathbf{U}}\boldsymbol{\Sigma}^{-1}\)</code>.
+Another way is <code class="language-plaintext highlighter-rouge">\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^{-1}\)</code>.</p>
+  </li>
+</ol>
+
 
 
   <footer class="footer bg-light">

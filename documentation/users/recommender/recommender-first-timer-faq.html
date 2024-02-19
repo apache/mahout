@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Recommender First-Timer FAQ
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/recommender/recommender-first-timer-faq.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,37 +173,53 @@
 </nav>
 
 
-  <p>#Bank Marketing Example</p>
+  <h1 id="recommender-first-timer-dos-and-donts">Recommender First Timer Dos and Don’ts</h1>
 
-<h3 id="introduction">Introduction</h3>
+<p>Many people with an interest in recommenders arrive at Mahout since they’re
+building a first recommender system. Some starting questions have been
+asked enough times to warrant a FAQ collecting advice and rules-of-thumb to
+newcomers.</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+<p>For the interested, these topics are treated in detail in the book <a href="http://manning.com/owen/">Mahout in Action</a>.</p>
 
-<h3 id="code--data">Code &amp; Data</h3>
+<p>Don’t start with a distributed, Hadoop-based recommender; take on that
+complexity only if necessary. Start with non-distributed recommenders. It
+is simpler, has fewer requirements, and is more flexible.</p>
 
-<p>The bank marketing example code lives under</p>
+<p>As a crude rule of thumb, a system with up to 100M user-item associations
+(ratings, preferences) should “fit” onto one modern server machine with 4GB
+of heap available and run acceptably as a real-time recommender. The system
+is invariably memory-bound since keeping data in memory is essential to
+performance.</p>
 
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
+<p>Beyond this point it gets expensive to deploy a machine with enough RAM,
+so, designing for a distributed makes sense when nearing this scale.
+However most applications don’t “really” have 100M associations to process.
+Data can be sampled; noisy and old data can often be aggressively pruned
+without significant impact on the result.</p>
 
-<p>The data can be found at</p>
+<p>The next question is whether or not your system has preference values, or
+ratings. Do users and items merely have an association or not, such as the
+existence or lack of a click? or is behavior translated into some scalar
+value representing the user’s degree of preference for the item.</p>
 
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
+<p>If you have ratings, then a good place to start is a
+GenericItemBasedRecommender, plus a PearsonCorrelationSimilarity similarity
+metric. If you don’t have ratings, then a good place to start is
+GenericBooleanPrefItemBasedRecommender and LogLikelihoodSimilarity.</p>
 
-<h3 id="code-details">Code details</h3>
+<p>If you want to do content-based item-item similarity, you need to implement
+your own ItemSimilarity.</p>
 
-<p>This example consists of 3 classes:</p>
+<p>If your data can be simply exported to a CSV file, use FileDataModel and
+push new files periodically.
+If your data is in a database, use MySQLJDBCDataModel (or its “BooleanPref”
+counterpart if appropriate, or its PostgreSQL counterpart, etc.) and put on
+top a ReloadFromJDBCDataModel.</p>
 
-<ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
-</ul>
-
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<p>This should give a reasonable starter system which responds fast. The
+nature of the system is that new data comes in from the file or database
+only periodically – perhaps on the order of minutes.</p>
 
 
   <footer class="footer bg-light">

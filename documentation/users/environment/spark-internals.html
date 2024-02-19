@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/environment/spark-internals.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,37 +173,21 @@
 </nav>
 
 
-  <p>#Bank Marketing Example</p>
+  <h1 id="introduction">Introduction</h1>
 
-<h3 id="introduction">Introduction</h3>
+<p>This document provides an overview of how the Mahout Scala DSL (distributed algebraic operators) is implemented over the Spark back end engine. The document is aimed at Mahout developers, to give a high level description of the design.</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+<h2 id="spark-overview">Spark Overview</h2>
 
-<h3 id="code--data">Code &amp; Data</h3>
+<h2 id="spark-data-model">Spark Data Model</h2>
 
-<p>The bank marketing example code lives under</p>
+<h2 id="mahout-drm">Mahout DRM</h2>
 
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
+<p>Mahout DRM, or Distributed Row Matrix, is an abstraction for storing a large matrix of numbers in-memory in a cluster by distributing logical rows among servers. The DSL provides an abstract API on DRMs for backend engines to provide implementations of this API. Examples are Spark and H2O backend engines. Each engine has its own design of mapping the abstract API onto its data model and provide implementations for algebraic operators over that mapping.</p>
 
-<p>The data can be found at</p>
+<h2 id="spark-dsl-engine">Spark DSL Engine</h2>
 
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
-
-<h3 id="code-details">Code details</h3>
-
-<p>This example consists of 3 classes:</p>
-
-<ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
-</ul>
-
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<h2 id="source-layout">Source Layout</h2>
 
 
   <footer class="footer bg-light">

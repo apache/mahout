@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Clustering of synthetic control data
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/clustering/clustering-of-synthetic-control-data.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,37 +173,65 @@
 </nav>
 
 
-  <p>#Bank Marketing Example</p>
+  <h1 id="clustering-synthetic-control-data">Clustering synthetic control data</h1>
 
-<h3 id="introduction">Introduction</h3>
+<h2 id="introduction">Introduction</h2>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+<p>This example will demonstrate clustering of time series data, specifically control charts. <a href="http://en.wikipedia.org/wiki/Control_chart">Control charts</a> are tools used to determine whether a manufacturing or business process is in a state of statistical control. Such control charts are generated / simulated repeatedly at equal time intervals. A <a href="http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data.html">simulated dataset</a> is available for use in UCI machine learning repository.</p>
 
-<h3 id="code--data">Code &amp; Data</h3>
+<p>A time series of control charts needs to be clustered into their close knit groups. The data set we use is synthetic and is meant to resemble real world information in an anonymized format. It contains six different classes: Normal, Cyclic, Increasing trend, Decreasing trend, Upward shift, Downward shift. In this example we will use Mahout to cluster the data into corresponding class buckets.</p>
 
-<p>The bank marketing example code lives under</p>
+<p><em>For the sake of simplicity, we won’t use a cluster in this example, but instead show you the commands to run the clustering examples locally with Hadoop</em>.</p>
 
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
+<h2 id="setup">Setup</h2>
 
-<p>The data can be found at</p>
+<p>We need to do some initial setup before we are able to run the example.</p>
 
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
+<ol>
+  <li>
+    <p>Start out by downloading the dataset to be clustered from the UCI Machine Learning Repository: <a href="http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data">http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data</a>.</p>
+  </li>
+  <li>
+    <p>Download the <a href="/general/downloads.html">latest release of Mahout</a>.</p>
+  </li>
+  <li>
+    <p>Unpack the release binary and switch to the <em>mahout-distribution-0.x</em> folder</p>
+  </li>
+  <li>
+    <p>Make sure that the <em>JAVA_HOME</em> environment variable points to your local java installation</p>
+  </li>
+  <li>
+    <p>Create a folder called <em>testdata</em> in the current directory and copy the dataset into this folder.</p>
+  </li>
+</ol>
 
-<h3 id="code-details">Code details</h3>
+<h2 id="clustering-examples">Clustering Examples</h2>
 
-<p>This example consists of 3 classes:</p>
+<p>Depending on the clustering algorithm you want to run, the following commands can be used:</p>
 
 <ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
+  <li><a href="/users/clustering/canopy-clustering.html">Canopy Clustering</a></li>
 </ul>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.clustering.syntheticcontrol.canopy.Job
+</code></pre></div></div>
+
+<ul>
+  <li><a href="/users/clustering/k-means-clustering.html">k-Means Clustering</a></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.clustering.syntheticcontrol.kmeans.Job
+</code></pre></div></div>
+
+<ul>
+  <li><a href="/users/clustering/fuzzy-k-means.html">Fuzzy k-Means Clustering</a></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.clustering.syntheticcontrol.fuzzykmeans.Job
+</code></pre></div></div>
+
+<p>The clustering output will be produced in the <em>output</em> directory. The output data points are in vector format. In order to read/analyze the output, you can use the <a href="/users/clustering/cluster-dumper.html">clusterdump</a> utility provided by Mahout.</p>
+
 
 
   <footer class="footer bg-light">

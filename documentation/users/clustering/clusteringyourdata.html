@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    ClusteringYourData
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/clustering/clusteringyourdata.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,37 +173,132 @@
 </nav>
 
 
-  <p>#Bank Marketing Example</p>
+  <h1 id="clustering-your-data">Clustering your data</h1>
 
-<h3 id="introduction">Introduction</h3>
+<p>After you’ve done the <a href="quickstart.html">Quickstart</a> and are familiar with the basics of Mahout, it is time to cluster your own
+data. See also <a href="en.wikipedia.org/wiki/Cluster_analysis">Wikipedia on cluster analysis</a> for more background.</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+<p>The following pieces <em>may</em> be useful for in getting started:</p>
 
-<h3 id="code--data">Code &amp; Data</h3>
+<p><a name="ClusteringYourData-Input"></a></p>
+<h1 id="input">Input</h1>
 
-<p>The bank marketing example code lives under</p>
+<p>For starters, you will need your data in an appropriate Vector format, see <a href="../basics/creating-vectors.html">Creating Vectors</a>.
+In particular for text preparation check out <a href="../basics/creating-vectors-from-text.html">Creating Vectors from Text</a>.</p>
 
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
-
-<p>The data can be found at</p>
-
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
-
-<h3 id="code-details">Code details</h3>
-
-<p>This example consists of 3 classes:</p>
+<p><a name="ClusteringYourData-RunningtheProcess"></a></p>
+<h1 id="running-the-process">Running the Process</h1>
 
 <ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
+  <li>
+    <p><a href="canopy-clustering.html">Canopy background</a> and <a href="canopy-commandline.html">canopy-commandline</a>.</p>
+  </li>
+  <li>
+    <p><a href="k-means-clustering.html">K-Means background</a>, <a href="k-means-commandline.html">k-means-commandline</a>, and
+<a href="fuzzy-k-means-commandline.html">fuzzy-k-means-commandline</a>.</p>
+  </li>
+  <li>
+    <p><a href="dirichlet-process-clustering.html">Dirichlet background</a> and <a href="dirichlet-commandline.html">dirichlet-commandline</a>.</p>
+  </li>
+  <li>
+    <p><a href="mean-shift-clustering.html">Meanshift background</a> and <a href="mean-shift-commandline.html">mean-shift-commandline</a>.</p>
+  </li>
+  <li>
+    <p><a href="-latent-dirichlet-allocation.html">LDA (Latent Dirichlet Allocation) background</a> and <a href="lda-commandline.html">lda-commandline</a>.</p>
+  </li>
+  <li>
+    <p>TODO: kmeans++/ streaming kMeans documentation</p>
+  </li>
 </ul>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<p><a name="ClusteringYourData-RetrievingtheOutput"></a></p>
+<h1 id="retrieving-the-output">Retrieving the Output</h1>
+
+<p>Mahout has a cluster dumper utility that can be used to retrieve and evaluate your clustering data.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./bin/mahout clusterdump &lt;OPTIONS&gt;
+</code></pre></div></div>
+
+<p><a name="ClusteringYourData-Theclusterdumperoptionsare:"></a></p>
+<h2 id="the-cluster-dumper-options-are">The cluster dumper options are:</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --help (-h)				   Print out help	
+    
+  --input (-i) input			   The directory containing Sequence    
+					   Files for the Clusters	    
+
+  --output (-o) output			   The output file.  If not specified,  
+					   dumps to the console.
+
+  --outputFormat (-of) outputFormat	   The optional output format to write
+					   the results as. Options: TEXT, CSV, or GRAPH_ML		 
+
+  --substring (-b) substring		   The number of chars of the	    
+					   asFormatString() to print	
+
+  --pointsDir (-p) pointsDir		   The directory containing points  
+ 					   sequence files mapping input vectors     					   to their cluster.  If specified, 
+					   then the program will output the 
+					   points associated with a cluster 
+
+  --dictionary (-d) dictionary		   The dictionary file. 	    
+
+  --dictionaryType (-dt) dictionaryType    The dictionary file type	    
+					   (text|sequencefile)
+
+  --distanceMeasure (-dm) distanceMeasure  The classname of the DistanceMeasure.
+					   Default is SquaredEuclidean.     
+
+  --numWords (-n) numWords		   The number of top terms to print 
+
+  --tempDir tempDir			   Intermediate output directory
+
+  --startPhase startPhase		   First phase to run
+
+  --endPhase endPhase			   Last phase to run
+
+  --evaluate (-e)			   Run ClusterEvaluator and CDbwEvaluator over the
+					   input. The output will be appended to the rest of
+					   the output at the end.   
+</code></pre></div></div>
+
+<p>More information on using clusterdump utility can be found <a href="cluster-dumper.html">here</a></p>
+
+<p><a name="ClusteringYourData-ValidatingtheOutput"></a></p>
+<h1 id="validating-the-output">Validating the Output</h1>
+
+<p>{quote}
+Ted Dunning: A principled approach to cluster evaluation is to measure how well the
+cluster membership captures the structure of unseen data.  A natural
+measure for this is to measure how much of the entropy of the data is
+captured by cluster membership.  For k-means and its natural L_2 metric,
+the natural cluster quality metric is the squared distance from the nearest
+centroid adjusted by the log_2 of the number of clusters.  This can be
+compared to the squared magnitude of the original data or the squared
+deviation from the centroid for all of the data.  The idea is that you are
+changing the representation of the data by allocating some of the bits in
+your original representation to represent which cluster each point is in. 
+If those bits aren’t made up by the residue being small then your
+clustering is making a bad trade-off.</p>
+
+<p>In the past, I have used other more heuristic measures as well.  One of the
+key characteristics that I would like to see out of a clustering is a
+degree of stability.  Thus, I look at the fractions of points that are
+assigned to each cluster or the distribution of distances from the cluster
+centroid. These values should be relatively stable when applied to held-out
+data.</p>
+
+<p>For text, you can actually compute perplexity which measures how well
+cluster membership predicts what words are used.  This is nice because you
+don’t have to worry about the entropy of real valued numbers.</p>
+
+<p>Manual inspection and the so-called laugh test is also important.  The idea
+is that the results should not be so ludicrous as to make you laugh.
+Unfortunately, it is pretty easy to kid yourself into thinking your system
+is working using this kind of inspection.  The problem is that we are too
+good at seeing (making up) patterns.
+{quote}</p>
+
 
 
   <footer class="footer bg-light">

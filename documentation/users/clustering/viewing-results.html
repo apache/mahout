@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Viewing Results
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/clustering/viewing-results.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,37 +173,44 @@
 </nav>
 
 
-  <p>#Bank Marketing Example</p>
+  <p><a name="ViewingResults-Intro"></a></p>
+<h1 id="intro">Intro</h1>
 
-<h3 id="introduction">Introduction</h3>
+<p>Many of the Mahout libraries run as batch jobs, dumping results into Hadoop
+sequence files or other data structures.  This page is intended to
+demonstrate the various ways one might inspect the outcome of various jobs.
+ The page is organized by algorithms.</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
+<p><a name="ViewingResults-GeneralUtilities"></a></p>
+<h1 id="general-utilities">General Utilities</h1>
 
-<h3 id="code--data">Code &amp; Data</h3>
+<p><a name="ViewingResults-SequenceFileDumper"></a></p>
+<h2 id="sequence-file-dumper">Sequence File Dumper</h2>
 
-<p>The bank marketing example code lives under</p>
+<p><a name="ViewingResults-Clustering"></a></p>
+<h1 id="clustering">Clustering</h1>
 
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
+<p><a name="ViewingResults-ClusterDumper"></a></p>
+<h2 id="cluster-dumper">Cluster Dumper</h2>
 
-<p>The data can be found at</p>
+<p>Run the following to print out all options:</p>
 
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>java  -cp "*" org.apache.mahout.utils.clustering.ClusterDumper --help
+</code></pre></div></div>
 
-<h3 id="code-details">Code details</h3>
+<p><a name="ViewingResults-Example"></a></p>
+<h3 id="example">Example</h3>
 
-<p>This example consists of 3 classes:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>java  -cp "*" org.apache.mahout.utils.clustering.ClusterDumper --seqFileDir ./solr-clust-n2/out/clusters-2
+      --dictionary ./solr-clust-n2/dictionary.txt
+      --substring 100 --pointsDir ./solr-clust-n2/out/points/
+</code></pre></div></div>
 
-<ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
-</ul>
+<p><a name="ViewingResults-ClusterLabels(MAHOUT-163)"></a></p>
+<h2 id="cluster-labels-mahout-163">Cluster Labels (MAHOUT-163)</h2>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<p><a name="ViewingResults-Classification"></a></p>
+<h1 id="classification">Classification</h1>
 
 
   <footer class="footer bg-light">

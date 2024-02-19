@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Testing
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/misc/testing.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,37 +173,50 @@
 </nav>
 
 
-  <p>#Bank Marketing Example</p>
+  <p><a name="Testing-Intro"></a></p>
+<h1 id="intro">Intro</h1>
 
-<h3 id="introduction">Introduction</h3>
+<p>As Mahout matures, solid testing procedures are needed.  This page and its
+children capture test plans along with ideas for improving our testing.</p>
 
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
-
-<h3 id="code--data">Code &amp; Data</h3>
-
-<p>The bank marketing example code lives under</p>
-
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
-
-<p>The data can be found at</p>
-
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
-
-<h3 id="code-details">Code details</h3>
-
-<p>This example consists of 3 classes:</p>
+<p><a name="Testing-TestPlans"></a></p>
+<h1 id="test-plans">Test Plans</h1>
 
 <ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
+  <li><a href="0.6.html">0.6</a></li>
+  <li>Test Plans for the 0.6 release
+There are no special plans except for unit tests, and user testing of the
+Hadoop jobs.</li>
 </ul>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<p><a name="Testing-TestIdeas"></a></p>
+<h1 id="test-ideas">Test Ideas</h1>
+
+<p><a name="Testing-Regressions/Benchmarks/Integrations"></a></p>
+<h2 id="regressionsbenchmarksintegrations">Regressions/Benchmarks/Integrations</h2>
+<ul>
+  <li>Algorithmic quality and speed are not tested, except in a few instances.
+Such tests often require much longer run times (minutes to hours), a
+running Hadoop cluster, and downloads of large datasets (in the megabytes).</li>
+  <li>Standardized speed tests are difficult on different hardware.</li>
+  <li>Unit tests of external integrations require access to externals: HDFS,
+S3, JDBC, Cassandra, etc.</li>
+</ul>
+
+<p>Apache Jenkins is not able to support these environments. Commercial
+donations would help.</p>
+
+<p><a name="Testing-UnitTests"></a></p>
+<h2 id="unit-tests">Unit Tests</h2>
+<p>Mahout’s current tests are almost entirely unit tests. Algorithm tests
+generally supply a few numbers to code paths and verify that expected
+numbers come out. ‘mvn test’ runs these tests. There is “positive” coverage
+of a great many utilities and algorithms. A much smaller percent include
+“negative” coverage (bogus setups, inputs, combinations).</p>
+
+<p><a name="Testing-Other"></a></p>
+<h2 id="other">Other</h2>
+
 
 
   <footer class="footer bg-light">

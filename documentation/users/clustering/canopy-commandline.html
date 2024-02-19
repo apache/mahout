@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    canopy-commandline
     
   </title>
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/users/classification/bankmarketing-example.html">
+  <link rel="canonical" href="http://mahout.apache.org//documentation/users/clustering/canopy-commandline.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -173,37 +173,76 @@
 </nav>
 
 
-  <p>#Bank Marketing Example</p>
+  <p><a name="canopy-commandline-RunningCanopyClusteringfromtheCommandLine"></a></p>
+<h1 id="running-canopy-clustering-from-the-command-line">Running Canopy Clustering from the Command Line</h1>
+<p>Mahout’s Canopy clustering can be launched from the same command line
+invocation whether you are running on a single machine in stand-alone mode
+or on a larger Hadoop cluster. The difference is determined by the
+$HADOOP_HOME and $HADOOP_CONF_DIR environment variables. If both are set to
+an operating Hadoop cluster on the target machine then the invocation will
+run Canopy on that cluster. If either of the environment variables are
+missing then the stand-alone Hadoop configuration will be invoked instead.</p>
 
-<h3 id="introduction">Introduction</h3>
-
-<p>This page describes how to run Mahout’s SGD classifier on the <a href="http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing">UCI Bank Marketing dataset</a>.
-The goal is to predict if the client will subscribe a term deposit offered via a phone call. The features in the dataset consist
-of information such as age, job, marital status as well as information about the last contacts from the bank.</p>
-
-<h3 id="code--data">Code &amp; Data</h3>
-
-<p>The bank marketing example code lives under</p>
-
-<p><em>mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing</em></p>
-
-<p>The data can be found at</p>
-
-<p><em>mahout-examples/src/main/resources/bank-full.csv</em></p>
-
-<h3 id="code-details">Code details</h3>
-
-<p>This example consists of 3 classes:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./bin/mahout canopy &lt;OPTIONS&gt;
+</code></pre></div></div>
 
 <ul>
-  <li>BankMarketingClassificationMain</li>
-  <li>TelephoneCall</li>
-  <li>TelephoneCallParser</li>
+  <li>In $MAHOUT_HOME/, build the jar containing the job (mvn install) The job
+will be generated in $MAHOUT_HOME/core/target/ and it’s name will contain
+the Mahout version number. For example, when using Mahout 0.3 release, the
+job will be mahout-core-0.3.job</li>
 </ul>
 
-<p>When you run the main method of BankMarketingClassificationMain it parses the dataset using the TelephoneCallParser and trains
-a logistic regression model with 20 runs and 20 passes. The TelephoneCallParser uses Mahout’s feature vector encoder
-to encode the features in the dataset into a vector. Afterwards the model is tested and the learning rate and AUC is printed accuracy is printed to standard output.</p>
+<p><a name="canopy-commandline-Testingitononesinglemachinew/ocluster"></a></p>
+<h2 id="testing-it-on-one-single-machine-wo-cluster">Testing it on one single machine w/o cluster</h2>
+
+<ul>
+  <li>Put the data: cp <PATH TO="" DATA=""> testdata</PATH></li>
+  <li>
+    <p>Run the Job:</p>
+
+    <p>./bin/mahout canopy -i testdata -o output -dm
+org.apache.mahout.common.distance.CosineDistanceMeasure -ow -t1 5 -t2 2</p>
+  </li>
+</ul>
+
+<p><a name="canopy-commandline-Runningitonthecluster"></a></p>
+<h2 id="running-it-on-the-cluster">Running it on the cluster</h2>
+
+<ul>
+  <li>(As needed) Start up Hadoop: $HADOOP_HOME/bin/start-all.sh</li>
+  <li>Put the data: $HADOOP_HOME/bin/hadoop fs -put <PATH TO="" DATA=""> testdata</PATH></li>
+  <li>
+    <p>Run the Job:</p>
+
+    <p>export HADOOP_HOME=<Hadoop Home="" Directory="">
+  export HADOOP_CONF_DIR=$HADOOP_HOME/conf
+  ./bin/mahout canopy -i testdata -o output -dm
+org.apache.mahout.common.distance.CosineDistanceMeasure -ow -t1 5 -t2 2</Hadoop></p>
+  </li>
+  <li>Get the data out of HDFS and have a look. Use bin/hadoop fs -lsr output
+to view all outputs.</li>
+</ul>
+
+<p><a name="canopy-commandline-Commandlineoptions"></a></p>
+<h1 id="command-line-options">Command line options</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --input (-i) input			     Path to job input directory.Must  
+					     be a SequenceFile of	    
+					     VectorWritable		    
+  --output (-o) output			     The directory pathname for output. 
+  --overwrite (-ow)			     If present, overwrite the output	 
+					     directory before running job   
+  --distanceMeasure (-dm) distanceMeasure    The classname of the	    
+					     DistanceMeasure. Default is    
+					     SquaredEuclidean		    
+  --t1 (-t1) t1 			     T1 threshold value 	    
+  --t2 (-t2) t2 			     T2 threshold value 	    
+  --clustering (-cl)			     If present, run clustering after	
+					     the iterations have taken place	 
+  --help (-h)				     Print out help		    
+</code></pre></div></div>
+
 
 
   <footer class="footer bg-light">
