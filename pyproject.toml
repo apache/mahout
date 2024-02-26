@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 qiskit = "^0.45.1"
 qiskit-aer = "^0.13.2"
 

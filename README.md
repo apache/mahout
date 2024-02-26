@@ -30,5 +30,11 @@ QuMat is a POC of a high level Python library for intefacing with multiple quant
 
 Check out [basic gates](docs/basic_gates.md) for a quick introduction to the basic gates which are basically all that exist right now (and even those only exist for `qiskit`).
 
+## Getting started
+
+To install dependencies, run the following:
+`$ pip install -U poetry`
+`$ poetry install`
+
 #### Legal
 Please see the `NOTICE.txt` included in this directory for more information.
