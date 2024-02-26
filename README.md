@@ -33,8 +33,10 @@ Check out [basic gates](docs/basic_gates.md) for a quick introduction to the bas
 ## Getting started
 
 To install dependencies, run the following:
-`$ pip install -U poetry`
-`$ poetry install`
+```
+$ pip install -U poetry
+$ poetry install
+```
 
 #### Legal
 Please see the `NOTICE.txt` included in this directory for more information.
