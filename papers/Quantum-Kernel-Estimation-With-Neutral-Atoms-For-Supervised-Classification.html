@@ -7,11 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Papers
+    Summary of &#39;Quantum Kernel Estimation With Neutral Atoms For Supervised Classification: A Gate-Based Approach&#39;
     
   </title>
 
-  <meta name="description" content="Distributed Linear Algebra">
+  <meta name="description" content="Author: Marco Russo, Edoardo Giusto, Bartolomeo Montrucchio">
 
   <link rel="stylesheet" href="/assets/css/main.css">
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//papers.html">
+  <link rel="canonical" href="http://mahout.apache.org//papers/Quantum-Kernel-Estimation-With-Neutral-Atoms-For-Supervised-Classification.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -177,64 +177,60 @@
 
   <div class="container mt-5 pb-4">
 
-  <div class="row">
+  <article class="post" itemscope="itemscope" itemtype="http://schema.org/BlogPosting">
 
-    <div class="col-lg-8">
-      <h1 id="papers">Papers</h1>
+    <header class="post-header">
+      <h1 class="post-title" itemprop="name headline">Summary of &#39;Quantum Kernel Estimation With Neutral Atoms For Supervised Classification: A Gate-Based Approach&#39;</h1>
+      <p class="post-meta">
+        <time datetime="2024-03-06T00:00:00+00:00" itemprop="datePublished">
+          2024-03-06 00:00:00 +0000
+        </time>
+        
+      </p>
+    </header>
 
-<ul>
-  <li>
-    <p><a href="/papers/An-Efficient-Quantum-Factoring-Algorithm.html">Summary of ‘An Efficient Quantum Factoring Algorithm’</a></p>
-  </li>
-  <li>
-    <p><a href="/papers/Unleashing-the-Potential-of-LLMs-for-Quantum-Computing.html">Summary of ‘Unleashing the Potential of LLMs for Quantum Computing: A Study in Quantum Architecture Design’</a></p>
-  </li>
-  <li>
-    <p><a href="/papers/Quantum-Kernel-Estimation-With-Neutral-Atoms-For-Supervised-Classification.html">Summary of ‘Quantum Kernel Estimation With Neutral Atoms For Supervised Classification: A Gate-Based Approach’</a></p>
-  </li>
-  <li>
-    <p><a href="/papers/Quantum-machine-learning-beyond-kernel-methods.html">Summary of ‘Quantum machine learning beyond kernel methods’</a></p>
-  </li>
-</ul>
+    <div class="post-content" itemprop="articleBody">
+      <p>Author: Marco Russo, Edoardo Giusto, Bartolomeo Montrucchio</p>
 
+<p><a href="https://arxiv.org/abs/2307.15840">Original Paper</a></p>
 
-    </div>
-
-    <div class="col-lg-4">
-      <!-- Apache Software Foundation Links -->
-<div class="card mb-4 sidebar">
-    <div class="card-header">
-        Apache Software Foundation
-    </div>
-    <div class="card-body">
-        <ul class="list-unstyled mb-0">
-            <li>
-                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/licenses/">Apache License</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-<!-- Twitter Posts Widget -->
-<div class="card">
-    <div class="card-body">
-        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
-        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
-</div>
+<p>In this paper, the authors propose a gate-based approach to quantum kernel 
+estimation (QKE) for supervised classification using neutral atom quantum 
+computers. QKE is a technique that leverages the power of quantum computing to 
+estimate a kernel function that is difficult to compute classically. The 
+estimated kernel is then used by a classical computer to train a support vector 
+machine (SVM) for classification tasks. The authors focus on neutral atom 
+quantum computers because they allow for more freedom in arranging the atoms, 
+which is essential for implementing the necessary gates for QKE. They present a 
+general method for deriving 1-qubit and 2-qubit gates from laser pulses, which 
+are then used to construct a parameterized sequence for feature mapping on 3 
+qubits. They show that this approach can be extended to N qubits, taking 
+advantage of the more flexible arrangement of atoms in neutral atom devices. The
+experimental setup involves simulating the Pasqal Chadoq2 device, which allows 
+for planar arrangement of atoms. The authors generate a dataset of 40 training 
+samples and 20 test samples with 3 features and a separation gap of 0.1. They 
+use the Qiskit library to implement the feature mapping circuit and generate the
+sequences of pulses for QKE. The training and testing of the SVM are performed 
+on a classical computer using the estimated kernel matrices. The results show 
+that the proposed approach achieves a high accuracy of 75% on the test set, 
+despite the small size of the dataset and the low separation. The authors 
+compare the performance to a classical SVM with a radial basis function kernel 
+and find that the quantum approach outperforms the classical approach. The 
+authors discuss the advantages of using neutral atom quantum computers for QKE. 
+The arbitrary arrangement of atoms allows for more direct connections between 
+qubits, reducing the depth of the circuit and reducing the impact of 
+decoherence. They also highlight the exponential computational advantage of 
+quantum feature kernels over classical kernel computation methods for 
+high-dimensional feature spaces. Overall, the paper presents a gate-based 
+approach to QKE using neutral atom quantum computers. The experimental results 
+demonstrate the potential of this approach for supervised classification tasks 
+and highlight the advantages of neutral atom devices for implementing QKE 
+circuits. The paper provides a foundation for future research in the field of 
+quantum machine learning and quantum computing.</p>
 
     </div>
 
-  </div>
+  </article>
 
 </div>
 
