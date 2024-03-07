@@ -7,11 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Meeting Minutes
     
   </title>
 
-  <meta name="description" content="Distributed Linear Algebra">
+  <meta name="description" content="Weekly community meeting">
 
   <link rel="stylesheet" href="/assets/css/main.css">
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//">
+  <link rel="canonical" href="http://mahout.apache.org//minutes/2024/03/06/Meeting-Minutes.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -175,229 +175,75 @@
 </nav>
 
 
-  <div>
-  <header class="mahout-header">
-    <div class="mahout-header-upper">
-      <div class="container mt-auto">
-        <div class="row">
-          <div class="col-12">
-            <img src="/assets/mahout-logo-white.svg" alt="Apache Mahout">
-            <img class="asf-logo float-right" src="/assets/asf_logo_white.svg" alt="Apache Software Foundation">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="mahout-header-lower">
-      <div class="container position-relative mb-auto">
-        <h2 class="mb-4">For Creating Scalable Performant Machine Learning Applications</h2>
-        <a class="btn btn-lg btn-light btn-download mb-3" href="https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=mahout/14.1/mahout-14.1-source-release.zip"><i class="fa fa-download"></i> Download Mahout</a>
-        <div class="small text-white mx-auto">Currently v14.1</div>
-      </div>
-    </div>
-    <canvas id="waves" style="position: absolute; z-index: 0;"></canvas>
-  </header>
-
   <div class="container mt-5 pb-4">
-    <div class="row">
-      <div class="col-lg-8">
-        <p>Apache Mahout(TM) is a <strong>distributed linear algebra framework</strong> and <strong>mathematically expressive Scala DSL</strong> designed to let mathematicians, statisticians, and data scientists quickly <em>implement their own algorithms</em>. Apache Spark is the recommended out-of-the-box distributed back-end, <em>or can be extended to other distributed backends.</em></p>
 
+  <article class="post" itemscope="itemscope" itemtype="http://schema.org/BlogPosting">
+
+    <header class="post-header">
+      <h1 class="post-title" itemprop="name headline">Meeting Minutes</h1>
+      <p class="post-meta">
+        <time datetime="2024-03-06T08:00:00+00:00" itemprop="datePublished">
+          2024-03-06 08:00:00 +0000
+        </time>
+        
+      </p>
+    </header>
+
+    <div class="post-content" itemprop="articleBody">
+      <h2 id="weekly-community-meeting">Weekly community meeting</h2>
+
+<h3 id="attendees">Attendees</h3>
 <ul>
-  <li>Mathematically Expressive Scala DSL</li>
-  <li>Support for Multiple Distributed Backends (including Apache Spark)</li>
-  <li>Modular Native Solvers for CPU/GPU/CUDA Acceleration</li>
+  <li>Andrew Musselman</li>
+  <li>Trevor Grant</li>
+  <li>Tommy Naugle</li>
 </ul>
 
-<h2 class="section-heading">Recent News</h2>
+<h3 id="old-business">Old Business</h3>
 
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">March 06, 2024</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2024/03/06/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Weekly community meeting
-</p>
-        <a href="/minutes/2024/03/06/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
+<h3 id="new-business">New Business</h3>
+<ol>
+  <li>Trevor going off on a spike for kernel methods- what is output?
+    <ul>
+      <li>Other gates needed?</li>
+      <li>Other <other> needed?</other></li>
+      <li>https://chat.openai.com/share/ba29ef75-4158-4e22-be40-78ae14c25f93</li>
+    </ul>
+  </li>
+  <li>Coordinate on JIRA
+    <ul>
+      <li>Web site cleanup (~200 broken links fixed out of ~220, tommy continuing)</li>
+      <li>Python packaging (jowanza tagged on https://issues.apache.org/jira/browse/MAHOUT-2174) (done)</li>
+      <li>Continued qumat data structure work (tommy in flight, akm to review)</li>
+    </ul>
+  </li>
+  <li>Rebuild JIRA - now that we have wiped it clean, on the qumat side anyway, lets start grooming tasks into the appropriate components/releases/etc (todo)
+    <ul>
+      <li>Including adding filters to all boards so only those tickets show up (todo)</li>
+    </ul>
+  </li>
+</ol>
 
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">February 14, 2024</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2024/02/14/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Weekly community meeting
-</p>
-        <a href="/minutes/2024/02/14/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">January 31, 2024</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2024/01/31/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Monthly community meeting
-</p>
-        <a href="/minutes/2024/01/31/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">November 29, 2023</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2023/11/29/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Monthly community meeting
-</p>
-        <a href="/minutes/2023/11/29/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">October 25, 2023</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2023/10/25/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Monthly community meeting
-</p>
-        <a href="/minutes/2023/10/25/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
+<h3 id="other-business">Other Business</h3>
+<ol>
+  <li>Upgrading Scala and Spark
+    <ul>
+      <li>At its core would mean fixing docstrings</li>
+      <li>So it could compile for Java 1.8</li>
+      <li>So we could compile for Spark 2.3/Scala 2.12</li>
+      <li>Or in the mean time use maven flag to ignore docstrings for a local build</li>
+    </ul>
+  </li>
+  <li>Ask INFRA to help us make sure PRs are defaulting to main instead of trunk (akm)</li>
+  <li>Make ticket to add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198)</li>
+  <li>JIRA hygiene with Shashanka in monthly Classic meeting (on hold until Shashanka or Eric picks this up, meeting cancelled otherwise)</li>
+</ol>
 
 
-      </div>
-      <div class="col-lg-4">
-        <h2 class="section-heading">Sidebar Home</h2>
-        <!-- Apache Software Foundation Links -->
-<div class="card mb-4 sidebar">
-    <div class="card-header">
-        Apache Software Foundation
     </div>
-    <div class="card-body">
-        <ul class="list-unstyled mb-0">
-            <li>
-                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/licenses/">Apache License</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
-            </li>
-        </ul>
-    </div>
-</div>
 
-<!-- Twitter Posts Widget -->
-<div class="card">
-    <div class="card-body">
-        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
-        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
-</div>
+  </article>
 
-      </div>
-    </div>
-  </div>
 </div>
 
 
