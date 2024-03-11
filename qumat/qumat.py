@@ -7,7 +7,6 @@ class QuMat:
         self.backend_config = backend_config
         # Initialize the quantum backend (Qiskit, Cirq, Bracket, etc.) based on
         # the config
-        self.backend = qiskit.Aer.get_backend(backend_config['backend_name'])
         self.backend_name = backend_config['backend_name']
         self.backend = self._initialize_backend()
         # Initialize an empty quantum circuit
