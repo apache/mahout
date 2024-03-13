@@ -82,7 +82,7 @@ First of all, you need to get the [Mahout source code](/developers/version-contr
 <a name="HowToContribute-MakingChanges"></a>
 ## Making Changes
 
-Before you start, you should send a message to the [Mahout developer mailing list](/general/mailing-lists,-irc-and-archives.html)
+Before you start, you should send a message to the [Mahout developer mailing list](/community/mailing-lists.html)
 (note: you have to subscribe before you can post), or file a ticket in  our [issue tracker](/developers/issue-tracker.html).
 Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.
 
