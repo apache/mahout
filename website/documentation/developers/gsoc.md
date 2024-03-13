@@ -61,5 +61,5 @@ your career.
 ## References
 
  * [GSoC Home](http://code.google.com/soc/) - official GSoC page
- * [GSoC FAQ](http://socghop.appspot.com/document/show/gsoc_program/google/gsoc2010/faqs) - official FAQ
+ * [GSoC FAQ](https://developers.google.com/open-source/gsoc/faq) - official FAQ
  * [Apache GSoC coordination](http://community.apache.org/gsoc.html) - official Apache GSoC documentation, especially important  if you want to become a mentor

@@ -63,12 +63,6 @@ committed.
 * [http://mail-archives.apache.org/mod_mbox/mahout-dev/](http://mail-archives.apache.org/mod_mbox/mahout-dev/)
 * [http://mail-archives.apache.org/mod_mbox/mahout-user/](http://mail-archives.apache.org/mod_mbox/mahout-user/)
 
-<a name="MailingLists,IRCandArchives-ExternalArchives"></a>
-## External Archives
-
-* [MarkMail](http://mahout.markmail.org/)
-* [Gmane](http://dir.gmane.org/gmane.comp.apache.mahout.user)
-
 Please note the inclusion of a link to an archive does not imply an
 endorsement of that company by any of the committers of Mahout the Lucene
 PMC or the Apache Software Foundation. Each archive owner is solely
