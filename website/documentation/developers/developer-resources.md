@@ -38,7 +38,7 @@ All bugs, improvements, [pull requests](http://mahout.apache.org/developers/gith
 <a name="DeveloperResources-ContinuousIntegration"></a>
 ## Continuous Integration
 
-Mahout is continuously built on an hourly basis on the [Apache Jenkins](https://builds.apache.org/job/Mahout-Quality/)  build system.
+Mahout is continuously built using [Apache Maven](https://github.com/apache/mahout/actions/workflows/mahout.yml).
 
 ## Board reports
 

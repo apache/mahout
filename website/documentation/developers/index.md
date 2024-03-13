@@ -45,8 +45,6 @@ By following this Developer's Guide, developers can quickly harness the power of
 
 [Developer Resources](/developers/developer-resources.html)
 
-[Index](/developers/index.html)
-
 [Githubprs](/developers/githubPRs.html)
 
 [Buildingmahout](/developers/buildingmahout.html)
