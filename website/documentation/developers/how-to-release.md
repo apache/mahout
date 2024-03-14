@@ -17,8 +17,8 @@ create a new Mahout release.*
 Start a discussion on mahout-dev about having a release, questions to bring
 up include:
 
- * Any [Unresolved JIRA issues for the upcoming release ](-https://issues.apache.org/jira/secure/issuenavigator!executeadvanced.jspa?jqlquery=project+%3d+mahout+and+resolution+%3d+unresolved+and+fixversion+%3d+%220.6%22&runquery=true&clear=true.html)
- * Any [Resolved or Closed JIRA issues missing a "Fix Version" ](-https://issues.apache.org/jira/secure/issuenavigator!executeadvanced.jspa?jqlquery=project+%3d+mahout+and+%28status+%3d+resolved+or+status+%3d+closed%29+and+fixversion+is+null+and+resolution+%3d+fixed&runquery=true&clear=true.html)
+ * Any [Unresolved JIRA issues for the upcoming release ](https://issues.apache.org/jira/issues/?jql=project%20%3D%20MAHOUT%20AND%20status%20%3D%20Open%20AND%20resolution%20%3D%20Unresolved%20AND%20fixVersion%20in%20unreleasedVersions()%20AND%20component%20in%20(build-classic%2C%20classic)%20ORDER%20BY%20priority%20DESC%2C%20updated%20DESC)
+ * Any [Resolved or Closed JIRA issues missing a "Fix Version" ](https://issues.apache.org/jira/issues/?jql=project%20%3D%20MAHOUT%20AND%20status%20in%20(Resolved%2C%20Closed)%20AND%20resolution%20in%20(Fixed%2C%20Resolved)%20AND%20fixVersion%20%3D%20EMPTY%20AND%20component%20in%20(build-classic%2C%20classic)%20ORDER%20BY%20priority%20DESC%2C%20updated%20DESC)
  that should be marked as fixed in this release?
  * Does any documentation need an update?
  * Who is going to be the release engineer?
