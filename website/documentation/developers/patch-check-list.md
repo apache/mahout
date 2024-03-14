@@ -19,7 +19,6 @@ know you are working on it.
   - How is the documentation, especially the javadocs?
   - Before committing, make sure you add any new documents to your local Git repo.  
   - Run all unit tests, verify that all tests pass.
-  - Lastly, update the [CHANGELOG](https://github.com/apache/mahout/blob/master/CHANGELOG) file. Give proper credit to the authors.
  
 After the above steps are verified and completed, and the contribution is ready to merge, follow the steps in the "Merging a PR" section in: [Handling Github PRs](http://mahout.apache.org/developers/github.html).
 

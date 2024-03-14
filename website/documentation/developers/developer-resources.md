@@ -23,12 +23,12 @@ The source files are stored using Git, our page on [version control](/developers
 
 Javadoc and Scaladoc documentation is available online by module:
 
- * [Mahout Math](/docs/{{ site.mahout-version }}/api/docs/mahout-math/index.html)
- * [Mahout Math Scala bindings](/docs/{{ site.mahout-version }}/api/docs/mahout-math-scala/index.html)
- * [Mahout Spark bindings](/docs/{{ site.mahout-version }}/api/docs/mahout-spark/index.html)
- * [Mahout HDFS](/docs/{{ site.mahout-version }}/api/docs/mahout-hdfs/index.html)
- * [Mahout Map-Reduce](/docs/{{ site.mahout-version }}/api/docs/mahout-mr/index.html)
- * [Mahout Integration](/docs/{{ site.mahout-version }}/api/docs/mahout-integration/index.html)
+ * [Mahout Math](/docs/0.13.0/api/docs/mahout-math/index.html)
+ * [Mahout Math Scala bindings](/docs/0.13.0/api/docs/mahout-math-scala/index.html)
+ * [Mahout Spark bindings](/docs/0.13.0/api/docs/mahout-spark/index.html)
+ * [Mahout HDFS](/docs/0.13.0/api/docs/mahout-hdfs/index.html)
+ * [Mahout Map-Reduce](/docs/0.13.0/api/docs/mahout-mr/index.html)
+ * [Mahout Integration](/docs/0.13.0/api/docs/mahout-integration/index.html)
 
 <a name="DeveloperResources-Issues"></a>
 ## Issues
