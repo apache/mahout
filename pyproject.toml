@@ -12,6 +12,8 @@ qiskit = "^0.45.1"
 qiskit-aer = "^0.13.2"
 cirq = "^1.3.0"
 
+[tool.poetry.dev-dependencies]
+pytest = "^8.1.1"
 
 [build-system]
 requires = ["poetry-core"]
