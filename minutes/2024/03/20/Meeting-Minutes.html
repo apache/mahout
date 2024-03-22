@@ -7,11 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    News
+    Meeting Minutes
     
   </title>
 
-  <meta name="description" content="Distributed Linear Algebra">
+  <meta name="description" content="Weekly community meeting">
 
   <link rel="stylesheet" href="/assets/css/main.css">
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//news-and-events/news.html">
+  <link rel="canonical" href="http://mahout.apache.org//minutes/2024/03/20/Meeting-Minutes.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -174,86 +174,59 @@
 
   <div class="container mt-5 pb-4">
 
-  <div class="row">
+  <article class="post" itemscope="itemscope" itemtype="http://schema.org/BlogPosting">
 
-    <div class="col-lg-8">
-      <h1 id="news">News</h1>
+    <header class="post-header">
+      <h1 class="post-title" itemprop="name headline">Meeting Minutes</h1>
+      <p class="post-meta">
+        <time datetime="2024-03-20T08:00:00+00:00" itemprop="datePublished">
+          2024-03-20 08:00:00 +0000
+        </time>
+        
+      </p>
+    </header>
 
-<p>Welcome to the News page! Stay up-to-date with the latest announcements, releases, events, and community highlights from
-the Apache Mahout project. Keep an eye on this page for regular updates and make sure you don’t miss any important news 
-related to the project.</p>
+    <div class="post-content" itemprop="articleBody">
+      <h2 id="weekly-community-meeting">Weekly community meeting</h2>
 
+<h3 id="attendees">Attendees</h3>
 <ul>
-  <li>
-    <p><a href="/minutes/2024/03/20/Meeting-Minutes.html">Meeting Minutes</a> - March 20, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/03/13/Meeting-Minutes.html">Meeting Minutes</a> - March 13, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/03/06/Meeting-Minutes.html">Meeting Minutes</a> - March 06, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/02/14/Meeting-Minutes.html">Meeting Minutes</a> - February 14, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/01/31/Meeting-Minutes.html">Meeting Minutes</a> - January 31, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2023/11/29/Meeting-Minutes.html">Meeting Minutes</a> - November 29, 2023</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2023/10/25/Meeting-Minutes.html">Meeting Minutes</a> - October 25, 2023</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2023/09/27/Meeting-Minutes.html">Meeting Minutes</a> - September 27, 2023</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2023/08/30/Meeting-Minutes.html">Meeting Minutes</a> - August 30, 2023</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2023/07/26/Meeting-Minutes.html">Meeting Minutes</a> - July 26, 2023</p>
-  </li>
+  <li>Trevor Grant</li>
+  <li>Tommy Naugle</li>
 </ul>
 
+<h3 id="old-business">Old Business</h3>
+<ol>
+  <li>Happy hour some week soon, invite collaborators and conspirators</li>
+  <li>Drop this meeting time from two hours to a half hour</li>
+  <li>Coordinate on JIRA
+    <ul>
+      <li>Web site cleanup (~210 broken links fixed out of ~220, tommy continuing)</li>
+      <li>Continued qumat data structure work (tommy in flight, akm to review)</li>
+    </ul>
+  </li>
+  <li>Ask INFRA to help us make sure PRs are defaulting to main instead of trunk (akm) (done)</li>
+  <li>Kernel method research spike: https://issues.apache.org/jira/browse/MAHOUT-2200</li>
+  <li>Make ticket to add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198)</li>
+  <li>Add execute method to qumat https://issues.apache.org/jira/browse/MAHOUT-2201</li>
+  <li>Rebuild JIRA - now that we have wiped it clean, on the qumat side anyway, lets start grooming tasks into the appropriate components/releases/etc (todo)
+    <ul>
+      <li>Including adding filters to all boards so only those tickets show up (todo)</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="new-business">New Business</h3>
+<ol>
+  <li>Tommy is working on making a docker container for previewing website builds</li>
+  <li>Trevor is pivoting from kernel research into implementing POC for cirq ie the 9 gates and circuit execute</li>
+</ol>
+
+<h3 id="other-business">Other Business</h3>
 
     </div>
 
-    <div class="col-lg-4">
-      <!-- Apache Software Foundation Links -->
-<div class="card mb-4 sidebar">
-    <div class="card-header">
-        Apache Software Foundation
-    </div>
-    <div class="card-body">
-        <ul class="list-unstyled mb-0">
-            <li>
-                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/licenses/">Apache License</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-<!-- Twitter Posts Widget -->
-<div class="card">
-    <div class="card-body">
-        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
-        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
-</div>
-
-    </div>
-
-  </div>
+  </article>
 
 </div>
 
