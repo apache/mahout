@@ -1,16 +1,13 @@
 import cirq
 
 def initialize_backend(backend_config):
-    # Example initialization, this needs to be adapted to your backend config specifics
-    if backend_config['backend_name'] == 'cirq_simulator':
-        # Assuming 'simulator_type' specifies the type of simulator in Cirq
-        simulator_type = backend_config.get('backend_options', {}).get('simulator_type', 'default')
-        if simulator_type == 'default':
-            return cirq.Simulator()
-        else:
-            raise NotImplementedError(f"Simulator type '{simulator_type}' is not supported in Cirq.")
-    else:
-        raise NotImplementedError(f"Backend '{backend_config['backend_name']}' is not supported in Cirq.")
+   # Assuming 'simulator_type' specifies the type of simulator in Cirq
+    simulator_type = backend_config.get('backend_options', {}).get('simulator_type', 'default')
+    if simulator_type != 'default':
+        print(f"Simulator type '{simulator_type}' is not supported in Cirq. Ignoring this argument")
+
+    return cirq.Simulator()
+
 
 def create_empty_circuit(num_qubits):
     return cirq.Circuit()
