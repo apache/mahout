@@ -1,16 +1,13 @@
 import qiskit
 
 def initialize_backend(backend_config):
-    backend_name = backend_config['backend_name']
-    if backend_name == 'qiskit_simulator':
-        backend_options = backend_config['backend_options']
-        simulator_type = backend_options['simulator_type']
-        shots = backend_options['shots']
-        backend = qiskit.Aer.get_backend(simulator_type)
-        backend.shots = shots
-        return backend
-    else:
-        raise NotImplementedError(f"Backend '{backend_name}' is not supported.")
+    backend_options = backend_config['backend_options']
+    simulator_type = backend_options['simulator_type']
+    shots = backend_options['shots']
+    backend = qiskit.Aer.get_backend(simulator_type)
+    backend.shots = shots
+    return backend
+
 
 def create_empty_circuit(num_qubits):
     return qiskit.QuantumCircuit(num_qubits)
