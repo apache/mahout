@@ -17,10 +17,10 @@ category: minutes
 1. Make ticket to add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198)
 1. Add execute method to qumat https://issues.apache.org/jira/browse/MAHOUT-2201
 1. Splitting Mahout project code into discrete repos https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204
-  * mahout-website
-  * mahout-classic
-  * mahout-samsara
-  * mahout-qumat
+    * mahout-website
+    * mahout-classic
+    * mahout-samsara
+    * mahout-qumat
 1. Create testing suite template (PR open) https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2202
 1. Docker image for web site build https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165
 1. Cirq backend (resolved) issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2203
@@ -32,12 +32,11 @@ category: minutes
 1. Reviewed pytest pr
 1. Reviewing happy hour date/time (done)
 1. Roadmap
-  * Q2
-    1. Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends
-    1. Kernel methods started
-    1. Submit public talk about Qumat
-    1. Classic in maintenance mode
-  * Q3 and beyond
-    1. Amazon Braket
-    1. Distributed quantum solvers
-
+    * Q2
+        1. Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends
+        1. Kernel methods started
+        1. Submit public talk about Qumat
+        1. Classic in maintenance mode
+    * Q3 and beyond
+        1. Amazon Braket
+        1. Distributed quantum solvers
