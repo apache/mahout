@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Meeting Minutes
-date:   2024-04-02 00:00:00 -0800
+date:   2024-04-03 00:00:00 -0800
 category: minutes
 ---
 ## Weekly community meeting
