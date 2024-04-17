@@ -5,7 +5,6 @@ date:   2024-03-27 00:00:00 -0800
 category: minutes
 ---
 ## Weekly community meeting
-[Subscribe](mailto:user-subscribe@mahout.apache.org) to the Mahout User list to ask for details on joining.
 
 ### Attendees
 * Andrew Musselman
