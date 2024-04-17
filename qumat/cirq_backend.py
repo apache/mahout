@@ -66,8 +66,7 @@ def apply_pauli_z_gate(circuit, qubit_index):
 
 def execute_circuit(circuit, backend, backend_config):
     # This is a simplified example. You'll need to adjust this based on how you're handling backend configuration.
-    circuit.append(cirq.MeasurementGate(key=f'result',
-                                        num_qubits=len(circuit.all_qubits())).on(circuit.all_qubits()))
+    circuit.append(cirq.measure(*circuit.all_qubits(), key='result'))
     simulator = cirq.Simulator()
     result = simulator.run(circuit, repetitions=backend_config['backend_options'].get('shots', 1))
     return result.histogram(key='result')
