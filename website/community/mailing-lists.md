@@ -19,7 +19,7 @@ list so we are able to monitor what happens on the wiki and in svn.
 Follow the links below, or send mail manually, with empty subject and body. 
 
 The pattern for subscribing and unsubscribing to  mailing lists at the ASF 
-is <list-name>-<action>@<project.>apache.org.
+is &lt;list-name&gt;-&lt;action&gt;@&lt;project.&gt;apache.org.
 
 <a name="MailingLists,IRCandArchives-MahoutUserList"></a>
 ## Mahout User List
