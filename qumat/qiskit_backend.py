@@ -67,9 +67,13 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
 def execute_circuit(circuit, backend, backend_config):
-    # Transpile and execute the quantum circuit using the chosen backend
-    transpiled_circuit = circuit.transpile(backend)
+    # Transpile the circuit
+    circuit.measure_all()
+    transpiled_circuit = qiskit.compiler.transpile(circuit, backend)
+
+    # Execute the transpiled circuit on the backend
     job = qiskit.execute(transpiled_circuit, backend,
                          shots=backend_config['backend_options']['shots'])
     result = job.result()
     return result.get_counts(transpiled_circuit)
+
