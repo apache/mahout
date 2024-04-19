@@ -53,20 +53,20 @@ public final class CityBlockSimilarity extends AbstractItemSimilarity implements
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     DataModel dataModel = getDataModel();
-    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
-    int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
-    int intersection = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
+    long preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    long preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
+    long intersection = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
     return doSimilarity(preferring1, preferring2, intersection);
   }
 
   @Override
   public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
     DataModel dataModel = getDataModel();
-    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    long preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     double[] distance = new double[itemID2s.length];
     for (int i = 0; i < itemID2s.length; ++i) {
-      int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2s[i]);
-      int intersection = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2s[i]);
+      long preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2s[i]);
+      long intersection = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2s[i]);
       distance[i] = doSimilarity(preferring1, preferring2, intersection);
     }
     return distance;
@@ -90,8 +90,8 @@ public final class CityBlockSimilarity extends AbstractItemSimilarity implements
    * @param pref2        number of non-zero values in right vector
    * @param intersection number of overlapping non-zero values
    */
-  private static double doSimilarity(int pref1, int pref2, int intersection) {
-    int distance = pref1 + pref2 - 2 * intersection;
+  private static double doSimilarity(long pref1, long pref2, long intersection) {
+    long distance = pref1 + pref2 - 2 * intersection;
     return 1.0 / (1.0 + distance);
   }
 
