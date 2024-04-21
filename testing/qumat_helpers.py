@@ -56,11 +56,6 @@ def get_qumat_example_final_state_vector(backend_config: dict, initial_state_ket
     qumat_instance.apply_cnot_gate(control_qubit_index=0, target_qubit_index=1)
     qumat_instance.apply_hadamard_gate(qubit_index=0)
 
-    # Simulate the circuit
-    job = execute(qumat_instance.circuit, qumat_instance.backend, shots=1)
-    result = job.result()
-
-    # Get the state vector
-    state_vector = result.get_statevector()
+    state_vector = qumat_instance.get_final_state_vector()
 
     return state_vector
