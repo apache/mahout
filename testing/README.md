@@ -22,5 +22,7 @@ For each backend supported in Apache Mahout, the testing suite executes an examp
 # How to Add Tests for a New Backend
 In order to add *my-new-backend* to the testing suite:
 1.  Create a file `testing/my-new-backend_helpers.py`
-2. In `testing/my-new-backend_helpers.py`, create a function `get_my-new-backend_native_example_final_state_vector` which builds the example circuit using the native implementation of my-new-backend.
+2. In `testing/my-new-backend_helpers.py`, create a function `get_native_example_final_state_vector` which builds the example circuit using the native implementation of my-new-backend.
+3. In `testing/my-new-backend_helpers.py`, create a function `get_qumat_backend_config` which generates the qumat backend config needed for the qumat implementation of my-new-backend.
+4. In `testing/test_final_quantum_states.py`, add my-new-backend to `backends_to_test`.
 

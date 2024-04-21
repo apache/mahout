@@ -17,7 +17,6 @@
 import numpy as np
 from functools import reduce
 from qumat.qumat import QuMat
-from qiskit import execute
 
 class BinaryString(str):
     def __new__(cls, value):
