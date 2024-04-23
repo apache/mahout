@@ -38,5 +38,20 @@ pip install -U poetry
 poetry install
 ```
 
+## Roadmap
+
+Last Updated 2024-04-23
+## Roadmap
+
+### Q2
+- [ ] Integration of Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends
+- [ ] Initiation of kernel methods
+- [ ] Submission of public talk about Qumat
+- [ ] Transition of Classic to maintenance mode
+
+### Q3 and beyond
+- [ ] Integration with Amazon Braket
+- [ ] Development of distributed quantum solvers
+
 #### Legal
 Please see the `NOTICE.txt` included in this directory for more information.
