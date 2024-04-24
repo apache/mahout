@@ -7,11 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    Apache Mahout
+    Meeting Minutes
     
   </title>
 
-  <meta name="description" content="Distributed Linear Algebra">
+  <meta name="description" content="Weekly community meeting Subscribe to the Mahout User list to ask for details on joining.">
 
   <link rel="stylesheet" href="/assets/css/main.css">
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//documentation/developers/githubPRs.html">
+  <link rel="canonical" href="http://mahout.apache.org//minutes/2024/04/24/Meeting-Minutes.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -174,119 +174,38 @@
 
   <div class="container mt-5 pb-4">
 
-  <div class="row">
+  <article class="post" itemscope="itemscope" itemtype="http://schema.org/BlogPosting">
 
-    <div class="col-lg-8">
-      <h1 id="handling-github-prs">Handling Github PRs</h1>
+    <header class="post-header">
+      <h1 class="post-title" itemprop="name headline">Meeting Minutes</h1>
+      <p class="post-meta">
+        <time datetime="2024-04-24T08:00:00+00:00" itemprop="datePublished">
+          2024-04-24 08:00:00 +0000
+        </time>
+        
+      </p>
+    </header>
 
-<hr />
+    <div class="post-content" itemprop="articleBody">
+      <h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
 
-<p>Hit the merge button.</p>
+<h3 id="attendees">Attendees</h3>
+<ul>
+  <li>Tommy Naugle</li>
+  <li>Trevor Grant</li>
+</ul>
 
-<h2 id="how-to-create-a-pr-for-contributers">how to create a PR (for contributers)</h2>
+<p>All old and new business was pushed to next meeting due to lack of quorum.</p>
 
-<p>Read [<a href="https://help.github.com/articles/creating-a-pull-request">1</a>].</p>
+<p>Tommy and Trevor jointly reviewed <a href="https://github.com/apache/mahout/pull/442">PR #442</a>. 
+The tl;dr is that it will be merged following some clean up on the git log. (Trevor walked Tommy through a chatGPT he made about how to clean it up).</p>
 
-<p>Pull requests are made to apache/mahout repository on Github.</p>
-
-<h2 id="merging-a-pr-and-closing-it-for-committers">merging a PR and closing it (for committers).</h2>
-
-<p>Remember that pull requests are equivalent to a remote branch with potentially a multitude of commits. 
-In this case it is recommended to squash remote commit history to have one commit per issue, rather 
-than merging in a multitude of contributer’s commits. In order to do that, as well as close the PR at the 
-same time, it is recommended to use <strong>squash commits</strong>.</p>
-
-<p>Read [<a href="https://help.github.com/articles/merging-a-pull-request#merging-locally">2</a>] (merging locally). Merging pull requests are equivalent to merging contributor’s branch:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout master      # switch to local master branch
-git pull apache master   # fast-forward to current remote HEAD
-git pull --squash https://github.com/cuser/mahout cbranch  # merge to master 
-</code></pre></div></div>
-
-<p>In this example we assume that contributor Github handle is “cuser” and the PR branch name is “cbranch” there. We also 
-assume that <em>apache</em> remote is configured as</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apache  https://git-wip-us.apache.org/repos/asf/mahout.git (fetch)
-apache  https://git-wip-us.apache.org/repos/asf/mahout.git (push)
-</code></pre></div></div>
-
-<p>Squash pull ensures all PR history is squashed into single commit. Also, it is not yet committed, even if 
-fast forward is possible, so you get chance to change things before committing.</p>
-
-<p>At this point resolve conflicts, if any, or ask contributor to rebase on top of master, if PR went out of sync.</p>
-
-<p>Also run regular patch checks and change CHANGELOG.</p>
-
-<p>Suppose everything is fine, you now can commit the squashed request</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit -a
-</code></pre></div></div>
-
-<p>edit message to contain “MAHOUT-YYYY description <strong>closes #ZZ</strong>”, where ZZ is the pull request number. 
-Including “closes #ZZ” will close PR automatically. More information [<a href="https://help.github.com/articles/closing-issues-via-commit-messages">3</a>].</p>
-
-<p>push apache master</p>
-
-<p>(this will require credentials).</p>
-
-<p>Note on squashing: Since squash discards remote branch history, repeated PRs from the same remote branch are 
-difficult for merging. The workflow implies that every new PR starts with a new rebased branch. This is more 
-important for contributors to know, rather than for committers, because if new PR is not mergeable, github
-would warn to begin with. Anyway, watch for dupe PRs (based on same source branches). This is a bad practice.</p>
-
-<h2 id="closing-a-pr-without-committing">Closing a PR without committing</h2>
-
-<p>When we want to reject a PR (close without committing), just do the following commit on master’s HEAD 
-<em>without merging the PR</em>:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit --allow-empty -m "closes #ZZ *Won't fix*"
-git push apache master
-</code></pre></div></div>
-
-<p>that should close PR without merging and any code modifications in the master repository.</p>
-
-<h2 id="apachegithub-integration-features">Apache/github integration features</h2>
-
-<p>Read [<a href="https://blogs.apache.org/infra/entry/improved_integration_between_apache_and">4</a>]. Issue handles mentioned in comments and PR name should post to mailing lists and Jira.</p>
-
+<p>Don’t forget the Community Happy Hour on Monday 4/29! (Ask for link on user@m.a.o or the #mahout channel on the-asf.slack.com, all are welcome!)</p>
 
     </div>
 
-    <div class="col-lg-4">
-      <!-- Apache Software Foundation Links -->
-<div class="card mb-4 sidebar">
-    <div class="card-header">
-        Apache Software Foundation
-    </div>
-    <div class="card-body">
-        <ul class="list-unstyled mb-0">
-            <li>
-                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/licenses/">Apache License</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-<!-- Twitter Posts Widget -->
-<div class="card">
-    <div class="card-body">
-        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
-        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
-</div>
-
-    </div>
-
-  </div>
+  </article>
 
 </div>
 
