@@ -259,7 +259,7 @@ For examples of how to use Mahout, see the examples directory located in `exampl
 For information on how to contribute, visit the [How to Contribute Page](https://mahout.apache.org/developers/how-to-contribute.html)
 
 #### Legal
-Please see the `NOTICE.txt` included in this directory for more information.
+Please see the `NOTICE.txt` included in this directory for more information. 
 
 [![Build Status](https://api.travis-ci.org/apache/mahout.svg?branch=master)](https://travis-ci.org/apache/mahout)
 <!--
