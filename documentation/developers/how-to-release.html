@@ -82,8 +82,6 @@
                        aria-expanded="false">Documentation</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <a class="dropdown-item"
-                           href="/papers.html">Papers</a>
-                        <a class="dropdown-item"
                            href="/documentation/users">User Guide</a>
                         <a class="dropdown-item"
                            href="/documentation/developers">Developer Guide</a>
@@ -103,7 +101,7 @@
                        aria-expanded="false">Download</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <a class="dropdown-item"
-                           href="/download/downloads.html">Latest Release</a>
+                           href="/download/downloads/html">Latest Release</a>
                         <a class="dropdown-item"
                            href="https://github.com/apache/mahout/">Github Repository</a>
                         <a class="dropdown-item"
@@ -132,6 +130,9 @@
                            href="/documentation/developers/">Developer Documentation</a>
                         <a class="dropdown-item"
                            href="/community/coc.html">Code of Conduct</a>
+                        <a class="dropdown-item"
+                           href="/404.html">Partners and Supporters</a>
+<!--                        Maybe make a new page that merges professional support and powered-by-mahout?-->
                     </div>
                 </li>
 
@@ -189,8 +190,8 @@ create a new Mahout release.</em></p>
 up include:</p>
 
 <ul>
-  <li>Any <a href="https://issues.apache.org/jira/issues/?jql=project%20%3D%20MAHOUT%20AND%20status%20%3D%20Open%20AND%20resolution%20%3D%20Unresolved%20AND%20fixVersion%20in%20unreleasedVersions()%20AND%20component%20in%20(build-classic%2C%20classic)%20ORDER%20BY%20priority%20DESC%2C%20updated%20DESC">Unresolved JIRA issues for the upcoming release </a></li>
-  <li>Any <a href="https://issues.apache.org/jira/issues/?jql=project%20%3D%20MAHOUT%20AND%20status%20in%20(Resolved%2C%20Closed)%20AND%20resolution%20in%20(Fixed%2C%20Resolved)%20AND%20fixVersion%20%3D%20EMPTY%20AND%20component%20in%20(build-classic%2C%20classic)%20ORDER%20BY%20priority%20DESC%2C%20updated%20DESC">Resolved or Closed JIRA issues missing a “Fix Version” </a>
+  <li>Any <a href="-https://issues.apache.org/jira/secure/issuenavigator!executeadvanced.jspa?jqlquery=project+%3d+mahout+and+resolution+%3d+unresolved+and+fixversion+%3d+%220.6%22&amp;runquery=true&amp;clear=true.html">Unresolved JIRA issues for the upcoming release </a></li>
+  <li>Any <a href="-https://issues.apache.org/jira/secure/issuenavigator!executeadvanced.jspa?jqlquery=project+%3d+mahout+and+%28status+%3d+resolved+or+status+%3d+closed%29+and+fixversion+is+null+and+resolution+%3d+fixed&amp;runquery=true&amp;clear=true.html">Resolved or Closed JIRA issues missing a “Fix Version” </a>
  that should be marked as fixed in this release?</li>
   <li>Does any documentation need an update?</li>
   <li>Who is going to be the release engineer?</li>
