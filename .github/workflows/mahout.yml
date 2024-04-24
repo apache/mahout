@@ -16,6 +16,10 @@
 name: Java CI with Maven
 
 on:
+  pull_request:
+    types: [opened]
+    branches:
+      - trunk
   push:
     branches:
       - trunk
