@@ -77,3 +77,12 @@ def execute_circuit(circuit, backend, backend_config):
     result = job.result()
     return result.get_counts(transpiled_circuit)
 
+# placeholder method for use in the testing suite
+def get_final_state_vector(circuit, backend, backend_config):
+    simulator = qiskit.Aer.get_backend('statevector_simulator')
+
+    # Simulate the circuit
+    job = qiskit.execute(circuit, simulator)
+    result = job.result()
+
+    return result.get_statevector()

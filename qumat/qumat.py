@@ -54,3 +54,7 @@ class QuMat:
 
     def execute_circuit(self):
         return self.backend_module.execute_circuit(self.circuit, self.backend, self.backend_config)
+
+    # placeholder method for use in the testing suite
+    def get_final_state_vector(self):
+        return self.backend_module.get_final_state_vector(self.circuit, self.backend, self.backend_config)
