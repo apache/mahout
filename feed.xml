@@ -1,4 +1,54 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2024-04-29T13:39:54+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/04/24/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-04-24T08:00:00+00:00</published><updated>2024-04-24T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/04/24/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/04/24/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2024-05-08T21:15:29+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-05-08T08:00:00+00:00</published><updated>2024-05-08T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
+
+<h3 id="attendees">Attendees</h3>
+<ul>
+  <li>Andrew Musselman</li>
+  <li>Trevor Grant</li>
+</ul>
+
+<h3 id="old-business">Old Business</h3>
+<ul>
+  <li>Make ticket to add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198)</li>
+  <li>Splitting Mahout project code into discrete repos (andrew): https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204
+    <ul>
+      <li>mahout-website</li>
+      <li>mahout-classic</li>
+      <li>mahout-samsara</li>
+      <li>mahout-qumat</li>
+    </ul>
+  </li>
+  <li>Docker image for web site build (to jowanza) https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165</li>
+  <li>Next steps for qiskit and cirq back ends (sub-tasks created) issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206</li>
+  <li>Roadmap
+    <ul>
+      <li>Q2
+        <ul>
+          <li>Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends</li>
+          <li>Kernel methods started</li>
+          <li>Submit public talk about Qumat</li>
+          <li>Classic in maintenance mode</li>
+        </ul>
+      </li>
+      <li>Q3 and beyond
+        <ul>
+          <li>Amazon Braket</li>
+          <li>Distributed quantum solvers</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Add a measure method issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2208</li>
+  <li>Add a draw method - ive stumbled across it in both cirq and qiskit issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2209</li>
+</ul>
+
+<h3 id="new-business">New Business</h3>
+<ul>
+  <li>Logo and name</li>
+  <li>Andrew to review PRs for MAHOUT-2210 and MAHOUT-2211</li>
+  <li>Kernel method research spike (trevor): https://issues.apache.org/jira/browse/MAHOUT-2200</li>
+  <li>Moving to GitHub Issues instead of JIRA (asked infra): issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2205</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting Subscribe to the Mahout User list to ask for details on joining.]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/04/24/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-04-24T08:00:00+00:00</published><updated>2024-04-24T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/04/24/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/04/24/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
 <p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
 
 <h3 id="attendees">Attendees</h3>
@@ -340,49 +390,4 @@ The tl;dr is that it will be merged following some clean up on the git log. (Tre
   <li>TODO in Q12024: Submit proposal to NSF <a href="https://new.nsf.gov/funding/opportunities/pathways-enable-open-source-ecosystems-pose">Pathways to Enable Open-Source Ecosystems (POSE)</a></li>
   <li>Reach out to formerly active project members</li>
   <li>Reach out to quantum compute people</li>
-</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Monthly community meeting]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2023/11/29/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2023-11-29T08:00:00+00:00</published><updated>2023-11-29T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2023/11/29/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2023/11/29/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-meeting">Monthly community meeting</h2>
-
-<h3 id="attendees">Attendees</h3>
-<ul>
-  <li>Andrew Musselman</li>
-  <li>Shannon Quinn</li>
-  <li>Trevor Grant</li>
-</ul>
-
-<h3 id="jira-focus">JIRA focus</h3>
-<ol>
-  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2166">Proof of concept of quantum front-end</a></li>
-  <li>TBD: Updating Docker images</li>
-  <li>TBD: Live in-browser code environment</li>
-  <li>TBD: Simple spike for matrix math on the IBM quantum compute platform</li>
-  <li>TBD: Assess all quantum platforms vis-a-vis interop and portability</li>
-  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2152">Web site check</a></li>
-  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2153">Download page improvements</a></li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-2154">Update NOTICE</a></li>
-  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2156">Add “how to do your first JIRA” notes</a></li>
-  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2157">Add “first ticket” tag or type in JIRA</a></li>
-  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2159">Add Docker instructions to nav</a></li>
-  <li>Assigned: <a href="https://issues.apache.org/jira/browse/MAHOUT-2165">Docker image for web site build</a></li>
-  <li>Complete: <a href="https://issues.apache.org/jira/browse/MAHOUT-2149">Migrate off Travis</a></li>
-</ol>
-
-<h3 id="release-plans">Release plans</h3>
-<ul>
-  <li>Nov: 14.2, point release with minor improvements and new build system</li>
-</ul>
-
-<h3 id="active-ideas">Active Ideas</h3>
-<ul>
-  <li>Quantum computing</li>
-  <li>Python bindings for DSL</li>
-</ul>
-
-<h3 id="summary-and-next-steps">Summary and next steps</h3>
-<ul>
-  <li>TODO in Dec: Push 14.2 out</li>
-  <li>TODO Dec 3: Pair work (Trevor/Andrew) on beta of <code class="language-plaintext highlighter-rouge">mahout-q</code> <a href="https://issues.apache.org/jira/browse/MAHOUT-2166">Proof of concept of quantum front-end</a></li>
-  <li>TODO in Q12024: Submit proposal to NSF <a href="https://new.nsf.gov/funding/opportunities/pathways-enable-open-source-ecosystems-pose">Pathways to Enable Open-Source Ecosystems (POSE)</a></li>
-  <li>Reach out to formerly active project members</li>
-  <li>Reach out to quantum compute people</li>
-  <li>JIRA ranching</li>
 </ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Monthly community meeting]]></summary></entry></feed>
