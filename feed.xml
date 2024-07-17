@@ -1,4 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2024-05-08T21:15:29+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-05-08T08:00:00+00:00</published><updated>2024-05-08T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2024-07-17T21:08:45+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/07/17/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-07-17T08:00:00+00:00</published><updated>2024-07-17T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/07/17/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/07/17/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
+
+<h3 id="attendees">Attendees</h3>
+<ul>
+  <li>Andrew Musselman</li>
+  <li>Trevor Grant</li>
+  <li>Tommy Naugle</li>
+</ul>
+
+<h3 id="old-business">Old Business</h3>
+<ul>
+  <li>Make ticket to add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198)</li>
+  <li>Splitting Mahout project code into discrete repos (andrew): https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204
+    <ul>
+      <li>mahout-website</li>
+      <li>mahout-classic</li>
+      <li>mahout-samsara</li>
+      <li>mahout-qumat</li>
+    </ul>
+  </li>
+  <li>Docker image for web site build (to jowanza) https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165</li>
+  <li>Next steps for qiskit and cirq back ends (sub-tasks created) issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206</li>
+  <li>Roadmap
+    <ul>
+      <li>Q2
+        <ul>
+          <li>Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends (in flight)</li>
+          <li>Kernel methods (in flight)</li>
+          <li>Submit public talk about Qumat (accepted, Fossy Aug 2024)</li>
+          <li>Classic in maintenance mode (done)</li>
+        </ul>
+      </li>
+      <li>Q3 and beyond
+        <ul>
+          <li>Amazon Braket (in flight)</li>
+          <li>Distributed quantum solvers</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="new-business">New Business</h3>
+<ul>
+  <li>Next community call Trevor will do a roundtable on automated documentation methods</li>
+  <li>Add Braket (Trevor) https://issues.apache.org/jira/browse/MAHOUT-2213</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting Subscribe to the Mahout User list to ask for details on joining.]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-05-08T08:00:00+00:00</published><updated>2024-05-08T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/05/08/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
 <p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
 
 <h3 id="attendees">Attendees</h3>
@@ -353,41 +400,4 @@ The tl;dr is that it will be merged following some clean up on the git log. (Tre
 <h3 id="other-business">Other Business</h3>
 <ul>
   <li>JIRA hygiene with Shashanka in monthly Classic meeting</li>
-</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-01-31T08:00:00+00:00</published><updated>2024-01-31T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/01/31/Meeting-Minutes.html"><![CDATA[<h2 id="monthly-community-meeting">Monthly community meeting</h2>
-
-<h3 id="attendees">Attendees</h3>
-<ul>
-  <li>Andrew Musselman</li>
-  <li>Trevor Grant</li>
-</ul>
-
-<h3 id="jira-focus">JIRA focus</h3>
-<ol>
-  <li>TBD clear out old “boards;” question into INFRA for help</li>
-  <li>Cleared out old versions</li>
-  <li>Cleared out old components</li>
-  <li>Assigned all potentially relevant Classic tickets to Shashanka Srinivasa</li>
-  <li>Resolved stale tickets</li>
-  <li>Created new versions <code class="language-plaintext highlighter-rouge">classic-15.0</code> and <code class="language-plaintext highlighter-rouge">qumat-0.1.0</code></li>
-  <li>Created new components <code class="language-plaintext highlighter-rouge">website</code>, <code class="language-plaintext highlighter-rouge">classic</code>, <code class="language-plaintext highlighter-rouge">build-classic</code>, <code class="language-plaintext highlighter-rouge">qumat</code>, and <code class="language-plaintext highlighter-rouge">build-qumat</code></li>
-</ol>
-
-<h3 id="release-plans">Release plans</h3>
-<ul>
-  <li>Not discussed but qumat is pushed to <code class="language-plaintext highlighter-rouge">main</code> and nightlies are building the website from that branch</li>
-</ul>
-
-<h3 id="active-ideas">Active Ideas</h3>
-<ul>
-  <li>Quantum computing</li>
-  <li>Python bindings for DSL</li>
-</ul>
-
-<h3 id="summary-and-next-steps">Summary and next steps</h3>
-<ul>
-  <li>Completed work on beta of <code class="language-plaintext highlighter-rouge">qumat</code> <a href="https://issues.apache.org/jira/browse/MAHOUT-2166">Proof of concept of quantum front-end</a></li>
-  <li>Completed JIRA ranching</li>
-  <li>TODO in Q12024: Submit proposal to NSF <a href="https://new.nsf.gov/funding/opportunities/pathways-enable-open-source-ecosystems-pose">Pathways to Enable Open-Source Ecosystems (POSE)</a></li>
-  <li>Reach out to formerly active project members</li>
-  <li>Reach out to quantum compute people</li>
-</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Monthly community meeting]]></summary></entry></feed>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting]]></summary></entry></feed>
