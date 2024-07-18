@@ -23,11 +23,13 @@ category: minutes
 * Next steps for qiskit and cirq back ends (sub-tasks created) issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206
 * Roadmap
     * Q2
+        * Classic in maintenance mode (done)
+    * Q3
         * Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends (in flight)
         * Kernel methods (in flight)
         * Submit public talk about Qumat (accepted, Fossy Aug 2024)
-        * Classic in maintenance mode (done)
-    * Q3 and beyond
+        * Amazon Braket (in flight)
+    * Q4 and beyond
         * Amazon Braket (in flight)
         * Distributed quantum solvers
 
