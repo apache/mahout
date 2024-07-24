@@ -12,14 +12,14 @@ category: minutes
 * Trevor Grant
 
 ### Old Business
-* Make ticket to add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198)
-* Splitting Mahout project code into discrete repos (andrew): https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204
+* [Make ticket to add notebooks to notebooks directory in source tree](https://issues.apache.org/jira/browse/MAHOUT-2198)
+* [Splitting Mahout project code into discrete repos (andrew)](https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204)
     * mahout-website
     * mahout-classic
     * mahout-samsara
     * mahout-qumat
-* Docker image for web site build (to jowanza) https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165
-* Next steps for qiskit and cirq back ends (sub-tasks created) issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206
+* [Docker image for web site build (to jowanza)](https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165)
+* [Next steps for qiskit and cirq back ends (sub-tasks created)](https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206)
 * Roadmap
     * Q2
         * Classic in maintenance mode (done)
@@ -32,10 +32,10 @@ category: minutes
         * Amazon Braket (in flight)
         * Distributed quantum solvers
 * Next community call Trevor will do a roundtable on automated documentation methods
-* Add Braket (Trevor) https://issues.apache.org/jira/browse/MAHOUT-2213
+* [Add Braket (Trevor)](https://issues.apache.org/jira/browse/MAHOUT-2213)
 
 ### New Business
-* FOSSY talk slides and notebook (https://2024.fossy.us/schedule/presentation/265/)
+* FOSSY talk slides and notebook [Abstract](https://2024.fossy.us/schedule/presentation/265/)
 * Other conferences to target in 2025
     * FOSDEM
     * Berlin Buzzwords
