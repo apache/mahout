@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2024-07-24T22:25:41+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/07/24/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-07-24T08:00:00+00:00</published><updated>2024-07-24T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/07/24/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/07/24/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2024-07-24T22:41:18+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/07/24/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-07-24T08:00:00+00:00</published><updated>2024-07-24T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/07/24/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/07/24/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
 <p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
 
 <h3 id="attendees">Attendees</h3>
@@ -9,8 +9,8 @@
 
 <h3 id="old-business">Old Business</h3>
 <ul>
-  <li>Make ticket to add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198)</li>
-  <li>Splitting Mahout project code into discrete repos (andrew): https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-2198">Make ticket to add notebooks to notebooks directory in source tree</a></li>
+  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204">Splitting Mahout project code into discrete repos (andrew)</a>
     <ul>
       <li>mahout-website</li>
       <li>mahout-classic</li>
@@ -18,8 +18,8 @@
       <li>mahout-qumat</li>
     </ul>
   </li>
-  <li>Docker image for web site build (to jowanza) https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165</li>
-  <li>Next steps for qiskit and cirq back ends (sub-tasks created) issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206</li>
+  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165">Docker image for web site build (to jowanza)</a></li>
+  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206">Next steps for qiskit and cirq back ends (sub-tasks created)</a></li>
   <li>Roadmap
     <ul>
       <li>Q2
@@ -44,12 +44,12 @@
     </ul>
   </li>
   <li>Next community call Trevor will do a roundtable on automated documentation methods</li>
-  <li>Add Braket (Trevor) https://issues.apache.org/jira/browse/MAHOUT-2213</li>
+  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-2213">Add Braket (Trevor)</a></li>
 </ul>
 
 <h3 id="new-business">New Business</h3>
 <ul>
-  <li>FOSSY talk slides and notebook (https://2024.fossy.us/schedule/presentation/265/)</li>
+  <li>FOSSY talk slides and notebook <a href="https://2024.fossy.us/schedule/presentation/265/">Abstract</a></li>
   <li>Other conferences to target in 2025
     <ul>
       <li>FOSDEM</li>
