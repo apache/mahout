@@ -40,17 +40,16 @@ poetry install
 
 ## Roadmap
 
-Last Updated 2024-04-23
-## Roadmap
-
 ### Q2
+- [x] Transition of Classic to maintenance mode
+
+### Q3
 - [ ] Integration of Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends
 - [ ] Initiation of kernel methods
-- [ ] Submission of public talk about Qumat
-- [ ] Transition of Classic to maintenance mode
+- [x] Integration with Amazon Braket
+- [x] [Public talk about Qumat](https://2024.fossy.us/schedule/presentation/265/)
 
 ### Q3 and beyond
-- [ ] Integration with Amazon Braket
 - [ ] Development of distributed quantum solvers
 
 #### Legal
