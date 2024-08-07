@@ -67,3 +67,9 @@
 ## `execute_circuit(self)`
 - **Purpose**: Executes the quantum circuit and retrieves the results.
 - **Usage**: Used to run the entire set of quantum operations and measure the outcomes.
+
+## `draw_circuit(self)`
+- **Purpose**: Visualizes the quantum circuit.
+- **Usage**: Provides a graphical representation of the quantum circuit for better understanding.
+- **Note**: Just a pass through function, will use underlying libraries 
+  method for drawing circuit. 

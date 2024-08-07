@@ -62,3 +62,9 @@ def execute_circuit(circuit, backend, backend_config):
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
     raise NotImplementedError("Final state vector calculation is not currently supported with Amazon Braket.")
+
+def draw_circuit(circuit):
+    # Unfortunately, Amazon Braket does not have direct support for drawing circuits in the same way
+    # as Qiskit and Cirq. You would typically visualize Amazon Braket circuits using external tools.
+    # For simplicity, we'll print the circuit object which gives some textual representation.
+    print(circuit)
