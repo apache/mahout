@@ -20,3 +20,11 @@
 
 publish:
   whoami:    asf-site
+github:
+  features:
+    # Enable wiki for documentation
+    wiki: true
+    # Enable issue management
+    issues: true
+    # Enable projects for project management boards
+    projects: true
