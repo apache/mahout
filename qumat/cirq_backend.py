@@ -71,3 +71,5 @@ def execute_circuit(circuit, backend, backend_config):
     result = simulator.run(circuit, repetitions=backend_config['backend_options'].get('shots', 1))
     return result.histogram(key='result')
 
+def draw_circuit(circuit):
+    print(circuit)
