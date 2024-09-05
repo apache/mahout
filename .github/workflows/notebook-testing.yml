@@ -3,10 +3,10 @@ name: CI for Jupyter Notebooks
 on:
   push:
     branches:
-      - 454-notebook-testing
+      - main
   pull_request:
     branches:
-      - 454-notebook-testing
+      - main
 
 jobs:
   test-notebooks:
