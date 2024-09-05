@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip  
-          pip install nbconvert nbclient ipykernel git+https://github.com/apache/mahout.git@main
+          pip install nbconvert nbclient ipykernel
 
       - name: Run Jupyter Notebooks
         run: |
