@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Meeting Minutes
-date:   2024-08-09 00:00:00 -0800
+date:   2024-09-20 00:00:00 -0800
 category: minutes
 ---
 ## Weekly community meeting
@@ -10,7 +10,6 @@ category: minutes
 ### Attendees
 * Andrew Musselman
 * Tommy Naugle
-* Trevor Grant
 
 ### Old Business
 * [Make ticket to add notebooks to notebooks directory in source tree](https://issues.apache.org/jira/browse/MAHOUT-2198)
