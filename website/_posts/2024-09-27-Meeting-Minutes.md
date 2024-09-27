@@ -25,7 +25,7 @@ category: minutes
     * Q3
         * Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends (in flight)
         * Kernel methods (in flight)
-        * Submit public talk about Qumat (accepted, Fossy Aug 2024)
+        * Submit public talk about Qumat (done, Fossy Aug 2024)
         * Amazon Braket (done)
     * Q4 and beyond
         * Distributed quantum solvers
@@ -34,8 +34,8 @@ category: minutes
 * Add GitHub Project
 * Add "talks" page to web site (for Andrew)
 * PyPi release for QuMat
-* Tommy has picked up kernel methods spike (https://issues.apache.org/jira/browse/MAHOUT-2200) now https://github.com/apache/mahout/issues/456
-    * https://github.com/apache/mahout/issues/457
-    * https://github.com/apache/mahout/issues/458
-    * https://github.com/apache/mahout/wiki/Data-Encoding-and-Kernel-Notes
-* Stacked hands to review https://docs.quantum.ibm.com/api/qiskit/qiskit.circuit.library.ZZFeatureMap and get some understanding of what's needed in Qumat
+* Tommy has picked up [kernel methods spike](https://issues.apache.org/jira/browse/MAHOUT-2200) now [in github issue](https://github.com/apache/mahout/issues/456)
+    * [457](https://github.com/apache/mahout/issues/457)
+    * [458](https://github.com/apache/mahout/issues/458)
+    * [Data encoding and kernel notes](https://github.com/apache/mahout/wiki/Data-Encoding-and-Kernel-Notes)
+* Stacked hands to review [ZZFeatureMap](https://docs.quantum.ibm.com/api/qiskit/qiskit.circuit.library.ZZFeatureMap) and get some understanding of what's needed in Qumat
