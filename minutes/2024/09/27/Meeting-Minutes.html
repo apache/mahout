@@ -7,11 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>
-    News
+    Meeting Minutes
     
   </title>
 
-  <meta name="description" content="Distributed Linear Algebra">
+  <meta name="description" content="Weekly community meeting Subscribe to the Mahout User list to ask for details on joining.">
 
   <link rel="stylesheet" href="/assets/css/main.css">
 
@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
 
-  <link rel="canonical" href="http://mahout.apache.org//news-and-events/news.html">
+  <link rel="canonical" href="http://mahout.apache.org//minutes/2024/09/27/Meeting-Minutes.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
 
@@ -174,86 +174,82 @@
 
   <div class="container mt-5 pb-4">
 
-  <div class="row">
+  <article class="post" itemscope="itemscope" itemtype="http://schema.org/BlogPosting">
 
-    <div class="col-lg-8">
-      <h1 id="news">News</h1>
+    <header class="post-header">
+      <h1 class="post-title" itemprop="name headline">Meeting Minutes</h1>
+      <p class="post-meta">
+        <time datetime="2024-09-27T08:00:00+00:00" itemprop="datePublished">
+          2024-09-27 08:00:00 +0000
+        </time>
+        
+      </p>
+    </header>
 
-<p>Welcome to the News page! Stay up-to-date with the latest announcements, releases, events, and community highlights from
-the Apache Mahout project. Keep an eye on this page for regular updates and make sure you don’t miss any important news 
-related to the project.</p>
+    <div class="post-content" itemprop="articleBody">
+      <h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
 
+<h3 id="attendees">Attendees</h3>
 <ul>
-  <li>
-    <p><a href="/minutes/2024/09/27/Meeting-Minutes.html">Meeting Minutes</a> - September 27, 2024</p>
+  <li>Andrew Musselman</li>
+  <li>Tommy Naugle</li>
+  <li>Trevor Grant</li>
+</ul>
+
+<h3 id="old-business">Old Business</h3>
+<ul>
+  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204">Splitting Mahout project code into discrete repos (andrew)</a>
+    <ul>
+      <li>mahout-website</li>
+      <li>mahout-classic</li>
+      <li>mahout-samsara</li>
+      <li>mahout-qumat</li>
+    </ul>
   </li>
-  <li>
-    <p><a href="/minutes/2024/09/20/Meeting-Minutes.html">Meeting Minutes</a> - September 20, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/08/30/Meeting-Minutes.html">Meeting Minutes</a> - August 30, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/08/09/Meeting-Minutes.html">Meeting Minutes</a> - August 09, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/08/02/Meeting-Minutes.html">Meeting Minutes</a> - August 02, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/07/24/Meeting-Minutes.html">Meeting Minutes</a> - July 24, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/07/17/Meeting-Minutes.html">Meeting Minutes</a> - July 17, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/05/08/Meeting-Minutes.html">Meeting Minutes</a> - May 08, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/04/24/Meeting-Minutes.html">Meeting Minutes</a> - April 24, 2024</p>
-  </li>
-  <li>
-    <p><a href="/minutes/2024/04/17/Meeting-Minutes.html">Meeting Minutes</a> - April 17, 2024</p>
+  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165">Docker image for web site build (to jowanza)</a></li>
+  <li>Roadmap
+    <ul>
+      <li>Q2
+        <ul>
+          <li>Classic in maintenance mode (done)</li>
+        </ul>
+      </li>
+      <li>Q3
+        <ul>
+          <li>Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends (in flight)</li>
+          <li>Kernel methods (in flight)</li>
+          <li>Submit public talk about Qumat (accepted, Fossy Aug 2024)</li>
+          <li>Amazon Braket (done)</li>
+        </ul>
+      </li>
+      <li>Q4 and beyond
+        <ul>
+          <li>Distributed quantum solvers</li>
+        </ul>
+      </li>
+    </ul>
   </li>
 </ul>
 
+<h3 id="new-business">New Business</h3>
+<ul>
+  <li>Add GitHub Project</li>
+  <li>Add “talks” page to web site (for Andrew)</li>
+  <li>PyPi release for QuMat</li>
+  <li>Tommy has picked up kernel methods spike (https://issues.apache.org/jira/browse/MAHOUT-2200) now https://github.com/apache/mahout/issues/456
+    <ul>
+      <li>https://github.com/apache/mahout/issues/457</li>
+      <li>https://github.com/apache/mahout/issues/458</li>
+      <li>https://github.com/apache/mahout/wiki/Data-Encoding-and-Kernel-Notes</li>
+    </ul>
+  </li>
+  <li>Stacked hands to review https://docs.quantum.ibm.com/api/qiskit/qiskit.circuit.library.ZZFeatureMap and get some understanding of what’s needed in Qumat</li>
+</ul>
 
     </div>
 
-    <div class="col-lg-4">
-      <!-- Apache Software Foundation Links -->
-<div class="card mb-4 sidebar">
-    <div class="card-header">
-        Apache Software Foundation
-    </div>
-    <div class="card-body">
-        <ul class="list-unstyled mb-0">
-            <li>
-                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/licenses/">Apache License</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
-            </li>
-            <li>
-                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-<!-- Twitter Posts Widget -->
-<div class="card">
-    <div class="card-body">
-        <a class="twitter-timeline" data-height="500" href="https://twitter.com/ApacheMahout">Tweets by ApacheMahout</a>
-        <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
-</div>
-
-    </div>
-
-  </div>
+  </article>
 
 </div>
 
