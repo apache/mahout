@@ -77,3 +77,8 @@ def apply_ry_gate(circuit, qubit_index, angle):
 
 def apply_rz_gate(circuit, qubit_index, angle):
     circuit.rz(qubit_index, angle)
+
+def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+    circuit.rx(qubit_index, theta)
+    circuit.ry(qubit_index, phi)
+    circuit.rz(qubit_index, lambd)

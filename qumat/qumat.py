@@ -70,3 +70,6 @@ class QuMat:
 
     def apply_rz_gate(self, qubit_index, angle):
         self.backend_module.apply_rz_gate(self.circuit, qubit_index, angle)
+
+    def apply_u_gate(self, qubit_index, theta, phi, lambd):
+        self.backend_module.apply_u_gate(self.circuit, qubit_index, theta, phi, lambd)

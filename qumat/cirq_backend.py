@@ -86,3 +86,8 @@ def apply_rz_gate(circuit, qubit_index, angle):
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.rz(angle).on(qubit))
 
+def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.rz(lambd).on(qubit))
+    circuit.append(cirq.ry(phi).on(qubit))
+    circuit.append(cirq.rx(theta).on(qubit))
