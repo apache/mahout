@@ -61,3 +61,12 @@ class QuMat:
 
     def draw(self):
         return self.backend_module.draw_circuit(self.circuit)
+
+    def apply_rx_gate(self, qubit_index, angle):
+        self.backend_module.apply_rx_gate(self.circuit, qubit_index, angle)
+
+    def apply_ry_gate(self, qubit_index, angle):
+        self.backend_module.apply_ry_gate(self.circuit, qubit_index, angle)
+
+    def apply_rz_gate(self, qubit_index, angle):
+        self.backend_module.apply_rz_gate(self.circuit, qubit_index, angle)
