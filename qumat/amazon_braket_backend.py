@@ -68,3 +68,17 @@ def draw_circuit(circuit):
     # as Qiskit and Cirq. You would typically visualize Amazon Braket circuits using external tools.
     # For simplicity, we'll print the circuit object which gives some textual representation.
     print(circuit)
+
+def apply_rx_gate(circuit, qubit_index, angle):
+    circuit.rx(qubit_index, angle)
+
+def apply_ry_gate(circuit, qubit_index, angle):
+    circuit.ry(qubit_index, angle)
+
+def apply_rz_gate(circuit, qubit_index, angle):
+    circuit.rz(qubit_index, angle)
+
+def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+    circuit.rx(qubit_index, theta)
+    circuit.ry(qubit_index, phi)
+    circuit.rz(qubit_index, lambd)
