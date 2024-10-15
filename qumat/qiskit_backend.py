@@ -90,3 +90,16 @@ def get_final_state_vector(circuit, backend, backend_config):
 def draw_circuit(circuit):
     # Use Qiskit's built-in drawing function
     print(circuit.draw())
+
+def apply_rx_gate(circuit, qubit_index, angle):
+    circuit.rx(angle, qubit_index)
+
+def apply_ry_gate(circuit, qubit_index, angle):
+    circuit.ry(angle, qubit_index)
+
+def apply_rz_gate(circuit, qubit_index, angle):
+    circuit.rz(angle, qubit_index)
+
+def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+    # Apply the U gate directly with specified parameters
+    circuit.u(theta, phi, lambd, qubit_index)

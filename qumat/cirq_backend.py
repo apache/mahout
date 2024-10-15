@@ -73,3 +73,21 @@ def execute_circuit(circuit, backend, backend_config):
 
 def draw_circuit(circuit):
     print(circuit)
+
+def apply_rx_gate(circuit, qubit_index, angle):
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.rx(angle).on(qubit))
+
+def apply_ry_gate(circuit, qubit_index, angle):
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.ry(angle).on(qubit))
+
+def apply_rz_gate(circuit, qubit_index, angle):
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.rz(angle).on(qubit))
+
+def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.rz(lambd).on(qubit))
+    circuit.append(cirq.ry(phi).on(qubit))
+    circuit.append(cirq.rx(theta).on(qubit))
