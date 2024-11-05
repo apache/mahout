@@ -66,20 +66,18 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.append(cirq.Z(qubit))
 
 def execute_circuit(circuit, backend, backend_config, parameter_values=None):
-    # Append measurement to all qubits at the end of the circuit
-    qubits = circuit.all_qubits()
-    circuit.append(cirq.measure(*qubits, key='result'))
+    # Ensure measurement is added to capture the results
+    circuit.append(cirq.measure(*circuit.all_qubits(), key='result'))
 
-    if parameter_values is None:
-        parameter_values = {}
-
-    # Construct the parameter resolver for Cirq
-    resolver = {sympy.Symbol(k): v for k, v in parameter_values.items()}
-
-    # Execute the circuit via a parameter sweep
-    simulator = cirq.Simulator()
-    result = simulator.run(circuit, param_resolver=resolver, repetitions=backend_config['backend_options'].get('shots', 1))
-    return result.histogram(key='result')
+    if parameter_values:
+        # Convert parameter_values to applicable resolvers
+        res = [cirq.ParamResolver(parameter_values)]
+        simulator = cirq.Simulator()
+        results = simulator.run_sweep(circuit=circuit, repetitions=backend_config['backend_options'].get('shots', 1), params=res)
+        return [result.histogram(key='result') for result in results]
+    else:
+        result = cirq.simulator.run(circuit, repetitions=backend_config['backend_options'].get('shots', 1))
+        return result.histogram(key='result')
 
 def draw_circuit(circuit):
     print(circuit)
