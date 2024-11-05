@@ -67,9 +67,9 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
 def execute_circuit(circuit, backend, backend_config):
-    # Add measurements if they are not already present
-    if not circuit.cregs:
-        circuit.measure_all()
+    # # Add measurements if they are not already present
+    # if not circuit.cregs:
+    #     circuit.measure_all()
 
     # Ensure the circuit is parameterized properly
     if circuit.parameters:
