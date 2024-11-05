@@ -56,7 +56,7 @@ class QuMat:
         if parameter_values:
             self.bind_parameters(parameter_values)
         self.backend_config['parameter_values'] = self.parameters  # Pass parameters
-        return self.backend_module.execute_circuit(self.circuit, self.backend, self.backend_config, parameter_values)
+        return self.backend_module.execute_circuit(self.circuit, self.backend, self.backend_config)
 
     def bind_parameters(self, parameter_values):
         for param, value in parameter_values.items():
