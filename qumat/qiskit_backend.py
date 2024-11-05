@@ -67,24 +67,25 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
 def execute_circuit(circuit, backend, backend_config):
-    # Ensure the circuit is parameterized properly
+    shots = backend_config['backend_options'].get('shots', 1024)
+
     if circuit.parameters:
-        # Parse the global parameter configuration
-        parameter_bindings = {param: backend_config['parameter_values'][str(param)] for param in circuit.parameters}
+        # Bind parameters if necessary
+        parameter_binds = {
+            param: backend_config.get('parameter_values', {}).get(str(param), 0)
+            for param in circuit.parameters
+        }
 
-        transpiled_circuit = qiskit.transpile(circuit, backend)
-        qobj = qiskit.assemble(transpiled_circuit, parameter_binds=[parameter_bindings], shots=backend_config['backend_options']['shots'])
-
+        # Assemble and bind parameters to the circuit
+        qobj = qiskit.assemble(qiskit.transpile(circuit, backend), backend=backend, parameter_binds=[parameter_binds], shots=shots)
         job = backend.run(qobj)
-        result = job.result()
-        return result.get_counts()
+
     else:
-        # For non-parameterized circuits
-        circuit.measure_all()
-        transpiled_circuit = qiskit.transpile(circuit, backend)
-        job = qiskit.execute(transpiled_circuit, backend, shots=backend_config['backend_options']['shots'])
-        result = job.result()
-        return result.get_counts()
+        # Execute directly if no parameters exist
+        job = qiskit.execute(circuit, backend, shots=shots)
+
+    result = job.result()
+    return result.get_counts()
 
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
