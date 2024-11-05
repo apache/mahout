@@ -73,7 +73,7 @@ def execute_circuit(circuit, backend, backend_config, parameter_values=None):
     # if parameter_values:
         # Convert parameter_values to applicable resolvers
     res = [cirq.ParamResolver(parameter_values)]
-    results = simulator.run_sweep(circuit=circuit, repetitions=backend_config['backend_options'].get('shots', 1), params=res)
+    results = simulator.run_sweep(circuit, repetitions=backend_config['backend_options'].get('shots', 1), params=res)
     return [result.histogram(key='result') for result in results]
     # else:
     #     result = simulator.run(circuit, repetitions=backend_config['backend_options'].get('shots', 1))
