@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 import cirq
+import sympy
 
 def initialize_backend(backend_config):
    # Assuming 'simulator_type' specifies the type of simulator in Cirq
@@ -74,17 +75,23 @@ def execute_circuit(circuit, backend, backend_config):
 def draw_circuit(circuit):
     print(circuit)
 
+
 def apply_rx_gate(circuit, qubit_index, angle):
+    param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
-    circuit.append(cirq.rx(angle).on(qubit))
+    circuit.append(cirq.rx(param).on(qubit))
+
 
 def apply_ry_gate(circuit, qubit_index, angle):
+    param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
-    circuit.append(cirq.ry(angle).on(qubit))
+    circuit.append(cirq.ry(param).on(qubit))
+
 
 def apply_rz_gate(circuit, qubit_index, angle):
+    param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
-    circuit.append(cirq.rz(angle).on(qubit))
+    circuit.append(cirq.rz(param).on(qubit))
 
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     qubit = cirq.LineQubit(qubit_index)
