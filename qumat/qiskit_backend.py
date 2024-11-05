@@ -92,15 +92,15 @@ def draw_circuit(circuit):
     print(circuit.draw())
 
 def apply_rx_gate(circuit, qubit_index, angle):
-    param = qiskit.Parameter(angle) if isinstance(angle, str) else angle
+    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.rx(param, qubit_index)
 
 def apply_ry_gate(circuit, qubit_index, angle):
-    param = qiskit.Parameter(angle) if isinstance(angle, str) else angle
+    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.ry(param, qubit_index)
 
 def apply_rz_gate(circuit, qubit_index, angle):
-    param = qiskit.Parameter(angle) if isinstance(angle, str) else angle
+    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.rz(param, qubit_index)
 
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
