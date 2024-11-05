@@ -75,16 +75,12 @@ def execute_circuit(circuit, backend, backend_config):
     if circuit.parameters:
         # Parse the global parameter configuration
         parameter_bindings = {param: backend_config['parameter_values'][str(param)] for param in circuit.parameters}
-
         transpiled_circuit = qiskit.transpile(circuit, backend)
         qobj = qiskit.assemble(transpiled_circuit, parameter_binds=[parameter_bindings], shots=backend_config['backend_options']['shots'])
-
         job = backend.run(qobj)
         result = job.result()
         return result.get_counts()
     else:
-        # For non-parameterized circuits
-        circuit.measure_all()
         transpiled_circuit = qiskit.transpile(circuit, backend)
         job = qiskit.execute(transpiled_circuit, backend, shots=backend_config['backend_options']['shots'])
         result = job.result()
