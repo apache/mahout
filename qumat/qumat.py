@@ -53,9 +53,9 @@ class QuMat:
         self.backend_module.apply_pauli_z_gate(self.circuit, qubit_index)
 
     def execute_circuit(self, parameter_values=None):
-        # If parameter_values is provided, bind them to the circuit before execution
         if parameter_values:
             self.bind_parameters(parameter_values)
+        self.backend_config['parameter_values'] = self.parameters  # Pass parameters
         return self.backend_module.execute_circuit(self.circuit, self.backend, self.backend_config)
 
     def bind_parameters(self, parameter_values):
