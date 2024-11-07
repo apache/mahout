@@ -84,7 +84,6 @@ def execute_circuit(circuit, backend, backend_config):
 def draw_circuit(circuit):
     print(circuit)
 
-
 def apply_rx_gate(circuit, qubit_index, angle):
     param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
