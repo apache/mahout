@@ -67,15 +67,24 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
 def execute_circuit(circuit, backend, backend_config):
-    # Transpile the circuit
-    circuit.measure_all()
-    transpiled_circuit = qiskit.compiler.transpile(circuit, backend)
+    # Add measurements if they are not already present
+    if not circuit.cregs:
+        circuit.measure_all()
 
-    # Execute the transpiled circuit on the backend
-    job = qiskit.execute(transpiled_circuit, backend,
-                         shots=backend_config['backend_options']['shots'])
-    result = job.result()
-    return result.get_counts(transpiled_circuit)
+    # Ensure the circuit is parameterized properly
+    if circuit.parameters:
+        # Parse the global parameter configuration
+        parameter_bindings = {param: backend_config['parameter_values'][str(param)] for param in circuit.parameters}
+        transpiled_circuit = qiskit.transpile(circuit, backend)
+        qobj = qiskit.assemble(transpiled_circuit, parameter_binds=[parameter_bindings], shots=backend_config['backend_options']['shots'])
+        job = backend.run(qobj)
+        result = job.result()
+        return result.get_counts()
+    else:
+        transpiled_circuit = qiskit.transpile(circuit, backend)
+        job = qiskit.execute(transpiled_circuit, backend, shots=backend_config['backend_options']['shots'])
+        result = job.result()
+        return result.get_counts()
 
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
@@ -92,13 +101,16 @@ def draw_circuit(circuit):
     print(circuit.draw())
 
 def apply_rx_gate(circuit, qubit_index, angle):
-    circuit.rx(angle, qubit_index)
+    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    circuit.rx(param, qubit_index)
 
 def apply_ry_gate(circuit, qubit_index, angle):
-    circuit.ry(angle, qubit_index)
+    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    circuit.ry(param, qubit_index)
 
 def apply_rz_gate(circuit, qubit_index, angle):
-    circuit.rz(angle, qubit_index)
+    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    circuit.rz(param, qubit_index)
 
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     # Apply the U gate directly with specified parameters

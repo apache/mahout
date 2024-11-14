@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 import cirq
+import sympy
 
 def initialize_backend(backend_config):
    # Assuming 'simulator_type' specifies the type of simulator in Cirq
@@ -64,27 +65,41 @@ def apply_pauli_z_gate(circuit, qubit_index):
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.Z(qubit))
 
+
 def execute_circuit(circuit, backend, backend_config):
-    # This is a simplified example. You'll need to adjust this based on how you're handling backend configuration.
-    circuit.append(cirq.measure(*circuit.all_qubits(), key='result'))
+    # Ensure measurement is added to capture the results
+    if not circuit.has_measurements():
+        circuit.append(cirq.measure(*circuit.all_qubits(), key='result'))
     simulator = cirq.Simulator()
-    result = simulator.run(circuit, repetitions=backend_config['backend_options'].get('shots', 1))
-    return result.histogram(key='result')
+    parameter_values = backend_config.get('parameter_values', None)
+    if parameter_values:
+        # Convert parameter_values to applicable resolvers
+        res = [cirq.ParamResolver(parameter_values)]
+        results = simulator.run_sweep(circuit, repetitions=backend_config['backend_options'].get('shots', 1), params=res)
+        return [result.histogram(key='result') for result in results]
+    else:
+        result = simulator.run(circuit, repetitions=backend_config['backend_options'].get('shots', 1))
+        return [result.histogram(key='result')]
 
 def draw_circuit(circuit):
     print(circuit)
 
 def apply_rx_gate(circuit, qubit_index, angle):
+    param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
-    circuit.append(cirq.rx(angle).on(qubit))
+    circuit.append(cirq.rx(param).on(qubit))
+
 
 def apply_ry_gate(circuit, qubit_index, angle):
+    param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
-    circuit.append(cirq.ry(angle).on(qubit))
+    circuit.append(cirq.ry(param).on(qubit))
+
 
 def apply_rz_gate(circuit, qubit_index, angle):
+    param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
-    circuit.append(cirq.rz(angle).on(qubit))
+    circuit.append(cirq.rz(param).on(qubit))
 
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     qubit = cirq.LineQubit(qubit_index)

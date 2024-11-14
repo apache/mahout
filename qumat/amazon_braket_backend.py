@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 from braket.aws import AwsQuantumSimulator, AwsDevice
-from braket.circuits import Circuit
+from braket.circuits import Circuit, FreeParameter
 
 def initialize_backend(backend_config):
     backend_options = backend_config['backend_options']
@@ -70,13 +70,27 @@ def draw_circuit(circuit):
     print(circuit)
 
 def apply_rx_gate(circuit, qubit_index, angle):
-    circuit.rx(qubit_index, angle)
+    if isinstance(angle, (int, float)):
+        circuit.rx(qubit_index, angle)
+    else:
+        param = FreeParameter(angle)
+        circuit.rx(qubit_index, param)
+
 
 def apply_ry_gate(circuit, qubit_index, angle):
-    circuit.ry(qubit_index, angle)
+    if isinstance(angle, (int, float)):
+        circuit.ry(qubit_index, angle)
+    else:
+        param = FreeParameter(angle)
+        circuit.ry(qubit_index, param)
+
 
 def apply_rz_gate(circuit, qubit_index, angle):
-    circuit.rz(qubit_index, angle)
+    if isinstance(angle, (int, float)):
+        circuit.rz(qubit_index, angle)
+    else:
+        param = FreeParameter(angle)
+        circuit.rz(qubit_index, param)
 
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     circuit.rx(qubit_index, theta)

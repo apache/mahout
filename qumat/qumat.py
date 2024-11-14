@@ -20,10 +20,10 @@ class QuMat:
     def __init__(self, backend_config):
         self.backend_config = backend_config
         self.backend_name = backend_config['backend_name']
-        # Dynamically load the backend module based on the user's choice
         self.backend_module = import_module(f".{self.backend_name}_backend", package="qumat")
         self.backend = self.backend_module.initialize_backend(backend_config)
         self.circuit = None
+        self.parameters = {}
 
     def create_empty_circuit(self, num_qubits):
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
@@ -52,8 +52,16 @@ class QuMat:
     def apply_pauli_z_gate(self, qubit_index):
         self.backend_module.apply_pauli_z_gate(self.circuit, qubit_index)
 
-    def execute_circuit(self):
+    def execute_circuit(self, parameter_values=None):
+        if parameter_values:
+            self.bind_parameters(parameter_values)
+        self.backend_config['parameter_values'] = self.parameters  # Pass parameters
         return self.backend_module.execute_circuit(self.circuit, self.backend, self.backend_config)
+
+    def bind_parameters(self, parameter_values):
+        for param, value in parameter_values.items():
+            if param in self.parameters:
+                self.parameters[param] = value
 
     # placeholder method for use in the testing suite
     def get_final_state_vector(self):
@@ -63,13 +71,20 @@ class QuMat:
         return self.backend_module.draw_circuit(self.circuit)
 
     def apply_rx_gate(self, qubit_index, angle):
+        self._handle_parameter(angle)
         self.backend_module.apply_rx_gate(self.circuit, qubit_index, angle)
 
     def apply_ry_gate(self, qubit_index, angle):
+        self._handle_parameter(angle)
         self.backend_module.apply_ry_gate(self.circuit, qubit_index, angle)
 
     def apply_rz_gate(self, qubit_index, angle):
+        self._handle_parameter(angle)
         self.backend_module.apply_rz_gate(self.circuit, qubit_index, angle)
+
+    def _handle_parameter(self, param_name):
+        if isinstance(param_name, str) and param_name not in self.parameters:
+            self.parameters[param_name] = None
 
     def apply_u_gate(self, qubit_index, theta, phi, lambd):
         self.backend_module.apply_u_gate(self.circuit, qubit_index, theta, phi, lambd)

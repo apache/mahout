@@ -12,6 +12,7 @@ qiskit = "^0.45.1"
 qiskit-aer = "^0.13.2"
 cirq = "^1.3.0"
 amazon-braket-sdk = "^1.10.0"
+sympy = "^1.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.1.1"
