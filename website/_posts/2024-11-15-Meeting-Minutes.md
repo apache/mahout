@@ -19,7 +19,7 @@ category: minutes
     * mahout-qumat
 * [Docker image for web site build (to jowanza)](https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165)
 * Roadmap
-    * H5-2025
+    * H1-2025
         * Distributed quantum solvers
 * Add GitHub Project
 * [#463 Move PQC docs to this repo](https://github.com/apache/mahout/issues/463) (done)
