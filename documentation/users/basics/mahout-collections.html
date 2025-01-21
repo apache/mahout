@@ -25,7 +25,26 @@
   <link rel="canonical" href="http://mahout.apache.org//documentation/users/basics/mahout-collections.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
-
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML">
+    MathJax.Hub.Config({
+      "HTML-CSS": {
+        availableFonts: ["TeX"],
+      },
+      tex2jax: {
+        inlineMath: [['$','$'],["\\(","\\)"]]},
+      displayMath: [ ['$$','$$'], ['\[','\]'] ],
+      TeX: {
+        extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
+        equationNumbers: {
+          autoNumber: "AMS"
+        }
+      },
+      showProcessingMessages: false,
+      messageStyle: "none",
+      imageFont: null,
+      "AssistiveMML": { disabled: true }
+    });
+  </script>
 </head>
 
 <!-- Matomo -->
@@ -81,6 +100,18 @@
                     </div>
                 </li>
 
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-qumat"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Qumat</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/quantum-computing-primer">Quantum Computing Primer</a>
+<!--                        TODO: Add More QuMat stuff here or refactor the whole thing-->
+                    </div>
+                </li>
                 <!-- Documentation -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle"
