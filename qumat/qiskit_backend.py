@@ -79,12 +79,12 @@ def execute_circuit(circuit, backend, backend_config):
         transpiled_circuit = qiskit.transpile(circuit, backend)
         qobj = qiskit.assemble(transpiled_circuit, parameter_binds=[parameter_bindings], shots=backend_config['backend_options']['shots'])
         job = backend.run(qobj)
-        result = job.result().data.meas.get_counts() # TODO seems hacky, double check this later
+        result = job.result()
         return result
     else:
         transpiled_circuit = qiskit.transpile(circuit, backend)
         job = backend.run(transpiled_circuit, shots=backend_config['backend_options']['shots'])
-        result = job.result().data.meas.get_counts() # TODO seems hacky, double check this later
+        result = job.result()
         return result
 
 # placeholder method for use in the testing suite
