@@ -15,12 +15,13 @@
 # limitations under the License.
 #
 import qiskit
+from qiskit_aer import Aer
 
 def initialize_backend(backend_config):
     backend_options = backend_config['backend_options']
     simulator_type = backend_options['simulator_type']
     shots = backend_options['shots']
-    backend = qiskit.Aer.get_backend(simulator_type)
+    backend = Aer.get_backend(simulator_type)
     backend.shots = shots
     return backend
 
