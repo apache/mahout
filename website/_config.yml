@@ -41,6 +41,7 @@ baseurl:  ""
 markdown: kramdown
 plugins:
   - jekyll-feed
+  - jekyll-latex
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
