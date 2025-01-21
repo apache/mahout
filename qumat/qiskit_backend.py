@@ -83,7 +83,7 @@ def execute_circuit(circuit, backend, backend_config):
         return result.get_counts()
     else:
         transpiled_circuit = qiskit.transpile(circuit, backend)
-        job = qiskit.execute(transpiled_circuit, backend, shots=backend_config['backend_options']['shots'])
+        job = backend.run(transpiled_circuit, shots=backend_config['backend_options']['shots'])
         result = job.result()
         return result.get_counts()
 
