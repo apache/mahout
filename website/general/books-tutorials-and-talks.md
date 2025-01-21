@@ -1,8 +1,6 @@
 ---
 layout: default
 title: Books Tutorials and Talks
-
-    
 ---
 # Intro
 
