@@ -224,13 +224,20 @@
 
 <h2 id="71-deutsch-jozsa-algorithm">7.1 Deutsch-Jozsa Algorithm</h2>
 
-<p>The Deutsch-Jozsa algorithm is one of the earliest quantum algorithms that demonstrates the potential of quantum computing. It solves a specific problem exponentially faster than any classical algorithm.</p>
+<p>The Deutsch-Jozsa algorithm is one of the earliest quantum algorithms that 
+demonstrates the potential of quantum computing. It solves a specific problem 
+exponentially faster than any classical algorithm.</p>
 
 <h3 id="problem-statement">Problem Statement</h3>
-<p>Given a function ( f: {0,1}^n \rightarrow {0,1} ), determine whether the function is <strong>constant</strong> (returns the same value for all inputs) or <strong>balanced</strong> (returns 0 for half of the inputs and 1 for the other half).</p>
+<p>Given a function $ f: {0,1}^n \rightarrow {0,1} $, determine whether the 
+function is <strong>constant</strong> (returns the same value for all inputs) or <strong>balanced</strong> 
+(returns 0 for half of the inputs and 1 for the other half).</p>
 
 <h3 id="quantum-solution">Quantum Solution</h3>
-<p>The Deutsch-Jozsa algorithm uses quantum parallelism to evaluate the function over all possible inputs simultaneously. It requires only <strong>one query</strong> to the function, whereas a classical algorithm would need ( 2^{n-1} + 1 ) queries in the worst case.</p>
+<p>The Deutsch-Jozsa algorithm uses quantum parallelism to evaluate the function 
+over all possible inputs simultaneously. It requires only <strong>one query</strong> to the 
+function, whereas a classical algorithm would need $ 2^{n-1} + 1 $ queries in 
+the worst case.</p>
 
 <h3 id="implementation-with-qumat">Implementation with <code class="language-plaintext highlighter-rouge">qumat</code></h3>
 <p>Here’s how you can implement the Deutsch-Jozsa algorithm using <code class="language-plaintext highlighter-rouge">qumat</code>:</p>
@@ -269,10 +276,12 @@
 
 <h2 id="72-grovers-algorithm">7.2 Grover’s Algorithm</h2>
 
-<p>Grover’s algorithm is a quantum search algorithm that can search an unsorted database of ( N ) items in ( O(\sqrt{N}) ) time, compared to ( O(N) ) for classical algorithms.</p>
+<p>Grover’s algorithm is a quantum search algorithm that can search an unsorted 
+database of $ N $ items in $ O(\sqrt{N}) $ time, compared to $ O(N) $ for 
+classical algorithms.</p>
 
 <h3 id="problem-statement-1">Problem Statement</h3>
-<p>Given an unsorted database of ( N ) items, find a specific item (marked by an oracle) with as few queries as possible.</p>
+<p>Given an unsorted database of $ N $ items, find a specific item (marked by an oracle) with as few queries as possible.</p>
 
 <h3 id="quantum-solution-1">Quantum Solution</h3>
 <p>Grover’s algorithm uses amplitude amplification to increase the probability of measuring the marked item. It consists of two main steps:</p>
@@ -325,7 +334,16 @@
 
 <h3 id="explanation-1">Explanation</h3>
 <ul>
-  <li>The oracle marks the desired state (e.g., <code class="language-plaintext highlighter-rouge">|110&gt;</code>).</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>The oracle marks the desired state (e.g., $</td>
+          <td>110\rangle$).</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
   <li>The diffusion operator amplifies the probability of measuring the marked state.</li>
   <li>After running the algorithm, the marked state will have a higher probability of being measured.</li>
 </ul>

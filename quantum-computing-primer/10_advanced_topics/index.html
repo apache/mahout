@@ -237,11 +237,11 @@
 
 <span class="c1"># Apply the Quantum Fourier Transform
 </span><span class="k">def</span> <span class="nf">apply_qft</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
-<span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
-<span class="k">for</span> <span class="n">next_qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">qubit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
-<span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">next_qubit</span> <span class="o">-</span> <span class="n">qubit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="n">next_qubit</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
+        <span class="k">for</span> <span class="n">next_qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">qubit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
+            <span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">next_qubit</span> <span class="o">-</span> <span class="n">qubit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>  
+            <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="n">next_qubit</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
 
 <span class="nf">apply_qft</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 
@@ -267,11 +267,11 @@
 
 <span class="c1"># Apply the Quantum Phase Estimation
 </span><span class="k">def</span> <span class="nf">apply_qpe</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
-<span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
-<span class="c1"># Apply controlled unitary operations (simplified example)  
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>  
+    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
+        <span class="c1"># Apply controlled unitary operations (simplified example)  
+</span>        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>  
 <span class="c1"># Inverse QFT  
 </span><span class="nf">apply_qft</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">)</span>
 
@@ -299,13 +299,13 @@
 
 <span class="c1"># Apply the Quantum Annealing process
 </span><span class="k">def</span> <span class="nf">apply_quantum_annealing</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
-<span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
-<span class="c1"># Apply a simple Hamiltonian (simplified example)  
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_rx_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_ry_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
-<span class="c1"># Measure the qubits  
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
+        <span class="c1"># Apply a simple Hamiltonian (simplified example)  
+</span>        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_rx_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_ry_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
+    <span class="c1"># Measure the qubits  
+</span>    <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 
 <span class="nf">apply_quantum_annealing</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 

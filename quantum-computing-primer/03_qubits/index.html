@@ -224,50 +224,32 @@
 
 \[|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\]
 
-<table>
-  <tbody>
-    <tr>
-      <td>where (\alpha) and (\beta) are complex numbers representing the probability amplitudes of the qubit being in the (</td>
-      <td>0\rangle) and (</td>
-      <td>1\rangle) states, respectively. The probabilities of measuring the qubit in either state are given by (</td>
-      <td>\alpha</td>
-      <td>^2) and (</td>
-      <td>\beta</td>
-      <td>^2), and they must satisfy the normalization condition:</td>
-    </tr>
-  </tbody>
-</table>
+<p>where $\alpha$ and $\beta$ are complex numbers representing the probability 
+amplitudes of the qubit being in the $|0\rangle$ and $|1\rangle$ states, 
+respectively. The probabilities of measuring the qubit in either state are given
+by $|\alpha|^2$ and $|\beta|^2$, and they must satisfy the normalization condition:</p>
 
 \[|\alpha|^2 + |\beta|^2 = 1\]
 
 <h2 id="32-representing-qubits">3.2 Representing Qubits</h2>
 
-<table>
-  <tbody>
-    <tr>
-      <td>Qubits can be visualized using the <strong>Bloch sphere</strong>, a geometric representation of the quantum state of a single qubit. The Bloch sphere is a unit sphere where the north and south poles represent the (</td>
-      <td>0\rangle) and (</td>
-      <td>1\rangle) states, respectively. Any point on the surface of the sphere represents a valid quantum state of the qubit.</td>
-    </tr>
-  </tbody>
-</table>
+<p>Qubits can be visualized using the <strong>Bloch sphere</strong>, a geometric representation 
+of the quantum state of a single qubit. The Bloch sphere is a unit sphere where 
+the north and south poles represent the $|0\rangle$ and $|1\rangle$ states, 
+respectively. Any point on the surface of the sphere represents a valid quantum 
+state of the qubit.</p>
 
-<table>
-  <tbody>
-    <tr>
-      <td>The state of a qubit can also be described using a <strong>state vector</strong> in a two-dimensional complex vector space. For example, the state (</td>
-      <td>0\rangle) is represented as:</td>
-    </tr>
-  </tbody>
-</table>
+<p>The state of a qubit can also be described using a <strong>state vector</strong> in a 
+two-dimensional complex vector space. For example, the state $|0\rangle$ is 
+represented as:</p>
 
 \[|0\rangle = \begin{pmatrix} 1 \\ 0 \end{pmatrix}\]
 
 <table>
   <tbody>
     <tr>
-      <td>and the state (</td>
-      <td>1\rangle) is represented as:</td>
+      <td>and the state $</td>
+      <td>1\rangle$ is represented as:</td>
     </tr>
   </tbody>
 </table>
@@ -297,14 +279,9 @@
 
 <h3 id="example-applying-a-hadamard-gate">Example: Applying a Hadamard Gate</h3>
 
-<table>
-  <tbody>
-    <tr>
-      <td>The Hadamard gate ((H)) is a fundamental quantum gate that puts a qubit into a superposition state. Applying the Hadamard gate to a qubit initially in the (</td>
-      <td>0\rangle) state results in the state:</td>
-    </tr>
-  </tbody>
-</table>
+<p>The Hadamard gate ((H)) is a fundamental quantum gate that puts a qubit into a 
+superposition state. Applying the Hadamard gate to a qubit initially in the 
+$|0\rangle$ state results in the state:</p>
 
 \[H|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle)\]
 
@@ -318,15 +295,9 @@
 <span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
 </code></pre></div></div>
 
-<table>
-  <tbody>
-    <tr>
-      <td>In this example, the Hadamard gate is applied to the qubit at index 0, and the circuit is executed to obtain the measurement results. The output will show the probabilities of measuring the qubit in the (</td>
-      <td>0\rangle) and (</td>
-      <td>1\rangle) states.</td>
-    </tr>
-  </tbody>
-</table>
+<p>In this example, the Hadamard gate is applied to the qubit at index 0, and the 
+circuit is executed to obtain the measurement results. The output will show the 
+probabilities of measuring the qubit in the $|0\rangle$ and $|1\rangle$ states.</p>
 
 <h3 id="visualizing-the-circuit">Visualizing the Circuit</h3>
 
