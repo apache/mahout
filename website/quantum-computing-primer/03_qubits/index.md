@@ -11,19 +11,32 @@ In classical computing, the fundamental unit of information is the **bit**, whic
 
 $$|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$$
 
-where \(\alpha\) and \(\beta\) are complex numbers representing the probability amplitudes of the qubit being in the \(|0\rangle\) and \(|1\rangle\) states, respectively. The probabilities of measuring the qubit in either state are given by \(|\alpha|^2\) and \(|\beta|^2\), and they must satisfy the normalization condition:
+{% raw %}
+where $\alpha$ and $\beta$ are complex numbers representing the probability 
+amplitudes of the qubit being in the $|0\rangle$ and $|1\rangle$ states, 
+respectively. The probabilities of measuring the qubit in either state are given
+by $|\alpha|^2$ and $|\beta|^2$, and they must satisfy the normalization condition:
+{% endraw %}
 
 $$|\alpha|^2 + |\beta|^2 = 1$$
 
 ## 3.2 Representing Qubits
 
-Qubits can be visualized using the **Bloch sphere**, a geometric representation of the quantum state of a single qubit. The Bloch sphere is a unit sphere where the north and south poles represent the \(|0\rangle\) and \(|1\rangle\) states, respectively. Any point on the surface of the sphere represents a valid quantum state of the qubit.
+Qubits can be visualized using the **Bloch sphere**, a geometric representation 
+of the quantum state of a single qubit. The Bloch sphere is a unit sphere where 
+the north and south poles represent the $|0\rangle$ and $|1\rangle$ states, 
+respectively. Any point on the surface of the sphere represents a valid quantum 
+state of the qubit.
 
-The state of a qubit can also be described using a **state vector** in a two-dimensional complex vector space. For example, the state \(|0\rangle\) is represented as:
+The state of a qubit can also be described using a **state vector** in a 
+two-dimensional complex vector space. For example, the state $|0\rangle$ is 
+represented as:
 
 $$|0\rangle = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$$
 
-and the state \(|1\rangle\) is represented as:
+{% raw %}
+and the state $|1\rangle$ is represented as:
+{% endraw %}
 
 $$|1\rangle = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$$
 
@@ -51,7 +64,9 @@ In this example, we initialize a quantum circuit with one qubit using the qiskit
 
 ### Example: Applying a Hadamard Gate
 
-The Hadamard gate ((H)) is a fundamental quantum gate that puts a qubit into a superposition state. Applying the Hadamard gate to a qubit initially in the (|0\rangle) state results in the state:
+The Hadamard gate ((H)) is a fundamental quantum gate that puts a qubit into a 
+superposition state. Applying the Hadamard gate to a qubit initially in the 
+$|0\rangle$ state results in the state:
 
 $$H|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle)$$
 
@@ -66,7 +81,9 @@ result = qc.execute_circuit()
 print(result)  
 ```
 
-In this example, the Hadamard gate is applied to the qubit at index 0, and the circuit is executed to obtain the measurement results. The output will show the probabilities of measuring the qubit in the (|0\rangle) and (|1\rangle) states.
+In this example, the Hadamard gate is applied to the qubit at index 0, and the 
+circuit is executed to obtain the measurement results. The output will show the 
+probabilities of measuring the qubit in the $|0\rangle$ and $|1\rangle$ states.
 
 ### Visualizing the Circuit
 

@@ -25,11 +25,11 @@ qc.create_empty_circuit(3)
 
 # Apply the Quantum Fourier Transform
 def apply_qft(qc, n_qubits):  
-for qubit in range(n_qubits):  
-qc.apply_hadamard_gate(qubit)  
-for next_qubit in range(qubit + 1, n_qubits):  
-angle = 2 * 3.14159 / (2 ** (next_qubit - qubit + 1))  
-qc.apply_cu_gate(next_qubit, qubit, angle)
+    for qubit in range(n_qubits):  
+        qc.apply_hadamard_gate(qubit)  
+        for next_qubit in range(qubit + 1, n_qubits):  
+            angle = 2 * 3.14159 / (2 ** (next_qubit - qubit + 1))  
+            qc.apply_cu_gate(next_qubit, qubit, angle)
 
 apply_qft(qc, 3)
 
@@ -56,11 +56,11 @@ qc.create_empty_circuit(3)
 
 # Apply the Quantum Phase Estimation
 def apply_qpe(qc, n_qubits):  
-for qubit in range(n_qubits):  
-qc.apply_hadamard_gate(qubit)  
-# Apply controlled unitary operations (simplified example)  
-qc.apply_cu_gate(1, 0, 3.14159 / 2)  
-qc.apply_cu_gate(2, 1, 3.14159 / 4)  
+    for qubit in range(n_qubits):  
+        qc.apply_hadamard_gate(qubit)  
+        # Apply controlled unitary operations (simplified example)  
+        qc.apply_cu_gate(1, 0, 3.14159 / 2)  
+        qc.apply_cu_gate(2, 1, 3.14159 / 4)  
 # Inverse QFT  
 apply_qft(qc, n_qubits)
 
@@ -89,13 +89,13 @@ qc.create_empty_circuit(2)
 
 # Apply the Quantum Annealing process
 def apply_quantum_annealing(qc, n_qubits):  
-for qubit in range(n_qubits):  
-qc.apply_hadamard_gate(qubit)  
-# Apply a simple Hamiltonian (simplified example)  
-qc.apply_rx_gate(0, 3.14159 / 2)  
-qc.apply_ry_gate(1, 3.14159 / 2)  
-# Measure the qubits  
-qc.execute_circuit()
+    for qubit in range(n_qubits):  
+        qc.apply_hadamard_gate(qubit)  
+        # Apply a simple Hamiltonian (simplified example)  
+        qc.apply_rx_gate(0, 3.14159 / 2)  
+        qc.apply_ry_gate(1, 3.14159 / 2)  
+    # Measure the qubits  
+    qc.execute_circuit()
 
 apply_quantum_annealing(qc, 2)
 
