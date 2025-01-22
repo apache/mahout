@@ -11,13 +11,20 @@ Quantum algorithms leverage the unique properties of quantum mechanics, such as 
 
 ## 7.1 Deutsch-Jozsa Algorithm
 
-The Deutsch-Jozsa algorithm is one of the earliest quantum algorithms that demonstrates the potential of quantum computing. It solves a specific problem exponentially faster than any classical algorithm.
+The Deutsch-Jozsa algorithm is one of the earliest quantum algorithms that 
+demonstrates the potential of quantum computing. It solves a specific problem 
+exponentially faster than any classical algorithm.
 
 ### Problem Statement
-Given a function \( f: \{0,1\}^n \rightarrow \{0,1\} \), determine whether the function is **constant** (returns the same value for all inputs) or **balanced** (returns 0 for half of the inputs and 1 for the other half).
+Given a function $ f: \{0,1\}^n \rightarrow \{0,1\} $, determine whether the 
+function is **constant** (returns the same value for all inputs) or **balanced** 
+(returns 0 for half of the inputs and 1 for the other half).
 
 ### Quantum Solution
-The Deutsch-Jozsa algorithm uses quantum parallelism to evaluate the function over all possible inputs simultaneously. It requires only **one query** to the function, whereas a classical algorithm would need \( 2^{n-1} + 1 \) queries in the worst case.
+The Deutsch-Jozsa algorithm uses quantum parallelism to evaluate the function 
+over all possible inputs simultaneously. It requires only **one query** to the 
+function, whereas a classical algorithm would need $ 2^{n-1} + 1 $ queries in 
+the worst case.
 
 ### Implementation with `qumat`
 Here’s how you can implement the Deutsch-Jozsa algorithm using `qumat`:
@@ -55,10 +62,12 @@ print(result)
 
 ## 7.2 Grover's Algorithm
 
-Grover's algorithm is a quantum search algorithm that can search an unsorted database of \( N \) items in \( O(\sqrt{N}) \) time, compared to \( O(N) \) for classical algorithms.
+Grover's algorithm is a quantum search algorithm that can search an unsorted 
+database of $ N $ items in $ O(\sqrt{N}) $ time, compared to $ O(N) $ for 
+classical algorithms.
 
 ### Problem Statement
-Given an unsorted database of \( N \) items, find a specific item (marked by an oracle) with as few queries as possible.
+Given an unsorted database of $ N $ items, find a specific item (marked by an oracle) with as few queries as possible.
 
 ### Quantum Solution
 Grover's algorithm uses amplitude amplification to increase the probability of measuring the marked item. It consists of two main steps:
@@ -109,7 +118,7 @@ print(result)
 ```
 
 ### Explanation
-- The oracle marks the desired state (e.g., `|110>`).
+- The oracle marks the desired state (e.g., $|110\rangle$).
 - The diffusion operator amplifies the probability of measuring the marked state.
 - After running the algorithm, the marked state will have a higher probability of being measured.
 

@@ -36,10 +36,13 @@ print(result)
 
 ## 4.2 Multi-Qubit Gates
 
-Multi-qubit gates operate on two or more qubits, enabling entanglement and more complex quantum operations. Some of the most common multi-qubit gates include:
+Multi-qubit gates operate on two or more qubits, enabling entanglement and more 
+complex quantum operations. Some of the most common multi-qubit gates include:
 
-- **CNOT Gate (Controlled-NOT)**: Flips the target qubit if the control qubit is in the state |1⟩.
-- **Toffoli Gate (CCNOT)**: A controlled-controlled-NOT gate that flips the target qubit if both control qubits are in the state |1⟩.
+- **CNOT Gate (Controlled-NOT)**: Flips the target qubit if the control qubit is 
+in the state $|1\rangle$.
+- **Toffoli Gate (CCNOT)**: A controlled-controlled-NOT gate that flips the 
+target qubit if both control qubits are in the state $|1\rangle$.
 - **SWAP Gate**: Exchanges the states of two qubits.
 
 ### Example: Applying a CNOT Gate
