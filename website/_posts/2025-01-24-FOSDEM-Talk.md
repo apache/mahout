@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Mahout at FOSDEM: "Introducing Qumat"
+title: Mahout at FOSDEM - Introducing Qumat
 date:   2025-01-24 00:00:00 -0800
 category: news
 ---
