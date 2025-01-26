@@ -29,7 +29,7 @@ index.	For those wanting to use just Lucene, see the [Lucene website](http://luc
  or check out _Lucene In Action_ by Erik Hatcher, Otis Gospodnetic and Mike
 McCandless.
 
-To get started, make sure you get a fresh copy of Mahout from [GitHub](http://mahout.apache.org/developers/buildingmahout.html)
+To get started, make sure you get a fresh copy of Mahout from [GitHub](/documentation/developers/buildingmahout.html)
  and are comfortable building it. It defines interfaces and implementations
 for efficiently iterating over a data source (it only supports Lucene
 currently, but should be extensible to databases, Solr, etc.) and produces

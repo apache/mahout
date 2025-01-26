@@ -92,5 +92,5 @@ Based on the output feature matrices from step 3, we could make recommendations 
 The input user file is a sequence file, the sequence record key is user id and value is the user's rated item ids which will be removed from recommendation. The output file generated in our simple example will be a text file giving the recommended item ids for each user. 
 Remember to translate the Mahout ids back into your application specific ids. 
 
-There exist a variety of parameters for Mahout’s ALS recommender to accommodate custom business requirements; exploring and testing various configurations to suit your needs will doubtless lead to additional questions. Feel free to ask such questions on the [mailing list](https://mahout.apache.org/general/mailing-lists,-irc-and-archives.html).
+There exist a variety of parameters for Mahout’s ALS recommender to accommodate custom business requirements; exploring and testing various configurations to suit your needs will doubtless lead to additional questions. Feel free to ask such questions on the [mailing list](https://mahout.apache.org/community/mailing-lists.html).
 

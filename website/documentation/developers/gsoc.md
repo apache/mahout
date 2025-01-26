@@ -26,7 +26,7 @@ opportunities for you.
 of how we rate proposals.  Having a good idea is just one part of the
 process.  You must show you can communicate and work within the community
 parameters.   You might even consider putting up a patch or two that shows
-you get how things work.  See [How To Contribute](how-to-contribute.html).
+you get how things work.  See [How To Contribute](/about/how-to-contribute.html).
 * Since Machine Learning is fairly academic, be sure to cite your sources
 in your proposal.
 * Provide a realistic timeline.  Be sure you indicate what other

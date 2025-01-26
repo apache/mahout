@@ -32,7 +32,7 @@ Quote only what it is you are responding to in comments.
 
 Patches should be created at trunk or trunk parent level and if possible be
 a single uncompressed text file so it is easy to inspect the patch in a web
-browser. (See [Patch Check List](/developers/patch-check-list.html)
+browser. (See [Patch Check List](patch-check-list.html)
 .)
 
 Use the issue identity when referring to an issue in any discussion.

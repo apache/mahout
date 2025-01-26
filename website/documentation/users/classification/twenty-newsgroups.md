@@ -21,7 +21,7 @@ the 20 newsgroups.
 <a name="TwentyNewsgroups-Prerequisites"></a>
 ### Prerequisites
 
-* Mahout has been downloaded ([instructions here](https://mahout.apache.org/general/downloads.html))
+* Mahout has been downloaded ([instructions here](https://mahout.apache.org/download/downloads.html))
 * Maven is available
 * Your environment has the following variables:
      * **HADOOP_HOME** Environment variables refers to where Hadoop lives 

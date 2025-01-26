@@ -29,7 +29,7 @@ title: Quickstart
 
 Download the latest release [here](http://www.apache.org/dyn/closer.cgi/mahout/).
 
-Or checkout the latest code from [here](http://mahout.apache.org/developers/version-control.html)
+Or checkout the latest code from [here](http://mahout.apache.org/documentation/developers/version-control.html)
 
 #### Alternatively: Add Mahout 0.10.0 to a maven project
 
