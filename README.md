@@ -28,7 +28,7 @@ For additional information about Mahout, visit the [Mahout Home Page](http://mah
 
 QuMat is a POC of a high level Python library for intefacing with multiple quantum computing backends. It is designed to be easy to use and to abstract the particularities of each backend, so that you may 'write once, run anywhere.' Like the Java of quantum computing, but Java is the new COBOL so we're trying to distance ourselves from that comparison :P
 
-Check out [basic gates](docs/basic_gates.md) for a quick introduction to the basic gates which are basically all that exist right now (and even those only exist for `qiskit`).
+Check out [basic gates](docs/basic_gates.md) for a quick introduction to the basic gates. These are now supported across multiple quantum computing frameworks, including Qiskit, Cirq, and Amazon Braket.
 
 ## Getting started
 
@@ -44,7 +44,7 @@ poetry install
 - [x] Transition of Classic to maintenance mode
 
 ### Q3
-- [ ] Integration of Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends
+- [ ] Integration of Qumat with hardened (tests, docs, CI/CD) Cirq, Qiskit, and Amazon Braket backends
 - [ ] Initiation of kernel methods
 - [x] Integration with Amazon Braket
 - [x] [Public talk about Qumat](https://2024.fossy.us/schedule/presentation/265/)
