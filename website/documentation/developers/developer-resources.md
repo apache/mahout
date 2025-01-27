@@ -9,13 +9,13 @@ title: Developer Resources
 ## Making a Contribution
 
 Mahout is always looking for contributions, especially in the areas of
-documentation. See our [How to contribute](/developers/how-to-contribute.html) page for details.
+documentation. See our [How to contribute](/about/how-to-contribute.html) page for details.
 
 
 <a name="DeveloperResources-SourceCode"></a>
 ## Source Code
 
-The source files are stored using Git, our page on [version control](/developers/version-control.html) has details on how to access the sourcecode.
+The source files are stored using Git, our page on [version control](/documentation/developers/version-control.html) has details on how to access the sourcecode.
 
 
 <a name="DeveloperResources-Documentation"></a>
@@ -33,7 +33,7 @@ Javadoc and Scaladoc documentation is available online by module:
 <a name="DeveloperResources-Issues"></a>
 ## Issues
 
-All bugs, improvements, [pull requests](http://mahout.apache.org/developers/github.html), etc. should be logged in our [issue tracker](/developers/issue-tracker.html).
+All bugs, improvements, [pull requests](github.html), etc. should be logged in our [issue tracker](issue-tracker.html).
 
 <a name="DeveloperResources-ContinuousIntegration"></a>
 ## Continuous Integration

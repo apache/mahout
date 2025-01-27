@@ -90,7 +90,7 @@ which are already implemented in Mahout. You can find a list [here](https://maho
 
 There are many machine learning algorithms that we would like to have in
 Mahout. If you have an algorithm or an improvement to an algorithm that you would
-like to implement, start a discussion on our [mailing list](https://mahout.apache.org/general/mailing-lists,-irc-and-archives.html).
+like to implement, start a discussion on our [mailing list](https://mahout.apache.org/community/mailing-lists.html).
 
 <a name="hadoop"></a>
 #### Do I need Hadoop to use Mahout?

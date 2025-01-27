@@ -63,7 +63,7 @@ executed the [synthetic control example ](clustering-of-synthetic-control-data.h
 
 ### Standalone Java Program                                          
 
-Run the clusterdump utility as follows as a standalone Java Program through Eclipse. <!-- - if you are using eclipse, setup mahout-utils as a project as specified in [Working with Maven in Eclipse](../../developers/buildingmahout.html). -->
+Run the clusterdump utility as follows as a standalone Java Program through Eclipse. <!-- - if you are using eclipse, setup mahout-utils as a project as specified in [Working with Maven in Eclipse](/documentation/developers/buildingmahout.html). -->
     To execute ClusterDumper.java,
     
 * Under mahout-utils, Right-Click on ClusterDumper.java

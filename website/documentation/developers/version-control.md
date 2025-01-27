@@ -27,4 +27,4 @@ The Git URL for committers is [https://git-wip-us.apache.org/repos/asf/mahout.gi
 <a name="VersionControl-Issues"></a>
 ## Issues
 
-All bugs, improvements, [pull requests](http://mahout.apache.org/developers/github.html), etc. should be logged in our [issue tracker](https://mahout.apache.org/developers/issue-tracker.html).
+All bugs, improvements, [pull requests](github.html), etc. should be logged in our [issue tracker](issue-tracker.html).

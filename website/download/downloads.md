@@ -70,6 +70,6 @@ In case you are using Ivy, Gradle, Buildr, Grape or SBT you might want to direct
 
 Official releases are usually created when the developers feel there are
 sufficient changes, improvements and bug fixes to warrant a release. Watch
-the <a href="https://mahout.apache.org/general/mailing-lists,-irc-and-archives.html">Mailing lists</a>
+the <a href="https://mahout.apache.org/community/mailing-lists.html">Mailing lists</a>
  for latest release discussions and check the Github repo.
 

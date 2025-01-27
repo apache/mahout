@@ -12,7 +12,7 @@ of ways to contribute!
 <a name="HowToContribute-BeInvolved"></a>
 ## Get Involved
 
-Discussions at Apache happen on the mailing list. To get involved, you should join the [Mahout mailing lists](/general/mailing-lists.html).  In particular:
+Discussions at Apache happen on the mailing list. To get involved, you should join the [Mahout mailing lists](/community/mailing-lists.html).  In particular:
 
 * The **user list** (to help others)
 * The **development list** (to join discussions of changes)  -- This is the best place
@@ -50,7 +50,7 @@ to this website, and we have a [guide for making website updates][2].
 We also have a [wide variety of books and slides][3] for learning more about 
 machine learning algorithms. 
 
-If you are interested in working towards being a committer, [general guidelines are available online](/developers/how-to-become-a-committer.html).
+If you are interested in working towards being a committer, [general guidelines are available online](/documentation/developers/how-to-become-a-committer.html).
 
 <a name="HowToContribute-ContributingCode(Features,BigFixes,Tests,etc...)"></a>
 ## Contributing Code (Features, Big Fixes, Tests, etc...)
@@ -76,14 +76,14 @@ and possibly improve it.
 <a name="HowToContribute-Gettingthesourcecode"></a>
 ## Getting the source code
 
-First of all, you need to get the [Mahout source code](/developers/version-control.html). Most development is done on the "trunk".  Mahout mirrors its codebase on [GitHub](https://github.com/apache/mahout). The first step to making a contribution is to fork Mahout's master branch to your GitHub repository.  
+First of all, you need to get the [Mahout source code](/documentation/developers/version-control.html). Most development is done on the "trunk".  Mahout mirrors its codebase on [GitHub](https://github.com/apache/mahout). The first step to making a contribution is to fork Mahout's master branch to your GitHub repository.  
 
 
 <a name="HowToContribute-MakingChanges"></a>
 ## Making Changes
 
 Before you start, you should send a message to the [Mahout developer mailing list](/community/mailing-lists.html)
-(note: you have to subscribe before you can post), or file a ticket in  our [issue tracker](/developers/issue-tracker.html).
+(note: you have to subscribe before you can post), or file a ticket in  our [issue tracker](/documentation/developers/issue-tracker.html).
 Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.
 
  1. Create a JIRA Issue (if one does not already exist or you haven't already) 
@@ -144,9 +144,9 @@ for improvement (more tests, better javadocs, etc...) then make the changes on y
 thumbs up, that's a good sign for committers when deciding if it's worth spending time to review it -- and if other people have already put in
 effort to improve the docs/tests for an issue, that helps even more.
 
-For more information see [Handling GitHub PRs](http://mahout.apache.org/developers/github.html).
+For more information see [Handling GitHub PRs](http://mahout.apache.org/documentation/developers/github.html).
 
 
   [1]: http://www.apache.org/dev/contrib-email-tips
-  [2]: http://mahout.apache.org/developers/how-to-update-the-website.html
+  [2]: http://mahout.apache.org/documentation/developers/how-to-update-the-website.html
   [3]: http://mahout.apache.org/general/books-tutorials-and-talks.html

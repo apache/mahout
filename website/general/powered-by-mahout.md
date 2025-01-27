@@ -7,7 +7,7 @@ title: Powered By Mahout
 
 # Powered by Mahout
 
-Are you using Mahout to do Machine Learning? <a href="https://mahout.apache.org/general/mailing-lists,-irc-and-archives.html">Care to share</a>? Developers of the project always are happy to learn about new happy users with interesting use cases.
+Are you using Mahout to do Machine Learning? <a href="https://mahout.apache.org/community/mailing-lists.html">Care to share</a>? Developers of the project always are happy to learn about new happy users with interesting use cases.
 
 *Links here do NOT imply
 endorsement by Mahout, its committers or the Apache Software Foundation and

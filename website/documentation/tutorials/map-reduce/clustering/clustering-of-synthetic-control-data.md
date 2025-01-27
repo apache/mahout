@@ -20,7 +20,7 @@ We need to do some initial setup before we are able to run the example.
 
   1. Start out by downloading the dataset to be clustered from the UCI Machine Learning Repository: [http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data](http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data).
 
-  2. Download the [latest release of Mahout](/general/downloads.html).
+  2. Download the [latest release of Mahout](/download//downloads.html).
 
   3. Unpack the release binary and switch to the *mahout-distribution-0.x* folder
 

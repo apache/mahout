@@ -31,26 +31,26 @@ By following this Developer's Guide, developers can quickly harness the power of
 
 ## Index
 
-[Patch Check List](/developers/patch-check-list.html)
+[Patch Check List](patch-check-list.html)
 
-[How To Release](/developers/how-to-release.html)
+[How To Release](how-to-release.html)
 
-[Version Control](/developers/version-control.html)
+[Version Control](version-control.html)
 
-[Gsoc](/developers/gsoc.html)
+[Gsoc](gsoc.html)
 
-[Github](/developers/github.html)
+[Github](github.html)
 
-[How To Update The Website](/developers/how-to-update-the-website.html)
+[How To Update The Website](how-to-update-the-website.html)
 
-[Developer Resources](/developers/developer-resources.html)
+[Developer Resources](developer-resources.html)
 
-[Githubprs](/developers/githubPRs.html)
+[Githubprs](githubPRs.html)
 
-[Buildingmahout](/developers/buildingmahout.html)
+[Buildingmahout](buildingmahout.html)
 
-[Thirdparty Dependencies](/developers/thirdparty-dependencies.html)
+[Thirdparty Dependencies](thirdparty-dependencies.html)
 
-[Issue Tracker](/developers/issue-tracker.html)
+[Issue Tracker](issue-tracker.html)
 
-[How To Become A Committer](/developers/how-to-become-a-committer.html)
+[How To Become A Committer](how-to-become-a-committer.html)

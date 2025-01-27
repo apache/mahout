@@ -29,8 +29,8 @@
     <asfext:pmc rdf:resource="http://mahout.apache.org" />
     <shortdesc>Scalable machine learning library</shortdesc>
     <bug-database rdf:resource="https://issues.apache.org/jira/browse/MAHOUT" />
-    <mailing-list rdf:resource="https://mahout.apache.org/general/mailing-lists,-irc-and-archives.html" />
-    <download-page rdf:resource="http://mahout.apache.org/general/downloads.html" />
+    <mailing-list rdf:resource="https://mahout.apache.org/community/mailing-lists.html" />
+    <download-page rdf:resource="http://mahout.apache.org/download/downloads.html" />
     <programming-language>Java</programming-language>
     <programming-language>Scala</programming-language>
     <category rdf:resource="http://projects.apache.org/category/library" />

@@ -10,4 +10,4 @@ We've launced a new website, (a HUUUGE special thanks to David Miller from [Star
 It looks great but there's lots to do as we migrate and clean up content from the old site. If you see anything broken, 
 please let us know via either:
 - send an email to dev@mahout.apache.org
-- fix it yourself and [open a PR](/developers/githubPRs)! 
+- fix it yourself and [open a PR](/documentation/developers/githubPRs)! 
