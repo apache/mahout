@@ -53,7 +53,7 @@ poetry install
 - [ ] Development of distributed quantum solvers
 
 ### Q1 2025
-- [x] [FOSDEM talk](https://fosdem.org/2025/schedule/event/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-/
+- [x] [FOSDEM talk](https://fosdem.org/2025/schedule/event/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-/)
 
 #### Legal
 Please see the `NOTICE.txt` included in this directory for more information.
