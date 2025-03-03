@@ -1,8 +1,10 @@
 ### Purpose of PR  
 Describe what this PR does.
 
-
-Closes #123 
+### Linked Issues  
+Add links to related issues.
+- Closes #123 
+- Related to #123  
 
 ### Changes Made  
 - [ ] Bug fix  
