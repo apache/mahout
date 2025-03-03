@@ -1,0 +1,10 @@
+# Label configuration for GitHub Actions labeler
+
+bug:
+  - any: ['.github/ISSUE_TEMPLATE/bug_report.md']
+
+feature:
+  - any: ['.github/ISSUE_TEMPLATE/feature_request.md']
+
+documentation:
+  - any: ['.github/ISSUE_TEMPLATE/documentation_issue.md']
