@@ -7,16 +7,16 @@ assignees: []
 ---
 
 ### Summary  
-<!-- A brief description of the feature. -->
+A brief description of the feature.
 
 ### Use Case  
-<!-- Explain why this feature is useful. -->
+Explain why this feature is useful.
 
 ### Proposed Implementation  
-<!-- How do you propose implementing this feature? -->
+How do you propose implementing this feature?
 
 ### Alternatives Considered  
-<!-- Have you thought of other ways to solve the same problem? -->
+Have you thought of other ways to solve the same problem?
 
 ### Additional Context  
-<!-- Any other relevant information or resources. -->
+Any other relevant information or resources.

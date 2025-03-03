@@ -1,8 +1,8 @@
 ### Purpose of PR  
-<!-- Describe what this PR does. -->
+Describe what this PR does.
 
 ### Linked Issues  
-<!-- Add links to related issues or JIRA tickets. -->
+Add links to related issues.
 - Fixes MAHOUT-XXXX  
 - Related to #123  
 
@@ -11,17 +11,32 @@
 - [ ] New feature  
 - [ ] Documentation update  
 
+### Important ToDos
+Please mark each with an "x"  
+
+A GitHub issue exists (if not, please create one) [https://github.com/apache/mahout/issues]  
+- [ ] Title of PR is "Issue #XXXX: Brief Description of Changes" where XXXX is the GitHub issue number.  
+- [ ] Created unit tests where appropriate  
+- [ ] Added correct licenses on newly added files  
+- [ ] Assigned GitHub issue to self  
+- [ ] Added documentation in ScalaDocs/JavaDocs and to the website  
+- [ ] Successfully built and ran all unit tests, verified that all tests pass locally  
+
+If all of these items are not yet complete, but you still feel it is appropriate to open a PR, please open it as a **Draft PR** instead.  
+Once all requirements are met, you can mark it as ready for review.
+
+
 ### Breaking Changes  
-<!-- Does this PR introduce a breaking change? -->
+Does this PR introduce a breaking change?
 - [ ] Yes  
 - [ ] No  
 
 ### Testing & Verification  
-<!-- Describe how you tested the changes. -->
+Describe how you tested the changes.
 - [ ] Unit tests added  
 - [ ] Manually tested  
 
 ### Checklist  
 - [ ] The title follows the format "MAHOUT-XXXX Brief Description"  
-- [ ] JIRA issue is created  
+- [ ] GitHub issue is created
 - [ ] Code follows ASF guidelines  
