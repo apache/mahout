@@ -7,12 +7,12 @@ assignees: []
 ---
 
 ### Description  
-<!-- A clear and concise description of the bug. -->
+A clear and concise description of the bug.
 
 ### Steps to Reproduce  
-<!-- 1. Step 1 -->
-<!-- 2. Step 2 -->
-<!-- 3. Step 3 -->
+1. Step 1
+2. Step 2
+3. Step 3
 
 ### Expected Behavior  
 What should have happened?
