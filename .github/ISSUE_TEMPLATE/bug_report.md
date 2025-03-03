@@ -10,22 +10,22 @@ assignees: []
 <!-- A clear and concise description of the bug. -->
 
 ### Steps to Reproduce  
-1. <!-- Step 1 -->
-2. <!-- Step 2 -->
-3. <!-- Step 3 -->
+<!-- 1. Step 1 -->
+<!-- 2. Step 2 -->
+<!-- 3. Step 3 -->
 
 ### Expected Behavior  
-<!-- What should have happened? -->
+What should have happened?
 
 ### Actual Behavior  
-<!-- What actually happened? -->
+What actually happened?
 
 ### Screenshots or Logs  
-<!-- Add screenshots or log output if applicable. -->
+Add screenshots or log output if applicable.
 
 ### Environment  
-- **OS:** <!-- e.g., Windows, Linux -->
-- **Browser/Tool Version:** <!-- e.g., Chrome 96, Python 3.8 -->
+- **OS:** e.g., Windows, Linux
+- **Browser/Tool Version:** e.g., Chrome 96, Python 3.8
 
 ### Additional Context  
-<!-- Any other information that may be helpful. -->
+Any other information that may be helpful.
