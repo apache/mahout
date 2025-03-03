@@ -1,21 +1,27 @@
-### Purpose of PR:
-Please give a short description of what this PR is for.
+### Purpose of PR  
+<!-- Describe what this PR does. -->
 
+### Linked Issues  
+<!-- Add links to related issues or JIRA tickets. -->
+- Fixes MAHOUT-XXXX  
+- Related to #123  
 
-### Important ToDos
-Please mark each with an "x"
-- [ ] A JIRA ticket exists (if not, please create this first)[https://issues.apache.org/jira/browse/mahout/]
-- [ ] Title of PR is "MAHOUT-XXXX Brief Description of Changes" where XXXX is the JIRA number.
-- [ ] Created unit tests where appropriate
-- [ ] Added licenses correct on newly added files
-- [ ] Assigned JIRA to self
-- [ ] Added documentation in scala docs/java docs, and to website
-- [ ] Successfully built and ran all unit tests, verified that all tests pass locally.
+### Changes Made  
+- [ ] Bug fix  
+- [ ] New feature  
+- [ ] Documentation update  
 
-If all of these things aren't complete, but you still feel it is
-appropriate to open a PR, please add [WIP] after MAHOUT-XXXX before the
-descriptions- e.g. "MAHOUT-XXXX [WIP] Description of Change"
+### Breaking Changes  
+<!-- Does this PR introduce a breaking change? -->
+- [ ] Yes  
+- [ ] No  
 
-Does this change break earlier versions?
+### Testing & Verification  
+<!-- Describe how you tested the changes. -->
+- [ ] Unit tests added  
+- [ ] Manually tested  
 
-Is this the beginning of a larger project for which a feature branch should be made?
+### Checklist  
+- [ ] The title follows the format "MAHOUT-XXXX Brief Description"  
+- [ ] JIRA issue is created  
+- [ ] Code follows ASF guidelines  
