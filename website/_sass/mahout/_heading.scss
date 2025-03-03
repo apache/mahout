@@ -71,3 +71,9 @@ header.mahout-header {
     }
   }
 }
+
+@media (max-width: 576px) {
+  .btn-download {
+    margin-bottom: 0.25rem !important;
+  }
+}
