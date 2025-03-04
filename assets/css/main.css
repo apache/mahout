@@ -7539,6 +7539,11 @@ header.mahout-header .mahout-header-lower .btn-download:hover {
   color: #212529;
 }
 
+@media (max-width: 576px) {
+  .btn-download {
+    margin-bottom: 0.25rem !important;
+  }
+}
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -7794,6 +7799,8 @@ header.mahout-header .mahout-header-lower .btn-download:hover {
 table {
   border-collapse: collapse;
   width: 100%;
+  display: block;
+  overflow-x: auto;
 }
 
 th,
