@@ -1,18 +1,21 @@
-#navbarDropdownMenuLink-qumat {
+.navbarDropdownMenuLinkColor {
     font-weight: bold;
-    color: #0000FF !important; // Blue text color on hover
 
 }
+.navbarDropdownMenuLinkColor:hover {
+    font-weight: bold;
+    color: #0000FF !important; 
 
+}
 .dropdown-menu {
-    background-color: #222; // Dark background for dropdown
+    background-color: #222; 
 }
 
 .dropdown-item {
-    color: white; // Default text color for dropdown items
+    color: white;
 }
 
 .dropdown-item:hover {
-    background-color: #444; // Darker background on hover
-    color: #0000FF !important; // Blue text color on hover
+    background-color: #444; 
+    color: #0000FF !important; 
 }
