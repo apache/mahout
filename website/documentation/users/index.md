@@ -26,11 +26,11 @@ library for your machine learning projects.
 2. **Data Preparation**: Learn how to prepare your data for processing with Mahout, including importing, preprocessing, and transforming your datasets.
 3. **Algorithm Selection**: We provide an overview of the available algorithms in Mahout, along with guidance on selecting the best algorithm for your specific problem.
 4. **Model Training and Evaluation**: Understand how to train, validate, and evaluate machine learning models using Mahout's tools and best practices.
-5. **Deployment**: Explore various options for deploying your trained models, such as integrating with web services or embedding within your applications.
+5. **Deployment**: Explore various options for deploying your trained models, such as integrating with web services or embedding them within your applications.
 
 By following this User's Guide, you will gain the necessary knowledge and skills to effectively leverage Apache Mahout 
 for your machine learning projects, harnessing the power of big data processing to achieve better results.
-
+ 
 ## Index
 
 [Index](/documentation/users/index.html)
