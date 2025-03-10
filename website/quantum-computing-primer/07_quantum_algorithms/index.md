@@ -3,23 +3,23 @@ layout: page
 title: Quantum Algorithms
 ---
 
-## 7. Quantum Algorithms
+# 7. Quantum Algorithms
 
-Quantum algorithms leverage the unique properties of quantum mechanics, such as superposition and entanglement, to solve problems more efficiently than classical algorithms. In this section, we will explore two fundamental quantum algorithms: the Deutsch-Jozsa Algorithm and Grover's Algorithm. We will also provide implementations using the `qumat` library.
+Quantum algorithms leverage the unique properties of quantum mechanics, such as superposition and entanglement, to solve problems more efficiently than classical algorithms. In this section, we will explore two fundamental quantum algorithms: the **Deutsch-Jozsa Algorithm** and **Grover's Algorithm**. We will also provide implementations using the `qumat` library.
 
-### 7.1 Deutsch-Jozsa Algorithm
+## 7.1 Deutsch-Jozsa Algorithm
 
 The Deutsch-Jozsa algorithm is one of the earliest quantum algorithms that demonstrates the potential of quantum computing. It solves a specific problem exponentially faster than any classical algorithm.
 
-#### Problem Statement
+## Problem Statement
 
 Given a function \( f: \{0,1\}^n \rightarrow \{0,1\} \), determine whether the function is constant (returns the same value for all inputs) or balanced (returns 0 for half of the inputs and 1 for the other half).
 
-#### Quantum Solution
+## Quantum Solution
 
 The Deutsch-Jozsa algorithm uses quantum parallelism to evaluate the function over all possible inputs simultaneously. It requires only one query to the function, whereas a classical algorithm would need \( 2^{n-1} + 1 \) queries in the worst case.
 
-#### Implementation with `qumat`
+## Implementation with `qumat`
 
 ```python
 from qumat import QuMat
@@ -46,25 +46,25 @@ result = qc.execute_circuit()
 print(result)
 ```
 
-#### Explanation
+## Explanation
 - If the function is constant, the first qubit will always measure as `0`.
 - If the function is balanced, the first qubit will measure as `1` with high probability.
 
-### 7.2 Grover's Algorithm
+## 7.2 Grover's Algorithm
 
 Grover's algorithm is a quantum search algorithm that can search an unsorted database of \( N \) items in \( O(\sqrt{N}) \) time, compared to \( O(N) \) for classical algorithms.
 
-#### Problem Statement
+## Problem Statement
 
 Given an unsorted database of \( N \) items, find a specific item (marked by an oracle) with as few queries as possible.
 
-#### Quantum Solution
+## Quantum Solution
 
 Grover's algorithm uses amplitude amplification to increase the probability of measuring the marked item. It consists of two main steps:
 1. **Oracle:** Marks the desired item.
 2. **Diffusion Operator:** Amplifies the probability of the marked item.
 
-#### Implementation with `qumat`
+## Implementation with `qumat`
 
 ```python
 from qumat import QuMat
@@ -106,12 +106,11 @@ result = qc.execute_circuit()
 print(result)
 ```
 
-#### Explanation
-- The oracle marks the desired state (e.g., \(|110\rangle\)).
-- The diffusion operator amplifies the probability of measuring the marked state.
-- After running the algorithm, the marked state will have a higher probability of being measured.
+## Explanation
+- If the function is **constant**, the first qubit will always measure as `0`.
+- If the function is **balanced**, the first qubit will measure as `1` with high probability.
 
-### 7.3 Applications of Quantum Algorithms
+## 7.3 Applications of Quantum Algorithms
 
 Quantum algorithms like Deutsch-Jozsa and Grover's are foundational to many advanced quantum computing applications, including:
 
