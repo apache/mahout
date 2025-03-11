@@ -1,0 +1,31 @@
+name: PR Tool Review
+on:
+  pull_request_target:
+    types: [labeled]
+
+jobs:
+  review:
+    if: github.event.label.name == 'run-tests'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out base repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install Gofannon
+        run: |
+          pip install gofannon
+      - name: Run PR Review Tool
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: "https://api.deepinfra.com/v1/openai"
+          OPENAI_MODEL_NAME: "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          poetry run python .github/scripts/review_pr.py
