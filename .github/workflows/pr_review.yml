@@ -37,7 +37,7 @@ jobs:
           pip install gofannon
       - name: Run PR Review Tool
         env:
-          PR_REVIEW_CHECKS_PATH:  ".github/pr_review_checks.yml"
+          PR_REVIEW_CHECKS_PATH:  ".github/scripts/pr_review_checks.yml"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_BASE_URL: "https://api.deepinfra.com/v1/openai"
@@ -45,4 +45,5 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO_NAME: ${{ github.repository }}
         run: |
+          ls -la .github/scripts
           python .github/scripts/review_pr.py
