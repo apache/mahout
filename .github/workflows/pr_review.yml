@@ -44,4 +44,4 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO_NAME: ${{ github.repository }}
         run: |
-          poetry run python .github/scripts/review_pr.py
+          python .github/scripts/review_pr.py
