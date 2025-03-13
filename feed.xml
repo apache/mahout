@@ -1,4 +1,59 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2025-03-12T15:48:57+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2025/02/14/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2025-02-14T08:00:00+00:00</published><updated>2025-02-14T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2025/02/14/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2025/02/14/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://mahout.apache.org//feed.xml" rel="self" type="application/atom+xml" /><link href="http://mahout.apache.org//" rel="alternate" type="text/html" /><updated>2025-03-13T17:26:21+00:00</updated><id>http://mahout.apache.org//feed.xml</id><title type="html">Apache Mahout</title><subtitle>Distributed Linear Algebra</subtitle><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2025/03/13/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2025-03-13T08:00:00+00:00</published><updated>2025-03-13T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2025/03/13/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2025/03/13/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
+<p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
+
+<h3 id="attendees">Attendees</h3>
+<ul>
+  <li>Andrew Musselman</li>
+  <li>Trevor Grant</li>
+  <li>Krishna Dave</li>
+</ul>
+
+<h3 id="old-business">Old Business</h3>
+<ul>
+  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204">Splitting Mahout project code into discrete repos</a> (to Andrew)
+    <ul>
+      <li>mahout-website</li>
+      <li>mahout-classic</li>
+      <li>mahout-samsara</li>
+      <li>mahout-qumat</li>
+    </ul>
+  </li>
+  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165">Docker image for web site build</a> (to Jowanza)</li>
+  <li>Roadmap
+    <ul>
+      <li>H1-2025
+        <ul>
+          <li>Distributed quantum solvers</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Add GitHub Project</li>
+  <li><a href="https://github.com/apache/mahout/issues/463">#463 Move PQC docs to this repo</a> (done)</li>
+  <li><a href="https://github.com/apache/mahout/issues/464">#464 Parameterize R(X)</a> (done)</li>
+  <li><a href="https://github.com/apache/mahout/issues/465">#465 Parameterize R(Z)</a> (done)</li>
+  <li><a href="https://github.com/apache/mahout/issues/466">#466 Parameterize R(Y)</a> (done)</li>
+  <li><a href="https://github.com/apache/mahout/issues/467">#467 Parameterize U</a> (done)</li>
+  <li><a href="https://github.com/apache/mahout/issues/468">#468 Add a Parameter object</a> (done)</li>
+  <li><a href="https://github.com/apache/mahout/issues/469">#469 Bind parameter values at execution</a> (done)</li>
+  <li><a href="https://github.com/apache/mahout/issues/461">#461 Implement testing workflow</a></li>
+  <li><a href="https://github.com/apache/mahout/issues/476">#476 Overlap measurements</a> (to Trevor)</li>
+  <li><a href="https://github.com/apache/mahout/issues/477">#477 Swap test</a> (to Andrew)</li>
+  <li><a href="https://github.com/apache/mahout/issues/478">#478 Post-processing</a></li>
+  <li><a href="https://github.com/apache/mahout/issues/475">#475 Add open in colab button to Optimization Example</a> (to Andrew)</li>
+  <li><a href="https://github.com/apache/mahout/issues/474">#474 Add angle definitions to Optimization Example</a></li>
+  <li><a href="https://mahout.apache.org/quantum-computing-primer">New quantum computing primer</a> on web site</li>
+</ul>
+
+<h3 id="new-business">New Business</h3>
+<ul>
+  <li>Word back from PyPi about qumat ownership, they are going to contact the owner of the current package  <a href="https://github.com/apache/mahout/issues/470">#470 Add Qumat to PyPi</a></li>
+  <li>Andrew contacted INFRA, got help, will push an ASF Qumat release out</li>
+  <li>Krishna is looking for work when he’s back from break</li>
+  <li>Continued meetings with qBraid</li>
+  <li>Gofannon talk at meetup including Qumat</li>
+  <li>PR reviewer from gofannon included on GitHub, reviewed together</li>
+</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting Subscribe to the Mahout User list to ask for details on joining.]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2025/02/14/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2025-02-14T08:00:00+00:00</published><updated>2025-02-14T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2025/02/14/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2025/02/14/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
 <p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
 
 <h3 id="attendees">Attendees</h3>
@@ -455,69 +510,6 @@
       <li>https://github.com/apache/mahout/issues/457</li>
       <li>https://github.com/apache/mahout/issues/458</li>
       <li>https://github.com/apache/mahout/wiki/Data-Encoding-and-Kernel-Notes</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting Subscribe to the Mahout User list to ask for details on joining.]]></summary></entry><entry><title type="html">Meeting Minutes</title><link href="http://mahout.apache.org//minutes/2024/08/30/Meeting-Minutes.html" rel="alternate" type="text/html" title="Meeting Minutes" /><published>2024-08-30T08:00:00+00:00</published><updated>2024-08-30T08:00:00+00:00</updated><id>http://mahout.apache.org//minutes/2024/08/30/Meeting-Minutes</id><content type="html" xml:base="http://mahout.apache.org//minutes/2024/08/30/Meeting-Minutes.html"><![CDATA[<h2 id="weekly-community-meeting">Weekly community meeting</h2>
-<p><a href="mailto:user-subscribe@mahout.apache.org">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
-
-<h3 id="attendees">Attendees</h3>
-<ul>
-  <li>Andrew Musselman</li>
-  <li>Tommy Naugle</li>
-  <li>Trevor Grant</li>
-</ul>
-
-<h3 id="old-business">Old Business</h3>
-<ul>
-  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204">Splitting Mahout project code into discrete repos (andrew)</a>
-    <ul>
-      <li>mahout-website</li>
-      <li>mahout-classic</li>
-      <li>mahout-samsara</li>
-      <li>mahout-qumat</li>
-    </ul>
-  </li>
-  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165">Docker image for web site build (to jowanza)</a></li>
-  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206">Next steps for qiskit and cirq back ends (sub-tasks created)</a></li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-2213">Add Braket (Trevor, done)</a></li>
-  <li>Roadmap
-    <ul>
-      <li>Q2
-        <ul>
-          <li>Classic in maintenance mode (done)</li>
-        </ul>
-      </li>
-      <li>Q3
-        <ul>
-          <li>Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends (in flight)</li>
-          <li>Kernel methods (in flight)</li>
-          <li>Submit public talk about Qumat (accepted, Fossy Aug 2024)</li>
-          <li>Amazon Braket (done)</li>
-        </ul>
-      </li>
-      <li>Q4 and beyond
-        <ul>
-          <li>Distributed quantum solvers</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="new-business">New Business</h3>
-<ul>
-  <li>Notebook Testing (#454) (replaces add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198))</li>
-  <li><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2205">Move to GitHub Issues (done)</a></li>
-  <li>Added GitHub Issues and Wiki</li>
-  <li>Add GitHub Project</li>
-  <li><a href="https://github.com/apache/mahout/issues/455">Add “talks” page to web site (for Andrew)</a></li>
-  <li>Move to Discord instead of Slack</li>
-  <li>PyPi release for QuMat</li>
-  <li><a href="https://issues.apache.org/jira/browse/MAHOUT-2200">Tommy has picked up kernel methods spike</a>
-    <ul>
-      <li><a href="https://github.com/apache/mahout/issues/456">456</a></li>
-      <li><a href="https://github.com/apache/mahout/issues/457">457</a></li>
-      <li><a href="https://github.com/apache/mahout/issues/458">458</a></li>
     </ul>
   </li>
 </ul>]]></content><author><name>The Apache Software Foundation</name><email>dev@mahout.apache.org</email></author><category term="minutes" /><summary type="html"><![CDATA[Weekly community meeting Subscribe to the Mahout User list to ask for details on joining.]]></summary></entry></feed>
