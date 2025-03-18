@@ -20,6 +20,10 @@
 
 publish:
   whoami:    asf-site
+
+notifications:
+  discussions: issues@mahout.apache.org
+
 github:
   features:
     # Enable wiki for documentation
@@ -28,3 +32,5 @@ github:
     issues: true
     # Enable projects for project management boards
     projects: true
+    # Enable discussions
+    discussions: true
