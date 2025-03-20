@@ -72,10 +72,11 @@ The Steane code is another error correction code that can correct arbitrary sing
 ### Implementing Advanced Codes with `qumat`
 While the above example demonstrates a simple bit-flip error correction, `qumat` can also be used to implement more advanced codes like the Shor code and Steane code. These implementations require more qubits and gates but follow similar principles of encoding, error detection, and correction.
 
+
 ## 8.4 Conclusion
 
 Quantum error correction is essential for building reliable quantum computers. By using `qumat`, you can implement and experiment with various error correction techniques, from simple bit-flip correction to more advanced codes like the Shor and Steane codes. As quantum hardware continues to improve, these techniques will play a critical role in realizing the full potential of quantum computing.
   
 ---  
 
-This section provides a foundational understanding of quantum error correction and demonstrates how to implement basic error correction circuits using `qumat`. For further exploration, consider experimenting with more complex error correction codes and their applications in quantum computing.  
+This section provides a foundational understanding of quantum error correction and demonstrates how to implement basic error correction circuits using `qumat`. For further exploration, consider experimenting with more complex error correction codes and their applications in quantum computing.
