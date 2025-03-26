@@ -1,2 +1,3 @@
 ---
 BUNDLE_PATH: "~/.rvm/gems"
+BUNDLE_JOBS: "4"
