@@ -28,8 +28,8 @@ author :
   github : apache
   twitter : ApacheMahout
 
-url: http://mahout.apache.org/
-
+url: "http://127.0.0.1:4000"  
+log_level: info
 # Serving
 detach:   false
 port:     4000
