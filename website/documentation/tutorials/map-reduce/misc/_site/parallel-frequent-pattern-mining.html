@@ -1,14 +1,9 @@
----
-layout: doc-page
-title: (Deprecated)  Parallel Frequent Pattern Mining
----
-
 <div style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-bottom: 20px;"> <strong>⚠️ Deprecation Notice:</strong> This component (<em>Map Reduce</em>) is no longer actively maintained. It remains accessible for historical reference but is not recommended for new development.  Please check out <a href="https://mahout.apache.org/quantum-computing-primer/" style="color: #0c5460; text-decoration: underline;">Qumat - Mahout's Quantum Computing Primer</a> for the latest innovations.</div>
 
-Mahout has a Top K Parallel FPGrowth Implementation. Its based on the paper [http://infolab.stanford.edu/~echang/recsys08-69.pdf](http://infolab.stanford.edu/~echang/recsys08-69.pdf)
- with some optimisations in mining the data.
+<p>Mahout has a Top K Parallel FPGrowth Implementation. Its based on the paper <a href="http://infolab.stanford.edu/~echang/recsys08-69.pdf">http://infolab.stanford.edu/~echang/recsys08-69.pdf</a>
+ with some optimisations in mining the data.</p>
 
-Given a huge transaction list, the algorithm finds all unique features(sets
+<p>Given a huge transaction list, the algorithm finds all unique features(sets
 of field values) and eliminates those features whose frequency in the whole
 dataset is less that minSupport. Using these remaining features N, we find
 the top K closed patterns for each of them, generating a total of NxK
@@ -17,51 +12,51 @@ Object type to denote a feature. Current implementation requires you to use
 a String as the object type. You may implement a version for any object by
 creating Iterators, Convertors and TopKPatternWritable for that particular
 object. For more information please refer the package
-org.apache.mahout.fpm.pfpgrowth.convertors.string
+org.apache.mahout.fpm.pfpgrowth.convertors.string</p>
 
-    e.g:
-     FPGrowth<String> fp = new FPGrowth<String>();
-     Set<String> features = new HashSet<String>();
-     fp.generateTopKStringFrequentPatterns(
-         new StringRecordIterator(new FileLineIterable(new File(input),
-encoding, false), pattern),
-    	fp.generateFList(
-    	  new StringRecordIterator(new FileLineIterable(new File(input),
-encoding, false), pattern), minSupport),
-    	 minSupport,
-    	maxHeapSize,
-    	features,
-    	new StringOutputConvertor(new SequenceFileOutputCollector<Text,
-TopKStringPatterns>(writer))
-      );
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>e.g:
+ FPGrowth&lt;String&gt; fp = new FPGrowth&lt;String&gt;();
+ Set&lt;String&gt; features = new HashSet&lt;String&gt;();
+ fp.generateTopKStringFrequentPatterns(
+     new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+	fp.generateFList(
+	  new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern), minSupport),
+	 minSupport,
+	maxHeapSize,
+	features,
+	new StringOutputConvertor(new SequenceFileOutputCollector&lt;Text, TopKStringPatterns&gt;(writer))
+  );
+</code></pre></div></div>
 
-* The first argument is the iterator of transaction in this case its
-Iterator<List<String>>
-* The second argument is the output of generateFList function, which
+<ul>
+  <li>The first argument is the iterator of transaction in this case its
+Iterator&lt;List<String>&gt;</String></li>
+  <li>The second argument is the output of generateFList function, which
 returns the frequent items and their frequencies from the given database
-transaction iterator
-* The third argument is the minimum Support of the pattern to be generated
-* The fourth argument is the maximum number of patterns to be mined for
-each feature
-* The fifth argument is the set of features for which the frequent patterns
-has to be mined
-* The last argument is an output collector which takes \[key, value\](key,-value\.html)
- of Feature and TopK Patterns of the format \[String,
-List<Pair<List<String>, Long>>\] and writes them to the appropriate writer
+transaction iterator</li>
+  <li>The third argument is the minimum Support of the pattern to be generated</li>
+  <li>The fourth argument is the maximum number of patterns to be mined for
+each feature</li>
+  <li>The fifth argument is the set of features for which the frequent patterns
+has to be mined</li>
+  <li>The last argument is an output collector which takes [key, value](key,-value.html)
+ of Feature and TopK Patterns of the format [String,
+List&lt;Pair&lt;List<String>, Long&gt;&gt;\] and writes them to the appropriate writer
 class which takes care of storing the object, in this case in a Sequence
-File Output format
+File Output format</String></li>
+</ul>
 
-<a name="ParallelFrequentPatternMining-RunningFrequentPatternGrowthviacommandline"></a>
-## Running Frequent Pattern Growth via command line
+<p><a name="ParallelFrequentPatternMining-RunningFrequentPatternGrowthviacommandline"></a></p>
+<h2 id="running-frequent-pattern-growth-via-command-line">Running Frequent Pattern Growth via command line</h2>
 
-The command line launcher for string transaction data
+<p>The command line launcher for string transaction data
 org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver has other features including
 specifying the regex pattern for spitting a string line of a transaction
-into the constituent features.
+into the constituent features.</p>
 
-Input files have to be in the following format.
+<p>Input files have to be in the following format.</p>
 
-<optional document id>TAB<TOKEN1>SPACE<TOKEN2>SPACE....
+<optional document="">TAB<TOKEN1>SPACE<TOKEN2>SPACE....
 
 instead of tab you could use , or \| as the default tokenization is done using a java Regex pattern {code}[,\t](,\t.html)
 *[,|\t][ ,\t]*{code}
@@ -173,7 +168,7 @@ mining up to top 100 patterns for each feature.
 <a name="ParallelFrequentPatternMining-Viewingtheresults"></a>
 ## Viewing the results
 The output will be dumped to a SequenceFile in the frequentpatterns
-directory in Text=>TopKStringPatterns format. Run this command to see a few
+directory in Text=&gt;TopKStringPatterns format. Run this command to see a few
 of the Frequent Patterns:
 
     bin/mahout seqdumper \
@@ -184,3 +179,4 @@ or replace -n 4 with -c for the count of patterns.
  
 Open questions: how does one experiment and monitor with these various
 parameters?
+</TOKEN2></TOKEN1></optional>
