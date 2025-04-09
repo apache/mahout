@@ -15,13 +15,41 @@
  limitations under the License.
 -->
 
+ # The below are the steps to Setup the Apache Mahout Project Locally.
+
+# 1.Clone the repository 
+```bash
+git clone https://github.com/username/mahout.git
+cd mahout
+```
+Replace username with your github username.
+
+
  
+ ## 2. Install Jekyll Locally
+ ### A. Prerequisites
+ - Ruby Version 2.7.0 or higher
+ - RubyGems
+ - GCC and Make
+## After installing the above pre-requisites, run the following in Terminal
+```terminal
+gem install jekyll bundler
+```
+## Once the jekyll is installed, navigate to the website folder of the mahout folder that is cloned in your system
 
+```
+cd website
+```
+## Run the following command while in website directory
+```
+bundle exec jekyll serve
+```
+### After running this, you would see the project locally setup at http://localhost:4000/
 
+### Note: If you find any errors running the above command, make sure that jekyll is upto date and ruby is installed on your system 
 
-
-
-
-
-
+## To install ruby in your system, run the following command in terminal
+```
+brew install ruby
+```
 
