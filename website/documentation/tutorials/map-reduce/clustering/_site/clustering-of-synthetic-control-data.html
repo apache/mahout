@@ -1,0 +1,61 @@
+<div style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-bottom: 20px;"> <strong>⚠️ Deprecation Notice:</strong> This component (<em>Map Reduce</em>) is no longer actively maintained. It remains accessible for historical reference but is not recommended for new development.  Please check out <a href="https://mahout.apache.org/quantum-computing-primer/" style="color: #0c5460; text-decoration: underline;">Qumat - Mahout's Quantum Computing Primer</a> for the latest innovations.</div>
+
+<h1 id="clustering-synthetic-control-data">Clustering synthetic control data</h1>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>This example will demonstrate clustering of time series data, specifically control charts. <a href="http://en.wikipedia.org/wiki/Control_chart">Control charts</a> are tools used to determine whether a manufacturing or business process is in a state of statistical control. Such control charts are generated / simulated repeatedly at equal time intervals. A <a href="http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data.html">simulated dataset</a> is available for use in UCI machine learning repository.</p>
+
+<p>A time series of control charts needs to be clustered into their close knit groups. The data set we use is synthetic and is meant to resemble real world information in an anonymized format. It contains six different classes: Normal, Cyclic, Increasing trend, Decreasing trend, Upward shift, Downward shift. In this example we will use Mahout to cluster the data into corresponding class buckets.</p>
+
+<p><em>For the sake of simplicity, we won’t use a cluster in this example, but instead show you the commands to run the clustering examples locally with Hadoop</em>.</p>
+
+<h2 id="setup">Setup</h2>
+
+<p>We need to do some initial setup before we are able to run the example.</p>
+
+<ol>
+  <li>
+    <p>Start out by downloading the dataset to be clustered from the UCI Machine Learning Repository: <a href="http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data">http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data</a>.</p>
+  </li>
+  <li>
+    <p>Download the <a href="/download//downloads.html">latest release of Mahout</a>.</p>
+  </li>
+  <li>
+    <p>Unpack the release binary and switch to the <em>mahout-distribution-0.x</em> folder</p>
+  </li>
+  <li>
+    <p>Make sure that the <em>JAVA_HOME</em> environment variable points to your local java installation</p>
+  </li>
+  <li>
+    <p>Create a folder called <em>testdata</em> in the current directory and copy the dataset into this folder.</p>
+  </li>
+</ol>
+
+<h2 id="clustering-examples">Clustering Examples</h2>
+
+<p>Depending on the clustering algorithm you want to run, the following commands can be used:</p>
+
+<ul>
+  <li><a href="/users/clustering/canopy-clustering.html">Canopy Clustering</a></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.clustering.syntheticcontrol.canopy.Job
+</code></pre></div></div>
+
+<ul>
+  <li><a href="/users/clustering/k-means-clustering.html">k-Means Clustering</a></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.clustering.syntheticcontrol.kmeans.Job
+</code></pre></div></div>
+
+<ul>
+  <li><a href="/users/clustering/fuzzy-k-means.html">Fuzzy k-Means Clustering</a></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.clustering.syntheticcontrol.fuzzykmeans.Job
+</code></pre></div></div>
+
+<p>The clustering output will be produced in the <em>output</em> directory. The output data points are in vector format. In order to read/analyze the output, you can use the <a href="/users/clustering/cluster-dumper.html">clusterdump</a> utility provided by Mahout.</p>
+
