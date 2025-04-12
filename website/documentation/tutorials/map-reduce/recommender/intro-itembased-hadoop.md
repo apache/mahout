@@ -1,5 +1,5 @@
 ---
-layout: deprecation-Banner
+layout: deprecated-docs
 title: (Deprecated)  Item Based Reccommenders in Hadoop
 
     

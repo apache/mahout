@@ -1,5 +1,5 @@
 ---
-layout: deprecation-Banner
+layout: deprecated-docs
 title: Text Classification Example
 ---
 

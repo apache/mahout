@@ -1,5 +1,5 @@
 ---
-layout: deprecation-Banner
+layout: deprecated-docs
 title: Co-Occurrence With Spark
 ---
 

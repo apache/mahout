@@ -1,5 +1,5 @@
 ---
-layout: deprecation-Banner
+layout: deprecated-docs
 title: (Deprecated)  Clustering of synthetic control data
 ---
 

@@ -1,5 +1,5 @@
 ---
-layout: deprecation-Banner
+layout: deprecated-docs
 title: (Deprecated)  Using Mahout with Python via JPype
 ---
 
