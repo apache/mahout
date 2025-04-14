@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Wikipedia XML parser and Naive Bayes Example
 ---
+
 
 # Wikipedia XML parser and Naive Bayes Classifier Example
 

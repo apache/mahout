@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: Spark Naive Bayes
 ---
+
 
 # Spark Naive Bayes
 

@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: Text Classification Example
 ---
+
+
 
 # Building a text classifier in Mahout's Spark Shell
 

@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  k-means-commandline
 ---
+
+
 
 <a name="k-means-commandline-Introduction"></a>
 # kMeans commandline introduction

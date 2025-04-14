@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  canopy-commandline
 ---
+
 
 <a name="canopy-commandline-RunningCanopyClusteringfromtheCommandLine"></a>
 # Running Canopy Clustering from the Command Line

@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  MR - Map Reduce
 ---
+
+
 
 {excerpt}MapReduce is a framework for processing huge datasets on certain
 kinds of distributable problems using a large number of computers (nodes),

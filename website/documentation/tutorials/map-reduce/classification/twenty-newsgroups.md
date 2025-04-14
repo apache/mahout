@@ -1,5 +1,5 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Twenty Newsgroups
 ---
 

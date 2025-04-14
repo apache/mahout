@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Viewing Results
 ---
+
+
 
 <a name="ViewingResults-Intro"></a>
 # Intro

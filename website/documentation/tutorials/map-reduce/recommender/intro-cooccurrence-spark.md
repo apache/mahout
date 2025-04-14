@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: Co-Occurrence With Spark
 ---
+
+
 
 #Intro to Cooccurrence Recommenders with Spark
 

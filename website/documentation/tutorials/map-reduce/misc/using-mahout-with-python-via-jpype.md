@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Using Mahout with Python via JPype
 ---
+
 
 <a name="UsingMahoutwithPythonviaJPype-overview"></a>
 # Mahout over Jython - some examples

@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Viewing Result
 ---
+
+
 * [Algorithm Viewing pages](#ViewingResult-AlgorithmViewingpages)
 
 There are various technologies available to view the output of Mahout

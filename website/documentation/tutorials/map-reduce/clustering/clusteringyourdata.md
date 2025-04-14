@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  ClusteringYourData
 ---
+
 
 # Clustering your data
 

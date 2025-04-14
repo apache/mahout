@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  lda-commandline
 ---
+
 
 <a name="lda-commandline-RunningLatentDirichletAllocation(algorithm)fromtheCommandLine"></a>
 # Running Latent Dirichlet Allocation (algorithm) from the Command Line

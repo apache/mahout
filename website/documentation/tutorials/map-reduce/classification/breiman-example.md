@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Breiman Example
 ---
+
+
 
 #Breiman Example
 

@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Recommender First-Timer FAQ
 ---
+
 
 # Recommender First Timer Dos and Don'ts
 

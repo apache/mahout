@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Visualizing Sample Clusters
 ---
+
+
 
 <a name="VisualizingSampleClusters-Introduction"></a>
 # Introduction

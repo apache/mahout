@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: Mahout Samsara In Core
 ---
+
 
 # Playing with Mahout's Spark Shell 
 

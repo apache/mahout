@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Clustering Seinfeld Episodes
 ---
+
+
 
 Below is short tutorial on how to cluster Seinfeld episode transcripts with
 Mahout.

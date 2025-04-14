@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: 
 ---
+
 
 ## Getting Started 
 

@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  fuzzy-k-means-commandline
 ---
+
+
 
 <a name="fuzzy-k-means-commandline-RunningFuzzyk-MeansClusteringfromtheCommandLine"></a>
 # Running Fuzzy k-Means Clustering from the Command Line

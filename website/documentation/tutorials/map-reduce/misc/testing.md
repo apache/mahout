@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Testing
 ---
+
 
 <a name="Testing-Intro"></a>
 # Intro

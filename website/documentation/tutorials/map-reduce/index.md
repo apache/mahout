@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Deprecated Map Reduce Based Examples
 ---
+
+
 
 A note about the sunsetting of our support for Map Reduce.
 

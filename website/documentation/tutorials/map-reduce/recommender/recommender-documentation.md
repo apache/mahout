@@ -1,7 +1,9 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Recommender Documentation
 ---
+
+
 
 <a name="RecommenderDocumentation-Overview"></a>
 ## Overview

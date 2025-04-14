@@ -1,7 +1,8 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Clustering of synthetic control data
 ---
+
 
 # Clustering synthetic control data
 

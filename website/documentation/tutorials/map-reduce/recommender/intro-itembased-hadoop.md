@@ -1,9 +1,12 @@
 ---
-layout: doc-page
+layout: deprecated-docs
 title: (Deprecated)  Item Based Reccommenders in Hadoop
 
     
 ---
+
+
+
 # Introduction to Item-Based Recommendations with Hadoop
 
 ##Overview
