@@ -1,1 +1,1 @@
-from . import Qumat
+from .qumat import Qumat
