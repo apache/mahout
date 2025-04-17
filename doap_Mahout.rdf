@@ -37,8 +37,8 @@
     <release>
       <Version>
         <name>Apache Mahout</name>
-        <created>2019-11-11</created>
-        <revision>14.1</revision>
+        <created>2025-04-17</created>
+        <revision>0.4</revision>
       </Version>
     </release>
     <repository>
