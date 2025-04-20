@@ -3,6 +3,30 @@ layout: doc-page
 title: (Deprecated)  Multilayer Perceptron
 ---
 
+<div style="
+  background-color: #e7f3fe;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+  padding: 20px;
+  border-radius: 6px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  margin: 20px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+">
+  <strong style="font-size: 16px;">⚠️ Deprecation Notice:</strong>
+  <p style="margin-top: 10px; font-size: 14px; line-height: 1.5;">
+    The <em>MapReduce</em> components of Apache Mahout are no longer actively maintained and are kept solely for historical reference.
+    We recommend avoiding their use in new development.
+  </p>
+  <p style="margin-top: 10px; font-size: 14px;">
+    Explore our latest advancements in quantum computing with
+    <a href="https://mahout.apache.org/quantum-computing-primer/" style="color: #0056b3; font-weight: bold; text-decoration: underline;">
+      Qumat – Mahout’s Quantum Computing Primer
+    </a>.
+  </p>
+</div>
+
+
 Multilayer Perceptron
 =====================
 
