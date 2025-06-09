@@ -18,6 +18,10 @@
 #
 
 source "https://rubygems.org"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 95bd4d3d56af02aa5bb53056967531e91843bd4b
 
 # Hello! This is where you manage which Jekyll version is used to run.
 # When you want to use a different version, change it below, save the
