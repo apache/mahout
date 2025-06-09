@@ -15,8 +15,8 @@ the Apache mirrors. The latest Mahout release is available for download at:
   * To validate artifacts:
     * (From KEYS file): `gpg --import KEYS`
 ```
-$ gpg mahout-14.1-source-release.zip.asc
-gpg: assuming signed data in `mahout-14.1-source-release.zip'
+$ gpg mahout-qumat-0.4.zip.gpg
+gpg: assuming signed data in `mahout-qumat-0.4.zip.gpg'
 gpg: Signature made Fri 01 Mar 2019 09:59:00 AM PST using RSA key ID 140A5BE9
 gpg: Good signature from "Apache B. Committer (ASF Signing Key) <abc@apache.org>"
 ```
@@ -27,43 +27,13 @@ Apache Mahout is mirrored to [Github](https://github.com/apache/mahout). To get 
 
     git clone https://github.com/apache/mahout.git mahout
 
-# Environment
+## Getting started
 
-Whether you are using Mahout's Shell, running command line jobs or using it as a library to build your own apps 
-you'll need to setup several environment variables. 
-Edit your environment in ```~/.bash_profile``` for Mac or ```~/.bashrc``` for many linux distributions. Add the following
-
-    export MAHOUT_HOME=/path/to/mahout
-    export MAHOUT_LOCAL=true # for running standalone on your dev machine, 
-    # unset MAHOUT_LOCAL for running on a cluster 
-
-If you are running on Spark you will also need $SPARK_HOME
-
-Make sure to have $JAVA_HOME set also
-
-# Using Mahout as a Library
-
-Running any application that uses Mahout will require installing a binary or source version and setting the environment.  
-Then add the appropriate setting to your pom.xml or build.sbt following the template below.
- 
-If you only need the math part of Mahout:
-
-    <dependency>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-math</artifactId>
-        <version>${mahout.version}</version>
-    </dependency>
-
-In case you would like to use some of our integration tooling (e.g. for generating vectors from Lucene):
-
-    <dependency>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-hdfs</artifactId>
-        <version>${mahout.version}</version>
-    </dependency>
-
-In case you are using Ivy, Gradle, Buildr, Grape or SBT you might want to directly head over to the official [Maven Repository search](http://mvnrepository.com/artifact/org.apache.mahout/mahout-core).
-
+To install dependencies, run the following:
+```
+pip install -U poetry
+poetry install
+```
 
 <a name="Downloads-FutureReleases"></a>
 # Future Releases
