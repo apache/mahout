@@ -115,55 +115,55 @@ for your machine learning projects, harnessing the power of big data processing 
 
 [Spark Naive Bayes](/Map_Reduce_Folder/algorithms/spark-naive-bayes.html)
 
-[Intro Cooccurrence Spark](/documentation/users/algorithms/intro-cooccurrence-spark.html)
+[Intro Cooccurrence Spark](/Map_Reduce_Folder/algorithms/intro-cooccurrence-spark.html)
 
-[Recommender Overview](/documentation/users/algorithms/recommender-overview.html)
+[Recommender Overview](/Map_Reduce_Folder/algorithms/recommender-overview.html)
 
-[D Spca](/documentation/users/algorithms/d-spca.html)
+[D Spca](/Map_Reduce_Folder/algorithms/d-spca.html)
 
-[D Qr](/documentation/users/algorithms/d-qr.html)
+[D Qr](/Map_Reduce_Folder/algorithms/d-qr.html)
 
-[Clustering Of Synthetic Control Data](/documentation/users/clustering/clustering-of-synthetic-control-data.html)
+[Clustering Of Synthetic Control Data](/Map_Reduce_Folder/clustering/clustering-of-synthetic-control-data.html)
 
-[Canopy Commandline](/documentation/users/clustering/canopy-commandline.html)
+[Canopy Commandline](/Map_Reduce_Folder/clustering/canopy-commandline.html)
 
-[Latent Dirichlet Allocation](/documentation/users/clustering/latent-dirichlet-allocation.html)
+[Latent Dirichlet Allocation](/Map_Reduce_Folder/clustering/latent-dirichlet-allocation.html)
 
-[Visualizing Sample Clusters](/documentation/users/clustering/visualizing-sample-clusters.html)
+[Visualizing Sample Clusters](/Map_Reduce_Folder/clustering/visualizing-sample-clusters.html)
 
-[K Means Clustering](/documentation/users/clustering/k-means-clustering.html)
+[K Means Clustering](/Map_Reduce_Folder/clustering/k-means-clustering.html)
 
-[Spectral Clustering](/documentation/users/clustering/spectral-clustering.html)
+[Spectral Clustering](/Map_Reduce_Folder/clustering/spectral-clustering.html)
 
-[Viewing Results](/documentation/users/clustering/viewing-results.html)
+[Viewing Results](/Map_Reduce_Folder/clustering/viewing-results.html)
 
-[K Means Commandline](/documentation/users/clustering/k-means-commandline.html)
+[K Means Commandline](/Map_Reduce_Folder/clustering/k-means-commandline.html)
 
-[Viewing Result](/documentation/users/clustering/viewing-result.html)
+[Viewing Result](/Map_Reduce_Folder/clustering/viewing-result.html)
 
-[Expectation Maximization](/documentation/users/clustering/expectation-maximization.html)
+[Expectation Maximization](/Map_Reduce_Folder/clustering/expectation-maximization.html)
 
-[20Newsgroups](/documentation/users/clustering/20newsgroups.html)
+[20Newsgroups](/Map_Reduce_Folder/clustering/20newsgroups.html)
 
-[Llr   Log Likelihood Ratio](/documentation/users/clustering/llr---log-likelihood-ratio.html)
+[Llr   Log Likelihood Ratio](/Map_Reduce_Folder/clustering/llr---log-likelihood-ratio.html)
 
-[Clusteringyourdata](/documentation/users/clustering/clusteringyourdata.html)
+[Clusteringyourdata](/Map_Reduce_Folder/clustering/clusteringyourdata.html)
 
-[Fuzzy K Means](/documentation/users/clustering/fuzzy-k-means.html)
+[Fuzzy K Means](/Map_Reduce_Folder/clustering/fuzzy-k-means.html)
 
-[Hierarchical Clustering](/documentation/users/clustering/hierarchical-clustering.html)
+[Hierarchical Clustering](/Map_Reduce_Folder/clustering/hierarchical-clustering.html)
 
-[Canopy Clustering](/documentation/users/clustering/canopy-clustering.html)
+[Canopy Clustering](/Map_Reduce_Folder/clustering/canopy-clustering.html)
 
-[Streaming K Means](/documentation/users/clustering/streaming-k-means.html)
+[Streaming K Means](/Map_Reduce_Folder/clustering/streaming-k-means.html)
 
-[Cluster Dumper](/documentation/users/clustering/cluster-dumper.html)
+[Cluster Dumper](/Map_Reduce_Folder/clustering/cluster-dumper.html)
 
-[Clustering Seinfeld Episodes](/documentation/users/clustering/clustering-seinfeld-episodes.html)
+[Clustering Seinfeld Episodes](/Map_Reduce_Folder/clustering/clustering-seinfeld-episodes.html)
 
-[Lda Commandline](/documentation/users/clustering/lda-commandline.html)
+[Lda Commandline](/Map_Reduce_Folder/clustering/lda-commandline.html)
 
-[Fuzzy K Means Commandline](/documentation/users/clustering/fuzzy-k-means-commandline.html)
+[Fuzzy K Means Commandline](/Map_Reduce_Folder/clustering/fuzzy-k-means-commandline.html)
 
 [Recommender First Timer Faq](/documentation/users/recommender/recommender-first-timer-faq.html)
 
