@@ -109,11 +109,11 @@ for your machine learning projects, harnessing the power of big data processing 
 
 [Mahoutintegration](/Map_Reduce_Folder/basics/mahoutintegration.html)
 
-[D Ssvd](/documentation/users/algorithms/d-ssvd.html)
+[D Ssvd](/Map_Reduce_Folder/algorithms/d-ssvd.html)
 
-[D Als](/documentation/users/algorithms/d-als.html)
+[D Als](/Map_Reduce_Folder/algorithms/d-als.html)
 
-[Spark Naive Bayes](/documentation/users/algorithms/spark-naive-bayes.html)
+[Spark Naive Bayes](/Map_Reduce_Folder/algorithms/spark-naive-bayes.html)
 
 [Intro Cooccurrence Spark](/documentation/users/algorithms/intro-cooccurrence-spark.html)
 
