@@ -165,21 +165,21 @@ for your machine learning projects, harnessing the power of big data processing 
 
 [Fuzzy K Means Commandline](/Map_Reduce_Folder/clustering/fuzzy-k-means-commandline.html)
 
-[Recommender First Timer Faq](/documentation/users/recommender/recommender-first-timer-faq.html)
+[Recommender First Timer Faq](/Map_Reduce_Folder/recommender/recommender-first-timer-faq.html)
 
-[Matrix Factorization](/documentation/users/recommender/matrix-factorization.html)
+[Matrix Factorization](/Map_Reduce_Folder/recommender/matrix-factorization.html)
 
-[Recommender Documentation](/documentation/users/recommender/recommender-documentation.html)
+[Recommender Documentation](/Map_Reduce_Folder/recommender/recommender-documentation.html)
 
-[Quickstart](/documentation/users/recommender/quickstart.html)
+[Quickstart](/Map_Reduce_Folder/recommender/quickstart.html)
 
-[Intro Itembased Hadoop](/documentation/users/recommender/intro-itembased-hadoop.html)
+[Intro Itembased Hadoop](/Map_Reduce_Folder/recommender/intro-itembased-hadoop.html)
 
-[Userbased 5 Minutes](/documentation/users/recommender/userbased-5-minutes.html)
+[Userbased 5 Minutes](/Map_Reduce_Folder/recommender/userbased-5-minutes.html)
 
-[Intro Cooccurrence Spark](/documentation/users/recommender/intro-cooccurrence-spark.html)
+[Intro Cooccurrence Spark](/Map_Reduce_Folder/recommender/intro-cooccurrence-spark.html)
 
-[Intro Als Hadoop](/documentation/users/recommender/intro-als-hadoop.html)
+[Intro Als Hadoop](/Map_Reduce_Folder/recommender/intro-als-hadoop.html)
 
 [In Core Reference](/documentation/users/environment/in-core-reference.html)
 
