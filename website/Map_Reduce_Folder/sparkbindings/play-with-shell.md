@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Perceptron and Winnow
+redirect_from:
+  - /documentation/users/sparkbindings/play-with-shell
+  - /documentation/users/sparkbindings/play-with-shell.html
 ---
 
 # Playing with Mahout's Spark Shell

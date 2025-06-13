@@ -1,6 +1,9 @@
 ---
 layout: default
 title: 
+redirect_from:
+  - /documentation/users/environment/how-to-build-an-app
+  - /documentation/users/environment/how-to-build-an-app.html
 ---
 
 # How to create and App using Mahout

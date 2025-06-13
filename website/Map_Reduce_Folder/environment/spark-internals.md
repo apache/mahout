@@ -1,6 +1,9 @@
 ---
 layout: default
 title: 
+redirect_from:
+    - /documentation/users/environment/spark-internals
+    - /documentation/users/environment/spark-internals.html
 ---
 
 # Introduction

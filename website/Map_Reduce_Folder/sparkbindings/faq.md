@@ -1,6 +1,9 @@
 ---
 layout: default
 title: FAQ
+redirect_from:
+    - /documentation/users/sparkbindings/faq
+    - /documentation/users/sparkbindings/faq.html
 ---
 
 # FAQ for using Mahout with Spark

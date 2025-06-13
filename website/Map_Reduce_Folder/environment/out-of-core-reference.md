@@ -1,6 +1,9 @@
 ---
 layout: default
 title: 
+redirect_from:
+    - /documentation/users/environment/out-of-core-reference
+    - /documentation/users/environment/out-of-core-reference.html
 ---
 
 # Mahout-Samsara's Distributed Linear Algebra DSL Reference

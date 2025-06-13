@@ -1,6 +1,9 @@
 ---
 layout: default
 title: 
+redirect_from:
+    - /documentation/users/environment/in-core-reference
+    - /documentation/users/environment/in-core-reference.html
 ---
 
 ## Mahout-Samsara's In-Core Linear Algebra DSL Reference

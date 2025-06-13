@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Spark Bindings
+redirect_from:
+        - /documentation/users/sparkbindings/home
+        - /documentation/users/sparkbindings/home.html
 ---
 
 # Scala & Spark Bindings:

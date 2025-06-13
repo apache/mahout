@@ -1,6 +1,9 @@
 ---
 layout: default
 title: 
+redirect_from:
+    - /documentation/users/environment/classify-a-doc-from-the-shell
+    - /documentation/users/environment/classify-a-doc-from-the-shell.html
 ---
 
 #Building a text classifier in Mahout's Spark Shell
