@@ -52,4 +52,10 @@ bundle exec jekyll serve
 ```
 brew install ruby
 ```
-
+ # How to post minutes on the home page
+1. Make a new GitHub Discussion like https://github.com/apache/mahout/discussions/541
+1. Copy the latest Minutes in _posts to a new file, e.g., `cp 2025-05-16-Meeting-Minutes.md 2025-06-13-Meeting-Minutes.md`
+1. Edit the new Minutes to reflect the new Discussion link
+1. Add and commit, make a PR
+1. The site will automatically build
+1. Notify Slack and Twitter
