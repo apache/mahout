@@ -6,7 +6,7 @@ title: User's Guide
 # Apache Mahout User's Guide
 
 Apache Mahout is a powerful, scalable, and versatile machine learning library designed for distributed data processing. 
-It offers a comprehensive set of algorithms for various tasks, including classification, clustering, recommendation, and
+It offers a comprehensive set of algorithms for various tasks, including Classification, clustering, recommendation, and
 pattern mining. Built on top of the Apache Hadoop ecosystem, Mahout leverages MapReduce and Spark to enable data 
 processing on large-scale datasets.
 
@@ -16,7 +16,7 @@ library for your machine learning projects.
 ## Key Features
 
 - **Scalability**: Apache Mahout is designed to handle large-scale data processing by leveraging the power of Hadoop and Spark, making it an excellent choice for big data machine learning projects.
-- **Versatility**: Mahout offers a wide range of machine learning algorithms, covering classification, clustering, recommendation, and more, ensuring that you have the right tools for your specific use case.
+- **Versatility**: Mahout offers a wide range of machine learning algorithms, covering Classification, clustering, recommendation, and more, ensuring that you have the right tools for your specific use case.
 - **Extensibility**: The library is easily extensible, allowing you to add custom algorithms and processing steps to meet your unique requirements.
 - **Integration**: Mahout seamlessly integrates with other components of the Hadoop ecosystem, such as HDFS and HBase, simplifying data storage and retrieval in your projects.
 
@@ -35,151 +35,151 @@ for your machine learning projects, harnessing the power of big data processing 
 
 [Index](/documentation/users/index.html)
 
-[Twenty Newsgroups](/documentation/users/classification/twenty-newsgroups.html)
+[Twenty Newsgroups](/Map_Reduce_Folder/Classification/twenty-newsgroups.html)
 
-[Random Forests](/documentation/users/classification/random-forests.html)
+[Random Forests](/Map_Reduce_Folder/Classification/random-forests.html)
 
-[Partial Implementation](/documentation/users/classification/partial-implementation.html)
+[Partial Implementation](/Map_Reduce_Folder/Classification/partial-implementation.html)
 
-[Breiman Example](/documentation/users/classification/breiman-example.html)
+[Breiman Example](/Map_Reduce_Folder/Classification/breiman-example.html)
 
-[Neural Network](/documentation/users/classification/neural-network.html)
+[Neural Network](/Map_Reduce_Folder/Classification/neural-network.html)
 
-[Restricted Boltzmann Machines](/documentation/users/classification/restricted-boltzmann-machines.html)
+[Restricted Boltzmann Machines](/Map_Reduce_Folder/Classification/restricted-boltzmann-machines.html)
 
-[Logistic Regression](/documentation/users/classification/logistic-regression.html)
+[Logistic Regression](/Map_Reduce_Folder/Classification/logistic-regression.html)
 
-[Class Discovery](/documentation/users/classification/class-discovery.html)
+[Class Discovery](/Map_Reduce_Folder/Classification/class-discovery.html)
 
-[Naivebayes](/documentation/users/classification/naivebayes.html)
+[Naivebayes](/Map_Reduce_Folder/Classification/naivebayes.html)
 
-[Bayesian Commandline](/documentation/users/classification/bayesian-commandline.html)
+[Bayesian Commandline](/Map_Reduce_Folder/Classification/bayesian-commandline.html)
 
-[Wikipedia Classifier Example](/documentation/users/classification/wikipedia-classifier-example.html)
+[Wikipedia Classifier Example](/Map_Reduce_Folder/Classification/wikipedia-classifier-example.html)
 
-[Bayesian](/documentation/users/classification/bayesian.html)
+[Bayesian](/Map_Reduce_Folder/Classification/bayesian.html)
 
-[Support Vector Machines](/documentation/users/classification/support-vector-machines.html)
+[Support Vector Machines](/Map_Reduce_Folder/Classification/support-vector-machines.html)
 
-[Hidden Markov Models](/documentation/users/classification/hidden-markov-models.html)
+[Hidden Markov Models](/Map_Reduce_Folder/Classification/hidden-markov-models.html)
 
-[Locally Weighted Linear Regression](/documentation/users/classification/locally-weighted-linear-regression.html)
+[Locally Weighted Linear Regression](/Map_Reduce_Folder/Classification/locally-weighted-linear-regression.html)
 
-[Mlp](/documentation/users/classification/mlp.html)
+[Mlp](/Map_Reduce_Folder/Classification/mlp.html)
 
-[Bankmarketing Example](/documentation/users/classification/bankmarketing-example.html)
+[Bankmarketing Example](/Map_Reduce_Folder/Classification/bankmarketing-example.html)
 
-[Classifyingyourdata](/documentation/users/classification/classifyingyourdata.html)
+[Classifyingyourdata](/Map_Reduce_Folder/Classification/classifyingyourdata.html)
 
-[Using Mahout With Python Via Jpype](/documentation/users/misc/using-mahout-with-python-via-jpype.html)
+[Using Mahout With Python Via Jpype](/Map_Reduce_Folder/misc/using-mahout-with-python-via-jpype.html)
 
-[Perceptron And Winnow](/documentation/users/misc/perceptron-and-winnow.html)
+[Perceptron And Winnow](/Map_Reduce_Folder/misc/perceptron-and-winnow.html)
 
-[Testing](/documentation/users/misc/testing.html)
+[Testing](/Map_Reduce_Folder/misc/testing.html)
 
-[Parallel Frequent Pattern Mining](/documentation/users/misc/parallel-frequent-pattern-mining.html)
+[Parallel Frequent Pattern Mining](/Map_Reduce_Folder/misc/parallel-frequent-pattern-mining.html)
 
-[Mr   Map Reduce](/documentation/users/misc/mr---map-reduce.html)
+[Mr   Map Reduce](/Map_Reduce_Folder/misc/mr---map-reduce.html)
 
-[Matrix And Vector Needs](/documentation/users/basics/matrix-and-vector-needs.html)
+[Matrix And Vector Needs](/Map_Reduce_Folder/basics/matrix-and-vector-needs.html)
 
-[Independent Component Analysis](/documentation/users/basics/independent-component-analysis.html)
+[Independent Component Analysis](/Map_Reduce_Folder/basics/independent-component-analysis.html)
 
-[Creating Vectors](/documentation/users/basics/creating-vectors.html)
+[Creating Vectors](/Map_Reduce_Folder/basics/creating-vectors.html)
 
-[System Requirements](/documentation/users/basics/system-requirements.html)
+[System Requirements](/Map_Reduce_Folder/basics/system-requirements.html)
 
-[Collections](/documentation/users/basics/collections.html)
+[Collections](/Map_Reduce_Folder/basics/collections.html)
 
-[Creating Vectors From Text](/documentation/users/basics/creating-vectors-from-text.html)
+[Creating Vectors From Text](/Map_Reduce_Folder/basics/creating-vectors-from-text.html)
 
-[Mahout Collections](/documentation/users/basics/mahout-collections.html)
+[Mahout Collections](/Map_Reduce_Folder/basics/mahout-collections.html)
 
-[Collocations](/documentation/users/basics/collocations.html)
+[Collocations](/Map_Reduce_Folder/basics/collocations.html)
 
-[Algorithms](/documentation/users/basics/algorithms.html)
+[Algorithms](/Map_Reduce_Folder/basics/algorithms.html)
 
-[Svd   Singular Value Decomposition](/documentation/users/basics/svd---singular-value-decomposition.html)
+[Svd   Singular Value Decomposition](/Map_Reduce_Folder/basics/svd---singular-value-decomposition.html)
 
-[Tf Idf   Term Frequency Inverse Document Frequency](/documentation/users/basics/tf-idf---term-frequency-inverse-document-frequency.html)
+[Tf Idf   Term Frequency Inverse Document Frequency](/Map_Reduce_Folder/basics/tf-idf---term-frequency-inverse-document-frequency.html)
 
-[Principal Components Analysis](/documentation/users/basics/principal-components-analysis.html)
+[Principal Components Analysis](/Map_Reduce_Folder/basics/principal-components-analysis.html)
 
-[Gaussian Discriminative Analysis](/documentation/users/basics/gaussian-discriminative-analysis.html)
+[Gaussian Discriminative Analysis](/Map_Reduce_Folder/basics/gaussian-discriminative-analysis.html)
 
-[Mahoutintegration](/documentation/users/basics/mahoutintegration.html)
+[Mahoutintegration](/Map_Reduce_Folder/basics/mahoutintegration.html)
 
-[D Ssvd](/documentation/users/algorithms/d-ssvd.html)
+[D Ssvd](/Map_Reduce_Folder/algorithms/d-ssvd.html)
 
-[D Als](/documentation/users/algorithms/d-als.html)
+[D Als](/Map_Reduce_Folder/algorithms/d-als.html)
 
-[Spark Naive Bayes](/documentation/users/algorithms/spark-naive-bayes.html)
+[Spark Naive Bayes](/Map_Reduce_Folder/algorithms/spark-naive-bayes.html)
 
-[Intro Cooccurrence Spark](/documentation/users/algorithms/intro-cooccurrence-spark.html)
+[Intro Cooccurrence Spark](/Map_Reduce_Folder/algorithms/intro-cooccurrence-spark.html)
 
-[Recommender Overview](/documentation/users/algorithms/recommender-overview.html)
+[Recommender Overview](/Map_Reduce_Folder/algorithms/recommender-overview.html)
 
-[D Spca](/documentation/users/algorithms/d-spca.html)
+[D Spca](/Map_Reduce_Folder/algorithms/d-spca.html)
 
-[D Qr](/documentation/users/algorithms/d-qr.html)
+[D Qr](/Map_Reduce_Folder/algorithms/d-qr.html)
 
-[Clustering Of Synthetic Control Data](/documentation/users/clustering/clustering-of-synthetic-control-data.html)
+[Clustering Of Synthetic Control Data](/Map_Reduce_Folder/clustering/clustering-of-synthetic-control-data.html)
 
-[Canopy Commandline](/documentation/users/clustering/canopy-commandline.html)
+[Canopy Commandline](/Map_Reduce_Folder/clustering/canopy-commandline.html)
 
-[Latent Dirichlet Allocation](/documentation/users/clustering/latent-dirichlet-allocation.html)
+[Latent Dirichlet Allocation](/Map_Reduce_Folder/clustering/latent-dirichlet-allocation.html)
 
-[Visualizing Sample Clusters](/documentation/users/clustering/visualizing-sample-clusters.html)
+[Visualizing Sample Clusters](/Map_Reduce_Folder/clustering/visualizing-sample-clusters.html)
 
-[K Means Clustering](/documentation/users/clustering/k-means-clustering.html)
+[K Means Clustering](/Map_Reduce_Folder/clustering/k-means-clustering.html)
 
-[Spectral Clustering](/documentation/users/clustering/spectral-clustering.html)
+[Spectral Clustering](/Map_Reduce_Folder/clustering/spectral-clustering.html)
 
-[Viewing Results](/documentation/users/clustering/viewing-results.html)
+[Viewing Results](/Map_Reduce_Folder/clustering/viewing-results.html)
 
-[K Means Commandline](/documentation/users/clustering/k-means-commandline.html)
+[K Means Commandline](/Map_Reduce_Folder/clustering/k-means-commandline.html)
 
-[Viewing Result](/documentation/users/clustering/viewing-result.html)
+[Viewing Result](/Map_Reduce_Folder/clustering/viewing-result.html)
 
-[Expectation Maximization](/documentation/users/clustering/expectation-maximization.html)
+[Expectation Maximization](/Map_Reduce_Folder/clustering/expectation-maximization.html)
 
-[20Newsgroups](/documentation/users/clustering/20newsgroups.html)
+[20Newsgroups](/Map_Reduce_Folder/clustering/20newsgroups.html)
 
-[Llr   Log Likelihood Ratio](/documentation/users/clustering/llr---log-likelihood-ratio.html)
+[Llr   Log Likelihood Ratio](/Map_Reduce_Folder/clustering/llr---log-likelihood-ratio.html)
 
-[Clusteringyourdata](/documentation/users/clustering/clusteringyourdata.html)
+[Clusteringyourdata](/Map_Reduce_Folder/clustering/clusteringyourdata.html)
 
-[Fuzzy K Means](/documentation/users/clustering/fuzzy-k-means.html)
+[Fuzzy K Means](/Map_Reduce_Folder/clustering/fuzzy-k-means.html)
 
-[Hierarchical Clustering](/documentation/users/clustering/hierarchical-clustering.html)
+[Hierarchical Clustering](/Map_Reduce_Folder/clustering/hierarchical-clustering.html)
 
-[Canopy Clustering](/documentation/users/clustering/canopy-clustering.html)
+[Canopy Clustering](/Map_Reduce_Folder/clustering/canopy-clustering.html)
 
-[Streaming K Means](/documentation/users/clustering/streaming-k-means.html)
+[Streaming K Means](/Map_Reduce_Folder/clustering/streaming-k-means.html)
 
-[Cluster Dumper](/documentation/users/clustering/cluster-dumper.html)
+[Cluster Dumper](/Map_Reduce_Folder/clustering/cluster-dumper.html)
 
-[Clustering Seinfeld Episodes](/documentation/users/clustering/clustering-seinfeld-episodes.html)
+[Clustering Seinfeld Episodes](/Map_Reduce_Folder/clustering/clustering-seinfeld-episodes.html)
 
-[Lda Commandline](/documentation/users/clustering/lda-commandline.html)
+[Lda Commandline](/Map_Reduce_Folder/clustering/lda-commandline.html)
 
-[Fuzzy K Means Commandline](/documentation/users/clustering/fuzzy-k-means-commandline.html)
+[Fuzzy K Means Commandline](/Map_Reduce_Folder/clustering/fuzzy-k-means-commandline.html)
 
-[Recommender First Timer Faq](/documentation/users/recommender/recommender-first-timer-faq.html)
+[Recommender First Timer Faq](/Map_Reduce_Folder/recommender/recommender-first-timer-faq.html)
 
-[Matrix Factorization](/documentation/users/recommender/matrix-factorization.html)
+[Matrix Factorization](/Map_Reduce_Folder/recommender/matrix-factorization.html)
 
-[Recommender Documentation](/documentation/users/recommender/recommender-documentation.html)
+[Recommender Documentation](/Map_Reduce_Folder/recommender/recommender-documentation.html)
 
-[Quickstart](/documentation/users/recommender/quickstart.html)
+[Quickstart](/Map_Reduce_Folder/recommender/quickstart.html)
 
-[Intro Itembased Hadoop](/documentation/users/recommender/intro-itembased-hadoop.html)
+[Intro Itembased Hadoop](/Map_Reduce_Folder/recommender/intro-itembased-hadoop.html)
 
-[Userbased 5 Minutes](/documentation/users/recommender/userbased-5-minutes.html)
+[Userbased 5 Minutes](/Map_Reduce_Folder/recommender/userbased-5-minutes.html)
 
-[Intro Cooccurrence Spark](/documentation/users/recommender/intro-cooccurrence-spark.html)
+[Intro Cooccurrence Spark](/Map_Reduce_Folder/recommender/intro-cooccurrence-spark.html)
 
-[Intro Als Hadoop](/documentation/users/recommender/intro-als-hadoop.html)
+[Intro Als Hadoop](/Map_Reduce_Folder/recommender/intro-als-hadoop.html)
 
 [In Core Reference](/documentation/users/environment/in-core-reference.html)
 
