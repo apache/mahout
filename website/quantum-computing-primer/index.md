@@ -2,6 +2,12 @@
 layout: page
 title: Quantum Computing Primer
 ---
+ <div>
+        <h2>🚀 Qumat 0.4 Released!</h2>
+        <p>Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
+        <a href="/documentation/qumat/">Explore Qumat →</a>
+      </div>
+      
 
 # Outline for an In-Depth Primer in Quantum Computing Using `qumat`
 
