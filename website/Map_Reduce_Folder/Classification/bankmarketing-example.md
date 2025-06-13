@@ -1,6 +1,9 @@
 ---
 layout: default
 title:
+redirect_from:
+  - /documentation/users/classification/bankmarketing-example
+  - /documentation/users/classification/bankmarketing-example.html
 ---
 
 #Bank Marketing Example

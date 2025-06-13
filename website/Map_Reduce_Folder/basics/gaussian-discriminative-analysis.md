@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Gaussian Discriminative Analysis
+redirect_from:
+    - /documentation/users/basics/gaussian-discriminative-analysis
+    - /documentation/users/basics/gaussian-discriminative-analysis.html
 ---
 
 <a name="GaussianDiscriminativeAnalysis-GaussianDiscriminativeAnalysis"></a>

@@ -1,6 +1,9 @@
 ---
 layout: default
 title: lda-commandline
+redirect_from:
+    - /documentation/users/clustering/lda-commandline
+    - /documentation/users/clustering/lda-commandline.html
 ---
 
 <a name="lda-commandline-RunningLatentDirichletAllocation(algorithm)fromtheCommandLine"></a>

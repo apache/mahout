@@ -1,6 +1,9 @@
 ---
 layout: default
 title: bayesian-commandline
+redirect_from:
+    - /documentation/users/classification/bayesian-commandline
+    - /documentation/users/classification/bayesian-commandline.html
 ---
 
 # Naive Bayes commandline documentation

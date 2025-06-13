@@ -1,6 +1,9 @@
 ---
 layout: default
 title: 20Newsgroups
+redirect_from:
+    - /documentation/users/clustering/20newsgroups
+    - /documentation/users/clustering/20newsgroups.html
 ---
 
 <a name="20Newsgroups-NaiveBayesusing20NewsgroupsData"></a>

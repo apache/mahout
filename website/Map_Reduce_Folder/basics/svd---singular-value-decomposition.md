@@ -1,6 +1,9 @@
 ---
 layout: default
 title: SVD - Singular Value Decomposition
+redirect_from:
+  - /documentation/users/basics/svd---singular-value-decomposition
+  - /documentation/users/basics/svd---singular-value-decomposition.html
 ---
 
 {excerpt}Singular Value Decomposition is a form of product decomposition of

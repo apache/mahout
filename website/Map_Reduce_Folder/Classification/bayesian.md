@@ -1,6 +1,9 @@
 ---
 layout: default
 title:
+redirect_from:
+  - /documentation/users/classification/bayesian
+  - /documentation/users/classification/bayesian.html
 ---
 
 # Naive Bayes

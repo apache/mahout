@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Partial Implementation
+redirect_from:
+    - /documentation/users/classification/partial-implementation
+    - /documentation/users/classification/partial-implementation.html
 ---
 
 

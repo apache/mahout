@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Collocations
+redirect_from:
+    - /documentation/users/basics/collocations
+    - /documentation/users/basics/collocations.html
 ---
 
 

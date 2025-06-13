@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Class Discovery
+redirect_from:
+  - /documentation/users/classification/class-discovery
+  - /documentation/users/classification/class-discovery.html
 ---
 <a name="ClassDiscovery-ClassDiscovery"></a>
 # Class Discovery

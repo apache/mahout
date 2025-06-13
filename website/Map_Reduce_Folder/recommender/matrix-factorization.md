@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Introduction to Matrix Factorization for Recommendation Mining
+redirect_from:
+    - /documentation/users/recommender/matrix-factorization
+    - /documentation/users/recommender/matrix-factorization.html
 ---
 
 <a name="MatrixFactorization-Intro"></a>

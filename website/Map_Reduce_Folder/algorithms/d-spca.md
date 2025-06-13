@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Distributed Stochastic PCA
+redirect_from:
+    - /documentation/users/algorithms/d-spca
+    - /documentation/users/algorithms/d-spca.html
 ---
 
 # Distributed Stochastic PCA

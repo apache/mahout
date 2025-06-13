@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Fuzzy K-Means
+redirect_from:
+    - /documentation/users/clustering/fuzzy-k-means
+    - /documentation/users/clustering/fuzzy-k-means.html
 ---
 
 # Fuzzy K-Means

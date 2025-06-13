@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Testing
+redirect_from:
+    - /documentation/users/misc/testing
+    - /documentation/users/misc/testing.html
 ---
 
 <a name="Testing-Intro"></a>

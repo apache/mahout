@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Principal Components Analysis
+redirect_from:
+    - /documentation/users/basics/principal-components-analysis
+    - /documentation/users/basics/principal-components-analysis.html
 ---
 
 <a name="PrincipalComponentsAnalysis-PrincipalComponentsAnalysis"></a>

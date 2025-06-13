@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Locally Weighted Linear Regression
+redirect_from:
+    - /documentation/users/classificaation/locally-weighted-linear-regression
+    - /documentation/users/classificaation/locally-weighted-linear-regression.html
 ---
 
 <a name="LocallyWeightedLinearRegression-LocallyWeightedLinearRegression"></a>

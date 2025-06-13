@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Introduction to ALS Recommendations with Hadoop
+redirect_from:
+    - /documentation/users/recommender/intro-als-hadoop
+    - /documentation/users/recommender/intro-als-hadoop.html
 ---
 
 # Introduction to ALS Recommendations with Hadoop

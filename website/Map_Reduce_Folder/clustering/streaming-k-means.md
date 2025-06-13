@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Spectral Clustering
+redirect_from:
+  - /documentation/users/clustering/streaming-k-means
+  - /documentation/users/clustering/streaming-k-means.html
 ---
 
 # *StreamingKMeans* algorithm 

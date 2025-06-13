@@ -1,6 +1,9 @@
 ---
 layout: default
 title: ClusteringYourData
+redirect_from:
+    - /documentation/users/clustering/clusteringyourdata
+    - /documentation/users/clustering/clusteringyourdata.html
 ---
 
 # Clustering your data

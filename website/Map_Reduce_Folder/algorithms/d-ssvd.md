@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Distributed Stochastic Singular Value Decomposition
+redirect_from:
+    - /documentation/users/algorithms/d-ssvd
+    - /documentation/users/algorithms/d-ssvd.html
 ---
 
 # Distributed Stochastic Singular Value Decomposition

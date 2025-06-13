@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Spark Naive Bayes
+redirect_from:
+  - /documentation/users/algorithms/spark-naive-bayes
+  - /documentation/users/algorithms/spark-naive-bayes.html
 ---
 
 # Spark Naive Bayes

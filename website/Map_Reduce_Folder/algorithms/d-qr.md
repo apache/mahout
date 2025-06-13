@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Distributed Cholesky QR
+redirect_from:
+    - /documentation/users/algorithms/d-qr
+    - /documentation/users/algorithms/d-qr.html
 ---
 
 # Distributed Cholesky QR

@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Independent Component Analysis
+redirect_from:
+    - /documentation/users/basics/independent-component-analysis
+    - /documentation/users/basics/independent-component-analysis.html
 ---
 
 <a name="IndependentComponentAnalysis-IndependentComponentAnalysis"></a>

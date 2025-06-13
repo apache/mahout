@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Expectation Maximization
+redirect_from:
+    - /documentation/users/clustering/expectation-maximization
+    - /documentation/users/clustering/expectation-maximization.html
 ---
 
 <a name="ExpectationMaximization-ExpectationMaximization"></a>

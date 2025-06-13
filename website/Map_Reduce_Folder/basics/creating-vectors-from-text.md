@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Creating Vectors from Text
+redirect_from:
+    - /documentation/users/basics/creating-vectors-from-text
+    - /documentation/users/basics/creating-vectors-from-text.html
 ---
 
 

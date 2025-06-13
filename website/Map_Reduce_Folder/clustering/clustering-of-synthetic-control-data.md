@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Clustering of synthetic control data
+redirect_from:
+  - /documentation/users/clustering/clustering-of-synthetic-control-data
+  - /documentation/users/clustering/clustering-of-synthetic-control-data.html
 ---
 
 # Clustering synthetic control data

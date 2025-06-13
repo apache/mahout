@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Recommender Overview
+redirect-from:
+    - /documentation/users/algorithms/recommender-overview
+    - /documentation/users/algorithms/recommender-overview.html
 ---
 
 

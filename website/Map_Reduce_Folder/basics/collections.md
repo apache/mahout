@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Collections
+redirect_from:
+    - /documentation/users/basics/collections
+    - /documentation/users/basics/collections.html
 ---
 
 TODO: Organize these somehow, add one-line blurbs

@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Visualizing Sample Clusters
+redirect_from:
+    - /documentation/users/clustering/visualizing-sample-clusters
+    - /documentation/users/clustering/visualizing-sample-clusters.html
 ---
 
 <a name="VisualizingSampleClusters-Introduction"></a>

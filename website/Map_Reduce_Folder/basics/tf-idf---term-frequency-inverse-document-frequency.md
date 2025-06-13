@@ -1,6 +1,9 @@
 ---
 layout: default
 title: TF-IDF - Term Frequency-Inverse Document Frequency
+redirect_from:
+    - /documentation/users/basics/tf-idf---term-frequency-inverse-document-frequency
+    - /documentation/users/basics/tf-idf---term-frequency-inverse-document-frequency.html
 ---
 
 {excerpt}Is a weight measure often used in information retrieval and text

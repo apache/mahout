@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Spectral Clustering
+redirect_from:
+    - /documentation/users/clustering/spectral-clustering
+    - /documentation/users/clustering/spectral-clustering.html
 ---
 
 # Spectral Clustering Overview

@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Creating Vectors
+redirect_from:
+    - /documentation/users/basics/creating-vectors
+    - /documentation/users/basics/creating-vectors.html
 ---
 
 

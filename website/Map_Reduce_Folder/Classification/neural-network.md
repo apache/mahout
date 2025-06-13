@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Neural Network
+redirect_from:
+    - /documentation/users/classification/neural-network
+    - /documentation/users/classification/neural-network.html
 ---
 
 <a name="NeuralNetwork-NeuralNetworks"></a>

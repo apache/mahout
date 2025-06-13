@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Using Mahout with Python via JPype
+redirect_from:
+    - /documentation/users/misc/using-mahout-with-python-via-jpype
+    - /documentation/users/misc/using-mahout-with-python-via-jpype.html
 ---
 
 <a name="UsingMahoutwithPythonviaJPype-overview"></a>

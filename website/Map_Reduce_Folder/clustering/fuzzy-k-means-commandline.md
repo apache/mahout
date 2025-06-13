@@ -1,6 +1,9 @@
 ---
 layout: default
 title: fuzzy-k-means-commandline
+redirect_from:
+	- /documentation/users/clustering/fuzzy-k-means-commandline
+	- /documentation/users/clustering/fuzzy-k-means-commandline.html
 ---
 
 <a name="fuzzy-k-means-commandline-RunningFuzzyk-MeansClusteringfromtheCommandLine"></a>

@@ -1,6 +1,9 @@
 ---
 layout: default
 title: K-Means Clustering
+redirect_from:
+    - /documentation/users/clustering/k-means-clustering
+    - /documentation/users/clustering/k-means-clustering.html
 ---
 
 # k-Means clustering - basics

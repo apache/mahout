@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Recommender First-Timer FAQ
+redirect_from:
+    - /documentation/users/recommender/recommender-first-timer-faq
+    - /documentation/users/recommender/recommender-first-timer-faq.html
 ---
 
 # Recommender First Timer Dos and Don'ts

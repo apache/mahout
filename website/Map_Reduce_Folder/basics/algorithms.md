@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Algorithms
+redirect_from:
+    - /documentation/users/basics/algorithms
+    - /documentation/users/basics/algorithms.html
 ---
 
 

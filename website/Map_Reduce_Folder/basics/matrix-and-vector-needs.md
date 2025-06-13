@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Matrix and Vector Needs
+redirect_from:
+    - /documentation/users/basics/matrix-and-vectors-needs
+    - /documentation/users/basics/matrix-and-vectors-needs.html
 ---
 
 <a name="MatrixandVectorNeeds-Intro"></a>

@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Perceptron and Winnow
+redirect_from:
+    - /documentation/users/misc/perceptron-and-winnow
+    - /documentation/users/misc/perceptron-and-winnow.html
 ---
 
 <a name="PerceptronandWinnow-ClassificationwithPerceptronorWinnow"></a>

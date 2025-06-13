@@ -1,6 +1,9 @@
 ---
 layout: default
 title: System Requirements
+redirect_from:
+    - /documentation/users/basics/system-requirements
+    - /documentation/users/basics/system-requirements.html
 ---
 
 

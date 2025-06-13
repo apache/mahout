@@ -1,6 +1,9 @@
 ---
 layout: default
 title: mahout-collections
+redirect_from:
+    - /documentation/users/basics/mahout-collections
+    - /documentation/users/basics/mahout-collections.html
 ---
 
 # Mahout collections

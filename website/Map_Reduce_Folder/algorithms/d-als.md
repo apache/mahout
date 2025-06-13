@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Disitrubted ALS
+redirect_from:
+    - /documentation/users/algorithms/d-als
+    - /documentation/users/algorithms/d-als.html
 ---
 
 

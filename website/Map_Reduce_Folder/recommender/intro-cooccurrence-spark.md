@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Building a Mahout Recommender
+redirect_from:
+      - /documentation/users/recommender/intro-cooccurrence-spark
+      - /documentation/users/recommender/intro-cooccurrence-spark.html
 ---
 
 # Building a Correlated Cross-Occurrence (CCO) Recommenders with the Mahout CLI

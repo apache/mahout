@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Restricted Boltzmann Machines
+redirect_from:
+    - /documentation/users/classification/restricted-boltzmann-machines
+    - /documentation/users/classification/restricted-boltzmann-machines.html
 ---
 
 NOTE: This implementation is a Work-In-Progress, at least till September,

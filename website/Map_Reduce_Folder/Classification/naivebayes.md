@@ -1,6 +1,9 @@
 ---
 layout: default
 title: NaiveBayes
+redirect_from:
+    - /documentation/users/classification/naivebayes
+    - /documentation/users/classification/naivebayes.html
 ---
 
 <a name="NaiveBayes-NaiveBayes"></a>

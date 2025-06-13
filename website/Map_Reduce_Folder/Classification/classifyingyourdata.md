@@ -1,6 +1,9 @@
 ---
 layout: default
 title: ClassifyingYourData
+redirect_from:
+    - /documentation/users/classification/classifyingyourdata
+    - /documentation/users/classification/classifyingyourdata.html
 ---
 
 # Classifying data from the command line

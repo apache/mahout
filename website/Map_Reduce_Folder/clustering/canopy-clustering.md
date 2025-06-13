@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Canopy Clustering
+redirect_from:
+    - /documentation/users/clustering/canopy-clustering
+    - /documentation/users/clutsering/canopy-clustering.html
 ---
 
 <a name="CanopyClustering-CanopyClustering"></a>

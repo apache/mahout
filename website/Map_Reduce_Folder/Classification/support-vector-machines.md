@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Support Vector Machines
+redirect_from:
+    - /documentation/users/classification/support-vector-machines
+    - /documentation/users/classification/support-vector-machines.html
 ---
 
 <a name="SupportVectorMachines-SupportVectorMachines"></a>

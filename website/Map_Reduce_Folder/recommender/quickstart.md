@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Recommender Overview
+redirect_from:
+    - /documentation/users/recommender/quickstart
+    - /documentation/users/recommender/quickstart.html
 ---
 
 

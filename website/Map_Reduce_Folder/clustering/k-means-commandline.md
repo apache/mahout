@@ -1,6 +1,9 @@
 ---
 layout: default
 title: k-means-commandline
+redirect_from:
+	- /documentation/users/clustering/k-means-commandline
+	- /documentation/users/clustering/k-means-commandline.html
 ---
 
 <a name="k-means-commandline-Introduction"></a>

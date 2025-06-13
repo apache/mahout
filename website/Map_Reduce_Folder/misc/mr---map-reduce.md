@@ -1,6 +1,9 @@
 ---
 layout: default
 title: MR - Map Reduce
+redirect_from:
+    - /documentation/users/misc/mr---map-reduce
+    - /documentation/users/misc/mr---map-reduce.html
 ---
 
 {excerpt}MapReduce is a framework for processing huge datasets on certain

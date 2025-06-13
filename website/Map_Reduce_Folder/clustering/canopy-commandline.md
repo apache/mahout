@@ -1,6 +1,9 @@
 ---
 layout: default
 title: canopy-commandline
+redirect_from:
+    - /documentation/users/clustering/canopy-commandline
+    - /documentation/users/clustering/canopy-commandline.html
 ---
 
 <a name="canopy-commandline-RunningCanopyClusteringfromtheCommandLine"></a>

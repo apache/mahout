@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Twenty Newsgroups
+redirect_from:
+    - /documentation/users/classification/twenty-newsgroups
+    - /documentation/users/classification/twenty-newsgroups.html
 ---
 
 

@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Recommender Documentation
+redirect_from:
+    - /documentation/users/recommender/recommender-documentation
+    - /documentation/users/recommender/recommender-documentation.html
 ---
 
 <a name="RecommenderDocumentation-Overview"></a>

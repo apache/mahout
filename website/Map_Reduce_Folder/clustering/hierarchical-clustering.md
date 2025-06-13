@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Hierarchical Clustering
+redirect_from:
+    - /documentation/users/clustering/hierarchical-clustering
+    - /documentation/users/clustering/hierarchical-clustering.html
 ---
 
 Hierarchical clustering is the process or finding bigger clusters, and also

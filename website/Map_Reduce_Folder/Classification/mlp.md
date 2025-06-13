@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Multilayer Perceptron
+redirect_from:
+    - /documentation/users/classification/mlp
+    - /documentation/users/classification/mlp.html
 ---
 
 Multilayer Perceptron

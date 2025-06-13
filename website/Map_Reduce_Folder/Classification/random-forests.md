@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Random Forests
+redirect_from:
+    - /documentation/users/classification/random-forests
+    - /documentation/users/classification/random-forests.html
 ---
 
 <a name="RandomForests-HowtogrowaDecisionTree"></a>

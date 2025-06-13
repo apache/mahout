@@ -1,6 +1,9 @@
 ---
 layout: default
 title: LLR - Log-likelihood Ratio
+redirect_from:
+    - /documentation/users/clustering/llr---log-likelihood-ratio
+    - /documentation/users/clustering/llr---log-likelihood-ratio.html
 ---
 
 # Likelihood ratio test

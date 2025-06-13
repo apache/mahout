@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Hidden Markov Models
+redirect_from:
+    - /documentation/users/classification/hidden-markov-models
+    - /documentation/users/classification/hidden-markov-models.html
 ---
 
 # Hidden Markov Models

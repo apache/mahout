@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Parallel Frequent Pattern Mining
+redirect_from:
+    - /documentation/users/misc/parallel-frequent-pattern-mining
+    - /documentation/users/misc/parallel-frequent-pattern-mining.html
 ---
 
 Mahout has a Top K Parallel FPGrowth Implementation. Its based on the paper [http://infolab.stanford.edu/~echang/recsys08-69.pdf](http://infolab.stanford.edu/~echang/recsys08-69.pdf)

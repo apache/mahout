@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Breiman Example
+redirect_from:
+  - /documentation/users/classification/breiman-example
+  - /documentation/users/classification/breiman-example.html
 ---
 
 #Breiman Example

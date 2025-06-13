@@ -1,6 +1,9 @@
 ---
 layout: default
 title: User Based Recommender in 5 Minutes
+redirect_from:
+  - /documentation/users/recommender/userbased-5-minutes
+  - /documentation/users/recommender/userbased-5-minutes.html
 ---
 
 # Creating a User-Based Recommender in 5 minutes

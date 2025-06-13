@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Latent Dirichlet Allocation
+redirect_from:
+    - /documentation/users/clustering/latent-dirichlet/allocation
+    - /documentation/users/clustering/latent-dirichlet/allocation.html
 ---
 
 <a name="LatentDirichletAllocation-Overview"></a>

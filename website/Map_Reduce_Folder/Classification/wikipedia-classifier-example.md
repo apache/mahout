@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Wikipedia XML parser and Naive Bayes Example
+redirect_from:
+    - /documentation/users/classification/wikipedia-classifier-example
+    - /documentation/users/classification/wikipedia-classifier-example.html
 ---
 
 

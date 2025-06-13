@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Logistic Regression
+redirect_from:
+    - /documentation/users/classification/logistic-regression
+    - /documentation/users/classification/logistic-regression.html
 ---
 
 <a name="LogisticRegression-LogisticRegression(SGD)"></a>

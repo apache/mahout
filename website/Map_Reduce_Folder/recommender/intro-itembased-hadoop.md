@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Introduction to Item-Based Recommendations with Hadoop
+redirect_from:
+    - /documentation/users/recommender/intro-itembased-hadoop
+    - /documentation/users/recommender/intro-itembased-hadoop.html
 ---
 
 # Introduction to Item-Based Recommendations with Hadoop

@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Cluster Dumper
+redirect_from:
+    - /documentation/users/clustering/cluster-dumper
+    - /documentation/users/clustering/cluster-dumper.html
 ---
 
 <a name="ClusterDumper-Introduction"></a>

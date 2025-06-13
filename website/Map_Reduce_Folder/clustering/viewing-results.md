@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Viewing Results
+redirect_from:
+    - /documentation/users/clustering/viewing-results
+    - /documentation/users/clustering/viewing-results.html
 ---
 
 <a name="ViewingResults-Intro"></a>
