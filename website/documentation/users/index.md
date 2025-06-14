@@ -199,9 +199,9 @@ for your machine learning projects, harnessing the power of big data processing 
 
 [Play With Shell](/Map_Reduce_Folder/sparkbindings/play-with-shell.html)
 
-[Dimensional Reduction](/documentation/users/dim-reduction/dimensional-reduction.html)
+[Dimensional Reduction](/Map_Reduce_Folder/dim-reduction/dimensional-reduction.html)
 
-[Ssvd](/documentation/users/dim-reduction/ssvd.html)
+[Ssvd](/Map_Reduce_Folder/dim-reduction/ssvd.html)
 
 [Playing With Samsara Flink](/documentation/users/flinkbindings/playing-with-samsara-flink.html)
 

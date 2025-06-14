@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Dimensional Reduction
+redirect_from:
+      - /documentation/users/dim-reduction/dimensional-reduction
+      - /documentation/users/dim-reduction/dimensional-reduction.html
 ---
 
 # Support for dimensional reduction

@@ -1,6 +1,9 @@
 ---
 layout: default
 title:     Stochastic SVD
+redirect_from:
+  - /documentation/users/dim-reduction/ssvd
+  - /documentation/users/dim-reduction/ssvd.html
 ---
 
 # Stochastic Singular Value Decomposition #
