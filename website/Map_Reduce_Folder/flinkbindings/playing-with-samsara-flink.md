@@ -3,7 +3,6 @@ layout: default
 title: 
 redirect_from:
 	- /documentation/users/flinkbindings/playing-with-samsara-flink
-	- /documentation/users/flinkbindings/playing-with-samsara-flink.md
 	- /documentation/users/flinkbindings/playing-with-samsara-flink.html
 ---
 
