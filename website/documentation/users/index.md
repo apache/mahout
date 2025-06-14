@@ -203,6 +203,6 @@ for your machine learning projects, harnessing the power of big data processing 
 
 [Ssvd](/Map_Reduce_Folder/dim-reduction/ssvd.html)
 
-[Playing With Samsara Flink](/documentation/users/flinkbindings/playing-with-samsara-flink.html)
+[Playing With Samsara Flink](/Map_Reduce_Folder/flinkbindings/playing-with-samsara-flink.html)
 
-[Flink Internals](/documentation/users/flinkbindings/flink-internals.html)
+[Flink Internals](/Map_Reduce_Folder/flinkbindings/flink-internals.html)

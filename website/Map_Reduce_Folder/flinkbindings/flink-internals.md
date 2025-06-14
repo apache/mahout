@@ -1,6 +1,9 @@
 ---
 layout: default
 title: 
+redirect_from:
+    - /documentation/users/flinkbindings/flink-internals
+    - /documentation/users/flinkbindings/flink-internals.html
 ---
 
 #Introduction
