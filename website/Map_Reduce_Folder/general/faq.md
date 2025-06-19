@@ -1,7 +1,9 @@
 ---
 layout: default
 title: FAQ
-
+redirect_from:
+    - /general/faq
+    - /general/faq.html
     
 ---
 

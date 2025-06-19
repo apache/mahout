@@ -1,7 +1,9 @@
 ---
 layout: page
 title: GSOC
-
+redirect_from:
+    - /documentaion/developers/gsoc
+    - /documentaion/developers/gsoc.html
     
 ---
 

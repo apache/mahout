@@ -1,6 +1,9 @@
 ---
 layout: page
 title: Developer's Guide
+redirect_from:
+    - /documentation/developers/index
+    - /documentation/developers/index.html
 ---
 
 # Developer's Guide for Apache Mahout

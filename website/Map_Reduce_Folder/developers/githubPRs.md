@@ -1,7 +1,9 @@
 ---
 layout: page
 title:
-
+redirect_from:
+    - /documentation/developers/githubPRs
+    - /documentation/developers/githubPRs.html
     
 ---
 # Handling Github PRs #

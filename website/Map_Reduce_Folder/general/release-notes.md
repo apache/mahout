@@ -1,7 +1,9 @@
 ---
 layout: default
 title: Release Notes
-
+redirect_from:
+  - /general/release-notes
+  - /general/release-notes.html
     
 ---
 

@@ -1,6 +1,9 @@
 ---
 layout: page
 title:
+redirect_from:
+    - /documentation/developers/github
+    - /documentation/developers/github.html
 
     
 ---

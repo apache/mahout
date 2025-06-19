@@ -1,6 +1,9 @@
 ---
 layout: page
 title:  Events
+redirect_from:
+    - /news-and-events/announcements
+    - /news-and-events/announcements.html
 ---
 
 # Announcements

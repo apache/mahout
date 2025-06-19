@@ -1,7 +1,9 @@
 ---
 layout: default
 title: Mahout Wiki
-
+redirect_from:
+  - /general/mahout-wiki
+  - /general/mahout-wiki.html
     
 ---
 Apache Mahout is a new Apache TLP project to create scalable, machine

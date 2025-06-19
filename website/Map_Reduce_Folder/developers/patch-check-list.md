@@ -1,6 +1,9 @@
 ---
 layout: page
 title: Patch Check List
+redirect_from:
+  - /documentation/developers/patch-check-list
+  - /documentation/developers/patch-check-list.html
 
     
 ---

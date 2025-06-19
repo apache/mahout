@@ -1,6 +1,9 @@
 ---
 layout: page
 title:  News
+redirect_from:
+    - /news-and-events/news
+    - /news-and-events/news.html
 ---
 
 # News

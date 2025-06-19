@@ -1,7 +1,9 @@
 ---
 layout: page
 title: Developer Resources
-
+redirect_from:
+    - /documentation/developers/developer-resources
+    - /documentation/developers/developer-resources.html
     
 ---
 

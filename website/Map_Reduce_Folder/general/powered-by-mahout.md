@@ -1,7 +1,9 @@
 ---
 layout: default
 title: Powered By Mahout
-
+redirect_from:
+    - /general/powered-by-mahout
+    - /general/powered-by-mahout.html
     
 ---
 

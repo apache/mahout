@@ -1,7 +1,9 @@
 ---
 layout: page
 title: Privacy Policy
-
+redirect_from:
+    - /general/privacy-policy
+    - /general/privacy-policy.html
 
 
 ---

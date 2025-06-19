@@ -1,7 +1,9 @@
 ---
 layout: default
 title: Reference Reading
-
+redirect_from:
+    - /general/reference-reading
+    - /general/reference-reading.html
     
 ---
 

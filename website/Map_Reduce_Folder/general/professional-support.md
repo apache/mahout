@@ -1,7 +1,9 @@
 ---
 layout: default
 title: Professional Support
-
+redirect_from:
+    - /general/professional-support
+    - /general/professional-support.html
     
 ---
 

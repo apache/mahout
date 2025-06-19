@@ -1,8 +1,9 @@
 ---
 layout: default
 title: Mahout Benchmarks
-
-    
+redirect_from:
+    - /general/mahout-benchmarks
+    - /general/mahout-benchmarks.html
 ---
 
 <a name="MahoutBenchmarks-Introduction"></a>

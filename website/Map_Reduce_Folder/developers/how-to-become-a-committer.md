@@ -1,7 +1,9 @@
 ---
 layout: page
 title: How To Become A Committer
-
+redirect_from:
+    - /documentation/developers/how-to-become-a-committer
+    - /documentation/developers/how-to-become-a-committer.html
     
 ---
 

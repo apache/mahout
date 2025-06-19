@@ -1,6 +1,9 @@
 ---
 layout: page
 title: Version Control
+redirect_from:
+    - /documentation/developers/version-control
+    - /documentation/developers/version-control.html
 
     
 ---

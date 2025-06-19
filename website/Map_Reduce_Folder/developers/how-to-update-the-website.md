@@ -1,6 +1,9 @@
 ---
 layout: page
 title: How To Update The Website
+redirect_from:
+    - /documentation/developers/how-to-update-the-website
+    - /documentation/developers/how-to-update-the-website.html
 ---
 
 # How to update the Mahout Website

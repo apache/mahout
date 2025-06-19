@@ -1,8 +1,9 @@
 ---
 layout: page
 title: Issue Tracker
-
-    
+redirect_from:
+    - /documentation/developers/issue-tracker
+    - /documentation/developers/issue-tracker.html
 ---
 
 # Issue tracker

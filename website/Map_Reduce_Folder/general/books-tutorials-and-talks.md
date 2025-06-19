@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Books Tutorials and Talks
+redirect_from:
+   - /general/books-tutorials-and-talks
+   - /general/books-tutorials-and-talks.html
 ---
 # Intro
 

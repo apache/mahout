@@ -1,7 +1,9 @@
 ---
 layout: page
 title: Building Mahout
-   
+redirect_from:
+	- /documentation/developers/buildingmahout
+	- /documentation/developers/buildingmahout.html
 ---
 
 

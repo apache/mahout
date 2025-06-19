@@ -1,6 +1,9 @@
 ---
 layout: page
 title: How To Release
+redirect_from:
+  - /documentation/developers/how-to-release
+  - /documentation/developers/how-to-release.html
 
     
 ---
