@@ -181,28 +181,28 @@ for your machine learning projects, harnessing the power of big data processing 
 
 [Intro Als Hadoop](/Map_Reduce_Folder/recommender/intro-als-hadoop.html)
 
-[In Core Reference](/documentation/users/environment/in-core-reference.html)
+[In Core Reference](/Map_Reduce_Folder/environment/in-core-reference.html)
 
-[How To Build An App](/documentation/users/environment/how-to-build-an-app.html)
+[How To Build An App](/Map_Reduce_Folder/environment/how-to-build-an-app.html)
 
-[Out Of Core Reference](/documentation/users/environment/out-of-core-reference.html)
+[Out Of Core Reference](/Map_Reduce_Folder/environment/out-of-core-reference.html)
 
-[Spark Internals](/documentation/users/environment/spark-internals.html)
+[Spark Internals](/Map_Reduce_Folder/environment/spark-internals.html)
 
-[H2O Internals](/documentation/users/environment/h2o-internals.html)
+[H2O Internals](/Map_Reduce_Folder/environment/h2o-internals.html)
 
-[Classify A Doc From The Shell](/documentation/users/environment/classify-a-doc-from-the-shell.html)
+[Classify A Doc From The Shell](/Map_Reduce_Folder/environment/classify-a-doc-from-the-shell.html)
 
-[Faq](/documentation/users/sparkbindings/faq.html)
+[Faq](/Map_Reduce_Folder/sparkbindings/faq.html)
 
-[Home](/documentation/users/sparkbindings/home.html)
+[Home](/Map_Reduce_Folder/sparkbindings/home.html)
 
-[Play With Shell](/documentation/users/sparkbindings/play-with-shell.html)
+[Play With Shell](/Map_Reduce_Folder/sparkbindings/play-with-shell.html)
 
-[Dimensional Reduction](/documentation/users/dim-reduction/dimensional-reduction.html)
+[Dimensional Reduction](/Map_Reduce_Folder/dim-reduction/dimensional-reduction.html)
 
-[Ssvd](/documentation/users/dim-reduction/ssvd.html)
+[Ssvd](/Map_Reduce_Folder/dim-reduction/ssvd.html)
 
-[Playing With Samsara Flink](/documentation/users/flinkbindings/playing-with-samsara-flink.html)
+[Playing With Samsara Flink](/Map_Reduce_Folder/flinkbindings/playing-with-samsara-flink.html)
 
-[Flink Internals](/documentation/users/flinkbindings/flink-internals.html)
+[Flink Internals](/Map_Reduce_Folder/flinkbindings/flink-internals.html)
