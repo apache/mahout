@@ -32,6 +32,7 @@ Holden Karau            | holden@...        | No  |
 Isabel Drost-Fromm      | isabel@...        | Yes | <!--Passion for free software (development, but to some extend also the political and economic implications), interested in agile development and project management, lives in Germany. Follow me on Twitter @MaineC-->
 Jacob Alexander Mannix  | jmannix@...       | Yes | 
 Jeff Eastman            | jeastman@...      | No  | (Emeritus PMC)
+Krishna Dave            | krishnadave829@...| No  | @krishnadave
 Nikolay Sakharnykh      | nsakharnykh@...   | No  | 
 Paritosh Ranjan         | pranjan@...       | Yes | @paritoshranjan
 Pat Ferrel              | pat@...           | Yes | @occam 
