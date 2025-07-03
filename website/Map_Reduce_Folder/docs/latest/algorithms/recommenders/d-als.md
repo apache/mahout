@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Mahout Samsara Distributed ALS
+redirect_from:
+    - /docs/latest/algorithms/recomenders/d-als
+    - /docs/latest/algorithms/recomenders/d-als.html
 ---
 
 Seems like someone has jacked up this page? 

@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Regression Algorithms
+redirect_from:
+    - /docs/latest/algorithms/regression/index
+    - /docs/latest/algorithms/regression/index.html
 ---
 
 Apache Mahout implements the following regression algorithms "off the shelf".

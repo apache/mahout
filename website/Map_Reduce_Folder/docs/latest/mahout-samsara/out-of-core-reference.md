@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Mahout Samsara Out of Core
+redirect_from:
+    - /docs/latest/mahout-samsara/out-of-core-reference
+    - /docs/latest/mahout-samsara/out-of-core-reference.html
 ---
 
 # Mahout-Samsara's Distributed Linear Algebra DSL Reference

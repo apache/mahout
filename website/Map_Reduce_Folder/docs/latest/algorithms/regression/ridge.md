@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Ridge Regression
+redirect_from:
+   - /docs/latest/algorithms/regression/ridge
+   - /docs/latest/algorithms/regression/ridge.html
 ---
 
 ### About

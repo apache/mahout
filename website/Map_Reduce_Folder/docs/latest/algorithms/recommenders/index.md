@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Recommender Overview
+redirect_from:
+    - /docs/latest/algorothms/recommenders/index
+    - /docs/latest/algorothms/recommenders/index.html
 ---
 
 
