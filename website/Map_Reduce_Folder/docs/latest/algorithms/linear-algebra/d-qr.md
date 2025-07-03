@@ -1,8 +1,9 @@
 ---
 layout: doc-page
 title: Distributed Cholesky QR
-
-    
+redirect_from:
+    - /docs/latest/algorithms/linear-algebra/d-qr
+    - /docs/latest/algorithms/linear-algebra/d-qr.html 
 ---
 
 ## Intro

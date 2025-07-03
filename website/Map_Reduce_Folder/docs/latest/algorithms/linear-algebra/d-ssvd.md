@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Distributed Stochastic Singular Value Decomposition  
+redirect_from:
+    - /docs/latest/algorithms/linear-algebra/d-ssvd
+    - /docs/latest/algorithms/linear-algebra/d-ssvd.html
 ---
 
 ## Intro
