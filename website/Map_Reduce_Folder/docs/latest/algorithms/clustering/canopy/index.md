@@ -1,7 +1,9 @@
 ---
 layout: doc-page
 title: Canopy Clustering
-
+redirect_from:
+    - /docs/latest/algorithms/clustering/canopy/index
+    - /docs/latest/algorithms/clustering/canopy/index.html
    
 ---
 

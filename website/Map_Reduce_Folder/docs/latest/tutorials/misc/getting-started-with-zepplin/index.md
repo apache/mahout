@@ -1,7 +1,9 @@
 ---
 layout: doc-page
 title: Getting Started with Mahout in Apache Zeppelin
-  
+redirect_from:
+    - /docs/latest/tutorials/misc/getting-started-with-zepplin/index
+    - /docs/latest/tutorials/misc/getting-started-with-zepplin/index.html
 ---
 
 Mahout has lots of pieces, and can be overwhelming to get started. We've tried to make it easier for users by providing

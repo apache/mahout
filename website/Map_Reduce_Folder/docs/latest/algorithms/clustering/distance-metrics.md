@@ -1,7 +1,9 @@
 ---
 layout: doc-page
 title: Distance Metrics
-
+redirect_from:
+    - /docs/latest/algorithms/clustering/distance-metrics
+    - /docs/latest/algorithms/clustering/distance-metrics.html
    
 ---
 

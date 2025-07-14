@@ -2,6 +2,9 @@
 layout: doc-page
 title: Welcome to the Docs
 tagline: Apache Mahout from 30,000 feet (10,000 meters)
+redirect_from:
+    - /docs/latest/index
+    - /docs/latest/index.html
 ---
 
 

@@ -1,6 +1,9 @@
 ---
 layout: doc-page
 title: Quickstart
+redirect_from:
+    - /docs/latest/quickstart
+    - /docs/latest/quickstart.html
 ---
 
 # Mahout Quick Start 
