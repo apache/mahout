@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Meeting Minutes
-date:   2025-05-15 00:00:00 -0800
+date:   2025-08-01 00:00:00 -0800
 category: minutes
 ---
 ## Weekly community meeting
