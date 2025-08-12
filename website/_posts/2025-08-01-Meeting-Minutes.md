@@ -21,4 +21,4 @@ category: minutes
 * Andrew and Trevor to review Krishna’s PRs.  
 * Krishna to prepare and log GitHub issues for required file updates.  
 * Follow up on UI changes discussed in the meeting.
-[Minutes](https://github.com/apache/mahout/discussions/541) on GitHub Discussions.
+[Minutes](https://github.com/apache/mahout/discussions/551) on GitHub Discussions.
