@@ -3089,15 +3089,15 @@ tbody.collapse.show {
     display: none;
   }
 }
-.navbar-expand {
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-}
 .navbar-expand > .container,
 .navbar-expand > .container-fluid {
   padding-right: 0;
   padding-left: 0;
+}
+.navbar-expand {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
 }
 .navbar-expand .navbar-nav {
   flex-direction: row;
@@ -7444,11 +7444,11 @@ h6 {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.navbar-mahout {
-  border-bottom: 1px solid #e9ecef;
-}
 .navbar-mahout .navbar-brand img {
   height: 2.5rem;
+}
+.navbar-mahout {
+  border-bottom: 1px solid #e9ecef;
 }
 .navbar-mahout .navbar-nav > .nav-item > .nav-link {
   font-family: "Maven Pro", Arial, sans-serif;
