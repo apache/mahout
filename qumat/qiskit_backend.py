@@ -76,13 +76,13 @@ def execute_circuit(circuit, backend, backend_config):
         # Parse the global parameter configuration
         parameter_bindings = {param: backend_config['parameter_values'][str(param)] for param in circuit.parameters}
         transpiled_circuit = qiskit.transpile(circuit, backend)
-        qobj = qiskit.assemble(transpiled_circuit, parameter_binds=[parameter_bindings], shots=backend_config['backend_options']['shots'])
-        job = backend.run(qobj)
+        bound_circuit = transpiled_circuit.assign_parameters(parameter_bindings)
+        job = backend.run(bound_circuit, shots=backend_config['backend_options']['shots'])
         result = job.result()
         return result.get_counts()
     else:
         transpiled_circuit = qiskit.transpile(circuit, backend)
-        job = qiskit.execute(transpiled_circuit, backend, shots=backend_config['backend_options']['shots'])
+        job = backend.run(transpiled_circuit, shots=backend_config['backend_options']['shots'])
         result = job.result()
         return result.get_counts()
 
@@ -91,7 +91,8 @@ def get_final_state_vector(circuit, backend, backend_config):
     simulator = qiskit.Aer.get_backend('statevector_simulator')
 
     # Simulate the circuit
-    job = qiskit.execute(circuit, simulator)
+    transpiled_circuit = qiskit.transpile(circuit, simulator)
+    job = simulator.run(transpiled_circuit)
     result = job.result()
 
     return result.get_statevector()
