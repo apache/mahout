@@ -33,5 +33,16 @@ website/.sass-cache
 
 *.iml
 .idea
-venv
 
+
+# Python environments
+venv/
+.venv/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+
+# Testing and type checking (project uses these)
+.pytest_cache/
