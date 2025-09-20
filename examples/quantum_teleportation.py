@@ -1,19 +1,21 @@
 # Example of implementing Quantum Teleportation using QuMat
 
 # Initialize your QuMat quantum computer with the chosen backend
+from qumat import QuMat
+import qiskit
+
 backend_config = {
-    'backend_name': 'qiskit_simulator',
-    'backend_options': {
-        'simulator_type': 'qasm_simulator',
-        'shots': 1  # Set to 1 for teleportation
-    }
+    "backend_name": "qiskit",
+    "backend_options": {
+        "simulator_type": "qasm_simulator",
+        "shots": 1,  # Set to 1 for teleportation
+    },
 }
 
 quantum_computer = QuMat(backend_config)
 
-# Create an empty circuit with 3 qubits: one for the state to be teleported,
-# and two for entanglement
-quantum_computer.create_empty_circuit(3)
+# Create an empty circuit with 3 qubits and 3 classical bits
+quantum_computer.circuit = qiskit.QuantumCircuit(3, 3)
 
 # Step 1: Create entanglement between qubits 1 and 2
 quantum_computer.apply_hadamard_gate(1)
@@ -40,14 +42,14 @@ quantum_computer.circuit.measure([0, 1], [0, 1])
 # Receiver's side:
 # Initialize a quantum computer with the same backend
 receiver_quantum_computer = QuMat(backend_config)
-receiver_quantum_computer.create_empty_circuit(3)
+receiver_quantum_computer.circuit = qiskit.QuantumCircuit(3, 3)
 
 # Apply X and Z gates based on the received measurement results
 received_measurement_results = [0, 1]  # Simulated measurement results
 if received_measurement_results[1] == 1:
-    receiver_quantum_computer.apply_x_gate(2)
+    receiver_quantum_computer.apply_pauli_x_gate(2)
 if received_measurement_results[0] == 1:
-    receiver_quantum_computer.apply_z_gate(2)
+    receiver_quantum_computer.apply_pauli_z_gate(2)
 
 # The state on qubit 2 now matches the original state on qubit 0
 
