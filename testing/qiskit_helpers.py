@@ -16,7 +16,7 @@
 #
 
 # Import necessary Qiskit libraries
-from qiskit import Aer, QuantumCircuit, execute
+from qiskit import Aer, QuantumCircuit, transpile
 from qiskit.quantum_info import Statevector
 
 def get_qumat_backend_config(test_type: str = "get_final_state_vector"):
@@ -59,7 +59,8 @@ def get_native_example_final_state_vector(initial_state_ket_str: str = "000") ->
     qc.h(0)  # Apply Hadamard gate on qubit 0
 
     # Simulate the circuit
-    job = execute(qc, simulator)
+    transpiled_qc = transpile(qc, simulator)
+    job = simulator.run(transpiled_qc)
     result = job.result()
 
     # Get the state vector
