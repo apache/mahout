@@ -19,15 +19,13 @@
 from qiskit import Aer, QuantumCircuit, transpile
 from qiskit.quantum_info import Statevector
 
+
 def get_qumat_backend_config(test_type: str = "get_final_state_vector"):
     if test_type == "get_final_state_vector":
         print("success")
         qumat_backend_config = {
-            'backend_name': 'qiskit',
-            'backend_options': {
-                'simulator_type': 'statevector_simulator',
-                'shots': 1
-            }
+            "backend_name": "qiskit",
+            "backend_options": {"simulator_type": "statevector_simulator", "shots": 1},
         }
     else:
         pass
@@ -35,11 +33,15 @@ def get_qumat_backend_config(test_type: str = "get_final_state_vector"):
     return qumat_backend_config
 
 
-def get_native_example_final_state_vector(initial_state_ket_str: str = "000") -> Statevector:
+def get_native_example_final_state_vector(
+    initial_state_ket_str: str = "000",
+) -> Statevector:
     n_qubits = len(initial_state_ket_str)
-    assert n_qubits == 3, print("The current qiskit native testing example is strictly 3 qubits")
+    assert n_qubits == 3, print(
+        "The current qiskit native testing example is strictly 3 qubits"
+    )
 
-    simulator = Aer.get_backend('statevector_simulator')
+    simulator = Aer.get_backend("statevector_simulator")
 
     qc = QuantumCircuit(n_qubits)
 

@@ -16,11 +16,14 @@
 #
 from importlib import import_module
 
+
 class QuMat:
     def __init__(self, backend_config):
         self.backend_config = backend_config
-        self.backend_name = backend_config['backend_name']
-        self.backend_module = import_module(f".{self.backend_name}_backend", package="qumat")
+        self.backend_name = backend_config["backend_name"]
+        self.backend_module = import_module(
+            f".{self.backend_name}_backend", package="qumat"
+        )
         self.backend = self.backend_module.initialize_backend(backend_config)
         self.circuit = None
         self.parameters = {}
@@ -35,10 +38,16 @@ class QuMat:
         self.backend_module.apply_hadamard_gate(self.circuit, qubit_index)
 
     def apply_cnot_gate(self, control_qubit_index, target_qubit_index):
-        self.backend_module.apply_cnot_gate(self.circuit, control_qubit_index, target_qubit_index)
+        self.backend_module.apply_cnot_gate(
+            self.circuit, control_qubit_index, target_qubit_index
+        )
 
-    def apply_toffoli_gate(self, control_qubit_index1, control_qubit_index2, target_qubit_index):
-        self.backend_module.apply_toffoli_gate(self.circuit, control_qubit_index1, control_qubit_index2, target_qubit_index)
+    def apply_toffoli_gate(
+        self, control_qubit_index1, control_qubit_index2, target_qubit_index
+    ):
+        self.backend_module.apply_toffoli_gate(
+            self.circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
+        )
 
     def apply_swap_gate(self, qubit_index1, qubit_index2):
         self.backend_module.apply_swap_gate(self.circuit, qubit_index1, qubit_index2)
@@ -55,8 +64,10 @@ class QuMat:
     def execute_circuit(self, parameter_values=None):
         if parameter_values:
             self.bind_parameters(parameter_values)
-        self.backend_config['parameter_values'] = self.parameters  # Pass parameters
-        return self.backend_module.execute_circuit(self.circuit, self.backend, self.backend_config)
+        self.backend_config["parameter_values"] = self.parameters  # Pass parameters
+        return self.backend_module.execute_circuit(
+            self.circuit, self.backend, self.backend_config
+        )
 
     def bind_parameters(self, parameter_values):
         for param, value in parameter_values.items():
@@ -65,7 +76,9 @@ class QuMat:
 
     # placeholder method for use in the testing suite
     def get_final_state_vector(self):
-        return self.backend_module.get_final_state_vector(self.circuit, self.backend, self.backend_config)
+        return self.backend_module.get_final_state_vector(
+            self.circuit, self.backend, self.backend_config
+        )
 
     def draw(self):
         return self.backend_module.draw_circuit(self.circuit)

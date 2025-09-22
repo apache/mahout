@@ -2,11 +2,11 @@
 
 # Initialize your QuMat quantum computer with the chosen backend
 backend_config = {
-    'backend_name': 'qiskit_simulator',
-    'backend_options': {
-        'simulator_type': 'qasm_simulator',
-        'shots': 1  # Set to 1 for teleportation
-    }
+    "backend_name": "qiskit_simulator",
+    "backend_options": {
+        "simulator_type": "qasm_simulator",
+        "shots": 1,  # Set to 1 for teleportation
+    },
 }
 
 quantum_computer = QuMat(backend_config)
