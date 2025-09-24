@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 import ast
-from github import Github
+
 
 class GeneralReviewCheck:
     def __init__(self, client, model_name):
@@ -26,26 +26,28 @@ class GeneralReviewCheck:
         comments = []
         analyzed = False
 
-        if file.filename.endswith('.py'):
+        if file.filename.endswith(".py"):
             analyzed = True
-            content = repo.get_contents(file.filename, ref=pr.head.sha).decoded_content.decode()
+            content = repo.get_contents(
+                file.filename, ref=pr.head.sha
+            ).decoded_content.decode()
 
             # Basic code analysis
             try:
                 tree = ast.parse(content)
                 analysis = self.analyze_code_structure(tree)
                 if analysis:
-                    comments.append({
-                        "path": file.filename,
-                        "body": analysis,
-                        "line": 1
-                    })
+                    comments.append(
+                        {"path": file.filename, "body": analysis, "line": 1}
+                    )
             except SyntaxError as e:
-                comments.append({
-                    "path": file.filename,
-                    "body": f"⚠️ Syntax error found:\n{e}",
-                    "line": 1
-                })
+                comments.append(
+                    {
+                        "path": file.filename,
+                        "body": f"⚠️ Syntax error found:\n{e}",
+                        "line": 1,
+                    }
+                )
 
         return comments, analyzed
 
@@ -57,19 +59,26 @@ class GeneralReviewCheck:
             if isinstance(node, ast.ClassDef):
                 methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
                 if len(methods) > 10:
-                    analysis.append(f"- Class '{node.name}' has {len(methods)} methods. Consider splitting into smaller classes.")
+                    analysis.append(
+                        f"- Class '{node.name}' has {len(methods)} methods. Consider splitting into smaller classes."
+                    )
 
                     # Check for long functions
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 lines = node.end_lineno - node.lineno if node.end_lineno else 0
                 if lines > 50:
-                    analysis.append(f"- Function '{node.name}' is {lines} lines long. Consider breaking it into smaller functions.")
+                    analysis.append(
+                        f"- Function '{node.name}' is {lines} lines long. Consider breaking it into smaller functions."
+                    )
 
                     # Check for TODO comments
         for node in ast.walk(tree):
             if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
-                if isinstance(node.value.value, str) and 'TODO' in node.value.value.upper():
+                if (
+                    isinstance(node.value.value, str)
+                    and "TODO" in node.value.value.upper()
+                ):
                     analysis.append(f"- TODO comment found: {node.value.value}")
 
         if analysis:
@@ -99,21 +108,17 @@ Provide your analysis in markdown format with these sections:
 
         response = self.client.chat.completions.create(
             model=self.model_name,
-            messages=[{
-                "role": "system",
-                "content": "You are an experienced code reviewer. Provide a high-level analysis of pull requests."
-            }, {
-                "role": "user",
-                "content": prompt
-            }]
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an experienced code reviewer. Provide a high-level analysis of pull requests.",
+                },
+                {"role": "user", "content": prompt},
+            ],
         )
 
         return response.choices[0].message.content
 
     def process_pr(self, pr):
         general_analysis = self.generate_general_impression(pr)
-        return [{
-            "path": "GENERAL",
-            "body": general_analysis,
-            "line": 0
-        }], True
+        return [{"path": "GENERAL", "body": general_analysis, "line": 0}], True

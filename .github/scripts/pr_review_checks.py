@@ -1,1 +1,0 @@
-from checks.general_review import GeneralReviewCheck
