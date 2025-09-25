@@ -1,27 +1,13 @@
 # Label configuration for GitHub Actions labeler
 
 bug:
-  - '.*[Bb]ug.*'
-  - '.*[Ee]rror.*'
-  - '.*[Ff]ix.*'
-  - '.*not working.*'
-  - '.*broken.*'
+  - '/(bug|error|fix|not working|broken)/i'
 
 enhancement:
-  - '.*[Ff]eature.*'
-  - '.*[Ee]nhancement.*'
-  - '.*[Ii]mprovement.*'
-  - '.*[Aa]dd.*'
-  - '.*[Nn]ew.*'
+  - '/(feature|enhancement|improvement|add|new)/i'
 
-docs:
-  - '.*[Dd]oc.*'
-  - '.*[Rr]eadme.*'
-  - '.*[Gg]uide.*'
-  - '.*[Tt]utorial.*'
+documentation:
+  - '/(doc|readme|guide|tutorial)/i'
 
 question:
-  - '.*[Qq]uestion.*'
-  - '.*[Hh]elp.*'
-  - '.*[Hh]ow to.*'
-  - '.*\?.*'
+  - '/(question|help|how to|\?)/i'
