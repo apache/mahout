@@ -6,7 +6,7 @@ bug:
 enhancement:
   - '/(feature|enhancement|improvement|add|new)/i'
 
-documentation:
+docs:
   - '/(doc|readme|guide|tutorial)/i'
 
 question:
