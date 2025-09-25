@@ -2,7 +2,7 @@
 name: "Documentation Issue"
 about: "Report issues related to documentation"
 title: "[Docs] "
-labels: ["documentation"]
+labels: ["docs"]
 assignees: []
 ---
 

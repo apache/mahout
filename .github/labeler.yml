@@ -1,10 +1,13 @@
 # Label configuration for GitHub Actions labeler
 
 bug:
-  - any: ['.github/ISSUE_TEMPLATE/bug_report.md']
+  - '/(bug|error|fix|not working|broken)/i'
 
-feature:
-  - any: ['.github/ISSUE_TEMPLATE/feature_request.md']
+enhancement:
+  - '/(feature|enhancement|improvement|add|new)/i'
 
-documentation:
-  - any: ['.github/ISSUE_TEMPLATE/documentation_issue.md']
+docs:
+  - '/(doc|readme|guide|tutorial)/i'
+
+question:
+  - '/(question|help|how to|\?)/i'
