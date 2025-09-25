@@ -16,8 +16,9 @@
 #
 
 # Import necessary Qiskit libraries
-from qiskit import Aer, QuantumCircuit, transpile
+from qiskit import QuantumCircuit, transpile
 from qiskit.quantum_info import Statevector
+from qiskit_aer import AerSimulator
 
 
 def get_qumat_backend_config(test_type: str = "get_final_state_vector"):
@@ -41,7 +42,7 @@ def get_native_example_final_state_vector(
         "The current qiskit native testing example is strictly 3 qubits"
     )
 
-    simulator = Aer.get_backend("statevector_simulator")
+    simulator = AerSimulator(method="statevector")
 
     qc = QuantumCircuit(n_qubits)
 
@@ -59,6 +60,9 @@ def get_native_example_final_state_vector(
     # Perform Bell measurement on qubits 0 and 1
     qc.cx(0, 1)  # Apply CNOT gate with qubit 0 as control and qubit 1 as target
     qc.h(0)  # Apply Hadamard gate on qubit 0
+
+    # Add save_statevector instruction
+    qc.save_statevector()
 
     # Simulate the circuit
     transpiled_qc = transpile(qc, simulator)
