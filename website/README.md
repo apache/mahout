@@ -19,11 +19,9 @@
 
 # 1.Clone the repository 
 ```bash
-git clone https://github.com/username/mahout.git
+git clone https://github.com/apache/mahout.git
 cd mahout
 ```
-Replace username with your github username.
-
 
  
  ## 2. Install Jekyll Locally
