@@ -26,7 +26,7 @@ For additional information about Mahout, visit the [Mahout Home Page](http://mah
 
 # Qumat
 
-Qunat is a POC of a high level Python library for intefacing with multiple quantum computing backends. It is designed to be easy to use and to abstract the particularities of each backend, so that you may 'write once, run anywhere.' Like the Java of quantum computing, but Java is the new COBOL so we're trying to distance ourselves from that comparison :P
+Qumat is a POC of a high level Python library for intefacing with multiple quantum computing backends. It is designed to be easy to use and to abstract the particularities of each backend, so that you may 'write once, run anywhere.' Like the Java of quantum computing, but Java is the new COBOL so we're trying to distance ourselves from that comparison :P
 
 Check out [basic gates](docs/basic_gates.md) for a quick introduction to the basic gates. These are now supported across multiple quantum computing frameworks, including Qiskit, Cirq, and Braket.
 
