@@ -3,11 +3,11 @@ from qumat import QuMat
 
 # Create an instance of QuantumComputer with a specific backend configuration
 backend_config = {
-    'backend_name': 'qiskit',  # Replace with the actual backend you want to use
-    'backend_options': {
-        'simulator_type': 'aer_simulator',
-        'shots': 1024  # Number of shots for measurement
-    }
+    "backend_name": "qiskit",  # Replace with the actual backend you want to use
+    "backend_options": {
+        "simulator_type": "aer_simulator",
+        "shots": 1024,  # Number of shots for measurement
+    },
 }
 qumat = QuMat(backend_config)
 

@@ -14,60 +14,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from braket.aws import AwsQuantumSimulator, AwsDevice
+from braket.aws import AwsDevice
 from braket.circuits import Circuit, FreeParameter
 
+
 def initialize_backend(backend_config):
-    backend_options = backend_config['backend_options']
-    simulator_type = backend_options.get('simulator_type', 'default')
-    if simulator_type == 'default':
+    backend_options = backend_config["backend_options"]
+    simulator_type = backend_options.get("simulator_type", "default")
+    if simulator_type == "default":
         return AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
     else:
-        print(f"Simulator type '{simulator_type}' is not supported in Amazon Braket. Using default.")
+        print(
+            f"Simulator type '{simulator_type}' is not supported in Amazon Braket. Using default."
+        )
         return AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
+
 
 def create_empty_circuit(num_qubits):
     return Circuit()
 
+
 def apply_not_gate(circuit, qubit_index):
     circuit.x(qubit_index)
+
 
 def apply_hadamard_gate(circuit, qubit_index):
     circuit.h(qubit_index)
 
+
 def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index):
     circuit.cnot(control_qubit_index, target_qubit_index)
 
-def apply_toffoli_gate(circuit, control_qubit_index1, control_qubit_index2, target_qubit_index):
+
+def apply_toffoli_gate(
+    circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
+):
     circuit.ccnot(control_qubit_index1, control_qubit_index2, target_qubit_index)
+
 
 def apply_swap_gate(circuit, qubit_index1, qubit_index2):
     circuit.swap(qubit_index1, qubit_index2)
 
+
 def apply_pauli_x_gate(circuit, qubit_index):
     circuit.x(qubit_index)
+
 
 def apply_pauli_y_gate(circuit, qubit_index):
     circuit.y(qubit_index)
 
+
 def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
+
 def execute_circuit(circuit, backend, backend_config):
-    shots = backend_config['backend_options'].get('shots', 1)
+    shots = backend_config["backend_options"].get("shots", 1)
     task = backend.run(circuit, shots=shots)
     result = task.result()
     return result.measurement_counts
 
+
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
-    raise NotImplementedError("Final state vector calculation is not currently supported with Amazon Braket.")
+    raise NotImplementedError(
+        "Final state vector calculation is not currently supported with Amazon Braket."
+    )
+
 
 def draw_circuit(circuit):
     # Unfortunately, Amazon Braket does not have direct support for drawing circuits in the same way
     # as Qiskit and Cirq. You would typically visualize Amazon Braket circuits using external tools.
     # For simplicity, we'll print the circuit object which gives some textual representation.
     print(circuit)
+
 
 def apply_rx_gate(circuit, qubit_index, angle):
     if isinstance(angle, (int, float)):
@@ -91,6 +111,7 @@ def apply_rz_gate(circuit, qubit_index, angle):
     else:
         param = FreeParameter(angle)
         circuit.rz(qubit_index, param)
+
 
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     circuit.rx(qubit_index, theta)
