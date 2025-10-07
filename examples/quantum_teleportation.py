@@ -1,4 +1,5 @@
 # Example of implementing Quantum Teleportation using QuMat
+from qumat import QuMat
 
 # Initialize your QuMat quantum computer with the chosen backend
 backend_config = {
