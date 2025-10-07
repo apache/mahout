@@ -17,6 +17,12 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.1.1", "ruff>=0.13.1"]
 
+[tool.pytest.ini_options]
+testpaths = ["testing"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = ["-v", "--tb=short"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

@@ -14,24 +14,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from qumat_helpers import get_qumat_example_final_state_vector
+
+import pytest
 import numpy as np
 from importlib import import_module
 
 
-def test_final_state_vector():
-    # Specify initial computational basis state vector
-    initial_ket_str = "001"
+from .qumat_helpers import get_qumat_example_final_state_vector
 
-    backends_to_test = ["qiskit"]
-    for backend_name in backends_to_test:
-        backend_module = import_module(f"{backend_name}_helpers", package="qumat")
-        # use native implementation
+
+class TestFinalQuantumStates:
+    """Test class for final quantum state comparisons between QuMat and native implementations."""
+
+    @pytest.mark.parametrize("initial_ket_str", ["000", "001", "010", "011"])
+    def test_qiskit_final_state_vector(self, initial_ket_str):
+        """Test that QuMat produces same final state as native Qiskit implementation."""
+        backend_name = "qiskit"
+
+        # Import backend-specific helpers
+        backend_module = import_module(f".{backend_name}_helpers", package="testing")
+
+        # Get native implementation result
         native_example_vector = backend_module.get_native_example_final_state_vector(
             initial_ket_str
         )
 
-        # use qumat implementation
+        # Get QuMat implementation result
         qumat_backend_config = backend_module.get_qumat_backend_config(
             "get_final_state_vector"
         )
@@ -39,5 +47,25 @@ def test_final_state_vector():
             qumat_backend_config, initial_ket_str
         )
 
-        # Compare final state vectors from qumat vs. native implementation
-        np.testing.assert_array_equal(qumat_example_vector, native_example_vector)
+        # Compare final state vectors from QuMat vs. native implementation
+        np.testing.assert_array_equal(
+            qumat_example_vector,
+            native_example_vector,
+            err_msg=f"State vectors don't match for initial state {initial_ket_str} using {backend_name}",
+        )
+
+    def test_all_backends_consistency(self, testing_backends):
+        """Test that all available backends produce consistent results."""
+        initial_ket_str = "001"
+        results = {}
+
+        for backend_name in testing_backends:
+            backend_module = import_module(
+                f".{backend_name}_helpers", package="testing"
+            )
+            qumat_backend_config = backend_module.get_qumat_backend_config(
+                "get_final_state_vector"
+            )
+            results[backend_name] = get_qumat_example_final_state_vector(
+                qumat_backend_config, initial_ket_str
+            )
