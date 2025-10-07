@@ -19,18 +19,17 @@ import pytest
 import numpy as np
 from importlib import import_module
 
-
+from .conftest import TESTING_BACKENDS
 from .qumat_helpers import get_qumat_example_final_state_vector
 
 
 class TestFinalQuantumStates:
     """Test class for final quantum state comparisons between QuMat and native implementations."""
 
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     @pytest.mark.parametrize("initial_ket_str", ["000", "001", "010", "011"])
-    def test_qiskit_final_state_vector(self, initial_ket_str):
-        """Test that QuMat produces same final state as native Qiskit implementation."""
-        backend_name = "qiskit"
-
+    def test_backend_final_state_vector(self, backend_name, initial_ket_str):
+        """Test that QuMat produces same final state as native backend implementation."""
         # Import backend-specific helpers
         backend_module = import_module(f".{backend_name}_helpers", package="testing")
 
