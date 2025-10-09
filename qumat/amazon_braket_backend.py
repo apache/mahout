@@ -15,13 +15,16 @@
 # limitations under the License.
 #
 from braket.aws import AwsDevice
+from braket.devices import LocalSimulator
 from braket.circuits import Circuit, FreeParameter
 
 
 def initialize_backend(backend_config):
     backend_options = backend_config["backend_options"]
     simulator_type = backend_options.get("simulator_type", "default")
-    if simulator_type == "default":
+    if simulator_type == "local":
+        return LocalSimulator()
+    elif simulator_type == "default":
         return AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
     else:
         print(
@@ -77,9 +80,11 @@ def execute_circuit(circuit, backend, backend_config):
 
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
-    raise NotImplementedError(
-        "Final state vector calculation is not currently supported with Amazon Braket."
-    )
+    circuit.state_vector()
+    result = backend.run(circuit, shots=0).result()
+    state_vector = result.values[0]
+
+    return state_vector
 
 
 def draw_circuit(circuit):
