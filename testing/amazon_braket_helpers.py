@@ -36,7 +36,9 @@ def get_native_example_final_state_vector(
     initial_state_ket_str: str = "000",
 ) -> np.ndarray:
     n_qubits = len(initial_state_ket_str)
-    assert n_qubits == 3, "The current braket native testing example is strictly 3 qubits"
+    assert n_qubits == 3, (
+        "The current braket native testing example is strictly 3 qubits"
+    )
 
     # Use LocalSimulator for state vector simulation
     device = LocalSimulator()
