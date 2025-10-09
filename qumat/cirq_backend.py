@@ -130,3 +130,9 @@ def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     circuit.append(cirq.rz(lambd).on(qubit))
     circuit.append(cirq.ry(phi).on(qubit))
     circuit.append(cirq.rx(theta).on(qubit))
+
+
+def get_final_state_vector(circuit, backend, backend_config):
+    simulator = cirq.Simulator()
+    result = simulator.simulate(circuit)
+    return result.final_state_vector

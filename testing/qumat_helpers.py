@@ -51,8 +51,11 @@ def get_qumat_example_final_state_vector(
     qumat_instance = QuMat(backend_config)
 
     qumat_instance.create_empty_circuit(num_qubits=3)
-    initial_state = create_np_computational_basis_state(initial_state_ket_str)
-    qumat_instance.circuit.initialize(initial_state, range(n_qubits))
+
+    # Initialize state using X gates (backend-agnostic)
+    for i, bit in enumerate(initial_state_ket_str):
+        if bit == "1":
+            qumat_instance.apply_pauli_x_gate(qubit_index=i)
 
     qumat_instance.apply_hadamard_gate(qubit_index=1)
     qumat_instance.apply_cnot_gate(control_qubit_index=1, target_qubit_index=2)
