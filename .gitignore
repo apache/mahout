@@ -46,3 +46,6 @@ __pycache__/
 
 # Testing and type checking (project uses these)
 .pytest_cache/
+
+# Poetry
+poetry.lock

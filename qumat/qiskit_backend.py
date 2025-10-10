@@ -15,13 +15,14 @@
 # limitations under the License.
 #
 import qiskit
+from qiskit_aer import Aer, AerSimulator
 
 
 def initialize_backend(backend_config):
     backend_options = backend_config["backend_options"]
     simulator_type = backend_options["simulator_type"]
     shots = backend_options["shots"]
-    backend = qiskit.Aer.get_backend(simulator_type)
+    backend = Aer.get_backend(simulator_type)
     backend.shots = shots
     return backend
 
@@ -104,7 +105,10 @@ def execute_circuit(circuit, backend, backend_config):
 
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
-    simulator = qiskit.Aer.get_backend("statevector_simulator")
+    simulator = AerSimulator(method="statevector")
+
+    # Add save_statevector instruction
+    circuit.save_statevector()
 
     # Simulate the circuit
     transpiled_circuit = qiskit.transpile(circuit, simulator)
