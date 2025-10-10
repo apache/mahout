@@ -24,7 +24,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Define backends to test - used by both parametrize and fixture
-TESTING_BACKENDS = ["qiskit", "cirq"]  # Can be expanded to include "braket" when ready
+TESTING_BACKENDS = ["qiskit", "cirq", "amazon_braket"]
 
 
 @pytest.fixture(scope="session")
