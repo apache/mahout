@@ -59,6 +59,12 @@ def apply_swap_gate(circuit, qubit_index1, qubit_index2):
     circuit.swap(qubit_index1, qubit_index2)
 
 
+def apply_cswap_gate(
+    circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
+):
+    circuit.cswap(control_qubit_index, target_qubit_index1, target_qubit_index2)
+
+
 def apply_pauli_x_gate(circuit, qubit_index):
     circuit.x(qubit_index)
 

@@ -52,6 +52,13 @@ class QuMat:
     def apply_swap_gate(self, qubit_index1, qubit_index2):
         self.backend_module.apply_swap_gate(self.circuit, qubit_index1, qubit_index2)
 
+    def apply_cswap_gate(
+        self, control_qubit_index, target_qubit_index1, target_qubit_index2
+    ):
+        self.backend_module.apply_cswap_gate(
+            self.circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
+        )
+
     def apply_pauli_x_gate(self, qubit_index):
         self.backend_module.apply_pauli_x_gate(self.circuit, qubit_index)
 
@@ -101,3 +108,25 @@ class QuMat:
 
     def apply_u_gate(self, qubit_index, theta, phi, lambd):
         self.backend_module.apply_u_gate(self.circuit, qubit_index, theta, phi, lambd)
+
+    def swap_test(self, ancilla_qubit, qubit1, qubit2):
+        """
+        Implements the swap test circuit for measuring overlap between two quantum states.
+
+        The swap test measures the inner product between the states on qubit1 and qubit2.
+        The probability of measuring the ancilla qubit in state |0> is related to the overlap
+        as: P(0) = (1 + |<ψ|φ>|²) / 2
+
+        Args:
+            ancilla_qubit: Index of the ancilla qubit (should be initialized to |0>)
+            qubit1: Index of the first qubit containing state |ψ>
+            qubit2: Index of the second qubit containing state |φ>
+        """
+        # Apply Hadamard to ancilla qubit
+        self.apply_hadamard_gate(ancilla_qubit)
+
+        # Apply controlled-SWAP (Fredkin gate) with ancilla as control
+        self.apply_cswap_gate(ancilla_qubit, qubit1, qubit2)
+
+        # Apply Hadamard to ancilla qubit again
+        self.apply_hadamard_gate(ancilla_qubit)
