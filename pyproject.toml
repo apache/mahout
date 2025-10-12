@@ -10,7 +10,7 @@ dependencies = [
     "qiskit>=2.2.0,<3.0.0",
     "qiskit-aer>=0.17.2,<0.18.0",
     "cirq>=1.5.0,<1.6.0",
-    "amazon-braket-sdk>=1.10.0,<2.0",
+    "amazon-braket-sdk>=1.102.6,<2.0",
     "sympy>=1.14.0,<2.0",
 ]
 
