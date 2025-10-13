@@ -66,6 +66,15 @@ def apply_swap_gate(circuit, qubit_index1, qubit_index2):
     circuit.append(cirq.SWAP(qubit1, qubit2))
 
 
+def apply_cswap_gate(
+    circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
+):
+    control_qubit = cirq.LineQubit(control_qubit_index)
+    target_qubit1 = cirq.LineQubit(target_qubit_index1)
+    target_qubit2 = cirq.LineQubit(target_qubit_index2)
+    circuit.append(cirq.CSWAP(control_qubit, target_qubit1, target_qubit2))
+
+
 def apply_pauli_x_gate(circuit, qubit_index):
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.X(qubit))
