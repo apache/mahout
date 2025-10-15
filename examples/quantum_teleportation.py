@@ -46,9 +46,9 @@ receiver_quantum_computer.create_empty_circuit(3)
 # Apply X and Z gates based on the received measurement results
 received_measurement_results = [0, 1]  # Simulated measurement results
 if received_measurement_results[1] == 1:
-    receiver_quantum_computer.apply_x_gate(2)
+    receiver_quantum_computer.apply_pauli_x_gate(2)
 if received_measurement_results[0] == 1:
-    receiver_quantum_computer.apply_z_gate(2)
+    receiver_quantum_computer.apply_pauli_z_gate(2)
 
 # The state on qubit 2 now matches the original state on qubit 0
 
