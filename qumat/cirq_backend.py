@@ -150,3 +150,32 @@ def get_final_state_vector(circuit, backend, backend_config):
     simulator = cirq.Simulator()
     result = simulator.simulate(circuit)
     return result.final_state_vector
+
+
+def calculate_prob_zero(results, ancilla_qubit, num_qubits):
+    """
+    Calculate the probability of measuring the ancilla qubit in |0> state.
+
+    Cirq uses big-endian qubit ordering with integer format results,
+    where qubit i corresponds to bit (num_qubits - 1 - i).
+
+    Args:
+        results: Measurement results from execute_circuit() (list of dicts with integer keys)
+        ancilla_qubit: Index of the ancilla qubit
+        num_qubits: Total number of qubits in the circuit
+
+    Returns:
+        float: Probability of measuring ancilla in |0> state
+    """
+    if isinstance(results, list):
+        results = results[0]
+
+    total_shots = sum(results.values())
+    count_zero = 0
+
+    for state, count in results.items():
+        bit_position = num_qubits - 1 - ancilla_qubit
+        if ((state >> bit_position) & 1) == 0:
+            count_zero += count
+
+    return count_zero / total_shots if total_shots > 0 else 0.0

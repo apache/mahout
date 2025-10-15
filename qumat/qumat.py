@@ -26,9 +26,11 @@ class QuMat:
         )
         self.backend = self.backend_module.initialize_backend(backend_config)
         self.circuit = None
+        self.num_qubits = None
         self.parameters = {}
 
     def create_empty_circuit(self, num_qubits: int | None = None):
+        self.num_qubits = num_qubits
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
 
     def apply_not_gate(self, qubit_index):
@@ -130,3 +132,53 @@ class QuMat:
 
         # Apply Hadamard to ancilla qubit again
         self.apply_hadamard_gate(ancilla_qubit)
+
+    def measure_overlap(self, qubit1, qubit2, ancilla_qubit=0):
+        """
+        Measures the overlap (fidelity) between two quantum states using the swap test.
+
+        This method creates a swap test circuit to calculate the similarity between
+        the quantum states on qubit1 and qubit2. It returns the squared overlap |<ψ|φ>|²,
+        which represents the fidelity between the two states.
+
+        The swap test measures P(ancilla=0), which is related to overlap as:
+        P(0) = (1 + |<ψ|φ>|²) / 2
+
+        However, for certain states (especially identical excited states), global phase
+        effects may cause the ancilla to measure predominantly |1> instead of |0>.
+        This method handles both cases by taking the measurement probability closer to 1.
+
+        Args:
+            qubit1: Index of the first qubit containing state |ψ>
+            qubit2: Index of the second qubit containing state |φ>
+            ancilla_qubit: Index of the ancilla qubit (default: 0, should be initialized to |0>)
+
+        Returns:
+            float: The squared overlap |<ψ|φ>|² between the two states (fidelity)
+        """
+        # Perform the swap test
+        self.swap_test(ancilla_qubit, qubit1, qubit2)
+        results = self.execute_circuit()
+
+        # Calculate the probability of measuring ancilla in |0> state
+        prob_zero = self.calculate_prob_zero(results, ancilla_qubit)
+        prob_zero_or_one = max(prob_zero, 1 - prob_zero)
+        overlap_squared = 2 * prob_zero_or_one - 1
+        overlap_squared = max(0.0, min(1.0, overlap_squared))
+
+        return overlap_squared
+
+    def calculate_prob_zero(self, results, ancilla_qubit):
+        """
+        Calculate the probability of measuring the ancilla qubit in |0> state.
+
+        Delegates to backend-specific implementation via the backend module.
+
+        Args:
+            results: Measurement results from execute_circuit()
+            ancilla_qubit: Index of the ancilla qubit
+
+        Returns:
+            float: Probability of measuring ancilla in |0> state
+        """
+        return self.backend_module.calculate_prob_zero(results, ancilla_qubit, self.num_qubits)
