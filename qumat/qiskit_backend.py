@@ -27,7 +27,7 @@ def initialize_backend(backend_config):
     return backend
 
 
-def create_empty_circuit(num_qubits=None):
+def create_empty_circuit(num_qubits: int | None = None):
     if num_qubits is not None:
         return qiskit.QuantumCircuit(num_qubits)
     else:

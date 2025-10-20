@@ -33,7 +33,7 @@ def initialize_backend(backend_config):
         return AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
 
 
-def create_empty_circuit(num_qubits=None):
+def create_empty_circuit(num_qubits: int | None = None):
     circuit = Circuit()
     if num_qubits is not None:
         for i in range(num_qubits):
