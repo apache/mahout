@@ -28,7 +28,7 @@ class QuMat:
         self.circuit = None
         self.parameters = {}
 
-    def create_empty_circuit(self, num_qubits):
+    def create_empty_circuit(self, num_qubits: int | None = None):
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
 
     def apply_not_gate(self, qubit_index):

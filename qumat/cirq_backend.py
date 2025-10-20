@@ -31,8 +31,13 @@ def initialize_backend(backend_config):
     return cirq.Simulator()
 
 
-def create_empty_circuit(num_qubits):
-    return cirq.Circuit()
+def create_empty_circuit(num_qubits: int | None = None):
+    circuit = cirq.Circuit()
+    if num_qubits is not None:
+        qubits = [cirq.LineQubit(i) for i in range(num_qubits)]
+        for qubit in qubits:
+            circuit.append(cirq.I(qubit))
+    return circuit
 
 
 def apply_not_gate(circuit, qubit_index):
