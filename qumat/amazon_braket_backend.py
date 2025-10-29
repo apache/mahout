@@ -132,3 +132,32 @@ def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     circuit.rx(qubit_index, theta)
     circuit.ry(qubit_index, phi)
     circuit.rz(qubit_index, lambd)
+
+
+def calculate_prob_zero(results, ancilla_qubit, num_qubits):
+    """
+    Calculate the probability of measuring the ancilla qubit in |0> state.
+
+    Amazon Braket uses big-endian qubit ordering with string format results,
+    where the leftmost bit corresponds to qubit 0.
+
+    Args:
+        results: Measurement results from execute_circuit() (dict with string keys)
+        ancilla_qubit: Index of the ancilla qubit
+        num_qubits: Total number of qubits in the circuit
+
+    Returns:
+        float: Probability of measuring ancilla in |0> state
+    """
+    if isinstance(results, list):
+        results = results[0]
+
+    total_shots = sum(results.values())
+    count_zero = 0
+
+    for state, count in results.items():
+        # Braket: big-endian, leftmost bit is qubit 0
+        if len(state) > ancilla_qubit and state[ancilla_qubit] == "0":
+            count_zero += count
+
+    return count_zero / total_shots if total_shots > 0 else 0.0
