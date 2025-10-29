@@ -148,7 +148,9 @@ class TestOverlapMeasurement:
         for backend_name in testing_backends:
             qumat = QuMat(self.get_backend_config(backend_name))
             qumat.create_empty_circuit(num_qubits=3)
-            results[backend_name] = qumat.measure_overlap(qubit1=1, qubit2=2, ancilla_qubit=0)
+            results[backend_name] = qumat.measure_overlap(
+                qubit1=1, qubit2=2, ancilla_qubit=0
+            )
 
         overlaps = list(results.values())
         for i in range(len(overlaps)):

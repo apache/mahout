@@ -181,4 +181,6 @@ class QuMat:
         Returns:
             float: Probability of measuring ancilla in |0> state
         """
-        return self.backend_module.calculate_prob_zero(results, ancilla_qubit, self.num_qubits)
+        return self.backend_module.calculate_prob_zero(
+            results, ancilla_qubit, self.num_qubits
+        )
