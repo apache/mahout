@@ -17,10 +17,11 @@
 
 import pytest
 
-from .conftest import TESTING_BACKENDS
+from .utils import TESTING_BACKENDS
 from qumat import QuMat
 
 
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestSwapTest:
     """Test class for swap test functionality across different backends."""
 
@@ -76,7 +77,6 @@ class TestSwapTest:
         prob_zero = count_zero / total_shots
         return prob_zero
 
-    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     def test_identical_zero_states(self, backend_name):
         """Test swap test with two identical |0> states."""
         backend_config = self.get_backend_config(backend_name)
@@ -97,7 +97,6 @@ class TestSwapTest:
         prob_zero = self.calculate_prob_zero(results, backend_name)
         assert prob_zero > 0.95, f"Expected P(0) ≈ 1.0, got {prob_zero}"
 
-    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     def test_orthogonal_states(self, backend_name):
         """Test swap test with orthogonal states |0> and |1>."""
         backend_config = self.get_backend_config(backend_name)
@@ -120,7 +119,6 @@ class TestSwapTest:
         prob_zero = self.calculate_prob_zero(results, backend_name)
         assert 0.45 < prob_zero < 0.55, f"Expected P(0) ≈ 0.5, got {prob_zero}"
 
-    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     def test_identical_one_states(self, backend_name):
         """Test swap test with two identical |1> states.
 
@@ -150,7 +148,6 @@ class TestSwapTest:
             f"Expected P(0) ≈ 0 or ≈ 1 for identical states, got {prob_zero}"
         )
 
-    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     def test_cswap_gate_exists(self, backend_name):
         """Test that the CSWAP gate is properly implemented."""
         backend_config = self.get_backend_config(backend_name)
@@ -165,11 +162,67 @@ class TestSwapTest:
         except Exception as e:
             pytest.fail(f"CSWAP gate failed on {backend_name}: {str(e)}")
 
-    def test_all_backends_consistency(self, testing_backends):
+
+class TestSwapTestConsistency:
+    """Test class for consistency checks across all backends."""
+
+    def get_backend_config(self, backend_name):
+        """Helper method to get backend configuration."""
+        if backend_name == "qiskit":
+            return {
+                "backend_name": backend_name,
+                "backend_options": {
+                    "simulator_type": "aer_simulator",
+                    "shots": 10000,
+                },
+            }
+        elif backend_name == "cirq":
+            return {
+                "backend_name": backend_name,
+                "backend_options": {
+                    "simulator_type": "default",
+                    "shots": 10000,
+                },
+            }
+        elif backend_name == "amazon_braket":
+            return {
+                "backend_name": backend_name,
+                "backend_options": {
+                    "simulator_type": "local",
+                    "shots": 10000,
+                },
+            }
+
+    def calculate_prob_zero(self, results, backend_name):
+        """Calculate probability of measuring ancilla qubit in |0> state."""
+        if isinstance(results, list):
+            results = results[0]
+
+        total_shots = sum(results.values())
+
+        # Count measurements where ancilla (qubit 0) is in |0> state
+        # Different backends return different formats:
+        # - Cirq: integer keys (e.g., 0, 1, 2, 3 for 3-qubit system)
+        # - Qiskit/Braket: string keys (e.g., '000', '001', '010', '011')
+        count_zero = 0
+        for state, count in results.items():
+            if isinstance(state, str):
+                # For string format, check the rightmost bit (ancilla is qubit 0)
+                if state[-1] == "0":
+                    count_zero += count
+            else:
+                # For integer format, check if least significant bit is 0
+                if (state & 1) == 0:
+                    count_zero += count
+
+        prob_zero = count_zero / total_shots
+        return prob_zero
+
+    def test_all_backends_consistency(self):
         """Test that all backends produce consistent results for the same swap test."""
         results_dict = {}
 
-        for backend_name in testing_backends:
+        for backend_name in TESTING_BACKENDS:
             backend_config = self.get_backend_config(backend_name)
             qumat = QuMat(backend_config)
 

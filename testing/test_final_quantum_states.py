@@ -19,19 +19,21 @@ import pytest
 import numpy as np
 from importlib import import_module
 
-from .conftest import TESTING_BACKENDS
-from .qumat_helpers import get_qumat_example_final_state_vector
+from .utils import TESTING_BACKENDS
+from .utils.qumat_helpers import get_qumat_example_final_state_vector
 
 
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestFinalQuantumStates:
     """Test class for final quantum state comparisons between QuMat and native implementations."""
 
-    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     @pytest.mark.parametrize("initial_ket_str", ["000", "001", "010", "011"])
     def test_backend_final_state_vector(self, backend_name, initial_ket_str):
         """Test that QuMat produces same final state as native backend implementation."""
         # Import backend-specific helpers
-        backend_module = import_module(f".{backend_name}_helpers", package="testing")
+        backend_module = import_module(
+            f".{backend_name}_helpers", package="testing.utils"
+        )
 
         # Get native implementation result
         native_example_vector = backend_module.get_native_example_final_state_vector(
@@ -53,14 +55,18 @@ class TestFinalQuantumStates:
             err_msg=f"State vectors don't match for initial state {initial_ket_str} using {backend_name}",
         )
 
-    def test_all_backends_consistency(self, testing_backends):
+
+class TestFinalQuantumStatesConsistency:
+    """Test class for consistency checks across all backends."""
+
+    def test_all_backends_consistency(self):
         """Test that all available backends produce consistent results."""
         initial_ket_str = "001"
         results = {}
 
-        for backend_name in testing_backends:
+        for backend_name in TESTING_BACKENDS:
             backend_module = import_module(
-                f".{backend_name}_helpers", package="testing"
+                f".{backend_name}_helpers", package="testing.utils"
             )
             qumat_backend_config = backend_module.get_qumat_backend_config(
                 "get_final_state_vector"

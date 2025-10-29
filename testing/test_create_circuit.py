@@ -17,10 +17,11 @@
 
 import pytest
 
-from .conftest import TESTING_BACKENDS
+from .utils import TESTING_BACKENDS
 from qumat import QuMat
 
 
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestCreateCircuit:
     """Test class for create_empty_circuit functionality."""
 
@@ -51,7 +52,6 @@ class TestCreateCircuit:
                 },
             }
 
-    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     def test_create_empty_circuit(self, backend_name):
         """Test that create_empty_circuit works"""
         backend_config = self.get_backend_config(backend_name)
@@ -60,7 +60,6 @@ class TestCreateCircuit:
 
         assert qumat.circuit is not None
 
-    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     @pytest.mark.parametrize("num_qubits", [1, 3, 5])
     def test_create_circuit_initializes_to_zero(self, backend_name, num_qubits):
         """Test that create_empty_circuit properly initializes all qubits to |0⟩."""
