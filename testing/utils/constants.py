@@ -15,19 +15,7 @@
 # limitations under the License.
 #
 
-import pytest
-import sys
-from pathlib import Path
+"""Constants for testing."""
 
-# Add project root to Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-# Define backends to test - used by both parametrize and fixture
+# List of backends to test across
 TESTING_BACKENDS = ["qiskit", "cirq", "amazon_braket"]
-
-
-@pytest.fixture(scope="session")
-def testing_backends():
-    """Fixture to provide the list of backends to test."""
-    return TESTING_BACKENDS
