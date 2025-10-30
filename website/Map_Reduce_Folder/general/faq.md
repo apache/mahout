@@ -4,7 +4,7 @@ title: FAQ
 redirect_from:
     - /general/faq
     - /general/faq.html
-    
+
 ---
 
 # The Official Mahout FAQ
@@ -104,4 +104,4 @@ There is a number of algorithm implementations that require no Hadoop dependenci
 #### Mahout just won't run in parallel on my dataset. Why?
 
 If you are running training on a Hadoop cluster keep in mind that the number of mappers started is governed by the size of the input data and the configured split/block size of your cluster. As a rule of thumb,
-anything below 100MB in size won't be split by default. 
+anything below 100MB in size won't be split by default.

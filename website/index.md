@@ -13,4 +13,3 @@ Apache Mahout(TM) is a <strong>distributed linear algebra framework</strong> and
 {% for post in site.posts limit: 5 %}
   {% include posts/post-preview.html %}
 {% endfor %}
-

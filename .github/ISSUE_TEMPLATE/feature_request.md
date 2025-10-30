@@ -6,17 +6,17 @@ labels: ["enhancement"]
 assignees: []
 ---
 
-### Summary  
+### Summary
 A brief description of the feature.
 
-### Use Case  
+### Use Case
 Explain why this feature is useful.
 
-### Proposed Implementation  
+### Proposed Implementation
 How do you propose implementing this feature?
 
-### Alternatives Considered  
+### Alternatives Considered
 Have you thought of other ways to solve the same problem?
 
-### Additional Context  
+### Additional Context
 Any other relevant information or resources.

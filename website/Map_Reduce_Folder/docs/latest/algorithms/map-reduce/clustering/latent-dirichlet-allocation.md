@@ -13,7 +13,7 @@ Latent Dirichlet Allocation (Blei et al, 2003) is a powerful learning
 algorithm for automatically and jointly clustering words into "topics" and
 documents into mixtures of topics. It has been successfully applied to
 model change in scientific fields over time (Griffiths and Steyvers, 2004;
-Hall, et al. 2008). 
+Hall, et al. 2008).
 
 A topic model is, roughly, a hierarchical Bayesian model that associates
 with each document a probability distribution over "topics", which are in
@@ -98,7 +98,7 @@ test_set_percentage>0> \
 
 Topic smoothing should generally be about 50/K, where K is the number of
 topics. The number of words in the vocabulary can be an upper bound, though
-it shouldn't be too high (for memory concerns). 
+it shouldn't be too high (for memory concerns).
 
 Choosing the number of topics is more art than science, and it's
 recommended that you try several values.
@@ -124,7 +124,7 @@ An example is located in mahout/examples/bin/build-reuters.sh. The script
 automatically downloads the Reuters-21578 corpus, builds a Lucene index and
 converts the Lucene index to vectors. By uncommenting the last two lines
 you can then cause it to run LDA on the vectors and finally print the
-resultant topics to the console. 
+resultant topics to the console.
 
 To adapt the example yourself, you should note that Lucene has specialized
 support for Reuters, and that building your own index will require some
@@ -140,7 +140,7 @@ document, inferring the posterior probability of each topic for each word
 in each document. We then take the sufficient statistics and emit them in
 the form of (log) pseudo-counts for each word in each topic. The M-Step is
 simply to sum these together and (log) normalize them so that we have a
-distribution over the entire vocabulary of the corpus for each topic. 
+distribution over the entire vocabulary of the corpus for each topic.
 
 In implementation, the E-Step is implemented in the Map, and the M-Step is
 executed in the reduce step, with the final normalization happening as a

@@ -12,10 +12,10 @@ Committers and contributors are all welcomed and encouraged to update the Mahout
  Mahout uses Jekyll to build the website. A [script](https://github.com/apache/mahout/blob/master/website/build_site.sh)
  is executed by Jenkins after any change is detected in the `master` branch of the official Apache repository (
  e.g. after any PR is merged ). As such it is important that you, and any reviewers stage site changes locally before
- committing. 
- 
+ committing.
+
  The process for updating the website is as follows:
- 
+
 #### Clone the Mahout Git Repository Locally
 
 ```git clone http://github.com/apache/mahout```
@@ -24,7 +24,7 @@ See [Building from Source](buildingmahout.html#getting-code) for more details.
 
 #### Working with Markdown
 
-Jekyll uses [Kramdown](https://kramdown.gettalong.org/syntax.html) to compile markdown into HTML. 
+Jekyll uses [Kramdown](https://kramdown.gettalong.org/syntax.html) to compile markdown into HTML.
 
 Kramdown syntax is very similar to standard markdown, but with a few subtle diferences, please review
 to the [Kramdown syntax guide](https://kramdown.gettalong.org/syntax.html).
@@ -35,8 +35,8 @@ LaTeX portions are signalled with enclosing `$` characters, e.g. `$$ ... $$`
 
 #### Stage changes locally
 
-This step actually can be done _while you are editing_. Then you can see you changes in near-real time 
-(pending browser refreshes). 
+This step actually can be done _while you are editing_. Then you can see you changes in near-real time
+(pending browser refreshes).
 
 In the terminal,
 
@@ -52,10 +52,10 @@ open your favorite browser and make sure your changes look the way you expect th
 
 Once you're sure everything is right, you commit your code, push to your github.com account (preferably on a branch other than `trunk`
 then click "OpenPR"). This process closely follows [How To Contribute- Making Changes](/about/how-to-contribute.html#HowToContribute-MakingChanges) with an exception that for _WEBSITE ONLY_ changes we relax the requirement to open a JIRA ticket. That is to say, small
-website changes such as fixing a broken link or typo, do not require a specific JIRA issues, and where you would normally 
-commit with a message like `MAHOUT-XXXX The thing I did` (where `XXXX` is the assosciated JIRA number), you can instead 
-simply create a message like `WEBSITE Typos in how-to-update-the-website.md`.  There's nothing to stop you from making a 
-JIRA issue, it simply isn't required. 
+website changes such as fixing a broken link or typo, do not require a specific JIRA issues, and where you would normally
+commit with a message like `MAHOUT-XXXX The thing I did` (where `XXXX` is the assosciated JIRA number), you can instead
+simply create a message like `WEBSITE Typos in how-to-update-the-website.md`.  There's nothing to stop you from making a
+JIRA issue, it simply isn't required.
 
 The same goes for when you open a PR (where conventionally one includes the JIRA issue, you can again title `WEBSITE` to indicate
 there is no JIRA)
@@ -66,10 +66,10 @@ A committer will be along shortly to review your changes, please be patient. In 
 other contributors PRs. (Here's a little secret, this is a great way to signal to us that you're interested in becoming a committer too,
 as PR reviews is a big part of a committer's job).
 
-Once everything is confirmed to be in order, the committer will merge your pull request. 
+Once everything is confirmed to be in order, the committer will merge your pull request.
 
 #### Committers ONLY
 
 No further action is needed, this section is here to deliniate from the old CMS system and Jekyll builds of other projects. Jenkins
 will execute [build_site.sh](https://github.com/apache/mahout/blob/trunk/website/build_site.sh) upon merging. This will build the website and
-copy it to the `asf-site` branch, where [mahout.apache.org](http://mahout.apache.org) is served from. 
+copy it to the `asf-site` branch, where [mahout.apache.org](http://mahout.apache.org) is served from.

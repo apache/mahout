@@ -75,7 +75,7 @@ The tools that the collocation identification algorithm are embeeded within
 either consume tokenized text as input or provide the ability to specify an
 implementation of the Lucene Analyzer class perform tokenization in order
 to form ngrams. The tokens are passed through a Lucene ShingleFilter to
-produce NGrams of the desired length. 
+produce NGrams of the desired length.
 
 Given the text "Alice was beginning to get very tired" as an example,
 Lucene's StandardAnalyzer produces the tokens 'alice', 'beginning', 'get',
@@ -102,20 +102,20 @@ defaults to 2 or is set to a number of 2 or greater. The --minLLR option
 can be used to control the cutoff that prevents collocations below the
 specified LLR score from being emitted, and the --minSupport argument can
 be used to filter out collocations that appear below a certain number of
-times. 
+times.
 
 
     bin/mahout seq2sparse
-    
-    Usage:									    
+
+    Usage:
          [--minSupport <minSupport> --analyzerName <analyzerName> --chunkSize <chunkSize>
           --output <output> --input <input> --minDF <minDF>
           --maxDFPercent<maxDFPercent> --weight <weight> --norm <norm> --minLLR <minLLR>
-          --numReducers  <numReducers> --maxNGramSize <ngramSize> --overwrite --help		    
+          --numReducers  <numReducers> --maxNGramSize <ngramSize> --overwrite --help
           --sequentialAccessVector]
-    Options 								    
+    Options
 
-      --minSupport (-s) minSupport	  (Optional) Minimum Support. Default Value: 2				    
+      --minSupport (-s) minSupport	  (Optional) Minimum Support. Default Value: 2
 
       --analyzerName (-a) analyzerName    The class name of the analyzer
 
@@ -127,33 +127,33 @@ times.
 
       --minDF (-md) minDF		  The minimum document frequency. Default is 1
 
-      --maxDFPercent (-x) maxDFPercent    The max percentage of docs for the DF. Can be used to remove 
+      --maxDFPercent (-x) maxDFPercent    The max percentage of docs for the DF. Can be used to remove
                                           really high frequency terms. Expressed as an
-                                          integer between 0 and 100. Default is 99.     
+                                          integer between 0 and 100. Default is 99.
 
-      --weight (-wt) weight 	      The kind of weight to use. Currently TF   
-    				      or TFIDF				    
+      --weight (-wt) weight 	      The kind of weight to use. Currently TF
+    				      or TFIDF
 
-      --norm (-n) norm		      The norm to use, expressed as either a    
-    				      float or "INF" if you want to use the 
-    				      Infinite norm.  Must be greater orequal  
-    				      to 0.  The default is not to normalize    
+      --norm (-n) norm		      The norm to use, expressed as either a
+    				      float or "INF" if you want to use the
+    				      Infinite norm.  Must be greater orequal
+    				      to 0.  The default is not to normalize
 
-      --minLLR (-ml) minLLR 	      (Optional)The minimum Log Likelihood  
+      --minLLR (-ml) minLLR 	      (Optional)The minimum Log Likelihood
     				      Ratio(Float)  Default is 1.0
-	    
-      --numReducers (-nr) numReducers     (Optional) Number of reduce tasks.    
-    				      Default Value: 1			    
 
-      --maxNGramSize (-ng) ngramSize      (Optional) The maximum size of ngrams to  
-    				      create (2 = bigrams, 3 = trigrams, etc)   
-    				      Default Value:2			 
-   
-      --overwrite (-w)		      If set, overwrite the output directory    
-      --help (-h)			      Print out help			    
-      --sequentialAccessVector (-seq)     (Optional) Whether output vectors should	
-    				      be SequentialAccessVectors If set true	
-    				      else false 
+      --numReducers (-nr) numReducers     (Optional) Number of reduce tasks.
+    				      Default Value: 1
+
+      --maxNGramSize (-ng) ngramSize      (Optional) The maximum size of ngrams to
+    				      create (2 = bigrams, 3 = trigrams, etc)
+    				      Default Value:2
+
+      --overwrite (-w)		      If set, overwrite the output directory
+      --help (-h)			      Print out help
+      --sequentialAccessVector (-seq)     (Optional) Whether output vectors should
+    				      be SequentialAccessVectors If set true
+    				      else false
 
 
 <a name="Collocations-CollocDriver"></a>
@@ -161,44 +161,44 @@ times.
 
 
     bin/mahout org.apache.mahout.vectorizer.collocations.llr.CollocDriver
-    
-    Usage:									    
-     [--input <input> --output <output> --maxNGramSize <ngramSize> --overwrite    
-    --minSupport <minSupport> --minLLR <minLLR> --numReducers <numReducers>     
+
+    Usage:
+     [--input <input> --output <output> --maxNGramSize <ngramSize> --overwrite
+    --minSupport <minSupport> --minLLR <minLLR> --numReducers <numReducers>
     --analyzerName <analyzerName> --preprocess --unigram --help]
 
-    Options 								    
+    Options
 
-      --input (-i) input		      The Path for input files. 	    
+      --input (-i) input		      The Path for input files.
 
-      --output (-o) output		      The Path write output to		    
+      --output (-o) output		      The Path write output to
 
-      --maxNGramSize (-ng) ngramSize      (Optional) The maximum size of ngramsto  
-    				      create (2 = bigrams, 3 = trigrams,etc)   
-    				      Default Value:2			
-    
-      --overwrite (-w)		      If set, overwrite the outputdirectory    
+      --maxNGramSize (-ng) ngramSize      (Optional) The maximum size of ngramsto
+    				      create (2 = bigrams, 3 = trigrams,etc)
+    				      Default Value:2
 
-      --minSupport (-s) minSupport	      (Optional) Minimum Support. Default   
-    				      Value: 2				    
+      --overwrite (-w)		      If set, overwrite the outputdirectory
+
+      --minSupport (-s) minSupport	      (Optional) Minimum Support. Default
+    				      Value: 2
 
       --minLLR (-ml) minLLR 	      (Optional)The minimum Log Likelihood
-    				      Ratio(Float)  Default is 1.0	  
-  
-      --numReducers (-nr) numReducers     (Optional) Number of reduce tasks.    
-    				      Default Value: 1			    
+    				      Ratio(Float)  Default is 1.0
 
-      --analyzerName (-a) analyzerName    The class name of the analyzer	    
+      --numReducers (-nr) numReducers     (Optional) Number of reduce tasks.
+    				      Default Value: 1
 
-      --preprocess (-p)		      If set, input is SequenceFile<Text,Text>  
-    				      where the value is the document, which	
-    				      will be tokenized using the specified 
-    				      analyzer. 			
-    
-      --unigram (-u)		      If set, unigrams will be emitted inthe   
+      --analyzerName (-a) analyzerName    The class name of the analyzer
+
+      --preprocess (-p)		      If set, input is SequenceFile<Text,Text>
+    				      where the value is the document, which
+    				      will be tokenized using the specified
+    				      analyzer.
+
+      --unigram (-u)		      If set, unigrams will be emitted inthe
     				      final output alongside collocations
-   
-      --help (-h)			      Print out help	      
+
+      --help (-h)			      Print out help
 
 
 <a name="Collocations-Algorithmdetails"></a>
@@ -221,7 +221,7 @@ Generates NGrams and counts frequencies for ngrams, head and tail subgrams.
 <a name="Collocations-Map:CollocMapper"></a>
 #### Map: CollocMapper
 
-Input k: Text (documentId), v: StringTuple (tokens) 
+Input k: Text (documentId), v: StringTuple (tokens)
 
 Each call to the mapper passes in the full set of tokens for the
 corresponding document using a StringTuple. The ShingleFilter is run across
@@ -234,7 +234,7 @@ Once this is done, ngrams are split into head and tail portions. A key of type G
 
     head_key(EMPTY) -> (head subgram, head frequency)
 
-    head_key(ngram) -> (ngram, ngram frequency) 
+    head_key(ngram) -> (ngram, ngram frequency)
 
     tail_key(EMPTY) -> (tail subgram, tail frequency)
 
@@ -284,7 +284,7 @@ The input will be traversed in the following order:
 
     (head subgram, frequency 1)
     (head subgram, frequency 2)
-    ... 
+    ...
     (head subgram, frequency N)
     (ngram 1, frequency 1)
     (ngram 1, frequency 2)
@@ -382,4 +382,3 @@ By default in seq2sparse, or if the -u option is provided to the
 CollocDriver, unigrams (single tokens) will be passed through the job and
 each token's frequency will be calculated. As with ngrams, unigrams are
 subject to filtering with minSupport and minLLR.
-

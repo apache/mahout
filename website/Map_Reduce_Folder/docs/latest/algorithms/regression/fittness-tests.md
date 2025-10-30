@@ -14,5 +14,3 @@ Stub
 ### Parameters
 
 ### Example
-
-

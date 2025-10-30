@@ -17,7 +17,7 @@ For the interested, these topics are treated in detail in the book [Mahout in Ac
 
 Don't start with a distributed, Hadoop-based recommender; take on that
 complexity only if necessary. Start with non-distributed recommenders. It
-is simpler, has fewer requirements, and is more flexible. 
+is simpler, has fewer requirements, and is more flexible.
 
 As a crude rule of thumb, a system with up to 100M user-item associations
 (ratings, preferences) should "fit" onto one modern server machine with 4GB
@@ -52,4 +52,4 @@ top a ReloadFromJDBCDataModel.
 
 This should give a reasonable starter system which responds fast. The
 nature of the system is that new data comes in from the file or database
-only periodically -- perhaps on the order of minutes. 
+only periodically -- perhaps on the order of minutes.

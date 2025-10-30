@@ -27,13 +27,13 @@ Hadoop jobs.
 ## Regressions/Benchmarks/Integrations
 * Algorithmic quality and speed are not tested, except in a few instances.
 Such tests often require much longer run times (minutes to hours), a
-running Hadoop cluster, and downloads of large datasets (in the megabytes). 
-* Standardized speed tests are difficult on different hardware. 
+running Hadoop cluster, and downloads of large datasets (in the megabytes).
+* Standardized speed tests are difficult on different hardware.
 * Unit tests of external integrations require access to externals: HDFS,
-S3, JDBC, Cassandra, etc. 
+S3, JDBC, Cassandra, etc.
 
 Apache Jenkins is not able to support these environments. Commercial
-donations would help. 
+donations would help.
 
 <a name="Testing-UnitTests"></a>
 ## Unit Tests
@@ -45,4 +45,3 @@ of a great many utilities and algorithms. A much smaller percent include
 
 <a name="Testing-Other"></a>
 ## Other
-

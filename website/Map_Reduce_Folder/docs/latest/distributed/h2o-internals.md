@@ -6,7 +6,7 @@ redirect_from:
   - /docs/latest/distributed/h2o-internals.html
 ---
 # Introduction
- 
+
 This document provides an overview of how the Mahout Samsara environment is implemented over the H2O backend engine. The document is aimed at Mahout developers, to give a high level description of the design so that one can explore the code inside `h2o/` with some context.
 
 ## H2O Overview

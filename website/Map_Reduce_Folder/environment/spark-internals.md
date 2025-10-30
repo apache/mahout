@@ -1,6 +1,6 @@
 ---
 layout: default
-title: 
+title:
 redirect_from:
     - /documentation/users/environment/spark-internals
     - /documentation/users/environment/spark-internals.html
@@ -8,7 +8,7 @@ redirect_from:
 
 # Introduction
 
-This document provides an overview of how the Mahout Scala DSL (distributed algebraic operators) is implemented over the Spark back end engine. The document is aimed at Mahout developers, to give a high level description of the design. 
+This document provides an overview of how the Mahout Scala DSL (distributed algebraic operators) is implemented over the Spark back end engine. The document is aimed at Mahout developers, to give a high level description of the design.
 
 ## Spark Overview
 

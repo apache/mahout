@@ -61,4 +61,3 @@ exponentially small influence.
 
 <a name="ExpectationMaximization-Map/ReduceImplementation"></a>
 ## Map/Reduce Implementation
-

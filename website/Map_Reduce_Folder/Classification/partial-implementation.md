@@ -44,7 +44,7 @@ $HADOOP_HOME/bin/hadoop fs -put <PATH TO DATA> testdata{code}
 * In $MAHOUT_HOME/ run: {code}mvn clean install -DskipTests{code}
 
 <a name="PartialImplementation-Generateafiledescriptorforthedataset:"></a>
-## Generate a file descriptor for the dataset: 
+## Generate a file descriptor for the dataset:
 run the following command:
 
     $HADOOP_HOME/bin/hadoop jar
@@ -118,7 +118,7 @@ matrix
     Correctly Classified Instances		:      17657	   78.3224%
     Incorrectly Classified Instances	:	4887	   21.6776%
     Total Classified Instances		:      22544
-    
+
     =======================================================
     Confusion Matrix
     -------------------------------------------------------
@@ -139,7 +139,7 @@ the output will be a directory 'predictions' containing two files
 The "Decision Forest" code is still "a work in progress", many features are
 still missing. Here is a list of some known issues:
 * For now, the training does not support multiple input files. The input
-dataset must be one single file (this support will be available with the upcoming release). 
+dataset must be one single file (this support will be available with the upcoming release).
 Classifying new data does support multiple
 input files.
 * The tree building is done when each mapper.close() method is called.

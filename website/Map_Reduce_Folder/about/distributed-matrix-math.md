@@ -59,4 +59,3 @@ Distributed Matrix Math has numerous applications in various fields, including:
 
 - [1] Apache Mahout: Machine Learning on Distributed Dataflow Systems. R Anil, G Capan, I Drost-Fromm, T Dunning… - The Journal of Machine Learning Research, 2020
 - [2] Apache Mahout: Beyond MapReduce (1st. ed.). Dmitriy Lyubimov and Andrew Palumbo. 2016. CreateSpace Independent Publishing Platform, North Charleston, SC, USA.
-

@@ -11,13 +11,13 @@ redirect_from:
 
 The `AsFactor` preprocessor is used to turn the integer values of the columns into sparse vectors where the value is 1
  at the index that corresponds to the 'category' of that column.  This is also known as "One Hot Encoding" in many other
- packages. 
- 
+ packages.
+
 
 ### Parameters
 
 `AsFactor` takes no parameters.
- 
+
 ### Example
 
 ```scala
@@ -33,4 +33,3 @@ val factorizer: AsFactorModel = new AsFactor().fit(A)
 
 val factoredA = factorizer.transform(A)
 ```
-

@@ -8,11 +8,11 @@ redirect_from:
 
 ### About
 
-The [Cochrane Orcutt](https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation) procedure is use in economics to 
-adjust a linear model for serial correlation in the error term. 
- 
+The [Cochrane Orcutt](https://en.wikipedia.org/wiki/Cochrane%E2%80%93Orcutt_estimation) procedure is use in economics to
+adjust a linear model for serial correlation in the error term.
+
 The cooresponding method in R is [`cochrane.orcutt`](https://cran.r-project.org/web/packages/orcutt/orcutt.pdf)
-however the implementation differes slightly. 
+however the implementation differes slightly.
 
 #### R Prototype:
     library(orcutt)
@@ -44,7 +44,7 @@ however the implementation differes slightly.
     my_lm = lm(y ~ x, data=df)
     coch = cochrane.orcutt(my_lm)
 
-    
+
 The R-implementation is kind of...silly.
 
 The above works- converges at 318 iterations- the transformed DW is   1.72, yet the rho is
@@ -52,8 +52,8 @@ The above works- converges at 318 iterations- the transformed DW is   1.72, yet 
  autocorrelation- nothing close to 1.72.
 
  At anyrate, the real prototype for this is the example from [Applied Linear Statistcal Models
- 5th Edition by Kunter, Nachstheim, Neter, and Li](https://www.amazon.com/Applied-Linear-Statistical-Models-Hardcover/dp/B010EWX85C/ref=sr_1_4?ie=UTF8&qid=1493847480&sr=8-4&keywords=applied+linear+statistical+models+5th+edition).  
- 
+ 5th Edition by Kunter, Nachstheim, Neter, and Li](https://www.amazon.com/Applied-Linear-Statistical-Models-Hardcover/dp/B010EWX85C/ref=sr_1_4?ie=UTF8&qid=1493847480&sr=8-4&keywords=applied+linear+statistical+models+5th+edition).
+
 Steps:
 1. Normal Regression
 2. Estimate <foo>\(\rho\)</foo>
@@ -61,10 +61,10 @@ Steps:
 4. Step 5: Use Betas from (4) to recalculate model from (1)
 5. Step 6: repeat  Step 2 through 5 until a stopping criteria is met. Some models call for convergence-
 Kunter et. al reccomend 3 iterations, if you don't achieve desired results, use an alternative method.
- 
+
 #### Some additional notes from Applied Linear Statistical Models:
  They also provide some interesting notes on p 494:
- 
+
  1. "Cochrane-Orcutt does not always work properly.  A major reason is that when the error terms
  are positively autocorrelated, the estimate <foo>\(r\)</foo> in (12.22) tends to underestimate the autocorrelation
  parameter <foo>\(\rho\)</foo>.  When this bias is serious, it can significantly reduce the effectiveness of the
@@ -108,7 +108,7 @@ Kunter et. al reccomend 3 iterations, if you don't achieve desired results, use 
         <td><code>'cacheHint</code></td>
         <td>The DRM Cache Hint to use when holding the data in memory between iterations</td>
         <td><code>CacheHint.MEMORY_ONLY</code></td>
-     </tr>                 
+     </tr>
   </table>
 </div>
 
@@ -136,12 +136,11 @@ Kunter et. al reccomend 3 iterations, if you don't achieve desired results, use 
           (27.78,  165.6),
           (28.24,  168.7),
           (28.78,  171.7) ))
-    
+
     val drmY = alsmBlaisdellCo(::, 0 until 1)
     val drmX = alsmBlaisdellCo(::, 1 until 2)
 
     var coModel = new CochraneOrcutt[Int]().fit(drmX, drmY , ('iterations -> 2))
-    
+
     println(coModel.rhos)
     println(coModel.summary)
-

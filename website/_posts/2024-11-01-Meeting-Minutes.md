@@ -45,4 +45,3 @@ Trevor and Andrew taking these
 * [#468 Add a Parameter object](https://github.com/apache/mahout/issues/468)
 * [#469 Bind parameter values at execution](https://github.com/apache/mahout/issues/469)
 * [#470 Add Qumat to PyPi](https://github.com/apache/mahout/issues/470)
-

@@ -38,8 +38,8 @@ Similar to K-Means, the program doesn't modify the input directories. And
 for every iteration, the cluster output is stored in a directory cluster-N.
 The code has set number of reduce tasks equal to number of map tasks. So,
 those many part-0
-  
-  
+
+
 Files are created in clusterN directory. The code uses
 driver/mapper/combiner/reducer as follows:
 
@@ -77,7 +77,7 @@ converged clusters with 'Vn' clusterId.
 
 The Fuzzy k-Means clustering algorithm may be run using a command-line
 invocation on FuzzyKMeansDriver.main or by making a Java call to
-FuzzyKMeansDriver.run(). 
+FuzzyKMeansDriver.run().
 
 Invocation using the command line takes the form:
 
@@ -144,7 +144,7 @@ SequenceFile(IntWritable, WeightedVectorWritable). The IntWritable _key_ is
 the clusterId. The WeightedVectorWritable _value_ is a bean containing a
 double _weight_ and a VectorWritable _vector_ where the weights are
 computed as 1/(1+distance) where the distance is between the cluster center
-and the vector using the chosen DistanceMeasure. 
+and the vector using the chosen DistanceMeasure.
 
 <a name="FuzzyK-Means-Examples"></a>
 # Examples
@@ -165,7 +165,7 @@ The points are generated as follows:
  sd=0.1
 
 In the first image, the points are plotted and the 3-sigma boundaries of
-their generator are superimposed. 
+their generator are superimposed.
 
 ![fuzzy](../../images/SampleData.png)
 

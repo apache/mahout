@@ -29,4 +29,3 @@ Tutorials, Algorithms, MR-Tutorials, and MR-Algorithsm each have an accordion si
 
 
 ![landing](screenshots/mr-algos.png)
-

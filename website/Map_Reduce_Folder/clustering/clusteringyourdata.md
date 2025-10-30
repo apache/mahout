@@ -48,34 +48,34 @@ Mahout has a cluster dumper utility that can be used to retrieve and evaluate yo
 <a name="ClusteringYourData-Theclusterdumperoptionsare:"></a>
 ## The cluster dumper options are:
 
-      --help (-h)				   Print out help	
-	    
-      --input (-i) input			   The directory containing Sequence    
-    					   Files for the Clusters	    
+      --help (-h)				   Print out help
 
-      --output (-o) output			   The output file.  If not specified,  
+      --input (-i) input			   The directory containing Sequence
+    					   Files for the Clusters
+
+      --output (-o) output			   The output file.  If not specified,
     					   dumps to the console.
 
       --outputFormat (-of) outputFormat	   The optional output format to write
-    					   the results as. Options: TEXT, CSV, or GRAPH_ML		 
+    					   the results as. Options: TEXT, CSV, or GRAPH_ML
 
-      --substring (-b) substring		   The number of chars of the	    
-    					   asFormatString() to print	
-    
-      --pointsDir (-p) pointsDir		   The directory containing points  
- 					   sequence files mapping input vectors     					   to their cluster.  If specified, 
-    					   then the program will output the 
-    					   points associated with a cluster 
+      --substring (-b) substring		   The number of chars of the
+    					   asFormatString() to print
 
-      --dictionary (-d) dictionary		   The dictionary file. 	    
+      --pointsDir (-p) pointsDir		   The directory containing points
+ 					   sequence files mapping input vectors     					   to their cluster.  If specified,
+    					   then the program will output the
+    					   points associated with a cluster
 
-      --dictionaryType (-dt) dictionaryType    The dictionary file type	    
+      --dictionary (-d) dictionary		   The dictionary file.
+
+      --dictionaryType (-dt) dictionaryType    The dictionary file type
     					   (text|sequencefile)
 
       --distanceMeasure (-dm) distanceMeasure  The classname of the DistanceMeasure.
-    					   Default is SquaredEuclidean.     
+    					   Default is SquaredEuclidean.
 
-      --numWords (-n) numWords		   The number of top terms to print 
+      --numWords (-n) numWords		   The number of top terms to print
 
       --tempDir tempDir			   Intermediate output directory
 
@@ -85,7 +85,7 @@ Mahout has a cluster dumper utility that can be used to retrieve and evaluate yo
 
       --evaluate (-e)			   Run ClusterEvaluator and CDbwEvaluator over the
     					   input. The output will be appended to the rest of
-    					   the output at the end.   
+    					   the output at the end.
 
 
 More information on using clusterdump utility can be found [here](cluster-dumper.html)
@@ -103,7 +103,7 @@ centroid adjusted by the log_2 of the number of clusters.  This can be
 compared to the squared magnitude of the original data or the squared
 deviation from the centroid for all of the data.  The idea is that you are
 changing the representation of the data by allocating some of the bits in
-your original representation to represent which cluster each point is in. 
+your original representation to represent which cluster each point is in.
 If those bits aren't made up by the residue being small then your
 clustering is making a bad trade-off.
 
@@ -124,4 +124,3 @@ Unfortunately, it is pretty easy to kid yourself into thinking your system
 is working using this kind of inspection.  The problem is that we are too
 good at seeing (making up) patterns.
 {quote}
-

@@ -15,16 +15,16 @@ Quantum cryptography leverages the principles of quantum mechanics to create sec
 ### Example: Implementing a Simple QKD Protocol with `qumat`
 Below is a simplified example of how to implement a basic QKD protocol using `qumat`. This example demonstrates the generation of a shared key between two parties, Alice and Bob.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Alice prepares her qubits
-qc.apply_hadamard_gate(0)  
+qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Alice sends the second qubit to Bob
@@ -32,7 +32,7 @@ qc.apply_cnot_gate(0, 1)
 qc.apply_hadamard_gate(1)
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Shared key:", result)
 ```
 
@@ -44,21 +44,21 @@ Quantum simulation involves using a quantum computer to simulate quantum systems
 ### Example: Simulating a Simple Quantum System with `qumat`
 In this example, we simulate a simple quantum system, such as a hydrogen molecule, using `qumat`. The goal is to find the ground state energy of the molecule.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to simulate the hydrogen molecule
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_rz_gate(1, 0.5)  # Example of a parameterized gate
 
 # Execute the circuit and get the final state vector
-state_vector = qc.get_final_state_vector()  
+state_vector = qc.get_final_state_vector()
 print("Final state vector:", state_vector)
 ```
 ## 9.3 Quantum Machine Learning
@@ -69,21 +69,21 @@ Quantum machine learning (QML) is an emerging field that combines quantum comput
 ### Example: Implementing a Basic Quantum Classifier with `qumat`
 In this example, we implement a basic quantum classifier using `qumat`. The classifier is trained to distinguish between two classes based on a simple dataset.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to create a quantum classifier
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_ry_gate(1, 0.3)  # Example of a parameterized gate
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Classification result:", result)
 ```
 
@@ -95,22 +95,22 @@ Quantum optimization involves using quantum algorithms to solve optimization pro
 ### Example: Solving an Optimization Problem with `qumat`
 In this example, we use `qumat` to implement a simple QAOA circuit to solve a basic optimization problem.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement QAOA
-qc.apply_hadamard_gate(0)  
-qc.apply_hadamard_gate(1)  
-qc.apply_rx_gate(0, 0.5)  # Example of a parameterized gate  
+qc.apply_hadamard_gate(0)
+qc.apply_hadamard_gate(1)
+qc.apply_rx_gate(0, 0.5)  # Example of a parameterized gate
 qc.apply_ry_gate(1, 0.5)  # Example of a parameterized gate
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Optimization result:", result)
 ```
 
@@ -122,21 +122,21 @@ Quantum chemistry involves the application of quantum mechanics to chemical syst
 ### Example: Simulating a Chemical Reaction with `qumat`
 In this example, we use `qumat` to simulate a simple chemical reaction, such as the formation of a hydrogen molecule from two hydrogen atoms.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to simulate the chemical reaction
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_rz_gate(1, 0.5)  # Example of a parameterized gate
 
 # Execute the circuit and get the final state vector
-state_vector = qc.get_final_state_vector()  
+state_vector = qc.get_final_state_vector()
 print("Final state vector:", state_vector)
 ```
 
@@ -148,21 +148,21 @@ Quantum finance involves the application of quantum computing to financial probl
 ### Example: Portfolio Optimization with `qumat`
 In this example, we use `qumat` to implement a simple quantum algorithm for portfolio optimization.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement portfolio optimization
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_ry_gate(1, 0.5)  # Example of a parameterized gate
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Portfolio optimization result:", result)
 ```
 ## 9.7 Quantum Artificial Intelligence
@@ -173,21 +173,21 @@ Quantum artificial intelligence (QAI) combines quantum computing with artificial
 ### Example: Implementing a Quantum Neural Network with `qumat`
 In this example, we use `qumat` to implement a simple quantum neural network (QNN) for a basic classification task.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement a quantum neural network
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_ry_gate(1, 0.5)  # Example of a parameterized gate
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("QNN classification result:", result)
 ```
 
@@ -199,21 +199,21 @@ Quantum sensing involves using quantum systems to measure physical quantities wi
 ### Example: Implementing a Quantum Sensor with `qumat`
 In this example, we use `qumat` to implement a simple quantum sensor for measuring a physical quantity, such as magnetic field strength.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement a quantum sensor
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_rz_gate(1, 0.5)  # Example of a parameterized gate
 
 # Execute the circuit and get the final state vector
-state_vector = qc.get_final_state_vector()  
+state_vector = qc.get_final_state_vector()
 print("Quantum sensor measurement:", state_vector)
 ```
 ## 9.9 Quantum Communication
@@ -224,21 +224,21 @@ Quantum communication involves the transmission of information using quantum sta
 ### Example: Implementing Quantum Teleportation with `qumat`
 In this example, we use `qumat` to implement a quantum teleportation protocol, which allows the transfer of quantum information from one qubit to another.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(3)
 
 # Apply gates to implement quantum teleportation
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_cnot_gate(1, 2)
 
 # Execute the circuit and get the final state vector
-state_vector = qc.get_final_state_vector()  
+state_vector = qc.get_final_state_vector()
 print("Quantum teleportation result:", state_vector)
 ```
 ## 9.10 Quantum Error Correction
@@ -249,29 +249,29 @@ Quantum error correction is essential for building reliable quantum computers. Q
 ### Example: Implementing a Quantum Error Correction Code with `qumat`
 In this example, we use `qumat` to implement a simple quantum error correction code, such as the bit-flip code.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(3)
 
 # Apply gates to implement the bit-flip code
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_cnot_gate(0, 2)
 
 # Simulate an error (e.g., bit flip on qubit 1)
 qc.apply_pauli_x_gate(1)
 
 # Error correction steps
-qc.apply_cnot_gate(0, 1)  
-qc.apply_cnot_gate(0, 2)  
+qc.apply_cnot_gate(0, 1)
+qc.apply_cnot_gate(0, 2)
 qc.apply_toffoli_gate(1, 2, 0)
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Error correction result:", result)
 ```
 ## 9.11 Quantum Games
@@ -282,20 +282,20 @@ Quantum games are games that incorporate quantum mechanics into their rules or s
 ### Example: Implementing a Quantum Game with `qumat`
 In this example, we use `qumat` to implement a simple quantum game, such as the quantum version of the classic game "Rock-Paper-Scissors."
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement the quantum game
-qc.apply_hadamard_gate(0)  
+qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Quantum game result:", result)
 ```
 ## 9.12 Quantum Random Number Generation
@@ -306,19 +306,19 @@ Quantum random number generation (QRNG) uses the inherent randomness of quantum 
 ### Example: Implementing a Quantum Random Number Generator with `qumat`
 In this example, we use `qumat` to implement a simple quantum random number generator.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(1)
 
 # Apply a Hadamard gate to generate a random bit
 qc.apply_hadamard_gate(0)
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Random number:", result)
 ```
 ## 9.13 Quantum Image Processing
@@ -329,20 +329,20 @@ Quantum image processing involves using quantum algorithms to process and analyz
 ### Example: Implementing a Quantum Image Processing Algorithm with `qumat`
 In this example, we use `qumat` to implement a simple quantum image processing algorithm, such as edge detection.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement edge detection
-qc.apply_hadamard_gate(0)  
+qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Edge detection result:", result)
 ```
 ## 9.14 Quantum Natural Language Processing
@@ -353,20 +353,20 @@ Quantum natural language processing (QNLP) involves using quantum algorithms to 
 ### Example: Implementing a Quantum NLP Algorithm with `qumat`
 In this example, we use `qumat` to implement a simple quantum NLP algorithm, such as text classification.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement text classification
-qc.apply_hadamard_gate(0)  
+qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Text classification result:", result)
 ```
 ## 9.15 Quantum Robotics
@@ -377,20 +377,20 @@ Quantum robotics involves using quantum computing to enhance the capabilities of
 ### Example: Implementing a Quantum Robotics Algorithm with `qumat`
 In this example, we use `qumat` to implement a simple quantum robotics algorithm, such as path planning.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement path planning
-qc.apply_hadamard_gate(0)  
+qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Path planning result:", result)
 ```
 ## 9.16 Quantum Internet
@@ -401,20 +401,20 @@ The quantum internet is a proposed network that uses quantum communication proto
 ### Example: Implementing a Quantum Internet Protocol with `qumat`
 In this example, we use `qumat` to implement a simple quantum internet protocol, such as quantum key distribution.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to implement quantum key distribution
-qc.apply_hadamard_gate(0)  
+qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Execute the circuit and get the results
-result = qc.execute_circuit()  
+result = qc.execute_circuit()
 print("Quantum key distribution result:", result)
 ```
 ## 9.17 Quantum Biology
@@ -425,20 +425,20 @@ Quantum biology explores the role of quantum mechanics in biological processes. 
 ### Example: Simulating a Biological Process with `qumat`
 In this example, we use `qumat` to simulate a simple biological process, such as photosynthesis.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to simulate photosynthesis
-qc.apply_hadamard_gate(0)  
+qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Execute the circuit and get the final state vector
-state_vector = qc.get_final_state_vector()  
+state_vector = qc.get_final_state_vector()
 print("Photosynthesis simulation result:", state_vector)
 ```
 ## 9.18 Quantum Materials Science
@@ -449,12 +449,12 @@ Quantum materials science involves using quantum computing to study and design n
 ### Example: Simulating a Material with `qumat`
 In this example, we use `qumat` to simulate a simple material, such as graphene.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(2)
 
 # Apply gates to simulate graphene

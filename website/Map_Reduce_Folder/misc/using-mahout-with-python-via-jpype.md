@@ -65,20 +65,20 @@ vectors from two Gaussian distributions with unit variance.
      """Create a sequence file containing some normally distributed
     	ifile - path to the sequence file to create
      """
-     
+
      #matrix of the cluster means
      cmeans=np.array([[1,1] ,[-1,-1]],np.int)
-     
+
      nperc=30  #number of points per cluster
-     
+
      vecs=[]
-     
+
      vnames=[]
      for cind in range(cmeans.shape[0]):
       pts=np.random.randn(nperc,2)
       pts=pts+cmeans[cind,:].reshape([1,cmeans.shape[1]])
       vecs.append(pts)
-     
+
       #names for the vectors
       #names are just the points with an index
       #we do this so we can validate by cross-refencing the name with thevector
@@ -86,43 +86,43 @@ vectors from two Gaussian distributions with unit variance.
       for row in range(nperc):
        vn[row]="c"+str(cind)+"_"+pts[row,0].astype((np.str,4))+"_"+pts[row,1].astype((np.str,4))
       vnames.append(vn)
-      
+
      vecs=np.vstack(vecs)
      vnames=np.hstack(vnames)
-     
-    
+
+
      #start the jvm
      start_jpype()
-     
+
      #create the sequence file that we will write to
-     io=JPackage("org").apache.hadoop.io 
+     io=JPackage("org").apache.hadoop.io
      FileSystemCls=JPackage("org").apache.hadoop.fs.FileSystem
-     
+
      PathCls=JPackage("org").apache.hadoop.fs.Path
      path=PathCls(ifile)
-    
-     ConfCls=JPackage("org").apache.hadoop.conf.Configuration 
+
+     ConfCls=JPackage("org").apache.hadoop.conf.Configuration
      conf=ConfCls()
-     
+
      fs=FileSystemCls.get(conf)
-     
+
      #vector classes
      VectorWritableCls=JPackage("org").apache.mahout.math.VectorWritable
      DenseVectorCls=JPackage("org").apache.mahout.math.DenseVector
      NamedVectorCls=JPackage("org").apache.mahout.math.NamedVector
      writer=io.SequenceFile.createWriter(fs, conf, path,io.Text,VectorWritableCls)
-     
-     
+
+
      vecwritable=VectorWritableCls()
      for row in range(vecs.shape[0]):
       nvector=NamedVectorCls(DenseVectorCls(JArray(JDouble,1)(vecs[row,:])),vnames[row])
       #need to wrap key and value because of overloading
       wrapkey=JObject(io.Text("key "+str(row)),io.Writable)
       wrapval=JObject(vecwritable,io.Writable)
-      
+
       vecwritable.set(nvector)
       writer.append(wrapkey,wrapval)
-      
+
      writer.close()
 
 
@@ -134,43 +134,43 @@ mahout.
     def read_clustered_pts(ifile,*args,**param):
      """Read the clustered points
      ifile - path to the sequence file containing the clustered points
-     """ 
-    
+     """
+
      #start the jvm
      start_jpype()
-     
+
      #create the sequence file that we will write to
-     io=JPackage("org").apache.hadoop.io 
+     io=JPackage("org").apache.hadoop.io
      FileSystemCls=JPackage("org").apache.hadoop.fs.FileSystem
-     
+
      PathCls=JPackage("org").apache.hadoop.fs.Path
      path=PathCls(ifile)
-    
-     ConfCls=JPackage("org").apache.hadoop.conf.Configuration 
+
+     ConfCls=JPackage("org").apache.hadoop.conf.Configuration
      conf=ConfCls()
-     
+
      fs=FileSystemCls.get(conf)
-     
+
      #vector classes
      VectorWritableCls=JPackage("org").apache.mahout.math.VectorWritable
      NamedVectorCls=JPackage("org").apache.mahout.math.NamedVector
-     
-     
-     ReaderCls=io.__getattribute__("SequenceFile$Reader") 
+
+
+     ReaderCls=io.__getattribute__("SequenceFile$Reader")
      reader=ReaderCls(fs, path,conf)
-     
-    
+
+
      key=reader.getKeyClass()()
-     
-    
+
+
      valcls=reader.getValueClass()
      vecwritable=valcls()
-     while (reader.next(key,vecwritable)):	
+     while (reader.next(key,vecwritable)):
       weight=vecwritable.getWeight()
       nvec=vecwritable.getVector()
-      
+
       cname=nvec.__class__.__name__
-      if (cname.rsplit('.',1)[1]=="NamedVector"):  
+      if (cname.rsplit('.',1)[1]=="NamedVector"):
        print "cluster={key} Name={name} x={x}y={y}".format(key=key.toString(),name=nvec.getName(),x=nvec.get(0),y=nvec.get(1))
       else:
        raise NotImplementedError("Vector isn't a NamedVector. Need tomodify/test the code to handle this case.")
@@ -184,40 +184,39 @@ found by mahout,
     def getClusters(ifile,*args,**param):
      """Read the centroids from the clusters outputted by kmenas
     	   ifile - Path to the sequence file containing the centroids
-     """ 
-    
+     """
+
      #start the jvm
      start_jpype()
-     
+
      #create the sequence file that we will write to
-     io=JPackage("org").apache.hadoop.io 
+     io=JPackage("org").apache.hadoop.io
      FileSystemCls=JPackage("org").apache.hadoop.fs.FileSystem
-     
+
      PathCls=JPackage("org").apache.hadoop.fs.Path
      path=PathCls(ifile)
-    
-     ConfCls=JPackage("org").apache.hadoop.conf.Configuration 
+
+     ConfCls=JPackage("org").apache.hadoop.conf.Configuration
      conf=ConfCls()
-     
+
      fs=FileSystemCls.get(conf)
-     
+
      #vector classes
      VectorWritableCls=JPackage("org").apache.mahout.math.VectorWritable
      NamedVectorCls=JPackage("org").apache.mahout.math.NamedVector
      ReaderCls=io.__getattribute__("SequenceFile$Reader")
      reader=ReaderCls(fs, path,conf)
-     
-    
+
+
      key=io.Text()
-     
-    
+
+
      valcls=reader.getValueClass()
-    
+
      vecwritable=valcls()
-     
-     while (reader.next(key,vecwritable)):	
+
+     while (reader.next(key,vecwritable)):
       center=vecwritable.getCenter()
-      
+
       print "id={cid}center={center}".format(cid=vecwritable.getId(),center=center.values)
       pass
-

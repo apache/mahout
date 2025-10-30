@@ -5,7 +5,7 @@ redirect_from:
   - /documentation/developers/how-to-release
   - /documentation/developers/how-to-release.html
 
-    
+
 ---
 
 # How To Release Mahout
@@ -87,9 +87,9 @@ warnings)
 * Create the release candidate: `mvn -Pmahout-release,apache-release release:prepare release:perform`; to add credentials for source control use `mvn -Dusername=myusername -Dpassword='mypassword' -Papache-release release:prepare release:perform`
 
 * If you have problems authenticating to svn.apache.org, try adding to the command line `-Dusername=USERNAME -Dpassword=PASSWORD`
-* If there is an issue first try doing: 
-  1. `mvn -Dmahout-release,apache-release release:rollback` 
-  1. followed by `mvn -Dmahout-release,apache-release release:clean` as this will likely save you time and do the right thing. You may also have to rollback the version numbers in the POM files. 
+* If there is an issue first try doing:
+  1. `mvn -Dmahout-release,apache-release release:rollback`
+  1. followed by `mvn -Dmahout-release,apache-release release:clean` as this will likely save you time and do the right thing. You may also have to rollback the version numbers in the POM files.
   1. _Optional_ If you want to skip test cases while rebuilding, use `mvn -DpreparationGoals="clean compile" release:prepare release:perform`
 * Review the artifacts, etc. on the Apache Repository (using Sonatype's Nexus application) site: https://repository.apache.org/. You will need to login using your ASF SVN credentials and then browse to the staging area.
 * Once you have reviewed the artifacts, you will need to "Close" out
@@ -107,7 +107,7 @@ release:perform target
 ```
 mvn -Pmahout-release,apache-release versions:set -DnewVersion=PREVIOUS_SNAPSHOT
 mvn -Pmahout-release,apache-release versions:commit
-git commit 
+git commit
 git push --delete apache <tagname> (deletes the remote tag)
 git tag -d tagname (deletes the local tag)
 ```

@@ -19,10 +19,10 @@ redirect_from:
 
 Checkout the sources from the [Mahout GitHub repository](https://github.com/apache/mahout)
 either via
- 
+
     git clone git@github.com:apache/mahout.git
 or
- 
+
     git clone https://github.com/apache/mahout.git
 
 ## Building From Source
@@ -37,14 +37,14 @@ NVIDIA Card (installed with OpenCL drivers alongside usual GPU drivers)
 
 Install java 1.7+ in an easily accessible directory (for this example,  ~/java/)
 http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-    
+
 Create a directory ~/apache/ .
-    
+
 Download apache Maven 3.3.9 and un-tar/gunzip to ~/apache/apache-maven-3.3.9/ .
 https://maven.apache.org/download.cgi
-        
+
 Download and un-tar/gunzip Hadoop 2.4.1 to ~/apache/hadoop-2.4.1/ .
-https://archive.apache.org/dist/hadoop/common/hadoop-2.4.1/    
+https://archive.apache.org/dist/hadoop/common/hadoop-2.4.1/
 
 Download and un-tar/gunzip spark-1.6.3-bin-hadoop2.4 to  ~/apache/ .
 http://spark.apache.org/downloads.html
@@ -81,7 +81,7 @@ When building mahout for a spark backend, we need four System Environment variab
 ```
     export MAHOUT_HOME=/home/<user>/apache/mahout
     export HADOOP_HOME=/home/<user>/apache/hadoop-2.4.1
-    export SPARK_HOME=/home/<user>/apache/spark-1.6.3-bin-hadoop2.4    
+    export SPARK_HOME=/home/<user>/apache/spark-1.6.3-bin-hadoop2.4
     export JAVA_HOME=/home/<user>/java/jdk-1.8.121
 ```
 
@@ -95,7 +95,7 @@ To use all available local cores (again, Spark master need not be running)
 ```
 export MASTER=local[*]
 ```
-To point to a cluster with spark running: 
+To point to a cluster with spark running:
 ```
 export MASTER=spark://master.ip.address:7077
 ```
@@ -131,7 +131,7 @@ mvn clean install -Pviennacl -DskipTests
 
 Apache Maven encourages users to make use of build profiles for selectively building modules.
 
-The command 
+The command
 ```bash
 mvn clean package
 ```
@@ -139,13 +139,13 @@ mvn clean package
 Is the basic build command. This default will build the following packages.
 
 ```bash
-[INFO] Apache Mahout 
-[INFO] Mahout Core 
-[INFO] Mahout Engine 
-[INFO] - Mahout HDFS Support 
-[INFO] - Mahout Spark Engine 
-[INFO] Mahout Community 
-[INFO] - Mahout Spark CLI Drivers 
+[INFO] Apache Mahout
+[INFO] Mahout Core
+[INFO] Mahout Engine
+[INFO] - Mahout HDFS Support
+[INFO] - Mahout Spark Engine
+[INFO] Mahout Community
+[INFO] - Mahout Spark CLI Drivers
 ```
 
 The following profiles are available for building optional components:
@@ -197,7 +197,7 @@ The following profiles are available for building optional components:
 
 #### Example
 
-If you want to build Apache Mahout with ViennaCL OpenMP support but skip the command line Spark drivers you would use this 
+If you want to build Apache Mahout with ViennaCL OpenMP support but skip the command line Spark drivers you would use this
 command to build:
 
 ```bash
@@ -206,13 +206,10 @@ mvn clean package -Pviennacl-omp -DskipCli
 
 #### Building Java/Scala Docs
 
-To build the Java/Scala docs use the maven `site` goal and the `docs` profile. 
+To build the Java/Scala docs use the maven `site` goal and the `docs` profile.
 
 Additionally, passing the `-Ddependency.locations.enabled=false` option will skip checking the dependency location and allow a much faster build.
-  
+
 ```bash
 mvn clean site -Pall,docs -Ddependency.locations.enabled=false
 ```
-
-
-

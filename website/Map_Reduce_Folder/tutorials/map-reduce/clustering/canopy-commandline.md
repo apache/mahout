@@ -31,7 +31,7 @@ job will be mahout-core-0.3.job
 ## Testing it on one single machine w/o cluster
 
 * Put the data: cp <PATH TO DATA> testdata
-* Run the Job: 
+* Run the Job:
 
     ./bin/mahout canopy -i testdata -o output -dm
 org.apache.mahout.common.distance.CosineDistanceMeasure -ow -t1 5 -t2 2
@@ -42,7 +42,7 @@ org.apache.mahout.common.distance.CosineDistanceMeasure -ow -t1 5 -t2 2
 
 * (As needed) Start up Hadoop: $HADOOP_HOME/bin/start-all.sh
 * Put the data: $HADOOP_HOME/bin/hadoop fs -put <PATH TO DATA> testdata
-* Run the Job: 
+* Run the Job:
 
     export HADOOP_HOME=<Hadoop Home Directory>
     export HADOOP_CONF_DIR=$HADOOP_HOME/conf
@@ -55,18 +55,17 @@ to view all outputs.
 <a name="canopy-commandline-Commandlineoptions"></a>
 # Command line options
 
-      --input (-i) input			     Path to job input directory.Must  
-    					     be a SequenceFile of	    
-    					     VectorWritable		    
-      --output (-o) output			     The directory pathname for output. 
-      --overwrite (-ow)			     If present, overwrite the output	 
-    					     directory before running job   
-      --distanceMeasure (-dm) distanceMeasure    The classname of the	    
-    					     DistanceMeasure. Default is    
-    					     SquaredEuclidean		    
-      --t1 (-t1) t1 			     T1 threshold value 	    
-      --t2 (-t2) t2 			     T2 threshold value 	    
-      --clustering (-cl)			     If present, run clustering after	
-    					     the iterations have taken place	 
-      --help (-h)				     Print out help		    
-
+      --input (-i) input			     Path to job input directory.Must
+    					     be a SequenceFile of
+    					     VectorWritable
+      --output (-o) output			     The directory pathname for output.
+      --overwrite (-ow)			     If present, overwrite the output
+    					     directory before running job
+      --distanceMeasure (-dm) distanceMeasure    The classname of the
+    					     DistanceMeasure. Default is
+    					     SquaredEuclidean
+      --t1 (-t1) t1 			     T1 threshold value
+      --t2 (-t2) t2 			     T2 threshold value
+      --clustering (-cl)			     If present, run clustering after
+    					     the iterations have taken place
+      --help (-h)				     Print out help
