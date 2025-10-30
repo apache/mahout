@@ -125,4 +125,3 @@ SVD `\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)`:
 Another way is `\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^{-1}\)`.
 
 [Halko, Martinsson, Tropp]: http://arxiv.org/abs/0909.4061
-

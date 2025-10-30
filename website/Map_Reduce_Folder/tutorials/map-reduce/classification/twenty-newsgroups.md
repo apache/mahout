@@ -175,5 +175,3 @@ If we wanted to use different parsing methods or transformations on the term fre
                 -ow
                 -o ${WORK_DIR}/20news-testing
                 -c
-
-

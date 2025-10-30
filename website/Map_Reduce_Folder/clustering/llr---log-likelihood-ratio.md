@@ -43,5 +43,3 @@ number of training examples and where features are highly interdependent.
 * [Blog post "surprise and coincidence"](http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html)
 * [G-Test](http://en.wikipedia.org/wiki/G-test)
 * [Likelihood Ratio Test](http://en.wikipedia.org/wiki/Likelihood-ratio_test)
-
-

@@ -54,4 +54,3 @@ jobs:
 
         RUBY_PATH: ~/shared/.rvm
         GEM_HOME: ${RUBY_PATH}/gems
-

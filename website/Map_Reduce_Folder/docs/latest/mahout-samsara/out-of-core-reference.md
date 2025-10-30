@@ -310,7 +310,3 @@ Set the engine specific automatic parallelism adjustment for computations on `dr
     val myDataSet = drmA.ds
 
 For more information including information on Mahout-Samsara's Algebraic Optimizer and in-core Linear algebra bindings see: [Mahout Scala Bindings and Mahout Spark Bindings for Linear Algebra Subroutines](http://mahout.apache.org/users/sparkbindings/ScalaSparkBindings.pdf)
-
-
-
-

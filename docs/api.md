@@ -112,4 +112,3 @@
 - **Parameters**:
     - `param_name` (str): The name of the parameter to handle.
 - **Usage**: Automatically invoked when applying parameterized gates to keep track of parameters efficiently.
-

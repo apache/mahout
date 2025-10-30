@@ -96,4 +96,3 @@ to view all outputs.
     					       is 0
       --clustering (-cl)			       If present, run clustering after
     					       the iterations have taken place
-

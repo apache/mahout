@@ -96,7 +96,3 @@ Spark, Flink and H20.
 * **BYODMs:** Bring Your Own Distributed Method on SparkBindings!
 * In-core jBlas matrix adapter
 * In-core GPU matrix adapters -->
-
-
-
-

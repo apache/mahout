@@ -55,4 +55,3 @@ redirect_from:
     XML Parsing|  | [*deprecated*](https://issues.apache.org/jira/browse/MAHOUT-1479?jql=text%20~%20%22wikipedia%20mahout%22) |
     Email Archive Parsing |  | [*deprecated*](https://github.com/apache/mahout/tree/master/integration/src/main/java/org/apache/mahout/text) |
     Evolutionary Processes | [x](https://github.com/apache/mahout/tree/master/mr/src/main/java/org/apache/mahout/ep) |
-
