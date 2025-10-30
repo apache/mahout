@@ -17,8 +17,8 @@ Quantum computing is a revolutionary approach to computation that leverages the 
 
 ### Why Quantum Computing Matters:
 Quantum computing has the potential to revolutionize fields such as cryptography, optimization, and material science. For example, quantum algorithms like **Shor's algorithm** can factorize large numbers exponentially faster than classical algorithms, posing a threat to current cryptographic systems. Similarly, **Grover's algorithm** can search unsorted databases quadratically faster than classical methods.
-  
----  
+
+---
 
 ## 1.2 Why Quantum Computing?
 
@@ -39,38 +39,38 @@ Quantum computing is not just a theoretical concept; it has practical implicatio
 ### 5. **Machine Learning**:
 - Quantum machine learning algorithms promise to accelerate training and improve model performance for specific tasks.
 
----  
+---
 
 ## 1.3 Quantum Computing vs. Classical Computing
 
-| Feature                | Classical Computing               | Quantum Computing               |  
-|------------------------|-----------------------------------|----------------------------------|  
-| **Basic Unit**         | Bit (0 or 1)                     | Qubit (superposition of 0 and 1)|  
-| **State Representation**| Deterministic                    | Probabilistic                   |  
-| **Operations**         | Logic gates (AND, OR, NOT, etc.) | Quantum gates (X, Y, Z, H, etc.)|  
-| **Parallelism**        | Limited by CPU cores             | Exponential parallelism via superposition |  
-| **Error Correction**   | Well-established                 | Still an active area of research|  
-  
----  
+| Feature                | Classical Computing               | Quantum Computing               |
+|------------------------|-----------------------------------|----------------------------------|
+| **Basic Unit**         | Bit (0 or 1)                     | Qubit (superposition of 0 and 1)|
+| **State Representation**| Deterministic                    | Probabilistic                   |
+| **Operations**         | Logic gates (AND, OR, NOT, etc.) | Quantum gates (X, Y, Z, H, etc.)|
+| **Parallelism**        | Limited by CPU cores             | Exponential parallelism via superposition |
+| **Error Correction**   | Well-established                 | Still an active area of research|
+
+---
 
 ## 1.4 Getting Started with Quantum Computing Using `qumat`
 
 To begin your journey into quantum computing, you'll use the `qumat` library, which provides a simple and unified interface for working with quantum circuits across different backends (e.g., Amazon Braket, Cirq, Qiskit). Here's a quick example to get you started:
 
-```python  
-from qumat import QuMat  
-  
-# Initialize a quantum circuit with 1 qubit  
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
-qc.create_empty_circuit(1)  
-  
-# Apply a Hadamard gate to create a superposition  
-qc.apply_hadamard_gate(0)  
-  
-# Execute the circuit and measure the result  
-result = qc.execute_circuit()  
-print(result)  
+```python
+from qumat import QuMat
+
+# Initialize a quantum circuit with 1 qubit
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
+qc.create_empty_circuit(1)
+
+# Apply a Hadamard gate to create a superposition
+qc.apply_hadamard_gate(0)
+
+# Execute the circuit and measure the result
+result = qc.execute_circuit()
+print(result)
 ```
 
 In this example, we:

@@ -22,7 +22,7 @@
 
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 
-// We need to turn our raw text files into RDD[(String, String)] 
+// We need to turn our raw text files into RDD[(String, String)]
 val userTagsRDD = sc.textFile("/path/to/lastfm/user_taggedartists.dat").map(line => line.split("\t")).map(a => (a(0), a(2))).filter(_._1 != "userID")
 val userTagsIDS = IndexedDatasetSpark.apply(userTagsRDD)(sc)
 

@@ -34,7 +34,7 @@ Round the room quick introductions
 ### Release plans
 * Apr: 14.2, point release with minor improvements and new build system
 
-### Ideas 
+### Ideas
 * Python bindings for DSL (XXXL)
 * Automating or maintaining Docker images (XL, including docs)
 * New parsing and processing modules
@@ -50,7 +50,7 @@ Round the room quick introductions
 ### Project management
 * Inactive PMC
 
-### Summary and next steps 
+### Summary and next steps
 * Continue monthly community calls
 * Complete JIRA focus
 * Get travis migration done, nightlies running

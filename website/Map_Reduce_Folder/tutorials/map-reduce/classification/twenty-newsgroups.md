@@ -27,7 +27,7 @@ the 20 newsgroups.
 * Mahout has been downloaded ([instructions here](https://mahout.apache.org/download/downloads.html))
 * Maven is available
 * Your environment has the following variables:
-     * **HADOOP_HOME** Environment variables refers to where Hadoop lives 
+     * **HADOOP_HOME** Environment variables refers to where Hadoop lives
      * **MAHOUT_HOME** Environment variables refers to where Mahout lives
 
 <a name="TwentyNewsgroups-Instructionsforrunningtheexample"></a>
@@ -37,7 +37,7 @@ the 20 newsgroups.
 
             $ cd $HADOOP_HOME/bin
             $ ./start-all.sh
-   
+
     Otherwise:
 
             $ export MAHOUT_LOCAL=true
@@ -51,8 +51,8 @@ the 20 newsgroups.
 
             $ ./examples/bin/classify-20newsgroups.sh
 
-4. You will be prompted to select a classification method algorithm: 
-    
+4. You will be prompted to select a classification method algorithm:
+
             1. Complement Naive Bayes
             2. Naive Bayes
             3. Stochastic Gradient Descent
@@ -61,9 +61,9 @@ Select 1 and the the script will perform the following:
 
 1. Create a working directory for the dataset and all input/output.
 2. Download and extract the *20news-bydate.tar.gz* from the [20 newsgroups dataset](http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz) to the working directory.
-3. Convert the full 20 newsgroups dataset into a < Text, Text > SequenceFile. 
+3. Convert the full 20 newsgroups dataset into a < Text, Text > SequenceFile.
 4. Convert and preprocesses the dataset into a < Text, VectorWritable > SequenceFile containing term frequencies for each document.
-5. Split the preprocessed dataset into training and testing sets. 
+5. Split the preprocessed dataset into training and testing sets.
 6. Train the classifier.
 7. Test the classifier.
 
@@ -109,71 +109,69 @@ Output should look something like:
 
 <a name="TwentyNewsgroups-ComplementaryNaiveBayes"></a>
 ## End to end commands to build a CBayes model for 20 newsgroups
-The [20 newsgroups example script](https://github.com/apache/mahout/blob/master/examples/bin/classify-20newsgroups.sh) issues the following commands as outlined above. We can build a CBayes classifier from the command line by following the process in the script: 
+The [20 newsgroups example script](https://github.com/apache/mahout/blob/master/examples/bin/classify-20newsgroups.sh) issues the following commands as outlined above. We can build a CBayes classifier from the command line by following the process in the script:
 
 *Be sure that **MAHOUT_HOME**/bin and **HADOOP_HOME**/bin are in your **$PATH***
 
 1. Create a working directory for the dataset and all input/output.
-           
+
             $ export WORK_DIR=/tmp/mahout-work-${USER}
             $ mkdir -p ${WORK_DIR}
 
 2. Download and extract the *20news-bydate.tar.gz* from the [20newsgroups dataset](http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz) to the working directory.
 
-            $ curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz 
+            $ curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz
                 -o ${WORK_DIR}/20news-bydate.tar.gz
             $ mkdir -p ${WORK_DIR}/20news-bydate
             $ cd ${WORK_DIR}/20news-bydate && tar xzf ../20news-bydate.tar.gz && cd .. && cd ..
             $ mkdir ${WORK_DIR}/20news-all
             $ cp -R ${WORK_DIR}/20news-bydate/*/* ${WORK_DIR}/20news-all
      * If you're running on a Hadoop cluster:
- 
+
             $ hadoop dfs -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
 
-3. Convert the full 20 newsgroups dataset into a < Text, Text > SequenceFile. 
-          
-            $ mahout seqdirectory 
-                -i ${WORK_DIR}/20news-all 
-                -o ${WORK_DIR}/20news-seq 
+3. Convert the full 20 newsgroups dataset into a < Text, Text > SequenceFile.
+
+            $ mahout seqdirectory
+                -i ${WORK_DIR}/20news-all
+                -o ${WORK_DIR}/20news-seq
                 -ow
-            
-4. Convert and preprocesses the dataset into  a < Text, VectorWritable > SequenceFile containing term frequencies for each document. 
-            
-            $ mahout seq2sparse 
-                -i ${WORK_DIR}/20news-seq 
+
+4. Convert and preprocesses the dataset into  a < Text, VectorWritable > SequenceFile containing term frequencies for each document.
+
+            $ mahout seq2sparse
+                -i ${WORK_DIR}/20news-seq
                 -o ${WORK_DIR}/20news-vectors
-                -lnorm 
-                -nv 
+                -lnorm
+                -nv
                 -wt tfidf
-If we wanted to use different parsing methods or transformations on the term frequency vectors we could supply different options here e.g.: -ng 2 for bigrams or -n 2 for L2 length normalization.  See the [Creating vectors from text](http://mahout.apache.org/users/basics/creating-vectors-from-text.html) page for a list of all seq2sparse options.   
+If we wanted to use different parsing methods or transformations on the term frequency vectors we could supply different options here e.g.: -ng 2 for bigrams or -n 2 for L2 length normalization.  See the [Creating vectors from text](http://mahout.apache.org/users/basics/creating-vectors-from-text.html) page for a list of all seq2sparse options.
 
 5. Split the preprocessed dataset into training and testing sets.
 
-            $ mahout split 
-                -i ${WORK_DIR}/20news-vectors/tfidf-vectors 
-                --trainingOutput ${WORK_DIR}/20news-train-vectors 
-                --testOutput ${WORK_DIR}/20news-test-vectors  
-                --randomSelectionPct 40 
+            $ mahout split
+                -i ${WORK_DIR}/20news-vectors/tfidf-vectors
+                --trainingOutput ${WORK_DIR}/20news-train-vectors
+                --testOutput ${WORK_DIR}/20news-test-vectors
+                --randomSelectionPct 40
                 --overwrite --sequenceFiles -xm sequential
- 
+
 6. Train the classifier.
 
-            $ mahout trainnb 
+            $ mahout trainnb
                 -i ${WORK_DIR}/20news-train-vectors
-                -el  
-                -o ${WORK_DIR}/model 
-                -li ${WORK_DIR}/labelindex 
-                -ow 
+                -el
+                -o ${WORK_DIR}/model
+                -li ${WORK_DIR}/labelindex
+                -ow
                 -c
 
 7. Test the classifier.
 
-            $ mahout testnb 
+            $ mahout testnb
                 -i ${WORK_DIR}/20news-test-vectors
-                -m ${WORK_DIR}/model 
-                -l ${WORK_DIR}/labelindex 
-                -ow 
-                -o ${WORK_DIR}/20news-testing 
+                -m ${WORK_DIR}/model
+                -l ${WORK_DIR}/labelindex
+                -ow
+                -o ${WORK_DIR}/20news-testing
                 -c
-
- 

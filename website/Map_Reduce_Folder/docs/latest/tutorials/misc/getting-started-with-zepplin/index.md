@@ -7,8 +7,8 @@ redirect_from:
 ---
 
 Mahout has lots of pieces, and can be overwhelming to get started. We've tried to make it easier for users by providing
-a precompiled Docker container which runs Apache Zeppelin (a popular notebooking tool) with an Apache Spark 
-interpreter that is preconfigured for Mahout and has all the required libraries loaded. We hope this will help you get 
+a precompiled Docker container which runs Apache Zeppelin (a popular notebooking tool) with an Apache Spark
+interpreter that is preconfigured for Mahout and has all the required libraries loaded. We hope this will help you get
 "up and running with Mahout" as quickly as possible. (If you are interested in adding Apache Mahout to an existing Zeppelin
 Instance, see [this tutorial](http://mahout.apache.org/docs/latest/tutorials/misc/mahout-in-zeppelin/)).
 

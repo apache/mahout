@@ -8,7 +8,7 @@ redirect_from:
 
 # Building a Correlated Cross-Occurrence (CCO) Recommenders with the Mahout CLI
 
-Mahout's CCO algorithm is one of a new breed of "Multimodal" recommenders that can use input of many types in very flexible ways. 
+Mahout's CCO algorithm is one of a new breed of "Multimodal" recommenders that can use input of many types in very flexible ways.
 
 Mahout provides several important building blocks for creating recommendations using Spark. *spark-itemsimilarity* can be used to create "other people also liked these things" type recommendations and paired with a search engine can personalize recommendations for individual users. *spark-rowsimilarity* can provide non-personalized content based recommendations and when paired with a search engine can be used to personalize content based recommendations.
 
@@ -16,7 +16,7 @@ Mahout provides several important building blocks for creating recommendations u
 
 This is a simplified Lambda architecture with Mahout's *spark-itemsimilarity* playing the batch model building role and a search engine playing the realtime serving role.
 
-You will create two collections, one for user history and one for item "indicators". Indicators are user interactions that lead to the wished for interaction. So for example if you wish a user to purchase something and you collect all users purchase interactions *spark-itemsimilarity* will create a purchase indicator from them. But you can also use other user interactions in a cross-cooccurrence calculation, to create purchase indicators. 
+You will create two collections, one for user history and one for item "indicators". Indicators are user interactions that lead to the wished for interaction. So for example if you wish a user to purchase something and you collect all users purchase interactions *spark-itemsimilarity* will create a purchase indicator from them. But you can also use other user interactions in a cross-cooccurrence calculation, to create purchase indicators.
 
 User history is used as a query on the item collection with its cooccurrence and cross-cooccurrence indicators (there may be several indicators). The primary interaction or indicator is picked to be the thing you want to recommend, other action / indicators are believed to be correlated but may not indicate exactly the same user intent. For instance in an ecom recommender a purchase is a very good primary action / indicator, but you may also know product detail-views, or additions-to-wishlists. These can be considered secondary actions / indicators which may all be used to calculate cross-cooccurrence indicators. The user history that forms the recommendations query will contain recorded primary and secondary indicators all targeted towards the correct indicator fields.
 
@@ -33,20 +33,20 @@ Below are the command line jobs but the drivers and associated code can also be 
 ## 1. spark-itemsimilarity
 *spark-itemsimilarity* is the Spark counterpart of the of the Mahout mapreduce job called *itemsimilarity*. It takes in elements of interactions, which have userID, itemID, and optionally a value. It will produce one of more indicator matrices created by comparing every user's interactions with every other user. The indicator matrix is an item x item matrix where the values are log-likelihood ratio strengths. For the legacy mapreduce version, there were several possible similarity measures but these are being deprecated in favor of LLR because in practice it performs the best.
 
-Mahout's mapreduce version of itemsimilarity takes a text file that is expected to have user and item IDs that conform to 
+Mahout's mapreduce version of itemsimilarity takes a text file that is expected to have user and item IDs that conform to
 Mahout's ID requirements--they are non-negative integers that can be viewed as row and column numbers in a matrix.
 
-*spark-itemsimilarity* also extends the notion of cooccurrence to cross-cooccurrence, in other words the Spark version will 
-account for multi-modal interactions and create cross-cooccurrence indicator matrices allowing the use of much more data in 
-creating recommendations or similar item lists. People try to do this by mixing different indicators and giving them weights. 
+*spark-itemsimilarity* also extends the notion of cooccurrence to cross-cooccurrence, in other words the Spark version will
+account for multi-modal interactions and create cross-cooccurrence indicator matrices allowing the use of much more data in
+creating recommendations or similar item lists. People try to do this by mixing different indicators and giving them weights.
 For instance they might say an item-view is 0.2 of an item purchase. In practice this is often not helpful. Spark-itemsimilarity's
 cross-cooccurrence is a more principled way to handle this case. In effect it scrubs secondary indicators with the indicator you want
-to recommend.   
+to recommend.
 
 
     spark-itemsimilarity Mahout 1.0
     Usage: spark-itemsimilarity [options]
-    
+
     Disconnected from the target VM, address: '127.0.0.1:64676', transport: 'socket'
     Input, output options
       -i <value> | --input <value>
@@ -55,15 +55,15 @@ to recommend.
             Secondary input path for cross-similarity calculation, same restrictions as "--input" (optional). Default: empty.
       -o <value> | --output <value>
             Path for output, any local or HDFS supported URI (required)
-    
+
     Algorithm control options:
       -mppu <value> | --maxPrefs <value>
             Max number of preferences to consider per user (optional). Default: 500
       -m <value> | --maxSimilaritiesPerItem <value>
             Limit the number of similarities per item to this number (optional). Default: 100
-    
+
     Note: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.
-    
+
     Input text file schema options:
       -id <value> | --inDelim <value>
             Input delimiter character (optional). Default: "[,\t]"
@@ -77,15 +77,15 @@ to recommend.
             Column number (0 based Int) containing the item ID string (optional). Default: 1
       -fc <value> | --filterColumn <value>
             Column number (0 based Int) containing the filter string (optional). Default: -1 for no filter
-    
+
     Using all defaults the input is expected of the form: "userID<tab>itemId" or "userID<tab>itemID<tab>any-text..." and all rows will be used
-    
+
     File discovery options:
       -r | --recursive
             Searched the -i path recursively for files that match --filenamePattern (optional), Default: false
       -fp <value> | --filenamePattern <value>
             Regex to match in determining input files (optional). Default: filename in the --input option or "^part-.*" if --input is a directory
-    
+
     Output text file schema options:
       -rd <value> | --rowKeyDelim <value>
             Separates the rowID key from the vector values list (optional). Default: "\t"
@@ -96,22 +96,22 @@ to recommend.
       -os | --omitStrength
             Do not write the strength to the output files (optional), Default: false.
     This option is used to output indexable data for creating a search engine recommender.
-    
+
     Default delimiters will produce output of the form: "itemID1<tab>itemID2:value2<space>itemID10:value10..."
-    
+
     Spark config options:
       -ma <value> | --master <value>
             Spark Master URL (optional). Default: "local". Note that you can specify the number of cores to get a performance improvement, for example "local[4]"
       -sem <value> | --sparkExecutorMem <value>
             Max Java heap available as "executor memory" on each node (optional). Default: 4g
       -rs <value> | --randomSeed <value>
-            
+
       -h | --help
             prints this usage text
 
 This looks daunting but defaults to simple fairly sane values to take exactly the same input as legacy code and is pretty flexible. It allows the user to point to a single text file, a directory full of files, or a tree of directories to be traversed recursively. The files included can be specified with either a regex-style pattern or filename. The schema for the file is defined by column numbers, which map to the important bits of data including IDs and values. The files can even contain filters, which allow unneeded rows to be discarded or used for cross-cooccurrence calculations.
 
-See `ItemSimilarityDriver.scala` in Mahout's spark module if you want to customize the code. 
+See `ItemSimilarityDriver.scala` in Mahout's spark module if you want to customize the code.
 
 ### Defaults in the _**spark-itemsimilarity**_ CLI
 
@@ -133,13 +133,13 @@ This will use the "local" Spark context and will output the standard text versio
 
 ### <a name="multiple-actions">How To Use Multiple User Indicators</a>
 
-Often we record various indicators the user takes for later analytics. These can now be used to make recommendations. 
+Often we record various indicators the user takes for later analytics. These can now be used to make recommendations.
 The idea of a recommender is to recommend the action you want the user to make. For an ecom app this might be a purchase action recorded in a "purchase" indicator. It is usually not a good idea to just treat other indicators the same as the indicator you want to recommend. For example is you have user purchase and view data, never treat a view as a purchase it will never increase the quality of recommendations, instead use the view data as a secondary indicator so the CCO algorithm will find meaningful correlated cross-occurrences. Without this the views will be so noisy they will almost surely reduce the performance of the recommender. Too many people have fallen into this mistake. With *spark-itemsimilarity*
 we can now use both indicators. Mahout will use cross-occurrence analysis to limit the views to ones that do predict purchases.
-We do this by treating the primary indicator (purchase) as data for the indicator matrix and use the secondary indicator (view) 
-to calculate the cross-cooccurrence indicator matrix.  
+We do this by treating the primary indicator (purchase) as data for the indicator matrix and use the secondary indicator (view)
+to calculate the cross-cooccurrence indicator matrix.
 
-*spark-itemsimilarity* can read separate indicators from separate files or from a mixed indicator log by filtering certain lines. For a mixed 
+*spark-itemsimilarity* can read separate indicators from separate files or from a mixed indicator log by filtering certain lines. For a mixed
 indicator log of the form:
 
     u1,purchase,iphone
@@ -182,7 +182,7 @@ Use the following options:
 
 ### Output
 
-The output of the job will be the standard text version of two Mahout DRMs. This is a case where we are calculating 
+The output of the job will be the standard text version of two Mahout DRMs. This is a case where we are calculating
 cross-cooccurrence so a primary indicator matrix and cross-cooccurrence indicator matrix will be created
 
     out-path
@@ -230,7 +230,7 @@ A common method of storing data is in log files. If they are written using some 
     2014-06-23 14:46:53.115<tab>u3<tab>view<tab>random text<tab>nexus
     2014-06-23 14:46:53.115<tab>u4<tab>view<tab>random text<tab>iphone
     2014-06-23 14:46:53.115<tab>u4<tab>view<tab>random text<tab>ipad
-    2014-06-23 14:46:53.115<tab>u4<tab>view<tab>random text<tab>galaxy    
+    2014-06-23 14:46:53.115<tab>u4<tab>view<tab>random text<tab>galaxy
 
 Can be parsed with the following CLI and run on the cluster producing the same output as the above example. The important bit of information in the example tab delimited file are user-id, indicator-name, and item-id. The rest is ignored.
 
@@ -247,35 +247,35 @@ Can be parsed with the following CLI and run on the cluster producing the same o
 
 ## 2. spark-rowsimilarity
 
-*spark-rowsimilarity* is the companion to *spark-itemsimilarity* the primary difference is that it takes a text file version of 
+*spark-rowsimilarity* is the companion to *spark-itemsimilarity* the primary difference is that it takes a text file version of
 a matrix of sparse vectors with optional application specific IDs and it finds similar rows rather than items (columns). Its use is
-not limited to collaborative filtering. The input is in text-delimited form where there are three delimiters used. By 
+not limited to collaborative filtering. The input is in text-delimited form where there are three delimiters used. By
 default it reads `(rowID<tab>columnID1:strength1<space>columnID2:strength2...)` Since this job only supports LLR similarity,
- which does not use the input strengths, they may be omitted in the input. It writes 
-`(rowID<tab>rowID1:strength1<space>rowID2:strength2...)` 
-The output is sorted by strength descending. The output can be interpreted as a row ID from the primary input followed 
+ which does not use the input strengths, they may be omitted in the input. It writes
+`(rowID<tab>rowID1:strength1<space>rowID2:strength2...)`
+The output is sorted by strength descending. The output can be interpreted as a row ID from the primary input followed
 by a list of the most similar rows.
 
 The command line interface is:
 
     spark-rowsimilarity Mahout 0.x
     Usage: spark-rowsimilarity [options]
-    
+
     Input, output options
       -i <value> | --input <value>
             Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)
       -o <value> | --output <value>
             Path for output, any local or HDFS supported URI (required)
-    
+
     Algorithm control options:
       -mo <value> | --maxObservations <value>
             Max number of observations to consider per row (optional). Default: 500
       -m <value> | --maxSimilaritiesPerRow <value>
             Limit the number of similarities per item to this number (optional). Default: 100
-    
+
     Note: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.
     Disconnected from the target VM, address: '127.0.0.1:49162', transport: 'socket'
-    
+
     Output text file schema options:
       -rd <value> | --rowKeyDelim <value>
             Separates the rowID key from the vector values list (optional). Default: "\t"
@@ -286,39 +286,39 @@ The command line interface is:
       -os | --omitStrength
             Do not write the strength to the output files (optional), Default: false.
     This option is used to output indexable data for creating a search engine recommender.
-    
+
     Default delimiters will produce output of the form: "itemID1<tab>itemID2:value2<space>itemID10:value10..."
-    
+
     File discovery options:
       -r | --recursive
             Searched the -i path recursively for files that match --filenamePattern (optional), Default: false
       -fp <value> | --filenamePattern <value>
             Regex to match in determining input files (optional). Default: filename in the --input option or "^part-.*" if --input is a directory
-    
+
     Spark config options:
       -ma <value> | --master <value>
             Spark Master URL (optional). Default: "local". Note that you can specify the number of cores to get a performance improvement, for example "local[4]"
       -sem <value> | --sparkExecutorMem <value>
             Max Java heap available as "executor memory" on each node (optional). Default: 4g
       -rs <value> | --randomSeed <value>
-            
+
       -h | --help
             prints this usage text
 
-See RowSimilarityDriver.scala in Mahout's spark module if you want to customize the code. 
+See RowSimilarityDriver.scala in Mahout's spark module if you want to customize the code.
 
 #3. Using *spark-rowsimilarity* with Text Data
 
-Another use case for *spark-rowsimilarity* is in finding similar textual content. For instance given the tags associated with 
-a blog post, which other posts have similar tags. In this case the columns are tags and the rows are posts. Since LLR is 
-the only similarity method supported this is not the optimal way to determine general "bag-of-words" document similarity. 
-LLR is used more as a quality filter than as a similarity measure. However *spark-rowsimilarity* will produce 
+Another use case for *spark-rowsimilarity* is in finding similar textual content. For instance given the tags associated with
+a blog post, which other posts have similar tags. In this case the columns are tags and the rows are posts. Since LLR is
+the only similarity method supported this is not the optimal way to determine general "bag-of-words" document similarity.
+LLR is used more as a quality filter than as a similarity measure. However *spark-rowsimilarity* will produce
 lists of similar docs for every doc if input is docs with lists of terms. The Apache [Lucene](http://lucene.apache.org) project provides several methods of analyzing and tokenizing documents.
 
 # <a name="unified-recommender">4. Creating a Multimodal Recommender</a>
 
 Using the output of *spark-itemsimilarity* and *spark-rowsimilarity* you can build a miltimodal cooccurrence and content based
- recommender that can be used in both or either mode depending on indicators available and the history available at 
+ recommender that can be used in both or either mode depending on indicators available and the history available at
 runtime for a user. Some slide describing this method can be found [here](http://occamsmachete.com/ml/2014/10/07/creating-a-unified-recommender-with-mahout-and-a-search-engine/)
 
 ## Requirements
@@ -336,43 +336,43 @@ Indicators come in 3 types
 2. **Content**: calculated from item metadata or content using *spark-rowsimilarity*
 3. **Intrinsic**: assigned to items as metadata. Can be anything that describes the item. These will be used in search engine queries to implement business rules.
 
-The query for recommendations will be a mix of values meant to match one of your indicators. The query can be constructed 
-from user history and values derived from context (category being viewed for instance) or special pre-calculated data 
-(popularity rank for instance). This blending of indicators allows for creating many flavors or recommendations to fit 
+The query for recommendations will be a mix of values meant to match one of your indicators. The query can be constructed
+from user history and values derived from context (category being viewed for instance) or special pre-calculated data
+(popularity rank for instance). This blending of indicators allows for creating many flavors or recommendations to fit
 a very wide variety of circumstances.
 
-With the right mix of indicators developers can construct a single query that works for completely new items and new users 
+With the right mix of indicators developers can construct a single query that works for completely new items and new users
 while working well for items with lots of interactions and users with many recorded indicators. In other words by adding in content and intrinsic indicators developers can create a solution for the "cold-start" problem that gracefully improves with more user history
-and as items have more interactions. It is also possible to create a completely content-based recommender that personalizes 
+and as items have more interactions. It is also possible to create a completely content-based recommender that personalizes
 recommendations.
 
 ## Example with 3 Indicators
 
-You will need to decide how you store user indicator data so they can be processed by the item and row similarity jobs and 
-this is most easily done by using text files as described above. The data that is processed by these jobs is considered the 
-training data. You will need some amount of user history in your recs query. It is typical to use the most recent user history 
-but need not be exactly what is in the training set, which may include a greater volume of historical data. Keeping the user 
-history for query purposes could be done with a database by storing it in a users table. In the example above the two 
-collaborative filtering indicators are "purchase" and "view", but let's also add tags (taken from catalog categories or other 
-descriptive metadata). 
+You will need to decide how you store user indicator data so they can be processed by the item and row similarity jobs and
+this is most easily done by using text files as described above. The data that is processed by these jobs is considered the
+training data. You will need some amount of user history in your recs query. It is typical to use the most recent user history
+but need not be exactly what is in the training set, which may include a greater volume of historical data. Keeping the user
+history for query purposes could be done with a database by storing it in a users table. In the example above the two
+collaborative filtering indicators are "purchase" and "view", but let's also add tags (taken from catalog categories or other
+descriptive metadata).
 
-We will need to create 1 cooccurrence indicator from the primary indicator (purchase) 1 cross-occurrence indicator 
-from the secondary indicator (view) 
+We will need to create 1 cooccurrence indicator from the primary indicator (purchase) 1 cross-occurrence indicator
+from the secondary indicator (view)
 and 1 content indicator (tags). We'll have to run *spark-itemsimilarity* once and *spark-rowsimilarity* once.
 
-We have described how to create the collaborative filtering indicators for purchase and view (the [How to use Multiple User 
-Indicators](#multiple-actions) section) but tags will be a slightly different process. We want to use the fact that 
-certain items have tags similar to the ones associated with a user's purchases. This is not a collaborative filtering indicator 
-but rather a "content" or "metadata" type indicator since you are not using other users' history, only the 
-individual that you are making recs for. This means that this method will make recommendations for items that have 
+We have described how to create the collaborative filtering indicators for purchase and view (the [How to use Multiple User
+Indicators](#multiple-actions) section) but tags will be a slightly different process. We want to use the fact that
+certain items have tags similar to the ones associated with a user's purchases. This is not a collaborative filtering indicator
+but rather a "content" or "metadata" type indicator since you are not using other users' history, only the
+individual that you are making recs for. This means that this method will make recommendations for items that have
 no collaborative filtering data, as happens with new items in a catalog. New items may have tags assigned but no one
  has purchased or viewed them yet. In the final query we will mix all 3 indicators.
 
 ## Content Indicator
 
-To create a content-indicator we'll make use of the fact that the user has purchased items with certain tags. We want to find 
-items with the most similar tags. Notice that other users' behavior is not considered--only other item's tags. This defines a 
-content or metadata indicator. They are used when you want to find items that are similar to other items by using their 
+To create a content-indicator we'll make use of the fact that the user has purchased items with certain tags. We want to find
+items with the most similar tags. Notice that other users' behavior is not considered--only other item's tags. This defines a
+content or metadata indicator. They are used when you want to find items that are similar to other items by using their
 content or metadata, not by which users interacted with them.
 
 **Note**: It may be advisable to treat tags as cross-cooccurrence indicators but for the sake of an example they are treated here as content only.
@@ -388,9 +388,9 @@ The full collection will look like the tags column from a catalog DB. For our ec
     9446577d<tab>women tops chambray clothing casual
     ...
 
-We'll use *spark-rowimilairity* because we are looking for similar rows, which encode items in this case. As with the 
-collaborative filtering indicators we use the --omitStrength option. The strengths created are 
-probabilistic log-likelihood ratios and so are used to filter unimportant similarities. Once the filtering or downsampling 
+We'll use *spark-rowimilairity* because we are looking for similar rows, which encode items in this case. As with the
+collaborative filtering indicators we use the --omitStrength option. The strengths created are
+probabilistic log-likelihood ratios and so are used to filter unimportant similarities. Once the filtering or downsampling
 is finished we no longer need the strengths. We will get an indicator matrix of the form:
 
     itemID<tab>list-of-item IDs
@@ -400,30 +400,30 @@ This is a content indicator since it has found other items with similar content 
 
     3459860b<tab>3459860b 3459860b 6749860c 5959860a 3434860a 3477860a
     9446577d<tab>9446577d 9496577d 0943577d 8346577d 9442277d 9446577e
-    ...  
-    
+    ...
+
 We now have three indicators, two collaborative filtering type and one content type.
 
 ## Multimodal Recommender Query
 
-The actual form of the query for recommendations will vary depending on your search engine but the intent is the same. For a given user, map their history of an indicator or content to the correct indicator field and perform an OR'd query. 
+The actual form of the query for recommendations will vary depending on your search engine but the intent is the same. For a given user, map their history of an indicator or content to the correct indicator field and perform an OR'd query.
 
-We have 3 indicators, these are indexed by the search engine into 3 fields, we'll call them "purchase", "view", and "tags". 
+We have 3 indicators, these are indexed by the search engine into 3 fields, we'll call them "purchase", "view", and "tags".
 We take the user's history that corresponds to each indicator and create a query of the form:
 
     Query:
       field: purchase; q:user's-purchase-history
       field: view; q:user's view-history
       field: tags; q:user's-tags-associated-with-purchases
-      
-The query will result in an ordered list of items recommended for purchase but skewed towards items with similar tags to 
-the ones the user has already purchased. 
 
-This is only an example and not necessarily the optimal way to create recs. It illustrates how business rules can be 
-translated into recommendations. This technique can be used to skew recommendations towards intrinsic indicators also. 
-For instance you may want to put personalized popular item recs in a special place in the UI. Create a popularity indicator 
+The query will result in an ordered list of items recommended for purchase but skewed towards items with similar tags to
+the ones the user has already purchased.
+
+This is only an example and not necessarily the optimal way to create recs. It illustrates how business rules can be
+translated into recommendations. This technique can be used to skew recommendations towards intrinsic indicators also.
+For instance you may want to put personalized popular item recs in a special place in the UI. Create a popularity indicator
 by tagging items with some category of popularity (hot, warm, cold for instance) then
-index that as a new indicator field and include the corresponding value in a query 
+index that as a new indicator field and include the corresponding value in a query
 on the popularity field. If we use the ecom example but use the query to get "hot" recommendations it might look like this:
 
     Query:

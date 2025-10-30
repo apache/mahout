@@ -6,14 +6,14 @@ labels: ["docs"]
 assignees: []
 ---
 
-### Description  
+### Description
 What is unclear, incorrect, or missing?
 
-### Location of the Issue  
+### Location of the Issue
 Provide links or file paths where the issue exists.
 
-### Suggested Improvement  
+### Suggested Improvement
 How should this be fixed?
 
-### Additional Context  
+### Additional Context
 Anything else that would help improve the documentation.

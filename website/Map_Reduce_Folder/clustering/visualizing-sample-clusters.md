@@ -41,7 +41,7 @@ If you are using Eclipse, just right-click on each of the classes mentioned abov
     cd $MAHOUT_HOME/examples
     mvn -q exec:java -Dexec.mainClass=org.apache.mahout.clustering.display.DisplayClustering
 
-You can substitute other names above for *DisplayClustering*. 
+You can substitute other names above for *DisplayClustering*.
 
 
 Note that some of these programs display the sample points and then superimpose all of the clusters from each iteration. The last iteration's clusters are in

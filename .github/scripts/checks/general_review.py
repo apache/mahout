@@ -86,24 +86,24 @@ class GeneralReviewCheck:
         return None
 
     def generate_general_impression(self, pr):
-        prompt = f"""Provide a general impression of this pull request. Consider:  
-- Overall code quality  
-- Code organization  
-- Documentation  
-- Potential improvements  
-- Areas that need special attention  
-  
-Pull Request Details:  
-Title: {pr.title}  
-Description: {pr.body}  
-Files Changed: {pr.changed_files}  
-Additions: {pr.additions}  
-Deletions: {pr.deletions}  
-  
-Provide your analysis in markdown format with these sections:  
-1. Overall Impression  
-2. Strengths  
-3. Areas for Improvement  
+        prompt = f"""Provide a general impression of this pull request. Consider:
+- Overall code quality
+- Code organization
+- Documentation
+- Potential improvements
+- Areas that need special attention
+
+Pull Request Details:
+Title: {pr.title}
+Description: {pr.body}
+Files Changed: {pr.changed_files}
+Additions: {pr.additions}
+Deletions: {pr.deletions}
+
+Provide your analysis in markdown format with these sections:
+1. Overall Impression
+2. Strengths
+3. Areas for Improvement
 4. Special Attention Needed"""
 
         response = self.client.chat.completions.create(

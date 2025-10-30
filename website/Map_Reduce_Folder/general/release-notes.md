@@ -4,7 +4,7 @@ title: Release Notes
 redirect_from:
   - /general/release-notes
   - /general/release-notes.html
-    
+
 ---
 
 # Release Notes
@@ -14,7 +14,7 @@ redirect_from:
 This release marks a major milestone for the “Samsara” environment’s goal
 of providing an engine neutral math platform by now supporting Apache Flink.
 While still experimental, the mahout Flink bindings now offer all of the R-Like
-semantics for linear algebra operations, matrix decompositions, 
+semantics for linear algebra operations, matrix decompositions,
 and algorithms of the “Samsara” platform for execution on a Flink back-end.
 
 This release gives users of Apache Flink out of the box access to the following features (and more):
@@ -96,7 +96,7 @@ Highlights include:
 * Adding in-place elementwise functional assignment (e.g. mxA := exp _, mxA ::= exp _).
 * Distributed and in-core version of simple elementwise analogues of scala.math._. for example, for log(x) the convention is dlog(drm), mlog(mx), vlog(vec). Unfortunately we cannot overload these functions over what is done in scala.math, i.e. scala would not allow log(mx) or log(drm) and log(Double) at the same time, mainly because they are being defined in different packages.
 * Distributed and in-core first and second moment routines. R analogs: mean(), colMeans(), rowMeans(), variance(), sd(). By convention, distributed versions are prepended by (d) letter: colMeanVars() colMeanStdevs() dcolMeanVars() dcolMeanStdevs().
-* Distance and squared distance matrix routines. R analog: dist(). Provide both squared and non-squared Euclidean distance matrices. By convention, distributed versions are prepended by (d) letter: dist(x), sqDist(x), dsqDist(x). Also a variation for pair-wise distance matrix of two different inputs x and y: sqDist(x,y), dsqDist(x,y). 
+* Distance and squared distance matrix routines. R analog: dist(). Provide both squared and non-squared Euclidean distance matrices. By convention, distributed versions are prepended by (d) letter: dist(x), sqDist(x), dsqDist(x). Also a variation for pair-wise distance matrix of two different inputs x and y: sqDist(x,y), dsqDist(x,y).
 * DRM row sampling api.
 * Distributed performance bug fixes. This relates mostly to (a) matrix multiplication deficiencies, and (b) handling parallelism.
 * Distributed engine neutral allreduceBlock() operator api for Spark and H2O.
@@ -105,11 +105,11 @@ Highlights include:
 * Added +=: and *=: operators on vectors.
 * Closeable API for broadcast tensors.
 * Support for conversion of any type-keyed DRM into ordinally-keyed DRM.
-* Scala logging style. 
+* Scala logging style.
 * rowSumsMap() summary for non-int-keyed DRMs.
-* elementwise power operator ^ . 
-* R-like vector concatenation operator. 
-* In-core functional assignments e.g.: mxA := { (x) => x * x}. 
+* elementwise power operator ^ .
+* R-like vector concatenation operator.
+* In-core functional assignments e.g.: mxA := { (x) => x * x}.
 * Straighten out behavior of Matrix.iterator() and iterateNonEmpty().
 * New mutable transposition view for in-core matrices.  In-core matrix transpose view. rewrite with mostly two goals in mind: (1) enable mutability, e.g. for (col <- mxA.t) col := k (2) translate matrix structural flavor for optimizers correctly. i.e. new SparseRowMatrix.t carries on as column-major structure.
 * Native support for kryo serialization of tensor types.
@@ -128,10 +128,10 @@ Highlights include:
 
 #### 11 April 2015 - Apache Mahout 0.10.0 released
 
-Mahout 0.10.0 was a major release, which separates out a ML environment (we call Mahout-Samsara) including an 
-extended version of Scala that is largely backend independent but runs fully on Spark. The Hadoop MapReduce versions of 
-Mahout algorithms are still maintained but no new MapReduce contributions are accepted. From this release onwards 
-contributions must be Mahout Samsara based or at least run on Spark. 
+Mahout 0.10.0 was a major release, which separates out a ML environment (we call Mahout-Samsara) including an
+extended version of Scala that is largely backend independent but runs fully on Spark. The Hadoop MapReduce versions of
+Mahout algorithms are still maintained but no new MapReduce contributions are accepted. From this release onwards
+contributions must be Mahout Samsara based or at least run on Spark.
 
 Highlights include:
 
@@ -240,5 +240,5 @@ Changes in 0.10.0 are detailed <a href="https://github.com/apache/mahout/blob/ma
  * [Mahout 0.5](https://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12315255&styleName=Text&projectId=12310751&Create=Create&atl_token=A5KQ-2QAV-T4JA-FDED|20f0d06214912accbd47acf2f0a89231ed00a767|lin)
  * [Mahout 0.4](https://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12314281&styleName=Text&projectId=12310751&Create=Create&atl_token=A5KQ-2QAV-T4JA-FDED|20f0d06214912accbd47acf2f0a89231ed00a767|lin)
  * [Mahout 0.3](https://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12314281&styleName=Text&projectId=12310751&Create=Create&atl_token=A5KQ-2QAV-T4JA-FDED|20f0d06214912accbd47acf2f0a89231ed00a767|lin)
- * [Mahout 0.2](https://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12313278&styleName=Text&projectId=12310751&Create=Create&atl_token=A5KQ-2QAV-T4JA-FDED|20f0d06214912accbd47acf2f0a89231ed00a767|lin) 
+ * [Mahout 0.2](https://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12313278&styleName=Text&projectId=12310751&Create=Create&atl_token=A5KQ-2QAV-T4JA-FDED|20f0d06214912accbd47acf2f0a89231ed00a767|lin)
  * [Mahout 0.1](https://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12312976&styleName=Html&projectId=12310751&Create=Create&atl_token=A5KQ-2QAV-T4JA-FDED%7C48e83cdefb8bca42acf8f129692f8c3a05b360cf%7Clout)

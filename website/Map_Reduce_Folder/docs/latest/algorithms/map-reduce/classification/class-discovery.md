@@ -11,7 +11,7 @@ redirect_from:
 See http://www.cs.bham.ac.uk/~wbl/biblio/gecco1999/GP-417.pdf
 
 CDGA uses a Genetic Algorithm to discover a classification rule for a given
-dataset. 
+dataset.
 A dataset can be seen as a table:
 
 <table>
@@ -114,15 +114,15 @@ file
     * param 7 : mutation precision
     * param 8 : population size
     * param 9 : number of generations before the program stops
-    
+
     For more information about 4th parameter, please see [Multi-point Crossover|http://www.geatbx.com/docu/algindex-03.html#P616_36571]
 .
     For a detailed explanation about the 5th, 6th and 7th parameters, please
 see [Real Valued Mutation|http://www.geatbx.com/docu/algindex-04.html#P659_42386]
 .
-    
+
     *TODO*: Fill in where to find the output and what it means.
-    
+
     h1. The info file:
     To run properly, CDGA needs some informations about the dataset. Each
 dataset should be accompanied by an .infos file that contains the needed
@@ -136,10 +136,10 @@ describes it, it can be one of the following:
       if the attribute is categorial (nominal), and its possible values
     * NUMERICAL, min, max
       if the attribute is numerical, and its min and max values
-    
+
     This file can be generated automaticaly using a special tool available with
 CDGA.
-    
+
 
 
 *  the tool searches for an existing infos file (*must be filled by the
@@ -149,7 +149,7 @@ the ".infos" extension, that contain the type of the attributes:
   ** 'C' categorical attribute
   ** 'L' label (this also a categorical attribute)
   ** 'I' to ignore the attribute
-  each attribute is in a separate 
+  each attribute is in a separate
 * A Hadoop job is used to parse the dataset and collect the informations.
 This means that *the dataset can be distributed over HDFS*.
 * the results are written back in the same .info file, with the correct

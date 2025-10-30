@@ -14,7 +14,7 @@ occurrence of an event. It makes use of several predictor variables that
 may be either numerical or categories.
 
 Logistic regression is the standard industry workhorse that underlies many
-production fraud detection and advertising quality and targeting products. 
+production fraud detection and advertising quality and targeting products.
 The Mahout implementation uses Stochastic Gradient Descent (SGD) to all
 large training sets to be used.
 
@@ -23,18 +23,18 @@ Paul Komarek](http://repository.cmu.edu/cgi/viewcontent.cgi?article=1221&context
 
 See MAHOUT-228 for the main JIRA issue for SGD.
 
-A more detailed overview of the Mahout Linear Regression classifier and [detailed discription of building a Logistic Regression classifier](http://blog.trifork.com/2014/02/04/an-introduction-to-mahouts-logistic-regression-sgd-classifier/) for the classic [Iris flower dataset](http://en.wikipedia.org/wiki/Iris_flower_data_set) is also available [2]. 
+A more detailed overview of the Mahout Linear Regression classifier and [detailed discription of building a Logistic Regression classifier](http://blog.trifork.com/2014/02/04/an-introduction-to-mahouts-logistic-regression-sgd-classifier/) for the classic [Iris flower dataset](http://en.wikipedia.org/wiki/Iris_flower_data_set) is also available [2].
 
 An example of training a Logistic Regression classifier for the [UCI Bank Marketing Dataset](http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing) can be found [on the Mahout website](http://mahout.apache.org/users/classification/bankmarketing-example.html) [3].
 
-An example of training and testing a Logistic Regression document classifier for the classic [20 newsgroups corpus](https://github.com/apache/mahout/blob/master/examples/bin/classify-20newsgroups.sh) [4] is also available. 
+An example of training and testing a Logistic Regression document classifier for the classic [20 newsgroups corpus](https://github.com/apache/mahout/blob/master/examples/bin/classify-20newsgroups.sh) [4] is also available.
 
 <a name="LogisticRegression-Parallelizationstrategy"></a>
 ## Parallelization strategy
 
 The bad news is that SGD is an inherently sequential algorithm.  The good
 news is that it is blazingly fast and thus it is not a problem for Mahout's
-implementation to handle training sets of tens of millions of examples. 
+implementation to handle training sets of tens of millions of examples.
 With the down-sampling typical in many data-sets, this is equivalent to a
 dataset with billions of raw training examples.
 
@@ -44,7 +44,7 @@ performance testing as your system runs.  Often this means that you can
 stop training when a model reaches a target level of performance.  The SGD
 framework includes classes to do on-line evaluation using cross validation
 (the CrossFoldLearner) and an evolutionary system to do learning
-hyper-parameter optimization on the fly (the AdaptiveLogisticRegression). 
+hyper-parameter optimization on the fly (the AdaptiveLogisticRegression).
 The AdaptiveLogisticRegression system makes heavy use of threads to
 increase machine utilization.  The way it works is that it runs 20
 CrossFoldLearners in separate threads, each with slightly different
@@ -127,4 +127,3 @@ Paul Komarek](http://repository.cmu.edu/cgi/viewcontent.cgi?article=1221&context
 [3] [SGD Bank Marketing Example](http://mahout.apache.org/users/classification/bankmarketing-example.html)
 
 [4] [SGD 20 newsgroups classification](https://github.com/apache/mahout/blob/master/examples/bin/classify-20newsgroups.sh)
-

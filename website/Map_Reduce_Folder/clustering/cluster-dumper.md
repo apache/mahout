@@ -22,7 +22,7 @@ you can run clusterdumper in 2 modes:
 
 
 1. Hadoop Environment
-1. Standalone Java Program 
+1. Standalone Java Program
 
 
 <a name="ClusterDumper-HadoopEnvironment{anchor:HadoopEnvironment}"></a>
@@ -37,38 +37,38 @@ executed the [synthetic control example ](clustering-of-synthetic-control-data.h
  and want to analyze the output, you can execute the `mahout clusterdumper` utility from the command line.
 
 #### CLI options:
-    --help                               Print out help	
+    --help                               Print out help
     --input (-i) input                   The directory containing Sequence
-                                           Files for the Clusters	    
+                                           Files for the Clusters
     --output (-o) output                 The output file.  If not specified,
                                            dumps to the console.
     --outputFormat (-of) outputFormat    The optional output format to write
-                                           the results as. Options: TEXT, CSV, or GRAPH_ML		 
-    --substring (-b) substring           The number of chars of the	    
-    					   asFormatString() to print	
-    --pointsDir (-p) pointsDir           The directory containing points  
+                                           the results as. Options: TEXT, CSV, or GRAPH_ML
+    --substring (-b) substring           The number of chars of the
+    					   asFormatString() to print
+    --pointsDir (-p) pointsDir           The directory containing points
                                            sequence files mapping input vectors
-                                           to their cluster.  If specified, 
-                                           then the program will output the 
-                                           points associated with a cluster 
+                                           to their cluster.  If specified,
+                                           then the program will output the
+                                           points associated with a cluster
     --dictionary (-d) dictionary         The dictionary file.
-    --dictionaryType (-dt) dictionaryType    The dictionary file type	    
+    --dictionaryType (-dt) dictionaryType    The dictionary file type
                                          (text|sequencefile)
     --distanceMeasure (-dm) distanceMeasure  The classname of the DistanceMeasure.
                                                Default is SquaredEuclidean.
-    --numWords (-n) numWords             The number of top terms to print 
+    --numWords (-n) numWords             The number of top terms to print
     --tempDir tempDir                    Intermediate output directory
     --startPhase startPhase              First phase to run
     --endPhase endPhase                  Last phase to run
     --evaluate (-e)                      Run ClusterEvaluator and CDbwEvaluator over the
                                           input. The output will be appended to the rest of
-                                          the output at the end.   
+                                          the output at the end.
 
-### Standalone Java Program                                          
+### Standalone Java Program
 
 Run the clusterdump utility as follows as a standalone Java Program through Eclipse. <!-- - if you are using eclipse, setup mahout-utils as a project as specified in [Working with Maven in Eclipse](/documentation/developers/buildingmahout.html). -->
     To execute ClusterDumper.java,
-    
+
 * Under mahout-utils, Right-Click on ClusterDumper.java
 * Choose Run-As, Run Configurations
 * On the left menu, click on Java Application
@@ -80,15 +80,15 @@ Run the clusterdump utility as follows as a standalone Java Program through Ecli
 In the arguments tab, specify the below arguments
 
 
-    --seqFileDir <MAHOUT_HOME>/examples/output/clusters-10 
-    --pointsDir <MAHOUT_HOME>/examples/output/clusteredPoints 
+    --seqFileDir <MAHOUT_HOME>/examples/output/clusters-10
+    --pointsDir <MAHOUT_HOME>/examples/output/clusteredPoints
     --output <MAHOUT_HOME>/examples/output/clusteranalyze.txt
     replace <MAHOUT_HOME> with the actual path of your $MAHOUT_HOME
 
 * Hit run to execute the ClusterDumper using Eclipse. Setting breakpoints etc should just work fine.
-    
+
 Reading the output file
-    
+
 This will output the clusters into a file called clusteranalyze.txt inside $MAHOUT_HOME/examples/output
 Sample data will look like
 

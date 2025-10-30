@@ -4,10 +4,10 @@ title: Mahout Wiki
 redirect_from:
   - /general/mahout-wiki
   - /general/mahout-wiki.html
-    
+
 ---
 Apache Mahout is a new Apache TLP project to create scalable, machine
-learning algorithms under the Apache license. 
+learning algorithms under the Apache license.
 
 {toc:style=disc|minlevel=2}
 
@@ -198,4 +198,3 @@ that definitely need to be cleaned up.
     * {noformat}+*Mahout_(version)*+{noformat} (+*Mahout_0.2*+) is used to
 draw attention to which version of Mahout a feature was (or will be) added
 to Mahout.
-

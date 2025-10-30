@@ -30,7 +30,7 @@ We caught up on personal and ASF topics
 ### Release plans
 * Aug: 14.2, point release with minor improvements and new build system
 
-### Ideas 
+### Ideas
 * Quantum computing (IBM and Honeywell have free-tier APIs) XXXL
 * Python bindings for DSL (XXXL)
 * Automating or maintaining Docker images (XL, including docs)
@@ -47,7 +47,7 @@ We caught up on personal and ASF topics
 ### Project management
 * Previous vote on PMC involvement passed: https://lists.apache.org/thread/stv6jjjx72gmgs3pg7lvwf1wmngmtnbs
 
-### Summary and next steps 
+### Summary and next steps
 * Continue monthly community calls
 * Complete JIRA focus
 * Get travis migration done, nightlies running

@@ -26,11 +26,11 @@ positive and false negative rates.  The LLR is typically far more suitable
 in the case of small than many other measures such as Pearson's
 correlation, Pearson's chi squared statistic or z statistics.  The LLR as
 stated does not, however, make any use of rating data which can limit its
-applicability in problems such as the Netflix competition. 
+applicability in problems such as the Netflix competition.
 
 The actual value of the LLR is not usually very helpful other than as a way
 of ordering pairs of items.  As such, it is often used to determine a
-sparse set of coefficients to be estimated by other means such as TF-IDF. 
+sparse set of coefficients to be estimated by other means such as TF-IDF.
 Since the actual estimation of these coefficients can be done in a way that
 is independent of the training data such as by general corpus statistics,
 and since the ordering imposed by the LLR is relatively robust to counting
@@ -38,10 +38,8 @@ fluctuation, this technique can provide very strong results in very sparse
 problems where the potential number of features vastly out-numbers the
 number of training examples and where features are highly interdependent.
 
- See Also: 
+ See Also:
 
 * [Blog post "surprise and coincidence"](http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html)
 * [G-Test](http://en.wikipedia.org/wiki/G-test)
 * [Likelihood Ratio Test](http://en.wikipedia.org/wiki/Likelihood-ratio_test)
-
-      

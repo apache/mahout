@@ -29,14 +29,14 @@ category: minutes
 ### Release plans
 * Nov: 14.2, point release with minor improvements and new build system
 
-### Active Ideas 
+### Active Ideas
 * Quantum computing
 * Python bindings for DSL
 
-### Summary and next steps 
+### Summary and next steps
 * TODO in Dec: Push 14.2 out
 * TODO Dec 3: Pair work (Trevor/Andrew) on beta of `mahout-q` [Proof of concept of quantum front-end](https://issues.apache.org/jira/browse/MAHOUT-2166)
 * TODO in Q12024: Submit proposal to NSF [Pathways to Enable Open-Source Ecosystems (POSE)](https://new.nsf.gov/funding/opportunities/pathways-enable-open-source-ecosystems-pose)
 * Reach out to formerly active project members
-* Reach out to quantum compute people 
+* Reach out to quantum compute people
 * JIRA ranching

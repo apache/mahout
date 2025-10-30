@@ -1,4 +1,4 @@
-### Purpose of PR  
+### Purpose of PR
 <!-- Describe what this PR does. -->
 
 ### Related Issues or PRs
@@ -6,9 +6,9 @@
 <!-- - Closes #123  -->
 <!-- - Related to #123   -->
 
-### Changes Made  
+### Changes Made
 <!-- Please mark one with an "x"   -->
-- [ ] Bug fix  
+- [ ] Bug fix
 - [ ] New feature
 - [ ] Refactoring
 - [ ] Documentation
@@ -16,9 +16,9 @@
 - [ ] CI/CD pipeline
 - [ ] Other
 
-### Breaking Changes  
+### Breaking Changes
 <!-- Does this PR introduce a breaking change? -->
-- [ ] Yes  
+- [ ] Yes
 - [ ] No
 
 ### Checklist
@@ -31,4 +31,3 @@ Once all requirements are met, mark as ready for review. -->
 - [ ] Successfully built and ran all unit tests or manual tests locally
 - [ ] PR title follows "MAHOUT-XXX: Brief Description" format (if related to an issue)
 - [ ] Code follows ASF guidelines
-

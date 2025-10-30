@@ -10,7 +10,7 @@ redirect_from:
 # Wikipedia XML parser and Naive Bayes Classifier Example
 
 ## Introduction
-Mahout has an [example script](https://github.com/apache/mahout/blob/master/examples/bin/classify-wikipedia.sh) [1] which will download a recent XML dump of the (entire if desired) [English Wikipedia database](http://dumps.wikimedia.org/enwiki/latest/). After running the classification script, you can use the [document classification script](https://github.com/apache/mahout/blob/master/examples/bin/spark-document-classifier.mscala) from the Mahout [spark-shell](http://mahout.apache.org/users/sparkbindings/play-with-shell.html) to vectorize and classify text from outside of the training and testing corpus using a modle built on the Wikipedia dataset.  
+Mahout has an [example script](https://github.com/apache/mahout/blob/master/examples/bin/classify-wikipedia.sh) [1] which will download a recent XML dump of the (entire if desired) [English Wikipedia database](http://dumps.wikimedia.org/enwiki/latest/). After running the classification script, you can use the [document classification script](https://github.com/apache/mahout/blob/master/examples/bin/spark-document-classifier.mscala) from the Mahout [spark-shell](http://mahout.apache.org/users/sparkbindings/play-with-shell.html) to vectorize and classify text from outside of the training and testing corpus using a modle built on the Wikipedia dataset.
 
 You can run this script to build and test a Naive Bayes classifier for option (1) 10 arbitrary countries or option (2) 2 countries (United States and United Kingdom).
 
@@ -22,7 +22,7 @@ By defult the script is set to run on a medium sized Wikipedia XML dump.  To run
 
 The step by step process for Creating a Naive Bayes Classifier for the Wikipedia XML dump is very similar to that for [creating a 20 Newsgroups Classifier](http://mahout.apache.org/users/classification/twenty-newsgroups.html) [4].  The only difference being that instead of running `$mahout seqdirectory` on the unzipped 20 Newsgroups file, you'll run `$mahout seqwiki` on the unzipped Wikipedia xml dump.
 
-    $ mahout seqwiki 
+    $ mahout seqwiki
 
 The above command launches `WikipediaToSequenceFile.java` which accepts a text file of categories [3] and starts an MR job to parse the each document in the XML file.  This process will seek to extract documents with a wikipedia category tag which (exactly, if the `-exactMatchOnly` option is set) matches a line in the category file.  If no match is found and the `-all` option is set, the document will be dumped into an "unknown" category. The documents will then be written out as a `<Text,Text>` sequence file of the form (K:/category/document_title , V: document).
 
@@ -57,4 +57,3 @@ After `seqwiki`, the script runs `seq2sparse`, `split`, `trainnb` and `testnb` a
 [6] [Mahout Spark Naive Bayes](http://mahout.apache.org/users/algorithms/spark-naive-bayes.html)
 
 [7] [Mahout Scala Spark and H2O Bindings](http://mahout.apache.org/users/sparkbindings/home.html)
-

@@ -8,10 +8,10 @@ redirect_from:
 
 ### About
 
-The `OrinaryLeastSquares` regressor in Mahout implements a _closed-form_ solution to [Ordinary Least Squares](https://en.wikipedia.org/wiki/Ordinary_least_squares). 
+The `OrinaryLeastSquares` regressor in Mahout implements a _closed-form_ solution to [Ordinary Least Squares](https://en.wikipedia.org/wiki/Ordinary_least_squares).
 This is in stark contrast to many "big data machine learning" frameworks which implement a _stochastic_ approach. From the users perspecive this difference can be reduced to:
 
-- **_Stochastic_**- A series of guesses at a line line of best fit. 
+- **_Stochastic_**- A series of guesses at a line line of best fit.
 - **_Closed Form_**- A mathimatical approach has been explored, the properties of the parameters are well understood, and problems which arise (and the remedial measures), exist.  This is usually the preferred choice of mathematicians/statisticians, but computational limititaions have forced us to resort to SGD.
 
 ### Parameters
@@ -37,7 +37,7 @@ This is in stark contrast to many "big data machine learning" frameworks which i
         <td><code>'addIntercept</code></td>
         <td>Add an intercept to \(\mathbf{X}\)</td>
         <td><code>true</code></td>
-     </tr>                 
+     </tr>
   </table>
 </div>
 

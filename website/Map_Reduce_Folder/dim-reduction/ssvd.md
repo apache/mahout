@@ -8,7 +8,7 @@ redirect_from:
 
 # Stochastic Singular Value Decomposition #
 
-Stochastic SVD method in Mahout produces reduced rank Singular Value Decomposition output in its 
+Stochastic SVD method in Mahout produces reduced rank Singular Value Decomposition output in its
 strict mathematical definition: ` \(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)`.
 
 ##The benefits over other methods are:
@@ -23,7 +23,7 @@ strict mathematical definition: ` \(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathb
 
  - As of 0.7 trunk, includes PCA and dimensionality reduction workflow (EXPERIMENTAL! Feedback on performance/other PCA related issues/ blogs is greatly appreciated.)
 
-### Map-Reduce characteristics: 
+### Map-Reduce characteristics:
 SSVD uses at most 3 MR sequential steps (map-only + map-reduce + 2 optional parallel map-reduce jobs) to produce reduced rank approximation of U, V and S matrices. Additionally, two more map-reduce steps are added for each power iteration step if requested.
 
 ##Potential drawbacks:
@@ -58,16 +58,16 @@ However, try this R code to simulate a meaningful input:
     n<-1000
     m<-2000
     k<-10
-     
+
     qi<-1
-     
+
     #simulated input
     svalsim<-diag(k:1)
-     
+
     usim<- qr.Q(qr(matrix(rnorm(m*k, mean=3), nrow=m,ncol=k)))
     vsim<- qr.Q(qr( matrix(rnorm(n*k,mean=5), nrow=n,ncol=k)))
-     
-     
+
+
     x<- usim %*% svalsim %*% t(vsim)
 
 
@@ -85,8 +85,8 @@ Note: numerical stability of R algorithms may differ from that of Mahout's distr
 
 Given an `\(m\times n\)`
 matrix `\(\mathbf{A}\)`, a target rank `\(k\in\mathbb{N}_{1}\)`
-, an oversampling parameter `\(p\in\mathbb{N}_{1}\)`, 
-and the number of additional power iterations `\(q\in\mathbb{N}_{0}\)`, 
+, an oversampling parameter `\(p\in\mathbb{N}_{1}\)`,
+and the number of additional power iterations `\(q\in\mathbb{N}_{0}\)`,
 this procedure computes an `\(m\times\left(k+p\right)\)`
 SVD `\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)`:
 
@@ -95,34 +95,33 @@ SVD `\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)`:
   using Gaussian unit vectors per one of suggestions in [Halko, Martinsson, Tropp].
 
   2. `\(\mathbf{Y=A\boldsymbol{\Omega}},\,\mathbf{Y}\in\mathbb{R}^{m\times\left(k+p\right)}\)`
- 
+
 
   3. Column-orthonormalize `\(\mathbf{Y}\rightarrow\mathbf{Q}\)`
   by computing thin decomposition `\(\mathbf{Y}=\mathbf{Q}\mathbf{R}\)`.
   Also, `\(\mathbf{Q}\in\mathbb{R}^{m\times\left(k+p\right)},\,\mathbf{R}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)`.
   I denote this as `\(\mathbf{Q}=\mbox{qr}\left(\mathbf{Y}\right).\mathbf{Q}\)`
- 
+
 
   4. `\(\mathbf{B}_{0}=\mathbf{Q}^{\top}\mathbf{A}:\,\,\mathbf{B}\in\mathbb{R}^{\left(k+p\right)\times n}\)`.
- 
+
   5. If `\(q>0\)`
-  repeat: for `\(i=1..q\)`: 
+  repeat: for `\(i=1..q\)`:
   `\(\mathbf{B}_{i}^{\top}=\mathbf{A}^{\top}\mbox{qr}\left(\mathbf{A}\mathbf{B}_{i-1}^{\top}\right).\mathbf{Q}\)`
   (power iterations step).
 
   6. Compute Eigensolution of a small Hermitian `\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}=\mathbf{\hat{U}}\boldsymbol{\Lambda}\mathbf{\hat{U}}^{\top}\)`,
   `\(\mathbf{B}_{q}\mathbf{B}_{q}^{\top}\in\mathbb{R}^{\left(k+p\right)\times\left(k+p\right)}\)`.
- 
+
 
   7. Singular values `\(\mathbf{\boldsymbol{\Sigma}}=\boldsymbol{\Lambda}^{0.5}\)`,
   or, in other words, `\(s_{i}=\sqrt{\sigma_{i}}\)`.
- 
+
 
   8. If needed, compute `\(\mathbf{U}=\mathbf{Q}\hat{\mathbf{U}}\)`.
- 
+
 
   9. If needed, compute `\(\mathbf{V}=\mathbf{B}_{q}^{\top}\hat{\mathbf{U}}\boldsymbol{\Sigma}^{-1}\)`.
 Another way is `\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^{-1}\)`.
 
 [Halko, Martinsson, Tropp]: http://arxiv.org/abs/0909.4061
- 

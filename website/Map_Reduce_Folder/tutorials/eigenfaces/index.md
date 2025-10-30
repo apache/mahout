@@ -17,7 +17,7 @@ Deep learning will admittedly do better a recognizing and correctly classifying 
 
 The advantage/use-case for the eigenfaces approach is when new faces are being regularly added. Even when building a production
 grade eigenfaces based system- neural networks still have a place- _idenitifying faces_ in images, and creating _centered and scaled_ images around
-the face.  This is scalable because we only need to train our neural network to detect, center, and scale faces once.  E.g. 
+the face.  This is scalable because we only need to train our neural network to detect, center, and scale faces once.  E.g.
 a neural network would be deployed as a microservice, and then eigenfaces would be deployed as a microservice.
 
 A production version ends up looking something like this:
@@ -26,7 +26,7 @@ A production version ends up looking something like this:
 - For each face:<br>
     a. Decompose face into linear combination of eigenfaces<br>
     b. Determine if linear combination vector is close enough to any exististing vector to declare a match <br>
-    c. If no match "add new person" to face corpus. 
+    c. If no match "add new person" to face corpus.
 
 ### Get the data
 
@@ -44,7 +44,7 @@ The first thing we're going to do is collect a set of 13,232 face images (250x25
         --packages com.sksamuel.scrimage:scrimage-core_2.10:2.1.0, \
         com.sksamuel.scrimage:scrimage-io-extra_2.10:2.1.0, \
         com.sksamuel.scrimage:scrimage-filters_2.10:2.1.0
-    
+
 
 
 ### Create a DRM of Vectorized Images
@@ -95,7 +95,7 @@ import java.io.File
 import javax.imageio.ImageIO
 
 val sampleImagePath = "/home/guest/lfw-deepfunneled/Aaron_Eckhart/Aaron_Eckhart_0001.jpg"
-val sampleImage = ImageIO.read(new File(sampleImagePath))  
+val sampleImage = ImageIO.read(new File(sampleImagePath))
 val w = sampleImage.getWidth
 val h = sampleImage.getHeight
 
@@ -119,7 +119,7 @@ If using Zeppelin, the following can be used to generate a fun table of the Eige
 
 ```python
 %python
- 
+
 r = 4
 c = 5
 print '%html\n<table style="width:100%">' + "".join(["<tr>" + "".join([ '<td><img src="/tmp/eigenfaces/%i.png"></td>' % (i + j) for j in range(0, c) ]) + "</tr>" for i in range(0, r * c, r +1 ) ]) + '</table>'

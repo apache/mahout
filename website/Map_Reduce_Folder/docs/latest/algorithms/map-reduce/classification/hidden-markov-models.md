@@ -13,7 +13,7 @@ redirect_from:
 
 Hidden Markov Models are used in multiple areas of Machine Learning, such
 as speech recognition, handwritten letter recognition or natural language
-processing. 
+processing.
 
 <a name="HiddenMarkovModels-FormalDefinition"></a>
 ## Formal Definition
@@ -69,19 +69,19 @@ Now run the baumwelch job to train your model, after first setting MAHOUT_LOCAL 
 
 Output like the following should appear in the console.
 
-    Initial probabilities: 
-    0 1 2 
-    1.0 0.0 3.5659361683006626E-251 
+    Initial probabilities:
+    0 1 2
+    1.0 0.0 3.5659361683006626E-251
     Transition matrix:
-      0 1 2 
-    0 6.098919959130616E-5 0.9997275322964165 2.1147850399214744E-4 
-    1 7.404648706054873E-37 0.9086408633885092 0.09135913661149081 
-    2 0.2284374545687356 7.01786289571088E-11 0.7715625453610858 
-    Emission matrix: 
-      0 1 2 3 
-    0 0.9999997858591223 2.0536163836449762E-39 2.1414087769942127E-7 1.052441093535389E-27 
-    1 7.495656581383351E-34 0.2241269055449904 0.4510889999455847 0.32478409450942497 
-    2 0.815051477991782 0.18494852200821799 8.465660634827592E-33 2.8603899591778015E-36 
+      0 1 2
+    0 6.098919959130616E-5 0.9997275322964165 2.1147850399214744E-4
+    1 7.404648706054873E-37 0.9086408633885092 0.09135913661149081
+    2 0.2284374545687356 7.01786289571088E-11 0.7715625453610858
+    Emission matrix:
+      0 1 2 3
+    0 0.9999997858591223 2.0536163836449762E-39 2.1414087769942127E-7 1.052441093535389E-27
+    1 7.495656581383351E-34 0.2241269055449904 0.4510889999455847 0.32478409450942497
+    2 0.815051477991782 0.18494852200821799 8.465660634827592E-33 2.8603899591778015E-36
     14/03/22 09:52:21 INFO driver.MahoutDriver: Program took 180 ms (Minutes: 0.003)
 
 The model trained with the input set now is in the file 'hmm-model', which we can use to build a predicted sequence.
@@ -90,7 +90,7 @@ The model trained with the input set now is in the file 'hmm-model', which we ca
 
 To see the predictions:
 
-    $ cat hmm-predictions 
+    $ cat hmm-predictions
     0 1 3 3 2 2 2 2 1 2
 
 

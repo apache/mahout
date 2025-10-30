@@ -21,30 +21,30 @@ Quantum bits (qubits) are highly susceptible to errors caused by environmental n
 ### Example: Simple Bit-Flip Error Correction
 The following example demonstrates a simple bit-flip error correction circuit using `qumat`. The circuit encodes one logical qubit into three physical qubits and corrects a single bit-flip error.
 
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit with 3 qubits
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(3)
 
 # Encode the logical qubit into 3 physical qubits
-qc.apply_hadamard_gate(0)  
-qc.apply_cnot_gate(0, 1)  
+qc.apply_hadamard_gate(0)
+qc.apply_cnot_gate(0, 1)
 qc.apply_cnot_gate(0, 2)
 
 # Simulate a bit-flip error on qubit 1
 qc.apply_pauli_x_gate(1)
 
 # Error correction steps
-qc.apply_cnot_gate(0, 1)  
-qc.apply_cnot_gate(0, 2)  
+qc.apply_cnot_gate(0, 1)
+qc.apply_cnot_gate(0, 2)
 qc.apply_toffoli_gate(1, 2, 0)
 
 # Execute the circuit and print the results
-result = qc.execute_circuit()  
-print(result)  
+result = qc.execute_circuit()
+print(result)
 ```
 
 ### Explanation
@@ -55,8 +55,8 @@ print(result)
 ### Visualizing the Circuit
 You can visualize the error correction circuit using the `draw` method:
 
-```python  
-qc.draw()  
+```python
+qc.draw()
 ```
 
 This will display the circuit diagram, showing the encoding, error simulation, and correction steps.
@@ -75,7 +75,7 @@ While the above example demonstrates a simple bit-flip error correction, `qumat`
 ## 8.4 Conclusion
 
 Quantum error correction is essential for building reliable quantum computers. By using `qumat`, you can implement and experiment with various error correction techniques, from simple bit-flip correction to more advanced codes like the Shor and Steane codes. As quantum hardware continues to improve, these techniques will play a critical role in realizing the full potential of quantum computing.
-  
----  
 
-This section provides a foundational understanding of quantum error correction and demonstrates how to implement basic error correction circuits using `qumat`. For further exploration, consider experimenting with more complex error correction codes and their applications in quantum computing.  
+---
+
+This section provides a foundational understanding of quantum error correction and demonstrates how to implement basic error correction circuits using `qumat`. For further exploration, consider experimenting with more complex error correction codes and their applications in quantum computing.

@@ -25,6 +25,6 @@ No progress to date- weather is unseasonably nice in Chicago.
 
 
 
-Created 
+Created
 - MAHOUT-2133 Update Quickstart Page
 - MAHOUT-2134 Update Zeppelin Tutorial

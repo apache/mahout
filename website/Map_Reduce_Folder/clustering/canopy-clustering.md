@@ -30,7 +30,7 @@ distance measurements can be significantly reduced by ignoring points
 outside of the initial canopies.
 
 **WARNING**: Canopy is deprecated in the latest release and will be removed once streaming k-means becomes stable enough.
- 
+
 <a name="CanopyClustering-Strategyforparallelization"></a>
 ## Strategy for parallelization
 
@@ -69,7 +69,7 @@ to produce canopy centroids which are output, using a constant key
 centroids and again applies the canopy measure and thresholds to produce a
 final set of canopy centroids which is output (i.e. clustering the cluster
 centroids). The reducer output format is: SequenceFile(Text, Canopy) with
-the _key_ encoding the canopy identifier. 
+the _key_ encoding the canopy identifier.
 
 <a name="CanopyClustering-Clusteringphase"></a>
 ### Clustering phase
@@ -168,7 +168,7 @@ The points are generated as follows:
  sd=0.1
 
 In the first image, the points are plotted and the 3-sigma boundaries of
-their generator are superimposed. 
+their generator are superimposed.
 
 ![sample data](../../images/SampleData.png)
 
@@ -186,4 +186,3 @@ enough to iterate runs using different T1, T2 parameters and display
 thresholds.
 
 ![canopy](../../images/Canopy10.png)
-

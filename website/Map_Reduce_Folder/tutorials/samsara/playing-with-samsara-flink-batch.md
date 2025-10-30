@@ -1,13 +1,13 @@
 ---
 layout: deprecated-docs
-title: 
+title:
 redirect_from:
 	- /documentation/tutorials/samsara/playing-with-samsara-flink-batch
 	- /documentation/tutorials/samsara/playing-with-samsara-flink-batch.html
 ---
 
 
-## Getting Started 
+## Getting Started
 
 To get started, add the following dependency to the pom:
 
@@ -46,18 +46,18 @@ The top JIRA for Flink backend is [MAHOUT-1570](https://issues.apache.org/jira/b
 ### Implemented
 
 * [MAHOUT-1701](https://issues.apache.org/jira/browse/MAHOUT-1701) Mahout DSL for Flink: implement AtB ABt and AtA operators
-* [MAHOUT-1702](https://issues.apache.org/jira/browse/MAHOUT-1702) implement element-wise operators (like `A + 2` or `A + B`) 
+* [MAHOUT-1702](https://issues.apache.org/jira/browse/MAHOUT-1702) implement element-wise operators (like `A + 2` or `A + B`)
 * [MAHOUT-1703](https://issues.apache.org/jira/browse/MAHOUT-1703) implement `cbind` and `rbind`
 * [MAHOUT-1709](https://issues.apache.org/jira/browse/MAHOUT-1709) implement slicing (like `A(1 to 10, ::)`)
-* [MAHOUT-1710](https://issues.apache.org/jira/browse/MAHOUT-1710) implement right in-core matrix multiplication (`A %*% B` when `B` is in-core) 
+* [MAHOUT-1710](https://issues.apache.org/jira/browse/MAHOUT-1710) implement right in-core matrix multiplication (`A %*% B` when `B` is in-core)
 * [MAHOUT-1711](https://issues.apache.org/jira/browse/MAHOUT-1711) implement broadcasting
 * [MAHOUT-1712](https://issues.apache.org/jira/browse/MAHOUT-1712) implement operators `At`, `Ax`, `Atx` - `Ax` and `At` are implemented
 * [MAHOUT-1734](https://issues.apache.org/jira/browse/MAHOUT-1734) implement I/O - should be able to read results of Flink bindings
 * [MAHOUT-1747](https://issues.apache.org/jira/browse/MAHOUT-1747) add support for different types of indexes (String, long, etc) - now supports `Int`, `Long` and `String`
-* [MAHOUT-1748](https://issues.apache.org/jira/browse/MAHOUT-1748) switch to Flink Scala API 
+* [MAHOUT-1748](https://issues.apache.org/jira/browse/MAHOUT-1748) switch to Flink Scala API
 * [MAHOUT-1749](https://issues.apache.org/jira/browse/MAHOUT-1749) Implement `Atx`
 * [MAHOUT-1750](https://issues.apache.org/jira/browse/MAHOUT-1750) Implement `ABt`
-* [MAHOUT-1751](https://issues.apache.org/jira/browse/MAHOUT-1751) Implement `AtA` 
+* [MAHOUT-1751](https://issues.apache.org/jira/browse/MAHOUT-1751) Implement `AtA`
 * [MAHOUT-1755](https://issues.apache.org/jira/browse/MAHOUT-1755) Flush intermediate results to FS - Flink, unlike Spark, does not store intermediate results in memory.
 * [MAHOUT-1764](https://issues.apache.org/jira/browse/MAHOUT-1764) Add standard backend tests for Flink
 * [MAHOUT-1765](https://issues.apache.org/jira/browse/MAHOUT-1765) Add documentation about Flink backend
@@ -81,14 +81,14 @@ The top JIRA for Flink backend is [MAHOUT-1570](https://issues.apache.org/jira/b
 * [MAHOUT-1824](https://issues.apache.org/jira/browse/MAHOUT-1824) Optimize FlinkOpAtA to use upper triangular matrices
 * [MAHOUT-1825](https://issues.apache.org/jira/browse/MAHOUT-1825) Add List of Flink algorithms to Mahout wiki page
 
-### Tests 
+### Tests
 
-There is a set of standard tests that all engines should pass (see [MAHOUT-1764](https://issues.apache.org/jira/browse/MAHOUT-1764)).  
+There is a set of standard tests that all engines should pass (see [MAHOUT-1764](https://issues.apache.org/jira/browse/MAHOUT-1764)).
 
-* `DistributedDecompositionsSuite` 
-* `DrmLikeOpsSuite` 
-* `DrmLikeSuite` 
-* `RLikeDrmOpsSuite` 
+* `DistributedDecompositionsSuite`
+* `DrmLikeOpsSuite`
+* `DrmLikeSuite`
+* `RLikeDrmOpsSuite`
 
 
 These are Flink-backend specific tests, e.g.
@@ -98,14 +98,14 @@ These are Flink-backend specific tests, e.g.
 * `LATestSuite` tests for specific operators like `AtB`, `Ax`, etc
 * `UseCasesSuite` has more complex examples, like power iteration, ridge regression, etc
 
-## Environment 
+## Environment
 
-For development the minimal supported configuration is 
+For development the minimal supported configuration is
 
 * [JDK 1.7](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 * [Scala 2.10]
 
-When using mahout, please import the following modules: 
+When using mahout, please import the following modules:
 
 * `mahout-math`
 * `mahout-math-scala`

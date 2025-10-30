@@ -19,7 +19,7 @@ Discussions at Apache happen on the mailing list. To get involved, you should jo
 to understand where the project is headed.
 * The **commit list** (to see changes as they are made)
 
-Please keep discussions about Mahout on list so that everyone benefits. 
+Please keep discussions about Mahout on list so that everyone benefits.
 Emailing individual committers with questions about specific Mahout issues
 is discouraged.  See [http://people.apache.org/~hossman/#private_q](http://people.apache.org/~hossman/#private_q)
 .  Apache  has a number of [email tips for contributors][1] as well.
@@ -44,11 +44,11 @@ what we are working on in the internals and where you can get a sense of
 where people are working.
 
 Also, documentation is a great way to familiarize yourself with the code
-and is always a welcome addition to the codebase and this website. Feel free 
-to contribute texts and tutorials! Committers will make sure they are added 
+and is always a welcome addition to the codebase and this website. Feel free
+to contribute texts and tutorials! Committers will make sure they are added
 to this website, and we have a [guide for making website updates][2].
-We also have a [wide variety of books and slides][3] for learning more about 
-machine learning algorithms. 
+We also have a [wide variety of books and slides][3] for learning more about
+machine learning algorithms.
 
 If you are interested in working towards being a committer, [general guidelines are available online](/documentation/developers/how-to-become-a-committer.html).
 
@@ -64,7 +64,7 @@ against possible future changes).
 Please note that these are the "optimal" steps, and community members that
 don't have the time or resources to do everything outlined on this below
 should not be discouraged from submitting their ideas "as is" per "Yonik
-Seeley's (Solr committer) Law of Patches": 
+Seeley's (Solr committer) Law of Patches":
 
 *A half-baked patch in Jira, with no documentation, no tests and no backwards compatibility is better than no patch at all.*
 
@@ -76,7 +76,7 @@ and possibly improve it.
 <a name="HowToContribute-Gettingthesourcecode"></a>
 ## Getting the source code
 
-First of all, you need to get the [Mahout source code](/documentation/developers/version-control.html). Most development is done on the "trunk".  Mahout mirrors its codebase on [GitHub](https://github.com/apache/mahout). The first step to making a contribution is to fork Mahout's master branch to your GitHub repository.  
+First of all, you need to get the [Mahout source code](/documentation/developers/version-control.html). Most development is done on the "trunk".  Mahout mirrors its codebase on [GitHub](https://github.com/apache/mahout). The first step to making a contribution is to fork Mahout's master branch to your GitHub repository.
 
 
 <a name="HowToContribute-MakingChanges"></a>
@@ -86,24 +86,24 @@ Before you start, you should send a message to the [Mahout developer mailing lis
 (note: you have to subscribe before you can post), or file a ticket in  our [issue tracker](/documentation/developers/issue-tracker.html).
 Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.
 
- 1. Create a JIRA Issue (if one does not already exist or you haven't already) 
- 2. Pull the code from your GitHub repository 
+ 1. Create a JIRA Issue (if one does not already exist or you haven't already)
+ 2. Pull the code from your GitHub repository
  3. Ensure that you are working with the latest code from the [apache/mahout](https://github.com/apache/mahout) master branch.
- 3. Modify the source code and add some (very) nice features. 
+ 3. Modify the source code and add some (very) nice features.
      - Be sure to adhere to the following points:
          - All public classes and methods should have informative Javadoc
-    comments.  
+    comments.
          - Code should be formatted according to standard
     [Java coding conventions](http://www.oracle.com/technetwork/java/codeconventions-150003.pdf),
     with two exceptions:
-             - indent two spaces per level, not four.  
-             - lines can be 120 characters, not 80.  
-         - Contributions should pass existing unit tests. 
+             - indent two spaces per level, not four.
+             - lines can be 120 characters, not 80.
+         - Contributions should pass existing unit tests.
          - New unit tests should be provided to demonstrate bugs and fixes.
- 4. Commit the changes to your local repository. 
+ 4. Commit the changes to your local repository.
  4. Push the code back up to your GitHub repository.
  5. Create a [Pull Request](https://help.github.com/articles/creating-a-pull-request) to the to apache/mahout repository on Github.
-     - Include the corresponding JIRA Issue number and description in the title of the pull request: 
+     - Include the corresponding JIRA Issue number and description in the title of the pull request:
         - ie. MAHOUT-xxxx: < JIRA-Issue-Description >
  6. Committers and other members of the Mahout community can then comment on the Pull Request.  Be sure to watch for comments, respond and make any necessary changes.
 
@@ -115,7 +115,7 @@ incorporate other's suggestions into into your changes if you think they're reas
 
 Please make sure that all unit tests succeed before creating your Pull Request.
 
-Run *mvn clean test*, if you see *BUILD SUCCESSFUL* after the tests have finished, all is ok, but if you see *BUILD FAILED*, 
+Run *mvn clean test*, if you see *BUILD SUCCESSFUL* after the tests have finished, all is ok, but if you see *BUILD FAILED*,
 please carefully read the errors messages and check your code.
 
 #### Do's and Don'ts

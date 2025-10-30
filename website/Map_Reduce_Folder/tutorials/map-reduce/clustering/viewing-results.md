@@ -42,7 +42,7 @@ Run the following to print out all options:
 ./solr-clust-n2/out/clusters-2
           --dictionary ./solr-clust-n2/dictionary.txt
           --substring 100 --pointsDir ./solr-clust-n2/out/points/
-    
+
 
 
 

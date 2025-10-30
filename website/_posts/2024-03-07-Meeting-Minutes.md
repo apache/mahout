@@ -35,4 +35,3 @@ category: minutes
 1. Ask INFRA to help us make sure PRs are defaulting to main instead of trunk (akm)
 1. Make ticket to add notebooks to notebooks directory in source tree (https://issues.apache.org/jira/browse/MAHOUT-2198)
 1. JIRA hygiene with Shashanka in monthly Classic meeting (on hold until Shashanka or Eric picks this up, meeting cancelled otherwise)
-
