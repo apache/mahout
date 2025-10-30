@@ -17,40 +17,13 @@
 
 import pytest
 
-from .utils import TESTING_BACKENDS
+from .utils import TESTING_BACKENDS, get_backend_config
 from qumat import QuMat
 
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestSwapTest:
     """Test class for swap test functionality across different backends."""
-
-    def get_backend_config(self, backend_name):
-        """Helper method to get backend configuration."""
-        if backend_name == "qiskit":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "aer_simulator",
-                    "shots": 10000,
-                },
-            }
-        elif backend_name == "cirq":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "default",
-                    "shots": 10000,
-                },
-            }
-        elif backend_name == "amazon_braket":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "local",
-                    "shots": 10000,
-                },
-            }
 
     def calculate_prob_zero(self, results, backend_name):
         """Calculate probability of measuring ancilla qubit in |0> state."""
@@ -79,7 +52,7 @@ class TestSwapTest:
 
     def test_identical_zero_states(self, backend_name):
         """Test swap test with two identical |0> states."""
-        backend_config = self.get_backend_config(backend_name)
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
 
         # Create circuit with 3 qubits: ancilla, state1, state2
@@ -99,7 +72,7 @@ class TestSwapTest:
 
     def test_orthogonal_states(self, backend_name):
         """Test swap test with orthogonal states |0> and |1>."""
-        backend_config = self.get_backend_config(backend_name)
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
 
         # Create circuit with 3 qubits
@@ -126,7 +99,7 @@ class TestSwapTest:
         predominantly |1⟩ instead of |0⟩ for identical |1⟩ states.
         The key is that identical states give deterministic results (close to 0 or 1).
         """
-        backend_config = self.get_backend_config(backend_name)
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
 
         # Create circuit with 3 qubits
@@ -150,7 +123,7 @@ class TestSwapTest:
 
     def test_cswap_gate_exists(self, backend_name):
         """Test that the CSWAP gate is properly implemented."""
-        backend_config = self.get_backend_config(backend_name)
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
 
         # Create a simple circuit
@@ -165,33 +138,6 @@ class TestSwapTest:
 
 class TestSwapTestConsistency:
     """Test class for consistency checks across all backends."""
-
-    def get_backend_config(self, backend_name):
-        """Helper method to get backend configuration."""
-        if backend_name == "qiskit":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "aer_simulator",
-                    "shots": 10000,
-                },
-            }
-        elif backend_name == "cirq":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "default",
-                    "shots": 10000,
-                },
-            }
-        elif backend_name == "amazon_braket":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "local",
-                    "shots": 10000,
-                },
-            }
 
     def calculate_prob_zero(self, results, backend_name):
         """Calculate probability of measuring ancilla qubit in |0> state."""
@@ -223,7 +169,7 @@ class TestSwapTestConsistency:
         results_dict = {}
 
         for backend_name in TESTING_BACKENDS:
-            backend_config = self.get_backend_config(backend_name)
+            backend_config = get_backend_config(backend_name)
             qumat = QuMat(backend_config)
 
             # Create circuit with identical |0> states

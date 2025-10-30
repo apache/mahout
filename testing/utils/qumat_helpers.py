@@ -19,6 +19,35 @@ from functools import reduce
 from qumat.qumat import QuMat
 
 
+def get_backend_config(backend_name: str) -> dict | None:
+    """Helper function to get backend configuration by name."""
+    configs = {
+        "qiskit": {
+            "backend_name": "qiskit",
+            "backend_options": {
+                "simulator_type": "aer_simulator",
+                "shots": 10000,
+            },
+        },
+        "cirq": {
+            "backend_name": "cirq",
+            "backend_options": {
+                "simulator_type": "default",
+                "shots": 10000,
+            },
+        },
+        "amazon_braket": {
+            "backend_name": "amazon_braket",
+            "backend_options": {
+                "simulator_type": "local",
+                "shots": 10000,
+            },
+        },
+    }
+
+    return configs.get(backend_name)
+
+
 class BinaryString(str):
     def __new__(cls, value):
         if not all(char in ["0", "1"] for char in value):

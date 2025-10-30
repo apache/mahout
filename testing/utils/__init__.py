@@ -16,5 +16,6 @@
 #
 
 from .constants import TESTING_BACKENDS
+from .qumat_helpers import get_backend_config
 
-__all__ = ["TESTING_BACKENDS"]
+__all__ = ["TESTING_BACKENDS", "get_backend_config"]
