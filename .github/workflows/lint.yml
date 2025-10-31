@@ -16,14 +16,14 @@
 name: Lint
 
 on:
-  pull_request:
-    paths:
-      - "**/*.py"
   push:
     branches:
       - main
     paths:
-      - "**/*.py"
+      - "**.py"
+  pull_request:
+    paths:
+      - "**.py"
 
 jobs:
   lint:
