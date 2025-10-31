@@ -20,3 +20,4 @@ category: minutes
 * Krishna, Wes to learn more about PyPi and make accounts
 * New release 0.4.1 to be done, currently on 0.4.
 * Andrew to try using ATR for 0.4.1 release
+[Minutes](https://github.com/apache/mahout/discussions/551) on GitHub Discussions.
