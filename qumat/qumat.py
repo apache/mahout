@@ -35,13 +35,24 @@ class QuMat:
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
         self.num_qubits = num_qubits
 
+    def _ensure_circuit_initialized(self):
+        """validate that circuit has been created before operations."""
+        if self.circuit is None:
+            raise RuntimeError(
+                "circuit not initialized. call create_empty_circuit(num_qubits) "
+                "before applying gates or executing operations."
+            )
+
     def apply_not_gate(self, qubit_index):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_not_gate(self.circuit, qubit_index)
 
     def apply_hadamard_gate(self, qubit_index):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_hadamard_gate(self.circuit, qubit_index)
 
     def apply_cnot_gate(self, control_qubit_index, target_qubit_index):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_cnot_gate(
             self.circuit, control_qubit_index, target_qubit_index
         )
@@ -49,30 +60,37 @@ class QuMat:
     def apply_toffoli_gate(
         self, control_qubit_index1, control_qubit_index2, target_qubit_index
     ):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_toffoli_gate(
             self.circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
         )
 
     def apply_swap_gate(self, qubit_index1, qubit_index2):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_swap_gate(self.circuit, qubit_index1, qubit_index2)
 
     def apply_cswap_gate(
         self, control_qubit_index, target_qubit_index1, target_qubit_index2
     ):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_cswap_gate(
             self.circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
         )
 
     def apply_pauli_x_gate(self, qubit_index):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_pauli_x_gate(self.circuit, qubit_index)
 
     def apply_pauli_y_gate(self, qubit_index):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_pauli_y_gate(self.circuit, qubit_index)
 
     def apply_pauli_z_gate(self, qubit_index):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_pauli_z_gate(self.circuit, qubit_index)
 
     def execute_circuit(self, parameter_values=None):
+        self._ensure_circuit_initialized()
         if self.num_qubits == 0:
             shots = self.backend_config["backend_options"].get("shots", 1)
             if self.backend_name == "cirq":
@@ -94,22 +112,27 @@ class QuMat:
 
     # placeholder method for use in the testing suite
     def get_final_state_vector(self):
+        self._ensure_circuit_initialized()
         return self.backend_module.get_final_state_vector(
             self.circuit, self.backend, self.backend_config
         )
 
     def draw(self):
+        self._ensure_circuit_initialized()
         return self.backend_module.draw_circuit(self.circuit)
 
     def apply_rx_gate(self, qubit_index, angle):
+        self._ensure_circuit_initialized()
         self._handle_parameter(angle)
         self.backend_module.apply_rx_gate(self.circuit, qubit_index, angle)
 
     def apply_ry_gate(self, qubit_index, angle):
+        self._ensure_circuit_initialized()
         self._handle_parameter(angle)
         self.backend_module.apply_ry_gate(self.circuit, qubit_index, angle)
 
     def apply_rz_gate(self, qubit_index, angle):
+        self._ensure_circuit_initialized()
         self._handle_parameter(angle)
         self.backend_module.apply_rz_gate(self.circuit, qubit_index, angle)
 
@@ -118,6 +141,7 @@ class QuMat:
             self.parameters[param_name] = None
 
     def apply_u_gate(self, qubit_index, theta, phi, lambd):
+        self._ensure_circuit_initialized()
         self.backend_module.apply_u_gate(self.circuit, qubit_index, theta, phi, lambd)
 
     def swap_test(self, ancilla_qubit, qubit1, qubit2):
