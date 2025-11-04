@@ -260,14 +260,14 @@ val documentFrequencyCount = sdc.sequenceFile(pathToData + "wikipediaVecs/df-cou
                                               classOf[LongWritable])
 
 // setup the dictionary and document frequency count as maps
-val dictionaryRDD = dictionary.map { 
+val dictionaryRDD = dictionary.map {
                                 case (wKey, wVal) =&gt; wKey.asInstanceOf[Text]
-                                                         .toString() -&gt; wVal.get() 
+                                                         .toString() -&gt; wVal.get()
                                    }
-                                   
+
 val documentFrequencyCountRDD = documentFrequencyCount.map {
                                         case (wKey, wVal) =&gt; wKey.asInstanceOf[IntWritable]
-                                                                 .get() -&gt; wVal.get() 
+                                                                 .get() -&gt; wVal.get()
                                                            }
 
 val dictionaryMap = dictionaryRDD.collect.map(x =&gt; x._1.toString -&gt; x._2.toInt).toMap
@@ -285,7 +285,7 @@ val dfCountMap = documentFrequencyCountRDD.collect.map(x =&gt; x._1.toInt -&gt; 
                                 .toLowerCase
                                 .split(" ")
                                 .groupBy(identity)
-                                .mapValues(_.length)         
+                                .mapValues(_.length)
     val vec = new RandomAccessSparseVector(dictionaryMap.size)
     val totalDFSize = dfMap(-1)
     val docSize = wordCounts.size
@@ -359,9 +359,9 @@ val UStextToClassify = new String("(Reuters) - Super Bowl security officials ack
     " will battle. Deadly shootings in Paris and arrest of suspects in Belgium, Greece and" +
     " Germany heightened fears of more attacks around the world and social media accounts" +
     " linked to Middle East militant groups have carried a number of threats to attack" +
-    " high-profile U.S. events. There is no specific credible threat, said Johnson, who" + 
+    " high-profile U.S. events. There is no specific credible threat, said Johnson, who" +
     " has appointed a federal coordination team to work with local, state and federal" +
-    " agencies to ensure safety of fans, players and other workers associated with the" + 
+    " agencies to ensure safety of fans, players and other workers associated with the" +
     " Super Bowl. I'm confident we will have a safe and secure and successful event." +
     " Sunday's game has been given a Special Event Assessment Rating (SEAR) 1 rating, the" +
     " same as in previous years, except for the year after the Sept. 11, 2001 attacks, when" +
@@ -411,7 +411,7 @@ val UKtextToClassify = new String("(Reuters) - Manchester United have signed a s
     " significant growth even within categories. United have endured a tricky transition" +
     " following the retirement of manager Alex Ferguson in 2013, finishing seventh in the" +
     " Premier League last season and missing out on a place in the lucrative Champions League." +
-    " ($1 = 0.8910 Swiss francs) (Writing by Neil Maidment, additional reporting by Jemima" + 
+    " ($1 = 0.8910 Swiss francs) (Writing by Neil Maidment, additional reporting by Jemima" +
     " Kelly; editing by Keith Weir)")
 </code></pre></div></div>
 

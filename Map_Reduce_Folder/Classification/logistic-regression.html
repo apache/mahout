@@ -212,7 +212,7 @@ occurrence of an event. It makes use of several predictor variables that
 may be either numerical or categories.</p>
 
 <p>Logistic regression is the standard industry workhorse that underlies many
-production fraud detection and advertising quality and targeting products. 
+production fraud detection and advertising quality and targeting products.
 The Mahout implementation uses Stochastic Gradient Descent (SGD) to all
 large training sets to be used.</p>
 
@@ -232,7 +232,7 @@ Paul Komarek</a> [1].</p>
 
 <p>The bad news is that SGD is an inherently sequential algorithm.  The good
 news is that it is blazingly fast and thus it is not a problem for Mahout’s
-implementation to handle training sets of tens of millions of examples. 
+implementation to handle training sets of tens of millions of examples.
 With the down-sampling typical in many data-sets, this is equivalent to a
 dataset with billions of raw training examples.</p>
 
@@ -242,7 +242,7 @@ performance testing as your system runs.  Often this means that you can
 stop training when a model reaches a target level of performance.  The SGD
 framework includes classes to do on-line evaluation using cross validation
 (the CrossFoldLearner) and an evolutionary system to do learning
-hyper-parameter optimization on the fly (the AdaptiveLogisticRegression). 
+hyper-parameter optimization on the fly (the AdaptiveLogisticRegression).
 The AdaptiveLogisticRegression system makes heavy use of threads to
 increase machine utilization.  The way it works is that it runs 20
 CrossFoldLearners in separate threads, each with slightly different
@@ -331,7 +331,6 @@ Paul Komarek</a></p>
 <p>[3] <a href="http://mahout.apache.org/users/classification/bankmarketing-example.html">SGD Bank Marketing Example</a></p>
 
 <p>[4] <a href="https://github.com/apache/mahout/blob/master/examples/bin/classify-20newsgroups.sh">SGD 20 newsgroups classification</a></p>
-
 
   <footer class="footer bg-light">
     <div class="container text-center small">

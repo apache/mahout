@@ -218,7 +218,7 @@
 
 <p>Mahout <code class="language-plaintext highlighter-rouge">dqrThin(...)</code> is implemented in the mahout <code class="language-plaintext highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {        
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
     if (drmA.ncol &gt; 5000)
         log.warn("A is too fat. A'A must fit in memory and easily broadcasted.")
     implicit val ctx = drmA.context

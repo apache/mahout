@@ -187,8 +187,8 @@
     <div class="col-lg-8">
       <h1 id="multilayer-perceptron">Multilayer Perceptron</h1>
 
-<p>A multilayer perceptron is a biologically inspired feed-forward network that can 
-be trained to represent a nonlinear mapping between input and output data. It 
+<p>A multilayer perceptron is a biologically inspired feed-forward network that can
+be trained to represent a nonlinear mapping between input and output data. It
 consists of multiple layers, each containing multiple artificial neuron units and
 can be used for classification and regression tasks in a supervised learning approach.</p>
 
@@ -198,7 +198,7 @@ can be used for classification and regression tasks in a supervised learning app
 can be used with the following commands:</p>
 
 <h1 id="model-training">model training</h1>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron  # model usage
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bin/mahout org.apache.mahout.classifier.mlp.TrainMultilayerPerceptron # model usage
 $ bin/mahout org.apache.mahout.classifier.mlp.RunMultilayerPerceptron
 </code></pre></div></div>
 
@@ -366,7 +366,7 @@ The dimensions of the data set are given through some flower parameters (sepal l
 
 <p>where <em>a</em> is the activation of the unit. It is not yet possible to change the learning to more advanced methods using adaptive learning rates yet.</p>
 
-<p>The number of layers and units per layer can be specified manually and determines the whole topology with each unit being fully connected to the previous layer. A bias unit is automatically added to the input of every layer. 
+<p>The number of layers and units per layer can be specified manually and determines the whole topology with each unit being fully connected to the previous layer. A bias unit is automatically added to the input of every layer.
 Currently, the logistic sigmoid is used as a squashing function in every hidden and output layer. It is of the form:</p>
 
 \[\frac{1}{1 + exp(-a)}\]
@@ -377,10 +377,10 @@ Currently, the logistic sigmoid is used as a squashing function in every hidden 
 
 <h2 id="theoretical-background">Theoretical Background</h2>
 
-<p>The <em>multilayer perceptron</em> was inspired by the biological structure of the brain where multiple neurons are connected and form columns and layers. Perceptual input enters this network through our sensory organs and is then further processed into higher levels. 
+<p>The <em>multilayer perceptron</em> was inspired by the biological structure of the brain where multiple neurons are connected and form columns and layers. Perceptual input enters this network through our sensory organs and is then further processed into higher levels.
 The term multilayer perceptron is a little misleading since the <em>perceptron</em> is a special case of a single <em>artificial neuron</em> that can be used for simple computations <a href="http://en.wikipedia.org/wiki/Perceptron" title="The perceptron in wikipedia">[1]</a>. The difference is that the perceptron uses a discontinous nonlinearity while for the MLP neurons that are implemented in mahout it is important to use continous nonlinearities. This is necessary for the implemented learning algorithm, where the error is propagated back from the output layer to the input layer and the weights of the connections are changed according to their contribution to the overall error. This algorithm is called backpropagation and uses gradient descent to update the weights. To compute the gradients we need continous nonlinearities. But let’s start from the beginning!</p>
 
-<p>The first layer of the MLP represents the input and has no other purpose than routing the input to every connected unit in a feed-forward fashion. Following layers are called hidden layers and the last layer serves the special purpose to determine the output. The activation of a unit <em>u</em> in a hidden layer is computed through a weighted sum of all inputs, resulting in 
+<p>The first layer of the MLP represents the input and has no other purpose than routing the input to every connected unit in a feed-forward fashion. Following layers are called hidden layers and the last layer serves the special purpose to determine the output. The activation of a unit <em>u</em> in a hidden layer is computed through a weighted sum of all inputs, resulting in
 \(a_j = \sum_{i=1}^{D} w_{ji}^{(l)} x_i + w_{j0}^{(l)}\)
 This computes the activation <em>a</em> for neuron <em>j</em> where <em>w</em> is the weight from neuron <em>i</em> to neuron <em>j</em> in layer <em>l</em>. The last part, where <em>i = 0</em> is called the bias and can be used as an offset, independent from the input.</p>
 
@@ -420,7 +420,6 @@ This computes the activation <em>a</em> for neuron <em>j</em> where <em>w</em> i
 <p>[2] http://en.wikipedia.org/wiki/Sigmoid_function</p>
 
 <p>[3] <a href="http://research.microsoft.com/en-us/um/people/cmbishop/prml/">Christopher M. Bishop: Pattern Recognition and Machine Learning, Springer 2009</a></p>
-
 
     </div>
 

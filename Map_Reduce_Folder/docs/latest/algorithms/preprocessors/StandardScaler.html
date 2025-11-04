@@ -191,7 +191,7 @@
 
 <h4 id="relation-to-the-scale-function-in-r-base">Relation to the <code class="language-plaintext highlighter-rouge">scale</code> function in R-base</h4>
 <p>The <code class="language-plaintext highlighter-rouge">StandardScaler</code> is the equivelent of the R-base function <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/scale.html"><code class="language-plaintext highlighter-rouge">scale</code></a> with
-one noteable tweek. R’s <code class="language-plaintext highlighter-rouge">scale</code> function (indeed all of R) calculates standard deviation with 1 degree of freedom, Mahout 
+one noteable tweek. R’s <code class="language-plaintext highlighter-rouge">scale</code> function (indeed all of R) calculates standard deviation with 1 degree of freedom, Mahout
 (like many other statistical packages aimed at larger data sets) does not make this adjustment.  In larger datasets the difference
 is trivial, however when testing the function on smaller datasets the practicioner may be confused by the discrepency.</p>
 
@@ -217,7 +217,6 @@ is trivial, however when testing the function on smaller datasets the practicion
 
 <span class="k">val</span> <span class="nv">scaledA</span> <span class="k">=</span> <span class="nv">scaler</span><span class="o">.</span><span class="py">transform</span><span class="o">(</span><span class="n">A</span><span class="o">)</span>
 </code></pre></div></div>
-
 
     </div>
 

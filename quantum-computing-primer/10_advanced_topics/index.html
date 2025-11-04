@@ -224,23 +224,23 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># Apply the Quantum Fourier Transform
-</span><span class="k">def</span> <span class="nf">apply_qft</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
-    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
-        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
-        <span class="k">for</span> <span class="n">next_qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">qubit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
-            <span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">next_qubit</span> <span class="o">-</span> <span class="n">qubit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>  
+</span><span class="k">def</span> <span class="nf">apply_qft</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">next_qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">qubit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">next_qubit</span> <span class="o">-</span> <span class="n">qubit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
             <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="n">next_qubit</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
 
 <span class="nf">apply_qft</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and print the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
-<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h2 id="102-quantum-phase-estimation-qpe">10.2 Quantum Phase Estimation (QPE)</h2>
@@ -254,25 +254,25 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># Apply the Quantum Phase Estimation
-</span><span class="k">def</span> <span class="nf">apply_qpe</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
-    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
-        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
-        <span class="c1"># Apply controlled unitary operations (simplified example)  
-</span>        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
-        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>  
-<span class="c1"># Inverse QFT  
+</span><span class="k">def</span> <span class="nf">apply_qpe</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
+        <span class="c1"># Apply controlled unitary operations (simplified example)
+</span>        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cu_gate</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+<span class="c1"># Inverse QFT
 </span><span class="nf">apply_qft</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">)</span>
 
 <span class="nf">apply_qpe</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and print the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
-<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h2 id="103-quantum-annealing">10.3 Quantum Annealing</h2>
@@ -286,25 +286,25 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply the Quantum Annealing process
-</span><span class="k">def</span> <span class="nf">apply_quantum_annealing</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>  
-    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>  
-        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>  
-        <span class="c1"># Apply a simple Hamiltonian (simplified example)  
-</span>        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_rx_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
-        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_ry_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  
-    <span class="c1"># Measure the qubits  
+</span><span class="k">def</span> <span class="nf">apply_quantum_annealing</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">):</span>
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
+        <span class="c1"># Apply a simple Hamiltonian (simplified example)
+</span>        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_rx_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">qc</span><span class="p">.</span><span class="nf">apply_ry_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">3.14159</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># Measure the qubits
 </span>    <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 
 <span class="nf">apply_quantum_annealing</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and print the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
-<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h2 id="conclusion">Conclusion</h2>
@@ -348,7 +348,7 @@
             <li>
                 FOSSY 2024, Portland Oregon - <a href="https://www.youtube.com/watch?v=tgFaUL1wYhY" target="_blank">
                     QuMat: Apache Mahout's Quantum Computing Interface
-                </a> 
+                </a>
                 [<a href="https://www.slideshare.net/slideshow/qumat_-apache-mahout-s-quantum-computing-interface-pptx/272300949" target="_blank">Slides</a>]
             </li>
                 <li>

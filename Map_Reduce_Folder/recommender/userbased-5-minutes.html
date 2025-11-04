@@ -306,7 +306,7 @@ UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.1, similarity, d
 return new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
 </pre>
 
-Now we have to create the code for the test. We'll check how much the recommender misses the real interaction strength on average. We employ an *AverageAbsoluteDifferenceRecommenderEvaluator* for this. The following code shows how to put the pieces together and run a hold-out test: 
+Now we have to create the code for the test. We'll check how much the recommender misses the real interaction strength on average. We employ an *AverageAbsoluteDifferenceRecommenderEvaluator* for this. The following code shows how to put the pieces together and run a hold-out test:
 
 <pre>
 DataModel model = new FileDataModel(new File("/path/to/dataset.csv"));
@@ -316,18 +316,7 @@ double result = evaluator.evaluate(builder, null, model, 0.9, 1.0);
 System.out.println(result);
 </pre>
 
-Note: if you run this test multiple times, you will get different results, because the splitting into trainingset and testset is done randomly. 
-
-
-
-
-
-
-
-
-
-
-
+Note: if you run this test multiple times, you will get different results, because the splitting into trainingset and testset is done randomly.
 </RecommendedItem></pre>
 
   <footer class="footer bg-light">

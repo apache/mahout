@@ -303,15 +303,15 @@ times.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout seq2sparse
 
-Usage:									    
+Usage:
      [--minSupport &lt;minSupport&gt; --analyzerName &lt;analyzerName&gt; --chunkSize &lt;chunkSize&gt;
       --output &lt;output&gt; --input &lt;input&gt; --minDF &lt;minDF&gt;
       --maxDFPercent&lt;maxDFPercent&gt; --weight &lt;weight&gt; --norm &lt;norm&gt; --minLLR &lt;minLLR&gt;
-      --numReducers  &lt;numReducers&gt; --maxNGramSize &lt;ngramSize&gt; --overwrite --help		    
+      --numReducers  &lt;numReducers&gt; --maxNGramSize &lt;ngramSize&gt; --overwrite --help
       --sequentialAccessVector]
-Options 								    
+Options
 
-  --minSupport (-s) minSupport	  (Optional) Minimum Support. Default Value: 2				    
+  --minSupport (-s) minSupport	  (Optional) Minimum Support. Default Value: 2
 
   --analyzerName (-a) analyzerName    The class name of the analyzer
 
@@ -323,33 +323,33 @@ Options
 
   --minDF (-md) minDF		  The minimum document frequency. Default is 1
 
-  --maxDFPercent (-x) maxDFPercent    The max percentage of docs for the DF. Can be used to remove 
+  --maxDFPercent (-x) maxDFPercent    The max percentage of docs for the DF. Can be used to remove
                                       really high frequency terms. Expressed as an
-                                      integer between 0 and 100. Default is 99.     
+                                      integer between 0 and 100. Default is 99.
 
-  --weight (-wt) weight 	      The kind of weight to use. Currently TF   
-				      or TFIDF				    
+  --weight (-wt) weight 	      The kind of weight to use. Currently TF
+				      or TFIDF
 
-  --norm (-n) norm		      The norm to use, expressed as either a    
-				      float or "INF" if you want to use the 
-				      Infinite norm.  Must be greater orequal  
-				      to 0.  The default is not to normalize    
+  --norm (-n) norm		      The norm to use, expressed as either a
+				      float or "INF" if you want to use the
+				      Infinite norm.  Must be greater orequal
+				      to 0.  The default is not to normalize
 
-  --minLLR (-ml) minLLR 	      (Optional)The minimum Log Likelihood  
+  --minLLR (-ml) minLLR 	      (Optional)The minimum Log Likelihood
 				      Ratio(Float)  Default is 1.0
-    
-  --numReducers (-nr) numReducers     (Optional) Number of reduce tasks.    
-				      Default Value: 1			    
 
-  --maxNGramSize (-ng) ngramSize      (Optional) The maximum size of ngrams to  
-				      create (2 = bigrams, 3 = trigrams, etc)   
-				      Default Value:2			 
-   
-  --overwrite (-w)		      If set, overwrite the output directory    
-  --help (-h)			      Print out help			    
-  --sequentialAccessVector (-seq)     (Optional) Whether output vectors should	
-				      be SequentialAccessVectors If set true	
-				      else false 
+  --numReducers (-nr) numReducers     (Optional) Number of reduce tasks.
+				      Default Value: 1
+
+  --maxNGramSize (-ng) ngramSize      (Optional) The maximum size of ngrams to
+				      create (2 = bigrams, 3 = trigrams, etc)
+				      Default Value:2
+
+  --overwrite (-w)		      If set, overwrite the output directory
+  --help (-h)			      Print out help
+  --sequentialAccessVector (-seq)     (Optional) Whether output vectors should
+				      be SequentialAccessVectors If set true
+				      else false
 </code></pre></div></div>
 
 <p><a name="Collocations-CollocDriver"></a></p>
@@ -357,43 +357,43 @@ Options
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mahout org.apache.mahout.vectorizer.collocations.llr.CollocDriver
 
-Usage:									    
- [--input &lt;input&gt; --output &lt;output&gt; --maxNGramSize &lt;ngramSize&gt; --overwrite    
---minSupport &lt;minSupport&gt; --minLLR &lt;minLLR&gt; --numReducers &lt;numReducers&gt;     
+Usage:
+ [--input &lt;input&gt; --output &lt;output&gt; --maxNGramSize &lt;ngramSize&gt; --overwrite
+--minSupport &lt;minSupport&gt; --minLLR &lt;minLLR&gt; --numReducers &lt;numReducers&gt;
 --analyzerName &lt;analyzerName&gt; --preprocess --unigram --help]
 
-Options 								    
+Options
 
-  --input (-i) input		      The Path for input files. 	    
+  --input (-i) input		      The Path for input files.
 
-  --output (-o) output		      The Path write output to		    
+  --output (-o) output		      The Path write output to
 
-  --maxNGramSize (-ng) ngramSize      (Optional) The maximum size of ngramsto  
-				      create (2 = bigrams, 3 = trigrams,etc)   
-				      Default Value:2			
+  --maxNGramSize (-ng) ngramSize      (Optional) The maximum size of ngramsto
+				      create (2 = bigrams, 3 = trigrams,etc)
+				      Default Value:2
 
-  --overwrite (-w)		      If set, overwrite the outputdirectory    
+  --overwrite (-w)		      If set, overwrite the outputdirectory
 
-  --minSupport (-s) minSupport	      (Optional) Minimum Support. Default   
-				      Value: 2				    
+  --minSupport (-s) minSupport	      (Optional) Minimum Support. Default
+				      Value: 2
 
   --minLLR (-ml) minLLR 	      (Optional)The minimum Log Likelihood
-				      Ratio(Float)  Default is 1.0	  
-  
-  --numReducers (-nr) numReducers     (Optional) Number of reduce tasks.    
-				      Default Value: 1			    
+				      Ratio(Float)  Default is 1.0
 
-  --analyzerName (-a) analyzerName    The class name of the analyzer	    
+  --numReducers (-nr) numReducers     (Optional) Number of reduce tasks.
+				      Default Value: 1
 
-  --preprocess (-p)		      If set, input is SequenceFile&lt;Text,Text&gt;  
-				      where the value is the document, which	
-				      will be tokenized using the specified 
-				      analyzer. 			
+  --analyzerName (-a) analyzerName    The class name of the analyzer
 
-  --unigram (-u)		      If set, unigrams will be emitted inthe   
+  --preprocess (-p)		      If set, input is SequenceFile&lt;Text,Text&gt;
+				      where the value is the document, which
+				      will be tokenized using the specified
+				      analyzer.
+
+  --unigram (-u)		      If set, unigrams will be emitted inthe
 				      final output alongside collocations
-   
-  --help (-h)			      Print out help	      
+
+  --help (-h)			      Print out help
 </code></pre></div></div>
 
 <p><a name="Collocations-Algorithmdetails"></a></p>
@@ -428,7 +428,7 @@ frequencies are collected across the entire document.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>head_key(EMPTY) -&gt; (head subgram, head frequency)
 
-head_key(ngram) -&gt; (ngram, ngram frequency) 
+head_key(ngram) -&gt; (ngram, ngram frequency)
 
 tail_key(EMPTY) -&gt; (tail subgram, tail frequency)
 
@@ -477,7 +477,7 @@ The input will be traversed in the following order:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(head subgram, frequency 1)
 (head subgram, frequency 2)
-... 
+...
 (head subgram, frequency N)
 (ngram 1, frequency 1)
 (ngram 1, frequency 2)
@@ -572,7 +572,6 @@ the Skipped.LESS_THAN_MIN_LLR counter is incremented.</p>
 CollocDriver, unigrams (single tokens) will be passed through the job and
 each token’s frequency will be calculated. As with ngrams, unigrams are
 subject to filtering with minSupport and minLLR.</p>
-
 
   <footer class="footer bg-light">
     <div class="container text-center small">

@@ -198,7 +198,7 @@ Deep learning will admittedly do better a recognizing and correctly classifying 
 
 <p>The advantage/use-case for the eigenfaces approach is when new faces are being regularly added. Even when building a production
 grade eigenfaces based system- neural networks still have a place- <em>idenitifying faces</em> in images, and creating <em>centered and scaled</em> images around
-the face.  This is scalable because we only need to train our neural network to detect, center, and scale faces once.  E.g. 
+the face.  This is scalable because we only need to train our neural network to detect, center, and scale faces once.  E.g.
 a neural network would be deployed as a microservice, and then eigenfaces would be deployed as a microservice.</p>
 
 <p>A production version ends up looking something like this:</p>
@@ -273,7 +273,7 @@ tar -xzf lfw-deepfunneled.tgz
 <span class="k">import</span> <span class="nn">javax.imageio.ImageIO</span>
 
 <span class="k">val</span> <span class="nv">sampleImagePath</span> <span class="k">=</span> <span class="s">"/home/guest/lfw-deepfunneled/Aaron_Eckhart/Aaron_Eckhart_0001.jpg"</span>
-<span class="k">val</span> <span class="nv">sampleImage</span> <span class="k">=</span> <span class="nv">ImageIO</span><span class="o">.</span><span class="py">read</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">sampleImagePath</span><span class="o">))</span>  
+<span class="k">val</span> <span class="nv">sampleImage</span> <span class="k">=</span> <span class="nv">ImageIO</span><span class="o">.</span><span class="py">read</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">sampleImagePath</span><span class="o">))</span>
 <span class="k">val</span> <span class="nv">w</span> <span class="k">=</span> <span class="nv">sampleImage</span><span class="o">.</span><span class="py">getWidth</span>
 <span class="k">val</span> <span class="nv">h</span> <span class="k">=</span> <span class="nv">sampleImage</span><span class="o">.</span><span class="py">getHeight</span>
 
@@ -296,7 +296,7 @@ tar -xzf lfw-deepfunneled.tgz
 <p>If using Zeppelin, the following can be used to generate a fun table of the Eigenfaces:</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">%</span><span class="n">python</span>
- 
+
 <span class="n">r</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">c</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="k">print</span> <span class="sh">'</span><span class="s">%html</span><span class="se">\n</span><span class="s">&lt;table style=</span><span class="sh">"</span><span class="s">width:100%</span><span class="sh">"</span><span class="s">&gt;</span><span class="sh">'</span> <span class="o">+</span> <span class="sh">""</span><span class="p">.</span><span class="nf">join</span><span class="p">([</span><span class="sh">"</span><span class="s">&lt;tr&gt;</span><span class="sh">"</span> <span class="o">+</span> <span class="sh">""</span><span class="p">.</span><span class="nf">join</span><span class="p">([</span> <span class="sh">'</span><span class="s">&lt;td&gt;&lt;img src=</span><span class="sh">"</span><span class="s">/tmp/eigenfaces/%i.png</span><span class="sh">"</span><span class="s">&gt;&lt;/td&gt;</span><span class="sh">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="p">])</span> <span class="o">+</span> <span class="sh">"</span><span class="s">&lt;/tr&gt;</span><span class="sh">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">r</span> <span class="o">*</span> <span class="n">c</span><span class="p">,</span> <span class="n">r</span> <span class="o">+</span><span class="mi">1</span> <span class="p">)</span> <span class="p">])</span> <span class="o">+</span> <span class="sh">'</span><span class="s">&lt;/table&gt;</span><span class="sh">'</span>

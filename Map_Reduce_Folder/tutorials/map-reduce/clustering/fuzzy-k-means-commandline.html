@@ -50,47 +50,46 @@ to view all outputs.</li>
 <p><a name="fuzzy-k-means-commandline-Commandlineoptions"></a></p>
 <h1 id="command-line-options">Command line options</h1>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --input (-i) input			       Path to job input directory. 
-					       Must be a SequenceFile of    
-					       VectorWritable		    
-  --clusters (-c) clusters		       The input centroids, as Vectors. 
-					       Must be a SequenceFile of    
-					       Writable, Cluster/Canopy. If k  
-					       is also specified, then a random 
-					       set of vectors will be selected  
-					       and written out to this path 
-					       first			    
-  --output (-o) output			       The directory pathname for   
-					       output.			    
-  --distanceMeasure (-dm) distanceMeasure      The classname of the	    
-					       DistanceMeasure. Default is  
-					       SquaredEuclidean 	    
-  --convergenceDelta (-cd) convergenceDelta    The convergence delta value. 
-					       Default is 0.5		    
-  --maxIter (-x) maxIter		       The maximum number of	    
-					       iterations.		    
-  --k (-k) k				       The k in k-Means.  If specified, 
-					       then a random selection of k 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --input (-i) input			       Path to job input directory.
+					       Must be a SequenceFile of
+					       VectorWritable
+  --clusters (-c) clusters		       The input centroids, as Vectors.
+					       Must be a SequenceFile of
+					       Writable, Cluster/Canopy. If k
+					       is also specified, then a random
+					       set of vectors will be selected
+					       and written out to this path
+					       first
+  --output (-o) output			       The directory pathname for
+					       output.
+  --distanceMeasure (-dm) distanceMeasure      The classname of the
+					       DistanceMeasure. Default is
+					       SquaredEuclidean
+  --convergenceDelta (-cd) convergenceDelta    The convergence delta value.
+					       Default is 0.5
+  --maxIter (-x) maxIter		       The maximum number of
+					       iterations.
+  --k (-k) k				       The k in k-Means.  If specified,
+					       then a random selection of k
 					       Vectors will be chosen as the
-    					       Centroid and written to the  
-					       clusters input path.	    
-  --m (-m) m				       coefficient normalization    
-					       factor, must be greater than 1   
-  --overwrite (-ow)			       If present, overwrite the output 
-					       directory before running job 
-  --help (-h)				       Print out help		    
-  --numMap (-u) numMap			       The number of map tasks.     
-					       Defaults to 10		    
-  --maxRed (-r) maxRed			       The number of reduce tasks.  
-					       Defaults to 2		    
-  --emitMostLikely (-e) emitMostLikely	       True if clustering should emit   
-					       the most likely point only,  
-					       false for threshold clustering.  
-					       Default is true		    
-  --threshold (-t) threshold		       The pdf threshold used for   
-					       cluster determination. Default   
-					       is 0 
-  --clustering (-cl)			       If present, run clustering after 
-					       the iterations have taken place  
+    					       Centroid and written to the
+					       clusters input path.
+  --m (-m) m				       coefficient normalization
+					       factor, must be greater than 1
+  --overwrite (-ow)			       If present, overwrite the output
+					       directory before running job
+  --help (-h)				       Print out help
+  --numMap (-u) numMap			       The number of map tasks.
+					       Defaults to 10
+  --maxRed (-r) maxRed			       The number of reduce tasks.
+					       Defaults to 2
+  --emitMostLikely (-e) emitMostLikely	       True if clustering should emit
+					       the most likely point only,
+					       false for threshold clustering.
+					       Default is true
+  --threshold (-t) threshold		       The pdf threshold used for
+					       cluster determination. Default
+					       is 0
+  --clustering (-cl)			       If present, run clustering after
+					       the iterations have taken place
 </code></pre></div></div>
-

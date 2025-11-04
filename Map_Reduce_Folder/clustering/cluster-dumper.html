@@ -235,32 +235,32 @@ executed the <a href="clustering-of-synthetic-control-data.html">synthetic contr
  and want to analyze the output, you can execute the <code class="language-plaintext highlighter-rouge">mahout clusterdumper</code> utility from the command line.</p>
 
 <h4 id="cli-options">CLI options:</h4>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--help                               Print out help	
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--help                               Print out help
 --input (-i) input                   The directory containing Sequence
-                                       Files for the Clusters	    
+                                       Files for the Clusters
 --output (-o) output                 The output file.  If not specified,
                                        dumps to the console.
 --outputFormat (-of) outputFormat    The optional output format to write
-                                       the results as. Options: TEXT, CSV, or GRAPH_ML		 
---substring (-b) substring           The number of chars of the	    
-					   asFormatString() to print	
---pointsDir (-p) pointsDir           The directory containing points  
+                                       the results as. Options: TEXT, CSV, or GRAPH_ML
+--substring (-b) substring           The number of chars of the
+					   asFormatString() to print
+--pointsDir (-p) pointsDir           The directory containing points
                                        sequence files mapping input vectors
-                                       to their cluster.  If specified, 
-                                       then the program will output the 
-                                       points associated with a cluster 
+                                       to their cluster.  If specified,
+                                       then the program will output the
+                                       points associated with a cluster
 --dictionary (-d) dictionary         The dictionary file.
---dictionaryType (-dt) dictionaryType    The dictionary file type	    
+--dictionaryType (-dt) dictionaryType    The dictionary file type
                                      (text|sequencefile)
 --distanceMeasure (-dm) distanceMeasure  The classname of the DistanceMeasure.
                                            Default is SquaredEuclidean.
---numWords (-n) numWords             The number of top terms to print 
+--numWords (-n) numWords             The number of top terms to print
 --tempDir tempDir                    Intermediate output directory
 --startPhase startPhase              First phase to run
 --endPhase endPhase                  Last phase to run
 --evaluate (-e)                      Run ClusterEvaluator and CDbwEvaluator over the
                                       input. The output will be appended to the rest of
-                                      the output at the end.   
+                                      the output at the end.
 </code></pre></div></div>
 
 <h3 id="standalone-java-program">Standalone Java Program</h3>
@@ -282,8 +282,8 @@ executed the <a href="clustering-of-synthetic-control-data.html">synthetic contr
 
 <p>In the arguments tab, specify the below arguments</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--seqFileDir &lt;MAHOUT_HOME&gt;/examples/output/clusters-10 
---pointsDir &lt;MAHOUT_HOME&gt;/examples/output/clusteredPoints 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--seqFileDir &lt;MAHOUT_HOME&gt;/examples/output/clusters-10
+--pointsDir &lt;MAHOUT_HOME&gt;/examples/output/clusteredPoints
 --output &lt;MAHOUT_HOME&gt;/examples/output/clusteranalyze.txt
 replace &lt;MAHOUT_HOME&gt; with the actual path of your $MAHOUT_HOME
 </code></pre></div></div>

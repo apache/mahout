@@ -335,73 +335,72 @@ Reliability (standard deviation)            0.2131
   <li>
     <p>Download and extract the <em>20news-bydate.tar.gz</em> from the <a href="http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz">20newsgroups dataset</a> to the working directory.</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz
          -o ${WORK_DIR}/20news-bydate.tar.gz
      $ mkdir -p ${WORK_DIR}/20news-bydate
      $ cd ${WORK_DIR}/20news-bydate &amp;&amp; tar xzf ../20news-bydate.tar.gz &amp;&amp; cd .. &amp;&amp; cd ..
      $ mkdir ${WORK_DIR}/20news-all
      $ cp -R ${WORK_DIR}/20news-bydate/*/* ${WORK_DIR}/20news-all   * If you're running on a Hadoop cluster:
- 
+
      $ hadoop dfs -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
 </code></pre></div>    </div>
   </li>
   <li>
     <p>Convert the full 20 newsgroups dataset into a &lt; Text, Text &gt; SequenceFile.</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout seqdirectory 
-         -i ${WORK_DIR}/20news-all 
-         -o ${WORK_DIR}/20news-seq 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout seqdirectory
+         -i ${WORK_DIR}/20news-all
+         -o ${WORK_DIR}/20news-seq
          -ow
 </code></pre></div>    </div>
   </li>
   <li>
     <p>Convert and preprocesses the dataset into  a &lt; Text, VectorWritable &gt; SequenceFile containing term frequencies for each document.</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout seq2sparse 
-         -i ${WORK_DIR}/20news-seq 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout seq2sparse
+         -i ${WORK_DIR}/20news-seq
          -o ${WORK_DIR}/20news-vectors
-         -lnorm 
-         -nv 
-         -wt tfidf If we wanted to use different parsing methods or transformations on the term frequency vectors we could supply different options here e.g.: -ng 2 for bigrams or -n 2 for L2 length normalization.  See the [Creating vectors from text](http://mahout.apache.org/users/basics/creating-vectors-from-text.html) page for a list of all seq2sparse options.   
+         -lnorm
+         -nv
+         -wt tfidf If we wanted to use different parsing methods or transformations on the term frequency vectors we could supply different options here e.g.: -ng 2 for bigrams or -n 2 for L2 length normalization.  See the [Creating vectors from text](http://mahout.apache.org/users/basics/creating-vectors-from-text.html) page for a list of all seq2sparse options.
 </code></pre></div>    </div>
   </li>
   <li>
     <p>Split the preprocessed dataset into training and testing sets.</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout split 
-         -i ${WORK_DIR}/20news-vectors/tfidf-vectors 
-         --trainingOutput ${WORK_DIR}/20news-train-vectors 
-         --testOutput ${WORK_DIR}/20news-test-vectors  
-         --randomSelectionPct 40 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout split
+         -i ${WORK_DIR}/20news-vectors/tfidf-vectors
+         --trainingOutput ${WORK_DIR}/20news-train-vectors
+         --testOutput ${WORK_DIR}/20news-test-vectors
+         --randomSelectionPct 40
          --overwrite --sequenceFiles -xm sequential
 </code></pre></div>    </div>
   </li>
   <li>
     <p>Train the classifier.</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout trainnb 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout trainnb
          -i ${WORK_DIR}/20news-train-vectors
-         -el  
-         -o ${WORK_DIR}/model 
-         -li ${WORK_DIR}/labelindex 
-         -ow 
+         -el
+         -o ${WORK_DIR}/model
+         -li ${WORK_DIR}/labelindex
+         -ow
          -c
 </code></pre></div>    </div>
   </li>
   <li>
     <p>Test the classifier.</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout testnb 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     $ mahout testnb
          -i ${WORK_DIR}/20news-test-vectors
-         -m ${WORK_DIR}/model 
-         -l ${WORK_DIR}/labelindex 
-         -ow 
-         -o ${WORK_DIR}/20news-testing 
+         -m ${WORK_DIR}/model
+         -l ${WORK_DIR}/labelindex
+         -ow
+         -o ${WORK_DIR}/20news-testing
          -c
 </code></pre></div>    </div>
   </li>
 </ol>
-
 
   <footer class="footer bg-light">
     <div class="container text-center small">

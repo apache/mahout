@@ -223,7 +223,7 @@
 
 <p>Mahout <code class="language-plaintext highlighter-rouge">dspca(...)</code> is implemented in the mahout <code class="language-plaintext highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dspca[K](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0): 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dspca[K](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
 (DrmLike[K], DrmLike[Int], Vector) = {
 
     // Some mapBlock() calls need it

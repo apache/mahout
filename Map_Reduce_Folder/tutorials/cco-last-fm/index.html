@@ -187,14 +187,14 @@
     <div class="col-lg-8">
       <p>Most recommender examples utilize the MovieLense dataset, but that relies only on ratings (which makes the recommender being demonstrated look less trivial).  Right next to the MovieLense dataset is the LastFM data set.  The LastFM dataset has ratings by user, friends of the user, bands listened to by user, and tags by user.  This is the kind of exciting data set we’d like to work with!</p>
 
-<p>Start by downloading the LastFM dataset from 
+<p>Start by downloading the LastFM dataset from
 http://files.grouplens.org/datasets/hetrec2011/hetrec2011-lastfm-2k.zip</p>
 
 <p>I’m going to assume you’ve unzipped them to /path/to/lastfm/*
 We’re going to use a new trick for creating our IndexedDataSets, the <code class="language-plaintext highlighter-rouge">apply</code> function.  <code class="language-plaintext highlighter-rouge">apply</code> takes an <code class="language-plaintext highlighter-rouge">RDD[(String, String)]</code> that is an RDD of tuples where both elements are strings. We load RDDs, and use Spark to manipulate the RDDs into this form.  The files from LastFM are tab seperated- but it should be noted, that this could easily be done from log files, but would just take a touch more Spark-Fu.</p>
 
-<p>The second important thing to note is that the first element in each tuple is going to be the rows in the resulting matrix, the second element will be the column, and at that position there will be a one.  The BiDictionary will automatically be created from the strings. 
-For those following along at home- <a href="cco-lastfm.scala">the full Scala worksheet</a> might be easier than copying and pasting 
+<p>The second important thing to note is that the first element in each tuple is going to be the rows in the resulting matrix, the second element will be the column, and at that position there will be a one.  The BiDictionary will automatically be created from the strings.
+For those following along at home- <a href="cco-lastfm.scala">the full Scala worksheet</a> might be easier than copying and pasting
 from this page.</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark</span>
@@ -209,14 +209,14 @@ from this page.</p>
 													<span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="nv">line</span><span class="o">.</span><span class="py">split</span><span class="o">(</span><span class="s">"\t"</span><span class="o">))</span>
 													<span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">a</span> <span class="k">=&gt;</span> <span class="o">(</span><span class="nf">a</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="nf">a</span><span class="o">(</span><span class="mi">1</span><span class="o">)))</span>
 										      <span class="o">.</span><span class="py">filter</span><span class="o">(</span><span class="nv">_</span><span class="o">.</span><span class="py">_1</span> <span class="o">!=</span> <span class="s">"userID"</span><span class="o">)</span>
-										      
+
 <span class="k">val</span> <span class="nv">userArtistsIDS</span> <span class="k">=</span> <span class="nv">IndexedDatasetSpark</span><span class="o">.</span><span class="py">apply</span><span class="o">(</span><span class="n">userArtistsRDD</span><span class="o">)(</span><span class="n">sc</span><span class="o">)</span>
 
 <span class="k">val</span> <span class="nv">userFriendsRDD</span> <span class="k">=</span> <span class="nv">sc</span><span class="o">.</span><span class="py">textFile</span><span class="o">(</span><span class="s">"/path/to/lastfm/user_friends.dat"</span><span class="o">)</span>
                           <span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="nv">line</span><span class="o">.</span><span class="py">split</span><span class="o">(</span><span class="s">"\t"</span><span class="o">))</span>
                           <span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">a</span> <span class="k">=&gt;</span> <span class="o">(</span><span class="nf">a</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="nf">a</span><span class="o">(</span><span class="mi">1</span><span class="o">)))</span>
                           <span class="o">.</span><span class="py">filter</span><span class="o">(</span><span class="nv">_</span><span class="o">.</span><span class="py">_1</span> <span class="o">!=</span> <span class="s">"userID"</span><span class="o">)</span>
-                          
+
 <span class="k">val</span> <span class="nv">userFriendsIDS</span> <span class="k">=</span> <span class="nv">IndexedDatasetSpark</span><span class="o">.</span><span class="py">apply</span><span class="o">(</span><span class="n">userFriendsRDD</span><span class="o">)(</span><span class="n">sc</span><span class="o">)</span>
 </code></pre></div></div>
 
@@ -242,7 +242,7 @@ from this page.</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.filter(_._1 != "userID")
 </code></pre></div></div>
 
-<p>Then we easily create an IndexedDataSet using the <code class="language-plaintext highlighter-rouge">apply</code> method. 
+<p>Then we easily create an IndexedDataSet using the <code class="language-plaintext highlighter-rouge">apply</code> method.
 val userTagsIDS = IndexedDatasetSpark.apply(userTagsRDD)(sc)
 Note the <code class="language-plaintext highlighter-rouge">(sc)</code> at the end. You may or may not need that.  <code class="language-plaintext highlighter-rouge">sc</code> is the SparkContext and should be passed as an implicit parameter, however the REPL environment (e.g. Mahout Shell or notebooks) has a hard time with the implicits, so I had to pass it explicitly.</p>
 
@@ -250,9 +250,9 @@ Note the <code class="language-plaintext highlighter-rouge">(sc)</code> at the e
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.apache.mahout.math.cf.SimilarityAnalysis</span>
 
 <span class="k">val</span> <span class="nv">artistReccosLlrDrmListByArtist</span> <span class="k">=</span> <span class="nv">SimilarityAnalysis</span><span class="o">.</span><span class="py">cooccurrencesIDSs</span><span class="o">(</span>
-			<span class="nc">Array</span><span class="o">(</span><span class="n">userArtistsIDS</span><span class="o">,</span> <span class="n">userTagsIDS</span><span class="o">,</span> <span class="n">userFriendsIDS</span><span class="o">),</span> 
+			<span class="nc">Array</span><span class="o">(</span><span class="n">userArtistsIDS</span><span class="o">,</span> <span class="n">userTagsIDS</span><span class="o">,</span> <span class="n">userFriendsIDS</span><span class="o">),</span>
 						<span class="n">maxInterestingItemsPerThing</span> <span class="k">=</span> <span class="mi">20</span><span class="o">,</span>
-						<span class="n">maxNumInteractions</span> <span class="k">=</span> <span class="mi">500</span><span class="o">,</span> 
+						<span class="n">maxNumInteractions</span> <span class="k">=</span> <span class="mi">500</span><span class="o">,</span>
 						<span class="n">randomSeed</span> <span class="k">=</span> <span class="mi">1234</span><span class="o">)</span>
 </code></pre></div></div>
 
@@ -293,7 +293,7 @@ Note the <code class="language-plaintext highlighter-rouge">(sc)</code> at the e
  <span class="o">(</span><span class="nv">userArtistsIDS</span><span class="o">.</span><span class="py">columnIDs</span><span class="o">.</span><span class="py">get</span><span class="o">(</span><span class="nf">artistMap</span><span class="o">(</span><span class="s">"Talking Heads"</span><span class="o">)).</span><span class="py">get</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span> <span class="o">::</span>
  <span class="o">(</span><span class="nv">userArtistsIDS</span><span class="o">.</span><span class="py">columnIDs</span><span class="o">.</span><span class="py">get</span><span class="o">(</span><span class="nf">artistMap</span><span class="o">(</span><span class="s">"Tom Waits"</span><span class="o">)).</span><span class="py">get</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span> <span class="o">::</span>
  <span class="o">(</span><span class="nv">userArtistsIDS</span><span class="o">.</span><span class="py">columnIDs</span><span class="o">.</span><span class="py">get</span><span class="o">(</span><span class="nf">artistMap</span><span class="o">(</span><span class="s">"Waylon Jennings"</span><span class="o">)).</span><span class="py">get</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span> <span class="o">::</span>
- <span class="o">(</span><span class="nv">userArtistsIDS</span><span class="o">.</span><span class="py">columnIDs</span><span class="o">.</span><span class="py">get</span><span class="o">(</span><span class="nf">artistMap</span><span class="o">(</span><span class="s">"Wu-Tang Clan"</span><span class="o">)).</span><span class="py">get</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span> <span class="o">::</span> <span class="nc">Nil</span><span class="o">,</span> 
+ <span class="o">(</span><span class="nv">userArtistsIDS</span><span class="o">.</span><span class="py">columnIDs</span><span class="o">.</span><span class="py">get</span><span class="o">(</span><span class="nf">artistMap</span><span class="o">(</span><span class="s">"Wu-Tang Clan"</span><span class="o">)).</span><span class="py">get</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span> <span class="o">::</span> <span class="nc">Nil</span><span class="o">,</span>
  <span class="n">cardinality</span> <span class="k">=</span> <span class="nv">userArtistsIDS</span><span class="o">.</span><span class="py">columnIDs</span><span class="o">.</span><span class="py">size</span>
 <span class="o">)</span>
 

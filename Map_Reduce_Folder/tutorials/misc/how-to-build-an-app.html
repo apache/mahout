@@ -216,7 +216,7 @@
 
 <p>Before we can execute something on Spark we’ll need to create a context. We could use raw Spark calls here but default values are setup for a Mahout context by using the Mahout helper function.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>implicit val mc = mahoutSparkContext(masterUrl = "local", 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>implicit val mc = mahoutSparkContext(masterUrl = "local",
   appName = "CooccurrenceDriver")
 </code></pre></div></div>
 
@@ -238,7 +238,7 @@ u4,galaxy
 <p>One important thing to note about this example is that we read in all datasets before we adjust the number of rows in them to match the total number of users in the data. This is so the math works out <a href="http://mahout.apache.org/users/algorithms/intro-cooccurrence-spark.html">(A’A, A’B, A’C)</a> even if some users took one action but not another there must be the same number of rows in all matrices.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/**
- * Read files of element tuples and create IndexedDatasets one per action. These 
+ * Read files of element tuples and create IndexedDatasets one per action. These
  * share a userID BiMap but have their own itemID BiMaps
  */
 def readActions(actionInput: Array[(String, String)]): Array[(String, IndexedDataset)] = {
@@ -246,7 +246,7 @@ def readActions(actionInput: Array[(String, String)]): Array[(String, IndexedDat
 
   val userDictionary: BiMap[String, Int] = HashBiMap.create()
 
-  // The first action named in the sequence is the "primary" action and 
+  // The first action named in the sequence is the "primary" action and
   // begins to fill up the user dictionary
   for ( actionDescription &lt;- actionInput ) {// grab the path to actions
     val action: IndexedDataset = SparkEngine.indexedDatasetDFSReadElements(
@@ -255,11 +255,11 @@ def readActions(actionInput: Array[(String, String)]): Array[(String, IndexedDat
       existingRowIDs = userDictionary)
     userDictionary.putAll(action.rowIDs)
     // put the name in the tuple with the indexedDataset
-    actions = actions :+ (actionDescription._1, action) 
+    actions = actions :+ (actionDescription._1, action)
   }
 
-  // After all actions are read in the userDictonary will contain every user seen, 
-  // even if they may not have taken all actions . Now we adjust the row rank of 
+  // After all actions are read in the userDictonary will contain every user seen,
+  // even if they may not have taken all actions . Now we adjust the row rank of
   // all IndxedDataset's to have this number of rows
   // Note: this is very important or the cooccurrence calc may fail
   val numUsers = userDictionary.size() // one more than the cardinality
@@ -277,7 +277,7 @@ def readActions(actionInput: Array[(String, String)]): Array[(String, IndexedDat
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// actions.map creates an array of just the IndeedDatasets
 val indicatorMatrices = SimilarityAnalysis.cooccurrencesIDSs(
-  actions.map(a =&gt; a._2)) 
+  actions.map(a =&gt; a._2))
 </code></pre></div></div>
 
 <p>All we need to do now is write the indicators.</p>
@@ -299,9 +299,9 @@ def writeIndicators( indicators: Array[(String, IndexedDataset)]) = {
     val indicatorDir = OutputPath + indicator._1
     indicator._2.dfsWrite(
       indicatorDir,
-      // Schema tells the writer to omit LLR strengths 
+      // Schema tells the writer to omit LLR strengths
       // and format for search engine indexing
-      IndexedDatasetWriteBooleanSchema) 
+      IndexedDatasetWriteBooleanSchema)
   }
 }
 </code></pre></div></div>
@@ -401,14 +401,14 @@ packMain := Map(
         | | | | | | (_| | | | | (_) | |_| | |_
         |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.10.0
 
-  
+
 Using Scala version 2.10.4 (Java HotSpot(TM) 64-Bit Server VM, Java 1.7.0_72)
 Type in expressions to have them evaluated.
 Type :help for more information.
 15/04/26 09:30:48 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 Created spark context..
 Mahout distributed context is available as "implicit val sdc".
-mahout&gt; 
+mahout&gt;
 </code></pre></div></div>
 
 <p>To load the driver type:</p>
@@ -422,7 +422,7 @@ import org.apache.mahout.math.indexeddataset._
 import org.apache.mahout.sparkbindings._
 import scala.collection.immutable.HashMap
 defined module CooccurrenceDriver
-mahout&gt; 
+mahout&gt;
 </code></pre></div></div>
 
 <p>To run the driver type:</p>

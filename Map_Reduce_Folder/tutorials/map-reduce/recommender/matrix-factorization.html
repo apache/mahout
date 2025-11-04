@@ -188,14 +188,14 @@
       <p><a name="MatrixFactorization-Intro"></a></p>
 <h1 id="introduction-to-matrix-factorization-for-recommendation-mining">Introduction to Matrix Factorization for Recommendation Mining</h1>
 
-<p>In the mathematical discipline of linear algebra, a matrix decomposition 
-or matrix factorization is a dimensionality reduction technique that factorizes a matrix into a product of matrices, usually two. 
+<p>In the mathematical discipline of linear algebra, a matrix decomposition
+or matrix factorization is a dimensionality reduction technique that factorizes a matrix into a product of matrices, usually two.
 There are many different matrix decompositions, each finds use among a particular class of problems.</p>
 
 <p>In mahout, the SVDRecommender provides an interface to build recommender based on matrix factorization.
 The idea behind is to project the users and items onto a feature space and try to optimize U and M so that U * (M^t) is as close to R as possible:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> U is n * p user feature matrix, 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> U is n * p user feature matrix,
  M is m * p item feature matrix, M^t is the conjugate transpose of M,
  R is n * m rating matrix,
  n is the number of users,
@@ -208,7 +208,7 @@ RMSE is defined as the squared root of the sum of squared errors at each known u
 So our matrix factorization target could be mathmatically defined as:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> find U and M, (U, M) = argmin(RMSE) = argmin(pow(SSE / K, 0.5))
- 
+
  SSE = sum(e(u,i)^2)
  e(u,i) = r(u, i) - U[u,] * (M[i,]^t) = r(u,i) - sum(U[u,f] * M[i,f]), f = 0, 1, .. p - 1
  K is the number of known user item ratings.
@@ -226,7 +226,7 @@ So our matrix factorization target could be mathmatically defined as:</p>
 
 <p>Stochastic gradient descent is a gradient descent optimization method for minimizing an objective function that is written as a su of differentiable functions.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   Q(w) = sum(Q_i(w)), 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   Q(w) = sum(Q_i(w)),
 </code></pre></div></div>
 
 <p>where w is the parameters to be estimated,
@@ -252,8 +252,8 @@ So our matrix factorization target could be mathmatically defined as:</p>
 
 <p>The algorithm is sketched as follows:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  init U and M with randomized value between 0.0 and 1.0 with standard Gaussian distribution   
-  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  init U and M with randomized value between 0.0 and 1.0 with standard Gaussian distribution
+
   for(iter = 0; iter &lt; numIterations; iter++)
   {
       for(user u and item i with rating R[u,i])
@@ -264,11 +264,11 @@ So our matrix factorization target could be mathmatically defined as:</p>
           // p is the number of features
           for(f = 0; f &lt; p; f++) {
              NU[u,f] = U[u,f] - alpha * d(Q(u,i))/d(U[u,f]) //optimize U[u,f]
-                     = U[u, f] + alpha * (e(u,i) * M[i,f] - lambda * U[u,f]) 
+                     = U[u, f] + alpha * (e(u,i) * M[i,f] - lambda * U[u,f])
           }
           for(f = 0; f &lt; p; f++) {
-             M[i,f] = M[i,f] - alpha * d(Q(u,i))/d(M[i,f])  //optimize M[i,f] 
-                    = M[i,f] + alpha * (e(u,i) * U[u,f] - lambda * M[i,f]) 
+             M[i,f] = M[i,f] - alpha * d(Q(u,i))/d(M[i,f])  //optimize M[i,f]
+                    = M[i,f] + alpha * (e(u,i) * U[u,f] - lambda * M[i,f])
           }
           U[u,] = NU[u,]
       }
@@ -304,8 +304,8 @@ for some items to receive higher ratings than other items.</p>
 <p>fm is the latent factor model to capture the interactions between user and item via a feature layer. q[i,] is the feature vector of item i, and the rest part of the formula represents user u with a user feature vector and a sum of features of items in N(u),
 N(u) is the set of items that user u have expressed preference, y[j,] is feature vector of an item in N(u).</p>
 
-<p>nm is an extension of the classic item-based neighborhood model. 
-It captures not only the user’s explicit ratings but also the user’s implicit preferences. R(i;u;k) is the set of items that have got explicit rating from user u and only retain top k most similar items. r[u,j0] is the actual rating of user u on item j0, 
+<p>nm is an extension of the classic item-based neighborhood model.
+It captures not only the user’s explicit ratings but also the user’s implicit preferences. R(i;u;k) is the set of items that have got explicit rating from user u and only retain top k most similar items. r[u,j0] is the actual rating of user u on item j0,
 b[u,j0] is the corresponding baseline estimate.</p>
 
 <p>The difference between r[u,j0] and b[u,j0] is weighted by a parameter w[i,j0], which could be thought as the similarity between item i and j0.</p>
@@ -313,7 +313,7 @@ b[u,j0] is the corresponding baseline estimate.</p>
 <p>N[i;u;k] is the top k most similar items that have got the user’s preference.
 c[i;j1] is the paramter to be estimated.</p>
 
-<p>The value of w[i,j0] and c[i,j1] could be treated as the significance of the 
+<p>The value of w[i,j0] and c[i,j1] could be treated as the significance of the
 user’s explicit rating and implicit preference respectively.</p>
 
 <p>The parameters b, y, q, w, c are to be determined by minimizing the the associated regularized squared error function through gradient descent. We loop over all known ratings and for a given training case r[u,i], we apply gradient descent on the error function and modify the parameters by moving in the opposite direction of the gradient.</p>
@@ -334,7 +334,7 @@ please refer to the paper <a href="http://research.yahoo.com/files/kdd08koren.pd
 <p>The update to q, p, y in each gradient descent step is:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  err(u,i) = r[u,i] - pr[u,i]
-  q[i,] = q[i,] + alpha * (err(u,i) * (p[u,] + pow(|N(u)|, -0.5) * sum(y[j,])) - lamda * q[i,]) 
+  q[i,] = q[i,] + alpha * (err(u,i) * (p[u,] + pow(|N(u)|, -0.5) * sum(y[j,])) - lamda * q[i,])
   p[u,] = p[u,] + alpha * (err(u,i) * q[i,] - lambda * p[u,])
   for j that is an item in N(u):
      y[j,] = y[j,] + alpha * (err(u,i) * pow(|N(u)|, -0.5) * q[i,] - lambda * y[j,])
@@ -344,16 +344,16 @@ please refer to the paper <a href="http://research.yahoo.com/files/kdd08koren.pd
 
 <h2 id="parallel-sgd">Parallel SGD</h2>
 
-<p>Mahout has a parallel SGD implementation in ParallelSGDFactorizer class. It shuffles the user ratings in every iteration and 
-generates splits on the shuffled ratings. Each split is handled by a thread to update the user features and item features using 
+<p>Mahout has a parallel SGD implementation in ParallelSGDFactorizer class. It shuffles the user ratings in every iteration and
+generates splits on the shuffled ratings. Each split is handled by a thread to update the user features and item features using
 vanilla SGD.</p>
 
-<p>The implementation could be traced back to a lock-free version of SGD based on paper 
+<p>The implementation could be traced back to a lock-free version of SGD based on paper
 <a href="http://www.eecs.berkeley.edu/~brecht/papers/hogwildTR.pdf">Hogwild!: A Lock-Free Approach to Parallelizing Stochastic Gradient Descent</a>.</p>
 
 <h2 id="alswr">ALSWR</h2>
 
-<p>ALSWR is an iterative algorithm to solve the low rank factorization of user feature matrix U and item feature matrix M.<br />
+<p>ALSWR is an iterative algorithm to solve the low rank factorization of user feature matrix U and item feature matrix M.
 The loss function to be minimized is formulated as the sum of squared errors plus <a href="http://en.wikipedia.org/wiki/Tikhonov_regularization">Tikhonov regularization</a>:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> L(R, U, M) = sum(pow((R[u,i] - U[u,]* (M[i,]^t)), 2)) + lambda * (sum(n(u) * ||U[u,]||^2) + sum(n(i) * ||M[i,]||^2))
@@ -361,16 +361,16 @@ The loss function to be minimized is formulated as the sum of squared errors plu
 
 <p>At the beginning of the algorithm, M is initialized with the average item ratings as its first row and random numbers for the rest row.</p>
 
-<p>In every iteration, we fix M and solve U by minimization of the cost function L(R, U, M), then we fix U and solve M by the minimization of 
+<p>In every iteration, we fix M and solve U by minimization of the cost function L(R, U, M), then we fix U and solve M by the minimization of
 the cost function similarly. The iteration stops until a certain stopping criteria is met.</p>
 
-<p>To solve the matrix U when M is given, each user’s feature vector is calculated by resolving a regularized linear least square error function 
+<p>To solve the matrix U when M is given, each user’s feature vector is calculated by resolving a regularized linear least square error function
 using the items the user has rated and their feature vectors:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  1/2 * d(L(R,U,M)) / d(U[u,f]) = 0 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  1/2 * d(L(R,U,M)) / d(U[u,f]) = 0
 </code></pre></div></div>
 
-<p>Similary, when M is updated, we resolve a regularized linear least square error function using feature vectors of the users that have rated the 
+<p>Similary, when M is updated, we resolve a regularized linear least square error function using feature vectors of the users that have rated the
 item and their feature vectors:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  1/2 * d(L(R,U,M)) / d(M[i,f]) = 0
@@ -385,7 +385,6 @@ Mahout also offers a <a href="https://mahout.apache.org/users/recommender/intro-
 <p><a href="http://en.wikipedia.org/wiki/Stochastic_gradient_descent">Stochastic gradient descent</a></p>
 
 <p><a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08%28submitted%29.pdf">ALSWR</a></p>
-
 
     </div>
   </div>

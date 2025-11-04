@@ -426,7 +426,7 @@ val bcastV = drmBroadcast(v)
 val drm2 = drm1.mapBlock() {
     case (keys, block) =&gt;
         for(row &lt;- 0 until block.nrow) block(row, ::) -= bcastV
-    keys -&gt; block    
+    keys -&gt; block
 }
 </code></pre></div></div>
 
@@ -518,7 +518,6 @@ val myKeys = drmA.keys
 </code></pre></div></div>
 
 <p>For more information including information on Mahout-Samsara’s Algebraic Optimizer and in-core Linear algebra bindings see: <a href="http://mahout.apache.org/users/sparkbindings/ScalaSparkBindings.pdf">Mahout Scala Bindings and Mahout Spark Bindings for Linear Algebra Subroutines</a></p>
-
 
     </div>
 

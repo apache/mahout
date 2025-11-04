@@ -377,7 +377,7 @@ a *= 5
 
 <p><em>note: All assignment operations, including :=, return the assignee just like in C++</em>:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a -= b 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a -= b
 </code></pre></div></div>
 
 <p>assigns <strong>a - b</strong> to <strong>b</strong> (in-place) and returns <strong>b</strong>.  Similarly for <strong>a /=: b</strong> or <strong>1 /=: v</strong></p>
@@ -543,14 +543,13 @@ import JavaConversions._
 *Note that Vector.Element also has some implicit syntatic sugar, e.g to add 5.0 to every non-zero element of a matrix, the following code may be used:*
 
     for (row <- m; el <- row.nonZero) el = 5.0 + el
-    ... or 
+    ... or
     for (row <- m; el <- row.nonZero) el := 5.0 + el
-    
-Similarly **row.all** produces an iterator over all elements in a row (Vector). 
+
+Similarly **row.all** produces an iterator over all elements in a row (Vector).
 -->
 
 <p>For more information including information on Mahout-Samsara’s out-of-core Linear algebra bindings see: <a href="http://mahout.apache.org/users/sparkbindings/ScalaSparkBindings.pdf">Mahout Scala Bindings and Mahout Spark Bindings for Linear Algebra Subroutines</a></p>
-
 
   <footer class="footer bg-light">
     <div class="container text-center small">

@@ -57,36 +57,35 @@ to view all outputs.</li>
 <p><a name="k-means-commandline-Commandlineoptions"></a></p>
 <h1 id="command-line-options">Command line options</h1>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --input (-i) input			       Path to job input directory. 
-					       Must be a SequenceFile of    
-					       VectorWritable		    
-  --clusters (-c) clusters		       The input centroids, as Vectors. 
-					       Must be a SequenceFile of    
-					       Writable, Cluster/Canopy. If k  
-					       is also specified, then a random 
-					       set of vectors will be selected  
-					       and written out to this path 
-					       first			    
-  --output (-o) output			       The directory pathname for   
-					       output.			    
-  --distanceMeasure (-dm) distanceMeasure      The classname of the	    
-					       DistanceMeasure. Default is  
-					       SquaredEuclidean 	    
-  --convergenceDelta (-cd) convergenceDelta    The convergence delta value. 
-					       Default is 0.5		    
-  --maxIter (-x) maxIter		       The maximum number of	    
-					       iterations.		    
-  --maxRed (-r) maxRed			       The number of reduce tasks.  
-					       Defaults to 2		    
-  --k (-k) k				       The k in k-Means.  If specified, 
-					       then a random selection of k 
-					       Vectors will be chosen as the    
-					       Centroid and written to the  
-					       clusters input path.	    
-  --overwrite (-ow)			       If present, overwrite the output 
-					       directory before running job 
-  --help (-h)				       Print out help		    
-  --clustering (-cl)			       If present, run clustering after 
-					       the iterations have taken place  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --input (-i) input			       Path to job input directory.
+					       Must be a SequenceFile of
+					       VectorWritable
+  --clusters (-c) clusters		       The input centroids, as Vectors.
+					       Must be a SequenceFile of
+					       Writable, Cluster/Canopy. If k
+					       is also specified, then a random
+					       set of vectors will be selected
+					       and written out to this path
+					       first
+  --output (-o) output			       The directory pathname for
+					       output.
+  --distanceMeasure (-dm) distanceMeasure      The classname of the
+					       DistanceMeasure. Default is
+					       SquaredEuclidean
+  --convergenceDelta (-cd) convergenceDelta    The convergence delta value.
+					       Default is 0.5
+  --maxIter (-x) maxIter		       The maximum number of
+					       iterations.
+  --maxRed (-r) maxRed			       The number of reduce tasks.
+					       Defaults to 2
+  --k (-k) k				       The k in k-Means.  If specified,
+					       then a random selection of k
+					       Vectors will be chosen as the
+					       Centroid and written to the
+					       clusters input path.
+  --overwrite (-ow)			       If present, overwrite the output
+					       directory before running job
+  --help (-h)				       Print out help
+  --clustering (-cl)			       If present, run clustering after
+					       the iterations have taken place
 </code></pre></div></div>
-

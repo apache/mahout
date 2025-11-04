@@ -224,12 +224,12 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Alice prepares her qubits
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Alice sends the second qubit to Bob
@@ -237,7 +237,7 @@
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Shared key:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
@@ -252,17 +252,17 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to simulate the hydrogen molecule
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_rz_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate
 </span>
 <span class="c1"># Execute the circuit and get the final state vector
-</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>  
+</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Final state vector:</span><span class="sh">"</span><span class="p">,</span> <span class="n">state_vector</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="93-quantum-machine-learning">9.3 Quantum Machine Learning</h2>
@@ -276,17 +276,17 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to create a quantum classifier
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_ry_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate
 </span>
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Classification result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
@@ -301,18 +301,18 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement QAOA
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_rx_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_rx_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_ry_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate
 </span>
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Optimization result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
@@ -327,17 +327,17 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to simulate the chemical reaction
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_rz_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate
 </span>
 <span class="c1"># Execute the circuit and get the final state vector
-</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>  
+</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Final state vector:</span><span class="sh">"</span><span class="p">,</span> <span class="n">state_vector</span><span class="p">)</span>
 </code></pre></div></div>
 
@@ -352,17 +352,17 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement portfolio optimization
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_ry_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate
 </span>
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Portfolio optimization result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="97-quantum-artificial-intelligence">9.7 Quantum Artificial Intelligence</h2>
@@ -376,17 +376,17 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement a quantum neural network
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_ry_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate
 </span>
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">QNN classification result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
@@ -401,17 +401,17 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement a quantum sensor
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_rz_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Example of a parameterized gate
 </span>
 <span class="c1"># Execute the circuit and get the final state vector
-</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>  
+</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Quantum sensor measurement:</span><span class="sh">"</span><span class="p">,</span> <span class="n">state_vector</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="99-quantum-communication">9.9 Quantum Communication</h2>
@@ -425,17 +425,17 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement quantum teleportation
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the final state vector
-</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>  
+</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Quantum teleportation result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">state_vector</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="910-quantum-error-correction">9.10 Quantum Error Correction</h2>
@@ -449,25 +449,25 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement the bit-flip code
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Simulate an error (e.g., bit flip on qubit 1)
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_pauli_x_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Error correction steps
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
-<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_toffoli_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Error correction result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="911-quantum-games">9.11 Quantum Games</h2>
@@ -481,16 +481,16 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement the quantum game
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Quantum game result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="912-quantum-random-number-generation">9.12 Quantum Random Number Generation</h2>
@@ -504,15 +504,15 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Apply a Hadamard gate to generate a random bit
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Random number:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="913-quantum-image-processing">9.13 Quantum Image Processing</h2>
@@ -526,16 +526,16 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement edge detection
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Edge detection result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="914-quantum-natural-language-processing">9.14 Quantum Natural Language Processing</h2>
@@ -549,16 +549,16 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement text classification
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Text classification result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="915-quantum-robotics">9.15 Quantum Robotics</h2>
@@ -572,16 +572,16 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement path planning
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Path planning result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="916-quantum-internet">9.16 Quantum Internet</h2>
@@ -595,16 +595,16 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to implement quantum key distribution
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Quantum key distribution result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="917-quantum-biology">9.17 Quantum Biology</h2>
@@ -618,16 +618,16 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to simulate photosynthesis
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and get the final state vector
-</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>  
+</span><span class="n">state_vector</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">get_final_state_vector</span><span class="p">()</span>
 <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Photosynthesis simulation result:</span><span class="sh">"</span><span class="p">,</span> <span class="n">state_vector</span><span class="p">)</span>
 </code></pre></div></div>
 <h2 id="918-quantum-materials-science">9.18 Quantum Materials Science</h2>
@@ -641,8 +641,8 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">statevector_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Apply gates to simulate graphene
@@ -685,7 +685,7 @@
             <li>
                 FOSSY 2024, Portland Oregon - <a href="https://www.youtube.com/watch?v=tgFaUL1wYhY" target="_blank">
                     QuMat: Apache Mahout's Quantum Computing Interface
-                </a> 
+                </a>
                 [<a href="https://www.slideshare.net/slideshow/qumat_-apache-mahout-s-quantum-computing-interface-pptx/272300949" target="_blank">Slides</a>]
             </li>
                 <li>

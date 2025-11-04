@@ -185,10 +185,10 @@
   <div class="row">
 
     <div class="col-lg-8">
-      <p>The Mahout community is driven by user contribution.  If you have implemented an algorithm and are interested in 
+      <p>The Mahout community is driven by user contribution.  If you have implemented an algorithm and are interested in
 sharing it with the rest of the community, we highly encourage you to contribute it to the codebase.  However to
-keep things from getting too out of control, we have instituted a standard API for our algorithms, and we ask you 
-contribute your algorithm in a way that conforms to this API as much as possible.  You can always reach out on 
+keep things from getting too out of control, we have instituted a standard API for our algorithms, and we ask you
+contribute your algorithm in a way that conforms to this API as much as possible.  You can always reach out on
 <a href="dev@mahout.apache.org">dev@mahout.apache.org</a> if you need help.</p>
 
 <p>In this example, let’s say you’ve created a totally new algorithm- a regression algorithm called <code class="language-plaintext highlighter-rouge">Foo</code></p>
@@ -277,10 +277,10 @@ class FooModel extends RegressorModel {
 }
 </code></pre></div></div>
 
-<p>The Fitter class holds the methods for fitting which returns a Model, the Model class hold the parameters for the model and 
+<p>The Fitter class holds the methods for fitting which returns a Model, the Model class hold the parameters for the model and
  methods for using on new data sets. In a RegressorModel that is going to be a <code class="language-plaintext highlighter-rouge">predict()</code> method.</p>
 
-<p>In your algorithm, most of your code is going to go into the <code class="language-plaintext highlighter-rouge">.fit</code> method. Since this is just a silly example, we’re 
+<p>In your algorithm, most of your code is going to go into the <code class="language-plaintext highlighter-rouge">.fit</code> method. Since this is just a silly example, we’re
  don’t really have anything to fit- so we’re just going to return a FooModel (because that is what the Fitter must do)</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Foo[K] extends RegressorFitter[K] {
@@ -332,7 +332,7 @@ as a reminder to you, the person writing a useful algorithm, that this is a good
 val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4), (1.1, 1.5, 2.5, 1.0), (6.0, 5.2, -5.2, 5.3), (7.0,6.0, 5.0, 5.0), (10.0, 1.0, 20.0, -10.0)))
 
 val model = new Foo().fit(drmA(::, 0 until 2), drmA(::, 2 until 3))
- 
+
 model.predict(drmA).collect
 </code></pre></div></div>
 
@@ -352,14 +352,14 @@ model.predict(drmA).collect
 
 <p>It’s entirely likely you’ll need to have hyper-parameters to tune your algorithm.</p>
 
-<p>In Mahout we handle these with a map of Symbols. You might have noticed in the <code class="language-plaintext highlighter-rouge">fit</code> and <code class="language-plaintext highlighter-rouge">predict</code> methods we included 
+<p>In Mahout we handle these with a map of Symbols. You might have noticed in the <code class="language-plaintext highlighter-rouge">fit</code> and <code class="language-plaintext highlighter-rouge">predict</code> methods we included
 <code class="language-plaintext highlighter-rouge">hyperparameters: (Symbol, Any)*</code></p>
 
 <p>Well let’s look at how we would work with those.</p>
 
 <p>Suppose instead of always guessing “1.0” we wanted to guess some user defined number (a very silly algorithm).</p>
 
-<p>We’ll be adding a parameter called <code class="language-plaintext highlighter-rouge">guessThisNumber</code> to the Fitter method. By convention, we usually create a function in 
+<p>We’ll be adding a parameter called <code class="language-plaintext highlighter-rouge">guessThisNumber</code> to the Fitter method. By convention, we usually create a function in
 the fitter called <code class="language-plaintext highlighter-rouge">setStandardHyperparameters</code> and let that take care of setting up all of our hyperparameters and then call
 that function inside of fit. This keeps things nice and clean.</p>
 
@@ -390,7 +390,7 @@ that function inside of fit. This keeps things nice and clean.</p>
 <p>Also notice we set the <em>default value</em> to 1.0.  We also now have something to add into the summary string.</p>
 
 <p>To implement this, we’ll need to broadcast the guessed number in the <code class="language-plaintext highlighter-rouge">predict</code> method.  In Mahout you can only broadcast
-<code class="language-plaintext highlighter-rouge">Vectors</code> and <code class="language-plaintext highlighter-rouge">Matrices</code>.  We use <code class="language-plaintext highlighter-rouge">drmBroadcast</code> It might be tempting to use the broadcast method of the underlying engine, but 
+<code class="language-plaintext highlighter-rouge">Vectors</code> and <code class="language-plaintext highlighter-rouge">Matrices</code>.  We use <code class="language-plaintext highlighter-rouge">drmBroadcast</code> It might be tempting to use the broadcast method of the underlying engine, but
 this is a no-no.  The reason for this is that we want to keep our algorithm abstracted over multiple distributed engines.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class FooModel[K] extends RegressorModel[K] {
@@ -404,7 +404,7 @@ this is a no-no.  The reason for this is that we want to keep our algorithm abst
 
     // This is needed for broadcasting
     implicit val ctx = drmPredictors.context
-    
+
     val bcGuess = drmBroadcast(dvec(guessThisNumber))
     drmPredictors.mapBlock(1) {
       case (keys, block: Matrix) =&gt; {
@@ -426,11 +426,11 @@ this is a no-no.  The reason for this is that we want to keep our algorithm abst
 <p>Let’s open up the <code class="language-plaintext highlighter-rouge">$MAHOUT_HOME/bin/mahout spark-shell</code> and try out the hyperparameter</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import org.apache.mahout.math.algorithms.regression.Foo
-    
+
 val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4), (1.1, 1.5, 2.5, 1.0), (6.0, 5.2, -5.2, 5.3), (7.0,6.0, 5.0, 5.0), (10.0, 1.0, 20.0, -10.0)))
 
 val model = new Foo().fit(drmA(::, 0 until 2), drmA(::, 2 until 3), 'guessThisNumber -&gt; 2.0)
- 
+
 model.predict(drmA).collect
 </code></pre></div></div>
 
@@ -444,7 +444,7 @@ of the algorithm- and then verify your algorithm generates the same results, or 
 
 <p>Since no one has implemented Foo in any other packages however, we will have to be very sure our algorithm correct by doing
 it by hand in R, and in a way others can verify.  Actually- I’m not making a prototype of the Foo algorithm, but I do want to impress
-that it <em>is</em> very important that you do, so that the person reviewing the PR can verify your results. (Maybe there is an example 
+that it <em>is</em> very important that you do, so that the person reviewing the PR can verify your results. (Maybe there is an example
 in the paper you read).</p>
 
 <p>Since this is a regression model, open up</p>
@@ -452,7 +452,7 @@ in the paper you read).</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/math-scala/src/test/scala/org/apache/mahout/math/algorithms/RegressionSuiteBase.scala
 </code></pre></div></div>
 
-<p>You’ll see some other tests in there to get you started. You’ll also see some R-Prototypes, and in the case of <code class="language-plaintext highlighter-rouge">cochrane orcutt</code> 
+<p>You’ll see some other tests in there to get you started. You’ll also see some R-Prototypes, and in the case of <code class="language-plaintext highlighter-rouge">cochrane orcutt</code>
 where the R implementation had divergent results and my argument for why our algorithm was right.</p>
 
 <p>I’m going to create a new test called <code class="language-plaintext highlighter-rouge">foo test</code> and I’m going to build it similar to the example I’ve been using.</p>
@@ -481,7 +481,7 @@ where the R implementation had divergent results and my argument for why our alg
   }
 </code></pre></div></div>
 
-<p>Note the use of <code class="language-plaintext highlighter-rouge">epsilon</code>.  The answer really <em>should be</em> 0.0. But, especially for more complicated algorithms, we allow 
+<p>Note the use of <code class="language-plaintext highlighter-rouge">epsilon</code>.  The answer really <em>should be</em> 0.0. But, especially for more complicated algorithms, we allow
 for a touch of machine rounding error.</p>
 
 <p>Now build and check your tests by building without skipping the tests</p>
@@ -502,7 +502,7 @@ for a touch of machine rounding error.</p>
 layout: doc-page
 title: Foo
 
-    
+
 ---
 
 ### About
@@ -530,24 +530,24 @@ Foo is a very famous and useful algorithm. Let me tell you lots about it...
 
 ### Example
 import org.apache.mahout.math.algorithms.regression.Foo
-        
+
 val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4), (1.1, 1.5, 2.5, 1.0), (6.0, 5.2, -5.2, 5.3), (7.0,6.0, 5.0, 5.0), (10.0, 1.0, 20.0, -10.0)))
 
 val model = new Foo().fit(drmA(::, 0 until 2), drmA(::, 2 until 3), 'guessThisNumber -&gt; 2.0)
- 
+
 model.predict(drmA).collect
 </code></pre></div></div>
 
-<p>The firse few lines between the <code class="language-plaintext highlighter-rouge">---</code> is the header, this has the title and tells Jekyll what sort of page this is, it knows 
+<p>The firse few lines between the <code class="language-plaintext highlighter-rouge">---</code> is the header, this has the title and tells Jekyll what sort of page this is, it knows
 elsewhere based on that, how to compile the page (add navbars, etc).</p>
 
-<p>The <em>About</em> section, is your chance to really dive into the algorithm and its implementation. More is more. If you didn’t have an 
+<p>The <em>About</em> section, is your chance to really dive into the algorithm and its implementation. More is more. If you didn’t have an
 R prototype in the unit tests (or have a divergent answer from R) this is a good place to really expand on that.</p>
 
 <p>The <em>Parameters</em> section is a good reference for users to know that the hyperparameters are and what they do.</p>
 
-<p>The <em>Example</em> section is a quick little example to get users started. You may have noticed I used the same code I used in 
-the unit test.  That’s something I do often, but there is no reason you have to. If you want to come up with a more illustrative example 
+<p>The <em>Example</em> section is a quick little example to get users started. You may have noticed I used the same code I used in
+the unit test.  That’s something I do often, but there is no reason you have to. If you want to come up with a more illustrative example
 (or several illustrative examples) that’s encouraged.
 Add links to the nav-bars</p>
 

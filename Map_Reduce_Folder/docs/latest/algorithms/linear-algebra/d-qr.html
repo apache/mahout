@@ -191,21 +191,21 @@
 
 <h2 id="algorithm">Algorithm</h2>
 
-<p>For the classic QR decomposition of the form \(\mathbf{A}=\mathbf{QR},\mathbf{A}\in\mathbb{R}^{m\times n}\) 
-a distributed version is fairly easily achieved if \(\mathbf{A}\) is tall and thin such that 
-\(\mathbf{A}^{\top}\mathbf{A}\) fits in memory, i.e. <em>m</em> is large but <em>n</em> &lt; ~5000 Under such circumstances, 
-only \(\mathbf{A}\) and \(\mathbf{Q}\) are distributed matrices and \(\mathbf{A^{\top}A}\) and 
-\(\mathbf{R}\) are in-core products. We just compute the in-core version of the Cholesky decomposition 
+<p>For the classic QR decomposition of the form \(\mathbf{A}=\mathbf{QR},\mathbf{A}\in\mathbb{R}^{m\times n}\)
+a distributed version is fairly easily achieved if \(\mathbf{A}\) is tall and thin such that
+\(\mathbf{A}^{\top}\mathbf{A}\) fits in memory, i.e. <em>m</em> is large but <em>n</em> &lt; ~5000 Under such circumstances,
+only \(\mathbf{A}\) and \(\mathbf{Q}\) are distributed matrices and \(\mathbf{A^{\top}A}\) and
+\(\mathbf{R}\) are in-core products. We just compute the in-core version of the Cholesky decomposition
 in the form of \(\mathbf{LL}^{\top}= \mathbf{A}^{\top}\mathbf{A}\).  After that we take \(\mathbf{R}= \mathbf{L}^{\top}\)
- and \(\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}\).  The latter is easily achieved by multiplying each 
- vertical block of \(\mathbf{A}\) by \(\left(\mathbf{L}^{\top}\right)^{-1}\).  (There is no actual matrix inversion 
+ and \(\mathbf{Q}=\mathbf{A}\left(\mathbf{L}^{\top}\right)^{-1}\).  The latter is easily achieved by multiplying each
+ vertical block of \(\mathbf{A}\) by \(\left(\mathbf{L}^{\top}\right)^{-1}\).  (There is no actual matrix inversion
  happening).</p>
 
 <h2 id="implementation">Implementation</h2>
 
 <p>Mahout <code class="language-plaintext highlighter-rouge">dqrThin(...)</code> is implemented in the mahout <code class="language-plaintext highlighter-rouge">math-scala</code> algebraic optimizer which translates Mahout’s R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {        
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
     if (drmA.ncol &gt; 5000)
         log.warn("A is too fat. A'A must fit in memory and easily broadcasted.")
     implicit val ctx = drmA.context

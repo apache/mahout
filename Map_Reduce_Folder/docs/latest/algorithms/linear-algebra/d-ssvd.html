@@ -193,8 +193,8 @@
 
 <p>Given an <foo>\(m\times n\)</foo>
 matrix <foo>\(\mathbf{A}\)</foo>, a target rank <foo>\(k\in\mathbb{N}_{1}\)</foo>
-, an oversampling parameter <foo>\(p\in\mathbb{N}_{1}\)</foo>, 
-and the number of additional power iterations <foo>\(q\in\mathbb{N}_{0}\)</foo>, 
+, an oversampling parameter <foo>\(p\in\mathbb{N}_{1}\)</foo>,
+and the number of additional power iterations <foo>\(q\in\mathbb{N}_{0}\)</foo>,
 this procedure computes an <foo>\(m\times\left(k+p\right)\)</foo>
 SVD <foo>\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)</foo>:</p>
 
@@ -262,7 +262,7 @@ Another way is <foo>\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^
     // We represent Omega by its seed.
     val omegaSeed = RandomUtils.getRandom().nextInt()
 
-    // Compute Y = A*Omega.  
+    // Compute Y = A*Omega.
     var drmY = drmAcp.mapBlock(ncol = r) {
         case (keys, blockA) =&gt;
             val blockY = blockA %*% Matrices.symmetricUniformView(n, r, omegaSeed)
@@ -275,19 +275,19 @@ Another way is <foo>\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^
     if (q == 0) drmQ = drmQ.checkpoint()
 
     var drmBt = drmAcp.t %*% drmQ
-    
+
     // Checkpoint B' if last iteration
     if (q == 0) drmBt = drmBt.checkpoint()
 
     for (i &lt;- 0  until q) {
         drmY = drmAcp %*% drmBt
-        drmQ = dqrThin(drmY.checkpoint())._1            
-        
+        drmQ = dqrThin(drmY.checkpoint())._1
+
         // Checkpoint Q if last iteration
         if (i == q - 1) drmQ = drmQ.checkpoint()
-        
+
         drmBt = drmAcp.t %*% drmQ
-        
+
         // Checkpoint B' if last iteration
         if (i == q - 1) drmBt = drmBt.checkpoint()
     }
@@ -296,7 +296,7 @@ Another way is <foo>\(\mathbf{V}=\mathbf{A}^{\top}\mathbf{U}\boldsymbol{\Sigma}^
     val s = d.sqrt
 
     // Since neither drmU nor drmV are actually computed until actually used
-    // we don't need the flags instructing compute (or not compute) either of the U,V outputs 
+    // we don't need the flags instructing compute (or not compute) either of the U,V outputs
     val drmU = drmQ %*% inCoreUHat
     val drmV = drmBt %*% (inCoreUHat %*%: diagv(1 /: s))
 

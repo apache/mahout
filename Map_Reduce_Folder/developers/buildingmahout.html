@@ -14,7 +14,7 @@
 either via</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git@github.com:apache/mahout.git or
- 
+
 git clone https://github.com/apache/mahout.git
 </code></pre></div></div>
 
@@ -70,7 +70,7 @@ cp -r CL/ /usr/local/
 <p>When building mahout for a spark backend, we need four System Environment variables set:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    export MAHOUT_HOME=/home/&lt;user&gt;/apache/mahout
     export HADOOP_HOME=/home/&lt;user&gt;/apache/hadoop-2.4.1
-    export SPARK_HOME=/home/&lt;user&gt;/apache/spark-1.6.3-bin-hadoop2.4    
+    export SPARK_HOME=/home/&lt;user&gt;/apache/spark-1.6.3-bin-hadoop2.4
     export JAVA_HOME=/home/&lt;user&gt;/java/jdk-1.8.121
 </code></pre></div></div>
 
@@ -118,13 +118,13 @@ cp -r CL/ /usr/local/
 
 <p>Is the basic build command. This default will build the following packages.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>INFO] Apache Mahout 
-<span class="o">[</span>INFO] Mahout Core 
-<span class="o">[</span>INFO] Mahout Engine 
-<span class="o">[</span>INFO] - Mahout HDFS Support 
-<span class="o">[</span>INFO] - Mahout Spark Engine 
-<span class="o">[</span>INFO] Mahout Community 
-<span class="o">[</span>INFO] - Mahout Spark CLI Drivers 
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>INFO] Apache Mahout
+<span class="o">[</span>INFO] Mahout Core
+<span class="o">[</span>INFO] Mahout Engine
+<span class="o">[</span>INFO] - Mahout HDFS Support
+<span class="o">[</span>INFO] - Mahout Spark Engine
+<span class="o">[</span>INFO] Mahout Community
+<span class="o">[</span>INFO] - Mahout Spark CLI Drivers
 </code></pre></div></div>
 
 <p>The following profiles are available for building optional components:</p>
@@ -176,7 +176,7 @@ cp -r CL/ /usr/local/
 
 #### Example
 
-If you want to build Apache Mahout with ViennaCL OpenMP support but skip the command line Spark drivers you would use this 
+If you want to build Apache Mahout with ViennaCL OpenMP support but skip the command line Spark drivers you would use this
 command to build:
 
 ```bash
@@ -185,14 +185,11 @@ mvn clean package -Pviennacl-omp -DskipCli
 
 #### Building Java/Scala Docs
 
-To build the Java/Scala docs use the maven `site` goal and the `docs` profile. 
+To build the Java/Scala docs use the maven `site` goal and the `docs` profile.
 
 Additionally, passing the `-Ddependency.locations.enabled=false` option will skip checking the dependency location and allow a much faster build.
-  
+
 ```bash
 mvn clean site -Pall,docs -Ddependency.locations.enabled=false
 ```
-
-
-
 </tr></tr></tr></tr></tr></table></center>

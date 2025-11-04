@@ -206,7 +206,7 @@
 
   <h1 id="stochastic-singular-value-decomposition">Stochastic Singular Value Decomposition</h1>
 
-<p>Stochastic SVD method in Mahout produces reduced rank Singular Value Decomposition output in its 
+<p>Stochastic SVD method in Mahout produces reduced rank Singular Value Decomposition output in its
 strict mathematical definition: ` (\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top})`.</p>
 
 <p>##The benefits over other methods are:</p>
@@ -260,16 +260,16 @@ approximations of matrices” contains comprehensive definition of parallelizati
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>n&lt;-1000
 m&lt;-2000
 k&lt;-10
- 
+
 qi&lt;-1
- 
+
 #simulated input
 svalsim&lt;-diag(k:1)
- 
+
 usim&lt;- qr.Q(qr(matrix(rnorm(m*k, mean=3), nrow=m,ncol=k)))
 vsim&lt;- qr.Q(qr( matrix(rnorm(n*k,mean=5), nrow=n,ncol=k)))
- 
- 
+
+
 x&lt;- usim %*% svalsim %*% t(vsim)
 </code></pre></div></div>
 
@@ -281,8 +281,8 @@ x&lt;- usim %*% svalsim %*% t(vsim)
 
 <p>Given an <code class="language-plaintext highlighter-rouge">\(m\times n\)</code>
 matrix <code class="language-plaintext highlighter-rouge">\(\mathbf{A}\)</code>, a target rank <code class="language-plaintext highlighter-rouge">\(k\in\mathbb{N}_{1}\)</code>
-, an oversampling parameter <code class="language-plaintext highlighter-rouge">\(p\in\mathbb{N}_{1}\)</code>, 
-and the number of additional power iterations <code class="language-plaintext highlighter-rouge">\(q\in\mathbb{N}_{0}\)</code>, 
+, an oversampling parameter <code class="language-plaintext highlighter-rouge">\(p\in\mathbb{N}_{1}\)</code>,
+and the number of additional power iterations <code class="language-plaintext highlighter-rouge">\(q\in\mathbb{N}_{0}\)</code>,
 this procedure computes an <code class="language-plaintext highlighter-rouge">\(m\times\left(k+p\right)\)</code>
 SVD <code class="language-plaintext highlighter-rouge">\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)</code>:</p>
 
@@ -306,7 +306,7 @@ SVD <code class="language-plaintext highlighter-rouge">\(\mathbf{A\approx U}\bol
   </li>
   <li>
     <p>If <code class="language-plaintext highlighter-rouge">\(q&gt;0\)</code>
-  repeat: for <code class="language-plaintext highlighter-rouge">\(i=1..q\)</code>: 
+  repeat: for <code class="language-plaintext highlighter-rouge">\(i=1..q\)</code>:
   <code class="language-plaintext highlighter-rouge">\(\mathbf{B}_{i}^{\top}=\mathbf{A}^{\top}\mbox{qr}\left(\mathbf{A}\mathbf{B}_{i-1}^{\top}\right).\mathbf{Q}\)</code>
   (power iterations step).</p>
   </li>

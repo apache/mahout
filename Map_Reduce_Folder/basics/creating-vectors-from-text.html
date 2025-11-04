@@ -242,67 +242,67 @@ option.  Examples of running the driver are included below:</p>
 <p><a name="CreatingVectorsfromText-GeneratinganoutputfilefromaLuceneIndex"></a></p>
 <h4 id="generating-an-output-file-from-a-lucene-index">Generating an output file from a Lucene Index</h4>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout lucene.vector 
-    --dir (-d) dir                     The Lucene directory      
-    --idField idField                  The field in the index    
-                                           containing the index.  If 
-                                           null, then the Lucene     
-                                           internal doc id is used   
-                                           which is prone to error   
-                                           if the underlying index   
-                                           changes                   
-    --output (-o) output               The output file           
-    --delimiter (-l) delimiter         The delimiter for         
-                                           outputting the dictionary 
-    --help (-h)                        Print out help            
-    --field (-f) field                 The field in the index    
-    --max (-m) max                         The maximum number of     
-                                           vectors to output.  If    
-                                           not specified, then it    
-                                           will loop over all docs   
-    --dictOut (-t) dictOut             The output of the         
-                                           dictionary                
-    --seqDictOut (-st) seqDictOut      The output of the         
-                                           dictionary as sequence    
-                                           file                      
-    --norm (-n) norm                   The norm to use,          
-                                           expressed as either a     
-                                           double or "INF" if you    
-                                           want to use the Infinite  
-                                           norm.  Must be greater or 
-                                           equal to 0.  The default  
-                                           is not to normalize       
-    --maxDFPercent (-x) maxDFPercent   The max percentage of     
-                                           docs for the DF.  Can be  
-                                           used to remove really     
-                                           high frequency terms.     
-                                           Expressed as an integer   
-                                           between 0 and 100.        
-                                           Default is 99.            
-    --weight (-w) weight               The kind of weight to     
-                                           use. Currently TF or      
-                                           TFIDF                     
-    --minDF (-md) minDF                The minimum document      
-                                           frequency.  Default is 1  
-    --maxPercentErrorDocs (-err) mErr  The max percentage of     
-                                           docs that can have a null 
-                                           term vector. These are    
-                                           noise document and can    
-                                           occur if the analyzer     
-                                           used strips out all terms 
-                                           in the target field. This 
-                                           percentage is expressed   
-                                           as a value between 0 and  
-                                           1. The default is 0.  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout lucene.vector
+    --dir (-d) dir                     The Lucene directory
+    --idField idField                  The field in the index
+                                           containing the index.  If
+                                           null, then the Lucene
+                                           internal doc id is used
+                                           which is prone to error
+                                           if the underlying index
+                                           changes
+    --output (-o) output               The output file
+    --delimiter (-l) delimiter         The delimiter for
+                                           outputting the dictionary
+    --help (-h)                        Print out help
+    --field (-f) field                 The field in the index
+    --max (-m) max                         The maximum number of
+                                           vectors to output.  If
+                                           not specified, then it
+                                           will loop over all docs
+    --dictOut (-t) dictOut             The output of the
+                                           dictionary
+    --seqDictOut (-st) seqDictOut      The output of the
+                                           dictionary as sequence
+                                           file
+    --norm (-n) norm                   The norm to use,
+                                           expressed as either a
+                                           double or "INF" if you
+                                           want to use the Infinite
+                                           norm.  Must be greater or
+                                           equal to 0.  The default
+                                           is not to normalize
+    --maxDFPercent (-x) maxDFPercent   The max percentage of
+                                           docs for the DF.  Can be
+                                           used to remove really
+                                           high frequency terms.
+                                           Expressed as an integer
+                                           between 0 and 100.
+                                           Default is 99.
+    --weight (-w) weight               The kind of weight to
+                                           use. Currently TF or
+                                           TFIDF
+    --minDF (-md) minDF                The minimum document
+                                           frequency.  Default is 1
+    --maxPercentErrorDocs (-err) mErr  The max percentage of
+                                           docs that can have a null
+                                           term vector. These are
+                                           noise document and can
+                                           occur if the analyzer
+                                           used strips out all terms
+                                           in the target field. This
+                                           percentage is expressed
+                                           as a value between 0 and
+                                           1. The default is 0.
 </code></pre></div></div>
 
 <h4 id="example-create-50-vectors-from-an-index">Example: Create 50 Vectors from an Index</h4>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout lucene.vector
-    --dir $WORK_DIR/wikipedia/solr/data/index 
-    --field body 
+    --dir $WORK_DIR/wikipedia/solr/data/index
+    --field body
     --dictOut $WORK_DIR/solr/wikipedia/dict.txt
-    --output $WORK_DIR/solr/wikipedia/out.txt 
+    --output $WORK_DIR/solr/wikipedia/out.txt
     --max 50
 </code></pre></div></div>
 
@@ -314,12 +314,12 @@ the index are output.</p>
 <p><a name="CreatingVectorsfromText-50VectorsFromLuceneL2Norm"></a></p>
 <h4 id="example-creating-50-normalized-vectors-from-a-lucene-index-using-the-l_2-norm">Example: Creating 50 Normalized Vectors from a Lucene Index using the <a href="http://en.wikipedia.org/wiki/Lp_space">L_2 Norm</a></h4>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout lucene.vector 
-    --dir $WORK_DIR/wikipedia/solr/data/index 
-    --field body 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout lucene.vector
+    --dir $WORK_DIR/wikipedia/solr/data/index
+    --field body
     --dictOut $WORK_DIR/solr/wikipedia/dict.txt
-    --output $WORK_DIR/solr/wikipedia/out.txt 
-    --max 50 
+    --output $WORK_DIR/solr/wikipedia/out.txt
+    --max 50
     --norm 2
 </code></pre></div></div>
 
@@ -340,36 +340,36 @@ binary documents to text.</p>
 <p>Mahout has a nifty utility which reads a directory path including its
 sub-directories and creates the SequenceFile in a chunked manner for us.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seqdirectory 
-    --input (-i) input                       Path to job input directory.   
-    --output (-o) output                     The directory pathname for     
-                                                 output.                        
-    --overwrite (-ow)                        If present, overwrite the      
-                                                 output directory before        
-                                                 running job                    
-    --method (-xm) method                    The execution method to use:   
-                                                 sequential or mapreduce.       
-                                                 Default is mapreduce           
-    --chunkSize (-chunk) chunkSize           The chunkSize in MegaBytes.    
-                                                 Defaults to 64                 
-    --fileFilterClass (-filter) fFilterClass The name of the class to use   
-                                                 for file parsing. Default:     
-                                                 org.apache.mahout.text.PrefixAdditionFilter                   
-    --keyPrefix (-prefix) keyPrefix          The prefix to be prepended to  
-                                                 the key                        
-    --charset (-c) charset                   The name of the character      
-                                                 encoding of the input files.   
-                                                 Default to UTF-8 {accepts: cp1252|ascii...}             
-    --method (-xm) method                    The execution method to use:   
-                                                 sequential or mapreduce.       
-                                             Default is mapreduce           
-    --overwrite (-ow)                        If present, overwrite the      
-                                                 output directory before        
-                                                 running job                    
-    --help (-h)                              Print out help                 
-    --tempDir tempDir                        Intermediate output directory  
-    --startPhase startPhase                  First phase to run             
-    --endPhase endPhase                      Last phase to run  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seqdirectory
+    --input (-i) input                       Path to job input directory.
+    --output (-o) output                     The directory pathname for
+                                                 output.
+    --overwrite (-ow)                        If present, overwrite the
+                                                 output directory before
+                                                 running job
+    --method (-xm) method                    The execution method to use:
+                                                 sequential or mapreduce.
+                                                 Default is mapreduce
+    --chunkSize (-chunk) chunkSize           The chunkSize in MegaBytes.
+                                                 Defaults to 64
+    --fileFilterClass (-filter) fFilterClass The name of the class to use
+                                                 for file parsing. Default:
+                                                 org.apache.mahout.text.PrefixAdditionFilter
+    --keyPrefix (-prefix) keyPrefix          The prefix to be prepended to
+                                                 the key
+    --charset (-c) charset                   The name of the character
+                                                 encoding of the input files.
+                                                 Default to UTF-8 {accepts: cp1252|ascii...}
+    --method (-xm) method                    The execution method to use:
+                                                 sequential or mapreduce.
+                                             Default is mapreduce
+    --overwrite (-ow)                        If present, overwrite the
+                                                 output directory before
+                                                 running job
+    --help (-h)                              Print out help
+    --tempDir tempDir                        Intermediate output directory
+    --startPhase startPhase                  First phase to run
+    --endPhase endPhase                      Last phase to run
 </code></pre></div></div>
 
 <p>The output of seqDirectory will be a Sequence file &lt; Text, Text &gt; of all documents (/sub-directory-path/documentFileName, documentText).</p>
@@ -381,53 +381,53 @@ sub-directories and creates the SequenceFile in a chunked manner for us.</p>
 generate vectors.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seq2sparse
-    --minSupport (-s) minSupport      (Optional) Minimum Support. Default       
-                                          Value: 2                                  
-    --analyzerName (-a) analyzerName  The class name of the analyzer            
-    --chunkSize (-chunk) chunkSize    The chunkSize in MegaBytes. Default       
-                                          Value: 100MB                              
-    --output (-o) output              The directory pathname for output.        
-    --input (-i) input                Path to job input directory.              
-    --minDF (-md) minDF               The minimum document frequency.  Default  
-                                          is 1                                      
-    --maxDFSigma (-xs) maxDFSigma     What portion of the tf (tf-idf) vectors   
-                                          to be used, expressed in times the        
-                                          standard deviation (sigma) of the         
-                                          document frequencies of these vectors.    
-                                          Can be used to remove really high         
-                                          frequency terms. Expressed as a double    
-                                          value. Good value to be specified is 3.0. 
-                                          In case the value is less than 0 no       
-                                          vectors will be filtered out. Default is  
-                                          -1.0.  Overrides maxDFPercent             
-    --maxDFPercent (-x) maxDFPercent  The max percentage of docs for the DF.    
-                                          Can be used to remove really high         
-                                          frequency terms. Expressed as an integer  
-                                          between 0 and 100. Default is 99.  If     
-                                          maxDFSigma is also set, it will override  
-                                          this value.                               
-    --weight (-wt) weight             The kind of weight to use. Currently TF   
-                                          or TFIDF. Default: TFIDF                  
-    --norm (-n) norm                  The norm to use, expressed as either a    
-                                          float or "INF" if you want to use the     
-                                          Infinite norm.  Must be greater or equal  
-                                          to 0.  The default is not to normalize    
-    --minLLR (-ml) minLLR             (Optional)The minimum Log Likelihood      
-                                          Ratio(Float)  Default is 1.0              
-    --numReducers (-nr) numReducers   (Optional) Number of reduce tasks.        
-                                          Default Value: 1                          
-    --maxNGramSize (-ng) ngramSize    (Optional) The maximum size of ngrams to  
-                                          create (2 = bigrams, 3 = trigrams, etc)   
-                                          Default Value:1                           
-    --overwrite (-ow)                 If set, overwrite the output directory    
-    --help (-h)                           Print out help                            
-    --sequentialAccessVector (-seq)   (Optional) Whether output vectors should  
+    --minSupport (-s) minSupport      (Optional) Minimum Support. Default
+                                          Value: 2
+    --analyzerName (-a) analyzerName  The class name of the analyzer
+    --chunkSize (-chunk) chunkSize    The chunkSize in MegaBytes. Default
+                                          Value: 100MB
+    --output (-o) output              The directory pathname for output.
+    --input (-i) input                Path to job input directory.
+    --minDF (-md) minDF               The minimum document frequency.  Default
+                                          is 1
+    --maxDFSigma (-xs) maxDFSigma     What portion of the tf (tf-idf) vectors
+                                          to be used, expressed in times the
+                                          standard deviation (sigma) of the
+                                          document frequencies of these vectors.
+                                          Can be used to remove really high
+                                          frequency terms. Expressed as a double
+                                          value. Good value to be specified is 3.0.
+                                          In case the value is less than 0 no
+                                          vectors will be filtered out. Default is
+                                          -1.0.  Overrides maxDFPercent
+    --maxDFPercent (-x) maxDFPercent  The max percentage of docs for the DF.
+                                          Can be used to remove really high
+                                          frequency terms. Expressed as an integer
+                                          between 0 and 100. Default is 99.  If
+                                          maxDFSigma is also set, it will override
+                                          this value.
+    --weight (-wt) weight             The kind of weight to use. Currently TF
+                                          or TFIDF. Default: TFIDF
+    --norm (-n) norm                  The norm to use, expressed as either a
+                                          float or "INF" if you want to use the
+                                          Infinite norm.  Must be greater or equal
+                                          to 0.  The default is not to normalize
+    --minLLR (-ml) minLLR             (Optional)The minimum Log Likelihood
+                                          Ratio(Float)  Default is 1.0
+    --numReducers (-nr) numReducers   (Optional) Number of reduce tasks.
+                                          Default Value: 1
+    --maxNGramSize (-ng) ngramSize    (Optional) The maximum size of ngrams to
+                                          create (2 = bigrams, 3 = trigrams, etc)
+                                          Default Value:1
+    --overwrite (-ow)                 If set, overwrite the output directory
+    --help (-h)                           Print out help
+    --sequentialAccessVector (-seq)   (Optional) Whether output vectors should
                                           be SequentialAccessVectors. Default is false;
                                           true required for running some algorithms
-                                          (LDA,Lanczos)                                
-    --namedVector (-nv)               (Optional) Whether output vectors should  
-                                          be NamedVectors. If set true else false   
-    --logNormalize (-lnorm)           (Optional) Whether output vectors should  
+                                          (LDA,Lanczos)
+    --namedVector (-nv)               (Optional) Whether output vectors should
+                                          be NamedVectors. If set true else false
+    --logNormalize (-lnorm)           (Optional) Whether output vectors should
                                           be logNormalize. If set true else false
 </code></pre></div></div>
 
@@ -442,9 +442,9 @@ generate vectors.</p>
 <h4 id="example-creating-normalized-tf-idf-vectors-from-a-directory-of-text-documents-using-trigrams-and-the-l_2-norm">Example: Creating Normalized <a href="http://en.wikipedia.org/wiki/Tf%E2%80%93idf">TF-IDF</a> Vectors from a directory of text documents using <a href="http://en.wikipedia.org/wiki/N-gram">trigrams</a> and the <a href="http://en.wikipedia.org/wiki/Lp_space">L_2 Norm</a></h4>
 <p>Create sequence files from the directory of text documents:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seqdirectory 
-    -i $WORK_DIR/reuters 
-    -o $WORK_DIR/reuters-seqdir 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seqdirectory
+    -i $WORK_DIR/reuters
+    -o $WORK_DIR/reuters-seqdir
     -c UTF-8
     -chunk 64
     -xm sequential
@@ -452,14 +452,14 @@ generate vectors.</p>
 
 <p>Vectorize the documents using trigrams, L_2 length normalization and a maximum document frequency cutoff of 85%.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seq2sparse 
-    -i $WORK_DIR/reuters-out-seqdir/ 
-    -o $WORK_DIR/reuters-out-seqdir-sparse-kmeans 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$MAHOUT_HOME/bin/mahout seq2sparse
+    -i $WORK_DIR/reuters-out-seqdir/
+    -o $WORK_DIR/reuters-out-seqdir-sparse-kmeans
     --namedVec
     -wt tfidf
     -ng 3
     -n 2
-    --maxDFPercent 85 
+    --maxDFPercent 85
 </code></pre></div></div>
 
 <p>The sequence file in the $WORK_DIR/reuters-out-seqdir-sparse-kmeans/tfidf-vectors directory can now be used as input to the Mahout <a href="http://mahout.apache.org/users/clustering/k-means-clustering.html">k-Means</a> clustering algorithm.</p>
@@ -489,7 +489,6 @@ reuse the existing VectorWriter classes:</Vector></p>
 
 long numDocs = vectorWriter.write(new VectorIterable(), Long.MAX_VALUE);
 </code></pre></div></div>
-
 
   <footer class="footer bg-light">
     <div class="container text-center small">

@@ -214,8 +214,8 @@
 
 <p>Given an <code class="language-plaintext highlighter-rouge">\(m\times n\)</code>
 matrix <code class="language-plaintext highlighter-rouge">\(\mathbf{A}\)</code>, a target rank <code class="language-plaintext highlighter-rouge">\(k\in\mathbb{N}_{1}\)</code>
-, an oversampling parameter <code class="language-plaintext highlighter-rouge">\(p\in\mathbb{N}_{1}\)</code>, 
-and the number of additional power iterations <code class="language-plaintext highlighter-rouge">\(q\in\mathbb{N}_{0}\)</code>, 
+, an oversampling parameter <code class="language-plaintext highlighter-rouge">\(p\in\mathbb{N}_{1}\)</code>,
+and the number of additional power iterations <code class="language-plaintext highlighter-rouge">\(q\in\mathbb{N}_{0}\)</code>,
 this procedure computes an <code class="language-plaintext highlighter-rouge">\(m\times\left(k+p\right)\)</code>
 SVD <code class="language-plaintext highlighter-rouge">\(\mathbf{A\approx U}\boldsymbol{\Sigma}\mathbf{V}^{\top}\)</code>:</p>
 
@@ -238,7 +238,7 @@ SVD <code class="language-plaintext highlighter-rouge">\(\mathbf{A\approx U}\bol
   </li>
   <li>
     <p>If <code class="language-plaintext highlighter-rouge">\(q&gt;0\)</code>
-  repeat: for <code class="language-plaintext highlighter-rouge">\(i=1..q\)</code>: 
+  repeat: for <code class="language-plaintext highlighter-rouge">\(i=1..q\)</code>:
   <code class="language-plaintext highlighter-rouge">\(\mathbf{B}_{i}^{\top}=\mathbf{A}^{\top}\mbox{qr}\left(\mathbf{A}\mathbf{B}_{i-1}^{\top}\right).\mathbf{Q}\)</code>
   (power iterations step).</p>
   </li>
@@ -279,7 +279,7 @@ Another way is <code class="language-plaintext highlighter-rouge">\(\mathbf{V}=\
     // We represent Omega by its seed.
     val omegaSeed = RandomUtils.getRandom().nextInt()
 
-    // Compute Y = A*Omega.  
+    // Compute Y = A*Omega.
     var drmY = drmAcp.mapBlock(ncol = r) {
         case (keys, blockA) =&gt;
             val blockY = blockA %*% Matrices.symmetricUniformView(n, r, omegaSeed)
@@ -292,19 +292,19 @@ Another way is <code class="language-plaintext highlighter-rouge">\(\mathbf{V}=\
     if (q == 0) drmQ = drmQ.checkpoint()
 
     var drmBt = drmAcp.t %*% drmQ
-    
+
     // Checkpoint B' if last iteration
     if (q == 0) drmBt = drmBt.checkpoint()
 
     for (i &lt;- 0  until q) {
         drmY = drmAcp %*% drmBt
-        drmQ = dqrThin(drmY.checkpoint())._1            
-        
+        drmQ = dqrThin(drmY.checkpoint())._1
+
         // Checkpoint Q if last iteration
         if (i == q - 1) drmQ = drmQ.checkpoint()
-        
+
         drmBt = drmAcp.t %*% drmQ
-        
+
         // Checkpoint B' if last iteration
         if (i == q - 1) drmBt = drmBt.checkpoint()
     }
@@ -313,7 +313,7 @@ Another way is <code class="language-plaintext highlighter-rouge">\(\mathbf{V}=\
     val s = d.sqrt
 
     // Since neither drmU nor drmV are actually computed until actually used
-    // we don't need the flags instructing compute (or not compute) either of the U,V outputs 
+    // we don't need the flags instructing compute (or not compute) either of the U,V outputs
     val drmU = drmQ %*% inCoreUHat
     val drmV = drmBt %*% (inCoreUHat %*%: diagv(1 /: s))
 

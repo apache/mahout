@@ -213,11 +213,11 @@
   <li>BallKMeans step.</li>
 </ol>
 
-<p>The streaming step is a randomized algorithm that makes one pass through the data and 
-produces as many centroids as it determines is optimal. This step can be viewed as 
-a preparatory dimensionality reduction. If the size of the data stream is <em>n</em> and the 
-expected number of clusters is <em>k</em>, the streaming step will produce roughly <em>k*log(n)</em> 
-clusters that will be passed on to the BallKMeans step which will further reduce the 
+<p>The streaming step is a randomized algorithm that makes one pass through the data and
+produces as many centroids as it determines is optimal. This step can be viewed as
+a preparatory dimensionality reduction. If the size of the data stream is <em>n</em> and the
+expected number of clusters is <em>k</em>, the streaming step will produce roughly <em>k*log(n)</em>
+clusters that will be passed on to the BallKMeans step which will further reduce the
 number of clusters down to <em>k</em>. BallKMeans is a randomized Lloyd-type algorithm that
 has been studied in detail, see <a href="http://www.math.uwaterloo.ca/~cswamy/papers/kmeansfnl.pdf" title="R. Ostrovsky, Y. Rabani, L. Schulman, Ch. Swamy: The Effectiveness of Lloyd-Type Methods for the k-means Problem">Ostrovsky et al</a>.</p>
 
@@ -227,29 +227,29 @@ has been studied in detail, see <a href="http://www.math.uwaterloo.ca/~cswamy/pa
 
 <h3 id="overview">Overview</h3>
 
-<p>The streaming step is a derivative of the streaming 
-portion of Algorithm 1 in <a href="http://nips.cc/Conferences/2011/Program/event.php?ID=2989" title="M. Shindler, A. Wong, A. Meyerson: Fast and Accurate k-means For Large Datasets">Shindler et al</a>. The main difference between the two is that 
-Algorithm 1 of <a href="http://nips.cc/Conferences/2011/Program/event.php?ID=2989" title="M. Shindler, A. Wong, A. Meyerson: Fast and Accurate k-means For Large Datasets">Shindler et al</a> assumes 
-the knowledge of the size of the data stream and uses it to set a key parameter 
-for the algorithm. More precisely, the initial <em>distanceCutoff</em> (defined below), which is 
-denoted by <em>f</em> in <a href="http://nips.cc/Conferences/2011/Program/event.php?ID=2989" title="M. Shindler, A. Wong, A. Meyerson: Fast and Accurate k-means For Large Datasets">Shindler et al</a>, is set to <em>1/(k(1+log(n))</em>. The <em>distanceCutoff</em> influences the number of clusters that the algorithm 
-will produce. 
-In contrast, Mahout implementation does not require the knowledge of the size of the 
-data stream. Instead, it dynamically re-evaluates the parameters that depend on the size 
-of the data stream at runtime as more and more data is processed. In particular, 
+<p>The streaming step is a derivative of the streaming
+portion of Algorithm 1 in <a href="http://nips.cc/Conferences/2011/Program/event.php?ID=2989" title="M. Shindler, A. Wong, A. Meyerson: Fast and Accurate k-means For Large Datasets">Shindler et al</a>. The main difference between the two is that
+Algorithm 1 of <a href="http://nips.cc/Conferences/2011/Program/event.php?ID=2989" title="M. Shindler, A. Wong, A. Meyerson: Fast and Accurate k-means For Large Datasets">Shindler et al</a> assumes
+the knowledge of the size of the data stream and uses it to set a key parameter
+for the algorithm. More precisely, the initial <em>distanceCutoff</em> (defined below), which is
+denoted by <em>f</em> in <a href="http://nips.cc/Conferences/2011/Program/event.php?ID=2989" title="M. Shindler, A. Wong, A. Meyerson: Fast and Accurate k-means For Large Datasets">Shindler et al</a>, is set to <em>1/(k(1+log(n))</em>. The <em>distanceCutoff</em> influences the number of clusters that the algorithm
+will produce.
+In contrast, Mahout implementation does not require the knowledge of the size of the
+data stream. Instead, it dynamically re-evaluates the parameters that depend on the size
+of the data stream at runtime as more and more data is processed. In particular,
 the parameter <em>numClusters</em> (defined below) changes its value as the data is processed.</p>
 
 <p>###Parameters</p>
 
 <ul>
-  <li><strong>numClusters</strong> (int): Conceptually, <em>numClusters</em> represents the algorithm’s guess at the optimal 
-number of clusters it is shooting for. In particular, <em>numClusters</em> will increase at run 
+  <li><strong>numClusters</strong> (int): Conceptually, <em>numClusters</em> represents the algorithm’s guess at the optimal
+number of clusters it is shooting for. In particular, <em>numClusters</em> will increase at run
 time as more and more data is processed. Note that •numClusters• is not the number of clusters that the algorithm will produce. Also, <em>numClusters</em> should not be set to the final number of clusters that we expect to receive as the output of <em>StreamingKMeans</em>.</li>
-  <li><strong>distanceCutoff</strong> (double): a parameter representing the value of the distance between a point and 
+  <li><strong>distanceCutoff</strong> (double): a parameter representing the value of the distance between a point and
 its closest centroid after which
-the new point will definitely be assigned to a new cluster. <em>distanceCutoff</em> can be thought 
-of as an estimate of the variable <em>f</em> from Shindler et al. The default initial value for 
-<em>distanceCutoff</em> is <em>1.0/numClusters</em> and <em>distanceCutoff</em> grows as a geometric progression with 
+the new point will definitely be assigned to a new cluster. <em>distanceCutoff</em> can be thought
+of as an estimate of the variable <em>f</em> from Shindler et al. The default initial value for
+<em>distanceCutoff</em> is <em>1.0/numClusters</em> and <em>distanceCutoff</em> grows as a geometric progression with
 common ratio <em>beta</em> (see below).</li>
   <li><strong>beta</strong> (double): a constant parameter that controls the growth of <em>distanceCutoff</em>. If the initial setting of <em>distanceCutoff</em> is <em>d0</em>, <em>distanceCutoff</em> will grow as the geometric progression with initial term <em>d0</em> and common ratio <em>beta</em>. The default value for <em>beta</em> is 1.3.</li>
   <li><strong>clusterLogFactor</strong> (double): a constant parameter such that <em>clusterLogFactor</em> <em>log(numProcessedPoints)</em> is the runtime estimate of the number of clusters to be produced by the streaming step. If the final number of clusters (that we expect <em>StreamingKMeans</em> to output) is <em>k</em>, <em>clusterLogFactor</em> can be set to <em>k</em>.</li>
@@ -329,29 +329,29 @@ The algorithm can be instructed to take multiple independent runs (using the <em
 
 <p>##Usage of <em>StreamingKMeans</em></p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bin/mahout streamingkmeans  
-   -i &lt;input&gt;  
-   -o &lt;output&gt; 
-   -ow  
-   -k &lt;k&gt;  
-   -km &lt;estimatedNumMapClusters&gt;  
-   -e &lt;estimatedDistanceCutoff&gt;  
-   -mi &lt;maxNumIterations&gt;  
-   -tf &lt;trimFraction&gt;  
-   -ri                  
-   -iw  
-   -testp &lt;testProbability&gt;  
-   -nbkm &lt;numBallKMeansRuns&gt;  
-   -dm &lt;distanceMeasure&gt;   
-   -sc &lt;searcherClass&gt;  
-   -np &lt;numProjections&gt;  
-   -s &lt;searchSize&gt;   
-   -rskm  
-   -xm &lt;method&gt;  
-   -h   
-   --tempDir &lt;tempDir&gt;   
-   --startPhase &lt;startPhase&gt;   
-   --endPhase &lt;endPhase&gt;                    
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bin/mahout streamingkmeans
+   -i &lt;input&gt;
+   -o &lt;output&gt;
+   -ow
+   -k &lt;k&gt;
+   -km &lt;estimatedNumMapClusters&gt;
+   -e &lt;estimatedDistanceCutoff&gt;
+   -mi &lt;maxNumIterations&gt;
+   -tf &lt;trimFraction&gt;
+   -ri
+   -iw
+   -testp &lt;testProbability&gt;
+   -nbkm &lt;numBallKMeansRuns&gt;
+   -dm &lt;distanceMeasure&gt;
+   -sc &lt;searcherClass&gt;
+   -np &lt;numProjections&gt;
+   -s &lt;searchSize&gt;
+   -rskm
+   -xm &lt;method&gt;
+   -h
+   --tempDir &lt;tempDir&gt;
+   --startPhase &lt;startPhase&gt;
+   --endPhase &lt;endPhase&gt;
 </code></pre></div></div>
 
 <p>###Details on Job-Specific Options:</p>

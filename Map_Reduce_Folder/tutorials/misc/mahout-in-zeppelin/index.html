@@ -185,12 +185,12 @@
   <div class="row">
 
     <div class="col-lg-8">
-      <p>** DEPRECATED : While this page is useful for learning how to set up Mahout in Zeppelin, we strongly reccomend using a 
+      <p>** DEPRECATED : While this page is useful for learning how to set up Mahout in Zeppelin, we strongly reccomend using a
 pre-built Docker container for trying out Mahout. See instructions <a href="http://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/">here</a> **</p>
 
 <p>The <a href="http://zeppelin.apache.org">Apache Zeppelin</a> is an exciting notebooking tool, designed for working with Big Data
-applications.  It comes with great integration for graphing in R and Python, supports multiple langauges in a single 
-notebook (and facilitates sharing of variables between interpreters), and makes working with Spark and Flink in an interactive environment (either locally or in cluster mode) a 
+applications.  It comes with great integration for graphing in R and Python, supports multiple langauges in a single
+notebook (and facilitates sharing of variables between interpreters), and makes working with Spark and Flink in an interactive environment (either locally or in cluster mode) a
 breeze.  Of course, it does lots of other cool things too- but those are the features we’re going to take advantage of.</p>
 
 <h3 id="step1-download-and-install-zeppelin">Step1: Download and Install Zeppelin</h3>
@@ -240,7 +240,7 @@ mvn clean package -Pspark1.6 -Pscala2.10 -DskipTests
 
 <h3 id="step2-create-the-mahout-spark-interpreter">Step2: Create the Mahout Spark Interpreter</h3>
 
-<p>After opening your web browser and surfing to <a href="http://localhost:8080">http://localhost:8080</a>, click on the <code class="language-plaintext highlighter-rouge">Anonymous</code> 
+<p>After opening your web browser and surfing to <a href="http://localhost:8080">http://localhost:8080</a>, click on the <code class="language-plaintext highlighter-rouge">Anonymous</code>
 button on the top right corner, which will open a drop down. Then click <code class="language-plaintext highlighter-rouge">Interpreter</code>.</p>
 
 <p><img src="zeppelin1.png" alt="Screen Shot1" /></p>
@@ -281,11 +281,11 @@ named it later in the tutorial)</p>
     <tr>
         <td>spark.kryoserializer.buffer.max</td>
         <td>600m</td>
-    </tr>    
+    </tr>
     <tr>
         <td>spark.serializer</td>
         <td>org.apache.spark.serializer.KryoSerializer</td>
-    </tr> 
+    </tr>
 </table>
 </div>
 
@@ -313,7 +313,7 @@ named it later in the tutorial)</p>
     <tr>
         <td>/path/to/mahout/mahout-spark_2.11-0.14.jar</td>
         <td></td>
-    </tr>  
+    </tr>
     <tr>
         <td>/path/to/mahout/mahout-spark_2.11-0.14.jar-dependeny-reduced.jar</td>
         <td></td>
@@ -344,7 +344,7 @@ named it later in the tutorial)</p>
      <tr>
          <td>org.apache.mahout:mahout-native-viennacl-omp_2.11:0.14</td>
          <td></td>
-     </tr> 
+     </tr>
 
 </table>
 </div>
@@ -362,12 +362,12 @@ named it later in the tutorial)</p>
          <td>org.apache.mahout:mahout-native-viennacl_2.11:0.14</td>
          <td></td>
          <td>ViennaCL GPU Accelerated</td>
-     </tr> 
+     </tr>
      <tr>
          <td>org.apache.mahout:mahout-native-viennacl-omp_2.11:0.14</td>
          <td></td>
          <td>ViennaCL-OMP CPU Accelerated (use this if you don't have a good graphics card)</td>
-     </tr> 
+     </tr>
 </table>
 </div>
 
@@ -375,8 +375,8 @@ named it later in the tutorial)</p>
 
 <h3 id="step-4-rock-and-roll">Step 4. Rock and Roll.</h3>
 
-<p>Mahout in Zeppelin, unlike the Mahout Shell, won’t take care of importing the Mahout libraries or creating the 
-<code class="language-plaintext highlighter-rouge">MahoutSparkContext</code>, we need to do that manually. This is easy though.  When ever you start Zeppelin (or restart) the 
+<p>Mahout in Zeppelin, unlike the Mahout Shell, won’t take care of importing the Mahout libraries or creating the
+<code class="language-plaintext highlighter-rouge">MahoutSparkContext</code>, we need to do that manually. This is easy though.  When ever you start Zeppelin (or restart) the
 Mahout interpreter, you’ll need to run the following code first:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>%sparkMahout
@@ -403,8 +403,8 @@ implicit val sdc: org.apache.mahout.sparkbindings.SparkDistributedContext = sc2s
 
 <p>We can use <code class="language-plaintext highlighter-rouge">.mapBlock</code> and some clever code to create a 3D Gausian Matrix.</p>
 
-<p>We can use <code class="language-plaintext highlighter-rouge">.drmSampleToTsv</code> to take a sample of the matrix and turn it in to a tab seperated string. We take a sample of 
- the matrix because, since we are dealing with “big” data, we wouldn’t want to try to collect and plot the entire matrix, 
+<p>We can use <code class="language-plaintext highlighter-rouge">.drmSampleToTsv</code> to take a sample of the matrix and turn it in to a tab seperated string. We take a sample of
+ the matrix because, since we are dealing with “big” data, we wouldn’t want to try to collect and plot the entire matrix,
  however, IF we knew we had a small matrix and we DID want to sample the entire thing, then we could sample <code class="language-plaintext highlighter-rouge">100.0</code> e.g. 100%.</p>
 
 <p>Finally we use <code class="language-plaintext highlighter-rouge">z.put(...)</code> to put a variable into Zeppelin’s <code class="language-plaintext highlighter-rouge">ResourcePool</code> a block of memory shared by all interpreters.</p>

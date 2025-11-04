@@ -243,10 +243,10 @@
     <p><strong>Preprocessing:</strong>
 For a set of Sequence File Formatted documents in PATH_TO_SEQUENCE_FILES the <a href="https://mahout.apache.org/users/basics/creating-vectors-from-text.html">mahout seq2sparse</a> command performs the TF-IDF transformations (-wt tfidf option) and L2 length normalization (-n 2 option) as follows:</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout seq2sparse 
-    -i ${PATH_TO_SEQUENCE_FILES} 
-    -o ${PATH_TO_TFIDF_VECTORS} 
-    -nv 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout seq2sparse
+    -i ${PATH_TO_SEQUENCE_FILES}
+    -o ${PATH_TO_TFIDF_VECTORS}
+    -nv
     -n 2
     -wt tfidf
 </code></pre></div>    </div>
@@ -256,9 +256,9 @@ For a set of Sequence File Formatted documents in PATH_TO_SEQUENCE_FILES the <a 
 The model is then trained using <code class="language-plaintext highlighter-rouge">mahout spark-trainnb</code>.  The default is to train a Bayes model. The -c option is given to train a CBayes model:</p>
 
     <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-trainnb
-    -i ${PATH_TO_TFIDF_VECTORS} 
+    -i ${PATH_TO_TFIDF_VECTORS}
     -o ${PATH_TO_MODEL}
-    -ow 
+    -ow
     -c
 </code></pre></div>    </div>
   </li>
@@ -266,10 +266,10 @@ The model is then trained using <code class="language-plaintext highlighter-roug
     <p><strong>Label Assignment/Testing:</strong>
 Classification and testing on a holdout set can then be performed via <code class="language-plaintext highlighter-rouge">mahout spark-testnb</code>. Again, the -c option indicates that the model is CBayes:</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-testnb 
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-testnb
     -i ${PATH_TO_TFIDF_TEST_VECTORS}
-    -m ${PATH_TO_MODEL} 
-    -c 
+    -m ${PATH_TO_MODEL}
+    -c
 </code></pre></div>    </div>
   </li>
 </ul>
@@ -282,49 +282,49 @@ Classification and testing on a holdout set can then be performed via <code clas
 
     <p>Only relevant parameters used for Bayes/CBayes as detailed above are shown. Several other transformations can be performed by <code class="language-plaintext highlighter-rouge">mahout seq2sparse</code> and used as input to Bayes/CBayes.  For a full list of <code class="language-plaintext highlighter-rouge">mahout seq2Sparse</code> options see the <a href="https://mahout.apache.org/users/basics/creating-vectors-from-text.html">Creating vectors from text</a> page.</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout seq2sparse                         
-    --output (-o) output             The directory pathname for output.        
-    --input (-i) input               Path to job input directory.              
-    --weight (-wt) weight            The kind of weight to use. Currently TF   
-                                         or TFIDF. Default: TFIDF                  
-    --norm (-n) norm                 The norm to use, expressed as either a    
-                                         float or "INF" if you want to use the     
-                                         Infinite norm.  Must be greater or equal  
-                                         to 0.  The default is not to normalize    
-    --overwrite (-ow)                If set, overwrite the output directory    
-    --sequentialAccessVector (-seq)  (Optional) Whether output vectors should  
-                                         be SequentialAccessVectors. If set true   
-                                         else false                                
-    --namedVector (-nv)              (Optional) Whether output vectors should  
-                                         be NamedVectors. If set true else false   
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout seq2sparse
+    --output (-o) output             The directory pathname for output.
+    --input (-i) input               Path to job input directory.
+    --weight (-wt) weight            The kind of weight to use. Currently TF
+                                         or TFIDF. Default: TFIDF
+    --norm (-n) norm                 The norm to use, expressed as either a
+                                         float or "INF" if you want to use the
+                                         Infinite norm.  Must be greater or equal
+                                         to 0.  The default is not to normalize
+    --overwrite (-ow)                If set, overwrite the output directory
+    --sequentialAccessVector (-seq)  (Optional) Whether output vectors should
+                                         be SequentialAccessVectors. If set true
+                                         else false
+    --namedVector (-nv)              (Optional) Whether output vectors should
+                                         be NamedVectors. If set true else false
 </code></pre></div>    </div>
   </li>
   <li>
     <p><strong>Training:</strong></p>
 
     <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-trainnb
-    --input (-i) input               Path to job input directory.                 
-    --output (-o) output             The directory pathname for output.           
+    --input (-i) input               Path to job input directory.
+    --output (-o) output             The directory pathname for output.
     --trainComplementary (-c)        Train complementary? Default is false.
     --master (-ma)                   Spark Master URL (optional). Default: "local".
-                                         Note that you can specify the number of 
-                                         cores to get a performance improvement, 
+                                         Note that you can specify the number of
+                                         cores to get a performance improvement,
                                          for example "local[4]"
-    --help (-h)                      Print out help                               
+    --help (-h)                      Print out help
 </code></pre></div>    </div>
   </li>
   <li>
     <p><strong>Testing:</strong></p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-testnb   
-    --input (-i) input               Path to job input directory.                  
-    --model (-m) model               The path to the model built during training.   
-    --testComplementary (-c)         Test complementary? Default is false.                          
-    --master (-ma)                   Spark Master URL (optional). Default: "local". 
-                                         Note that you can specify the number of 
-                                         cores to get a performance improvement, 
-                                         for example "local[4]"                        
-    --help (-h)                      Print out help                                
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  $ mahout spark-testnb
+    --input (-i) input               Path to job input directory.
+    --model (-m) model               The path to the model built during training.
+    --testComplementary (-c)         Test complementary? Default is false.
+    --master (-ma)                   Spark Master URL (optional). Default: "local".
+                                         Note that you can specify the number of
+                                         cores to get a performance improvement,
+                                         for example "local[4]"
+    --help (-h)                      Print out help
 </code></pre></div>    </div>
   </li>
 </ul>

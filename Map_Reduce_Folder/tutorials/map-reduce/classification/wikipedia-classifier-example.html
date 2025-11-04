@@ -200,7 +200,7 @@
 
 <p>The step by step process for Creating a Naive Bayes Classifier for the Wikipedia XML dump is very similar to that for <a href="http://mahout.apache.org/users/classification/twenty-newsgroups.html">creating a 20 Newsgroups Classifier</a> [4].  The only difference being that instead of running <code class="language-plaintext highlighter-rouge">$mahout seqdirectory</code> on the unzipped 20 Newsgroups file, you’ll run <code class="language-plaintext highlighter-rouge">$mahout seqwiki</code> on the unzipped Wikipedia xml dump.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mahout seqwiki 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mahout seqwiki
 </code></pre></div></div>
 
 <p>The above command launches <code class="language-plaintext highlighter-rouge">WikipediaToSequenceFile.java</code> which accepts a text file of categories [3] and starts an MR job to parse the each document in the XML file.  This process will seek to extract documents with a wikipedia category tag which (exactly, if the <code class="language-plaintext highlighter-rouge">-exactMatchOnly</code> option is set) matches a line in the category file.  If no match is found and the <code class="language-plaintext highlighter-rouge">-all</code> option is set, the document will be dumped into an “unknown” category. The documents will then be written out as a <code class="language-plaintext highlighter-rouge">&lt;Text,Text&gt;</code> sequence file of the form (K:/category/document_title , V: document).</p>
@@ -236,7 +236,6 @@ directory:  country.txt, country10.txt and country2.txt.  You can edit these cat
 <p>[6] <a href="http://mahout.apache.org/users/algorithms/spark-naive-bayes.html">Mahout Spark Naive Bayes</a></p>
 
 <p>[7] <a href="http://mahout.apache.org/users/sparkbindings/home.html">Mahout Scala Spark and H2O Bindings</a></p>
-
 
     </div>
   </div>

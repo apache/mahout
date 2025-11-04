@@ -229,27 +229,27 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
 
 <span class="c1"># Initialize the quantum circuit with 1 qubit
-</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>  
-<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>  
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Apply the Hadamard gate to the first qubit
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and print the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
-<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h2 id="42-multi-qubit-gates">4.2 Multi-Qubit Gates</h2>
 
-<p>Multi-qubit gates operate on two or more qubits, enabling entanglement and more 
+<p>Multi-qubit gates operate on two or more qubits, enabling entanglement and more
 complex quantum operations. Some of the most common multi-qubit gates include:</p>
 
 <ul>
-  <li><strong>CNOT Gate (Controlled-NOT)</strong>: Flips the target qubit if the control qubit is 
+  <li><strong>CNOT Gate (Controlled-NOT)</strong>: Flips the target qubit if the control qubit is
 in the state $|1\rangle$.</li>
-  <li><strong>Toffoli Gate (CCNOT)</strong>: A controlled-controlled-NOT gate that flips the 
+  <li><strong>Toffoli Gate (CCNOT)</strong>: A controlled-controlled-NOT gate that flips the
 target qubit if both control qubits are in the state $|1\rangle$.</li>
   <li><strong>SWAP Gate</strong>: Exchanges the states of two qubits.</li>
 </ul>
@@ -265,8 +265,8 @@ target qubit if both control qubits are in the state $|1\rangle$.</li>
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and print the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
-<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h2 id="43-applying-gates-with-qumat">4.3 Applying Gates with <code class="language-plaintext highlighter-rouge">qumat</code></h2>
@@ -287,8 +287,8 @@ target qubit if both control qubits are in the state $|1\rangle$.</li>
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_rz_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">3.14159</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and print the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
-<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h3 id="example-applying-a-toffoli-gate">Example: Applying a Toffoli Gate</h3>
@@ -296,15 +296,15 @@ target qubit if both control qubits are in the state $|1\rangle$.</li>
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># Apply the Hadamard gate to the first two qubits
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Apply the Toffoli gate with qubits 0 and 1 as controls and qubit 2 as target
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_toffoli_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and print the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
-<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h3 id="example-applying-a-swap-gate">Example: Applying a SWAP Gate</h3>
@@ -318,8 +318,8 @@ target qubit if both control qubits are in the state $|1\rangle$.</li>
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_swap_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Execute the circuit and print the results
-</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>  
-<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h2 id="44-visualizing-quantum-circuits">4.4 Visualizing Quantum Circuits</h2>
@@ -337,7 +337,7 @@ target qubit if both control qubits are in the state $|1\rangle$.</li>
 </span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Draw the circuit
-</span><span class="n">qc</span><span class="p">.</span><span class="nf">draw</span><span class="p">()</span>  
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">draw</span><span class="p">()</span>
 </code></pre></div></div>
 
 <p>This section introduced the fundamental quantum gates and demonstrated how to apply them using the <code class="language-plaintext highlighter-rouge">qumat</code> library. In the next section, we will explore how to build more complex quantum circuits by combining these gates.</p>
@@ -378,7 +378,7 @@ target qubit if both control qubits are in the state $|1\rangle$.</li>
             <li>
                 FOSSY 2024, Portland Oregon - <a href="https://www.youtube.com/watch?v=tgFaUL1wYhY" target="_blank">
                     QuMat: Apache Mahout's Quantum Computing Interface
-                </a> 
+                </a>
                 [<a href="https://www.slideshare.net/slideshow/qumat_-apache-mahout-s-quantum-computing-interface-pptx/272300949" target="_blank">Slides</a>]
             </li>
                 <li>
