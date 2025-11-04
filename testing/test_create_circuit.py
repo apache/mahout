@@ -60,7 +60,7 @@ class TestCreateCircuit:
 
         assert qumat.circuit is not None
 
-    @pytest.mark.parametrize("num_qubits", [1, 3, 5])
+    @pytest.mark.parametrize("num_qubits", [0, 1, 3, 5])
     def test_create_circuit_initializes_to_zero(self, backend_name, num_qubits):
         """Test that create_empty_circuit properly initializes all qubits to |0⟩."""
         backend_config = self.get_backend_config(backend_name)
