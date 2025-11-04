@@ -8,7 +8,7 @@ title: Downloads
 <a name="Downloads-OfficialRelease"></a>
 # Official Release
 Apache Mahout is an official Apache project and thus available from any of
-the Apache mirrors. The latest Mahout release is available for download at: 
+the Apache mirrors. The latest Mahout release is available for download at:
 
 * [Download Latest](http://www.apache.org/dist/mahout)
 * [Release Archive](http://archive.apache.org/dist/mahout)
@@ -42,4 +42,3 @@ Official releases are usually created when the developers feel there are
 sufficient changes, improvements and bug fixes to warrant a release. Watch
 the <a href="https://mahout.apache.org/community/mailing-lists.html">Mailing lists</a>
  for latest release discussions and check the Github repo.
-

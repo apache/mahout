@@ -44,4 +44,3 @@ category: minutes
     - [456](https://github.com/apache/mahout/issues/456)
     - [457](https://github.com/apache/mahout/issues/457)
     - [458](https://github.com/apache/mahout/issues/458)
-

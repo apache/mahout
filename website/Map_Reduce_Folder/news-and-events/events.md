@@ -17,6 +17,3 @@ Check out the upcoming events related to the Apache Mahout project! Join webinar
 | 2023-05-31 | Mahout Community Call       | Online          | A Monthly Community Call Where project leaders discuss pressing issues |
 
 Don't forget to check back frequently for updates on new events and opportunities to connect with the Mahout community. We look forward to seeing you at an event soon!
-
-
-

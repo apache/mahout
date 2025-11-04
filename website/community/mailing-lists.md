@@ -2,7 +2,7 @@
 layout: page
 title: Mailing Lists, IRC and Archives
 
-    
+
 ---
 
 # General
@@ -16,9 +16,9 @@ list so we are able to monitor what happens on the wiki and in svn.
 
 ## How to subscribe/unsubscribe
 
-Follow the links below, or send mail manually, with empty subject and body. 
+Follow the links below, or send mail manually, with empty subject and body.
 
-The pattern for subscribing and unsubscribing to  mailing lists at the ASF 
+The pattern for subscribing and unsubscribing to  mailing lists at the ASF
 is &lt;list-name&gt;-&lt;action&gt;@&lt;project.&gt;apache.org.
 
 <a name="MailingLists,IRCandArchives-MahoutUserList"></a>
@@ -27,7 +27,7 @@ is &lt;list-name&gt;-&lt;action&gt;@&lt;project.&gt;apache.org.
 This list is for users of Mahout to ask questions, share knowledge, and
 discuss issues. Do send mail to this list with usage and configuration
 questions and problems. Also, please send questions to this list to verify
-your problem before filing issues in JIRA. 
+your problem before filing issues in JIRA.
 
 * [Subscribe](mailto:user-subscribe@mahout.apache.org)
 * [Unsubscribe](mailto:user-unsubscribe@mahout.apache.org)
@@ -38,16 +38,16 @@ your problem before filing issues in JIRA.
 This is the list where participating developers of the Mahout project meet
 and discuss issues concerning Mahout internals, code changes/additions,
 etc. Do not send mail to this list with usage questions or configuration
-questions and problems. 
+questions and problems.
 
-Discussion list: 
+Discussion list:
 
 * [Subscribe](mailto:dev-subscribe@mahout.apache.org)
  -- Do not send mail to this list with usage questions or configuration
-questions and problems. 
+questions and problems.
 * [Unsubscribe](mailto:dev-unsubscribe@mahout.apache.org)
 
-Commit notifications: 
+Commit notifications:
 
 * [Subscribe](mailto:commits-subscribe@mahout.apache.org)
 * [Unsubscribe](mailto:commits-unsubscribe@mahout.apache.org)

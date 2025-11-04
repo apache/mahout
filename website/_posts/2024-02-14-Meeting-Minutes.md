@@ -29,4 +29,3 @@ category: minutes
 
 ### Other Business
 * JIRA hygiene with Shashanka in monthly Classic meeting
-

@@ -30,15 +30,15 @@ Using Mahout as a library in an application will require a little Scala code. Sc
 
     object CooccurrenceDriver extends App {
     }
-    
+
 
 This will look a little different than Java since ```App``` does delayed initialization, which causes the body to be executed when the App is launched, just as in Java you would create a main method.
 
 Before we can execute something on Spark we'll need to create a context. We could use raw Spark calls here but default values are setup for a Mahout context by using the Mahout helper function.
 
-    implicit val mc = mahoutSparkContext(masterUrl = "local", 
+    implicit val mc = mahoutSparkContext(masterUrl = "local",
       appName = "CooccurrenceDriver")
-    
+
 We need to read in three files containing different interaction types. The files will each be read into a Mahout IndexedDataset. This allows us to preserve application-specific user and item IDs throughout the calculations.
 
 For example, here is data/purchase.csv:
@@ -51,12 +51,12 @@ For example, here is data/purchase.csv:
     u4,iphone
     u4,galaxy
 
-Mahout has a helper function that reads the text delimited files  SparkEngine.indexedDatasetDFSReadElements. The function reads single element tuples (user-id,item-id) in a distributed way to create the IndexedDataset. Distributed Row Matrices (DRM) and Vectors are important data types supplied by Mahout and IndexedDataset is like a very lightweight Dataframe in R, it wraps a DRM with HashBiMaps for row and column IDs. 
+Mahout has a helper function that reads the text delimited files  SparkEngine.indexedDatasetDFSReadElements. The function reads single element tuples (user-id,item-id) in a distributed way to create the IndexedDataset. Distributed Row Matrices (DRM) and Vectors are important data types supplied by Mahout and IndexedDataset is like a very lightweight Dataframe in R, it wraps a DRM with HashBiMaps for row and column IDs.
 
 One important thing to note about this example is that we read in all datasets before we adjust the number of rows in them to match the total number of users in the data. This is so the math works out [(A'A, A'B, A'C)](http://mahout.apache.org/users/algorithms/intro-cooccurrence-spark.html) even if some users took one action but not another there must be the same number of rows in all matrices.
 
     /**
-     * Read files of element tuples and create IndexedDatasets one per action. These 
+     * Read files of element tuples and create IndexedDatasets one per action. These
      * share a userID BiMap but have their own itemID BiMaps
      */
     def readActions(actionInput: Array[(String, String)]): Array[(String, IndexedDataset)] = {
@@ -64,7 +64,7 @@ One important thing to note about this example is that we read in all datasets b
 
       val userDictionary: BiMap[String, Int] = HashBiMap.create()
 
-      // The first action named in the sequence is the "primary" action and 
+      // The first action named in the sequence is the "primary" action and
       // begins to fill up the user dictionary
       for ( actionDescription <- actionInput ) {// grab the path to actions
         val action: IndexedDataset = SparkEngine.indexedDatasetDFSReadElements(
@@ -73,11 +73,11 @@ One important thing to note about this example is that we read in all datasets b
           existingRowIDs = userDictionary)
         userDictionary.putAll(action.rowIDs)
         // put the name in the tuple with the indexedDataset
-        actions = actions :+ (actionDescription._1, action) 
+        actions = actions :+ (actionDescription._1, action)
       }
 
-      // After all actions are read in the userDictonary will contain every user seen, 
-      // even if they may not have taken all actions . Now we adjust the row rank of 
+      // After all actions are read in the userDictonary will contain every user seen,
+      // even if they may not have taken all actions . Now we adjust the row rank of
       // all IndxedDataset's to have this number of rows
       // Note: this is very important or the cooccurrence calc may fail
       val numUsers = userDictionary.size() // one more than the cardinality
@@ -95,7 +95,7 @@ Now that we have the data read in we can perform the cooccurrence calculation.
 
     // actions.map creates an array of just the IndeedDatasets
     val indicatorMatrices = SimilarityAnalysis.cooccurrencesIDSs(
-      actions.map(a => a._2)) 
+      actions.map(a => a._2))
 
 All we need to do now is write the indicators.
 
@@ -116,14 +116,14 @@ The ```writeIndicators``` method uses the default write function ```dfsWrite```.
         val indicatorDir = OutputPath + indicator._1
         indicator._2.dfsWrite(
           indicatorDir,
-          // Schema tells the writer to omit LLR strengths 
+          // Schema tells the writer to omit LLR strengths
           // and format for search engine indexing
-          IndexedDatasetWriteBooleanSchema) 
+          IndexedDatasetWriteBooleanSchema)
       }
     }
- 
 
-See the Github project for the full source. Now we create a build.sbt to build the example. 
+
+See the Github project for the full source. Now we create a build.sbt to build the example.
 
     name := "cooccurrence-driver"
 
@@ -164,7 +164,7 @@ Building the examples from project's root folder:
 This will automatically set up some launcher scripts for the driver. To run execute
 
     $ target/pack/bin/cooc
-    
+
 The driver will execute in Spark standalone mode and put the data in /path/to/3-input-cooc/data/indicators/*indicator-type*
 
 ## Using a Debugger
@@ -172,7 +172,7 @@ To build and run this example in a debugger like IntelliJ IDEA. Install from the
 
 Open IDEA and go to the menu File->New->Project from existing sources->SBT->/path/to/3-input-cooc. This will create an IDEA project from ```build.sbt``` in the root directory.
 
-At this point you may create a "Debug Configuration" to run. In the menu choose Run->Edit Configurations. Under "Default" choose "Application". In the dialog hit the elipsis button "..." to the right of "Environment Variables" and fill in your versions of JAVA_HOME, SPARK_HOME, and MAHOUT_HOME. In configuration editor under "Use classpath from" choose root-3-input-cooc module. 
+At this point you may create a "Debug Configuration" to run. In the menu choose Run->Edit Configurations. Under "Default" choose "Application". In the dialog hit the elipsis button "..." to the right of "Environment Variables" and fill in your versions of JAVA_HOME, SPARK_HOME, and MAHOUT_HOME. In configuration editor under "Use classpath from" choose root-3-input-cooc module.
 
 ![image](http://mahout.apache.org/images/debug-config.png)
 
@@ -191,18 +191,18 @@ To make the CooccurrenceDriver.scala into a script make the following changes:
 
 * You won't need the context, since it is created when the shell is launched, comment that line out.
 * Replace the logger.info lines with println
-* Remove the package info since it's not needed, this will produce the file in ```path/to/3-input-cooc/bin/CooccurrenceDriver.mscala```. 
+* Remove the package info since it's not needed, this will produce the file in ```path/to/3-input-cooc/bin/CooccurrenceDriver.mscala```.
 
 Note the extension ```.mscala``` to indicate we are using Mahout's scala extensions for math, otherwise known as [Mahout-Samsara](http://mahout.apache.org/users/environment/out-of-core-reference.html)
 
 To run the code make sure the output does not exist already
 
     $ rm -r /path/to/3-input-cooc/data/indicators
-    
+
 Launch the Mahout + Spark shell:
 
     $ mahout spark-shell
-    
+
 You'll see the Mahout splash:
 
     MAHOUT_LOCAL is set, so we don't add HADOOP_CONF_DIR to classpath.
@@ -213,14 +213,14 @@ You'll see the Mahout splash:
             | | | | | | (_| | | | | (_) | |_| | |_
             |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 0.10.0
 
-      
+
     Using Scala version 2.10.4 (Java HotSpot(TM) 64-Bit Server VM, Java 1.7.0_72)
     Type in expressions to have them evaluated.
     Type :help for more information.
     15/04/26 09:30:48 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
     Created spark context..
     Mahout distributed context is available as "implicit val sdc".
-    mahout> 
+    mahout>
 
 To load the driver type:
 
@@ -233,12 +233,12 @@ To load the driver type:
     import org.apache.mahout.sparkbindings._
     import scala.collection.immutable.HashMap
     defined module CooccurrenceDriver
-    mahout> 
+    mahout>
 
 To run the driver type:
 
     mahout> CooccurrenceDriver.main(args = Array(""))
-    
+
 You'll get some stats printed:
 
     Total number of users for all actions = 5
@@ -254,5 +254,5 @@ You'll get some stats printed:
       Number of rows for matrix = 5
       Number of columns for matrix = 7
       Number of rows after resize = 5
-    
+
 If you look in ```path/to/3-input-cooc/data/indicators``` you should find folders containing the indicator matrices.

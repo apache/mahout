@@ -42,7 +42,7 @@ by using a Ridge regression, penalizing higher values of beta coefficients.
         <td><code>'addIntercept</code></td>
         <td>Add an intercept to \(\mathbf{X}\)</td>
         <td><code>true</code></td>
-     </tr>                 
+     </tr>
   </table>
 </div>
 

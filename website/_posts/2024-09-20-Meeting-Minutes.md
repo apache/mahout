@@ -41,4 +41,3 @@ category: minutes
     * https://github.com/apache/mahout/issues/457
     * https://github.com/apache/mahout/issues/458
     * https://github.com/apache/mahout/wiki/Data-Encoding-and-Kernel-Notes
-

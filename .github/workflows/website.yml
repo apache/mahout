@@ -48,10 +48,9 @@ jobs:
         cp -r $WORKDIR/* .
         git add .
         git commit -m "Automatic Site Publish by Buildbot"
-        git push 
+        git push
       env:
         WORKDIR: /tmp/mahout-site
-        
+
         RUBY_PATH: ~/shared/.rvm
         GEM_HOME: ${RUBY_PATH}/gems
-  

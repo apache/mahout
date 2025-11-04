@@ -7,4 +7,3 @@ category: minutes
 
 Trevor able to do Mahout in-core matrix addition in Python. Will continue working, but good first step. Want
 to see POC that DRMs will also "work" and then will sketch plan.
-
