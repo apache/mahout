@@ -4,7 +4,7 @@ title: Powered By Mahout
 redirect_from:
     - /general/powered-by-mahout
     - /general/powered-by-mahout.html
-    
+
 ---
 
 # Powered by Mahout
@@ -19,7 +19,7 @@ are for informational purposes only.*
 ## Commercial Use
 
 * <a href="http://nosql.mypopescu.com/post/2082712431/hbase-and-hadoop-at-adobe">Adobe AMP</a> uses Mahout's clustering algorithms to increase video
-consumption by better user targeting. 
+consumption by better user targeting.
 * Accenture uses Mahout as typical example for their [Hadoop Deployment Comparison Study](http://www.accenture.com/SiteCollectionDocuments/PDF/Accenture-Hadoop-Deployment-Comparison-Study.pdf)
 * [AOL](http://www.aol.com)
  use Mahout for shopping recommendations. See [slide deck](http://www.slideshare.net/kryton/the-data-layer)

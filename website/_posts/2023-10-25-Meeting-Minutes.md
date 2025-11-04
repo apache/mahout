@@ -31,7 +31,7 @@ category: minutes
 * Nightly builds working
 * Nov: 14.2, point release with minor improvements and new build system
 
-### Ideas 
+### Ideas
 * Quantum computing (IBM and Honeywell have free-tier APIs) XXXL
 * Python bindings for DSL (XXXL)
 * Automating or maintaining Docker images (XL, including docs)
@@ -45,7 +45,7 @@ category: minutes
 * Look at OpenNLP for tokenizing and other processing
 * New embedding similarity job
 
-### Summary and next steps 
+### Summary and next steps
 * DONE: Get travis migration done, nightlies running
 * TODO in Nov: Push 14.2 out
 * Reach out to formerly active project members

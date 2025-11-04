@@ -18,30 +18,30 @@ Single-qubit gates operate on a single qubit, changing its state. Some of the mo
 - **Rotation Gates (Rx, Ry, Rz)**: Rotate the qubit state around the X, Y, or Z axis of the Bloch sphere.
 
 ### Example: Applying a Hadamard Gate
-```python  
+```python
 from qumat import QuMat
 
 # Initialize the quantum circuit with 1 qubit
-backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}  
-qc = QuMat(backend_config)  
+backend_config = {'backend_name': 'qiskit', 'backend_options': {'simulator_type': 'qasm_simulator', 'shots': 1000}}
+qc = QuMat(backend_config)
 qc.create_empty_circuit(1)
 
 # Apply the Hadamard gate to the first qubit
 qc.apply_hadamard_gate(0)
 
 # Execute the circuit and print the results
-result = qc.execute_circuit()  
-print(result)  
+result = qc.execute_circuit()
+print(result)
 ```
 
 ## 4.2 Multi-Qubit Gates
 
-Multi-qubit gates operate on two or more qubits, enabling entanglement and more 
+Multi-qubit gates operate on two or more qubits, enabling entanglement and more
 complex quantum operations. Some of the most common multi-qubit gates include:
 
-- **CNOT Gate (Controlled-NOT)**: Flips the target qubit if the control qubit is 
+- **CNOT Gate (Controlled-NOT)**: Flips the target qubit if the control qubit is
 in the state $|1\rangle$.
-- **Toffoli Gate (CCNOT)**: A controlled-controlled-NOT gate that flips the 
+- **Toffoli Gate (CCNOT)**: A controlled-controlled-NOT gate that flips the
 target qubit if both control qubits are in the state $|1\rangle$.
 - **SWAP Gate**: Exchanges the states of two qubits.
 
@@ -57,8 +57,8 @@ qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Execute the circuit and print the results
-result = qc.execute_circuit()  
-print(result)  
+result = qc.execute_circuit()
+print(result)
 ```
 
 ## 4.3 Applying Gates with `qumat`
@@ -80,8 +80,8 @@ qc.apply_ry_gate(0, 3.14159 / 4)
 qc.apply_rz_gate(0, 3.14159)
 
 # Execute the circuit and print the results
-result = qc.execute_circuit()  
-print(result)  
+result = qc.execute_circuit()
+print(result)
 ```
 
 ### Example: Applying a Toffoli Gate
@@ -90,15 +90,15 @@ print(result)
 qc.create_empty_circuit(3)
 
 # Apply the Hadamard gate to the first two qubits
-qc.apply_hadamard_gate(0)  
+qc.apply_hadamard_gate(0)
 qc.apply_hadamard_gate(1)
 
 # Apply the Toffoli gate with qubits 0 and 1 as controls and qubit 2 as target
 qc.apply_toffoli_gate(0, 1, 2)
 
 # Execute the circuit and print the results
-result = qc.execute_circuit()  
-print(result)  
+result = qc.execute_circuit()
+print(result)
 ```
 
 ### Example: Applying a SWAP Gate
@@ -113,8 +113,8 @@ qc.apply_hadamard_gate(0)
 qc.apply_swap_gate(0, 1)
 
 # Execute the circuit and print the results
-result = qc.execute_circuit()  
-print(result)  
+result = qc.execute_circuit()
+print(result)
 ```
 
 ## 4.4 Visualizing Quantum Circuits
@@ -133,7 +133,7 @@ qc.apply_hadamard_gate(0)
 qc.apply_cnot_gate(0, 1)
 
 # Draw the circuit
-qc.draw()  
+qc.draw()
 ```
 
-This section introduced the fundamental quantum gates and demonstrated how to apply them using the `qumat` library. In the next section, we will explore how to build more complex quantum circuits by combining these gates.  
+This section introduced the fundamental quantum gates and demonstrated how to apply them using the `qumat` library. In the next section, we will explore how to build more complex quantum circuits by combining these gates.

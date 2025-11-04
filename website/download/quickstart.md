@@ -18,7 +18,7 @@
 layout: page
 title: Quickstart
 
-    
+
 ---
 
 # Mahout MapReduce Overview
@@ -47,7 +47,7 @@ If you would like to import the latest release of mahout into a java project, ad
 
 For a full list of Mahout's features see our [Features by Engine](http://mahout.apache.org/users/basics/algorithms.html) page.
 
-    
+
 ## Using Mahout
 
 Mahout has prepared a bunch of examples and tutorials for users to quickly learn how to use its machine learning algorithms.
@@ -66,10 +66,10 @@ Check the [Synthetic data](/users/clustering/clustering-of-synthetic-control-dat
 
 If you are interested in how to train a **Naive Bayes** model, look at the [20 newsgroups](/users/classification/twenty-newsgroups.html) example.
 
-If you plan to build a **Hidden Markov Model** for speech recognition, the example [here](/users/classification/hidden-markov-models.html) might be instructive. 
+If you plan to build a **Hidden Markov Model** for speech recognition, the example [here](/users/classification/hidden-markov-models.html) might be instructive.
 
 Or you could build a **Random Forest** model by following this [quick start page](/users/classification/partial-implementation.html).
 
-#### Working with Text 
+#### Working with Text
 
 If you need to convert raw text into word vectors as input to clustering or classification algorithms, please refer to this page on [how to create vectors from text](/users/basics/creating-vectors-from-text.html).

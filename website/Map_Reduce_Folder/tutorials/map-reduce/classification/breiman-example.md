@@ -16,7 +16,7 @@ This page describes how to run the Breiman example, which implements the test pr
 
  * repeat *I* iterations
  * in each iteration do
-  * keep 10% of the dataset apart as a testing set 
+  * keep 10% of the dataset apart as a testing set
   * build two forests using the training set, one with *m = int(log2(M) + 1)* (called Random-Input) and one with *m = 1* (called Single-Input)
   * choose the forest that gave the lowest oob error estimation to compute
 the test set error
@@ -45,7 +45,7 @@ Finally, we build and evaluate our random forest classifier as follows:
 
     bin/mahout org.apache.mahout.classifier.df.BreimanExample -d /path/to/glass.data -ds /path/to/glass.info -i 10 -t 100
 which builds 100 trees (-t argument) and repeats the test 10 iterations (-i
-argument) 
+argument)
 
 The example outputs the following results:
 
@@ -65,6 +65,3 @@ We can repeat this for a [Sonar](http://archive.ics.uci.edu/ml/datasets/Connecti
 The argument "60 N L" means 60 numerical(N) attributes, followed by the label (L). Analogous to the previous case, we run the evaluation as follows:
 
     bin/mahout org.apache.mahout.classifier.df.BreimanExample -d /path/to/sonar.all-data -ds /path/to/sonar.info -i 10 -t 100
-
-
-

@@ -17,7 +17,7 @@ The Mahout DRM, or Distributed Row Matrix, is an abstraction for storing a large
 
 # Flink Overview
 
-Apache Flink is an open source, distributed Stream and Batch Processing Framework. At it's core, Flink is a Stream Processing engine and Batch processing is an extension of Stream Processing. 
+Apache Flink is an open source, distributed Stream and Batch Processing Framework. At it's core, Flink is a Stream Processing engine and Batch processing is an extension of Stream Processing.
 
 Flink includes several APIs for building applications with the Flink Engine:
 
@@ -46,5 +46,3 @@ flink/src/main/scala/org/apache/mahout/flinkbindings/drm/*.scala - Flink Dataset
 flink/src/main/scala/org/apache/mahout/flinkbindings/io/*.scala - Read / Write between DRMDataSet and files on HDFS
 
 flink/src/main/scala/org/apache/mahout/flinkbindings/FlinkEngine.scala - DSL operator graph evaluator and various abstract API implementations for a distributed engine.
-
-

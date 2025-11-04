@@ -8,7 +8,7 @@ redirect_from:
 
 ### About
 
-`MeanCenter` centers values about the column mean. 
+`MeanCenter` centers values about the column mean.
 
 ### Parameters
 
@@ -26,6 +26,3 @@ val scaler: MeanCenterModel = new MeanCenter().fit(A)
 
 val centeredA = scaler.transform(A)
 ```
-
-
-

@@ -71,45 +71,44 @@
 ## `draw_circuit(self)`
 - **Purpose**: Visualizes the quantum circuit.
 - **Usage**: Provides a graphical representation of the quantum circuit for better understanding.
-- **Note**: Just a pass through function, will use underlying libraries 
-  method for drawing circuit. 
+- **Note**: Just a pass through function, will use underlying libraries
+  method for drawing circuit.
 
-## `apply_rx_gate(self, qubit_index, angle)`  
-- **Purpose**: Applies a rotation around the X-axis to a specified qubit with an optional parameter for optimization.  
-- **Parameters**:  
-    - `qubit_index` (int): Index of the qubit.  
-    - `angle` (str or float): Angle in radians for the rotation. Can be a static value or a parameter name for optimization.  
-- **Usage**: Used to rotate a qubit around the X-axis, often in parameterized quantum circuits for variational algorithms.  
-  
-## `apply_ry_gate(self, qubit_index, angle)`  
-- **Purpose**: Applies a rotation around the Y-axis to a specified qubit with an optional parameter for optimization.  
-- **Parameters**:  
-    - `qubit_index` (int): Index of the qubit.  
-    - `angle` (str or float): Angle in radians for the rotation. Can be a static value or a parameter name for optimization.  
-- **Usage**: Used to rotate a qubit around the Y-axis in parameterized circuits, aiding in the creation of complex quantum states.  
-  
-## `apply_rz_gate(self, qubit_index, angle)`  
-- **Purpose**: Applies a rotation around the Z-axis to a specified qubit with an optional parameter for optimization.  
-- **Parameters**:  
-    - `qubit_index` (int): Index of the qubit.  
-    - `angle` (str or float): Angle in radians for the rotation. Can be a static value or a parameter name for optimization.  
-- **Usage**: Utilized in parameterized quantum circuits to modify the phase of a qubit state during optimization.  
-  
-## `execute_circuit(self, parameter_values=None)`  
-- **Purpose**: Executes the quantum circuit with the ability to bind specific parameter values if provided.  
-- **Parameters**:  
-    - `parameter_values` (dict, optional): A dictionary where keys are parameter names and values are the numerical values to bind.  
-- **Usage**: Enables the execution of parameterized circuits by binding parameter values, facilitating optimization processes.  
-  
-## `bind_parameters(self, parameter_values)`  
-- **Purpose**: Binds numerical values to the parameters of the quantum circuit, allowing for dynamic updates during optimization.  
-- **Parameters**:  
-    - `parameter_values` (dict): A dictionary with parameter names as keys and numerical values to bind.  
-- **Usage**: Essential for optimization loops where parameters are adjusted based on cost function evaluations.  
-  
-## `_handle_parameter(self, param_name)`  
-- **Purpose**: Internal function to manage parameter registration.  
-- **Parameters**:  
-    - `param_name` (str): The name of the parameter to handle.  
-- **Usage**: Automatically invoked when applying parameterized gates to keep track of parameters efficiently.  
-  
+## `apply_rx_gate(self, qubit_index, angle)`
+- **Purpose**: Applies a rotation around the X-axis to a specified qubit with an optional parameter for optimization.
+- **Parameters**:
+    - `qubit_index` (int): Index of the qubit.
+    - `angle` (str or float): Angle in radians for the rotation. Can be a static value or a parameter name for optimization.
+- **Usage**: Used to rotate a qubit around the X-axis, often in parameterized quantum circuits for variational algorithms.
+
+## `apply_ry_gate(self, qubit_index, angle)`
+- **Purpose**: Applies a rotation around the Y-axis to a specified qubit with an optional parameter for optimization.
+- **Parameters**:
+    - `qubit_index` (int): Index of the qubit.
+    - `angle` (str or float): Angle in radians for the rotation. Can be a static value or a parameter name for optimization.
+- **Usage**: Used to rotate a qubit around the Y-axis in parameterized circuits, aiding in the creation of complex quantum states.
+
+## `apply_rz_gate(self, qubit_index, angle)`
+- **Purpose**: Applies a rotation around the Z-axis to a specified qubit with an optional parameter for optimization.
+- **Parameters**:
+    - `qubit_index` (int): Index of the qubit.
+    - `angle` (str or float): Angle in radians for the rotation. Can be a static value or a parameter name for optimization.
+- **Usage**: Utilized in parameterized quantum circuits to modify the phase of a qubit state during optimization.
+
+## `execute_circuit(self, parameter_values=None)`
+- **Purpose**: Executes the quantum circuit with the ability to bind specific parameter values if provided.
+- **Parameters**:
+    - `parameter_values` (dict, optional): A dictionary where keys are parameter names and values are the numerical values to bind.
+- **Usage**: Enables the execution of parameterized circuits by binding parameter values, facilitating optimization processes.
+
+## `bind_parameters(self, parameter_values)`
+- **Purpose**: Binds numerical values to the parameters of the quantum circuit, allowing for dynamic updates during optimization.
+- **Parameters**:
+    - `parameter_values` (dict): A dictionary with parameter names as keys and numerical values to bind.
+- **Usage**: Essential for optimization loops where parameters are adjusted based on cost function evaluations.
+
+## `_handle_parameter(self, param_name)`
+- **Purpose**: Internal function to manage parameter registration.
+- **Parameters**:
+    - `param_name` (str): The name of the parameter to handle.
+- **Usage**: Automatically invoked when applying parameterized gates to keep track of parameters efficiently.

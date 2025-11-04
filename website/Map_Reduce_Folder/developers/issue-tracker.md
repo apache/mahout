@@ -14,7 +14,7 @@ For most changes (apart from trivial stuff) Mahout works according to a review-t
 This means anything that is to be added is first presented as a patch in the issue tracker. All conversations in the issue tracker are automatically
 echoed on the developer mailing list and people tend to respond or continue
 conversations there rather in the issue tracker, so in order to follow an
-issue you also have to read to the [mailing lists](/community/mailing-lists.html). 
+issue you also have to read to the [mailing lists](/community/mailing-lists.html).
 
 An issue does not literally have to be an issue. It could be a wish, task,
 bug report, etc. and it does not have to contain a patch.

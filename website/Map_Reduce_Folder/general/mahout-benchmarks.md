@@ -150,5 +150,3 @@ measured in seconds, not milliseconds.
 # Clustering
 
 See [MAHOUT-588](https://issues.apache.org/jira/browse/MAHOUT-588)
-
-

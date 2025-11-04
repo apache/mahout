@@ -77,7 +77,7 @@ As Vector and Matrix implementations are currently memory-resident, very
 large instances greater than available memory are not supported. An
 extended set of implementations that use HBase (BigTable) in Hadoop to
 represent their instances would facilitate applications requiring such
-large collections.  
+large collections.
 See [MAHOUT-6](https://issues.apache.org/jira/browse/MAHOUT-6)
 See [Hama](http://wiki.apache.org/hadoop/Hama)
 

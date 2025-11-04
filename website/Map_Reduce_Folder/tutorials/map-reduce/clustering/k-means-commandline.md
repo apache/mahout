@@ -12,7 +12,7 @@ redirect_from:
 # kMeans commandline introduction
 
 This quick start page describes how to run the kMeans clustering algorithm
-on a Hadoop cluster. 
+on a Hadoop cluster.
 
 <a name="k-means-commandline-Steps"></a>
 # Steps
@@ -39,7 +39,7 @@ job will be mahout-core-0.3.job
 ## Testing it on one single machine w/o cluster
 
 * Put the data: cp <PATH TO DATA> testdata
-* Run the Job: 
+* Run the Job:
 
     ./bin/mahout kmeans -i testdata -o output -c clusters -dm
 org.apache.mahout.common.distance.CosineDistanceMeasure -x 5 -ow -cd 1 -k
@@ -51,7 +51,7 @@ org.apache.mahout.common.distance.CosineDistanceMeasure -x 5 -ow -cd 1 -k
 
 * (As needed) Start up Hadoop: $HADOOP_HOME/bin/start-all.sh
 * Put the data: $HADOOP_HOME/bin/hadoop fs -put <PATH TO DATA> testdata
-* Run the Job: 
+* Run the Job:
 
     export HADOOP_HOME=<Hadoop Home Directory>
     export HADOOP_CONF_DIR=$HADOOP_HOME/conf
@@ -63,35 +63,34 @@ to view all outputs.
 <a name="k-means-commandline-Commandlineoptions"></a>
 # Command line options
 
-      --input (-i) input			       Path to job input directory. 
-    					       Must be a SequenceFile of    
-    					       VectorWritable		    
-      --clusters (-c) clusters		       The input centroids, as Vectors. 
-    					       Must be a SequenceFile of    
-    					       Writable, Cluster/Canopy. If k  
-    					       is also specified, then a random 
-    					       set of vectors will be selected  
-    					       and written out to this path 
-    					       first			    
-      --output (-o) output			       The directory pathname for   
-    					       output.			    
-      --distanceMeasure (-dm) distanceMeasure      The classname of the	    
-    					       DistanceMeasure. Default is  
-    					       SquaredEuclidean 	    
-      --convergenceDelta (-cd) convergenceDelta    The convergence delta value. 
-    					       Default is 0.5		    
-      --maxIter (-x) maxIter		       The maximum number of	    
-    					       iterations.		    
-      --maxRed (-r) maxRed			       The number of reduce tasks.  
-    					       Defaults to 2		    
-      --k (-k) k				       The k in k-Means.  If specified, 
-    					       then a random selection of k 
-    					       Vectors will be chosen as the    
-    					       Centroid and written to the  
-    					       clusters input path.	    
-      --overwrite (-ow)			       If present, overwrite the output 
-    					       directory before running job 
-      --help (-h)				       Print out help		    
-      --clustering (-cl)			       If present, run clustering after 
-    					       the iterations have taken place  
-
+      --input (-i) input			       Path to job input directory.
+    					       Must be a SequenceFile of
+    					       VectorWritable
+      --clusters (-c) clusters		       The input centroids, as Vectors.
+    					       Must be a SequenceFile of
+    					       Writable, Cluster/Canopy. If k
+    					       is also specified, then a random
+    					       set of vectors will be selected
+    					       and written out to this path
+    					       first
+      --output (-o) output			       The directory pathname for
+    					       output.
+      --distanceMeasure (-dm) distanceMeasure      The classname of the
+    					       DistanceMeasure. Default is
+    					       SquaredEuclidean
+      --convergenceDelta (-cd) convergenceDelta    The convergence delta value.
+    					       Default is 0.5
+      --maxIter (-x) maxIter		       The maximum number of
+    					       iterations.
+      --maxRed (-r) maxRed			       The number of reduce tasks.
+    					       Defaults to 2
+      --k (-k) k				       The k in k-Means.  If specified,
+    					       then a random selection of k
+    					       Vectors will be chosen as the
+    					       Centroid and written to the
+    					       clusters input path.
+      --overwrite (-ow)			       If present, overwrite the output
+    					       directory before running job
+      --help (-h)				       Print out help
+      --clustering (-cl)			       If present, run clustering after
+    					       the iterations have taken place
