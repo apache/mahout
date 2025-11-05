@@ -28,12 +28,10 @@ class QuMat:
         self.circuit = None
         self.num_qubits = None
         self.parameters = {}
-        self.num_qubits = None
 
     def create_empty_circuit(self, num_qubits: int | None = None):
         self.num_qubits = num_qubits
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
-        self.num_qubits = num_qubits
 
     def _ensure_circuit_initialized(self):
         """validate that circuit has been created before operations."""
