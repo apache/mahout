@@ -29,7 +29,7 @@ Frank Scholten          | frankscholten@... | No  |
 Gokhan Capan            | gcapan@...        | No  |
 Grant Ingersoll         | gsingers@...      | No  | (Emeritus PMC) @gsingers
 Guan-Ming (Wesley) Chiu | guanmingchiu@...  | No  | @guan404ming
-Holden Karau            | holden@...        | No  | 
+Holden Karau            | holden@...        | No  |
 Isabel Drost-Fromm      | isabel@...        | Yes | <!--Passion for free software (development, but to some extend also the political and economic implications), interested in agile development and project management, lives in Germany. Follow me on Twitter @MaineC-->
 Jacob Alexander Mannix  | jmannix@...       | Yes |
 Jeff Eastman            | jeastman@...      | No  | (Emeritus PMC)
