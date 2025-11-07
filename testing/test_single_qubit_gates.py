@@ -30,17 +30,13 @@ class TestPauliXGate:
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-
         # Apply Pauli X gate
         qumat.apply_pauli_x_gate(0)
-
         # Execute circuit
         results = qumat.execute_circuit()
         if isinstance(results, list):
             results = results[0]
-
         total_shots = sum(results.values())
-
         # Count measurements of |1⟩ state
         one_count = 0
         for state, count in results.items():
@@ -50,7 +46,6 @@ class TestPauliXGate:
             else:
                 if state == 1:
                     one_count = count
-
         # Should measure |1⟩ with high probability
         prob_one = one_count / total_shots
         assert prob_one > 0.95, (
@@ -62,19 +57,15 @@ class TestPauliXGate:
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-
         # Prepare |1⟩ state
         qumat.apply_pauli_x_gate(0)
         # Apply Pauli X again to flip back to |0⟩
         qumat.apply_pauli_x_gate(0)
-
         # Execute circuit
         results = qumat.execute_circuit()
         if isinstance(results, list):
             results = results[0]
-
         total_shots = sum(results.values())
-
         # Count measurements of |0⟩ state
         zero_count = 0
         for state, count in results.items():
@@ -84,7 +75,6 @@ class TestPauliXGate:
             else:
                 if state == 0:
                     zero_count = count
-
         # Should measure |0⟩ with high probability
         prob_zero = zero_count / total_shots
         assert prob_zero > 0.95, (
@@ -96,16 +86,13 @@ class TestPauliXGate:
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=3)
-
         # Apply Pauli X to qubits 0 and 2
         qumat.apply_pauli_x_gate(0)
         qumat.apply_pauli_x_gate(2)
-
         # Execute circuit
         results = qumat.execute_circuit()
         if isinstance(results, list):
             results = results[0]
-
         total_shots = sum(results.values())
 
         # Should measure |101⟩ state (qubits 0 and 2 are |1⟩, qubit 1 is |0⟩)
@@ -118,7 +105,6 @@ class TestPauliXGate:
                 # For integer format, |101⟩ = 5
                 if state == 5:
                     target_state_count = count
-
         prob_target = target_state_count / total_shots
         assert prob_target > 0.95, (
             f"Expected |101⟩ state, got probability {prob_target}"
@@ -134,17 +120,13 @@ class TestPauliYGate:
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-
         # Apply Pauli Y gate
         qumat.apply_pauli_y_gate(0)
-
         # Execute circuit
         results = qumat.execute_circuit()
         if isinstance(results, list):
             results = results[0]
-
         total_shots = sum(results.values())
-
         # Count measurements of |1⟩ state
         one_count = 0
         for state, count in results.items():
@@ -154,7 +136,6 @@ class TestPauliYGate:
             else:
                 if state == 1:
                     one_count = count
-
         # Should measure |1⟩ with high probability (phase doesn't affect measurement)
         prob_one = one_count / total_shots
         assert prob_one > 0.95, (
@@ -166,19 +147,15 @@ class TestPauliYGate:
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-
         # Prepare |1⟩ state
         qumat.apply_pauli_x_gate(0)
         # Apply Pauli Y gate
         qumat.apply_pauli_y_gate(0)
-
         # Execute circuit
         results = qumat.execute_circuit()
         if isinstance(results, list):
             results = results[0]
-
         total_shots = sum(results.values())
-
         # Count measurements of |0⟩ state
         zero_count = 0
         for state, count in results.items():
@@ -188,7 +165,6 @@ class TestPauliYGate:
             else:
                 if state == 0:
                     zero_count = count
-
         # Should measure |0⟩ with high probability
         prob_zero = zero_count / total_shots
         assert prob_zero > 0.95, (
@@ -200,18 +176,14 @@ class TestPauliYGate:
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-
         # Apply Pauli Y twice (should return to |0⟩)
         qumat.apply_pauli_y_gate(0)
         qumat.apply_pauli_y_gate(0)
-
         # Execute circuit
         results = qumat.execute_circuit()
         if isinstance(results, list):
             results = results[0]
-
         total_shots = sum(results.values())
-
         # Count measurements of |0⟩ state
         zero_count = 0
         for state, count in results.items():
@@ -221,7 +193,6 @@ class TestPauliYGate:
             else:
                 if state == 0:
                     zero_count = count
-
         # Should measure |0⟩ with high probability
         prob_zero = zero_count / total_shots
         assert prob_zero > 0.95, (
@@ -238,17 +209,14 @@ class TestPauliZGate:
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-
         # Apply Pauli Z gate
         qumat.apply_pauli_z_gate(0)
-
         # Execute circuit
         results = qumat.execute_circuit()
         if isinstance(results, list):
             results = results[0]
 
         total_shots = sum(results.values())
-
         # Count measurements of |0⟩ state
         zero_count = 0
         for state, count in results.items():
@@ -258,7 +226,6 @@ class TestPauliZGate:
             else:
                 if state == 0:
                     zero_count = count
-
         # Should measure |0⟩ with high probability
         prob_zero = zero_count / total_shots
         assert prob_zero > 0.95, (
@@ -270,19 +237,15 @@ class TestPauliZGate:
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-
         # Prepare |1⟩ state
         qumat.apply_pauli_x_gate(0)
         # Apply Pauli Z gate
         qumat.apply_pauli_z_gate(0)
-
         # Execute circuit
         results = qumat.execute_circuit()
         if isinstance(results, list):
             results = results[0]
-
         total_shots = sum(results.values())
-
         # Count measurements of |1⟩ state (phase flip doesn't affect measurement)
         one_count = 0
         for state, count in results.items():
@@ -292,7 +255,6 @@ class TestPauliZGate:
             else:
                 if state == 1:
                     one_count = count
-
         # Should still measure |1⟩ with high probability
         prob_one = one_count / total_shots
         assert prob_one > 0.95, (
