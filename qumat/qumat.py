@@ -105,8 +105,12 @@ class QuMat:
 
     def bind_parameters(self, parameter_values):
         for param, value in parameter_values.items():
-            if param in self.parameters:
-                self.parameters[param] = value
+            if param not in self.parameters:
+                raise ValueError(
+                    f"parameter '{param}' not found in circuit. "
+                    f"available parameters: {list(self.parameters.keys())}"
+                )
+            self.parameters[param] = value
 
     # placeholder method for use in the testing suite
     def get_final_state_vector(self):
