@@ -21,93 +21,124 @@ from .utils import TESTING_BACKENDS, get_backend_config
 from qumat import QuMat
 
 
+def get_state_probability(results, target_state, num_qubits=1):
+    """
+    Calculate the probability of measuring a target state.
+
+    Args:
+        results: Dictionary of measurement results from execute_circuit()
+        target_state: Target state as string (e.g., "0", "1", "101") or int
+        num_qubits: Number of qubits in the circuit
+
+    Returns:
+        Probability of measuring the target state
+    """
+    if isinstance(results, list):
+        results = results[0]
+
+    total_shots = sum(results.values())
+    if total_shots == 0:
+        return 0.0
+
+    # Convert target_state to both string and int formats for comparison
+    if isinstance(target_state, str):
+        target_str = target_state
+        # Convert binary string to integer
+        target_int = int(target_state, 2) if target_state else 0
+    else:
+        target_int = target_state
+        # Convert integer to binary string
+        target_str = format(target_state, f"0{num_qubits}b")
+
+    target_count = 0
+    for state, count in results.items():
+        if isinstance(state, str):
+            if state == target_str:
+                target_count = count
+                break
+        else:
+            if state == target_int:
+                target_count = count
+                break
+
+    return target_count / total_shots
+
+
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestPauliXGate:
     """Test class for Pauli X gate functionality."""
 
-    def test_pauli_x_flips_zero_to_one(self, backend_name):
-        """Test that Pauli X gate flips |0⟩ to |1⟩."""
+    @pytest.mark.parametrize(
+        "initial_state, num_applications, expected_state",
+        [
+            ("0", 1, "1"),  # |0⟩ -> X -> |1⟩
+            ("1", 1, "0"),  # |1⟩ -> X -> |0⟩
+            ("0", 2, "0"),  # |0⟩ -> X -> X -> |0⟩
+            ("1", 2, "1"),  # |1⟩ -> X -> X -> |1⟩
+        ],
+    )
+    def test_pauli_x_state_transitions(
+        self, backend_name, initial_state, num_applications, expected_state
+    ):
+        """Test Pauli X gate state transitions with parametrized test cases."""
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-        # Apply Pauli X gate
-        qumat.apply_pauli_x_gate(0)
+
+        # Prepare initial state: |0⟩ -> |initial_state⟩
+        if initial_state == "1":
+            qumat.apply_pauli_x_gate(0)  # |0⟩ -> |1⟩
+
+        # Apply Pauli X gate specified number of times
+        # This transforms |initial_state⟩ -> |expected_state⟩
+        for _ in range(num_applications):
+            qumat.apply_pauli_x_gate(0)
+
         # Execute circuit
         results = qumat.execute_circuit()
-        if isinstance(results, list):
-            results = results[0]
-        total_shots = sum(results.values())
-        # Count measurements of |1⟩ state
-        one_count = 0
-        for state, count in results.items():
-            if isinstance(state, str):
-                if state == "1":
-                    one_count = count
-            else:
-                if state == 1:
-                    one_count = count
-        # Should measure |1⟩ with high probability
-        prob_one = one_count / total_shots
-        assert prob_one > 0.95, (
-            f"Expected |1⟩ state after Pauli X, got probability {prob_one}"
+
+        # Calculate probability of expected state
+        prob = get_state_probability(results, expected_state, num_qubits=1)
+
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, "
+            f"Initial state: |{initial_state}⟩, "
+            f"Gate applications: {num_applications}, "
+            f"Expected: |{expected_state}⟩, "
+            f"Got probability: {prob:.4f}"
         )
 
-    def test_pauli_x_flips_one_to_zero(self, backend_name):
-        """Test that Pauli X gate flips |1⟩ back to |0⟩."""
+    @pytest.mark.parametrize(
+        "qubits_to_flip, num_qubits, expected_state",
+        [
+            ([0], 1, "1"),  # Single qubit: flip qubit 0 -> |1⟩
+            ([0, 2], 3, "101"),  # Three qubits: flip qubits 0 and 2 -> |101⟩
+            ([1], 3, "010"),  # Three qubits: flip qubit 1 -> |010⟩
+            ([0, 1, 2], 3, "111"),  # Three qubits: flip all -> |111⟩
+        ],
+    )
+    def test_pauli_x_on_multiple_qubits(
+        self, backend_name, qubits_to_flip, num_qubits, expected_state
+    ):
+        """Test Pauli X gate on multiple qubits with parametrized test cases."""
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
-        qumat.create_empty_circuit(num_qubits=1)
-        # Prepare |1⟩ state
-        qumat.apply_pauli_x_gate(0)
-        # Apply Pauli X again to flip back to |0⟩
-        qumat.apply_pauli_x_gate(0)
+        qumat.create_empty_circuit(num_qubits=num_qubits)
+
+        # Apply Pauli X to specified qubits
+        for qubit in qubits_to_flip:
+            qumat.apply_pauli_x_gate(qubit)
+
         # Execute circuit
         results = qumat.execute_circuit()
-        if isinstance(results, list):
-            results = results[0]
-        total_shots = sum(results.values())
-        # Count measurements of |0⟩ state
-        zero_count = 0
-        for state, count in results.items():
-            if isinstance(state, str):
-                if state == "0":
-                    zero_count = count
-            else:
-                if state == 0:
-                    zero_count = count
-        # Should measure |0⟩ with high probability
-        prob_zero = zero_count / total_shots
-        assert prob_zero > 0.95, (
-            f"Expected |0⟩ state after double Pauli X, got probability {prob_zero}"
-        )
 
-    def test_pauli_x_on_multiple_qubits(self, backend_name):
-        """Test Pauli X gate on multiple qubits."""
-        backend_config = get_backend_config(backend_name)
-        qumat = QuMat(backend_config)
-        qumat.create_empty_circuit(num_qubits=3)
-        # Apply Pauli X to qubits 0 and 2
-        qumat.apply_pauli_x_gate(0)
-        qumat.apply_pauli_x_gate(2)
-        # Execute circuit
-        results = qumat.execute_circuit()
-        if isinstance(results, list):
-            results = results[0]
-        total_shots = sum(results.values())
+        # Calculate probability of expected state
+        prob = get_state_probability(results, expected_state, num_qubits=num_qubits)
 
-        # Should measure |101⟩ state (qubits 0 and 2 are |1⟩, qubit 1 is |0⟩)
-        target_state_count = 0
-        for state, count in results.items():
-            if isinstance(state, str):
-                if state == "101":
-                    target_state_count = count
-            else:
-                # For integer format, |101⟩ = 5
-                if state == 5:
-                    target_state_count = count
-        prob_target = target_state_count / total_shots
-        assert prob_target > 0.95, (
-            f"Expected |101⟩ state, got probability {prob_target}"
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, "
+            f"Expected |{expected_state}⟩ state after flipping qubits "
+            f"{qubits_to_flip}, got probability {prob:.4f}"
         )
 
 
@@ -115,88 +146,44 @@ class TestPauliXGate:
 class TestPauliYGate:
     """Test class for Pauli Y gate functionality."""
 
-    def test_pauli_y_on_zero_state(self, backend_name):
-        """Test that Pauli Y gate transforms |0⟩ to i|1⟩."""
+    @pytest.mark.parametrize(
+        "initial_state, num_applications, expected_state",
+        [
+            ("0", 1, "1"),  # |0⟩ -> Y -> i|1⟩ (phase doesn't affect measurement)
+            ("1", 1, "0"),  # |1⟩ -> Y -> -i|0⟩
+            ("0", 2, "0"),  # |0⟩ -> Y -> Y -> |0⟩ (Y² = I)
+            ("1", 2, "1"),  # |1⟩ -> Y -> Y -> |1⟩ (Y² = I)
+        ],
+    )
+    def test_pauli_y_state_transitions(
+        self, backend_name, initial_state, num_applications, expected_state
+    ):
+        """Test Pauli Y gate state transitions with parametrized test cases."""
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-        # Apply Pauli Y gate
-        qumat.apply_pauli_y_gate(0)
-        # Execute circuit
-        results = qumat.execute_circuit()
-        if isinstance(results, list):
-            results = results[0]
-        total_shots = sum(results.values())
-        # Count measurements of |1⟩ state
-        one_count = 0
-        for state, count in results.items():
-            if isinstance(state, str):
-                if state == "1":
-                    one_count = count
-            else:
-                if state == 1:
-                    one_count = count
-        # Should measure |1⟩ with high probability (phase doesn't affect measurement)
-        prob_one = one_count / total_shots
-        assert prob_one > 0.95, (
-            f"Expected |1⟩ state after Pauli Y, got probability {prob_one}"
-        )
 
-    def test_pauli_y_on_one_state(self, backend_name):
-        """Test that Pauli Y gate transforms |1⟩ to -i|0⟩."""
-        backend_config = get_backend_config(backend_name)
-        qumat = QuMat(backend_config)
-        qumat.create_empty_circuit(num_qubits=1)
-        # Prepare |1⟩ state
-        qumat.apply_pauli_x_gate(0)
-        # Apply Pauli Y gate
-        qumat.apply_pauli_y_gate(0)
-        # Execute circuit
-        results = qumat.execute_circuit()
-        if isinstance(results, list):
-            results = results[0]
-        total_shots = sum(results.values())
-        # Count measurements of |0⟩ state
-        zero_count = 0
-        for state, count in results.items():
-            if isinstance(state, str):
-                if state == "0":
-                    zero_count = count
-            else:
-                if state == 0:
-                    zero_count = count
-        # Should measure |0⟩ with high probability
-        prob_zero = zero_count / total_shots
-        assert prob_zero > 0.95, (
-            f"Expected |0⟩ state after Pauli Y on |1⟩, got probability {prob_zero}"
-        )
+        # Prepare initial state: |0⟩ -> |initial_state⟩
+        if initial_state == "1":
+            qumat.apply_pauli_x_gate(0)  # |0⟩ -> |1⟩
 
-    def test_pauli_y_double_application(self, backend_name):
-        """Test that applying Pauli Y twice returns to original state."""
-        backend_config = get_backend_config(backend_name)
-        qumat = QuMat(backend_config)
-        qumat.create_empty_circuit(num_qubits=1)
-        # Apply Pauli Y twice (should return to |0⟩)
-        qumat.apply_pauli_y_gate(0)
-        qumat.apply_pauli_y_gate(0)
+        # Apply Pauli Y gate specified number of times
+        # This transforms |initial_state⟩ -> |expected_state⟩
+        for _ in range(num_applications):
+            qumat.apply_pauli_y_gate(0)
+
         # Execute circuit
         results = qumat.execute_circuit()
-        if isinstance(results, list):
-            results = results[0]
-        total_shots = sum(results.values())
-        # Count measurements of |0⟩ state
-        zero_count = 0
-        for state, count in results.items():
-            if isinstance(state, str):
-                if state == "0":
-                    zero_count = count
-            else:
-                if state == 0:
-                    zero_count = count
-        # Should measure |0⟩ with high probability
-        prob_zero = zero_count / total_shots
-        assert prob_zero > 0.95, (
-            f"Expected |0⟩ state after double Pauli Y, got probability {prob_zero}"
+
+        # Calculate probability of expected state
+        prob = get_state_probability(results, expected_state, num_qubits=1)
+
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, "
+            f"Initial state: |{initial_state}⟩, "
+            f"Gate applications: {num_applications}, "
+            f"Expected: |{expected_state}⟩, "
+            f"Got probability: {prob:.4f}"
         )
 
 
@@ -204,59 +191,42 @@ class TestPauliYGate:
 class TestPauliZGate:
     """Test class for Pauli Z gate functionality."""
 
-    def test_pauli_z_on_zero_state(self, backend_name):
-        """Test that Pauli Z gate leaves |0⟩ unchanged."""
+    @pytest.mark.parametrize(
+        "initial_state, num_applications, expected_state",
+        [
+            ("0", 1, "0"),  # |0⟩ -> Z -> |0⟩ (Z leaves |0⟩ unchanged)
+            ("1", 1, "1"),  # |1⟩ -> Z -> -|1⟩ (phase flip doesn't affect measurement)
+            ("0", 2, "0"),  # |0⟩ -> Z -> Z -> |0⟩ (Z² = I)
+            ("1", 2, "1"),  # |1⟩ -> Z -> Z -> |1⟩ (Z² = I)
+        ],
+    )
+    def test_pauli_z_state_transitions(
+        self, backend_name, initial_state, num_applications, expected_state
+    ):
+        """Test Pauli Z gate state transitions with parametrized test cases."""
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
-        # Apply Pauli Z gate
-        qumat.apply_pauli_z_gate(0)
+
+        # Prepare initial state: |0⟩ -> |initial_state⟩
+        if initial_state == "1":
+            qumat.apply_pauli_x_gate(0)  # |0⟩ -> |1⟩
+
+        # Apply Pauli Z gate specified number of times
+        # This transforms |initial_state⟩ -> |expected_state⟩
+        for _ in range(num_applications):
+            qumat.apply_pauli_z_gate(0)
+
         # Execute circuit
         results = qumat.execute_circuit()
-        if isinstance(results, list):
-            results = results[0]
 
-        total_shots = sum(results.values())
-        # Count measurements of |0⟩ state
-        zero_count = 0
-        for state, count in results.items():
-            if isinstance(state, str):
-                if state == "0":
-                    zero_count = count
-            else:
-                if state == 0:
-                    zero_count = count
-        # Should measure |0⟩ with high probability
-        prob_zero = zero_count / total_shots
-        assert prob_zero > 0.95, (
-            f"Expected |0⟩ state after Pauli Z, got probability {prob_zero}"
-        )
+        # Calculate probability of expected state
+        prob = get_state_probability(results, expected_state, num_qubits=1)
 
-    def test_pauli_z_on_one_state(self, backend_name):
-        """Test that Pauli Z gate flips phase of |1⟩ to -|1⟩."""
-        backend_config = get_backend_config(backend_name)
-        qumat = QuMat(backend_config)
-        qumat.create_empty_circuit(num_qubits=1)
-        # Prepare |1⟩ state
-        qumat.apply_pauli_x_gate(0)
-        # Apply Pauli Z gate
-        qumat.apply_pauli_z_gate(0)
-        # Execute circuit
-        results = qumat.execute_circuit()
-        if isinstance(results, list):
-            results = results[0]
-        total_shots = sum(results.values())
-        # Count measurements of |1⟩ state (phase flip doesn't affect measurement)
-        one_count = 0
-        for state, count in results.items():
-            if isinstance(state, str):
-                if state == "1":
-                    one_count = count
-            else:
-                if state == 1:
-                    one_count = count
-        # Should still measure |1⟩ with high probability
-        prob_one = one_count / total_shots
-        assert prob_one > 0.95, (
-            f"Expected |1⟩ state after Pauli Z on |1⟩, got probability {prob_one}"
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, "
+            f"Initial state: |{initial_state}⟩, "
+            f"Gate applications: {num_applications}, "
+            f"Expected: |{expected_state}⟩, "
+            f"Got probability: {prob:.4f}"
         )
