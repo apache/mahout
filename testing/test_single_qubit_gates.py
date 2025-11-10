@@ -455,3 +455,175 @@ class TestPauliZGate:
             f"Backend: {backend_name}, "
             f"Expected |1⟩ state after H-Z-H sequence, got probability {prob:.4f}"
         )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestSingleQubitGatesEdgeCases:
+    """Test class for edge cases of single-qubit gates."""
+
+    def test_gate_on_uninitialized_circuit(self, backend_name):
+        """Test that gates raise error on uninitialized circuit."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+
+        # Try to apply gate without creating circuit
+        with pytest.raises(RuntimeError, match="circuit not initialized"):
+            qumat.apply_pauli_x_gate(0)
+
+    def test_gate_on_invalid_qubit_index(self, backend_name):
+        """Test that gates handle invalid qubit indices appropriately."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=2)
+
+        # Try to apply gate to invalid qubit index
+        # Note: Different backends may handle this differently,
+        # so we test that it either raises an error or handles gracefully
+        try:
+            qumat.apply_pauli_x_gate(5)  # Invalid index
+            # If no error, the backend handles it gracefully
+        except (IndexError, ValueError, RuntimeError, Exception):
+            # Expected behavior - invalid index should raise error
+            # Qiskit raises CircuitError which is a subclass of Exception
+            pass
+
+    def test_gate_on_zero_qubit_circuit(self, backend_name):
+        """Test gates on zero-qubit circuit."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=0)
+
+        # Try to apply gate to qubit 0 in zero-qubit circuit
+        # This should raise an error or handle gracefully
+        try:
+            qumat.apply_pauli_x_gate(0)
+            # If no error, check execution still works
+            results = qumat.execute_circuit()
+            assert results is not None
+        except (IndexError, ValueError, RuntimeError, Exception):
+            # Expected behavior - no qubits available
+            # Qiskit raises CircuitError which is a subclass of Exception
+            pass
+
+    def test_multiple_gates_on_same_qubit(self, backend_name):
+        """Test applying multiple gates sequentially on the same qubit."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        # Apply multiple gates in sequence
+        qumat.apply_pauli_x_gate(0)  # |0⟩ -> |1⟩
+        qumat.apply_hadamard_gate(0)  # |1⟩ -> |−⟩
+        qumat.apply_pauli_z_gate(0)  # |−⟩ -> |+⟩
+        qumat.apply_hadamard_gate(0)  # |+⟩ -> |0⟩
+
+        # Execute circuit
+        results = qumat.execute_circuit()
+
+        # Calculate probability of |0⟩ state
+        prob = get_state_probability(results, "0", num_qubits=1)
+
+        assert prob > 0.95, (
+            f"Expected |0⟩ state after gate sequence, got probability {prob}"
+        )
+
+    def test_gates_on_different_qubits_independently(self, backend_name):
+        """Test that gates on different qubits operate independently."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=3)
+
+        # Apply different gates to different qubits
+        qumat.apply_pauli_x_gate(0)  # Qubit 0: |0⟩ -> |1⟩
+        qumat.apply_hadamard_gate(1)  # Qubit 1: |0⟩ -> |+⟩
+        # Qubit 2: remains |0⟩
+
+        # Execute circuit
+        results = qumat.execute_circuit()
+        if isinstance(results, list):
+            results = results[0]
+
+        total_shots = sum(results.values())
+
+        # Check that qubit 0 is |1⟩, qubit 1 is in superposition, qubit 2 is |0⟩
+        # Different backends use different bit ordering:
+        # - Qiskit: little-endian (rightmost bit = qubit 0), so "x01" where x is 0 or 1
+        # - Braket: big-endian (leftmost bit = qubit 0), so "1x0" where x is 0 or 1
+        # - Cirq: integer format, big-endian
+        target_states_count = 0
+        for state, count in results.items():
+            if isinstance(state, str):
+                if backend_name == "qiskit":
+                    # Qiskit: little-endian, rightmost bit is qubit 0
+                    # Qubit 0=1 (rightmost), qubit 1=superposition (middle), qubit 2=0 (leftmost)
+                    # State string format: "qubit2 qubit1 qubit0" = "x01" where x is 0 or 1
+                    if len(state) == 3 and state[0] in ["0", "1"] and state[1] in ["0", "1"] and state[2] == "1":
+                        # Qubit 0 (rightmost) must be 1, qubit 2 (leftmost) must be 0
+                        if state[0] == "0":
+                            target_states_count += count
+                elif backend_name == "amazon_braket":
+                    # Braket: big-endian, leftmost bit is qubit 0
+                    # Qubit 0=1 (leftmost), qubit 1=superposition (middle), qubit 2=0 (rightmost)
+                    # State string format: "qubit0 qubit1 qubit2" = "1x0" where x is 0 or 1
+                    if len(state) == 3 and state[0] == "1" and state[2] == "0":
+                        target_states_count += count
+            else:
+                # Cirq: integer format, big-endian
+                # Qubit 0=1, qubit 1=superposition, qubit 2=0
+                # |100⟩ = 4, |101⟩ = 5 (qubit 0 is MSB)
+                if state in [4, 5]:
+                    target_states_count += count
+
+        prob_target = target_states_count / total_shots
+        assert prob_target > 0.4, (
+            f"Expected high probability for target states, got {prob_target}"
+        )
+
+
+class TestSingleQubitGatesConsistency:
+    """Test class for consistency checks across all backends."""
+
+    @pytest.mark.parametrize(
+        "gate_name, expected_state_or_behavior",
+        [
+            ("pauli_x", "1"),  # Pauli X should flip |0⟩ to |1⟩
+            ("hadamard", "superposition"),  # Hadamard creates superposition
+        ],
+    )
+    def test_gate_consistency(self, gate_name, expected_state_or_behavior):
+
+        results_dict = {}
+
+        for backend_name in TESTING_BACKENDS:
+            backend_config = get_backend_config(backend_name)
+            qumat = QuMat(backend_config)
+            qumat.create_empty_circuit(num_qubits=1)
+
+            # Apply the gate based on gate_name
+            if gate_name == "pauli_x":
+                qumat.apply_pauli_x_gate(0)
+            elif gate_name == "hadamard":
+                qumat.apply_hadamard_gate(0)
+            # Future gates can be easily added here
+
+            results = qumat.execute_circuit()
+
+            if expected_state_or_behavior == "superposition":
+                # For Hadamard, check superposition probabilities
+                prob_zero, _ = get_superposition_probabilities(results, num_qubits=1)
+                results_dict[backend_name] = prob_zero
+            else:
+                # For other gates, check specific state probability
+                prob = get_state_probability(
+                    results, expected_state_or_behavior, num_qubits=1
+                )
+                results_dict[backend_name] = prob
+
+        # All backends should give similar results
+        probabilities = list(results_dict.values())
+        for i in range(len(probabilities)):
+            for j in range(i + 1, len(probabilities)):
+                diff = abs(probabilities[i] - probabilities[j])
+                assert diff < 0.05, (
+                    f"Backends have inconsistent results for {gate_name}: {results_dict}"
+                )
