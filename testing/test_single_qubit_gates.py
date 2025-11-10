@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import math
 import pytest
 
 from .utils import TESTING_BACKENDS, get_backend_config
@@ -62,6 +63,42 @@ def get_state_probability(results, target_state, num_qubits=1):
                 break
 
     return target_count / total_shots
+
+
+def get_superposition_probabilities(results, num_qubits=1):
+    """
+    Calculate probabilities for |0⟩ and |1⟩ states in a superposition.
+
+    Args:
+        results: Dictionary of measurement results from execute_circuit()
+        num_qubits: Number of qubits in the circuit
+
+    Returns:
+        Tuple of (prob_zero, prob_one)
+    """
+    if isinstance(results, list):
+        results = results[0]
+
+    total_shots = sum(results.values())
+
+    zero_count = 0
+    one_count = 0
+    for state, count in results.items():
+        if isinstance(state, str):
+            if state == "0" * num_qubits:
+                zero_count = count
+            elif state == "1" * num_qubits:
+                one_count = count
+        else:
+            if state == 0:
+                zero_count = count
+            elif state == (2**num_qubits - 1):
+                one_count = count
+
+    prob_zero = zero_count / total_shots if total_shots > 0 else 0.0
+    prob_one = one_count / total_shots if total_shots > 0 else 0.0
+
+    return prob_zero, prob_one
 
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
@@ -188,6 +225,170 @@ class TestPauliYGate:
 
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestHadamardGate:
+    """Test class for Hadamard gate functionality."""
+
+    @pytest.mark.parametrize(
+        "initial_state, num_applications",
+        [
+            ("0", 1),  # |0⟩ -> H -> |+⟩ (superposition)
+            ("1", 1),  # |1⟩ -> H -> |-⟩ (superposition)
+            ("0", 2),  # |0⟩ -> H -> H -> |0⟩ (H² = I)
+            ("1", 2),  # |1⟩ -> H -> H -> |1⟩ (H² = I)
+        ],
+    )
+    def test_hadamard_state_transitions(
+        self, backend_name, initial_state, num_applications
+    ):
+        """Test Hadamard gate state transitions with parametrized test cases."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        # Prepare initial state: |0⟩ -> |initial_state⟩
+        if initial_state == "1":
+            qumat.apply_pauli_x_gate(0)  # |0⟩ -> |1⟩
+
+        # Apply Hadamard gate specified number of times
+        # This transforms |initial_state⟩ -> |expected_state⟩
+        for _ in range(num_applications):
+            qumat.apply_hadamard_gate(0)
+
+        # Execute circuit
+        results = qumat.execute_circuit()
+
+        if num_applications == 1:
+            # Single application creates superposition
+            prob_zero, prob_one = get_superposition_probabilities(results, num_qubits=1)
+            assert 0.45 < prob_zero < 0.55, (
+                f"Expected ~0.5 probability for |0⟩ after Hadamard on |{initial_state}⟩, "
+                f"got {prob_zero}"
+            )
+            assert 0.45 < prob_one < 0.55, (
+                f"Expected ~0.5 probability for |1⟩ after Hadamard on |{initial_state}⟩, "
+                f"got {prob_one}"
+            )
+        else:
+            # Double application returns to original state
+            prob = get_state_probability(results, initial_state, num_qubits=1)
+            assert prob > 0.95, (
+                f"Backend: {backend_name}, "
+                f"Initial state: |{initial_state}⟩, "
+                f"Gate applications: {num_applications}, "
+                f"Expected: |{initial_state}⟩, "
+                f"Got probability: {prob:.4f}"
+            )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestNOTGate:
+    """Test class for NOT gate functionality."""
+
+    @pytest.mark.parametrize(
+        "initial_state, num_applications, expected_state",
+        [
+            ("0", 1, "1"),  # |0⟩ -> NOT -> |1⟩ (equivalent to Pauli X)
+            ("1", 1, "0"),  # |1⟩ -> NOT -> |0⟩
+            ("0", 2, "0"),  # |0⟩ -> NOT -> NOT -> |0⟩
+            ("1", 2, "1"),  # |1⟩ -> NOT -> NOT -> |1⟩
+        ],
+    )
+    def test_not_gate_state_transitions(
+        self, backend_name, initial_state, num_applications, expected_state
+    ):
+        """Test NOT gate state transitions with parametrized test cases."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        # Prepare initial state: |0⟩ -> |initial_state⟩
+        if initial_state == "1":
+            qumat.apply_not_gate(0)  # |0⟩ -> |1⟩
+
+        # Apply NOT gate specified number of times
+        # This transforms |initial_state⟩ -> |expected_state⟩
+        for _ in range(num_applications):
+            qumat.apply_not_gate(0)
+
+        # Execute circuit
+        results = qumat.execute_circuit()
+
+        # Calculate probability of expected state
+        prob = get_state_probability(results, expected_state, num_qubits=1)
+
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, "
+            f"Initial state: |{initial_state}⟩, "
+            f"Gate applications: {num_applications}, "
+            f"Expected: |{expected_state}⟩, "
+            f"Got probability: {prob:.4f}"
+        )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestUGate:
+    """Test class for U gate (universal single-qubit gate) functionality."""
+
+    @pytest.mark.parametrize(
+        "theta, phi, lambd, expected_behavior",
+        [
+            (0, 0, 0, "identity"),  # U(0, 0, 0) should be identity
+            (
+                math.pi,
+                0,
+                math.pi,
+                "pauli_x",
+            ),  # U(π, 0, π) should be equivalent to Pauli X
+            (
+                math.pi / 2,
+                0,
+                math.pi,
+                "hadamard",
+            ),  # U(π/2, 0, π) should be equivalent to Hadamard
+        ],
+    )
+    def test_u_gate_operations(
+        self, backend_name, theta, phi, lambd, expected_behavior
+    ):
+        """Test U gate with different parameters using parametrized test cases."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        # Apply U gate with specified parameters
+        qumat.apply_u_gate(0, theta=theta, phi=phi, lambd=lambd)
+
+        # Execute circuit
+        results = qumat.execute_circuit()
+
+        if expected_behavior == "identity":
+            # Should measure |0⟩ with high probability
+            prob = get_state_probability(results, "0", num_qubits=1)
+            assert prob > 0.95, (
+                f"Backend: {backend_name}, "
+                f"Expected |0⟩ state after U({theta},{phi},{lambd}), got probability {prob:.4f}"
+            )
+        elif expected_behavior == "pauli_x":
+            # Should measure |1⟩ with high probability
+            prob = get_state_probability(results, "1", num_qubits=1)
+            assert prob > 0.95, (
+                f"Backend: {backend_name}, "
+                f"Expected |1⟩ state after U({theta},{phi},{lambd}), got probability {prob:.4f}"
+            )
+        elif expected_behavior == "hadamard":
+            # Should have approximately equal probability for |0⟩ and |1⟩
+            prob_zero, prob_one = get_superposition_probabilities(results, num_qubits=1)
+            assert 0.45 < prob_zero < 0.55, (
+                f"Expected ~0.5 probability for |0⟩ after U({theta},{phi},{lambd}), "
+                f"got {prob_zero}"
+            )
+            assert 0.45 < prob_one < 0.55, (
+                f"Expected ~0.5 probability for |1⟩ after U({theta},{phi},{lambd}), "
+                f"got {prob_one}"
+            )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestPauliZGate:
     """Test class for Pauli Z gate functionality."""
 
@@ -229,4 +430,28 @@ class TestPauliZGate:
             f"Gate applications: {num_applications}, "
             f"Expected: |{expected_state}⟩, "
             f"Got probability: {prob:.4f}"
+        )
+
+    def test_pauli_z_with_hadamard(self, backend_name):
+        """Test Pauli Z gate with Hadamard to verify phase flip effect."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        # Create |+⟩ state with Hadamard
+        qumat.apply_hadamard_gate(0)
+        # Apply Pauli Z (should flip to |-⟩)
+        qumat.apply_pauli_z_gate(0)
+        # Apply Hadamard again (should convert |-⟩ to |1⟩)
+        qumat.apply_hadamard_gate(0)
+
+        # Execute circuit
+        results = qumat.execute_circuit()
+
+        # Calculate probability of |1⟩ state
+        prob = get_state_probability(results, "1", num_qubits=1)
+
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, "
+            f"Expected |1⟩ state after H-Z-H sequence, got probability {prob:.4f}"
         )
