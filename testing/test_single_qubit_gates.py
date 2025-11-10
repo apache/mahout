@@ -237,7 +237,9 @@ class TestHadamardGate:
             ("1", 2),  # |1⟩ -> H -> H -> |1⟩ (H² = I)
         ],
     )
-    def test_hadamard_state_transitions(self, backend_name, initial_state, num_applications):
+    def test_hadamard_state_transitions(
+        self, backend_name, initial_state, num_applications
+    ):
         """Test Hadamard gate state transitions with parametrized test cases."""
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
@@ -331,8 +333,18 @@ class TestUGate:
         "theta, phi, lambd, expected_behavior",
         [
             (0, 0, 0, "identity"),  # U(0, 0, 0) should be identity
-            (math.pi, 0, math.pi, "pauli_x"),  # U(π, 0, π) should be equivalent to Pauli X
-            (math.pi / 2, 0, math.pi, "hadamard"),  # U(π/2, 0, π) should be equivalent to Hadamard
+            (
+                math.pi,
+                0,
+                math.pi,
+                "pauli_x",
+            ),  # U(π, 0, π) should be equivalent to Pauli X
+            (
+                math.pi / 2,
+                0,
+                math.pi,
+                "hadamard",
+            ),  # U(π/2, 0, π) should be equivalent to Hadamard
         ],
     )
     def test_u_gate_operations(
