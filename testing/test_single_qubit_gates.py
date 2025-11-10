@@ -513,8 +513,8 @@ class TestSingleQubitGatesEdgeCases:
 
         # Apply multiple gates in sequence
         qumat.apply_pauli_x_gate(0)  # |0⟩ -> |1⟩
-        qumat.apply_hadamard_gate(0)  # |1⟩ -> |−⟩
-        qumat.apply_pauli_z_gate(0)  # |−⟩ -> |+⟩
+        qumat.apply_hadamard_gate(0)  # |1⟩ -> |-⟩
+        qumat.apply_pauli_z_gate(0)  # |-⟩ -> |+⟩
         qumat.apply_hadamard_gate(0)  # |+⟩ -> |0⟩
 
         # Execute circuit
@@ -591,7 +591,12 @@ class TestSingleQubitGatesConsistency:
         ],
     )
     def test_gate_consistency(self, gate_name, expected_state_or_behavior):
-
+        """
+        Test that gates produce consistent results across backends.
+        
+        Using parametrized tests makes it more flexible to include new test cases
+        in the future.
+        """
         results_dict = {}
 
         for backend_name in TESTING_BACKENDS:
