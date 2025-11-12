@@ -96,7 +96,7 @@ Create a pull request on GitHub. Please follow the [pull request template](.gith
 ## 3. Project Structure
 
 - `qumat/` - Core library code
-- `testing/` - Test files (using pytest)
 - `docs/` - Documentation
-- `.pre-commit-config.yaml` - Pre-commit hook configuration
-- `pyproject.toml` - Project dependencies and configuration
+- `examples/` - Examples and Jupyter notebooks
+- `testing/` - Test files (using pytest)
+- `website/` - Website source code (using Jekyll)
