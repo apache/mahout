@@ -96,6 +96,11 @@ def apply_pauli_z_gate(circuit, qubit_index):
 
 
 def execute_circuit(circuit, backend, backend_config):
+    # handle 0-qubit circuits before adding measurements
+    if not circuit.all_qubits():
+        shots = backend_config["backend_options"].get("shots", 1)
+        return [{0: shots}]
+
     # Ensure measurement is added to capture the results
     if not circuit.has_measurements():
         circuit.append(cirq.measure(*circuit.all_qubits(), key="result"))
