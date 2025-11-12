@@ -476,15 +476,10 @@ class TestSingleQubitGatesEdgeCases:
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=2)
 
-        # Try to apply gate to invalid qubit index
-        # Note: Different backends may handle this differently,
-        # so we test that it either raises an error or handles gracefully
+        # Different backends may handle this differently
         try:
             qumat.apply_pauli_x_gate(5)  # Invalid index
-            # If no error, the backend handles it gracefully
         except (IndexError, ValueError, RuntimeError, Exception):
-            # Expected behavior - invalid index should raise error
-            # Qiskit raises CircuitError which is a subclass of Exception
             pass
 
     def test_gate_on_zero_qubit_circuit(self, backend_name):
@@ -493,16 +488,11 @@ class TestSingleQubitGatesEdgeCases:
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=0)
 
-        # Try to apply gate to qubit 0 in zero-qubit circuit
-        # This should raise an error or handle gracefully
         try:
             qumat.apply_pauli_x_gate(0)
-            # If no error, check execution still works
             results = qumat.execute_circuit()
             assert results is not None
         except (IndexError, ValueError, RuntimeError, Exception):
-            # Expected behavior - no qubits available
-            # Qiskit raises CircuitError which is a subclass of Exception
             pass
 
     def test_multiple_gates_on_same_qubit(self, backend_name):
@@ -545,37 +535,27 @@ class TestSingleQubitGatesEdgeCases:
 
         total_shots = sum(results.values())
 
-        # Check that qubit 0 is |1⟩, qubit 1 is in superposition, qubit 2 is |0⟩
-        # Different backends use different bit ordering:
-        # - Qiskit: little-endian (rightmost bit = qubit 0), so "x01" where x is 0 or 1
-        # - Braket: big-endian (leftmost bit = qubit 0), so "1x0" where x is 0 or 1
-        # - Cirq: integer format, big-endian
+        # Check qubit 0=|1⟩, qubit 1=superposition, qubit 2=|0⟩
+        # Backends use different bit ordering (little-endian vs big-endian)
         target_states_count = 0
         for state, count in results.items():
             if isinstance(state, str):
                 if backend_name == "qiskit":
-                    # Qiskit: little-endian, rightmost bit is qubit 0
-                    # Qubit 0=1 (rightmost), qubit 1=superposition (middle), qubit 2=0 (leftmost)
-                    # State string format: "qubit2 qubit1 qubit0" = "x01" where x is 0 or 1
+                    # Little-endian: "x01" where x is 0 or 1
                     if (
                         len(state) == 3
                         and state[0] in ["0", "1"]
                         and state[1] in ["0", "1"]
                         and state[2] == "1"
+                        and state[0] == "0"
                     ):
-                        # Qubit 0 (rightmost) must be 1, qubit 2 (leftmost) must be 0
-                        if state[0] == "0":
-                            target_states_count += count
+                        target_states_count += count
                 elif backend_name == "amazon_braket":
-                    # Braket: big-endian, leftmost bit is qubit 0
-                    # Qubit 0=1 (leftmost), qubit 1=superposition (middle), qubit 2=0 (rightmost)
-                    # State string format: "qubit0 qubit1 qubit2" = "1x0" where x is 0 or 1
+                    # Big-endian: "1x0" where x is 0 or 1
                     if len(state) == 3 and state[0] == "1" and state[2] == "0":
                         target_states_count += count
             else:
-                # Cirq: integer format, big-endian
-                # Qubit 0=1, qubit 1=superposition, qubit 2=0
-                # |100⟩ = 4, |101⟩ = 5 (qubit 0 is MSB)
+                # Cirq: integer format, |100⟩=4, |101⟩=5
                 if state in [4, 5]:
                     target_states_count += count
 
@@ -596,12 +576,7 @@ class TestSingleQubitGatesConsistency:
         ],
     )
     def test_gate_consistency(self, gate_name, expected_state_or_behavior):
-        """
-        Test that gates produce consistent results across backends.
-
-        Using parametrized tests makes it more flexible to include new test cases
-        in the future.
-        """
+        """Test that gates produce consistent results across backends."""
         results_dict = {}
 
         for backend_name in TESTING_BACKENDS:
