@@ -557,7 +557,12 @@ class TestSingleQubitGatesEdgeCases:
                     # Qiskit: little-endian, rightmost bit is qubit 0
                     # Qubit 0=1 (rightmost), qubit 1=superposition (middle), qubit 2=0 (leftmost)
                     # State string format: "qubit2 qubit1 qubit0" = "x01" where x is 0 or 1
-                    if len(state) == 3 and state[0] in ["0", "1"] and state[1] in ["0", "1"] and state[2] == "1":
+                    if (
+                        len(state) == 3
+                        and state[0] in ["0", "1"]
+                        and state[1] in ["0", "1"]
+                        and state[2] == "1"
+                    ):
                         # Qubit 0 (rightmost) must be 1, qubit 2 (leftmost) must be 0
                         if state[0] == "0":
                             target_states_count += count
@@ -593,7 +598,7 @@ class TestSingleQubitGatesConsistency:
     def test_gate_consistency(self, gate_name, expected_state_or_behavior):
         """
         Test that gates produce consistent results across backends.
-        
+
         Using parametrized tests makes it more flexible to include new test cases
         in the future.
         """
