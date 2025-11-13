@@ -345,6 +345,37 @@ class TestUGate:
                 math.pi,
                 "hadamard",
             ),  # U(π/2, 0, π) should be equivalent to Hadamard
+            # Additional test cases with non-zero phi to detect decomposition errors
+            (
+                math.pi / 4,
+                math.pi / 4,
+                math.pi / 4,
+                "superposition",
+            ),  # U(π/4, π/4, π/4) should create superposition
+            (
+                math.pi / 2,
+                math.pi / 4,
+                0,
+                "superposition",
+            ),  # U(π/2, π/4, 0) should create superposition
+            (
+                0,
+                math.pi / 2,
+                0,
+                "identity",
+            ),  # U(0, π/2, 0) = Rz(π/2) · I · I = Rz(π/2), phase rotation only
+            (
+                math.pi / 2,
+                math.pi / 2,
+                math.pi / 2,
+                "superposition",
+            ),  # U(π/2, π/2, π/2) should create superposition
+            (
+                math.pi / 3,
+                math.pi / 6,
+                math.pi / 4,
+                "superposition",
+            ),  # U(π/3, π/6, π/4) with all non-zero parameters
         ],
     )
     def test_u_gate_operations(
@@ -386,6 +417,67 @@ class TestUGate:
                 f"Expected ~0.5 probability for |1⟩ after U({theta},{phi},{lambd}), "
                 f"got {prob_one}"
             )
+        elif expected_behavior == "superposition":
+            # Should create a superposition (not all probability in one state)
+            prob_zero, prob_one = get_superposition_probabilities(results, num_qubits=1)
+            # At least one state should have significant probability (> 0.1)
+            # and not all probability should be in one state (< 0.9)
+            assert (
+                prob_zero > 0.1 or prob_one > 0.1
+            ), f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
+            assert (
+                prob_zero < 0.9 and prob_one < 0.9
+            ), f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
+
+
+def test_u_gate_cross_backend_consistency():
+    """Test that U gate produces consistent results across all backends."""
+    # Test cases with non-zero phi to detect decomposition errors
+    test_cases = [
+        (math.pi / 4, math.pi / 4, math.pi / 4),
+        (math.pi / 2, math.pi / 4, 0),
+        (math.pi / 3, math.pi / 6, math.pi / 4),
+        (math.pi / 2, math.pi / 2, math.pi / 2),
+    ]
+
+    for theta, phi, lambd in test_cases:
+        results_dict = {}
+
+        for backend_name in TESTING_BACKENDS:
+            backend_config = get_backend_config(backend_name)
+            qumat = QuMat(backend_config)
+            qumat.create_empty_circuit(num_qubits=1)
+
+            # Apply U gate with specified parameters
+            qumat.apply_u_gate(0, theta=theta, phi=phi, lambd=lambd)
+
+            # Execute circuit
+            results = qumat.execute_circuit()
+
+            # Calculate probabilities for |0⟩ and |1⟩
+            prob_zero, prob_one = get_superposition_probabilities(results, num_qubits=1)
+            results_dict[backend_name] = (prob_zero, prob_one)
+
+        # All backends should give similar results (within 5% tolerance)
+        backends = list(results_dict.keys())
+        for i in range(len(backends)):
+            for j in range(i + 1, len(backends)):
+                backend1 = backends[i]
+                backend2 = backends[j]
+                prob_zero1, prob_one1 = results_dict[backend1]
+                prob_zero2, prob_one2 = results_dict[backend2]
+
+                diff_zero = abs(prob_zero1 - prob_zero2)
+                diff_one = abs(prob_one1 - prob_one2)
+
+                assert diff_zero < 0.05, (
+                    f"Backends {backend1} and {backend2} have inconsistent |0⟩ probabilities "
+                    f"for U({theta},{phi},{lambd}): {prob_zero1:.4f} vs {prob_zero2:.4f}"
+                )
+                assert diff_one < 0.05, (
+                    f"Backends {backend1} and {backend2} have inconsistent |1⟩ probabilities "
+                    f"for U({theta},{phi},{lambd}): {prob_one1:.4f} vs {prob_one2:.4f}"
+                )
 
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
