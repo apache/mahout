@@ -78,6 +78,28 @@ class QuMat:
                 "before applying gates or executing operations."
             )
 
+    def _validate_qubit_index(self, qubit_index, param_name="qubit_index"):
+        """validate qubit index is within circuit bounds.
+
+        :param qubit_index: the qubit index to validate.
+        :type qubit_index: int
+        :param param_name: name of the parameter for error messages.
+        :type param_name: str
+        :raises TypeError: if qubit_index is not an integer.
+        :raises ValueError: if qubit_index is negative or out of range.
+        """
+        if not isinstance(qubit_index, int):
+            raise TypeError(
+                f"{param_name} must be an integer, got {type(qubit_index).__name__}"
+            )
+        if qubit_index < 0:
+            raise ValueError(f"{param_name} cannot be negative, got {qubit_index}")
+        if self.num_qubits is not None and qubit_index >= self.num_qubits:
+            raise ValueError(
+                f"{param_name} {qubit_index} out of range for circuit with "
+                f"{self.num_qubits} qubits (valid range: 0-{self.num_qubits - 1})"
+            )
+
     def apply_not_gate(self, qubit_index):
         """Apply a NOT gate (Pauli-X gate) to the specified qubit.
 
@@ -89,6 +111,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self.backend_module.apply_not_gate(self.circuit, qubit_index)
 
     def apply_hadamard_gate(self, qubit_index):
@@ -102,6 +125,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self.backend_module.apply_hadamard_gate(self.circuit, qubit_index)
 
     def apply_cnot_gate(self, control_qubit_index, target_qubit_index):
@@ -117,6 +141,8 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(control_qubit_index, "control_qubit_index")
+        self._validate_qubit_index(target_qubit_index, "target_qubit_index")
         self.backend_module.apply_cnot_gate(
             self.circuit, control_qubit_index, target_qubit_index
         )
@@ -138,6 +164,9 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(control_qubit_index1, "control_qubit_index1")
+        self._validate_qubit_index(control_qubit_index2, "control_qubit_index2")
+        self._validate_qubit_index(target_qubit_index, "target_qubit_index")
         self.backend_module.apply_toffoli_gate(
             self.circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
         )
@@ -152,6 +181,8 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index1, "qubit_index1")
+        self._validate_qubit_index(qubit_index2, "qubit_index2")
         self.backend_module.apply_swap_gate(self.circuit, qubit_index1, qubit_index2)
 
     def apply_cswap_gate(
@@ -171,6 +202,9 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(control_qubit_index, "control_qubit_index")
+        self._validate_qubit_index(target_qubit_index1, "target_qubit_index1")
+        self._validate_qubit_index(target_qubit_index2, "target_qubit_index2")
         self.backend_module.apply_cswap_gate(
             self.circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
         )
@@ -186,6 +220,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self.backend_module.apply_pauli_x_gate(self.circuit, qubit_index)
 
     def apply_pauli_y_gate(self, qubit_index):
@@ -199,6 +234,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self.backend_module.apply_pauli_y_gate(self.circuit, qubit_index)
 
     def apply_pauli_z_gate(self, qubit_index):
@@ -212,6 +248,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self.backend_module.apply_pauli_z_gate(self.circuit, qubit_index)
 
     def execute_circuit(self, parameter_values=None):
@@ -307,6 +344,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self._handle_parameter(angle)
         self.backend_module.apply_rx_gate(self.circuit, qubit_index, angle)
 
@@ -325,6 +363,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self._handle_parameter(angle)
         self.backend_module.apply_ry_gate(self.circuit, qubit_index, angle)
 
@@ -343,6 +382,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self._handle_parameter(angle)
         self.backend_module.apply_rz_gate(self.circuit, qubit_index, angle)
 
@@ -376,6 +416,7 @@ class QuMat:
         :raises RuntimeError: If the circuit has not been initialized.
         """
         self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
         self.backend_module.apply_u_gate(self.circuit, qubit_index, theta, phi, lambd)
 
     def swap_test(self, ancilla_qubit, qubit1, qubit2):
