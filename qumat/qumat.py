@@ -276,7 +276,25 @@ class QuMat:
 
         if parameter_values:
             self.bind_parameters(parameter_values)
-        self.backend_config["parameter_values"] = self.parameters  # Pass parameters
+
+        # Only pass bound parameters (non-None values) to backend
+        bound_parameters = {
+            param: value
+            for param, value in self.parameters.items()
+            if value is not None
+        }
+
+        # Check if there are unbound parameters in the circuit
+        if self.parameters and not bound_parameters:
+            unbound_params = [
+                p for p in self.parameters.keys() if self.parameters[p] is None
+            ]
+            raise ValueError(
+                f"Circuit contains unbound parameters: {unbound_params}. "
+                f"Please provide parameter_values when executing the circuit."
+            )
+
+        self.backend_config["parameter_values"] = bound_parameters
         return self.backend_module.execute_circuit(
             self.circuit, self.backend, self.backend_config
         )

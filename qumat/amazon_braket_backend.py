@@ -83,7 +83,17 @@ def apply_pauli_z_gate(circuit, qubit_index):
 
 def execute_circuit(circuit, backend, backend_config):
     shots = backend_config["backend_options"].get("shots", 1)
-    task = backend.run(circuit, shots=shots)
+    parameter_values = backend_config.get("parameter_values", {})
+    if parameter_values and circuit.parameters:
+        # Braket accepts parameter names as strings in inputs dict
+        inputs = {
+            param_name: value
+            for param_name, value in parameter_values.items()
+            if param_name in {p.name for p in circuit.parameters}
+        }
+        task = backend.run(circuit, shots=shots, inputs=inputs)
+    else:
+        task = backend.run(circuit, shots=shots)
     result = task.result()
     return result.measurement_counts
 
