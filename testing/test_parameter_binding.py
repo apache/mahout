@@ -98,7 +98,7 @@ class TestParameterBinding:
         # Handle both string and integer state formats (Cirq uses integers)
         if isinstance(results, list):
             results = results[0]
-        
+
         total_shots = sum(results.values())
         zero_count = 0
         for state, count in results.items():
@@ -110,7 +110,7 @@ class TestParameterBinding:
                 if state == 0:
                     zero_count = count
                     break
-        
+
         prob_zero = zero_count / total_shots if total_shots > 0 else 0.0
 
         assert 0.45 < prob_zero < 0.55, (
@@ -159,10 +159,10 @@ class TestParameterBinding:
         # Handle backend-specific result formats
         if isinstance(results, list):
             results = results[0]
-        
+
         total_shots = sum(results.values())
         target_count = 0
-        
+
         for state, count in results.items():
             if isinstance(state, str):
                 # Qiskit: little-endian (rightmost bit is qubit 0)
@@ -183,7 +183,7 @@ class TestParameterBinding:
                 bit_position = num_qubits - 1 - 0
                 if ((state >> bit_position) & 1) == 1:
                     target_count += count
-        
+
         prob = target_count / total_shots if total_shots > 0 else 0.0
 
         assert prob > 0.4, (
@@ -204,4 +204,3 @@ class TestParameterBinding:
         # Should raise ValueError with clear message
         with pytest.raises(ValueError, match="unbound parameters"):
             qumat.execute_circuit()
-
