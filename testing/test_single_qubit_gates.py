@@ -422,12 +422,12 @@ class TestUGate:
             prob_zero, prob_one = get_superposition_probabilities(results, num_qubits=1)
             # At least one state should have significant probability (> 0.1)
             # and not all probability should be in one state (< 0.9)
-            assert (
-                prob_zero > 0.1 or prob_one > 0.1
-            ), f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
-            assert (
-                prob_zero < 0.9 and prob_one < 0.9
-            ), f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
+            assert prob_zero > 0.1 or prob_one > 0.1, (
+                f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
+            )
+            assert prob_zero < 0.9 and prob_one < 0.9, (
+                f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
+            )
 
 
 @pytest.mark.parametrize(
@@ -441,7 +441,7 @@ class TestUGate:
 )
 def test_u_gate_cross_backend_consistency(theta, phi, lambd):
     """Test that U gate produces consistent results across all backends.
-    
+
     Test cases with non-zero phi to detect decomposition errors.
     """
     results_dict = {}
