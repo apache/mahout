@@ -21,7 +21,7 @@ import pytest
 
 from qumat import QuMat
 
-from .utils import get_backend_config
+from .utils import TESTING_BACKENDS, get_backend_config
 
 
 def get_state_probability(results, target_state, num_qubits=1):
@@ -54,16 +54,17 @@ def get_state_probability(results, target_state, num_qubits=1):
     return target_count / total_shots
 
 
-class TestAmazonBraketParameterBinding:
-    """Regression tests for Amazon Braket parameter binding functionality.
+class TestParameterBinding:
+    """Regression tests for parameter binding functionality across all backends.
 
-    These tests ensure that parameter binding support in Amazon Braket backend
-    is not accidentally removed or broken.
+    These tests ensure that parameter binding support in all backends
+    (Qiskit, Cirq, Amazon Braket) is not accidentally removed or broken.
     """
 
-    def test_rx_gate_parameter_binding(self):
-        """Test RX gate parameter binding in Amazon Braket backend."""
-        backend_config = get_backend_config("amazon_braket")
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_rx_gate_parameter_binding(self, backend_name):
+        """Test RX gate parameter binding across all backends."""
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
 
@@ -76,13 +77,14 @@ class TestAmazonBraketParameterBinding:
         # RX(π) should flip |0⟩ to |1⟩
         prob = get_state_probability(results, "1", num_qubits=1)
         assert prob > 0.95, (
-            f"Expected |1⟩ after RX(π) with parameter binding, "
+            f"Expected |1⟩ after RX(π) with parameter binding in {backend_name}, "
             f"got probability {prob:.4f}"
         )
 
-    def test_ry_gate_parameter_binding(self):
-        """Test RY gate parameter binding in Amazon Braket backend."""
-        backend_config = get_backend_config("amazon_braket")
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_ry_gate_parameter_binding(self, backend_name):
+        """Test RY gate parameter binding across all backends."""
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
 
@@ -93,17 +95,33 @@ class TestAmazonBraketParameterBinding:
         results = qumat.execute_circuit(parameter_values={"phi": math.pi / 2})
 
         # RY(π/2) creates superposition
+        # Handle both string and integer state formats (Cirq uses integers)
+        if isinstance(results, list):
+            results = results[0]
+        
         total_shots = sum(results.values())
-        zero_count = sum(count for state, count in results.items() if state == "0")
-        prob_zero = zero_count / total_shots
+        zero_count = 0
+        for state, count in results.items():
+            if isinstance(state, str):
+                if state == "0":
+                    zero_count = count
+                    break
+            else:
+                if state == 0:
+                    zero_count = count
+                    break
+        
+        prob_zero = zero_count / total_shots if total_shots > 0 else 0.0
 
         assert 0.45 < prob_zero < 0.55, (
-            f"Expected ~0.5 probability for |0⟩ after RY(π/2), got {prob_zero:.4f}"
+            f"Expected ~0.5 probability for |0⟩ after RY(π/2) in {backend_name}, "
+            f"got {prob_zero:.4f}"
         )
 
-    def test_rz_gate_parameter_binding(self):
-        """Test RZ gate parameter binding in Amazon Braket backend."""
-        backend_config = get_backend_config("amazon_braket")
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_rz_gate_parameter_binding(self, backend_name):
+        """Test RZ gate parameter binding across all backends."""
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
 
@@ -116,13 +134,14 @@ class TestAmazonBraketParameterBinding:
         # RZ(π) doesn't change |0⟩ measurement probability
         prob = get_state_probability(results, "0", num_qubits=1)
         assert prob > 0.95, (
-            f"Expected |0⟩ after RZ(π) with parameter binding, "
+            f"Expected |0⟩ after RZ(π) with parameter binding in {backend_name}, "
             f"got probability {prob:.4f}"
         )
 
-    def test_multiple_parameter_binding(self):
-        """Test binding multiple parameters in Amazon Braket backend."""
-        backend_config = get_backend_config("amazon_braket")
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_multiple_parameter_binding(self, backend_name):
+        """Test binding multiple parameters across all backends."""
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=2)
 
@@ -137,21 +156,45 @@ class TestAmazonBraketParameterBinding:
 
         # Qubit 0 should be |1⟩ (RX(π) = X)
         # Check that we get states with qubit 0 = |1⟩
+        # Handle backend-specific result formats
+        if isinstance(results, list):
+            results = results[0]
+        
         total_shots = sum(results.values())
-        target_count = sum(
-            count
-            for state, count in results.items()
-            if isinstance(state, str) and state[0] == "1"
-        )
-        prob = target_count / total_shots
+        target_count = 0
+        
+        for state, count in results.items():
+            if isinstance(state, str):
+                # Qiskit: little-endian (rightmost bit is qubit 0)
+                # Amazon Braket: big-endian (leftmost bit is qubit 0)
+                if backend_name == "qiskit":
+                    # For Qiskit, qubit 0 is rightmost, so check last character
+                    if len(state) > 0 and state[-1] == "1":
+                        target_count += count
+                else:
+                    # For Amazon Braket, qubit 0 is leftmost, so check first character
+                    if len(state) > 0 and state[0] == "1":
+                        target_count += count
+            else:
+                # Cirq: integer format, big-endian
+                # Qubit i is at bit position (num_qubits - 1 - i)
+                # For qubit 0 with 2 qubits: bit_position = 2 - 1 - 0 = 1
+                num_qubits = 2
+                bit_position = num_qubits - 1 - 0
+                if ((state >> bit_position) & 1) == 1:
+                    target_count += count
+        
+        prob = target_count / total_shots if total_shots > 0 else 0.0
 
         assert prob > 0.4, (
-            f"Expected high probability for states with qubit 0=|1⟩, got {prob:.4f}"
+            f"Expected high probability for states with qubit 0=|1⟩ in {backend_name}, "
+            f"got {prob:.4f}"
         )
 
-    def test_unbound_parameter_error(self):
-        """Test that unbound parameters raise clear error message."""
-        backend_config = get_backend_config("amazon_braket")
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_unbound_parameter_error(self, backend_name):
+        """Test that unbound parameters raise clear error message across all backends."""
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=1)
 
@@ -161,3 +204,4 @@ class TestAmazonBraketParameterBinding:
         # Should raise ValueError with clear message
         with pytest.raises(ValueError, match="unbound parameters"):
             qumat.execute_circuit()
+
