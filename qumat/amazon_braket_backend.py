@@ -139,9 +139,10 @@ def apply_rz_gate(circuit, qubit_index, angle):
 
 
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
-    circuit.rx(qubit_index, theta)
-    circuit.ry(qubit_index, phi)
+    # U(θ, φ, λ) = Rz(φ) · Ry(θ) · Rz(λ)
     circuit.rz(qubit_index, lambd)
+    circuit.ry(qubit_index, theta)
+    circuit.rz(qubit_index, phi)
 
 
 def calculate_prob_zero(results, ancilla_qubit, num_qubits):

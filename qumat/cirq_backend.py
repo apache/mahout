@@ -147,8 +147,8 @@ def apply_rz_gate(circuit, qubit_index, angle):
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.rz(lambd).on(qubit))
-    circuit.append(cirq.ry(phi).on(qubit))
-    circuit.append(cirq.rx(theta).on(qubit))
+    circuit.append(cirq.ry(theta).on(qubit))
+    circuit.append(cirq.rz(phi).on(qubit))
 
 
 def get_final_state_vector(circuit, backend, backend_config):

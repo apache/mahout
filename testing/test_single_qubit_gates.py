@@ -345,6 +345,37 @@ class TestUGate:
                 math.pi,
                 "hadamard",
             ),  # U(π/2, 0, π) should be equivalent to Hadamard
+            # Additional test cases with non-zero phi to detect decomposition errors
+            (
+                math.pi / 4,
+                math.pi / 4,
+                math.pi / 4,
+                "superposition",
+            ),  # U(π/4, π/4, π/4) should create superposition
+            (
+                math.pi / 2,
+                math.pi / 4,
+                0,
+                "superposition",
+            ),  # U(π/2, π/4, 0) should create superposition
+            (
+                0,
+                math.pi / 2,
+                0,
+                "identity",
+            ),  # U(0, π/2, 0) = Rz(π/2) · I · I = Rz(π/2), phase rotation only
+            (
+                math.pi / 2,
+                math.pi / 2,
+                math.pi / 2,
+                "superposition",
+            ),  # U(π/2, π/2, π/2) should create superposition
+            (
+                math.pi / 3,
+                math.pi / 6,
+                math.pi / 4,
+                "superposition",
+            ),  # U(π/3, π/6, π/4) with all non-zero parameters
         ],
     )
     def test_u_gate_operations(
@@ -385,6 +416,70 @@ class TestUGate:
             assert 0.45 < prob_one < 0.55, (
                 f"Expected ~0.5 probability for |1⟩ after U({theta},{phi},{lambd}), "
                 f"got {prob_one}"
+            )
+        elif expected_behavior == "superposition":
+            # Should create a superposition (not all probability in one state)
+            prob_zero, prob_one = get_superposition_probabilities(results, num_qubits=1)
+            # At least one state should have significant probability (> 0.1)
+            # and not all probability should be in one state (< 0.9)
+            assert prob_zero > 0.1 or prob_one > 0.1, (
+                f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
+            )
+            assert prob_zero < 0.9 and prob_one < 0.9, (
+                f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
+            )
+
+
+@pytest.mark.parametrize(
+    "theta, phi, lambd",
+    [
+        (math.pi / 4, math.pi / 4, math.pi / 4),
+        (math.pi / 2, math.pi / 4, 0),
+        (math.pi / 3, math.pi / 6, math.pi / 4),
+        (math.pi / 2, math.pi / 2, math.pi / 2),
+    ],
+)
+def test_u_gate_cross_backend_consistency(theta, phi, lambd):
+    """Test that U gate produces consistent results across all backends.
+
+    Test cases with non-zero phi to detect decomposition errors.
+    """
+    results_dict = {}
+
+    for backend_name in TESTING_BACKENDS:
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        # Apply U gate with specified parameters
+        qumat.apply_u_gate(0, theta=theta, phi=phi, lambd=lambd)
+
+        # Execute circuit
+        results = qumat.execute_circuit()
+
+        # Calculate probabilities for |0⟩ and |1⟩
+        prob_zero, prob_one = get_superposition_probabilities(results, num_qubits=1)
+        results_dict[backend_name] = (prob_zero, prob_one)
+
+    # All backends should give similar results (within 5% tolerance)
+    backends = list(results_dict.keys())
+    for i in range(len(backends)):
+        for j in range(i + 1, len(backends)):
+            backend1 = backends[i]
+            backend2 = backends[j]
+            prob_zero1, prob_one1 = results_dict[backend1]
+            prob_zero2, prob_one2 = results_dict[backend2]
+
+            diff_zero = abs(prob_zero1 - prob_zero2)
+            diff_one = abs(prob_one1 - prob_one2)
+
+            assert diff_zero < 0.05, (
+                f"Backends {backend1} and {backend2} have inconsistent |0⟩ probabilities "
+                f"for U({theta},{phi},{lambd}): {prob_zero1:.4f} vs {prob_zero2:.4f}"
+            )
+            assert diff_one < 0.05, (
+                f"Backends {backend1} and {backend2} have inconsistent |1⟩ probabilities "
+                f"for U({theta},{phi},{lambd}): {prob_one1:.4f} vs {prob_one2:.4f}"
             )
 
 
@@ -565,50 +660,47 @@ class TestSingleQubitGatesEdgeCases:
         )
 
 
-class TestSingleQubitGatesConsistency:
-    """Test class for consistency checks across all backends."""
+@pytest.mark.parametrize(
+    "gate_name, expected_state_or_behavior",
+    [
+        ("pauli_x", "1"),  # Pauli X should flip |0⟩ to |1⟩
+        ("hadamard", "superposition"),  # Hadamard creates superposition
+    ],
+)
+def test_gate_consistency(gate_name, expected_state_or_behavior):
+    """Test that gates produce consistent results across all backends."""
+    results_dict = {}
 
-    @pytest.mark.parametrize(
-        "gate_name, expected_state_or_behavior",
-        [
-            ("pauli_x", "1"),  # Pauli X should flip |0⟩ to |1⟩
-            ("hadamard", "superposition"),  # Hadamard creates superposition
-        ],
-    )
-    def test_gate_consistency(self, gate_name, expected_state_or_behavior):
-        """Test that gates produce consistent results across backends."""
-        results_dict = {}
+    for backend_name in TESTING_BACKENDS:
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
 
-        for backend_name in TESTING_BACKENDS:
-            backend_config = get_backend_config(backend_name)
-            qumat = QuMat(backend_config)
-            qumat.create_empty_circuit(num_qubits=1)
+        # Apply the gate based on gate_name
+        if gate_name == "pauli_x":
+            qumat.apply_pauli_x_gate(0)
+        elif gate_name == "hadamard":
+            qumat.apply_hadamard_gate(0)
+        # Future gates can be easily added here
 
-            # Apply the gate based on gate_name
-            if gate_name == "pauli_x":
-                qumat.apply_pauli_x_gate(0)
-            elif gate_name == "hadamard":
-                qumat.apply_hadamard_gate(0)
-            # Future gates can be easily added here
+        results = qumat.execute_circuit()
 
-            results = qumat.execute_circuit()
+        if expected_state_or_behavior == "superposition":
+            # For Hadamard, check superposition probabilities
+            prob_zero, _ = get_superposition_probabilities(results, num_qubits=1)
+            results_dict[backend_name] = prob_zero
+        else:
+            # For other gates, check specific state probability
+            prob = get_state_probability(
+                results, expected_state_or_behavior, num_qubits=1
+            )
+            results_dict[backend_name] = prob
 
-            if expected_state_or_behavior == "superposition":
-                # For Hadamard, check superposition probabilities
-                prob_zero, _ = get_superposition_probabilities(results, num_qubits=1)
-                results_dict[backend_name] = prob_zero
-            else:
-                # For other gates, check specific state probability
-                prob = get_state_probability(
-                    results, expected_state_or_behavior, num_qubits=1
-                )
-                results_dict[backend_name] = prob
-
-        # All backends should give similar results
-        probabilities = list(results_dict.values())
-        for i in range(len(probabilities)):
-            for j in range(i + 1, len(probabilities)):
-                diff = abs(probabilities[i] - probabilities[j])
-                assert diff < 0.05, (
-                    f"Backends have inconsistent results for {gate_name}: {results_dict}"
-                )
+    # All backends should give similar results
+    probabilities = list(results_dict.values())
+    for i in range(len(probabilities)):
+        for j in range(i + 1, len(probabilities)):
+            diff = abs(probabilities[i] - probabilities[j])
+            assert diff < 0.05, (
+                f"Backends have inconsistent results for {gate_name}: {results_dict}"
+            )
