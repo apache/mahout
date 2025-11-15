@@ -84,7 +84,7 @@ This decomposition shows that the U gate applies:
 - **Identity**: U(0, 0, 0) = I
 - **Pauli X**: U(π, 0, π) = X
 - **Pauli Y**: U(π, π/2, π/2) = Y
-- **Pauli Z**: U(0, π, 0) = Z
+- **Pauli Z**: U(0, 0, π) = Z
 - **Hadamard**: U(π/2, 0, π) = H
 
 This gate is particularly useful in parameterized quantum circuits and variational quantum algorithms where you need to optimize over all possible single-qubit operations.
