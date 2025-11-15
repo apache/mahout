@@ -17,75 +17,8 @@
 
 import pytest
 
-from .utils import TESTING_BACKENDS, get_backend_config
+from .utils import TESTING_BACKENDS, get_backend_config, get_state_probability
 from qumat import QuMat
-
-
-def get_state_probability(results, target_state, num_qubits=1, backend_name=None):
-    """
-    Calculate the probability of measuring a target state.
-
-    Args:
-        results: Dictionary of measurement results from execute_circuit()
-        target_state: Target state as string (e.g., "0", "1", "101") or int
-        num_qubits: Number of qubits in the circuit
-        backend_name: Name of the backend (for handling qubit ordering)
-
-    Returns:
-        Probability of measuring the target state
-    """
-    if isinstance(results, list):
-        results = results[0]
-
-    total_shots = sum(results.values())
-    if total_shots == 0:
-        return 0.0
-
-    # Convert target_state to both string and int formats for comparison
-    if isinstance(target_state, str):
-        target_str = target_state
-        # Convert binary string to integer
-        target_int = int(target_state, 2) if target_state else 0
-    else:
-        target_int = target_state
-        # Convert integer to binary string
-        target_str = format(target_state, f"0{num_qubits}b")
-
-    # Handle backend-specific qubit ordering
-    # Qiskit uses little-endian (rightmost bit is qubit 0)
-    # Amazon Braket and Cirq use big-endian (leftmost bit is qubit 0)
-    if backend_name == "qiskit" and isinstance(target_str, str) and len(target_str) > 1:
-        # Reverse the string for Qiskit (little-endian)
-        target_str_qiskit = target_str[::-1]
-    else:
-        target_str_qiskit = target_str
-
-    target_count = 0
-    for state, count in results.items():
-        if isinstance(state, str):
-            # For Qiskit, compare with reversed string
-            if backend_name == "qiskit" and len(state) > 1:
-                if state == target_str_qiskit:
-                    target_count = count
-                    break
-            else:
-                if state == target_str:
-                    target_count = count
-                    break
-        else:
-            # For Cirq, use integer comparison
-            # Cirq uses big-endian, so the integer representation matches
-            if backend_name == "cirq":
-                if state == target_int:
-                    target_count = count
-                    break
-            else:
-                # For other backends, also try integer comparison
-                if state == target_int:
-                    target_count = count
-                    break
-
-    return target_count / total_shots
 
 
 def create_qumat_instance(backend_name, num_qubits):
@@ -280,16 +213,52 @@ class TestToffoliGate:
             ("011", 0, 1, 2, "011"),  # |011⟩ -> Toffoli -> |011⟩
             ("100", 0, 1, 2, "100"),  # |100⟩ -> Toffoli -> |100⟩
             ("101", 0, 1, 2, "101"),  # |101⟩ -> Toffoli -> |101⟩
-            ("110", 0, 1, 2, "111"),  # |110⟩ -> Toffoli -> |111⟩ (both controls=1, flip target)
-            ("111", 0, 1, 2, "110"),  # |111⟩ -> Toffoli -> |110⟩ (both controls=1, flip target)
+            (
+                "110",
+                0,
+                1,
+                2,
+                "111",
+            ),  # |110⟩ -> Toffoli -> |111⟩ (both controls=1, flip target)
+            (
+                "111",
+                0,
+                1,
+                2,
+                "110",
+            ),  # |111⟩ -> Toffoli -> |110⟩ (both controls=1, flip target)
             # Different control/target combinations
             # |110⟩ -> Toffoli(0,2,1): control0=1, control2=0 -> no flip, result |110⟩
-            ("110", 0, 2, 1, "110"),  # |110⟩ -> Toffoli(0,2,1) -> |110⟩ (control2=0, no flip)
+            (
+                "110",
+                0,
+                2,
+                1,
+                "110",
+            ),  # |110⟩ -> Toffoli(0,2,1) -> |110⟩ (control2=0, no flip)
             # |101⟩ -> Toffoli(1,2,0): control1=0, control2=1 -> no flip, result |101⟩
-            ("101", 1, 2, 0, "101"),  # |101⟩ -> Toffoli(1,2,0) -> |101⟩ (control1=0, no flip)
+            (
+                "101",
+                1,
+                2,
+                0,
+                "101",
+            ),  # |101⟩ -> Toffoli(1,2,0) -> |101⟩ (control1=0, no flip)
             # Test cases where both controls are 1 with different target
-            ("111", 0, 2, 1, "101"),  # |111⟩ -> Toffoli(0,2,1) -> |101⟩ (both controls=1, flip target)
-            ("111", 1, 2, 0, "011"),  # |111⟩ -> Toffoli(1,2,0) -> |011⟩ (both controls=1, flip target)
+            (
+                "111",
+                0,
+                2,
+                1,
+                "101",
+            ),  # |111⟩ -> Toffoli(0,2,1) -> |101⟩ (both controls=1, flip target)
+            (
+                "111",
+                1,
+                2,
+                0,
+                "011",
+            ),  # |111⟩ -> Toffoli(1,2,0) -> |011⟩ (both controls=1, flip target)
         ],
     )
     def test_toffoli_state_transitions(
@@ -322,9 +291,17 @@ class TestToffoliGate:
             ("000", 1, "000"),  # |000⟩ -> Toffoli -> |000⟩
             ("000", 2, "000"),  # |000⟩ -> Toffoli -> Toffoli -> |000⟩ (Toffoli² = I)
             ("110", 1, "111"),  # |110⟩ -> Toffoli -> |111⟩
-            ("110", 2, "110"),  # |110⟩ -> Toffoli -> |111⟩ -> Toffoli -> |110⟩ (Toffoli² = I)
+            (
+                "110",
+                2,
+                "110",
+            ),  # |110⟩ -> Toffoli -> |111⟩ -> Toffoli -> |110⟩ (Toffoli² = I)
             ("111", 1, "110"),  # |111⟩ -> Toffoli -> |110⟩
-            ("111", 2, "111"),  # |111⟩ -> Toffoli -> |110⟩ -> Toffoli -> |111⟩ (Toffoli² = I)
+            (
+                "111",
+                2,
+                "111",
+            ),  # |111⟩ -> Toffoli -> |110⟩ -> Toffoli -> |111⟩ (Toffoli² = I)
         ],
     )
     def test_toffoli_double_application(
@@ -370,8 +347,7 @@ class TestToffoliGate:
         qumat.apply_toffoli_gate(control1, control2, target)
         # Expected: all three qubits should be |1⟩
         expected_state = "".join(
-            "1" if i in (control1, control2, target) else "0"
-            for i in range(num_qubits)
+            "1" if i in (control1, control2, target) else "0" for i in range(num_qubits)
         )
         execute_and_assert_state(
             qumat,
