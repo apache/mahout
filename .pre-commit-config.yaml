@@ -10,6 +10,18 @@ repos:
       - id: trailing-whitespace
         name: trim trailing whitespace
 
+  # Ruff linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      - id: ruff
+        name: ruff linting
+        files: \.py$
+        args: [--fix]
+      - id: ruff-format
+        name: ruff formatting
+        files: \.py$
+
   # Check Apache license headers
   - repo: https://github.com/lucas-c/pre-commit-hooks
     rev: v1.5.5
