@@ -1,34 +1,90 @@
 ---
 layout: page
-title:  Community Overview
+title: Community Overview
 ---
 
 # Community Overview
 
-Welcome to the Apache Mahout Community Overview page! Apache Mahout is an open-source project driven by a diverse and passionate community of developers, users, and contributors from around the world. This page provides an introduction to the Mahout community and highlights various ways you can get involved and contribute to the project.
+The Apache Mahout community consists of developers, users, data scientists, researchers, and open-source contributors who collaborate to build scalable machine-learning libraries on the Apache platform.  
+Mahout follows the principles of the Apache Software Foundation — openness, transparency, community-driven development, and meritocracy.
 
-## Get Involved
+This page explains the official communication channels, how to participate, and how to contribute to the project.
 
-There are numerous ways to engage with the Mahout community, no matter your background or skill level. Some options include:
+---
 
-- **Mailing Lists**: Join the [user](mailto:user-subscribe@mahout.apache.org) and [developer](mailto:dev-subscribe@mahout.apache.org) mailing lists to participate in discussions, ask questions, and share your experiences.
-- **Issue Tracker**: Report bugs, request features, or contribute patches via the [Mahout JIRA issue tracker](https://issues.apache.org/jira/projects/MAHOUT/).
-- **GitHub**: Contribute code, review pull requests, or submit issues on the [Apache Mahout GitHub repository](https://github.com/apache/mahout).
-- **Documentation**: Help improve the [Mahout documentation](https://mahout.apache.org/docs/) by adding tutorials, guides, or updating existing content.
+## How to Participate
 
-## Community Guidelines
+There are several ways to engage with the Mahout community:
 
-As a member of the Mahout community, we expect you to adhere to the following guidelines:
+### 💬 Mailing Lists
+All official communication for Mahout happens on Apache-managed public mailing lists:
 
-- **Be respectful**: Treat all community members with kindness and respect, and appreciate the diversity of opinions and perspectives.
-- **Be constructive**: Offer helpful feedback and support to your fellow community members, and always strive to contribute positively to the project.
-- **Be collaborative**: Work together with others in the community, embracing teamwork and shared decision-making.
+- **User List (questions, installation help, usage discussions):**  
+  https://lists.apache.org/list.html?user@mahout.apache.org
 
-## Community Recognition
+- **Development List (design discussions, patches, roadmap, votes):**  
+  https://lists.apache.org/list.html?dev@mahout.apache.org
 
-We value the hard work and dedication of our community members and acknowledge their contributions through various recognition programs, such as:
+To subscribe, send an empty email to:
 
-- **Mahout Committer**: Active contributors with a track record of high-quality code contributions and community engagement may be granted Committer status, which allows direct access to the code repository.
-- **Mahout Project Management Committee (PMC)**: Long-term, dedicated Committers may be invited to join the PMC, taking on additional responsibilities and guiding the project's overall direction.
+- `user-subscribe@mahout.apache.org`  
+- `dev-subscribe@mahout.apache.org`
 
-Thank you for your interest in the Apache Mahout community! By working together, we can continue to build and maintain a robust, scalable machine learning library for everyone.
+---
+
+### 🐛 Issue Tracking & Contributions
+Mahout uses **GitHub Issues and Pull Requests** for development.
+
+- **Source Code:** https://github.com/apache/mahout  
+- **Open Issues:** https://github.com/apache/mahout/issues  
+- **Pull Requests:** https://github.com/apache/mahout/pulls
+
+If you find a bug or want to propose a feature:
+
+1. Open a GitHub issue  
+2. Discuss the design on the **dev mailing list**  
+3. Submit a Pull Request
+
+---
+
+### 📘 Documentation & Website
+Contribute to documentation or help update website pages (like this one):
+
+- https://mahout.apache.org  
+- Website source folder: `/website/`
+
+Documentation improvements are always welcome — fixing broken links, updating examples, adding explanations, etc.
+
+---
+
+## Contribution Guidelines
+
+Apache Mahout follows the ASF standard contribution process:
+
+- Communicate on the mailing list before large changes  
+- Submit well-tested Pull Requests  
+- Follow project coding style and review guidelines  
+- Participate in community discussions and votes  
+- Respect others — Mahout operates under the ASF Code of Conduct
+
+ASF Code of Conduct:  
+https://www.apache.org/foundation/policies/conduct
+
+---
+
+## Community and Governance
+
+Mahout is governed by the **Apache Mahout PMC** (Project Management Committee).  
+The PMC is responsible for project direction, releases, and community oversight.
+
+Contributors who consistently help the project through code, documentation, or community involvement may be invited to become:
+
+- **Committers** — have write access to the repository  
+- **PMC Members** — participate in project decision-making
+
+Mahout community decisions are made publicly on the **dev@mahout.apache.org** mailing list following ASF voting rules.
+
+---
+
+Thank you for being part of the Apache Mahout community!  
+Contributions of all kinds — code, documentation, discussion, or feedback — help keep the project healthy and evolving.
