@@ -45,7 +45,7 @@ def apply_hadamard_gate(circuit, qubit_index):
 
 
 def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index):
-    # Apply a CNOT gate (controlled-X gate) with the specified control and
+    # Apply a CNOT gate (controlled-X) gate with the specified control and
     # target qubits
     circuit.cx(control_qubit_index, target_qubit_index)
 
@@ -87,7 +87,8 @@ def apply_pauli_z_gate(circuit, qubit_index):
 
 def execute_circuit(circuit, backend, backend_config):
     # Add measurements if they are not already present
-    if not circuit.cregs:
+    has_measurements = any(op.name == "measure" for op, _, _ in circuit.data)
+    if not has_measurements:
         circuit.measure_all()
 
     # Ensure the circuit is parameterized properly
