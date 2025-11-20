@@ -14,62 +14,66 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
----
-layout: page
-title: Quickstart
 
 
----
-
-# Mahout MapReduce Overview
+# Mahout Quickstart Guide
 
 ## Getting Mahout
 
-#### Download the latest release
+### Download the Latest Release
 
-Download the latest release [here](http://www.apache.org/dyn/closer.cgi/mahout/).
+You can download the latest official Mahout release from the Apache downloads page:
 
-Or checkout the latest code from [here](http://mahout.apache.org/documentation/developers/version-control.html)
+👉 **https://downloads.apache.org/mahout/**
 
-#### Alternatively: Add Mahout 0.10.0 to a maven project
+Or access the latest source code on GitHub:
 
-Mahout is also available via a [maven repository](http://mvnrepository.com/artifact/org.apache.mahout) under the group id *org.apache.mahout*.
-If you would like to import the latest release of mahout into a java project, add the following dependency in your *pom.xml*:
+👉 **https://github.com/apache/mahout.git**
 
-    <dependency>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-mr</artifactId>
-        <version>0.14.0</version>
-    </dependency>
+### Add Mahout to a Maven Project
 
+Mahout is available on Maven Central under the group ID `org.apache.mahout`.
+
+To use the latest stable release, add the following to your **pom.xml**:
+
+```xml
+<dependency>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout-mr</artifactId>
+    <version>14.1</version> 
+</dependency>
+```
+
+> Note: Although MapReduce components are still available, Mahout now primarily focuses on linear algebra and Samsara DSL. See the documentation for current engine support.
 
 ## Features
 
-For a full list of Mahout's features see our [Features by Engine](http://mahout.apache.org/users/basics/algorithms.html) page.
+For a full list of Mahout’s features, visit:
 
+👉 **https://mahout.apache.org/community/mailing-lists.html**
 
 ## Using Mahout
 
-Mahout has prepared a bunch of examples and tutorials for users to quickly learn how to use its machine learning algorithms.
+Mahout provides examples and tutorials to help users explore its algorithms.
 
-#### Recommendations
+### Recommendations
 
-Check the [Recommender Quickstart](/users/recommender/quickstart.html) or the tutorial on [creating a userbased recommender in 5 minutes](/users/recommender/userbased-5-minutes.html).
+- [Recommender Quickstart](/users/recommender/quickstart.html)  
+- [User-Based Recommender in 5 Minutes](/users/recommender/userbased-5-minutes.html)  
+- [Recommender Dos and Don’ts](/users/recommender/recommender-first-timer-faq.html)
 
-If you are building a recommender system for the first time, please also refer to a list of [Dos and Don'ts](/users/recommender/recommender-first-timer-faq.html) that might be helpful.
+### Clustering
 
-#### Clustering
+- [Clustering Synthetic Data](/users/clustering/clustering-of-synthetic-control-data.html)
 
-Check the [Synthetic data](/users/clustering/clustering-of-synthetic-control-data.html) example.
+### Classification
 
-#### Classification
+- [Naive Bayes on 20 Newsgroups](/users/classification/twenty-newsgroups.html)  
+- [Hidden Markov Models Example](/users/classification/hidden-markov-models.html)  
+- [Random Forest Quickstart](/users/classification/partial-implementation.html)
 
-If you are interested in how to train a **Naive Bayes** model, look at the [20 newsgroups](/users/classification/twenty-newsgroups.html) example.
+### Working with Text
 
-If you plan to build a **Hidden Markov Model** for speech recognition, the example [here](/users/classification/hidden-markov-models.html) might be instructive.
+To convert raw text into vectors:
 
-Or you could build a **Random Forest** model by following this [quick start page](/users/classification/partial-implementation.html).
-
-#### Working with Text
-
-If you need to convert raw text into word vectors as input to clustering or classification algorithms, please refer to this page on [how to create vectors from text](/users/basics/creating-vectors-from-text.html).
+- [Creating Vectors from Text](/users/basics/creating-vectors-from-text.html). 
