@@ -89,8 +89,7 @@ def execute_circuit(circuit, backend, backend_config):
     # Add measurements if they are not already present
     # Check if circuit already has measurement operations
     has_measurements = any(
-        isinstance(inst.operation, qiskit.circuit.Measure)
-        for inst in circuit.data
+        isinstance(inst.operation, qiskit.circuit.Measure) for inst in circuit.data
     )
     if not has_measurements:
         circuit.measure_all()
