@@ -15,7 +15,10 @@
  limitations under the License.
 -->
 
-
+---
+layout: page
+title: Quickstart
+---
 # Mahout Quickstart Guide
 
 ## Getting Mahout
@@ -31,17 +34,13 @@ Or access the latest source code on GitHub:
 👉 **https://github.com/apache/mahout.git**
 
 ### Add Mahout to a Maven Project
+### Using Mahout with Python
 
-Mahout is available on Maven Central under the group ID `org.apache.mahout`.
+Mahout can be used from Python via **PySpark**. Install PySpark first:
 
-To use the latest stable release, add the following to your **pom.xml**:
-
-```xml
-<dependency>
-    <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-mr</artifactId>
-    <version>14.1</version> 
-</dependency>
+```bash
+pip install pyspark
+pip install git+https://github.com/apache/mahout.git
 ```
 
 > Note: Although MapReduce components are still available, Mahout now primarily focuses on linear algebra and Samsara DSL. See the documentation for current engine support.
@@ -58,8 +57,8 @@ Mahout provides examples and tutorials to help users explore its algorithms.
 
 ### Recommendations
 
-- [Recommender Quickstart](/users/recommender/quickstart.html)  
-- [User-Based Recommender in 5 Minutes](/users/recommender/userbased-5-minutes.html)  
+- [Recommender Quickstart](/users/recommender/quickstart.html)
+- [User-Based Recommender in 5 Minutes](/users/recommender/userbased-5-minutes.html)
 - [Recommender Dos and Don’ts](/users/recommender/recommender-first-timer-faq.html)
 
 ### Clustering
@@ -68,12 +67,12 @@ Mahout provides examples and tutorials to help users explore its algorithms.
 
 ### Classification
 
-- [Naive Bayes on 20 Newsgroups](/users/classification/twenty-newsgroups.html)  
-- [Hidden Markov Models Example](/users/classification/hidden-markov-models.html)  
+- [Naive Bayes on 20 Newsgroups](/users/classification/twenty-newsgroups.html)
+- [Hidden Markov Models Example](/users/classification/hidden-markov-models.html)
 - [Random Forest Quickstart](/users/classification/partial-implementation.html)
 
 ### Working with Text
 
 To convert raw text into vectors:
 
-- [Creating Vectors from Text](/users/basics/creating-vectors-from-text.html). 
+- [Creating Vectors from Text](/users/basics/creating-vectors-from-text.html).
