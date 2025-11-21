@@ -96,3 +96,70 @@ def get_qumat_example_final_state_vector(
     state_vector = qumat_instance.get_final_state_vector()
 
     return state_vector
+
+
+def get_state_probability(results, target_state, num_qubits=1, backend_name=None):
+    """
+    Calculate the probability of measuring a target state.
+
+    Args:
+        results: Dictionary of measurement results from execute_circuit()
+        target_state: Target state as string (e.g., "0", "1", "101") or int
+        num_qubits: Number of qubits in the circuit
+        backend_name: Name of the backend (for handling qubit ordering)
+
+    Returns:
+        Probability of measuring the target state
+    """
+    if isinstance(results, list):
+        results = results[0]
+
+    total_shots = sum(results.values())
+    if total_shots == 0:
+        return 0.0
+
+    # Convert target_state to both string and int formats for comparison
+    if isinstance(target_state, str):
+        target_str = target_state
+        # Convert binary string to integer
+        target_int = int(target_state, 2) if target_state else 0
+    else:
+        target_int = target_state
+        # Convert integer to binary string
+        target_str = format(target_state, f"0{num_qubits}b")
+
+    # Handle backend-specific qubit ordering
+    # Qiskit uses little-endian (rightmost bit is qubit 0)
+    # Amazon Braket and Cirq use big-endian (leftmost bit is qubit 0)
+    if backend_name == "qiskit" and isinstance(target_str, str) and len(target_str) > 1:
+        # Reverse the string for Qiskit (little-endian)
+        target_str_qiskit = target_str[::-1]
+    else:
+        target_str_qiskit = target_str
+
+    target_count = 0
+    for state, count in results.items():
+        if isinstance(state, str):
+            # For Qiskit, compare with reversed string
+            if backend_name == "qiskit" and len(state) > 1:
+                if state == target_str_qiskit:
+                    target_count = count
+                    break
+            else:
+                if state == target_str:
+                    target_count = count
+                    break
+        else:
+            # For Cirq, use integer comparison
+            # Cirq uses big-endian, so the integer representation matches
+            if backend_name == "cirq":
+                if state == target_int:
+                    target_count = count
+                    break
+            else:
+                # For other backends, also try integer comparison
+                if state == target_int:
+                    target_count = count
+                    break
+
+    return target_count / total_shots
