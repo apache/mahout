@@ -1,5 +1,5 @@
 repos:
-  # Check yaml, end of file, trailing whitespace
+  # Basic formatting & whitespace checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -12,17 +12,17 @@ repos:
 
   # Ruff linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.5
+    rev: v0.6.9
     hooks:
       - id: ruff
         name: ruff linting
-        files: \.py$
         args: [--fix]
+        files: \.py$
       - id: ruff-format
         name: ruff formatting
         files: \.py$
 
-  # Check Apache license headers
+  # License header check (Apache 2.0)
   - repo: https://github.com/lucas-c/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -34,3 +34,35 @@ repos:
           - testing/utils/.license-header.txt
           - --comment-style
           - "#"
+
+  # Docstring formatting / placement validation
+  - repo: https://github.com/PyCQA/docformatter
+    rev: v1.7.5
+    hooks:
+      - id: docformatter
+        name: format docstrings
+        args: ["--in-place"]
+        files: \.py$
+
+  # Strip Jupyter notebook outputs
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.6.1
+    hooks:
+      - id: nbstripout
+        name: strip notebook outputs
+
+  # Bandit security scanner
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        name: security scan
+        args: ["-ll", "-ii"]
+        files: \.py$
+
+  # TOML syntax validation
+  - repo: https://github.com/pre-commit/mirrors-toml-sort
+    rev: v0.23.1
+    hooks:
+      - id: toml-sort
+        name: validate and sort toml files
