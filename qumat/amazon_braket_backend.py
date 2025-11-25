@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from braket.aws import AwsDevice
@@ -106,7 +106,7 @@ def execute_circuit(
     else:
         task = backend.run(circuit, shots=shots)
     result = task.result()
-    return result.measurement_counts
+    return cast(dict[str, int], result.measurement_counts)
 
 
 # placeholder method for use in the testing suite
@@ -117,7 +117,7 @@ def get_final_state_vector(
     result = backend.run(circuit, shots=0).result()
     state_vector = result.values[0]
 
-    return state_vector
+    return cast(np.ndarray, state_vector)
 
 
 def draw_circuit(circuit: Circuit) -> None:
