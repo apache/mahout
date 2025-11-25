@@ -14,12 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import Any
+
+import numpy as np
 from braket.aws import AwsDevice
-from braket.devices import LocalSimulator
 from braket.circuits import Circuit, FreeParameter
+from braket.devices import LocalSimulator
 
 
-def initialize_backend(backend_config):
+def initialize_backend(backend_config: dict[str, Any]) -> LocalSimulator | AwsDevice:
     backend_options = backend_config["backend_options"]
     simulator_type = backend_options.get("simulator_type", "default")
     if simulator_type == "local":
@@ -33,7 +36,7 @@ def initialize_backend(backend_config):
         return AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
 
 
-def create_empty_circuit(num_qubits: int | None = None):
+def create_empty_circuit(num_qubits: int | None = None) -> Circuit:
     circuit = Circuit()
     if num_qubits is not None:
         for i in range(num_qubits):
@@ -41,47 +44,55 @@ def create_empty_circuit(num_qubits: int | None = None):
     return circuit
 
 
-def apply_not_gate(circuit, qubit_index):
+def apply_not_gate(circuit: Circuit, qubit_index: int) -> None:
     circuit.x(qubit_index)
 
 
-def apply_hadamard_gate(circuit, qubit_index):
+def apply_hadamard_gate(circuit: Circuit, qubit_index: int) -> None:
     circuit.h(qubit_index)
 
 
-def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index):
+def apply_cnot_gate(circuit: Circuit, control_qubit_index: int, target_qubit_index: int) -> None:
     circuit.cnot(control_qubit_index, target_qubit_index)
 
 
 def apply_toffoli_gate(
-    circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
-):
+    circuit: Circuit,
+    control_qubit_index1: int,
+    control_qubit_index2: int,
+    target_qubit_index: int,
+) -> None:
     circuit.ccnot(control_qubit_index1, control_qubit_index2, target_qubit_index)
 
 
-def apply_swap_gate(circuit, qubit_index1, qubit_index2):
+def apply_swap_gate(circuit: Circuit, qubit_index1: int, qubit_index2: int) -> None:
     circuit.swap(qubit_index1, qubit_index2)
 
 
 def apply_cswap_gate(
-    circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
-):
+    circuit: Circuit,
+    control_qubit_index: int,
+    target_qubit_index1: int,
+    target_qubit_index2: int,
+) -> None:
     circuit.cswap(control_qubit_index, target_qubit_index1, target_qubit_index2)
 
 
-def apply_pauli_x_gate(circuit, qubit_index):
+def apply_pauli_x_gate(circuit: Circuit, qubit_index: int) -> None:
     circuit.x(qubit_index)
 
 
-def apply_pauli_y_gate(circuit, qubit_index):
+def apply_pauli_y_gate(circuit: Circuit, qubit_index: int) -> None:
     circuit.y(qubit_index)
 
 
-def apply_pauli_z_gate(circuit, qubit_index):
+def apply_pauli_z_gate(circuit: Circuit, qubit_index: int) -> None:
     circuit.z(qubit_index)
 
 
-def execute_circuit(circuit, backend, backend_config):
+def execute_circuit(
+    circuit: Circuit, backend: LocalSimulator | AwsDevice, backend_config: dict[str, Any]
+) -> dict[str, int]:
     shots = backend_config["backend_options"].get("shots", 1)
     parameter_values = backend_config.get("parameter_values", {})
     if parameter_values and circuit.parameters:
@@ -99,7 +110,9 @@ def execute_circuit(circuit, backend, backend_config):
 
 
 # placeholder method for use in the testing suite
-def get_final_state_vector(circuit, backend, backend_config):
+def get_final_state_vector(
+    circuit: Circuit, backend: LocalSimulator | AwsDevice, backend_config: dict[str, Any]
+) -> np.ndarray:
     circuit.state_vector()
     result = backend.run(circuit, shots=0).result()
     state_vector = result.values[0]
@@ -107,14 +120,14 @@ def get_final_state_vector(circuit, backend, backend_config):
     return state_vector
 
 
-def draw_circuit(circuit):
+def draw_circuit(circuit: Circuit) -> None:
     # Unfortunately, Amazon Braket does not have direct support for drawing circuits in the same way
     # as Qiskit and Cirq. You would typically visualize Amazon Braket circuits using external tools.
     # For simplicity, we'll print the circuit object which gives some textual representation.
     print(circuit)
 
 
-def apply_rx_gate(circuit, qubit_index, angle):
+def apply_rx_gate(circuit: Circuit, qubit_index: int, angle: float | str) -> None:
     if isinstance(angle, (int, float)):
         circuit.rx(qubit_index, angle)
     else:
@@ -122,7 +135,7 @@ def apply_rx_gate(circuit, qubit_index, angle):
         circuit.rx(qubit_index, param)
 
 
-def apply_ry_gate(circuit, qubit_index, angle):
+def apply_ry_gate(circuit: Circuit, qubit_index: int, angle: float | str) -> None:
     if isinstance(angle, (int, float)):
         circuit.ry(qubit_index, angle)
     else:
@@ -130,7 +143,7 @@ def apply_ry_gate(circuit, qubit_index, angle):
         circuit.ry(qubit_index, param)
 
 
-def apply_rz_gate(circuit, qubit_index, angle):
+def apply_rz_gate(circuit: Circuit, qubit_index: int, angle: float | str) -> None:
     if isinstance(angle, (int, float)):
         circuit.rz(qubit_index, angle)
     else:
@@ -138,14 +151,18 @@ def apply_rz_gate(circuit, qubit_index, angle):
         circuit.rz(qubit_index, param)
 
 
-def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+def apply_u_gate(
+    circuit: Circuit, qubit_index: int, theta: float, phi: float, lambd: float
+) -> None:
     # U(θ, φ, λ) = Rz(φ) · Ry(θ) · Rz(λ)
     circuit.rz(qubit_index, lambd)
     circuit.ry(qubit_index, theta)
     circuit.rz(qubit_index, phi)
 
 
-def calculate_prob_zero(results, ancilla_qubit, num_qubits):
+def calculate_prob_zero(
+    results: dict[str, int] | list[dict[str, int]], ancilla_qubit: int, num_qubits: int
+) -> float:
     """
     Calculate the probability of measuring the ancilla qubit in |0> state.
 
