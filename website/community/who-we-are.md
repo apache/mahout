@@ -36,7 +36,7 @@ Jeff Eastman            | jeastman@...      | No  | (Emeritus PMC)
 Krishna Dave            | krishnadave829@...| No  | @krishnadave
 Nikolay Sakharnykh      | nsakharnykh@...   | No  |
 Paritosh Ranjan         | pranjan@...       | Yes | @paritoshranjan
-Pat Ferrel              | pat@...           | Yes | @occam
+Pat Ferrel              | pat@...           | Yes | (Emeritus PMC) @occam
 Robin Anil              | robinanil@...     | Yes |
 Sean Owen               | srowen@...        | No  | (Emeritus PMC)
 Sebastian Schelter      | ssc@...           | Yes |
