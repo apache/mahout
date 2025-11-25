@@ -16,7 +16,7 @@
 #
 import qiskit
 from qiskit_aer import Aer, AerSimulator
-from typing import Any
+from typing import Any, cast
 import numpy as np
 
 
@@ -211,14 +211,14 @@ def execute_circuit(
             bound_circuit, shots=backend_config["backend_options"]["shots"]
         )
         result = job.result()
-        return result.get_counts()
+        return cast(dict[str, int], result.get_counts())
     else:
         transpiled_circuit = qiskit.transpile(circuit, backend)
         job = backend.run(
             transpiled_circuit, shots=backend_config["backend_options"]["shots"]
         )
         result = job.result()
-        return result.get_counts()
+        return cast(dict[str, int], result.get_counts())
 
 
 def get_final_state_vector(
@@ -247,7 +247,7 @@ def get_final_state_vector(
     job = simulator.run(transpiled_circuit)
     result = job.result()
 
-    return result.get_statevector()
+    return cast(np.ndarray, result.get_statevector())
 
 
 def draw_circuit(circuit: qiskit.QuantumCircuit) -> None:
