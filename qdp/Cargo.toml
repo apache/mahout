@@ -1,9 +1,9 @@
 [workspace]
 members = [
-    "core",
-    "kernels",
+    "qdp-core",
+    "qdp-kernels",
     # TODO: Python bindings (add later)
-    # "python",
+    # "qdp-python",
 ]
 resolver = "2"
 

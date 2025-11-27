@@ -1,13 +1,13 @@
 [package]
-name = "python"
+name = "qdp-python"
 version.workspace = true
 edition.workspace = true
 
 [lib]
-name = "mahout"
+name = "qdp_python"
 crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.23", features = ["abi3-py311"] }
-core = { path = "../core" }
+qdp-core = { path = "../qdp-core" }
 cudarc = { workspace = true }

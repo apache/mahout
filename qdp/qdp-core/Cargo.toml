@@ -5,7 +5,7 @@ edition.workspace = true
 
 [dependencies]
 cudarc = { workspace = true }
-qdp-kernels = { path = "../kernels" }
+qdp-kernels = { path = "../qdp-kernels" }
 thiserror = { workspace = true }
 rayon = { workspace = true }
 
