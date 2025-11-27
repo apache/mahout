@@ -7,7 +7,7 @@ pub use error::{MahoutError, Result};
 use std::sync::Arc;
 use cudarc::driver::CudaDevice;
 use crate::dlpack::DLManagedTensor;
-use crate::gpu::{get_encoder, GpuStateVector};
+use crate::gpu::get_encoder;
 
 /// Main entry point for Mahout QDP
 /// 

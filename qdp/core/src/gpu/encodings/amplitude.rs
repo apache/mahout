@@ -1,5 +1,6 @@
 // Amplitude encoding: direct state injection with L2 normalization
 
+use std::sync::Arc;
 use cudarc::driver::CudaDevice;
 use rayon::prelude::*;
 use crate::error::{MahoutError, Result};
@@ -9,9 +10,9 @@ use super::QuantumEncoder;
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
 #[cfg(target_os = "linux")]
-use cudarc::driver::CudaSlice;
+use cudarc::driver::{CudaSlice, DevicePtr};
 #[cfg(target_os = "linux")]
-use kernels::{launch_amplitude_encode, CuDoubleComplex};
+use qdp_kernels::launch_amplitude_encode;
 
 /// Amplitude encoding: data → normalized quantum amplitudes
 /// 
@@ -22,7 +23,7 @@ pub struct AmplitudeEncoder;
 impl QuantumEncoder for AmplitudeEncoder {
     fn encode(
         &self,
-        _device: &CudaDevice,
+        _device: &Arc<CudaDevice>,
         host_data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
@@ -66,14 +67,14 @@ impl QuantumEncoder for AmplitudeEncoder {
             let state_vector = GpuStateVector::new(_device, num_qubits)?;
 
             // Copy input data to GPU
-            let input_slice: CudaSlice<f64> = _device.htod_sync_copy(host_data)
+            let input_slice: CudaSlice<f64> = _device.htod_copy(host_data.to_vec())
                 .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to allocate input buffer: {:?}", e)))?;
 
             // Launch CUDA kernel
-            // Safety: pointers valid until kernel completes (htod_sync_copy waits)
+            // Safety: pointers valid until kernel completes (htod_copy waits)
             let ret = unsafe {
                 launch_amplitude_encode(
-                    input_slice.as_ref().as_raw_ptr(),
+                    *input_slice.device_ptr() as *const f64,
                     state_vector.ptr() as *mut c_void,
                     host_data.len() as i32,
                     state_len as i32,

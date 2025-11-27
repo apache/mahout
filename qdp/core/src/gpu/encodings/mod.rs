@@ -1,5 +1,6 @@
 // Quantum encoding strategies (Strategy Pattern)
 
+use std::sync::Arc;
 use cudarc::driver::CudaDevice;
 use crate::error::Result;
 use crate::gpu::memory::GpuStateVector;
@@ -10,7 +11,7 @@ pub trait QuantumEncoder: Send + Sync {
     /// Encode classical data to quantum state on GPU
     fn encode(
         &self,
-        device: &CudaDevice,
+        device: &Arc<CudaDevice>,
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector>;

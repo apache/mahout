@@ -53,7 +53,7 @@ pub struct DLTensor {
 pub struct DLManagedTensor {
     pub dl_tensor: DLTensor,
     pub manager_ctx: *mut c_void,
-    pub deleter: Option<extern "C" fn(*mut DLManagedTensor)>,
+    pub deleter: Option<unsafe extern "C" fn(*mut DLManagedTensor)>,
 }
 
 // Deleter: frees memory when PyTorch is done
@@ -61,38 +61,38 @@ pub struct DLManagedTensor {
 /// Called by PyTorch to free tensor memory
 /// 
 /// # Safety
-/// Frees shape, strides, GPU buffer, and managed tensor
-pub extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
-    unsafe {
-        if managed.is_null() {
-            return;
-        }
-
-        let tensor = &(*managed).dl_tensor;
-        
-        // 1. Free shape array (Box<[i64]>)
-        if !tensor.shape.is_null() {
-            let len = if tensor.ndim > 0 { tensor.ndim as usize } else { 1 };
-            let slice_ptr: *mut [i64] = std::ptr::slice_from_raw_parts_mut(tensor.shape, len);
-            let _ = Box::from_raw(slice_ptr);
-        }
-
-        // 2. Free strides array
-        if !tensor.strides.is_null() {
-            let len = if tensor.ndim > 0 { tensor.ndim as usize } else { 1 };
-            let slice_ptr: *mut [i64] = std::ptr::slice_from_raw_parts_mut(tensor.strides, len);
-            let _ = Box::from_raw(slice_ptr);
-        }
-
-        // 3. Free GPU buffer (Arc reference count)
-        let ctx = (*managed).manager_ctx;
-        if !ctx.is_null() {
-            let _ = Arc::from_raw(ctx as *const crate::gpu::memory::GpuBufferRaw);
-        }
-
-        // 4. Free DLManagedTensor
-        let _ = Box::from_raw(managed);
+/// Frees shape, strides, GPU buffer, and managed tensor.
+/// Caller must ensure the pointer is valid and points to a properly initialized DLManagedTensor.
+#[allow(unsafe_op_in_unsafe_fn)]
+pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
+    if managed.is_null() {
+        return;
     }
+
+    let tensor = &(*managed).dl_tensor;
+    
+    // 1. Free shape array (Box<[i64]>)
+    if !tensor.shape.is_null() {
+        let len = if tensor.ndim > 0 { tensor.ndim as usize } else { 1 };
+        let slice_ptr: *mut [i64] = std::ptr::slice_from_raw_parts_mut(tensor.shape, len);
+        let _ = Box::from_raw(slice_ptr);
+    }
+
+    // 2. Free strides array
+    if !tensor.strides.is_null() {
+        let len = if tensor.ndim > 0 { tensor.ndim as usize } else { 1 };
+        let slice_ptr: *mut [i64] = std::ptr::slice_from_raw_parts_mut(tensor.strides, len);
+        let _ = Box::from_raw(slice_ptr);
+    }
+
+    // 3. Free GPU buffer (Arc reference count)
+    let ctx = (*managed).manager_ctx;
+    if !ctx.is_null() {
+        let _ = Arc::from_raw(ctx as *const crate::gpu::memory::GpuBufferRaw);
+    }
+
+    // 4. Free DLManagedTensor
+    let _ = Box::from_raw(managed);
 }
 
 impl GpuStateVector {

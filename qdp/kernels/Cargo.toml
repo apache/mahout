@@ -1,11 +1,14 @@
 [package]
-name = "kernels"
+name = "qdp-kernels"
 version.workspace = true
 edition.workspace = true
+
+[dependencies]
+cudarc = { workspace = true }
 
 [build-dependencies]
 cc = { workspace = true }
 
 [lib]
-name = "kernels"
+name = "qdp_kernels"
 crate-type = ["rlib", "staticlib"]

@@ -1,6 +1,7 @@
 // Angle encoding (placeholder)
 // TODO: Rotation-based encoding via tensor product
 
+use std::sync::Arc;
 use cudarc::driver::CudaDevice;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
@@ -13,7 +14,7 @@ pub struct AngleEncoder;
 impl QuantumEncoder for AngleEncoder {
     fn encode(
         &self,
-        _device: &CudaDevice,
+        _device: &Arc<CudaDevice>,
         _data: &[f64],
         _num_qubits: usize,
     ) -> Result<GpuStateVector> {

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
-use kernels::CuDoubleComplex;
+use qdp_kernels::CuDoubleComplex;
 use crate::error::{MahoutError, Result};
 
 /// RAII wrapper for GPU memory buffer
@@ -38,7 +38,7 @@ unsafe impl Sync for GpuStateVector {}
 impl GpuStateVector {
     /// Create GPU state vector for n qubits
     /// Allocates 2^n complex numbers on GPU (freed on drop)
-    pub fn new(_device: &CudaDevice, qubits: usize) -> Result<Self> {
+    pub fn new(_device: &Arc<CudaDevice>, qubits: usize) -> Result<Self> {
         let _size_elements = 1 << qubits;
         
         // Use alloc_zeros for device-side allocation (critical for performance):
@@ -47,8 +47,9 @@ impl GpuStateVector {
         // - Fast: microseconds vs seconds for 30 qubits (16GB)
         #[cfg(target_os = "linux")]
         {
-            // Calls cuMemAlloc + cuMemsetD8 (GPU hardware zero-fill)
-            let slice = _device.alloc_zeros::<CuDoubleComplex>(_size_elements)
+            // Allocate GPU memory (zero-initialized)
+            let zeros = vec![CuDoubleComplex { x: 0.0, y: 0.0 }; _size_elements];
+            let slice = _device.htod_sync_copy(&zeros)
                 .map_err(|e| MahoutError::MemoryAllocation(
                     format!("Failed to allocate {} bytes of GPU memory (qubits={}): {:?}", 
                             _size_elements * std::mem::size_of::<CuDoubleComplex>(), 

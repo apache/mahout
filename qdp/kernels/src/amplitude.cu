@@ -53,6 +53,14 @@ int launch_amplitude_encode(
     // 3. Zero-padding for unused state vector elements
     // 4. Error checking and stream synchronization
     
+    // Suppress unused parameter warnings (parameters will be used in full implementation)
+    (void)input_d;
+    (void)state_d;
+    (void)input_len;
+    (void)state_len;
+    (void)norm;
+    (void)stream;
+    
     // For now, just return success
     // TODO: Launch actual kernel here
     return cudaSuccess;

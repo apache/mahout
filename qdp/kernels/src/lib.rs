@@ -12,9 +12,17 @@ pub struct CuDoubleComplex {
     pub y: f64,  // Imaginary part
 }
 
+// Implement DeviceRepr for cudarc compatibility
+#[cfg(target_os = "linux")]
+unsafe impl cudarc::driver::DeviceRepr for CuDoubleComplex {}
+
+// Also implement ValidAsZeroBits for alloc_zeros support
+#[cfg(target_os = "linux")]
+unsafe impl cudarc::driver::ValidAsZeroBits for CuDoubleComplex {}
+
 // CUDA kernel FFI (Linux only, dummy on other platforms)
 #[cfg(target_os = "linux")]
-extern "C" {
+unsafe extern "C" {
     /// Launch amplitude encoding kernel
     /// Returns CUDA error code (0 = success)
     /// 
