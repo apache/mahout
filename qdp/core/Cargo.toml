@@ -1,0 +1,10 @@
+[package]
+name = "core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+cudarc = { workspace = true }
+kernels = { path = "../kernels" }
+thiserror = { workspace = true }
+rayon = { workspace = true }

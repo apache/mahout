@@ -1,0 +1,11 @@
+[package]
+name = "kernels"
+version.workspace = true
+edition.workspace = true
+
+[build-dependencies]
+cc = { workspace = true }
+
+[lib]
+name = "kernels"
+crate-type = ["rlib", "staticlib"]
