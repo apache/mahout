@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 
 [lib]
-name = "qdp_python"
+name = "mahout"
 crate-type = ["cdylib"]
 
 [dependencies]

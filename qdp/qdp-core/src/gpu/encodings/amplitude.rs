@@ -66,12 +66,12 @@ impl QuantumEncoder for AmplitudeEncoder {
             // Allocate GPU state vector
             let state_vector = GpuStateVector::new(_device, num_qubits)?;
 
-            // Copy input data to GPU
-            let input_slice: CudaSlice<f64> = _device.htod_copy(host_data.to_vec())
+            // Copy input data to GPU (synchronous, zero-copy from slice)
+            let input_slice: CudaSlice<f64> = _device.htod_sync_copy(host_data)
                 .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to allocate input buffer: {:?}", e)))?;
 
             // Launch CUDA kernel
-            // Safety: pointers valid until kernel completes (htod_copy waits)
+            // Safety: pointers valid until kernel completes (htod_sync_copy waits)
             let ret = unsafe {
                 launch_amplitude_encode(
                     *input_slice.device_ptr() as *const f64,
