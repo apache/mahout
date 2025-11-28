@@ -1,0 +1,29 @@
+[workspace]
+members = [
+    "qdp-core",
+    "qdp-kernels",
+    # TODO: Python bindings (add later)
+    # "qdp-python",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Apache Mahout Contributors"]
+license = "Apache-2.0"
+
+[workspace.dependencies]
+# CUDA runtime bindings (using 0.13+ for alloc_zeros support)
+# Using CUDA 12.5 as baseline (compatible with most modern GPUs)
+# 0.13+ provides crucial device-side allocation APIs that avoid CPU memory overhead
+cudarc = { version = "0.13", features = ["cuda-12050"] }
+# Build dependencies (locked to minor version for CUDA 13 / C++20 support)
+cc = "1.2"
+# Utilities (Rust 2024 Edition compatible)
+thiserror = "2.0"
+# Parallel computing (for CPU preprocessing)
+rayon = "1.10"
+
+

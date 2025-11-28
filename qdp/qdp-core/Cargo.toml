@@ -1,0 +1,13 @@
+[package]
+name = "qdp-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+cudarc = { workspace = true }
+qdp-kernels = { path = "../qdp-kernels" }
+thiserror = { workspace = true }
+rayon = { workspace = true }
+
+[lib]
+name = "qdp_core"
