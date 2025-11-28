@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -13,33 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Pre-commit
+"""Simple tests for PyO3 bindings."""
 
-on:
-  push:
-    branches: [main, dev-qdp]
-  pull_request:
-    branches: [main, dev-qdp]
+import pytest
+import mahout_qdp
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
 
-    steps:
-      - uses: actions/checkout@v4
+def test_import():
+    """Test that PyO3 bindings are properly imported."""
+    assert hasattr(mahout_qdp, "QdpEngine")
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry and dependencies
-        run: |
-          pip install poetry
-          poetry install --extras dev
+@pytest.mark.gpu
+def test_encode():
+    """Test encoding (requires GPU)."""
+    from mahout_qdp import QdpEngine
 
-      - name: Run pre-commit hooks
-        run: poetry run pre-commit run --all-files
+    engine = QdpEngine(0)
+    data = [0.5, 0.5, 0.5, 0.5]
+    ptr = engine.encode(data, 2, "amplitude")
+    assert isinstance(ptr, int)
+    assert ptr != 0

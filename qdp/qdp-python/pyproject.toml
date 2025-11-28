@@ -1,0 +1,26 @@
+[build-system]
+requires = ["maturin>=1.10,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "qdp-python"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+
+[dependency-groups]
+dev = [
+    "maturin>=1.10.2",
+    "patchelf>=0.17.2.4",
+    "pytest>=9.0.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "gpu: tests that require GPU (deselect with '-m \"not gpu\"')",
+]

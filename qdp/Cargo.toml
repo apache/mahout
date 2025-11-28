@@ -2,8 +2,7 @@
 members = [
     "qdp-core",
     "qdp-kernels",
-    # TODO: Python bindings (add later)
-    # "qdp-python",
+    "qdp-python",
 ]
 resolver = "2"
 
@@ -25,5 +24,3 @@ cc = "1.2"
 thiserror = "2.0"
 # Parallel computing (for CPU preprocessing)
 rayon = "1.10"
-
-
