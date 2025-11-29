@@ -1,3 +1,18 @@
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // NVTX profiling example
 // Run: cargo run -p qdp-core --example nvtx_profile --features observability --release
 
@@ -6,7 +21,7 @@ use qdp_core::QdpEngine;
 fn main() {
     println!("=== NVTX Profiling Example ===");
     println!();
-    
+
     // Initialize engine
     let engine = match QdpEngine::new(0) {
         Ok(e) => {
@@ -18,12 +33,12 @@ fn main() {
             return;
         }
     };
-    
+
     // Create test data
     let data: Vec<f64> = (0..1024).map(|i| (i as f64) / 1024.0).collect();
     println!("✓ Created test data: {} elements", data.len());
     println!();
-    
+
     println!("Starting encoding (NVTX markers will appear in Nsight Systems)...");
     println!("Expected NVTX markers:");
     println!("  - Mahout::Encode");
@@ -32,13 +47,13 @@ fn main() {
     println!("  - GPU::H2DCopy");
     println!("  - GPU::Kernel");
     println!();
-    
+
     // Perform encoding (this will trigger NVTX markers)
     match engine.encode(&data, 10, "amplitude") {
         Ok(ptr) => {
             println!("✓ Encoding succeeded");
             println!("✓ DLPack pointer: {:p}", ptr);
-            
+
             // Clean up
             unsafe {
                 let managed = &mut *ptr;
@@ -52,7 +67,7 @@ fn main() {
             eprintln!("✗ Encoding failed: {:?}", e);
         }
     }
-    
+
     println!();
     println!("=== Test Complete ===");
     println!();
@@ -60,4 +75,3 @@ fn main() {
     println!("  nsys profile --trace=cuda,nvtx cargo run -p qdp-core --example nvtx_profile --features observability --release");
     println!("Then open the generated .nsys-rep file in Nsight Systems");
 }
-
