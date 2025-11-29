@@ -27,10 +27,18 @@ repos:
     rev: v1.5.5
     hooks:
       - id: insert-license
-        name: check license headers
+        name: check license headers (Python)
         files: \.py$
         args:
           - --license-filepath
           - testing/utils/.license-header.txt
           - --comment-style
           - "#"
+      - id: insert-license
+        name: check license headers (Rust)
+        files: \.rs$
+        args:
+          - --license-filepath
+          - testing/utils/.license-header.txt
+          - --comment-style
+          - "//"
