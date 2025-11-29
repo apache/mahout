@@ -54,7 +54,7 @@ impl QdpEngine {
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::Encode");
-        
+
         let encoder = get_encoder(encoding_method)?;
         let state_vector = encoder.encode(&self.device, data, num_qubits)?;
         let dlpack_ptr = {

@@ -59,7 +59,7 @@ impl QuantumEncoder for AmplitudeEncoder {
             let norm_sq: f64 = host_data.par_iter().map(|x| x * x).sum();
             norm_sq.sqrt()
         };
-        
+
         if norm == 0.0 {
             return Err(MahoutError::InvalidInput("Input data has zero norm".to_string()));
         }

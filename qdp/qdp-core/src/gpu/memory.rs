@@ -40,7 +40,7 @@ impl GpuStateVector {
     /// Allocates 2^n complex numbers on GPU (freed on drop)
     pub fn new(_device: &Arc<CudaDevice>, qubits: usize) -> Result<Self> {
         let _size_elements = 1 << qubits;
-        
+
         // Use device-side allocation (critical for performance):
         // - No CPU RAM usage (avoids OOM for large states)
         // - Fast: microseconds vs seconds for 30 qubits (16GB)
