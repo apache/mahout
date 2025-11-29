@@ -50,5 +50,8 @@ jobs:
           pip install poetry
           poetry install --extras dev
 
+      - name: Run type checking
+        run: poetry run mypy qumat/
+
       - name: Run tests
         run: poetry run pytest testing/ -v
