@@ -147,6 +147,9 @@ impl QdpEngine {
     ///     >>> engine = QdpEngine(device_id=0)
     ///     >>> qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], num_qubits=2, encoding_method="amplitude")
     ///     >>> torch_tensor = torch.from_dlpack(qtensor)
+    ///
+    /// TODO: Replace Vec<f64> with numpy array input to enable zero-copy reading.
+    /// Consider using the numpy crate (e.g., PyReadonlyArray1<f64>) for better performance.
     fn encode(&self, data: Vec<f64>, num_qubits: usize, encoding_method: &str) -> PyResult<QuantumTensor> {
         let ptr = self.engine.encode(&data, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
