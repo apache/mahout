@@ -41,10 +41,10 @@ impl GpuStateVector {
     pub fn new(_device: &Arc<CudaDevice>, qubits: usize) -> Result<Self> {
         let _size_elements = 1 << qubits;
         
-        // Use alloc_zeros for device-side allocation (critical for performance):
+        // Use device-side allocation (critical for performance):
         // - No CPU RAM usage (avoids OOM for large states)
-        // - No PCIe transfer (GPU hardware zero-fill)
         // - Fast: microseconds vs seconds for 30 qubits (16GB)
+        // TODO: Use uninitialized alloc() when kernel fully implements padding
         #[cfg(target_os = "linux")]
         {
             // Allocate GPU memory (zero-initialized)

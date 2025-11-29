@@ -10,7 +10,7 @@ use super::QuantumEncoder;
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
 #[cfg(target_os = "linux")]
-use cudarc::driver::{CudaSlice, DevicePtr};
+use cudarc::driver::DevicePtr;
 #[cfg(target_os = "linux")]
 use qdp_kernels::launch_amplitude_encode;
 
@@ -54,8 +54,11 @@ impl QuantumEncoder for AmplitudeEncoder {
         }
 
         // Calculate L2 norm (parallel on CPU for speed)
-        let norm_sq: f64 = host_data.par_iter().map(|x| x * x).sum();
-        let norm = norm_sq.sqrt();
+        let norm = {
+            crate::profile_scope!("CPU::L2Norm");
+            let norm_sq: f64 = host_data.par_iter().map(|x| x * x).sum();
+            norm_sq.sqrt()
+        };
         
         if norm == 0.0 {
             return Err(MahoutError::InvalidInput("Input data has zero norm".to_string()));
@@ -64,23 +67,32 @@ impl QuantumEncoder for AmplitudeEncoder {
         #[cfg(target_os = "linux")]
         {
             // Allocate GPU state vector
-            let state_vector = GpuStateVector::new(_device, num_qubits)?;
+            let state_vector = {
+                crate::profile_scope!("GPU::Alloc");
+                GpuStateVector::new(_device, num_qubits)?
+            };
 
             // Copy input data to GPU (synchronous, zero-copy from slice)
-            let input_slice: CudaSlice<f64> = _device.htod_sync_copy(host_data)
-                .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to allocate input buffer: {:?}", e)))?;
+            // TODO : Use async CUDA streams for pipeline overlap
+            let input_slice = {
+                crate::profile_scope!("GPU::H2DCopy");
+                _device.htod_sync_copy(host_data)
+                    .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to allocate input buffer: {:?}", e)))?
+            };
 
-            // Launch CUDA kernel
-            // Safety: pointers valid until kernel completes (htod_sync_copy waits)
-            let ret = unsafe {
-                launch_amplitude_encode(
-                    *input_slice.device_ptr() as *const f64,
-                    state_vector.ptr() as *mut c_void,
-                    host_data.len() as i32,
-                    state_len as i32,
-                    norm,
-                    std::ptr::null_mut(), // default stream
-                )
+            // Launch CUDA kernel (CPU-side launch only; execution is asynchronous)
+            let ret = {
+                crate::profile_scope!("GPU::KernelLaunch");
+                unsafe {
+                    launch_amplitude_encode(
+                        *input_slice.device_ptr() as *const f64,
+                        state_vector.ptr() as *mut c_void,
+                        host_data.len() as i32,
+                        state_len as i32,
+                        norm,
+                        std::ptr::null_mut(), // default stream
+                    )
+                }
             };
 
             if ret != 0 {
@@ -90,6 +102,14 @@ impl QuantumEncoder for AmplitudeEncoder {
                     cuda_error_to_string(ret)
                 );
                 return Err(MahoutError::KernelLaunch(error_msg));
+            }
+
+            // Block until all work on the device is complete
+            {
+                crate::profile_scope!("GPU::Synchronize");
+                _device
+                    .synchronize()
+                    .map_err(|e| MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e)))?;
             }
 
             Ok(state_vector)

@@ -2,6 +2,9 @@ pub mod dlpack;
 pub mod gpu;
 pub mod error;
 
+#[macro_use]
+mod profiling;
+
 pub use error::{MahoutError, Result};
 
 use std::sync::Arc;
@@ -50,9 +53,15 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::Encode");
+        
         let encoder = get_encoder(encoding_method)?;
         let state_vector = encoder.encode(&self.device, data, num_qubits)?;
-        Ok(state_vector.to_dlpack())
+        let dlpack_ptr = {
+            crate::profile_scope!("DLPack::Wrap");
+            state_vector.to_dlpack()
+        };
+        Ok(dlpack_ptr)
     }
 
     /// Get CUDA device reference for advanced operations
