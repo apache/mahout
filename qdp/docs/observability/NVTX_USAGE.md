@@ -9,7 +9,7 @@ NVTX (NVIDIA Tools Extension) provides performance markers visible in Nsight Sys
 Default builds exclude NVTX for zero overhead. Enable profiling with:
 
 ```bash
-cd /mahout/qdp
+cd mahout/qdp
 cargo build -p qdp-core --example nvtx_profile --features observability --release
 ```
 
