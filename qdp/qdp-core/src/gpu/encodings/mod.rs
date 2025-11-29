@@ -43,4 +43,3 @@ pub fn get_encoder(name: &str) -> Result<Box<dyn QuantumEncoder>> {
         )),
     }
 }
-

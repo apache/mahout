@@ -1,0 +1,91 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Simple tests for PyO3 bindings."""
+
+import pytest
+import mahout_qdp
+
+
+def test_import():
+    """Test that PyO3 bindings are properly imported."""
+    assert hasattr(mahout_qdp, "QdpEngine")
+    assert hasattr(mahout_qdp, "QuantumTensor")
+
+
+@pytest.mark.gpu
+def test_encode():
+    """Test encoding returns QuantumTensor (requires GPU)."""
+    from mahout_qdp import QdpEngine
+
+    engine = QdpEngine(0)
+    data = [0.5, 0.5, 0.5, 0.5]
+    qtensor = engine.encode(data, 2, "amplitude")
+    assert isinstance(qtensor, mahout_qdp.QuantumTensor)
+
+
+@pytest.mark.gpu
+def test_dlpack_device():
+    """Test __dlpack_device__ method (requires GPU)."""
+    from mahout_qdp import QdpEngine
+
+    engine = QdpEngine(0)
+    data = [1.0, 2.0, 3.0, 4.0]
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    device_info = qtensor.__dlpack_device__()
+    assert device_info == (2, 0), "Expected (2, 0) for CUDA device 0"
+
+
+@pytest.mark.gpu
+def test_dlpack_single_use():
+    """Test that __dlpack__ can only be called once (requires GPU)."""
+    import torch
+    from mahout_qdp import QdpEngine
+
+    engine = QdpEngine(0)
+    data = [1.0, 2.0, 3.0, 4.0]
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    # First call succeeds - let PyTorch consume it
+    _ = torch.from_dlpack(qtensor)
+
+    # Second call should fail because tensor was already consumed
+    qtensor2 = engine.encode(data, 2, "amplitude")
+    _ = qtensor2.__dlpack__()  # Consume the capsule
+    with pytest.raises(RuntimeError, match="already consumed"):
+        qtensor2.__dlpack__()
+
+
+@pytest.mark.gpu
+def test_pytorch_integration():
+    """Test PyTorch integration via DLPack (requires GPU and PyTorch)."""
+    pytest.importorskip("torch")
+    import torch
+    from mahout_qdp import QdpEngine
+
+    engine = QdpEngine(0)
+    data = [1.0, 2.0, 3.0, 4.0]
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    # Convert to PyTorch tensor using DLPack
+    torch_tensor = torch.from_dlpack(qtensor)
+    assert torch_tensor.is_cuda
+    assert torch_tensor.device.index == 0
+    assert torch_tensor.dtype == torch.complex128
+
+    # Verify shape (2 qubits = 2^2 = 4 elements)
+    assert torch_tensor.shape == (4,)

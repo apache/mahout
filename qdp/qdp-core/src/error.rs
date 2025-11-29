@@ -21,4 +21,3 @@ pub enum MahoutError {
 
 /// Result type alias for Mahout operations
 pub type Result<T> = std::result::Result<T, MahoutError>;
-

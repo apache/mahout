@@ -59,7 +59,7 @@ pub struct DLManagedTensor {
 // Deleter: frees memory when PyTorch is done
 
 /// Called by PyTorch to free tensor memory
-/// 
+///
 /// # Safety
 /// Frees shape, strides, GPU buffer, and managed tensor.
 /// Caller must ensure the pointer is valid and points to a properly initialized DLManagedTensor.
@@ -70,7 +70,7 @@ pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
     }
 
     let tensor = &(*managed).dl_tensor;
-    
+
     // 1. Free shape array (Box<[i64]>)
     if !tensor.shape.is_null() {
         let len = if tensor.ndim > 0 { tensor.ndim as usize } else { 1 };
@@ -97,9 +97,9 @@ pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
 
 impl GpuStateVector {
     /// Convert to DLPack format for PyTorch
-    /// 
+    ///
     /// Returns raw pointer for torch.from_dlpack() (zero-copy, GPU memory).
-    /// 
+    ///
     /// # Safety
     /// Freed by DLPack deleter when PyTorch releases tensor.
     /// Do not free manually.
@@ -141,4 +141,3 @@ impl GpuStateVector {
         Box::into_raw(Box::new(managed))
     }
 }
-
