@@ -4,10 +4,9 @@ version.workspace = true
 edition.workspace = true
 
 [lib]
-name = "mahout"
+name = "mahout_qdp"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.23", features = ["abi3-py311"] }
+pyo3 = { version = "0.27", features = ["extension-module"] }
 qdp-core = { path = "../qdp-core" }
-cudarc = { workspace = true }

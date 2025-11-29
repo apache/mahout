@@ -15,7 +15,7 @@ use cudarc::driver::{CudaSlice, DevicePtr};
 use qdp_kernels::launch_amplitude_encode;
 
 /// Amplitude encoding: data → normalized quantum amplitudes
-/// 
+///
 /// Steps: L2 norm (CPU) → GPU allocation → CUDA kernel (normalize + pad)
 /// Fast: ~50-100x vs circuit-based methods
 pub struct AmplitudeEncoder;
@@ -56,7 +56,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Calculate L2 norm (parallel on CPU for speed)
         let norm_sq: f64 = host_data.par_iter().map(|x| x * x).sum();
         let norm = norm_sq.sqrt();
-        
+
         if norm == 0.0 {
             return Err(MahoutError::InvalidInput("Input data has zero norm".to_string()));
         }
@@ -94,7 +94,7 @@ impl QuantumEncoder for AmplitudeEncoder {
 
             Ok(state_vector)
         }
-        
+
         #[cfg(not(target_os = "linux"))]
         {
             Err(MahoutError::Cuda("CUDA unavailable (non-Linux)".to_string()))
@@ -128,4 +128,3 @@ fn cuda_error_to_string(code: i32) -> &'static str {
         _ => "Unknown CUDA error",
     }
 }
-

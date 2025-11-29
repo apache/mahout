@@ -10,7 +10,7 @@ use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 
 /// Main entry point for Mahout QDP
-/// 
+///
 /// Manages GPU context and dispatches encoding tasks.
 /// Provides unified interface for device management, memory allocation, and DLPack.
 pub struct QdpEngine {
@@ -19,29 +19,29 @@ pub struct QdpEngine {
 
 impl QdpEngine {
     /// Initialize engine on GPU device
-    /// 
+    ///
     /// # Arguments
     /// * `device_id` - CUDA device ID (typically 0)
     pub fn new(device_id: usize) -> Result<Self> {
         let device = CudaDevice::new(device_id)
             .map_err(|e| MahoutError::Cuda(format!("Failed to initialize CUDA device {}: {:?}", device_id, e)))?;
-        Ok(Self { 
+        Ok(Self {
             device  // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
         })
     }
 
     /// Encode classical data into quantum state
-    /// 
+    ///
     /// Selects encoding strategy, executes on GPU, returns DLPack pointer.
-    /// 
+    ///
     /// # Arguments
     /// * `data` - Input data
     /// * `num_qubits` - Number of qubits
     /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
-    /// 
+    ///
     /// # Returns
     /// DLPack pointer for zero-copy PyTorch integration
-    /// 
+    ///
     /// # Safety
     /// Pointer freed by DLPack deleter, do not free manually.
     pub fn encode(
