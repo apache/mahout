@@ -23,15 +23,69 @@ import mahout_qdp
 def test_import():
     """Test that PyO3 bindings are properly imported."""
     assert hasattr(mahout_qdp, "QdpEngine")
+    assert hasattr(mahout_qdp, "QuantumTensor")
 
 
 @pytest.mark.gpu
 def test_encode():
-    """Test encoding (requires GPU)."""
+    """Test encoding returns QuantumTensor (requires GPU)."""
     from mahout_qdp import QdpEngine
 
     engine = QdpEngine(0)
     data = [0.5, 0.5, 0.5, 0.5]
-    ptr = engine.encode(data, 2, "amplitude")
-    assert isinstance(ptr, int)
-    assert ptr != 0
+    qtensor = engine.encode(data, 2, "amplitude")
+    assert isinstance(qtensor, mahout_qdp.QuantumTensor)
+
+
+@pytest.mark.gpu
+def test_dlpack_device():
+    """Test __dlpack_device__ method (requires GPU)."""
+    from mahout_qdp import QdpEngine
+
+    engine = QdpEngine(0)
+    data = [1.0, 2.0, 3.0, 4.0]
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    device_info = qtensor.__dlpack_device__()
+    assert device_info == (2, 0), "Expected (2, 0) for CUDA device 0"
+
+
+@pytest.mark.gpu
+def test_dlpack_single_use():
+    """Test that __dlpack__ can only be called once (requires GPU)."""
+    import torch
+    from mahout_qdp import QdpEngine
+
+    engine = QdpEngine(0)
+    data = [1.0, 2.0, 3.0, 4.0]
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    # First call succeeds - let PyTorch consume it
+    _ = torch.from_dlpack(qtensor)
+
+    # Second call should fail because tensor was already consumed
+    qtensor2 = engine.encode(data, 2, "amplitude")
+    _ = qtensor2.__dlpack__()  # Consume the capsule
+    with pytest.raises(RuntimeError, match="already consumed"):
+        qtensor2.__dlpack__()
+
+
+@pytest.mark.gpu
+def test_pytorch_integration():
+    """Test PyTorch integration via DLPack (requires GPU and PyTorch)."""
+    pytest.importorskip("torch")
+    import torch
+    from mahout_qdp import QdpEngine
+
+    engine = QdpEngine(0)
+    data = [1.0, 2.0, 3.0, 4.0]
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    # Convert to PyTorch tensor using DLPack
+    torch_tensor = torch.from_dlpack(qtensor)
+    assert torch_tensor.is_cuda
+    assert torch_tensor.device.index == 0
+    assert torch_tensor.dtype == torch.complex128
+
+    # Verify shape (2 qubits = 2^2 = 4 elements)
+    assert torch_tensor.shape == (4,)

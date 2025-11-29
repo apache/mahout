@@ -17,7 +17,13 @@ dev = [
     "maturin>=1.10.2",
     "patchelf>=0.17.2.4",
     "pytest>=9.0.1",
+    "torch>=2.2,<2.3",
 ]
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu122"
+explicit = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
