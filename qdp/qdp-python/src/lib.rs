@@ -124,6 +124,7 @@ impl QdpEngine {
     /// Raises:
     ///     RuntimeError: If CUDA device initialization fails
     #[new]
+    #[pyo3(signature = (device_id=0))]
     fn new(device_id: usize) -> PyResult<Self> {
         let engine = CoreEngine::new(device_id)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to initialize: {}", e)))?;
