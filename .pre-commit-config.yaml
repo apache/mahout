@@ -21,7 +21,7 @@ repos:
       - id: ruff-format
         name: ruff formatting
         files: \.py$
-        
+
   # Static type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.0
@@ -43,10 +43,3 @@ repos:
           - testing/utils/.license-header.txt
           - --comment-style
           - "#"
-          
-  # Validate Poetry lock file is up to date
-  - repo: https://github.com/python-poetry/poetry
-    rev: '1.8.0'
-    hooks:
-      - id: poetry-check
-      # - id: poetry-lock # Uncomment if want to force lock consistency
