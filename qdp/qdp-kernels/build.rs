@@ -44,6 +44,8 @@ fn main() {
     // This uses cc crate's CUDA support to invoke nvcc
     let mut build = cc::Build::new();
 
+    build.include(format!("{}/include", cuda_path));
+
     build
         .cuda(true)
         .flag("-cudart=shared")  // Use shared CUDA runtime
