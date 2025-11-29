@@ -15,7 +15,7 @@ use cudarc::driver::DevicePtr;
 use qdp_kernels::launch_amplitude_encode;
 
 /// Amplitude encoding: data → normalized quantum amplitudes
-/// 
+///
 /// Steps: L2 norm (CPU) → GPU allocation → CUDA kernel (normalize + pad)
 /// Fast: ~50-100x vs circuit-based methods
 pub struct AmplitudeEncoder;
@@ -114,7 +114,7 @@ impl QuantumEncoder for AmplitudeEncoder {
 
             Ok(state_vector)
         }
-        
+
         #[cfg(not(target_os = "linux"))]
         {
             Err(MahoutError::Cuda("CUDA unavailable (non-Linux)".to_string()))
@@ -148,4 +148,3 @@ fn cuda_error_to_string(code: i32) -> &'static str {
         _ => "Unknown CUDA error",
     }
 }
-

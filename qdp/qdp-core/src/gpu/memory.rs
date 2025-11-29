@@ -11,7 +11,7 @@ pub struct GpuBufferRaw {
 
 impl GpuBufferRaw {
     /// Get raw pointer to GPU memory
-    /// 
+    ///
     /// # Safety
     /// Valid only while GpuBufferRaw is alive
     pub fn ptr(&self) -> *mut CuDoubleComplex {
@@ -20,7 +20,7 @@ impl GpuBufferRaw {
 }
 
 /// Quantum state vector on GPU
-/// 
+///
 /// Manages complex128 array of size 2^n (n = qubits) in GPU memory.
 /// Uses Arc for shared ownership (needed for DLPack/PyTorch integration).
 /// Thread-safe: Send + Sync
@@ -51,9 +51,9 @@ impl GpuStateVector {
             let zeros = vec![CuDoubleComplex { x: 0.0, y: 0.0 }; _size_elements];
             let slice = _device.htod_sync_copy(&zeros)
                 .map_err(|e| MahoutError::MemoryAllocation(
-                    format!("Failed to allocate {} bytes of GPU memory (qubits={}): {:?}", 
-                            _size_elements * std::mem::size_of::<CuDoubleComplex>(), 
-                            qubits, 
+                    format!("Failed to allocate {} bytes of GPU memory (qubits={}): {:?}",
+                            _size_elements * std::mem::size_of::<CuDoubleComplex>(),
+                            qubits,
                             e)
                 ))?;
 
@@ -63,7 +63,7 @@ impl GpuStateVector {
                 size_elements: _size_elements,
             })
         }
-        
+
         #[cfg(not(target_os = "linux"))]
         {
             // Non-Linux: compiles but GPU unavailable
@@ -72,7 +72,7 @@ impl GpuStateVector {
     }
 
     /// Get raw GPU pointer for DLPack/FFI
-    /// 
+    ///
     /// # Safety
     /// Valid while GpuStateVector or any Arc clone is alive
     pub fn ptr(&self) -> *mut CuDoubleComplex {

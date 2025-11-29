@@ -2,8 +2,7 @@
 members = [
     "qdp-core",
     "qdp-kernels",
-    # TODO: Python bindings (add later)
-    # "qdp-python",
+    "qdp-python",
 ]
 resolver = "2"
 

@@ -31,4 +31,3 @@ impl QuantumEncoder for AngleEncoder {
         "Angle encoding (not implemented)"
     }
 }
-

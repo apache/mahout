@@ -31,4 +31,3 @@ impl QuantumEncoder for BasisEncoder {
         "Basis encoding (not implemented)"
     }
 }
-

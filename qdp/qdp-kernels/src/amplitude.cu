@@ -17,7 +17,7 @@
 extern "C" {
 
 /// Launch amplitude encoding kernel (skeleton implementation)
-/// 
+///
 /// TODO: Full implementation with:
 /// - Parallel normalization kernel
 /// - Coalesced memory access patterns
@@ -46,13 +46,13 @@ int launch_amplitude_encode(
 ) {
     // Skeleton implementation - ensures FFI linkage is correct
     // This allows the project to compile and pass CI/CD checks.
-    // 
+    //
     // TODO: Implement full CUDA kernel:
     // 1. Kernel launch with optimal grid/block dimensions
     // 2. Parallel normalization and complex number construction
     // 3. Zero-padding for unused state vector elements
     // 4. Error checking and stream synchronization
-    
+
     // Suppress unused parameter warnings (parameters will be used in full implementation)
     (void)input_d;
     (void)state_d;
@@ -60,7 +60,7 @@ int launch_amplitude_encode(
     (void)state_len;
     (void)norm;
     (void)stream;
-    
+
     // For now, just return success
     // TODO: Launch actual kernel here
     return cudaSuccess;
@@ -72,4 +72,3 @@ int launch_amplitude_encode(
 // - launch_iqp_encode (IQP encoding)
 
 } // extern "C"
-

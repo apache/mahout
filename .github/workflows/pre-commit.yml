@@ -17,9 +17,9 @@ name: Pre-commit
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev-qdp]
   pull_request:
-    branches: [main]
+    branches: [main, dev-qdp]
 
 jobs:
   test:

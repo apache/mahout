@@ -25,7 +25,7 @@ unsafe impl cudarc::driver::ValidAsZeroBits for CuDoubleComplex {}
 unsafe extern "C" {
     /// Launch amplitude encoding kernel
     /// Returns CUDA error code (0 = success)
-    /// 
+    ///
     /// # Safety
     /// Requires valid GPU pointers, must sync before freeing
     pub fn launch_amplitude_encode(
@@ -53,4 +53,3 @@ pub extern "C" fn launch_amplitude_encode(
 ) -> i32 {
     999 // Error: CUDA unavailable
 }
-
