@@ -32,5 +32,3 @@ lto = "fat"            # Link Time Optimization: cross-crate inlining
 codegen-units = 1      # Single codegen unit for better optimization
 panic = "abort"        # Smaller binary, faster (unwind logic removed)
 strip = true           # Strip symbols for smaller binary size
-
-

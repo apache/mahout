@@ -77,12 +77,12 @@ nsys stats report.nsys-rep
 
 **Example NVTX Range Summary output:**
 ```
-Time (%)  Total Time (ns)  Instances    Avg (ns)      Med (ns)     Min (ns)    Max (ns)   StdDev (ns)   Style        Range     
+Time (%)  Total Time (ns)  Instances    Avg (ns)      Med (ns)     Min (ns)    Max (ns)   StdDev (ns)   Style        Range
 --------  ---------------  ---------  ------------  ------------  ----------  ----------  -----------  --------  --------------
    50.0       11,207,505          1  11,207,505.0  11,207,505.0  11,207,505  11,207,505          0.0  StartEnd  Mahout::Encode
-   48.0       10,759,758          1  10,759,758.0  10,759,758.0  10,759,758  10,759,758          0.0  StartEnd  GPU::Alloc    
-    1.8          413,753          1     413,753.0     413,753.0     413,753     413,753          0.0  StartEnd  CPU::L2Norm   
-    0.1           15,873          1      15,873.0      15,873.0      15,873      15,873          0.0  StartEnd  GPU::H2DCopy  
+   48.0       10,759,758          1  10,759,758.0  10,759,758.0  10,759,758  10,759,758          0.0  StartEnd  GPU::Alloc
+    1.8          413,753          1     413,753.0     413,753.0     413,753     413,753          0.0  StartEnd  CPU::L2Norm
+    0.1           15,873          1      15,873.0      15,873.0      15,873      15,873          0.0  StartEnd  GPU::H2DCopy
     0.0              317          1         317.0         317.0         317         317          0.0  StartEnd  GPU::KernelLaunch
 ```
 
@@ -94,15 +94,15 @@ The output shows:
 
 **CUDA API Summary** shows detailed CUDA call statistics:
 
- Time (%)  Total Time (ns)  Num Calls   Avg (ns)     Med (ns)    Min (ns)   Max (ns)   StdDev (ns)          Name        
+ Time (%)  Total Time (ns)  Num Calls   Avg (ns)     Med (ns)    Min (ns)   Max (ns)   StdDev (ns)          Name
  --------  ---------------  ---------  -----------  -----------  --------  ----------  -----------  --------------------
-     99.2       11,760,277          2  5,880,138.5  5,880,138.5     2,913  11,757,364  8,311,652.0  cuMemAllocAsync     
+     99.2       11,760,277          2  5,880,138.5  5,880,138.5     2,913  11,757,364  8,311,652.0  cuMemAllocAsync
       0.4           45,979          2     22,989.5     22,989.5     7,938      38,041     21,286.0  cuMemcpyHtoDAsync_v2
-      0.1           14,722          1     14,722.0     14,722.0    14,722      14,722          0.0  cuEventCreate       
-      0.1           13,100          3      4,366.7      3,512.0       861       8,727      4,002.0  cuStreamSynchronize 
-      0.1            9,468         11        860.7        250.0       114       4,671      1,453.3  cuCtxSetCurrent     
-      0.1            6,479          1      6,479.0      6,479.0     6,479       6,479          0.0  cuEventDestroy_v2   
-      0.0            4,599          2      2,299.5      2,299.5     1,773       2,826        744.6  cuMemFreeAsync  
+      0.1           14,722          1     14,722.0     14,722.0    14,722      14,722          0.0  cuEventCreate
+      0.1           13,100          3      4,366.7      3,512.0       861       8,727      4,002.0  cuStreamSynchronize
+      0.1            9,468         11        860.7        250.0       114       4,671      1,453.3  cuCtxSetCurrent
+      0.1            6,479          1      6,479.0      6,479.0     6,479       6,479          0.0  cuEventDestroy_v2
+      0.0            4,599          2      2,299.5      2,299.5     1,773       2,826        744.6  cuMemFreeAsync
 - Memory allocation (`cuMemAllocAsync`)
 - Memory copies (`cuMemcpyHtoDAsync_v2`)
 - Stream synchronization (`cuStreamSynchronize`)
