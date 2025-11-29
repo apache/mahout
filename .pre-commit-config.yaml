@@ -24,11 +24,9 @@ repos:
 
   # Static type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
+    rev: v1.19.0
     hooks:
       - id: mypy
-        # may need to add types-libs here if mypy complains about missing imports
-        # e.g., additional_dependencies: [types-requests]
         args: ["--ignore-missing-imports"]
 
   # Check Apache license headers
