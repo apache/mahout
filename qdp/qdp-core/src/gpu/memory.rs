@@ -57,21 +57,17 @@ impl GpuStateVector {
     pub fn new(_device: &Arc<CudaDevice>, qubits: usize) -> Result<Self> {
         let _size_elements = 1 << qubits;
 
-        // Use device-side allocation (critical for performance):
-        // - No CPU RAM usage (avoids OOM for large states)
-        // - Fast: microseconds vs seconds for 30 qubits (16GB)
-        // TODO: Use uninitialized alloc() when kernel fully implements padding
         #[cfg(target_os = "linux")]
         {
-            // Allocate GPU memory (zero-initialized)
-            let zeros = vec![CuDoubleComplex { x: 0.0, y: 0.0 }; _size_elements];
-            let slice = _device.htod_sync_copy(&zeros)
-                .map_err(|e| MahoutError::MemoryAllocation(
-                    format!("Failed to allocate {} bytes of GPU memory (qubits={}): {:?}",
-                            _size_elements * std::mem::size_of::<CuDoubleComplex>(),
-                            qubits,
-                            e)
-                ))?;
+            // Use uninitialized allocation to avoid memory bandwidth waste.
+            let slice = unsafe {
+                _device.alloc::<CuDoubleComplex>(_size_elements)
+            }.map_err(|e| MahoutError::MemoryAllocation(
+                format!("Failed to allocate {} bytes of GPU memory (qubits={}): {:?}",
+                        _size_elements * std::mem::size_of::<CuDoubleComplex>(),
+                        qubits,
+                        e)
+            ))?;
 
             Ok(Self {
                 buffer: Arc::new(GpuBufferRaw { slice }),
