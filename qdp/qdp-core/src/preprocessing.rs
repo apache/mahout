@@ -15,7 +15,6 @@
 // limitations under the License.
 
 use rayon::prelude::*;
-use std::borrow::Cow;
 use crate::error::{MahoutError, Result};
 
 /// Shared CPU-based pre-processing pipeline for quantum encoding.
