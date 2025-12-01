@@ -18,7 +18,6 @@
 
 use std::sync::Arc;
 use cudarc::driver::CudaDevice;
-use rayon::prelude::*;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
 use super::QuantumEncoder;
@@ -29,6 +28,8 @@ use std::ffi::c_void;
 use cudarc::driver::DevicePtr;
 #[cfg(target_os = "linux")]
 use qdp_kernels::launch_amplitude_encode;
+
+use crate::preprocessing::Preprocessor;
 
 /// Amplitude encoding: data → normalized quantum amplitudes
 ///
@@ -44,41 +45,9 @@ impl QuantumEncoder for AmplitudeEncoder {
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
         // Validate qubits (max 30 = 16GB GPU memory)
-        if num_qubits == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of qubits must be at least 1".to_string()
-            ));
-        }
-        if num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(
-                format!("Number of qubits {} exceeds practical limit of 30", num_qubits)
-            ));
-        }
-
-        // Validate input data
-        if host_data.is_empty() {
-            return Err(MahoutError::InvalidInput(
-                "Input data cannot be empty".to_string()
-            ));
-        }
-
+        Preprocessor::validate_input(host_data, num_qubits)?;
+        let norm = Preprocessor::calculate_l2_norm(host_data)?;
         let state_len = 1 << num_qubits;
-        if host_data.len() > state_len {
-            return Err(MahoutError::InvalidInput(
-                format!("Input data length {} exceeds state vector size {}", host_data.len(), state_len)
-            ));
-        }
-
-        // Calculate L2 norm (parallel on CPU for speed)
-        let norm = {
-            crate::profile_scope!("CPU::L2Norm");
-            let norm_sq: f64 = host_data.par_iter().map(|x| x * x).sum();
-            norm_sq.sqrt()
-        };
-
-        if norm == 0.0 {
-            return Err(MahoutError::InvalidInput("Input data has zero norm".to_string()));
-        }
 
         #[cfg(target_os = "linux")]
         {

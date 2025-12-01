@@ -20,6 +20,7 @@ use std::sync::Arc;
 use cudarc::driver::CudaDevice;
 use crate::error::Result;
 use crate::gpu::memory::GpuStateVector;
+use crate::preprocessing::Preprocessor;
 
 /// Quantum encoding strategy interface
 /// Implemented by: AmplitudeEncoder, AngleEncoder, BasisEncoder
@@ -31,6 +32,11 @@ pub trait QuantumEncoder: Send + Sync {
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector>;
+
+    /// Validate input data before encoding
+    fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
+        Preprocessor::validate_input(data, num_qubits)
+    }
 
     /// Strategy name
     fn name(&self) -> &'static str;
