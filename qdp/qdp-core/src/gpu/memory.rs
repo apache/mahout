@@ -60,6 +60,8 @@ impl GpuStateVector {
         #[cfg(target_os = "linux")]
         {
             // Use uninitialized allocation to avoid memory bandwidth waste.
+            // TODO: Consider using a memory pool for input buffers to avoid repeated
+            // cudaMalloc overhead in high-frequency encode() calls.
             let slice = unsafe {
                 _device.alloc::<CuDoubleComplex>(_size_elements)
             }.map_err(|e| MahoutError::MemoryAllocation(

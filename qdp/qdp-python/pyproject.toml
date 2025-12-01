@@ -17,7 +17,7 @@ dev = [
     "maturin>=1.10.2",
     "patchelf>=0.17.2.4",
     "pytest>=9.0.1",
-    "torch>=2.2,<2.3",
+    "torch>=2.2",
 ]
 
 [[tool.uv.index]]

@@ -81,6 +81,4 @@ fn main() {
         // .flag("arch=compute_89,code=sm_89")
         .file("src/amplitude.cu")
         .compile("kernels");
-
-    println!("cargo:warning=CUDA kernels compiled successfully");
 }
