@@ -31,9 +31,10 @@ impl QuantumEncoder for AngleEncoder {
     fn encode(
         &self,
         _device: &Arc<CudaDevice>,
-        _data: &[f64],
-        _num_qubits: usize,
+        data: &[f64],
+        num_qubits: usize,
     ) -> Result<GpuStateVector> {
+        self.validate_input(data, num_qubits)?;
         Err(MahoutError::InvalidInput(
             "Angle encoding not yet implemented. Use 'amplitude' encoding for now.".to_string()
         ))

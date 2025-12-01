@@ -17,6 +17,7 @@
 pub mod dlpack;
 pub mod gpu;
 pub mod error;
+pub mod preprocessing;
 
 #[macro_use]
 mod profiling;
