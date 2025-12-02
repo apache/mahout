@@ -76,6 +76,7 @@ where
     let streams = [&stream1, &stream2];
 
     // 2. Chunk size: 8MB per chunk (balance between overhead and overlap opportunity)
+    // TODO: we should tune this dynamically based on the detected GPU model or PCIe bandwidth in the future.
     // Too small = launch overhead dominates, too large = less overlap
     const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
 
