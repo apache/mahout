@@ -55,6 +55,18 @@ fn test_validate_input_data_too_large() {
 }
 
 #[test]
+fn test_validate_input_allows_partial_state() {
+    let data = vec![0.5, -0.5, 0.25];
+    assert!(Preprocessor::validate_input(&data, 3).is_ok()); // state vector can hold up to 8 elements
+}
+
+#[test]
+fn test_validate_input_max_qubits_boundary() {
+    let data = vec![1.0];
+    assert!(Preprocessor::validate_input(&data, 30).is_ok());
+}
+
+#[test]
 fn test_calculate_l2_norm_success() {
     let data = vec![3.0, 4.0];
     let norm = Preprocessor::calculate_l2_norm(&data).unwrap();
@@ -70,4 +82,20 @@ fn test_calculate_l2_norm_zero() {
     let data = vec![0.0, 0.0, 0.0];
     let result = Preprocessor::calculate_l2_norm(&data);
     assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("zero norm")));
+}
+
+#[test]
+fn test_calculate_l2_norm_mixed_signs() {
+    let data = vec![-3.0, 4.0];
+    let norm = Preprocessor::calculate_l2_norm(&data).unwrap();
+    assert!((norm - 5.0).abs() < 1e-10);
+}
+
+#[test]
+fn test_calculate_l2_norm_matches_sequential_sum() {
+    let data: Vec<f64> = (1..=1000).map(|v| v as f64).collect();
+    let norm_parallel = Preprocessor::calculate_l2_norm(&data).unwrap();
+
+    let norm_sequential = data.iter().map(|x| x * x).sum::<f64>().sqrt();
+    assert!((norm_parallel - norm_sequential).abs() < 1e-10);
 }
