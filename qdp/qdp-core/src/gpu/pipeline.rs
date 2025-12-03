@@ -131,7 +131,7 @@ where
                 );
 
                 if result != 0 {
-                    return Err(MahoutError::MemoryAllocation(
+                    return Err(MahoutError::Cuda(
                         format!("Async H2D copy failed with CUDA error: {}", result)
                     ));
                 }
