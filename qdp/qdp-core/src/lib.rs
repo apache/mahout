@@ -18,6 +18,7 @@ pub mod dlpack;
 pub mod gpu;
 pub mod error;
 pub mod preprocessing;
+pub mod io;
 
 #[macro_use]
 mod profiling;
@@ -26,6 +27,7 @@ pub use error::{MahoutError, Result};
 
 use std::sync::Arc;
 use cudarc::driver::CudaDevice;
+use arrow::array::Float64Array;
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 
@@ -84,6 +86,43 @@ impl QdpEngine {
     /// Get CUDA device reference for advanced operations
     pub fn device(&self) -> &CudaDevice {
         &self.device
+    }
+
+    /// Encode data from an Arrow Float64Array into quantum state
+    ///
+    /// # Arguments
+    /// * `array` - Arrow Float64Array containing the input data
+    /// * `num_qubits` - Number of qubits
+    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
+    ///
+    /// # Returns
+    /// DLPack pointer for zero-copy PyTorch integration
+    pub fn encode_from_arrow(
+        &self,
+        array: &Float64Array,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> Result<*mut DLManagedTensor> {
+        let data = crate::io::arrow_to_vec(array);
+        self.encode(&data, num_qubits, encoding_method)
+    }
+
+    /// Load data from Parquet file and encode into quantum state
+    ///
+    /// # Arguments
+    /// * `path` - Path to Parquet file
+    /// * `num_qubits` - Number of qubits
+    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
+    pub fn encode_from_parquet(
+        &self,
+        path: &str,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeFromParquet");
+
+        let data = crate::io::read_parquet(path)?;
+        self.encode(&data, num_qubits, encoding_method)
     }
 }
 

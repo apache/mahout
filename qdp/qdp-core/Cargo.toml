@@ -9,6 +9,8 @@ qdp-kernels = { path = "../qdp-kernels" }
 thiserror = { workspace = true }
 rayon = { workspace = true }
 nvtx = { version = "1.3", optional = true }
+arrow = { workspace = true }
+parquet = { workspace = true }
 
 [lib]
 name = "qdp_core"
