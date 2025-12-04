@@ -14,17 +14,27 @@
 #include <cuda_runtime.h>
 #include <cuComplex.h>
 
+__global__ void amplitude_encode_kernel(
+    const double* __restrict__ input,
+    cuDoubleComplex* __restrict__ state,
+    size_t input_len,
+    size_t state_len,
+    double norm
+) {
+    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx >= state_len) return;
+
+    double real_part = 0.0;
+    if (idx < input_len) {
+        real_part = input[idx] / norm;
+    }
+
+    state[idx] = make_cuDoubleComplex(real_part, 0.0);
+}
+
 extern "C" {
 
-/// Launch amplitude encoding kernel (skeleton implementation)
-///
-/// TODO: Full implementation with:
-/// - Parallel normalization kernel
-/// - Coalesced memory access patterns
-/// - Warp-level optimizations
-/// - Stream support for async execution
-///
-/// For now, this returns success to allow Core compilation.
+/// Launch amplitude encoding kernel
 ///
 /// # Arguments
 /// * input_d - Device pointer to input data (already normalized by host)
@@ -44,26 +54,21 @@ int launch_amplitude_encode(
     double norm,
     cudaStream_t stream
 ) {
-    // Skeleton implementation - ensures FFI linkage is correct
-    // This allows the project to compile and pass CI/CD checks.
-    //
-    // TODO: Implement full CUDA kernel:
-    // 1. Kernel launch with optimal grid/block dimensions
-    // 2. Parallel normalization and complex number construction
-    // 3. Zero-padding for unused state vector elements
-    // 4. Error checking and stream synchronization
+    // Cast void* (from Rust) to strong CUDA type
+    cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
 
-    // Suppress unused parameter warnings (parameters will be used in full implementation)
-    (void)input_d;
-    (void)state_d;
-    (void)input_len;
-    (void)state_len;
-    (void)norm;
-    (void)stream;
+    const int blockSize = 256;
+    const int gridSize = (state_len + blockSize - 1) / blockSize;
 
-    // For now, just return success
-    // TODO: Launch actual kernel here
-    return cudaSuccess;
+    amplitude_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
+        input_d,
+        state_complex_d,
+        input_len,
+        state_len,
+        norm
+    );
+
+    return (int)cudaGetLastError();
 }
 
 // TODO: Future encoding methods:
