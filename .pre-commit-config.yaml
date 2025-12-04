@@ -42,3 +42,11 @@ repos:
           - testing/utils/.license-header.txt
           - --comment-style
           - "//"
+      - id: insert-license
+        name: check license headers (CUDA)
+        files: \.(cu|cuh)$
+        args:
+          - --license-filepath
+          - testing/utils/.license-header.txt
+          - --comment-style
+          - "//"
