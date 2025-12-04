@@ -348,7 +348,7 @@ dev = [
     { name = "maturin", specifier = ">=1.10.2" },
     { name = "patchelf", specifier = ">=0.17.2.4" },
     { name = "pytest", specifier = ">=9.0.1" },
-    { name = "torch", specifier = ">=2.2,<2.3" },
+    { name = "torch", specifier = ">=2.2" },
 ]
 
 [[package]]
