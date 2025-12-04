@@ -47,8 +47,8 @@ unsafe extern "C" {
     pub fn launch_amplitude_encode(
         input_d: *const f64,
         state_d: *mut c_void,
-        input_len: i32,
-        state_len: i32,
+        input_len: usize,
+        state_len: usize,
         norm: f64,
         stream: *mut c_void,
     ) -> i32;
@@ -62,8 +62,8 @@ unsafe extern "C" {
 pub extern "C" fn launch_amplitude_encode(
     _input_d: *const f64,
     _state_d: *mut c_void,
-    _input_len: i32,
-    _state_len: i32,
+    _input_len: usize,
+    _state_len: usize,
     _norm: f64,
     _stream: *mut c_void,
 ) -> i32 {

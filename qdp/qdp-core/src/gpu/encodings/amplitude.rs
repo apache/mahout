@@ -20,6 +20,7 @@ use std::sync::Arc;
 use cudarc::driver::CudaDevice;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
+use crate::gpu::pipeline::run_dual_stream_pipeline;
 use super::QuantumEncoder;
 
 #[cfg(target_os = "linux")]
@@ -57,23 +58,27 @@ impl QuantumEncoder for AmplitudeEncoder {
                 GpuStateVector::new(_device, num_qubits)?
             };
 
-            // Copy input data to GPU (synchronous, zero-copy from slice)
-            // TODO : Use async CUDA streams for pipeline overlap
+            // SSS-Tier Optimization: Async Pipeline for large data
+            // For small data (< 1MB), use synchronous path to avoid stream overhead
+            // For large data, use dual-stream async pipeline for maximum throughput
+            const ASYNC_THRESHOLD: usize = 1024 * 1024 / std::mem::size_of::<f64>(); // 1MB threshold
+
+            if host_data.len() < ASYNC_THRESHOLD {
+                // Synchronous path for small data (avoids stream overhead)
             let input_slice = {
                 crate::profile_scope!("GPU::H2DCopy");
                 _device.htod_sync_copy(host_data)
                     .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to allocate input buffer: {:?}", e)))?
             };
 
-            // Launch CUDA kernel (CPU-side launch only; execution is asynchronous)
             let ret = {
                 crate::profile_scope!("GPU::KernelLaunch");
                 unsafe {
                     launch_amplitude_encode(
                         *input_slice.device_ptr() as *const f64,
                         state_vector.ptr() as *mut c_void,
-                        host_data.len() as i32,
-                        state_len as i32,
+                            host_data.len(),
+                            state_len,
                         norm,
                         std::ptr::null_mut(), // default stream
                     )
@@ -89,12 +94,15 @@ impl QuantumEncoder for AmplitudeEncoder {
                 return Err(MahoutError::KernelLaunch(error_msg));
             }
 
-            // Block until all work on the device is complete
             {
                 crate::profile_scope!("GPU::Synchronize");
                 _device
                     .synchronize()
                     .map_err(|e| MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e)))?;
+                }
+            } else {
+                // Async Pipeline path for large data
+                Self::encode_async_pipeline(_device, host_data, num_qubits, state_len, norm, &state_vector)?;
             }
 
             Ok(state_vector)
@@ -112,6 +120,108 @@ impl QuantumEncoder for AmplitudeEncoder {
 
     fn description(&self) -> &'static str {
         "Amplitude encoding with L2 normalization"
+    }
+}
+
+impl AmplitudeEncoder {
+    /// Async pipeline encoding for large data (SSS-tier optimization)
+    ///
+    /// Uses the generic dual-stream pipeline infrastructure to overlap
+    /// data transfer and computation. The pipeline handles all the
+    /// streaming mechanics, while this method focuses on the amplitude
+    /// encoding kernel logic.
+    #[cfg(target_os = "linux")]
+    fn encode_async_pipeline(
+        device: &Arc<CudaDevice>,
+        host_data: &[f64],
+        _num_qubits: usize,
+        state_len: usize,
+        norm: f64,
+        state_vector: &GpuStateVector,
+    ) -> Result<()> {
+        // Use generic pipeline infrastructure
+        // The closure handles amplitude-specific kernel launch logic
+        run_dual_stream_pipeline(device, host_data, |stream, input_ptr, chunk_offset, chunk_len| {
+            // Calculate offset pointer for state vector (type-safe pointer arithmetic)
+            // Offset is in complex numbers (CuDoubleComplex), not f64 elements
+            let state_ptr_offset = unsafe {
+                state_vector.ptr().cast::<u8>()
+                    .add(chunk_offset * std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
+                    .cast::<std::ffi::c_void>()
+            };
+
+            // Launch amplitude encoding kernel on the provided stream
+            let ret = unsafe {
+                launch_amplitude_encode(
+                    input_ptr,
+                    state_ptr_offset,
+                    chunk_len,
+                    state_len,
+                    norm,
+                    stream.stream as *mut c_void,
+                )
+            };
+
+            if ret != 0 {
+                let error_msg = format!(
+                    "Kernel launch failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                );
+                return Err(MahoutError::KernelLaunch(error_msg));
+            }
+
+            Ok(())
+        })?;
+
+        // CRITICAL FIX: Handle padding for uninitialized memory
+        // Since we use alloc() (uninitialized), we must zero-fill any tail region
+        // that wasn't written by the pipeline. This ensures correctness when
+        // host_data.len() < state_len (e.g., 1000 elements in a 1024-element state).
+        let data_len = host_data.len();
+        if data_len < state_len {
+            let padding_start = data_len;
+            let padding_elements = state_len - padding_start;
+            let padding_bytes = padding_elements * std::mem::size_of::<qdp_kernels::CuDoubleComplex>();
+
+            // Calculate tail pointer (in complex numbers)
+            let tail_ptr = unsafe {
+                state_vector.ptr().add(padding_start) as *mut c_void
+            };
+
+            // Zero-fill padding region using CUDA Runtime API
+            // Use default stream since pipeline streams are already synchronized
+            unsafe {
+                unsafe extern "C" {
+                    fn cudaMemsetAsync(
+                        devPtr: *mut c_void,
+                        value: i32,
+                        count: usize,
+                        stream: *mut c_void,
+                    ) -> i32;
+                }
+
+                let result = cudaMemsetAsync(
+                    tail_ptr,
+                    0,
+                    padding_bytes,
+                    std::ptr::null_mut(), // default stream
+                );
+
+                if result != 0 {
+                    return Err(MahoutError::Cuda(
+                        format!("Failed to zero-fill padding region: {} ({})",
+                                result, cuda_error_to_string(result))
+                    ));
+                }
+            }
+
+            // Synchronize to ensure padding is complete before returning
+            device.synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("Failed to sync after padding: {:?}", e)))?;
+        }
+
+        Ok(())
     }
 }
 

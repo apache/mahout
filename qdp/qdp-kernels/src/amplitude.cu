@@ -39,8 +39,8 @@ extern "C" {
 int launch_amplitude_encode(
     const double* input_d,
     void* state_d,
-    int input_len,
-    int state_len,
+    size_t input_len,
+    size_t state_len,
     double norm,
     cudaStream_t stream
 ) {

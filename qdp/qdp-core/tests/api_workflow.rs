@@ -72,3 +72,38 @@ fn test_amplitude_encoding_workflow() {
         println!("PASS: Memory freed successfully");
     }
 }
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_amplitude_encoding_async_pipeline() {
+    println!("Testing amplitude encoding async pipeline path...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    // Use 200000 elements to trigger async pipeline path (ASYNC_THRESHOLD = 131072)
+    let data = common::create_test_data(200000);
+    println!("Created test data: {} elements", data.len());
+
+    let result = engine.encode(&data, 18, "amplitude");
+    assert!(result.is_ok(), "Encoding should succeed");
+
+    let dlpack_ptr = result.unwrap();
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+    println!("PASS: Encoding succeeded, DLPack pointer valid");
+
+    unsafe {
+        let managed = &mut *dlpack_ptr;
+        assert!(managed.deleter.is_some(), "Deleter must be present");
+
+        println!("Calling deleter to free GPU memory");
+        let deleter = managed.deleter.take().expect("Deleter function pointer is missing!");
+        deleter(dlpack_ptr);
+        println!("PASS: Memory freed successfully");
+    }
+}
