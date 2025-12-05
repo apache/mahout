@@ -26,8 +26,8 @@ mod profiling;
 pub use error::{MahoutError, Result};
 
 use std::sync::Arc;
-use cudarc::driver::CudaDevice;
 use arrow::array::Float64Array;
+use cudarc::driver::CudaDevice;
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 
@@ -88,26 +88,35 @@ impl QdpEngine {
         &self.device
     }
 
-    /// Encode data from an Arrow Float64Array into quantum state
+    /// Encode from chunked Arrow arrays (zero-copy from Parquet)
     ///
     /// # Arguments
-    /// * `array` - Arrow Float64Array containing the input data
+    /// * `chunks` - Chunked Arrow Float64Arrays (from read_parquet_to_arrow)
     /// * `num_qubits` - Number of qubits
     /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
     ///
     /// # Returns
     /// DLPack pointer for zero-copy PyTorch integration
-    pub fn encode_from_arrow(
+    pub fn encode_chunked(
         &self,
-        array: &Float64Array,
+        chunks: &[Float64Array],
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
-        let data = crate::io::arrow_to_vec(array);
-        self.encode(&data, num_qubits, encoding_method)
+        crate::profile_scope!("Mahout::EncodeChunked");
+
+        let encoder = get_encoder(encoding_method)?;
+        let state_vector = encoder.encode_chunked(&self.device, chunks, num_qubits)?;
+        let dlpack_ptr = {
+            crate::profile_scope!("Mahout::CreateDLPack");
+            state_vector.to_dlpack()
+        };
+        Ok(dlpack_ptr)
     }
 
     /// Load data from Parquet file and encode into quantum state
+    ///
+    /// **ZERO-COPY**: Reads Parquet chunks directly without intermediate Vec allocation.
     ///
     /// # Arguments
     /// * `path` - Path to Parquet file
@@ -121,8 +130,8 @@ impl QdpEngine {
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromParquet");
 
-        let data = crate::io::read_parquet(path)?;
-        self.encode(&data, num_qubits, encoding_method)
+        let chunks = crate::io::read_parquet_to_arrow(path)?;
+        self.encode_chunked(&chunks, num_qubits, encoding_method)
     }
 }
 
