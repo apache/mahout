@@ -1,11 +1,4 @@
 // Amplitude Encoding CUDA Kernel
-//
-// This is a minimal skeleton implementation for the Core Architecture.
-//
-// Updates:
-// - Refactored to use multiplication (inv_norm) instead of division.
-// - Implemented double2 vectorized memory access for bandwidth optimization.
-// - Added host-side safety guards.
 
 #include <cuda_runtime.h>
 #include <cuComplex.h>
