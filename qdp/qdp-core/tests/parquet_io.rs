@@ -14,7 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::io::{read_parquet, write_parquet, read_parquet_to_arrow, write_arrow_to_parquet};
+use qdp_core::io::{
+    arrow_to_vec_chunked, read_parquet, read_parquet_to_arrow, write_arrow_to_parquet,
+    write_parquet,
+};
 use arrow::array::Float64Array;
 use std::fs;
 
@@ -82,13 +85,20 @@ fn test_arrow_roundtrip() {
     // Write Arrow array
     write_arrow_to_parquet(temp_path, &array, None).unwrap();
 
-    // Read back as Arrow array
-    let read_array = read_parquet_to_arrow(temp_path).unwrap();
+    // Read back as Arrow arrays (chunked)
+    let read_chunks = read_parquet_to_arrow(temp_path).unwrap();
 
-    // Verify
-    assert_eq!(array.len(), read_array.len());
-    for i in 0..array.len() {
-        assert!((array.value(i) - read_array.value(i)).abs() < 1e-10);
+    // Verify total length
+    let total_len: usize = read_chunks.iter().map(|c| c.len()).sum();
+    assert_eq!(array.len(), total_len);
+
+    // Verify data integrity
+    let mut offset = 0;
+    for chunk in &read_chunks {
+        for i in 0..chunk.len() {
+            assert!((array.value(offset + i) - chunk.value(i)).abs() < 1e-10);
+        }
+        offset += chunk.len();
     }
 
     // Cleanup
@@ -120,6 +130,44 @@ fn test_large_dataset() {
     assert_eq!(data.len(), read_data.len());
     assert!((data[0] - read_data[0]).abs() < 1e-10);
     assert!((data[size - 1] - read_data[size - 1]).abs() < 1e-10);
+
+    // Cleanup
+    fs::remove_file(temp_path).unwrap();
+}
+
+#[test]
+fn test_chunked_zero_copy_api() {
+    let temp_path = "/tmp/test_chunked_api.parquet";
+    let data = common::create_test_data(16);
+
+    // Write test data
+    write_parquet(temp_path, &data, None).unwrap();
+
+    // Read using chunked API (zero-copy)
+    let chunks = read_parquet_to_arrow(temp_path).unwrap();
+
+    // Verify we got chunks
+    assert!(!chunks.is_empty());
+
+    // Verify total length
+    let total_len: usize = chunks.iter().map(|c| c.len()).sum();
+    assert_eq!(total_len, data.len());
+
+    // Verify data integrity through chunks
+    let mut offset = 0;
+    for chunk in &chunks {
+        for i in 0..chunk.len() {
+            assert!((chunk.value(i) - data[offset + i]).abs() < 1e-10);
+        }
+        offset += chunk.len();
+    }
+
+    // Test conversion to Vec using chunked helper
+    let vec_data = arrow_to_vec_chunked(&chunks);
+    assert_eq!(vec_data.len(), data.len());
+    for (original, read) in data.iter().zip(vec_data.iter()) {
+        assert!((original - read).abs() < 1e-10);
+    }
 
     // Cleanup
     fs::remove_file(temp_path).unwrap();
