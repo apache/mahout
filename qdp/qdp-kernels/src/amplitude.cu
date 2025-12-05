@@ -20,7 +20,7 @@ __global__ void amplitude_encode_kernel(
 ) {
     // We process 2 elements per thread to maximize memory bandwidth via double2
     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    
+
     // Each thread handles two state amplitudes (indices 2*idx and 2*idx + 1)
     size_t state_idx_base = idx * 2;
 
@@ -39,17 +39,17 @@ __global__ void amplitude_encode_kernel(
         double2 loaded = input_vec[idx];
         v1 = loaded.x;
         v2 = loaded.y;
-    } 
+    }
     // Handle edge case: Odd input length
     else if (state_idx_base < input_len) {
         v1 = input[state_idx_base];
         // v2 remains 0.0
     }
 
-    // Write output: 
+    // Write output:
     // Apply pre-calculated reciprocal (multiplication is faster than division)
     state[state_idx_base]     = make_cuDoubleComplex(v1 * inv_norm, 0.0);
-    
+
     // Check boundary for the second element (state_len is usually power of 2, but good to be safe)
     if (state_idx_base + 1 < state_len) {
         state[state_idx_base + 1] = make_cuDoubleComplex(v2 * inv_norm, 0.0);
