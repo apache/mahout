@@ -33,6 +33,9 @@ pub enum MahoutError {
 
     #[error("DLPack operation failed: {0}")]
     DLPack(String),
+
+    #[error("I/O error: {0}")]
+    Io(String),
 }
 
 /// Result type alias for Mahout operations

@@ -17,6 +17,7 @@
 // Quantum encoding strategies (Strategy Pattern)
 
 use std::sync::Arc;
+use arrow::array::Float64Array;
 use cudarc::driver::CudaDevice;
 use crate::error::Result;
 use crate::gpu::memory::GpuStateVector;
@@ -32,6 +33,20 @@ pub trait QuantumEncoder: Send + Sync {
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector>;
+
+    /// Encode from chunked Arrow arrays
+    ///
+    /// Default implementation flattens chunks. (TODO: Encoders can override for true zero-copy.)
+    fn encode_chunked(
+        &self,
+        device: &Arc<CudaDevice>,
+        chunks: &[Float64Array],
+        num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        // Default: flatten and use regular encode
+        let data = crate::io::arrow_to_vec_chunked(chunks);
+        self.encode(device, &data, num_qubits)
+    }
 
     /// Validate input data before encoding
     fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
