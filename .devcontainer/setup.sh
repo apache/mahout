@@ -30,6 +30,3 @@ pipx install poetry
 # setup pre-install hook
 poetry install --extras dev
 poetry run pre-commit install
-
-# (Optional) CUDA dev packages you may want later
-# apt-get install -y cuda-toolkit-12-4
