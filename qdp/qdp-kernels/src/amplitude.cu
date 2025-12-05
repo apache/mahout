@@ -1,35 +1,59 @@
 // Amplitude Encoding CUDA Kernel
 //
 // This is a minimal skeleton implementation for the Core Architecture.
-// TODO: Implement full optimized kernel with parallel normalization.
 //
-// Purpose of this skeleton:
-// - Provides the function signature required by mahout-core
-// - Ensures the project compiles and links correctly
-// - Allows CI/CD to pass for the Core PR
-//
-// The actual parallel normalization and state encoding logic will be
-// implemented in the next PR, focusing on CUDA optimization strategies.
+// Updates:
+// - Refactored to use multiplication (inv_norm) instead of division.
+// - Implemented double2 vectorized memory access for bandwidth optimization.
+// - Added host-side safety guards.
 
 #include <cuda_runtime.h>
 #include <cuComplex.h>
+#include <vector_types.h>
 
 __global__ void amplitude_encode_kernel(
     const double* __restrict__ input,
     cuDoubleComplex* __restrict__ state,
     size_t input_len,
     size_t state_len,
-    double norm
+    double inv_norm
 ) {
+    // We process 2 elements per thread to maximize memory bandwidth via double2
     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= state_len) return;
+    
+    // Each thread handles two state amplitudes (indices 2*idx and 2*idx + 1)
+    size_t state_idx_base = idx * 2;
 
-    double real_part = 0.0;
-    if (idx < input_len) {
-        real_part = input[idx] / norm;
+    if (state_idx_base >= state_len) return;
+
+    double v1 = 0.0;
+    double v2 = 0.0;
+
+    // Vectorized Load Optimization:
+    // If we are well within bounds, treat input as double2 to issue a single 128-bit load instruction.
+    // This reduces memory transactions and improves throughput on RTX cards.
+    if (state_idx_base + 1 < input_len) {
+        // Reinterpret cast to load two doubles at once
+        // Note: Assumes input is reasonably aligned (standard cudaMalloc provides 256-byte alignment)
+        const double2* input_vec = reinterpret_cast<const double2*>(input);
+        double2 loaded = input_vec[idx];
+        v1 = loaded.x;
+        v2 = loaded.y;
+    } 
+    // Handle edge case: Odd input length
+    else if (state_idx_base < input_len) {
+        v1 = input[state_idx_base];
+        // v2 remains 0.0
     }
 
-    state[idx] = make_cuDoubleComplex(real_part, 0.0);
+    // Write output: 
+    // Apply pre-calculated reciprocal (multiplication is faster than division)
+    state[state_idx_base]     = make_cuDoubleComplex(v1 * inv_norm, 0.0);
+    
+    // Check boundary for the second element (state_len is usually power of 2, but good to be safe)
+    if (state_idx_base + 1 < state_len) {
+        state[state_idx_base + 1] = make_cuDoubleComplex(v2 * inv_norm, 0.0);
+    }
 }
 
 extern "C" {
@@ -54,18 +78,28 @@ int launch_amplitude_encode(
     double norm,
     cudaStream_t stream
 ) {
-    // Cast void* (from Rust) to strong CUDA type
+    // Address Comment 2 (@400Ping): Explicitly guard against norm <= 0.0
+    // Returning cudaErrorInvalidValue prevents undefined behavior (NaN/Inf) in the kernel.
+    if (norm <= 0.0) {
+        return cudaErrorInvalidValue;
+    }
+
+    // Address Comment 1 (@rich7420): Replace slow division with fast multiplication.
+    // We compute the reciprocal once on the host to save cycles on the device.
+    double inv_norm = 1.0 / norm;
+
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
 
     const int blockSize = 256;
-    const int gridSize = (state_len + blockSize - 1) / blockSize;
+    // Halve the grid size because each thread now processes 2 elements
+    const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
 
     amplitude_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
         input_d,
         state_complex_d,
         input_len,
         state_len,
-        norm
+        inv_norm // Pass reciprocal
     );
 
     return (int)cudaGetLastError();
