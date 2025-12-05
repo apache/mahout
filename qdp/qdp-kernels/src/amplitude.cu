@@ -78,14 +78,10 @@ int launch_amplitude_encode(
     double norm,
     cudaStream_t stream
 ) {
-    // Address Comment 2 (@400Ping): Explicitly guard against norm <= 0.0
-    // Returning cudaErrorInvalidValue prevents undefined behavior (NaN/Inf) in the kernel.
     if (norm <= 0.0) {
         return cudaErrorInvalidValue;
     }
 
-    // Address Comment 1 (@rich7420): Replace slow division with fast multiplication.
-    // We compute the reciprocal once on the host to save cycles on the device.
     double inv_norm = 1.0 / norm;
 
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
