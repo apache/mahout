@@ -23,6 +23,8 @@ use std::sync::Arc;
 use std::ffi::c_void;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use crate::error::{MahoutError, Result};
+#[cfg(target_os = "linux")]
+use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 
 /// Chunk processing callback for async pipeline
 ///
@@ -92,11 +94,17 @@ where
 
         crate::profile_scope!("GPU::ChunkProcess");
 
+        let chunk_bytes = chunk.len() * std::mem::size_of::<f64>();
+        ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
+
         // Allocate temporary device buffer for this chunk
         let input_chunk_dev = unsafe {
             device.alloc::<f64>(chunk.len())
-        }.map_err(|e| MahoutError::MemoryAllocation(
-            format!("Failed to allocate chunk buffer: {:?}", e)
+        }.map_err(|e| map_allocation_error(
+            chunk_bytes,
+            "pipeline chunk buffer allocation",
+            None,
+            e,
         ))?;
 
         // Async copy: host to device (non-blocking, on specified stream)

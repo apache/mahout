@@ -29,6 +29,8 @@ use std::ffi::c_void;
 use cudarc::driver::DevicePtr;
 #[cfg(target_os = "linux")]
 use qdp_kernels::launch_amplitude_encode;
+#[cfg(target_os = "linux")]
+use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 
 use crate::preprocessing::Preprocessor;
 
@@ -65,40 +67,56 @@ impl QuantumEncoder for AmplitudeEncoder {
 
             if host_data.len() < ASYNC_THRESHOLD {
                 // Synchronous path for small data (avoids stream overhead)
-            let input_slice = {
-                crate::profile_scope!("GPU::H2DCopy");
-                _device.htod_sync_copy(host_data)
-                    .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to allocate input buffer: {:?}", e)))?
-            };
+                let input_bytes = host_data.len() * std::mem::size_of::<f64>();
+                ensure_device_memory_available(input_bytes, "input staging buffer", Some(num_qubits))?;
 
-            let ret = {
-                crate::profile_scope!("GPU::KernelLaunch");
-                unsafe {
-                    launch_amplitude_encode(
-                        *input_slice.device_ptr() as *const f64,
-                        state_vector.ptr() as *mut c_void,
+                let input_slice = {
+                    crate::profile_scope!("GPU::H2DCopy");
+                    _device.htod_sync_copy(host_data)
+                        .map_err(|e| map_allocation_error(
+                            input_bytes,
+                            "input staging buffer",
+                            Some(num_qubits),
+                            e,
+                        ))?
+                };
+
+                let ret = {
+                    crate::profile_scope!("GPU::KernelLaunch");
+                    unsafe {
+                        launch_amplitude_encode(
+                            *input_slice.device_ptr() as *const f64,
+                            state_vector.ptr() as *mut c_void,
                             host_data.len(),
                             state_len,
-                        norm,
-                        std::ptr::null_mut(), // default stream
-                    )
+                            norm,
+                            std::ptr::null_mut(), // default stream
+                        )
+                    }
+                };
+
+                if ret != 0 {
+                    let error_msg = if ret == 2 {
+                        format!(
+                            "Kernel launch reported cudaErrorMemoryAllocation (likely OOM) while encoding {} elements into 2^{} state.",
+                            host_data.len(),
+                            num_qubits,
+                        )
+                    } else {
+                        format!(
+                            "Kernel launch failed with CUDA error code: {} ({})",
+                            ret,
+                            cuda_error_to_string(ret)
+                        )
+                    };
+                    return Err(MahoutError::KernelLaunch(error_msg));
                 }
-            };
 
-            if ret != 0 {
-                let error_msg = format!(
-                    "Kernel launch failed with CUDA error code: {} ({})",
-                    ret,
-                    cuda_error_to_string(ret)
-                );
-                return Err(MahoutError::KernelLaunch(error_msg));
-            }
-
-            {
-                crate::profile_scope!("GPU::Synchronize");
-                _device
-                    .synchronize()
-                    .map_err(|e| MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e)))?;
+                {
+                    crate::profile_scope!("GPU::Synchronize");
+                    _device
+                        .synchronize()
+                        .map_err(|e| MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e)))?;
                 }
             } else {
                 // Async Pipeline path for large data
@@ -163,11 +181,19 @@ impl AmplitudeEncoder {
             };
 
             if ret != 0 {
-                let error_msg = format!(
-                    "Kernel launch failed with CUDA error code: {} ({})",
-                    ret,
-                    cuda_error_to_string(ret)
-                );
+                let error_msg = if ret == 2 {
+                    format!(
+                        "Kernel launch reported cudaErrorMemoryAllocation (likely OOM) while encoding chunk starting at offset {} (len={}).",
+                        chunk_offset,
+                        chunk_len
+                    )
+                } else {
+                    format!(
+                        "Kernel launch failed with CUDA error code: {} ({})",
+                        ret,
+                        cuda_error_to_string(ret)
+                    )
+                };
                 return Err(MahoutError::KernelLaunch(error_msg));
             }
 
