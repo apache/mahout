@@ -14,10 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! I/O module for reading and writing quantum data using Apache Arrow and Parquet.
+//! I/O module for reading and writing quantum data
 //!
 //! This module provides efficient columnar data exchange with the data science ecosystem,
-//! enabling zero-copy interoperability with pandas, polars, and other Arrow-compatible tools.
 
 use std::fs::File;
 use std::path::Path;
@@ -63,7 +62,7 @@ pub fn arrow_to_vec_chunked(arrays: &[Float64Array]) -> Vec<f64> {
 /// Reads quantum data from a Parquet file.
 ///
 /// Expects a single column named "data" containing Float64 values.
-/// This function performs one copy from Arrow to Vec. For zero-copy access,
+/// This function performs one copy from Arrow to Vec.
 /// use `read_parquet_to_arrow` instead.
 ///
 /// # Arguments
@@ -151,7 +150,7 @@ pub fn write_parquet<P: AsRef<Path>>(
 
 /// Reads quantum data from a Parquet file as Arrow arrays.
 ///
-/// **TRUE ZERO-COPY**: Returns Arrow arrays directly from Parquet batches without any data copying.
+/// Returns Arrow arrays directly from Parquet batches.
 /// Each element in the returned Vec corresponds to one Parquet batch.
 ///
 /// Directly constructs the Arrow array from Parquet batches
@@ -160,7 +159,7 @@ pub fn write_parquet<P: AsRef<Path>>(
 /// * `path` - Path to the Parquet file
 ///
 /// # Returns
-/// Vector of Float64Arrays, one per Parquet batch (zero-copy references to Parquet data)
+/// Vector of Float64Arrays, one per Parquet batch
 pub fn read_parquet_to_arrow<P: AsRef<Path>>(path: P) -> Result<Vec<Float64Array>> {
     let file = File::open(path.as_ref()).map_err(|e| {
         MahoutError::Io(format!("Failed to open Parquet file: {}", e))
@@ -218,7 +217,7 @@ pub fn read_parquet_to_arrow<P: AsRef<Path>>(path: P) -> Result<Vec<Float64Array
 
 /// Writes an Arrow Float64Array to a Parquet file.
 ///
-/// Zero-copy write from Arrow format to Parquet.
+/// Writes from Arrow format to Parquet.
 ///
 /// # Arguments
 /// * `path` - Path to write the Parquet file

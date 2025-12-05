@@ -34,9 +34,9 @@ pub trait QuantumEncoder: Send + Sync {
         num_qubits: usize,
     ) -> Result<GpuStateVector>;
 
-    /// Encode from chunked Arrow arrays (zero-copy from Parquet)
+    /// Encode from chunked Arrow arrays
     ///
-    /// Default implementation flattens chunks. Encoders can override for true zero-copy.
+    /// Default implementation flattens chunks. (TODO: Encoders can override for true zero-copy.)
     fn encode_chunked(
         &self,
         device: &Arc<CudaDevice>,
