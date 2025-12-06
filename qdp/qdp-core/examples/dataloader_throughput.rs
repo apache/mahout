@@ -30,12 +30,16 @@ const VECTOR_LEN: usize = 1024; // 2^10
 const NUM_QUBITS: usize = 10;
 
 fn build_sample(seed: u64) -> Vec<f64> {
-    (0..VECTOR_LEN)
-        .map(|i| {
-            let mixed = (i as u64).wrapping_add(seed) % 997;
-            (mixed as f64 + 1.0) / 1000.0
-        })
-        .collect()
+    // Lightweight deterministic pattern to keep CPU generation cheap
+    let mask = (VECTOR_LEN - 1) as u64; // power-of-two mask instead of modulo
+    let scale = 1.0 / VECTOR_LEN as f64;
+
+    let mut out = Vec::with_capacity(VECTOR_LEN);
+    for i in 0..VECTOR_LEN {
+        let mixed = (i as u64 + seed) & mask;
+        out.push(mixed as f64 * scale);
+    }
+    out
 }
 
 fn main() {
@@ -57,7 +61,7 @@ fn main() {
         .ok()
         .and_then(|v| v.parse().ok())
         .filter(|v| *v > 0)
-        .unwrap_or(4);
+        .unwrap_or(16);
     let report_interval = Duration::from_secs(1);
 
     println!("Config:");

@@ -29,7 +29,7 @@ Unit tests for QDP core library covering input validation, API workflows, and me
 - Producer/consumer model with configurable prefetch to avoid GPU starvation
 - Reports vectors-per-second to verify QDP keeps the GPU busy
 - Run: `cargo run -p qdp-core --example dataloader_throughput --release`
-- Environment overrides: `BATCHES=<usize>` (default 200), `PREFETCH=<usize>` (default 4)
+- Environment overrides: `BATCHES=<usize>` (default 200), `PREFETCH=<usize>` (default 16)
 
 ### `common/mod.rs` - Test Utilities
 
