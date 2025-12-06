@@ -1,0 +1,29 @@
+{
+    "name": "CUDA Python + Rust Dev",
+    "image": "nvidia/cuda:12.4.1-devel-ubuntu22.04",
+    // Give container full GPU access
+    "runArgs": [
+        "--gpus",
+        "all"
+    ],
+    // Auto mount your GitHub repo as workspace
+    "workspaceFolder": "/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    // Install Python via devcontainers-features
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {
+            "version": "3.10"
+        }
+    },
+    // Additional setup (Rust, CUDA tools, etc.)
+    "postCreateCommand": "bash /workspace/.devcontainer/setup.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "tamasfe.even-better-toml",
+                "rust-lang.rust-analyzer"
+            ]
+        }
+    }
+}

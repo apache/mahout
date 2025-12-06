@@ -15,32 +15,59 @@
 // limitations under the License.
 
 // Amplitude Encoding CUDA Kernel
-//
-// This is a minimal skeleton implementation for the Core Architecture.
-// TODO: Implement full optimized kernel with parallel normalization.
-//
-// Purpose of this skeleton:
-// - Provides the function signature required by mahout-core
-// - Ensures the project compiles and links correctly
-// - Allows CI/CD to pass for the Core PR
-//
-// The actual parallel normalization and state encoding logic will be
-// implemented in the next PR, focusing on CUDA optimization strategies.
 
 #include <cuda_runtime.h>
 #include <cuComplex.h>
+#include <vector_types.h>
+
+__global__ void amplitude_encode_kernel(
+    const double* __restrict__ input,
+    cuDoubleComplex* __restrict__ state,
+    size_t input_len,
+    size_t state_len,
+    double inv_norm
+) {
+    // We process 2 elements per thread to maximize memory bandwidth via double2
+    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Each thread handles two state amplitudes (indices 2*idx and 2*idx + 1)
+    size_t state_idx_base = idx * 2;
+
+    if (state_idx_base >= state_len) return;
+
+    double v1 = 0.0;
+    double v2 = 0.0;
+
+    // Vectorized Load Optimization:
+    // If we are well within bounds, treat input as double2 to issue a single 128-bit load instruction.
+    // This reduces memory transactions and improves throughput on RTX cards.
+    if (state_idx_base + 1 < input_len) {
+        // Reinterpret cast to load two doubles at once
+        // Note: Assumes input is reasonably aligned (standard cudaMalloc provides 256-byte alignment)
+        const double2* input_vec = reinterpret_cast<const double2*>(input);
+        double2 loaded = input_vec[idx];
+        v1 = loaded.x;
+        v2 = loaded.y;
+    }
+    // Handle edge case: Odd input length
+    else if (state_idx_base < input_len) {
+        v1 = input[state_idx_base];
+        // v2 remains 0.0
+    }
+
+    // Write output:
+    // Apply pre-calculated reciprocal (multiplication is faster than division)
+    state[state_idx_base]     = make_cuDoubleComplex(v1 * inv_norm, 0.0);
+
+    // Check boundary for the second element (state_len is usually power of 2, but good to be safe)
+    if (state_idx_base + 1 < state_len) {
+        state[state_idx_base + 1] = make_cuDoubleComplex(v2 * inv_norm, 0.0);
+    }
+}
 
 extern "C" {
 
-/// Launch amplitude encoding kernel (skeleton implementation)
-///
-/// TODO: Full implementation with:
-/// - Parallel normalization kernel
-/// - Coalesced memory access patterns
-/// - Warp-level optimizations
-/// - Stream support for async execution
-///
-/// For now, this returns success to allow Core compilation.
+/// Launch amplitude encoding kernel
 ///
 /// # Arguments
 /// * input_d - Device pointer to input data (already normalized by host)
@@ -60,26 +87,27 @@ int launch_amplitude_encode(
     double norm,
     cudaStream_t stream
 ) {
-    // Skeleton implementation - ensures FFI linkage is correct
-    // This allows the project to compile and pass CI/CD checks.
-    //
-    // TODO: Implement full CUDA kernel:
-    // 1. Kernel launch with optimal grid/block dimensions
-    // 2. Parallel normalization and complex number construction
-    // 3. Zero-padding for unused state vector elements
-    // 4. Error checking and stream synchronization
+    if (norm <= 0.0) {
+        return cudaErrorInvalidValue;
+    }
 
-    // Suppress unused parameter warnings (parameters will be used in full implementation)
-    (void)input_d;
-    (void)state_d;
-    (void)input_len;
-    (void)state_len;
-    (void)norm;
-    (void)stream;
+    double inv_norm = 1.0 / norm;
 
-    // For now, just return success
-    // TODO: Launch actual kernel here
-    return cudaSuccess;
+    cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
+
+    const int blockSize = 256;
+    // Halve the grid size because each thread now processes 2 elements
+    const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
+
+    amplitude_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
+        input_d,
+        state_complex_d,
+        input_len,
+        state_len,
+        inv_norm // Pass reciprocal
+    );
+
+    return (int)cudaGetLastError();
 }
 
 // TODO: Future encoding methods:
