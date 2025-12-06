@@ -95,6 +95,11 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.append(cirq.Z(qubit))
 
 
+def apply_t_gate(circuit, qubit_index):
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.T(qubit))
+
+
 def execute_circuit(circuit, backend, backend_config):
     # handle 0-qubit circuits before adding measurements
     if not circuit.all_qubits():

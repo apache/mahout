@@ -40,7 +40,7 @@ The Pauli Z gate introduces a phase flip without changing the qubit's state. It 
 
 It's used for measuring the phase of a qubit.
 
-## T-Gate (π/8 Gate) (New Addition)
+## T-Gate (π/8 Gate)
 The T-Gate applies a **π/4 phase shift** to the qubit. It is essential for quantum computing because it, along with the Hadamard and CNOT gates, allows for **universal quantum computation**. Mathematically:
 
 \[ T|0⟩ = |0⟩ \]

@@ -251,6 +251,20 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_pauli_z_gate(self.circuit, qubit_index)
 
+    def apply_t_gate(self, qubit_index):
+        """Apply a T-gate (π/8 gate) to the specified qubit.
+
+        Applies a π/4 phase shift to the qubit. Essential for universal
+        quantum computation when combined with Hadamard and CNOT gates.
+
+        :param qubit_index: Index of the qubit.
+        :type qubit_index: int
+        :raises RuntimeError: If the circuit has not been initialized.
+        """
+        self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
+        self.backend_module.apply_t_gate(self.circuit, qubit_index)
+
     def execute_circuit(self, parameter_values=None):
         """Execute the quantum circuit and return the measurement results.
 
