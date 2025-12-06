@@ -102,7 +102,7 @@ def test_amplitude_encoding_fidelity_comprehensive(engine, num_qubits, data_size
 
 @pytest.mark.gpu
 def test_complex_integrity(engine):
-    """Verify imaginary part is strictly 0 for amplitude encoding."""
+    """Verify imaginary part is effectively zero for amplitude encoding."""
     num_qubits = 12
     data_size = 3000  # Non-power-of-2 size
 
@@ -111,8 +111,12 @@ def test_complex_integrity(engine):
     torch_state = torch.from_dlpack(qtensor)
 
     imag_error = torch.sum(torch.abs(torch_state.imag)).item()
-    print(f"\nSum of imaginary parts (should be 0): {imag_error}")
-    assert imag_error == 0.0, "State vector contains non-zero imaginary components!"
+    print(f"\nSum of imaginary parts (should be near 0): {imag_error}")
+
+    # Use tolerance check (< 1e-16) instead of strict equality to handle floating-point noise
+    assert imag_error < 1e-16, (
+        f"State vector contains significant imaginary components! ({imag_error})"
+    )
 
 
 # 2. Numerical Stability Tests
