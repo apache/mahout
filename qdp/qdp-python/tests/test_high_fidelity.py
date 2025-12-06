@@ -31,15 +31,18 @@ np.random.seed(2026)
 PIPELINE_CHUNK_SIZE = 131072
 
 
-def calculate_fidelity(state_vector_gpu: torch.Tensor, ground_truth_cpu: np.ndarray) -> float:
+def calculate_fidelity(
+    state_vector_gpu: torch.Tensor, ground_truth_cpu: np.ndarray
+) -> float:
     """Calculate quantum state fidelity: F = |<ψ_gpu | ψ_cpu>|²"""
     psi_gpu = state_vector_gpu.cpu().numpy()
 
     if np.any(np.isnan(psi_gpu)) or np.any(np.isinf(psi_gpu)):
         return 0.0
 
-    assert psi_gpu.shape == ground_truth_cpu.shape, \
+    assert psi_gpu.shape == ground_truth_cpu.shape, (
         f"Shape mismatch: {psi_gpu.shape} vs {ground_truth_cpu.shape}"
+    )
 
     overlap = np.vdot(ground_truth_cpu, psi_gpu)
     fidelity = np.abs(overlap) ** 2
@@ -59,14 +62,17 @@ def engine():
 
 
 @pytest.mark.gpu
-@pytest.mark.parametrize("num_qubits, data_size, desc", [
-    (4, 16, "Small - Sync Path"),
-    (10, 1000, "Medium - Padding Logic"),
-    (18, PIPELINE_CHUNK_SIZE, "Boundary - Exact Chunk Size"),
-    (18, PIPELINE_CHUNK_SIZE + 1, "Boundary - Chunk + 1"),
-    (18, PIPELINE_CHUNK_SIZE * 2, "Boundary - Two Exact Chunks"),
-    (20, 1_000_000, "Large - Async Pipeline"),
-])
+@pytest.mark.parametrize(
+    "num_qubits, data_size, desc",
+    [
+        (4, 16, "Small - Sync Path"),
+        (10, 1000, "Medium - Padding Logic"),
+        (18, PIPELINE_CHUNK_SIZE, "Boundary - Exact Chunk Size"),
+        (18, PIPELINE_CHUNK_SIZE + 1, "Boundary - Chunk + 1"),
+        (18, PIPELINE_CHUNK_SIZE * 2, "Boundary - Two Exact Chunks"),
+        (20, 1_000_000, "Large - Async Pipeline"),
+    ],
+)
 def test_amplitude_encoding_fidelity_comprehensive(engine, num_qubits, data_size, desc):
     """Test fidelity across sync path, async pipeline, and chunk boundaries."""
     print(f"\n[Test Case] {desc} (Size: {data_size})")
@@ -111,6 +117,7 @@ def test_complex_integrity(engine):
 
 # 2. Numerical Stability Tests
 
+
 @pytest.mark.gpu
 def test_numerical_stability_underflow(engine):
     """Test precision with extremely small values (1e-150)."""
@@ -128,6 +135,7 @@ def test_numerical_stability_underflow(engine):
 
 
 # 3. Memory Leak Tests
+
 
 @pytest.mark.gpu
 def test_memory_leak_quantitative(engine):
@@ -152,7 +160,9 @@ def test_memory_leak_quantitative(engine):
     end_mem = torch.cuda.memory_allocated()
     print(f"End GPU Memory:   {end_mem} bytes")
 
-    assert end_mem == start_mem, f"Memory leak detected! Leaked {end_mem - start_mem} bytes"
+    assert end_mem == start_mem, (
+        f"Memory leak detected! Leaked {end_mem - start_mem} bytes"
+    )
 
 
 @pytest.mark.gpu
@@ -179,9 +189,11 @@ def test_memory_safety_stress(engine):
 
 # 4. Thread Safety Tests
 
+
 @pytest.mark.gpu
 def test_multithreaded_access(engine):
     """Test concurrent access from multiple threads (validates Send+Sync)."""
+
     def worker_task(thread_id):
         size = 100 + thread_id
         data = np.random.rand(size).tolist()
@@ -208,6 +220,7 @@ def test_multithreaded_access(engine):
 
 
 # 5. Error Propagation Tests
+
 
 @pytest.mark.gpu
 def test_error_propagation(engine):
