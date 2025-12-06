@@ -81,6 +81,10 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
 
+def apply_t_gate(circuit, qubit_index):
+    circuit.t(qubit_index)
+
+
 def execute_circuit(circuit, backend, backend_config):
     shots = backend_config["backend_options"].get("shots", 1)
     parameter_values = backend_config.get("parameter_values", {})
