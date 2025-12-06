@@ -38,7 +38,7 @@ fn cuda_error_to_string(code: i32) -> &'static str {
 #[cfg(target_os = "linux")]
 fn query_cuda_mem_info() -> Result<(usize, usize)> {
     unsafe {
-        extern "C" {
+        unsafe extern "C" {
             fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> i32;
         }
 
@@ -164,7 +164,7 @@ impl GpuStateVector {
     /// Create GPU state vector for n qubits
     /// Allocates 2^n complex numbers on GPU (freed on drop)
     pub fn new(_device: &Arc<CudaDevice>, qubits: usize) -> Result<Self> {
-        let _size_elements = 1 << qubits;
+        let _size_elements: usize = 1usize << qubits;
 
         #[cfg(target_os = "linux")]
         {
