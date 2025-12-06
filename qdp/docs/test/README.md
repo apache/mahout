@@ -23,6 +23,14 @@ Unit tests for QDP core library covering input validation, API workflows, and me
 - Concurrent state vector management
 - DLPack tensor metadata validation
 
+### `examples/dataloader_throughput.rs` - DataLoader Batch Throughput
+
+- Simulates a QML training loop that streams batches of 64 vectors
+- Producer/consumer model with configurable prefetch to avoid GPU starvation
+- Reports vectors-per-second to verify QDP keeps the GPU busy
+- Run: `cargo run -p qdp-core --example dataloader_throughput --release`
+- Environment overrides: `BATCHES=<usize>` (default 200), `PREFETCH=<usize>` (default 16)
+
 ### `common/mod.rs` - Test Utilities
 
 - `create_test_data(size)`: Generates normalized test data
