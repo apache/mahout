@@ -93,6 +93,10 @@ fn main() {
     let start = Instant::now();
 
     for (batch_idx, batch) in rx.iter().enumerate() {
+        // NOTE: The DataLoader produces host-side batches of size BATCH_SIZE,
+        // but we currently submit each sample to the GPU one-by-one.
+        // From the GPU's perspective this is effectively "batch size = 1"
+        // per encode call; batching is only happening on the host side.
         for sample in batch {
             match engine.encode(&sample, NUM_QUBITS, "amplitude") {
                 Ok(ptr) => unsafe {
