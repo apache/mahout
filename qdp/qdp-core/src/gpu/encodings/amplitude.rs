@@ -154,15 +154,20 @@ impl QuantumEncoder for AmplitudeEncoder {
                 GpuStateVector::new(device, num_qubits)?
             };
 
+            // Require pre-processed data (no nulls)
+            for chunk in chunks {
+                if chunk.null_count() > 0 {
+                    return Err(MahoutError::InvalidInput(
+                        format!("Chunk contains {} null values. Data must be pre-processed before encoding", chunk.null_count())
+                    ));
+                }
+            }
+
             let norm = {
                 crate::profile_scope!("CPU::L2Norm");
                 let mut norm_sq = 0.0;
                 for chunk in chunks {
-                    if chunk.null_count() == 0 {
-                        norm_sq += chunk.values().iter().map(|&x| x * x).sum::<f64>();
-                    } else {
-                        norm_sq += chunk.iter().map(|opt| opt.unwrap_or(0.0).powi(2)).sum::<f64>();
-                    }
+                    norm_sq += chunk.values().iter().map(|&x| x * x).sum::<f64>();
                 }
                 let norm = norm_sq.sqrt();
                 if norm == 0.0 {
@@ -186,13 +191,9 @@ impl QuantumEncoder for AmplitudeEncoder {
 
                 let chunk_slice = {
                     crate::profile_scope!("GPU::ChunkH2DCopy");
-                    if chunk.null_count() == 0 {
-                        device.htod_sync_copy(chunk.values())
-                    } else {
-                        let temp_vec: Vec<f64> = chunk.iter().map(|opt| opt.unwrap_or(0.0)).collect();
-                        device.htod_sync_copy(&temp_vec)
-                    }
-                    .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to copy chunk: {:?}", e)))?
+                    // Zero-copy from Arrow buffer to GPU
+                    device.htod_sync_copy(chunk.values())
+                        .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to copy chunk: {:?}", e)))?
                 };
 
                 {
