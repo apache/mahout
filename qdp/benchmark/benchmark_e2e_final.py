@@ -34,6 +34,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import os
+import itertools
 import pyarrow as pa
 import pyarrow.parquet as pq
 from mahout_qdp import QdpEngine
@@ -73,10 +74,6 @@ def generate_data(n_qubits, n_samples):
     if os.path.exists(DATA_FILE):
         os.remove(DATA_FILE)
 
-    MAHOUT_DATA_FILE = DATA_FILE.replace(".parquet", "_mahout.parquet")
-    if os.path.exists(MAHOUT_DATA_FILE):
-        os.remove(MAHOUT_DATA_FILE)
-
     print(f"Generating {n_samples} samples of {n_qubits} qubits...")
     dim = 1 << n_qubits
 
@@ -93,20 +90,9 @@ def generate_data(n_qubits, n_samples):
             batch_table = pa.Table.from_arrays([arrays], names=["feature_vector"])
             writer.write_table(batch_table)
 
-    # Generate for Mahout (flat Float64 format, one sample per batch)
-    schema_flat = pa.schema([("data", pa.float64())])
-    with pq.ParquetWriter(MAHOUT_DATA_FILE, schema_flat) as writer:
-        for i in range(n_samples):
-            sample_data = np.random.rand(dim).astype(np.float64)
-            array = pa.array(sample_data, type=pa.float64())
-            batch_table = pa.Table.from_arrays([array], names=["data"])
-            writer.write_table(batch_table)
-
     file_size_mb = os.path.getsize(DATA_FILE) / (1024 * 1024)
-    mahout_size_mb = os.path.getsize(MAHOUT_DATA_FILE) / (1024 * 1024)
     print(f"  Generated {n_samples} samples")
-    print(f"  PennyLane/Qiskit format: {file_size_mb:.2f} MB")
-    print(f"  Mahout format: {mahout_size_mb:.2f} MB")
+    print(f"  Parquet file size: {file_size_mb:.2f} MB")
 
 
 # -----------------------------------------------------------
@@ -115,7 +101,7 @@ def generate_data(n_qubits, n_samples):
 def run_qiskit(n_qubits, n_samples):
     if not HAS_QISKIT:
         print("\n[Qiskit] Not installed, skipping.")
-        return 0.0
+        return 0.0, None
 
     print("\n[Qiskit] Full Pipeline (Disk -> GPU)...")
     model = DummyQNN(n_qubits).cuda()
@@ -131,6 +117,8 @@ def run_qiskit(n_qubits, n_samples):
     raw_data = np.stack(df["feature_vector"].values)
     io_time = time.perf_counter() - start_time
     print(f"  IO Time: {io_time:.4f} s")
+
+    all_qiskit_states = []
 
     # Process batches
     for i in range(0, n_samples, BATCH_SIZE):
@@ -158,12 +146,15 @@ def run_qiskit(n_qubits, n_samples):
         gpu_tensor = torch.tensor(
             np.array(batch_states), device="cuda", dtype=torch.complex64
         )
+        all_qiskit_states.append(gpu_tensor)
         _ = model(gpu_tensor.abs())
 
     torch.cuda.synchronize()
     total_time = time.perf_counter() - start_time
     print(f"\n  Total Time: {total_time:.4f} s")
-    return total_time
+
+    all_qiskit_tensor = torch.cat(all_qiskit_states, dim=0)
+    return total_time, all_qiskit_tensor
 
 
 # -----------------------------------------------------------
@@ -172,7 +163,7 @@ def run_qiskit(n_qubits, n_samples):
 def run_pennylane(n_qubits, n_samples):
     if not HAS_PENNYLANE:
         print("\n[PennyLane] Not installed, skipping.")
-        return 0.0
+        return 0.0, None
 
     print("\n[PennyLane] Full Pipeline (Disk -> GPU)...")
 
@@ -198,6 +189,8 @@ def run_pennylane(n_qubits, n_samples):
     io_time = time.perf_counter() - start_time
     print(f"  IO Time: {io_time:.4f} s")
 
+    all_pl_states = []
+
     # Process batches
     for i in range(0, n_samples, BATCH_SIZE):
         batch_cpu = torch.tensor(raw_data[i : i + BATCH_SIZE])
@@ -208,6 +201,8 @@ def run_pennylane(n_qubits, n_samples):
         except Exception:
             state_cpu = torch.stack([circuit(x) for x in batch_cpu])
 
+        all_pl_states.append(state_cpu)
+
         # Transfer to GPU
         state_gpu = state_cpu.to("cuda", dtype=torch.float32)
         _ = model(state_gpu.abs())
@@ -215,7 +210,13 @@ def run_pennylane(n_qubits, n_samples):
     torch.cuda.synchronize()
     total_time = time.perf_counter() - start_time
     print(f"  Total Time: {total_time:.4f} s")
-    return total_time
+
+    # Stack all collected states
+    all_pl_states_tensor = torch.cat(
+        all_pl_states, dim=0
+    )  # Should handle cases where last batch is smaller
+
+    return total_time, all_pl_states_tensor
 
 
 # -----------------------------------------------------------
@@ -224,28 +225,31 @@ def run_pennylane(n_qubits, n_samples):
 def run_mahout(engine, n_qubits, n_samples):
     print("\n[Mahout] Full Pipeline (Disk -> GPU)...")
     model = DummyQNN(n_qubits).cuda()
-    MAHOUT_DATA_FILE = DATA_FILE.replace(".parquet", "_mahout.parquet")
 
     torch.cuda.synchronize()
     start_time = time.perf_counter()
 
-    # Read Parquet and encode all samples
-    import pyarrow.parquet as pq
+    # Direct Parquet to GPU pipeline
+    parquet_encode_start = time.perf_counter()
+    batched_tensor = engine.encode_from_parquet(DATA_FILE, n_qubits, "amplitude")
+    parquet_encode_time = time.perf_counter() - parquet_encode_start
+    print(f"  Parquet->GPU (IO+Encode): {parquet_encode_time:.4f} s")
 
-    parquet_file = pq.ParquetFile(MAHOUT_DATA_FILE)
+    # Convert to torch tensor (single DLPack call)
+    dlpack_start = time.perf_counter()
+    gpu_batched = torch.from_dlpack(batched_tensor)
+    dlpack_time = time.perf_counter() - dlpack_start
+    print(f"  DLPack conversion: {dlpack_time:.4f} s")
 
-    all_states = []
-    for batch in parquet_file.iter_batches():
-        sample_data = batch.column(0).to_numpy()
-        qtensor = engine.encode(sample_data.tolist(), n_qubits, "amplitude")
-        gpu_state = torch.from_dlpack(qtensor)
-        all_states.append(gpu_state)
+    # Reshape to [n_samples, state_len] (still complex)
+    state_len = 1 << n_qubits
+    gpu_reshaped = gpu_batched.view(n_samples, state_len)
 
-    # Stack and convert
-    gpu_all_data = torch.stack(all_states).abs().to(torch.float32)
-
-    encode_time = time.perf_counter() - start_time
-    print(f"  IO + Encode Time: {encode_time:.4f} s")
+    # Convert to float for model (batch already on GPU)
+    reshape_start = time.perf_counter()
+    gpu_all_data = gpu_reshaped.abs().to(torch.float32)
+    reshape_time = time.perf_counter() - reshape_start
+    print(f"  Reshape & convert: {reshape_time:.4f} s")
 
     # Forward pass (data already on GPU)
     for i in range(0, n_samples, BATCH_SIZE):
@@ -255,7 +259,46 @@ def run_mahout(engine, n_qubits, n_samples):
     torch.cuda.synchronize()
     total_time = time.perf_counter() - start_time
     print(f"  Total Time: {total_time:.4f} s")
-    return total_time
+    return total_time, gpu_reshaped
+
+
+def compare_states(name_a, states_a, name_b, states_b):
+    print("\n" + "=" * 70)
+    print(f"VERIFICATION ({name_a} vs {name_b})")
+    print("=" * 70)
+
+    # Ensure both tensors are on GPU for comparison
+    n_compare = min(len(states_a), len(states_b))
+    tensor_a = states_a[:n_compare].cuda()
+    tensor_b = states_b[:n_compare].cuda()
+
+    # Compare Probabilities (|psi|^2)
+    diff_probs = (tensor_a.abs() ** 2 - tensor_b.abs() ** 2).abs().max().item()
+    print(f"Max Probability Difference: {diff_probs:.2e}")
+
+    # Compare Raw Amplitudes
+    # We compare full complex difference magnitude
+    diff_amps = (tensor_a - tensor_b).abs().max().item()
+    print(f"Max Amplitude Difference:   {diff_amps:.2e}")
+
+    if diff_probs < 1e-5:
+        print(">> SUCCESS: Quantum States Match!")
+    else:
+        print(">> FAILURE: States do not match.")
+
+
+def verify_correctness(states_dict):
+    # Filter out None values
+    valid_states = {
+        name: states for name, states in states_dict.items() if states is not None
+    }
+
+    if len(valid_states) < 2:
+        return
+
+    keys = sorted(list(valid_states.keys()))
+    for name_a, name_b in itertools.combinations(keys, 2):
+        compare_states(name_a, valid_states[name_a], name_b, valid_states[name_b])
 
 
 if __name__ == "__main__":
@@ -268,7 +311,25 @@ if __name__ == "__main__":
     parser.add_argument(
         "--samples", type=int, default=200, help="Number of training samples"
     )
+    parser.add_argument(
+        "--frameworks",
+        nargs="+",
+        default=["mahout", "pennylane"],
+        choices=["mahout", "pennylane", "qiskit", "all"],
+        help="Frameworks to benchmark (default: mahout pennylane). Use 'all' to run all available frameworks.",
+    )
     args = parser.parse_args()
+
+    # Expand "all" option
+    if "all" in args.frameworks:
+        all_frameworks = []
+        if "mahout" in args.frameworks or "all" in args.frameworks:
+            all_frameworks.append("mahout")
+        if "pennylane" in args.frameworks or "all" in args.frameworks:
+            all_frameworks.append("pennylane")
+        if "qiskit" in args.frameworks or "all" in args.frameworks:
+            all_frameworks.append("qiskit")
+        args.frameworks = all_frameworks
 
     generate_data(args.qubits, args.samples)
 
@@ -282,10 +343,20 @@ if __name__ == "__main__":
     print(f"E2E BENCHMARK: {args.qubits} Qubits, {args.samples} Samples")
     print("=" * 70)
 
+    # Initialize results
+    t_pl, pl_all_states = 0.0, None
+    t_mahout, mahout_all_states = 0.0, None
+    t_qiskit, qiskit_all_states = 0.0, None
+
     # Run benchmarks
-    t_pl = run_pennylane(args.qubits, args.samples)
-    t_qiskit = run_qiskit(args.qubits, args.samples)
-    t_mahout = run_mahout(engine, args.qubits, args.samples)
+    if "pennylane" in args.frameworks:
+        t_pl, pl_all_states = run_pennylane(args.qubits, args.samples)
+
+    if "qiskit" in args.frameworks:
+        t_qiskit, qiskit_all_states = run_qiskit(args.qubits, args.samples)
+
+    if "mahout" in args.frameworks:
+        t_mahout, mahout_all_states = run_mahout(engine, args.qubits, args.samples)
 
     print("\n" + "=" * 70)
     print("E2E LATENCY (Lower is Better)")
@@ -311,3 +382,12 @@ if __name__ == "__main__":
             print(f"Speedup vs PennyLane: {t_pl / t_mahout:10.2f}x")
         if t_qiskit > 0:
             print(f"Speedup vs Qiskit:    {t_qiskit / t_mahout:10.2f}x")
+
+    # Run Verification after benchmarks
+    verify_correctness(
+        {
+            "Mahout": mahout_all_states,
+            "PennyLane": pl_all_states,
+            "Qiskit": qiskit_all_states,
+        }
+    )

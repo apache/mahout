@@ -17,7 +17,7 @@
 // Amplitude encoding: direct state injection with L2 normalization
 
 use std::sync::Arc;
-use arrow::array::{Array, Float64Array};
+
 use cudarc::driver::CudaDevice;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
@@ -29,7 +29,7 @@ use std::ffi::c_void;
 #[cfg(target_os = "linux")]
 use cudarc::driver::DevicePtr;
 #[cfg(target_os = "linux")]
-use qdp_kernels::launch_amplitude_encode;
+use qdp_kernels::{launch_amplitude_encode, launch_amplitude_encode_batch};
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 
@@ -133,6 +133,113 @@ impl QuantumEncoder for AmplitudeEncoder {
         }
     }
 
+    /// Encode multiple samples in a single GPU allocation and kernel launch
+    #[cfg(target_os = "linux")]
+    fn encode_batch(
+        &self,
+        device: &Arc<CudaDevice>,
+        batch_data: &[f64],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        crate::profile_scope!("AmplitudeEncoder::encode_batch");
+
+        if batch_data.len() != num_samples * sample_size {
+            return Err(MahoutError::InvalidInput(
+                format!("Batch data length {} doesn't match num_samples {} * sample_size {}",
+                    batch_data.len(), num_samples, sample_size)
+            ));
+        }
+
+        let state_len = 1 << num_qubits;
+
+        // Validate inputs
+        if num_qubits == 0 || num_qubits > 30 {
+            return Err(MahoutError::InvalidInput(
+                format!("Number of qubits {} must be between 1 and 30", num_qubits)
+            ));
+        }
+
+        // Calculate L2 norms for each sample
+        let norms: Vec<f64> = {
+            crate::profile_scope!("CPU::BatchL2Norm");
+            (0..num_samples)
+                .map(|i| {
+                    let start = i * sample_size;
+                    let end = start + sample_size;
+                    let sample = &batch_data[start..end];
+                    let norm_sq: f64 = sample.iter().map(|&x| x * x).sum();
+                    let norm = norm_sq.sqrt();
+                    if norm == 0.0 {
+                        return Err(MahoutError::InvalidInput(
+                            format!("Sample {} has zero norm", i)
+                        ));
+                    }
+                    Ok(norm)
+                })
+                .collect::<Result<Vec<_>>>()?
+        };
+
+        // Convert to inverse norms
+        let inv_norms: Vec<f64> = norms.iter().map(|n| 1.0 / n).collect();
+
+        // Allocate single large GPU buffer for all states
+        let batch_state_vector = {
+            crate::profile_scope!("GPU::AllocBatch");
+            GpuStateVector::new_batch(device, num_samples, num_qubits)?
+        };
+
+        // Upload input data to GPU
+        let input_batch_gpu = {
+            crate::profile_scope!("GPU::H2D_InputBatch");
+            device.htod_sync_copy(batch_data)
+                .map_err(|e| MahoutError::MemoryAllocation(
+                    format!("Failed to upload batch input: {:?}", e)
+                ))?
+        };
+
+        // Upload inverse norms to GPU
+        let inv_norms_gpu = {
+            crate::profile_scope!("GPU::H2D_Norms");
+            device.htod_sync_copy(&inv_norms)
+                .map_err(|e| MahoutError::MemoryAllocation(
+                    format!("Failed to upload norms: {:?}", e)
+                ))?
+        };
+
+        // Launch batch kernel
+        {
+            crate::profile_scope!("GPU::BatchKernelLaunch");
+            let ret = unsafe {
+                launch_amplitude_encode_batch(
+                    *input_batch_gpu.device_ptr() as *const f64,
+                    batch_state_vector.ptr() as *mut c_void,
+                    *inv_norms_gpu.device_ptr() as *const f64,
+                    num_samples,
+                    sample_size,
+                    state_len,
+                    std::ptr::null_mut(), // default stream
+                )
+            };
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(
+                    format!("Batch kernel launch failed: {} ({})", ret, cuda_error_to_string(ret))
+                ));
+            }
+        }
+
+        // Synchronize
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            device.synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+        }
+
+        Ok(batch_state_vector)
+    }
+
     fn name(&self) -> &'static str {
         "amplitude"
     }
@@ -140,133 +247,11 @@ impl QuantumEncoder for AmplitudeEncoder {
     fn description(&self) -> &'static str {
         "Amplitude encoding with L2 normalization"
     }
-
-    /// Override to avoid intermediate Vec allocation. Processes chunks directly to GPU offsets.
-    fn encode_chunked(
-        &self,
-        device: &Arc<CudaDevice>,
-        chunks: &[Float64Array],
-        num_qubits: usize,
-    ) -> Result<GpuStateVector> {
-        #[cfg(target_os = "linux")]
-        {
-            let total_len: usize = chunks.iter().map(|c| c.len()).sum();
-            let state_len = 1 << num_qubits;
-
-            if total_len == 0 {
-                return Err(MahoutError::InvalidInput("Input chunks cannot be empty".to_string()));
-            }
-            if total_len > state_len {
-                return Err(MahoutError::InvalidInput(
-                    format!("Total data length {} exceeds state vector size {}", total_len, state_len)
-                ));
-            }
-            if num_qubits == 0 || num_qubits > 30 {
-                return Err(MahoutError::InvalidInput(
-                    format!("Number of qubits {} must be between 1 and 30", num_qubits)
-                ));
-            }
-
-            let state_vector = {
-                crate::profile_scope!("GPU::Alloc");
-                GpuStateVector::new(device, num_qubits)?
-            };
-
-            // Require pre-processed data (no nulls)
-            for chunk in chunks {
-                if chunk.null_count() > 0 {
-                    return Err(MahoutError::InvalidInput(
-                        format!("Chunk contains {} null values. Data must be pre-processed before encoding", chunk.null_count())
-                    ));
-                }
-            }
-
-            let norm = {
-                crate::profile_scope!("CPU::L2Norm");
-                let mut norm_sq = 0.0;
-                for chunk in chunks {
-                    norm_sq += chunk.values().iter().map(|&x| x * x).sum::<f64>();
-                }
-                let norm = norm_sq.sqrt();
-                if norm == 0.0 {
-                    return Err(MahoutError::InvalidInput("Input data has zero norm".to_string()));
-                }
-                norm
-            };
-
-            let mut current_offset = 0;
-            for chunk in chunks {
-                let chunk_len = chunk.len();
-                if chunk_len == 0 {
-                    continue;
-                }
-
-                let state_ptr_offset = unsafe {
-                    state_vector.ptr().cast::<u8>()
-                        .add(current_offset * std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
-                        .cast::<std::ffi::c_void>()
-                };
-
-                let chunk_slice = {
-                    crate::profile_scope!("GPU::ChunkH2DCopy");
-                    // Zero-copy from Arrow buffer to GPU
-                    device.htod_sync_copy(chunk.values())
-                        .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to copy chunk: {:?}", e)))?
-                };
-
-                {
-                    crate::profile_scope!("GPU::KernelLaunch");
-                    let ret = unsafe {
-                        launch_amplitude_encode(
-                            *chunk_slice.device_ptr() as *const f64,
-                            state_ptr_offset,
-                            chunk_len,
-                            state_len,
-                            norm,
-                            std::ptr::null_mut(),
-                        )
-                    };
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(
-                            format!("Kernel launch failed: {} ({})", ret, cuda_error_to_string(ret))
-                        ));
-                    }
-                }
-
-                current_offset += chunk_len;
-            }
-
-            if total_len < state_len {
-                let padding_bytes = (state_len - total_len) * std::mem::size_of::<qdp_kernels::CuDoubleComplex>();
-                let tail_ptr = unsafe { state_vector.ptr().add(total_len) as *mut c_void };
-
-                unsafe {
-                    unsafe extern "C" {
-                        fn cudaMemsetAsync(devPtr: *mut c_void, value: i32, count: usize, stream: *mut c_void) -> i32;
-                    }
-                    let result = cudaMemsetAsync(tail_ptr, 0, padding_bytes, std::ptr::null_mut());
-                    if result != 0 {
-                        return Err(MahoutError::Cuda(
-                            format!("Failed to zero-fill padding: {} ({})", result, cuda_error_to_string(result))
-                        ));
-                    }
-                }
-            }
-
-            device.synchronize()
-                .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
-
-            Ok(state_vector)
-        }
-
-        #[cfg(not(target_os = "linux"))]
-        {
-            Err(MahoutError::Cuda("CUDA unavailable (non-Linux)".to_string()))
-        }
-    }
 }
 
 impl AmplitudeEncoder {
+
+
     /// Async pipeline encoding for large data (SSS-tier optimization)
     ///
     /// Uses the generic dual-stream pipeline infrastructure to overlap
