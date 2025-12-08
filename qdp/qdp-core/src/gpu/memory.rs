@@ -210,14 +210,4 @@ impl GpuStateVector {
     pub fn ptr(&self) -> *mut CuDoubleComplex {
         self.buffer.ptr()
     }
-
-    /// Get the number of qubits
-    pub fn num_qubits(&self) -> usize {
-        self.num_qubits
-    }
-
-    /// Get the size in elements (2^n where n is number of qubits)
-    pub fn size_elements(&self) -> usize {
-        self.size_elements
-    }
 }

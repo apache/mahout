@@ -21,6 +21,7 @@ use std::sync::Arc;
 use cudarc::driver::CudaDevice;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
+use crate::gpu::pool::StagingBufferPool;
 use super::QuantumEncoder;
 
 /// Angle encoding (not implemented)
@@ -31,6 +32,7 @@ impl QuantumEncoder for AngleEncoder {
     fn encode(
         &self,
         _device: &Arc<CudaDevice>,
+        _pool: &Arc<StagingBufferPool>,
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {

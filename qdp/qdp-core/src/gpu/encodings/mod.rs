@@ -21,6 +21,7 @@ use arrow::array::Float64Array;
 use cudarc::driver::CudaDevice;
 use crate::error::Result;
 use crate::gpu::memory::GpuStateVector;
+use crate::gpu::pool::StagingBufferPool;
 use crate::preprocessing::Preprocessor;
 
 /// Quantum encoding strategy interface
@@ -30,6 +31,7 @@ pub trait QuantumEncoder: Send + Sync {
     fn encode(
         &self,
         device: &Arc<CudaDevice>,
+        pool: &Arc<StagingBufferPool>,
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector>;
@@ -40,12 +42,13 @@ pub trait QuantumEncoder: Send + Sync {
     fn encode_chunked(
         &self,
         device: &Arc<CudaDevice>,
+        pool: &Arc<StagingBufferPool>,
         chunks: &[Float64Array],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
         // Default: flatten and use regular encode
         let data = crate::io::arrow_to_vec_chunked(chunks);
-        self.encode(device, &data, num_qubits)
+        self.encode(device, pool, &data, num_qubits)
     }
 
     /// Validate input data before encoding

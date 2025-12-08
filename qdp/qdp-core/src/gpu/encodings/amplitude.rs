@@ -22,16 +22,14 @@ use cudarc::driver::CudaDevice;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
 use crate::gpu::pipeline::run_dual_stream_pipeline;
+use crate::gpu::pool::StagingBufferPool;
 use super::QuantumEncoder;
 
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
 #[cfg(target_os = "linux")]
-use cudarc::driver::DevicePtr;
 #[cfg(target_os = "linux")]
 use qdp_kernels::launch_amplitude_encode;
-#[cfg(target_os = "linux")]
-use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 
 use crate::preprocessing::Preprocessor;
 
@@ -44,7 +42,8 @@ pub struct AmplitudeEncoder;
 impl QuantumEncoder for AmplitudeEncoder {
     fn encode(
         &self,
-        _device: &Arc<CudaDevice>,
+        device: &Arc<CudaDevice>,
+        pool: &Arc<StagingBufferPool>,
         host_data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
@@ -58,7 +57,7 @@ impl QuantumEncoder for AmplitudeEncoder {
             // Allocate GPU state vector
             let state_vector = {
                 crate::profile_scope!("GPU::Alloc");
-                GpuStateVector::new(_device, num_qubits)?
+                GpuStateVector::new(device, num_qubits)?
             };
 
             // Async Pipeline for large data
@@ -69,24 +68,29 @@ impl QuantumEncoder for AmplitudeEncoder {
             if host_data.len() < ASYNC_THRESHOLD {
                 // Synchronous path for small data (avoids stream overhead)
                 let input_bytes = host_data.len() * std::mem::size_of::<f64>();
-                ensure_device_memory_available(input_bytes, "input staging buffer", Some(num_qubits))?;
 
-                let input_slice = {
-                    crate::profile_scope!("GPU::H2DCopy");
-                    _device.htod_sync_copy(host_data)
-                        .map_err(|e| map_allocation_error(
-                            input_bytes,
-                            "input staging buffer",
-                            Some(num_qubits),
-                            e,
-                        ))?
+                // Acquire buffer (RAII: auto-released on drop)
+                let mut _staging_buffer = {
+                    crate::profile_scope!("Pool::Acquire");
+                    pool.acquire(input_bytes)?
                 };
+
+                // Convert f64 to u8 view (zero-copy) and copy to device
+                let src_bytes: &[u8] = unsafe {
+                    std::slice::from_raw_parts(host_data.as_ptr() as *const u8, input_bytes)
+                };
+
+                {
+                    crate::profile_scope!("GPU::H2DCopy");
+                    device.htod_sync_copy_into(src_bytes, &mut _staging_buffer.slice_mut(0..input_bytes))
+                        .map_err(|e| MahoutError::Cuda(format!("H2D copy failed: {:?}", e)))?;
+                }
 
                 let ret = {
                     crate::profile_scope!("GPU::KernelLaunch");
                     unsafe {
                         launch_amplitude_encode(
-                            *input_slice.device_ptr() as *const f64,
+                            _staging_buffer.device_ptr_u8() as *const f64,
                             state_vector.ptr() as *mut c_void,
                             host_data.len(),
                             state_len,
@@ -95,6 +99,8 @@ impl QuantumEncoder for AmplitudeEncoder {
                         )
                     }
                 };
+
+                // BufferGuard auto-releases buffer on drop
 
                 if ret != 0 {
                     let error_msg = if ret == 2 {
@@ -115,13 +121,13 @@ impl QuantumEncoder for AmplitudeEncoder {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    _device
+                    device
                         .synchronize()
                         .map_err(|e| MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e)))?;
                 }
             } else {
                 // Async Pipeline path for large data
-                Self::encode_async_pipeline(_device, host_data, num_qubits, state_len, norm, &state_vector)?;
+                Self::encode_async_pipeline(device, host_data, num_qubits, state_len, norm, &state_vector)?;
             }
 
             Ok(state_vector)
@@ -145,6 +151,7 @@ impl QuantumEncoder for AmplitudeEncoder {
     fn encode_chunked(
         &self,
         device: &Arc<CudaDevice>,
+        pool: &Arc<StagingBufferPool>,
         chunks: &[Float64Array],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
@@ -207,18 +214,35 @@ impl QuantumEncoder for AmplitudeEncoder {
                         .cast::<std::ffi::c_void>()
                 };
 
-                let chunk_slice = {
-                    crate::profile_scope!("GPU::ChunkH2DCopy");
-                    // Zero-copy from Arrow buffer to GPU
-                    device.htod_sync_copy(chunk.values())
-                        .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to copy chunk: {:?}", e)))?
+                let chunk_bytes = chunk_len * std::mem::size_of::<f64>();
+
+                // Acquire buffer (RAII: auto-released on drop)
+                let mut _chunk_buffer = {
+                    crate::profile_scope!("Pool::Acquire");
+                    pool.acquire(chunk_bytes)?
                 };
+
+                // Convert f64 to u8 view (zero-copy) and copy to device
+                let src_bytes: &[u8] = unsafe {
+                    std::slice::from_raw_parts(
+                        chunk.values().as_ptr() as *const u8,
+                        chunk_bytes
+                    )
+                };
+
+                {
+                    crate::profile_scope!("GPU::ChunkH2DCopy");
+                    device.htod_sync_copy_into(src_bytes, &mut _chunk_buffer.slice_mut(0..chunk_bytes))
+                        .map_err(|e| MahoutError::MemoryAllocation(
+                            format!("Failed to copy chunk: {:?}", e)
+                        ))?;
+                }
 
                 {
                     crate::profile_scope!("GPU::KernelLaunch");
                     let ret = unsafe {
                         launch_amplitude_encode(
-                            *chunk_slice.device_ptr() as *const f64,
+                            _chunk_buffer.device_ptr_u8() as *const f64,
                             state_ptr_offset,
                             chunk_len,
                             state_len,
@@ -226,6 +250,9 @@ impl QuantumEncoder for AmplitudeEncoder {
                             std::ptr::null_mut(),
                         )
                     };
+
+                    // BufferGuard auto-releases buffer on drop
+
                     if ret != 0 {
                         return Err(MahoutError::KernelLaunch(
                             format!("Kernel launch failed: {} ({})", ret, cuda_error_to_string(ret))
