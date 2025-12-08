@@ -180,6 +180,34 @@ impl QdpEngine {
             consumed: false,
         })
     }
+
+    /// Load data from Parquet file and encode into quantum state
+    ///
+    /// **ZERO-COPY**: Reads Parquet chunks directly without intermediate Vec allocation.
+    ///
+    /// Args:
+    ///     path: Path to Parquet file
+    ///     num_qubits: Number of qubits for encoding
+    ///     encoding_method: Encoding strategy ("amplitude", "angle", or "basis")
+    ///
+    /// Returns:
+    ///     QuantumTensor: DLPack-compatible tensor for zero-copy PyTorch integration
+    ///
+    /// Raises:
+    ///     RuntimeError: If encoding fails
+    ///
+    /// Example:
+    ///     >>> engine = QdpEngine(device_id=0)
+    ///     >>> qtensor = engine.encode_from_parquet("data.parquet", num_qubits=2, encoding_method="amplitude")
+    ///     >>> torch_tensor = torch.from_dlpack(qtensor)
+    fn encode_from_parquet(&self, path: &str, num_qubits: usize, encoding_method: &str) -> PyResult<QuantumTensor> {
+        let ptr = self.engine.encode_from_parquet(path, num_qubits, encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("Encoding from parquet failed: {}", e)))?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
+    }
 }
 
 /// Mahout QDP Python module
