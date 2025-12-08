@@ -145,41 +145,13 @@ impl QuantumEncoder for AmplitudeEncoder {
     ) -> Result<GpuStateVector> {
         crate::profile_scope!("AmplitudeEncoder::encode_batch");
 
-        if batch_data.len() != num_samples * sample_size {
-            return Err(MahoutError::InvalidInput(
-                format!("Batch data length {} doesn't match num_samples {} * sample_size {}",
-                    batch_data.len(), num_samples, sample_size)
-            ));
-        }
+        // Validate inputs using shared preprocessor
+        Preprocessor::validate_batch(batch_data, num_samples, sample_size, num_qubits)?;
 
         let state_len = 1 << num_qubits;
 
-        // Validate inputs
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(
-                format!("Number of qubits {} must be between 1 and 30", num_qubits)
-            ));
-        }
-
-        // Calculate L2 norms for each sample
-        let norms: Vec<f64> = {
-            crate::profile_scope!("CPU::BatchL2Norm");
-            (0..num_samples)
-                .map(|i| {
-                    let start = i * sample_size;
-                    let end = start + sample_size;
-                    let sample = &batch_data[start..end];
-                    let norm_sq: f64 = sample.iter().map(|&x| x * x).sum();
-                    let norm = norm_sq.sqrt();
-                    if norm == 0.0 {
-                        return Err(MahoutError::InvalidInput(
-                            format!("Sample {} has zero norm", i)
-                        ));
-                    }
-                    Ok(norm)
-                })
-                .collect::<Result<Vec<_>>>()?
-        };
+        // Calculate L2 norms using shared preprocessor (parallelized)
+        let norms = Preprocessor::calculate_batch_l2_norms(batch_data, num_samples, sample_size)?;
 
         // Convert to inverse norms
         let inv_norms: Vec<f64> = norms.iter().map(|n| 1.0 / n).collect();
