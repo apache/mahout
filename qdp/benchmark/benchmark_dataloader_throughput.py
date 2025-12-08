@@ -37,6 +37,9 @@ import torch
 
 from mahout_qdp import QdpEngine
 
+BAR = "=" * 70
+SEP = "-" * 70
+
 try:
     import pennylane as qml
 
@@ -206,23 +209,27 @@ def main():
     print(f"  Mahout format: {total_vectors * bytes_per_vec / (1024 * 1024):.2f} MB")
     print()
 
-    print("=" * 70)
+    print(BAR)
     print(f"E2E BENCHMARK: {args.qubits} Qubits, {total_vectors} Samples")
-    print("=" * 70)
+    print(BAR)
 
-    print("\n[PennyLane] Full Pipeline (DataLoader -> GPU)...")
+    print()
+    print("[PennyLane] Full Pipeline (DataLoader -> GPU)...")
     t_pl, th_pl = run_pennylane(args.qubits, args.batches, args.batch_size, args.prefetch)
 
-    print("\n[Qiskit] Full Pipeline (DataLoader -> GPU)...")
+    print()
+    print("[Qiskit] Full Pipeline (DataLoader -> GPU)...")
     t_qiskit, th_qiskit = run_qiskit(args.qubits, args.batches, args.batch_size, args.prefetch)
 
-    print("\n[Mahout] Full Pipeline (DataLoader -> GPU)...")
+    print()
+    print("[Mahout] Full Pipeline (DataLoader -> GPU)...")
     t_mahout, th_mahout = run_mahout(args.qubits, args.batches, args.batch_size, args.prefetch)
 
-    print("\n" + "=" * 70)
+    print()
+    print(BAR)
     print("THROUGHPUT (Higher is Better)")
     print(f"Samples: {total_vectors}, Qubits: {args.qubits}")
-    print("=" * 70)
+    print(BAR)
 
     throughput_results = []
     if th_pl > 0:
@@ -238,7 +245,7 @@ def main():
         print(f"{name:12s} {tput:10.1f} vectors/sec")
 
     if t_mahout > 0:
-        print("-" * 70)
+        print(SEP)
         if t_pl > 0:
             print(f"Speedup vs PennyLane: {th_mahout / th_pl:10.2f}x")
         if t_qiskit > 0:
