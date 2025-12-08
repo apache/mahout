@@ -29,7 +29,7 @@ use std::sync::Arc;
 use arrow::array::Float64Array;
 use cudarc::driver::CudaDevice;
 use crate::dlpack::DLManagedTensor;
-use crate::gpu::{get_encoder, StagingBufferPool};
+use crate::gpu::get_encoder;
 
 /// Main entry point for Mahout QDP
 ///
@@ -37,7 +37,6 @@ use crate::gpu::{get_encoder, StagingBufferPool};
 /// Provides unified interface for device management, memory allocation, and DLPack.
 pub struct QdpEngine {
     device: Arc<CudaDevice>,
-    pool: Arc<StagingBufferPool>,
 }
 
 impl QdpEngine {
@@ -48,10 +47,8 @@ impl QdpEngine {
     pub fn new(device_id: usize) -> Result<Self> {
         let device = CudaDevice::new(device_id)
             .map_err(|e| MahoutError::Cuda(format!("Failed to initialize CUDA device {}: {:?}", device_id, e)))?;
-        let pool = Arc::new(StagingBufferPool::new(device.clone()));
         Ok(Self {
-            device,  // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
-            pool,
+            device  // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
         })
     }
 
@@ -78,7 +75,7 @@ impl QdpEngine {
         crate::profile_scope!("Mahout::Encode");
 
         let encoder = get_encoder(encoding_method)?;
-        let state_vector = encoder.encode(&self.device, &self.pool, data, num_qubits)?;
+        let state_vector = encoder.encode(&self.device, data, num_qubits)?;
         let dlpack_ptr = {
             crate::profile_scope!("DLPack::Wrap");
             state_vector.to_dlpack()
@@ -109,7 +106,7 @@ impl QdpEngine {
         crate::profile_scope!("Mahout::EncodeChunked");
 
         let encoder = get_encoder(encoding_method)?;
-        let state_vector = encoder.encode_chunked(&self.device, &self.pool, chunks, num_qubits)?;
+        let state_vector = encoder.encode_chunked(&self.device, chunks, num_qubits)?;
         let dlpack_ptr = {
             crate::profile_scope!("Mahout::CreateDLPack");
             state_vector.to_dlpack()

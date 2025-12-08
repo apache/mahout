@@ -21,7 +21,6 @@ use std::sync::Arc;
 use cudarc::driver::CudaDevice;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
-use crate::gpu::pool::StagingBufferPool;
 use super::QuantumEncoder;
 
 /// Basis encoding (not implemented)
@@ -32,7 +31,6 @@ impl QuantumEncoder for BasisEncoder {
     fn encode(
         &self,
         _device: &Arc<CudaDevice>,
-        _pool: &Arc<StagingBufferPool>,
         _data: &[f64],
         _num_qubits: usize,
     ) -> Result<GpuStateVector> {
