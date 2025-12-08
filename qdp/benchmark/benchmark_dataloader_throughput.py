@@ -220,38 +220,29 @@ def main():
     t_mahout, th_mahout = run_mahout(args.qubits, args.batches, args.batch_size, args.prefetch)
 
     print("\n" + "=" * 70)
-    print("E2E LATENCY (Lower is Better)")
+    print("THROUGHPUT (Higher is Better)")
     print(f"Samples: {total_vectors}, Qubits: {args.qubits}")
     print("=" * 70)
 
-    latency_results = []
     throughput_results = []
-    if t_pl > 0:
-        latency_results.append(("PennyLane", t_pl))
+    if th_pl > 0:
         throughput_results.append(("PennyLane", th_pl))
-    if t_qiskit > 0:
-        latency_results.append(("Qiskit", t_qiskit))
+    if th_qiskit > 0:
         throughput_results.append(("Qiskit", th_qiskit))
-    if t_mahout > 0:
-        latency_results.append(("Mahout", t_mahout))
+    if th_mahout > 0:
         throughput_results.append(("Mahout", th_mahout))
 
-    latency_results.sort(key=lambda x: x[1])
     throughput_results.sort(key=lambda x: x[1], reverse=True)
 
-    for name, tval in latency_results:
-        print(f"{name:12s} {tval:10.4f} s")
-
-    print("-" * 70)
     for name, tput in throughput_results:
         print(f"{name:12s} {tput:10.1f} vectors/sec")
 
     if t_mahout > 0:
         print("-" * 70)
         if t_pl > 0:
-            print(f"Speedup vs PennyLane: {t_pl / t_mahout:10.2f}x")
+            print(f"Speedup vs PennyLane: {th_mahout / th_pl:10.2f}x")
         if t_qiskit > 0:
-            print(f"Speedup vs Qiskit:    {t_qiskit / t_mahout:10.2f}x")
+            print(f"Speedup vs Qiskit:    {th_mahout / th_qiskit:10.2f}x")
 
 
 if __name__ == "__main__":

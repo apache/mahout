@@ -47,13 +47,9 @@ E2E BENCHMARK: 16 Qubits, 12800 Samples
   Total Time: 115.5840 s (110.8 vectors/sec)
 
 ======================================================================
-E2E LATENCY (Lower is Better)
+THROUGHPUT (Higher is Better)
 Samples: 12800, Qubits: 16
 ======================================================================
-PennyLane       26.1952 s
-Mahout         115.5840 s
-Qiskit         975.8720 s
-----------------------------------------------------------------------
 PennyLane        488.6 vectors/sec
 Mahout           110.8 vectors/sec
 Qiskit            13.1 vectors/sec
@@ -64,7 +60,7 @@ Speedup vs Qiskit:          8.44x
 
 ## Notes
 
-- Example numbers reuse the prior 200-sample timings scaled to the default 12.8k vectors; re-run on target GPUs for fresh measurements.
+- Example numbers reuse prior timings scaled to the default 12.8k vectors; re-run on target GPUs for fresh measurements.
 - PennyLane/Qiskit sections include CPU-side state preparation time; Mahout timing includes IO + encode on GPU.
 - Install competitor dependencies only if you plan to run their legs; the script auto-skips missing frameworks.
 - Adjust `--qubits`, `--batches`, and `--batch-size` to explore other shapes; prefetch depth keeps the GPU fed when CPU-side encode is slow.
