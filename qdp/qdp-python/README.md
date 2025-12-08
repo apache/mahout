@@ -16,9 +16,13 @@ dlpack_ptr = engine.encode(data, num_qubits=2, encoding_method="amplitude")
 ```
 
 ## Build from source
-
 ```bash
-uv sync --extra dev
+# add a uv python 3.11 environment
+uv venv -p python3.11
+source .venv/bin/activate
+```
+```bash
+uv sync --group dev
 uv run maturin develop
 ```
 
