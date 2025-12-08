@@ -174,8 +174,6 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
             state = backend.run(t_qc).result().get_statevector().data
             batch_states.append(state)
             processed += 1
-            if (vec_idx + 1) % 10 == 0:
-                print(f"    Processed {vec_idx + 1}/{len(normalized)} vectors...", end="\r")
 
         gpu_tensor = torch.tensor(np.array(batch_states), device="cuda", dtype=torch.complex64)
         _ = gpu_tensor.abs().sum()
