@@ -32,7 +32,7 @@ Generating 12800 samples of 16 qubits...
   Mahout format: 6400.00 MB
 
 ======================================================================
-E2E BENCHMARK: 16 Qubits, 12800 Samples
+DATALOADER THROUGHPUT BENCHMARK: 16 Qubits, 12800 Samples
 ======================================================================
 
 [PennyLane] Full Pipeline (DataLoader -> GPU)...

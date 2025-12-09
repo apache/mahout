@@ -208,7 +208,7 @@ def main():
     print()
 
     print(BAR)
-    print(f"E2E BENCHMARK: {args.qubits} Qubits, {total_vectors} Samples")
+    print(f"DATALOADER THROUGHPUT BENCHMARK: {args.qubits} Qubits, {total_vectors} Samples")
     print(BAR)
 
     print()
