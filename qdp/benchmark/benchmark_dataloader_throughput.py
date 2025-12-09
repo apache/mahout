@@ -96,7 +96,6 @@ def run_mahout(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
         print(f"[Mahout] Init failed: {exc}")
         return 0.0, 0.0
 
-    total_vectors = total_batches * batch_size
     torch.cuda.synchronize()
     start = time.perf_counter()
 
