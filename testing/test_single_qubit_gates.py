@@ -527,6 +527,119 @@ class TestPauliZGate:
         )
 
 
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestTGate:
+    """Test class for T gate functionality."""
+
+    @pytest.mark.parametrize(
+        "initial_state, expected_state",
+        [
+            ("0", "0"),  # T leaves |0> unchanged
+            ("1", "1"),  # T applies phase to |1>, measurement unchanged
+        ],
+    )
+    def test_t_gate_preserves_basis_states(
+        self, backend_name, initial_state, expected_state
+    ):
+        """T gate should preserve computational basis measurement outcomes."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        if initial_state == "1":
+            qumat.apply_pauli_x_gate(0)
+
+        qumat.apply_t_gate(0)
+        results = qumat.execute_circuit()
+
+        prob = get_state_probability(
+            results, expected_state, num_qubits=1, backend_name=backend_name
+        )
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, expected |{expected_state}> after T, "
+            f"got probability {prob:.4f}"
+        )
+
+    def test_t_gate_phase_visible_via_hzh(self, backend_name):
+        """T^4 = Z; H-Z-H should act like X and flip |0> to |1>."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        qumat.apply_hadamard_gate(0)
+        for _ in range(4):
+            qumat.apply_t_gate(0)
+        qumat.apply_hadamard_gate(0)
+
+        results = qumat.execute_circuit()
+        prob = get_state_probability(
+            results, "1", num_qubits=1, backend_name=backend_name
+        )
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, expected |1> after H-T^4-H, "
+            f"got probability {prob:.4f}"
+        )
+
+    def test_t_gate_eight_applications_identity(self, backend_name):
+        """T^8 should be identity."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        for _ in range(8):
+            qumat.apply_t_gate(0)
+
+        results = qumat.execute_circuit()
+        prob = get_state_probability(
+            results, "0", num_qubits=1, backend_name=backend_name
+        )
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, expected |0> after T^8, "
+            f"got probability {prob:.4f}"
+        )
+
+
+@pytest.mark.parametrize(
+    "phase_applications",
+    [
+        1,  # single T
+        2,  # T^2 = S
+        4,  # T^4 = Z
+    ],
+)
+def test_t_gate_cross_backend_consistency(phase_applications):
+    """T gate should behave consistently across all backends."""
+    results_dict = {}
+
+    for backend_name in TESTING_BACKENDS:
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        # Use H ... H sandwich to turn phase into amplitude when needed
+        qumat.apply_hadamard_gate(0)
+        for _ in range(phase_applications):
+            qumat.apply_t_gate(0)
+        qumat.apply_hadamard_gate(0)
+
+        results = qumat.execute_circuit()
+        prob_one = get_state_probability(
+            results, "1", num_qubits=1, backend_name=backend_name
+        )
+        results_dict[backend_name] = prob_one
+
+    backends = list(results_dict.keys())
+    for i in range(len(backends)):
+        for j in range(i + 1, len(backends)):
+            b1, b2 = backends[i], backends[j]
+            diff = abs(results_dict[b1] - results_dict[b2])
+            assert diff < 0.05, (
+                f"T gate inconsistent between {b1} and {b2} for T^{phase_applications}: "
+                f"{results_dict[b1]:.4f} vs {results_dict[b2]:.4f}"
+            )
+
+
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestSingleQubitGatesEdgeCases:
     """Test class for edge cases of single-qubit gates."""

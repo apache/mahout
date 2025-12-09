@@ -254,8 +254,9 @@ class QuMat:
     def apply_t_gate(self, qubit_index):
         """Apply a T-gate (π/8 gate) to the specified qubit.
 
-        Applies a π/4 phase shift to the qubit. Essential for universal
-        quantum computation when combined with Hadamard and CNOT gates.
+        Applies a relative pi/4 phase (multiplies the |1> state by e^{i*pi/4}).
+        Essential for universal quantum computation when combined with
+        Hadamard and CNOT gates.
 
         :param qubit_index: Index of the qubit.
         :type qubit_index: int
