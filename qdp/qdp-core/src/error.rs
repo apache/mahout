@@ -36,6 +36,9 @@ pub enum MahoutError {
 
     #[error("I/O error: {0}")]
     Io(String),
+
+    #[error("Not implemented: {0}")]
+    NotImplemented(String),
 }
 
 /// Result type alias for Mahout operations
