@@ -76,4 +76,59 @@ impl Preprocessor {
 
         Ok(norm)
     }
+
+    /// Validates input constraints for batch processing.
+    pub fn validate_batch(
+        batch_data: &[f64],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<()> {
+        if batch_data.len() != num_samples * sample_size {
+            return Err(MahoutError::InvalidInput(
+                format!("Batch data length {} doesn't match num_samples {} * sample_size {}",
+                    batch_data.len(), num_samples, sample_size)
+            ));
+        }
+
+        if num_qubits == 0 || num_qubits > 30 {
+            return Err(MahoutError::InvalidInput(
+                format!("Number of qubits {} must be between 1 and 30", num_qubits)
+            ));
+        }
+
+        let state_len = 1 << num_qubits;
+        if sample_size > state_len {
+            return Err(MahoutError::InvalidInput(
+                format!("Sample size {} exceeds state vector size {}", sample_size, state_len)
+            ));
+        }
+
+        Ok(())
+    }
+
+    /// Calculates L2 norms for a batch of samples in parallel.
+    pub fn calculate_batch_l2_norms(
+        batch_data: &[f64],
+        _num_samples: usize,
+        sample_size: usize,
+    ) -> Result<Vec<f64>> {
+        crate::profile_scope!("CPU::BatchL2Norm");
+
+        // Process chunks in parallel using rayon
+        batch_data
+            .par_chunks(sample_size)
+            .enumerate()
+            .map(|(i, sample)| {
+                let norm_sq: f64 = sample.iter().map(|&x| x * x).sum();
+                let norm = norm_sq.sqrt();
+                if norm == 0.0 {
+                    return Err(MahoutError::InvalidInput(
+                        format!("Sample {} has zero norm", i)
+                    ));
+                }
+                Ok(norm)
+            })
+            .collect()
+    }
 }

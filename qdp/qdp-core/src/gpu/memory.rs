@@ -220,4 +220,46 @@ impl GpuStateVector {
     pub fn size_elements(&self) -> usize {
         self.size_elements
     }
+
+    /// Create GPU state vector for a batch of samples
+    /// Allocates num_samples * 2^qubits complex numbers on GPU
+    pub fn new_batch(_device: &Arc<CudaDevice>, num_samples: usize, qubits: usize) -> Result<Self> {
+        let single_state_size: usize = 1usize << qubits;
+        let total_elements = num_samples.checked_mul(single_state_size)
+            .ok_or_else(|| MahoutError::MemoryAllocation(
+                format!("Batch size overflow: {} samples * {} elements", num_samples, single_state_size)
+            ))?;
+
+        #[cfg(target_os = "linux")]
+        {
+            let requested_bytes = total_elements
+                .checked_mul(std::mem::size_of::<CuDoubleComplex>())
+                .ok_or_else(|| MahoutError::MemoryAllocation(
+                    format!("Requested GPU allocation size overflow (elements={})", total_elements)
+                ))?;
+
+            // Pre-flight check
+            ensure_device_memory_available(requested_bytes, "batch state vector allocation", Some(qubits))?;
+
+            let slice = unsafe {
+                _device.alloc::<CuDoubleComplex>(total_elements)
+            }.map_err(|e| map_allocation_error(
+                requested_bytes,
+                "batch state vector allocation",
+                Some(qubits),
+                e,
+            ))?;
+
+            Ok(Self {
+                buffer: Arc::new(GpuBufferRaw { slice }),
+                num_qubits: qubits,
+                size_elements: total_elements,
+            })
+        }
+
+        #[cfg(not(target_os = "linux"))]
+        {
+            Err(MahoutError::Cuda("CUDA is only available on Linux. This build does not support GPU operations.".to_string()))
+        }
+    }
 }

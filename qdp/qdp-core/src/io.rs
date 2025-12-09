@@ -22,7 +22,7 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
-use arrow::array::{Array, ArrayRef, Float64Array, RecordBatch};
+use arrow::array::{Array, ArrayRef, Float64Array, ListArray, RecordBatch};
 use arrow::datatypes::{DataType, Field, Schema};
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::ArrowWriter;
@@ -269,4 +269,99 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
     })?;
 
     Ok(())
+}
+
+/// Read batch data from Parquet file with list column format
+///
+/// Efficiently reads Parquet files where each row contains a list of values.
+/// Returns a flattened Vec with all samples concatenated, suitable for batch encoding.
+///
+/// # Arguments
+/// * `path` - Path to Parquet file
+///
+/// # Returns
+/// Tuple of (flattened_data, num_samples, sample_size)
+///
+/// # Example
+/// File format: column "feature_vector" with type List<Float64>
+/// Each row = one sample = one list of floats
+pub fn read_parquet_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
+    let file = File::open(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to open Parquet file: {}", e))
+    })?;
+
+    let builder = ParquetRecordBatchReaderBuilder::try_new(file).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet reader: {}", e))
+    })?;
+
+    let mut reader = builder.build().map_err(|e| {
+        MahoutError::Io(format!("Failed to build Parquet reader: {}", e))
+    })?;
+
+    let mut all_data = Vec::new();
+    let mut num_samples = 0;
+    let mut sample_size = None;
+
+    while let Some(batch_result) = reader.next() {
+        let batch = batch_result.map_err(|e| {
+            MahoutError::Io(format!("Failed to read Parquet batch: {}", e))
+        })?;
+
+        if batch.num_columns() == 0 {
+            return Err(MahoutError::Io("Parquet file has no columns".to_string()));
+        }
+
+        let column = batch.column(0);
+
+        // Handle List<Float64> column type
+        if let DataType::List(_) = column.data_type() {
+            let list_array = column
+                .as_any()
+                .downcast_ref::<ListArray>()
+                .ok_or_else(|| MahoutError::Io("Failed to downcast to ListArray".to_string()))?;
+
+            for i in 0..list_array.len() {
+                let value_array = list_array.value(i);
+                let float_array = value_array
+                    .as_any()
+                    .downcast_ref::<Float64Array>()
+                    .ok_or_else(|| MahoutError::Io("List values must be Float64".to_string()))?;
+
+                let current_size = float_array.len();
+
+                // Verify all samples have the same size
+                if let Some(expected_size) = sample_size {
+                    if current_size != expected_size {
+                        return Err(MahoutError::InvalidInput(format!(
+                            "Inconsistent sample sizes: expected {}, got {}",
+                            expected_size, current_size
+                        )));
+                    }
+                } else {
+                    sample_size = Some(current_size);
+                    all_data.reserve(current_size * 100); // Reserve space
+                }
+
+                // Efficiently copy the values
+                if float_array.null_count() == 0 {
+                    all_data.extend_from_slice(float_array.values());
+                } else {
+                    all_data.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
+                }
+
+                num_samples += 1;
+            }
+        } else {
+            return Err(MahoutError::Io(format!(
+                "Expected List<Float64> column, got {:?}",
+                column.data_type()
+            )));
+        }
+    }
+
+    let sample_size = sample_size.ok_or_else(|| {
+        MahoutError::Io("Parquet file contains no data".to_string())
+    })?;
+
+    Ok((all_data, num_samples, sample_size))
 }

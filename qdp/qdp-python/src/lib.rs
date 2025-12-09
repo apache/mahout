@@ -181,25 +181,26 @@ impl QdpEngine {
         })
     }
 
-    /// Load data from Parquet file and encode into quantum state
+    /// Encode from Parquet file (FASTEST - recommended for batches)
     ///
-    /// **ZERO-COPY**: Reads Parquet chunks directly without intermediate Vec allocation.
+    /// Direct Parquet→GPU pipeline:
+    /// - Reads List<Float64> column format using Arrow
+    /// - Zero-copy data extraction
+    /// - Single optimized batch kernel launch
+    /// - Returns batched tensor (shape: [num_samples, 2^num_qubits])
     ///
     /// Args:
     ///     path: Path to Parquet file
     ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy ("amplitude", "angle", or "basis")
+    ///     encoding_method: Encoding strategy (currently only "amplitude")
     ///
     /// Returns:
-    ///     QuantumTensor: DLPack-compatible tensor for zero-copy PyTorch integration
-    ///
-    /// Raises:
-    ///     RuntimeError: If encoding fails
+    ///     QuantumTensor: DLPack tensor containing all encoded states
     ///
     /// Example:
     ///     >>> engine = QdpEngine(device_id=0)
-    ///     >>> qtensor = engine.encode_from_parquet("data.parquet", num_qubits=2, encoding_method="amplitude")
-    ///     >>> torch_tensor = torch.from_dlpack(qtensor)
+    ///     >>> batched = engine.encode_from_parquet("data.parquet", 16, "amplitude")
+    ///     >>> torch_tensor = torch.from_dlpack(batched)  # Shape: [200, 65536]
     fn encode_from_parquet(&self, path: &str, num_qubits: usize, encoding_method: &str) -> PyResult<QuantumTensor> {
         let ptr = self.engine.encode_from_parquet(path, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Encoding from parquet failed: {}", e)))?;

@@ -110,6 +110,127 @@ int launch_amplitude_encode(
     return (int)cudaGetLastError();
 }
 
+/// Optimized batch amplitude encoding kernel
+///
+/// Memory Layout (row-major):
+/// - input_batch: [sample0_data | sample1_data | ... | sampleN_data]
+/// - state_batch: [sample0_state | sample1_state | ... | sampleN_state]
+///
+/// Optimizations:
+/// 1. Vectorized double2 loads for 128-bit memory transactions
+/// 2. Grid-stride loop for arbitrary batch sizes
+/// 3. Coalesced memory access within warps
+/// 4. Minimized register pressure
+__global__ void amplitude_encode_batch_kernel(
+    const double* __restrict__ input_batch,
+    cuDoubleComplex* __restrict__ state_batch,
+    const double* __restrict__ inv_norms,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len
+) {
+    // Grid-stride loop pattern for flexibility
+    const size_t elements_per_sample = state_len / 2;  // Each thread handles 2 elements
+    const size_t total_work = num_samples * elements_per_sample;
+    const size_t stride = gridDim.x * blockDim.x;
+
+    size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Process elements in grid-stride fashion
+    for (size_t idx = global_idx; idx < total_work; idx += stride) {
+        // Decompose linear index into (sample, element_pair)
+        const size_t sample_idx = idx / elements_per_sample;
+        const size_t elem_pair = idx % elements_per_sample;
+
+        // Calculate base addresses (strength-reduced)
+        const size_t input_base = sample_idx * input_len;
+        const size_t state_base = sample_idx * state_len;
+        const size_t elem_offset = elem_pair * 2;
+
+        // Load inverse norm (cached by L1)
+        const double inv_norm = inv_norms[sample_idx];
+
+        // Vectorized load: read 2 doubles as double2 for 128-bit transaction
+        double v1, v2;
+        if (elem_offset + 1 < input_len) {
+            // Aligned vectorized load
+            const double2 vec_data = __ldg(reinterpret_cast<const double2*>(input_batch + input_base) + elem_pair);
+            v1 = vec_data.x;
+            v2 = vec_data.y;
+        } else if (elem_offset < input_len) {
+            // Edge case: single element load
+            v1 = __ldg(input_batch + input_base + elem_offset);
+            v2 = 0.0;
+        } else {
+            // Padding region
+            v1 = v2 = 0.0;
+        }
+
+        // Normalize and write as complex numbers
+        // Compiler will optimize multiplications
+        const cuDoubleComplex c1 = make_cuDoubleComplex(v1 * inv_norm, 0.0);
+        const cuDoubleComplex c2 = make_cuDoubleComplex(v2 * inv_norm, 0.0);
+
+        // Write to global memory (coalesced within warp)
+        state_batch[state_base + elem_offset] = c1;
+        if (elem_offset + 1 < state_len) {
+            state_batch[state_base + elem_offset + 1] = c2;
+        }
+    }
+}
+
+/// Launch optimized batch amplitude encoding kernel
+///
+/// # Arguments
+/// * input_batch_d - Device pointer to batch input data
+/// * state_batch_d - Device pointer to output batch state vectors
+/// * inv_norms_d - Device pointer to inverse norms array
+/// * num_samples - Number of samples in batch
+/// * input_len - Elements per sample
+/// * state_len - State vector size per sample (2^num_qubits)
+/// * stream - CUDA stream for async execution
+///
+/// # Returns
+/// CUDA error code (0 = cudaSuccess)
+int launch_amplitude_encode_batch(
+    const double* input_batch_d,
+    void* state_batch_d,
+    const double* inv_norms_d,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len,
+    cudaStream_t stream
+) {
+    if (num_samples == 0 || state_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_batch_d);
+
+    // Optimal configuration for modern GPUs (SM 7.0+)
+    // - Block size: 256 threads (8 warps, good occupancy)
+    // - Grid size: Enough blocks to saturate GPU, but not excessive
+    const int blockSize = 256;
+    const size_t total_work = num_samples * (state_len / 2);
+
+    // Calculate grid size: aim for high occupancy without too many blocks
+    // Limit to reasonable number of blocks to avoid scheduler overhead
+    const size_t blocks_needed = (total_work + blockSize - 1) / blockSize;
+    const size_t max_blocks = 2048;  // Reasonable limit for most GPUs
+    const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
+
+    amplitude_encode_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
+        input_batch_d,
+        state_complex_d,
+        inv_norms_d,
+        num_samples,
+        input_len,
+        state_len
+    );
+
+    return (int)cudaGetLastError();
+}
+
 // TODO: Future encoding methods:
 // - launch_angle_encode (angle encoding)
 // - launch_basis_encode (basis encoding)

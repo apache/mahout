@@ -26,7 +26,7 @@ mod profiling;
 pub use error::{MahoutError, Result};
 
 use std::sync::Arc;
-use arrow::array::Float64Array;
+
 use cudarc::driver::CudaDevice;
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
@@ -88,40 +88,55 @@ impl QdpEngine {
         &self.device
     }
 
-    /// Encode from chunked Arrow arrays (zero-copy from Parquet)
+    /// Encode multiple samples in a single fused kernel (most efficient)
+    ///
+    /// Allocates one large GPU buffer and launches a single batch kernel.
+    /// This is faster than encode_batch() as it reduces allocation and kernel launch overhead.
     ///
     /// # Arguments
-    /// * `chunks` - Chunked Arrow Float64Arrays (from read_parquet_to_arrow)
+    /// * `batch_data` - Flattened batch data (all samples concatenated)
+    /// * `num_samples` - Number of samples in the batch
+    /// * `sample_size` - Size of each sample
     /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
+    /// * `encoding_method` - Strategy (currently only "amplitude" supported for batch)
     ///
     /// # Returns
-    /// DLPack pointer for zero-copy PyTorch integration
-    pub fn encode_chunked(
+    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
+    pub fn encode_batch(
         &self,
-        chunks: &[Float64Array],
+        batch_data: &[f64],
+        num_samples: usize,
+        sample_size: usize,
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeChunked");
+        crate::profile_scope!("Mahout::EncodeBatch");
 
         let encoder = get_encoder(encoding_method)?;
-        let state_vector = encoder.encode_chunked(&self.device, chunks, num_qubits)?;
-        let dlpack_ptr = {
-            crate::profile_scope!("Mahout::CreateDLPack");
-            state_vector.to_dlpack()
-        };
+        let state_vector = encoder.encode_batch(
+            &self.device,
+            batch_data,
+            num_samples,
+            sample_size,
+            num_qubits,
+        )?;
+
+        let dlpack_ptr = state_vector.to_dlpack();
         Ok(dlpack_ptr)
     }
 
     /// Load data from Parquet file and encode into quantum state
     ///
-    /// **ZERO-COPY**: Reads Parquet chunks directly without intermediate Vec allocation.
+    /// Reads Parquet file with List<Float64> column format and encodes all samples
+    /// in a single batch operation. Bypasses pandas for maximum performance.
     ///
     /// # Arguments
     /// * `path` - Path to Parquet file
     /// * `num_qubits` - Number of qubits
     /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
+    ///
+    /// # Returns
+    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
     pub fn encode_from_parquet(
         &self,
         path: &str,
@@ -130,8 +145,14 @@ impl QdpEngine {
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromParquet");
 
-        let chunks = crate::io::read_parquet_to_arrow(path)?;
-        self.encode_chunked(&chunks, num_qubits, encoding_method)
+        // Read Parquet directly using Arrow (faster than pandas)
+        let (batch_data, num_samples, sample_size) = {
+            crate::profile_scope!("IO::ReadParquetBatch");
+            crate::io::read_parquet_batch(path)?
+        };
+
+        // Encode using fused batch kernel
+        self.encode_batch(&batch_data, num_samples, sample_size, num_qubits, encoding_method)
     }
 }
 
