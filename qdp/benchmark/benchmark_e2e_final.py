@@ -360,7 +360,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--frameworks",
         nargs="+",
-        default=["mahout-arrow", "pennylane"],
+        default=["mahout-parquet", "pennylane"],
         choices=["mahout-parquet", "mahout-arrow", "pennylane", "qiskit", "all"],
         help="Frameworks to benchmark. Use 'all' to run all available frameworks.",
     )
