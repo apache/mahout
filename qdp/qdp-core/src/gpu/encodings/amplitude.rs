@@ -27,9 +27,14 @@ use super::QuantumEncoder;
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
 #[cfg(target_os = "linux")]
-use cudarc::driver::DevicePtr;
+use cudarc::driver::{DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
-use qdp_kernels::{launch_amplitude_encode, launch_amplitude_encode_batch};
+use qdp_kernels::{
+    launch_amplitude_encode,
+    launch_amplitude_encode_batch,
+    launch_l2_norm,
+    launch_l2_norm_batch,
+};
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 
@@ -50,7 +55,6 @@ impl QuantumEncoder for AmplitudeEncoder {
     ) -> Result<GpuStateVector> {
         // Validate qubits (max 30 = 16GB GPU memory)
         Preprocessor::validate_input(host_data, num_qubits)?;
-        let norm = Preprocessor::calculate_l2_norm(host_data)?;
         let state_len = 1 << num_qubits;
 
         #[cfg(target_os = "linux")]
@@ -65,6 +69,7 @@ impl QuantumEncoder for AmplitudeEncoder {
             // For small data (< 1MB), use synchronous path to avoid stream overhead
             // For large data, use dual-stream async pipeline for maximum throughput
             const ASYNC_THRESHOLD: usize = 1024 * 1024 / std::mem::size_of::<f64>(); // 1MB threshold
+            const GPU_NORM_THRESHOLD: usize = 4096; // heuristic: amortize kernel launch
 
             if host_data.len() < ASYNC_THRESHOLD {
                 // Synchronous path for small data (avoids stream overhead)
@@ -82,6 +87,18 @@ impl QuantumEncoder for AmplitudeEncoder {
                         ))?
                 };
 
+                // GPU-accelerated norm for medium+ inputs, CPU fallback for tiny payloads
+                let inv_norm = if host_data.len() >= GPU_NORM_THRESHOLD {
+                    Self::calculate_inv_norm_gpu(
+                        _device,
+                        *input_slice.device_ptr() as *const f64,
+                        host_data.len(),
+                    )?
+                } else {
+                    let norm = Preprocessor::calculate_l2_norm(host_data)?;
+                    1.0 / norm
+                };
+
                 let ret = {
                     crate::profile_scope!("GPU::KernelLaunch");
                     unsafe {
@@ -90,7 +107,7 @@ impl QuantumEncoder for AmplitudeEncoder {
                             state_vector.ptr() as *mut c_void,
                             host_data.len(),
                             state_len,
-                            norm,
+                            inv_norm,
                             std::ptr::null_mut(), // default stream
                         )
                     }
@@ -121,7 +138,9 @@ impl QuantumEncoder for AmplitudeEncoder {
                 }
             } else {
                 // Async Pipeline path for large data
-                Self::encode_async_pipeline(_device, host_data, num_qubits, state_len, norm, &state_vector)?;
+                let norm = Preprocessor::calculate_l2_norm(host_data)?;
+                let inv_norm = 1.0 / norm;
+                Self::encode_async_pipeline(_device, host_data, num_qubits, state_len, inv_norm, &state_vector)?;
             }
 
             Ok(state_vector)
@@ -150,12 +169,6 @@ impl QuantumEncoder for AmplitudeEncoder {
 
         let state_len = 1 << num_qubits;
 
-        // Calculate L2 norms using shared preprocessor (parallelized)
-        let norms = Preprocessor::calculate_batch_l2_norms(batch_data, num_samples, sample_size)?;
-
-        // Convert to inverse norms
-        let inv_norms: Vec<f64> = norms.iter().map(|n| 1.0 / n).collect();
-
         // Allocate single large GPU buffer for all states
         let batch_state_vector = {
             crate::profile_scope!("GPU::AllocBatch");
@@ -171,14 +184,45 @@ impl QuantumEncoder for AmplitudeEncoder {
                 ))?
         };
 
-        // Upload inverse norms to GPU
+        // Compute inverse norms on GPU using warp-reduced kernel
         let inv_norms_gpu = {
-            crate::profile_scope!("GPU::H2D_Norms");
-            device.htod_sync_copy(&inv_norms)
+            crate::profile_scope!("GPU::BatchNormKernel");
+            let buffer = device.alloc_zeros::<f64>(num_samples)
                 .map_err(|e| MahoutError::MemoryAllocation(
-                    format!("Failed to upload norms: {:?}", e)
-                ))?
+                    format!("Failed to allocate norm buffer: {:?}", e)
+                ))?;
+
+            let ret = unsafe {
+                launch_l2_norm_batch(
+                    *input_batch_gpu.device_ptr() as *const f64,
+                    num_samples,
+                    sample_size,
+                    *buffer.device_ptr_mut() as *mut f64,
+                    std::ptr::null_mut(), // default stream
+                )
+            };
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(
+                    format!("Norm reduction kernel failed: {} ({})", ret, cuda_error_to_string(ret))
+                ));
+            }
+
+            buffer
         };
+
+        // Validate norms on host to catch zero or NaN samples early
+        {
+            crate::profile_scope!("GPU::NormValidation");
+            let host_inv_norms = device.dtoh_sync_copy(&inv_norms_gpu)
+                .map_err(|e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)))?;
+
+            if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
+                return Err(MahoutError::InvalidInput(
+                    "One or more samples have zero or invalid norm".to_string()
+                ));
+            }
+        }
 
         // Launch batch kernel
         {
@@ -236,7 +280,7 @@ impl AmplitudeEncoder {
         host_data: &[f64],
         _num_qubits: usize,
         state_len: usize,
-        norm: f64,
+        inv_norm: f64,
         state_vector: &GpuStateVector,
     ) -> Result<()> {
         // Use generic pipeline infrastructure
@@ -257,7 +301,7 @@ impl AmplitudeEncoder {
                     state_ptr_offset,
                     chunk_len,
                     state_len,
-                    norm,
+                    inv_norm,
                     stream.stream as *mut c_void,
                 )
             };
@@ -330,6 +374,50 @@ impl AmplitudeEncoder {
         }
 
         Ok(())
+    }
+}
+
+impl AmplitudeEncoder {
+    /// Compute inverse L2 norm on GPU using the reduction kernel.
+    #[cfg(target_os = "linux")]
+    fn calculate_inv_norm_gpu(
+        device: &Arc<CudaDevice>,
+        input_ptr: *const f64,
+        len: usize,
+    ) -> Result<f64> {
+        crate::profile_scope!("GPU::NormSingle");
+
+        let norm_buffer = device.alloc_zeros::<f64>(1)
+            .map_err(|e| MahoutError::MemoryAllocation(
+                format!("Failed to allocate norm buffer: {:?}", e)
+            ))?;
+
+        let ret = unsafe {
+            launch_l2_norm(
+                input_ptr,
+                len,
+                *norm_buffer.device_ptr_mut() as *mut f64,
+                std::ptr::null_mut(), // default stream
+            )
+        };
+
+        if ret != 0 {
+            return Err(MahoutError::KernelLaunch(
+                format!("Norm kernel failed: {} ({})", ret, cuda_error_to_string(ret))
+            ));
+        }
+
+        let inv_norm_host = device.dtoh_sync_copy(&norm_buffer)
+            .map_err(|e| MahoutError::Cuda(format!("Failed to copy norm to host: {:?}", e)))?;
+
+        let inv_norm = inv_norm_host.get(0).copied().unwrap_or(0.0);
+        if inv_norm == 0.0 || !inv_norm.is_finite() {
+            return Err(MahoutError::InvalidInput(
+                "Input data has zero norm".to_string()
+            ));
+        }
+
+        Ok(inv_norm)
     }
 }
 
