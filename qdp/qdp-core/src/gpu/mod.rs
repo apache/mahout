@@ -21,3 +21,6 @@ pub mod pipeline;
 pub use memory::GpuStateVector;
 pub use encodings::{QuantumEncoder, AmplitudeEncoder, AngleEncoder, BasisEncoder, get_encoder};
 pub use pipeline::run_dual_stream_pipeline;
+
+#[cfg(target_os = "linux")]
+pub use pipeline::PipelineContext;

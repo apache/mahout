@@ -28,6 +28,10 @@ pub use error::{MahoutError, Result};
 use std::sync::Arc;
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
+#[cfg(target_os = "linux")]
+use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
+#[cfg(target_os = "linux")]
+use std::thread;
 
 use cudarc::driver::{CudaDevice, DevicePtr};
 use crate::dlpack::DLManagedTensor;
@@ -35,26 +39,15 @@ use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{PinnedBuffer, GpuStateVector};
 #[cfg(target_os = "linux")]
+use crate::gpu::PipelineContext;
+#[cfg(target_os = "linux")]
 use qdp_kernels::launch_fused_amplitude_encode_batch;
 
+/// 512MB staging buffer for large Parquet row groups (reduces fragmentation)
 #[cfg(target_os = "linux")]
-const STAGE_SIZE_BYTES: usize = 256 * 1024 * 1024;  // 256MB buffer (reduces IO calls)
+const STAGE_SIZE_BYTES: usize = 512 * 1024 * 1024;
 #[cfg(target_os = "linux")]
 const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
-
-// CUDA FFI for event management
-#[cfg(target_os = "linux")]
-unsafe extern "C" {
-    fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: usize, kind: u32, stream: *mut c_void) -> i32;
-    fn cudaEventCreateWithFlags(event: *mut *mut c_void, flags: u32) -> i32;
-    fn cudaEventRecord(event: *mut c_void, stream: *mut c_void) -> i32;
-    fn cudaEventSynchronize(event: *mut c_void) -> i32;
-    fn cudaEventDestroy(event: *mut c_void) -> i32;
-    fn cudaStreamWaitEvent(stream: *mut c_void, event: *mut c_void, flags: u32) -> i32;
-}
-
-#[cfg(target_os = "linux")]
-const CUDA_EVENT_DISABLE_TIMING: u32 = 0x02;
 
 /// Main entry point for Mahout QDP
 ///
@@ -153,18 +146,18 @@ impl QdpEngine {
         Ok(dlpack_ptr)
     }
 
-    /// Load data from Parquet file and encode into quantum state
+    /// Streaming Parquet encoder with multi-threaded IO
     ///
-    /// Reads Parquet file with List<Float64> column format and encodes all samples
-    /// in a single batch operation. Bypasses pandas for maximum performance.
+    /// Uses Producer-Consumer pattern: IO thread reads Parquet while GPU processes data.
+    /// Double-buffered (ping-pong) for maximum pipeline overlap.
     ///
     /// # Arguments
-    /// * `path` - Path to Parquet file
+    /// * `path` - Path to Parquet file with List<Float64> column
     /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
+    /// * `encoding_method` - Currently only "amplitude" supported for streaming
     ///
     /// # Returns
-    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
+    /// DLPack pointer to encoded states [num_samples, 2^num_qubits]
     pub fn encode_from_parquet(
         &self,
         path: &str,
@@ -176,100 +169,90 @@ impl QdpEngine {
         #[cfg(target_os = "linux")]
         {
             if encoding_method != "amplitude" {
-                return Err(MahoutError::NotImplemented("Only amplitude encoding supported for parquet streaming".into()));
+                return Err(MahoutError::NotImplemented("Only amplitude encoding supported for streaming".into()));
             }
 
-            const CUDA_MEMCPY_HOST_TO_DEVICE: u32 = 1;
+            // Initialize reader
+            let mut reader_core = crate::io::ParquetBlockReader::new(path)?;
+            let num_samples = reader_core.total_samples;
 
-            let min_required_elements = 1 << num_qubits;
-            if STAGE_SIZE_ELEMENTS < min_required_elements {
-                return Err(MahoutError::MemoryAllocation(format!(
-                    "Staging buffer ({} MB) is too small for {} qubits.",
-                    STAGE_SIZE_BYTES / (1024*1024),
-                    num_qubits
-                )));
-            }
+            // Allocate GPU memory once
+            let total_state_vector = GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
 
-            // Allocate resources once (not in hot path)
-            let mut host_buf_a = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
-            let mut host_buf_b = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+            // Initialize dual-stream pipeline context
+            let ctx = PipelineContext::new(&self.device)?;
 
+            // Double-buffered device input (ping-pong)
             let dev_in_a = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
             let dev_in_b = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
 
-            let stream_compute = self.device.fork_default_stream()
-                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
-            let stream_copy = self.device.fork_default_stream()
-                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+            // Setup Producer-Consumer channels
+            let (full_buf_tx, full_buf_rx): (SyncSender<(PinnedBuffer, usize)>, Receiver<(PinnedBuffer, usize)>) = sync_channel(2);
+            let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedBuffer>, Receiver<PinnedBuffer>) = sync_channel(2);
 
-            let mut reader = crate::io::ParquetBlockReader::new(path)?;
-            let sample_size = reader.get_sample_size()
+            // CRITICAL FIX: Pre-read first chunk to determine sample_size
+            // This data must be processed, not discarded!
+            let mut host_buf_first = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+            let first_len = reader_core.read_chunk(host_buf_first.as_slice_mut())?;
+
+            let sample_size = reader_core.get_sample_size()
                 .ok_or_else(|| MahoutError::InvalidInput("Could not determine sample size".into()))?;
-            let num_samples = reader.total_samples;
 
-            let total_state_vector = GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
+            // Send first chunk directly to GPU loop (must be processed first)
+            full_buf_tx.send((host_buf_first, first_len))
+                .map_err(|_| MahoutError::Io("Failed to send first buffer".into()))?;
 
+            // Send one empty buffer to IO thread for subsequent reads
+            empty_buf_tx.send(PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?)
+                .map_err(|_| MahoutError::Io("Failed to send second buffer".into()))?;
+
+            // Spawn IO thread (Producer): continues reading from second chunk onwards
+            let mut reader = reader_core;
+            let io_handle = thread::spawn(move || {
+                loop {
+                    let mut buffer = match empty_buf_rx.recv() {
+                        Ok(b) => b,
+                        Err(_) => break,
+                    };
+
+                    let len = match reader.read_chunk(buffer.as_slice_mut()) {
+                        Ok(l) => l,
+                        Err(e) => { eprintln!("IO Error: {:?}", e); 0 }
+                    };
+
+                    if full_buf_tx.send((buffer, len)).is_err() { break; }
+                    if len == 0 { break; }
+                }
+            });
+
+            // Main thread (Consumer): GPU processing loop
+            // First receives pre-read chunk, then IO thread's subsequent chunks
             let mut global_sample_offset = 0;
-            let mut current_read_len = reader.read_chunk(host_buf_a.as_slice_mut())?;
-            let mut use_buffer_a = true;
+            let mut use_dev_a = true;
             let state_len_per_sample = 1 << num_qubits;
 
-            // Create events for pipeline synchronization
-            let mut event_copy_done_a: *mut c_void = std::ptr::null_mut();
-            let mut event_copy_done_b: *mut c_void = std::ptr::null_mut();
+            loop {
+                // Receives: first pre-read chunk, then IO thread's chunks
+                let (host_buffer, current_len) = full_buf_rx.recv()
+                    .map_err(|_| MahoutError::Io("IO thread disconnected".into()))?;
 
-            unsafe {
-                let ret_a = cudaEventCreateWithFlags(&mut event_copy_done_a, CUDA_EVENT_DISABLE_TIMING);
-                let ret_b = cudaEventCreateWithFlags(&mut event_copy_done_b, CUDA_EVENT_DISABLE_TIMING);
-                if ret_a != 0 || ret_b != 0 {
-                    return Err(MahoutError::Cuda(format!("Failed to create CUDA events: {} {}", ret_a, ret_b)));
-                }
+                if current_len == 0 { break; }
 
-                loop {
-                    if current_read_len == 0 { break; }
+                let samples_in_chunk = current_len / sample_size;
+                if samples_in_chunk > 0 {
+                    let dev_ptr = if use_dev_a { *dev_in_a.device_ptr() } else { *dev_in_b.device_ptr() };
 
-                    let samples_in_chunk = current_read_len / sample_size;
+                    unsafe {
+                        crate::profile_scope!("GPU::Dispatch");
 
-                    if samples_in_chunk > 0 {
-                        crate::profile_scope!("Pipeline::Step");
+                        // Async H2D copy → record event → wait for copy → launch kernel
+                        ctx.async_copy_to_device(&host_buffer, dev_ptr as *mut c_void, current_len);
+                        ctx.record_copy_done();
+                        ctx.wait_for_copy();
 
-                        if global_sample_offset + samples_in_chunk > num_samples {
-                            return Err(MahoutError::InvalidInput(
-                                "Parquet file contains more data than metadata".into()
-                            ));
-                        }
-
-                        // Select current resources and corresponding event
-                        let (curr_host, curr_dev, curr_event) = if use_buffer_a {
-                            (&host_buf_a, &dev_in_a, event_copy_done_a)
-                        } else {
-                            (&host_buf_b, &dev_in_b, event_copy_done_b)
-                        };
-
-                        // H2D copy on copy stream
-                        {
-                            crate::profile_scope!("GPU::H2D_Copy");
-                            cudaMemcpyAsync(
-                                *curr_dev.device_ptr() as *mut c_void,
-                                curr_host.ptr() as *const c_void,
-                                current_read_len * std::mem::size_of::<f64>(),
-                                CUDA_MEMCPY_HOST_TO_DEVICE,
-                                stream_copy.stream as *mut c_void
-                            );
-
-                            // Record event when copy completes
-                            cudaEventRecord(curr_event, stream_copy.stream as *mut c_void);
-                        }
-
-                        // Make compute stream wait for copy to complete
-                        {
-                            crate::profile_scope!("GPU::StreamWait");
-                            cudaStreamWaitEvent(stream_compute.stream as *mut c_void, curr_event, 0);
-                        }
-
-                        // Launch fused kernel (norm + encode in one pass)
+                        // Launch fused batch kernel
                         {
                             crate::profile_scope!("GPU::FusedKernel");
                             let offset_elements = global_sample_offset * state_len_per_sample;
@@ -278,54 +261,32 @@ impl QdpEngine {
                                 .cast::<std::ffi::c_void>();
 
                             let ret = launch_fused_amplitude_encode_batch(
-                                *curr_dev.device_ptr() as *const f64,
+                                dev_ptr as *const f64,
                                 state_ptr_offset,
                                 samples_in_chunk,
                                 sample_size,
                                 state_len_per_sample,
-                                stream_compute.stream as *mut c_void
+                                ctx.stream_compute.stream as *mut c_void
                             );
-
-                            if ret != 0 {
-                                return Err(MahoutError::KernelLaunch(format!("Fused kernel error: {}", ret)));
-                            }
+                            if ret != 0 { return Err(MahoutError::KernelLaunch(format!("Kernel error: {}", ret))); }
                         }
 
-                        global_sample_offset += samples_in_chunk;
+                        // Sync copy stream before buffer reuse
+                        ctx.sync_copy_stream();
                     }
-
-                    // Read next chunk while GPU processes current chunk
-                    {
-                        crate::profile_scope!("IO::ReadNext");
-                        use_buffer_a = !use_buffer_a;
-
-                        let (next_host, next_event) = if use_buffer_a {
-                            (&mut host_buf_a, event_copy_done_a)
-                        } else {
-                            (&mut host_buf_b, event_copy_done_b)
-                        };
-
-                        // Wait for GPU copy to finish before CPU overwrites buffer
-                        cudaEventSynchronize(next_event);
-
-                        // Read next chunk (overlaps with GPU processing)
-                        current_read_len = reader.read_chunk(next_host.as_slice_mut())?;
-                    }
+                    global_sample_offset += samples_in_chunk;
+                    use_dev_a = !use_dev_a;
                 }
+
+                // Return buffer to IO thread for next read
+                empty_buf_tx.send(host_buffer).map_err(|_| MahoutError::Io("Recycle failed".into()))?;
             }
 
             self.device.synchronize().map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+            let _ = io_handle.join();
 
-            // Clean up events (streams auto-destroyed by cudarc Drop)
-            unsafe {
-                cudaEventDestroy(event_copy_done_a);
-                cudaEventDestroy(event_copy_done_b);
-            }
-
-            // Transfer ownership to DLPack deleter (prevent double-free)
+            // Transfer ownership to DLPack (Arc handles ref counting)
             let dlpack_ptr = total_state_vector.to_dlpack();
-            std::mem::forget(total_state_vector);
-
             Ok(dlpack_ptr)
         }
 
