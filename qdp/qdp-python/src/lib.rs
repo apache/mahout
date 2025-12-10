@@ -181,13 +181,7 @@ impl QdpEngine {
         })
     }
 
-    /// Encode from Parquet file (FASTEST - recommended for batches)
-    ///
-    /// Direct Parquet→GPU pipeline:
-    /// - Reads List<Float64> column format using Arrow
-    /// - Zero-copy data extraction
-    /// - Single optimized batch kernel launch
-    /// - Returns batched tensor (shape: [num_samples, 2^num_qubits])
+    /// Encode from Parquet file
     ///
     /// Args:
     ///     path: Path to Parquet file
@@ -204,6 +198,29 @@ impl QdpEngine {
     fn encode_from_parquet(&self, path: &str, num_qubits: usize, encoding_method: &str) -> PyResult<QuantumTensor> {
         let ptr = self.engine.encode_from_parquet(path, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Encoding from parquet failed: {}", e)))?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
+    }
+
+    /// Encode from Arrow IPC file
+    ///
+    /// Args:
+    ///     path: Path to Arrow IPC file (.arrow or .feather)
+    ///     num_qubits: Number of qubits for encoding
+    ///     encoding_method: Encoding strategy (currently only "amplitude")
+    ///
+    /// Returns:
+    ///     QuantumTensor: DLPack tensor containing all encoded states
+    ///
+    /// Example:
+    ///     >>> engine = QdpEngine(device_id=0)
+    ///     >>> batched = engine.encode_from_arrow_ipc("data.arrow", 16, "amplitude")
+    ///     >>> torch_tensor = torch.from_dlpack(batched)
+    fn encode_from_arrow_ipc(&self, path: &str, num_qubits: usize, encoding_method: &str) -> PyResult<QuantumTensor> {
+        let ptr = self.engine.encode_from_arrow_ipc(path, num_qubits, encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("Encoding from Arrow IPC failed: {}", e)))?;
         Ok(QuantumTensor {
             ptr,
             consumed: false,
