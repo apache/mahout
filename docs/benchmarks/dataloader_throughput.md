@@ -62,4 +62,4 @@ Speedup vs Qiskit:          8.44x
 - Example numbers reuse prior timings scaled to the default 12.8k vectors; re-run on target GPUs for fresh measurements.
 - PennyLane/Qiskit sections include CPU-side state preparation time; Mahout timing includes IO + encode on GPU.
 - Install competitor dependencies only if you plan to run their legs; the script auto-skips missing frameworks.
-- Adjust `--qubits`, `--batches`, and `--batch-size` to explore other shapes; prefetch depth keeps the GPU fed when CPU-side encode is slow.
+- Adjust `--qubits`, `--batches`, `--batch-size`, and `--prefetch` to explore other shapes; higher `--prefetch` keeps the GPU fed when CPU-side encode is slow (e.g., Qiskit state prep).
