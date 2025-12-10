@@ -68,6 +68,33 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Launch GPU kernel to compute L2 norms for a batch
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_compute_l2_norms_batch(
+        input_batch_d: *const f64,
+        norms_out_d: *mut f64,
+        num_samples: usize,
+        input_len: usize,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch fused amplitude encoding kernel (norm computation + encoding in one pass)
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_fused_amplitude_encode_batch(
+        input_batch_d: *const f64,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        input_len: usize,
+        state_len: usize,
+        stream: *mut c_void,
+    ) -> i32;
+
     // TODO: launch_angle_encode, launch_basis_encode
 }
 

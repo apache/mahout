@@ -25,41 +25,36 @@ mod profiling;
 
 pub use error::{MahoutError, Result};
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
 
-use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
+use cudarc::driver::{CudaDevice, DevicePtr};
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{PinnedBuffer, GpuStateVector};
 #[cfg(target_os = "linux")]
-use qdp_kernels::launch_amplitude_encode_batch;
+use qdp_kernels::launch_fused_amplitude_encode_batch;
 
 #[cfg(target_os = "linux")]
-const STAGE_SIZE_BYTES: usize = 64 * 1024 * 1024;
+const STAGE_SIZE_BYTES: usize = 256 * 1024 * 1024;  // 256MB buffer (reduces IO calls)
 #[cfg(target_os = "linux")]
 const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
 
+// CUDA FFI for event management
 #[cfg(target_os = "linux")]
-struct PipelineResources {
-    pinned_a: PinnedBuffer,
-    pinned_b: PinnedBuffer,
-    dev_in_a: CudaSlice<f64>,
-    dev_in_b: CudaSlice<f64>,
-    norms_pinned_a: PinnedBuffer,
-    norms_pinned_b: PinnedBuffer,
-    dev_norms_a: CudaSlice<f64>,
-    dev_norms_b: CudaSlice<f64>,
-    stream_a: CudaStream,
-    stream_b: CudaStream,
+unsafe extern "C" {
+    fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: usize, kind: u32, stream: *mut c_void) -> i32;
+    fn cudaEventCreateWithFlags(event: *mut *mut c_void, flags: u32) -> i32;
+    fn cudaEventRecord(event: *mut c_void, stream: *mut c_void) -> i32;
+    fn cudaEventSynchronize(event: *mut c_void) -> i32;
+    fn cudaEventDestroy(event: *mut c_void) -> i32;
+    fn cudaStreamWaitEvent(stream: *mut c_void, event: *mut c_void, flags: u32) -> i32;
 }
 
 #[cfg(target_os = "linux")]
-unsafe impl Send for PipelineResources {}
-#[cfg(target_os = "linux")]
-unsafe impl Sync for PipelineResources {}
+const CUDA_EVENT_DISABLE_TIMING: u32 = 0x02;
 
 /// Main entry point for Mahout QDP
 ///
@@ -67,8 +62,6 @@ unsafe impl Sync for PipelineResources {}
 /// Provides unified interface for device management, memory allocation, and DLPack.
 pub struct QdpEngine {
     device: Arc<CudaDevice>,
-    #[cfg(target_os = "linux")]
-    resources: Mutex<PipelineResources>,
 }
 
 impl QdpEngine {
@@ -82,40 +75,7 @@ impl QdpEngine {
 
         #[cfg(target_os = "linux")]
         {
-            let pinned_a = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
-            let pinned_b = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
-            let norms_pinned_a = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
-            let norms_pinned_b = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
-
-            let dev_in_a = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-            let dev_in_b = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-            let dev_norms_a = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-            let dev_norms_b = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-
-            let stream_a = device.fork_default_stream()
-                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
-            let stream_b = device.fork_default_stream()
-                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
-
-            Ok(Self {
-                device,
-                resources: Mutex::new(PipelineResources {
-                    pinned_a,
-                    pinned_b,
-                    dev_in_a,
-                    dev_in_b,
-                    norms_pinned_a,
-                    norms_pinned_b,
-                    dev_norms_a,
-                    dev_norms_b,
-                    stream_a,
-                    stream_b,
-                }),
-            })
+            Ok(Self { device })
         }
 
         #[cfg(not(target_os = "linux"))]
@@ -230,12 +190,21 @@ impl QdpEngine {
                 )));
             }
 
-            let mut res = self.resources.lock()
-                .map_err(|_| MahoutError::Cuda("Failed to lock pipeline resources".into()))?;
+            // Allocate resources once (not in hot path)
+            let mut host_buf_a = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+            let mut host_buf_b = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+
+            let dev_in_a = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+            let dev_in_b = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+
+            let stream_compute = self.device.fork_default_stream()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+            let stream_copy = self.device.fork_default_stream()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
 
             let mut reader = crate::io::ParquetBlockReader::new(path)?;
-
-            let read_len = reader.read_chunk(res.pinned_a.as_slice_mut())?;
             let sample_size = reader.get_sample_size()
                 .ok_or_else(|| MahoutError::InvalidInput("Could not determine sample size".into()))?;
             let num_samples = reader.total_samples;
@@ -243,13 +212,19 @@ impl QdpEngine {
             let total_state_vector = GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
 
             let mut global_sample_offset = 0;
-            let mut current_read_len = read_len;
+            let mut current_read_len = reader.read_chunk(host_buf_a.as_slice_mut())?;
             let mut use_buffer_a = true;
             let state_len_per_sample = 1 << num_qubits;
 
+            // Create events for pipeline synchronization
+            let mut event_copy_done_a: *mut c_void = std::ptr::null_mut();
+            let mut event_copy_done_b: *mut c_void = std::ptr::null_mut();
+
             unsafe {
-                unsafe extern "C" {
-                    fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: usize, kind: u32, stream: *mut c_void) -> i32;
+                let ret_a = cudaEventCreateWithFlags(&mut event_copy_done_a, CUDA_EVENT_DISABLE_TIMING);
+                let ret_b = cudaEventCreateWithFlags(&mut event_copy_done_b, CUDA_EVENT_DISABLE_TIMING);
+                if ret_a != 0 || ret_b != 0 {
+                    return Err(MahoutError::Cuda(format!("Failed to create CUDA events: {} {}", ret_a, ret_b)));
                 }
 
                 loop {
@@ -266,97 +241,92 @@ impl QdpEngine {
                             ));
                         }
 
-                        {
-                            crate::profile_scope!("CPU::CalcNorms");
-                            let (data_slice, norms_ptr) = if use_buffer_a {
-                                let norms = res.norms_pinned_a.ptr();
-                                (&res.pinned_a.as_slice_mut()[0..current_read_len], norms)
-                            } else {
-                                let norms = res.norms_pinned_b.ptr();
-                                (&res.pinned_b.as_slice_mut()[0..current_read_len], norms)
-                            };
-                            let target_norms = std::slice::from_raw_parts_mut(
-                                norms_ptr as *mut f64,
-                                samples_in_chunk
-                            );
+                        // Select current resources and corresponding event
+                        let (curr_host, curr_dev, curr_event) = if use_buffer_a {
+                            (&host_buf_a, &dev_in_a, event_copy_done_a)
+                        } else {
+                            (&host_buf_b, &dev_in_b, event_copy_done_b)
+                        };
 
-                            use rayon::prelude::*;
-                            target_norms.par_iter_mut().enumerate().for_each(|(i, norm_out)| {
-                                let start = i * sample_size;
-                                let sample = &data_slice[start..start + sample_size];
-                                *norm_out = 1.0 / sample.iter().map(|x| x*x).sum::<f64>().sqrt();
-                            });
-                        }
-
+                        // H2D copy on copy stream
                         {
-                            crate::profile_scope!("GPU::CopyData");
-                            let (pinned_buf, norms_buf, dev_in, dev_norms, stream) = if use_buffer_a {
-                                (&res.pinned_a, &res.norms_pinned_a, &res.dev_in_a, &res.dev_norms_a, &res.stream_a)
-                            } else {
-                                (&res.pinned_b, &res.norms_pinned_b, &res.dev_in_b, &res.dev_norms_b, &res.stream_b)
-                            };
+                            crate::profile_scope!("GPU::H2D_Copy");
                             cudaMemcpyAsync(
-                                *dev_in.device_ptr() as *mut c_void,
-                                pinned_buf.ptr() as *const c_void,
+                                *curr_dev.device_ptr() as *mut c_void,
+                                curr_host.ptr() as *const c_void,
                                 current_read_len * std::mem::size_of::<f64>(),
                                 CUDA_MEMCPY_HOST_TO_DEVICE,
-                                stream.stream as *mut c_void
+                                stream_copy.stream as *mut c_void
                             );
-                            cudaMemcpyAsync(
-                                *dev_norms.device_ptr() as *mut c_void,
-                                norms_buf.ptr() as *const c_void,
-                                samples_in_chunk * std::mem::size_of::<f64>(),
-                                CUDA_MEMCPY_HOST_TO_DEVICE,
-                                stream.stream as *mut c_void
-                            );
+
+                            // Record event when copy completes
+                            cudaEventRecord(curr_event, stream_copy.stream as *mut c_void);
                         }
 
+                        // Make compute stream wait for copy to complete
                         {
-                            crate::profile_scope!("GPU::Kernel");
+                            crate::profile_scope!("GPU::StreamWait");
+                            cudaStreamWaitEvent(stream_compute.stream as *mut c_void, curr_event, 0);
+                        }
+
+                        // Launch fused kernel (norm + encode in one pass)
+                        {
+                            crate::profile_scope!("GPU::FusedKernel");
                             let offset_elements = global_sample_offset * state_len_per_sample;
                             let state_ptr_offset = total_state_vector.ptr().cast::<u8>()
                                 .add(offset_elements * std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
                                 .cast::<std::ffi::c_void>();
 
-                            let (dev_in, dev_norms, stream) = if use_buffer_a {
-                                (&res.dev_in_a, &res.dev_norms_a, &res.stream_a)
-                            } else {
-                                (&res.dev_in_b, &res.dev_norms_b, &res.stream_b)
-                            };
-
-                            let ret = launch_amplitude_encode_batch(
-                                *dev_in.device_ptr() as *const f64,
+                            let ret = launch_fused_amplitude_encode_batch(
+                                *curr_dev.device_ptr() as *const f64,
                                 state_ptr_offset,
-                                *dev_norms.device_ptr() as *const f64,
                                 samples_in_chunk,
                                 sample_size,
                                 state_len_per_sample,
-                                stream.stream as *mut c_void
+                                stream_compute.stream as *mut c_void
                             );
 
                             if ret != 0 {
-                                return Err(MahoutError::KernelLaunch(format!("Error: {}", ret)));
+                                return Err(MahoutError::KernelLaunch(format!("Fused kernel error: {}", ret)));
                             }
                         }
 
                         global_sample_offset += samples_in_chunk;
                     }
 
+                    // Read next chunk while GPU processes current chunk
                     {
                         crate::profile_scope!("IO::ReadNext");
-                        let next_stream = if use_buffer_a { &res.stream_b } else { &res.stream_a };
-                        self.device.wait_for(next_stream)
-                            .map_err(|e| MahoutError::Cuda(format!("Sync error: {:?}", e)))?;
                         use_buffer_a = !use_buffer_a;
-                        let next_pinned = if use_buffer_a { &mut res.pinned_a } else { &mut res.pinned_b };
-                        current_read_len = reader.read_chunk(next_pinned.as_slice_mut())?;
+
+                        let (next_host, next_event) = if use_buffer_a {
+                            (&mut host_buf_a, event_copy_done_a)
+                        } else {
+                            (&mut host_buf_b, event_copy_done_b)
+                        };
+
+                        // Wait for GPU copy to finish before CPU overwrites buffer
+                        cudaEventSynchronize(next_event);
+
+                        // Read next chunk (overlaps with GPU processing)
+                        current_read_len = reader.read_chunk(next_host.as_slice_mut())?;
                     }
                 }
             }
 
             self.device.synchronize().map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
 
-            Ok(total_state_vector.to_dlpack())
+            // Clean up events (streams auto-destroyed by cudarc Drop)
+            unsafe {
+                cudaEventDestroy(event_copy_done_a);
+                cudaEventDestroy(event_copy_done_b);
+            }
+
+            // Transfer ownership to DLPack deleter (prevent double-free)
+            let dlpack_ptr = total_state_vector.to_dlpack();
+            std::mem::forget(total_state_vector);
+
+            Ok(dlpack_ptr)
         }
 
         #[cfg(not(target_os = "linux"))]

@@ -110,6 +110,73 @@ int launch_amplitude_encode(
     return (int)cudaGetLastError();
 }
 
+/// Compute inverse L2 norms for batch using tree reduction
+/// Output: inv_norms[sample_idx] = 1.0 / sqrt(sum(x^2))
+__global__ void compute_l2_norms_batch_kernel(
+    const double* __restrict__ input_batch,
+    double* __restrict__ norms_out,
+    size_t num_samples,
+    size_t input_len
+) {
+    extern __shared__ double sdata[];
+
+    const size_t sample_idx = blockIdx.x;
+    if (sample_idx >= num_samples) return;
+
+    const size_t input_base = sample_idx * input_len;
+    const size_t tid = threadIdx.x;
+
+    // Compute sum of squares (grid-stride loop)
+    double sum_sq = 0.0;
+    for (size_t i = tid; i < input_len; i += blockDim.x) {
+        const double val = __ldg(input_batch + input_base + i);
+        sum_sq += val * val;
+    }
+
+    // Tree reduction in shared memory
+    sdata[tid] = sum_sq;
+    __syncthreads();
+
+    for (size_t s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (tid < s) {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+
+    // Write inverse norm (avoid division in encoding kernel)
+    if (tid == 0) {
+        const double norm = sqrt(sdata[0]);
+        norms_out[sample_idx] = (norm > 0.0) ? (1.0 / norm) : 0.0;
+    }
+}
+
+/// Launch kernel to compute inverse L2 norms for batch
+int launch_compute_l2_norms_batch(
+    const double* input_batch_d,
+    double* norms_out_d,
+    size_t num_samples,
+    size_t input_len,
+    cudaStream_t stream
+) {
+    if (num_samples == 0 || input_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    const int blockSize = 256;
+    const size_t sharedMemSize = blockSize * sizeof(double);
+    const size_t gridSize = num_samples;  // One block per sample
+
+    compute_l2_norms_batch_kernel<<<gridSize, blockSize, sharedMemSize, stream>>>(
+        input_batch_d,
+        norms_out_d,
+        num_samples,
+        input_len
+    );
+
+    return (int)cudaGetLastError();
+}
+
 /// Optimized batch amplitude encoding kernel
 ///
 /// Memory Layout (row-major):
@@ -223,6 +290,89 @@ int launch_amplitude_encode_batch(
         input_batch_d,
         state_complex_d,
         inv_norms_d,
+        num_samples,
+        input_len,
+        state_len
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Fused kernel: compute norm and encode in one pass
+/// Each block processes one sample: compute norm via reduction, then normalize and write
+__global__ void fused_amplitude_encode_batch_kernel(
+    const double* __restrict__ input_batch,
+    cuDoubleComplex* __restrict__ state_batch,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len
+) {
+    extern __shared__ double sdata[];
+
+    const size_t sample_idx = blockIdx.x;
+    if (sample_idx >= num_samples) return;
+
+    const size_t input_base = sample_idx * input_len;
+    const size_t state_base = sample_idx * state_len;
+    const size_t tid = threadIdx.x;
+
+    // Step 1: Compute sum of squares (grid-stride loop)
+    double sum_sq = 0.0;
+    for (size_t i = tid; i < input_len; i += blockDim.x) {
+        const double val = __ldg(input_batch + input_base + i);
+        sum_sq += val * val;
+    }
+
+    // Step 2: Tree reduction
+    sdata[tid] = sum_sq;
+    __syncthreads();
+
+    for (size_t s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (tid < s) {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+
+    // Step 3: Compute inverse norm and broadcast
+    double inv_norm = 0.0;
+    if (tid == 0) {
+        const double norm = sqrt(sdata[0]);
+        inv_norm = (norm > 1e-9) ? (1.0 / norm) : 0.0;
+        sdata[0] = inv_norm;
+    }
+    __syncthreads();
+    inv_norm = sdata[0];
+
+    // Step 4: Normalize and write (standard double reads, GPU coalescing handles efficiency)
+    for (size_t i = tid; i < state_len; i += blockDim.x) {
+        double val = (i < input_len) ? __ldg(input_batch + input_base + i) : 0.0;
+        state_batch[state_base + i] = make_cuDoubleComplex(val * inv_norm, 0.0);
+    }
+}
+
+/// Launch fused amplitude encoding kernel (norm computation + encoding in one pass)
+int launch_fused_amplitude_encode_batch(
+    const double* input_batch_d,
+    void* state_batch_d,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len,
+    cudaStream_t stream
+) {
+    if (num_samples == 0 || state_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_batch_d);
+
+    const int blockSize = 256;
+    const size_t sharedMemSize = blockSize * sizeof(double);
+    const size_t gridSize = num_samples;  // One block per sample
+
+    fused_amplitude_encode_batch_kernel<<<gridSize, blockSize, sharedMemSize, stream>>>(
+        input_batch_d,
+        state_complex_d,
         num_samples,
         input_len,
         state_len
