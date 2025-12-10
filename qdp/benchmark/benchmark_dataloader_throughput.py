@@ -64,7 +64,9 @@ def build_sample(seed: int, vector_len: int) -> np.ndarray:
     return mixed.astype(np.float64) * scale
 
 
-def prefetched_batches(total_batches: int, batch_size: int, vector_len: int, prefetch: int):
+def prefetched_batches(
+    total_batches: int, batch_size: int, vector_len: int, prefetch: int
+):
     q: queue.Queue[np.ndarray | None] = queue.Queue(maxsize=prefetch)
 
     def producer():
@@ -100,7 +102,9 @@ def run_mahout(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
     start = time.perf_counter()
 
     processed = 0
-    for batch in prefetched_batches(total_batches, batch_size, 1 << num_qubits, prefetch):
+    for batch in prefetched_batches(
+        total_batches, batch_size, 1 << num_qubits, prefetch
+    ):
         normalized = normalize_batch(batch)
         for sample in normalized:
             qtensor = engine.encode(sample.tolist(), num_qubits, "amplitude")
@@ -134,7 +138,9 @@ def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch
     start = time.perf_counter()
     processed = 0
 
-    for batch in prefetched_batches(total_batches, batch_size, 1 << num_qubits, prefetch):
+    for batch in prefetched_batches(
+        total_batches, batch_size, 1 << num_qubits, prefetch
+    ):
         batch_cpu = torch.tensor(batch, dtype=torch.float64)
         try:
             state_cpu = circuit(batch_cpu)
@@ -161,7 +167,9 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
     start = time.perf_counter()
     processed = 0
 
-    for batch in prefetched_batches(total_batches, batch_size, 1 << num_qubits, prefetch):
+    for batch in prefetched_batches(
+        total_batches, batch_size, 1 << num_qubits, prefetch
+    ):
         normalized = normalize_batch(batch)
 
         batch_states = []
@@ -174,7 +182,9 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
             batch_states.append(state)
             processed += 1
 
-        gpu_tensor = torch.tensor(np.array(batch_states), device="cuda", dtype=torch.complex64)
+        gpu_tensor = torch.tensor(
+            np.array(batch_states), device="cuda", dtype=torch.complex64
+        )
         _ = gpu_tensor.abs().sum()
 
     torch.cuda.synchronize()
@@ -185,11 +195,22 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Benchmark DataLoader throughput across frameworks.")
-    parser.add_argument("--qubits", type=int, default=16, help="Number of qubits (power-of-two vector length).")
-    parser.add_argument("--batches", type=int, default=200, help="Total batches to stream.")
+    parser = argparse.ArgumentParser(
+        description="Benchmark DataLoader throughput across frameworks."
+    )
+    parser.add_argument(
+        "--qubits",
+        type=int,
+        default=16,
+        help="Number of qubits (power-of-two vector length).",
+    )
+    parser.add_argument(
+        "--batches", type=int, default=200, help="Total batches to stream."
+    )
     parser.add_argument("--batch-size", type=int, default=64, help="Vectors per batch.")
-    parser.add_argument("--prefetch", type=int, default=16, help="CPU-side prefetch depth.")
+    parser.add_argument(
+        "--prefetch", type=int, default=16, help="CPU-side prefetch depth."
+    )
     args = parser.parse_args()
 
     total_vectors = args.batches * args.batch_size
@@ -202,25 +223,35 @@ def main():
     print(f"  Prefetch     : {args.prefetch}")
     bytes_per_vec = vector_len * 8
     print(f"  Generated {total_vectors} samples")
-    print(f"  PennyLane/Qiskit format: {total_vectors * bytes_per_vec / (1024 * 1024):.2f} MB")
+    print(
+        f"  PennyLane/Qiskit format: {total_vectors * bytes_per_vec / (1024 * 1024):.2f} MB"
+    )
     print(f"  Mahout format: {total_vectors * bytes_per_vec / (1024 * 1024):.2f} MB")
     print()
 
     print(BAR)
-    print(f"DATALOADER THROUGHPUT BENCHMARK: {args.qubits} Qubits, {total_vectors} Samples")
+    print(
+        f"DATALOADER THROUGHPUT BENCHMARK: {args.qubits} Qubits, {total_vectors} Samples"
+    )
     print(BAR)
 
     print()
     print("[PennyLane] Full Pipeline (DataLoader -> GPU)...")
-    t_pl, th_pl = run_pennylane(args.qubits, args.batches, args.batch_size, args.prefetch)
+    t_pl, th_pl = run_pennylane(
+        args.qubits, args.batches, args.batch_size, args.prefetch
+    )
 
     print()
     print("[Qiskit] Full Pipeline (DataLoader -> GPU)...")
-    t_qiskit, th_qiskit = run_qiskit(args.qubits, args.batches, args.batch_size, args.prefetch)
+    t_qiskit, th_qiskit = run_qiskit(
+        args.qubits, args.batches, args.batch_size, args.prefetch
+    )
 
     print()
     print("[Mahout] Full Pipeline (DataLoader -> GPU)...")
-    t_mahout, th_mahout = run_mahout(args.qubits, args.batches, args.batch_size, args.prefetch)
+    t_mahout, th_mahout = run_mahout(
+        args.qubits, args.batches, args.batch_size, args.prefetch
+    )
 
     print()
     print(BAR)
