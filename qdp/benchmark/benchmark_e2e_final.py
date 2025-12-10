@@ -37,6 +37,7 @@ import os
 import itertools
 import pyarrow as pa
 import pyarrow.parquet as pq
+import pyarrow.ipc as ipc
 from mahout_qdp import QdpEngine
 
 # Competitors
@@ -57,6 +58,7 @@ except ImportError:
 
 # Config
 DATA_FILE = "final_benchmark_data.parquet"
+ARROW_FILE = "final_benchmark_data.arrow"
 HIDDEN_DIM = 16
 BATCH_SIZE = 64  # Small batch to stress loop overhead
 
@@ -71,28 +73,34 @@ class DummyQNN(nn.Module):
 
 
 def generate_data(n_qubits, n_samples):
-    if os.path.exists(DATA_FILE):
-        os.remove(DATA_FILE)
+    for f in [DATA_FILE, ARROW_FILE]:
+        if os.path.exists(f):
+            os.remove(f)
 
     print(f"Generating {n_samples} samples of {n_qubits} qubits...")
     dim = 1 << n_qubits
 
-    # Generate for PennyLane/Qiskit (List format)
-    chunk_size = 500
-    schema_list = pa.schema([("feature_vector", pa.list_(pa.float64()))])
+    # Generate all data at once
+    np.random.seed(42)
+    all_data = np.random.rand(n_samples, dim).astype(np.float64)
 
-    with pq.ParquetWriter(DATA_FILE, schema_list) as writer:
-        for start_idx in range(0, n_samples, chunk_size):
-            current = min(chunk_size, n_samples - start_idx)
-            data = np.random.rand(current, dim).astype(np.float64)
-            feature_vectors = [row.tolist() for row in data]
-            arrays = pa.array(feature_vectors, type=pa.list_(pa.float64()))
-            batch_table = pa.Table.from_arrays([arrays], names=["feature_vector"])
-            writer.write_table(batch_table)
+    # Save as Parquet (List format for PennyLane/Qiskit)
+    feature_vectors = [row.tolist() for row in all_data]
+    table = pa.table(
+        {"feature_vector": pa.array(feature_vectors, type=pa.list_(pa.float64()))}
+    )
+    pq.write_table(table, DATA_FILE)
 
-    file_size_mb = os.path.getsize(DATA_FILE) / (1024 * 1024)
+    # Save as Arrow IPC (FixedSizeList format for Mahout)
+    arr = pa.FixedSizeListArray.from_arrays(pa.array(all_data.flatten()), dim)
+    arrow_table = pa.table({"data": arr})
+    with ipc.RecordBatchFileWriter(ARROW_FILE, arrow_table.schema) as writer:
+        writer.write_table(arrow_table)
+
+    parquet_size = os.path.getsize(DATA_FILE) / (1024 * 1024)
+    arrow_size = os.path.getsize(ARROW_FILE) / (1024 * 1024)
     print(f"  Generated {n_samples} samples")
-    print(f"  Parquet file size: {file_size_mb:.2f} MB")
+    print(f"  Parquet: {parquet_size:.2f} MB, Arrow IPC: {arrow_size:.2f} MB")
 
 
 # -----------------------------------------------------------
@@ -220,10 +228,10 @@ def run_pennylane(n_qubits, n_samples):
 
 
 # -----------------------------------------------------------
-# 3. Mahout Full Pipeline
+# 3. Mahout Parquet Pipeline
 # -----------------------------------------------------------
-def run_mahout(engine, n_qubits, n_samples):
-    print("\n[Mahout] Full Pipeline (Disk -> GPU)...")
+def run_mahout_parquet(engine, n_qubits, n_samples):
+    print("\n[Mahout-Parquet] Full Pipeline (Parquet -> GPU)...")
     model = DummyQNN(n_qubits).cuda()
 
     torch.cuda.synchronize()
@@ -252,6 +260,44 @@ def run_mahout(engine, n_qubits, n_samples):
     print(f"  Reshape & convert: {reshape_time:.4f} s")
 
     # Forward pass (data already on GPU)
+    for i in range(0, n_samples, BATCH_SIZE):
+        batch = gpu_all_data[i : i + BATCH_SIZE]
+        _ = model(batch)
+
+    torch.cuda.synchronize()
+    total_time = time.perf_counter() - start_time
+    print(f"  Total Time: {total_time:.4f} s")
+    return total_time, gpu_reshaped
+
+
+# -----------------------------------------------------------
+# 4. Mahout Arrow IPC Pipeline
+# -----------------------------------------------------------
+def run_mahout_arrow(engine, n_qubits, n_samples):
+    print("\n[Mahout-Arrow] Full Pipeline (Arrow IPC -> GPU)...")
+    model = DummyQNN(n_qubits).cuda()
+
+    torch.cuda.synchronize()
+    start_time = time.perf_counter()
+
+    arrow_encode_start = time.perf_counter()
+    batched_tensor = engine.encode_from_arrow_ipc(ARROW_FILE, n_qubits, "amplitude")
+    arrow_encode_time = time.perf_counter() - arrow_encode_start
+    print(f"  Arrow->GPU (IO+Encode): {arrow_encode_time:.4f} s")
+
+    dlpack_start = time.perf_counter()
+    gpu_batched = torch.from_dlpack(batched_tensor)
+    dlpack_time = time.perf_counter() - dlpack_start
+    print(f"  DLPack conversion: {dlpack_time:.4f} s")
+
+    state_len = 1 << n_qubits
+    gpu_reshaped = gpu_batched.view(n_samples, state_len)
+
+    reshape_start = time.perf_counter()
+    gpu_all_data = gpu_reshaped.abs().to(torch.float32)
+    reshape_time = time.perf_counter() - reshape_start
+    print(f"  Reshape & convert: {reshape_time:.4f} s")
+
     for i in range(0, n_samples, BATCH_SIZE):
         batch = gpu_all_data[i : i + BATCH_SIZE]
         _ = model(batch)
@@ -314,22 +360,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--frameworks",
         nargs="+",
-        default=["mahout", "pennylane"],
-        choices=["mahout", "pennylane", "qiskit", "all"],
-        help="Frameworks to benchmark (default: mahout pennylane). Use 'all' to run all available frameworks.",
+        default=["mahout-parquet", "pennylane"],
+        choices=["mahout-parquet", "mahout-arrow", "pennylane", "qiskit", "all"],
+        help="Frameworks to benchmark. Use 'all' to run all available frameworks.",
     )
     args = parser.parse_args()
 
     # Expand "all" option
     if "all" in args.frameworks:
-        all_frameworks = []
-        if "mahout" in args.frameworks or "all" in args.frameworks:
-            all_frameworks.append("mahout")
-        if "pennylane" in args.frameworks or "all" in args.frameworks:
-            all_frameworks.append("pennylane")
-        if "qiskit" in args.frameworks or "all" in args.frameworks:
-            all_frameworks.append("qiskit")
-        args.frameworks = all_frameworks
+        args.frameworks = ["mahout-parquet", "mahout-arrow", "pennylane", "qiskit"]
 
     generate_data(args.qubits, args.samples)
 
@@ -345,7 +384,8 @@ if __name__ == "__main__":
 
     # Initialize results
     t_pl, pl_all_states = 0.0, None
-    t_mahout, mahout_all_states = 0.0, None
+    t_mahout_parquet, mahout_parquet_all_states = 0.0, None
+    t_mahout_arrow, mahout_arrow_all_states = 0.0, None
     t_qiskit, qiskit_all_states = 0.0, None
 
     # Run benchmarks
@@ -355,8 +395,15 @@ if __name__ == "__main__":
     if "qiskit" in args.frameworks:
         t_qiskit, qiskit_all_states = run_qiskit(args.qubits, args.samples)
 
-    if "mahout" in args.frameworks:
-        t_mahout, mahout_all_states = run_mahout(engine, args.qubits, args.samples)
+    if "mahout-parquet" in args.frameworks:
+        t_mahout_parquet, mahout_parquet_all_states = run_mahout_parquet(
+            engine, args.qubits, args.samples
+        )
+
+    if "mahout-arrow" in args.frameworks:
+        t_mahout_arrow, mahout_arrow_all_states = run_mahout_arrow(
+            engine, args.qubits, args.samples
+        )
 
     print("\n" + "=" * 70)
     print("E2E LATENCY (Lower is Better)")
@@ -364,8 +411,10 @@ if __name__ == "__main__":
     print("=" * 70)
 
     results = []
-    if t_mahout > 0:
-        results.append(("Mahout", t_mahout))
+    if t_mahout_parquet > 0:
+        results.append(("Mahout-Parquet", t_mahout_parquet))
+    if t_mahout_arrow > 0:
+        results.append(("Mahout-Arrow", t_mahout_arrow))
     if t_pl > 0:
         results.append(("PennyLane", t_pl))
     if t_qiskit > 0:
@@ -374,19 +423,23 @@ if __name__ == "__main__":
     results.sort(key=lambda x: x[1])
 
     for name, time_val in results:
-        print(f"{name:12s} {time_val:10.4f} s")
+        print(f"{name:16s} {time_val:10.4f} s")
 
     print("-" * 70)
-    if t_mahout > 0:
+    # Use fastest Mahout variant for speedup comparison
+    mahout_times = [t for t in [t_mahout_arrow, t_mahout_parquet] if t > 0]
+    t_mahout_best = min(mahout_times) if mahout_times else 0
+    if t_mahout_best > 0:
         if t_pl > 0:
-            print(f"Speedup vs PennyLane: {t_pl / t_mahout:10.2f}x")
+            print(f"Speedup vs PennyLane: {t_pl / t_mahout_best:10.2f}x")
         if t_qiskit > 0:
-            print(f"Speedup vs Qiskit:    {t_qiskit / t_mahout:10.2f}x")
+            print(f"Speedup vs Qiskit:    {t_qiskit / t_mahout_best:10.2f}x")
 
     # Run Verification after benchmarks
     verify_correctness(
         {
-            "Mahout": mahout_all_states,
+            "Mahout-Parquet": mahout_parquet_all_states,
+            "Mahout-Arrow": mahout_arrow_all_states,
             "PennyLane": pl_all_states,
             "Qiskit": qiskit_all_states,
         }
