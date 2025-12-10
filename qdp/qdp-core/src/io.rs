@@ -22,7 +22,7 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
-use arrow::array::{Array, ArrayRef, Float64Array, ListArray, RecordBatch};
+use arrow::array::{Array, ArrayRef, Float64Array, ListArray, RecordBatch, AsArray};
 use arrow::datatypes::{DataType, Field, Schema};
 use parquet::arrow::arrow_reader::{ParquetRecordBatchReader, ParquetRecordBatchReaderBuilder};
 use parquet::arrow::ArrowWriter;
@@ -32,7 +32,7 @@ use crate::error::{MahoutError, Result};
 
 /// Convert Arrow Float64Array to Vec<f64>
 ///
-/// Uses Arrow's internal buffer directly if no nulls, otherwise copies
+/// Uses Arrow's internal buffer if no nulls, otherwise copies
 pub fn arrow_to_vec(array: &Float64Array) -> Vec<f64> {
     if array.null_count() == 0 {
         array.values().to_vec()
@@ -150,10 +150,10 @@ pub fn write_parquet<P: AsRef<Path>>(
 
 /// Reads quantum data from a Parquet file as Arrow arrays.
 ///
-/// Returns Arrow arrays directly from Parquet batches.
+/// Returns Arrow arrays from Parquet batches.
 /// Each element in the returned Vec corresponds to one Parquet batch.
 ///
-/// Directly constructs the Arrow array from Parquet batches
+/// Constructs the Arrow array from Parquet batches
 ///
 /// # Arguments
 /// * `path` - Path to the Parquet file
@@ -370,11 +370,12 @@ pub fn read_parquet_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, u
 
 /// Streaming Parquet reader for pipeline processing
 ///
-/// Reads chunks directly into staging buffers, avoiding full-file memory allocation.
+/// Reads chunks into staging buffers, avoiding full-file memory allocation.
 pub struct ParquetBlockReader {
     reader: ParquetRecordBatchReader,
     sample_size: Option<usize>,
-    leftover_data: Vec<f64>, // Handles batch boundaries that don't align with buffer size
+    leftover_data: Vec<f64>,
+    leftover_cursor: usize,
     pub total_samples: usize,
 }
 
@@ -398,50 +399,111 @@ impl ParquetBlockReader {
             reader,
             sample_size: None,
             leftover_data: Vec::new(),
+            leftover_cursor: 0,
             total_samples: total_rows,
         })
     }
 
-    /// Read next chunk into the provided buffer
-    ///
-    /// Returns the number of elements written.
+    /// Read next chunk into the provided buffer.
+    /// Ensures only complete samples are written if sample_size is known.
+    /// Returns the number of f64 elements written.
     pub fn read_chunk(&mut self, buffer: &mut [f64]) -> Result<usize> {
         let mut written = 0;
-        let buf_len = buffer.len();
+        let buf_cap = buffer.len();
+
+        // Calculate capacity aligned to sample boundaries
+        let calc_limit = |ss: usize| -> usize {
+            if ss == 0 { buf_cap } else { (buf_cap / ss) * ss }
+        };
+
+        let mut limit = self.sample_size.map_or(buf_cap, calc_limit);
+
+        if limit == 0 && self.sample_size.is_some() {
+            return Err(MahoutError::MemoryAllocation(format!(
+                "Staging buffer too small ({} elements) for sample size ({} elements)",
+                buf_cap, self.sample_size.unwrap()
+            )));
+        }
 
         // Drain leftovers first
-        if !self.leftover_data.is_empty() {
-            let to_copy = std::cmp::min(self.leftover_data.len(), buf_len);
-            buffer[0..to_copy].copy_from_slice(&self.leftover_data[0..to_copy]);
-            written += to_copy;
-            self.leftover_data.drain(0..to_copy);
-            if written == buf_len {
+        if self.leftover_cursor < self.leftover_data.len() {
+            let available = self.leftover_data.len() - self.leftover_cursor;
+            let space_left = limit - written;
+
+            // Ensure we only copy complete samples if sample_size is known
+            let to_copy = if let Some(ss) = self.sample_size {
+                if ss == 0 {
+                    std::cmp::min(available, space_left)
+                } else {
+                    // Align to sample boundaries
+                    let max_by_space = (space_left / ss) * ss;
+                    let max_by_available = (available / ss) * ss;
+                    std::cmp::min(max_by_available, max_by_space)
+                }
+            } else {
+                std::cmp::min(available, space_left)
+            };
+
+            if to_copy > 0 {
+                buffer[written..written+to_copy].copy_from_slice(&self.leftover_data[self.leftover_cursor..self.leftover_cursor+to_copy]);
+
+                written += to_copy;
+                self.leftover_cursor += to_copy;
+
+                if self.leftover_cursor == self.leftover_data.len() {
+                    self.leftover_data.clear();
+                    self.leftover_cursor = 0;
+                }
+            }
+
+            if written == limit {
                 return Ok(written);
             }
         }
 
         // Read new batches until buffer is full
-        while written < buf_len {
+        while written < limit {
             match self.reader.next() {
                 Some(Ok(batch)) => {
                     if batch.num_columns() == 0 { continue; }
+                    let column = batch.column(0);
 
-                    let (batch_data, current_sample_size) = extract_batch_data(batch.column(0), self.sample_size)?;
+                    let (values, current_sample_size) = extract_values_bulk(column)?;
 
+                    // On first read, establish sample size
                     if self.sample_size.is_none() {
                         self.sample_size = Some(current_sample_size);
+                        let new_limit = calc_limit(current_sample_size);
+                        if written > new_limit {
+                            self.leftover_data.clear();
+                            self.leftover_data.extend_from_slice(&buffer[new_limit..written]);
+                            written = new_limit;
+                            self.leftover_cursor = 0;
+                            return Ok(written);
+                        }
+                        limit = new_limit;
+                    } else if current_sample_size != self.sample_size.unwrap() {
+                        return Err(MahoutError::InvalidInput(format!(
+                            "Inconsistent sample size: expected {}, got {}",
+                            self.sample_size.unwrap(), current_sample_size
+                        )));
                     }
 
-                    let available = batch_data.len();
-                    let space_left = buf_len - written;
+                    let available = values.len();
+                    let space_left = if written >= limit { 0 } else { limit - written };
 
                     if available <= space_left {
-                        buffer[written..written+available].copy_from_slice(&batch_data);
+                        buffer[written..written+available].copy_from_slice(values);
                         written += available;
                     } else {
-                        buffer[written..buf_len].copy_from_slice(&batch_data[0..space_left]);
-                        self.leftover_data.extend_from_slice(&batch_data[space_left..]);
-                        written = buf_len;
+                        if space_left > 0 {
+                            buffer[written..written+space_left].copy_from_slice(&values[0..space_left]);
+                            written += space_left;
+                        }
+
+                        self.leftover_data.clear();
+                        self.leftover_data.extend_from_slice(&values[space_left..]);
+                        self.leftover_cursor = 0;
                         break;
                     }
                 },
@@ -458,7 +520,42 @@ impl ParquetBlockReader {
     }
 }
 
-/// Extract flattened data from Arrow List<Float64> column
+/// Extract Arrow List<Float64> values directly from underlying buffers.
+/// Returns (values slice, sample size per row).
+fn extract_values_bulk(column: &ArrayRef) -> Result<(&[f64], usize)> {
+    match column.data_type() {
+        DataType::List(_) => {
+            let list_array = column.as_list::<i32>();
+            let values_array = list_array.values();
+            let float_values = values_array.as_primitive::<arrow::datatypes::Float64Type>();
+            let raw_slice = float_values.values();
+
+            if list_array.is_empty() {
+                return Ok((&[], 0));
+            }
+
+            let offsets = list_array.value_offsets();
+            let sample_size = if offsets.len() > 1 {
+                (offsets[1] - offsets[0]) as usize
+            } else {
+                0
+            };
+
+            let start_offset = offsets[0] as usize;
+            let end_offset = offsets[offsets.len() - 1] as usize;
+
+            if end_offset > raw_slice.len() {
+                 return Err(MahoutError::Io("Corrupt Arrow Array: Offsets exceed value buffer".into()));
+            }
+
+            Ok((&raw_slice[start_offset..end_offset], sample_size))
+        },
+        _ => Err(MahoutError::Io(format!("Expected List<Float64>, got {:?}", column.data_type()))),
+    }
+}
+
+/// Legacy: Extract to Vec (kept for compatibility).
+#[allow(dead_code)]
 fn extract_batch_data(column: &ArrayRef, expected_size: Option<usize>) -> Result<(Vec<f64>, usize)> {
     let mut batch_data = Vec::new();
     let mut sample_size = expected_size.unwrap_or(0);

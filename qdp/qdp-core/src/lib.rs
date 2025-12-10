@@ -157,10 +157,24 @@ impl QdpEngine {
                 return Err(MahoutError::NotImplemented("Only amplitude encoding supported for parquet streaming".into()));
             }
 
-            const STAGE_SIZE_BYTES: usize = 64 * 1024 * 1024; // 64MB per stage
+            // 64MB buffer size per stage
+            // For 18 qubits: sample size = 2MB, buffer holds 32 samples
+            // For >22 qubits: buffer can only hold 1 sample
+            // For >23 qubits: will fail (buffer too small)
+            const STAGE_SIZE_BYTES: usize = 64 * 1024 * 1024;
             const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
             const BYTES_PER_F64: usize = 8;
             const CUDA_MEMCPY_HOST_TO_DEVICE: u32 = 1;
+
+            let min_required_elements = 1 << num_qubits;
+            if STAGE_SIZE_ELEMENTS < min_required_elements {
+                return Err(MahoutError::MemoryAllocation(format!(
+                    "Staging buffer ({} MB) is too small for {} qubits (requires {} MB). Increase buffer size.",
+                    STAGE_SIZE_BYTES / (1024*1024),
+                    num_qubits,
+                    (min_required_elements * 8) / (1024*1024)
+                )));
+            }
 
             let mut reader = crate::io::ParquetBlockReader::new(path)?;
 
@@ -179,11 +193,11 @@ impl QdpEngine {
             let num_samples = reader.total_samples;
 
             let max_samples_per_chunk = STAGE_SIZE_ELEMENTS / sample_size + 1;
-            let norms_pinned_a = PinnedBuffer::new(max_samples_per_chunk)?;
-            let norms_pinned_b = PinnedBuffer::new(max_samples_per_chunk)?;
-            let dev_norms_a = unsafe { self.device.alloc::<f64>(max_samples_per_chunk) }
+            let mut norms_pinned_a = PinnedBuffer::new(max_samples_per_chunk)?;
+            let mut norms_pinned_b = PinnedBuffer::new(max_samples_per_chunk)?;
+            let mut dev_norms_a = unsafe { self.device.alloc::<f64>(max_samples_per_chunk) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-            let dev_norms_b = unsafe { self.device.alloc::<f64>(max_samples_per_chunk) }
+            let mut dev_norms_b = unsafe { self.device.alloc::<f64>(max_samples_per_chunk) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
 
             let total_state_vector = GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
@@ -210,10 +224,18 @@ impl QdpEngine {
                     if samples_in_chunk > 0 {
                         crate::profile_scope!("Pipeline::Step");
 
-                        // CPU: Calculate norms (overlapped with GPU work)
+                        // Safety: Prevent OOB write if metadata underestimates row count
+                        if global_sample_offset + samples_in_chunk > num_samples {
+                            return Err(MahoutError::InvalidInput(format!(
+                                "Parquet file contains more data than metadata indicated. Allocated: {}, Found so far: {}",
+                                num_samples, global_sample_offset + samples_in_chunk
+                            )));
+                        }
+
+                        // CPU: Calculate norms
                         {
                             crate::profile_scope!("CPU::CalcNorms");
-                            let (data_slice, norms_slice) = if use_buffer_a {
+                            let (data_slice, target_norms) = if use_buffer_a {
                                 (
                                     &pinned_a.as_slice_mut()[0..current_read_len],
                                     std::slice::from_raw_parts_mut(norms_pinned_a.ptr() as *mut f64, samples_in_chunk)
@@ -226,7 +248,7 @@ impl QdpEngine {
                             };
 
                             use rayon::prelude::*;
-                            norms_slice.par_iter_mut().enumerate().for_each(|(i, norm_out)| {
+                            target_norms.par_iter_mut().enumerate().for_each(|(i, norm_out)| {
                                 let start = i * sample_size;
                                 let sample = &data_slice[start..start + sample_size];
                                 *norm_out = 1.0 / sample.iter().map(|x| x*x).sum::<f64>().sqrt();
@@ -253,7 +275,6 @@ impl QdpEngine {
                                     stream_b.stream as *mut c_void
                                 )
                             };
-
                             cudaMemcpyAsync(dev_in_ptr, pinned_ptr, current_read_len * BYTES_PER_F64, CUDA_MEMCPY_HOST_TO_DEVICE, stream_ptr);
                             cudaMemcpyAsync(dev_norms_ptr, norms_ptr, samples_in_chunk * BYTES_PER_F64, CUDA_MEMCPY_HOST_TO_DEVICE, stream_ptr);
                         }
@@ -273,8 +294,13 @@ impl QdpEngine {
                             };
 
                             let ret = launch_amplitude_encode_batch(
-                                dev_in_ptr, state_ptr_offset, dev_norms_ptr,
-                                samples_in_chunk, sample_size, state_len_per_sample, stream_ptr
+                                dev_in_ptr,
+                                state_ptr_offset,
+                                dev_norms_ptr,
+                                samples_in_chunk,
+                                sample_size,
+                                state_len_per_sample,
+                                stream_ptr
                             );
 
                             if ret != 0 {
@@ -285,12 +311,11 @@ impl QdpEngine {
                         global_sample_offset += samples_in_chunk;
                     }
 
-                    // CPU: Read next chunk (overlapped with GPU work)
+                    // CPU: Read next chunk
                     {
                         crate::profile_scope!("IO::ReadNext");
 
-                        // Sync: Wait for next stream to finish before overwriting its buffer
-                        // Prevents data race where CPU writes while GPU DMA reads
+                        // Sync: Wait for next stream to finish before overwriting buffer (prevents data race)
                         let next_stream = if use_buffer_a { &stream_b } else { &stream_a };
                         self.device.wait_for(next_stream)
                             .map_err(|e| MahoutError::Cuda(format!("Stream sync failed before IO: {:?}", e)))?;
@@ -302,7 +327,7 @@ impl QdpEngine {
                 }
             }
 
-            // Sync everything at the end
+            // Final sync: ensure all streams complete
             self.device.synchronize().map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
 
             Ok(total_state_vector.to_dlpack())
@@ -310,14 +335,11 @@ impl QdpEngine {
 
         #[cfg(not(target_os = "linux"))]
         {
-            // Fallback for non-Linux
-            // Read Parquet directly using Arrow (faster than pandas)
+            // Fallback: synchronous read and encode
             let (batch_data, num_samples, sample_size) = {
                 crate::profile_scope!("IO::ReadParquetBatch");
                 crate::io::read_parquet_batch(path)?
             };
-
-            // Encode using fused batch kernel
             self.encode_batch(&batch_data, num_samples, sample_size, num_qubits, encoding_method)
         }
     }

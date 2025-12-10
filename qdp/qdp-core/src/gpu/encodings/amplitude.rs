@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Amplitude encoding: direct state injection with L2 normalization
+// Amplitude encoding: state injection with L2 normalization
 
 use std::sync::Arc;
 
@@ -31,7 +31,7 @@ use cudarc::driver::DevicePtr;
 #[cfg(target_os = "linux")]
 use qdp_kernels::{launch_amplitude_encode, launch_amplitude_encode_batch};
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
+use crate::gpu::memory::map_allocation_error;
 
 use crate::preprocessing::Preprocessor;
 
@@ -69,7 +69,6 @@ impl QuantumEncoder for AmplitudeEncoder {
             if host_data.len() < ASYNC_THRESHOLD {
                 // Synchronous path for small data (avoids stream overhead)
                 let input_bytes = host_data.len() * std::mem::size_of::<f64>();
-                ensure_device_memory_available(input_bytes, "input staging buffer", Some(num_qubits))?;
 
                 let input_slice = {
                     crate::profile_scope!("GPU::H2DCopy");
@@ -77,7 +76,6 @@ impl QuantumEncoder for AmplitudeEncoder {
                         .map_err(|e| map_allocation_error(
                             input_bytes,
                             "input staging buffer",
-                            Some(num_qubits),
                             e,
                         ))?
                 };
@@ -224,7 +222,7 @@ impl QuantumEncoder for AmplitudeEncoder {
 impl AmplitudeEncoder {
 
 
-    /// Async pipeline encoding for large data (SSS-tier optimization)
+    /// Async pipeline encoding for large data
     ///
     /// Uses the generic dual-stream pipeline infrastructure to overlap
     /// data transfer and computation. The pipeline handles all the

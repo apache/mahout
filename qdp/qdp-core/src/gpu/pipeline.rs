@@ -24,7 +24,7 @@ use std::ffi::c_void;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use crate::error::{MahoutError, Result};
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
+use crate::gpu::memory::map_allocation_error;
 
 /// Chunk processing callback for async pipeline
 ///
@@ -95,7 +95,6 @@ where
         crate::profile_scope!("GPU::ChunkProcess");
 
         let chunk_bytes = chunk.len() * std::mem::size_of::<f64>();
-        ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
 
         // Allocate temporary device buffer for this chunk
         let input_chunk_dev = unsafe {
@@ -103,7 +102,6 @@ where
         }.map_err(|e| map_allocation_error(
             chunk_bytes,
             "pipeline chunk buffer allocation",
-            None,
             e,
         ))?;
 
