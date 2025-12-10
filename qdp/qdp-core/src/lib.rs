@@ -227,17 +227,16 @@ impl QdpEngine {
                 }
             });
 
-            // Main thread (Consumer): GPU processing loop
-            // First receives pre-read chunk, then IO thread's subsequent chunks
+            // GPU processing loop: receives pre-read chunk, then IO thread chunks
             let mut global_sample_offset = 0;
             let mut use_dev_a = true;
             let state_len_per_sample = 1 << num_qubits;
 
             loop {
-                // Receives: first pre-read chunk, then IO thread's chunks
                 let (host_buffer, current_len) = full_buf_rx.recv()
                     .map_err(|_| MahoutError::Io("IO thread disconnected".into()))?;
 
+                // len == 0 means IO thread finished (don't recycle buffer)
                 if current_len == 0 { break; }
 
                 let samples_in_chunk = current_len / sample_size;
@@ -252,7 +251,7 @@ impl QdpEngine {
                         ctx.record_copy_done();
                         ctx.wait_for_copy();
 
-                        // Launch fused batch kernel
+                        // Launch fused kernel
                         {
                             crate::profile_scope!("GPU::FusedKernel");
                             let offset_elements = global_sample_offset * state_len_per_sample;
@@ -278,8 +277,8 @@ impl QdpEngine {
                     use_dev_a = !use_dev_a;
                 }
 
-                // Return buffer to IO thread for next read
-                empty_buf_tx.send(host_buffer).map_err(|_| MahoutError::Io("Recycle failed".into()))?;
+                // Return buffer to IO thread (ignore errors if thread exited)
+                let _ = empty_buf_tx.send(host_buffer);
             }
 
             self.device.synchronize().map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
