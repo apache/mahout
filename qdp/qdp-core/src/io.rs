@@ -16,7 +16,11 @@
 
 //! I/O utilities for reading and writing quantum data.
 //!
-//! Provides efficient columnar data exchange
+//! Provides efficient columnar data exchange via Apache Arrow and Parquet formats.
+//!
+//! # TODO
+//! Consider using generic `T: ArrowPrimitiveType` instead of hardcoded `Float64Array`
+//! to support both Float32 and Float64 for flexibility in precision vs performance trade-offs.
 
 use std::fs::File;
 use std::path::Path;
