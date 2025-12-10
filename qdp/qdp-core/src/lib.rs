@@ -25,11 +25,11 @@ mod profiling;
 
 pub use error::{MahoutError, Result};
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
 
-use cudarc::driver::{CudaDevice, DevicePtr};
+use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
@@ -37,12 +37,38 @@ use crate::gpu::memory::{PinnedBuffer, GpuStateVector};
 #[cfg(target_os = "linux")]
 use qdp_kernels::launch_amplitude_encode_batch;
 
+#[cfg(target_os = "linux")]
+const STAGE_SIZE_BYTES: usize = 64 * 1024 * 1024;
+#[cfg(target_os = "linux")]
+const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
+
+#[cfg(target_os = "linux")]
+struct PipelineResources {
+    pinned_a: PinnedBuffer,
+    pinned_b: PinnedBuffer,
+    dev_in_a: CudaSlice<f64>,
+    dev_in_b: CudaSlice<f64>,
+    norms_pinned_a: PinnedBuffer,
+    norms_pinned_b: PinnedBuffer,
+    dev_norms_a: CudaSlice<f64>,
+    dev_norms_b: CudaSlice<f64>,
+    stream_a: CudaStream,
+    stream_b: CudaStream,
+}
+
+#[cfg(target_os = "linux")]
+unsafe impl Send for PipelineResources {}
+#[cfg(target_os = "linux")]
+unsafe impl Sync for PipelineResources {}
+
 /// Main entry point for Mahout QDP
 ///
 /// Manages GPU context and dispatches encoding tasks.
 /// Provides unified interface for device management, memory allocation, and DLPack.
 pub struct QdpEngine {
     device: Arc<CudaDevice>,
+    #[cfg(target_os = "linux")]
+    resources: Mutex<PipelineResources>,
 }
 
 impl QdpEngine {
@@ -53,9 +79,49 @@ impl QdpEngine {
     pub fn new(device_id: usize) -> Result<Self> {
         let device = CudaDevice::new(device_id)
             .map_err(|e| MahoutError::Cuda(format!("Failed to initialize CUDA device {}: {:?}", device_id, e)))?;
-        Ok(Self {
-            device  // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
-        })
+
+        #[cfg(target_os = "linux")]
+        {
+            let pinned_a = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+            let pinned_b = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+            let norms_pinned_a = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+            let norms_pinned_b = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+
+            let dev_in_a = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+            let dev_in_b = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+            let dev_norms_a = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+            let dev_norms_b = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+
+            let stream_a = device.fork_default_stream()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+            let stream_b = device.fork_default_stream()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+
+            Ok(Self {
+                device,
+                resources: Mutex::new(PipelineResources {
+                    pinned_a,
+                    pinned_b,
+                    dev_in_a,
+                    dev_in_b,
+                    norms_pinned_a,
+                    norms_pinned_b,
+                    dev_norms_a,
+                    dev_norms_b,
+                    stream_a,
+                    stream_b,
+                }),
+            })
+        }
+
+        #[cfg(not(target_os = "linux"))]
+        {
+            Ok(Self { device })
+        }
     }
 
     /// Encode classical data into quantum state
@@ -82,11 +148,7 @@ impl QdpEngine {
 
         let encoder = get_encoder(encoding_method)?;
         let state_vector = encoder.encode(&self.device, data, num_qubits)?;
-        let dlpack_ptr = {
-            crate::profile_scope!("DLPack::Wrap");
-            state_vector.to_dlpack()
-        };
-        Ok(dlpack_ptr)
+        Ok(state_vector.to_dlpack())
     }
 
     /// Get CUDA device reference for advanced operations
@@ -157,54 +219,28 @@ impl QdpEngine {
                 return Err(MahoutError::NotImplemented("Only amplitude encoding supported for parquet streaming".into()));
             }
 
-            // 64MB buffer size per stage
-            // For 18 qubits: sample size = 2MB, buffer holds 32 samples
-            // For >22 qubits: buffer can only hold 1 sample
-            // For >23 qubits: will fail (buffer too small)
-            const STAGE_SIZE_BYTES: usize = 64 * 1024 * 1024;
-            const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
-            const BYTES_PER_F64: usize = 8;
             const CUDA_MEMCPY_HOST_TO_DEVICE: u32 = 1;
 
             let min_required_elements = 1 << num_qubits;
             if STAGE_SIZE_ELEMENTS < min_required_elements {
                 return Err(MahoutError::MemoryAllocation(format!(
-                    "Staging buffer ({} MB) is too small for {} qubits (requires {} MB). Increase buffer size.",
+                    "Staging buffer ({} MB) is too small for {} qubits.",
                     STAGE_SIZE_BYTES / (1024*1024),
-                    num_qubits,
-                    (min_required_elements * 8) / (1024*1024)
+                    num_qubits
                 )));
             }
 
+            let mut res = self.resources.lock()
+                .map_err(|_| MahoutError::Cuda("Failed to lock pipeline resources".into()))?;
+
             let mut reader = crate::io::ParquetBlockReader::new(path)?;
 
-            // Setup double-buffered staging area
-            let mut pinned_a = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
-            let mut pinned_b = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
-            let dev_in_a = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-            let dev_in_b = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-
-            // Pre-read first chunk to determine sample size
-            let read_len = reader.read_chunk(pinned_a.as_slice_mut())?;
+            let read_len = reader.read_chunk(res.pinned_a.as_slice_mut())?;
             let sample_size = reader.get_sample_size()
-                .ok_or_else(|| MahoutError::InvalidInput("Could not determine sample size from parquet".into()))?;
+                .ok_or_else(|| MahoutError::InvalidInput("Could not determine sample size".into()))?;
             let num_samples = reader.total_samples;
 
-            let max_samples_per_chunk = STAGE_SIZE_ELEMENTS / sample_size + 1;
-            let mut norms_pinned_a = PinnedBuffer::new(max_samples_per_chunk)?;
-            let mut norms_pinned_b = PinnedBuffer::new(max_samples_per_chunk)?;
-            let mut dev_norms_a = unsafe { self.device.alloc::<f64>(max_samples_per_chunk) }
-                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-            let mut dev_norms_b = unsafe { self.device.alloc::<f64>(max_samples_per_chunk) }
-                .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-
             let total_state_vector = GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
-            let stream_a = self.device.fork_default_stream()
-                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
-            let stream_b = self.device.fork_default_stream()
-                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
 
             let mut global_sample_offset = 0;
             let mut current_read_len = read_len;
@@ -224,28 +260,25 @@ impl QdpEngine {
                     if samples_in_chunk > 0 {
                         crate::profile_scope!("Pipeline::Step");
 
-                        // Safety: Prevent OOB write if metadata underestimates row count
                         if global_sample_offset + samples_in_chunk > num_samples {
-                            return Err(MahoutError::InvalidInput(format!(
-                                "Parquet file contains more data than metadata indicated. Allocated: {}, Found so far: {}",
-                                num_samples, global_sample_offset + samples_in_chunk
-                            )));
+                            return Err(MahoutError::InvalidInput(
+                                "Parquet file contains more data than metadata".into()
+                            ));
                         }
 
-                        // CPU: Calculate norms
                         {
                             crate::profile_scope!("CPU::CalcNorms");
-                            let (data_slice, target_norms) = if use_buffer_a {
-                                (
-                                    &pinned_a.as_slice_mut()[0..current_read_len],
-                                    std::slice::from_raw_parts_mut(norms_pinned_a.ptr() as *mut f64, samples_in_chunk)
-                                )
+                            let (data_slice, norms_ptr) = if use_buffer_a {
+                                let norms = res.norms_pinned_a.ptr();
+                                (&res.pinned_a.as_slice_mut()[0..current_read_len], norms)
                             } else {
-                                (
-                                    &pinned_b.as_slice_mut()[0..current_read_len],
-                                    std::slice::from_raw_parts_mut(norms_pinned_b.ptr() as *mut f64, samples_in_chunk)
-                                )
+                                let norms = res.norms_pinned_b.ptr();
+                                (&res.pinned_b.as_slice_mut()[0..current_read_len], norms)
                             };
+                            let target_norms = std::slice::from_raw_parts_mut(
+                                norms_ptr as *mut f64,
+                                samples_in_chunk
+                            );
 
                             use rayon::prelude::*;
                             target_norms.par_iter_mut().enumerate().for_each(|(i, norm_out)| {
@@ -255,31 +288,29 @@ impl QdpEngine {
                             });
                         }
 
-                        // GPU: Async copy data and norms
                         {
                             crate::profile_scope!("GPU::CopyData");
-                            let (pinned_ptr, norms_ptr, dev_in_ptr, dev_norms_ptr, stream_ptr) = if use_buffer_a {
-                                (
-                                    pinned_a.ptr() as *const c_void,
-                                    norms_pinned_a.ptr() as *const c_void,
-                                    *dev_in_a.device_ptr() as *mut c_void,
-                                    *dev_norms_a.device_ptr() as *mut c_void,
-                                    stream_a.stream as *mut c_void
-                                )
+                            let (pinned_buf, norms_buf, dev_in, dev_norms, stream) = if use_buffer_a {
+                                (&res.pinned_a, &res.norms_pinned_a, &res.dev_in_a, &res.dev_norms_a, &res.stream_a)
                             } else {
-                                (
-                                    pinned_b.ptr() as *const c_void,
-                                    norms_pinned_b.ptr() as *const c_void,
-                                    *dev_in_b.device_ptr() as *mut c_void,
-                                    *dev_norms_b.device_ptr() as *mut c_void,
-                                    stream_b.stream as *mut c_void
-                                )
+                                (&res.pinned_b, &res.norms_pinned_b, &res.dev_in_b, &res.dev_norms_b, &res.stream_b)
                             };
-                            cudaMemcpyAsync(dev_in_ptr, pinned_ptr, current_read_len * BYTES_PER_F64, CUDA_MEMCPY_HOST_TO_DEVICE, stream_ptr);
-                            cudaMemcpyAsync(dev_norms_ptr, norms_ptr, samples_in_chunk * BYTES_PER_F64, CUDA_MEMCPY_HOST_TO_DEVICE, stream_ptr);
+                            cudaMemcpyAsync(
+                                *dev_in.device_ptr() as *mut c_void,
+                                pinned_buf.ptr() as *const c_void,
+                                current_read_len * std::mem::size_of::<f64>(),
+                                CUDA_MEMCPY_HOST_TO_DEVICE,
+                                stream.stream as *mut c_void
+                            );
+                            cudaMemcpyAsync(
+                                *dev_norms.device_ptr() as *mut c_void,
+                                norms_buf.ptr() as *const c_void,
+                                samples_in_chunk * std::mem::size_of::<f64>(),
+                                CUDA_MEMCPY_HOST_TO_DEVICE,
+                                stream.stream as *mut c_void
+                            );
                         }
 
-                        // GPU: Launch kernel
                         {
                             crate::profile_scope!("GPU::Kernel");
                             let offset_elements = global_sample_offset * state_len_per_sample;
@@ -287,47 +318,42 @@ impl QdpEngine {
                                 .add(offset_elements * std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
                                 .cast::<std::ffi::c_void>();
 
-                            let (dev_in_ptr, dev_norms_ptr, stream_ptr) = if use_buffer_a {
-                                (*dev_in_a.device_ptr() as *const f64, *dev_norms_a.device_ptr() as *const f64, stream_a.stream as *mut c_void)
+                            let (dev_in, dev_norms, stream) = if use_buffer_a {
+                                (&res.dev_in_a, &res.dev_norms_a, &res.stream_a)
                             } else {
-                                (*dev_in_b.device_ptr() as *const f64, *dev_norms_b.device_ptr() as *const f64, stream_b.stream as *mut c_void)
+                                (&res.dev_in_b, &res.dev_norms_b, &res.stream_b)
                             };
 
                             let ret = launch_amplitude_encode_batch(
-                                dev_in_ptr,
+                                *dev_in.device_ptr() as *const f64,
                                 state_ptr_offset,
-                                dev_norms_ptr,
+                                *dev_norms.device_ptr() as *const f64,
                                 samples_in_chunk,
                                 sample_size,
                                 state_len_per_sample,
-                                stream_ptr
+                                stream.stream as *mut c_void
                             );
 
                             if ret != 0 {
-                                return Err(MahoutError::KernelLaunch(format!("Pipeline kernel failed: {}", ret)));
+                                return Err(MahoutError::KernelLaunch(format!("Error: {}", ret)));
                             }
                         }
 
                         global_sample_offset += samples_in_chunk;
                     }
 
-                    // CPU: Read next chunk
                     {
                         crate::profile_scope!("IO::ReadNext");
-
-                        // Sync: Wait for next stream to finish before overwriting buffer (prevents data race)
-                        let next_stream = if use_buffer_a { &stream_b } else { &stream_a };
+                        let next_stream = if use_buffer_a { &res.stream_b } else { &res.stream_a };
                         self.device.wait_for(next_stream)
-                            .map_err(|e| MahoutError::Cuda(format!("Stream sync failed before IO: {:?}", e)))?;
-
+                            .map_err(|e| MahoutError::Cuda(format!("Sync error: {:?}", e)))?;
                         use_buffer_a = !use_buffer_a;
-                        let next_pinned = if use_buffer_a { &mut pinned_a } else { &mut pinned_b };
+                        let next_pinned = if use_buffer_a { &mut res.pinned_a } else { &mut res.pinned_b };
                         current_read_len = reader.read_chunk(next_pinned.as_slice_mut())?;
                     }
                 }
             }
 
-            // Final sync: ensure all streams complete
             self.device.synchronize().map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
 
             Ok(total_state_vector.to_dlpack())
@@ -335,11 +361,7 @@ impl QdpEngine {
 
         #[cfg(not(target_os = "linux"))]
         {
-            // Fallback: synchronous read and encode
-            let (batch_data, num_samples, sample_size) = {
-                crate::profile_scope!("IO::ReadParquetBatch");
-                crate::io::read_parquet_batch(path)?
-            };
+            let (batch_data, num_samples, sample_size) = crate::io::read_parquet_batch(path)?;
             self.encode_batch(&batch_data, num_samples, sample_size, num_qubits, encoding_method)
         }
     }
