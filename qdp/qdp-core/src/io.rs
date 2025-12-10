@@ -24,7 +24,7 @@ use std::sync::Arc;
 
 use arrow::array::{Array, ArrayRef, Float64Array, ListArray, RecordBatch};
 use arrow::datatypes::{DataType, Field, Schema};
-use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+use parquet::arrow::arrow_reader::{ParquetRecordBatchReader, ParquetRecordBatchReaderBuilder};
 use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;
 
@@ -364,4 +364,133 @@ pub fn read_parquet_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, u
     })?;
 
     Ok((all_data, num_samples, sample_size))
+}
+
+// === Streaming IO Support ===
+
+/// Streaming Parquet reader for pipeline processing
+///
+/// Reads chunks directly into staging buffers, avoiding full-file memory allocation.
+pub struct ParquetBlockReader {
+    reader: ParquetRecordBatchReader,
+    sample_size: Option<usize>,
+    leftover_data: Vec<f64>, // Handles batch boundaries that don't align with buffer size
+    pub total_samples: usize,
+}
+
+impl ParquetBlockReader {
+    /// Initialize reader and validate schema
+    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let file = File::open(path.as_ref()).map_err(|e| {
+            MahoutError::Io(format!("Failed to open Parquet file: {}", e))
+        })?;
+
+        let builder = ParquetRecordBatchReaderBuilder::try_new(file).map_err(|e| {
+            MahoutError::Io(format!("Failed to create Parquet reader: {}", e))
+        })?;
+
+        let total_rows = builder.metadata().file_metadata().num_rows() as usize;
+        let reader = builder.build().map_err(|e| {
+            MahoutError::Io(format!("Failed to build Parquet reader: {}", e))
+        })?;
+
+        Ok(Self {
+            reader,
+            sample_size: None,
+            leftover_data: Vec::new(),
+            total_samples: total_rows,
+        })
+    }
+
+    /// Read next chunk into the provided buffer
+    ///
+    /// Returns the number of elements written.
+    pub fn read_chunk(&mut self, buffer: &mut [f64]) -> Result<usize> {
+        let mut written = 0;
+        let buf_len = buffer.len();
+
+        // Drain leftovers first
+        if !self.leftover_data.is_empty() {
+            let to_copy = std::cmp::min(self.leftover_data.len(), buf_len);
+            buffer[0..to_copy].copy_from_slice(&self.leftover_data[0..to_copy]);
+            written += to_copy;
+            self.leftover_data.drain(0..to_copy);
+            if written == buf_len {
+                return Ok(written);
+            }
+        }
+
+        // Read new batches until buffer is full
+        while written < buf_len {
+            match self.reader.next() {
+                Some(Ok(batch)) => {
+                    if batch.num_columns() == 0 { continue; }
+
+                    let (batch_data, current_sample_size) = extract_batch_data(batch.column(0), self.sample_size)?;
+
+                    if self.sample_size.is_none() {
+                        self.sample_size = Some(current_sample_size);
+                    }
+
+                    let available = batch_data.len();
+                    let space_left = buf_len - written;
+
+                    if available <= space_left {
+                        buffer[written..written+available].copy_from_slice(&batch_data);
+                        written += available;
+                    } else {
+                        buffer[written..buf_len].copy_from_slice(&batch_data[0..space_left]);
+                        self.leftover_data.extend_from_slice(&batch_data[space_left..]);
+                        written = buf_len;
+                        break;
+                    }
+                },
+                Some(Err(e)) => return Err(MahoutError::Io(format!("Parquet read error: {}", e))),
+                None => break,
+            }
+        }
+
+        Ok(written)
+    }
+
+    pub fn get_sample_size(&self) -> Option<usize> {
+        self.sample_size
+    }
+}
+
+/// Extract flattened data from Arrow List<Float64> column
+fn extract_batch_data(column: &ArrayRef, expected_size: Option<usize>) -> Result<(Vec<f64>, usize)> {
+    let mut batch_data = Vec::new();
+    let mut sample_size = expected_size.unwrap_or(0);
+
+    let list_array = column.as_any().downcast_ref::<ListArray>()
+        .ok_or_else(|| MahoutError::Io(format!("Expected List<Float64>, got {:?}", column.data_type())))?;
+
+    for i in 0..list_array.len() {
+        let value_array = list_array.value(i);
+        let float_array = value_array
+            .as_any()
+            .downcast_ref::<Float64Array>()
+            .ok_or_else(|| MahoutError::Io("List values must be Float64".to_string()))?;
+
+        let current_len = float_array.len();
+
+        if let Some(expected) = expected_size {
+            if current_len != expected {
+                return Err(MahoutError::InvalidInput(format!(
+                    "Inconsistent sample sizes: expected {}, got {}", expected, current_len
+                )));
+            }
+        } else if sample_size == 0 {
+            sample_size = current_len;
+        }
+
+        if float_array.null_count() == 0 {
+            batch_data.extend_from_slice(float_array.values());
+        } else {
+            batch_data.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
+        }
+    }
+
+    Ok((batch_data, sample_size))
 }

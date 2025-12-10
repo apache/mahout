@@ -20,6 +20,9 @@ use qdp_kernels::CuDoubleComplex;
 use crate::error::{MahoutError, Result};
 
 #[cfg(target_os = "linux")]
+use std::ffi::c_void;
+
+#[cfg(target_os = "linux")]
 fn bytes_to_mib(bytes: usize) -> f64 {
     bytes as f64 / (1024.0 * 1024.0)
 }
@@ -263,3 +266,79 @@ impl GpuStateVector {
         }
     }
 }
+
+// === Pinned Memory Implementation ===
+
+/// Pinned Host Memory Buffer (Page-Locked)
+///
+/// Enables DMA for H2D copies, doubling bandwidth and reducing CPU usage.
+#[cfg(target_os = "linux")]
+pub struct PinnedBuffer {
+    ptr: *mut f64,
+    size_elements: usize,
+}
+
+#[cfg(target_os = "linux")]
+impl PinnedBuffer {
+    /// Allocate pinned memory
+    pub fn new(elements: usize) -> Result<Self> {
+        unsafe {
+            let bytes = elements * std::mem::size_of::<f64>();
+            let mut ptr: *mut c_void = std::ptr::null_mut();
+
+            unsafe extern "C" {
+                fn cudaHostAlloc(pHost: *mut *mut c_void, size: usize, flags: u32) -> i32;
+            }
+
+            let ret = cudaHostAlloc(&mut ptr, bytes, 0); // cudaHostAllocDefault
+
+            if ret != 0 {
+                return Err(MahoutError::MemoryAllocation(
+                    format!("cudaHostAlloc failed with error code: {}", ret)
+                ));
+            }
+
+            Ok(Self {
+                ptr: ptr as *mut f64,
+                size_elements: elements,
+            })
+        }
+    }
+
+    /// Get mutable slice to write data into
+    pub fn as_slice_mut(&mut self) -> &mut [f64] {
+        unsafe { std::slice::from_raw_parts_mut(self.ptr, self.size_elements) }
+    }
+
+    /// Get raw pointer for CUDA memcpy
+    pub fn ptr(&self) -> *const f64 {
+        self.ptr
+    }
+
+    pub fn len(&self) -> usize {
+        self.size_elements
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.size_elements == 0
+    }
+}
+
+#[cfg(target_os = "linux")]
+impl Drop for PinnedBuffer {
+    fn drop(&mut self) {
+        unsafe {
+            unsafe extern "C" {
+                fn cudaFreeHost(ptr: *mut c_void) -> i32;
+            }
+            let _ = cudaFreeHost(self.ptr as *mut c_void);
+        }
+    }
+}
+
+// Safety: Pinned memory is accessible from any thread
+#[cfg(target_os = "linux")]
+unsafe impl Send for PinnedBuffer {}
+
+#[cfg(target_os = "linux")]
+unsafe impl Sync for PinnedBuffer {}
