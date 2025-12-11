@@ -17,7 +17,7 @@
 use pyo3::prelude::*;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
-use qdp_core::QdpEngine as CoreEngine;
+use qdp_core::{Precision, QdpEngine as CoreEngine};
 use qdp_core::dlpack::DLManagedTensor;
 
 /// Quantum tensor wrapper implementing DLPack protocol
@@ -139,6 +139,7 @@ impl QdpEngine {
     ///
     /// Args:
     ///     device_id: CUDA device ID (typically 0)
+    ///     precision: Output precision ("float32" default, or "float64")
     ///
     /// Returns:
     ///     QdpEngine instance
@@ -146,9 +147,20 @@ impl QdpEngine {
     /// Raises:
     ///     RuntimeError: If CUDA device initialization fails
     #[new]
-    #[pyo3(signature = (device_id=0))]
-    fn new(device_id: usize) -> PyResult<Self> {
-        let engine = CoreEngine::new(device_id)
+    #[pyo3(signature = (device_id=0, precision=\"float32\"))]
+    fn new(device_id: usize, precision: &str) -> PyResult<Self> {
+        let precision = match precision.to_ascii_lowercase().as_str() {
+            "float32" | "f32" | "float" => Precision::Float32,
+            "float64" | "f64" | "double" => Precision::Float64,
+            other => {
+                return Err(PyRuntimeError::new_err(format!(
+                    "Unsupported precision '{}'. Use 'float32' (default) or 'float64'.",
+                    other
+                )))
+            }
+        };
+
+        let engine = CoreEngine::new_with_precision(device_id, precision)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to initialize: {}", e)))?;
         Ok(Self { engine })
     }

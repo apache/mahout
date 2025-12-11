@@ -58,6 +58,15 @@ def engine():
         pytest.skip(f"CUDA initialization failed: {e}")
 
 
+@pytest.fixture(scope="module")
+def engine_float64():
+    """High-precision engine for fidelity-sensitive tests."""
+    try:
+        return QdpEngine(0, precision="float64")
+    except RuntimeError as e:
+        pytest.skip(f"CUDA initialization failed: {e}")
+
+
 # 1. Core Logic and Boundary Tests
 
 
@@ -73,7 +82,7 @@ def engine():
         (20, 1_000_000, "Large - Async Pipeline"),
     ],
 )
-def test_amplitude_encoding_fidelity_comprehensive(engine, num_qubits, data_size, desc):
+def test_amplitude_encoding_fidelity_comprehensive(engine_float64, num_qubits, data_size, desc):
     """Test fidelity across sync path, async pipeline, and chunk boundaries."""
     print(f"\n[Test Case] {desc} (Size: {data_size})")
 
@@ -87,7 +96,7 @@ def test_amplitude_encoding_fidelity_comprehensive(engine, num_qubits, data_size
         expected_state = np.concatenate([expected_state, padding])
 
     expected_state_complex = expected_state.astype(np.complex128)
-    qtensor = engine.encode(raw_data.tolist(), num_qubits, "amplitude")
+    qtensor = engine_float64.encode(raw_data.tolist(), num_qubits, "amplitude")
     torch_state = torch.from_dlpack(qtensor)
 
     assert torch_state.is_cuda, "Tensor must be on GPU"
@@ -110,6 +119,7 @@ def test_complex_integrity(engine):
     qtensor = engine.encode(raw_data.tolist(), num_qubits, "amplitude")
     torch_state = torch.from_dlpack(qtensor)
 
+    assert torch_state.dtype == torch.complex64
     imag_error = torch.sum(torch.abs(torch_state.imag)).item()
     print(f"\nSum of imaginary parts (should be near 0): {imag_error}")
 
@@ -123,12 +133,12 @@ def test_complex_integrity(engine):
 
 
 @pytest.mark.gpu
-def test_numerical_stability_underflow(engine):
+def test_numerical_stability_underflow(engine_float64):
     """Test precision with extremely small values (1e-150)."""
     num_qubits = 4
     data = [1e-150] * 16
 
-    qtensor = engine.encode(data, num_qubits, "amplitude")
+    qtensor = engine_float64.encode(data, num_qubits, "amplitude")
     torch_state = torch.from_dlpack(qtensor)
 
     assert not torch.isnan(torch_state).any(), "Result contains NaN for small inputs"
