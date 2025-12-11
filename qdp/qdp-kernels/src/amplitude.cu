@@ -19,6 +19,7 @@
 #include <cuda_runtime.h>
 #include <cuComplex.h>
 #include <vector_types.h>
+#include <math.h>
 
 __global__ void amplitude_encode_kernel(
     const double* __restrict__ input,
@@ -65,6 +66,34 @@ __global__ void amplitude_encode_kernel(
     }
 }
 
+// Warp-level reduction for sum using shuffle instructions
+__device__ __forceinline__ double warp_reduce_sum(double val) {
+    for (int offset = warpSize / 2; offset > 0; offset >>= 1) {
+        val += __shfl_down_sync(0xffffffff, val, offset);
+    }
+    return val;
+}
+
+// Block-level reduction built on top of warp reduction
+__device__ __forceinline__ double block_reduce_sum(double val) {
+    __shared__ double shared[32]; // supports up to 1024 threads (32 warps)
+    int lane = threadIdx.x & (warpSize - 1);
+    int warp_id = threadIdx.x >> 5;
+
+    val = warp_reduce_sum(val);
+    if (lane == 0) {
+        shared[warp_id] = val;
+    }
+    __syncthreads();
+
+    // Only first warp participates in final reduction
+    val = (threadIdx.x < (blockDim.x + warpSize - 1) / warpSize) ? shared[lane] : 0.0;
+    if (warp_id == 0) {
+        val = warp_reduce_sum(val);
+    }
+    return val;
+}
+
 extern "C" {
 
 /// Launch amplitude encoding kernel
@@ -74,7 +103,7 @@ extern "C" {
 /// * state_d - Device pointer to output state vector
 /// * input_len - Number of input elements
 /// * state_len - Target state vector size (2^num_qubits)
-/// * norm - L2 norm computed by host
+/// * inv_norm - Reciprocal L2 norm (1 / ||input||)
 /// * stream - CUDA stream for async execution (nullptr = default stream)
 ///
 /// # Returns
@@ -84,14 +113,12 @@ int launch_amplitude_encode(
     void* state_d,
     size_t input_len,
     size_t state_len,
-    double norm,
+    double inv_norm,
     cudaStream_t stream
 ) {
-    if (norm <= 0.0) {
+    if (inv_norm <= 0.0 || !isfinite(inv_norm)) {
         return cudaErrorInvalidValue;
     }
-
-    double inv_norm = 1.0 / norm;
 
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
 
@@ -226,6 +253,202 @@ int launch_amplitude_encode_batch(
         num_samples,
         input_len,
         state_len
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Kernel: accumulate L2 norm using coalesced vectorized loads.
+/// Each block atomically adds its partial sum to the output accumulator.
+__global__ void l2_norm_kernel(
+    const double* __restrict__ input,
+    size_t input_len,
+    double* __restrict__ out_accum
+) {
+    // Vectorized double2 loads for bandwidth and coalescing
+    const size_t vec_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    const size_t stride = gridDim.x * blockDim.x;
+
+    double local_sum = 0.0;
+
+    // Process two elements per iteration via double2
+    size_t vec_offset = vec_idx;
+    size_t offset = vec_offset * 2;
+    while (offset + 1 < input_len) {
+        const double2 v = __ldg(reinterpret_cast<const double2*>(input) + vec_offset);
+        local_sum += v.x * v.x + v.y * v.y;
+        vec_offset += stride;
+        offset = vec_offset * 2;
+    }
+
+    // Handle tail element if input_len is odd
+    if (offset < input_len) {
+        const double v = __ldg(input + offset);
+        local_sum += v * v;
+    }
+
+    const double block_sum = block_reduce_sum(local_sum);
+    if (threadIdx.x == 0) {
+        atomicAdd(out_accum, block_sum);
+    }
+}
+
+/// Kernel: accumulate L2 norms for a batch.
+/// Grid is organized as (blocks_per_sample * num_samples) blocks.
+__global__ void l2_norm_batch_kernel(
+    const double* __restrict__ input_batch,
+    size_t num_samples,
+    size_t sample_len,
+    size_t blocks_per_sample,
+    double* __restrict__ out_norms
+) {
+    const size_t sample_idx = blockIdx.x / blocks_per_sample;
+    if (sample_idx >= num_samples) return;
+
+    const size_t block_in_sample = blockIdx.x % blocks_per_sample;
+    const size_t base = sample_idx * sample_len;
+
+    const size_t vec_idx = block_in_sample * blockDim.x + threadIdx.x;
+    const size_t stride = blockDim.x * blocks_per_sample;
+
+    double local_sum = 0.0;
+
+    size_t vec_offset = vec_idx;
+    size_t offset = vec_offset * 2;
+    while (offset + 1 < sample_len) {
+        const double2 v = __ldg(reinterpret_cast<const double2*>(input_batch + base) + vec_offset);
+        local_sum += v.x * v.x + v.y * v.y;
+        vec_offset += stride;
+        offset = vec_offset * 2;
+    }
+
+    if (offset < sample_len) {
+        const double v = __ldg(input_batch + base + offset);
+        local_sum += v * v;
+    }
+
+    const double block_sum = block_reduce_sum(local_sum);
+    if (threadIdx.x == 0) {
+        atomicAdd(out_norms + sample_idx, block_sum);
+    }
+}
+
+/// Kernel: converts accumulated sum-of-squares into inverse norms.
+__global__ void finalize_inv_norm_kernel(
+    double* __restrict__ norms,
+    size_t count
+) {
+    const size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx >= count) return;
+
+    double sum = norms[idx];
+    // Guard against zero or NaN to avoid inf propagation
+    if (sum <= 0.0 || !isfinite(sum)) {
+        norms[idx] = 0.0;
+    } else {
+        norms[idx] = rsqrt(sum);
+    }
+}
+
+/// Launch L2 norm reduction for a single vector.
+/// Writes the inverse norm (1 / ||x||) into `inv_norm_out_d`.
+int launch_l2_norm(
+    const double* input_d,
+    size_t input_len,
+    double* inv_norm_out_d,
+    cudaStream_t stream
+) {
+    if (input_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cudaError_t memset_status = cudaMemsetAsync(
+        inv_norm_out_d,
+        0,
+        sizeof(double),
+        stream
+    );
+    if (memset_status != cudaSuccess) {
+        return memset_status;
+    }
+
+    const int blockSize = 256;
+    const size_t elements_per_block = blockSize * 2; // double2 per thread
+    size_t gridSize = (input_len + elements_per_block - 1) / elements_per_block;
+    gridSize = (gridSize == 0) ? 1 : gridSize;
+    const size_t maxBlocks = 4096;
+    if (gridSize > maxBlocks) gridSize = maxBlocks;
+
+    l2_norm_kernel<<<gridSize, blockSize, 0, stream>>>(
+        input_d,
+        input_len,
+        inv_norm_out_d
+    );
+
+    // Finalize: convert accumulated sum to inverse norm
+    finalize_inv_norm_kernel<<<1, 32, 0, stream>>>(
+        inv_norm_out_d,
+        1
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Launch L2 norm reduction for a batch of vectors.
+/// Writes inverse norms for each sample into `inv_norms_out_d`.
+int launch_l2_norm_batch(
+    const double* input_batch_d,
+    size_t num_samples,
+    size_t sample_len,
+    double* inv_norms_out_d,
+    cudaStream_t stream
+) {
+    if (num_samples == 0 || sample_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cudaError_t memset_status = cudaMemsetAsync(
+        inv_norms_out_d,
+        0,
+        num_samples * sizeof(double),
+        stream
+    );
+    if (memset_status != cudaSuccess) {
+        return memset_status;
+    }
+
+    const int blockSize = 256;
+    const size_t elements_per_block = blockSize * 2; // double2 per thread
+    size_t blocks_per_sample = (sample_len + elements_per_block - 1) / elements_per_block;
+    const size_t max_blocks_per_sample = 32;
+    if (blocks_per_sample == 0) blocks_per_sample = 1;
+    if (blocks_per_sample > max_blocks_per_sample) {
+        blocks_per_sample = max_blocks_per_sample;
+    }
+
+    size_t gridSize = num_samples * blocks_per_sample;
+    const size_t max_grid = 65535; // CUDA grid dimension limit for 1D launch
+    if (gridSize > max_grid) {
+        blocks_per_sample = max_grid / num_samples;
+        if (blocks_per_sample == 0) {
+            blocks_per_sample = 1;
+        }
+        gridSize = num_samples * blocks_per_sample;
+    }
+
+    l2_norm_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
+        input_batch_d,
+        num_samples,
+        sample_len,
+        blocks_per_sample,
+        inv_norms_out_d
+    );
+
+    const int finalizeBlock = 256;
+    const int finalizeGrid = (num_samples + finalizeBlock - 1) / finalizeBlock;
+    finalize_inv_norm_kernel<<<finalizeGrid, finalizeBlock, 0, stream>>>(
+        inv_norms_out_d,
+        num_samples
     );
 
     return (int)cudaGetLastError();
