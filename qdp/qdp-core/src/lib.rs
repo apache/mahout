@@ -33,7 +33,7 @@ use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 #[cfg(target_os = "linux")]
 use std::thread;
 
-use cudarc::driver::{CudaDevice, DevicePtr};
+use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
@@ -41,7 +41,7 @@ use crate::gpu::memory::{PinnedBuffer, GpuStateVector};
 #[cfg(target_os = "linux")]
 use crate::gpu::PipelineContext;
 #[cfg(target_os = "linux")]
-use qdp_kernels::launch_fused_amplitude_encode_batch;
+use qdp_kernels::{launch_l2_norm_batch, launch_amplitude_encode_batch};
 
 /// 512MB staging buffer for large Parquet row groups (reduces fragmentation)
 #[cfg(target_os = "linux")]
@@ -251,23 +251,49 @@ impl QdpEngine {
                         ctx.record_copy_done();
                         ctx.wait_for_copy();
 
-                        // Launch fused kernel
+                        // Compute norms and encode batch
                         {
-                            crate::profile_scope!("GPU::FusedKernel");
+                            crate::profile_scope!("GPU::BatchEncode");
                             let offset_elements = global_sample_offset * state_len_per_sample;
                             let state_ptr_offset = total_state_vector.ptr().cast::<u8>()
                                 .add(offset_elements * std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
                                 .cast::<std::ffi::c_void>();
 
-                            let ret = launch_fused_amplitude_encode_batch(
-                                dev_ptr as *const f64,
-                                state_ptr_offset,
-                                samples_in_chunk,
-                                sample_size,
-                                state_len_per_sample,
-                                ctx.stream_compute.stream as *mut c_void
-                            );
-                            if ret != 0 { return Err(MahoutError::KernelLaunch(format!("Kernel error: {}", ret))); }
+                            // Allocate norm buffer for this chunk
+                            let mut norm_buffer = self.device.alloc_zeros::<f64>(samples_in_chunk)
+                                .map_err(|e| MahoutError::MemoryAllocation(format!("Failed to allocate norm buffer: {:?}", e)))?;
+
+                            // Step 1: Compute L2 norms for this chunk
+                            {
+                                crate::profile_scope!("GPU::NormBatch");
+                                let ret = launch_l2_norm_batch(
+                                    dev_ptr as *const f64,
+                                    samples_in_chunk,
+                                    sample_size,
+                                    *norm_buffer.device_ptr_mut() as *mut f64,
+                                    ctx.stream_compute.stream as *mut c_void
+                                );
+                                if ret != 0 {
+                                    return Err(MahoutError::KernelLaunch(format!("Norm kernel error: {}", ret)));
+                                }
+                            }
+
+                            // Step 2: Encode batch using computed norms
+                            {
+                                crate::profile_scope!("GPU::EncodeBatch");
+                                let ret = launch_amplitude_encode_batch(
+                                    dev_ptr as *const f64,
+                                    state_ptr_offset,
+                                    *norm_buffer.device_ptr() as *const f64,
+                                    samples_in_chunk,
+                                    sample_size,
+                                    state_len_per_sample,
+                                    ctx.stream_compute.stream as *mut c_void
+                                );
+                                if ret != 0 {
+                                    return Err(MahoutError::KernelLaunch(format!("Encode kernel error: {}", ret)));
+                                }
+                            }
                         }
 
                         // Sync copy stream before buffer reuse

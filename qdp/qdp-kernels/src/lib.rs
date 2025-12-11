@@ -49,7 +49,7 @@ unsafe extern "C" {
         state_d: *mut c_void,
         input_len: usize,
         state_len: usize,
-        norm: f64,
+        inv_norm: f64,
         stream: *mut c_void,
     ) -> i32;
 
@@ -68,30 +68,28 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
-    /// Launch GPU kernel to compute L2 norms for a batch
+    /// Launch L2 norm reduction (returns inverse norm)
     /// Returns CUDA error code (0 = success)
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
-    pub fn launch_compute_l2_norms_batch(
-        input_batch_d: *const f64,
-        norms_out_d: *mut f64,
-        num_samples: usize,
+    /// Pointers must reference valid device memory on the provided stream.
+    pub fn launch_l2_norm(
+        input_d: *const f64,
         input_len: usize,
+        inv_norm_out_d: *mut f64,
         stream: *mut c_void,
     ) -> i32;
 
-    /// Launch fused amplitude encoding kernel (norm computation + encoding in one pass)
+    /// Launch batched L2 norm reduction (returns inverse norms per sample)
     /// Returns CUDA error code (0 = success)
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
-    pub fn launch_fused_amplitude_encode_batch(
+    /// Pointers must reference valid device memory on the provided stream.
+    pub fn launch_l2_norm_batch(
         input_batch_d: *const f64,
-        state_batch_d: *mut c_void,
         num_samples: usize,
-        input_len: usize,
-        state_len: usize,
+        sample_len: usize,
+        inv_norms_out_d: *mut f64,
         stream: *mut c_void,
     ) -> i32;
 
@@ -106,8 +104,31 @@ pub extern "C" fn launch_amplitude_encode(
     _state_d: *mut c_void,
     _input_len: usize,
     _state_len: usize,
-    _norm: f64,
+    _inv_norm: f64,
     _stream: *mut c_void,
 ) -> i32 {
     999 // Error: CUDA unavailable
+}
+
+#[cfg(not(target_os = "linux"))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_l2_norm(
+    _input_d: *const f64,
+    _input_len: usize,
+    _inv_norm_out_d: *mut f64,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(not(target_os = "linux"))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_l2_norm_batch(
+    _input_batch_d: *const f64,
+    _num_samples: usize,
+    _sample_len: usize,
+    _inv_norms_out_d: *mut f64,
+    _stream: *mut c_void,
+) -> i32 {
+    999
 }
