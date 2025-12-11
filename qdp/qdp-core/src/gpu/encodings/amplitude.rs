@@ -187,7 +187,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Compute inverse norms on GPU using warp-reduced kernel
         let inv_norms_gpu = {
             crate::profile_scope!("GPU::BatchNormKernel");
-            let buffer = device.alloc_zeros::<f64>(num_samples)
+            let mut buffer = device.alloc_zeros::<f64>(num_samples)
                 .map_err(|e| MahoutError::MemoryAllocation(
                     format!("Failed to allocate norm buffer: {:?}", e)
                 ))?;
@@ -387,7 +387,7 @@ impl AmplitudeEncoder {
     ) -> Result<f64> {
         crate::profile_scope!("GPU::NormSingle");
 
-        let norm_buffer = device.alloc_zeros::<f64>(1)
+        let mut norm_buffer = device.alloc_zeros::<f64>(1)
             .map_err(|e| MahoutError::MemoryAllocation(
                 format!("Failed to allocate norm buffer: {:?}", e)
             ))?;
