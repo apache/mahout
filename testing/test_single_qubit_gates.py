@@ -527,7 +527,6 @@ class TestPauliZGate:
         )
 
 
-
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestTGate:
     """Test class for T gate functionality."""
