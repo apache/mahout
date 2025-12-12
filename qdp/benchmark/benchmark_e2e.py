@@ -66,10 +66,10 @@ BATCH_SIZE = 64  # Small batch to stress loop overhead
 
 def clean_cache():
     """Clear GPU cache and Python garbage collection."""
+    gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
-    gc.collect()
 
 
 class DummyQNN(nn.Module):
