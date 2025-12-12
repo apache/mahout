@@ -7,8 +7,11 @@ PyO3 Python bindings for Apache Mahout QDP.
 ```python
 from mahout_qdp import QdpEngine
 
-# Initialize on GPU 0
+# Initialize on GPU 0 (defaults to float32 output)
 engine = QdpEngine(0)
+
+# Optional: request float64 output if you need higher precision
+# engine = QdpEngine(0, precision="float64")
 
 # Encode data
 data = [0.5, 0.5, 0.5, 0.5]

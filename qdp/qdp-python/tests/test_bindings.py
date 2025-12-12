@@ -85,7 +85,22 @@ def test_pytorch_integration():
     torch_tensor = torch.from_dlpack(qtensor)
     assert torch_tensor.is_cuda
     assert torch_tensor.device.index == 0
-    assert torch_tensor.dtype == torch.complex128
+    assert torch_tensor.dtype == torch.complex64
 
     # Verify shape (2 qubits = 2^2 = 4 elements)
     assert torch_tensor.shape == (4,)
+
+
+@pytest.mark.gpu
+def test_pytorch_precision_float64():
+    """Verify optional float64 precision produces complex128 tensors."""
+    pytest.importorskip("torch")
+    import torch
+    from mahout_qdp import QdpEngine
+
+    engine = QdpEngine(0, precision="float64")
+    data = [1.0, 2.0, 3.0, 4.0]
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    torch_tensor = torch.from_dlpack(qtensor)
+    assert torch_tensor.dtype == torch.complex128
