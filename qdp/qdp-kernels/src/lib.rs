@@ -93,6 +93,16 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Launch fused reduction + encoding kernel
+    pub fn launch_fused_amplitude_encode(
+        input_d: *const f64,
+        state_d: *mut c_void,
+        input_len: usize,
+        state_len: usize,
+        temp_accum_d: *mut f64,
+        stream: *mut c_void,
+    ) -> i32;
+
     // TODO: launch_angle_encode, launch_basis_encode
 }
 
