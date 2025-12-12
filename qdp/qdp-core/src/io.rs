@@ -569,7 +569,7 @@ impl ParquetBlockReader {
                         if float_array.null_count() == 0 {
                             batch_values.extend_from_slice(float_array.values());
                         } else {
-                            batch_values.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
+                            return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
                         }
                     }
 

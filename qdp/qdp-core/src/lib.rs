@@ -66,15 +66,7 @@ impl QdpEngine {
         let device = CudaDevice::new(device_id)
             .map_err(|e| MahoutError::Cuda(format!("Failed to initialize CUDA device {}: {:?}", device_id, e)))?;
 
-        #[cfg(target_os = "linux")]
-        {
-            Ok(Self { device })
-        }
-
-        #[cfg(not(target_os = "linux"))]
-        {
-            Ok(Self { device })
-        }
+        Ok(Self { device })
     }
 
     /// Encode classical data into quantum state
@@ -308,7 +300,7 @@ impl QdpEngine {
             }
 
             self.device.synchronize().map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
-            let _ = io_handle.join();
+            io_handle.join().map_err(|e| MahoutError::Io(format!("IO thread panicked: {:?}", e)))?;
 
             // Transfer ownership to DLPack (Arc handles ref counting)
             let dlpack_ptr = total_state_vector.to_dlpack();
