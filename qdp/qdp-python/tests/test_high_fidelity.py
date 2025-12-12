@@ -82,7 +82,9 @@ def engine_float64():
         (20, 1_000_000, "Large - Async Pipeline"),
     ],
 )
-def test_amplitude_encoding_fidelity_comprehensive(engine_float64, num_qubits, data_size, desc):
+def test_amplitude_encoding_fidelity_comprehensive(
+    engine_float64, num_qubits, data_size, desc
+):
     """Test fidelity across sync path, async pipeline, and chunk boundaries."""
     print(f"\n[Test Case] {desc} (Size: {data_size})")
 

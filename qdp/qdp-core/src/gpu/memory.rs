@@ -346,7 +346,7 @@ impl GpuStateVector {
                     let ret = unsafe {
                         qdp_kernels::convert_state_to_float(
                             src_ptr as *const CuDoubleComplex,
-                            *slice.device_ptr_mut() as *mut CuComplex,
+                            *slice.device_ptr() as *mut CuComplex,
                             self.size_elements,
                             std::ptr::null_mut(),
                         )
