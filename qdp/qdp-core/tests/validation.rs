@@ -31,7 +31,6 @@ fn test_input_validation_invalid_strategy() {
     };
 
     let data = common::create_test_data(100);
-
     let result = engine.encode(&data, 7, "invalid_strategy");
     assert!(result.is_err(), "Should reject invalid strategy");
 

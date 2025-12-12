@@ -74,6 +74,10 @@ impl QuantumEncoder for AmplitudeEncoder {
 
             if host_data.len() < ASYNC_THRESHOLD {
                 // Synchronous path for small data (avoids stream overhead)
+                // Validate input norm (check for zero vectors)
+                // This ensures we return InvalidInput error as expected by tests
+                // instead of launching a kernel that produces NaNs.
+                let _ = Preprocessor::calculate_l2_norm(host_data)?;
                 let input_bytes = host_data.len() * std::mem::size_of::<f64>();
                 ensure_device_memory_available(input_bytes, "input staging buffer", Some(num_qubits))?;
 
