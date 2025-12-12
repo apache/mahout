@@ -147,7 +147,7 @@ impl QdpEngine {
     /// Raises:
     ///     RuntimeError: If CUDA device initialization fails
     #[new]
-    #[pyo3(signature = (device_id=0, precision=\"float32\"))]
+    #[pyo3(signature = (device_id=0, precision="float32"))]
     fn new(device_id: usize, precision: &str) -> PyResult<Self> {
         let precision = match precision.to_ascii_lowercase().as_str() {
             "float32" | "f32" | "float" => Precision::Float32,
