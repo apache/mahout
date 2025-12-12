@@ -334,7 +334,7 @@ class QuMat:
             self.circuit, self.backend, self.backend_config
         )
 
-    def draw(self):
+    def draw_circuit(self):
         """Visualize the quantum circuit.
 
         Generates a visual representation of the circuit. The output format
