@@ -35,6 +35,7 @@ import torch.nn as nn
 import numpy as np
 import os
 import itertools
+import gc
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pyarrow.ipc as ipc
@@ -61,6 +62,14 @@ DATA_FILE = "final_benchmark_data.parquet"
 ARROW_FILE = "final_benchmark_data.arrow"
 HIDDEN_DIM = 16
 BATCH_SIZE = 64  # Small batch to stress loop overhead
+
+
+def clean_cache():
+    """Clear GPU cache and Python garbage collection."""
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.synchronize()
+    gc.collect()
 
 
 class DummyQNN(nn.Module):
@@ -102,6 +111,9 @@ def generate_data(n_qubits, n_samples):
     print(f"  Generated {n_samples} samples")
     print(f"  Parquet: {parquet_size:.2f} MB, Arrow IPC: {arrow_size:.2f} MB")
 
+    # Clean cache after data generation
+    clean_cache()
+
 
 # -----------------------------------------------------------
 # 1. Qiskit Full Pipeline
@@ -110,6 +122,9 @@ def run_qiskit(n_qubits, n_samples):
     if not HAS_QISKIT:
         print("\n[Qiskit] Not installed, skipping.")
         return 0.0, None
+
+    # Clean cache before starting benchmark
+    clean_cache()
 
     print("\n[Qiskit] Full Pipeline (Disk -> GPU)...")
     model = DummyQNN(n_qubits).cuda()
@@ -162,6 +177,10 @@ def run_qiskit(n_qubits, n_samples):
     print(f"\n  Total Time: {total_time:.4f} s")
 
     all_qiskit_tensor = torch.cat(all_qiskit_states, dim=0)
+
+    # Clean cache after benchmark completion
+    clean_cache()
+
     return total_time, all_qiskit_tensor
 
 
@@ -172,6 +191,9 @@ def run_pennylane(n_qubits, n_samples):
     if not HAS_PENNYLANE:
         print("\n[PennyLane] Not installed, skipping.")
         return 0.0, None
+
+    # Clean cache before starting benchmark
+    clean_cache()
 
     print("\n[PennyLane] Full Pipeline (Disk -> GPU)...")
 
@@ -224,6 +246,9 @@ def run_pennylane(n_qubits, n_samples):
         all_pl_states, dim=0
     )  # Should handle cases where last batch is smaller
 
+    # Clean cache after benchmark completion
+    clean_cache()
+
     return total_time, all_pl_states_tensor
 
 
@@ -231,6 +256,9 @@ def run_pennylane(n_qubits, n_samples):
 # 3. Mahout Parquet Pipeline
 # -----------------------------------------------------------
 def run_mahout_parquet(engine, n_qubits, n_samples):
+    # Clean cache before starting benchmark
+    clean_cache()
+
     print("\n[Mahout-Parquet] Full Pipeline (Parquet -> GPU)...")
     model = DummyQNN(n_qubits).cuda()
 
@@ -251,10 +279,10 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
 
     # Reshape to [n_samples, state_len] (still complex)
     state_len = 1 << n_qubits
-    gpu_reshaped = gpu_batched.view(n_samples, state_len)
 
     # Convert to float for model (batch already on GPU)
     reshape_start = time.perf_counter()
+    gpu_reshaped = gpu_batched.view(n_samples, state_len)
     gpu_all_data = gpu_reshaped.abs().to(torch.float32)
     reshape_time = time.perf_counter() - reshape_start
     print(f"  Reshape & convert: {reshape_time:.4f} s")
@@ -267,6 +295,10 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
     torch.cuda.synchronize()
     total_time = time.perf_counter() - start_time
     print(f"  Total Time: {total_time:.4f} s")
+
+    # Clean cache after benchmark completion
+    clean_cache()
+
     return total_time, gpu_reshaped
 
 
@@ -274,6 +306,9 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
 # 4. Mahout Arrow IPC Pipeline
 # -----------------------------------------------------------
 def run_mahout_arrow(engine, n_qubits, n_samples):
+    # Clean cache before starting benchmark
+    clean_cache()
+
     print("\n[Mahout-Arrow] Full Pipeline (Arrow IPC -> GPU)...")
     model = DummyQNN(n_qubits).cuda()
 
@@ -291,9 +326,9 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
     print(f"  DLPack conversion: {dlpack_time:.4f} s")
 
     state_len = 1 << n_qubits
-    gpu_reshaped = gpu_batched.view(n_samples, state_len)
 
     reshape_start = time.perf_counter()
+    gpu_reshaped = gpu_batched.view(n_samples, state_len)
     gpu_all_data = gpu_reshaped.abs().to(torch.float32)
     reshape_time = time.perf_counter() - reshape_start
     print(f"  Reshape & convert: {reshape_time:.4f} s")
@@ -305,6 +340,10 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
     torch.cuda.synchronize()
     total_time = time.perf_counter() - start_time
     print(f"  Total Time: {total_time:.4f} s")
+
+    # Clean cache after benchmark completion
+    clean_cache()
+
     return total_time, gpu_reshaped
 
 
@@ -378,6 +417,9 @@ if __name__ == "__main__":
         print(f"Mahout Init Error: {e}")
         exit(1)
 
+    # Clean cache before starting benchmarks
+    clean_cache()
+
     print("\n" + "=" * 70)
     print(f"E2E BENCHMARK: {args.qubits} Qubits, {args.samples} Samples")
     print("=" * 70)
@@ -391,19 +433,27 @@ if __name__ == "__main__":
     # Run benchmarks
     if "pennylane" in args.frameworks:
         t_pl, pl_all_states = run_pennylane(args.qubits, args.samples)
+        # Clean cache between framework benchmarks
+        clean_cache()
 
     if "qiskit" in args.frameworks:
         t_qiskit, qiskit_all_states = run_qiskit(args.qubits, args.samples)
+        # Clean cache between framework benchmarks
+        clean_cache()
 
     if "mahout-parquet" in args.frameworks:
         t_mahout_parquet, mahout_parquet_all_states = run_mahout_parquet(
             engine, args.qubits, args.samples
         )
+        # Clean cache between framework benchmarks
+        clean_cache()
 
     if "mahout-arrow" in args.frameworks:
         t_mahout_arrow, mahout_arrow_all_states = run_mahout_arrow(
             engine, args.qubits, args.samples
         )
+        # Clean cache between framework benchmarks
+        clean_cache()
 
     print("\n" + "=" * 70)
     print("E2E LATENCY (Lower is Better)")
