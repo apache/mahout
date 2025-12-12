@@ -19,7 +19,7 @@
 #[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
-use qdp_kernels::{CuDoubleComplex, launch_amplitude_encode, launch_l2_norm, launch_l2_norm_batch};
+use qdp_kernels::{CuDoubleComplex, launch_amplitude_encode, launch_l2_norm, launch_l2_norm_batch, launch_fused_amplitude_encode};
 
 const EPSILON: f64 = 1e-10;
 
@@ -562,4 +562,64 @@ fn test_amplitude_encode_dummy_non_linux() {
 
     assert_eq!(result, 999, "Dummy implementation should return 999");
     println!("PASS: Non-Linux dummy implementation returns expected error code");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_fused_amplitude_encode() {
+    println!("Testing FUSED amplitude encoding (Reduction + Normalize)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    // 1. Setup Input: [3.0, 4.0]
+    // Expected Norm: sqrt(9 + 16) = 5.0
+    // Expected Output: [3/5, 4/5] = [0.6, 0.8]
+    let input = vec![3.0, 4.0];
+    let state_len = 4; // 2 qubits
+
+    // 2. Allocate Memory
+    let input_d = device.htod_copy(input.clone()).unwrap();
+    let mut state_d = device.alloc_zeros::<CuDoubleComplex>(state_len).unwrap();
+    
+    // CRITICAL: Allocate the temporary accumulator for the fused kernel
+    // The kernel uses this to store the global sum between Phase 1 and Phase 2
+    let mut temp_accum_d = device.alloc_zeros::<f64>(1).unwrap();
+
+    // 3. Launch Fused Kernel
+    // Note: We do NOT calculate inv_norm on CPU. The kernel does it.
+    let result = unsafe {
+        launch_fused_amplitude_encode(
+            *input_d.device_ptr() as *const f64,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            input.len(),
+            state_len,
+            *temp_accum_d.device_ptr_mut() as *mut f64,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(result, 0, "Fused kernel launch should succeed");
+
+    // 4. Verify Results
+    let state_h = device.dtoh_sync_copy(&state_d).unwrap();
+
+    // Check normalization: [0.6, 0.8, 0.0, 0.0]
+    assert!((state_h[0].x - 0.6).abs() < EPSILON, "Expected 0.6, got {}", state_h[0].x);
+    assert!((state_h[1].x - 0.8).abs() < EPSILON, "Expected 0.8, got {}", state_h[1].x);
+    
+    // Verify padding
+    assert!(state_h[2].x.abs() < EPSILON, "Padding should be 0.0");
+    assert!(state_h[3].x.abs() < EPSILON, "Padding should be 0.0");
+
+    // Verify Total Probability is 1.0
+    let total_prob: f64 = state_h.iter().map(|c| c.x * c.x + c.y * c.y).sum();
+    assert!((total_prob - 1.0).abs() < EPSILON, "Total probability must be 1.0");
+
+    println!("PASS: Fused reduction+encoding kernel works correctly");
 }

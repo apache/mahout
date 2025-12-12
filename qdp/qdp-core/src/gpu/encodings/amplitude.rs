@@ -34,6 +34,7 @@ use qdp_kernels::{
     launch_amplitude_encode_batch,
     launch_l2_norm,
     launch_l2_norm_batch,
+    launch_fused_amplitude_encode,
 };
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
@@ -87,27 +88,21 @@ impl QuantumEncoder for AmplitudeEncoder {
                         ))?
                 };
 
-                // GPU-accelerated norm for medium+ inputs, CPU fallback for tiny payloads
-                let inv_norm = if host_data.len() >= GPU_NORM_THRESHOLD {
-                    Self::calculate_inv_norm_gpu(
-                        _device,
-                        *input_slice.device_ptr() as *const f64,
-                        host_data.len(),
-                    )?
-                } else {
-                    let norm = Preprocessor::calculate_l2_norm(host_data)?;
-                    1.0 / norm
+                // Allocate 1 double for the reduction accumulator
+                let mut temp_accum = {
+                    crate::profile_scope!("GPU::AllocTemp");
+                    _device.alloc_zeros::<f64>(1).map_err(|e| map_allocation_error(8, "temp accum", None, e))?
                 };
 
                 let ret = {
-                    crate::profile_scope!("GPU::KernelLaunch");
+                    crate::profile_scope!("GPU::FusedKernelLaunch");
                     unsafe {
-                        launch_amplitude_encode(
+                        launch_fused_amplitude_encode(
                             *input_slice.device_ptr() as *const f64,
                             state_vector.ptr() as *mut c_void,
                             host_data.len(),
                             state_len,
-                            inv_norm,
+                            *temp_accum.device_ptr_mut() as *mut f64,
                             std::ptr::null_mut(), // default stream
                         )
                     }

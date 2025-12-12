@@ -66,6 +66,7 @@ fn main() {
         .cuda(true)
         .flag("-cudart=shared")  // Use shared CUDA runtime
         .flag("-std=c++17")      // C++17 for modern CUDA features
+        .flag("-rdc=true")       // COOPERATIVE GROUPS
         // GPU architecture targets
         // SM 80 = Ampere (A100, RTX 3000 series)
         // SM 86 = Ampere (RTX 3090, A40)
@@ -75,8 +76,8 @@ fn main() {
         .flag("-gencode")
         .flag("arch=compute_80,code=sm_80")
         // Optional: Add more architectures for production
-        // .flag("-gencode")
-        // .flag("arch=compute_86,code=sm_86")
+        .flag("-gencode")
+        .flag("arch=compute_86,code=sm_86")
         // .flag("-gencode")
         // .flag("arch=compute_89,code=sm_89")
         .file("src/amplitude.cu")
