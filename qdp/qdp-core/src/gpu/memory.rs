@@ -283,7 +283,11 @@ impl PinnedBuffer {
     /// Allocate pinned memory
     pub fn new(elements: usize) -> Result<Self> {
         unsafe {
-            let bytes = elements * std::mem::size_of::<f64>();
+            let bytes = elements
+                .checked_mul(std::mem::size_of::<f64>())
+                .ok_or_else(|| MahoutError::MemoryAllocation(
+                    format!("Requested pinned buffer allocation size overflow (elements={})", elements)
+                ))?;
             let mut ptr: *mut c_void = std::ptr::null_mut();
 
             unsafe extern "C" {
@@ -331,7 +335,14 @@ impl Drop for PinnedBuffer {
             unsafe extern "C" {
                 fn cudaFreeHost(ptr: *mut c_void) -> i32;
             }
-            let _ = cudaFreeHost(self.ptr as *mut c_void);
+            let result = cudaFreeHost(self.ptr as *mut c_void);
+            if result != 0 {
+                eprintln!(
+                    "Warning: cudaFreeHost failed with error code {} ({})",
+                    result,
+                    cuda_error_to_string(result)
+                );
+            }
         }
     }
 }
