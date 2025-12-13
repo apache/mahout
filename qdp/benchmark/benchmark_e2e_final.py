@@ -267,13 +267,7 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
     torch.cuda.synchronize()
     total_time = time.perf_counter() - start_time
     print(f"  Total Time: {total_time:.4f} s")
-
-    # Clean up GPU memory for next test (DLPack tensor is consumed, so we can't reuse it)
-    del gpu_batched, gpu_reshaped, gpu_all_data
-    # Note: batched_tensor (DLPack) is consumed by torch.from_dlpack and managed by PyTorch
-    torch.cuda.empty_cache()
-
-    return total_time, None  # Return None to avoid holding GPU memory
+    return total_time, gpu_reshaped
 
 
 # -----------------------------------------------------------
@@ -311,13 +305,7 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
     torch.cuda.synchronize()
     total_time = time.perf_counter() - start_time
     print(f"  Total Time: {total_time:.4f} s")
-
-    # Clean up GPU memory for next test (DLPack tensor is consumed, so we can't reuse it)
-    del gpu_batched, gpu_reshaped, gpu_all_data
-    # Note: batched_tensor (DLPack) is consumed by torch.from_dlpack and managed by PyTorch
-    torch.cuda.empty_cache()
-
-    return total_time, None  # Return None to avoid holding GPU memory
+    return total_time, gpu_reshaped
 
 
 def compare_states(name_a, states_a, name_b, states_b):
@@ -411,9 +399,6 @@ if __name__ == "__main__":
         t_mahout_parquet, mahout_parquet_all_states = run_mahout_parquet(
             engine, args.qubits, args.samples
         )
-        # Force GPU memory cleanup before next test
-        torch.cuda.empty_cache()
-        torch.cuda.synchronize()
 
     if "mahout-arrow" in args.frameworks:
         t_mahout_arrow, mahout_arrow_all_states = run_mahout_arrow(
