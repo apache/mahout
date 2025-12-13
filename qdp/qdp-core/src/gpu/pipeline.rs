@@ -24,7 +24,94 @@ use std::ffi::c_void;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use crate::error::{MahoutError, Result};
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
+use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error, PinnedBuffer};
+
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_ffi::{
+    cudaEventCreateWithFlags, cudaEventDestroy, cudaEventRecord, cudaMemcpyAsync, cudaStreamSynchronize,
+    cudaStreamWaitEvent, CUDA_EVENT_DISABLE_TIMING, CUDA_MEMCPY_HOST_TO_DEVICE,
+};
+
+/// Dual-stream pipeline context: manages compute/copy streams and sync events
+#[cfg(target_os = "linux")]
+pub struct PipelineContext {
+    pub stream_compute: CudaStream,
+    pub stream_copy: CudaStream,
+    event_copy_done: *mut c_void,
+}
+
+#[cfg(target_os = "linux")]
+impl PipelineContext {
+    /// Create dual streams and sync event
+    pub fn new(device: &Arc<CudaDevice>) -> Result<Self> {
+        let stream_compute = device.fork_default_stream()
+            .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+        let stream_copy = device.fork_default_stream()
+            .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+
+        let mut event_copy_done: *mut c_void = std::ptr::null_mut();
+        unsafe {
+            let ret = cudaEventCreateWithFlags(&mut event_copy_done, CUDA_EVENT_DISABLE_TIMING);
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!("Failed to create CUDA event: {}", ret)));
+            }
+        }
+
+        Ok(Self {
+            stream_compute,
+            stream_copy,
+            event_copy_done,
+        })
+    }
+
+    /// Async H2D copy on copy stream
+    pub unsafe fn async_copy_to_device(&self, src: &PinnedBuffer, dst: *mut c_void, len_elements: usize) {
+        crate::profile_scope!("GPU::H2D_Copy");
+        unsafe {
+            cudaMemcpyAsync(
+                dst,
+                src.ptr() as *const c_void,
+                len_elements * std::mem::size_of::<f64>(),
+                CUDA_MEMCPY_HOST_TO_DEVICE,
+                self.stream_copy.stream as *mut c_void
+            );
+        }
+    }
+
+    /// Record copy completion event
+    pub unsafe fn record_copy_done(&self) {
+        unsafe {
+            cudaEventRecord(self.event_copy_done, self.stream_copy.stream as *mut c_void);
+        }
+    }
+
+    /// Make compute stream wait for copy completion
+    pub unsafe fn wait_for_copy(&self) {
+        crate::profile_scope!("GPU::StreamWait");
+        unsafe {
+            cudaStreamWaitEvent(self.stream_compute.stream as *mut c_void, self.event_copy_done, 0);
+        }
+    }
+
+    /// Sync copy stream (safe to reuse host buffer)
+    pub unsafe fn sync_copy_stream(&self) {
+        crate::profile_scope!("Pipeline::SyncCopy");
+        unsafe {
+            cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
+        }
+    }
+}
+
+#[cfg(target_os = "linux")]
+impl Drop for PipelineContext {
+    fn drop(&mut self) {
+        unsafe {
+            if !self.event_copy_done.is_null() {
+                cudaEventDestroy(self.event_copy_done);
+            }
+        }
+    }
+}
 
 /// Chunk processing callback for async pipeline
 ///
@@ -112,23 +199,10 @@ where
         {
             crate::profile_scope!("GPU::H2DCopyAsync");
             unsafe {
-                unsafe extern "C" {
-                    fn cudaMemcpyAsync(
-                        dst: *mut c_void,
-                        src: *const c_void,
-                        count: usize,
-                        kind: u32,
-                        stream: *mut c_void,
-                    ) -> i32;
-                }
-
                 let dst_device_ptr = *input_chunk_dev.device_ptr() as *mut c_void;
                 let src_host_ptr = chunk.as_ptr() as *const c_void;
                 let bytes = chunk.len() * std::mem::size_of::<f64>();
                 let stream_handle = current_stream.stream as *mut c_void;
-
-                // cudaMemcpyKind: cudaMemcpyHostToDevice = 1
-                const CUDA_MEMCPY_HOST_TO_DEVICE: u32 = 1;
 
                 let result = cudaMemcpyAsync(
                     dst_device_ptr,
