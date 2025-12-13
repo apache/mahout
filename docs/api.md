@@ -84,7 +84,7 @@
 
 ## `get_final_state_vector(self)`
 - **Purpose**: Returns the final state vector of the circuit from the configured backend.
-- **Usage**: Retrieve the full quantum state for simulation and analysis workflows.
+- **Usage**: Retrieves the full quantum state for simulation and analysis workflows.
 
 ## `draw_circuit(self)`
 - **Purpose**: Visualizes the quantum circuit.
