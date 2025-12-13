@@ -76,7 +76,7 @@
 - **Purpose**: Applies the T (π/8) phase gate to a specified qubit.
 - **Parameters**:
     - `qubit_index` (int): Index of the qubit.
-- **Usage**: Adds a π/4 phase to |1⟩; with H and CNOT it enables universal single-qubit control.
+- **Usage**: Adds a π/4 phase to |1⟩. Together with the Hadamard (H) and CNOT gates, it enables universal single-qubit control.
 
 ## `execute_circuit(self)`
 - **Purpose**: Executes the quantum circuit and retrieves the results.
@@ -153,5 +153,5 @@
 - **Parameters**:
     - `qubit1` (int): Index of the first state qubit.
     - `qubit2` (int): Index of the second state qubit.
-    - `ancilla_qubit` (int, optional): Index of the ancilla qubit; defaults to 0.
+    - `ancilla_qubit` (int, default to 0): Index of the ancilla qubit.
 - **Usage**: Convenience wrapper for fidelity/overlap measurement across backends.
