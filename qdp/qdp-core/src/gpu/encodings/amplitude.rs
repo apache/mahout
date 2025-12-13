@@ -27,6 +27,8 @@ use super::QuantumEncoder;
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
 #[cfg(target_os = "linux")]
+use crate::gpu::cuda_ffi::cudaMemsetAsync;
+#[cfg(target_os = "linux")]
 use cudarc::driver::{DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
@@ -344,15 +346,6 @@ impl AmplitudeEncoder {
             // Zero-fill padding region using CUDA Runtime API
             // Use default stream since pipeline streams are already synchronized
             unsafe {
-                unsafe extern "C" {
-                    fn cudaMemsetAsync(
-                        devPtr: *mut c_void,
-                        value: i32,
-                        count: usize,
-                        stream: *mut c_void,
-                    ) -> i32;
-                }
-
                 let result = cudaMemsetAsync(
                     tail_ptr,
                     0,

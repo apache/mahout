@@ -21,6 +21,8 @@ use crate::error::{MahoutError, Result};
 
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
 
 #[cfg(target_os = "linux")]
 fn bytes_to_mib(bytes: usize) -> f64 {
@@ -41,10 +43,6 @@ fn cuda_error_to_string(code: i32) -> &'static str {
 #[cfg(target_os = "linux")]
 fn query_cuda_mem_info() -> Result<(usize, usize)> {
     unsafe {
-        unsafe extern "C" {
-            fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> i32;
-        }
-
         let mut free_bytes: usize = 0;
         let mut total_bytes: usize = 0;
         let result = cudaMemGetInfo(&mut free_bytes as *mut usize, &mut total_bytes as *mut usize);
@@ -290,10 +288,6 @@ impl PinnedBuffer {
                 ))?;
             let mut ptr: *mut c_void = std::ptr::null_mut();
 
-            unsafe extern "C" {
-                fn cudaHostAlloc(pHost: *mut *mut c_void, size: usize, flags: u32) -> i32;
-            }
-
             let ret = cudaHostAlloc(&mut ptr, bytes, 0); // cudaHostAllocDefault
 
             if ret != 0 {
@@ -332,9 +326,6 @@ impl PinnedBuffer {
 impl Drop for PinnedBuffer {
     fn drop(&mut self) {
         unsafe {
-            unsafe extern "C" {
-                fn cudaFreeHost(ptr: *mut c_void) -> i32;
-            }
             let result = cudaFreeHost(self.ptr as *mut c_void);
             if result != 0 {
                 eprintln!(

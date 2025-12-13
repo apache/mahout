@@ -18,6 +18,9 @@ pub mod memory;
 pub mod encodings;
 pub mod pipeline;
 
+#[cfg(target_os = "linux")]
+pub(crate) mod cuda_ffi;
+
 pub use memory::GpuStateVector;
 pub use encodings::{QuantumEncoder, AmplitudeEncoder, AngleEncoder, BasisEncoder, get_encoder};
 pub use pipeline::run_dual_stream_pipeline;
