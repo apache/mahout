@@ -99,9 +99,13 @@ impl QuantumEncoder for AmplitudeEncoder {
                     1.0 / norm
                 };
 
-                let state_ptr = state_vector.ptr_f64().ok_or_else(|| MahoutError::InvalidInput(
-                    "State vector precision mismatch (expected float64 buffer)".to_string()
-                ))?;
+                let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
+                    let actual = state_vector.precision();
+                    MahoutError::InvalidInput(format!(
+                        "State vector precision mismatch (expected float64 buffer, got {:?})",
+                        actual
+                    ))
+                })?;
 
                 let ret = {
                     crate::profile_scope!("GPU::KernelLaunch");
