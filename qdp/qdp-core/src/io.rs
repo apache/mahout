@@ -643,32 +643,6 @@ impl ParquetBlockReader {
                     if self.sample_size.is_none() {
                         self.sample_size = Some(current_sample_size);
                         limit = calc_limit(current_sample_size);
-
-                        while self.leftover_cursor < self.leftover_data.len() && written < limit {
-                            let available = self.leftover_data.len() - self.leftover_cursor;
-                            let space_left = limit - written;
-                            let to_copy = std::cmp::min(available, space_left);
-
-                            if to_copy > 0 {
-                                buffer[written..written+to_copy].copy_from_slice(
-                                    &self.leftover_data[self.leftover_cursor..self.leftover_cursor+to_copy]
-                                );
-                                written += to_copy;
-                                self.leftover_cursor += to_copy;
-
-                                if self.leftover_cursor == self.leftover_data.len() {
-                                    self.leftover_data.clear();
-                                    self.leftover_cursor = 0;
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-
-                            if written >= limit {
-                                return Ok(written);
-                            }
-                        }
                     } else {
                         if let Some(expected_size) = self.sample_size {
                             if current_sample_size != expected_size {
