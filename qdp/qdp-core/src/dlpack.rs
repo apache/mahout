@@ -18,7 +18,7 @@
 
 use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
-use crate::gpu::memory::GpuStateVector;
+use crate::gpu::memory::{BufferStorage, GpuStateVector, Precision};
 
 // DLPack C structures (matching dlpack/dlpack.h)
 
@@ -104,7 +104,7 @@ pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
     // 3. Free GPU buffer (Arc reference count)
     let ctx = (*managed).manager_ctx;
     if !ctx.is_null() {
-        let _ = Arc::from_raw(ctx as *const crate::gpu::memory::GpuBufferRaw);
+        let _ = Arc::from_raw(ctx as *const BufferStorage);
     }
 
     // 4. Free DLManagedTensor
@@ -131,16 +131,21 @@ impl GpuStateVector {
         // Increment Arc ref count (decremented in deleter)
         let ctx = Arc::into_raw(self.buffer.clone()) as *mut c_void;
 
+        let dtype_bits = match self.precision() {
+            Precision::Float32 => 64, // complex64 (2x float32)
+            Precision::Float64 => 128, // complex128 (2x float64)
+        };
+
         let tensor = DLTensor {
-            data: self.ptr() as *mut c_void,
+            data: self.ptr_void(),
             device: DLDevice {
                 device_type: DLDeviceType::kDLCUDA,
                 device_id: 0,
             },
             ndim: 1,
             dtype: DLDataType {
-                code: DL_COMPLEX,  // Complex128
-                bits: 128,         // 2 * 64-bit floats
+                code: DL_COMPLEX,
+                bits: dtype_bits,
                 lanes: 1,
             },
             shape: shape_ptr,
