@@ -36,6 +36,22 @@ unsafe impl cudarc::driver::DeviceRepr for CuDoubleComplex {}
 #[cfg(target_os = "linux")]
 unsafe impl cudarc::driver::ValidAsZeroBits for CuDoubleComplex {}
 
+// Complex number (matches CUDA's cuComplex / cuFloatComplex)
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct CuComplex {
+    pub x: f32,  // Real part
+    pub y: f32,  // Imaginary part
+}
+
+// Implement DeviceRepr for cudarc compatibility
+#[cfg(target_os = "linux")]
+unsafe impl cudarc::driver::DeviceRepr for CuComplex {}
+
+// Also implement ValidAsZeroBits for alloc_zeros support
+#[cfg(target_os = "linux")]
+unsafe impl cudarc::driver::ValidAsZeroBits for CuComplex {}
+
 // CUDA kernel FFI (Linux only, dummy on other platforms)
 #[cfg(target_os = "linux")]
 unsafe extern "C" {
@@ -93,6 +109,18 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Convert a complex128 state vector to complex64 on GPU.
+    /// Returns CUDA error code (0 = success).
+    ///
+    /// # Safety
+    /// Pointers must reference valid device memory on the provided stream.
+    pub fn convert_state_to_float(
+        input_state_d: *const CuDoubleComplex,
+        output_state_d: *mut CuComplex,
+        len: usize,
+        stream: *mut c_void,
+    ) -> i32;
+
     // TODO: launch_angle_encode, launch_basis_encode
 }
 
@@ -128,6 +156,17 @@ pub extern "C" fn launch_l2_norm_batch(
     _num_samples: usize,
     _sample_len: usize,
     _inv_norms_out_d: *mut f64,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(not(target_os = "linux"))]
+#[unsafe(no_mangle)]
+pub extern "C" fn convert_state_to_float(
+    _input_state_d: *const CuDoubleComplex,
+    _output_state_d: *mut CuComplex,
+    _len: usize,
     _stream: *mut c_void,
 ) -> i32 {
     999

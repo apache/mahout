@@ -19,11 +19,11 @@ pub mod gpu;
 pub mod error;
 pub mod preprocessing;
 pub mod io;
-
 #[macro_use]
 mod profiling;
 
 pub use error::{MahoutError, Result};
+pub use gpu::memory::Precision;
 
 use std::sync::Arc;
 
@@ -37,6 +37,7 @@ use crate::gpu::get_encoder;
 /// Provides unified interface for device management, memory allocation, and DLPack.
 pub struct QdpEngine {
     device: Arc<CudaDevice>,
+    precision: Precision,
 }
 
 impl QdpEngine {
@@ -45,10 +46,16 @@ impl QdpEngine {
     /// # Arguments
     /// * `device_id` - CUDA device ID (typically 0)
     pub fn new(device_id: usize) -> Result<Self> {
+        Self::new_with_precision(device_id, Precision::Float32)
+    }
+
+    /// Initialize engine with explicit precision.
+    pub fn new_with_precision(device_id: usize, precision: Precision) -> Result<Self> {
         let device = CudaDevice::new(device_id)
             .map_err(|e| MahoutError::Cuda(format!("Failed to initialize CUDA device {}: {:?}", device_id, e)))?;
         Ok(Self {
-            device  // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
+            device,  // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
+            precision,
         })
     }
 
@@ -76,6 +83,7 @@ impl QdpEngine {
 
         let encoder = get_encoder(encoding_method)?;
         let state_vector = encoder.encode(&self.device, data, num_qubits)?;
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
         let dlpack_ptr = {
             crate::profile_scope!("DLPack::Wrap");
             state_vector.to_dlpack()
@@ -121,6 +129,7 @@ impl QdpEngine {
             num_qubits,
         )?;
 
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
         let dlpack_ptr = state_vector.to_dlpack();
         Ok(dlpack_ptr)
     }
