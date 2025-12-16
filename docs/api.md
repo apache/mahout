@@ -46,6 +46,14 @@
     - `qubit_index2` (int): Index of the second qubit.
 - **Usage**: Useful in quantum algorithms for rearranging qubit states.
 
+## `apply_cswap_gate(self, control_qubit_index, target_qubit_index1, target_qubit_index2)`
+- **Purpose**: Applies a controlled-SWAP (Fredkin) gate that swaps two targets when the control is |1⟩.
+- **Parameters**:
+    - `control_qubit_index` (int): Index of the control qubit.
+    - `target_qubit_index1` (int): Index of the first target qubit.
+    - `target_qubit_index2` (int): Index of the second target qubit.
+- **Usage**: Used in overlap estimation routines such as the swap test.
+
 ## `apply_pauli_x_gate(self, qubit_index)`
 - **Purpose**: Applies a Pauli-X gate to a specified qubit.
 - **Parameters**:
@@ -64,9 +72,19 @@
     - `qubit_index` (int): Index of the qubit.
 - **Usage**: Alters the phase of a qubit without changing its amplitude.
 
+## `apply_t_gate(self, qubit_index)`
+- **Purpose**: Applies the T (π/8) phase gate to a specified qubit.
+- **Parameters**:
+    - `qubit_index` (int): Index of the qubit.
+- **Usage**: Adds a π/4 phase to |1⟩. Together with the Hadamard (H) and CNOT gates, it enables universal single-qubit control.
+
 ## `execute_circuit(self)`
 - **Purpose**: Executes the quantum circuit and retrieves the results.
 - **Usage**: Used to run the entire set of quantum operations and measure the outcomes.
+
+## `get_final_state_vector(self)`
+- **Purpose**: Returns the final state vector of the circuit from the configured backend.
+- **Usage**: Retrieves the full quantum state for simulation and analysis workflows.
 
 ## `draw_circuit(self)`
 - **Purpose**: Visualizes the quantum circuit.
@@ -95,6 +113,15 @@
     - `angle` (str or float): Angle in radians for the rotation. Can be a static value or a parameter name for optimization.
 - **Usage**: Utilized in parameterized quantum circuits to modify the phase of a qubit state during optimization.
 
+## `apply_u_gate(self, qubit_index, theta, phi, lambd)`
+- **Purpose**: Applies the universal single-qubit U(θ, φ, λ) gate.
+- **Parameters**:
+    - `qubit_index` (int): Index of the qubit.
+    - `theta` (float): Rotation angle θ.
+    - `phi` (float): Rotation angle φ.
+    - `lambd` (float): Rotation angle λ.
+- **Usage**: Provides full single-qubit unitary control via Z–Y–Z Euler decomposition.
+
 ## `execute_circuit(self, parameter_values=None)`
 - **Purpose**: Executes the quantum circuit with the ability to bind specific parameter values if provided.
 - **Parameters**:
@@ -112,3 +139,19 @@
 - **Parameters**:
     - `param_name` (str): The name of the parameter to handle.
 - **Usage**: Automatically invoked when applying parameterized gates to keep track of parameters efficiently.
+
+## `swap_test(self, ancilla_qubit, qubit1, qubit2)`
+- **Purpose**: Builds the swap-test subcircuit (H–CSWAP–H) to compare two quantum states.
+- **Parameters**:
+    - `ancilla_qubit` (int): Index of the ancilla control qubit.
+    - `qubit1` (int): Index of the first state qubit.
+    - `qubit2` (int): Index of the second state qubit.
+- **Usage**: Used in overlap/fidelity estimation between two states.
+
+## `measure_overlap(self, qubit1, qubit2, ancilla_qubit=0)`
+- **Purpose**: Executes the swap test and returns |⟨ψ|φ⟩|² using backend-specific measurement parsing.
+- **Parameters**:
+    - `qubit1` (int): Index of the first state qubit.
+    - `qubit2` (int): Index of the second state qubit.
+    - `ancilla_qubit` (int, default to 0): Index of the ancilla qubit.
+- **Usage**: Convenience wrapper for fidelity/overlap measurement across backends.
