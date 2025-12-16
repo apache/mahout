@@ -13,11 +13,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+use std::ffi::c_void;
 use std::sync::Arc;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
-use qdp_kernels::CuDoubleComplex;
+use qdp_kernels::{CuComplex, CuDoubleComplex};
 use crate::error::{MahoutError, Result};
+
+/// Precision of the GPU state vector.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Precision {
+    Float32,
+    Float64,
+}
 
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
@@ -131,28 +138,58 @@ pub(crate) fn map_allocation_error(
 
 /// RAII wrapper for GPU memory buffer
 /// Automatically frees GPU memory when dropped
-pub struct GpuBufferRaw {
-    pub(crate) slice: CudaSlice<CuDoubleComplex>,
+pub struct GpuBufferRaw<T> {
+    pub(crate) slice: CudaSlice<T>,
 }
 
-impl GpuBufferRaw {
+impl<T> GpuBufferRaw<T> {
     /// Get raw pointer to GPU memory
     ///
     /// # Safety
     /// Valid only while GpuBufferRaw is alive
-    pub fn ptr(&self) -> *mut CuDoubleComplex {
-        *self.slice.device_ptr() as *mut CuDoubleComplex
+    pub fn ptr(&self) -> *mut T {
+        *self.slice.device_ptr() as *mut T
+    }
+}
+
+/// Storage wrapper for precision-specific GPU buffers
+pub enum BufferStorage {
+    F32(GpuBufferRaw<CuComplex>),
+    F64(GpuBufferRaw<CuDoubleComplex>),
+}
+
+impl BufferStorage {
+    fn precision(&self) -> Precision {
+        match self {
+            BufferStorage::F32(_) => Precision::Float32,
+            BufferStorage::F64(_) => Precision::Float64,
+        }
+    }
+
+    fn ptr_void(&self) -> *mut c_void {
+        match self {
+            BufferStorage::F32(buf) => buf.ptr() as *mut c_void,
+            BufferStorage::F64(buf) => buf.ptr() as *mut c_void,
+        }
+    }
+
+    fn ptr_f64(&self) -> Option<*mut CuDoubleComplex> {
+        match self {
+            BufferStorage::F64(buf) => Some(buf.ptr()),
+            _ => None,
+        }
     }
 }
 
 /// Quantum state vector on GPU
 ///
-/// Manages complex128 array of size 2^n (n = qubits) in GPU memory.
+/// Manages complex array of size 2^n (n = qubits) in GPU memory.
 /// Uses Arc for shared ownership (needed for DLPack/PyTorch integration).
 /// Thread-safe: Send + Sync
+#[derive(Clone)]
 pub struct GpuStateVector {
     // Use Arc to allow DLPack to share ownership
-    pub(crate) buffer: Arc<GpuBufferRaw>,
+    pub(crate) buffer: Arc<BufferStorage>,
     pub num_qubits: usize,
     pub size_elements: usize,
 }
@@ -191,7 +228,7 @@ impl GpuStateVector {
             ))?;
 
             Ok(Self {
-                buffer: Arc::new(GpuBufferRaw { slice }),
+                buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
                 num_qubits: qubits,
                 size_elements: _size_elements,
             })
@@ -204,12 +241,22 @@ impl GpuStateVector {
         }
     }
 
+    /// Get current precision of the underlying buffer.
+    pub fn precision(&self) -> Precision {
+        self.buffer.precision()
+    }
+
     /// Get raw GPU pointer for DLPack/FFI
     ///
     /// # Safety
     /// Valid while GpuStateVector or any Arc clone is alive
-    pub fn ptr(&self) -> *mut CuDoubleComplex {
-        self.buffer.ptr()
+    pub fn ptr_void(&self) -> *mut c_void {
+        self.buffer.ptr_void()
+    }
+
+    /// Returns a double-precision pointer if the buffer stores complex128 data.
+    pub fn ptr_f64(&self) -> Option<*mut CuDoubleComplex> {
+        self.buffer.ptr_f64()
     }
 
     /// Get the number of qubits
@@ -252,7 +299,7 @@ impl GpuStateVector {
             ))?;
 
             Ok(Self {
-                buffer: Arc::new(GpuBufferRaw { slice }),
+                buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
                 num_qubits: qubits,
                 size_elements: total_elements,
             })
@@ -261,6 +308,75 @@ impl GpuStateVector {
         #[cfg(not(target_os = "linux"))]
         {
             Err(MahoutError::Cuda("CUDA is only available on Linux. This build does not support GPU operations.".to_string()))
+        }
+    }
+
+    /// Convert the state vector to the requested precision (GPU-side).
+    ///
+    /// For now only down-conversion from Float64 -> Float32 is supported.
+    pub fn to_precision(&self, device: &Arc<CudaDevice>, target: Precision) -> Result<Self> {
+        if self.precision() == target {
+            return Ok(self.clone());
+        }
+
+        match (self.precision(), target) {
+            (Precision::Float64, Precision::Float32) => {
+                #[cfg(target_os = "linux")]
+                {
+                    let requested_bytes = self.size_elements
+                        .checked_mul(std::mem::size_of::<CuComplex>())
+                        .ok_or_else(|| MahoutError::MemoryAllocation(
+                            format!("Requested GPU allocation size overflow (elements={})", self.size_elements)
+                        ))?;
+
+                    ensure_device_memory_available(requested_bytes, "state vector precision conversion", Some(self.num_qubits))?;
+
+                    let slice = unsafe {
+                        device.alloc::<CuComplex>(self.size_elements)
+                    }.map_err(|e| map_allocation_error(
+                        requested_bytes,
+                        "state vector precision conversion",
+                        Some(self.num_qubits),
+                        e,
+                    ))?;
+
+                    let src_ptr = self.ptr_f64().ok_or_else(|| MahoutError::InvalidInput(
+                        "Source state vector is not Float64; cannot convert to Float32".to_string()
+                    ))?;
+
+                    let ret = unsafe {
+                        qdp_kernels::convert_state_to_float(
+                            src_ptr as *const CuDoubleComplex,
+                            *slice.device_ptr() as *mut CuComplex,
+                            self.size_elements,
+                            std::ptr::null_mut(),
+                        )
+                    };
+
+                    if ret != 0 {
+                        return Err(MahoutError::KernelLaunch(
+                            format!("Precision conversion kernel failed: {}", ret)
+                        ));
+                    }
+
+                    device.synchronize()
+                        .map_err(|e| MahoutError::Cuda(format!("Failed to sync after precision conversion: {:?}", e)))?;
+
+                    Ok(Self {
+                        buffer: Arc::new(BufferStorage::F32(GpuBufferRaw { slice })),
+                        num_qubits: self.num_qubits,
+                        size_elements: self.size_elements,
+                    })
+                }
+
+                #[cfg(not(target_os = "linux"))]
+                {
+                    Err(MahoutError::Cuda("Precision conversion requires CUDA (Linux)".to_string()))
+                }
+            }
+            _ => Err(MahoutError::NotImplemented(
+                "Requested precision conversion is not supported".to_string()
+            )),
         }
     }
 }

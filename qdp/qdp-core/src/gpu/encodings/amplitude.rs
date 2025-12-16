@@ -101,12 +101,20 @@ impl QuantumEncoder for AmplitudeEncoder {
                     1.0 / norm
                 };
 
+                let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
+                    let actual = state_vector.precision();
+                    MahoutError::InvalidInput(format!(
+                        "State vector precision mismatch (expected float64 buffer, got {:?})",
+                        actual
+                    ))
+                })?;
+
                 let ret = {
                     crate::profile_scope!("GPU::KernelLaunch");
                     unsafe {
                         launch_amplitude_encode(
                             *input_slice.device_ptr() as *const f64,
-                            state_vector.ptr() as *mut c_void,
+                            state_ptr as *mut c_void,
                             host_data.len(),
                             state_len,
                             inv_norm,
@@ -229,10 +237,13 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Launch batch kernel
         {
             crate::profile_scope!("GPU::BatchKernelLaunch");
+            let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| MahoutError::InvalidInput(
+                "Batch state vector precision mismatch (expected float64 buffer)".to_string()
+            ))?;
             let ret = unsafe {
                 launch_amplitude_encode_batch(
                     *input_batch_gpu.device_ptr() as *const f64,
-                    batch_state_vector.ptr() as *mut c_void,
+                    state_ptr as *mut c_void,
                     *inv_norms_gpu.device_ptr() as *const f64,
                     num_samples,
                     sample_size,
@@ -285,13 +296,17 @@ impl AmplitudeEncoder {
         inv_norm: f64,
         state_vector: &GpuStateVector,
     ) -> Result<()> {
+        let base_state_ptr = state_vector.ptr_f64().ok_or_else(|| MahoutError::InvalidInput(
+            "State vector precision mismatch (expected float64 buffer)".to_string()
+        ))?;
+
         // Use generic pipeline infrastructure
         // The closure handles amplitude-specific kernel launch logic
         run_dual_stream_pipeline(device, host_data, |stream, input_ptr, chunk_offset, chunk_len| {
             // Calculate offset pointer for state vector (type-safe pointer arithmetic)
             // Offset is in complex numbers (CuDoubleComplex), not f64 elements
             let state_ptr_offset = unsafe {
-                state_vector.ptr().cast::<u8>()
+                base_state_ptr.cast::<u8>()
                     .add(chunk_offset * std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
                     .cast::<std::ffi::c_void>()
             };
@@ -340,7 +355,7 @@ impl AmplitudeEncoder {
 
             // Calculate tail pointer (in complex numbers)
             let tail_ptr = unsafe {
-                state_vector.ptr().add(padding_start) as *mut c_void
+                base_state_ptr.add(padding_start) as *mut c_void
             };
 
             // Zero-fill padding region using CUDA Runtime API
