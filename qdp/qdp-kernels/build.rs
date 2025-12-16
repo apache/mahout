@@ -67,11 +67,14 @@ fn main() {
         .flag("-cudart=shared")  // Use shared CUDA runtime
         .flag("-std=c++17")      // C++17 for modern CUDA features
         // GPU architecture targets
+        // SM 75 = Turing (T4, RTX 2000 series)
         // SM 80 = Ampere (A100, RTX 3000 series)
         // SM 86 = Ampere (RTX 3090, A40)
         // SM 89 = Ada Lovelace (RTX 4000 series)
         // SM 90 = Hopper (H100)
-        // For MVP, we target SM 80 as baseline
+        // Support both Turing (sm_75) and Ampere+ architectures
+        .flag("-gencode")
+        .flag("arch=compute_75,code=sm_75")
         .flag("-gencode")
         .flag("arch=compute_80,code=sm_80")
         // Optional: Add more architectures for production
