@@ -27,8 +27,6 @@ pub enum Precision {
 }
 
 #[cfg(target_os = "linux")]
-use std::ffi::c_void;
-#[cfg(target_os = "linux")]
 use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
 
 #[cfg(target_os = "linux")]

@@ -274,7 +274,7 @@ impl QdpEngine {
                                     format!("Offset bytes calculation overflow: {} * {}", offset_elements, std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
                                 ))?;
 
-                            let state_ptr_offset = total_state_vector.ptr().cast::<u8>()
+                            let state_ptr_offset = total_state_vector.ptr_void().cast::<u8>()
                                 .add(offset_bytes)
                                 .cast::<std::ffi::c_void>();
 
