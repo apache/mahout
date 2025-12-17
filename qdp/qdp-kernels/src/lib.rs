@@ -103,6 +103,17 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Launch batched fused reduction + encoding kernel
+    pub fn launch_fused_amplitude_encode_batch(
+        input_batch_d: *const f64,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        input_len: usize,
+        state_len: usize,
+        status_d: *mut u8,
+        stream: *mut c_void,
+    ) -> i32;
+
     // TODO: launch_angle_encode, launch_basis_encode
 }
 
@@ -138,6 +149,20 @@ pub extern "C" fn launch_l2_norm_batch(
     _num_samples: usize,
     _sample_len: usize,
     _inv_norms_out_d: *mut f64,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(not(target_os = "linux"))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_fused_amplitude_encode_batch(
+    _input_batch_d: *const f64,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
+    _input_len: usize,
+    _state_len: usize,
+    _status_d: *mut u8,
     _stream: *mut c_void,
 ) -> i32 {
     999

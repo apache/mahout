@@ -237,15 +237,15 @@ def main():
 
     print()
     print("[PennyLane] Full Pipeline (DataLoader -> GPU)...")
-    t_pl, th_pl = run_pennylane(
-        args.qubits, args.batches, args.batch_size, args.prefetch
-    )
+    # t_pl, th_pl = run_pennylane(
+    #     args.qubits, args.batches, args.batch_size, args.prefetch
+    # )
 
     print()
     print("[Qiskit] Full Pipeline (DataLoader -> GPU)...")
-    t_qiskit, th_qiskit = run_qiskit(
-        args.qubits, args.batches, args.batch_size, args.prefetch
-    )
+    # t_qiskit, th_qiskit = run_qiskit(
+    #     args.qubits, args.batches, args.batch_size, args.prefetch
+    # )
 
     print()
     print("[Mahout] Full Pipeline (DataLoader -> GPU)...")

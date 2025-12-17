@@ -31,10 +31,9 @@ use cudarc::driver::{DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
     launch_amplitude_encode,
-    launch_amplitude_encode_batch,
     launch_l2_norm,
-    launch_l2_norm_batch,
     launch_fused_amplitude_encode,
+    launch_fused_amplitude_encode_batch,
 };
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
@@ -183,64 +182,46 @@ impl QuantumEncoder for AmplitudeEncoder {
                 ))?
         };
 
-        // Compute inverse norms on GPU using warp-reduced kernel
-        let inv_norms_gpu = {
-            crate::profile_scope!("GPU::BatchNormKernel");
-            let mut buffer = device.alloc_zeros::<f64>(num_samples)
+        // Allocate per-sample status flags (0 = valid, 1 = invalid norm)
+        let mut status_gpu = {
+            crate::profile_scope!("GPU::AllocStatus");
+            device.alloc_zeros::<u8>(num_samples)
                 .map_err(|e| MahoutError::MemoryAllocation(
-                    format!("Failed to allocate norm buffer: {:?}", e)
-                ))?;
+                    format!("Failed to allocate sample status buffer: {:?}", e)
+                ))?
+        };
 
+        // Launch fused batch kernel (norm + encode)
+        {
+            crate::profile_scope!("GPU::BatchFusedKernelLaunch");
             let ret = unsafe {
-                launch_l2_norm_batch(
+                launch_fused_amplitude_encode_batch(
                     *input_batch_gpu.device_ptr() as *const f64,
+                    batch_state_vector.ptr() as *mut c_void,
                     num_samples,
                     sample_size,
-                    *buffer.device_ptr_mut() as *mut f64,
-                    std::ptr::null_mut(), // default stream
+                    state_len,
+                    *status_gpu.device_ptr_mut() as *mut u8,
+                    std::ptr::null_mut(),
                 )
             };
 
             if ret != 0 {
                 return Err(MahoutError::KernelLaunch(
-                    format!("Norm reduction kernel failed: {} ({})", ret, cuda_error_to_string(ret))
-                ));
-            }
-
-            buffer
-        };
-
-        // Validate norms on host to catch zero or NaN samples early
-        {
-            crate::profile_scope!("GPU::NormValidation");
-            let host_inv_norms = device.dtoh_sync_copy(&inv_norms_gpu)
-                .map_err(|e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)))?;
-
-            if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
-                return Err(MahoutError::InvalidInput(
-                    "One or more samples have zero or invalid norm".to_string()
+                    format!("Fused batch kernel launch failed: {} ({})", ret, cuda_error_to_string(ret))
                 ));
             }
         }
 
-        // Launch batch kernel
+        // Validate per-sample norms using GPU-written status flags
         {
-            crate::profile_scope!("GPU::BatchKernelLaunch");
-            let ret = unsafe {
-                launch_amplitude_encode_batch(
-                    *input_batch_gpu.device_ptr() as *const f64,
-                    batch_state_vector.ptr() as *mut c_void,
-                    *inv_norms_gpu.device_ptr() as *const f64,
-                    num_samples,
-                    sample_size,
-                    state_len,
-                    std::ptr::null_mut(), // default stream
-                )
-            };
+            crate::profile_scope!("GPU::BatchStatusValidation");
+            let statuses = device.dtoh_sync_copy(&status_gpu)
+                .map_err(|e| MahoutError::Cuda(format!("Failed to copy sample status flags: {:?}", e)))?;
 
-            if ret != 0 {
-                return Err(MahoutError::KernelLaunch(
-                    format!("Batch kernel launch failed: {} ({})", ret, cuda_error_to_string(ret))
+            if let Some((idx, _)) = statuses.iter().enumerate().find(|(_, flag)| **flag != 0) {
+                return Err(MahoutError::InvalidInput(
+                    format!("Sample {} has zero or invalid norm", idx)
                 ));
             }
         }

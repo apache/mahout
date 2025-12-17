@@ -19,7 +19,14 @@
 #[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
-use qdp_kernels::{CuDoubleComplex, launch_amplitude_encode, launch_l2_norm, launch_l2_norm_batch, launch_fused_amplitude_encode};
+use qdp_kernels::{
+    CuDoubleComplex,
+    launch_amplitude_encode,
+    launch_fused_amplitude_encode,
+    launch_fused_amplitude_encode_batch,
+    launch_l2_norm,
+    launch_l2_norm_batch,
+};
 
 const EPSILON: f64 = 1e-10;
 
@@ -622,4 +629,110 @@ fn test_fused_amplitude_encode() {
     assert!((total_prob - 1.0).abs() < EPSILON, "Total probability must be 1.0");
 
     println!("PASS: Fused reduction+encoding kernel works correctly");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_fused_amplitude_encode_batch() {
+    println!("Testing batched FUSED amplitude encoding...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let num_samples = 3;
+    let input_len = 4;
+    let state_len = 8; // leave headroom for padding
+
+    let input: Vec<f64> = vec![
+        3.0, 4.0, 0.0, 0.0, // sample 0
+        1.0, 2.0, 3.0, 4.0, // sample 1
+        0.0, 0.0, 0.0, 0.0, // sample 2 (degenerate)
+    ];
+
+    let expected_real: Vec<f64> = {
+        let mut out = vec![0.0f64; num_samples * state_len];
+        for sample in 0..num_samples {
+            let base = sample * input_len;
+            let state_base = sample * state_len;
+            let slice = &input[base..base + input_len];
+            let norm_sq: f64 = slice.iter().map(|v| v * v).sum();
+            let inv = if norm_sq > 0.0 { 1.0 / norm_sq.sqrt() } else { 0.0 };
+            for idx in 0..state_len {
+                out[state_base + idx] = if idx < input_len {
+                    slice[idx] * inv
+                } else {
+                    0.0
+                };
+            }
+        }
+        out
+    };
+
+    let input_d = device.htod_copy(input.clone()).unwrap();
+    let mut state_d = device.alloc_zeros::<CuDoubleComplex>(num_samples * state_len).unwrap();
+    let mut status_d = device.alloc_zeros::<u8>(num_samples).unwrap();
+
+    let result = unsafe {
+        launch_fused_amplitude_encode_batch(
+            *input_d.device_ptr() as *const f64,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            num_samples,
+            input_len,
+            state_len,
+            *status_d.device_ptr_mut() as *mut u8,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(result, 0, "Batched fused kernel launch should succeed");
+
+    let state_h = device.dtoh_sync_copy(&state_d).unwrap();
+
+    let status_h = device.dtoh_sync_copy(&status_d).unwrap();
+    assert_eq!(status_h, vec![0, 0, 1], "Expected third sample to be flagged invalid");
+
+    for sample in 0..num_samples {
+        let state_base = sample * state_len;
+        let sample_slice = &state_h[state_base..state_base + state_len];
+        let expect_slice = &expected_real[state_base..state_base + state_len];
+
+        for idx in 0..state_len {
+            assert!(
+                (sample_slice[idx].x - expect_slice[idx]).abs() < EPSILON,
+                "Sample {} element {} mismatch: expected {}, got {}",
+                sample,
+                idx,
+                expect_slice[idx],
+                sample_slice[idx].x
+            );
+            assert!(sample_slice[idx].y.abs() < EPSILON, "Imaginary parts should be zero");
+        }
+
+        let total_prob: f64 = sample_slice.iter().map(|c| c.x * c.x + c.y * c.y).sum();
+        let raw_norm: f64 = input
+            [sample * input_len..(sample + 1) * input_len]
+            .iter()
+            .map(|v| v * v)
+            .sum();
+        if raw_norm > 0.0 {
+            assert!(
+                (total_prob - 1.0).abs() < EPSILON,
+                "Sample {} should be normalized",
+                sample
+            );
+        } else {
+            assert!(
+                total_prob.abs() < EPSILON,
+                "Sample {} should remain all zeros",
+                sample
+            );
+        }
+    }
+
+    println!("PASS: Batched fused reduction+encoding kernel matches CPU");
 }

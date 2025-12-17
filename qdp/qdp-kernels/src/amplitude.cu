@@ -20,6 +20,7 @@
 #include <cuComplex.h>
 #include <vector_types.h>
 #include <math.h>
+#include <stdint.h>
 #include <cooperative_groups.h>
 namespace cg = cooperative_groups;
 
@@ -175,6 +176,81 @@ __global__ void fused_amplitude_encode_kernel(
     }
 }
 
+// Batched fused kernel: each block reduces + normalizes a single sample
+__global__ void fused_amplitude_encode_batch_kernel(
+    const double *__restrict__ input_batch,
+    cuDoubleComplex *__restrict__ state_batch,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len,
+    uint8_t *__restrict__ sample_status)
+{
+    const size_t sample_idx = blockIdx.x + blockIdx.y * gridDim.x;
+    if (sample_idx >= num_samples)
+        return;
+
+    const size_t input_base = sample_idx * input_len;
+    const size_t state_base = sample_idx * state_len;
+
+    double local_sum = 0.0;
+    const size_t thread_stride_pairs = blockDim.x;
+    size_t vec_offset = threadIdx.x;
+    size_t elem_offset = vec_offset * 2;
+    const double2 *sample_vec_ptr = reinterpret_cast<const double2 *>(input_batch + input_base);
+
+    while (elem_offset + 1 < input_len)
+    {
+        const double2 v = __ldg(sample_vec_ptr + vec_offset);
+        local_sum += v.x * v.x + v.y * v.y;
+        vec_offset += thread_stride_pairs;
+        elem_offset = vec_offset * 2;
+    }
+
+    if (elem_offset < input_len)
+    {
+        const double v = __ldg(input_batch + input_base + elem_offset);
+        local_sum += v * v;
+    }
+
+    const double block_sum = block_reduce_sum(local_sum);
+
+    __shared__ double block_inv_norm;
+    if (threadIdx.x == 0)
+    {
+        const bool valid = (block_sum > 0.0) && isfinite(block_sum);
+        block_inv_norm = valid ? rsqrt(block_sum) : 0.0;
+        sample_status[sample_idx] = valid ? 0u : 1u;
+    }
+    __syncthreads();
+
+    const double inv_norm = block_inv_norm;
+    const size_t pair_count = (state_len + 1) / 2;
+
+    for (size_t pair_idx = threadIdx.x; pair_idx < pair_count; pair_idx += blockDim.x)
+    {
+        const size_t state_offset = pair_idx * 2;
+        double v1 = 0.0;
+        double v2 = 0.0;
+
+        if (state_offset + 1 < input_len)
+        {
+            const double2 vec_data = __ldg(sample_vec_ptr + pair_idx);
+            v1 = vec_data.x;
+            v2 = vec_data.y;
+        }
+        else if (state_offset < input_len)
+        {
+            v1 = __ldg(input_batch + input_base + state_offset);
+        }
+
+        state_batch[state_base + state_offset] = make_cuDoubleComplex(v1 * inv_norm, 0.0);
+        if (state_offset + 1 < state_len)
+        {
+            state_batch[state_base + state_offset + 1] = make_cuDoubleComplex(v2 * inv_norm, 0.0);
+        }
+    }
+}
+
 extern "C"
 {
     int launch_fused_amplitude_encode(
@@ -208,6 +284,51 @@ extern "C"
         // 3. Launch
         err = cudaLaunchCooperativeKernel((void *)fused_amplitude_encode_kernel, gridSize, numThreads, args, 0, stream);
         return (int)err;
+    }
+
+    /// Launch batched fused amplitude encoding kernel
+    /// Computes per-sample L2 norms on device and immediately normalizes outputs.
+    int launch_fused_amplitude_encode_batch(
+        const double *input_batch_d,
+        void *state_batch_d,
+        size_t num_samples,
+        size_t input_len,
+        size_t state_len,
+        uint8_t *status_d,
+        cudaStream_t stream)
+    {
+        if (num_samples == 0 || state_len == 0)
+        {
+            return cudaErrorInvalidValue;
+        }
+
+        cuDoubleComplex *state_complex_d = static_cast<cuDoubleComplex *>(state_batch_d);
+
+        const int blockSize = 256;
+        const unsigned int maxGridDim = 65535;
+        unsigned int grid_x = (num_samples > maxGridDim) ? maxGridDim : static_cast<unsigned int>(num_samples);
+        if (grid_x == 0)
+        {
+            grid_x = 1;
+        }
+        size_t blocks_needed = (num_samples + grid_x - 1) / grid_x;
+        unsigned int grid_y = (blocks_needed > maxGridDim) ? maxGridDim : static_cast<unsigned int>(blocks_needed);
+        if (grid_y == 0)
+        {
+            grid_y = 1;
+        }
+
+        dim3 grid(grid_x, grid_y, 1);
+
+        fused_amplitude_encode_batch_kernel<<<grid, blockSize, 0, stream>>>(
+            input_batch_d,
+            state_complex_d,
+            num_samples,
+            input_len,
+            state_len,
+            status_d);
+
+        return (int)cudaGetLastError();
     }
 
     /// Launch amplitude encoding kernel
