@@ -16,7 +16,7 @@
 
 // Memory safety tests: DLPack lifecycle, RAII, Arc reference counting
 
-use qdp_core::QdpEngine;
+use qdp_core::{Precision, QdpEngine};
 
 mod common;
 
@@ -37,12 +37,16 @@ fn test_memory_pressure() {
     let data = common::create_test_data(1024);
 
     for i in 0..100 {
-        let ptr = engine.encode(&data, 10, "amplitude")
+        let ptr = engine
+            .encode(&data, 10, "amplitude")
             .expect("Encoding should succeed");
 
         unsafe {
             let managed = &mut *ptr;
-            let deleter = managed.deleter.take().expect("Deleter missing in pressure test!");
+            let deleter = managed
+                .deleter
+                .take()
+                .expect("Deleter missing in pressure test!");
             deleter(ptr);
         }
 
@@ -90,7 +94,7 @@ fn test_multiple_concurrent_states() {
 fn test_dlpack_tensor_metadata() {
     println!("Testing DLPack tensor metadata...");
 
-    let engine = match QdpEngine::new(0) {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
         Ok(e) => e,
         Err(_) => return,
     };
@@ -114,15 +118,24 @@ fn test_dlpack_tensor_metadata() {
         assert_eq!(stride, 1, "Stride for 1D contiguous array should be 1");
 
         assert_eq!(tensor.dtype.code, 5, "Should be complex type (code=5)");
-        assert_eq!(tensor.dtype.bits, 128, "Should be 128 bits (2x64-bit floats)");
+        assert_eq!(
+            tensor.dtype.bits, 128,
+            "Should be 128 bits (2x64-bit floats)"
+        );
 
         println!("PASS: DLPack metadata verified");
         println!("  ndim: {}", tensor.ndim);
         println!("  shape: {}", shape);
         println!("  stride: {}", stride);
-        println!("  dtype: code={}, bits={}", tensor.dtype.code, tensor.dtype.bits);
+        println!(
+            "  dtype: code={}, bits={}",
+            tensor.dtype.code, tensor.dtype.bits
+        );
 
-        let deleter = managed.deleter.take().expect("Deleter missing in metadata test!");
+        let deleter = managed
+            .deleter
+            .take()
+            .expect("Deleter missing in metadata test!");
         deleter(ptr);
     }
 }
