@@ -77,9 +77,9 @@ fn main() {
         .flag("arch=compute_75,code=sm_75")
         .flag("-gencode")
         .flag("arch=compute_80,code=sm_80")
+        .flag("-gencode")
+        .flag("arch=compute_86,code=sm_86")
         // Optional: Add more architectures for production
-        // .flag("-gencode")
-        // .flag("arch=compute_86,code=sm_86")
         // .flag("-gencode")
         // .flag("arch=compute_89,code=sm_89")
         .file("src/amplitude.cu")
