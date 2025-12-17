@@ -66,6 +66,35 @@ __global__ void amplitude_encode_kernel(
     }
 }
 
+__global__ void amplitude_encode_kernel_f32(
+    const float* __restrict__ input,
+    cuComplex* __restrict__ state,
+    size_t input_len,
+    size_t state_len,
+    float inv_norm
+) {
+    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t state_idx_base = idx * 2;
+    if (state_idx_base >= state_len) return;
+
+    float v1 = 0.0f;
+    float v2 = 0.0f;
+
+    if (state_idx_base + 1 < input_len) {
+        const float2* input_vec = reinterpret_cast<const float2*>(input);
+        float2 loaded = input_vec[idx];
+        v1 = loaded.x;
+        v2 = loaded.y;
+    } else if (state_idx_base < input_len) {
+        v1 = input[state_idx_base];
+    }
+
+    state[state_idx_base] = make_cuComplex(v1 * inv_norm, 0.0f);
+    if (state_idx_base + 1 < state_len) {
+        state[state_idx_base + 1] = make_cuComplex(v2 * inv_norm, 0.0f);
+    }
+}
+
 // Warp-level reduction for sum using shuffle instructions
 __device__ __forceinline__ double warp_reduce_sum(double val) {
     for (int offset = warpSize / 2; offset > 0; offset >>= 1) {
@@ -132,6 +161,35 @@ int launch_amplitude_encode(
         input_len,
         state_len,
         inv_norm // Pass reciprocal
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Launch amplitude encoding kernel for float32
+int launch_amplitude_encode_f32(
+    const float* input_d,
+    void* state_d,
+    size_t input_len,
+    size_t state_len,
+    float inv_norm,
+    cudaStream_t stream
+) {
+    if (inv_norm <= 0.0f || !isfinite(inv_norm)) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuComplex* state_complex_d = static_cast<cuComplex*>(state_d);
+
+    const int blockSize = 256;
+    const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
+
+    amplitude_encode_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
+        input_d,
+        state_complex_d,
+        input_len,
+        state_len,
+        inv_norm
     );
 
     return (int)cudaGetLastError();
