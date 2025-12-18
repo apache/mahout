@@ -24,64 +24,171 @@
 // build, but GPU functionality will not be available.
 
 use std::env;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
+struct CudaConfig {
+    root: PathBuf,
+    nvcc: PathBuf,
+    include_dir: PathBuf,
+    lib_dir: PathBuf,
+}
+
 fn main() {
-    // Tell Cargo to rerun this script if the kernel source changes
     println!("cargo:rerun-if-changed=src/amplitude.cu");
+    println!("cargo:rerun-if-env-changed=QDP_CPU_ONLY");
+    println!("cargo:rerun-if-env-changed=CUDA_HOME");
+    println!("cargo:rerun-if-env-changed=CUDA_PATH");
+    println!("cargo:rerun-if-env-changed=NVCC");
+    println!("cargo:rerun-if-env-changed=PATH");
 
-    // Check if CUDA is available by looking for nvcc
-    let has_cuda = Command::new("nvcc")
-        .arg("--version")
-        .output()
-        .is_ok();
-
-    if !has_cuda {
-        println!("cargo:warning=CUDA not found (nvcc not in PATH). Skipping kernel compilation.");
-        println!("cargo:warning=This is expected on macOS or non-CUDA environments.");
-        println!("cargo:warning=The project will build, but GPU functionality will not be available.");
-        println!("cargo:warning=For production deployment, ensure CUDA toolkit is installed.");
+    if cpu_only_enabled() {
+        println!("cargo:rustc-cfg=cpu_only");
+        println!("cargo:warning=QDP_CPU_ONLY=1 detected: building in CPU-only mode and skipping CUDA kernels.");
         return;
     }
 
-    // Get CUDA installation path
-    // Priority: CUDA_PATH env var > /usr/local/cuda (default Linux location)
-    let cuda_path = env::var("CUDA_PATH")
-        .unwrap_or_else(|_| "/usr/local/cuda".to_string());
+    let cuda = detect_cuda().unwrap_or_else(|err| {
+        eprintln!("{err}");
+        eprintln!("Hint: install the CUDA toolkit and ensure nvcc is available, or set QDP_CPU_ONLY=1 to build without GPU kernels.");
+        panic!("CUDA toolkit not found");
+    });
 
-    println!("cargo:rustc-link-search=native={}/lib64", cuda_path);
-    println!("cargo:rustc-link-lib=cudart");
+    println!(
+        "cargo:warning=CUDA toolkit detected at {} (nvcc = {}). Building GPU kernels.",
+        cuda.root.display(),
+        cuda.nvcc.display()
+    );
 
-    // On macOS, also check /usr/local/cuda/lib
-    #[cfg(target_os = "macos")]
-    println!("cargo:rustc-link-search=native={}/lib", cuda_path);
+    emit_link_directives(&cuda.lib_dir);
 
-    // Compile CUDA kernels
-    // This uses cc crate's CUDA support to invoke nvcc
     let mut build = cc::Build::new();
-
-    build.include(format!("{}/include", cuda_path));
-
-    build
-        .cuda(true)
-        .flag("-cudart=shared")  // Use shared CUDA runtime
-        .flag("-std=c++17")      // C++17 for modern CUDA features
-        // GPU architecture targets
-        // SM 75 = Turing (T4, RTX 2000 series)
-        // SM 80 = Ampere (A100, RTX 3000 series)
-        // SM 86 = Ampere (RTX 3090, A40)
-        // SM 89 = Ada Lovelace (RTX 4000 series)
-        // SM 90 = Hopper (H100)
-        // Support both Turing (sm_75) and Ampere+ architectures
+    build.cuda(true)
+        .compiler(&cuda.nvcc)
+        .include(&cuda.include_dir)
+        .flag("-cudart=shared")
+        .flag("-std=c++17")
         .flag("-gencode")
         .flag("arch=compute_75,code=sm_75")
         .flag("-gencode")
         .flag("arch=compute_80,code=sm_80")
-        // Optional: Add more architectures for production
-        // .flag("-gencode")
-        // .flag("arch=compute_86,code=sm_86")
-        // .flag("-gencode")
-        // .flag("arch=compute_89,code=sm_89")
         .file("src/amplitude.cu")
         .compile("kernels");
+}
+
+fn cpu_only_enabled() -> bool {
+    env::var("QDP_CPU_ONLY")
+        .map(|val| val == "1" || val.eq_ignore_ascii_case("true"))
+        .unwrap_or(false)
+}
+
+fn detect_cuda() -> Result<CudaConfig, String> {
+    let nvcc = locate_nvcc().ok_or_else(|| {
+        format!(
+            "nvcc not found. Checked CUDA_HOME, CUDA_PATH, NVCC, and PATH.\
+             \nSet CUDA_HOME/CUDA_PATH to your toolkit root (e.g. /usr/local/cuda) so we can find bin/nvcc."
+        )
+    })?;
+
+    Command::new(&nvcc)
+        .arg("--version")
+        .output()
+        .map_err(|e| format!("Failed to execute nvcc at {}: {:?}", nvcc.display(), e))?;
+
+    let root = nvcc.parent()
+        .and_then(Path::parent)
+        .ok_or_else(|| format!("Unable to derive CUDA root from nvcc at {}", nvcc.display()))?;
+
+    let include_dir = root.join("include");
+    if !include_dir.exists() {
+        return Err(format!(
+            "CUDA include directory missing at {}. Set CUDA_HOME/CUDA_PATH to a valid toolkit install.",
+            include_dir.display()
+        ));
+    }
+
+    let lib_dir = find_library_dir(root).ok_or_else(|| {
+        format!(
+            "CUDA library directory not found under {}. Looked for lib64/lib (Linux/macOS) or lib/x64 (Windows).",
+            root.display()
+        )
+    })?;
+
+    Ok(CudaConfig {
+        root: root.to_path_buf(),
+        nvcc,
+        include_dir,
+        lib_dir,
+    })
+}
+
+fn locate_nvcc() -> Option<PathBuf> {
+    let nvcc_name = if cfg!(target_os = "windows") { "nvcc.exe" } else { "nvcc" };
+
+    let mut candidates: Vec<PathBuf> = Vec::new();
+
+    if let Some(nvcc_env) = env::var_os("NVCC") {
+        candidates.push(PathBuf::from(nvcc_env));
+    }
+
+    if let Some(cuda_home) = env::var_os("CUDA_HOME") {
+        candidates.push(PathBuf::from(cuda_home).join("bin").join(nvcc_name));
+    }
+
+    if let Some(cuda_path) = env::var_os("CUDA_PATH") {
+        candidates.push(PathBuf::from(cuda_path).join("bin").join(nvcc_name));
+    }
+
+    if cfg!(not(target_os = "windows")) {
+        candidates.push(PathBuf::from("/usr/local/cuda").join("bin").join(nvcc_name));
+    }
+
+    candidates.extend(path_nvcc_candidates(nvcc_name));
+
+    for candidate in candidates {
+        if candidate.exists() {
+            return Some(candidate);
+        }
+    }
+
+    None
+}
+
+fn path_nvcc_candidates(nvcc_name: &str) -> Vec<PathBuf> {
+    env::var_os("PATH")
+        .map(|paths| {
+            env::split_paths(&paths)
+                .map(|p| p.join(nvcc_name))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn find_library_dir(root: &Path) -> Option<PathBuf> {
+    let mut candidates = Vec::new();
+
+    if cfg!(target_os = "windows") {
+        candidates.push(root.join("lib").join("x64"));
+        candidates.push(root.join("lib64"));
+    } else if cfg!(target_os = "macos") {
+        candidates.push(root.join("lib"));
+        candidates.push(root.join("lib64"));
+    } else {
+        candidates.push(root.join("lib64"));
+        candidates.push(root.join("lib"));
+    }
+
+    candidates.into_iter().find(|p| p.exists())
+}
+
+fn emit_link_directives(lib_dir: &Path) {
+    println!("cargo:rustc-link-search=native={}", lib_dir.display());
+
+    if cfg!(target_os = "windows") {
+        println!("cargo:rustc-link-lib=cudart");
+    } else if cfg!(target_os = "macos") {
+        println!("cargo:rustc-link-lib=cudart");
+    } else {
+        println!("cargo:rustc-link-lib=cudart");
+    }
 }

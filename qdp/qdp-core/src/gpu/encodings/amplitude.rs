@@ -24,18 +24,18 @@ use crate::gpu::memory::GpuStateVector;
 use crate::gpu::pipeline::run_dual_stream_pipeline;
 use super::QuantumEncoder;
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 use std::ffi::c_void;
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 use cudarc::driver::{DevicePtr, DevicePtrMut};
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 use qdp_kernels::{
     launch_amplitude_encode,
     launch_amplitude_encode_batch,
     launch_l2_norm,
     launch_l2_norm_batch,
 };
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 
 use crate::preprocessing::Preprocessor;
@@ -57,7 +57,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         Preprocessor::validate_input(host_data, num_qubits)?;
         let state_len = 1 << num_qubits;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(all(target_os = "linux", not(cpu_only)))]
         {
             // Allocate GPU state vector
             let state_vector = {
@@ -154,14 +154,16 @@ impl QuantumEncoder for AmplitudeEncoder {
             Ok(state_vector)
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(any(not(target_os = "linux"), cpu_only))]
         {
-            Err(MahoutError::Cuda("CUDA unavailable (non-Linux)".to_string()))
+            Err(MahoutError::Cuda(
+                "CUDA unavailable in this build (set QDP_CPU_ONLY=0 and install CUDA to enable GPU kernels).".to_string()
+            ))
         }
     }
 
     /// Encode multiple samples in a single GPU allocation and kernel launch
-    #[cfg(target_os = "linux")]
+    #[cfg(all(target_os = "linux", not(cpu_only)))]
     fn encode_batch(
         &self,
         device: &Arc<CudaDevice>,
@@ -267,6 +269,20 @@ impl QuantumEncoder for AmplitudeEncoder {
         Ok(batch_state_vector)
     }
 
+    #[cfg(any(not(target_os = "linux"), cpu_only))]
+    fn encode_batch(
+        &self,
+        _device: &Arc<CudaDevice>,
+        _batch_data: &[f64],
+        _num_samples: usize,
+        _sample_size: usize,
+        _num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        Err(MahoutError::Cuda(
+            "Batch amplitude encoding unavailable (CPU-only/non-Linux build).".to_string()
+        ))
+    }
+
     fn name(&self) -> &'static str {
         "amplitude"
     }
@@ -285,7 +301,7 @@ impl AmplitudeEncoder {
     /// data transfer and computation. The pipeline handles all the
     /// streaming mechanics, while this method focuses on the amplitude
     /// encoding kernel logic.
-    #[cfg(target_os = "linux")]
+    #[cfg(all(target_os = "linux", not(cpu_only)))]
     fn encode_async_pipeline(
         device: &Arc<CudaDevice>,
         host_data: &[f64],
@@ -394,7 +410,7 @@ impl AmplitudeEncoder {
 
 impl AmplitudeEncoder {
     /// Compute inverse L2 norm on GPU using the reduction kernel.
-    #[cfg(target_os = "linux")]
+    #[cfg(all(target_os = "linux", not(cpu_only)))]
     fn calculate_inv_norm_gpu(
         device: &Arc<CudaDevice>,
         input_ptr: *const f64,
@@ -437,7 +453,7 @@ impl AmplitudeEncoder {
 }
 
 /// Convert CUDA error code to human-readable string
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 fn cuda_error_to_string(code: i32) -> &'static str {
     match code {
         0 => "cudaSuccess",

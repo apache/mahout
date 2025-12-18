@@ -23,7 +23,7 @@ use std::sync::Arc;
 use std::ffi::c_void;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use crate::error::{MahoutError, Result};
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 
 /// Chunk processing callback for async pipeline
@@ -59,7 +59,7 @@ pub type ChunkProcessor = dyn FnMut(&CudaStream, *const f64, usize, usize) -> Re
 ///     Ok(())
 /// })?;
 /// ```
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 pub fn run_dual_stream_pipeline<F>(
     device: &Arc<CudaDevice>,
     host_data: &[f64],
@@ -179,4 +179,18 @@ where
     drop(keep_alive_buffers);
 
     Ok(())
+}
+
+#[cfg(any(not(target_os = "linux"), cpu_only))]
+pub fn run_dual_stream_pipeline<F>(
+    _device: &Arc<CudaDevice>,
+    _host_data: &[f64],
+    _kernel_launcher: F,
+) -> Result<()>
+where
+    F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
+{
+    Err(MahoutError::Cuda(
+        "CUDA pipelines are unavailable in CPU-only/non-Linux builds.".to_string(),
+    ))
 }

@@ -26,12 +26,12 @@ pub enum Precision {
     Float64,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 fn bytes_to_mib(bytes: usize) -> f64 {
     bytes as f64 / (1024.0 * 1024.0)
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 fn cuda_error_to_string(code: i32) -> &'static str {
     match code {
         0 => "cudaSuccess",
@@ -42,7 +42,7 @@ fn cuda_error_to_string(code: i32) -> &'static str {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 fn query_cuda_mem_info() -> Result<(usize, usize)> {
     unsafe {
         unsafe extern "C" {
@@ -65,7 +65,7 @@ fn query_cuda_mem_info() -> Result<(usize, usize)> {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 fn build_oom_message(context: &str, requested_bytes: usize, qubits: Option<usize>, free: usize, total: usize) -> String {
     let qubit_hint = qubits
         .map(|q| format!(" (qubits={})", q))
@@ -83,7 +83,7 @@ fn build_oom_message(context: &str, requested_bytes: usize, qubits: Option<usize
 ///
 /// Returns a MemoryAllocation error with a helpful message when the request
 /// exceeds the currently reported free memory.
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 pub(crate) fn ensure_device_memory_available(requested_bytes: usize, context: &str, qubits: Option<usize>) -> Result<()> {
     let (free, total) = query_cuda_mem_info()?;
 
@@ -101,7 +101,7 @@ pub(crate) fn ensure_device_memory_available(requested_bytes: usize, context: &s
 }
 
 /// Wraps CUDA allocation errors with an OOM-aware MahoutError.
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(cpu_only)))]
 pub(crate) fn map_allocation_error(
     requested_bytes: usize,
     context: &str,
@@ -203,7 +203,7 @@ impl GpuStateVector {
     pub fn new(_device: &Arc<CudaDevice>, qubits: usize) -> Result<Self> {
         let _size_elements: usize = 1usize << qubits;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(all(target_os = "linux", not(cpu_only)))]
         {
             let requested_bytes = _size_elements
                 .checked_mul(std::mem::size_of::<CuDoubleComplex>())
@@ -233,10 +233,12 @@ impl GpuStateVector {
             })
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(any(not(target_os = "linux"), cpu_only))]
         {
-            // Non-Linux: compiles but GPU unavailable
-            Err(MahoutError::Cuda("CUDA is only available on Linux. This build does not support GPU operations.".to_string()))
+            // Non-Linux or CPU-only build: compiles but GPU unavailable
+            Err(MahoutError::Cuda(
+                "CUDA is unavailable in this build (CPU-only or non-Linux target).".to_string(),
+            ))
         }
     }
 
@@ -277,7 +279,7 @@ impl GpuStateVector {
                 format!("Batch size overflow: {} samples * {} elements", num_samples, single_state_size)
             ))?;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(all(target_os = "linux", not(cpu_only)))]
         {
             let requested_bytes = total_elements
                 .checked_mul(std::mem::size_of::<CuDoubleComplex>())
@@ -304,9 +306,11 @@ impl GpuStateVector {
             })
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(any(not(target_os = "linux"), cpu_only))]
         {
-            Err(MahoutError::Cuda("CUDA is only available on Linux. This build does not support GPU operations.".to_string()))
+            Err(MahoutError::Cuda(
+                "CUDA is unavailable in this build (CPU-only or non-Linux target).".to_string(),
+            ))
         }
     }
 
@@ -320,7 +324,7 @@ impl GpuStateVector {
 
         match (self.precision(), target) {
             (Precision::Float64, Precision::Float32) => {
-                #[cfg(target_os = "linux")]
+                #[cfg(all(target_os = "linux", not(cpu_only)))]
                 {
                     let requested_bytes = self.size_elements
                         .checked_mul(std::mem::size_of::<CuComplex>())
@@ -368,9 +372,11 @@ impl GpuStateVector {
                     })
                 }
 
-                #[cfg(not(target_os = "linux"))]
+                #[cfg(any(not(target_os = "linux"), cpu_only))]
                 {
-                    Err(MahoutError::Cuda("Precision conversion requires CUDA (Linux)".to_string()))
+                    Err(MahoutError::Cuda(
+                        "Precision conversion requires CUDA and is disabled in CPU-only/non-Linux builds.".to_string(),
+                    ))
                 }
             }
             _ => Err(MahoutError::NotImplemented(
