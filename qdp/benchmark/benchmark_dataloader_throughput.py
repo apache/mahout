@@ -39,6 +39,7 @@ from mahout_qdp import QdpEngine
 
 BAR = "=" * 70
 SEP = "-" * 70
+FRAMEWORK_CHOICES = ("pennylane", "qiskit", "mahout")
 
 try:
     import pennylane as qml
@@ -89,6 +90,26 @@ def normalize_batch(batch: np.ndarray) -> np.ndarray:
     norms = np.linalg.norm(batch, axis=1, keepdims=True)
     norms[norms == 0] = 1.0
     return batch / norms
+
+
+def parse_frameworks(raw: str) -> list[str]:
+    if raw.lower() == "all":
+        return list(FRAMEWORK_CHOICES)
+
+    selected: list[str] = []
+    for part in raw.split(","):
+        name = part.strip().lower()
+        if not name:
+            continue
+        if name not in FRAMEWORK_CHOICES:
+            raise ValueError(
+                f"Unknown framework '{name}'. Choose from: "
+                f"{', '.join(FRAMEWORK_CHOICES)} or 'all'."
+            )
+        if name not in selected:
+            selected.append(name)
+
+    return selected if selected else list(FRAMEWORK_CHOICES)
 
 
 def run_mahout(num_qubits: int, total_batches: int, batch_size: int, prefetch: int):
@@ -211,7 +232,21 @@ def main():
     parser.add_argument(
         "--prefetch", type=int, default=16, help="CPU-side prefetch depth."
     )
+    parser.add_argument(
+        "--frameworks",
+        type=str,
+        default="all",
+        help=(
+            "Comma-separated list of frameworks to run "
+            "(pennylane,qiskit,mahout) or 'all'."
+        ),
+    )
     args = parser.parse_args()
+
+    try:
+        frameworks = parse_frameworks(args.frameworks)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     total_vectors = args.batches * args.batch_size
     vector_len = 1 << args.qubits
@@ -221,6 +256,7 @@ def main():
     print(f"  Vector length: {vector_len}")
     print(f"  Batches      : {args.batches}")
     print(f"  Prefetch     : {args.prefetch}")
+    print(f"  Frameworks   : {', '.join(frameworks)}")
     bytes_per_vec = vector_len * 8
     print(f"  Generated {total_vectors} samples")
     print(
@@ -235,23 +271,28 @@ def main():
     )
     print(BAR)
 
-    print()
-    print("[PennyLane] Full Pipeline (DataLoader -> GPU)...")
-    t_pl, th_pl = run_pennylane(
-        args.qubits, args.batches, args.batch_size, args.prefetch
-    )
+    t_pl = th_pl = t_qiskit = th_qiskit = t_mahout = th_mahout = 0.0
 
-    print()
-    print("[Qiskit] Full Pipeline (DataLoader -> GPU)...")
-    t_qiskit, th_qiskit = run_qiskit(
-        args.qubits, args.batches, args.batch_size, args.prefetch
-    )
+    if "pennylane" in frameworks:
+        print()
+        print("[PennyLane] Full Pipeline (DataLoader -> GPU)...")
+        t_pl, th_pl = run_pennylane(
+            args.qubits, args.batches, args.batch_size, args.prefetch
+        )
 
-    print()
-    print("[Mahout] Full Pipeline (DataLoader -> GPU)...")
-    t_mahout, th_mahout = run_mahout(
-        args.qubits, args.batches, args.batch_size, args.prefetch
-    )
+    if "qiskit" in frameworks:
+        print()
+        print("[Qiskit] Full Pipeline (DataLoader -> GPU)...")
+        t_qiskit, th_qiskit = run_qiskit(
+            args.qubits, args.batches, args.batch_size, args.prefetch
+        )
+
+    if "mahout" in frameworks:
+        print()
+        print("[Mahout] Full Pipeline (DataLoader -> GPU)...")
+        t_mahout, th_mahout = run_mahout(
+            args.qubits, args.batches, args.batch_size, args.prefetch
+        )
 
     print()
     print(BAR)
