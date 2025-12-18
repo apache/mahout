@@ -8,6 +8,8 @@ This guide explains how to develop and test mahout qdp.
 
 - Linux machine
 - NVIDIA GPU with CUDA driver and toolkit installed
+- Python 3.10
+- Rust & Cargo
 
 You can run the following to ensure you have successfully installed CUDA toolkit:
 
@@ -19,6 +21,26 @@ nvcc --version
 # Cuda compilation tools, release 13.0, V13.0.88
 # Build cuda_13.0.r13.0/compiler.36424714_0
 ```
+
+## Using DevContainer (Alternative Setup)
+
+If you prefer a containerized development environment or want to avoid installing CUDA and development tools directly on your host machine, you can use the provided DevContainer configuration.
+
+### Setup
+
+1. Open the project in VS Code
+2. When prompted, click "Reopen in Container" (or use Command Palette: `Dev Containers: Reopen in Container`)
+3. VS Code will build and start the container using the configuration in [.devcontainer/devcontainer.json](.devcontainer/devcontainer.json)
+
+The container includes:
+- **Base image**: `nvidia/cuda:12.4.1-devel-ubuntu22.04` with full CUDA toolkit
+- **Python 3.10**: Installed via DevContainer features
+- **Rust & Cargo**: Installed automatically via [.devcontainer/setup.sh](.devcontainer/setup.sh)
+- **Development tools**: uv, poetry, pre-commit hooks, and build essentials
+- **GPU access**: The container has full access to all GPUs on the host
+- **VS Code extensions**: Python, Rust Analyzer, and TOML support pre-installed
+
+Once the container is running, you can proceed with the build and test steps as described in the sections below. All commands should be run inside the container terminal.
 
 ## Build
 
