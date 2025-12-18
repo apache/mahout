@@ -107,6 +107,30 @@ python benchmark_e2e.py
 
 ## Troubleshooting
 
+### Q: Python import fails after installation
+
+A: Ensure you're using the correct Python environment where the package was installed. Verify with `python -c "import mahout_qdp"`. Make sure you activated the virtual environment: `source .venv/bin/activate`.
+
+### Q: Build fails with CUDA-related errors
+
+A: Ensure CUDA toolkit is properly installed and `nvcc` is in PATH. Try `cargo clean` and rebuild.
+
 ### Q: I already installed CUDA driver and toolkit, making sure nvcc exists in PATH, but still get "no CUDA installed" warning
 
-A: Run `cargo clean` to clean up the cache and try again
+A: Run `cargo clean` to clean up the cache and try again.
+
+### Q: Runtime CUDA errors like "invalid device ordinal" or "out of memory"
+
+A: Check available GPUs with `nvidia-smi`. Verify GPU visibility with `echo $CUDA_VISIBLE_DEVICES`. If needed, specify a GPU: `CUDA_VISIBLE_DEVICES=0 python your_script.py`.
+
+### Q: Benchmark tests fail or produce unexpected results
+
+A: Ensure all dependencies are installed with `uv pip install -r benchmark/requirements.txt`. Check GPU memory availability using `nvidia-smi`. If you don't need qiskit/pennylane comparisons, uninstall them as mentioned in the [E2e test section](#e2e-tests).
+
+### Q: Pre-commit hooks fail
+
+A: Run `pre-commit run --all-files` to see specific errors. Common fixes include running `cargo fmt` for formatting and `cargo clippy` for linting issues.
+
+### Q: DevContainer fails to start
+
+A: Ensure Docker and NVIDIA Container Toolkit are installed. Test with `docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi`. Try rebuilding without cache via Command Palette: "Dev Containers: Rebuild Container Without Cache".
