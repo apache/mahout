@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Amplitude encoding: direct state injection with L2 normalization
+// Amplitude encoding: state injection with L2 normalization
 
 use std::sync::Arc;
 
@@ -26,6 +26,8 @@ use super::QuantumEncoder;
 
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_ffi::cudaMemsetAsync;
 #[cfg(target_os = "linux")]
 use cudarc::driver::{DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
@@ -279,7 +281,7 @@ impl QuantumEncoder for AmplitudeEncoder {
 impl AmplitudeEncoder {
 
 
-    /// Async pipeline encoding for large data (SSS-tier optimization)
+    /// Async pipeline encoding for large data
     ///
     /// Uses the generic dual-stream pipeline infrastructure to overlap
     /// data transfer and computation. The pipeline handles all the
@@ -359,15 +361,6 @@ impl AmplitudeEncoder {
             // Zero-fill padding region using CUDA Runtime API
             // Use default stream since pipeline streams are already synchronized
             unsafe {
-                unsafe extern "C" {
-                    fn cudaMemsetAsync(
-                        devPtr: *mut c_void,
-                        value: i32,
-                        count: usize,
-                        stream: *mut c_void,
-                    ) -> i32;
-                }
-
                 let result = cudaMemsetAsync(
                     tail_ptr,
                     0,
