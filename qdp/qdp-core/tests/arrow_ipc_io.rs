@@ -14,14 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::io::{read_arrow_ipc_batch, read_parquet_batch};
+use qdp_core::io::read_arrow_ipc_batch;
 use arrow::array::{Float64Array, FixedSizeListArray};
 use arrow::datatypes::{DataType, Field, Schema};
 use arrow::ipc::writer::FileWriter as ArrowFileWriter;
 use std::fs::{self, File};
 use std::sync::Arc;
-
-mod common;
 
 #[test]
 fn test_read_arrow_ipc_fixed_size_list() {
