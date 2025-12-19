@@ -114,7 +114,7 @@ fn test_dlpack_tensor_metadata() {
         assert_eq!(stride, 1, "Stride for 1D contiguous array should be 1");
 
         assert_eq!(tensor.dtype.code, 5, "Should be complex type (code=5)");
-        assert_eq!(tensor.dtype.bits, 128, "Should be 128 bits (2x64-bit floats)");
+        assert_eq!(tensor.dtype.bits, 64, "Should be 64 bits (2x32-bit floats, Float32 default)");
 
         println!("PASS: DLPack metadata verified");
         println!("  ndim: {}", tensor.ndim);

@@ -107,3 +107,95 @@ fn test_amplitude_encoding_async_pipeline() {
         println!("PASS: Memory freed successfully");
     }
 }
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_batch_dlpack_2d_shape() {
+    println!("Testing batch DLPack 2D shape...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    // Create batch data: 3 samples, each with 4 elements (2 qubits)
+    let num_samples = 3;
+    let num_qubits = 2;
+    let sample_size = 4;
+    let batch_data: Vec<f64> = (0..num_samples * sample_size)
+        .map(|i| (i as f64) / 10.0)
+        .collect();
+
+    let result = engine.encode_batch(&batch_data, num_samples, sample_size, num_qubits, "amplitude");
+    assert!(result.is_ok(), "Batch encoding should succeed");
+
+    let dlpack_ptr = result.unwrap();
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+
+    unsafe {
+        let managed = &*dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+
+        // Verify 2D shape for batch tensor
+        assert_eq!(tensor.ndim, 2, "Batch tensor should be 2D");
+
+        let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+        assert_eq!(shape_slice[0], num_samples as i64, "First dimension should be num_samples");
+        assert_eq!(shape_slice[1], (1 << num_qubits) as i64, "Second dimension should be 2^num_qubits");
+
+        let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
+        let state_len = 1 << num_qubits;
+        assert_eq!(strides_slice[0], state_len as i64, "Stride for first dimension should be state_len");
+        assert_eq!(strides_slice[1], 1, "Stride for second dimension should be 1");
+
+        println!("PASS: Batch DLPack tensor has correct 2D shape: [{}, {}]", shape_slice[0], shape_slice[1]);
+        println!("PASS: Strides are correct: [{}, {}]", strides_slice[0], strides_slice[1]);
+
+        // Free memory
+        if let Some(deleter) = managed.deleter {
+            deleter(dlpack_ptr);
+        }
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_single_encode_still_1d() {
+    println!("Testing single encode still returns 1D shape...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    let data = common::create_test_data(16);
+    let result = engine.encode(&data, 4, "amplitude");
+    assert!(result.is_ok(), "Encoding should succeed");
+
+    let dlpack_ptr = result.unwrap();
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+
+    unsafe {
+        let managed = &*dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+
+        // Verify 1D shape for single encode (backward compatibility)
+        assert_eq!(tensor.ndim, 1, "Single encode should still be 1D");
+
+        let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+        assert_eq!(shape_slice[0], 16, "Single encode shape should be [2^4]");
+
+        println!("PASS: Single encode still returns 1D shape: [{}]", shape_slice[0]);
+
+        // Free memory
+        if let Some(deleter) = managed.deleter {
+            deleter(dlpack_ptr);
+        }
+    }
+}

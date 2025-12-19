@@ -120,9 +120,18 @@ impl GpuStateVector {
     /// Freed by DLPack deleter when PyTorch releases tensor.
     /// Do not free manually.
     pub fn to_dlpack(&self) -> *mut DLManagedTensor {
-        // Allocate shape/strides on heap (freed by deleter)
-        let shape = vec![self.size_elements as i64];
-        let strides = vec![1i64];
+        let (shape, strides, ndim) = if let Some(num_samples) = self.num_samples {
+            // Batch: 2D [num_samples, state_len_per_sample], row-major strides
+            let state_len_per_sample = self.size_elements / num_samples;
+            let shape = vec![num_samples as i64, state_len_per_sample as i64];
+            let strides = vec![state_len_per_sample as i64, 1i64];
+            (shape, strides, 2)
+        } else {
+            // Single: 1D [size_elements]
+            let shape = vec![self.size_elements as i64];
+            let strides = vec![1i64];
+            (shape, strides, 1)
+        };
 
         // Transfer ownership to DLPack deleter
         let shape_ptr = Box::into_raw(shape.into_boxed_slice()) as *mut i64;
@@ -142,7 +151,7 @@ impl GpuStateVector {
                 device_type: DLDeviceType::kDLCUDA,
                 device_id: 0,
             },
-            ndim: 1,
+            ndim,
             dtype: DLDataType {
                 code: DL_COMPLEX,
                 bits: dtype_bits,
