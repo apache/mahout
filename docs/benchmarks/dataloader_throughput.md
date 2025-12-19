@@ -17,6 +17,9 @@ cargo run -p qdp-core --example dataloader_throughput --release
 
 # Cross-framework comparison (requires deps in qdp/benchmark/requirements.txt)
 python qdp/benchmark/benchmark_dataloader_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
+
+# Run only Mahout + PennyLane legs
+python qdp/benchmark/benchmark_dataloader_throughput.py --frameworks mahout,pennylane
 ```
 
 ## Example Output
@@ -67,3 +70,4 @@ Speedup vs Qiskit:          8.44x
   - `--batches`: number of host-side batches to stream.
   - `--batch-size`: vectors per batch; raises total samples (`batches * batch-size`).
   - `--prefetch`: CPU queue depth; higher values help hide slow CPU-side prep (e.g., Qiskit state prep) and keep GPU fed.
+  - `--frameworks`: comma-separated list of legs to execute (`pennylane,qiskit,mahout`) or `all`.
