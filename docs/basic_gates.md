@@ -9,7 +9,7 @@ The NOT gate, also called the **Pauli X Gate**, is a fundamental quantum gate us
 The Hadamard gate, denoted as the H-gate, is used to create superposition states. When applied to a qubit in the |0⟩ state, it transforms it into an equal superposition of |0⟩ and |1⟩ states. Mathematically:
 
 
-H|0⟩ = (|0⟩ + |1⟩) / √2
+\[ $H|0⟩ = \frac{(|0⟩ + |1⟩)}{√2}$ \]
 
 
 
