@@ -190,6 +190,7 @@ pub struct GpuStateVector {
     pub(crate) buffer: Arc<BufferStorage>,
     pub num_qubits: usize,
     pub size_elements: usize,
+    pub device_id: usize,
 }
 
 // Safety: CudaSlice and Arc are both Send + Sync
@@ -229,6 +230,7 @@ impl GpuStateVector {
                 buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
                 num_qubits: qubits,
                 size_elements: _size_elements,
+                device_id: _device.ordinal(),
             })
         }
 
@@ -300,6 +302,7 @@ impl GpuStateVector {
                 buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
                 num_qubits: qubits,
                 size_elements: total_elements,
+                device_id: _device.ordinal(),
             })
         }
 
@@ -364,6 +367,7 @@ impl GpuStateVector {
                         buffer: Arc::new(BufferStorage::F32(GpuBufferRaw { slice })),
                         num_qubits: self.num_qubits,
                         size_elements: self.size_elements,
+                        device_id: device.ordinal(),
                     })
                 }
 

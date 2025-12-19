@@ -94,8 +94,22 @@ impl QuantumTensor {
     /// Returns:
     ///     Tuple of (device_type, device_id) where device_type=2 for CUDA
     fn __dlpack_device__(&self) -> PyResult<(i32, i32)> {
-        // DLDeviceType::kDLCUDA = 2, device_id = 0
-        Ok((2, 0))
+        if self.ptr.is_null() {
+            return Err(PyRuntimeError::new_err("Invalid DLPack tensor pointer"));
+        }
+
+        unsafe {
+            // Read device_id from DLPack tensor metadata
+            // DLDeviceType::kDLCUDA = 2 (from dlpack.h)
+            let tensor = &(*self.ptr).dl_tensor;
+            // device_type is an enum, convert to integer
+            // kDLCUDA = 2, kDLCPU = 1
+            let device_type = match tensor.device.device_type {
+                qdp_core::dlpack::DLDeviceType::kDLCUDA => 2,
+                qdp_core::dlpack::DLDeviceType::kDLCPU => 1,
+            };
+            Ok((device_type, tensor.device.device_id))
+        }
     }
 }
 
