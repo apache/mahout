@@ -20,6 +20,16 @@ import pytest
 import mahout_qdp
 
 
+def _has_multi_gpu():
+    """Check if multiple GPUs are available via PyTorch."""
+    try:
+        import torch
+
+        return torch.cuda.is_available() and torch.cuda.device_count() >= 2
+    except ImportError:
+        return False
+
+
 def test_import():
     """Test that PyO3 bindings are properly imported."""
     assert hasattr(mahout_qdp, "QdpEngine")
@@ -51,15 +61,14 @@ def test_dlpack_device():
 
 
 @pytest.mark.gpu
+@pytest.mark.skipif(
+    not _has_multi_gpu(), reason="Multi-GPU setup required for this test"
+)
 def test_dlpack_device_id_non_zero():
     """Test device_id propagation for non-zero devices (requires multi-GPU)."""
     pytest.importorskip("torch")
     import torch
     from mahout_qdp import QdpEngine
-
-    # Check if multiple GPUs are available
-    if not torch.cuda.is_available() or torch.cuda.device_count() < 2:
-        pytest.skip("Multi-GPU setup required for this test")
 
     # Test with device_id=1 (second GPU)
     device_id = 1
