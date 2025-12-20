@@ -174,6 +174,7 @@ impl QdpEngine {
     ///
     /// Returns:
     ///     QuantumTensor: DLPack-compatible tensor for zero-copy PyTorch integration
+    ///         Shape: [1, 2^num_qubits]
     ///
     /// Raises:
     ///     RuntimeError: If encoding fails

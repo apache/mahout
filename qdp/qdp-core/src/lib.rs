@@ -87,7 +87,7 @@ impl QdpEngine {
     /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
     ///
     /// # Returns
-    /// DLPack pointer for zero-copy PyTorch integration
+    /// DLPack pointer for zero-copy PyTorch integration (shape: [1, 2^num_qubits])
     ///
     /// # Safety
     /// Pointer freed by DLPack deleter, do not free manually.

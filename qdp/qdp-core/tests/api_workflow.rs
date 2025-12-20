@@ -163,8 +163,8 @@ fn test_batch_dlpack_2d_shape() {
 
 #[test]
 #[cfg(target_os = "linux")]
-fn test_single_encode_still_1d() {
-    println!("Testing single encode still returns 1D shape...");
+fn test_single_encode_dlpack_2d_shape() {
+    println!("Testing single encode returns 2D shape...");
 
     let engine = match QdpEngine::new(0) {
         Ok(e) => e,
@@ -185,13 +185,21 @@ fn test_single_encode_still_1d() {
         let managed = &*dlpack_ptr;
         let tensor = &managed.dl_tensor;
 
-        // Verify 1D shape for single encode (backward compatibility)
-        assert_eq!(tensor.ndim, 1, "Single encode should still be 1D");
+        // Verify 2D shape for single encode: [1, 2^num_qubits]
+        assert_eq!(tensor.ndim, 2, "Single encode should be 2D");
 
         let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
-        assert_eq!(shape_slice[0], 16, "Single encode shape should be [2^4]");
+        assert_eq!(shape_slice[0], 1, "First dimension should be 1 for single encode");
+        assert_eq!(shape_slice[1], 16, "Second dimension should be [2^4]");
 
-        println!("PASS: Single encode still returns 1D shape: [{}]", shape_slice[0]);
+        let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
+        assert_eq!(strides_slice[0], 16, "Stride for first dimension should be state_len");
+        assert_eq!(strides_slice[1], 1, "Stride for second dimension should be 1");
+
+        println!(
+            "PASS: Single encode returns 2D shape: [{}, {}]",
+            shape_slice[0], shape_slice[1]
+        );
 
         // Free memory
         if let Some(deleter) = managed.deleter {

@@ -87,8 +87,8 @@ def test_pytorch_integration():
     assert torch_tensor.device.index == 0
     assert torch_tensor.dtype == torch.complex64
 
-    # Verify shape (2 qubits = 2^2 = 4 elements)
-    assert torch_tensor.shape == (4,)
+    # Verify shape (2 qubits = 2^2 = 4 elements) as 2D for consistency: [1, 4]
+    assert torch_tensor.shape == (1, 4)
 
 
 @pytest.mark.gpu

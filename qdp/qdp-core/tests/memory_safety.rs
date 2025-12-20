@@ -106,24 +106,26 @@ fn test_dlpack_tensor_metadata_default() {
         let managed = &mut *ptr;
         let tensor = &managed.dl_tensor;
 
-        assert_eq!(tensor.ndim, 1, "Should be 1D tensor");
+        assert_eq!(tensor.ndim, 2, "Should be 2D tensor");
         assert!(!tensor.data.is_null(), "Data pointer should be valid");
         assert!(!tensor.shape.is_null(), "Shape pointer should be valid");
         assert!(!tensor.strides.is_null(), "Strides pointer should be valid");
 
-        let shape = *tensor.shape;
-        assert_eq!(shape, 1024, "Shape should be 1024 (2^10)");
+        let shape = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+        assert_eq!(shape[0], 1, "First dimension should be 1 for single encode");
+        assert_eq!(shape[1], 1024, "Second dimension should be 1024 (2^10)");
 
-        let stride = *tensor.strides;
-        assert_eq!(stride, 1, "Stride for 1D contiguous array should be 1");
+        let strides = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
+        assert_eq!(strides[0], 1024, "Stride for first dimension should be state_len");
+        assert_eq!(strides[1], 1, "Stride for second dimension should be 1");
 
         assert_eq!(tensor.dtype.code, 5, "Should be complex type (code=5)");
         assert_eq!(tensor.dtype.bits, 64, "Should be 64 bits (2x32-bit floats, Float32 default)");
 
         println!("PASS: DLPack metadata verified");
         println!("  ndim: {}", tensor.ndim);
-        println!("  shape: {}", shape);
-        println!("  stride: {}", stride);
+        println!("  shape: [{}, {}]", shape[0], shape[1]);
+        println!("  strides: [{}, {}]", strides[0], strides[1]);
         println!(
             "  dtype: code={}, bits={}",
             tensor.dtype.code, tensor.dtype.bits
@@ -154,16 +156,18 @@ fn test_dlpack_tensor_metadata_f64() {
         let managed = &mut *ptr;
         let tensor = &managed.dl_tensor;
 
-        assert_eq!(tensor.ndim, 1, "Should be 1D tensor");
+        assert_eq!(tensor.ndim, 2, "Should be 2D tensor");
         assert!(!tensor.data.is_null(), "Data pointer should be valid");
         assert!(!tensor.shape.is_null(), "Shape pointer should be valid");
         assert!(!tensor.strides.is_null(), "Strides pointer should be valid");
 
-        let shape = *tensor.shape;
-        assert_eq!(shape, 1024, "Shape should be 1024 (2^10)");
+        let shape = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+        assert_eq!(shape[0], 1, "First dimension should be 1 for single encode");
+        assert_eq!(shape[1], 1024, "Second dimension should be 1024 (2^10)");
 
-        let stride = *tensor.strides;
-        assert_eq!(stride, 1, "Stride for 1D contiguous array should be 1");
+        let strides = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
+        assert_eq!(strides[0], 1024, "Stride for first dimension should be state_len");
+        assert_eq!(strides[1], 1, "Stride for second dimension should be 1");
 
         assert_eq!(tensor.dtype.code, 5, "Should be complex type (code=5)");
         assert_eq!(
@@ -173,8 +177,8 @@ fn test_dlpack_tensor_metadata_f64() {
 
         println!("PASS: DLPack metadata verified");
         println!("  ndim: {}", tensor.ndim);
-        println!("  shape: {}", shape);
-        println!("  stride: {}", stride);
+        println!("  shape: [{}, {}]", shape[0], shape[1]);
+        println!("  strides: [{}, {}]", strides[0], strides[1]);
         println!(
             "  dtype: code={}, bits={}",
             tensor.dtype.code, tensor.dtype.bits

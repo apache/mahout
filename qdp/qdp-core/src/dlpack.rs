@@ -120,18 +120,30 @@ impl GpuStateVector {
     /// Freed by DLPack deleter when PyTorch releases tensor.
     /// Do not free manually.
     pub fn to_dlpack(&self) -> *mut DLManagedTensor {
-        let (shape, strides, ndim) = if let Some(num_samples) = self.num_samples {
+        // Always return a consistent 2D tensor:
+        // - Batch:  [num_samples, state_len_per_sample]
+        // - Single: [1,          state_len]
+        //
+        // This is a breaking change for single encodes, but makes downstream
+        // consumers (PyTorch, etc.) simpler and consistent with batch outputs.
+        let (shape, strides) = if let Some(num_samples) = self.num_samples {
             // Batch: 2D [num_samples, state_len_per_sample], row-major strides
+            debug_assert!(
+                num_samples > 0 && self.size_elements % num_samples == 0,
+                "Batch state vector size must be divisible by num_samples"
+            );
             let state_len_per_sample = self.size_elements / num_samples;
             let shape = vec![num_samples as i64, state_len_per_sample as i64];
             let strides = vec![state_len_per_sample as i64, 1i64];
-            (shape, strides, 2)
+            (shape, strides)
         } else {
-            // Single: 1D [size_elements]
-            let shape = vec![self.size_elements as i64];
-            let strides = vec![1i64];
-            (shape, strides, 1)
+            // Single: 2D [1, size_elements]
+            let state_len = self.size_elements;
+            let shape = vec![1i64, state_len as i64];
+            let strides = vec![state_len as i64, 1i64];
+            (shape, strides)
         };
+        let ndim: c_int = 2;
 
         // Transfer ownership to DLPack deleter
         let shape_ptr = Box::into_raw(shape.into_boxed_slice()) as *mut i64;
