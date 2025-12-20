@@ -36,8 +36,7 @@ def calculate_fidelity(
 ) -> float:
     """Calculate quantum state fidelity: F = |<ψ_gpu | ψ_cpu>|²"""
     psi_gpu = state_vector_gpu.cpu().numpy()
-    # After switching single-encode output to consistent 2D ([1, state_len]),
-    # accept both 1D and [1, N] shapes for fidelity computation.
+    # Convert 2D [1, state_len] to 1D for compatibility with ground truth
     if psi_gpu.ndim == 2 and psi_gpu.shape[0] == 1:
         psi_gpu = psi_gpu[0]
 

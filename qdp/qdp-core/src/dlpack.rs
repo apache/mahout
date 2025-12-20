@@ -120,14 +120,9 @@ impl GpuStateVector {
     /// Freed by DLPack deleter when PyTorch releases tensor.
     /// Do not free manually.
     pub fn to_dlpack(&self) -> *mut DLManagedTensor {
-        // Always return a consistent 2D tensor:
-        // - Batch:  [num_samples, state_len_per_sample]
-        // - Single: [1,          state_len]
-        //
-        // This is a breaking change for single encodes, but makes downstream
-        // consumers (PyTorch, etc.) simpler and consistent with batch outputs.
+        // Always return 2D tensor: Batch [num_samples, state_len], Single [1, state_len]
         let (shape, strides) = if let Some(num_samples) = self.num_samples {
-            // Batch: 2D [num_samples, state_len_per_sample], row-major strides
+            // Batch: [num_samples, state_len_per_sample]
             debug_assert!(
                 num_samples > 0 && self.size_elements % num_samples == 0,
                 "Batch state vector size must be divisible by num_samples"
@@ -137,7 +132,7 @@ impl GpuStateVector {
             let strides = vec![state_len_per_sample as i64, 1i64];
             (shape, strides)
         } else {
-            // Single: 2D [1, size_elements]
+            // Single: [1, size_elements]
             let state_len = self.size_elements;
             let shape = vec![1i64, state_len as i64];
             let strides = vec![state_len as i64, 1i64];
