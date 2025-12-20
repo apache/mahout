@@ -99,15 +99,15 @@ impl QuantumTensor {
         }
 
         unsafe {
-            // Read device_id from DLPack tensor metadata
-            // DLDeviceType::kDLCUDA = 2 (from dlpack.h)
             let tensor = &(*self.ptr).dl_tensor;
             // device_type is an enum, convert to integer
             // kDLCUDA = 2, kDLCPU = 1
+            // Ref: https://github.com/dmlc/dlpack/blob/6ea9b3eb64c881f614cd4537f95f0e125a35555c/include/dlpack/dlpack.h#L76-L80
             let device_type = match tensor.device.device_type {
                 qdp_core::dlpack::DLDeviceType::kDLCUDA => 2,
                 qdp_core::dlpack::DLDeviceType::kDLCPU => 1,
             };
+            // Read device_id from DLPack tensor metadata
             Ok((device_type, tensor.device.device_id))
         }
     }
