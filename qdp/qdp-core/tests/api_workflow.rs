@@ -55,9 +55,7 @@ fn test_amplitude_encoding_workflow() {
     println!("Created test data: {} elements", data.len());
 
     let result = engine.encode(&data, 10, "amplitude");
-    assert!(result.is_ok(), "Encoding should succeed");
-
-    let dlpack_ptr = result.unwrap();
+    let dlpack_ptr = result.expect("Encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
     println!("PASS: Encoding succeeded, DLPack pointer valid");
 
@@ -91,9 +89,7 @@ fn test_amplitude_encoding_async_pipeline() {
     println!("Created test data: {} elements", data.len());
 
     let result = engine.encode(&data, 18, "amplitude");
-    assert!(result.is_ok(), "Encoding should succeed");
-
-    let dlpack_ptr = result.unwrap();
+    let dlpack_ptr = result.expect("Encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
     println!("PASS: Encoding succeeded, DLPack pointer valid");
 
@@ -130,9 +126,7 @@ fn test_batch_dlpack_2d_shape() {
         .collect();
 
     let result = engine.encode_batch(&batch_data, num_samples, sample_size, num_qubits, "amplitude");
-    assert!(result.is_ok(), "Batch encoding should succeed");
-
-    let dlpack_ptr = result.unwrap();
+    let dlpack_ptr = result.expect("Batch encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
     unsafe {
@@ -176,9 +170,7 @@ fn test_single_encode_dlpack_2d_shape() {
 
     let data = common::create_test_data(16);
     let result = engine.encode(&data, 4, "amplitude");
-    assert!(result.is_ok(), "Encoding should succeed");
-
-    let dlpack_ptr = result.unwrap();
+    let dlpack_ptr = result.expect("Encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
     unsafe {
