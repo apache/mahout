@@ -29,6 +29,9 @@ pub enum Precision {
 }
 
 #[cfg(target_os = "linux")]
+use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
+
+#[cfg(target_os = "linux")]
 fn bytes_to_mib(bytes: usize) -> f64 {
     bytes as f64 / (1024.0 * 1024.0)
 }
@@ -47,10 +50,6 @@ fn cuda_error_to_string(code: i32) -> &'static str {
 #[cfg(target_os = "linux")]
 fn query_cuda_mem_info() -> Result<(usize, usize)> {
     unsafe {
-        unsafe extern "C" {
-            fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> i32;
-        }
-
         let mut free_bytes: usize = 0;
         let mut total_bytes: usize = 0;
         let result = cudaMemGetInfo(&mut free_bytes as *mut usize, &mut total_bytes as *mut usize);
@@ -453,3 +452,83 @@ impl GpuStateVector {
         }
     }
 }
+
+// === Pinned Memory Implementation ===
+
+/// Pinned Host Memory Buffer (owned allocation).
+///
+/// Allocates page-locked memory to maximize H2D throughput in streaming IO paths.
+#[cfg(target_os = "linux")]
+pub struct PinnedHostBuffer {
+    ptr: *mut f64,
+    size_elements: usize,
+}
+
+#[cfg(target_os = "linux")]
+impl PinnedHostBuffer {
+    /// Allocate pinned memory
+    pub fn new(elements: usize) -> Result<Self> {
+        unsafe {
+            let bytes = elements
+                .checked_mul(std::mem::size_of::<f64>())
+                .ok_or_else(|| MahoutError::MemoryAllocation(
+                    format!("Requested pinned buffer allocation size overflow (elements={})", elements)
+                ))?;
+            let mut ptr: *mut c_void = std::ptr::null_mut();
+
+            let ret = cudaHostAlloc(&mut ptr, bytes, 0); // cudaHostAllocDefault
+
+            if ret != 0 {
+                return Err(MahoutError::MemoryAllocation(
+                    format!("cudaHostAlloc failed with error code: {}", ret)
+                ));
+            }
+
+            Ok(Self {
+                ptr: ptr as *mut f64,
+                size_elements: elements,
+            })
+        }
+    }
+
+    /// Get mutable slice to write data into
+    pub fn as_slice_mut(&mut self) -> &mut [f64] {
+        unsafe { std::slice::from_raw_parts_mut(self.ptr, self.size_elements) }
+    }
+
+    /// Get raw pointer for CUDA memcpy
+    pub fn ptr(&self) -> *const f64 {
+        self.ptr
+    }
+
+    pub fn len(&self) -> usize {
+        self.size_elements
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.size_elements == 0
+    }
+}
+
+#[cfg(target_os = "linux")]
+impl Drop for PinnedHostBuffer {
+    fn drop(&mut self) {
+        unsafe {
+            let result = cudaFreeHost(self.ptr as *mut c_void);
+            if result != 0 {
+                eprintln!(
+                    "Warning: cudaFreeHost failed with error code {} ({})",
+                    result,
+                    cuda_error_to_string(result)
+                );
+            }
+        }
+    }
+}
+
+// Safety: Pinned memory is accessible from any thread
+#[cfg(target_os = "linux")]
+unsafe impl Send for PinnedHostBuffer {}
+
+#[cfg(target_os = "linux")]
+unsafe impl Sync for PinnedHostBuffer {}
