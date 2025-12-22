@@ -52,6 +52,7 @@ pub struct PipelineContext {
 }
 
 #[cfg(target_os = "linux")]
+#[allow(unsafe_op_in_unsafe_fn)]
 impl PipelineContext {
     pub fn new(device: &Arc<CudaDevice>) -> Result<Self> {
         let stream_compute = device.fork_default_stream()
