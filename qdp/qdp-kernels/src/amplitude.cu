@@ -41,18 +41,17 @@ __global__ void amplitude_encode_kernel(
 
     // Vectorized Load Optimization:
     // If we are well within bounds, treat input as double2 to issue a single 128-bit load instruction.
-    // This reduces memory transactions and improves throughput on RTX cards.
+    // Use __ldg() to pull through the read-only cache; cudaMalloc aligns to 256 bytes so the
+    // reinterpret_cast<double2*> load is naturally aligned.
     if (state_idx_base + 1 < input_len) {
         // Reinterpret cast to load two doubles at once
-        // Note: Assumes input is reasonably aligned (standard cudaMalloc provides 256-byte alignment)
-        const double2* input_vec = reinterpret_cast<const double2*>(input);
-        double2 loaded = input_vec[idx];
+        const double2 loaded = __ldg(reinterpret_cast<const double2*>(input) + idx);
         v1 = loaded.x;
         v2 = loaded.y;
     }
     // Handle edge case: Odd input length
     else if (state_idx_base < input_len) {
-        v1 = input[state_idx_base];
+        v1 = __ldg(input + state_idx_base);
         // v2 remains 0.0
     }
 
@@ -81,12 +80,12 @@ __global__ void amplitude_encode_kernel_f32(
     float v2 = 0.0f;
 
     if (state_idx_base + 1 < input_len) {
-        const float2* input_vec = reinterpret_cast<const float2*>(input);
-        float2 loaded = input_vec[idx];
+        // Mirror the double kernel: cached vectorized load for two floats
+        const float2 loaded = __ldg(reinterpret_cast<const float2*>(input) + idx);
         v1 = loaded.x;
         v2 = loaded.y;
     } else if (state_idx_base < input_len) {
-        v1 = input[state_idx_base];
+        v1 = __ldg(input + state_idx_base);
     }
 
     state[state_idx_base] = make_cuComplex(v1 * inv_norm, 0.0f);
