@@ -180,6 +180,10 @@ where
         .map_err(|e| MahoutError::Cuda(format!("Failed to create stream 2: {:?}", e)))?;
     let streams = [&stream1, &stream2];
 
+    // Pin the full host buffer once so cudaMemcpyAsync can leverage DMA without staging.
+    let pinned_host = PinnedBuffer::register(host_data)
+        .map_err(|e| MahoutError::Cuda(format!("Failed to pin host input for async pipeline: {}", e)))?;
+
     // 2. Chunk size: 8MB per chunk (balance between overhead and overlap opportunity)
     // TODO: we should tune this dynamically based on the detected GPU model or PCIe bandwidth in the future.
     // Too small = launch overhead dominates, too large = less overlap
@@ -193,11 +197,12 @@ where
 
     // 4. Pipeline loop: alternate between streams for maximum overlap
     for (chunk_idx, chunk) in host_data.chunks(CHUNK_SIZE_ELEMENTS).enumerate() {
+        let chunk_offset = global_offset;
         let current_stream = streams[chunk_idx % 2];
 
         crate::profile_scope!("GPU::ChunkProcess");
 
-        let chunk_bytes = std::mem::size_of_val(chunk);
+        let chunk_bytes = chunk.len() * std::mem::size_of::<f64>();
         ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
 
         // Allocate temporary device buffer for this chunk
@@ -211,8 +216,8 @@ where
             crate::profile_scope!("GPU::H2DCopyAsync");
             unsafe {
                 let dst_device_ptr = *input_chunk_dev.device_ptr() as *mut c_void;
-                let src_host_ptr = chunk.as_ptr() as *const c_void;
-                let bytes = std::mem::size_of_val(chunk);
+                let src_host_ptr = pinned_host.as_ptr().add(chunk_offset) as *const c_void;
+                let bytes = chunk.len() * std::mem::size_of::<f64>();
                 let stream_handle = current_stream.stream as *mut c_void;
 
                 let result = cudaMemcpyAsync(
@@ -238,7 +243,7 @@ where
         // Invoke caller's kernel launcher (non-blocking)
         {
             crate::profile_scope!("GPU::KernelLaunchAsync");
-            kernel_launcher(current_stream, input_ptr, global_offset, chunk.len())?;
+            kernel_launcher(current_stream, input_ptr, chunk_offset, chunk.len())?;
         }
 
         // Keep buffer alive until synchronization

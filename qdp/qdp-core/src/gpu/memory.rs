@@ -13,11 +13,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::error::{MahoutError, Result};
+use std::ffi::c_void;
+#[cfg(target_os = "linux")]
+use std::marker::PhantomData;
+use std::sync::Arc;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
 use qdp_kernels::{CuComplex, CuDoubleComplex};
-use std::ffi::c_void;
-use std::sync::Arc;
+use crate::error::{MahoutError, Result};
 
 /// Precision of the GPU state vector.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -25,9 +27,6 @@ pub enum Precision {
     Float32,
     Float64,
 }
-
-#[cfg(target_os = "linux")]
-use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
 
 #[cfg(target_os = "linux")]
 fn bytes_to_mib(bytes: usize) -> f64 {
@@ -48,12 +47,13 @@ fn cuda_error_to_string(code: i32) -> &'static str {
 #[cfg(target_os = "linux")]
 fn query_cuda_mem_info() -> Result<(usize, usize)> {
     unsafe {
+        unsafe extern "C" {
+            fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> i32;
+        }
+
         let mut free_bytes: usize = 0;
         let mut total_bytes: usize = 0;
-        let result = cudaMemGetInfo(
-            &mut free_bytes as *mut usize,
-            &mut total_bytes as *mut usize,
-        );
+        let result = cudaMemGetInfo(&mut free_bytes as *mut usize, &mut total_bytes as *mut usize);
 
         if result != 0 {
             return Err(MahoutError::Cuda(format!(
@@ -68,13 +68,7 @@ fn query_cuda_mem_info() -> Result<(usize, usize)> {
 }
 
 #[cfg(target_os = "linux")]
-fn build_oom_message(
-    context: &str,
-    requested_bytes: usize,
-    qubits: Option<usize>,
-    free: usize,
-    total: usize,
-) -> String {
+fn build_oom_message(context: &str, requested_bytes: usize, qubits: Option<usize>, free: usize, total: usize) -> String {
     let qubit_hint = qubits
         .map(|q| format!(" (qubits={})", q))
         .unwrap_or_default();
@@ -92,11 +86,7 @@ fn build_oom_message(
 /// Returns a MemoryAllocation error with a helpful message when the request
 /// exceeds the currently reported free memory.
 #[cfg(target_os = "linux")]
-pub(crate) fn ensure_device_memory_available(
-    requested_bytes: usize,
-    context: &str,
-    qubits: Option<usize>,
-) -> Result<()> {
+pub(crate) fn ensure_device_memory_available(requested_bytes: usize, context: &str, qubits: Option<usize>) -> Result<()> {
     let (free, total) = query_cuda_mem_info()?;
 
     if (requested_bytes as u64) > (free as u64) {
@@ -144,6 +134,78 @@ pub(crate) fn map_allocation_error(
             e,
             source,
         )),
+    }
+}
+
+/// Page-locked host buffer used to enable true async DMA for H2D copies.
+#[cfg(target_os = "linux")]
+pub struct PinnedBuffer<'a, T> {
+    ptr: *mut T,
+    len_bytes: usize,
+    _marker: PhantomData<&'a [T]>,
+}
+
+#[cfg(target_os = "linux")]
+impl<'a, T> PinnedBuffer<'a, T> {
+    /// Registers an existing host slice as pinned memory for the duration of the buffer's lifetime.
+    pub fn register(host_slice: &'a [T]) -> Result<Self> {
+        if host_slice.is_empty() {
+            return Err(MahoutError::InvalidInput(
+                "Cannot pin an empty host buffer".to_string(),
+            ));
+        }
+
+        let len_bytes = host_slice.len()
+            .checked_mul(std::mem::size_of::<T>())
+            .ok_or_else(|| MahoutError::MemoryAllocation(
+                "Requested host pin size overflow".to_string(),
+            ))?;
+
+        unsafe {
+            unsafe extern "C" {
+                fn cudaHostRegister(ptr: *mut c_void, size: usize, flags: u32) -> i32;
+            }
+
+            // flags = 0 (default): portable, not mapped into device address space
+            let result = cudaHostRegister(host_slice.as_ptr() as *mut c_void, len_bytes, 0);
+            if result != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "Failed to pin host buffer for DMA: {} ({})",
+                    result,
+                    cuda_error_to_string(result)
+                )));
+            }
+        }
+
+        Ok(Self {
+            ptr: host_slice.as_ptr() as *mut T,
+            len_bytes,
+            _marker: PhantomData,
+        })
+    }
+
+    /// Raw const pointer to the pinned host memory.
+    #[inline]
+    pub fn as_ptr(&self) -> *const T {
+        self.ptr as *const T
+    }
+
+    /// Length in bytes of the pinned region.
+    #[inline]
+    pub fn len_bytes(&self) -> usize {
+        self.len_bytes
+    }
+}
+
+#[cfg(target_os = "linux")]
+impl<'a, T> Drop for PinnedBuffer<'a, T> {
+    fn drop(&mut self) {
+        unsafe {
+            unsafe extern "C" {
+                fn cudaHostUnregister(ptr: *mut c_void) -> i32;
+            }
+            let _ = cudaHostUnregister(self.ptr as *mut c_void);
+        }
     }
 }
 
@@ -203,9 +265,6 @@ pub struct GpuStateVector {
     pub(crate) buffer: Arc<BufferStorage>,
     pub num_qubits: usize,
     pub size_elements: usize,
-    /// Batch size (None for single state)
-    pub(crate) num_samples: Option<usize>,
-    pub device_id: usize,
 }
 
 // Safety: CudaSlice and Arc are both Send + Sync
@@ -222,49 +281,36 @@ impl GpuStateVector {
         {
             let requested_bytes = _size_elements
                 .checked_mul(std::mem::size_of::<CuDoubleComplex>())
-                .ok_or_else(|| {
-                    MahoutError::MemoryAllocation(format!(
-                        "Requested GPU allocation size overflow (elements={})",
-                        _size_elements
-                    ))
-                })?;
+                .ok_or_else(|| MahoutError::MemoryAllocation(
+                    format!("Requested GPU allocation size overflow (elements={})", _size_elements)
+                ))?;
 
             // Pre-flight check to gracefully fail before cudaMalloc when OOM is obvious
-            ensure_device_memory_available(
-                requested_bytes,
-                "state vector allocation",
-                Some(qubits),
-            )?;
+            ensure_device_memory_available(requested_bytes, "state vector allocation", Some(qubits))?;
 
             // Use uninitialized allocation to avoid memory bandwidth waste.
             // TODO: Consider using a memory pool for input buffers to avoid repeated
             // cudaMalloc overhead in high-frequency encode() calls.
-            let slice =
-                unsafe { _device.alloc::<CuDoubleComplex>(_size_elements) }.map_err(|e| {
-                    map_allocation_error(
-                        requested_bytes,
-                        "state vector allocation",
-                        Some(qubits),
-                        e,
-                    )
-                })?;
+            let slice = unsafe {
+                _device.alloc::<CuDoubleComplex>(_size_elements)
+            }.map_err(|e| map_allocation_error(
+                requested_bytes,
+                "state vector allocation",
+                Some(qubits),
+                e,
+            ))?;
 
             Ok(Self {
                 buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
                 num_qubits: qubits,
                 size_elements: _size_elements,
-                num_samples: None,
-                device_id: _device.ordinal(),
             })
         }
 
         #[cfg(not(target_os = "linux"))]
         {
             // Non-Linux: compiles but GPU unavailable
-            Err(MahoutError::Cuda(
-                "CUDA is only available on Linux. This build does not support GPU operations."
-                    .to_string(),
-            ))
+            Err(MahoutError::Cuda("CUDA is only available on Linux. This build does not support GPU operations.".to_string()))
         }
     }
 
@@ -300,56 +346,41 @@ impl GpuStateVector {
     /// Allocates num_samples * 2^qubits complex numbers on GPU
     pub fn new_batch(_device: &Arc<CudaDevice>, num_samples: usize, qubits: usize) -> Result<Self> {
         let single_state_size: usize = 1usize << qubits;
-        let total_elements = num_samples.checked_mul(single_state_size).ok_or_else(|| {
-            MahoutError::MemoryAllocation(format!(
-                "Batch size overflow: {} samples * {} elements",
-                num_samples, single_state_size
-            ))
-        })?;
+        let total_elements = num_samples.checked_mul(single_state_size)
+            .ok_or_else(|| MahoutError::MemoryAllocation(
+                format!("Batch size overflow: {} samples * {} elements", num_samples, single_state_size)
+            ))?;
 
         #[cfg(target_os = "linux")]
         {
             let requested_bytes = total_elements
                 .checked_mul(std::mem::size_of::<CuDoubleComplex>())
-                .ok_or_else(|| {
-                    MahoutError::MemoryAllocation(format!(
-                        "Requested GPU allocation size overflow (elements={})",
-                        total_elements
-                    ))
-                })?;
+                .ok_or_else(|| MahoutError::MemoryAllocation(
+                    format!("Requested GPU allocation size overflow (elements={})", total_elements)
+                ))?;
 
             // Pre-flight check
-            ensure_device_memory_available(
+            ensure_device_memory_available(requested_bytes, "batch state vector allocation", Some(qubits))?;
+
+            let slice = unsafe {
+                _device.alloc::<CuDoubleComplex>(total_elements)
+            }.map_err(|e| map_allocation_error(
                 requested_bytes,
                 "batch state vector allocation",
                 Some(qubits),
-            )?;
-
-            let slice =
-                unsafe { _device.alloc::<CuDoubleComplex>(total_elements) }.map_err(|e| {
-                    map_allocation_error(
-                        requested_bytes,
-                        "batch state vector allocation",
-                        Some(qubits),
-                        e,
-                    )
-                })?;
+                e,
+            ))?;
 
             Ok(Self {
                 buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
                 num_qubits: qubits,
                 size_elements: total_elements,
-                num_samples: Some(num_samples),
-                device_id: _device.ordinal(),
             })
         }
 
         #[cfg(not(target_os = "linux"))]
         {
-            Err(MahoutError::Cuda(
-                "CUDA is only available on Linux. This build does not support GPU operations."
-                    .to_string(),
-            ))
+            Err(MahoutError::Cuda("CUDA is only available on Linux. This build does not support GPU operations.".to_string()))
         }
     }
 
@@ -365,38 +396,26 @@ impl GpuStateVector {
             (Precision::Float64, Precision::Float32) => {
                 #[cfg(target_os = "linux")]
                 {
-                    let requested_bytes = self
-                        .size_elements
+                    let requested_bytes = self.size_elements
                         .checked_mul(std::mem::size_of::<CuComplex>())
-                        .ok_or_else(|| {
-                            MahoutError::MemoryAllocation(format!(
-                                "Requested GPU allocation size overflow (elements={})",
-                                self.size_elements
-                            ))
-                        })?;
+                        .ok_or_else(|| MahoutError::MemoryAllocation(
+                            format!("Requested GPU allocation size overflow (elements={})", self.size_elements)
+                        ))?;
 
-                    ensure_device_memory_available(
+                    ensure_device_memory_available(requested_bytes, "state vector precision conversion", Some(self.num_qubits))?;
+
+                    let slice = unsafe {
+                        device.alloc::<CuComplex>(self.size_elements)
+                    }.map_err(|e| map_allocation_error(
                         requested_bytes,
                         "state vector precision conversion",
                         Some(self.num_qubits),
-                    )?;
+                        e,
+                    ))?;
 
-                    let slice =
-                        unsafe { device.alloc::<CuComplex>(self.size_elements) }.map_err(|e| {
-                            map_allocation_error(
-                                requested_bytes,
-                                "state vector precision conversion",
-                                Some(self.num_qubits),
-                                e,
-                            )
-                        })?;
-
-                    let src_ptr = self.ptr_f64().ok_or_else(|| {
-                        MahoutError::InvalidInput(
-                            "Source state vector is not Float64; cannot convert to Float32"
-                                .to_string(),
-                        )
-                    })?;
+                    let src_ptr = self.ptr_f64().ok_or_else(|| MahoutError::InvalidInput(
+                        "Source state vector is not Float64; cannot convert to Float32".to_string()
+                    ))?;
 
                     let ret = unsafe {
                         qdp_kernels::convert_state_to_float(
@@ -408,122 +427,29 @@ impl GpuStateVector {
                     };
 
                     if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Precision conversion kernel failed: {}",
-                            ret
-                        )));
+                        return Err(MahoutError::KernelLaunch(
+                            format!("Precision conversion kernel failed: {}", ret)
+                        ));
                     }
 
-                    device.synchronize().map_err(|e| {
-                        MahoutError::Cuda(format!(
-                            "Failed to sync after precision conversion: {:?}",
-                            e
-                        ))
-                    })?;
+                    device.synchronize()
+                        .map_err(|e| MahoutError::Cuda(format!("Failed to sync after precision conversion: {:?}", e)))?;
 
                     Ok(Self {
                         buffer: Arc::new(BufferStorage::F32(GpuBufferRaw { slice })),
                         num_qubits: self.num_qubits,
                         size_elements: self.size_elements,
-                        num_samples: self.num_samples, // Preserve batch information
-                        device_id: device.ordinal(),
                     })
                 }
 
                 #[cfg(not(target_os = "linux"))]
                 {
-                    Err(MahoutError::Cuda(
-                        "Precision conversion requires CUDA (Linux)".to_string(),
-                    ))
+                    Err(MahoutError::Cuda("Precision conversion requires CUDA (Linux)".to_string()))
                 }
             }
             _ => Err(MahoutError::NotImplemented(
-                "Requested precision conversion is not supported".to_string(),
+                "Requested precision conversion is not supported".to_string()
             )),
         }
     }
 }
-
-// === Pinned Memory Implementation ===
-
-/// Pinned Host Memory Buffer (Page-Locked)
-///
-/// Enables DMA for H2D copies, doubling bandwidth and reducing CPU usage.
-#[cfg(target_os = "linux")]
-pub struct PinnedBuffer {
-    ptr: *mut f64,
-    size_elements: usize,
-}
-
-#[cfg(target_os = "linux")]
-impl PinnedBuffer {
-    /// Allocate pinned memory
-    pub fn new(elements: usize) -> Result<Self> {
-        unsafe {
-            let bytes = elements
-                .checked_mul(std::mem::size_of::<f64>())
-                .ok_or_else(|| {
-                    MahoutError::MemoryAllocation(format!(
-                        "Requested pinned buffer allocation size overflow (elements={})",
-                        elements
-                    ))
-                })?;
-            let mut ptr: *mut c_void = std::ptr::null_mut();
-
-            let ret = cudaHostAlloc(&mut ptr, bytes, 0); // cudaHostAllocDefault
-
-            if ret != 0 {
-                return Err(MahoutError::MemoryAllocation(format!(
-                    "cudaHostAlloc failed with error code: {}",
-                    ret
-                )));
-            }
-
-            Ok(Self {
-                ptr: ptr as *mut f64,
-                size_elements: elements,
-            })
-        }
-    }
-
-    /// Get mutable slice to write data into
-    pub fn as_slice_mut(&mut self) -> &mut [f64] {
-        unsafe { std::slice::from_raw_parts_mut(self.ptr, self.size_elements) }
-    }
-
-    /// Get raw pointer for CUDA memcpy
-    pub fn ptr(&self) -> *const f64 {
-        self.ptr
-    }
-
-    pub fn len(&self) -> usize {
-        self.size_elements
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.size_elements == 0
-    }
-}
-
-#[cfg(target_os = "linux")]
-impl Drop for PinnedBuffer {
-    fn drop(&mut self) {
-        unsafe {
-            let result = cudaFreeHost(self.ptr as *mut c_void);
-            if result != 0 {
-                eprintln!(
-                    "Warning: cudaFreeHost failed with error code {} ({})",
-                    result,
-                    cuda_error_to_string(result)
-                );
-            }
-        }
-    }
-}
-
-// Safety: Pinned memory is accessible from any thread
-#[cfg(target_os = "linux")]
-unsafe impl Send for PinnedBuffer {}
-
-#[cfg(target_os = "linux")]
-unsafe impl Sync for PinnedBuffer {}
