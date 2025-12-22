@@ -19,20 +19,31 @@
 // Provides generic double-buffered execution for large data processing.
 // Separates the "streaming mechanics" from the "kernel logic".
 
+use std::sync::Arc;
+use std::ffi::c_void;
+use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use crate::error::{MahoutError, Result};
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{PinnedBuffer, ensure_device_memory_available, map_allocation_error};
-use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
-use std::ffi::c_void;
-use std::sync::Arc;
+use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error, PinnedBuffer};
 
+// Minimal CUDA Runtime FFI for event-based stream coordination.
 #[cfg(target_os = "linux")]
-use crate::gpu::cuda_ffi::{
-    CUDA_EVENT_DISABLE_TIMING, CUDA_MEMCPY_HOST_TO_DEVICE, cudaEventCreateWithFlags,
-    cudaEventDestroy, cudaEventRecord, cudaMemcpyAsync, cudaStreamSynchronize, cudaStreamWaitEvent,
-};
+unsafe extern "C" {
+    fn cudaEventCreateWithFlags(event: *mut *mut c_void, flags: u32) -> i32;
+    fn cudaEventDestroy(event: *mut c_void) -> i32;
+    fn cudaEventRecord(event: *mut c_void, stream: *mut c_void) -> i32;
+    fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: usize, kind: u32, stream: *mut c_void) -> i32;
+    fn cudaStreamSynchronize(stream: *mut c_void) -> i32;
+    fn cudaStreamWaitEvent(stream: *mut c_void, event: *mut c_void, flags: u32) -> i32;
+}
 
-/// Dual-stream pipeline context: manages compute/copy streams and sync events
+// CUDA Runtime constants
+#[cfg(target_os = "linux")]
+const CUDA_EVENT_DISABLE_TIMING: u32 = 2;
+#[cfg(target_os = "linux")]
+const CUDA_MEMCPY_HOST_TO_DEVICE: u32 = 1;
+
+/// Dual-stream context coordinating copy/compute with an event.
 #[cfg(target_os = "linux")]
 pub struct PipelineContext {
     pub stream_compute: CudaStream,
@@ -42,23 +53,17 @@ pub struct PipelineContext {
 
 #[cfg(target_os = "linux")]
 impl PipelineContext {
-    /// Create dual streams and sync event
     pub fn new(device: &Arc<CudaDevice>) -> Result<Self> {
-        let stream_compute = device
-            .fork_default_stream()
-            .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
-        let stream_copy = device
-            .fork_default_stream()
-            .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+        let stream_compute = device.fork_default_stream()
+            .map_err(|e| MahoutError::Cuda(format!("Failed to create compute stream: {:?}", e)))?;
+        let stream_copy = device.fork_default_stream()
+            .map_err(|e| MahoutError::Cuda(format!("Failed to create copy stream: {:?}", e)))?;
 
         let mut event_copy_done: *mut c_void = std::ptr::null_mut();
         unsafe {
             let ret = cudaEventCreateWithFlags(&mut event_copy_done, CUDA_EVENT_DISABLE_TIMING);
             if ret != 0 {
-                return Err(MahoutError::Cuda(format!(
-                    "Failed to create CUDA event: {}",
-                    ret
-                )));
+                return Err(MahoutError::Cuda(format!("Failed to create CUDA event: {}", ret)));
             }
         }
 
@@ -69,50 +74,54 @@ impl PipelineContext {
         })
     }
 
-    /// Async H2D copy on copy stream
+    /// Async H2D copy on the copy stream.
     pub unsafe fn async_copy_to_device(
         &self,
-        src: &PinnedBuffer,
+        src: *const c_void,
         dst: *mut c_void,
         len_elements: usize,
-    ) {
+    ) -> Result<()> {
         crate::profile_scope!("GPU::H2D_Copy");
-        unsafe {
-            cudaMemcpyAsync(
-                dst,
-                src.ptr() as *const c_void,
-                len_elements * std::mem::size_of::<f64>(),
-                CUDA_MEMCPY_HOST_TO_DEVICE,
-                self.stream_copy.stream as *mut c_void,
-            );
+        let ret = cudaMemcpyAsync(
+            dst,
+            src,
+            len_elements * std::mem::size_of::<f64>(),
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+            self.stream_copy.stream as *mut c_void,
+        );
+        if ret != 0 {
+            return Err(MahoutError::Cuda(format!("Async H2D copy failed with CUDA error: {}", ret)));
         }
+        Ok(())
     }
 
-    /// Record copy completion event
-    pub unsafe fn record_copy_done(&self) {
-        unsafe {
-            cudaEventRecord(self.event_copy_done, self.stream_copy.stream as *mut c_void);
+    /// Record completion of the copy on the copy stream.
+    pub unsafe fn record_copy_done(&self) -> Result<()> {
+        let ret = cudaEventRecord(self.event_copy_done, self.stream_copy.stream as *mut c_void);
+        if ret != 0 {
+            return Err(MahoutError::Cuda(format!("cudaEventRecord failed: {}", ret)));
         }
+        Ok(())
     }
 
-    /// Make compute stream wait for copy completion
-    pub unsafe fn wait_for_copy(&self) {
+    /// Make compute stream wait for the copy completion event.
+    pub unsafe fn wait_for_copy(&self) -> Result<()> {
         crate::profile_scope!("GPU::StreamWait");
-        unsafe {
-            cudaStreamWaitEvent(
-                self.stream_compute.stream as *mut c_void,
-                self.event_copy_done,
-                0,
-            );
+        let ret = cudaStreamWaitEvent(self.stream_compute.stream as *mut c_void, self.event_copy_done, 0);
+        if ret != 0 {
+            return Err(MahoutError::Cuda(format!("cudaStreamWaitEvent failed: {}", ret)));
         }
+        Ok(())
     }
 
-    /// Sync copy stream (safe to reuse host buffer)
-    pub unsafe fn sync_copy_stream(&self) {
+    /// Sync copy stream (safe to reuse host buffer).
+    pub unsafe fn sync_copy_stream(&self) -> Result<()> {
         crate::profile_scope!("Pipeline::SyncCopy");
-        unsafe {
-            cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
+        let ret = cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
+        if ret != 0 {
+            return Err(MahoutError::Cuda(format!("cudaStreamSynchronize(copy) failed: {}", ret)));
         }
+        Ok(())
     }
 }
 
@@ -121,7 +130,7 @@ impl Drop for PipelineContext {
     fn drop(&mut self) {
         unsafe {
             if !self.event_copy_done.is_null() {
-                cudaEventDestroy(self.event_copy_done);
+                let _ = cudaEventDestroy(self.event_copy_done);
             }
         }
     }
@@ -171,14 +180,8 @@ where
 {
     crate::profile_scope!("GPU::AsyncPipeline");
 
-    // 1. Create dual streams for pipeline overlap
-    let stream1 = device
-        .fork_default_stream()
-        .map_err(|e| MahoutError::Cuda(format!("Failed to create stream 1: {:?}", e)))?;
-    let stream2 = device
-        .fork_default_stream()
-        .map_err(|e| MahoutError::Cuda(format!("Failed to create stream 2: {:?}", e)))?;
-    let streams = [&stream1, &stream2];
+    // 1. Create dual streams with an event to coordinate copy -> compute
+    let ctx = PipelineContext::new(device)?;
 
     // Pin the full host buffer once so cudaMemcpyAsync can leverage DMA without staging.
     let pinned_host = PinnedBuffer::register(host_data)
@@ -195,10 +198,9 @@ where
 
     let mut global_offset = 0;
 
-    // 4. Pipeline loop: alternate between streams for maximum overlap
-    for (chunk_idx, chunk) in host_data.chunks(CHUNK_SIZE_ELEMENTS).enumerate() {
+    // 4. Pipeline loop: copy on copy stream, compute on compute stream with event handoff
+    for chunk in host_data.chunks(CHUNK_SIZE_ELEMENTS) {
         let chunk_offset = global_offset;
-        let current_stream = streams[chunk_idx % 2];
 
         crate::profile_scope!("GPU::ChunkProcess");
 
@@ -206,34 +208,27 @@ where
         ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
 
         // Allocate temporary device buffer for this chunk
-        let input_chunk_dev = unsafe { device.alloc::<f64>(chunk.len()) }.map_err(|e| {
-            map_allocation_error(chunk_bytes, "pipeline chunk buffer allocation", None, e)
-        })?;
+        let input_chunk_dev = unsafe {
+            device.alloc::<f64>(chunk.len())
+        }.map_err(|e| map_allocation_error(
+            chunk_bytes,
+            "pipeline chunk buffer allocation",
+            None,
+            e,
+        ))?;
 
         // Async copy: host to device (non-blocking, on specified stream)
         // Uses CUDA Runtime API (cudaMemcpyAsync) for true async copy
         {
             crate::profile_scope!("GPU::H2DCopyAsync");
             unsafe {
-                let dst_device_ptr = *input_chunk_dev.device_ptr() as *mut c_void;
-                let src_host_ptr = pinned_host.as_ptr().add(chunk_offset) as *const c_void;
-                let bytes = chunk.len() * std::mem::size_of::<f64>();
-                let stream_handle = current_stream.stream as *mut c_void;
-
-                let result = cudaMemcpyAsync(
-                    dst_device_ptr,
-                    src_host_ptr,
-                    bytes,
-                    CUDA_MEMCPY_HOST_TO_DEVICE,
-                    stream_handle,
-                );
-
-                if result != 0 {
-                    return Err(MahoutError::Cuda(format!(
-                        "Async H2D copy failed with CUDA error: {}",
-                        result
-                    )));
-                }
+                ctx.async_copy_to_device(
+                    pinned_host.as_ptr().add(chunk_offset) as *const c_void,
+                    *input_chunk_dev.device_ptr() as *mut c_void,
+                    chunk.len(),
+                )?;
+                ctx.record_copy_done()?;
+                ctx.wait_for_copy()?;
             }
         }
 
@@ -243,7 +238,7 @@ where
         // Invoke caller's kernel launcher (non-blocking)
         {
             crate::profile_scope!("GPU::KernelLaunchAsync");
-            kernel_launcher(current_stream, input_ptr, chunk_offset, chunk.len())?;
+            kernel_launcher(&ctx.stream_compute, input_ptr, chunk_offset, chunk.len())?;
         }
 
         // Keep buffer alive until synchronization
@@ -259,12 +254,9 @@ where
     // This ensures all async copies and kernel launches have finished
     {
         crate::profile_scope!("GPU::StreamSync");
-        device
-            .wait_for(&stream1)
-            .map_err(|e| MahoutError::Cuda(format!("Stream 1 sync failed: {:?}", e)))?;
-        device
-            .wait_for(&stream2)
-            .map_err(|e| MahoutError::Cuda(format!("Stream 2 sync failed: {:?}", e)))?;
+        unsafe { ctx.sync_copy_stream()?; }
+        device.wait_for(&ctx.stream_compute)
+            .map_err(|e| MahoutError::Cuda(format!("Compute stream sync failed: {:?}", e)))?;
     }
 
     // Buffers are dropped here (after sync), freeing GPU memory
