@@ -107,3 +107,46 @@ fn test_amplitude_encoding_async_pipeline() {
         println!("PASS: Memory freed successfully");
     }
 }
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_dlpack_device_id() {
+    println!("Testing DLPack device_id propagation...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    let data = common::create_test_data(16);
+    let result = engine.encode(&data, 4, "amplitude");
+    assert!(result.is_ok(), "Encoding should succeed");
+
+    let dlpack_ptr = result.unwrap();
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+
+    unsafe {
+        let managed = &*dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+
+        // Verify device_id is correctly set (0 for device 0)
+        assert_eq!(tensor.device.device_id, 0, "device_id should be 0 for device 0");
+
+        // Verify device_type is CUDA (kDLCUDA = 2)
+        use qdp_core::dlpack::DLDeviceType;
+        match tensor.device.device_type {
+            DLDeviceType::kDLCUDA => println!("PASS: Device type is CUDA"),
+            _ => panic!("Expected CUDA device type"),
+        }
+
+        println!("PASS: DLPack device_id correctly set to {}", tensor.device.device_id);
+
+        // Free memory
+        if let Some(deleter) = managed.deleter {
+            deleter(dlpack_ptr);
+        }
+    }
+}

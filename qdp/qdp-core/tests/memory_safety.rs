@@ -94,7 +94,7 @@ fn test_multiple_concurrent_states() {
 fn test_dlpack_tensor_metadata_default() {
     println!("Testing DLPack tensor metadata...");
 
-    let engine = match QdpEngine::new(0) {
+    let engine = match QdpEngine::new_with_precision(0, qdp_core::Precision::Float64) {
         Ok(e) => e,
         Err(_) => return,
     };
