@@ -140,7 +140,7 @@ impl GpuStateVector {
             data: self.ptr_void(),
             device: DLDevice {
                 device_type: DLDeviceType::kDLCUDA,
-                device_id: 0,
+                device_id: self.device_id as c_int,
             },
             ndim: 1,
             dtype: DLDataType {
