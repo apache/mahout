@@ -94,7 +94,7 @@ fn test_multiple_concurrent_states() {
 fn test_dlpack_tensor_metadata_default() {
     println!("Testing DLPack tensor metadata...");
 
-    let engine = match QdpEngine::new(0) {
+    let engine = match QdpEngine::new_with_precision(0, qdp_core::Precision::Float64) {
         Ok(e) => e,
         Err(_) => return,
     };
@@ -120,7 +120,7 @@ fn test_dlpack_tensor_metadata_default() {
         assert_eq!(strides[1], 1, "Stride for second dimension should be 1");
 
         assert_eq!(tensor.dtype.code, 5, "Should be complex type (code=5)");
-        assert_eq!(tensor.dtype.bits, 64, "Should be 64 bits (2x32-bit floats, Float32 default)");
+        assert_eq!(tensor.dtype.bits, 128, "Should be 128 bits (2x64-bit floats, Float64)");
 
         println!("PASS: DLPack metadata verified");
         println!("  ndim: {}", tensor.ndim);

@@ -192,6 +192,7 @@ pub struct GpuStateVector {
     pub size_elements: usize,
     /// Batch size (None for single state)
     pub(crate) num_samples: Option<usize>,
+    pub device_id: usize,
 }
 
 // Safety: CudaSlice and Arc are both Send + Sync
@@ -232,6 +233,7 @@ impl GpuStateVector {
                 num_qubits: qubits,
                 size_elements: _size_elements,
                 num_samples: None,
+                device_id: _device.ordinal(),
             })
         }
 
@@ -304,6 +306,7 @@ impl GpuStateVector {
                 num_qubits: qubits,
                 size_elements: total_elements,
                 num_samples: Some(num_samples),
+                device_id: _device.ordinal(),
             })
         }
 
@@ -369,6 +372,7 @@ impl GpuStateVector {
                         num_qubits: self.num_qubits,
                         size_elements: self.size_elements,
                         num_samples: self.num_samples, // Preserve batch information
+                        device_id: device.ordinal(),
                     })
                 }
 
