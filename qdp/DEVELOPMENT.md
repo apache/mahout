@@ -98,12 +98,17 @@ uv pip uninstall qiskit pennylane
 Then, run the tests:
 
 ```sh
-# benchmark test for dataloader throughput
+# Benchmark test for dataloader throughput
 python benchmark_dataloader_throughput.py
 
-# e2e test
+# Benchmark test for NumPy I/O (NEW)
+python benchmark_numpy_io.py --qubits 10 --samples 1000
+
+# E2E test
 python benchmark_e2e.py
 ```
+
+See [benchmark/README.md](./benchmark/README.md) for detailed benchmark documentation.
 
 ## Troubleshooting
 
