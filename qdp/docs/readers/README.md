@@ -36,7 +36,7 @@ pub trait StreamingDataReader: DataReader {
 | Parquet | `ParquetReader` | ✅ `ParquetStreamingReader` | ✅ Complete |
 | Arrow IPC | `ArrowIPCReader` | ❌ | ✅ Complete |
 | NumPy | `NumpyReader` | ❌ | ✅ Complete |
-| PyTorch | `TorchReader` | ❌ | 🚧 Placeholder |
+| PyTorch | `TorchReader` | ❌ | ❌ |
 
 ## Benefits
 
