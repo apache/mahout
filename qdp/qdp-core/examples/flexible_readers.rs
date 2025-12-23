@@ -44,9 +44,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // === Example 1: Arrow IPC with FixedSizeList ===
     println!("\n[Example 1] Writing and reading Arrow IPC (FixedSizeList format)...");
-    
+
     let arrow_fixed_path = "/tmp/quantum_states_fixed.arrow";
-    
+
     // Write Arrow IPC file with FixedSizeList
     let values_array = Float64Array::from(all_data.clone());
     let field = Arc::new(Field::new("item", DataType::Float64, false));
@@ -84,12 +84,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // === Example 2: Arrow IPC with List (variable length) ===
     println!("\n[Example 2] Writing and reading Arrow IPC (List format)...");
-    
+
     let arrow_list_path = "/tmp/quantum_states_list.arrow";
-    
+
     // Write Arrow IPC file with List
     let mut list_builder = ListBuilder::new(Float64Array::builder(num_samples * sample_size));
-    
+
     for i in 0..num_samples {
         let values: Vec<f64> = (0..sample_size)
             .map(|j| (i * sample_size + j) as f64 / (num_samples * sample_size) as f64)
@@ -97,7 +97,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         list_builder.values().append_slice(&values);
         list_builder.append(true);
     }
-    
+
     let list_array = list_builder.finish();
 
     let schema = Arc::new(Schema::new(vec![Field::new(
@@ -124,9 +124,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // === Example 3: NumPy Format ===
     println!("\n[Example 3] Writing and reading NumPy format...");
-    
+
     let numpy_path = "/tmp/quantum_states.npy";
-    
+
     // Create and write NumPy array
     let array = Array2::from_shape_vec((num_samples, sample_size), all_data.clone())?;
     ndarray_npy::write_npy(numpy_path, &array)?;
@@ -139,9 +139,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // === Example 4: Demonstrating Generic Reader Usage ===
     println!("\n[Example 4] Using readers polymorphically...");
-    
-    fn process_with_any_reader<R: DataReader>(mut reader: R, format_name: &str) 
-        -> Result<(), Box<dyn std::error::Error>> 
+
+    fn process_with_any_reader<R: DataReader>(mut reader: R, format_name: &str)
+        -> Result<(), Box<dyn std::error::Error>>
     {
         let (data, samples, size) = reader.read_batch()?;
         println!("  {} format: {} samples × {} elements = {} total",
@@ -160,7 +160,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // === Example 5: Format Detection Pattern ===
     println!("\n[Example 5] Automatic format detection pattern...");
-    
+
     fn read_any_format(path: &str) -> Result<(Vec<f64>, usize, usize), Box<dyn std::error::Error>> {
         if path.ends_with(".parquet") {
             Err("Parquet needs List<Float64> format - use write_parquet_batch helper".into())
@@ -174,10 +174,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Err("Unsupported format".into())
         }
     }
-    
+
     let (_, samples, size) = read_any_format(arrow_fixed_path)?;
     println!("  Auto-detected Arrow (FixedSizeList): {} samples × {}", samples, size);
-    
+
     let (_, samples, size) = read_any_format(arrow_list_path)?;
     println!("  Auto-detected Arrow (List): {} samples × {}", samples, size);
 

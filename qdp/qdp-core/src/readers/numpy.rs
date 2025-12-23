@@ -55,7 +55,7 @@ impl NumpyReader {
     /// * `path` - Path to the `.npy` file
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
-        
+
         // Verify file exists
         if !path.exists() {
             return Err(MahoutError::Io(format!(
@@ -63,7 +63,7 @@ impl NumpyReader {
                 path.display()
             )));
         }
-        
+
         Ok(Self {
             path: path.to_path_buf(),
             read: false,
@@ -162,14 +162,14 @@ mod tests {
         let temp_path = "/tmp/test_numpy_basic.npy";
         let num_samples = 5;
         let sample_size = 8;
-        
+
         let mut data = Vec::with_capacity(num_samples * sample_size);
         for i in 0..num_samples {
             for j in 0..sample_size {
                 data.push((i * sample_size + j) as f64);
             }
         }
-        
+
         let array = Array2::from_shape_vec((num_samples, sample_size), data.clone()).unwrap();
         ndarray_npy::write_npy(temp_path, &array).unwrap();
 
@@ -192,14 +192,14 @@ mod tests {
         let temp_path = "/tmp/test_numpy_fortran.npy";
         let num_samples = 3;
         let sample_size = 4;
-        
+
         let data: Vec<f64> = (0..num_samples * sample_size).map(|i| i as f64).collect();
         let array = Array2::from_shape_vec((num_samples, sample_size), data.clone()).unwrap();
-        
+
         // Convert to Fortran order
         let array_f = array.reversed_axes();
         let array_f = array_f.as_standard_layout().reversed_axes();
-        
+
         ndarray_npy::write_npy(temp_path, &array_f).unwrap();
 
         // Read it back
@@ -243,7 +243,7 @@ mod tests {
 
         let mut reader = NumpyReader::new(temp_path).unwrap();
         let _ = reader.read_batch().unwrap();
-        
+
         // Second read should fail
         let result = reader.read_batch();
         assert!(result.is_err());

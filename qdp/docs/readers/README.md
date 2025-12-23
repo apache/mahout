@@ -90,7 +90,7 @@ use qdp_core::readers::ArrowIPCReader;
 let mut reader = ArrowIPCReader::new("quantum_states.arrow")?;
 let (data, num_samples, sample_size) = reader.read_batch()?;
 
-println!("Read {} samples of {} qubits", 
+println!("Read {} samples of {} qubits",
          num_samples, (sample_size as f64).log2() as usize);
 ```
 
@@ -106,7 +106,7 @@ let mut buffer = vec![0.0; 1024 * 1024]; // 1M element buffer
 loop {
     let written = reader.read_chunk(&mut buffer)?;
     if written == 0 { break; }
-    
+
     // Process chunk
     process_chunk(&buffer[..written])?;
 }
@@ -117,7 +117,7 @@ loop {
 ```rust
 fn read_quantum_data(path: &str) -> Result<(Vec<f64>, usize, usize)> {
     use qdp_core::reader::DataReader;
-    
+
     if path.ends_with(".parquet") {
         ParquetReader::new(path, None)?.read_batch()
     } else if path.ends_with(".arrow") {
