@@ -25,23 +25,17 @@ use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use crate::error::{MahoutError, Result};
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error, PinnedBuffer};
-
-// Minimal CUDA Runtime FFI for event-based stream coordination.
 #[cfg(target_os = "linux")]
-unsafe extern "C" {
-    fn cudaEventCreateWithFlags(event: *mut *mut c_void, flags: u32) -> i32;
-    fn cudaEventDestroy(event: *mut c_void) -> i32;
-    fn cudaEventRecord(event: *mut c_void, stream: *mut c_void) -> i32;
-    fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: usize, kind: u32, stream: *mut c_void) -> i32;
-    fn cudaStreamSynchronize(stream: *mut c_void) -> i32;
-    fn cudaStreamWaitEvent(stream: *mut c_void, event: *mut c_void, flags: u32) -> i32;
-}
-
-// CUDA Runtime constants
-#[cfg(target_os = "linux")]
-const CUDA_EVENT_DISABLE_TIMING: u32 = 2;
-#[cfg(target_os = "linux")]
-const CUDA_MEMCPY_HOST_TO_DEVICE: u32 = 1;
+use crate::gpu::cuda_ffi::{
+    cudaEventCreateWithFlags,
+    cudaEventDestroy,
+    cudaEventRecord,
+    cudaMemcpyAsync,
+    cudaStreamSynchronize,
+    cudaStreamWaitEvent,
+    CUDA_EVENT_DISABLE_TIMING,
+    CUDA_MEMCPY_HOST_TO_DEVICE,
+};
 
 /// Dual-stream context coordinating copy/compute with an event.
 #[cfg(target_os = "linux")]
