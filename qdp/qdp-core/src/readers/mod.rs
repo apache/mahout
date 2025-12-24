@@ -28,9 +28,7 @@
 //! - **PyTorch**: [`TorchReader`] - See [`docs/ADDING_INPUT_FORMATS.md`](../../docs/ADDING_INPUT_FORMATS.md)
 
 pub mod arrow_ipc;
-pub mod numpy;
 pub mod parquet;
 
 pub use arrow_ipc::ArrowIPCReader;
-pub use numpy::NumpyReader;
 pub use parquet::{ParquetReader, ParquetStreamingReader};
