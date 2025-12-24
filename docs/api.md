@@ -88,9 +88,9 @@
 
 ## `draw_circuit(self)`
 - **Purpose**: Visualizes the quantum circuit.
-- **Usage**: Provides a graphical representation of the quantum circuit for better understanding.
-- **Note**: Just a pass through function, will use underlying libraries
-  method for drawing circuit.
+- **Returns**: A string representation of the circuit visualization (format depends on backend).
+- **Usage**: Returns a visualization string that can be printed or used programmatically. Example: `print(qc.draw_circuit())` or `viz = qc.draw_circuit()`.
+- **Note**: Uses underlying libraries' methods for drawing circuits (Qiskit's `draw()`, Cirq's `str()`, or Braket's `str()`).
 
 ## `apply_rx_gate(self, qubit_index, angle)`
 - **Purpose**: Applies a rotation around the X-axis to a specified qubit with an optional parameter for optimization.
