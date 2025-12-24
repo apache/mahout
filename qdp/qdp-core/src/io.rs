@@ -26,11 +26,11 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
-use arrow::array::{Array, ArrayRef, FixedSizeListArray, Float64Array, ListArray, RecordBatch};
+use arrow::array::{Array, ArrayRef, Float64Array, FixedSizeListArray, ListArray, RecordBatch};
 use arrow::datatypes::{DataType, Field, Schema};
 use arrow::ipc::reader::FileReader as ArrowFileReader;
-use parquet::arrow::ArrowWriter;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;
 
 use crate::error::{MahoutError, Result};
@@ -96,23 +96,26 @@ pub fn write_parquet<P: AsRef<Path>>(
     let array = Float64Array::from_iter_values(data.iter().copied());
     let array_ref: ArrayRef = Arc::new(array);
 
-    let batch = RecordBatch::try_new(schema.clone(), vec![array_ref])
-        .map_err(|e| MahoutError::Io(format!("Failed to create RecordBatch: {}", e)))?;
+    let batch = RecordBatch::try_new(schema.clone(), vec![array_ref]).map_err(|e| {
+        MahoutError::Io(format!("Failed to create RecordBatch: {}", e))
+    })?;
 
-    let file = File::create(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet file: {}", e)))?;
+    let file = File::create(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet file: {}", e))
+    })?;
 
     let props = WriterProperties::builder().build();
-    let mut writer = ArrowWriter::try_new(file, schema, Some(props))
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet writer: {}", e)))?;
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
+    })?;
 
-    writer
-        .write(&batch)
-        .map_err(|e| MahoutError::Io(format!("Failed to write Parquet batch: {}", e)))?;
+    writer.write(&batch).map_err(|e| {
+        MahoutError::Io(format!("Failed to write Parquet batch: {}", e))
+    })?;
 
-    writer
-        .close()
-        .map_err(|e| MahoutError::Io(format!("Failed to close Parquet writer: {}", e)))?;
+    writer.close().map_err(|e| {
+        MahoutError::Io(format!("Failed to close Parquet writer: {}", e))
+    })?;
 
     Ok(())
 }
@@ -121,24 +124,29 @@ pub fn write_parquet<P: AsRef<Path>>(
 ///
 /// Returns one array per row group for zero-copy access.
 pub fn read_parquet_to_arrow<P: AsRef<Path>>(path: P) -> Result<Vec<Float64Array>> {
-    let file = File::open(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to open Parquet file: {}", e)))?;
+    let file = File::open(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to open Parquet file: {}", e))
+    })?;
 
-    let builder = ParquetRecordBatchReaderBuilder::try_new(file)
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet reader: {}", e)))?;
+    let builder = ParquetRecordBatchReaderBuilder::try_new(file).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet reader: {}", e))
+    })?;
 
-    let reader = builder
-        .build()
-        .map_err(|e| MahoutError::Io(format!("Failed to build Parquet reader: {}", e)))?;
+    let mut reader = builder.build().map_err(|e| {
+        MahoutError::Io(format!("Failed to build Parquet reader: {}", e))
+    })?;
 
     let mut arrays = Vec::new();
 
-    for batch_result in reader {
-        let batch = batch_result
-            .map_err(|e| MahoutError::Io(format!("Failed to read Parquet batch: {}", e)))?;
+    while let Some(batch_result) = reader.next() {
+        let batch = batch_result.map_err(|e| {
+            MahoutError::Io(format!("Failed to read Parquet batch: {}", e))
+        })?;
 
         if batch.num_columns() == 0 {
-            return Err(MahoutError::Io("Parquet file has no columns".to_string()));
+            return Err(MahoutError::Io(
+                "Parquet file has no columns".to_string(),
+            ));
         }
 
         let column = batch.column(0);
@@ -152,14 +160,18 @@ pub fn read_parquet_to_arrow<P: AsRef<Path>>(path: P) -> Result<Vec<Float64Array
         let float_array = column
             .as_any()
             .downcast_ref::<Float64Array>()
-            .ok_or_else(|| MahoutError::Io("Failed to downcast to Float64Array".to_string()))?
+            .ok_or_else(|| {
+                MahoutError::Io("Failed to downcast to Float64Array".to_string())
+            })?
             .clone();
 
         arrays.push(float_array);
     }
 
     if arrays.is_empty() {
-        return Err(MahoutError::Io("Parquet file contains no data".to_string()));
+        return Err(MahoutError::Io(
+            "Parquet file contains no data".to_string(),
+        ));
     }
 
     Ok(arrays)
@@ -191,23 +203,26 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
     )]));
 
     let array_ref: ArrayRef = Arc::new(array.clone());
-    let batch = RecordBatch::try_new(schema.clone(), vec![array_ref])
-        .map_err(|e| MahoutError::Io(format!("Failed to create RecordBatch: {}", e)))?;
+    let batch = RecordBatch::try_new(schema.clone(), vec![array_ref]).map_err(|e| {
+        MahoutError::Io(format!("Failed to create RecordBatch: {}", e))
+    })?;
 
-    let file = File::create(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet file: {}", e)))?;
+    let file = File::create(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet file: {}", e))
+    })?;
 
     let props = WriterProperties::builder().build();
-    let mut writer = ArrowWriter::try_new(file, schema, Some(props))
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet writer: {}", e)))?;
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
+    })?;
 
-    writer
-        .write(&batch)
-        .map_err(|e| MahoutError::Io(format!("Failed to write Parquet batch: {}", e)))?;
+    writer.write(&batch).map_err(|e| {
+        MahoutError::Io(format!("Failed to write Parquet batch: {}", e))
+    })?;
 
-    writer
-        .close()
-        .map_err(|e| MahoutError::Io(format!("Failed to close Parquet writer: {}", e)))?;
+    writer.close().map_err(|e| {
+        MahoutError::Io(format!("Failed to close Parquet writer: {}", e))
+    })?;
 
     Ok(())
 }
@@ -222,25 +237,28 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
 /// # TODO
 /// Add OOM protection for very large files
 pub fn read_parquet_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
-    let file = File::open(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to open Parquet file: {}", e)))?;
+    let file = File::open(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to open Parquet file: {}", e))
+    })?;
 
-    let builder = ParquetRecordBatchReaderBuilder::try_new(file)
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet reader: {}", e)))?;
+    let builder = ParquetRecordBatchReaderBuilder::try_new(file).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet reader: {}", e))
+    })?;
 
     let total_rows = builder.metadata().file_metadata().num_rows() as usize;
 
-    let reader = builder
-        .build()
-        .map_err(|e| MahoutError::Io(format!("Failed to build Parquet reader: {}", e)))?;
+    let mut reader = builder.build().map_err(|e| {
+        MahoutError::Io(format!("Failed to build Parquet reader: {}", e))
+    })?;
 
     let mut all_data = Vec::new();
     let mut num_samples = 0;
     let mut sample_size = None;
 
-    for batch_result in reader {
-        let batch = batch_result
-            .map_err(|e| MahoutError::Io(format!("Failed to read Parquet batch: {}", e)))?;
+    while let Some(batch_result) = reader.next() {
+        let batch = batch_result.map_err(|e| {
+            MahoutError::Io(format!("Failed to read Parquet batch: {}", e))
+        })?;
 
         if batch.num_columns() == 0 {
             return Err(MahoutError::Io("Parquet file has no columns".to_string()));
@@ -291,8 +309,9 @@ pub fn read_parquet_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, u
         }
     }
 
-    let sample_size =
-        sample_size.ok_or_else(|| MahoutError::Io("Parquet file contains no data".to_string()))?;
+    let sample_size = sample_size.ok_or_else(|| {
+        MahoutError::Io("Parquet file contains no data".to_string())
+    })?;
 
     Ok((all_data, num_samples, sample_size))
 }
@@ -308,19 +327,22 @@ pub fn read_parquet_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, u
 /// # TODO
 /// Add OOM protection for very large files
 pub fn read_arrow_ipc_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
-    let file = File::open(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to open Arrow IPC file: {}", e)))?;
+    let file = File::open(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to open Arrow IPC file: {}", e))
+    })?;
 
-    let reader = ArrowFileReader::try_new(file, None)
-        .map_err(|e| MahoutError::Io(format!("Failed to create Arrow IPC reader: {}", e)))?;
+    let reader = ArrowFileReader::try_new(file, None).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Arrow IPC reader: {}", e))
+    })?;
 
     let mut all_data = Vec::new();
     let mut num_samples = 0;
     let mut sample_size: Option<usize> = None;
 
     for batch_result in reader {
-        let batch = batch_result
-            .map_err(|e| MahoutError::Io(format!("Failed to read Arrow batch: {}", e)))?;
+        let batch = batch_result.map_err(|e| {
+            MahoutError::Io(format!("Failed to read Arrow batch: {}", e))
+        })?;
 
         if batch.num_columns() == 0 {
             return Err(MahoutError::Io("Arrow file has no columns".to_string()));
@@ -333,9 +355,7 @@ pub fn read_arrow_ipc_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize,
                 let list_array = column
                     .as_any()
                     .downcast_ref::<FixedSizeListArray>()
-                    .ok_or_else(|| {
-                        MahoutError::Io("Failed to downcast to FixedSizeListArray".to_string())
-                    })?;
+                    .ok_or_else(|| MahoutError::Io("Failed to downcast to FixedSizeListArray".to_string()))?;
 
                 let current_size = *size as usize;
 
@@ -367,18 +387,17 @@ pub fn read_arrow_ipc_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize,
             }
 
             DataType::List(_) => {
-                let list_array = column.as_any().downcast_ref::<ListArray>().ok_or_else(|| {
-                    MahoutError::Io("Failed to downcast to ListArray".to_string())
-                })?;
+                let list_array = column
+                    .as_any()
+                    .downcast_ref::<ListArray>()
+                    .ok_or_else(|| MahoutError::Io("Failed to downcast to ListArray".to_string()))?;
 
                 for i in 0..list_array.len() {
                     let value_array = list_array.value(i);
                     let float_array = value_array
                         .as_any()
                         .downcast_ref::<Float64Array>()
-                        .ok_or_else(|| {
-                            MahoutError::Io("List values must be Float64".to_string())
-                        })?;
+                        .ok_or_else(|| MahoutError::Io("List values must be Float64".to_string()))?;
 
                     let current_size = float_array.len();
 
@@ -413,8 +432,9 @@ pub fn read_arrow_ipc_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize,
         }
     }
 
-    let sample_size =
-        sample_size.ok_or_else(|| MahoutError::Io("Arrow file contains no data".to_string()))?;
+    let sample_size = sample_size.ok_or_else(|| {
+        MahoutError::Io("Arrow file contains no data".to_string())
+    })?;
 
     Ok((all_data, num_samples, sample_size))
 }
@@ -438,11 +458,13 @@ impl ParquetBlockReader {
     /// * `path` - Path to the Parquet file
     /// * `batch_size` - Optional batch size (defaults to 2048)
     pub fn new<P: AsRef<Path>>(path: P, batch_size: Option<usize>) -> Result<Self> {
-        let file = File::open(path.as_ref())
-            .map_err(|e| MahoutError::Io(format!("Failed to open Parquet file: {}", e)))?;
+        let file = File::open(path.as_ref()).map_err(|e| {
+            MahoutError::Io(format!("Failed to open Parquet file: {}", e))
+        })?;
 
-        let builder = ParquetRecordBatchReaderBuilder::try_new(file)
-            .map_err(|e| MahoutError::Io(format!("Failed to create Parquet reader: {}", e)))?;
+        let builder = ParquetRecordBatchReaderBuilder::try_new(file).map_err(|e| {
+            MahoutError::Io(format!("Failed to create Parquet reader: {}", e))
+        })?;
 
         let schema = builder.schema();
         if schema.fields().len() != 1 {
@@ -484,7 +506,9 @@ impl ParquetBlockReader {
         let reader = builder
             .with_batch_size(batch_size)
             .build()
-            .map_err(|e| MahoutError::Io(format!("Failed to build Parquet reader: {}", e)))?;
+            .map_err(|e| {
+                MahoutError::Io(format!("Failed to build Parquet reader: {}", e))
+            })?;
 
         Ok(Self {
             reader,
@@ -523,8 +547,8 @@ impl ParquetBlockReader {
                 let to_copy = std::cmp::min(available, space_left);
 
                 if to_copy > 0 {
-                    buffer[written..written + to_copy].copy_from_slice(
-                        &self.leftover_data[self.leftover_cursor..self.leftover_cursor + to_copy],
+                    buffer[written..written+to_copy].copy_from_slice(
+                        &self.leftover_data[self.leftover_cursor..self.leftover_cursor+to_copy]
                     );
                     written += to_copy;
                     self.leftover_cursor += to_copy;
@@ -548,54 +572,73 @@ impl ParquetBlockReader {
                     }
                     let column = batch.column(0);
 
-                    let (current_sample_size, batch_values) = match column.data_type() {
+                    let mut push_values = |values: &[f64]| -> Result<bool> {
+                        // returns true if buffer filled and we should break outer loop
+                        let available = values.len();
+                        let space_left = limit - written;
+
+                        if available <= space_left {
+                            buffer[written..written+available].copy_from_slice(values);
+                            written += available;
+                            Ok(false)
+                        } else {
+                            if space_left > 0 {
+                                buffer[written..written+space_left].copy_from_slice(&values[0..space_left]);
+                                written += space_left;
+                            }
+                            self.leftover_data.clear();
+                            self.leftover_data.extend_from_slice(&values[space_left..]);
+                            self.leftover_cursor = 0;
+                            Ok(true)
+                        }
+                    };
+
+                    let current_sample_size = match column.data_type() {
                         DataType::List(_) => {
-                            let list_array =
-                                column.as_any().downcast_ref::<ListArray>().ok_or_else(|| {
-                                    MahoutError::Io("Failed to downcast to ListArray".to_string())
-                                })?;
+                            let list_array = column
+                                .as_any()
+                                .downcast_ref::<ListArray>()
+                                .ok_or_else(|| MahoutError::Io("Failed to downcast to ListArray".to_string()))?;
 
                             if list_array.len() == 0 {
                                 continue;
                             }
 
-                            let mut batch_values = Vec::new();
-                            let mut current_sample_size = None;
+                            let mut detected_size = None;
                             for i in 0..list_array.len() {
                                 let value_array = list_array.value(i);
                                 let float_array = value_array
                                     .as_any()
                                     .downcast_ref::<Float64Array>()
-                                    .ok_or_else(|| {
-                                        MahoutError::Io("List values must be Float64".to_string())
-                                    })?;
+                                    .ok_or_else(|| MahoutError::Io("List values must be Float64".to_string()))?;
 
-                                if i == 0 {
-                                    current_sample_size = Some(float_array.len());
+                                if float_array.null_count() != 0 {
+                                    return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
                                 }
 
-                                if float_array.null_count() == 0 {
-                                    batch_values.extend_from_slice(float_array.values());
-                                } else {
-                                    return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
+                                let len = float_array.len();
+                                if detected_size.is_none() {
+                                    detected_size = Some(len);
+                                } else if Some(len) != detected_size {
+                                    return Err(MahoutError::InvalidInput(format!(
+                                        "Inconsistent sample sizes: expected {}, got {}",
+                                        detected_size.unwrap(), len
+                                    )));
+                                }
+
+                                let should_break = push_values(float_array.values())?;
+                                if should_break {
+                                    break;
                                 }
                             }
 
-                            (
-                                current_sample_size
-                                    .expect("list_array.len() > 0 ensures at least one element"),
-                                batch_values,
-                            )
+                            detected_size.expect("list_array.len() > 0 ensures at least one element")
                         }
                         DataType::FixedSizeList(_, size) => {
                             let list_array = column
                                 .as_any()
                                 .downcast_ref::<FixedSizeListArray>()
-                                .ok_or_else(|| {
-                                MahoutError::Io(
-                                    "Failed to downcast to FixedSizeListArray".to_string(),
-                                )
-                            })?;
+                                .ok_or_else(|| MahoutError::Io("Failed to downcast to FixedSizeListArray".to_string()))?;
 
                             if list_array.len() == 0 {
                                 continue;
@@ -607,20 +650,14 @@ impl ParquetBlockReader {
                             let float_array = values
                                 .as_any()
                                 .downcast_ref::<Float64Array>()
-                                .ok_or_else(|| {
-                                    MahoutError::Io(
-                                        "FixedSizeList values must be Float64".to_string(),
-                                    )
-                                })?;
+                                .ok_or_else(|| MahoutError::Io("FixedSizeList values must be Float64".to_string()))?;
 
-                            let mut batch_values = Vec::new();
-                            if float_array.null_count() == 0 {
-                                batch_values.extend_from_slice(float_array.values());
-                            } else {
+                            if float_array.null_count() != 0 {
                                 return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
                             }
 
-                            (current_sample_size, batch_values)
+                            let _ = push_values(float_array.values())?;
+                            current_sample_size
                         }
                         _ => {
                             return Err(MahoutError::Io(format!(
@@ -633,34 +670,17 @@ impl ParquetBlockReader {
                     if self.sample_size.is_none() {
                         self.sample_size = Some(current_sample_size);
                         limit = calc_limit(current_sample_size);
-                    } else if let Some(expected_size) = self.sample_size
-                        && current_sample_size != expected_size
-                    {
-                        return Err(MahoutError::InvalidInput(format!(
-                            "Inconsistent sample sizes: expected {}, got {}",
-                            expected_size, current_sample_size
-                        )));
-                    }
-
-                    let available = batch_values.len();
-                    let space_left = limit - written;
-
-                    if available <= space_left {
-                        buffer[written..written + available].copy_from_slice(&batch_values);
-                        written += available;
                     } else {
-                        if space_left > 0 {
-                            buffer[written..written + space_left]
-                                .copy_from_slice(&batch_values[0..space_left]);
-                            written += space_left;
+                        if let Some(expected_size) = self.sample_size {
+                            if current_sample_size != expected_size {
+                                return Err(MahoutError::InvalidInput(format!(
+                                    "Inconsistent sample sizes: expected {}, got {}",
+                                    expected_size, current_sample_size
+                                )));
+                            }
                         }
-                        self.leftover_data.clear();
-                        self.leftover_data
-                            .extend_from_slice(&batch_values[space_left..]);
-                        self.leftover_cursor = 0;
-                        break;
                     }
-                }
+                },
                 Some(Err(e)) => return Err(MahoutError::Io(format!("Parquet read error: {}", e))),
                 None => break,
             }
