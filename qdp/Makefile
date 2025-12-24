@@ -1,18 +1,29 @@
-.PHONY: install unit_test unit_test_python unit_test_rust e2e_test clean help
+.PHONY: install build build_nvtx_profile run_nvtx_profile unit_test unit_test_python unit_test_rust e2e_test clean help
 
 help:
 	@echo "Available targets:"
-	@echo "  make install          - Install the mahout python package"
-	@echo "  make unit_test        - Run all unit tests (Python + Rust)"
-	@echo "  make unit_test_python - Run Python unit tests only"
-	@echo "  make unit_test_rust   - Run Rust unit tests only"
-	@echo "  make e2e_test         - Run all e2e tests under qdp-python/benchmark"
-	@echo "  make clean            - Clean build artifacts"
+	@echo "  make install             - Install the mahout python package"
+	@echo "  make build               - Build qdp-core"
+	@echo "  make build_nvtx_profile  - Build qdp-core with observability features"
+	@echo "  make run_nvtx_profile    - Build example, run with nsys, and show stats (EXAMPLE=nvtx_profile)"
+	@echo "  make unit_test           - Run all unit tests (Python + Rust)"
+	@echo "  make unit_test_python    - Run Python unit tests only"
+	@echo "  make unit_test_rust      - Run Rust unit tests only"
+	@echo "  make e2e_test            - Run all e2e tests under qdp-python/benchmark"
+	@echo "  make clean               - Clean build artifacts"
 
 install:
 	@echo "Installing mahout python package..."
 	cd qdp-python && uv sync --group dev
 	cd qdp-python && uv run maturin develop
+
+build:
+	@echo "Building qdp-core..."
+	cargo build -p qdp-core
+
+build_nvtx_profile:
+	@echo "Building qdp-core with observability features..."
+	cargo build -p qdp-core --features observability --release
 
 unit_test: unit_test_python unit_test_rust
 
@@ -28,6 +39,15 @@ e2e_test:
 	@echo "Running e2e benchmark tests..."
 	cd qdp-python/benchmark && uv run python benchmark_e2e.py
 	cd qdp-python/benchmark && uv run python benchmark_dataloader_throughput.py
+
+run_nvtx_profile:
+	$(eval EXAMPLE ?= nvtx_profile)
+	@echo "Building example '$(EXAMPLE)' with observability features..."
+	cargo build -p qdp-core --example $(EXAMPLE) --features observability --release
+	@echo "Running '$(EXAMPLE)' with nsys profiling..."
+	nsys profile --trace=cuda,nvtx --force-overwrite=true -o report ./target/release/examples/$(EXAMPLE)
+	@echo "Showing profiling statistics..."
+	nsys stats --force-export=true report.nsys-rep
 
 clean:
 	@echo "Cleaning build artifacts..."

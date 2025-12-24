@@ -44,13 +44,39 @@ Once the container is running, you can proceed with the build and test steps as 
 
 ## Build
 
-Execute the following command in the `qdp/` directory to build
+Execute the following command in the `qdp/` directory to build:
 
 ```sh
 cargo build -p qdp-core
 ```
 
-To build with NVTX enabled, please refer to [NVTX_USAGE docs](./docs/observability/NVTX_USAGE.md).
+Or use the Makefile:
+
+```bash
+make build
+```
+
+To build with NVTX observability features enabled:
+
+```bash
+make build_nvtx_profile
+```
+
+## Profiling and Observability
+
+To run NVTX profiling with nsys and view performance statistics:
+
+```bash
+make run_nvtx_profile                    # Uses default nvtx_profile example
+make run_nvtx_profile EXAMPLE=my_example # Uses custom example
+```
+
+This will:
+1. Build the specified example with observability features enabled
+2. Run it with `nsys` to collect profiling data
+3. Display profiling statistics automatically
+
+For more details on NVTX profiling, markers, and how to interpret results, please refer to [NVTX_USAGE docs](./docs/observability/NVTX_USAGE.md).
 
 ## Install as Python Package
 
