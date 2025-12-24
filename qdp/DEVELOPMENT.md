@@ -71,22 +71,36 @@ uv sync --group dev
 uv run maturin develop
 ```
 
+Alternatively, you can directly run the following command from the `qdp/` directory:
+
+```bash
+make install
+```
+
 ## Test
 
 There are two types of tests in mahout qdp: unit tests and e2e tests (benchmark tests).
 
 ### Unit Tests
 
-You can simply follow the instructions in [test docs](./docs/test/README.md) to run unit tests.
+You can use the following make commands from the `qdp/` directory:
+
+```bash
+make unit_test        # Run all unit tests (Python + Rust)
+make unit_test_python # Run Python tests only
+make unit_test_rust   # Run Rust tests only
+```
+
+Or follow the instructions in [test docs](./docs/test/README.md) to run unit tests manually.
 
 ### E2e Tests
 
-The e2e and benchmark tests are located in the `benchmark` directory and are written in Python. To run them, please ensure you set up the Python environment and install the mahout qdp package following the [Install as Python package](#install-as-python-package) section.
+The e2e and benchmark tests are located in the `qdp-python/benchmark` directory and are written in Python.
 
-Then, go to the `benchmark/` directory, where all e2e and benchmark tests are located, and install the requirements needed for testing:
+First, ensure you set up the Python environment and install the mahout qdp package following the [Install as Python package](#install-as-python-package) section. Then, in the `qdp-python/` directory, run the following command to install the requirements needed for the benchmark testing:
 
 ```sh
-uv pip install -r requirements.txt
+uv sync --group benchmark
 ```
 
 If you only want to run mahout qdp without running qiskit or pennylane benchmark tests, simply uninstall them:
@@ -95,7 +109,7 @@ If you only want to run mahout qdp without running qiskit or pennylane benchmark
 uv pip uninstall qiskit pennylane
 ```
 
-Then, run the tests:
+Then, run the tests from the `qdp-python/benchmark/` directory:
 
 ```sh
 # benchmark test for dataloader throughput
@@ -103,6 +117,12 @@ python benchmark_dataloader_throughput.py
 
 # e2e test
 python benchmark_e2e.py
+```
+
+Or use the make command from the `qdp/` directory:
+
+```bash
+make e2e_test
 ```
 
 ## Troubleshooting
