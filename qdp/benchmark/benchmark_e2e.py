@@ -277,15 +277,17 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
     dlpack_time = time.perf_counter() - dlpack_start
     print(f"  DLPack conversion: {dlpack_time:.4f} s")
 
-    # Reshape to [n_samples, state_len] (still complex)
+    # Tensor is already 2D [n_samples, state_len] from to_dlpack()
     state_len = 1 << n_qubits
+    assert gpu_batched.shape == (n_samples, state_len), (
+        f"Expected shape ({n_samples}, {state_len}), got {gpu_batched.shape}"
+    )
 
     # Convert to float for model (batch already on GPU)
     reshape_start = time.perf_counter()
-    gpu_reshaped = gpu_batched.view(n_samples, state_len)
-    gpu_all_data = gpu_reshaped.abs().to(torch.float32)
+    gpu_all_data = gpu_batched.abs().to(torch.float32)
     reshape_time = time.perf_counter() - reshape_start
-    print(f"  Reshape & convert: {reshape_time:.4f} s")
+    print(f"  Convert to float32: {reshape_time:.4f} s")
 
     # Forward pass (data already on GPU)
     for i in range(0, n_samples, BATCH_SIZE):
@@ -299,7 +301,7 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
     # Clean cache after benchmark completion
     clean_cache()
 
-    return total_time, gpu_reshaped
+    return total_time, gpu_batched
 
 
 # -----------------------------------------------------------
@@ -325,13 +327,16 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
     dlpack_time = time.perf_counter() - dlpack_start
     print(f"  DLPack conversion: {dlpack_time:.4f} s")
 
+    # Tensor is already 2D [n_samples, state_len] from to_dlpack()
     state_len = 1 << n_qubits
+    assert gpu_batched.shape == (n_samples, state_len), (
+        f"Expected shape ({n_samples}, {state_len}), got {gpu_batched.shape}"
+    )
 
     reshape_start = time.perf_counter()
-    gpu_reshaped = gpu_batched.view(n_samples, state_len)
-    gpu_all_data = gpu_reshaped.abs().to(torch.float32)
+    gpu_all_data = gpu_batched.abs().to(torch.float32)
     reshape_time = time.perf_counter() - reshape_start
-    print(f"  Reshape & convert: {reshape_time:.4f} s")
+    print(f"  Convert to float32: {reshape_time:.4f} s")
 
     for i in range(0, n_samples, BATCH_SIZE):
         batch = gpu_all_data[i : i + BATCH_SIZE]
@@ -344,7 +349,7 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
     # Clean cache after benchmark completion
     clean_cache()
 
-    return total_time, gpu_reshaped
+    return total_time, gpu_batched
 
 
 def compare_states(name_a, states_a, name_b, states_b):
