@@ -24,7 +24,9 @@ use std::ffi::c_void;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use crate::error::{MahoutError, Result};
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error, PinnedBuffer};
+use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
+#[cfg(target_os = "linux")]
+use crate::gpu::buffer_pool::{PinnedBufferPool, PinnedBufferHandle};
 #[cfg(target_os = "linux")]
 use crate::gpu::cuda_ffi::{
     cudaEventCreateWithFlags,
@@ -178,18 +180,20 @@ where
     // 1. Create dual streams with an event to coordinate copy -> compute
     let ctx = PipelineContext::new(device)?;
 
-    // Pin the full host buffer once so cudaMemcpyAsync can leverage DMA without staging.
-    let pinned_host = PinnedBuffer::register(host_data)
-        .map_err(|e| MahoutError::Cuda(format!("Failed to pin host input for async pipeline: {}", e)))?;
+    // Pinned host staging pool sized to the current chunking strategy (double-buffer by default).
+    const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
+    const PINNED_POOL_SIZE: usize = 2; // double buffering
+    let pinned_pool = PinnedBufferPool::new(PINNED_POOL_SIZE, CHUNK_SIZE_ELEMENTS)
+        .map_err(|e| MahoutError::Cuda(format!("Failed to create pinned buffer pool: {}", e)))?;
 
     // 2. Chunk size: 8MB per chunk (balance between overhead and overlap opportunity)
-    // TODO: we should tune this dynamically based on the detected GPU model or PCIe bandwidth in the future.
-    // Too small = launch overhead dominates, too large = less overlap
-    const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
+    // TODO: tune dynamically based on GPU/PCIe bandwidth.
 
     // 3. Keep temporary buffers alive until all streams complete
     // This prevents Rust from dropping them while GPU is still using them
     let mut keep_alive_buffers: Vec<CudaSlice<f64>> = Vec::new();
+    // Keep pinned buffers alive until the copy stream has completed their H2D copy
+    let mut in_flight_pinned: Vec<PinnedBufferHandle> = Vec::new();
 
     let mut global_offset = 0;
 
@@ -212,19 +216,31 @@ where
             e,
         ))?;
 
+        // Acquire pinned staging buffer and populate it with the current chunk
+        let mut pinned_buf = pinned_pool.acquire();
+        pinned_buf.as_slice_mut()[..chunk.len()].copy_from_slice(chunk);
+
         // Async copy: host to device (non-blocking, on specified stream)
         // Uses CUDA Runtime API (cudaMemcpyAsync) for true async copy
         {
             crate::profile_scope!("GPU::H2DCopyAsync");
             unsafe {
                 ctx.async_copy_to_device(
-                    pinned_host.as_ptr().add(chunk_offset) as *const c_void,
+                    pinned_buf.ptr() as *const c_void,
                     *input_chunk_dev.device_ptr() as *mut c_void,
                     chunk.len(),
                 )?;
                 ctx.record_copy_done()?;
                 ctx.wait_for_copy()?;
             }
+        }
+
+        // Keep pinned buffer alive until the copy stream is synchronized.
+        in_flight_pinned.push(pinned_buf);
+        if in_flight_pinned.len() == PINNED_POOL_SIZE {
+            // Ensure previous H2D copies are done before reusing buffers.
+            unsafe { ctx.sync_copy_stream()?; }
+            in_flight_pinned.clear();
         }
 
         // Get device pointer for kernel launch
