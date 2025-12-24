@@ -128,7 +128,8 @@ def execute_circuit(circuit, backend, backend_config):
 
 
 def draw_circuit(circuit):
-    print(circuit)
+    # Use Cirq's string representation for circuit visualization
+    return str(circuit)
 
 
 def apply_rx_gate(circuit, qubit_index, angle):

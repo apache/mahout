@@ -139,7 +139,7 @@ def get_final_state_vector(circuit, backend, backend_config):
 
 def draw_circuit(circuit):
     # Use Qiskit's built-in drawing function
-    print(circuit.draw())
+    return circuit.draw()
 
 
 def apply_rx_gate(circuit, qubit_index, angle):
