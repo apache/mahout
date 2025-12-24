@@ -496,6 +496,11 @@ impl PinnedHostBuffer {
         unsafe { std::slice::from_raw_parts_mut(self.ptr, self.size_elements) }
     }
 
+    /// Immutable slice view of the pinned region
+    pub fn as_slice(&self) -> &[f64] {
+        unsafe { std::slice::from_raw_parts(self.ptr, self.size_elements) }
+    }
+
     /// Get raw pointer for CUDA memcpy
     pub fn ptr(&self) -> *const f64 {
         self.ptr
