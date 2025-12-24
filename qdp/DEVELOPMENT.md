@@ -112,9 +112,9 @@ There are two types of tests in mahout qdp: unit tests and e2e tests (benchmark 
 You can use the following make commands from the `qdp/` directory:
 
 ```bash
-make unit_test        # Run all unit tests (Python + Rust)
-make unit_test_python # Run Python tests only
-make unit_test_rust   # Run Rust tests only
+make test        # Run all unit tests (Python + Rust)
+make test_python # Run Python tests only
+make test_rust   # Run Rust tests only
 ```
 
 Or follow the instructions in [test docs](./docs/test/README.md) to run unit tests manually.

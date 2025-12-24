@@ -1,4 +1,4 @@
-.PHONY: install build build_nvtx_profile run_nvtx_profile unit_test unit_test_python unit_test_rust e2e_test clean help
+.PHONY: install build build_nvtx_profile run_nvtx_profile test test_python test_rust e2e_test clean help
 
 help:
 	@echo "Available targets:"
@@ -6,9 +6,9 @@ help:
 	@echo "  make build               - Build qdp-core"
 	@echo "  make build_nvtx_profile  - Build qdp-core with observability features"
 	@echo "  make run_nvtx_profile    - Build example, run with nsys, and show stats (EXAMPLE=nvtx_profile)"
-	@echo "  make unit_test           - Run all unit tests (Python + Rust)"
-	@echo "  make unit_test_python    - Run Python unit tests only"
-	@echo "  make unit_test_rust      - Run Rust unit tests only"
+	@echo "  make test                - Run all unit tests (Python + Rust)"
+	@echo "  make test_python         - Run Python unit tests only"
+	@echo "  make test_rust           - Run Rust unit tests only"
 	@echo "  make e2e_test            - Run all e2e tests under qdp-python/benchmark"
 	@echo "  make clean               - Clean build artifacts"
 
@@ -25,13 +25,13 @@ build_nvtx_profile:
 	@echo "Building qdp-core with observability features..."
 	cargo build -p qdp-core --features observability --release
 
-unit_test: unit_test_python unit_test_rust
+test: test_python test_rust
 
-unit_test_python:
+test_python:
 	@echo "Running Python unit tests..."
 	cd qdp-python && uv run pytest tests/
 
-unit_test_rust:
+test_rust:
 	@echo "Running Rust unit tests..."
 	cargo test --workspace
 
