@@ -20,7 +20,6 @@ dlpack_ptr = engine.encode(data, num_qubits=2, encoding_method="amplitude")
 # Or encode from file formats
 tensor_parquet = engine.encode_from_parquet("data.parquet", 10, "amplitude")
 tensor_arrow = engine.encode_from_arrow_ipc("data.arrow", 10, "amplitude")
-tensor_numpy = engine.encode_from_numpy("data.npy", 10, "amplitude")  # NEW!
 ```
 
 ## Build from source
@@ -44,7 +43,6 @@ uv run maturin develop
 
 - **Parquet** - `encode_from_parquet(path, num_qubits, encoding_method)`
 - **Arrow IPC** - `encode_from_arrow_ipc(path, num_qubits, encoding_method)`
-- **NumPy** - `encode_from_numpy(path, num_qubits, encoding_method)` ✨ NEW
 
 ## Adding new bindings
 

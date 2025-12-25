@@ -22,10 +22,6 @@
 //! # Fully Implemented Formats
 //! - **Parquet**: [`ParquetReader`], [`ParquetStreamingReader`]
 //! - **Arrow IPC**: [`ArrowIPCReader`]
-//! - **NumPy**: [`NumpyReader`]
-//!
-//! # Placeholder Formats (for demonstration)
-//! - **PyTorch**: [`TorchReader`] - See [`docs/ADDING_INPUT_FORMATS.md`](../../docs/ADDING_INPUT_FORMATS.md)
 
 pub mod arrow_ipc;
 pub mod parquet;

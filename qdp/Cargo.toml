@@ -28,9 +28,6 @@ rayon = "1.10"
 arrow = "54"
 # Parquet support for Arrow
 parquet = "54"
-# NumPy file format support
-ndarray = "0.16"
-ndarray-npy = "0.9"
 
 # Release profile optimizations
 [profile.release]
