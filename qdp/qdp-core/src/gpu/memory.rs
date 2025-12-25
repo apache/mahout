@@ -15,7 +15,6 @@
 // limitations under the License.
 use std::ffi::c_void;
 #[cfg(target_os = "linux")]
-use std::marker::PhantomData;
 use std::sync::Arc;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
 use qdp_kernels::{CuComplex, CuDoubleComplex};
@@ -133,78 +132,6 @@ pub(crate) fn map_allocation_error(
             e,
             source,
         )),
-    }
-}
-
-/// Page-locked host buffer used to enable true async DMA for H2D copies.
-#[cfg(target_os = "linux")]
-pub struct PinnedBuffer<'a, T> {
-    ptr: *mut T,
-    len_bytes: usize,
-    _marker: PhantomData<&'a [T]>,
-}
-
-#[cfg(target_os = "linux")]
-impl<'a, T> PinnedBuffer<'a, T> {
-    /// Registers an existing host slice as pinned memory for the duration of the buffer's lifetime.
-    pub fn register(host_slice: &'a [T]) -> Result<Self> {
-        if host_slice.is_empty() {
-            return Err(MahoutError::InvalidInput(
-                "Cannot pin an empty host buffer".to_string(),
-            ));
-        }
-
-        let len_bytes = host_slice.len()
-            .checked_mul(std::mem::size_of::<T>())
-            .ok_or_else(|| MahoutError::MemoryAllocation(
-                "Requested host pin size overflow".to_string(),
-            ))?;
-
-        unsafe {
-            unsafe extern "C" {
-                fn cudaHostRegister(ptr: *mut c_void, size: usize, flags: u32) -> i32;
-            }
-
-            // flags = 0 (default): portable, not mapped into device address space
-            let result = cudaHostRegister(host_slice.as_ptr() as *mut c_void, len_bytes, 0);
-            if result != 0 {
-                return Err(MahoutError::Cuda(format!(
-                    "Failed to pin host buffer for DMA: {} ({})",
-                    result,
-                    cuda_error_to_string(result)
-                )));
-            }
-        }
-
-        Ok(Self {
-            ptr: host_slice.as_ptr() as *mut T,
-            len_bytes,
-            _marker: PhantomData,
-        })
-    }
-
-    /// Raw const pointer to the pinned host memory.
-    #[inline]
-    pub fn as_ptr(&self) -> *const T {
-        self.ptr as *const T
-    }
-
-    /// Length in bytes of the pinned region.
-    #[inline]
-    pub fn len_bytes(&self) -> usize {
-        self.len_bytes
-    }
-}
-
-#[cfg(target_os = "linux")]
-impl<'a, T> Drop for PinnedBuffer<'a, T> {
-    fn drop(&mut self) {
-        unsafe {
-            unsafe extern "C" {
-                fn cudaHostUnregister(ptr: *mut c_void) -> i32;
-            }
-            let _ = cudaHostUnregister(self.ptr as *mut c_void);
-        }
     }
 }
 

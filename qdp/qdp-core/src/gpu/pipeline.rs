@@ -203,6 +203,14 @@ where
 
         crate::profile_scope!("GPU::ChunkProcess");
 
+        if chunk.len() > CHUNK_SIZE_ELEMENTS {
+            return Err(MahoutError::InvalidInput(format!(
+                "Chunk size {} exceeds pinned buffer capacity {}",
+                chunk.len(),
+                CHUNK_SIZE_ELEMENTS
+            )));
+        }
+
         let chunk_bytes = chunk.len() * std::mem::size_of::<f64>();
         ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
 

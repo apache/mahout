@@ -31,9 +31,17 @@ use arrow::datatypes::{DataType, Field, Schema};
 use arrow::ipc::reader::FileReader as ArrowFileReader;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::ArrowWriter;
+use parquet::basic::Compression;
 use parquet::file::properties::WriterProperties;
 
 use crate::error::{MahoutError, Result};
+
+/// Build Parquet writer properties optimized for fast decode.
+fn fast_decode_writer_props() -> WriterProperties {
+    WriterProperties::builder()
+        .set_compression(Compression::SNAPPY) // Light-weight codec; switch to UNCOMPRESSED for max decode speed
+        .build()
+}
 
 /// Converts an Arrow Float64Array to Vec<f64>.
 pub fn arrow_to_vec(array: &Float64Array) -> Vec<f64> {
@@ -104,7 +112,7 @@ pub fn write_parquet<P: AsRef<Path>>(
         MahoutError::Io(format!("Failed to create Parquet file: {}", e))
     })?;
 
-    let props = WriterProperties::builder().build();
+    let props = fast_decode_writer_props();
     let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
         MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
     })?;
@@ -211,7 +219,7 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
         MahoutError::Io(format!("Failed to create Parquet file: {}", e))
     })?;
 
-    let props = WriterProperties::builder().build();
+    let props = fast_decode_writer_props();
     let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
         MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
     })?;
