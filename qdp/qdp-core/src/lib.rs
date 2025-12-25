@@ -182,7 +182,8 @@ impl QdpEngine {
             let num_samples = reader_core.total_rows;
 
             let total_state_vector = GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
-            let ctx = PipelineContext::new(&self.device)?;
+            const PIPELINE_EVENT_SLOTS: usize = 2; // matches double-buffered staging buffers
+            let ctx = PipelineContext::new(&self.device, PIPELINE_EVENT_SLOTS)?;
 
             let dev_in_a = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
@@ -251,14 +252,15 @@ impl QdpEngine {
 
                 let samples_in_chunk = current_len / sample_size;
                 if samples_in_chunk > 0 {
+                    let event_slot = if use_dev_a { 0 } else { 1 };
                     let dev_ptr = if use_dev_a { *dev_in_a.device_ptr() } else { *dev_in_b.device_ptr() };
 
                     unsafe {
                         crate::profile_scope!("GPU::Dispatch");
 
                         ctx.async_copy_to_device(host_buffer.ptr() as *const c_void, dev_ptr as *mut c_void, current_len)?;
-                        ctx.record_copy_done()?;
-                        ctx.wait_for_copy()?;
+                        ctx.record_copy_done(event_slot)?;
+                        ctx.wait_for_copy(event_slot)?;
 
                         {
                             crate::profile_scope!("GPU::BatchEncode");
