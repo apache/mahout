@@ -120,9 +120,25 @@ impl GpuStateVector {
     /// Freed by DLPack deleter when PyTorch releases tensor.
     /// Do not free manually.
     pub fn to_dlpack(&self) -> *mut DLManagedTensor {
-        // Allocate shape/strides on heap (freed by deleter)
-        let shape = vec![self.size_elements as i64];
-        let strides = vec![1i64];
+        // Always return 2D tensor: Batch [num_samples, state_len], Single [1, state_len]
+        let (shape, strides) = if let Some(num_samples) = self.num_samples {
+            // Batch: [num_samples, state_len_per_sample]
+            debug_assert!(
+                num_samples > 0 && self.size_elements % num_samples == 0,
+                "Batch state vector size must be divisible by num_samples"
+            );
+            let state_len_per_sample = self.size_elements / num_samples;
+            let shape = vec![num_samples as i64, state_len_per_sample as i64];
+            let strides = vec![state_len_per_sample as i64, 1i64];
+            (shape, strides)
+        } else {
+            // Single: [1, size_elements]
+            let state_len = self.size_elements;
+            let shape = vec![1i64, state_len as i64];
+            let strides = vec![state_len as i64, 1i64];
+            (shape, strides)
+        };
+        let ndim: c_int = 2;
 
         // Transfer ownership to DLPack deleter
         let shape_ptr = Box::into_raw(shape.into_boxed_slice()) as *mut i64;
@@ -140,9 +156,9 @@ impl GpuStateVector {
             data: self.ptr_void(),
             device: DLDevice {
                 device_type: DLDeviceType::kDLCUDA,
-                device_id: 0,
+                device_id: self.device_id as c_int,
             },
-            ndim: 1,
+            ndim,
             dtype: DLDataType {
                 code: DL_COMPLEX,
                 bits: dtype_bits,

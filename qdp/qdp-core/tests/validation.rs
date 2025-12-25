@@ -121,6 +121,30 @@ fn test_input_validation_max_qubits() {
 
 #[test]
 #[cfg(target_os = "linux")]
+fn test_input_validation_batch_zero_samples() {
+    println!("Testing zero num_samples rejection...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+
+    let batch_data = vec![1.0, 2.0, 3.0, 4.0];
+    let result = engine.encode_batch(&batch_data, 0, 4, 2, "amplitude");
+    assert!(result.is_err(), "Should reject zero num_samples");
+
+    match result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(msg.contains("num_samples must be greater than 0"),
+                    "Error should mention num_samples requirement");
+            println!("PASS: Correctly rejected zero num_samples: {}", msg);
+        }
+        _ => panic!("Expected InvalidInput error for zero num_samples"),
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
 fn test_empty_data() {
     println!("Testing empty data rejection...");
 
