@@ -1,27 +1,21 @@
 ---
 layout: page
 title: Mailing Lists, IRC and Archives
-
-
 ---
-
 # General
 
-Communication at Mahout happens primarily online via mailing lists. We have
+Communication at Mahout happens primarily online via mailing Lists. We have
 a user as well as a dev list for discussion. In addition there is a commit
-list so we are able to monitor what happens on the wiki and in svn.
+list so we can monitor what happens on the wiki and in SVN.
 
-<a name="MailingLists,IRCandArchives-Mailinglists"></a>
 # Mailing lists
 
 ## How to subscribe/unsubscribe
 
 Follow the links below, or send mail manually, with empty subject and body.
 
-The pattern for subscribing and unsubscribing to  mailing lists at the ASF
-is &lt;list-name&gt;-&lt;action&gt;@&lt;project.&gt;apache.org.
+The pattern for subscribing and unsubscribing to mailing Lists at the ASF is:
 
-<a name="MailingLists,IRCandArchives-MahoutUserList"></a>
 ## Mahout User List
 
 This list is for users of Mahout to ask questions, share knowledge, and
@@ -32,7 +26,6 @@ your problem before filing issues in JIRA.
 * [Subscribe](mailto:user-subscribe@mahout.apache.org)
 * [Unsubscribe](mailto:user-unsubscribe@mahout.apache.org)
 
-<a name="MailingLists,IRCandArchives-MahoutDeveloperList"></a>
 ## Mahout Developer List
 
 This is the list where participating developers of the Mahout project meet
@@ -40,31 +33,23 @@ and discuss issues concerning Mahout internals, code changes/additions,
 etc. Do not send mail to this list with usage questions or configuration
 questions and problems.
 
-Discussion list:
+**Discussion list:**
 
 * [Subscribe](mailto:dev-subscribe@mahout.apache.org)
- -- Do not send mail to this list with usage questions or configuration
-questions and problems.
 * [Unsubscribe](mailto:dev-unsubscribe@mahout.apache.org)
 
-Commit notifications:
+**Commit notifications:**
 
 * [Subscribe](mailto:commits-subscribe@mahout.apache.org)
 * [Unsubscribe](mailto:commits-unsubscribe@mahout.apache.org)
 
-<a name="MailingLists,IRCandArchives-IRC"></a>
 # IRC
 
 Mahout's IRC channel is **#mahout**.  It is a logged channel.  Please keep in
 mind that it is for discussion purposes only and that (pseudo)decisions
-should be brought back to the dev@ mailing list or JIRA and other people
-who are not on IRC should be given time to respond before any work is
-committed.
-
-<a name="MailingLists,IRCandArchives-Archives"></a>
+should be brought back to the dev@ mailing list or JIRA and allow others who are not on IRC sufficient time to respond before committing work.
 # Archives
 
-<a name="MailingLists,IRCandArchives-OfficialApacheArchive"></a>
 ## Official Apache Archive
 
 * [http://mail-archives.apache.org/mod_mbox/mahout-dev/](http://mail-archives.apache.org/mod_mbox/mahout-dev/)
