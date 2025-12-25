@@ -84,6 +84,12 @@ impl Preprocessor {
         sample_size: usize,
         num_qubits: usize,
     ) -> Result<()> {
+        if num_samples == 0 {
+            return Err(MahoutError::InvalidInput(
+                "num_samples must be greater than 0".to_string()
+            ));
+        }
+
         if batch_data.len() != num_samples * sample_size {
             return Err(MahoutError::InvalidInput(
                 format!("Batch data length {} doesn't match num_samples {} * sample_size {}",
