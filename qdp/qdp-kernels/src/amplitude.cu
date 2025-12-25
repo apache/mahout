@@ -41,18 +41,17 @@ __global__ void amplitude_encode_kernel(
 
     // Vectorized Load Optimization:
     // If we are well within bounds, treat input as double2 to issue a single 128-bit load instruction.
-    // This reduces memory transactions and improves throughput on RTX cards.
+    // Use __ldg() to pull through the read-only cache; cudaMalloc aligns to 256 bytes so the
+    // reinterpret_cast<double2*> load is naturally aligned.
     if (state_idx_base + 1 < input_len) {
         // Reinterpret cast to load two doubles at once
-        // Note: Assumes input is reasonably aligned (standard cudaMalloc provides 256-byte alignment)
-        const double2* input_vec = reinterpret_cast<const double2*>(input);
-        double2 loaded = input_vec[idx];
+        const double2 loaded = __ldg(reinterpret_cast<const double2*>(input) + idx);
         v1 = loaded.x;
         v2 = loaded.y;
     }
     // Handle edge case: Odd input length
     else if (state_idx_base < input_len) {
-        v1 = input[state_idx_base];
+        v1 = __ldg(input + state_idx_base);
         // v2 remains 0.0
     }
 
@@ -63,6 +62,35 @@ __global__ void amplitude_encode_kernel(
     // Check boundary for the second element (state_len is usually power of 2, but good to be safe)
     if (state_idx_base + 1 < state_len) {
         state[state_idx_base + 1] = make_cuDoubleComplex(v2 * inv_norm, 0.0);
+    }
+}
+
+__global__ void amplitude_encode_kernel_f32(
+    const float* __restrict__ input,
+    cuComplex* __restrict__ state,
+    size_t input_len,
+    size_t state_len,
+    float inv_norm
+) {
+    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t state_idx_base = idx * 2;
+    if (state_idx_base >= state_len) return;
+
+    float v1 = 0.0f;
+    float v2 = 0.0f;
+
+    if (state_idx_base + 1 < input_len) {
+        // Mirror the double kernel: cached vectorized load for two floats
+        const float2 loaded = __ldg(reinterpret_cast<const float2*>(input) + idx);
+        v1 = loaded.x;
+        v2 = loaded.y;
+    } else if (state_idx_base < input_len) {
+        v1 = __ldg(input + state_idx_base);
+    }
+
+    state[state_idx_base] = make_cuComplex(v1 * inv_norm, 0.0f);
+    if (state_idx_base + 1 < state_len) {
+        state[state_idx_base + 1] = make_cuComplex(v2 * inv_norm, 0.0f);
     }
 }
 
@@ -132,6 +160,35 @@ int launch_amplitude_encode(
         input_len,
         state_len,
         inv_norm // Pass reciprocal
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Launch amplitude encoding kernel for float32
+int launch_amplitude_encode_f32(
+    const float* input_d,
+    void* state_d,
+    size_t input_len,
+    size_t state_len,
+    float inv_norm,
+    cudaStream_t stream
+) {
+    if (inv_norm <= 0.0f || !isfinite(inv_norm)) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuComplex* state_complex_d = static_cast<cuComplex*>(state_d);
+
+    const int blockSize = 256;
+    const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
+
+    amplitude_encode_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
+        input_d,
+        state_complex_d,
+        input_len,
+        state_len,
+        inv_norm
     );
 
     return (int)cudaGetLastError();
