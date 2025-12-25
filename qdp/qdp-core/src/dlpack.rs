@@ -16,9 +16,9 @@
 
 // DLPack protocol for zero-copy GPU memory sharing with PyTorch
 
+use crate::gpu::memory::{BufferStorage, GpuStateVector, Precision};
 use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
-use crate::gpu::memory::{BufferStorage, GpuStateVector, Precision};
 
 // DLPack C structures (matching dlpack/dlpack.h)
 
@@ -38,7 +38,7 @@ pub struct DLDevice {
 
 #[repr(C)]
 pub struct DLDataType {
-    pub code: u8,  // kDLInt=0, kDLUInt=1, kDLFloat=2, kDLBfloat=4, kDLComplex=5
+    pub code: u8, // kDLInt=0, kDLUInt=1, kDLFloat=2, kDLBfloat=4, kDLComplex=5
     pub bits: u8,
     pub lanes: u16,
 }
@@ -89,14 +89,22 @@ pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
 
     // 1. Free shape array (Box<[i64]>)
     if !tensor.shape.is_null() {
-        let len = if tensor.ndim > 0 { tensor.ndim as usize } else { 1 };
+        let len = if tensor.ndim > 0 {
+            tensor.ndim as usize
+        } else {
+            1
+        };
         let slice_ptr: *mut [i64] = std::ptr::slice_from_raw_parts_mut(tensor.shape, len);
         let _ = Box::from_raw(slice_ptr);
     }
 
     // 2. Free strides array
     if !tensor.strides.is_null() {
-        let len = if tensor.ndim > 0 { tensor.ndim as usize } else { 1 };
+        let len = if tensor.ndim > 0 {
+            tensor.ndim as usize
+        } else {
+            1
+        };
         let slice_ptr: *mut [i64] = std::ptr::slice_from_raw_parts_mut(tensor.strides, len);
         let _ = Box::from_raw(slice_ptr);
     }
@@ -124,7 +132,7 @@ impl GpuStateVector {
         let (shape, strides) = if let Some(num_samples) = self.num_samples {
             // Batch: [num_samples, state_len_per_sample]
             debug_assert!(
-                num_samples > 0 && self.size_elements % num_samples == 0,
+                num_samples > 0 && self.size_elements.is_multiple_of(num_samples),
                 "Batch state vector size must be divisible by num_samples"
             );
             let state_len_per_sample = self.size_elements / num_samples;
@@ -148,7 +156,7 @@ impl GpuStateVector {
         let ctx = Arc::into_raw(self.buffer.clone()) as *mut c_void;
 
         let dtype_bits = match self.precision() {
-            Precision::Float32 => 64, // complex64 (2x float32)
+            Precision::Float32 => 64,  // complex64 (2x float32)
             Precision::Float64 => 128, // complex128 (2x float64)
         };
 

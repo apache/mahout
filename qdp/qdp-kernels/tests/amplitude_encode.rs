@@ -20,12 +20,8 @@
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
-    CuComplex,
-    CuDoubleComplex,
-    launch_amplitude_encode,
-    launch_amplitude_encode_f32,
-    launch_l2_norm,
-    launch_l2_norm_batch,
+    CuComplex, CuDoubleComplex, launch_amplitude_encode, launch_amplitude_encode_f32,
+    launch_l2_norm, launch_l2_norm_batch,
 };
 
 const EPSILON: f64 = 1e-10;
@@ -138,15 +134,36 @@ fn test_amplitude_encode_basic_f32() {
 
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
 
-    assert!((state_h[0].x - 0.6).abs() < EPSILON_F32, "First element should be 0.6");
-    assert!(state_h[0].y.abs() < EPSILON_F32, "First element imaginary should be 0");
-    assert!((state_h[1].x - 0.8).abs() < EPSILON_F32, "Second element should be 0.8");
-    assert!(state_h[1].y.abs() < EPSILON_F32, "Second element imaginary should be 0");
-    assert!(state_h[2].x.abs() < EPSILON_F32, "Third element should be 0");
-    assert!(state_h[3].x.abs() < EPSILON_F32, "Fourth element should be 0");
+    assert!(
+        (state_h[0].x - 0.6).abs() < EPSILON_F32,
+        "First element should be 0.6"
+    );
+    assert!(
+        state_h[0].y.abs() < EPSILON_F32,
+        "First element imaginary should be 0"
+    );
+    assert!(
+        (state_h[1].x - 0.8).abs() < EPSILON_F32,
+        "Second element should be 0.8"
+    );
+    assert!(
+        state_h[1].y.abs() < EPSILON_F32,
+        "Second element imaginary should be 0"
+    );
+    assert!(
+        state_h[2].x.abs() < EPSILON_F32,
+        "Third element should be 0"
+    );
+    assert!(
+        state_h[3].x.abs() < EPSILON_F32,
+        "Fourth element should be 0"
+    );
 
     let total_prob: f32 = state_h.iter().map(|c| c.x * c.x + c.y * c.y).sum();
-    assert!((total_prob - 1.0).abs() < EPSILON_F32, "Total probability should be 1.0");
+    assert!(
+        (total_prob - 1.0).abs() < EPSILON_F32,
+        "Total probability should be 1.0"
+    );
 
     println!("PASS: Basic float32 amplitude encoding works correctly");
 }

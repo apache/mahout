@@ -14,15 +14,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod memory;
 pub mod encodings;
+pub mod memory;
 pub mod pipeline;
 
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_ffi;
 
+pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder, get_encoder};
 pub use memory::GpuStateVector;
-pub use encodings::{QuantumEncoder, AmplitudeEncoder, AngleEncoder, BasisEncoder, get_encoder};
 pub use pipeline::run_dual_stream_pipeline;
 
 #[cfg(target_os = "linux")]

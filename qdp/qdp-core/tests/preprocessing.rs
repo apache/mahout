@@ -14,8 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::preprocessing::Preprocessor;
 use qdp_core::MahoutError;
+use qdp_core::preprocessing::Preprocessor;
 
 #[test]
 fn test_validate_input_success() {
@@ -37,21 +37,27 @@ fn test_validate_input_zero_qubits() {
 fn test_validate_input_too_many_qubits() {
     let data = vec![1.0];
     let result = Preprocessor::validate_input(&data, 31);
-    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("exceeds practical limit")));
+    assert!(
+        matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("exceeds practical limit"))
+    );
 }
 
 #[test]
 fn test_validate_input_empty_data() {
     let data: Vec<f64> = vec![];
     let result = Preprocessor::validate_input(&data, 1);
-    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("cannot be empty")));
+    assert!(
+        matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("cannot be empty"))
+    );
 }
 
 #[test]
 fn test_validate_input_data_too_large() {
     let data = vec![1.0, 0.0, 0.0]; // 3 elements
     let result = Preprocessor::validate_input(&data, 1); // max size 2^1 = 2
-    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("exceeds state vector size")));
+    assert!(
+        matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("exceeds state vector size"))
+    );
 }
 
 #[test]
