@@ -37,9 +37,17 @@ use parquet::file::properties::WriterProperties;
 use crate::error::{MahoutError, Result};
 
 /// Build Parquet writer properties optimized for fast decode.
+/// Defaults to SNAPPY; override with env `MAHOUT_PARQUET_COMPRESSION=UNCOMPRESSED`
+/// if you want maximal decode speed and can afford larger files.
 fn fast_decode_writer_props() -> WriterProperties {
+    let compression = match std::env::var("MAHOUT_PARQUET_COMPRESSION") {
+        Ok(val) if val.eq_ignore_ascii_case("UNCOMPRESSED") => Compression::UNCOMPRESSED,
+        Ok(val) if val.eq_ignore_ascii_case("SNAPPY") => Compression::SNAPPY,
+        _ => Compression::SNAPPY,
+    };
+
     WriterProperties::builder()
-        .set_compression(Compression::SNAPPY) // Light-weight codec; switch to UNCOMPRESSED for max decode speed
+        .set_compression(compression)
         .build()
 }
 
@@ -655,18 +663,21 @@ impl ParquetBlockReader {
                             let current_sample_size = *size as usize;
 
                             let values = list_array.values();
-                            let float_array = values
-                                .as_any()
-                                .downcast_ref::<Float64Array>()
-                                .ok_or_else(|| MahoutError::Io("FixedSizeList values must be Float64".to_string()))?;
+                        let float_array = values
+                            .as_any()
+                            .downcast_ref::<Float64Array>()
+                            .ok_or_else(|| MahoutError::Io("FixedSizeList values must be Float64".to_string()))?;
 
-                            if float_array.null_count() != 0 {
-                                return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
-                            }
-
-                            let _ = push_values(float_array.values())?;
-                            current_sample_size
+                        if float_array.null_count() != 0 {
+                            return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
                         }
+
+                        let should_break = push_values(float_array.values())?;
+                        if should_break {
+                            break;
+                        }
+                        current_sample_size
+                    }
                         _ => {
                             return Err(MahoutError::Io(format!(
                                 "Expected List<Float64> or FixedSizeList<Float64>, got {:?}",

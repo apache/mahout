@@ -44,30 +44,34 @@ use crate::gpu::cuda_ffi::{
 pub struct PipelineContext {
     pub stream_compute: CudaStream,
     pub stream_copy: CudaStream,
-    event_copy_done: *mut c_void,
+    events_copy_done: Vec<*mut c_void>,
 }
 
 #[cfg(target_os = "linux")]
 #[allow(unsafe_op_in_unsafe_fn)]
 impl PipelineContext {
-    pub fn new(device: &Arc<CudaDevice>) -> Result<Self> {
+    pub fn new(device: &Arc<CudaDevice>, event_slots: usize) -> Result<Self> {
         let stream_compute = device.fork_default_stream()
             .map_err(|e| MahoutError::Cuda(format!("Failed to create compute stream: {:?}", e)))?;
         let stream_copy = device.fork_default_stream()
             .map_err(|e| MahoutError::Cuda(format!("Failed to create copy stream: {:?}", e)))?;
 
-        let mut event_copy_done: *mut c_void = std::ptr::null_mut();
-        unsafe {
-            let ret = cudaEventCreateWithFlags(&mut event_copy_done, CUDA_EVENT_DISABLE_TIMING);
-            if ret != 0 {
-                return Err(MahoutError::Cuda(format!("Failed to create CUDA event: {}", ret)));
+        let mut events_copy_done = Vec::with_capacity(event_slots);
+        for _ in 0..event_slots {
+            let mut ev: *mut c_void = std::ptr::null_mut();
+            unsafe {
+                let ret = cudaEventCreateWithFlags(&mut ev, CUDA_EVENT_DISABLE_TIMING);
+                if ret != 0 {
+                    return Err(MahoutError::Cuda(format!("Failed to create CUDA event: {}", ret)));
+                }
             }
+            events_copy_done.push(ev);
         }
 
         Ok(Self {
             stream_compute,
             stream_copy,
-            event_copy_done,
+            events_copy_done,
         })
     }
 
@@ -93,8 +97,8 @@ impl PipelineContext {
     }
 
     /// Record completion of the copy on the copy stream.
-    pub unsafe fn record_copy_done(&self) -> Result<()> {
-        let ret = cudaEventRecord(self.event_copy_done, self.stream_copy.stream as *mut c_void);
+    pub unsafe fn record_copy_done(&self, slot: usize) -> Result<()> {
+        let ret = cudaEventRecord(self.events_copy_done[slot], self.stream_copy.stream as *mut c_void);
         if ret != 0 {
             return Err(MahoutError::Cuda(format!("cudaEventRecord failed: {}", ret)));
         }
@@ -102,9 +106,9 @@ impl PipelineContext {
     }
 
     /// Make compute stream wait for the copy completion event.
-    pub unsafe fn wait_for_copy(&self) -> Result<()> {
+    pub unsafe fn wait_for_copy(&self, slot: usize) -> Result<()> {
         crate::profile_scope!("GPU::StreamWait");
-        let ret = cudaStreamWaitEvent(self.stream_compute.stream as *mut c_void, self.event_copy_done, 0);
+        let ret = cudaStreamWaitEvent(self.stream_compute.stream as *mut c_void, self.events_copy_done[slot], 0);
         if ret != 0 {
             return Err(MahoutError::Cuda(format!("cudaStreamWaitEvent failed: {}", ret)));
         }
@@ -126,8 +130,10 @@ impl PipelineContext {
 impl Drop for PipelineContext {
     fn drop(&mut self) {
         unsafe {
-            if !self.event_copy_done.is_null() {
-                let _ = cudaEventDestroy(self.event_copy_done);
+            for ev in &mut self.events_copy_done {
+                if !ev.is_null() {
+                    let _ = cudaEventDestroy(*ev);
+                }
             }
         }
     }
@@ -177,12 +183,11 @@ where
 {
     crate::profile_scope!("GPU::AsyncPipeline");
 
-    // 1. Create dual streams with an event to coordinate copy -> compute
-    let ctx = PipelineContext::new(device)?;
-
     // Pinned host staging pool sized to the current chunking strategy (double-buffer by default).
     const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
     const PINNED_POOL_SIZE: usize = 2; // double buffering
+    // 1. Create dual streams with per-slot events to coordinate copy -> compute
+    let ctx = PipelineContext::new(device, PINNED_POOL_SIZE)?;
     let pinned_pool = PinnedBufferPool::new(PINNED_POOL_SIZE, CHUNK_SIZE_ELEMENTS)
         .map_err(|e| MahoutError::Cuda(format!("Failed to create pinned buffer pool: {}", e)))?;
 
@@ -196,10 +201,12 @@ where
     let mut in_flight_pinned: Vec<PinnedBufferHandle> = Vec::new();
 
     let mut global_offset = 0;
+    let mut chunk_idx = 0usize;
 
     // 4. Pipeline loop: copy on copy stream, compute on compute stream with event handoff
     for chunk in host_data.chunks(CHUNK_SIZE_ELEMENTS) {
         let chunk_offset = global_offset;
+        let event_slot = chunk_idx % PINNED_POOL_SIZE;
 
         crate::profile_scope!("GPU::ChunkProcess");
 
@@ -238,8 +245,8 @@ where
                     *input_chunk_dev.device_ptr() as *mut c_void,
                     chunk.len(),
                 )?;
-                ctx.record_copy_done()?;
-                ctx.wait_for_copy()?;
+                ctx.record_copy_done(event_slot)?;
+                ctx.wait_for_copy(event_slot)?;
             }
         }
 
@@ -267,6 +274,7 @@ where
 
         // Update offset for next chunk
         global_offset += chunk.len();
+        chunk_idx += 1;
     }
 
     // 5. Synchronize all streams: wait for all work to complete
