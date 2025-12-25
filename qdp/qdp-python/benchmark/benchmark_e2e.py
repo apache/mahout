@@ -279,9 +279,12 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
 
     # Tensor is already 2D [n_samples, state_len] from to_dlpack()
     state_len = 1 << n_qubits
-    assert gpu_batched.shape == (n_samples, state_len), (
-        f"Expected shape ({n_samples}, {state_len}), got {gpu_batched.shape}"
-    )
+    if gpu_batched.numel() != n_samples * state_len:
+        raise ValueError(
+            f"Unexpected element count after DLPack ({gpu_batched.numel()} vs {n_samples * state_len})"
+        )
+    # PyTorch sometimes flattens DLPack complex tensors; reshape defensively.
+    gpu_batched = gpu_batched.view(n_samples, state_len)
 
     # Convert to float for model (batch already on GPU)
     reshape_start = time.perf_counter()
@@ -329,9 +332,12 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
 
     # Tensor is already 2D [n_samples, state_len] from to_dlpack()
     state_len = 1 << n_qubits
-    assert gpu_batched.shape == (n_samples, state_len), (
-        f"Expected shape ({n_samples}, {state_len}), got {gpu_batched.shape}"
-    )
+    if gpu_batched.numel() != n_samples * state_len:
+        raise ValueError(
+            f"Unexpected element count after DLPack ({gpu_batched.numel()} vs {n_samples * state_len})"
+        )
+    # PyTorch sometimes flattens DLPack complex tensors; reshape defensively.
+    gpu_batched = gpu_batched.view(n_samples, state_len)
 
     reshape_start = time.perf_counter()
     gpu_all_data = gpu_batched.abs().to(torch.float32)
