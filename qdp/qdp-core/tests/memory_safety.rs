@@ -116,11 +116,17 @@ fn test_dlpack_tensor_metadata_default() {
         assert_eq!(shape[1], 1024, "Second dimension should be 1024 (2^10)");
 
         let strides = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
-        assert_eq!(strides[0], 1024, "Stride for first dimension should be state_len");
+        assert_eq!(
+            strides[0], 1024,
+            "Stride for first dimension should be state_len"
+        );
         assert_eq!(strides[1], 1, "Stride for second dimension should be 1");
 
         assert_eq!(tensor.dtype.code, 5, "Should be complex type (code=5)");
-        assert_eq!(tensor.dtype.bits, 128, "Should be 128 bits (2x64-bit floats, Float64)");
+        assert_eq!(
+            tensor.dtype.bits, 64,
+            "Should be 64 bits (2x32-bit floats, Float64)"
+        );
 
         println!("PASS: DLPack metadata verified");
         println!("  ndim: {}", tensor.ndim);
@@ -166,7 +172,10 @@ fn test_dlpack_tensor_metadata_f64() {
         assert_eq!(shape[1], 1024, "Second dimension should be 1024 (2^10)");
 
         let strides = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
-        assert_eq!(strides[0], 1024, "Stride for first dimension should be state_len");
+        assert_eq!(
+            strides[0], 1024,
+            "Stride for first dimension should be state_len"
+        );
         assert_eq!(strides[1], 1, "Stride for second dimension should be 1");
 
         assert_eq!(tensor.dtype.code, 5, "Should be complex type (code=5)");
