@@ -36,6 +36,9 @@ def calculate_fidelity(
 ) -> float:
     """Calculate quantum state fidelity: F = |<ψ_gpu | ψ_cpu>|²"""
     psi_gpu = state_vector_gpu.cpu().numpy()
+    # Convert 2D [1, state_len] to 1D for compatibility with ground truth
+    if psi_gpu.ndim == 2 and psi_gpu.shape[0] == 1:
+        psi_gpu = psi_gpu[0]
 
     if np.any(np.isnan(psi_gpu)) or np.any(np.isinf(psi_gpu)):
         return 0.0
@@ -103,7 +106,7 @@ def test_amplitude_encoding_fidelity_comprehensive(
 
     assert torch_state.is_cuda, "Tensor must be on GPU"
     assert torch_state.dtype == torch.complex128, "Tensor must be Complex128"
-    assert torch_state.shape[0] == state_len, "Tensor shape must match 2^n"
+    assert torch_state.shape == (1, state_len), "Tensor shape must be [1, 2^n]"
 
     fidelity = calculate_fidelity(torch_state, expected_state_complex)
     print(f"Fidelity: {fidelity:.16f}")

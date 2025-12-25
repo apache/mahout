@@ -95,7 +95,7 @@ impl QdpEngine {
     /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
     ///
     /// # Returns
-    /// DLPack pointer for zero-copy PyTorch integration
+    /// DLPack pointer for zero-copy PyTorch integration (shape: [1, 2^num_qubits])
     ///
     /// # Safety
     /// Pointer freed by DLPack deleter, do not free manually.
@@ -219,6 +219,27 @@ impl QdpEngine {
                     "Sample size cannot be zero".into(),
                 ));
             }
+            if sample_size > STAGE_SIZE_ELEMENTS {
+                return Err(MahoutError::InvalidInput(format!(
+                    "Sample size {} exceeds staging buffer capacity {} (elements)",
+                    sample_size, STAGE_SIZE_ELEMENTS
+                )));
+            }
+
+            // Reuse a single norm buffer across chunks to avoid per-chunk allocations.
+            //
+            // Important: the norm buffer must outlive the async kernels that consume it.
+            // Per-chunk allocation + drop can lead to use-after-free when the next chunk
+            // reuses the same device memory while the previous chunk is still running.
+            let max_samples_per_chunk = std::cmp::max(
+                1,
+                std::cmp::min(num_samples, STAGE_SIZE_ELEMENTS / sample_size),
+            );
+            let mut norm_buffer = self.device.alloc_zeros::<f64>(max_samples_per_chunk)
+                .map_err(|e| MahoutError::MemoryAllocation(format!(
+                    "Failed to allocate norm buffer: {:?}",
+                    e
+                )))?;
 
             full_buf_tx
                 .send(Ok((host_buf_first, first_len)))
@@ -328,6 +349,10 @@ impl QdpEngine {
                                         e
                                     ))
                                 })?;
+                            debug_assert!(
+                                samples_in_chunk <= max_samples_per_chunk,
+                                "samples_in_chunk must be <= max_samples_per_chunk"
+                            );
 
                             {
                                 crate::profile_scope!("GPU::NormBatch");
