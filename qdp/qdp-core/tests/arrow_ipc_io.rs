@@ -14,10 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::io::read_arrow_ipc_batch;
-use arrow::array::{Float64Array, FixedSizeListArray};
+use arrow::array::{FixedSizeListArray, Float64Array};
 use arrow::datatypes::{DataType, Field, Schema};
 use arrow::ipc::writer::FileWriter as ArrowFileWriter;
+use qdp_core::io::read_arrow_ipc_batch;
 use std::fs::{self, File};
 use std::sync::Arc;
 
@@ -38,12 +38,8 @@ fn test_read_arrow_ipc_fixed_size_list() {
     // Write Arrow IPC with FixedSizeList format
     let values_array = Float64Array::from(all_values.clone());
     let field = Arc::new(Field::new("item", DataType::Float64, false));
-    let list_array = FixedSizeListArray::new(
-        field,
-        sample_size as i32,
-        Arc::new(values_array),
-        None,
-    );
+    let list_array =
+        FixedSizeListArray::new(field, sample_size as i32, Arc::new(values_array), None);
 
     let schema = Arc::new(Schema::new(vec![Field::new(
         "data",
@@ -54,11 +50,9 @@ fn test_read_arrow_ipc_fixed_size_list() {
         false,
     )]));
 
-    let batch = arrow::record_batch::RecordBatch::try_new(
-        schema.clone(),
-        vec![Arc::new(list_array)],
-    )
-    .unwrap();
+    let batch =
+        arrow::record_batch::RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array)])
+            .unwrap();
 
     let file = File::create(temp_path).unwrap();
     let mut writer = ArrowFileWriter::try_new(file, &schema).unwrap();
@@ -87,10 +81,13 @@ fn test_read_arrow_ipc_list() {
     let sample_size = 8;
 
     // Create test data with List format
-    let mut list_builder = arrow::array::ListBuilder::new(Float64Array::builder(num_samples * sample_size));
+    let mut list_builder =
+        arrow::array::ListBuilder::new(Float64Array::builder(num_samples * sample_size));
 
     for i in 0..num_samples {
-        let values: Vec<f64> = (0..sample_size).map(|j| (i * sample_size + j) as f64).collect();
+        let values: Vec<f64> = (0..sample_size)
+            .map(|j| (i * sample_size + j) as f64)
+            .collect();
         list_builder.values().append_slice(&values);
         list_builder.append(true);
     }
@@ -103,11 +100,9 @@ fn test_read_arrow_ipc_list() {
         false,
     )]));
 
-    let batch = arrow::record_batch::RecordBatch::try_new(
-        schema.clone(),
-        vec![Arc::new(list_array)],
-    )
-    .unwrap();
+    let batch =
+        arrow::record_batch::RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array)])
+            .unwrap();
 
     let file = File::create(temp_path).unwrap();
     let mut writer = ArrowFileWriter::try_new(file, &schema).unwrap();
@@ -141,7 +136,9 @@ fn test_arrow_ipc_inconsistent_sizes_fails() {
     list_builder.append(true);
 
     // Second sample: 8 elements (inconsistent!)
-    list_builder.values().append_slice(&[5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0]);
+    list_builder
+        .values()
+        .append_slice(&[5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0]);
     list_builder.append(true);
 
     let list_array = list_builder.finish();
@@ -152,11 +149,9 @@ fn test_arrow_ipc_inconsistent_sizes_fails() {
         false,
     )]));
 
-    let batch = arrow::record_batch::RecordBatch::try_new(
-        schema.clone(),
-        vec![Arc::new(list_array)],
-    )
-    .unwrap();
+    let batch =
+        arrow::record_batch::RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array)])
+            .unwrap();
 
     let file = File::create(temp_path).unwrap();
     let mut writer = ArrowFileWriter::try_new(file, &schema).unwrap();
@@ -194,12 +189,8 @@ fn test_arrow_ipc_large_batch() {
     // Write as FixedSizeList
     let values_array = Float64Array::from(all_values.clone());
     let field = Arc::new(Field::new("item", DataType::Float64, false));
-    let list_array = FixedSizeListArray::new(
-        field,
-        sample_size as i32,
-        Arc::new(values_array),
-        None,
-    );
+    let list_array =
+        FixedSizeListArray::new(field, sample_size as i32, Arc::new(values_array), None);
 
     let schema = Arc::new(Schema::new(vec![Field::new(
         "data",
@@ -210,11 +201,9 @@ fn test_arrow_ipc_large_batch() {
         false,
     )]));
 
-    let batch = arrow::record_batch::RecordBatch::try_new(
-        schema.clone(),
-        vec![Arc::new(list_array)],
-    )
-    .unwrap();
+    let batch =
+        arrow::record_batch::RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array)])
+            .unwrap();
 
     let file = File::create(temp_path).unwrap();
     let mut writer = ArrowFileWriter::try_new(file, &schema).unwrap();

@@ -108,9 +108,7 @@ fn main() {
                 Err(e) => {
                     eprintln!(
                         "Encode failed on batch {} (vector {}): {:?}",
-                        batch_idx,
-                        total_vectors,
-                        e
+                        batch_idx, total_vectors, e
                     );
                     return;
                 }

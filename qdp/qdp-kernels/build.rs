@@ -31,23 +31,21 @@ fn main() {
     println!("cargo:rerun-if-changed=src/amplitude.cu");
 
     // Check if CUDA is available by looking for nvcc
-    let has_cuda = Command::new("nvcc")
-        .arg("--version")
-        .output()
-        .is_ok();
+    let has_cuda = Command::new("nvcc").arg("--version").output().is_ok();
 
     if !has_cuda {
         println!("cargo:warning=CUDA not found (nvcc not in PATH). Skipping kernel compilation.");
         println!("cargo:warning=This is expected on macOS or non-CUDA environments.");
-        println!("cargo:warning=The project will build, but GPU functionality will not be available.");
+        println!(
+            "cargo:warning=The project will build, but GPU functionality will not be available."
+        );
         println!("cargo:warning=For production deployment, ensure CUDA toolkit is installed.");
         return;
     }
 
     // Get CUDA installation path
     // Priority: CUDA_PATH env var > /usr/local/cuda (default Linux location)
-    let cuda_path = env::var("CUDA_PATH")
-        .unwrap_or_else(|_| "/usr/local/cuda".to_string());
+    let cuda_path = env::var("CUDA_PATH").unwrap_or_else(|_| "/usr/local/cuda".to_string());
 
     println!("cargo:rustc-link-search=native={}/lib64", cuda_path);
     println!("cargo:rustc-link-lib=cudart");
@@ -64,8 +62,8 @@ fn main() {
 
     build
         .cuda(true)
-        .flag("-cudart=shared")  // Use shared CUDA runtime
-        .flag("-std=c++17")      // C++17 for modern CUDA features
+        .flag("-cudart=shared") // Use shared CUDA runtime
+        .flag("-std=c++17") // C++17 for modern CUDA features
         // GPU architecture targets
         // SM 75 = Turing (T4, RTX 2000 series)
         // SM 80 = Ampere (A100, RTX 3000 series)

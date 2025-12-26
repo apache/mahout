@@ -17,11 +17,11 @@
 // Basis encoding (placeholder)
 // TODO: Map integers to computational basis states
 
-use std::sync::Arc;
-use cudarc::driver::CudaDevice;
+use super::QuantumEncoder;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
-use super::QuantumEncoder;
+use cudarc::driver::CudaDevice;
+use std::sync::Arc;
 
 /// Basis encoding (not implemented)
 /// TODO: Map integers to basis states (e.g., 3 → |011⟩)
@@ -35,7 +35,7 @@ impl QuantumEncoder for BasisEncoder {
         _num_qubits: usize,
     ) -> Result<GpuStateVector> {
         Err(MahoutError::InvalidInput(
-            "Basis encoding not yet implemented. Use 'amplitude' encoding for now.".to_string()
+            "Basis encoding not yet implemented. Use 'amplitude' encoding for now.".to_string(),
         ))
     }
 

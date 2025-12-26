@@ -18,27 +18,24 @@
 
 use std::sync::Arc;
 
-use cudarc::driver::CudaDevice;
+use super::QuantumEncoder;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
 use crate::gpu::pipeline::run_dual_stream_pipeline;
-use super::QuantumEncoder;
+use cudarc::driver::CudaDevice;
 
 #[cfg(target_os = "linux")]
-use std::ffi::c_void;
-#[cfg(target_os = "linux")]
 use crate::gpu::cuda_ffi::cudaMemsetAsync;
+#[cfg(target_os = "linux")]
+use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 #[cfg(target_os = "linux")]
 use cudarc::driver::{DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
-    launch_amplitude_encode,
-    launch_amplitude_encode_batch,
-    launch_l2_norm,
-    launch_l2_norm_batch,
+    launch_amplitude_encode, launch_amplitude_encode_batch, launch_l2_norm, launch_l2_norm_batch,
 };
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
+use std::ffi::c_void;
 
 use crate::preprocessing::Preprocessor;
 
@@ -75,18 +72,23 @@ impl QuantumEncoder for AmplitudeEncoder {
 
             if host_data.len() < ASYNC_THRESHOLD {
                 // Synchronous path for small data (avoids stream overhead)
-                let input_bytes = host_data.len() * std::mem::size_of::<f64>();
-                ensure_device_memory_available(input_bytes, "input staging buffer", Some(num_qubits))?;
+                let input_bytes = std::mem::size_of_val(host_data);
+                ensure_device_memory_available(
+                    input_bytes,
+                    "input staging buffer",
+                    Some(num_qubits),
+                )?;
 
                 let input_slice = {
                     crate::profile_scope!("GPU::H2DCopy");
-                    _device.htod_sync_copy(host_data)
-                        .map_err(|e| map_allocation_error(
+                    _device.htod_sync_copy(host_data).map_err(|e| {
+                        map_allocation_error(
                             input_bytes,
                             "input staging buffer",
                             Some(num_qubits),
                             e,
-                        ))?
+                        )
+                    })?
                 };
 
                 // GPU-accelerated norm for medium+ inputs, CPU fallback for tiny payloads
@@ -142,15 +144,22 @@ impl QuantumEncoder for AmplitudeEncoder {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    _device
-                        .synchronize()
-                        .map_err(|e| MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e)))?;
+                    _device.synchronize().map_err(|e| {
+                        MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e))
+                    })?;
                 }
             } else {
                 // Async Pipeline path for large data
                 let norm = Preprocessor::calculate_l2_norm(host_data)?;
                 let inv_norm = 1.0 / norm;
-                Self::encode_async_pipeline(_device, host_data, num_qubits, state_len, inv_norm, &state_vector)?;
+                Self::encode_async_pipeline(
+                    _device,
+                    host_data,
+                    num_qubits,
+                    state_len,
+                    inv_norm,
+                    &state_vector,
+                )?;
             }
 
             Ok(state_vector)
@@ -158,7 +167,9 @@ impl QuantumEncoder for AmplitudeEncoder {
 
         #[cfg(not(target_os = "linux"))]
         {
-            Err(MahoutError::Cuda("CUDA unavailable (non-Linux)".to_string()))
+            Err(MahoutError::Cuda(
+                "CUDA unavailable (non-Linux)".to_string(),
+            ))
         }
     }
 
@@ -188,19 +199,17 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Upload input data to GPU
         let input_batch_gpu = {
             crate::profile_scope!("GPU::H2D_InputBatch");
-            device.htod_sync_copy(batch_data)
-                .map_err(|e| MahoutError::MemoryAllocation(
-                    format!("Failed to upload batch input: {:?}", e)
-                ))?
+            device.htod_sync_copy(batch_data).map_err(|e| {
+                MahoutError::MemoryAllocation(format!("Failed to upload batch input: {:?}", e))
+            })?
         };
 
         // Compute inverse norms on GPU using warp-reduced kernel
         let inv_norms_gpu = {
             crate::profile_scope!("GPU::BatchNormKernel");
-            let mut buffer = device.alloc_zeros::<f64>(num_samples)
-                .map_err(|e| MahoutError::MemoryAllocation(
-                    format!("Failed to allocate norm buffer: {:?}", e)
-                ))?;
+            let mut buffer = device.alloc_zeros::<f64>(num_samples).map_err(|e| {
+                MahoutError::MemoryAllocation(format!("Failed to allocate norm buffer: {:?}", e))
+            })?;
 
             let ret = unsafe {
                 launch_l2_norm_batch(
@@ -213,9 +222,11 @@ impl QuantumEncoder for AmplitudeEncoder {
             };
 
             if ret != 0 {
-                return Err(MahoutError::KernelLaunch(
-                    format!("Norm reduction kernel failed: {} ({})", ret, cuda_error_to_string(ret))
-                ));
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Norm reduction kernel failed: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
             }
 
             buffer
@@ -224,12 +235,13 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Validate norms on host to catch zero or NaN samples early
         {
             crate::profile_scope!("GPU::NormValidation");
-            let host_inv_norms = device.dtoh_sync_copy(&inv_norms_gpu)
+            let host_inv_norms = device
+                .dtoh_sync_copy(&inv_norms_gpu)
                 .map_err(|e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)))?;
 
             if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
                 return Err(MahoutError::InvalidInput(
-                    "One or more samples have zero or invalid norm".to_string()
+                    "One or more samples have zero or invalid norm".to_string(),
                 ));
             }
         }
@@ -237,9 +249,11 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Launch batch kernel
         {
             crate::profile_scope!("GPU::BatchKernelLaunch");
-            let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| MahoutError::InvalidInput(
-                "Batch state vector precision mismatch (expected float64 buffer)".to_string()
-            ))?;
+            let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
+                MahoutError::InvalidInput(
+                    "Batch state vector precision mismatch (expected float64 buffer)".to_string(),
+                )
+            })?;
             let ret = unsafe {
                 launch_amplitude_encode_batch(
                     *input_batch_gpu.device_ptr() as *const f64,
@@ -253,16 +267,19 @@ impl QuantumEncoder for AmplitudeEncoder {
             };
 
             if ret != 0 {
-                return Err(MahoutError::KernelLaunch(
-                    format!("Batch kernel launch failed: {} ({})", ret, cuda_error_to_string(ret))
-                ));
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Batch kernel launch failed: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
             }
         }
 
         // Synchronize
         {
             crate::profile_scope!("GPU::Synchronize");
-            device.synchronize()
+            device
+                .synchronize()
                 .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
         }
 
@@ -279,8 +296,6 @@ impl QuantumEncoder for AmplitudeEncoder {
 }
 
 impl AmplitudeEncoder {
-
-
     /// Async pipeline encoding for large data
     ///
     /// Uses the generic dual-stream pipeline infrastructure to overlap
@@ -296,52 +311,58 @@ impl AmplitudeEncoder {
         inv_norm: f64,
         state_vector: &GpuStateVector,
     ) -> Result<()> {
-        let base_state_ptr = state_vector.ptr_f64().ok_or_else(|| MahoutError::InvalidInput(
-            "State vector precision mismatch (expected float64 buffer)".to_string()
-        ))?;
+        let base_state_ptr = state_vector.ptr_f64().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "State vector precision mismatch (expected float64 buffer)".to_string(),
+            )
+        })?;
 
         // Use generic pipeline infrastructure
         // The closure handles amplitude-specific kernel launch logic
-        run_dual_stream_pipeline(device, host_data, |stream, input_ptr, chunk_offset, chunk_len| {
-            // Calculate offset pointer for state vector (type-safe pointer arithmetic)
-            // Offset is in complex numbers (CuDoubleComplex), not f64 elements
-            let state_ptr_offset = unsafe {
-                base_state_ptr.cast::<u8>()
-                    .add(chunk_offset * std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
-                    .cast::<std::ffi::c_void>()
-            };
+        run_dual_stream_pipeline(
+            device,
+            host_data,
+            |stream, input_ptr, chunk_offset, chunk_len| {
+                // Calculate offset pointer for state vector (type-safe pointer arithmetic)
+                // Offset is in complex numbers (CuDoubleComplex), not f64 elements
+                let state_ptr_offset = unsafe {
+                    base_state_ptr
+                        .cast::<u8>()
+                        .add(chunk_offset * std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
+                        .cast::<std::ffi::c_void>()
+                };
 
-            // Launch amplitude encoding kernel on the provided stream
-            let ret = unsafe {
-                launch_amplitude_encode(
-                    input_ptr,
-                    state_ptr_offset,
-                    chunk_len,
-                    state_len,
-                    inv_norm,
-                    stream.stream as *mut c_void,
-                )
-            };
-
-            if ret != 0 {
-                let error_msg = if ret == 2 {
-                    format!(
-                        "Kernel launch reported cudaErrorMemoryAllocation (likely OOM) while encoding chunk starting at offset {} (len={}).",
-                        chunk_offset,
-                        chunk_len
-                    )
-                } else {
-                    format!(
-                        "Kernel launch failed with CUDA error code: {} ({})",
-                        ret,
-                        cuda_error_to_string(ret)
+                // Launch amplitude encoding kernel on the provided stream
+                let ret = unsafe {
+                    launch_amplitude_encode(
+                        input_ptr,
+                        state_ptr_offset,
+                        chunk_len,
+                        state_len,
+                        inv_norm,
+                        stream.stream as *mut c_void,
                     )
                 };
-                return Err(MahoutError::KernelLaunch(error_msg));
-            }
 
-            Ok(())
-        })?;
+                if ret != 0 {
+                    let error_msg = if ret == 2 {
+                        format!(
+                            "Kernel launch reported cudaErrorMemoryAllocation (likely OOM) while encoding chunk starting at offset {} (len={}).",
+                            chunk_offset, chunk_len
+                        )
+                    } else {
+                        format!(
+                            "Kernel launch failed with CUDA error code: {} ({})",
+                            ret,
+                            cuda_error_to_string(ret)
+                        )
+                    };
+                    return Err(MahoutError::KernelLaunch(error_msg));
+                }
+
+                Ok(())
+            },
+        )?;
 
         // CRITICAL FIX: Handle padding for uninitialized memory
         // Since we use alloc() (uninitialized), we must zero-fill any tail region
@@ -351,12 +372,11 @@ impl AmplitudeEncoder {
         if data_len < state_len {
             let padding_start = data_len;
             let padding_elements = state_len - padding_start;
-            let padding_bytes = padding_elements * std::mem::size_of::<qdp_kernels::CuDoubleComplex>();
+            let padding_bytes =
+                padding_elements * std::mem::size_of::<qdp_kernels::CuDoubleComplex>();
 
             // Calculate tail pointer (in complex numbers)
-            let tail_ptr = unsafe {
-                base_state_ptr.add(padding_start) as *mut c_void
-            };
+            let tail_ptr = unsafe { base_state_ptr.add(padding_start) as *mut c_void };
 
             // Zero-fill padding region using CUDA Runtime API
             // Use default stream since pipeline streams are already synchronized
@@ -369,15 +389,17 @@ impl AmplitudeEncoder {
                 );
 
                 if result != 0 {
-                    return Err(MahoutError::Cuda(
-                        format!("Failed to zero-fill padding region: {} ({})",
-                                result, cuda_error_to_string(result))
-                    ));
+                    return Err(MahoutError::Cuda(format!(
+                        "Failed to zero-fill padding region: {} ({})",
+                        result,
+                        cuda_error_to_string(result)
+                    )));
                 }
             }
 
             // Synchronize to ensure padding is complete before returning
-            device.synchronize()
+            device
+                .synchronize()
                 .map_err(|e| MahoutError::Cuda(format!("Failed to sync after padding: {:?}", e)))?;
         }
 
@@ -395,10 +417,9 @@ impl AmplitudeEncoder {
     ) -> Result<f64> {
         crate::profile_scope!("GPU::NormSingle");
 
-        let mut norm_buffer = device.alloc_zeros::<f64>(1)
-            .map_err(|e| MahoutError::MemoryAllocation(
-                format!("Failed to allocate norm buffer: {:?}", e)
-            ))?;
+        let mut norm_buffer = device.alloc_zeros::<f64>(1).map_err(|e| {
+            MahoutError::MemoryAllocation(format!("Failed to allocate norm buffer: {:?}", e))
+        })?;
 
         let ret = unsafe {
             launch_l2_norm(
@@ -410,18 +431,21 @@ impl AmplitudeEncoder {
         };
 
         if ret != 0 {
-            return Err(MahoutError::KernelLaunch(
-                format!("Norm kernel failed: {} ({})", ret, cuda_error_to_string(ret))
-            ));
+            return Err(MahoutError::KernelLaunch(format!(
+                "Norm kernel failed: {} ({})",
+                ret,
+                cuda_error_to_string(ret)
+            )));
         }
 
-        let inv_norm_host = device.dtoh_sync_copy(&norm_buffer)
+        let inv_norm_host = device
+            .dtoh_sync_copy(&norm_buffer)
             .map_err(|e| MahoutError::Cuda(format!("Failed to copy norm to host: {:?}", e)))?;
 
-        let inv_norm = inv_norm_host.get(0).copied().unwrap_or(0.0);
+        let inv_norm = inv_norm_host.first().copied().unwrap_or(0.0);
         if inv_norm == 0.0 || !inv_norm.is_finite() {
             return Err(MahoutError::InvalidInput(
-                "Input data has zero norm".to_string()
+                "Input data has zero norm".to_string(),
             ));
         }
 

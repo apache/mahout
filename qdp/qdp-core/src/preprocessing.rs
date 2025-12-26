@@ -14,8 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use rayon::prelude::*;
 use crate::error::{MahoutError, Result};
+use rayon::prelude::*;
 
 /// Shared CPU-based pre-processing pipeline for quantum encoding.
 ///
@@ -34,27 +34,30 @@ impl Preprocessor {
         // Validate qubits (max 30 = 16GB GPU memory)
         if num_qubits == 0 {
             return Err(MahoutError::InvalidInput(
-                "Number of qubits must be at least 1".to_string()
+                "Number of qubits must be at least 1".to_string(),
             ));
         }
         if num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(
-                format!("Number of qubits {} exceeds practical limit of 30", num_qubits)
-            ));
+            return Err(MahoutError::InvalidInput(format!(
+                "Number of qubits {} exceeds practical limit of 30",
+                num_qubits
+            )));
         }
 
         // Validate input data
         if host_data.is_empty() {
             return Err(MahoutError::InvalidInput(
-                "Input data cannot be empty".to_string()
+                "Input data cannot be empty".to_string(),
             ));
         }
 
         let state_len = 1 << num_qubits;
         if host_data.len() > state_len {
-            return Err(MahoutError::InvalidInput(
-                format!("Input data length {} exceeds state vector size {}", host_data.len(), state_len)
-            ));
+            return Err(MahoutError::InvalidInput(format!(
+                "Input data length {} exceeds state vector size {}",
+                host_data.len(),
+                state_len
+            )));
         }
 
         Ok(())
@@ -71,7 +74,9 @@ impl Preprocessor {
         };
 
         if norm == 0.0 {
-            return Err(MahoutError::InvalidInput("Input data has zero norm".to_string()));
+            return Err(MahoutError::InvalidInput(
+                "Input data has zero norm".to_string(),
+            ));
         }
 
         Ok(norm)
@@ -86,28 +91,32 @@ impl Preprocessor {
     ) -> Result<()> {
         if num_samples == 0 {
             return Err(MahoutError::InvalidInput(
-                "num_samples must be greater than 0".to_string()
+                "num_samples must be greater than 0".to_string(),
             ));
         }
 
         if batch_data.len() != num_samples * sample_size {
-            return Err(MahoutError::InvalidInput(
-                format!("Batch data length {} doesn't match num_samples {} * sample_size {}",
-                    batch_data.len(), num_samples, sample_size)
-            ));
+            return Err(MahoutError::InvalidInput(format!(
+                "Batch data length {} doesn't match num_samples {} * sample_size {}",
+                batch_data.len(),
+                num_samples,
+                sample_size
+            )));
         }
 
         if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(
-                format!("Number of qubits {} must be between 1 and 30", num_qubits)
-            ));
+            return Err(MahoutError::InvalidInput(format!(
+                "Number of qubits {} must be between 1 and 30",
+                num_qubits
+            )));
         }
 
         let state_len = 1 << num_qubits;
         if sample_size > state_len {
-            return Err(MahoutError::InvalidInput(
-                format!("Sample size {} exceeds state vector size {}", sample_size, state_len)
-            ));
+            return Err(MahoutError::InvalidInput(format!(
+                "Sample size {} exceeds state vector size {}",
+                sample_size, state_len
+            )));
         }
 
         Ok(())
@@ -129,9 +138,10 @@ impl Preprocessor {
                 let norm_sq: f64 = sample.iter().map(|&x| x * x).sum();
                 let norm = norm_sq.sqrt();
                 if norm == 0.0 {
-                    return Err(MahoutError::InvalidInput(
-                        format!("Sample {} has zero norm", i)
-                    ));
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Sample {} has zero norm",
+                        i
+                    )));
                 }
                 Ok(norm)
             })

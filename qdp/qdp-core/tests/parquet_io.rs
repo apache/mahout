@@ -14,10 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::io::{
-    read_parquet, read_parquet_to_arrow, write_arrow_to_parquet, write_parquet,
-};
 use arrow::array::Float64Array;
+use qdp_core::io::{read_parquet, read_parquet_to_arrow, write_arrow_to_parquet, write_parquet};
 use std::fs;
 
 mod common;
