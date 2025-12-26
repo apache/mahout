@@ -44,13 +44,55 @@ Once the container is running, you can proceed with the build and test steps as 
 
 ## Build
 
-Execute the following command in the `qdp/` directory to build
+Execute the following command in the `qdp/` directory to build:
 
 ```sh
 cargo build -p qdp-core
 ```
 
-To build with NVTX enabled, please refer to [NVTX_USAGE docs](./docs/observability/NVTX_USAGE.md).
+Or use the Makefile:
+
+```bash
+make build
+```
+
+To build with NVTX observability features enabled:
+
+```bash
+make build_nvtx_profile
+```
+
+## Profiling and Observability
+
+### Profiling Rust Examples
+
+To run NVTX profiling with nsys on Rust examples and view performance statistics:
+
+```bash
+make run_nvtx_profile                    # Uses default nvtx_profile example
+make run_nvtx_profile EXAMPLE=my_example # Uses custom example
+```
+
+This will:
+1. Build the specified example with observability features enabled
+2. Run it with `nsys` to collect profiling data
+3. Display profiling statistics automatically
+
+### Profiling Python Benchmarks
+
+To profile Python benchmarks with NVTX annotations, you need to install the package with profiling support:
+
+```bash
+make install_profile
+```
+
+This installs the Python package with observability features enabled. Then you can profile any Python script:
+
+```bash
+nsys profile python qdp-python/benchmark/benchmark_e2e.py
+```
+
+For more details on NVTX profiling, markers, and how to interpret results, please refer to [NVTX_USAGE docs](./docs/observability/NVTX_USAGE.md).
 
 ## Install as Python Package
 
@@ -71,23 +113,50 @@ uv sync --group dev
 uv run maturin develop
 ```
 
+Alternatively, you can directly run the following command from the `qdp/` directory:
+
+```bash
+make install
+```
+
+To install the package with profiling support (includes NVTX observability features for performance analysis):
+
+```bash
+make install_profile
+```
+
 ## Test
 
 There are two types of tests in mahout qdp: unit tests and e2e tests (benchmark tests).
 
 ### Unit Tests
 
-You can simply follow the instructions in [test docs](./docs/test/README.md) to run unit tests.
+You can use the following make commands from the `qdp/` directory:
 
-### E2e Tests
-
-The e2e and benchmark tests are located in the `benchmark` directory and are written in Python. To run them, please ensure you set up the Python environment and install the mahout qdp package following the [Install as Python package](#install-as-python-package) section.
-
-Then, go to the `benchmark/` directory, where all e2e and benchmark tests are located, and install the requirements needed for testing:
-
-```sh
-uv pip install -r requirements.txt
+```bash
+make test        # Run all unit tests (Python + Rust)
+make test_python # Run Python tests only
+make test_rust   # Run Rust tests only
 ```
+
+Or follow the instructions in [test docs](./docs/test/README.md) to run unit tests manually.
+
+### Benchmark Tests
+
+The e2e and benchmark tests are located in the `qdp-python/benchmark` directory and are written in Python.
+
+First, ensure you set up the Python environment and install the mahout qdp package following the [Install as Python package](#install-as-python-package) section.
+
+To run all benchmark tests, use the make command from the `qdp/` directory:
+
+```bash
+make benchmark
+```
+
+This will:
+1. Install the mahout qdp package if not already installed
+2. Install benchmark dependencies (`uv sync --group benchmark`)
+3. Run all benchmark tests
 
 If you only want to run mahout qdp without running qiskit or pennylane benchmark tests, simply uninstall them:
 
@@ -95,7 +164,7 @@ If you only want to run mahout qdp without running qiskit or pennylane benchmark
 uv pip uninstall qiskit pennylane
 ```
 
-Then, run the tests:
+You can also run individual tests manually from the `qdp-python/benchmark/` directory:
 
 ```sh
 # benchmark test for dataloader throughput
