@@ -19,9 +19,17 @@
 #[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
-use qdp_kernels::{CuDoubleComplex, launch_amplitude_encode, launch_l2_norm, launch_l2_norm_batch};
+use qdp_kernels::{
+    CuComplex,
+    CuDoubleComplex,
+    launch_amplitude_encode,
+    launch_amplitude_encode_f32,
+    launch_l2_norm,
+    launch_l2_norm_batch,
+};
 
 const EPSILON: f64 = 1e-10;
+const EPSILON_F32: f32 = 1e-5;
 
 #[test]
 #[cfg(target_os = "linux")]
@@ -92,6 +100,55 @@ fn test_amplitude_encode_basic() {
     );
 
     println!("PASS: Basic amplitude encoding works correctly");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_amplitude_encode_basic_f32() {
+    println!("Testing basic amplitude encoding (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input: Vec<f32> = vec![3.0, 4.0];
+    let norm = (input[0] * input[0] + input[1] * input[1]).sqrt();
+    let inv_norm = 1.0f32 / norm;
+    let state_len = 4usize;
+
+    let input_d = device.htod_copy(input.clone()).unwrap();
+    let mut state_d = device.alloc_zeros::<CuComplex>(state_len).unwrap();
+
+    let result = unsafe {
+        launch_amplitude_encode_f32(
+            *input_d.device_ptr() as *const f32,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            input.len(),
+            state_len,
+            inv_norm,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(result, 0, "Kernel launch should succeed");
+
+    let state_h = device.dtoh_sync_copy(&state_d).unwrap();
+
+    assert!((state_h[0].x - 0.6).abs() < EPSILON_F32, "First element should be 0.6");
+    assert!(state_h[0].y.abs() < EPSILON_F32, "First element imaginary should be 0");
+    assert!((state_h[1].x - 0.8).abs() < EPSILON_F32, "Second element should be 0.8");
+    assert!(state_h[1].y.abs() < EPSILON_F32, "Second element imaginary should be 0");
+    assert!(state_h[2].x.abs() < EPSILON_F32, "Third element should be 0");
+    assert!(state_h[3].x.abs() < EPSILON_F32, "Fourth element should be 0");
+
+    let total_prob: f32 = state_h.iter().map(|c| c.x * c.x + c.y * c.y).sum();
+    assert!((total_prob - 1.0).abs() < EPSILON_F32, "Total probability should be 1.0");
+
+    println!("PASS: Basic float32 amplitude encoding works correctly");
 }
 
 #[test]

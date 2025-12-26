@@ -69,6 +69,20 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Launch amplitude encoding kernel (float32 input/output)
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_amplitude_encode_f32(
+        input_d: *const f32,
+        state_d: *mut c_void,
+        input_len: usize,
+        state_len: usize,
+        inv_norm: f32,
+        stream: *mut c_void,
+    ) -> i32;
+
     /// Launch batch amplitude encoding kernel
     /// Returns CUDA error code (0 = success)
     ///
@@ -136,6 +150,19 @@ pub extern "C" fn launch_amplitude_encode(
     _stream: *mut c_void,
 ) -> i32 {
     999 // Error: CUDA unavailable
+}
+
+#[cfg(not(target_os = "linux"))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_amplitude_encode_f32(
+    _input_d: *const f32,
+    _state_d: *mut c_void,
+    _input_len: usize,
+    _state_len: usize,
+    _inv_norm: f32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
 }
 
 #[cfg(not(target_os = "linux"))]
