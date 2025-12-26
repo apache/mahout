@@ -37,7 +37,7 @@ use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{PinnedBuffer, GpuStateVector};
+use crate::gpu::memory::{PinnedHostBuffer, GpuStateVector};
 #[cfg(target_os = "linux")]
 use crate::gpu::PipelineContext;
 #[cfg(target_os = "linux")]
@@ -182,17 +182,18 @@ impl QdpEngine {
             let num_samples = reader_core.total_rows;
 
             let total_state_vector = GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
-            let ctx = PipelineContext::new(&self.device)?;
+            const PIPELINE_EVENT_SLOTS: usize = 2; // matches double-buffered staging buffers
+            let ctx = PipelineContext::new(&self.device, PIPELINE_EVENT_SLOTS)?;
 
             let dev_in_a = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
             let dev_in_b = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
 
-            let (full_buf_tx, full_buf_rx): (SyncSender<std::result::Result<(PinnedBuffer, usize), MahoutError>>, Receiver<std::result::Result<(PinnedBuffer, usize), MahoutError>>) = sync_channel(2);
-            let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedBuffer>, Receiver<PinnedBuffer>) = sync_channel(2);
+            let (full_buf_tx, full_buf_rx): (SyncSender<std::result::Result<(PinnedHostBuffer, usize), MahoutError>>, Receiver<std::result::Result<(PinnedHostBuffer, usize), MahoutError>>) = sync_channel(2);
+            let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedHostBuffer>, Receiver<PinnedHostBuffer>) = sync_channel(2);
 
-            let mut host_buf_first = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+            let mut host_buf_first = PinnedHostBuffer::new(STAGE_SIZE_ELEMENTS)?;
             let first_len = reader_core.read_chunk(host_buf_first.as_slice_mut())?;
 
             let sample_size = reader_core.get_sample_size()
@@ -226,7 +227,7 @@ impl QdpEngine {
             full_buf_tx.send(Ok((host_buf_first, first_len)))
                 .map_err(|_| MahoutError::Io("Failed to send first buffer".into()))?;
 
-            empty_buf_tx.send(PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?)
+            empty_buf_tx.send(PinnedHostBuffer::new(STAGE_SIZE_ELEMENTS)?)
                 .map_err(|_| MahoutError::Io("Failed to send second buffer".into()))?;
 
             let mut reader = reader_core;
@@ -272,14 +273,15 @@ impl QdpEngine {
 
                 let samples_in_chunk = current_len / sample_size;
                 if samples_in_chunk > 0 {
+                    let event_slot = if use_dev_a { 0 } else { 1 };
                     let dev_ptr = if use_dev_a { *dev_in_a.device_ptr() } else { *dev_in_b.device_ptr() };
 
                     unsafe {
                         crate::profile_scope!("GPU::Dispatch");
 
-                        ctx.async_copy_to_device(&host_buffer, dev_ptr as *mut c_void, current_len);
-                        ctx.record_copy_done();
-                        ctx.wait_for_copy();
+                        ctx.async_copy_to_device(host_buffer.ptr() as *const c_void, dev_ptr as *mut c_void, current_len)?;
+                        ctx.record_copy_done(event_slot)?;
+                        ctx.wait_for_copy(event_slot)?;
 
                         {
                             crate::profile_scope!("GPU::BatchEncode");
@@ -334,7 +336,7 @@ impl QdpEngine {
                             }
                         }
 
-                        ctx.sync_copy_stream();
+                        ctx.sync_copy_stream()?;
                     }
                     global_sample_offset = global_sample_offset
                         .checked_add(samples_in_chunk)

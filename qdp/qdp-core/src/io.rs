@@ -31,9 +31,25 @@ use arrow::datatypes::{DataType, Field, Schema};
 use arrow::ipc::reader::FileReader as ArrowFileReader;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::ArrowWriter;
+use parquet::basic::Compression;
 use parquet::file::properties::WriterProperties;
 
 use crate::error::{MahoutError, Result};
+
+/// Build Parquet writer properties optimized for fast decode.
+/// Defaults to SNAPPY; override with env `MAHOUT_PARQUET_COMPRESSION=UNCOMPRESSED`
+/// if you want maximal decode speed and can afford larger files.
+fn fast_decode_writer_props() -> WriterProperties {
+    let compression = match std::env::var("MAHOUT_PARQUET_COMPRESSION") {
+        Ok(val) if val.eq_ignore_ascii_case("UNCOMPRESSED") => Compression::UNCOMPRESSED,
+        Ok(val) if val.eq_ignore_ascii_case("SNAPPY") => Compression::SNAPPY,
+        _ => Compression::SNAPPY,
+    };
+
+    WriterProperties::builder()
+        .set_compression(compression)
+        .build()
+}
 
 /// Converts an Arrow Float64Array to Vec<f64>.
 pub fn arrow_to_vec(array: &Float64Array) -> Vec<f64> {
@@ -104,7 +120,7 @@ pub fn write_parquet<P: AsRef<Path>>(
         MahoutError::Io(format!("Failed to create Parquet file: {}", e))
     })?;
 
-    let props = WriterProperties::builder().build();
+    let props = fast_decode_writer_props();
     let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
         MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
     })?;
@@ -211,7 +227,7 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
         MahoutError::Io(format!("Failed to create Parquet file: {}", e))
     })?;
 
-    let props = WriterProperties::builder().build();
+    let props = fast_decode_writer_props();
     let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
         MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
     })?;
@@ -572,7 +588,28 @@ impl ParquetBlockReader {
                     }
                     let column = batch.column(0);
 
-                    let (current_sample_size, batch_values) = match column.data_type() {
+                    let mut push_values = |values: &[f64]| -> Result<bool> {
+                        // returns true if buffer filled and we should break outer loop
+                        let available = values.len();
+                        let space_left = limit - written;
+
+                        if available <= space_left {
+                            buffer[written..written+available].copy_from_slice(values);
+                            written += available;
+                            Ok(false)
+                        } else {
+                            if space_left > 0 {
+                                buffer[written..written+space_left].copy_from_slice(&values[0..space_left]);
+                                written += space_left;
+                            }
+                            self.leftover_data.clear();
+                            self.leftover_data.extend_from_slice(&values[space_left..]);
+                            self.leftover_cursor = 0;
+                            Ok(true)
+                        }
+                    };
+
+                    let current_sample_size = match column.data_type() {
                         DataType::List(_) => {
                             let list_array = column
                                 .as_any()
@@ -583,8 +620,7 @@ impl ParquetBlockReader {
                                 continue;
                             }
 
-                            let mut batch_values = Vec::new();
-                            let mut current_sample_size = None;
+                            let mut detected_size = None;
                             for i in 0..list_array.len() {
                                 let value_array = list_array.value(i);
                                 let float_array = value_array
@@ -592,18 +628,27 @@ impl ParquetBlockReader {
                                     .downcast_ref::<Float64Array>()
                                     .ok_or_else(|| MahoutError::Io("List values must be Float64".to_string()))?;
 
-                                if i == 0 {
-                                    current_sample_size = Some(float_array.len());
+                                if float_array.null_count() != 0 {
+                                    return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
                                 }
 
-                                if float_array.null_count() == 0 {
-                                    batch_values.extend_from_slice(float_array.values());
-                                } else {
-                                    return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
+                                let len = float_array.len();
+                                if detected_size.is_none() {
+                                    detected_size = Some(len);
+                                } else if Some(len) != detected_size {
+                                    return Err(MahoutError::InvalidInput(format!(
+                                        "Inconsistent sample sizes: expected {}, got {}",
+                                        detected_size.unwrap(), len
+                                    )));
+                                }
+
+                                let should_break = push_values(float_array.values())?;
+                                if should_break {
+                                    break;
                                 }
                             }
 
-                            (current_sample_size.expect("list_array.len() > 0 ensures at least one element"), batch_values)
+                            detected_size.expect("list_array.len() > 0 ensures at least one element")
                         }
                         DataType::FixedSizeList(_, size) => {
                             let list_array = column
@@ -618,20 +663,21 @@ impl ParquetBlockReader {
                             let current_sample_size = *size as usize;
 
                             let values = list_array.values();
-                            let float_array = values
-                                .as_any()
-                                .downcast_ref::<Float64Array>()
-                                .ok_or_else(|| MahoutError::Io("FixedSizeList values must be Float64".to_string()))?;
+                        let float_array = values
+                            .as_any()
+                            .downcast_ref::<Float64Array>()
+                            .ok_or_else(|| MahoutError::Io("FixedSizeList values must be Float64".to_string()))?;
 
-                            let mut batch_values = Vec::new();
-                            if float_array.null_count() == 0 {
-                                batch_values.extend_from_slice(float_array.values());
-                            } else {
-                                return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
-                            }
-
-                            (current_sample_size, batch_values)
+                        if float_array.null_count() != 0 {
+                            return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
                         }
+
+                        let should_break = push_values(float_array.values())?;
+                        if should_break {
+                            break;
+                        }
+                        current_sample_size
+                    }
                         _ => {
                             return Err(MahoutError::Io(format!(
                                 "Expected List<Float64> or FixedSizeList<Float64>, got {:?}",
@@ -652,23 +698,6 @@ impl ParquetBlockReader {
                                 )));
                             }
                         }
-                    }
-
-                    let available = batch_values.len();
-                    let space_left = limit - written;
-
-                    if available <= space_left {
-                        buffer[written..written+available].copy_from_slice(&batch_values);
-                        written += available;
-                    } else {
-                        if space_left > 0 {
-                            buffer[written..written+space_left].copy_from_slice(&batch_values[0..space_left]);
-                            written += space_left;
-                        }
-                        self.leftover_data.clear();
-                        self.leftover_data.extend_from_slice(&batch_values[space_left..]);
-                        self.leftover_cursor = 0;
-                        break;
                     }
                 },
                 Some(Err(e)) => return Err(MahoutError::Io(format!("Parquet read error: {}", e))),
