@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use pyo3::prelude::*;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
-use pyo3::prelude::*;
-use qdp_core::dlpack::DLManagedTensor;
 use qdp_core::{Precision, QdpEngine as CoreEngine};
+use qdp_core::dlpack::DLManagedTensor;
 
 /// Quantum tensor wrapper implementing DLPack protocol
 ///
@@ -53,10 +53,10 @@ impl QuantumTensor {
     ///     RuntimeError: If the tensor has already been consumed
     #[pyo3(signature = (stream=None))]
     fn __dlpack__<'py>(&mut self, py: Python<'py>, stream: Option<i64>) -> PyResult<Py<PyAny>> {
-        let _ = stream; // Suppress unused variable warning
+        let _ = stream;  // Suppress unused variable warning
         if self.consumed {
             return Err(PyRuntimeError::new_err(
-                "DLPack tensor already consumed (can only be used once)",
+                "DLPack tensor already consumed (can only be used once)"
             ));
         }
 
@@ -78,7 +78,7 @@ impl QuantumTensor {
             let capsule_ptr = ffi::PyCapsule_New(
                 self.ptr as *mut std::ffi::c_void,
                 DLTENSOR_NAME.as_ptr() as *const i8,
-                None, // No destructor - PyTorch handles it
+                None  // No destructor - PyTorch handles it
             );
 
             if capsule_ptr.is_null() {
@@ -170,7 +170,7 @@ impl QdpEngine {
                 return Err(PyRuntimeError::new_err(format!(
                     "Unsupported precision '{}'. Use 'float32' (default) or 'float64'.",
                     other
-                )));
+                )))
             }
         };
 
@@ -199,15 +199,8 @@ impl QdpEngine {
     ///     >>> torch_tensor = torch.from_dlpack(qtensor)
     ///
     /// TODO: Use numpy array input (`PyReadonlyArray1<f64>`) for zero-copy instead of `Vec<f64>`.
-    fn encode(
-        &self,
-        data: Vec<f64>,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> PyResult<QuantumTensor> {
-        let ptr = self
-            .engine
-            .encode(&data, num_qubits, encoding_method)
+    fn encode(&self, data: Vec<f64>, num_qubits: usize, encoding_method: &str) -> PyResult<QuantumTensor> {
+        let ptr = self.engine.encode(&data, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
         Ok(QuantumTensor {
             ptr,
@@ -229,15 +222,8 @@ impl QdpEngine {
     ///     >>> engine = QdpEngine(device_id=0)
     ///     >>> batched = engine.encode_from_parquet("data.parquet", 16, "amplitude")
     ///     >>> torch_tensor = torch.from_dlpack(batched)  # Shape: [200, 65536]
-    fn encode_from_parquet(
-        &self,
-        path: &str,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> PyResult<QuantumTensor> {
-        let ptr = self
-            .engine
-            .encode_from_parquet(path, num_qubits, encoding_method)
+    fn encode_from_parquet(&self, path: &str, num_qubits: usize, encoding_method: &str) -> PyResult<QuantumTensor> {
+        let ptr = self.engine.encode_from_parquet(path, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Encoding from parquet failed: {}", e)))?;
         Ok(QuantumTensor {
             ptr,
@@ -259,18 +245,9 @@ impl QdpEngine {
     ///     >>> engine = QdpEngine(device_id=0)
     ///     >>> batched = engine.encode_from_arrow_ipc("data.arrow", 16, "amplitude")
     ///     >>> torch_tensor = torch.from_dlpack(batched)
-    fn encode_from_arrow_ipc(
-        &self,
-        path: &str,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> PyResult<QuantumTensor> {
-        let ptr = self
-            .engine
-            .encode_from_arrow_ipc(path, num_qubits, encoding_method)
-            .map_err(|e| {
-                PyRuntimeError::new_err(format!("Encoding from Arrow IPC failed: {}", e))
-            })?;
+    fn encode_from_arrow_ipc(&self, path: &str, num_qubits: usize, encoding_method: &str) -> PyResult<QuantumTensor> {
+        let ptr = self.engine.encode_from_arrow_ipc(path, num_qubits, encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("Encoding from Arrow IPC failed: {}", e)))?;
         Ok(QuantumTensor {
             ptr,
             consumed: false,

@@ -26,10 +26,11 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
-use arrow::array::{Array, ArrayRef, Float64Array, RecordBatch};
+use arrow::array::{Array, ArrayRef, Float64Array, FixedSizeListArray, ListArray, RecordBatch};
 use arrow::datatypes::{DataType, Field, Schema};
-use parquet::arrow::ArrowWriter;
+use arrow::ipc::reader::FileReader as ArrowFileReader;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;
 
 use crate::error::{MahoutError, Result};
@@ -95,23 +96,26 @@ pub fn write_parquet<P: AsRef<Path>>(
     let array = Float64Array::from_iter_values(data.iter().copied());
     let array_ref: ArrayRef = Arc::new(array);
 
-    let batch = RecordBatch::try_new(schema.clone(), vec![array_ref])
-        .map_err(|e| MahoutError::Io(format!("Failed to create RecordBatch: {}", e)))?;
+    let batch = RecordBatch::try_new(schema.clone(), vec![array_ref]).map_err(|e| {
+        MahoutError::Io(format!("Failed to create RecordBatch: {}", e))
+    })?;
 
-    let file = File::create(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet file: {}", e)))?;
+    let file = File::create(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet file: {}", e))
+    })?;
 
     let props = WriterProperties::builder().build();
-    let mut writer = ArrowWriter::try_new(file, schema, Some(props))
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet writer: {}", e)))?;
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
+    })?;
 
-    writer
-        .write(&batch)
-        .map_err(|e| MahoutError::Io(format!("Failed to write Parquet batch: {}", e)))?;
+    writer.write(&batch).map_err(|e| {
+        MahoutError::Io(format!("Failed to write Parquet batch: {}", e))
+    })?;
 
-    writer
-        .close()
-        .map_err(|e| MahoutError::Io(format!("Failed to close Parquet writer: {}", e)))?;
+    writer.close().map_err(|e| {
+        MahoutError::Io(format!("Failed to close Parquet writer: {}", e))
+    })?;
 
     Ok(())
 }
@@ -120,24 +124,29 @@ pub fn write_parquet<P: AsRef<Path>>(
 ///
 /// Returns one array per row group for zero-copy access.
 pub fn read_parquet_to_arrow<P: AsRef<Path>>(path: P) -> Result<Vec<Float64Array>> {
-    let file = File::open(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to open Parquet file: {}", e)))?;
+    let file = File::open(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to open Parquet file: {}", e))
+    })?;
 
-    let builder = ParquetRecordBatchReaderBuilder::try_new(file)
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet reader: {}", e)))?;
+    let builder = ParquetRecordBatchReaderBuilder::try_new(file).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet reader: {}", e))
+    })?;
 
-    let mut reader = builder
-        .build()
-        .map_err(|e| MahoutError::Io(format!("Failed to build Parquet reader: {}", e)))?;
+    let mut reader = builder.build().map_err(|e| {
+        MahoutError::Io(format!("Failed to build Parquet reader: {}", e))
+    })?;
 
     let mut arrays = Vec::new();
 
     while let Some(batch_result) = reader.next() {
-        let batch = batch_result
-            .map_err(|e| MahoutError::Io(format!("Failed to read Parquet batch: {}", e)))?;
+        let batch = batch_result.map_err(|e| {
+            MahoutError::Io(format!("Failed to read Parquet batch: {}", e))
+        })?;
 
         if batch.num_columns() == 0 {
-            return Err(MahoutError::Io("Parquet file has no columns".to_string()));
+            return Err(MahoutError::Io(
+                "Parquet file has no columns".to_string(),
+            ));
         }
 
         let column = batch.column(0);
@@ -151,14 +160,18 @@ pub fn read_parquet_to_arrow<P: AsRef<Path>>(path: P) -> Result<Vec<Float64Array
         let float_array = column
             .as_any()
             .downcast_ref::<Float64Array>()
-            .ok_or_else(|| MahoutError::Io("Failed to downcast to Float64Array".to_string()))?
+            .ok_or_else(|| {
+                MahoutError::Io("Failed to downcast to Float64Array".to_string())
+            })?
             .clone();
 
         arrays.push(float_array);
     }
 
     if arrays.is_empty() {
-        return Err(MahoutError::Io("Parquet file contains no data".to_string()));
+        return Err(MahoutError::Io(
+            "Parquet file contains no data".to_string(),
+        ));
     }
 
     Ok(arrays)
@@ -190,23 +203,26 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
     )]));
 
     let array_ref: ArrayRef = Arc::new(array.clone());
-    let batch = RecordBatch::try_new(schema.clone(), vec![array_ref])
-        .map_err(|e| MahoutError::Io(format!("Failed to create RecordBatch: {}", e)))?;
+    let batch = RecordBatch::try_new(schema.clone(), vec![array_ref]).map_err(|e| {
+        MahoutError::Io(format!("Failed to create RecordBatch: {}", e))
+    })?;
 
-    let file = File::create(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet file: {}", e)))?;
+    let file = File::create(path.as_ref()).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet file: {}", e))
+    })?;
 
     let props = WriterProperties::builder().build();
-    let mut writer = ArrowWriter::try_new(file, schema, Some(props))
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet writer: {}", e)))?;
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
+        MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
+    })?;
 
-    writer
-        .write(&batch)
-        .map_err(|e| MahoutError::Io(format!("Failed to write Parquet batch: {}", e)))?;
+    writer.write(&batch).map_err(|e| {
+        MahoutError::Io(format!("Failed to write Parquet batch: {}", e))
+    })?;
 
-    writer
-        .close()
-        .map_err(|e| MahoutError::Io(format!("Failed to close Parquet writer: {}", e)))?;
+    writer.close().map_err(|e| {
+        MahoutError::Io(format!("Failed to close Parquet writer: {}", e))
+    })?;
 
     Ok(())
 }
