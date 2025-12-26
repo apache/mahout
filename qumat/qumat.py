@@ -362,6 +362,18 @@ class QuMat:
         self._ensure_circuit_initialized()
         return self.backend_module.draw_circuit(self.circuit)
 
+    def draw(self):
+        """Alias for draw_circuit() for convenience.
+
+        Provides a shorter method name that matches common quantum computing
+        library conventions and documentation examples.
+
+        :returns: Circuit visualization. The exact type depends on the backend.
+        :rtype: str | object
+        :raises RuntimeError: If the circuit has not been initialized.
+        """
+        return self.draw_circuit()
+
     def apply_rx_gate(self, qubit_index, angle):
         """Apply a rotation around the X-axis to the specified qubit.
 
