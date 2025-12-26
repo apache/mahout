@@ -15,34 +15,37 @@
 // limitations under the License.
 
 pub mod dlpack;
-pub mod gpu;
 pub mod error;
-pub mod preprocessing;
+pub mod gpu;
 pub mod io;
+pub mod preprocessing;
+pub mod reader;
+pub mod readers;
 #[macro_use]
 mod profiling;
 
 pub use error::{MahoutError, Result};
 pub use gpu::memory::Precision;
 
-use std::sync::Arc;
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
+use std::sync::Arc;
 #[cfg(target_os = "linux")]
-use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
+use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 #[cfg(target_os = "linux")]
 use std::thread;
 
-use crate::reader::StreamingDataReader;
-use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 use crate::dlpack::DLManagedTensor;
-use crate::gpu::get_encoder;
-#[cfg(target_os = "linux")]
-use crate::gpu::memory::{PinnedBuffer, GpuStateVector};
 #[cfg(target_os = "linux")]
 use crate::gpu::PipelineContext;
+use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
-use qdp_kernels::{launch_l2_norm_batch, launch_amplitude_encode_batch};
+use crate::gpu::memory::{GpuStateVector, PinnedBuffer};
+#[cfg(target_os = "linux")]
+use crate::reader::StreamingDataReader;
+use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
+#[cfg(target_os = "linux")]
+use qdp_kernels::{launch_amplitude_encode_batch, launch_l2_norm_batch};
 
 /// 512MB staging buffer for large Parquet row groups (reduces fragmentation)
 #[cfg(target_os = "linux")]
