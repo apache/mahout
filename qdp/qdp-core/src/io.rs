@@ -31,25 +31,9 @@ use arrow::datatypes::{DataType, Field, Schema};
 use arrow::ipc::reader::FileReader as ArrowFileReader;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::ArrowWriter;
-use parquet::basic::Compression;
 use parquet::file::properties::WriterProperties;
 
 use crate::error::{MahoutError, Result};
-
-/// Build Parquet writer properties optimized for fast decode.
-/// Defaults to SNAPPY; override with env `MAHOUT_PARQUET_COMPRESSION=UNCOMPRESSED`
-/// if you want maximal decode speed and can afford larger files.
-fn fast_decode_writer_props() -> WriterProperties {
-    let compression = match std::env::var("MAHOUT_PARQUET_COMPRESSION") {
-        Ok(val) if val.eq_ignore_ascii_case("UNCOMPRESSED") => Compression::UNCOMPRESSED,
-        Ok(val) if val.eq_ignore_ascii_case("SNAPPY") => Compression::SNAPPY,
-        _ => Compression::SNAPPY,
-    };
-
-    WriterProperties::builder()
-        .set_compression(compression)
-        .build()
-}
 
 /// Converts an Arrow Float64Array to Vec<f64>.
 pub fn arrow_to_vec(array: &Float64Array) -> Vec<f64> {
@@ -120,10 +104,9 @@ pub fn write_parquet<P: AsRef<Path>>(
         MahoutError::Io(format!("Failed to create Parquet file: {}", e))
     })?;
 
-    let props = fast_decode_writer_props();
-    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
-        MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
-    })?;
+    let props = WriterProperties::builder().build();
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props))
+        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet writer: {}", e)))?;
 
     writer.write(&batch).map_err(|e| {
         MahoutError::Io(format!("Failed to write Parquet batch: {}", e))
@@ -227,10 +210,9 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
         MahoutError::Io(format!("Failed to create Parquet file: {}", e))
     })?;
 
-    let props = fast_decode_writer_props();
-    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).map_err(|e| {
-        MahoutError::Io(format!("Failed to create Parquet writer: {}", e))
-    })?;
+    let props = WriterProperties::builder().build();
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props))
+        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet writer: {}", e)))?;
 
     writer.write(&batch).map_err(|e| {
         MahoutError::Io(format!("Failed to write Parquet batch: {}", e))
