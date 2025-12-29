@@ -10,3 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3 = { version = "0.27", features = ["extension-module"] }
 qdp-core = { path = "../qdp-core" }
+
+[features]
+default = []
+observability = ["qdp-core/observability"]

@@ -18,10 +18,10 @@
 
 use std::sync::Arc;
 
-use cudarc::driver::CudaDevice;
 use crate::error::Result;
 use crate::gpu::memory::GpuStateVector;
 use crate::preprocessing::Preprocessor;
+use cudarc::driver::CudaDevice;
 
 /// Quantum encoding strategy interface
 /// Implemented by: AmplitudeEncoder, AngleEncoder, BasisEncoder
@@ -43,9 +43,10 @@ pub trait QuantumEncoder: Send + Sync {
         _sample_size: usize,
         _num_qubits: usize,
     ) -> Result<GpuStateVector> {
-        Err(crate::error::MahoutError::NotImplemented(
-            format!("Batch encoding not implemented for {}", self.name())
-        ))
+        Err(crate::error::MahoutError::NotImplemented(format!(
+            "Batch encoding not implemented for {}",
+            self.name()
+        )))
     }
 
     /// Validate input data before encoding
@@ -75,8 +76,9 @@ pub fn get_encoder(name: &str) -> Result<Box<dyn QuantumEncoder>> {
         "amplitude" => Ok(Box::new(AmplitudeEncoder)),
         "angle" => Ok(Box::new(AngleEncoder)),
         "basis" => Ok(Box::new(BasisEncoder)),
-        _ => Err(crate::error::MahoutError::InvalidInput(
-            format!("Unknown encoder: {}. Available: amplitude, angle, basis", name)
-        )),
+        _ => Err(crate::error::MahoutError::InvalidInput(format!(
+            "Unknown encoder: {}. Available: amplitude, angle, basis",
+            name
+        ))),
     }
 }

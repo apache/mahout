@@ -73,10 +73,14 @@ impl QdpEngine {
 
     /// Initialize engine with explicit precision.
     pub fn new_with_precision(device_id: usize, precision: Precision) -> Result<Self> {
-        let device = CudaDevice::new(device_id)
-            .map_err(|e| MahoutError::Cuda(format!("Failed to initialize CUDA device {}: {:?}", device_id, e)))?;
+        let device = CudaDevice::new(device_id).map_err(|e| {
+            MahoutError::Cuda(format!(
+                "Failed to initialize CUDA device {}: {:?}",
+                device_id, e
+            ))
+        })?;
         Ok(Self {
-            device,  // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
+            device, // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
             precision,
         })
     }
@@ -179,13 +183,16 @@ impl QdpEngine {
         #[cfg(target_os = "linux")]
         {
             if encoding_method != "amplitude" {
-                return Err(MahoutError::NotImplemented("Only amplitude encoding supported for streaming".into()));
+                return Err(MahoutError::NotImplemented(
+                    "Only amplitude encoding supported for streaming".into(),
+                ));
             }
 
             let mut reader_core = crate::io::ParquetBlockReader::new(path, None)?;
             let num_samples = reader_core.total_rows;
 
-            let total_state_vector = GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
+            let total_state_vector =
+                GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
             let ctx = PipelineContext::new(&self.device)?;
 
             let dev_in_a = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
@@ -193,17 +200,24 @@ impl QdpEngine {
             let dev_in_b = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
 
-            let (full_buf_tx, full_buf_rx): (SyncSender<std::result::Result<(PinnedBuffer, usize), MahoutError>>, Receiver<std::result::Result<(PinnedBuffer, usize), MahoutError>>) = sync_channel(2);
-            let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedBuffer>, Receiver<PinnedBuffer>) = sync_channel(2);
+            let (full_buf_tx, full_buf_rx): (
+                SyncSender<std::result::Result<(PinnedBuffer, usize), MahoutError>>,
+                Receiver<std::result::Result<(PinnedBuffer, usize), MahoutError>>,
+            ) = sync_channel(2);
+            let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedBuffer>, Receiver<PinnedBuffer>) =
+                sync_channel(2);
 
             let mut host_buf_first = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
             let first_len = reader_core.read_chunk(host_buf_first.as_slice_mut())?;
 
-            let sample_size = reader_core.get_sample_size()
-                .ok_or_else(|| MahoutError::InvalidInput("Could not determine sample size".into()))?;
+            let sample_size = reader_core.get_sample_size().ok_or_else(|| {
+                MahoutError::InvalidInput("Could not determine sample size".into())
+            })?;
 
             if sample_size == 0 {
-                return Err(MahoutError::InvalidInput("Sample size cannot be zero".into()));
+                return Err(MahoutError::InvalidInput(
+                    "Sample size cannot be zero".into(),
+                ));
             }
             if sample_size > STAGE_SIZE_ELEMENTS {
                 return Err(MahoutError::InvalidInput(format!(
@@ -221,16 +235,22 @@ impl QdpEngine {
                 1,
                 std::cmp::min(num_samples, STAGE_SIZE_ELEMENTS / sample_size),
             );
-            let mut norm_buffer = self.device.alloc_zeros::<f64>(max_samples_per_chunk)
-                .map_err(|e| MahoutError::MemoryAllocation(format!(
-                    "Failed to allocate norm buffer: {:?}",
-                    e
-                )))?;
+            let mut norm_buffer = self
+                .device
+                .alloc_zeros::<f64>(max_samples_per_chunk)
+                .map_err(|e| {
+                    MahoutError::MemoryAllocation(format!(
+                        "Failed to allocate norm buffer: {:?}",
+                        e
+                    ))
+                })?;
 
-            full_buf_tx.send(Ok((host_buf_first, first_len)))
+            full_buf_tx
+                .send(Ok((host_buf_first, first_len)))
                 .map_err(|_| MahoutError::Io("Failed to send first buffer".into()))?;
 
-            empty_buf_tx.send(PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?)
+            empty_buf_tx
+                .send(PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?)
                 .map_err(|_| MahoutError::Io("Failed to send second buffer".into()))?;
 
             let mut reader = reader_core;
@@ -241,16 +261,22 @@ impl QdpEngine {
                         Err(_) => break,
                     };
 
-                    let result = reader.read_chunk(buffer.as_slice_mut()).map(|len| (buffer, len));
+                    let result = reader
+                        .read_chunk(buffer.as_slice_mut())
+                        .map(|len| (buffer, len));
 
                     let should_break = match &result {
                         Ok((_, len)) => *len == 0,
                         Err(_) => true,
                     };
 
-                    if full_buf_tx.send(result).is_err() { break; }
+                    if full_buf_tx.send(result).is_err() {
+                        break;
+                    }
 
-                    if should_break { break; }
+                    if should_break {
+                        break;
+                    }
                 }
             });
 
@@ -265,7 +291,9 @@ impl QdpEngine {
                     Err(_) => return Err(MahoutError::Io("IO thread disconnected".into())),
                 };
 
-                if current_len == 0 { break; }
+                if current_len == 0 {
+                    break;
+                }
 
                 if current_len % sample_size != 0 {
                     return Err(MahoutError::InvalidInput(format!(
@@ -276,7 +304,11 @@ impl QdpEngine {
 
                 let samples_in_chunk = current_len / sample_size;
                 if samples_in_chunk > 0 {
-                    let dev_ptr = if use_dev_a { *dev_in_a.device_ptr() } else { *dev_in_b.device_ptr() };
+                    let dev_ptr = if use_dev_a {
+                        *dev_in_a.device_ptr()
+                    } else {
+                        *dev_in_b.device_ptr()
+                    };
 
                     unsafe {
                         crate::profile_scope!("GPU::Dispatch");
@@ -289,17 +321,26 @@ impl QdpEngine {
                             crate::profile_scope!("GPU::BatchEncode");
                             let offset_elements = global_sample_offset
                                 .checked_mul(state_len_per_sample)
-                                .ok_or_else(|| MahoutError::MemoryAllocation(
-                                    format!("Offset calculation overflow: {} * {}", global_sample_offset, state_len_per_sample)
-                                ))?;
+                                .ok_or_else(|| {
+                                    MahoutError::MemoryAllocation(format!(
+                                        "Offset calculation overflow: {} * {}",
+                                        global_sample_offset, state_len_per_sample
+                                    ))
+                                })?;
 
                             let offset_bytes = offset_elements
                                 .checked_mul(std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
-                                .ok_or_else(|| MahoutError::MemoryAllocation(
-                                    format!("Offset bytes calculation overflow: {} * {}", offset_elements, std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
-                                ))?;
+                                .ok_or_else(|| {
+                                    MahoutError::MemoryAllocation(format!(
+                                        "Offset bytes calculation overflow: {} * {}",
+                                        offset_elements,
+                                        std::mem::size_of::<qdp_kernels::CuDoubleComplex>()
+                                    ))
+                                })?;
 
-                            let state_ptr_offset = total_state_vector.ptr_void().cast::<u8>()
+                            let state_ptr_offset = total_state_vector
+                                .ptr_void()
+                                .cast::<u8>()
                                 .add(offset_bytes)
                                 .cast::<std::ffi::c_void>();
                             debug_assert!(
@@ -314,10 +355,13 @@ impl QdpEngine {
                                     samples_in_chunk,
                                     sample_size,
                                     *norm_buffer.device_ptr_mut() as *mut f64,
-                                    ctx.stream_compute.stream as *mut c_void
+                                    ctx.stream_compute.stream as *mut c_void,
                                 );
                                 if ret != 0 {
-                                    return Err(MahoutError::KernelLaunch(format!("Norm kernel error: {}", ret)));
+                                    return Err(MahoutError::KernelLaunch(format!(
+                                        "Norm kernel error: {}",
+                                        ret
+                                    )));
                                 }
                             }
 
@@ -330,10 +374,13 @@ impl QdpEngine {
                                     samples_in_chunk,
                                     sample_size,
                                     state_len_per_sample,
-                                    ctx.stream_compute.stream as *mut c_void
+                                    ctx.stream_compute.stream as *mut c_void,
                                 );
                                 if ret != 0 {
-                                    return Err(MahoutError::KernelLaunch(format!("Encode kernel error: {}", ret)));
+                                    return Err(MahoutError::KernelLaunch(format!(
+                                        "Encode kernel error: {}",
+                                        ret
+                                    )));
                                 }
                             }
                         }
@@ -342,17 +389,24 @@ impl QdpEngine {
                     }
                     global_sample_offset = global_sample_offset
                         .checked_add(samples_in_chunk)
-                        .ok_or_else(|| MahoutError::MemoryAllocation(
-                            format!("Sample offset overflow: {} + {}", global_sample_offset, samples_in_chunk)
-                        ))?;
+                        .ok_or_else(|| {
+                            MahoutError::MemoryAllocation(format!(
+                                "Sample offset overflow: {} + {}",
+                                global_sample_offset, samples_in_chunk
+                            ))
+                        })?;
                     use_dev_a = !use_dev_a;
                 }
 
                 let _ = empty_buf_tx.send(host_buffer);
             }
 
-            self.device.synchronize().map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
-            io_handle.join().map_err(|e| MahoutError::Io(format!("IO thread panicked: {:?}", e)))?;
+            self.device
+                .synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+            io_handle
+                .join()
+                .map_err(|e| MahoutError::Io(format!("IO thread panicked: {:?}", e)))?;
 
             let dlpack_ptr = total_state_vector.to_dlpack();
             Ok(dlpack_ptr)
@@ -361,7 +415,13 @@ impl QdpEngine {
         #[cfg(not(target_os = "linux"))]
         {
             let (batch_data, num_samples, sample_size) = crate::io::read_parquet_batch(path)?;
-            self.encode_batch(&batch_data, num_samples, sample_size, num_qubits, encoding_method)
+            self.encode_batch(
+                &batch_data,
+                num_samples,
+                sample_size,
+                num_qubits,
+                encoding_method,
+            )
         }
     }
 
@@ -391,7 +451,13 @@ impl QdpEngine {
             crate::io::read_arrow_ipc_batch(path)?
         };
 
-        self.encode_batch(&batch_data, num_samples, sample_size, num_qubits, encoding_method)
+        self.encode_batch(
+            &batch_data,
+            num_samples,
+            sample_size,
+            num_qubits,
+            encoding_method,
+        )
     }
 }
 

@@ -16,7 +16,7 @@
 
 // Input validation and error handling tests
 
-use qdp_core::{QdpEngine, MahoutError};
+use qdp_core::{MahoutError, QdpEngine};
 
 mod common;
 
@@ -37,7 +37,10 @@ fn test_input_validation_invalid_strategy() {
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
-            assert!(msg.contains("Unknown encoder"), "Error message should mention unknown encoder");
+            assert!(
+                msg.contains("Unknown encoder"),
+                "Error message should mention unknown encoder"
+            );
             println!("PASS: Correctly rejected invalid strategy: {}", msg);
         }
         _ => panic!("Expected InvalidInput error for invalid strategy"),
@@ -58,12 +61,17 @@ fn test_input_validation_qubit_mismatch() {
 
     // 100 elements need 7 qubits (2^7=128), but we request 6 (2^6=64)
     let result = engine.encode(&data, 6, "amplitude");
-    assert!(result.is_err(), "Should reject data larger than state vector");
+    assert!(
+        result.is_err(),
+        "Should reject data larger than state vector"
+    );
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
-            assert!(msg.contains("exceeds state vector size"),
-                    "Error should mention size mismatch");
+            assert!(
+                msg.contains("exceeds state vector size"),
+                "Error should mention size mismatch"
+            );
             println!("PASS: Correctly rejected qubit mismatch: {}", msg);
         }
         _ => panic!("Expected InvalidInput error for size mismatch"),
@@ -87,7 +95,10 @@ fn test_input_validation_zero_qubits() {
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
-            assert!(msg.contains("at least 1"), "Error should mention minimum qubit requirement");
+            assert!(
+                msg.contains("at least 1"),
+                "Error should mention minimum qubit requirement"
+            );
             println!("PASS: Correctly rejected zero qubits: {}", msg);
         }
         _ => panic!("Expected InvalidInput error for zero qubits"),
@@ -111,8 +122,10 @@ fn test_input_validation_max_qubits() {
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
-            assert!(msg.contains("exceeds") && msg.contains("30"),
-                    "Error should mention 30 qubit limit");
+            assert!(
+                msg.contains("exceeds") && msg.contains("30"),
+                "Error should mention 30 qubit limit"
+            );
             println!("PASS: Correctly rejected excessive qubits: {}", msg);
         }
         _ => panic!("Expected InvalidInput error for max qubits"),
@@ -135,8 +148,10 @@ fn test_input_validation_batch_zero_samples() {
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
-            assert!(msg.contains("num_samples must be greater than 0"),
-                    "Error should mention num_samples requirement");
+            assert!(
+                msg.contains("num_samples must be greater than 0"),
+                "Error should mention num_samples requirement"
+            );
             println!("PASS: Correctly rejected zero num_samples: {}", msg);
         }
         _ => panic!("Expected InvalidInput error for zero num_samples"),
