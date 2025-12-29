@@ -48,6 +48,18 @@ pub struct PipelineContext {
 }
 
 #[cfg(target_os = "linux")]
+fn validate_event_slot(events: &[*mut c_void], slot: usize) -> Result<()> {
+    if slot >= events.len() {
+        return Err(MahoutError::InvalidInput(format!(
+            "Event slot {} out of range (max: {})",
+            slot,
+            events.len().saturating_sub(1)
+        )));
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
 #[allow(unsafe_op_in_unsafe_fn)]
 impl PipelineContext {
     pub fn new(device: &Arc<CudaDevice>, event_slots: usize) -> Result<Self> {
@@ -98,7 +110,12 @@ impl PipelineContext {
 
     /// Record completion of the copy on the copy stream.
     pub unsafe fn record_copy_done(&self, slot: usize) -> Result<()> {
-        let ret = cudaEventRecord(self.events_copy_done[slot], self.stream_copy.stream as *mut c_void);
+        validate_event_slot(&self.events_copy_done, slot)?;
+
+        let ret = cudaEventRecord(
+            self.events_copy_done[slot],
+            self.stream_copy.stream as *mut c_void,
+        );
         if ret != 0 {
             return Err(MahoutError::Cuda(format!("cudaEventRecord failed: {}", ret)));
         }
@@ -108,7 +125,13 @@ impl PipelineContext {
     /// Make compute stream wait for the copy completion event.
     pub unsafe fn wait_for_copy(&self, slot: usize) -> Result<()> {
         crate::profile_scope!("GPU::StreamWait");
-        let ret = cudaStreamWaitEvent(self.stream_compute.stream as *mut c_void, self.events_copy_done[slot], 0);
+        validate_event_slot(&self.events_copy_done, slot)?;
+
+        let ret = cudaStreamWaitEvent(
+            self.stream_compute.stream as *mut c_void,
+            self.events_copy_done[slot],
+            0,
+        );
         if ret != 0 {
             return Err(MahoutError::Cuda(format!("cudaStreamWaitEvent failed: {}", ret)));
         }
@@ -123,6 +146,25 @@ impl PipelineContext {
             return Err(MahoutError::Cuda(format!("cudaStreamSynchronize(copy) failed: {}", ret)));
         }
         Ok(())
+    }
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod tests {
+    use super::validate_event_slot;
+
+    #[test]
+    fn validate_event_slot_allows_in_range() {
+        let events = vec![std::ptr::null_mut(); 2];
+        assert!(validate_event_slot(&events, 0).is_ok());
+        assert!(validate_event_slot(&events, 1).is_ok());
+    }
+
+    #[test]
+    fn validate_event_slot_rejects_out_of_range() {
+        let events = vec![std::ptr::null_mut(); 2];
+        let err = validate_event_slot(&events, 2).unwrap_err();
+        assert!(matches!(err, crate::error::MahoutError::InvalidInput(_)));
     }
 }
 
