@@ -24,8 +24,8 @@ use std::ffi::c_void;
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct CuDoubleComplex {
-    pub x: f64,  // Real part
-    pub y: f64,  // Imaginary part
+    pub x: f64, // Real part
+    pub y: f64, // Imaginary part
 }
 
 // Implement DeviceRepr for cudarc compatibility
@@ -40,8 +40,8 @@ unsafe impl cudarc::driver::ValidAsZeroBits for CuDoubleComplex {}
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct CuComplex {
-    pub x: f32,  // Real part
-    pub y: f32,  // Imaginary part
+    pub x: f32, // Real part
+    pub y: f32, // Imaginary part
 }
 
 // Implement DeviceRepr for cudarc compatibility

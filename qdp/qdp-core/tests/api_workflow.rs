@@ -30,7 +30,10 @@ fn test_engine_initialization() {
     match engine {
         Ok(_) => println!("PASS: Engine initialized successfully"),
         Err(e) => {
-            println!("SKIP: CUDA initialization failed (no GPU available): {:?}", e);
+            println!(
+                "SKIP: CUDA initialization failed (no GPU available): {:?}",
+                e
+            );
             return;
         }
     }
@@ -65,7 +68,10 @@ fn test_amplitude_encoding_workflow() {
         assert!(managed.deleter.is_some(), "Deleter must be present");
 
         println!("Calling deleter to free GPU memory");
-        let deleter = managed.deleter.take().expect("Deleter function pointer is missing!");
+        let deleter = managed
+            .deleter
+            .take()
+            .expect("Deleter function pointer is missing!");
         deleter(dlpack_ptr);
         println!("PASS: Memory freed successfully");
     }
@@ -98,7 +104,10 @@ fn test_amplitude_encoding_async_pipeline() {
         assert!(managed.deleter.is_some(), "Deleter must be present");
 
         println!("Calling deleter to free GPU memory");
-        let deleter = managed.deleter.take().expect("Deleter function pointer is missing!");
+        let deleter = managed
+            .deleter
+            .take()
+            .expect("Deleter function pointer is missing!");
         deleter(dlpack_ptr);
         println!("PASS: Memory freed successfully");
     }
@@ -125,7 +134,13 @@ fn test_batch_dlpack_2d_shape() {
         .map(|i| (i as f64) / 10.0)
         .collect();
 
-    let result = engine.encode_batch(&batch_data, num_samples, sample_size, num_qubits, "amplitude");
+    let result = engine.encode_batch(
+        &batch_data,
+        num_samples,
+        sample_size,
+        num_qubits,
+        "amplitude",
+    );
     let dlpack_ptr = result.expect("Batch encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
@@ -137,16 +152,35 @@ fn test_batch_dlpack_2d_shape() {
         assert_eq!(tensor.ndim, 2, "Batch tensor should be 2D");
 
         let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
-        assert_eq!(shape_slice[0], num_samples as i64, "First dimension should be num_samples");
-        assert_eq!(shape_slice[1], (1 << num_qubits) as i64, "Second dimension should be 2^num_qubits");
+        assert_eq!(
+            shape_slice[0], num_samples as i64,
+            "First dimension should be num_samples"
+        );
+        assert_eq!(
+            shape_slice[1],
+            (1 << num_qubits) as i64,
+            "Second dimension should be 2^num_qubits"
+        );
 
         let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
         let state_len = 1 << num_qubits;
-        assert_eq!(strides_slice[0], state_len as i64, "Stride for first dimension should be state_len");
-        assert_eq!(strides_slice[1], 1, "Stride for second dimension should be 1");
+        assert_eq!(
+            strides_slice[0], state_len as i64,
+            "Stride for first dimension should be state_len"
+        );
+        assert_eq!(
+            strides_slice[1], 1,
+            "Stride for second dimension should be 1"
+        );
 
-        println!("PASS: Batch DLPack tensor has correct 2D shape: [{}, {}]", shape_slice[0], shape_slice[1]);
-        println!("PASS: Strides are correct: [{}, {}]", strides_slice[0], strides_slice[1]);
+        println!(
+            "PASS: Batch DLPack tensor has correct 2D shape: [{}, {}]",
+            shape_slice[0], shape_slice[1]
+        );
+        println!(
+            "PASS: Strides are correct: [{}, {}]",
+            strides_slice[0], strides_slice[1]
+        );
 
         // Free memory
         if let Some(deleter) = managed.deleter {
@@ -183,12 +217,21 @@ fn test_single_encode_dlpack_2d_shape() {
         assert_eq!(tensor.ndim, 2, "Single encode should be 2D");
 
         let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
-        assert_eq!(shape_slice[0], 1, "First dimension should be 1 for single encode");
+        assert_eq!(
+            shape_slice[0], 1,
+            "First dimension should be 1 for single encode"
+        );
         assert_eq!(shape_slice[1], 16, "Second dimension should be [2^4]");
 
         let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
-        assert_eq!(strides_slice[0], 16, "Stride for first dimension should be state_len");
-        assert_eq!(strides_slice[1], 1, "Stride for second dimension should be 1");
+        assert_eq!(
+            strides_slice[0], 16,
+            "Stride for first dimension should be state_len"
+        );
+        assert_eq!(
+            strides_slice[1], 1,
+            "Stride for second dimension should be 1"
+        );
 
         println!(
             "PASS: Single encode returns 2D shape: [{}, {}]",
@@ -227,7 +270,10 @@ fn test_dlpack_device_id() {
         let tensor = &managed.dl_tensor;
 
         // Verify device_id is correctly set (0 for device 0)
-        assert_eq!(tensor.device.device_id, 0, "device_id should be 0 for device 0");
+        assert_eq!(
+            tensor.device.device_id, 0,
+            "device_id should be 0 for device 0"
+        );
 
         // Verify device_type is CUDA (kDLCUDA = 2)
         use qdp_core::dlpack::DLDeviceType;
@@ -236,7 +282,10 @@ fn test_dlpack_device_id() {
             _ => panic!("Expected CUDA device type"),
         }
 
-        println!("PASS: DLPack device_id correctly set to {}", tensor.device.device_id);
+        println!(
+            "PASS: DLPack device_id correctly set to {}",
+            tensor.device.device_id
+        );
 
         // Free memory
         if let Some(deleter) = managed.deleter {

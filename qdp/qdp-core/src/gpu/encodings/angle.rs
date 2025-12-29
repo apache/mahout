@@ -17,11 +17,11 @@
 // Angle encoding (placeholder)
 // TODO: Rotation-based encoding via tensor product
 
-use std::sync::Arc;
-use cudarc::driver::CudaDevice;
+use super::QuantumEncoder;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
-use super::QuantumEncoder;
+use cudarc::driver::CudaDevice;
+use std::sync::Arc;
 
 /// Angle encoding (not implemented)
 /// TODO: Use sin/cos for rotation-based states
@@ -36,7 +36,7 @@ impl QuantumEncoder for AngleEncoder {
     ) -> Result<GpuStateVector> {
         self.validate_input(data, num_qubits)?;
         Err(MahoutError::InvalidInput(
-            "Angle encoding not yet implemented. Use 'amplitude' encoding for now.".to_string()
+            "Angle encoding not yet implemented. Use 'amplitude' encoding for now.".to_string(),
         ))
     }
 

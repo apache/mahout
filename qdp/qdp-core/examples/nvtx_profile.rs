@@ -14,7 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 // NVTX profiling example
 // Run: cargo run -p qdp-core --example nvtx_profile --features observability --release
 
@@ -74,6 +73,8 @@ fn main() {
     println!("=== Test Complete ===");
     println!();
     println!("To view NVTX markers, use Nsight Systems:");
-    println!("  nsys profile --trace=cuda,nvtx cargo run -p qdp-core --example nvtx_profile --features observability --release");
+    println!(
+        "  nsys profile --trace=cuda,nvtx cargo run -p qdp-core --example nvtx_profile --features observability --release"
+    );
     println!("Then open the generated .nsys-rep file in Nsight Systems");
 }

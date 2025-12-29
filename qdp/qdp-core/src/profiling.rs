@@ -14,7 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 // Zero-cost profiling macros for NVTX integration
 //
 // Provides clean abstraction over NVTX markers without cluttering business logic.
