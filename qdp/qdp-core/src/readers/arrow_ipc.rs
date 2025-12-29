@@ -19,7 +19,7 @@
 use std::fs::File;
 use std::path::Path;
 
-use arrow::array::{Array, Float64Array, FixedSizeListArray, ListArray};
+use arrow::array::{Array, FixedSizeListArray, Float64Array, ListArray};
 use arrow::datatypes::DataType;
 use arrow::ipc::reader::FileReader as ArrowFileReader;
 
@@ -48,26 +48,25 @@ impl ArrowIPCReader {
 impl DataReader for ArrowIPCReader {
     fn read_batch(&mut self) -> Result<(Vec<f64>, usize, usize)> {
         if self.read {
-            return Err(MahoutError::InvalidInput("Reader already consumed".to_string()));
+            return Err(MahoutError::InvalidInput(
+                "Reader already consumed".to_string(),
+            ));
         }
         self.read = true;
 
-        let file = File::open(&self.path).map_err(|e| {
-            MahoutError::Io(format!("Failed to open Arrow IPC file: {}", e))
-        })?;
+        let file = File::open(&self.path)
+            .map_err(|e| MahoutError::Io(format!("Failed to open Arrow IPC file: {}", e)))?;
 
-        let reader = ArrowFileReader::try_new(file, None).map_err(|e| {
-            MahoutError::Io(format!("Failed to create Arrow IPC reader: {}", e))
-        })?;
+        let reader = ArrowFileReader::try_new(file, None)
+            .map_err(|e| MahoutError::Io(format!("Failed to create Arrow IPC reader: {}", e)))?;
 
         let mut all_data = Vec::new();
         let mut num_samples = 0;
         let mut sample_size: Option<usize> = None;
 
         for batch_result in reader {
-            let batch = batch_result.map_err(|e| {
-                MahoutError::Io(format!("Failed to read Arrow batch: {}", e))
-            })?;
+            let batch = batch_result
+                .map_err(|e| MahoutError::Io(format!("Failed to read Arrow batch: {}", e)))?;
 
             if batch.num_columns() == 0 {
                 return Err(MahoutError::Io("Arrow file has no columns".to_string()));
@@ -80,7 +79,9 @@ impl DataReader for ArrowIPCReader {
                     let list_array = column
                         .as_any()
                         .downcast_ref::<FixedSizeListArray>()
-                        .ok_or_else(|| MahoutError::Io("Failed to downcast to FixedSizeListArray".to_string()))?;
+                        .ok_or_else(|| {
+                            MahoutError::Io("Failed to downcast to FixedSizeListArray".to_string())
+                        })?;
 
                     let current_size = *size as usize;
 
@@ -93,7 +94,10 @@ impl DataReader for ArrowIPCReader {
                         }
                     } else {
                         sample_size = Some(current_size);
-                        all_data.reserve(current_size * batch.num_rows());
+                        let new_capacity = current_size
+                            .checked_mul(batch.num_rows())
+                            .expect("Capacity overflowed usize");
+                        all_data.reserve(new_capacity);
                     }
 
                     let values = list_array.values();
@@ -112,17 +116,19 @@ impl DataReader for ArrowIPCReader {
                 }
 
                 DataType::List(_) => {
-                    let list_array = column
-                        .as_any()
-                        .downcast_ref::<ListArray>()
-                        .ok_or_else(|| MahoutError::Io("Failed to downcast to ListArray".to_string()))?;
+                    let list_array =
+                        column.as_any().downcast_ref::<ListArray>().ok_or_else(|| {
+                            MahoutError::Io("Failed to downcast to ListArray".to_string())
+                        })?;
 
                     for i in 0..list_array.len() {
                         let value_array = list_array.value(i);
                         let float_array = value_array
                             .as_any()
                             .downcast_ref::<Float64Array>()
-                            .ok_or_else(|| MahoutError::Io("List values must be Float64".to_string()))?;
+                            .ok_or_else(|| {
+                                MahoutError::Io("List values must be Float64".to_string())
+                            })?;
 
                         let current_size = float_array.len();
 
@@ -157,9 +163,8 @@ impl DataReader for ArrowIPCReader {
             }
         }
 
-        let sample_size = sample_size.ok_or_else(|| {
-            MahoutError::Io("Arrow file contains no data".to_string())
-        })?;
+        let sample_size = sample_size
+            .ok_or_else(|| MahoutError::Io("Arrow file contains no data".to_string()))?;
 
         Ok((all_data, num_samples, sample_size))
     }

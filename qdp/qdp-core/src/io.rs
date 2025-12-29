@@ -26,9 +26,8 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
-use arrow::array::{Array, ArrayRef, FixedSizeListArray, Float64Array, ListArray, RecordBatch};
+use arrow::array::{Array, ArrayRef, Float64Array, RecordBatch};
 use arrow::datatypes::{DataType, Field, Schema};
-use arrow::ipc::reader::FileReader as ArrowFileReader;
 use parquet::arrow::ArrowWriter;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::file::properties::WriterProperties;
