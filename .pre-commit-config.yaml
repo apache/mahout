@@ -52,14 +52,12 @@ repos:
           - "//"
 
 # Rust Linter
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: fmt
   - repo: local
     hooks:
-      - id: rust-fmt
-        name: rustfmt
-        entry: bash -c 'cd qdp && cargo fmt --all'
-        language: system
-        types: [rust]
-        pass_filenames: false
       - id: rust-clippy
         name: clippy
         entry: cargo clippy --manifest-path qdp/Cargo.toml --all-targets --all-features --fix --allow-dirty --allow-staged -- -D warnings
