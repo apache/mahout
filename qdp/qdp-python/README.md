@@ -13,9 +13,13 @@ engine = QdpEngine(0)
 # Optional: request float64 output if you need higher precision
 # engine = QdpEngine(0, precision="float64")
 
-# Encode data
+# Encode data from Python list
 data = [0.5, 0.5, 0.5, 0.5]
 dlpack_ptr = engine.encode(data, num_qubits=2, encoding_method="amplitude")
+
+# Or encode from file formats
+tensor_parquet = engine.encode_from_parquet("data.parquet", 10, "amplitude")
+tensor_arrow = engine.encode_from_arrow_ipc("data.arrow", 10, "amplitude")
 ```
 
 ## Build from source
@@ -34,6 +38,11 @@ uv run maturin develop
 - `"amplitude"` - Amplitude encoding
 - `"angle"` - Angle encoding
 - `"basis"` - Basis encoding
+
+## File format support
+
+- **Parquet** - `encode_from_parquet(path, num_qubits, encoding_method)`
+- **Arrow IPC** - `encode_from_arrow_ipc(path, num_qubits, encoding_method)`
 
 ## Adding new bindings
 
