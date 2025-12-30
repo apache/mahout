@@ -19,6 +19,8 @@ pub mod error;
 pub mod gpu;
 pub mod io;
 pub mod preprocessing;
+pub mod reader;
+pub mod readers;
 #[macro_use]
 mod profiling;
 
@@ -39,6 +41,8 @@ use crate::gpu::PipelineContext;
 use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{GpuStateVector, PinnedBuffer};
+#[cfg(target_os = "linux")]
+use crate::reader::StreamingDataReader;
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{launch_amplitude_encode_batch, launch_l2_norm_batch};
