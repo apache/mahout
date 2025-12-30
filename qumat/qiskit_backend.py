@@ -91,22 +91,24 @@ def apply_t_gate(circuit, qubit_index):
 
 
 def execute_circuit(circuit, backend, backend_config):
+    working_circuit = circuit.copy()
+    
     # Add measurements if they are not already present
     # Check if circuit already has measurement operations
     has_measurements = any(
-        isinstance(inst.operation, qiskit.circuit.Measure) for inst in circuit.data
+        isinstance(inst.operation, qiskit.circuit.Measure) for inst in working_circuit.data
     )
     if not has_measurements:
-        circuit.measure_all()
+        working_circuit.measure_all()
 
     # Ensure the circuit is parameterized properly
-    if circuit.parameters:
+    if working_circuit.parameters:
         # Parse the global parameter configuration
         parameter_bindings = {
             param: backend_config["parameter_values"][str(param)]
-            for param in circuit.parameters
+            for param in working_circuit.parameters
         }
-        transpiled_circuit = qiskit.transpile(circuit, backend)
+        transpiled_circuit = qiskit.transpile(working_circuit, backend)
         bound_circuit = transpiled_circuit.assign_parameters(parameter_bindings)
         job = backend.run(
             bound_circuit, shots=backend_config["backend_options"]["shots"]
@@ -114,7 +116,7 @@ def execute_circuit(circuit, backend, backend_config):
         result = job.result()
         return result.get_counts()
     else:
-        transpiled_circuit = qiskit.transpile(circuit, backend)
+        transpiled_circuit = qiskit.transpile(working_circuit, backend)
         job = backend.run(
             transpiled_circuit, shots=backend_config["backend_options"]["shots"]
         )
@@ -124,13 +126,15 @@ def execute_circuit(circuit, backend, backend_config):
 
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
+    working_circuit = circuit.copy()
+    
     simulator = AerSimulator(method="statevector")
 
     # Add save_statevector instruction
-    circuit.save_statevector()
+    working_circuit.save_statevector()
 
     # Simulate the circuit
-    transpiled_circuit = qiskit.transpile(circuit, simulator)
+    transpiled_circuit = qiskit.transpile(working_circuit, simulator)
     job = simulator.run(transpiled_circuit)
     result = job.result()
 
