@@ -129,7 +129,7 @@ impl GpuStateVector {
     /// Do not free manually.
     pub fn to_dlpack(&self) -> *mut DLManagedTensor {
         // Always return 2D tensor: Batch [num_samples, state_len], Single [1, state_len]
-        let (shape, strides) = if let Some(num_samples) = self.num_samples {
+        let (shape_vec, strides_vec) = if let Some(num_samples) = self.num_samples {
             // Batch: [num_samples, state_len_per_sample]
             debug_assert!(
                 num_samples > 0 && self.size_elements.is_multiple_of(num_samples),
@@ -146,11 +146,17 @@ impl GpuStateVector {
             let strides = vec![state_len as i64, 1i64];
             (shape, strides)
         };
-        let ndim: c_int = 2;
+        let ndim: c_int = shape_vec.len() as c_int;
 
         // Transfer ownership to DLPack deleter
-        let shape_ptr = Box::into_raw(shape.into_boxed_slice()) as *mut i64;
-        let strides_ptr = Box::into_raw(strides.into_boxed_slice()) as *mut i64;
+        let mut shape = shape_vec.into_boxed_slice();
+        let shape_ptr = shape.as_mut_ptr();
+        let mut strides = strides_vec.into_boxed_slice();
+        let strides_ptr = strides.as_mut_ptr();
+
+        // Leak boxed slices so the DLPack deleter can free them later.
+        let _ = Box::into_raw(shape);
+        let _ = Box::into_raw(strides);
 
         // Increment Arc ref count (decremented in deleter)
         let ctx = Arc::into_raw(self.buffer.clone()) as *mut c_void;

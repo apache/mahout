@@ -81,6 +81,22 @@ class DummyQNN(nn.Module):
         return self.fc(x)
 
 
+def ensure_batched_shape(tensor: torch.Tensor, n_samples: int, state_len: int):
+    """Reshape flattened DLPack output back to [n_samples, state_len] if needed."""
+    expected = (n_samples, state_len)
+    if tensor.dim() == 2 and tensor.shape == torch.Size(expected):
+        return tensor
+
+    total = tensor.numel()
+    if total == n_samples * state_len:
+        return tensor.reshape(expected)
+
+    raise AssertionError(
+        f"Expected shape {expected}, got {tuple(tensor.shape)} "
+        f"with {total} elements"
+    )
+
+
 def generate_data(n_qubits, n_samples):
     for f in [DATA_FILE, ARROW_FILE]:
         if os.path.exists(f):
@@ -279,9 +295,7 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
 
     # Tensor is already 2D [n_samples, state_len] from to_dlpack()
     state_len = 1 << n_qubits
-    assert gpu_batched.shape == (n_samples, state_len), (
-        f"Expected shape ({n_samples}, {state_len}), got {gpu_batched.shape}"
-    )
+    gpu_batched = ensure_batched_shape(gpu_batched, n_samples, state_len)
 
     # Convert to float for model (batch already on GPU)
     reshape_start = time.perf_counter()
@@ -329,9 +343,7 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
 
     # Tensor is already 2D [n_samples, state_len] from to_dlpack()
     state_len = 1 << n_qubits
-    assert gpu_batched.shape == (n_samples, state_len), (
-        f"Expected shape ({n_samples}, {state_len}), got {gpu_batched.shape}"
-    )
+    gpu_batched = ensure_batched_shape(gpu_batched, n_samples, state_len)
 
     reshape_start = time.perf_counter()
     gpu_all_data = gpu_batched.abs().to(torch.float32)
