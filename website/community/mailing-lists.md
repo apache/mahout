@@ -1,15 +1,13 @@
 ---
 layout: page
 title: Mailing Lists, IRC and Archives
-
-
 ---
 
 # General
 
 Communication at Mahout happens primarily online via mailing lists. We have
-a user as well as a dev list for discussion. In addition there is a commit
-list so we are able to monitor what happens on the wiki and in svn.
+a user as well as a dev list for discussion. In addition, there is a commit
+list so we are able to monitor what happens in the GitHub repository.
 
 <a name="MailingLists,IRCandArchives-Mailinglists"></a>
 # Mailing lists
@@ -18,7 +16,7 @@ list so we are able to monitor what happens on the wiki and in svn.
 
 Follow the links below, or send mail manually, with empty subject and body.
 
-The pattern for subscribing and unsubscribing to  mailing lists at the ASF
+The pattern for subscribing and unsubscribing to mailing lists at the ASF
 is &lt;list-name&gt;-&lt;action&gt;@&lt;project.&gt;apache.org.
 
 <a name="MailingLists,IRCandArchives-MahoutUserList"></a>
@@ -27,7 +25,7 @@ is &lt;list-name&gt;-&lt;action&gt;@&lt;project.&gt;apache.org.
 This list is for users of Mahout to ask questions, share knowledge, and
 discuss issues. Do send mail to this list with usage and configuration
 questions and problems. Also, please send questions to this list to verify
-your problem before filing issues in JIRA.
+your problem before filing issues on GitHub.
 
 * [Subscribe](mailto:user-subscribe@mahout.apache.org)
 * [Unsubscribe](mailto:user-unsubscribe@mahout.apache.org)
@@ -55,11 +53,12 @@ Commit notifications:
 <a name="MailingLists,IRCandArchives-IRC"></a>
 # IRC
 
-Mahout's IRC channel is **#mahout**.  It is a logged channel.  Please keep in
-mind that it is for discussion purposes only and that (pseudo)decisions
-should be brought back to the dev@ mailing list or JIRA and other people
-who are not on IRC should be given time to respond before any work is
-committed.
+Mahout previously used the IRC channel **#mahout**. Most discussions now
+happen on the mailing lists and via GitHub issues. It is a logged channel.
+Please keep in mind that it is for discussion purposes only and that
+(pseudo)decisions should be brought back to the dev@ mailing list or GitHub
+issues, and other people who are not on IRC should be given time to respond
+before any work is committed.
 
 <a name="MailingLists,IRCandArchives-Archives"></a>
 # Archives
@@ -67,10 +66,10 @@ committed.
 <a name="MailingLists,IRCandArchives-OfficialApacheArchive"></a>
 ## Official Apache Archive
 
-* [http://mail-archives.apache.org/mod_mbox/mahout-dev/](http://mail-archives.apache.org/mod_mbox/mahout-dev/)
-* [http://mail-archives.apache.org/mod_mbox/mahout-user/](http://mail-archives.apache.org/mod_mbox/mahout-user/)
+* http://mail-archives.apache.org/mod_mbox/mahout-dev/
+* http://mail-archives.apache.org/mod_mbox/mahout-user/
 
 Please note the inclusion of a link to an archive does not imply an
-endorsement of that company by any of the committers of Mahout the Lucene
-PMC or the Apache Software Foundation. Each archive owner is solely
+endorsement of that company by any of the committers of Mahout, the Lucene
+PMC, or the Apache Software Foundation. Each archive owner is solely
 responsible for the contents and availability of their archive.

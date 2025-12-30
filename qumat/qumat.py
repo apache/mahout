@@ -251,6 +251,21 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_pauli_z_gate(self.circuit, qubit_index)
 
+    def apply_t_gate(self, qubit_index):
+        """Apply a T-gate (π/8 gate) to the specified qubit.
+
+        Applies a relative pi/4 phase (multiplies the |1> state by e^{i*pi/4}).
+        Essential for universal quantum computation when combined with
+        Hadamard and CNOT gates.
+
+        :param qubit_index: Index of the qubit.
+        :type qubit_index: int
+        :raises RuntimeError: If the circuit has not been initialized.
+        """
+        self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
+        self.backend_module.apply_t_gate(self.circuit, qubit_index)
+
     def execute_circuit(self, parameter_values=None):
         """Execute the quantum circuit and return the measurement results.
 
@@ -334,7 +349,7 @@ class QuMat:
             self.circuit, self.backend, self.backend_config
         )
 
-    def draw(self):
+    def draw_circuit(self):
         """Visualize the quantum circuit.
 
         Generates a visual representation of the circuit. The output format
@@ -346,6 +361,18 @@ class QuMat:
         """
         self._ensure_circuit_initialized()
         return self.backend_module.draw_circuit(self.circuit)
+
+    def draw(self):
+        """Alias for draw_circuit() for convenience.
+
+        Provides a shorter method name that matches common quantum computing
+        library conventions and documentation examples.
+
+        :returns: Circuit visualization. The exact type depends on the backend.
+        :rtype: str | object
+        :raises RuntimeError: If the circuit has not been initialized.
+        """
+        return self.draw_circuit()
 
     def apply_rx_gate(self, qubit_index, angle):
         """Apply a rotation around the X-axis to the specified qubit.

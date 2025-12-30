@@ -81,6 +81,10 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
 
+def apply_t_gate(circuit, qubit_index):
+    circuit.t(qubit_index)
+
+
 def execute_circuit(circuit, backend, backend_config):
     shots = backend_config["backend_options"].get("shots", 1)
     parameter_values = backend_config.get("parameter_values", {})
@@ -110,8 +114,8 @@ def get_final_state_vector(circuit, backend, backend_config):
 def draw_circuit(circuit):
     # Unfortunately, Amazon Braket does not have direct support for drawing circuits in the same way
     # as Qiskit and Cirq. You would typically visualize Amazon Braket circuits using external tools.
-    # For simplicity, we'll print the circuit object which gives some textual representation.
-    print(circuit)
+    # For simplicity, we'll return the circuit object's string representation.
+    return str(circuit)
 
 
 def apply_rx_gate(circuit, qubit_index, angle):
