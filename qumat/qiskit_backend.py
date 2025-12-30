@@ -92,11 +92,12 @@ def apply_t_gate(circuit, qubit_index):
 
 def execute_circuit(circuit, backend, backend_config):
     working_circuit = circuit.copy()
-    
+
     # Add measurements if they are not already present
     # Check if circuit already has measurement operations
     has_measurements = any(
-        isinstance(inst.operation, qiskit.circuit.Measure) for inst in working_circuit.data
+        isinstance(inst.operation, qiskit.circuit.Measure)
+        for inst in working_circuit.data
     )
     if not has_measurements:
         working_circuit.measure_all()
@@ -127,7 +128,7 @@ def execute_circuit(circuit, backend, backend_config):
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
     working_circuit = circuit.copy()
-    
+
     simulator = AerSimulator(method="statevector")
 
     # Add save_statevector instruction
