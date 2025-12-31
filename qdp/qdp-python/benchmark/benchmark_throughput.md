@@ -2,6 +2,10 @@
 
 This benchmark mirrors the `qdp-core/examples/dataloader_throughput.rs` pipeline and compares Mahout (QDP) against PennyLane and Qiskit on the same workload. It streams batches from a CPU-side producer, encodes amplitude states on GPU, and reports vectors-per-second.
 
+Goal: simulate a typical QML training loop by continuously loading batches of
+64 vectors (default), showing that QDP can keep GPU utilization high and avoid
+the "starvation" often seen in hybrid training loops.
+
 ## Workload
 
 - Qubits: 16 (vector length `2^16`)
@@ -15,11 +19,11 @@ This benchmark mirrors the `qdp-core/examples/dataloader_throughput.rs` pipeline
 # QDP-only Rust example
 cargo run -p qdp-core --example dataloader_throughput --release
 
-# Cross-framework comparison (requires deps in qdp/benchmark/requirements.txt)
-python qdp/benchmark/benchmark_dataloader_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
+# Cross-framework comparison (requires benchmark deps)
+python qdp/qdp-python/benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
 
 # Run only Mahout + PennyLane legs
-python qdp/benchmark/benchmark_dataloader_throughput.py --frameworks mahout,pennylane
+python qdp/qdp-python/benchmark/benchmark_throughput.py --frameworks mahout,pennylane
 ```
 
 ## Example Output

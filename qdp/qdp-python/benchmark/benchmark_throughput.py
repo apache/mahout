@@ -24,7 +24,7 @@ The workload mirrors the `qdp-core/examples/dataloader_throughput.rs` pipeline:
 - Encode vectors into amplitude states on GPU and run a tiny consumer op.
 
 Run:
-    python qdp/benchmark/benchmark_dataloader_throughput.py --qubits 16 --batches 200 --batch-size 64
+    python qdp/benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64
 """
 
 import argparse
