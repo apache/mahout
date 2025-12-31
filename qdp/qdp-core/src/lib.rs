@@ -35,7 +35,7 @@ use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 #[cfg(target_os = "linux")]
 use std::thread;
 
-use cudarc::driver::CudaDevice;
+use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]

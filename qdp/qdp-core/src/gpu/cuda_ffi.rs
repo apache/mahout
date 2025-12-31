@@ -16,8 +16,6 @@
 
 //! Centralized CUDA Runtime API FFI declarations.
 
-#![cfg(target_os = "linux")]
-
 use std::ffi::c_void;
 
 pub(crate) const CUDA_MEMCPY_HOST_TO_DEVICE: u32 = 1;
