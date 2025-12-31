@@ -19,6 +19,8 @@ pub mod gpu;
 pub mod error;
 pub mod preprocessing;
 pub mod io;
+pub mod reader;
+pub mod readers;
 #[macro_use]
 mod profiling;
 
@@ -33,11 +35,13 @@ use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 #[cfg(target_os = "linux")]
 use std::thread;
 
-use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
+use cudarc::driver::CudaDevice;
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{PinnedHostBuffer, GpuStateVector};
+use crate::gpu::memory::{GpuStateVector, PinnedHostBuffer};
+#[cfg(target_os = "linux")]
+use crate::reader::StreamingDataReader;
 #[cfg(target_os = "linux")]
 use crate::gpu::PipelineContext;
 #[cfg(target_os = "linux")]
