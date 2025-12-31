@@ -43,7 +43,7 @@ test_rust:
 	cargo test --workspace
 
 install_benchmark:
-	cd qdp/qdp-python && uv sync --group benchmark
+	cd qdp-python && uv sync --group benchmark
 
 benchmark: install install_benchmark
 	@echo "Running e2e benchmark tests..."
