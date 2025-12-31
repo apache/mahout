@@ -242,6 +242,24 @@ pub fn read_arrow_ipc_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize,
     reader.read_batch()
 }
 
+/// Reads batch data from a NumPy .npy file.
+///
+/// Expects a 2D array with shape `[num_samples, sample_size]` and dtype `float64`.
+/// Returns flattened data suitable for batch encoding.
+///
+/// # Returns
+/// Tuple of `(flattened_data, num_samples, sample_size)`
+///
+/// # Example
+/// ```rust,ignore
+/// let (data, num_samples, sample_size) = read_numpy_batch("quantum_states.npy")?;
+/// ```
+pub fn read_numpy_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
+    use crate::reader::DataReader;
+    let mut reader = crate::readers::NumpyReader::new(path)?;
+    reader.read_batch()
+}
+
 /// Streaming Parquet reader for List<Float64> and FixedSizeList<Float64> columns
 ///
 /// Reads Parquet files in chunks without loading entire file into memory.
