@@ -18,7 +18,7 @@
 //! Intended for producer/consumer pipelines that need a small, fixed set of
 //! page-locked buffers to avoid repeated cudaHostAlloc / cudaFreeHost.
 
-use std::sync::{Arc, Condvar, Mutex};
+use std::sync::{Arc, Condvar, Mutex, MutexGuard};
 
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::PinnedHostBuffer;
@@ -54,9 +54,11 @@ impl std::ops::DerefMut for PinnedBufferHandle {
 impl Drop for PinnedBufferHandle {
     fn drop(&mut self) {
         if let Some(buf) = self.buffer.take() {
-            let mut free = self.pool.free.lock().unwrap();
-            free.push(buf);
-            self.pool.available_cv.notify_one();
+            // If the mutex is poisoned, avoid touching shared state during drop.
+            if let Ok(mut free) = self.pool.free.lock() {
+                free.push(buf);
+                self.pool.available_cv.notify_one();
+            }
         }
     }
 }
@@ -98,9 +100,14 @@ impl PinnedBufferPool {
         }))
     }
 
+    fn lock_free(&self) -> MutexGuard<'_, Vec<PinnedHostBuffer>> {
+        // Ignore poisoning to keep the pool usable after a panic elsewhere.
+        self.free.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+    }
+
     /// Acquire a pinned buffer, blocking until one is available.
     pub fn acquire(self: &Arc<Self>) -> PinnedBufferHandle {
-        let mut free = self.free.lock().unwrap();
+        let mut free = self.lock_free();
         loop {
             if let Some(buffer) = free.pop() {
                 return PinnedBufferHandle {
@@ -108,7 +115,10 @@ impl PinnedBufferPool {
                     pool: Arc::clone(self),
                 };
             }
-            free = self.available_cv.wait(free).unwrap();
+            free = self
+                .available_cv
+                .wait(free)
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
         }
     }
 
@@ -117,7 +127,7 @@ impl PinnedBufferPool {
     /// Returns `None` if the pool is currently empty; callers can choose to spin/wait
     /// or fall back to synchronous paths.
     pub fn try_acquire(self: &Arc<Self>) -> Option<PinnedBufferHandle> {
-        let mut free = self.free.lock().unwrap();
+        let mut free = self.lock_free();
         free.pop().map(|buffer| PinnedBufferHandle {
             buffer: Some(buffer),
             pool: Arc::clone(self),
@@ -126,7 +136,7 @@ impl PinnedBufferPool {
 
     /// Number of buffers currently available.
     pub fn available(&self) -> usize {
-        self.free.lock().unwrap().len()
+        self.lock_free().len()
     }
 
     /// Total number of buffers managed by this pool.
