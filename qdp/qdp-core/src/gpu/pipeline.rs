@@ -88,6 +88,11 @@ impl PipelineContext {
     }
 
     /// Async H2D copy on the copy stream.
+    ///
+    /// # Safety
+    /// `src` must be valid for `len_elements` `f64` values and properly aligned.
+    /// `dst` must point to device memory for `len_elements` `f64` values on the same device.
+    /// Both pointers must remain valid until the copy completes on `stream_copy`.
     pub unsafe fn async_copy_to_device(
         &self,
         src: *const c_void,
@@ -109,6 +114,10 @@ impl PipelineContext {
     }
 
     /// Record completion of the copy on the copy stream.
+    ///
+    /// # Safety
+    /// `slot` must refer to a live event created by this context, and the context must
+    /// remain alive until the event is no longer used by any stream.
     pub unsafe fn record_copy_done(&self, slot: usize) -> Result<()> {
         validate_event_slot(&self.events_copy_done, slot)?;
 
@@ -123,6 +132,10 @@ impl PipelineContext {
     }
 
     /// Make compute stream wait for the copy completion event.
+    ///
+    /// # Safety
+    /// `slot` must refer to a live event previously recorded on `stream_copy`, and the
+    /// context and its streams must remain valid while waiting.
     pub unsafe fn wait_for_copy(&self, slot: usize) -> Result<()> {
         crate::profile_scope!("GPU::StreamWait");
         validate_event_slot(&self.events_copy_done, slot)?;
@@ -139,6 +152,9 @@ impl PipelineContext {
     }
 
     /// Sync copy stream (safe to reuse host buffer).
+    ///
+    /// # Safety
+    /// The context and its copy stream must be valid and not destroyed while syncing.
     pub unsafe fn sync_copy_stream(&self) -> Result<()> {
         crate::profile_scope!("Pipeline::SyncCopy");
         let ret = cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
@@ -243,10 +259,9 @@ where
     let mut in_flight_pinned: Vec<PinnedBufferHandle> = Vec::new();
 
     let mut global_offset = 0;
-    let mut chunk_idx = 0usize;
 
     // 4. Pipeline loop: copy on copy stream, compute on compute stream with event handoff
-    for chunk in host_data.chunks(CHUNK_SIZE_ELEMENTS) {
+    for (chunk_idx, chunk) in host_data.chunks(CHUNK_SIZE_ELEMENTS).enumerate() {
         let chunk_offset = global_offset;
         let event_slot = chunk_idx % PINNED_POOL_SIZE;
 
@@ -316,7 +331,6 @@ where
 
         // Update offset for next chunk
         global_offset += chunk.len();
-        chunk_idx += 1;
     }
 
     // 5. Synchronize all streams: wait for all work to complete

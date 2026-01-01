@@ -130,7 +130,7 @@ pub fn read_parquet_to_arrow<P: AsRef<Path>>(path: P) -> Result<Vec<Float64Array
         MahoutError::Io(format!("Failed to create Parquet reader: {}", e))
     })?;
 
-    let mut reader = builder.build().map_err(|e| {
+    let reader = builder.build().map_err(|e| {
         MahoutError::Io(format!("Failed to build Parquet reader: {}", e))
     })?;
 

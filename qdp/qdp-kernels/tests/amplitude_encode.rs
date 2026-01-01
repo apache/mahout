@@ -509,9 +509,9 @@ fn test_amplitude_encode_small_input_large_state() {
     assert!((state_h[1].x - 0.8).abs() < EPSILON);
 
     // Rest should be zero
-    for i in 2..state_len {
+    for (i, value) in state_h.iter().enumerate().skip(2) {
         assert!(
-            state_h[i].x.abs() < EPSILON && state_h[i].y.abs() < EPSILON,
+            value.x.abs() < EPSILON && value.y.abs() < EPSILON,
             "Element {} should be zero-padded",
             i
         );

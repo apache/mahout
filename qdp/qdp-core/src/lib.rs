@@ -52,6 +52,10 @@ use qdp_kernels::{launch_l2_norm_batch, launch_amplitude_encode_batch};
 const STAGE_SIZE_BYTES: usize = 512 * 1024 * 1024;
 #[cfg(target_os = "linux")]
 const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
+#[cfg(target_os = "linux")]
+type FullBufferResult = std::result::Result<(PinnedHostBuffer, usize), MahoutError>;
+#[cfg(target_os = "linux")]
+type FullBufferChannel = (SyncSender<FullBufferResult>, Receiver<FullBufferResult>);
 
 /// Main entry point for Mahout QDP
 ///
@@ -194,7 +198,7 @@ impl QdpEngine {
             let dev_in_b = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
 
-            let (full_buf_tx, full_buf_rx): (SyncSender<std::result::Result<(PinnedHostBuffer, usize), MahoutError>>, Receiver<std::result::Result<(PinnedHostBuffer, usize), MahoutError>>) = sync_channel(2);
+            let (full_buf_tx, full_buf_rx): FullBufferChannel = sync_channel(2);
             let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedHostBuffer>, Receiver<PinnedHostBuffer>) = sync_channel(2);
 
             let mut host_buf_first = PinnedHostBuffer::new(STAGE_SIZE_ELEMENTS)?;
