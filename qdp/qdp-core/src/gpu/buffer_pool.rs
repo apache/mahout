@@ -102,7 +102,9 @@ impl PinnedBufferPool {
 
     fn lock_free(&self) -> MutexGuard<'_, Vec<PinnedHostBuffer>> {
         // Ignore poisoning to keep the pool usable after a panic elsewhere.
-        self.free.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+        self.free
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 
     /// Acquire a pinned buffer, blocking until one is available.
