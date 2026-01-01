@@ -56,12 +56,15 @@ repos:
     rev: v1.0
     hooks:
       - id: fmt
-        args: ['--manifest-path', 'qdp']
+        pass_filenames: false
+        args: ['--manifest-path', 'qdp/Cargo.toml', '--all']
       - id: clippy
+        # clippy needs context of the whole crate to compile correctly
+        pass_filenames: false
         args: [
-          '--manifest-path', 'qdp/Cargo.toml', 
-          '--all-targets', 
-          '--all-features', 
-          '--', 
+          '--manifest-path', 'qdp/Cargo.toml',
+          '--all-targets',
+          '--all-features',
+          '--',
           '-D', 'warnings'
         ]
