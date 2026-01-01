@@ -35,14 +35,18 @@ impl std::ops::Deref for PinnedBufferHandle {
     type Target = PinnedHostBuffer;
 
     fn deref(&self) -> &Self::Target {
-        self.buffer.as_ref().expect("Buffer already returned to pool")
+        self.buffer
+            .as_ref()
+            .expect("Buffer already returned to pool")
     }
 }
 
 #[cfg(target_os = "linux")]
 impl std::ops::DerefMut for PinnedBufferHandle {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.buffer.as_mut().expect("Buffer already returned to pool")
+        self.buffer
+            .as_mut()
+            .expect("Buffer already returned to pool")
     }
 }
 
