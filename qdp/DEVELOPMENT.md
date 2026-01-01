@@ -167,10 +167,10 @@ uv pip uninstall qiskit pennylane
 You can also run individual tests manually from the `qdp-python/benchmark/` directory:
 
 ```sh
-# benchmark test for dataloader throughput
-python benchmark_dataloader_throughput.py
+# Benchmark test for dataloader throughput
+python benchmark_throughput.py
 
-# e2e test
+# E2E test
 python benchmark_e2e.py
 ```
 
@@ -194,7 +194,7 @@ A: Check available GPUs with `nvidia-smi`. Verify GPU visibility with `echo $CUD
 
 ### Q: Benchmark tests fail or produce unexpected results
 
-A: Ensure all dependencies are installed with `uv pip install -r benchmark/requirements.txt`. Check GPU memory availability using `nvidia-smi`. If you don't need qiskit/pennylane comparisons, uninstall them as mentioned in the [E2e test section](#e2e-tests).
+A: Ensure all dependencies are installed with `uv sync --group benchmark` (from `qdp/qdp-python`). Check GPU memory availability using `nvidia-smi`. If you don't need qiskit/pennylane comparisons, uninstall them as mentioned in the [E2e test section](#e2e-tests).
 
 ### Q: Pre-commit hooks fail
 

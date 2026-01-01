@@ -15,6 +15,7 @@ on:
       - "**.ipynb"
       - "pyproject.toml"
       - ".github/workflows/notebook-testing.yml"
+  workflow_dispatch:
 
 jobs:
   test-notebooks:

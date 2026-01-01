@@ -20,6 +20,7 @@ on:
     branches: [main, dev-qdp]
   pull_request:
     branches: [main, dev-qdp]
+  workflow_dispatch:
 
 jobs:
   test:
