@@ -56,11 +56,12 @@ repos:
     rev: v1.0
     hooks:
       - id: fmt
-  - repo: local
-    hooks:
-      - id: rust-clippy
-        name: clippy
-        entry: cargo clippy --manifest-path qdp/Cargo.toml --all-targets --all-features --fix --allow-dirty --allow-staged -- -D warnings
-        language: system
-        types: [rust]
-        pass_filenames: false
+        args: ['--manifest-path', 'qdp']
+      - id: clippy
+        args: [
+          '--manifest-path', 'qdp/Cargo.toml', 
+          '--all-targets', 
+          '--all-features', 
+          '--', 
+          '-D', 'warnings'
+        ]
