@@ -167,11 +167,14 @@ uv pip uninstall qiskit pennylane
 You can also run individual tests manually from the `qdp-python/benchmark/` directory:
 
 ```sh
-# Benchmark test for dataloader throughput
-python benchmark_throughput.py
-
 # E2E test
 python benchmark_e2e.py
+
+# Benchmark test for Data-to-State latency
+python benchmark_latency.py
+
+# Benchmark test for dataloader throughput
+python benchmark_throughput.py
 ```
 
 ## Troubleshooting
