@@ -43,12 +43,12 @@ test_rust:
 	cargo test --workspace
 
 install_benchmark:
-	cd qdp/qdp-python && uv sync --group benchmark
+	cd qdp-python && uv sync --group benchmark
 
 benchmark: install install_benchmark
 	@echo "Running e2e benchmark tests..."
 	uv run python qdp-python/benchmark/benchmark_e2e.py
-	uv run python qdp-python/benchmark/benchmark_dataloader_throughput.py
+	uv run python qdp-python/benchmark/benchmark_throughput.py
 
 run_nvtx_profile:
 	$(eval EXAMPLE ?= nvtx_profile)

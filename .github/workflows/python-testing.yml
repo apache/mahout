@@ -29,6 +29,7 @@ on:
       - "**.py"
       - "pyproject.toml"
       - ".github/workflows/python-testing.yml"
+  workflow_dispatch:
 
 jobs:
   test:
