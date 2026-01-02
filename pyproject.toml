@@ -4,7 +4,7 @@ version = "0.4"
 description = "A library for composing quantum machine learning."
 authors = [{ name = "Apache Mahout", email = "dev@mahout.apache.org" }]
 license = "Apache-2.0"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.10,<=3.13"
 readme = "README.md"
 dependencies = [
     "qiskit>=2.2.0,<3.0.0",
