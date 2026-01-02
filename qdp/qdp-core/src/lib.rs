@@ -35,6 +35,11 @@ use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 #[cfg(target_os = "linux")]
 use std::thread;
 
+#[cfg(target_os = "linux")]
+type BufferResult = std::result::Result<(PinnedBuffer, usize), MahoutError>;
+#[cfg(target_os = "linux")]
+type BufferChannels = (SyncSender<BufferResult>, Receiver<BufferResult>);
+
 use crate::dlpack::DLManagedTensor;
 #[cfg(target_os = "linux")]
 use crate::gpu::PipelineContext;
