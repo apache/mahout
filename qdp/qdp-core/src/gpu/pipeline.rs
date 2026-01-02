@@ -70,6 +70,14 @@ impl PipelineContext {
     }
 
     /// Async H2D copy on copy stream
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that:
+    /// - `dst` points to valid device memory of at least `len_elements * sizeof(f64)` bytes
+    /// - `src` is a valid pinned buffer with at least `len_elements` elements
+    /// - The memory regions do not overlap in an undefined way
+    /// - The CUDA stream is valid and properly initialized
     pub unsafe fn async_copy_to_device(
         &self,
         src: &PinnedBuffer,
@@ -89,6 +97,10 @@ impl PipelineContext {
     }
 
     /// Record copy completion event
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the CUDA event and stream are valid and properly initialized.
     pub unsafe fn record_copy_done(&self) {
         unsafe {
             cudaEventRecord(self.event_copy_done, self.stream_copy.stream as *mut c_void);
@@ -96,6 +108,10 @@ impl PipelineContext {
     }
 
     /// Make compute stream wait for copy completion
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the compute stream and copy event are valid and properly initialized.
     pub unsafe fn wait_for_copy(&self) {
         crate::profile_scope!("GPU::StreamWait");
         unsafe {
@@ -108,6 +124,10 @@ impl PipelineContext {
     }
 
     /// Sync copy stream (safe to reuse host buffer)
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the copy stream is valid and properly initialized.
     pub unsafe fn sync_copy_stream(&self) {
         crate::profile_scope!("Pipeline::SyncCopy");
         unsafe {

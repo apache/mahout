@@ -35,6 +35,11 @@ use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 #[cfg(target_os = "linux")]
 use std::thread;
 
+#[cfg(target_os = "linux")]
+type BufferResult = std::result::Result<(PinnedBuffer, usize), MahoutError>;
+#[cfg(target_os = "linux")]
+type BufferChannels = (SyncSender<BufferResult>, Receiver<BufferResult>);
+
 use crate::dlpack::DLManagedTensor;
 #[cfg(target_os = "linux")]
 use crate::gpu::PipelineContext;
@@ -200,10 +205,7 @@ impl QdpEngine {
             let dev_in_b = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
 
-            let (full_buf_tx, full_buf_rx): (
-                SyncSender<std::result::Result<(PinnedBuffer, usize), MahoutError>>,
-                Receiver<std::result::Result<(PinnedBuffer, usize), MahoutError>>,
-            ) = sync_channel(2);
+            let (full_buf_tx, full_buf_rx): BufferChannels = sync_channel(2);
             let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedBuffer>, Receiver<PinnedBuffer>) =
                 sync_channel(2);
 
