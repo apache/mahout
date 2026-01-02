@@ -28,11 +28,11 @@
     <homepage rdf:resource="http://mahout.apache.org" />
     <asfext:pmc rdf:resource="http://mahout.apache.org" />
     <shortdesc>Scalable machine learning library</shortdesc>
-    <bug-database rdf:resource="https://issues.apache.org/jira/browse/MAHOUT" />
+    <bug-database rdf:resource="https://github.com/apache/mahout/issues" />
     <mailing-list rdf:resource="https://mahout.apache.org/community/mailing-lists.html" />
     <download-page rdf:resource="http://mahout.apache.org/download/downloads.html" />
-    <programming-language>Java</programming-language>
-    <programming-language>Scala</programming-language>
+    <programming-language>Python</programming-language>
+    <programming-language>Rust</programming-language>
     <category rdf:resource="http://projects.apache.org/category/library" />
     <release>
       <Version>
@@ -42,10 +42,10 @@
       </Version>
     </release>
     <repository>
-      <SVNRepository>
+      <GitRepository>
         <location rdf:resource="https://github.com/apache/mahout"/>
         <browse rdf:resource="https://github.com/apache/mahout"/>
-      </SVNRepository>
+      </GitRepository>
     </repository>
   </Project>
 </rdf:RDF>
