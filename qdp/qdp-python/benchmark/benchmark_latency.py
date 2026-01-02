@@ -149,9 +149,7 @@ def run_mahout(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
     return duration, latency_ms
 
 
-def run_pennylane(
-    num_qubits: int, total_batches: int, batch_size: int, prefetch: int
-):
+def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch: int):
     if not HAS_PENNYLANE:
         print("[PennyLane] Not installed, skipping.")
         return 0.0, 0.0
@@ -298,7 +296,9 @@ def main():
     print()
 
     print(BAR)
-    print(f"DATA-TO-STATE LATENCY BENCHMARK: {args.qubits} Qubits, {total_vectors} Samples")
+    print(
+        f"DATA-TO-STATE LATENCY BENCHMARK: {args.qubits} Qubits, {total_vectors} Samples"
+    )
     print(BAR)
 
     t_pl = l_pl = t_q_init = l_q_init = t_q_sv = l_q_sv = t_mahout = l_mahout = 0.0
@@ -306,7 +306,9 @@ def main():
     if "pennylane" in frameworks:
         print()
         print("[PennyLane] Full Pipeline (DataLoader -> GPU)...")
-        t_pl, l_pl = run_pennylane(args.qubits, args.batches, args.batch_size, args.prefetch)
+        t_pl, l_pl = run_pennylane(
+            args.qubits, args.batches, args.batch_size, args.prefetch
+        )
 
     if "qiskit-init" in frameworks:
         print()
