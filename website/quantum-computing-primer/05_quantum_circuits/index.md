@@ -87,7 +87,7 @@ qc.apply_cnot_gate(0, 1)
 qc.draw()
 ```
 
-This code will print a textual representation of the quantum circuit, showing the sequence of gates applied to the qubits. This visualization helps in understanding the structure of the circuit and the flow of quantum information.
+This code returns a textual representation of the quantum circuit, which you can print with `print(qc.draw())` or use programmatically. The visualization shows the sequence of gates applied to the qubits and helps in understanding the structure of the circuit and the flow of quantum information.
 
 ## 5.3 Combining Gates to Create Complex Circuits
 

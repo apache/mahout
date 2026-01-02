@@ -85,6 +85,11 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
 
+def apply_t_gate(circuit, qubit_index):
+    # Apply a T gate (π/8 gate) on the specified qubit
+    circuit.t(qubit_index)
+
+
 def execute_circuit(circuit, backend, backend_config):
     # Add measurements if they are not already present
     # Check if circuit already has measurement operations
@@ -134,7 +139,7 @@ def get_final_state_vector(circuit, backend, backend_config):
 
 def draw_circuit(circuit):
     # Use Qiskit's built-in drawing function
-    print(circuit.draw())
+    return circuit.draw()
 
 
 def apply_rx_gate(circuit, qubit_index, angle):

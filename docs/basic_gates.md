@@ -9,7 +9,7 @@ The NOT gate, also called the **Pauli X Gate**, is a fundamental quantum gate us
 The Hadamard gate, denoted as the H-gate, is used to create superposition states. When applied to a qubit in the |0⟩ state, it transforms it into an equal superposition of |0⟩ and |1⟩ states. Mathematically:
 
 
-H|0⟩ = (|0⟩ + |1⟩) / √2
+\[ $H|0⟩ = \frac{(|0⟩ + |1⟩)}{√2}$ \]
 
 
 
@@ -40,7 +40,7 @@ The Pauli Z gate introduces a phase flip without changing the qubit's state. It 
 
 It's used for measuring the phase of a qubit.
 
-## T-Gate (π/8 Gate) (New Addition)
+## T-Gate (π/8 Gate)
 The T-Gate applies a **π/4 phase shift** to the qubit. It is essential for quantum computing because it, along with the Hadamard and CNOT gates, allows for **universal quantum computation**. Mathematically:
 
 \[ T|0⟩ = |0⟩ \]

@@ -94,7 +94,7 @@ You can also visualize the quantum circuit using the draw method:
 qc.draw()
 ```
 
-This will print a textual representation of the circuit, showing the sequence of gates applied to the qubits.
+This returns a textual representation of the circuit, which you can print with `print(qc.draw())` or use programmatically. The visualization shows the sequence of gates applied to the qubits.
 
 ---
 

@@ -70,7 +70,7 @@ def create_np_computational_basis_state(
 
 
 def get_qumat_example_final_state_vector(
-    backend_config: dict, initial_state_ket_str: BinaryString = "000"
+    backend_config: dict, initial_state_ket_str: BinaryString = BinaryString("000")
 ):
     n_qubits = len(initial_state_ket_str)
     assert n_qubits == 3, print(
