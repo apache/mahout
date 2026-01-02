@@ -85,19 +85,31 @@ def apply_pauli_z_gate(circuit, qubit_index):
     circuit.z(qubit_index)
 
 
+def apply_t_gate(circuit, qubit_index):
+    # Apply a T gate (π/8 gate) on the specified qubit
+    circuit.t(qubit_index)
+
+
 def execute_circuit(circuit, backend, backend_config):
+    working_circuit = circuit.copy()
+
     # Add measurements if they are not already present
-    if not circuit.cregs:
-        circuit.measure_all()
+    # Check if circuit already has measurement operations
+    has_measurements = any(
+        isinstance(inst.operation, qiskit.circuit.Measure)
+        for inst in working_circuit.data
+    )
+    if not has_measurements:
+        working_circuit.measure_all()
 
     # Ensure the circuit is parameterized properly
-    if circuit.parameters:
+    if working_circuit.parameters:
         # Parse the global parameter configuration
         parameter_bindings = {
             param: backend_config["parameter_values"][str(param)]
-            for param in circuit.parameters
+            for param in working_circuit.parameters
         }
-        transpiled_circuit = qiskit.transpile(circuit, backend)
+        transpiled_circuit = qiskit.transpile(working_circuit, backend)
         bound_circuit = transpiled_circuit.assign_parameters(parameter_bindings)
         job = backend.run(
             bound_circuit, shots=backend_config["backend_options"]["shots"]
@@ -105,7 +117,7 @@ def execute_circuit(circuit, backend, backend_config):
         result = job.result()
         return result.get_counts()
     else:
-        transpiled_circuit = qiskit.transpile(circuit, backend)
+        transpiled_circuit = qiskit.transpile(working_circuit, backend)
         job = backend.run(
             transpiled_circuit, shots=backend_config["backend_options"]["shots"]
         )
@@ -115,13 +127,15 @@ def execute_circuit(circuit, backend, backend_config):
 
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
+    working_circuit = circuit.copy()
+
     simulator = AerSimulator(method="statevector")
 
     # Add save_statevector instruction
-    circuit.save_statevector()
+    working_circuit.save_statevector()
 
     # Simulate the circuit
-    transpiled_circuit = qiskit.transpile(circuit, simulator)
+    transpiled_circuit = qiskit.transpile(working_circuit, simulator)
     job = simulator.run(transpiled_circuit)
     result = job.result()
 
@@ -130,7 +144,7 @@ def get_final_state_vector(circuit, backend, backend_config):
 
 def draw_circuit(circuit):
     # Use Qiskit's built-in drawing function
-    print(circuit.draw())
+    return circuit.draw()
 
 
 def apply_rx_gate(circuit, qubit_index, angle):
@@ -151,3 +165,33 @@ def apply_rz_gate(circuit, qubit_index, angle):
 def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
     # Apply the U gate directly with specified parameters
     circuit.u(theta, phi, lambd, qubit_index)
+
+
+def calculate_prob_zero(results, ancilla_qubit, num_qubits):
+    """
+    Calculate the probability of measuring the ancilla qubit in |0> state.
+
+    Qiskit uses little-endian qubit ordering with string format results,
+    where the rightmost bit corresponds to qubit 0.
+
+    Args:
+        results: Measurement results from execute_circuit() (dict with string keys)
+        ancilla_qubit: Index of the ancilla qubit
+        num_qubits: Total number of qubits in the circuit
+
+    Returns:
+        float: Probability of measuring ancilla in |0> state
+    """
+    # Handle different result formats from different backends
+    if isinstance(results, list):
+        results = results[0]
+
+    total_shots = sum(results.values())
+    count_zero = 0
+
+    for state, count in results.items():
+        # Qiskit: little-endian, rightmost bit is qubit 0
+        if len(state) > ancilla_qubit and state[-(ancilla_qubit + 1)] == "0":
+            count_zero += count
+
+    return count_zero / total_shots if total_shots > 0 else 0.0

@@ -3,7 +3,7 @@ layout: deprecated-docs
 title: (Deprecated)  Item Based Reccommenders in Hadoop
 redirect_from:
     - /documentation/tutorials/map-reduce/recommender/intro-itembased-hadoop
-    - /documentation/tutorials/map-reduce/recommender/intro-itembased-hadoop.html 
+    - /documentation/tutorials/map-reduce/recommender/intro-itembased-hadoop.html
 ---
 
 
@@ -55,4 +55,4 @@ Running the command will execute a series of jobs the final product of which wil
 
 **Step 4: Making use of the output and doing more with Mahout**
 
-The output file generated in our simple example can be transformed using your tool of choice and consumed by downstream applications. There exist a variety of configuration options for Mahout’s item based recommender to accommodate custom business requirements; exploring and testing various configurations to suit your needs will doubtless lead to additional questions. Our user community is accessible via our [mailing list](https://mahout.apache.org/community/mailing-lists.html) and the book *Mahout In Action* is a fantastic (but slightly outdated) starting point. 
+The output file generated in our simple example can be transformed using your tool of choice and consumed by downstream applications. There exist a variety of configuration options for Mahout’s item based recommender to accommodate custom business requirements; exploring and testing various configurations to suit your needs will doubtless lead to additional questions. Our user community is accessible via our [mailing list](https://mahout.apache.org/community/mailing-lists.html) and the book *Mahout In Action* is a fantastic (but slightly outdated) starting point.

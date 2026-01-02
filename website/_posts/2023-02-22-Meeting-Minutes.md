@@ -32,7 +32,7 @@ Notes from previous session
 * Apr: 14.2, point release with minor improvements and new build system
 * [Already done](https://mahout.apache.org/docs/latest/tutorials/misc/getting-started-with-zeppelin/) ~~Apr-Jun: Docker images (Zeppelin + Mahout, e.g.)~~
 
-### Ideas 
+### Ideas
 * Python bindings for DSL (XXXL)
 * Automating or maintaining Docker images (XL, including docs)
 * New parsing and processing modules
@@ -40,7 +40,7 @@ Notes from previous session
   1. Proof of concept GPL/BSD/ALv2/MIT classifier (start with small tutorial)
 * Live code environment (in-browser) to try DSL (XXL for a real version, start with simple env)
 
-### Summary and next steps 
+### Summary and next steps
 * Continue monthly community calls
 * Complete JIRA focus
 * Get travis migration done, nightlies running

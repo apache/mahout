@@ -15,19 +15,7 @@
 # limitations under the License.
 #
 
-import pytest
-import sys
-from pathlib import Path
+from .constants import TESTING_BACKENDS
+from .qumat_helpers import get_backend_config, get_state_probability
 
-# Add project root to Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-# Define backends to test - used by both parametrize and fixture
-TESTING_BACKENDS = ["qiskit", "cirq", "amazon_braket"]
-
-
-@pytest.fixture(scope="session")
-def testing_backends():
-    """Fixture to provide the list of backends to test."""
-    return TESTING_BACKENDS
+__all__ = ["TESTING_BACKENDS", "get_backend_config", "get_state_probability"]

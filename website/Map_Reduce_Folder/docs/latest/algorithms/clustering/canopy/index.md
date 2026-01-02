@@ -4,7 +4,7 @@ title: Canopy Clustering
 redirect_from:
     - /docs/latest/algorithms/clustering/canopy/index
     - /docs/latest/algorithms/clustering/canopy/index.html
-   
+
 ---
 
 ### About
@@ -64,7 +64,7 @@ The points are generated as follows:
  sd=0.1
 
 In the first image, the points are plotted and the 3-sigma boundaries of
-their generator are superimposed. 
+their generator are superimposed.
 
 ![sample data](SampleData.png)
 
@@ -123,8 +123,8 @@ thresholds.
 ### Example
 
     val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4), (1.1, 1.5, 2.5, 1.0), (6.0, 5.2, -5.2, 5.3), (7.0,6.0, 5.0, 5.0), (10.0, 1.0, 20.0, -10.0)))
-    
+
     import org.apache.mahout.math.algorithms.clustering.CanopyClustering
-    
+
     val model = new CanopyClustering().fit(drmA, 't1 -> 6.5, 't2 -> 5.5, 'distanceMeasure -> 'Chebyshev)
     model.cluster(drmA).collect

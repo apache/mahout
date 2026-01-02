@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -12,39 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-name: Lint
+"""Constants for testing."""
 
-on:
-  pull_request:
-    paths:
-      - "**/*.py"
-  push:
-    branches:
-      - main
-    paths:
-      - "**/*.py"
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.10"
-
-      - name: Install Poetry
-        run: pip install poetry
-
-      - name: Install dependencies
-        run: poetry install --extras dev
-
-      - name: Run Ruff Linter
-        run: poetry run ruff check .
-
-      - name: Run Ruff Formatter
-        run: poetry run ruff format --check .
+# List of backends to test across
+TESTING_BACKENDS = ["qiskit", "cirq", "amazon_braket"]

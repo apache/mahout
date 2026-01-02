@@ -56,10 +56,9 @@ to view all outputs.
 
     BayesDriver, BayesThetaNormalizerDriver, CBayesNormalizedWeightDriver, CBayesDriver, CBayesThetaDriver, CBayesThetaNormalizerDriver, BayesWeightSummerDriver, BayesFeatureDriver, BayesTfIdfDriver Usage:
         [--input <input> --output <output> --help]
-      
+
     Options
-    
+
       --input (-i) input	  The Path for input Vectors. Must be a SequenceFile of Writable, Vector.
       --output (-o) output	  The directory pathname for output points.
       --help (-h)		  Print out help.
-

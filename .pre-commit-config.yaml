@@ -1,0 +1,43 @@
+repos:
+  # Check yaml, end of file, trailing whitespace
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        name: check yaml
+      - id: end-of-file-fixer
+        name: fix end of file
+      - id: trailing-whitespace
+        name: trim trailing whitespace
+
+  # Ruff linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      - id: ruff
+        name: ruff linting
+        files: \.py$
+        args: [--fix]
+      - id: ruff-format
+        name: ruff formatting
+        files: \.py$
+
+  # Static type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.19.0
+    hooks:
+      - id: mypy
+        args: ["--ignore-missing-imports"]
+
+  # Check Apache license headers
+  - repo: https://github.com/lucas-c/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        name: check license headers
+        files: \.py$
+        args:
+          - --license-filepath
+          - testing/utils/.license-header.txt
+          - --comment-style
+          - "#"

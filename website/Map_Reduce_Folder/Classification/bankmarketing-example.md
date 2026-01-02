@@ -16,11 +16,11 @@ of information such as age, job, marital status as well as information about the
 
 ### Code & Data
 
-The bank marketing example code lives under 
+The bank marketing example code lives under
 
 *mahout-examples/src/main/java/org.apache.mahout.classifier.sgd.bankmarketing*
 
-The data can be found at 
+The data can be found at
 
 *mahout-examples/src/main/resources/bank-full.csv*
 

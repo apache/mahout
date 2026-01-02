@@ -71,7 +71,7 @@ See also: [https://cwiki.apache.org/confluence/display/MAHOUT/SVD+-+Singular+Val
 
 The Lanczos algorithm is designed for eigen-decomposition, but like any
 such algorithm, getting singular vectors out of it is immediate (singular
-vectors of matrix A are just the eigenvectors of A^t * A or A * A^t). 
+vectors of matrix A are just the eigenvectors of A^t * A or A * A^t).
 Lanczos works by taking a starting seed vector *v* (with cardinality equal
 to the number of columns of the matrix A), and repeatedly multiplying A by
 the result: *v'* = A.times(*v*) (and then subtracting off what is
@@ -123,41 +123,41 @@ arguments (which can be reproduced by just entering the command with no
 arguments):
 
 
-    Job-Specific Options:							    
-      --input (-i) input			  Path to job input directory.	    
-      --output (-o) output			  The directory pathname for output.    
-      --numRows (-nr) numRows		  Number of rows of the input matrix	  
-      --numCols (-nc) numCols		  Number of columns of the input matrix 
-      --rank (-r) rank			  Desired decomposition rank (note: 
-    					  only roughly 1/4 to 1/3 of these will 
-    					  have the top portion of the spectrum) 
-      --symmetric (-sym) symmetric		  Is the input matrix square and    
-    					  symmetric?			    
-      --cleansvd (-cl) cleansvd		  Run the EigenVerificationJob to clean 
-    					  the eigenvectors after SVD	    
-      --maxError (-err) maxError		  Maximum acceptable error	    
-      --minEigenvalue (-mev) minEigenvalue	  Minimum eigenvalue to keep the vector for				    
-      --inMemory (-mem) inMemory		  Buffer eigen matrix into memory (if you have enough!)		    
-      --help (-h)				  Print out help		    
-      --tempDir tempDir			  Intermediate output directory     
-      --startPhase startPhase		  First phase to run		    
-      --endPhase endPhase			  Last phase to run		    
+    Job-Specific Options:
+      --input (-i) input			  Path to job input directory.
+      --output (-o) output			  The directory pathname for output.
+      --numRows (-nr) numRows		  Number of rows of the input matrix
+      --numCols (-nc) numCols		  Number of columns of the input matrix
+      --rank (-r) rank			  Desired decomposition rank (note:
+    					  only roughly 1/4 to 1/3 of these will
+    					  have the top portion of the spectrum)
+      --symmetric (-sym) symmetric		  Is the input matrix square and
+    					  symmetric?
+      --cleansvd (-cl) cleansvd		  Run the EigenVerificationJob to clean
+    					  the eigenvectors after SVD
+      --maxError (-err) maxError		  Maximum acceptable error
+      --minEigenvalue (-mev) minEigenvalue	  Minimum eigenvalue to keep the vector for
+      --inMemory (-mem) inMemory		  Buffer eigen matrix into memory (if you have enough!)
+      --help (-h)				  Print out help
+      --tempDir tempDir			  Intermediate output directory
+      --startPhase startPhase		  First phase to run
+      --endPhase endPhase			  Last phase to run
 
 
-The short form invocation may be used to perform the SVD on the input data: 
+The short form invocation may be used to perform the SVD on the input data:
 
       <MAHOUT_HOME>/bin/mahout svd \
-      --input (-i) <Path to input matrix> \   
-      --output (-o) <The directory pathname for output> \	
-      --numRows (-nr) <Number of rows of the input matrix> \   
+      --input (-i) <Path to input matrix> \
+      --output (-o) <The directory pathname for output> \
+      --numRows (-nr) <Number of rows of the input matrix> \
       --numCols (-nc) <Number of columns of the input matrix> \
       --rank (-r) <Desired decomposition rank> \
-      --symmetric (-sym) <Is the input matrix square and symmetric>    
+      --symmetric (-sym) <Is the input matrix square and symmetric>
 
 
 The --input argument is the location on HDFS where a
 SequenceFile<Writable,VectorWritable> (preferably
-SequentialAccessSparseVectors instances) lies which you wish to decompose. 
+SequentialAccessSparseVectors instances) lies which you wish to decompose.
 Each vector of which has --numcols entries.  --numRows is the number of
 input rows and is used to properly size the matrix data structures.
 
@@ -195,18 +195,18 @@ least 8 bytes/double * rank * numCols), then you will see some speedups on
 this cleaning process.
 
 After execution, the --output directory will have a file named
-"cleanEigenvectors" containing the clean eigenvectors. 
+"cleanEigenvectors" containing the clean eigenvectors.
 
 These two steps can also be invoked together by the svd command by using
 the long form svd invocation:
 
       <MAHOUT_HOME>/bin/mahout svd \
-      --input (-i) <Path to input matrix> \   
-      --output (-o) <The directory pathname for output> \	
-      --numRows (-nr) <Number of rows of the input matrix> \   
+      --input (-i) <Path to input matrix> \
+      --output (-o) <The directory pathname for output> \
+      --numRows (-nr) <Number of rows of the input matrix> \
       --numCols (-nc) <Number of columns of the input matrix> \
       --rank (-r) <Desired decomposition rank> \
-      --symmetric (-sym) <Is the input matrix square and symmetric> \  
+      --symmetric (-sym) <Is the input matrix square and symmetric> \
       --cleansvd "true"   \
       --maxError <maximum allowed error. Default is 0.5> \
       --minEigenvalue <minimum allowed eigenvalue. Default is 0.0> \

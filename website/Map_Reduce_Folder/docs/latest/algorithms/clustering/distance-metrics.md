@@ -4,7 +4,7 @@ title: Distance Metrics
 redirect_from:
     - /docs/latest/algorithms/clustering/distance-metrics
     - /docs/latest/algorithms/clustering/distance-metrics.html
-   
+
 ---
 
 ### Distance Metrics Supported By Mahout
@@ -50,35 +50,35 @@ Weighted Manhattan-->
 
 ### Using Distance Metrics
 
-In Mahout one can access the distant metrics directly to measure the distance between two arbitrary vectors, or 
-can specify which distance metric to use as part of an algorithm. In the latter case the distance metric is called 
-by `Symbol`, we never pass Distance metrics directly to an algorithm.  This design choice, in part has to do with 
-serialization of object and keeping the engine bindings as simple as possible.  Behind the scenes, the only thing 
+In Mahout one can access the distant metrics directly to measure the distance between two arbitrary vectors, or
+can specify which distance metric to use as part of an algorithm. In the latter case the distance metric is called
+by `Symbol`, we never pass Distance metrics directly to an algorithm.  This design choice, in part has to do with
+serialization of object and keeping the engine bindings as simple as possible.  Behind the scenes, the only thing
 that is serialized and sent to the workers is a number which specifies what distant metric to use- this is much more
 abstract and easier to maintain on the back end than making sure each function can be serialized by any arbitrary engine.
-We feel from the user perspective, it may seem quirky but causes no decrease in usability.  If a user wishes to use a 
+We feel from the user perspective, it may seem quirky but causes no decrease in usability.  If a user wishes to use a
 custom distance metric- simply add it to [math-scala/src/main/org/apache/mahout/math/common/DistanceMetrics.scala](https://github.com/apache/mahout/blob/trunk/core/src/main/scala/org/apache/mahout/math/algorithms/common/distance/DistanceMetrics.scala)
-and recompile. 
+and recompile.
 
 ### Examples
 
 **Meausring the distance between two vectors**
 
     import org.apache.mahout.math.algorithms.common.distance._
-    
+
     val v1 = dvec(1.0, 1.5, -1.2, 3.5)
     val v2 = dvec(0.1, -1.4, 10.5, 3.2)
-    
+
     Cosine.distance(v1, v2)
 
 **Using distance in clustering**
 
     import org.apache.mahout.math.algorithms.clustering.CanopyClustering
 
-    val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4), 
-                                    (1.1, 1.5, 2.5, 1.0), 
-                                    (6.0, 5.2, -5.2, 5.3), 
-                                    (7.0,6.0, 5.0, 5.0), 
+    val drmA = drmParallelize(dense((1.0, 1.2, 1.3, 1.4),
+                                    (1.1, 1.5, 2.5, 1.0),
+                                    (6.0, 5.2, -5.2, 5.3),
+                                    (7.0,6.0, 5.0, 5.0),
                                     (10.0, 1.0, 20.0, -10.0)))
-                                    
+
     val model = new CanopyClustering().fit(drmA, 'distanceMeasure -> 'Cosine)

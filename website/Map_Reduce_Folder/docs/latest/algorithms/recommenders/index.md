@@ -23,7 +23,7 @@ To get the most out of our more modern CCO algorithm we'll need to think of the 
 
 To integrate with your application you will collect user interactions storing them in a DB and also in a from usable by Mahout. The simplest way to do this is to log user interactions to csv files (user-id, item-id). The DB should be setup to contain the last n user interactions, which will form part of the query for recommendations.
 
-Mahout's spark-itemsimilarity will create a table of (item-id, list-of-similar-items) in csv form. Think of this as an item collection with one field containing the item-ids of similar items. Index this with your search engine. 
+Mahout's spark-itemsimilarity will create a table of (item-id, list-of-similar-items) in csv form. Think of this as an item collection with one field containing the item-ids of similar items. Index this with your search engine.
 
 When your application needs recommendations for a specific person, get the latest user history of interactions from the DB and query the indicator collection with this history. You will get back an ordered list of item-ids. These are your recommendations. You may wish to filter out any that the user has already seen but that will depend on your use case.
 

@@ -1,42 +1,33 @@
-### Purpose of PR  
-Describe what this PR does.
+### Purpose of PR
+<!-- Describe what this PR does. -->
 
-### Linked Issues  
-Add links to related issues.
-- Closes #123 
-- Related to #123  
+### Related Issues or PRs
+<!-- Add links to related issues or PRs. -->
+<!-- - Closes #123  -->
+<!-- - Related to #123   -->
 
-### Changes Made  
-- [ ] Bug fix  
-- [ ] New feature  
-- [ ] Documentation update  
+### Changes Made
+<!-- Please mark one with an "x"   -->
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Refactoring
+- [ ] Documentation
+- [ ] Test
+- [ ] CI/CD pipeline
+- [ ] Other
 
-### Important ToDos
-Please mark each with an "x"  
+### Breaking Changes
+<!-- Does this PR introduce a breaking change? -->
+- [ ] Yes
+- [ ] No
 
-A GitHub issue exists (if not, please create one) [https://github.com/apache/mahout/issues]  
-- [ ] Title of PR is "Issue #XXXX: Brief Description of Changes" where XXXX is the GitHub issue number.  
-- [ ] Created unit tests where appropriate  
-- [ ] Added correct licenses on newly added files  
-- [ ] Assigned GitHub issue to self  
-- [ ] Added documentation in ScalaDocs/JavaDocs and to the website  
-- [ ] Successfully built and ran all unit tests, verified that all tests pass locally  
+### Checklist
+<!-- Please mark each item with an "x" when complete -->
+<!-- If not all items are complete, please open this as a **Draft PR**.
+Once all requirements are met, mark as ready for review. -->
 
-If all of these items are not yet complete, but you still feel it is appropriate to open a PR, please open it as a **Draft PR** instead.  
-Once all requirements are met, you can mark it as ready for review.
-
-
-### Breaking Changes  
-Does this PR introduce a breaking change?
-- [ ] Yes  
-- [ ] No  
-
-### Testing & Verification  
-Describe how you tested the changes.
-- [ ] Unit tests added  
-- [ ] Manually tested  
-
-### Checklist  
-- [ ] The title follows the format "MAHOUT-XXXX Brief Description"  
-- [ ] GitHub issue is created
-- [ ] Code follows ASF guidelines  
+- [ ] Added or updated unit tests for all changes
+- [ ] Added or updated documentation for all changes
+- [ ] Successfully built and ran all unit tests or manual tests locally
+- [ ] PR title follows "MAHOUT-XXX: Brief Description" format (if related to an issue)
+- [ ] Code follows ASF guidelines

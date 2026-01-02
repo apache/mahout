@@ -7,6 +7,6 @@ category: minutes
 
 Weekly community meeting minutes.
 
-No new issues. 
+No new issues.
 
 Will propose idea of moving meeting time on dev@m.a.o

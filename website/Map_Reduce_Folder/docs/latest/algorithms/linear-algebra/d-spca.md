@@ -1,6 +1,6 @@
 ---
 layout: doc-page
-title: Distributed Stochastic PCA 
+title: Distributed Stochastic PCA
 redirect_from:
     - /docs/latest/algorithms/linear-algebra/d-spca
     - /docs/latest/algorithms/linear-algebra/d-spca.html
@@ -40,7 +40,7 @@ Given an *m* `\(\times\)` *n* matrix `\(\mathbf{A}\)`, a target rank *k*, and an
 
 Mahout `dspca(...)` is implemented in the mahout `math-scala` algebraic optimizer which translates Mahout's R-like linear algebra operators into a physical plan for both Spark and H2O distributed engines.
 
-    def dspca[K](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0): 
+    def dspca[K](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
     (DrmLike[K], DrmLike[Int], Vector) = {
 
         // Some mapBlock() calls need it
@@ -165,11 +165,11 @@ The scala `dspca(...)` method can easily be called in any Spark, Flink, or H2O a
     import org.apache.mahout.math._
     import decompositions._
     import drm._
-    
+
     val (drmU, drmV, s) = dspca(drmA, k=200, q=1)
 
 Note the parameter is optional and its default value is zero.
- 
+
 ## References
 
 [1]: Lyubimov and Palumbo, ["Apache Mahout: Beyond MapReduce; Distributed Algorithm Design"](https://www.amazon.com/Apache-Mahout-MapReduce-Dmitriy-Lyubimov/dp/1523775785)

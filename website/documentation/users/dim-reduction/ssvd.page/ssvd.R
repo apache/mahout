@@ -1,6 +1,6 @@
 
 # standard SSVD
-ssvd.svd <- function(x, k, p=25, qiter=0 ) { 
+ssvd.svd <- function(x, k, p=25, qiter=0 ) {
 
 a <- as.matrix(x)
 m <- nrow(a)
@@ -17,7 +17,7 @@ q <- qr.Q(qr(y))
 b<- t(q) %*% a
 
 #power iterations
-for ( i in 1:qiter ) { 
+for ( i in 1:qiter ) {
   y <- a %*% t(b)
   q <- qr.Q(qr(y))
   b <- t(q) %*% a
@@ -40,7 +40,7 @@ return(res)
 
 #SSVD with Q=YR^-1 substitute.
 # this is just a simulation, because it is suboptimal to verify the actual result
-ssvd.svd1 <- function(x, k, p=25, qiter=0 ) { 
+ssvd.svd1 <- function(x, k, p=25, qiter=0 ) {
 
 a <- as.matrix(x)
 m <- nrow(a)
@@ -58,10 +58,10 @@ yty <- t(y) %*% y
 R <- chol(yty, pivot = T)
 q <- y %*% solve(R)
 
-b<- t( q ) %*% a   
+b<- t( q ) %*% a
 
 #power iterations
-for ( i in 1:qiter ) { 
+for ( i in 1:qiter ) {
   y <- a %*% t(b)
 
   yty <- t(y) %*% y
@@ -88,7 +88,7 @@ return(res)
 
 #############
 ## ssvd with pci options
-ssvd.cpca <- function ( x, k, p=25, qiter=0, fixY=T ) { 
+ssvd.cpca <- function ( x, k, p=25, qiter=0, fixY=T ) {
 
 a <- as.matrix(x)
 m <- nrow(a)
@@ -105,7 +105,7 @@ omega <- matrix ( rnorm(r*n), nrow=n, ncol=r)
 y <- a %*% omega
 
 #fix y
-if ( fixY ) { 
+if ( fixY ) {
   #debug
   cat ("fixing Y...\n");
 
@@ -118,27 +118,27 @@ q <- qr.Q(qr(y))
 
 b<- t(q) %*% a
 
-# compute sum of q rows 
+# compute sum of q rows
 s_q <- cbind(colSums(q))
 
 # compute B*xi
-# of course in MR implementation 
+# of course in MR implementation
 # it will be collected as sums of ( B[,i] * xi[i] ) and reduced after.
 s_b <- b %*% cbind(xi)
 
 
 #power iterations
-for ( i in 1:qiter ) { 
+for ( i in 1:qiter ) {
 
-  # fix b 
-  b <- b - s_q %*% rbind(xi) 
+  # fix b
+  b <- b - s_q %*% rbind(xi)
 
   y <- a %*% t(b)
 
-  # fix y 
-  if ( fixY )  
+  # fix y
+  if ( fixY )
     for (i in 1:r ) y[,i]<- y[,i]-s_b[i]
-  
+
 
   q <- qr.Q(qr(y))
   b <- t(q) %*% a
@@ -173,9 +173,3 @@ res$v <- (t(b- s_q %*% rbind(xi) ) %*% e$vectors %*% diag(1/e$values))[,1:k]
 return(res)
 
 }
-
-
-
-
-
-

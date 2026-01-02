@@ -7,7 +7,7 @@ title: Quantum Computing Primer
         <p>Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
         <a href="/documentation/qumat/">Explore Qumat →</a>
       </div>
-      
+
 
 # Outline for an In-Depth Primer in Quantum Computing Using `qumat`
 
@@ -54,4 +54,3 @@ title: Quantum Computing Primer
 - **10.1 Quantum Fourier Transform**
 - **10.2 Quantum Phase Estimation**
 - **10.3 Quantum Annealing**
-

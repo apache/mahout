@@ -13,7 +13,7 @@ redirect_from:
 
 The Mahout Collections library is a set of container classes that address
 some limitations of the standard collections in Java. [This presentation](http://domino.research.ibm.com/comm/research_people.nsf/pages/sevitsky.pubs.html/$FILE/oopsla08%20memory-efficient%20java%20slides.pdf)
- describes a number of performance problems with the standard collections. 
+ describes a number of performance problems with the standard collections.
 
 Mahout collections addresses two of the more glaring: the lack of support
 for primitive types and the lack of open hashing.
@@ -53,9 +53,3 @@ have any additional storage usage for unused keys.
 
 The implementation of Mahout Collections is derived from [Cern Colt](http://acs.lbl.gov/~hoschek/colt/)
 .
-
-
-
-
-
-

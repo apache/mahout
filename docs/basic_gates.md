@@ -9,7 +9,7 @@ The NOT gate, also called the **Pauli X Gate**, is a fundamental quantum gate us
 The Hadamard gate, denoted as the H-gate, is used to create superposition states. When applied to a qubit in the |0⟩ state, it transforms it into an equal superposition of |0⟩ and |1⟩ states. Mathematically:
 
 
-H|0⟩ = (|0⟩ + |1⟩) / √2
+\[ $H|0⟩ = \frac{(|0⟩ + |1⟩)}{√2}$ \]
 
 
 
@@ -40,16 +40,61 @@ The Pauli Z gate introduces a phase flip without changing the qubit's state. It 
 
 It's used for measuring the phase of a qubit.
 
-## T-Gate (π/8 Gate) (New Addition)
+## T-Gate (π/8 Gate)
 The T-Gate applies a **π/4 phase shift** to the qubit. It is essential for quantum computing because it, along with the Hadamard and CNOT gates, allows for **universal quantum computation**. Mathematically:
 
 \[ T|0⟩ = |0⟩ \]
 \[ T|1⟩ = e^{i\pi/4} |1⟩ \]
 
+## CSWAP Gate (Controlled-SWAP / Fredkin Gate)
+The CSWAP gate, also known as the **Fredkin gate**, is a three-qubit gate that conditionally swaps the states of two target qubits based on the state of a control qubit. If the control qubit is in the |1⟩ state, it swaps the states of the two target qubits; otherwise, it leaves them unchanged.
+
+### Mathematical Definition
+
+The CSWAP gate acts on three qubits: a control qubit |c⟩ and two target qubits |t₁⟩ and |t₂⟩. The operation is:
+
+\[ \text{CSWAP}|c\rangle|t_1\rangle|t_2\rangle = \begin{cases} |c\rangle|t_1\rangle|t_2\rangle & \text{if } c = 0 \\ |c\rangle|t_2\rangle|t_1\rangle & \text{if } c = 1 \end{cases} \]
+
+In matrix form (for the 8-dimensional space of three qubits), the CSWAP gate is:
+
+\[ \text{CSWAP} = \begin{pmatrix} 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \end{pmatrix} \]
+
+The CSWAP gate is fundamental in quantum algorithms such as the swap test, quantum error correction, and quantum state comparison. The CSWAP gate is reversible and preserves the number of |1⟩ states in the system (conserves the Hamming weight).
+
+## U Gate (Universal Single-Qubit Gate)
+The U gate is a **universal single-qubit gate** parameterized by three angles (θ, φ, λ) that can represent any single-qubit unitary operation. It provides a complete parameterization of single-qubit rotations and is essential for implementing arbitrary quantum operations.
+
+### Mathematical Definition
+
+The U gate matrix representation is:
+
+\[ U(\theta, \phi, \lambda) = \begin{pmatrix} \cos(\theta/2) & -e^{i\lambda}\sin(\theta/2) \\ e^{i\phi}\sin(\theta/2) & e^{i(\phi+\lambda)}\cos(\theta/2) \end{pmatrix} \]
+
+The U gate can be decomposed into rotations around the Z, Y, and Z axes:
+
+\[ U(\theta, \phi, \lambda) = R_z(\phi) \cdot R_y(\theta) \cdot R_z(\lambda) \]
+
+This decomposition shows that the U gate applies:
+1. A rotation by λ around the Z-axis
+2. A rotation by θ around the Y-axis
+3. A rotation by φ around the Z-axis
+
+### Special Cases
+
+- **Identity**: U(0, 0, 0) = I
+- **Pauli X**: U(π, 0, π) = X
+- **Pauli Y**: U(π, π/2, π/2) = Y
+- **Pauli Z**: U(0, 0, π) = Z
+- **Hadamard**: U(π/2, 0, π) = H
+
+This gate is particularly useful in parameterized quantum circuits and variational quantum algorithms where you need to optimize over all possible single-qubit operations.
+
 # **Updates**
 - **Acknowledged support for Cirq & Braket** (New Addition)
 - **Removed Pauli X Gate** (Merged into NOT Gate)
 - **Added T-Gate** (New Addition)
+- **Added CSWAP Gate** (New Addition)
+- **Added U Gate** (New Addition)
 - **Fixed typos**
 
 These quantum gates are fundamental building blocks in quantum computing, enabling the manipulation and transformation of qubit states to perform various quantum algorithms and computations.

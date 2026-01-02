@@ -4,7 +4,7 @@ title: GSOC
 redirect_from:
     - /documentaion/developers/gsoc
     - /documentaion/developers/gsoc.html
-    
+
 ---
 
 # Google Summer of Code
@@ -43,7 +43,7 @@ being selected, not increase them.
 students who propose to implement 3-5 machine learning algorithms on
 Map/Reduce, all in a two month period.	They NEVER get selected.   Be
 realistic.  All successful projects to date follow, more or less, the
-following formula:  Implement algorithm on Map/Reduce.	Write Unit Tests. 
+following formula:  Implement algorithm on Map/Reduce.	Write Unit Tests.
 Do some bigger scale tests.  Write 1 or 2 examples.  Write Wiki
 documentation.	That's it.  Trust us, it takes a summer to do these things.
 
@@ -57,7 +57,7 @@ evaluation will take place privately.
 about what you are implementing.  We care about you contributing to open
 source.  You learn.  We learn.	Win-win.
 * Enjoy it!  Contributing to open source can open some amazing doors for
-your career.  
+your career.
 
 <a name="GSOC-References"></a>
 ## References

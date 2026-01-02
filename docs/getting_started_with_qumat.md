@@ -36,7 +36,7 @@ pip install .
 
 ## Examples
 
-Refer to the example notebooks in the 'examples' directory for practical implementations of basic commands and getting started. Notable examples include: 
+Refer to the example notebooks in the 'examples' directory for practical implementations of basic commands and getting started. Notable examples include:
 
 - [Simple_Example.ipynb](examples/Simple_Example.ipynb)
 - [Optimization_Example.ipynb](examples/Optimization_Example.ipynb)

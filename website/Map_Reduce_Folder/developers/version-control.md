@@ -5,17 +5,17 @@ redirect_from:
     - /documentation/developers/version-control
     - /documentation/developers/version-control.html
 
-    
+
 ---
 
 # Version control access
 
 The Mahout source is mirrored in the **[Apache Mahout GitHub](https://github.com/apache/mahout)** repository.
-  
+
 <a name="VersionControl-WebAccess(read-only)"></a>
 ## Web Access (read-only)
 
-The source code can be browsed via the Web at [https://github.com/apache/mahout](https://github.com/apache/mahout). 
+The source code can be browsed via the Web at [https://github.com/apache/mahout](https://github.com/apache/mahout).
 
 <a name="VersionControl-AnonymousAccess(read-only)"></a>
 ## Anonymous Access (read-only)

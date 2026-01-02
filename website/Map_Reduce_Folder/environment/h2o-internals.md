@@ -1,6 +1,6 @@
 ---
 layout: default
-title: 
+title:
 redirect_from:
   - /documentation/users/environment/h2o-internals
   - /documentation/users/environment/h2o-internals.html

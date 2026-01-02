@@ -39,7 +39,7 @@ Top-level packages define the Mahout interfaces to these key abstractions:
 
 Subpackages of *org.apache.mahout.cf.taste.impl* hold implementations of
 these interfaces. These are the pieces from which you will build your own
-recommendation engine. That's it! 
+recommendation engine. That's it!
 
 <a name="RecommenderDocumentation-Architecture"></a>
 ## Architecture
@@ -124,23 +124,23 @@ Now we create a **UserNeighborhood** algorithm. Here we use nearest-3:
 
     UserNeighborhood neighborhood =
     	  new NearestNUserNeighborhood(3, userSimilarity, model);{code}
-    
+
 Now we can create our **Recommender**, and add a caching decorator:
-    
+
 
     Recommender recommender =
 	  new GenericUserBasedRecommender(model, neighborhood, userSimilarity);
     Recommender cachingRecommender = new CachingRecommender(recommender);
 
-    
+
 Now we can get 10 recommendations for user ID "1234" &mdash; done!
 
     List<RecommendedItem> recommendations =
 	  cachingRecommender.recommend(1234, 10);
 
-    
+
 ## Item-based Recommender
-    
+
 We could have created an item-based recommender instead. Item-based
 recommenders base recommendation not on user similarity, but on item
 similarity. In theory these are about the same approach to the problem,
@@ -149,19 +149,19 @@ relatively fixed, more so than the similarity of two users. So, item-based
 recommenders can use pre-computed similarity values in the computations,
 which make them much faster. For large data sets, item-based recommenders
 are more appropriate.
-    
+
 Let's start over, again with a **FileDataModel** to start:
-    
+
 
     DataModel model = new FileDataModel(new File("data.txt"));
 
-    
+
 We'll also need an **ItemSimilarity**. We could use
 **PearsonCorrelationSimilarity**, which computes item similarity in realtime,
 but, this is generally too slow to be useful. Instead, in a real
 application, you would feed a list of pre-computed correlations to a
-**GenericItemSimilarity**: 
-    
+**GenericItemSimilarity**:
+
 
     // Construct the list of pre-computed correlations
     Collection<GenericItemSimilarity.ItemItemSimilarity> correlations =
@@ -170,9 +170,9 @@ application, you would feed a list of pre-computed correlations to a
 	  new GenericItemSimilarity(correlations);
 
 
-    
+
 Then we can finish as before to produce recommendations:
-    
+
 
     Recommender recommender =
 	  new GenericItemBasedRecommender(model, itemSimilarity);
@@ -220,7 +220,7 @@ code and third-party code you use doesn't call this method.
 Also consider the following tips:
 
 * Use **CachingRecommender** on top of your custom **Recommender** implementation.
-* When using **JDBCDataModel**, make sure you wrap it with the **ReloadFromJDBCDataModel** to load data into memory!. 
+* When using **JDBCDataModel**, make sure you wrap it with the **ReloadFromJDBCDataModel** to load data into memory!.
 
 <a name="RecommenderDocumentation-AlgorithmPerformance:WhichOneIsBest?"></a>
 ### Algorithm Performance: Which One Is Best?

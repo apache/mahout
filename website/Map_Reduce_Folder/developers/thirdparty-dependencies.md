@@ -4,7 +4,7 @@ title: Thirdparty Dependencies
 redirect_from:
     - /documentation/developers/thirdparty
     - /documentation/developers/thirdparty.html
-    
+
 ---
 
 # Adding Thirdparty Dependencies in Maven
