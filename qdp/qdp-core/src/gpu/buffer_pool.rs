@@ -54,11 +54,9 @@ impl std::ops::DerefMut for PinnedBufferHandle {
 impl Drop for PinnedBufferHandle {
     fn drop(&mut self) {
         if let Some(buf) = self.buffer.take() {
-            // If the mutex is poisoned, avoid touching shared state during drop.
-            if let Ok(mut free) = self.pool.free.lock() {
-                free.push(buf);
-                self.pool.available_cv.notify_one();
-            }
+            let mut free = self.pool.lock_free();
+            free.push(buf);
+            self.pool.available_cv.notify_one();
         }
     }
 }
