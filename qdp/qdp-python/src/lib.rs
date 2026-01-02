@@ -421,6 +421,38 @@ impl QdpEngine {
             consumed: false,
         })
     }
+
+    /// Encode from TensorFlow TensorProto file
+    ///
+    /// Args:
+    ///     path: Path to TensorProto file (.pb)
+    ///     num_qubits: Number of qubits for encoding
+    ///     encoding_method: Encoding strategy (currently only "amplitude")
+    ///
+    /// Returns:
+    ///     QuantumTensor: DLPack tensor containing all encoded states
+    ///
+    /// Example:
+    ///     >>> engine = QdpEngine(device_id=0)
+    ///     >>> batched = engine.encode_from_tensorflow("data.pb", 16, "amplitude")
+    ///     >>> torch_tensor = torch.from_dlpack(batched)  # Shape: [200, 65536]
+    fn encode_from_tensorflow(
+        &self,
+        path: &str,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        let ptr = self
+            .engine
+            .encode_from_tensorflow(path, num_qubits, encoding_method)
+            .map_err(|e| {
+                PyRuntimeError::new_err(format!("Encoding from TensorFlow failed: {}", e))
+            })?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
+    }
 }
 
 /// Mahout QDP Python module
