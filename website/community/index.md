@@ -10,6 +10,9 @@ Welcome to the Apache Mahout Community Overview page! Apache Mahout is an open-s
 ## Get Involved
 
 There are numerous ways to engage with the Mahout community, no matter your background or skill level. Some options include:
+## Biweekly Community Meeting
+Apache Mahout is committed to work consistently and conducts its meetings once in two weeks. To get invovled, you can access the link here. The meeting timings are communicated via official slack channel. 
+[Meeting Link](https://meet.google.com/hjo-njer-hzw?authuser=0&hs=122&ijlm=1767371505662&pli=1)
 
 - **Mailing Lists**: Join the [user](mailto:user-subscribe@mahout.apache.org) and [developer](mailto:dev-subscribe@mahout.apache.org) mailing lists to participate in discussions, ask questions, and share your experiences.
 - **Issue Tracker**: Report bugs, request features, or contribute patches via the [Mahout JIRA issue tracker](https://issues.apache.org/jira/projects/MAHOUT/).
