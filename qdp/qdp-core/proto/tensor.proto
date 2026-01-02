@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package tensorflow;
+
+// TensorProto - only define necessary fields, field numbers match TensorFlow official
+message TensorProto {
+  // Field 1: dtype (enum DataType in TF, but varint in wire format)
+  // DT_DOUBLE = 2 (see tensorflow/core/framework/types.proto)
+  int32 dtype = 1;
+
+  // Field 2: tensor_shape
+  TensorShapeProto tensor_shape = 2;
+
+  // Field 4: tensor_content (preferred for efficient parsing)
+  bytes tensor_content = 4;
+
+  // Field 6: double_val (fallback, only used when tensor_content is empty)
+  repeated double double_val = 6 [packed = true];
+}
+
+message TensorShapeProto {
+  // Field 2: dim (field number matches official)
+  repeated Dim dim = 2;
+  // Field 3: unknown_rank (optional; helps with better error messages)
+  bool unknown_rank = 3;
+}
+
+message Dim {
+  // Field 1: size
+  int64 size = 1;
+  // Skip name field (field number 2) to reduce parsing overhead
+}

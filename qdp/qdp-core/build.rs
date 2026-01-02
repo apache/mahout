@@ -14,22 +14,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Format-specific data reader implementations.
-//!
-//! This module contains concrete implementations of the [`DataReader`] and
-//! [`StreamingDataReader`] traits for various file formats.
-//!
-//! # Fully Implemented Formats
-//! - **Parquet**: [`ParquetReader`], [`ParquetStreamingReader`]
-//! - **Arrow IPC**: [`ArrowIPCReader`]
-//! - **TensorFlow TensorProto**: [`TensorFlowReader`]
+fn main() {
+    // Use vendored protoc to avoid missing protoc in CI/dev environments
+    unsafe {
+        std::env::set_var("PROTOC", protoc_bin_vendored::protoc_bin_path().unwrap());
+    }
 
-pub mod arrow_ipc;
-pub mod numpy;
-pub mod parquet;
-pub mod tensorflow;
+    let mut config = prost_build::Config::new();
 
-pub use arrow_ipc::ArrowIPCReader;
-pub use numpy::NumpyReader;
-pub use parquet::{ParquetReader, ParquetStreamingReader};
-pub use tensorflow::TensorFlowReader;
+    // Generate tensor_content as bytes::Bytes (avoids copy during protobuf decode)
+    config.bytes([".tensorflow.TensorProto.tensor_content"]);
+
+    // Generate fixed filename include file to avoid guessing output filename/module path
+    config.include_file("tensorflow_proto_mod.rs");
+
+    config
+        .compile_protos(&["proto/tensor.proto"], &["proto"])
+        .unwrap();
+
+    println!("cargo:rerun-if-changed=proto/tensor.proto");
+}

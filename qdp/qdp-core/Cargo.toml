@@ -13,6 +13,12 @@ arrow = { workspace = true }
 parquet = { workspace = true }
 ndarray = { workspace = true }
 ndarray-npy = { workspace = true }
+prost = { workspace = true }
+bytes = { workspace = true }
+
+[build-dependencies]
+prost-build = { workspace = true }
+protoc-bin-vendored = { workspace = true }
 
 [lib]
 name = "qdp_core"

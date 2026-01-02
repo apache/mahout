@@ -267,3 +267,22 @@ pub fn read_numpy_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usi
 ///
 /// This is a type alias for backward compatibility. Use [`crate::readers::ParquetStreamingReader`] directly.
 pub type ParquetBlockReader = crate::readers::ParquetStreamingReader;
+
+/// Reads batch data from a TensorFlow TensorProto file.
+///
+/// Supports Float64 tensors with shape [batch_size, feature_size] or [n].
+/// Prefers tensor_content for efficient parsing, but still requires one copy to Vec<f64>.
+///
+/// # Byte Order
+/// Assumes little-endian byte order (standard on x86_64).
+///
+/// # Returns
+/// Tuple of `(flattened_data, num_samples, sample_size)`
+///
+/// # TODO
+/// Add OOM protection for very large files
+pub fn read_tensorflow_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
+    use crate::reader::DataReader;
+    let mut reader = crate::readers::TensorFlowReader::new(path)?;
+    reader.read_batch()
+}

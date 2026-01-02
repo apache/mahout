@@ -21,6 +21,7 @@ pub mod io;
 pub mod preprocessing;
 pub mod reader;
 pub mod readers;
+pub mod tf_proto;
 #[macro_use]
 mod profiling;
 
@@ -479,6 +480,40 @@ impl QdpEngine {
         let (batch_data, num_samples, sample_size) = {
             crate::profile_scope!("IO::ReadNumpyBatch");
             crate::io::read_numpy_batch(path)?
+        };
+
+        self.encode_batch(
+            &batch_data,
+            num_samples,
+            sample_size,
+            num_qubits,
+            encoding_method,
+        )
+    }
+
+    /// Load data from TensorFlow TensorProto file and encode into quantum state
+    ///
+    /// Supports Float64 tensors with shape [batch_size, feature_size] or [n].
+    /// Uses efficient parsing with tensor_content when available.
+    ///
+    /// # Arguments
+    /// * `path` - Path to TensorProto file (.pb)
+    /// * `num_qubits` - Number of qubits
+    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
+    ///
+    /// # Returns
+    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
+    pub fn encode_from_tensorflow(
+        &self,
+        path: &str,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeFromTensorFlow");
+
+        let (batch_data, num_samples, sample_size) = {
+            crate::profile_scope!("IO::ReadTensorFlowBatch");
+            crate::io::read_tensorflow_batch(path)?
         };
 
         self.encode_batch(
