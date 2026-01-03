@@ -208,15 +208,6 @@ impl Drop for PipelineContext {
     }
 }
 
-/// Chunk processing callback for async pipeline
-///
-/// This closure is called for each chunk with:
-/// - `stream`: The CUDA stream to launch the kernel on
-/// - `input_ptr`: Device pointer to the chunk data (already copied)
-/// - `chunk_offset`: Global offset in the original data (in elements)
-/// - `chunk_len`: Length of this chunk (in elements)
-pub type ChunkProcessor = dyn FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>;
-
 /// Executes a task using dual-stream double-buffering pattern
 ///
 /// This function handles the generic pipeline mechanics:
@@ -277,14 +268,6 @@ where
         let event_slot = chunk_idx % PINNED_POOL_SIZE;
 
         crate::profile_scope!("GPU::ChunkProcess");
-
-        if chunk.len() > CHUNK_SIZE_ELEMENTS {
-            return Err(MahoutError::InvalidInput(format!(
-                "Chunk size {} exceeds pinned buffer capacity {}",
-                chunk.len(),
-                CHUNK_SIZE_ELEMENTS
-            )));
-        }
 
         let chunk_bytes = std::mem::size_of_val(chunk);
         ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
