@@ -155,3 +155,32 @@
     - `qubit2` (int): Index of the second state qubit.
     - `ancilla_qubit` (int, default to 0): Index of the ancilla qubit.
 - **Usage**: Convenience wrapper for fidelity/overlap measurement across backends.
+
+## NumPy Usage in QDP
+
+QDP internally uses NumPy arrays (`numpy.ndarray`) to represent quantum state vectors,
+especially within simulation backends and testing utilities.
+
+### State Vector Representation
+
+A quantum state for `n` qubits is represented as a 1-dimensional NumPy array:
+
+- Length: `2**n`
+- Data type: complex numbers (commonly `complex128`)
+
+### Example
+
+Below is an example of a 3-qubit computational basis state |000⟩ represented using NumPy:
+
+```python
+import numpy as np
+
+state_vector = np.array(
+    [1, 0, 0, 0, 0, 0, 0, 0],
+    dtype=np.complex128
+)
+```
+### Notes
+
+- NumPy-based state vectors are primarily used in simulation backends.
+- Test utilities within QDP frequently rely on NumPy for validation.
