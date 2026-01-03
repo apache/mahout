@@ -223,6 +223,23 @@ impl QdpEngine {
                     "Sample size cannot be zero".into(),
                 ));
             }
+            if sample_size > STAGE_SIZE_ELEMENTS {
+                return Err(MahoutError::InvalidInput(format!(
+                    "Sample size {} exceeds staging buffer capacity {}",
+                    sample_size, STAGE_SIZE_ELEMENTS
+                )));
+            }
+
+            let max_samples_in_chunk = STAGE_SIZE_ELEMENTS / sample_size;
+            let mut norm_buffer = self
+                .device
+                .alloc_zeros::<f64>(max_samples_in_chunk)
+                .map_err(|e| {
+                    MahoutError::MemoryAllocation(format!(
+                        "Failed to allocate norm buffer: {:?}",
+                        e
+                    ))
+                })?;
 
             full_buf_tx
                 .send(Ok((host_buf_first, first_len)))
@@ -327,16 +344,6 @@ impl QdpEngine {
                                 .cast::<u8>()
                                 .add(offset_bytes)
                                 .cast::<std::ffi::c_void>();
-
-                            let mut norm_buffer = self
-                                .device
-                                .alloc_zeros::<f64>(samples_in_chunk)
-                                .map_err(|e| {
-                                    MahoutError::MemoryAllocation(format!(
-                                        "Failed to allocate norm buffer: {:?}",
-                                        e
-                                    ))
-                                })?;
 
                             {
                                 crate::profile_scope!("GPU::NormBatch");
