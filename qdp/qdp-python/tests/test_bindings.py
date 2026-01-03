@@ -85,9 +85,9 @@ def test_dlpack_device_id_non_zero():
     # Verify PyTorch integration works with non-zero device_id
     torch_tensor = torch.from_dlpack(qtensor)
     assert torch_tensor.is_cuda
-    assert (
-        torch_tensor.device.index == device_id
-    ), f"PyTorch tensor should be on device {device_id}"
+    assert torch_tensor.device.index == device_id, (
+        f"PyTorch tensor should be on device {device_id}"
+    )
 
 
 @pytest.mark.gpu
