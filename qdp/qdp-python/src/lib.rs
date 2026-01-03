@@ -263,7 +263,9 @@ impl QdpEngine {
     ) -> PyResult<QuantumTensor> {
         validate_tensor(tensor)?;
 
-        // Convert to flat list for encoding
+        // NOTE(perf): `tolist()` + `extract()` makes extra copies (Tensor -> Python list -> Vec).
+        // TODO: follow-up PR can use `numpy()`/buffer protocol (and possibly pinned host memory)
+        // to reduce copy overhead.
         let data: Vec<f64> = tensor
             .call_method0("flatten")?
             .call_method0("tolist")?
