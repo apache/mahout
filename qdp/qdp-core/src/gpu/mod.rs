@@ -14,6 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(target_os = "linux")]
+pub mod buffer_pool;
 pub mod encodings;
 pub mod memory;
 pub mod pipeline;
@@ -21,6 +23,8 @@ pub mod pipeline;
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_ffi;
 
+#[cfg(target_os = "linux")]
+pub use buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
 pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder, get_encoder};
 pub use memory::GpuStateVector;
 pub use pipeline::run_dual_stream_pipeline;

@@ -35,17 +35,12 @@ use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 #[cfg(target_os = "linux")]
 use std::thread;
 
-#[cfg(target_os = "linux")]
-type BufferResult = std::result::Result<(PinnedBuffer, usize), MahoutError>;
-#[cfg(target_os = "linux")]
-type BufferChannels = (SyncSender<BufferResult>, Receiver<BufferResult>);
-
 use crate::dlpack::DLManagedTensor;
 #[cfg(target_os = "linux")]
 use crate::gpu::PipelineContext;
 use crate::gpu::get_encoder;
 #[cfg(target_os = "linux")]
-use crate::gpu::memory::{GpuStateVector, PinnedBuffer};
+use crate::gpu::memory::{GpuStateVector, PinnedHostBuffer};
 #[cfg(target_os = "linux")]
 use crate::reader::StreamingDataReader;
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
@@ -57,6 +52,10 @@ use qdp_kernels::{launch_amplitude_encode_batch, launch_l2_norm_batch};
 const STAGE_SIZE_BYTES: usize = 512 * 1024 * 1024;
 #[cfg(target_os = "linux")]
 const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
+#[cfg(target_os = "linux")]
+type FullBufferResult = std::result::Result<(PinnedHostBuffer, usize), MahoutError>;
+#[cfg(target_os = "linux")]
+type FullBufferChannel = (SyncSender<FullBufferResult>, Receiver<FullBufferResult>);
 
 /// Main entry point for Mahout QDP
 ///
@@ -100,7 +99,7 @@ impl QdpEngine {
     /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
     ///
     /// # Returns
-    /// DLPack pointer for zero-copy PyTorch integration (shape: [1, 2^num_qubits])
+    /// DLPack pointer for zero-copy PyTorch integration
     ///
     /// # Safety
     /// Pointer freed by DLPack deleter, do not free manually.
@@ -198,18 +197,21 @@ impl QdpEngine {
 
             let total_state_vector =
                 GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?;
-            let ctx = PipelineContext::new(&self.device)?;
+            const PIPELINE_EVENT_SLOTS: usize = 2; // matches double-buffered staging buffers
+            let ctx = PipelineContext::new(&self.device, PIPELINE_EVENT_SLOTS)?;
 
             let dev_in_a = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
             let dev_in_b = unsafe { self.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
                 .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
 
-            let (full_buf_tx, full_buf_rx): BufferChannels = sync_channel(2);
-            let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedBuffer>, Receiver<PinnedBuffer>) =
-                sync_channel(2);
+            let (full_buf_tx, full_buf_rx): FullBufferChannel = sync_channel(2);
+            let (empty_buf_tx, empty_buf_rx): (
+                SyncSender<PinnedHostBuffer>,
+                Receiver<PinnedHostBuffer>,
+            ) = sync_channel(2);
 
-            let mut host_buf_first = PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?;
+            let mut host_buf_first = PinnedHostBuffer::new(STAGE_SIZE_ELEMENTS)?;
             let first_len = reader_core.read_chunk(host_buf_first.as_slice_mut())?;
 
             let sample_size = reader_core.get_sample_size().ok_or_else(|| {
@@ -223,23 +225,15 @@ impl QdpEngine {
             }
             if sample_size > STAGE_SIZE_ELEMENTS {
                 return Err(MahoutError::InvalidInput(format!(
-                    "Sample size {} exceeds staging buffer capacity {} (elements)",
+                    "Sample size {} exceeds staging buffer capacity {}",
                     sample_size, STAGE_SIZE_ELEMENTS
                 )));
             }
 
-            // Reuse a single norm buffer across chunks to avoid per-chunk allocations.
-            //
-            // Important: the norm buffer must outlive the async kernels that consume it.
-            // Per-chunk allocation + drop can lead to use-after-free when the next chunk
-            // reuses the same device memory while the previous chunk is still running.
-            let max_samples_per_chunk = std::cmp::max(
-                1,
-                std::cmp::min(num_samples, STAGE_SIZE_ELEMENTS / sample_size),
-            );
+            let max_samples_in_chunk = STAGE_SIZE_ELEMENTS / sample_size;
             let mut norm_buffer = self
                 .device
-                .alloc_zeros::<f64>(max_samples_per_chunk)
+                .alloc_zeros::<f64>(max_samples_in_chunk)
                 .map_err(|e| {
                     MahoutError::MemoryAllocation(format!(
                         "Failed to allocate norm buffer: {:?}",
@@ -252,7 +246,7 @@ impl QdpEngine {
                 .map_err(|_| MahoutError::Io("Failed to send first buffer".into()))?;
 
             empty_buf_tx
-                .send(PinnedBuffer::new(STAGE_SIZE_ELEMENTS)?)
+                .send(PinnedHostBuffer::new(STAGE_SIZE_ELEMENTS)?)
                 .map_err(|_| MahoutError::Io("Failed to send second buffer".into()))?;
 
             let mut reader = reader_core;
@@ -306,6 +300,7 @@ impl QdpEngine {
 
                 let samples_in_chunk = current_len / sample_size;
                 if samples_in_chunk > 0 {
+                    let event_slot = if use_dev_a { 0 } else { 1 };
                     let dev_ptr = if use_dev_a {
                         *dev_in_a.device_ptr()
                     } else {
@@ -315,9 +310,13 @@ impl QdpEngine {
                     unsafe {
                         crate::profile_scope!("GPU::Dispatch");
 
-                        ctx.async_copy_to_device(&host_buffer, dev_ptr as *mut c_void, current_len);
-                        ctx.record_copy_done();
-                        ctx.wait_for_copy();
+                        ctx.async_copy_to_device(
+                            host_buffer.ptr() as *const c_void,
+                            dev_ptr as *mut c_void,
+                            current_len,
+                        )?;
+                        ctx.record_copy_done(event_slot)?;
+                        ctx.wait_for_copy(event_slot)?;
 
                         {
                             crate::profile_scope!("GPU::BatchEncode");
@@ -345,10 +344,6 @@ impl QdpEngine {
                                 .cast::<u8>()
                                 .add(offset_bytes)
                                 .cast::<std::ffi::c_void>();
-                            debug_assert!(
-                                samples_in_chunk <= max_samples_per_chunk,
-                                "samples_in_chunk must be <= max_samples_per_chunk"
-                            );
 
                             {
                                 crate::profile_scope!("GPU::NormBatch");
@@ -387,7 +382,7 @@ impl QdpEngine {
                             }
                         }
 
-                        ctx.sync_copy_stream();
+                        ctx.sync_copy_stream()?;
                     }
                     global_sample_offset = global_sample_offset
                         .checked_add(samples_in_chunk)

@@ -17,6 +17,7 @@ use crate::error::{MahoutError, Result};
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
 use qdp_kernels::{CuComplex, CuDoubleComplex};
 use std::ffi::c_void;
+#[cfg(target_os = "linux")]
 use std::sync::Arc;
 
 /// Precision of the GPU state vector.
@@ -205,6 +206,7 @@ pub struct GpuStateVector {
     pub size_elements: usize,
     /// Batch size (None for single state)
     pub(crate) num_samples: Option<usize>,
+    /// CUDA device ordinal
     pub device_id: usize,
 }
 
@@ -446,17 +448,17 @@ impl GpuStateVector {
 
 // === Pinned Memory Implementation ===
 
-/// Pinned Host Memory Buffer (Page-Locked)
+/// Pinned Host Memory Buffer (owned allocation).
 ///
-/// Enables DMA for H2D copies, doubling bandwidth and reducing CPU usage.
+/// Allocates page-locked memory to maximize H2D throughput in streaming IO paths.
 #[cfg(target_os = "linux")]
-pub struct PinnedBuffer {
+pub struct PinnedHostBuffer {
     ptr: *mut f64,
     size_elements: usize,
 }
 
 #[cfg(target_os = "linux")]
-impl PinnedBuffer {
+impl PinnedHostBuffer {
     /// Allocate pinned memory
     pub fn new(elements: usize) -> Result<Self> {
         unsafe {
@@ -491,6 +493,11 @@ impl PinnedBuffer {
         unsafe { std::slice::from_raw_parts_mut(self.ptr, self.size_elements) }
     }
 
+    /// Immutable slice view of the pinned region
+    pub fn as_slice(&self) -> &[f64] {
+        unsafe { std::slice::from_raw_parts(self.ptr, self.size_elements) }
+    }
+
     /// Get raw pointer for CUDA memcpy
     pub fn ptr(&self) -> *const f64 {
         self.ptr
@@ -506,7 +513,7 @@ impl PinnedBuffer {
 }
 
 #[cfg(target_os = "linux")]
-impl Drop for PinnedBuffer {
+impl Drop for PinnedHostBuffer {
     fn drop(&mut self) {
         unsafe {
             let result = cudaFreeHost(self.ptr as *mut c_void);
@@ -523,7 +530,7 @@ impl Drop for PinnedBuffer {
 
 // Safety: Pinned memory is accessible from any thread
 #[cfg(target_os = "linux")]
-unsafe impl Send for PinnedBuffer {}
+unsafe impl Send for PinnedHostBuffer {}
 
 #[cfg(target_os = "linux")]
-unsafe impl Sync for PinnedBuffer {}
+unsafe impl Sync for PinnedHostBuffer {}
