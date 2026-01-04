@@ -139,6 +139,37 @@ impl Drop for QuantumTensor {
 unsafe impl Send for QuantumTensor {}
 unsafe impl Sync for QuantumTensor {}
 
+/// Helper to detect PyTorch tensor
+fn is_pytorch_tensor(obj: &Bound<'_, PyAny>) -> PyResult<bool> {
+    let type_obj = obj.get_type();
+    let name = type_obj.name()?;
+    if name != "Tensor" {
+        return Ok(false);
+    }
+    let module = type_obj.module()?;
+    let module_name = module.to_str()?;
+    Ok(module_name == "torch")
+}
+
+/// Helper to validate tensor
+fn validate_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<()> {
+    if !is_pytorch_tensor(tensor)? {
+        return Err(PyRuntimeError::new_err("Object is not a PyTorch Tensor"));
+    }
+
+    let device = tensor.getattr("device")?;
+    let device_type: String = device.getattr("type")?.extract()?;
+
+    if device_type != "cpu" {
+        return Err(PyRuntimeError::new_err(format!(
+            "Only CPU tensors are currently supported for this path. Got device: {}",
+            device_type
+        )));
+    }
+
+    Ok(())
+}
+
 /// PyO3 wrapper for QdpEngine
 ///
 /// Provides Python bindings for GPU-accelerated quantum state encoding.
@@ -209,6 +240,42 @@ impl QdpEngine {
             .engine
             .encode(&data, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
+    }
+
+    /// Encode from PyTorch Tensor
+    ///
+    /// Args:
+    ///     tensor: PyTorch Tensor (must be on CPU)
+    ///     num_qubits: Number of qubits for encoding
+    ///     encoding_method: Encoding strategy
+    ///
+    /// Returns:
+    ///     QuantumTensor: DLPack-compatible tensor
+    fn encode_tensor(
+        &self,
+        tensor: &Bound<'_, PyAny>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        validate_tensor(tensor)?;
+
+        // NOTE(perf): `tolist()` + `extract()` makes extra copies (Tensor -> Python list -> Vec).
+        // TODO: follow-up PR can use `numpy()`/buffer protocol (and possibly pinned host memory)
+        // to reduce copy overhead.
+        let data: Vec<f64> = tensor
+            .call_method0("flatten")?
+            .call_method0("tolist")?
+            .extract()?;
+
+        let ptr = self
+            .engine
+            .encode(&data, num_qubits, encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+
         Ok(QuantumTensor {
             ptr,
             consumed: false,
