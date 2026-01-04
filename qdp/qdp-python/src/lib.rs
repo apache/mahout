@@ -343,6 +343,36 @@ impl QdpEngine {
             consumed: false,
         })
     }
+
+    /// Encode from NumPy .npy file
+    ///
+    /// Args:
+    ///     path: Path to NumPy .npy file
+    ///     num_qubits: Number of qubits for encoding
+    ///     encoding_method: Encoding strategy ("amplitude", "angle", or "basis")
+    ///
+    /// Returns:
+    ///     QuantumTensor: DLPack tensor containing all encoded states
+    ///
+    /// Example:
+    ///     >>> engine = QdpEngine(device_id=0)
+    ///     >>> batched = engine.encode_from_numpy("states.npy", 10, "amplitude")
+    ///     >>> torch_tensor = torch.from_dlpack(batched)
+    fn encode_from_numpy(
+        &self,
+        path: &str,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        let ptr = self
+            .engine
+            .encode_from_numpy(path, num_qubits, encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("Encoding from NumPy failed: {}", e)))?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
+    }
 }
 
 /// Mahout QDP Python module
