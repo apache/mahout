@@ -35,6 +35,12 @@ def test_import():
     assert hasattr(mahout_qdp, "QdpEngine")
     assert hasattr(mahout_qdp, "QuantumTensor")
 
+    # Test that QdpEngine has the new encode_from_tensorflow method
+    from mahout_qdp import QdpEngine
+
+    assert hasattr(QdpEngine, "encode_from_tensorflow")
+    assert callable(getattr(QdpEngine, "encode_from_tensorflow"))
+
 
 @pytest.mark.gpu
 def test_encode():

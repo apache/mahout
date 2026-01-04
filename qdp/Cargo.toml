@@ -28,6 +28,12 @@ rayon = "1.10"
 arrow = "54"
 # Parquet support for Arrow
 parquet = "54"
+# Protocol Buffer support for TensorFlow TensorProto
+prost = "0.12"
+prost-build = "0.12"
+bytes = "1.5"
+# Optional: vendored protoc to avoid build failures when protoc is missing
+protoc-bin-vendored = "3"
 
 # Release profile optimizations
 [profile.release]
