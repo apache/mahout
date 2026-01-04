@@ -77,9 +77,10 @@ def test_dlpack_device_id_non_zero():
     qtensor = engine.encode(data, 2, "amplitude")
 
     device_info = qtensor.__dlpack_device__()
-    assert device_info == (2, device_id), (
-        f"Expected (2, {device_id}) for CUDA device {device_id}"
-    )
+    assert device_info == (
+        2,
+        device_id,
+    ), f"Expected (2, {device_id}) for CUDA device {device_id}"
 
     # Verify PyTorch integration works with non-zero device_id
     torch_tensor = torch.from_dlpack(qtensor)
@@ -143,3 +144,48 @@ def test_pytorch_precision_float64():
 
     torch_tensor = torch.from_dlpack(qtensor)
     assert torch_tensor.dtype == torch.complex128
+
+
+@pytest.mark.gpu
+def test_encode_tensor_cpu():
+    """Test encoding from CPU PyTorch tensor."""
+    pytest.importorskip("torch")
+    import torch
+    from mahout_qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64)
+    qtensor = engine.encode_tensor(data, 2, "amplitude")
+
+    # Verify result
+    torch_tensor = torch.from_dlpack(qtensor)
+    assert torch_tensor.is_cuda
+    assert torch_tensor.shape == (1, 4)
+
+
+@pytest.mark.gpu
+def test_encode_tensor_errors():
+    """Test error handling for encode_tensor."""
+    pytest.importorskip("torch")
+    import torch
+    from mahout_qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Test non-tensor input
+    with pytest.raises(RuntimeError, match="Object is not a PyTorch Tensor"):
+        engine.encode_tensor([1.0, 2.0], 1, "amplitude")
+
+    # Test GPU tensor input (should fail as only CPU is supported for this path)
+    if torch.cuda.is_available():
+        gpu_tensor = torch.tensor([1.0, 2.0], device="cuda:0")
+        with pytest.raises(
+            RuntimeError, match="Only CPU tensors are currently supported"
+        ):
+            engine.encode_tensor(gpu_tensor, 1, "amplitude")
