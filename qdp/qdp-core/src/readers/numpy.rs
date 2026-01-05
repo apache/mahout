@@ -57,11 +57,21 @@ impl NumpyReader {
         let path = path.as_ref();
 
         // Verify file exists
-        if !path.exists() {
-            return Err(MahoutError::Io(format!(
-                "NumPy file not found: {}",
-                path.display()
-            )));
+        match path.try_exists() {
+            Ok(false) => {
+                return Err(MahoutError::Io(format!(
+                    "NumPy file not found: {}",
+                    path.display()
+                )));
+            }
+            Err(e) => {
+                return Err(MahoutError::Io(format!(
+                    "Failed to check if NumPy file exists at {}: {}",
+                    path.display(),
+                    e
+                )));
+            }
+            Ok(true) => {}
         }
 
         Ok(Self {
