@@ -246,6 +246,57 @@ impl QdpEngine {
         })
     }
 
+    /// Encode a batch of samples into quantum states
+    ///
+    /// Args:
+    ///     batch_data: Flattened batch data (all samples concatenated)
+    ///     num_samples: Number of samples in the batch
+    ///     sample_size: Size of each sample
+    ///     num_qubits: Number of qubits for encoding
+    ///     encoding_method: Encoding strategy (currently only "amplitude" supported for batch)
+    ///
+    /// Returns:
+    ///     QuantumTensor: DLPack-compatible tensor
+    ///         Shape: [num_samples, 2^num_qubits]
+    fn encode_batch(
+        &self,
+        batch_data: Vec<f64>,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        if num_samples == 0 || sample_size == 0 {
+            return Err(PyRuntimeError::new_err(
+                "num_samples and sample_size must be > 0",
+            ));
+        }
+        let expected = num_samples
+            .checked_mul(sample_size)
+            .ok_or_else(|| PyRuntimeError::new_err("num_samples * sample_size overflow"))?;
+        if batch_data.len() != expected {
+            return Err(PyRuntimeError::new_err(format!(
+                "batch_data length {} does not match num_samples * sample_size ({})",
+                batch_data.len(),
+                expected
+            )));
+        }
+        let ptr = self
+            .engine
+            .encode_batch(
+                &batch_data,
+                num_samples,
+                sample_size,
+                num_qubits,
+                encoding_method,
+            )
+            .map_err(|e| PyRuntimeError::new_err(format!("Batch encoding failed: {}", e)))?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
+    }
+
     /// Encode from PyTorch Tensor
     ///
     /// Args:
