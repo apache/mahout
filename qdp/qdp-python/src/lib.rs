@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use numpy::{PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
 use pyo3::prelude::*;
@@ -246,50 +247,40 @@ impl QdpEngine {
         })
     }
 
-    /// Encode a batch of samples into quantum states
+    /// Encode a batch of samples from NumPy array (zero-copy, most efficient)
     ///
     /// Args:
-    ///     batch_data: Flattened batch data (all samples concatenated)
-    ///     num_samples: Number of samples in the batch
-    ///     sample_size: Size of each sample
+    ///     batch_data: 2D NumPy array of shape [num_samples, sample_size] with dtype float64
     ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy (currently only "amplitude" supported for batch)
+    ///     encoding_method: Encoding strategy ("amplitude", "angle", or "basis")
     ///
     /// Returns:
-    ///     QuantumTensor: DLPack-compatible tensor
+    ///     QuantumTensor: DLPack tensor containing all encoded states
     ///         Shape: [num_samples, 2^num_qubits]
+    ///
+    /// Example:
+    ///     >>> engine = QdpEngine(device_id=0)
+    ///     >>> batch = np.random.randn(64, 4).astype(np.float64)
+    ///     >>> qtensor = engine.encode_batch(batch, 2, "amplitude")
+    ///     >>> torch_tensor = torch.from_dlpack(qtensor)  # Shape: [64, 4]
     fn encode_batch(
         &self,
-        batch_data: Vec<f64>,
-        num_samples: usize,
-        sample_size: usize,
+        batch_data: PyReadonlyArray2<f64>,
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
-        if num_samples == 0 || sample_size == 0 {
-            return Err(PyRuntimeError::new_err(
-                "num_samples and sample_size must be > 0",
-            ));
-        }
-        let expected = num_samples
-            .checked_mul(sample_size)
-            .ok_or_else(|| PyRuntimeError::new_err("num_samples * sample_size overflow"))?;
-        if batch_data.len() != expected {
-            return Err(PyRuntimeError::new_err(format!(
-                "batch_data length {} does not match num_samples * sample_size ({})",
-                batch_data.len(),
-                expected
-            )));
-        }
+        let shape = batch_data.shape();
+        let num_samples = shape[0];
+        let sample_size = shape[1];
+
+        // Get contiguous slice from numpy array (zero-copy if already contiguous)
+        let data_slice = batch_data
+            .as_slice()
+            .map_err(|_| PyRuntimeError::new_err("NumPy array must be contiguous (C-order)"))?;
+
         let ptr = self
             .engine
-            .encode_batch(
-                &batch_data,
-                num_samples,
-                sample_size,
-                num_qubits,
-                encoding_method,
-            )
+            .encode_batch(data_slice, num_samples, sample_size, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Batch encoding failed: {}", e)))?;
         Ok(QuantumTensor {
             ptr,
