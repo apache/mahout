@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use numpy::{PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
 use pyo3::prelude::*;
@@ -240,6 +241,53 @@ impl QdpEngine {
             .engine
             .encode(&data, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
+    }
+
+    /// Encode a batch of samples from NumPy array (zero-copy, most efficient)
+    ///
+    /// Args:
+    ///     batch_data: 2D NumPy array of shape [num_samples, sample_size] with dtype float64
+    ///     num_qubits: Number of qubits for encoding
+    ///     encoding_method: Encoding strategy ("amplitude", "angle", or "basis")
+    ///
+    /// Returns:
+    ///     QuantumTensor: DLPack tensor containing all encoded states
+    ///         Shape: [num_samples, 2^num_qubits]
+    ///
+    /// Example:
+    ///     >>> engine = QdpEngine(device_id=0)
+    ///     >>> batch = np.random.randn(64, 4).astype(np.float64)
+    ///     >>> qtensor = engine.encode_batch(batch, 2, "amplitude")
+    ///     >>> torch_tensor = torch.from_dlpack(qtensor)  # Shape: [64, 4]
+    fn encode_batch(
+        &self,
+        batch_data: PyReadonlyArray2<f64>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        let shape = batch_data.shape();
+        let num_samples = shape[0];
+        let sample_size = shape[1];
+
+        // Get contiguous slice from numpy array (zero-copy if already contiguous)
+        let data_slice = batch_data
+            .as_slice()
+            .map_err(|_| PyRuntimeError::new_err("NumPy array must be contiguous (C-order)"))?;
+
+        let ptr = self
+            .engine
+            .encode_batch(
+                data_slice,
+                num_samples,
+                sample_size,
+                num_qubits,
+                encoding_method,
+            )
+            .map_err(|e| PyRuntimeError::new_err(format!("Batch encoding failed: {}", e)))?;
         Ok(QuantumTensor {
             ptr,
             consumed: false,
