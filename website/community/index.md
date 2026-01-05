@@ -10,6 +10,12 @@ Mahout follows the principles of the Apache Software Foundation — openness, tr
 
 This page explains the official communication channels, how to participate, and how to contribute to the project.
 
+<!-- <<<<<<< other -->
+There are numerous ways to engage with the Mahout community, no matter your background or skill level. Some options include:
+## Biweekly Community Meeting
+Apache Mahout is committed to work consistently and conducts its meetings once in two weeks. To get invovled, you can access the link here. The meeting timings are communicated via official slack channel.
+[Meeting Link](https://meet.google.com/hjo-njer-hzw?authuser=0&hs=122&ijlm=1767371505662&pli=1)
+=======
 ---
 
 ## How to Participate
