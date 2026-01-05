@@ -280,7 +280,13 @@ impl QdpEngine {
 
         let ptr = self
             .engine
-            .encode_batch(data_slice, num_samples, sample_size, num_qubits, encoding_method)
+            .encode_batch(
+                data_slice,
+                num_samples,
+                sample_size,
+                num_qubits,
+                encoding_method,
+            )
             .map_err(|e| PyRuntimeError::new_err(format!("Batch encoding failed: {}", e)))?;
         Ok(QuantumTensor {
             ptr,
