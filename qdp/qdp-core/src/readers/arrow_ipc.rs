@@ -38,8 +38,28 @@ impl ArrowIPCReader {
     /// # Arguments
     /// * `path` - Path to the Arrow IPC file (.arrow or .feather)
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let path = path.as_ref();
+
+        // Verify file exists
+        match path.try_exists() {
+            Ok(false) => {
+                return Err(MahoutError::Io(format!(
+                    "Arrow IPC file not found: {}",
+                    path.display()
+                )));
+            }
+            Err(e) => {
+                return Err(MahoutError::Io(format!(
+                    "Failed to check if Arrow IPC file exists at {}: {}",
+                    path.display(),
+                    e
+                )));
+            }
+            Ok(true) => {}
+        }
+
         Ok(Self {
-            path: path.as_ref().to_path_buf(),
+            path: path.to_path_buf(),
             read: false,
         })
     }
