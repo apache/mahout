@@ -300,7 +300,7 @@ class QuMat:
         }
 
         # Check if there are unbound parameters in the circuit
-        if self.parameters and not bound_parameters:
+        if self.parameters and len(bound_parameters) < len(self.parameters):
             unbound_params = [
                 p for p in self.parameters.keys() if self.parameters[p] is None
             ]
