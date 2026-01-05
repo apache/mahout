@@ -301,7 +301,10 @@ def main():
     )
     print(BAR)
 
-    t_pl = l_pl = t_q_init = l_q_init = t_q_sv = l_q_sv = t_mahout = l_mahout = 0.0
+    t_pl = l_pl = 0.0
+    t_q_init = l_q_init = 0.0
+    t_q_sv = l_q_sv = 0.0
+    t_mahout = l_mahout = 0.0
 
     if "pennylane" in frameworks:
         print()

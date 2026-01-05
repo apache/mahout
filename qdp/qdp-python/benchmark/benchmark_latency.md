@@ -76,3 +76,5 @@ Speedup vs Qiskit Statevec: 10.02x
   includes CPU->GPU encode + DLPack handoff.
 - Missing frameworks are auto-skipped; use `--frameworks` to control the legs.
 - Requires a CUDA-capable GPU (`torch.cuda.is_available()` must be true).
+- Results vary by device, driver versions, and system load; re-run on target
+  hardware for representative numbers.
