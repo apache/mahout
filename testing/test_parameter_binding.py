@@ -204,3 +204,19 @@ class TestParameterBinding:
         # Should raise ValueError with clear message
         with pytest.raises(ValueError, match="unbound parameters"):
             qumat.execute_circuit()
+
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_partially_bound_parameters_error(self, backend_name):
+        """Test that partially bound parameters raise an error across all backends."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=2)
+
+        # Apply multiple parameterized gates
+        qumat.apply_rx_gate(0, "theta0")
+        qumat.apply_ry_gate(1, "phi1")
+
+        # Bind only one parameter, leaving the other unbound
+        # This should raise ValueError
+        with pytest.raises(ValueError, match="unbound parameters"):
+            qumat.execute_circuit(parameter_values={"theta0": math.pi})
