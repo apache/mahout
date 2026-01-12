@@ -181,14 +181,9 @@ impl Preprocessor {
 
     /// Checks if data contains NaN or Infinity values.
     fn check_numerical_safety(data: &[f64]) -> Result<()> {
-        if data.par_iter().any(|&x| x.is_nan()) {
+        if data.par_iter().any(|&x| x.is_nan() || x.is_infinite()) {
             return Err(MahoutError::InvalidInput(
-                "Input data contains NaN (Not a Number) values".to_string(),
-            ));
-        }
-        if data.par_iter().any(|&x| x.is_infinite()) {
-            return Err(MahoutError::InvalidInput(
-                "Input data contains Infinity values".to_string(),
+                "Input data contains NaN or Infinity values".to_string(),
             ));
         }
         Ok(())
