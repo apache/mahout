@@ -238,17 +238,43 @@ fn validate_cuda_tensor_for_encoding(
     Ok(())
 }
 
-/// CUDA tensor information extracted directly from PyTorch tensor
-struct CudaTensorInfo {
+/// DLPack tensor information extracted from a PyCapsule
+///
+/// This struct owns the DLManagedTensor pointer and ensures proper cleanup
+/// via the DLPack deleter when dropped (RAII pattern).
+struct DLPackTensorInfo {
+    /// Raw DLManagedTensor pointer from PyTorch DLPack capsule
+    /// This is owned by this struct and will be freed via deleter on drop
+    managed_ptr: *mut DLManagedTensor,
+    /// Data pointer inside dl_tensor (GPU memory, owned by managed_ptr)
     data_ptr: *const f64,
     shape: Vec<i64>,
+    /// CUDA device ID from DLPack metadata.
+    /// Currently unused but kept for potential future device validation or multi-GPU support.
+    #[allow(dead_code)]
+    device_id: i32,
 }
 
-/// Extract GPU pointer directly from PyTorch CUDA tensor
+impl Drop for DLPackTensorInfo {
+    fn drop(&mut self) {
+        unsafe {
+            if !self.managed_ptr.is_null() {
+                // Per DLPack protocol: consumer must call deleter exactly once
+                if let Some(deleter) = (*self.managed_ptr).deleter {
+                    deleter(self.managed_ptr);
+                }
+                // Prevent double-free
+                self.managed_ptr = std::ptr::null_mut();
+            }
+        }
+    }
+}
+
+/// Extract GPU pointer from PyTorch tensor's __dlpack__() capsule
 ///
-/// Uses PyTorch's `data_ptr()` and `shape` APIs directly instead of DLPack protocol.
-/// This avoids the DLPack capsule lifecycle complexity and potential memory leaks
-/// from the capsule renaming pattern.
+/// Uses the DLPack protocol to obtain a zero-copy view of the tensor's GPU memory.
+/// The returned `DLPackTensorInfo` owns the DLManagedTensor and will automatically
+/// call the deleter when dropped, ensuring proper resource cleanup.
 ///
 /// # Safety
 /// The returned `data_ptr` points to GPU memory owned by the source tensor.
@@ -256,19 +282,59 @@ struct CudaTensorInfo {
 /// for the entire duration that `data_ptr` is in use. Python's GIL ensures
 /// the tensor won't be garbage collected during `encode()`, but the caller
 /// must not deallocate or resize the tensor while encoding is in progress.
-fn extract_cuda_tensor_info(tensor: &Bound<'_, PyAny>) -> PyResult<CudaTensorInfo> {
-    // Get GPU pointer directly via tensor.data_ptr()
-    let data_ptr_int: isize = tensor.call_method0("data_ptr")?.extract()?;
-    if data_ptr_int == 0 {
-        return Err(PyRuntimeError::new_err("CUDA tensor has null data pointer"));
+fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult<DLPackTensorInfo> {
+    // Call tensor.__dlpack__() to get PyCapsule
+    // Note: PyTorch's __dlpack__ uses the default stream when called without arguments
+    let capsule = tensor.call_method0("__dlpack__")?;
+
+    // Extract the DLManagedTensor pointer from the capsule
+    const DLTENSOR_NAME: &[u8] = b"dltensor\0";
+
+    unsafe {
+        let capsule_ptr = capsule.as_ptr();
+        let managed_ptr =
+            ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
+                as *mut DLManagedTensor;
+
+        if managed_ptr.is_null() {
+            return Err(PyRuntimeError::new_err(
+                "Failed to extract DLManagedTensor from PyCapsule",
+            ));
+        }
+
+        let dl_tensor = &(*managed_ptr).dl_tensor;
+
+        // Extract data pointer with null check
+        if dl_tensor.data.is_null() {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor has null data pointer",
+            ));
+        }
+        let data_ptr = dl_tensor.data as *const f64;
+
+        // Extract shape
+        let ndim = dl_tensor.ndim as usize;
+        let shape = if ndim > 0 && !dl_tensor.shape.is_null() {
+            std::slice::from_raw_parts(dl_tensor.shape, ndim).to_vec()
+        } else {
+            vec![]
+        };
+
+        // Extract device_id
+        let device_id = dl_tensor.device.device_id;
+
+        // Rename the capsule to "used_dltensor" as per DLPack protocol
+        // This prevents PyTorch from trying to delete it when the capsule is garbage collected
+        const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
+        ffi::PyCapsule_SetName(capsule_ptr, USED_DLTENSOR_NAME.as_ptr() as *const i8);
+
+        Ok(DLPackTensorInfo {
+            managed_ptr,
+            data_ptr,
+            shape,
+            device_id,
+        })
     }
-    let data_ptr = data_ptr_int as *const f64;
-
-    // Get shape directly via tensor.shape
-    let shape_obj = tensor.getattr("shape")?;
-    let shape: Vec<i64> = shape_obj.extract()?;
-
-    Ok(CudaTensorInfo { data_ptr, shape })
 }
 
 /// PyO3 wrapper for QdpEngine
@@ -358,207 +424,147 @@ impl QdpEngine {
 
         // Check if it's a NumPy array
         if data.hasattr("__array_interface__")? {
-            // Get the array's ndim for shape validation
-            let ndim: usize = data.getattr("ndim")?.extract()?;
-
-            match ndim {
-                1 => {
-                    // 1D array: single sample encoding (zero-copy if already contiguous)
-                    let array_1d = data.extract::<PyReadonlyArray1<f64>>().map_err(|_| {
-                        PyRuntimeError::new_err(
-                            "Failed to extract 1D NumPy array. Ensure dtype is float64.",
-                        )
-                    })?;
-                    let data_slice = array_1d.as_slice().map_err(|_| {
-                        PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
-                    })?;
-                    let ptr = self
-                        .engine
-                        .encode(data_slice, num_qubits, encoding_method)
-                        .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
-                    return Ok(QuantumTensor {
-                        ptr,
-                        consumed: false,
-                    });
-                }
-                2 => {
-                    // 2D array: batch encoding (zero-copy if already contiguous)
-                    let array_2d = data.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
-                        PyRuntimeError::new_err(
-                            "Failed to extract 2D NumPy array. Ensure dtype is float64.",
-                        )
-                    })?;
-                    let shape = array_2d.shape();
-                    let num_samples = shape[0];
-                    let sample_size = shape[1];
-                    let data_slice = array_2d.as_slice().map_err(|_| {
-                        PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
-                    })?;
-                    let ptr = self
-                        .engine
-                        .encode_batch(
-                            data_slice,
-                            num_samples,
-                            sample_size,
-                            num_qubits,
-                            encoding_method,
-                        )
-                        .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
-                    return Ok(QuantumTensor {
-                        ptr,
-                        consumed: false,
-                    });
-                }
-                _ => {
-                    return Err(PyRuntimeError::new_err(format!(
-                        "Unsupported array shape: {}D. Expected 1D array for single sample \
-                         encoding or 2D array (batch_size, features) for batch encoding.",
-                        ndim
-                    )));
-                }
-            }
+            return self.encode_from_numpy(data, num_qubits, encoding_method);
         }
 
         // Check if it's a PyTorch tensor
         if is_pytorch_tensor(data)? {
-            // Check if it's a CUDA tensor - use zero-copy GPU encoding
-            if is_cuda_tensor(data)? {
-                // Validate CUDA tensor for direct GPU encoding
-                validate_cuda_tensor_for_encoding(
-                    data,
-                    self.engine.device().ordinal(),
-                    encoding_method,
-                )?;
+            return self.encode_from_pytorch(data, num_qubits, encoding_method);
+        }
 
-                // Extract GPU pointer directly from PyTorch tensor
-                let tensor_info = extract_cuda_tensor_info(data)?;
+        // Fallback: try to extract as Vec<f64> (Python list)
+        self.encode_from_list(data, num_qubits, encoding_method)
+    }
 
-                let ndim: usize = data.call_method0("dim")?.extract()?;
+    /// Encode from NumPy array (1D or 2D)
+    fn encode_from_numpy(
+        &self,
+        data: &Bound<'_, PyAny>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        let ndim: usize = data.getattr("ndim")?.extract()?;
 
-                match ndim {
-                    1 => {
-                        // 1D CUDA tensor: single sample encoding
-                        let input_len = tensor_info.shape[0] as usize;
-                        // SAFETY: tensor_info.data_ptr was obtained via PyTorch's data_ptr() from a
-                        // valid CUDA tensor. The tensor remains alive during this call
-                        // (held by Python's GIL), and we validated dtype/contiguity/device above.
-                        let ptr = unsafe {
-                            self.engine
-                                .encode_from_gpu_ptr(
-                                    tensor_info.data_ptr,
-                                    input_len,
-                                    num_qubits,
-                                    encoding_method,
-                                )
-                                .map_err(|e| {
-                                    PyRuntimeError::new_err(format!("Encoding failed: {}", e))
-                                })?
-                        };
-                        return Ok(QuantumTensor {
-                            ptr,
-                            consumed: false,
-                        });
-                    }
-                    2 => {
-                        // 2D CUDA tensor: batch encoding
-                        let num_samples = tensor_info.shape[0] as usize;
-                        let sample_size = tensor_info.shape[1] as usize;
-                        // SAFETY: Same as above - pointer from validated PyTorch CUDA tensor
-                        let ptr = unsafe {
-                            self.engine
-                                .encode_batch_from_gpu_ptr(
-                                    tensor_info.data_ptr,
-                                    num_samples,
-                                    sample_size,
-                                    num_qubits,
-                                    encoding_method,
-                                )
-                                .map_err(|e| {
-                                    PyRuntimeError::new_err(format!("Encoding failed: {}", e))
-                                })?
-                        };
-                        return Ok(QuantumTensor {
-                            ptr,
-                            consumed: false,
-                        });
-                    }
-                    _ => {
-                        return Err(PyRuntimeError::new_err(format!(
-                            "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
-                             sample encoding or 2D tensor (batch_size, features) for batch encoding.",
-                            ndim
-                        )));
-                    }
-                }
+        match ndim {
+            1 => {
+                // 1D array: single sample encoding (zero-copy if already contiguous)
+                let array_1d = data.extract::<PyReadonlyArray1<f64>>().map_err(|_| {
+                    PyRuntimeError::new_err(
+                        "Failed to extract 1D NumPy array. Ensure dtype is float64.",
+                    )
+                })?;
+                let data_slice = array_1d.as_slice().map_err(|_| {
+                    PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
+                })?;
+                let ptr = self
+                    .engine
+                    .encode(data_slice, num_qubits, encoding_method)
+                    .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+                Ok(QuantumTensor {
+                    ptr,
+                    consumed: false,
+                })
             }
+            2 => {
+                // 2D array: batch encoding (zero-copy if already contiguous)
+                let array_2d = data.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+                    PyRuntimeError::new_err(
+                        "Failed to extract 2D NumPy array. Ensure dtype is float64.",
+                    )
+                })?;
+                let shape = array_2d.shape();
+                let num_samples = shape[0];
+                let sample_size = shape[1];
+                let data_slice = array_2d.as_slice().map_err(|_| {
+                    PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
+                })?;
+                let ptr = self
+                    .engine
+                    .encode_batch(
+                        data_slice,
+                        num_samples,
+                        sample_size,
+                        num_qubits,
+                        encoding_method,
+                    )
+                    .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+                Ok(QuantumTensor {
+                    ptr,
+                    consumed: false,
+                })
+            }
+            _ => Err(PyRuntimeError::new_err(format!(
+                "Unsupported array shape: {}D. Expected 1D array for single sample \
+                 encoding or 2D array (batch_size, features) for batch encoding.",
+                ndim
+            ))),
+        }
+    }
 
-            // CPU tensor path (existing code)
-            validate_tensor(data)?;
-            // PERF: Avoid Tensor -> Python list -> Vec deep copies.
-            //
-            // For CPU tensors, `tensor.detach().numpy()` returns a NumPy view that shares the same
-            // underlying memory (zero-copy) when the tensor is C-contiguous. We can then borrow a
-            // `&[f64]` directly via pyo3-numpy.
+    /// Encode from PyTorch tensor (1D or 2D)
+    fn encode_from_pytorch(
+        &self,
+        data: &Bound<'_, PyAny>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        // Check if it's a CUDA tensor - use zero-copy GPU encoding via DLPack
+        if is_cuda_tensor(data)? {
+            // Validate CUDA tensor for direct GPU encoding
+            validate_cuda_tensor_for_encoding(
+                data,
+                self.engine.device().ordinal(),
+                encoding_method,
+            )?;
+
+            // Extract GPU pointer via DLPack (RAII wrapper ensures deleter is called)
+            let dlpack_info = extract_dlpack_tensor(data.py(), data)?;
+
             let ndim: usize = data.call_method0("dim")?.extract()?;
-            let numpy_view = data
-                .call_method0("detach")?
-                .call_method0("numpy")
-                .map_err(|_| {
-                    PyRuntimeError::new_err(
-                        "Failed to convert torch.Tensor to NumPy view. Ensure the tensor is on CPU \
-                         and does not require grad (try: tensor = tensor.detach().cpu())",
-                    )
-                })?;
-
-            let array = numpy_view
-                .extract::<PyReadonlyArrayDyn<f64>>()
-                .map_err(|_| {
-                    PyRuntimeError::new_err(
-                        "Failed to extract NumPy view as float64 array. Ensure dtype is float64 \
-                         (try: tensor = tensor.to(torch.float64))",
-                    )
-                })?;
-
-            let data_slice = array.as_slice().map_err(|_| {
-                PyRuntimeError::new_err(
-                    "Tensor must be contiguous (C-order) to get zero-copy slice \
-                     (try: tensor = tensor.contiguous())",
-                )
-            })?;
 
             match ndim {
                 1 => {
-                    // 1D tensor: single sample encoding
-                    let ptr = self
-                        .engine
-                        .encode(data_slice, num_qubits, encoding_method)
-                        .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+                    // 1D CUDA tensor: single sample encoding
+                    let input_len = dlpack_info.shape[0] as usize;
+                    // SAFETY: dlpack_info.data_ptr was validated via DLPack protocol from a
+                    // valid PyTorch CUDA tensor. The tensor remains alive during this call
+                    // (held by Python's GIL), and we validated dtype/contiguity/device above.
+                    // The DLPackTensorInfo RAII wrapper will call deleter when dropped.
+                    let ptr = unsafe {
+                        self.engine
+                            .encode_from_gpu_ptr(
+                                dlpack_info.data_ptr,
+                                input_len,
+                                num_qubits,
+                                encoding_method,
+                            )
+                            .map_err(|e| {
+                                PyRuntimeError::new_err(format!("Encoding failed: {}", e))
+                            })?
+                    };
                     return Ok(QuantumTensor {
                         ptr,
                         consumed: false,
                     });
                 }
                 2 => {
-                    // 2D tensor: batch encoding
-                    let shape = array.shape();
-                    if shape.len() != 2 {
-                        return Err(PyRuntimeError::new_err(format!(
-                            "Unsupported tensor shape: {}D. Expected 2D tensor (batch_size, features).",
-                            shape.len()
-                        )));
-                    }
-                    let num_samples = shape[0];
-                    let sample_size = shape[1];
-                    let ptr = self
-                        .engine
-                        .encode_batch(
-                            data_slice,
-                            num_samples,
-                            sample_size,
-                            num_qubits,
-                            encoding_method,
-                        )
-                        .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+                    // 2D CUDA tensor: batch encoding
+                    let num_samples = dlpack_info.shape[0] as usize;
+                    let sample_size = dlpack_info.shape[1] as usize;
+                    // SAFETY: Same as above - pointer from validated DLPack tensor
+                    let ptr = unsafe {
+                        self.engine
+                            .encode_batch_from_gpu_ptr(
+                                dlpack_info.data_ptr,
+                                num_samples,
+                                sample_size,
+                                num_qubits,
+                                encoding_method,
+                            )
+                            .map_err(|e| {
+                                PyRuntimeError::new_err(format!("Encoding failed: {}", e))
+                            })?
+                    };
                     return Ok(QuantumTensor {
                         ptr,
                         consumed: false,
@@ -566,29 +572,114 @@ impl QdpEngine {
                 }
                 _ => {
                     return Err(PyRuntimeError::new_err(format!(
-                        "Unsupported tensor shape: {}D. Expected 1D tensor for single sample \
-                         encoding or 2D tensor (batch_size, features) for batch encoding.",
+                        "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
+                         sample encoding or 2D tensor (batch_size, features) for batch encoding.",
                         ndim
                     )));
                 }
             }
         }
 
-        // Fallback: try to extract as Vec<f64> (Python list)
-        if let Ok(vec_data) = data.extract::<Vec<f64>>() {
-            let ptr = self
-                .engine
-                .encode(&vec_data, num_qubits, encoding_method)
-                .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
-            return Ok(QuantumTensor {
-                ptr,
-                consumed: false,
-            });
-        }
+        // CPU tensor path
+        validate_tensor(data)?;
+        // PERF: Avoid Tensor -> Python list -> Vec deep copies.
+        //
+        // For CPU tensors, `tensor.detach().numpy()` returns a NumPy view that shares the same
+        // underlying memory (zero-copy) when the tensor is C-contiguous. We can then borrow a
+        // `&[f64]` directly via pyo3-numpy.
+        let ndim: usize = data.call_method0("dim")?.extract()?;
+        let numpy_view = data
+            .call_method0("detach")?
+            .call_method0("numpy")
+            .map_err(|_| {
+                PyRuntimeError::new_err(
+                    "Failed to convert torch.Tensor to NumPy view. Ensure the tensor is on CPU \
+                     and does not require grad (try: tensor = tensor.detach().cpu())",
+                )
+            })?;
 
-        Err(PyRuntimeError::new_err(
-            "Unsupported data type. Expected: list, NumPy array, PyTorch tensor, or file path",
-        ))
+        let array = numpy_view
+            .extract::<PyReadonlyArrayDyn<f64>>()
+            .map_err(|_| {
+                PyRuntimeError::new_err(
+                    "Failed to extract NumPy view as float64 array. Ensure dtype is float64 \
+                     (try: tensor = tensor.to(torch.float64))",
+                )
+            })?;
+
+        let data_slice = array.as_slice().map_err(|_| {
+            PyRuntimeError::new_err(
+                "Tensor must be contiguous (C-order) to get zero-copy slice \
+                 (try: tensor = tensor.contiguous())",
+            )
+        })?;
+
+        match ndim {
+            1 => {
+                // 1D tensor: single sample encoding
+                let ptr = self
+                    .engine
+                    .encode(data_slice, num_qubits, encoding_method)
+                    .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+                Ok(QuantumTensor {
+                    ptr,
+                    consumed: false,
+                })
+            }
+            2 => {
+                // 2D tensor: batch encoding
+                let shape = array.shape();
+                if shape.len() != 2 {
+                    return Err(PyRuntimeError::new_err(format!(
+                        "Unsupported tensor shape: {}D. Expected 2D tensor (batch_size, features).",
+                        shape.len()
+                    )));
+                }
+                let num_samples = shape[0];
+                let sample_size = shape[1];
+                let ptr = self
+                    .engine
+                    .encode_batch(
+                        data_slice,
+                        num_samples,
+                        sample_size,
+                        num_qubits,
+                        encoding_method,
+                    )
+                    .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+                Ok(QuantumTensor {
+                    ptr,
+                    consumed: false,
+                })
+            }
+            _ => Err(PyRuntimeError::new_err(format!(
+                "Unsupported tensor shape: {}D. Expected 1D tensor for single sample \
+                 encoding or 2D tensor (batch_size, features) for batch encoding.",
+                ndim
+            ))),
+        }
+    }
+
+    /// Encode from Python list
+    fn encode_from_list(
+        &self,
+        data: &Bound<'_, PyAny>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        let vec_data = data.extract::<Vec<f64>>().map_err(|_| {
+            PyRuntimeError::new_err(
+                "Unsupported data type. Expected: list, NumPy array, PyTorch tensor, or file path",
+            )
+        })?;
+        let ptr = self
+            .engine
+            .encode(&vec_data, num_qubits, encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
     }
 
     /// Internal helper to encode from file based on extension
