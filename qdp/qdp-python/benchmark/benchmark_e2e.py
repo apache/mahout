@@ -39,7 +39,7 @@ import gc
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pyarrow.ipc as ipc
-from mahout_qdp import QdpEngine
+from _qdp import QdpEngine
 
 # Competitors
 try:

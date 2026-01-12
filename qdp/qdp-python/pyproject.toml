@@ -3,8 +3,8 @@ requires = ["maturin>=1.10,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "qdp-python"
-requires-python = ">=3.11,<3.13"
+name = "qumat-qdp"
+requires-python = ">=3.10,<3.13"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -38,6 +38,9 @@ benchmark = [
 name = "pytorch"
 url = "https://download.pytorch.org/whl/cu122"
 explicit = true
+
+[tool.maturin]
+module-name = "_qdp"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

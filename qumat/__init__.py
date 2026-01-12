@@ -15,5 +15,6 @@
 # limitations under the License.
 
 from .qumat import QuMat
+from . import qdp
 
-__all__ = ["QuMat"]
+__all__ = ["QuMat", "qdp"]

@@ -17,7 +17,7 @@
 """Simple tests for PyO3 bindings."""
 
 import pytest
-import mahout_qdp
+import _qdp
 
 
 def _has_multi_gpu():
@@ -32,11 +32,11 @@ def _has_multi_gpu():
 
 def test_import():
     """Test that PyO3 bindings are properly imported."""
-    assert hasattr(mahout_qdp, "QdpEngine")
-    assert hasattr(mahout_qdp, "QuantumTensor")
+    assert hasattr(_qdp, "QdpEngine")
+    assert hasattr(_qdp, "QuantumTensor")
 
     # Test that QdpEngine has the new encode_from_tensorflow method
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     assert hasattr(QdpEngine, "encode_from_tensorflow")
     assert callable(getattr(QdpEngine, "encode_from_tensorflow"))
@@ -45,18 +45,18 @@ def test_import():
 @pytest.mark.gpu
 def test_encode():
     """Test encoding returns QuantumTensor (requires GPU)."""
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     engine = QdpEngine(0)
     data = [0.5, 0.5, 0.5, 0.5]
     qtensor = engine.encode(data, 2, "amplitude")
-    assert isinstance(qtensor, mahout_qdp.QuantumTensor)
+    assert isinstance(qtensor, _qdp.QuantumTensor)
 
 
 @pytest.mark.gpu
 def test_dlpack_device():
     """Test __dlpack_device__ method (requires GPU)."""
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     engine = QdpEngine(0)
     data = [1.0, 2.0, 3.0, 4.0]
@@ -74,7 +74,7 @@ def test_dlpack_device_id_non_zero():
     """Test device_id propagation for non-zero devices (requires multi-GPU)."""
     pytest.importorskip("torch")
     import torch
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     # Test with device_id=1 (second GPU)
     device_id = 1
@@ -100,7 +100,7 @@ def test_dlpack_device_id_non_zero():
 def test_dlpack_single_use():
     """Test that __dlpack__ can only be called once (requires GPU)."""
     import torch
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     engine = QdpEngine(0)
     data = [1.0, 2.0, 3.0, 4.0]
@@ -121,7 +121,7 @@ def test_pytorch_integration():
     """Test PyTorch integration via DLPack (requires GPU and PyTorch)."""
     pytest.importorskip("torch")
     import torch
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     engine = QdpEngine(0)
     data = [1.0, 2.0, 3.0, 4.0]
@@ -142,7 +142,7 @@ def test_pytorch_precision_float64():
     """Verify optional float64 precision produces complex128 tensors."""
     pytest.importorskip("torch")
     import torch
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     engine = QdpEngine(0, precision="float64")
     data = [1.0, 2.0, 3.0, 4.0]
@@ -157,7 +157,7 @@ def test_encode_tensor_cpu():
     """Test encoding from CPU PyTorch tensor."""
     pytest.importorskip("torch")
     import torch
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
@@ -177,7 +177,7 @@ def test_encode_tensor_errors():
     """Test error handling for encode_tensor."""
     pytest.importorskip("torch")
     import torch
-    from mahout_qdp import QdpEngine
+    from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
