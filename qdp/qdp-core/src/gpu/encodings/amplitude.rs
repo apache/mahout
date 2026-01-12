@@ -21,6 +21,7 @@ use std::sync::Arc;
 use super::QuantumEncoder;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
+#[cfg(target_os = "linux")]
 use crate::gpu::pipeline::run_dual_stream_pipeline;
 use cudarc::driver::CudaDevice;
 
@@ -54,7 +55,7 @@ impl QuantumEncoder for AmplitudeEncoder {
     ) -> Result<GpuStateVector> {
         // Validate qubits (max 30 = 16GB GPU memory)
         Preprocessor::validate_input(host_data, num_qubits)?;
-        let state_len = 1 << num_qubits;
+        let _state_len = 1 << num_qubits;
 
         #[cfg(target_os = "linux")]
         {

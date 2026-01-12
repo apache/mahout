@@ -16,6 +16,7 @@
 
 // Memory safety tests: DLPack lifecycle, RAII, Arc reference counting
 
+#[cfg(target_os = "linux")]
 use qdp_core::{Precision, QdpEngine};
 
 mod common;

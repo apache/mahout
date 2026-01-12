@@ -24,7 +24,9 @@ use qdp_kernels::{
     launch_l2_norm, launch_l2_norm_batch,
 };
 
+#[cfg(target_os = "linux")]
 const EPSILON: f64 = 1e-10;
+#[cfg(target_os = "linux")]
 const EPSILON_F32: f32 = 1e-5;
 
 #[test]
@@ -623,16 +625,14 @@ fn test_amplitude_encode_dummy_non_linux() {
     println!("Testing dummy implementation on non-Linux platform...");
 
     // The dummy implementation should return error code 999
-    let result = unsafe {
-        qdp_kernels::launch_amplitude_encode(
-            std::ptr::null(),
-            std::ptr::null_mut(),
-            0,
-            0,
-            1.0,
-            std::ptr::null_mut(),
-        )
-    };
+    let result = qdp_kernels::launch_amplitude_encode(
+        std::ptr::null(),
+        std::ptr::null_mut(),
+        0,
+        0,
+        1.0,
+        std::ptr::null_mut(),
+    );
 
     assert_eq!(result, 999, "Dummy implementation should return 999");
     println!("PASS: Non-Linux dummy implementation returns expected error code");

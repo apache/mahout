@@ -17,7 +17,6 @@ use crate::error::{MahoutError, Result};
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
 use qdp_kernels::{CuComplex, CuDoubleComplex};
 use std::ffi::c_void;
-#[cfg(target_os = "linux")]
 use std::sync::Arc;
 
 /// Precision of the GPU state vector.
@@ -300,17 +299,21 @@ impl GpuStateVector {
 
     /// Create GPU state vector for a batch of samples
     /// Allocates num_samples * 2^qubits complex numbers on GPU
-    pub fn new_batch(_device: &Arc<CudaDevice>, num_samples: usize, qubits: usize) -> Result<Self> {
-        let single_state_size: usize = 1usize << qubits;
-        let total_elements = num_samples.checked_mul(single_state_size).ok_or_else(|| {
-            MahoutError::MemoryAllocation(format!(
-                "Batch size overflow: {} samples * {} elements",
-                num_samples, single_state_size
-            ))
-        })?;
-
+    pub fn new_batch(
+        _device: &Arc<CudaDevice>,
+        _num_samples: usize,
+        _qubits: usize,
+    ) -> Result<Self> {
         #[cfg(target_os = "linux")]
         {
+            let single_state_size: usize = 1usize << _qubits;
+            let total_elements = _num_samples.checked_mul(single_state_size).ok_or_else(|| {
+                MahoutError::MemoryAllocation(format!(
+                    "Batch size overflow: {} samples * {} elements",
+                    _num_samples, single_state_size
+                ))
+            })?;
+
             let requested_bytes = total_elements
                 .checked_mul(std::mem::size_of::<CuDoubleComplex>())
                 .ok_or_else(|| {
@@ -324,7 +327,7 @@ impl GpuStateVector {
             ensure_device_memory_available(
                 requested_bytes,
                 "batch state vector allocation",
-                Some(qubits),
+                Some(_qubits),
             )?;
 
             let slice =
@@ -332,16 +335,16 @@ impl GpuStateVector {
                     map_allocation_error(
                         requested_bytes,
                         "batch state vector allocation",
-                        Some(qubits),
+                        Some(_qubits),
                         e,
                     )
                 })?;
 
             Ok(Self {
                 buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
-                num_qubits: qubits,
+                num_qubits: _qubits,
                 size_elements: total_elements,
-                num_samples: Some(num_samples),
+                num_samples: Some(_num_samples),
                 device_id: _device.ordinal(),
             })
         }
@@ -358,7 +361,7 @@ impl GpuStateVector {
     /// Convert the state vector to the requested precision (GPU-side).
     ///
     /// For now only down-conversion from Float64 -> Float32 is supported.
-    pub fn to_precision(&self, device: &Arc<CudaDevice>, target: Precision) -> Result<Self> {
+    pub fn to_precision(&self, _device: &Arc<CudaDevice>, target: Precision) -> Result<Self> {
         if self.precision() == target {
             return Ok(self.clone());
         }

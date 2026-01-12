@@ -19,6 +19,7 @@
 // Provides generic double-buffered execution for large data processing.
 // Separates the "streaming mechanics" from the "kernel logic".
 
+#[cfg(target_os = "linux")]
 use crate::error::{MahoutError, Result};
 #[cfg(target_os = "linux")]
 use crate::gpu::buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
@@ -29,8 +30,11 @@ use crate::gpu::cuda_ffi::{
 };
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
+#[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
+#[cfg(target_os = "linux")]
 use std::ffi::c_void;
+#[cfg(target_os = "linux")]
 use std::sync::Arc;
 
 /// Dual-stream context coordinating copy/compute with an event.

@@ -3,7 +3,7 @@ name: Python Bindings
 on:
   push:
     branches:
-      - dev-qdp
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -12,7 +12,13 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
     steps:
       - uses: actions/checkout@v6
 
@@ -22,14 +28,22 @@ jobs:
           enable-cache: true
           python-version: '3.11'
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Build PyO3 bindings
         working-directory: qdp/qdp-python
         run: |
           uv sync --group dev
-          uv run maturin develop
+          uv run maturin develop --release
+
+      - name: Test Python import
+        working-directory: qdp/qdp-python
+        run: uv run python -c "import _qdp; print('QDP imported successfully')"
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          name: python-wheel
+          name: python-wheel-${{ matrix.os }}
           path: qdp/qdp-python/target/wheels/*.whl
+          if-no-files-found: ignore

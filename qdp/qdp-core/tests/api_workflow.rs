@@ -16,6 +16,7 @@
 
 // API workflow tests: Engine initialization and encoding
 
+#[cfg(target_os = "linux")]
 use qdp_core::QdpEngine;
 
 mod common;
