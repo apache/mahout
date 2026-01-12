@@ -39,7 +39,7 @@ import time
 import numpy as np
 import torch
 
-from mahout_qdp import QdpEngine
+from _qdp import QdpEngine
 
 BAR = "=" * 70
 SEP = "-" * 70

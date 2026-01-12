@@ -455,11 +455,11 @@ impl QdpEngine {
     }
 }
 
-/// Mahout QDP Python module
+/// Quantum Data Plane (QDP) Python module
 ///
 /// GPU-accelerated quantum data encoding with DLPack integration.
 #[pymodule]
-fn mahout_qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
     Ok(())

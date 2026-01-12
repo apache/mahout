@@ -21,7 +21,7 @@ import tempfile
 import os
 import numpy as np
 import torch
-from mahout_qdp import QdpEngine
+from _qdp import QdpEngine
 
 
 def test_encode_from_numpy_basic():

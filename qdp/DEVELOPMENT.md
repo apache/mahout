@@ -181,7 +181,7 @@ python benchmark_throughput.py
 
 ### Q: Python import fails after installation
 
-A: Ensure you're using the correct Python environment where the package was installed. Verify with `python -c "import mahout_qdp"`. Make sure you activated the virtual environment: `source .venv/bin/activate`.
+A: Ensure you're using the correct Python environment where the package was installed. Verify with `python -c "import _qdp"`. Make sure you activated the virtual environment: `source .venv/bin/activate`.
 
 ### Q: Build fails with CUDA-related errors
 

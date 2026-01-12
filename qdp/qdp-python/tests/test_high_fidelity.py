@@ -23,7 +23,7 @@ import pytest
 import torch
 import numpy as np
 import concurrent.futures
-from mahout_qdp import QdpEngine
+from _qdp import QdpEngine
 
 np.random.seed(2026)
 

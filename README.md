@@ -38,6 +38,28 @@ pip install uv
 uv sync --group dev
 ```
 
+### Quantum Data Plane (QDP)
+
+QDP provides GPU-accelerated quantum state encoding with zero-copy PyTorch integration. To install with QDP support:
+
+```bash
+uv sync --extra qdp
+```
+
+Usage:
+```python
+import qumat.qdp as qdp
+
+engine = qdp.QdpEngine(device_id=0)
+qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], num_qubits=2, encoding_method="amplitude")
+
+# Zero-copy transfer to PyTorch
+import torch
+torch_tensor = torch.from_dlpack(qtensor)
+```
+
+Note: QDP requires a CUDA-capable GPU.
+
 ## Roadmap
 
 ### Q2 2024

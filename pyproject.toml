@@ -4,7 +4,7 @@ version = "0.4"
 description = "A library for composing quantum machine learning."
 authors = [{ name = "Apache Mahout", email = "dev@mahout.apache.org" }]
 license = "Apache-2.0"
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10,<3.13"
 readme = "README.md"
 dependencies = [
     "qiskit>=2.2.0,<3.0.0",
@@ -13,6 +13,9 @@ dependencies = [
     "amazon-braket-sdk>=1.108.0,<2.0",
     "sympy>=1.14.0,<2.0",
 ]
+
+[project.optional-dependencies]
+qdp = ["qumat-qdp"]
 
 [dependency-groups]
 dev = ["pytest>=8.1.1", "ruff>=0.13.1", "pre-commit>=3.0.0"]
@@ -24,6 +27,9 @@ override-dependencies = [
     "numba>=0.60.0",
     "llvmlite>=0.43.0",
 ]
+
+[tool.uv.sources]
+qumat-qdp = { path = "qdp/qdp-python", editable = true }
 
 [tool.pytest.ini_options]
 testpaths = ["testing"]

@@ -5,7 +5,7 @@ PyO3 Python bindings for Apache Mahout QDP.
 ## Usage
 
 ```python
-from mahout_qdp import QdpEngine
+from _qdp import QdpEngine
 
 # Initialize on GPU 0 (defaults to float32 output)
 engine = QdpEngine(0)
