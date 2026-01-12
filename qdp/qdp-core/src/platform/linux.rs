@@ -59,10 +59,8 @@ pub(crate) fn encode_from_parquet(
         .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
 
     let (full_buf_tx, full_buf_rx): FullBufferChannel = sync_channel(2);
-    let (empty_buf_tx, empty_buf_rx): (
-        SyncSender<PinnedHostBuffer>,
-        Receiver<PinnedHostBuffer>,
-    ) = sync_channel(2);
+    let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedHostBuffer>, Receiver<PinnedHostBuffer>) =
+        sync_channel(2);
 
     let mut host_buf_first = PinnedHostBuffer::new(STAGE_SIZE_ELEMENTS)?;
     let first_len = reader_core.read_chunk(host_buf_first.as_slice_mut())?;
