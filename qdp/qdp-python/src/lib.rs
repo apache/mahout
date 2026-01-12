@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
+use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
 use pyo3::prelude::*;
@@ -217,7 +217,7 @@ impl QdpEngine {
     ///     data: Input data - supports:
     ///         - Python list: [1.0, 2.0, 3.0, 4.0]
     ///         - NumPy array: 1D (single sample) or 2D (batch) array
-    ///         - PyTorch tensor: CPU tensor (will be copied to GPU)
+    ///         - PyTorch tensor: CPU float64 tensor (C-contiguous recommended; converted via NumPy view)
     ///         - String path: .parquet, .arrow, .npy file
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding

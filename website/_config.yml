@@ -62,3 +62,4 @@ exclude:
 collections:
   papers:
     output: true
+    permalink: /qumat/papers/:name/
