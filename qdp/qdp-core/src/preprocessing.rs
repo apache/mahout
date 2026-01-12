@@ -71,8 +71,6 @@ impl Preprocessor {
     ///
     /// Returns error if the calculated norm is zero, NaN, or Infinity.
     pub fn calculate_l2_norm(host_data: &[f64]) -> Result<f64> {
-        Self::check_numerical_safety(host_data)?;
-
         let norm = {
             crate::profile_scope!("CPU::L2Norm");
             let norm_sq: f64 = host_data.par_iter().map(|x| x * x).sum();
@@ -82,6 +80,18 @@ impl Preprocessor {
         if norm == 0.0 {
             return Err(MahoutError::InvalidInput(
                 "Input data has zero norm".to_string(),
+            ));
+        }
+
+        if norm.is_nan() {
+            return Err(MahoutError::InvalidInput(
+                "Input data contains NaN (Not a Number) values".to_string(),
+            ));
+        }
+
+        if norm.is_infinite() {
+            return Err(MahoutError::InvalidInput(
+                "Input data contains Infinity values".to_string(),
             ));
         }
 
@@ -136,8 +146,6 @@ impl Preprocessor {
         _num_samples: usize,
         sample_size: usize,
     ) -> Result<Vec<f64>> {
-        Self::check_numerical_safety(batch_data)?;
-
         crate::profile_scope!("CPU::BatchL2Norm");
 
         // Process chunks in parallel using rayon
@@ -173,12 +181,12 @@ impl Preprocessor {
 
     /// Checks if data contains NaN or Infinity values.
     fn check_numerical_safety(data: &[f64]) -> Result<()> {
-        if data.iter().any(|&x| x.is_nan()) {
+        if data.par_iter().any(|&x| x.is_nan()) {
             return Err(MahoutError::InvalidInput(
                 "Input data contains NaN (Not a Number) values".to_string(),
             ));
         }
-        if data.iter().any(|&x| x.is_infinite()) {
+        if data.par_iter().any(|&x| x.is_infinite()) {
             return Err(MahoutError::InvalidInput(
                 "Input data contains Infinity values".to_string(),
             ));
