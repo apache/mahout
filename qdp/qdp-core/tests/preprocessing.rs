@@ -53,8 +53,8 @@ fn test_validate_input_empty_data() {
 
 #[test]
 fn test_validate_input_data_too_large() {
-    let data = vec![1.0, 0.0, 0.0]; // 3 elements
-    let result = Preprocessor::validate_input(&data, 1); // max size 2^1 = 2
+    let data = vec![1.0, 0.0, 0.0];
+    let result = Preprocessor::validate_input(&data, 1);
     assert!(
         matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("exceeds state vector size"))
     );
@@ -63,7 +63,7 @@ fn test_validate_input_data_too_large() {
 #[test]
 fn test_validate_input_allows_partial_state() {
     let data = vec![0.5, -0.5, 0.25];
-    assert!(Preprocessor::validate_input(&data, 3).is_ok()); // state vector can hold up to 8 elements
+    assert!(Preprocessor::validate_input(&data, 3).is_ok());
 }
 
 #[test]
@@ -104,4 +104,67 @@ fn test_calculate_l2_norm_matches_sequential_sum() {
 
     let norm_sequential = data.iter().map(|x| x * x).sum::<f64>().sqrt();
     assert!((norm_parallel - norm_sequential).abs() < 1e-10);
+}
+
+#[test]
+fn test_validate_input_with_nan() {
+    let data = vec![1.0, f64::NAN, 0.0];
+    let result = Preprocessor::validate_input(&data, 2);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("NaN")));
+}
+
+#[test]
+fn test_validate_input_with_inf() {
+    let data = vec![1.0, f64::INFINITY, 0.0];
+    let result = Preprocessor::validate_input(&data, 2);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("Infinity")));
+}
+
+#[test]
+fn test_validate_input_with_negative_inf() {
+    let data = vec![1.0, f64::NEG_INFINITY, 0.0];
+    let result = Preprocessor::validate_input(&data, 2);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("Infinity")));
+}
+
+#[test]
+fn test_calculate_l2_norm_with_nan() {
+    let data = vec![1.0, f64::NAN, 3.0];
+    let result = Preprocessor::calculate_l2_norm(&data);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("NaN")));
+}
+
+#[test]
+fn test_calculate_l2_norm_with_inf() {
+    let data = vec![1.0, f64::INFINITY, 3.0];
+    let result = Preprocessor::calculate_l2_norm(&data);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("Infinity")));
+}
+
+#[test]
+fn test_validate_batch_with_nan() {
+    let batch_data = vec![1.0, 2.0, f64::NAN, 4.0];
+    let result = Preprocessor::validate_batch(&batch_data, 2, 2, 1);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("NaN")));
+}
+
+#[test]
+fn test_validate_batch_with_inf() {
+    let batch_data = vec![1.0, 2.0, f64::INFINITY, 4.0];
+    let result = Preprocessor::validate_batch(&batch_data, 2, 2, 1);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("Infinity")));
+}
+
+#[test]
+fn test_calculate_batch_l2_norms_with_nan() {
+    let batch_data = vec![1.0, 2.0, f64::NAN, 4.0];
+    let result = Preprocessor::calculate_batch_l2_norms(&batch_data, 2, 2);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("NaN")));
+}
+
+#[test]
+fn test_calculate_batch_l2_norms_with_inf() {
+    let batch_data = vec![1.0, 2.0, f64::INFINITY, 4.0];
+    let result = Preprocessor::calculate_batch_l2_norms(&batch_data, 2, 2);
+    assert!(matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("Infinity")));
 }

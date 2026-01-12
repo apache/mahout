@@ -30,6 +30,7 @@ impl Preprocessor {
     /// - Qubit count within practical limits (1-30)
     /// - Data availability
     /// - Data length against state vector size
+    /// - Numerical safety (NaN and Infinity)
     pub fn validate_input(host_data: &[f64], num_qubits: usize) -> Result<()> {
         // Validate qubits (max 30 = 16GB GPU memory)
         if num_qubits == 0 {
@@ -60,13 +61,18 @@ impl Preprocessor {
             )));
         }
 
+        // Checks if data contains NaN or Infinity values.
+        Self::check_numerical_safety(host_data)?;
+
         Ok(())
     }
 
     /// Calculates L2 norm of the input data in parallel on the CPU.
     ///
-    /// Returns error if the calculated norm is zero.
+    /// Returns error if the calculated norm is zero, NaN, or Infinity.
     pub fn calculate_l2_norm(host_data: &[f64]) -> Result<f64> {
+        Self::check_numerical_safety(host_data)?;
+
         let norm = {
             crate::profile_scope!("CPU::L2Norm");
             let norm_sq: f64 = host_data.par_iter().map(|x| x * x).sum();
@@ -119,6 +125,8 @@ impl Preprocessor {
             )));
         }
 
+        Self::check_numerical_safety(batch_data)?;
+
         Ok(())
     }
 
@@ -128,6 +136,8 @@ impl Preprocessor {
         _num_samples: usize,
         sample_size: usize,
     ) -> Result<Vec<f64>> {
+        Self::check_numerical_safety(batch_data)?;
+
         crate::profile_scope!("CPU::BatchL2Norm");
 
         // Process chunks in parallel using rayon
@@ -143,8 +153,36 @@ impl Preprocessor {
                         i
                     )));
                 }
+                // Check result for NaN and Infinity
+                if norm.is_nan() {
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Sample {} produced NaN norm",
+                        i
+                    )));
+                }
+                if norm.is_infinite() {
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Sample {} produced Infinity norm",
+                        i
+                    )));
+                }
                 Ok(norm)
             })
             .collect()
+    }
+
+    /// Checks if data contains NaN or Infinity values.
+    fn check_numerical_safety(data: &[f64]) -> Result<()> {
+        if data.iter().any(|&x| x.is_nan()) {
+            return Err(MahoutError::InvalidInput(
+                "Input data contains NaN (Not a Number) values".to_string(),
+            ));
+        }
+        if data.iter().any(|&x| x.is_infinite()) {
+            return Err(MahoutError::InvalidInput(
+                "Input data contains Infinity values".to_string(),
+            ));
+        }
+        Ok(())
     }
 }
