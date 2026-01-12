@@ -260,6 +260,20 @@ pub fn read_numpy_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usi
     reader.read_batch()
 }
 
+/// Reads batch data from a PyTorch .pt/.pth file.
+///
+/// Expects a 1D or 2D tensor saved with `torch.save`.
+/// Returns flattened data suitable for batch encoding.
+/// Requires the `pytorch` feature to be enabled.
+///
+/// # Returns
+/// Tuple of `(flattened_data, num_samples, sample_size)`
+pub fn read_torch_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
+    use crate::reader::DataReader;
+    let mut reader = crate::readers::TorchReader::new(path)?;
+    reader.read_batch()
+}
+
 /// Streaming Parquet reader for List<Float64> and FixedSizeList<Float64> columns
 ///
 /// Reads Parquet files in chunks without loading entire file into memory.

@@ -15,6 +15,7 @@ ndarray = { workspace = true }
 ndarray-npy = { workspace = true }
 prost = { workspace = true }
 bytes = { workspace = true }
+tch = { workspace = true, optional = true }
 
 [build-dependencies]
 prost-build = { workspace = true }
@@ -26,3 +27,4 @@ name = "qdp_core"
 [features]
 default = []
 observability = ["nvtx"]
+pytorch = ["tch"]

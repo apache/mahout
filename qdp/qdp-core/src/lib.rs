@@ -231,6 +231,40 @@ impl QdpEngine {
         )
     }
 
+    /// Load data from PyTorch .pt/.pth file and encode into quantum state
+    ///
+    /// Supports 1D or 2D tensors saved with `torch.save`.
+    /// Requires the `pytorch` feature to be enabled.
+    ///
+    /// # Arguments
+    /// * `path` - Path to PyTorch tensor file (.pt/.pth)
+    /// * `num_qubits` - Number of qubits
+    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
+    ///
+    /// # Returns
+    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
+    pub fn encode_from_torch(
+        &self,
+        path: &str,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeFromTorch");
+
+        let (batch_data, num_samples, sample_size) = {
+            crate::profile_scope!("IO::ReadTorchBatch");
+            crate::io::read_torch_batch(path)?
+        };
+
+        self.encode_batch(
+            &batch_data,
+            num_samples,
+            sample_size,
+            num_qubits,
+            encoding_method,
+        )
+    }
+
     /// Load data from TensorFlow TensorProto file and encode into quantum state
     ///
     /// Supports Float64 tensors with shape [batch_size, feature_size] or [n].

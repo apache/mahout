@@ -22,14 +22,18 @@
 //! # Fully Implemented Formats
 //! - **Parquet**: [`ParquetReader`], [`ParquetStreamingReader`]
 //! - **Arrow IPC**: [`ArrowIPCReader`]
+//! - **NumPy**: [`NumpyReader`]
 //! - **TensorFlow TensorProto**: [`TensorFlowReader`]
+//! - **PyTorch**: [`TorchReader`] (feature: `pytorch`)
 
 pub mod arrow_ipc;
 pub mod numpy;
 pub mod parquet;
 pub mod tensorflow;
+pub mod torch;
 
 pub use arrow_ipc::ArrowIPCReader;
 pub use numpy::NumpyReader;
 pub use parquet::{ParquetReader, ParquetStreamingReader};
 pub use tensorflow::TensorFlowReader;
+pub use torch::TorchReader;

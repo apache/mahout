@@ -218,7 +218,7 @@ impl QdpEngine {
     ///         - Python list: [1.0, 2.0, 3.0, 4.0]
     ///         - NumPy array: 1D (single sample) or 2D (batch) array
     ///         - PyTorch tensor: CPU tensor (will be copied to GPU)
-    ///         - String path: .parquet, .arrow, .npy file
+    ///         - String path: .parquet, .arrow, .npy, .pt, .pth file
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
     ///     encoding_method: Encoding strategy ("amplitude" default, "angle", or "basis")
@@ -416,9 +416,15 @@ impl QdpEngine {
                 .map_err(|e| {
                     PyRuntimeError::new_err(format!("Encoding from NumPy failed: {}", e))
                 })?
+        } else if path.ends_with(".pt") || path.ends_with(".pth") {
+            self.engine
+                .encode_from_torch(path, num_qubits, encoding_method)
+                .map_err(|e| {
+                    PyRuntimeError::new_err(format!("Encoding from PyTorch failed: {}", e))
+                })?
         } else {
             return Err(PyRuntimeError::new_err(format!(
-                "Unsupported file format. Expected .parquet, .arrow, .feather, or .npy, got: {}",
+                "Unsupported file format. Expected .parquet, .arrow, .feather, .npy, .pt, or .pth, got: {}",
                 path
             )));
         };
