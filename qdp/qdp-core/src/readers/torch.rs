@@ -106,7 +106,10 @@ fn read_torch_tensor(path: &Path) -> Result<(Vec<f64>, usize, usize)> {
         ))
     })?;
 
-    let tensor = tensor.to_device(Device::Cpu).to_kind(Kind::Double).contiguous();
+    let tensor = tensor
+        .to_device(Device::Cpu)
+        .to_kind(Kind::Double)
+        .contiguous();
     let sizes = tensor.size();
     let (num_samples, sample_size) = parse_shape(&sizes)?;
 
