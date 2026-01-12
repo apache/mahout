@@ -79,8 +79,8 @@ def run_mahout_numpy(num_qubits: int, num_samples: int, npy_path: str):
     start_total = time.perf_counter()
 
     try:
-        # Use the NumPy reader API
-        qtensor = engine.encode_from_numpy(npy_path, num_qubits, "amplitude")
+        # Use the unified encode API with file path
+        qtensor = engine.encode(npy_path, num_qubits, "amplitude")
         tensor = torch.utils.dlpack.from_dlpack(qtensor)
 
         # Small computation to ensure GPU has processed the data

@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use numpy::{PyReadonlyArray2, PyUntypedArrayMethods};
+use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
 use pyo3::prelude::*;
@@ -211,211 +211,180 @@ impl QdpEngine {
         Ok(Self { engine })
     }
 
-    /// Encode classical data into quantum state
+    /// Encode classical data into quantum state (auto-detects input type)
     ///
     /// Args:
-    ///     data: Input data as list of floats
+    ///     data: Input data - supports:
+    ///         - Python list: [1.0, 2.0, 3.0, 4.0]
+    ///         - NumPy array: 1D (single sample) or 2D (batch) array
+    ///         - PyTorch tensor: CPU tensor (will be copied to GPU)
+    ///         - String path: .parquet, .arrow, .npy file
+    ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy ("amplitude", "angle", or "basis")
+    ///     encoding_method: Encoding strategy ("amplitude" default, "angle", or "basis")
     ///
     /// Returns:
     ///     QuantumTensor: DLPack-compatible tensor for zero-copy PyTorch integration
-    ///         Shape: [1, 2^num_qubits]
-    ///
-    /// Raises:
-    ///     RuntimeError: If encoding fails
+    ///         Shape: [batch_size, 2^num_qubits]
     ///
     /// Example:
-    ///     >>> engine = QdpEngine(device_id=0)
-    ///     >>> qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], num_qubits=2, encoding_method="amplitude")
-    ///     >>> torch_tensor = torch.from_dlpack(qtensor)
-    ///
-    /// TODO: Use numpy array input (`PyReadonlyArray1<f64>`) for zero-copy instead of `Vec<f64>`.
+    ///     >>> engine = QdpEngine(0)
+    ///     >>> # From list
+    ///     >>> tensor = engine.encode([1.0, 2.0, 3.0, 4.0], 2)
+    ///     >>> # From NumPy batch
+    ///     >>> tensor = engine.encode(np.random.randn(64, 4), 2)
+    ///     >>> # From file path string
+    ///     >>> tensor = engine.encode("data.parquet", 10)
+    ///     >>> # From pathlib.Path
+    ///     >>> from pathlib import Path
+    ///     >>> tensor = engine.encode(Path("data.npy"), 10)
+    #[pyo3(signature = (data, num_qubits, encoding_method="amplitude"))]
     fn encode(
         &self,
-        data: Vec<f64>,
+        data: &Bound<'_, PyAny>,
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
-        let ptr = self
-            .engine
-            .encode(&data, num_qubits, encoding_method)
-            .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
-        Ok(QuantumTensor {
-            ptr,
-            consumed: false,
-        })
+        // Check if it's a string path
+        if let Ok(path) = data.extract::<String>() {
+            return self.encode_from_file(&path, num_qubits, encoding_method);
+        }
+
+        // Check if it's a pathlib.Path or os.PathLike object (has __fspath__ method)
+        if data.hasattr("__fspath__")? {
+            let path: String = data.call_method0("__fspath__")?.extract()?;
+            return self.encode_from_file(&path, num_qubits, encoding_method);
+        }
+
+        // Check if it's a NumPy array
+        if data.hasattr("__array_interface__")? {
+            // Get the array's ndim for shape validation
+            let ndim: usize = data.getattr("ndim")?.extract()?;
+
+            match ndim {
+                1 => {
+                    // 1D array: single sample encoding
+                    let array_1d = data.extract::<PyReadonlyArray1<f64>>().map_err(|_| {
+                        PyRuntimeError::new_err(
+                            "Failed to extract 1D NumPy array. Ensure dtype is float64.",
+                        )
+                    })?;
+                    let data_slice = array_1d.as_slice().map_err(|_| {
+                        PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
+                    })?;
+                    let ptr = self
+                        .engine
+                        .encode(data_slice, num_qubits, encoding_method)
+                        .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+                    return Ok(QuantumTensor {
+                        ptr,
+                        consumed: false,
+                    });
+                }
+                2 => {
+                    // 2D array: batch encoding
+                    let array_2d = data.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+                        PyRuntimeError::new_err(
+                            "Failed to extract 2D NumPy array. Ensure dtype is float64.",
+                        )
+                    })?;
+                    let shape = array_2d.shape();
+                    let num_samples = shape[0];
+                    let sample_size = shape[1];
+                    let data_slice = array_2d.as_slice().map_err(|_| {
+                        PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
+                    })?;
+                    let ptr = self
+                        .engine
+                        .encode_batch(
+                            data_slice,
+                            num_samples,
+                            sample_size,
+                            num_qubits,
+                            encoding_method,
+                        )
+                        .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+                    return Ok(QuantumTensor {
+                        ptr,
+                        consumed: false,
+                    });
+                }
+                _ => {
+                    return Err(PyRuntimeError::new_err(format!(
+                        "Unsupported array shape: {}D. Expected 1D array for single sample \
+                         encoding or 2D array (batch_size, features) for batch encoding.",
+                        ndim
+                    )));
+                }
+            }
+        }
+
+        // Check if it's a PyTorch tensor
+        if is_pytorch_tensor(data)? {
+            validate_tensor(data)?;
+            let vec_data: Vec<f64> = data
+                .call_method0("flatten")?
+                .call_method0("tolist")?
+                .extract()?;
+            let ptr = self
+                .engine
+                .encode(&vec_data, num_qubits, encoding_method)
+                .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+            return Ok(QuantumTensor {
+                ptr,
+                consumed: false,
+            });
+        }
+
+        // Fallback: try to extract as Vec<f64> (Python list)
+        if let Ok(vec_data) = data.extract::<Vec<f64>>() {
+            let ptr = self
+                .engine
+                .encode(&vec_data, num_qubits, encoding_method)
+                .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+            return Ok(QuantumTensor {
+                ptr,
+                consumed: false,
+            });
+        }
+
+        Err(PyRuntimeError::new_err(
+            "Unsupported data type. Expected: list, NumPy array, PyTorch tensor, or file path",
+        ))
     }
 
-    /// Encode a batch of samples from NumPy array (zero-copy, most efficient)
-    ///
-    /// Args:
-    ///     batch_data: 2D NumPy array of shape [num_samples, sample_size] with dtype float64
-    ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy ("amplitude", "angle", or "basis")
-    ///
-    /// Returns:
-    ///     QuantumTensor: DLPack tensor containing all encoded states
-    ///         Shape: [num_samples, 2^num_qubits]
-    ///
-    /// Example:
-    ///     >>> engine = QdpEngine(device_id=0)
-    ///     >>> batch = np.random.randn(64, 4).astype(np.float64)
-    ///     >>> qtensor = engine.encode_batch(batch, 2, "amplitude")
-    ///     >>> torch_tensor = torch.from_dlpack(qtensor)  # Shape: [64, 4]
-    fn encode_batch(
-        &self,
-        batch_data: PyReadonlyArray2<f64>,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> PyResult<QuantumTensor> {
-        let shape = batch_data.shape();
-        let num_samples = shape[0];
-        let sample_size = shape[1];
-
-        // Get contiguous slice from numpy array (zero-copy if already contiguous)
-        let data_slice = batch_data
-            .as_slice()
-            .map_err(|_| PyRuntimeError::new_err("NumPy array must be contiguous (C-order)"))?;
-
-        let ptr = self
-            .engine
-            .encode_batch(
-                data_slice,
-                num_samples,
-                sample_size,
-                num_qubits,
-                encoding_method,
-            )
-            .map_err(|e| PyRuntimeError::new_err(format!("Batch encoding failed: {}", e)))?;
-        Ok(QuantumTensor {
-            ptr,
-            consumed: false,
-        })
-    }
-
-    /// Encode from PyTorch Tensor
-    ///
-    /// Args:
-    ///     tensor: PyTorch Tensor (must be on CPU)
-    ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy
-    ///
-    /// Returns:
-    ///     QuantumTensor: DLPack-compatible tensor
-    fn encode_tensor(
-        &self,
-        tensor: &Bound<'_, PyAny>,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> PyResult<QuantumTensor> {
-        validate_tensor(tensor)?;
-
-        // NOTE(perf): `tolist()` + `extract()` makes extra copies (Tensor -> Python list -> Vec).
-        // TODO: follow-up PR can use `numpy()`/buffer protocol (and possibly pinned host memory)
-        // to reduce copy overhead.
-        let data: Vec<f64> = tensor
-            .call_method0("flatten")?
-            .call_method0("tolist")?
-            .extract()?;
-
-        let ptr = self
-            .engine
-            .encode(&data, num_qubits, encoding_method)
-            .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
-
-        Ok(QuantumTensor {
-            ptr,
-            consumed: false,
-        })
-    }
-
-    /// Encode from Parquet file
-    ///
-    /// Args:
-    ///     path: Path to Parquet file
-    ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy (currently only "amplitude")
-    ///
-    /// Returns:
-    ///     QuantumTensor: DLPack tensor containing all encoded states
-    ///
-    /// Example:
-    ///     >>> engine = QdpEngine(device_id=0)
-    ///     >>> batched = engine.encode_from_parquet("data.parquet", 16, "amplitude")
-    ///     >>> torch_tensor = torch.from_dlpack(batched)  # Shape: [200, 65536]
-    fn encode_from_parquet(
-        &self,
-        path: &str,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> PyResult<QuantumTensor> {
-        let ptr = self
-            .engine
-            .encode_from_parquet(path, num_qubits, encoding_method)
-            .map_err(|e| PyRuntimeError::new_err(format!("Encoding from parquet failed: {}", e)))?;
-        Ok(QuantumTensor {
-            ptr,
-            consumed: false,
-        })
-    }
-
-    /// Encode from Arrow IPC file
-    ///
-    /// Args:
-    ///     path: Path to Arrow IPC file (.arrow or .feather)
-    ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy (currently only "amplitude")
-    ///
-    /// Returns:
-    ///     QuantumTensor: DLPack tensor containing all encoded states
-    ///
-    /// Example:
-    ///     >>> engine = QdpEngine(device_id=0)
-    ///     >>> batched = engine.encode_from_arrow_ipc("data.arrow", 16, "amplitude")
-    ///     >>> torch_tensor = torch.from_dlpack(batched)
-    fn encode_from_arrow_ipc(
+    /// Internal helper to encode from file based on extension
+    fn encode_from_file(
         &self,
         path: &str,
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
-        let ptr = self
-            .engine
-            .encode_from_arrow_ipc(path, num_qubits, encoding_method)
-            .map_err(|e| {
-                PyRuntimeError::new_err(format!("Encoding from Arrow IPC failed: {}", e))
-            })?;
-        Ok(QuantumTensor {
-            ptr,
-            consumed: false,
-        })
-    }
+        let ptr = if path.ends_with(".parquet") {
+            self.engine
+                .encode_from_parquet(path, num_qubits, encoding_method)
+                .map_err(|e| {
+                    PyRuntimeError::new_err(format!("Encoding from parquet failed: {}", e))
+                })?
+        } else if path.ends_with(".arrow") || path.ends_with(".feather") {
+            self.engine
+                .encode_from_arrow_ipc(path, num_qubits, encoding_method)
+                .map_err(|e| {
+                    PyRuntimeError::new_err(format!("Encoding from Arrow IPC failed: {}", e))
+                })?
+        } else if path.ends_with(".npy") {
+            self.engine
+                .encode_from_numpy(path, num_qubits, encoding_method)
+                .map_err(|e| {
+                    PyRuntimeError::new_err(format!("Encoding from NumPy failed: {}", e))
+                })?
+        } else {
+            return Err(PyRuntimeError::new_err(format!(
+                "Unsupported file format. Expected .parquet, .arrow, .feather, or .npy, got: {}",
+                path
+            )));
+        };
 
-    /// Encode from NumPy .npy file
-    ///
-    /// Args:
-    ///     path: Path to NumPy .npy file
-    ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy ("amplitude", "angle", or "basis")
-    ///
-    /// Returns:
-    ///     QuantumTensor: DLPack tensor containing all encoded states
-    ///
-    /// Example:
-    ///     >>> engine = QdpEngine(device_id=0)
-    ///     >>> batched = engine.encode_from_numpy("states.npy", 10, "amplitude")
-    ///     >>> torch_tensor = torch.from_dlpack(batched)
-    fn encode_from_numpy(
-        &self,
-        path: &str,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> PyResult<QuantumTensor> {
-        let ptr = self
-            .engine
-            .encode_from_numpy(path, num_qubits, encoding_method)
-            .map_err(|e| PyRuntimeError::new_err(format!("Encoding from NumPy failed: {}", e)))?;
         Ok(QuantumTensor {
             ptr,
             consumed: false,

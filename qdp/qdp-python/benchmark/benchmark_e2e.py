@@ -267,23 +267,23 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
 
     # Direct Parquet to GPU pipeline
     parquet_encode_start = time.perf_counter()
-    batched_tensor = engine.encode_from_parquet(DATA_FILE, n_qubits, "amplitude")
+    qtensor = engine.encode(DATA_FILE, n_qubits)
     parquet_encode_time = time.perf_counter() - parquet_encode_start
     print(f"  Parquet->GPU (IO+Encode): {parquet_encode_time:.4f} s")
 
-    # Convert to torch tensor (single DLPack call)
+    # Convert to torch tensor
     dlpack_start = time.perf_counter()
-    gpu_batched = torch.from_dlpack(batched_tensor)
+    gpu_batched = torch.from_dlpack(qtensor)
     dlpack_time = time.perf_counter() - dlpack_start
     print(f"  DLPack conversion: {dlpack_time:.4f} s")
 
-    # Tensor is already 2D [n_samples, state_len] from to_dlpack()
+    # Tensor is already 2D [n_samples, state_len]
     state_len = 1 << n_qubits
     assert gpu_batched.shape == (n_samples, state_len), (
         f"Expected shape ({n_samples}, {state_len}), got {gpu_batched.shape}"
     )
 
-    # Convert to float for model (batch already on GPU)
+    # Convert to float for model
     reshape_start = time.perf_counter()
     gpu_all_data = gpu_batched.abs().to(torch.float32)
     reshape_time = time.perf_counter() - reshape_start
@@ -318,16 +318,16 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
     start_time = time.perf_counter()
 
     arrow_encode_start = time.perf_counter()
-    batched_tensor = engine.encode_from_arrow_ipc(ARROW_FILE, n_qubits, "amplitude")
+    qtensor = engine.encode(ARROW_FILE, n_qubits)
     arrow_encode_time = time.perf_counter() - arrow_encode_start
     print(f"  Arrow->GPU (IO+Encode): {arrow_encode_time:.4f} s")
 
     dlpack_start = time.perf_counter()
-    gpu_batched = torch.from_dlpack(batched_tensor)
+    gpu_batched = torch.from_dlpack(qtensor)
     dlpack_time = time.perf_counter() - dlpack_start
     print(f"  DLPack conversion: {dlpack_time:.4f} s")
 
-    # Tensor is already 2D [n_samples, state_len] from to_dlpack()
+    # Tensor is already 2D [n_samples, state_len]
     state_len = 1 << n_qubits
     assert gpu_batched.shape == (n_samples, state_len), (
         f"Expected shape ({n_samples}, {state_len}), got {gpu_batched.shape}"
