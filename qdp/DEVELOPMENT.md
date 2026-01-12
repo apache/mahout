@@ -36,7 +36,7 @@ The container includes:
 - **Base image**: `nvidia/cuda:12.4.1-devel-ubuntu22.04` with full CUDA toolkit
 - **Python 3.10**: Installed via DevContainer features
 - **Rust & Cargo**: Installed automatically via [.devcontainer/setup.sh](.devcontainer/setup.sh)
-- **Development tools**: uv, poetry, pre-commit hooks, and build essentials
+- **Development tools**: uv, pre-commit hooks, and build essentials
 - **GPU access**: The container has full access to all GPUs on the host
 - **VS Code extensions**: Python, Rust Analyzer, and TOML support pre-installed
 

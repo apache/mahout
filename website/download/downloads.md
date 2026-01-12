@@ -31,8 +31,8 @@ Apache Mahout is mirrored to [Github](https://github.com/apache/mahout). To get 
 
 To install dependencies, run the following:
 ```
-pip install -U poetry
-poetry install
+pip install uv
+uv sync --group dev
 ```
 
 <a name="Downloads-FutureReleases"></a>

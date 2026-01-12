@@ -20,16 +20,16 @@ limitations under the License.
 
 For each backend supported in Apache Mahout, the testing suite executes an example circuit using the qumat implementation of the backend, and then executes the same example circuit using the backend's native implementation. The test then checks that the resulting final state vectors are the same.
 
-The testing suite is run using `pytest`, which is installed by default using poetry. To run the tests, simply run
+The testing suite is run using `pytest`, which is installed by default. To run the tests, simply run
 
 ## Running Tests
 
 ```bash
 # Run all tests
-poetry run pytest
+pytest
 
 # Run with verbose output
-poetry run pytest -v
+pytest -v
 ```
 
 ## Adding New Backend Tests

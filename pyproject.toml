@@ -4,18 +4,26 @@ version = "0.4"
 description = "A library for composing quantum machine learning."
 authors = [{ name = "Apache Mahout", email = "dev@mahout.apache.org" }]
 license = "Apache-2.0"
-requires-python = ">=3.10,<=3.13"
+requires-python = ">=3.10,<3.14"
 readme = "README.md"
 dependencies = [
     "qiskit>=2.2.0,<3.0.0",
     "qiskit-aer>=0.17.2,<0.18.0",
     "cirq>=1.5.0,<1.6.0",
-    "amazon-braket-sdk>=1.102.6,<2.0",
+    "amazon-braket-sdk>=1.108.0,<2.0",
     "sympy>=1.14.0,<2.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = ["pytest>=8.1.1", "ruff>=0.13.1", "pre-commit>=3.0.0"]
+
+[tool.uv]
+# Override to fix amazon-braket-default-simulator dependency on old numba/llvmlite
+# The simulator v1.32.1 requires numba 0.53.1 which doesn't support Python 3.10+
+override-dependencies = [
+    "numba>=0.60.0",
+    "llvmlite>=0.43.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["testing"]
@@ -24,5 +32,5 @@ python_functions = "test_*"
 addopts = ["-v", "--tb=short"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
