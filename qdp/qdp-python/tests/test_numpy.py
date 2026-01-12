@@ -46,10 +46,7 @@ def test_encode_from_numpy_basic():
     try:
         np.save(npy_path, data)
 
-        # Encode from NumPy file
-        qtensor = engine.encode_from_numpy(npy_path, num_qubits, "amplitude")
-
-        # Convert to PyTorch
+        qtensor = engine.encode(npy_path, num_qubits)
         tensor = torch.from_dlpack(qtensor)
 
         # Verify shape
@@ -93,8 +90,7 @@ def test_encode_from_numpy_large():
     try:
         np.save(npy_path, data)
 
-        # Encode
-        qtensor = engine.encode_from_numpy(npy_path, num_qubits, "amplitude")
+        qtensor = engine.encode(npy_path, num_qubits)
         tensor = torch.from_dlpack(qtensor)
 
         # Verify
@@ -125,7 +121,7 @@ def test_encode_from_numpy_single_sample():
     try:
         np.save(npy_path, data)
 
-        qtensor = engine.encode_from_numpy(npy_path, num_qubits, "amplitude")
+        qtensor = engine.encode(npy_path, num_qubits)
         tensor = torch.from_dlpack(qtensor)
 
         assert tensor.shape == (1, sample_size)

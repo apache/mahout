@@ -15,11 +15,11 @@ engine = QdpEngine(0)
 
 # Encode data from Python list
 data = [0.5, 0.5, 0.5, 0.5]
-dlpack_ptr = engine.encode(data, num_qubits=2, encoding_method="amplitude")
+qtensor = engine.encode(data, num_qubits=2, encoding_method="amplitude")
 
 # Or encode from file formats
-tensor_parquet = engine.encode_from_parquet("data.parquet", 10, "amplitude")
-tensor_arrow = engine.encode_from_arrow_ipc("data.arrow", 10, "amplitude")
+tensor_parquet = engine.encode("data.parquet", 10, "amplitude")
+tensor_arrow = engine.encode("data.arrow", 10, "amplitude")
 ```
 
 ## Build from source
@@ -41,8 +41,9 @@ uv run maturin develop
 
 ## File format support
 
-- **Parquet** - `encode_from_parquet(path, num_qubits, encoding_method)`
-- **Arrow IPC** - `encode_from_arrow_ipc(path, num_qubits, encoding_method)`
+- **Parquet** - `.parquet` files
+- **Arrow IPC** - `.arrow` or `.feather` files
+- **NumPy** - `.npy` files
 
 ## Adding new bindings
 

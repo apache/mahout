@@ -164,7 +164,7 @@ def test_encode_tensor_cpu():
 
     engine = QdpEngine(0)
     data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64)
-    qtensor = engine.encode_tensor(data, 2, "amplitude")
+    qtensor = engine.encode(data, 2, "amplitude")
 
     # Verify result
     torch_tensor = torch.from_dlpack(qtensor)
@@ -173,8 +173,8 @@ def test_encode_tensor_cpu():
 
 
 @pytest.mark.gpu
-def test_encode_tensor_errors():
-    """Test error handling for encode_tensor."""
+def test_encode_errors():
+    """Test error handling for unified encode method."""
     pytest.importorskip("torch")
     import torch
     from _qdp import QdpEngine
@@ -184,14 +184,15 @@ def test_encode_tensor_errors():
 
     engine = QdpEngine(0)
 
-    # Test non-tensor input
-    with pytest.raises(RuntimeError, match="Object is not a PyTorch Tensor"):
-        engine.encode_tensor([1.0, 2.0], 1, "amplitude")
+    # Test unsupported file format
+    with pytest.raises(RuntimeError, match="Unsupported file format"):
+        engine.encode("data.txt", 2, "amplitude")
 
-    # Test GPU tensor input (should fail as only CPU is supported for this path)
-    if torch.cuda.is_available():
-        gpu_tensor = torch.tensor([1.0, 2.0], device="cuda:0")
-        with pytest.raises(
-            RuntimeError, match="Only CPU tensors are currently supported"
-        ):
-            engine.encode_tensor(gpu_tensor, 1, "amplitude")
+    # Test unsupported data type
+    with pytest.raises(RuntimeError, match="Unsupported data type"):
+        engine.encode({"key": "value"}, 2, "amplitude")
+
+    # Test GPU tensor input (should fail as only CPU is supported)
+    gpu_tensor = torch.tensor([1.0, 2.0], device="cuda:0")
+    with pytest.raises(RuntimeError, match="Only CPU tensors are currently supported"):
+        engine.encode(gpu_tensor, 1, "amplitude")

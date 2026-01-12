@@ -127,8 +127,8 @@ def run_mahout(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
         total_batches, batch_size, 1 << num_qubits, prefetch
     ):
         normalized = np.ascontiguousarray(normalize_batch(batch), dtype=np.float64)
-        qtensor = engine.encode_batch(normalized, num_qubits, "amplitude")
-        tensor = torch.utils.dlpack.from_dlpack(qtensor).abs().to(torch.float32)
+        qtensor = engine.encode(normalized, num_qubits)
+        tensor = torch.from_dlpack(qtensor).abs().to(torch.float32)
         _ = tensor.sum()
         processed += normalized.shape[0]
 
