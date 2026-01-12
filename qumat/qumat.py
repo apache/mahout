@@ -47,19 +47,19 @@ class QuMat:
             raise ValueError(
                 f"backend_config must be a dictionary, got {type(backend_config).__name__}"
             )
-        
+
         if "backend_name" not in backend_config:
             raise KeyError(
                 "backend_config is missing required key 'backend_name'. "
                 "Please provide a backend name (e.g., 'qiskit', 'cirq', 'amazon_braket')"
             )
-        
+
         if "backend_options" not in backend_config:
             raise KeyError(
                 "backend_config is missing required key 'backend_options'. "
                 "Please provide a dictionary with backend-specific options "
             )
-        
+
         self.backend_config = backend_config
         self.backend_name = backend_config["backend_name"]
         self.backend_module = import_module(
