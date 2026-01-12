@@ -4,6 +4,7 @@ mod linux;
 mod windows;
 #[cfg(not(any(target_os = "linux", target_os = "windows")))]
 mod other;
+#[cfg(not(target_os = "linux"))]
 mod fallback;
 
 #[cfg(target_os = "linux")]
