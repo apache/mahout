@@ -17,7 +17,7 @@
 
 import pytest
 
-from .utils import TESTING_BACKENDS
+from .utils import TESTING_BACKENDS, get_backend_config
 from qumat import QuMat
 
 
@@ -25,36 +25,9 @@ from qumat import QuMat
 class TestCreateCircuit:
     """Test class for create_empty_circuit functionality."""
 
-    def get_backend_config(self, backend_name):
-        """Helper method to get backend configuration."""
-        if backend_name == "qiskit":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "aer_simulator",
-                    "shots": 1000,
-                },
-            }
-        elif backend_name == "cirq":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "default",
-                    "shots": 1000,
-                },
-            }
-        elif backend_name == "amazon_braket":
-            return {
-                "backend_name": backend_name,
-                "backend_options": {
-                    "simulator_type": "local",
-                    "shots": 1000,
-                },
-            }
-
     def test_create_empty_circuit(self, backend_name):
         """Test that create_empty_circuit works"""
-        backend_config = self.get_backend_config(backend_name)
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit()
 
@@ -63,7 +36,7 @@ class TestCreateCircuit:
     @pytest.mark.parametrize("num_qubits", [0, 1, 3, 5])
     def test_create_circuit_initializes_to_zero(self, backend_name, num_qubits):
         """Test that create_empty_circuit properly initializes all qubits to |0⟩."""
-        backend_config = self.get_backend_config(backend_name)
+        backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
 
         # Create circuit with specified number of qubits
@@ -90,3 +63,27 @@ class TestCreateCircuit:
         assert zero_state_count > 0.95 * total_shots, (
             f"Expected |0...0⟩ state, got {zero_state_count}/{total_shots}"
         )
+
+
+class TestBackendConfigValidation:
+    """Test class for backend configuration validation."""
+
+    @pytest.mark.parametrize("invalid_config", [None, "not a dict"])
+    def test_invalid_type_raises_valueerror(self, invalid_config):
+        """Test that non-dictionary backend_config raises ValueError."""
+        with pytest.raises(ValueError, match="backend_config must be a dictionary"):
+            QuMat(invalid_config)
+
+    def test_missing_backend_name_raises_keyerror(self):
+        """Test that missing backend_name raises KeyError with helpful message."""
+        config = {"backend_options": {"simulator_type": "aer_simulator", "shots": 1024}}
+
+        with pytest.raises(KeyError, match="missing required key.*backend_name"):
+            QuMat(config)
+
+    def test_missing_backend_options_raises_keyerror(self):
+        """Test that missing backend_options raises KeyError with helpful message."""
+        config = {"backend_name": "qiskit"}
+
+        with pytest.raises(KeyError, match="missing required key.*backend_options"):
+            QuMat(config)
