@@ -74,14 +74,14 @@ impl DataReader for TorchReader {
 
         #[cfg(feature = "pytorch")]
         {
-            return read_torch_tensor(&self.path);
+            read_torch_tensor(&self.path)
         }
 
         #[cfg(not(feature = "pytorch"))]
         {
-            return Err(MahoutError::NotImplemented(
+            Err(MahoutError::NotImplemented(
                 "PyTorch reader requires the 'pytorch' feature".to_string(),
-            ));
+            ))
         }
     }
 
@@ -120,7 +120,14 @@ fn read_torch_tensor(path: &Path) -> Result<(Vec<f64>, usize, usize)> {
         ))
     })?;
 
-    let data: Vec<f64> = Vec::<f64>::from(&tensor);
+    let flat = tensor.view([-1]);
+    let data: Vec<f64> = Vec::<f64>::try_from(&flat).map_err(|e| {
+        MahoutError::InvalidInput(format!(
+            "Failed to read PyTorch tensor data from {}: {}",
+            path.display(),
+            e
+        ))
+    })?;
     if data.len() != expected {
         return Err(MahoutError::InvalidInput(format!(
             "Tensor data length mismatch: expected {}, got {}",

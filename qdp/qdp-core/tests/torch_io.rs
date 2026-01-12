@@ -28,7 +28,7 @@ mod pytorch_tests {
         let sample_size = 12;
         let data: Vec<f64> = (0..sample_size).map(|i| i as f64).collect();
 
-        let tensor = Tensor::of_slice(&data);
+        let tensor = Tensor::from_slice(&data);
         tensor.save(temp_path).unwrap();
 
         let mut reader = TorchReader::new(temp_path).unwrap();
@@ -48,7 +48,7 @@ mod pytorch_tests {
         let sample_size = 3;
         let data: Vec<f64> = (0..num_samples * sample_size).map(|i| i as f64).collect();
 
-        let tensor = Tensor::of_slice(&data).reshape(&[num_samples as i64, sample_size as i64]);
+        let tensor = Tensor::from_slice(&data).reshape([num_samples as i64, sample_size as i64]);
         tensor.save(temp_path).unwrap();
 
         let (read_data, read_samples, read_size) = read_torch_batch(temp_path).unwrap();
