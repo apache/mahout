@@ -43,5 +43,10 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev
 
+      - name: Install PyTorch (CPU)
+        run: uv pip install torch
+
       - name: Run pre-commit hooks
+        env:
+          LIBTORCH_USE_PYTORCH: "1"
         run: uv run pre-commit run --all-files
