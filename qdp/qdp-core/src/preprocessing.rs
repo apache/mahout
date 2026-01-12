@@ -180,11 +180,15 @@ impl Preprocessor {
     }
 
     /// Checks if data contains NaN or Infinity values.
+    /// Only performs the check in debug builds to avoid O(N) overhead in release mode.
     fn check_numerical_safety(data: &[f64]) -> Result<()> {
-        if data.par_iter().any(|&x| x.is_nan() || x.is_infinite()) {
-            return Err(MahoutError::InvalidInput(
-                "Input data contains NaN or Infinity values".to_string(),
-            ));
+        #[cfg(debug_assertions)]
+        {
+            if data.par_iter().any(|&x| x.is_nan() || x.is_infinite()) {
+                return Err(MahoutError::InvalidInput(
+                    "Input data contains NaN or Infinity values".to_string(),
+                ));
+            }
         }
         Ok(())
     }
