@@ -30,7 +30,6 @@ impl Preprocessor {
     /// - Qubit count within practical limits (1-30)
     /// - Data availability
     /// - Data length against state vector size
-    /// - Numerical safety (NaN and Infinity)
     pub fn validate_input(host_data: &[f64], num_qubits: usize) -> Result<()> {
         // Validate qubits (max 30 = 16GB GPU memory)
         if num_qubits == 0 {
@@ -61,15 +60,12 @@ impl Preprocessor {
             )));
         }
 
-        // Checks if data contains NaN or Infinity values.
-        Self::check_numerical_safety(host_data)?;
-
         Ok(())
     }
 
     /// Calculates L2 norm of the input data in parallel on the CPU.
     ///
-    /// Returns error if the calculated norm is zero, NaN, or Infinity.
+    /// Returns error if the calculated norm is zero.
     pub fn calculate_l2_norm(host_data: &[f64]) -> Result<f64> {
         let norm = {
             crate::profile_scope!("CPU::L2Norm");
@@ -135,8 +131,6 @@ impl Preprocessor {
             )));
         }
 
-        Self::check_numerical_safety(batch_data)?;
-
         Ok(())
     }
 
@@ -177,19 +171,5 @@ impl Preprocessor {
                 Ok(norm)
             })
             .collect()
-    }
-
-    /// Checks if data contains NaN or Infinity values.
-    /// Only performs the check in debug builds to avoid O(N) overhead in release mode.
-    fn check_numerical_safety(data: &[f64]) -> Result<()> {
-        #[cfg(debug_assertions)]
-        {
-            if data.par_iter().any(|&x| x.is_nan() || x.is_infinite()) {
-                return Err(MahoutError::InvalidInput(
-                    "Input data contains NaN or Infinity values".to_string(),
-                ));
-            }
-        }
-        Ok(())
     }
 }
