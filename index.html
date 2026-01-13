@@ -101,6 +101,7 @@
                     </div>
                 </li>
 
+                <!-- Qumat -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle"
                        href="" id="navbarDropdownMenuLink-qumat"
@@ -109,28 +110,15 @@
                        aria-expanded="false">Qumat</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <a class="dropdown-item"
-                           href="/quantum-computing-primer">Quantum Computing Primer</a>
-<!--                        TODO: Add More QuMat stuff here or refactor the whole thing-->
-                    </div>
-                </li>
-                <!-- Documentation -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle"
-                       href="" id="navbarDropdownMenuLink-docs"
-                       data-toggle="dropdown"
-                       aria-haspopup="true"
-                       aria-expanded="false">Documentation</a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                           href="/qumat">Overview</a>
                         <a class="dropdown-item"
-                           href="/papers.html">Papers</a>
+                           href="/qumat/core">Qumat Core</a>
                         <a class="dropdown-item"
-                           href="/documentation/users">User Guide</a>
+                           href="/qumat/qdp">QDP (Quantum Data Plane)</a>
                         <a class="dropdown-item"
-                           href="/documentation/developers">Developer Guide</a>
+                           href="/qumat/quantum-computing-primer">Quantum Computing Primer</a>
                         <a class="dropdown-item"
-                           href="/docs/0.13.0/api/docs/">API Reference</a>
-                        <a class="dropdown-item"
-                           href="/documentation/tutorials">Tutorials and Examples</a>
+                           href="/qumat/papers">Papers</a>
                     </div>
                 </li>
 
@@ -178,10 +166,10 @@
                     <a class="nav-link dropdown-toggle"
                        href="/news-and-events/news.html" id="navbarDropdownMenuLink-news-events"
                        aria-haspopup="true"
-                       aria-expanded="false">Latest Project News</a>
+                       aria-expanded="false">News</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <a class="dropdown-item"
-                           href="/news-and-events/news.html">Latest Project News</a>
+                           href="/news-and-events/news.html">News</a>
                     </div>
                 </li>
 
@@ -230,176 +218,40 @@
   <div class="container mt-5 pb-4">
     <div class="row">
       <div class="col-lg-8 markdown-body">
-        <p>Apache Mahout(TM) is a <strong>distributed linear algebra framework</strong> and <strong>mathematically expressive Scala DSL</strong> designed to let mathematicians, statisticians, and data scientists quickly <em>implement their own algorithms</em>. Apache Spark is the recommended out-of-the-box distributed back-end, <em>or can be extended to other distributed backends.</em></p>
+        <h1 class="section-heading">Apache Mahout</h1>
+
+<p>The goal of the Apache Mahout™ project is to build an environment for quickly creating scalable, performant machine learning applications.</p>
+
+<h2 class="section-heading">Qumat</h2>
+
+<div style="text-align: center; margin: 2rem 0;">
+  <img src="/assets/images/mascot_with_text.png" alt="Apache Mahout Qumat" style="max-width: 600px; width: 100%;" />
+</div>
+
+<p><strong>Qumat</strong> is a high-level Python library for quantum computing that provides:</p>
 
 <ul>
-  <li>Mathematically Expressive Scala DSL</li>
-  <li>Support for Multiple Distributed Backends (including Apache Spark)</li>
-  <li>Modular Native Solvers for CPU/GPU/CUDA Acceleration</li>
+  <li><strong>Qumat Core</strong> - Build quantum circuits with standard gates and run them on Qiskit, Cirq, or Amazon Braket with a single unified API</li>
+  <li><strong>QDP (Quantum Data Plane)</strong> - Encode classical data into quantum states using GPU-accelerated kernels with zero-copy tensor transfer</li>
 </ul>
 
-<h2 class="section-heading">Recent News</h2>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">October 24, 2025</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2025/10/24/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Weekly community meeting
-Subscribe to the Mahout User list for details on joining.
-</p>
-        <a href="/minutes/2025/10/24/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">August 01, 2025</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2025/08/01/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Weekly community meeting
-Subscribe to the Mahout User list for details on joining.
-</p>
-        <a href="/minutes/2025/08/01/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">May 15, 2025</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2025/05/15/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Weekly community meeting
-Minutes on GitHub Discussions.
-</p>
-        <a href="/minutes/2025/05/15/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">news</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">April 17, 2025</div>
-        </div>
-        <h3 class="card-title"><a href="/news/2025/04/17/Qumat-0.4-Release.html">Qumat 0.4 Release</a></h3>
-        <p>Qumat 0.4 Released
-Release notes on GitHub Discussions.
-</p>
-        <a href="/news/2025/04/17/Qumat-0.4-Release.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card card-post-preview mb-4">
-  <div class="card-body">
-    <div class="row no-gutters">
-      <div class="col-3 d-none d-md-flex my-auto card-post-img">
-        
-          <img class="rounded-circle img-fluid d-flex mx-auto" src="/assets/mahout-logo-blue.svg" />
-        
-      </div>
-      <div class="col-12 col-md-9 card-post-text">
-        <div class="clearfix mb-3">
-          <ul class="list-inline float-md-left mb-md-0">
-            
-            
-              <li class="list-inline-item">
-                <a class="small text-uppercase" href="#">minutes</a>
-              </li>
-              
-            
-          </ul>
-          <div class="float-md-right small text-muted">April 11, 2025</div>
-        </div>
-        <h3 class="card-title"><a href="/minutes/2025/04/11/Meeting-Minutes.html">Meeting Minutes</a></h3>
-        <p>Weekly community meeting
-Minutes on GitHub Discussions.
-</p>
-        <a href="/minutes/2025/04/11/Meeting-Minutes.html" class="btn btn-primary btn-sm">Read Post &rarr;</a>
-      </div>
-    </div>
-  </div>
-</div>
-
+<p><a href="/qumat">Learn more about Qumat →</a></p>
 
       </div>
       <div class="col-lg-4">
         <h2 class="section-heading">Sidebar Home</h2>
-        <!-- Apache Software Foundation Links -->
+        <!-- Qumat Release Banner -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        🚀 Qumat 0.4 Released!
+    </div>
+    <div class="card-body">
+        <p class="mb-2">Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
+        <a href="/download/downloads.html">Download Qumat 0.4 →</a>
+    </div>
+</div>
+
+<!-- Apache Software Foundation Links -->
 <div class="card mb-4 sidebar">
     <div class="card-header">
         Apache Software Foundation
