@@ -217,7 +217,7 @@ impl QdpEngine {
     ///     data: Input data - supports:
     ///         - Python list: [1.0, 2.0, 3.0, 4.0]
     ///         - NumPy array: 1D (single sample) or 2D (batch) array
-    ///         - PyTorch tensor: CPU tensor (will be copied to GPU)
+    ///         - PyTorch tensor: CPU tensor (float64 recommended; will be copied to GPU)
     ///         - String path: .parquet, .arrow, .npy, .pt, .pth file
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
