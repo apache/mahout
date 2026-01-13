@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang=" en ">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    Quantum Entanglement
+    
+  </title>
+
+  <meta name="description" content="Distributed Linear Algebra">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/github-markdown.css">
+
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
+
+  <link rel="canonical" href="http://mahout.apache.org//qumat/quantum-computing-primer/06_quantum_entanglement/">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML">
+    MathJax.Hub.Config({
+      "HTML-CSS": {
+        availableFonts: ["TeX"],
+      },
+      tex2jax: {
+        inlineMath: [['$','$'],["\\(","\\)"]]},
+      displayMath: [ ['$$','$$'], ['\[','\]'] ],
+      TeX: {
+        extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
+        equationNumbers: {
+          autoNumber: "AMS"
+        }
+      },
+      showProcessingMessages: false,
+      messageStyle: "none",
+      imageFont: null,
+      "AssistiveMML": { disabled: true }
+    });
+  </script>
+</head>
+
+<!-- Matomo -->
+<script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(["setDoNotTrack", true]);
+  _paq.push(["disableCookies"]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://analytics.apache.org/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '70']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
+
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+          <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ml-auto">
+
+                <!-- About -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-about"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">About</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="https://www.apache.org/foundation/how-it-works.html">Overview of the Apache Software Foundation</a>
+                        <a class="dropdown-item"
+                           href="/about/distributed-matrix-math.html">Overview of Distributed Matrix Math</a>
+                        <a class="dropdown-item"
+                           href="/about/how-to-contribute.html">How to Contribute</a>
+                    </div>
+                </li>
+
+                <!-- Qumat -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-qumat"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Qumat</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/qumat">Overview</a>
+                        <a class="dropdown-item"
+                           href="/qumat/core">Qumat Core</a>
+                        <a class="dropdown-item"
+                           href="/qumat/qdp">QDP (Quantum Data Plane)</a>
+                        <a class="dropdown-item"
+                           href="/qumat/quantum-computing-primer">Quantum Computing Primer</a>
+                        <a class="dropdown-item"
+                           href="/qumat/papers">Papers</a>
+                    </div>
+                </li>
+
+                <!-- Download -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-download"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Download</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/download/downloads.html">Latest Release</a>
+                        <a class="dropdown-item"
+                           href="https://github.com/apache/mahout/">Github Repository</a>
+                    </div>
+                </li>
+
+                <!-- Community -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-community"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Community</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                        <a class="dropdown-item"
+                           href="/community/">Overview</a>
+                        <a class="dropdown-item"
+                           href="/community/who-we-are.html">Who We Are</a>
+                        <a class="dropdown-item"
+                           href="/community/mailing-lists.html">Mailing Lists</a>
+                        <a class="dropdown-item"
+                           href="https://issues.apache.org/jira/browse/MAHOUT">Issue Tracker</a>
+                        <a class="dropdown-item"
+                           href="/documentation/developers/">Developer Documentation</a>
+                        <a class="dropdown-item"
+                           href="/community/coc.html">Code of Conduct</a>
+                    </div>
+                </li>
+
+                <!-- News and Events -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="/news-and-events/news.html" id="navbarDropdownMenuLink-news-events"
+                       aria-haspopup="true"
+                       aria-expanded="false">News</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/news-and-events/news.html">News</a>
+                    </div>
+                </li>
+
+
+                <!-- GitHub -->
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
+                </li>
+
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8 markdown-body">
+      <h1 id="6-quantum-entanglement">6. Quantum Entanglement</h1>
+
+<h2 id="61-understanding-entanglement">6.1 Understanding Entanglement</h2>
+
+<p>Quantum entanglement is one of the most fascinating and counterintuitive phenomena in quantum mechanics. When two or more qubits become entangled, the state of one qubit becomes directly related to the state of the other, no matter how far apart they are. This means that measuring one qubit instantly determines the state of the other, even if they are light-years apart.</p>
+
+<h3 id="key-concepts">Key Concepts:</h3>
+<ul>
+  <li><strong>Entangled States</strong>: A quantum state of two or more qubits that cannot be described independently of each other.</li>
+  <li><strong>Bell States</strong>: Specific examples of maximally entangled quantum states of two qubits.</li>
+  <li><strong>Non-Locality</strong>: The idea that entangled particles can influence each other instantaneously, regardless of distance.</li>
+</ul>
+
+<h2 id="62-entanglement-with-qumat">6.2 Entanglement with <code class="language-plaintext highlighter-rouge">qumat</code></h2>
+
+<p>In this section, we will explore how to create and measure entangled states using the <code class="language-plaintext highlighter-rouge">qumat</code> library. We will start by creating a simple entangled state known as a Bell state, which is a maximally entangled quantum state of two qubits.</p>
+
+<h3 id="example-creating-a-bell-state">Example: Creating a Bell State</h3>
+
+<p>A Bell state can be created by applying a Hadamard gate to the first qubit, followed by a CNOT gate with the first qubit as the control and the second qubit as the target. This results in a state where the two qubits are perfectly correlated.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
+
+<span class="c1"># Initialize the quantum circuit with 2 qubits
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Apply a Hadamard gate to the first qubit
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Apply a CNOT gate with the first qubit as control and the second as target
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Execute the circuit and measure the results
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="expected-output">Expected Output:</h3>
+<p>The output will show the measurement results of the two qubits. Since the qubits are entangled, you should observe that the states of the two qubits are perfectly correlated. For example, if the first qubit is measured as <code class="language-plaintext highlighter-rouge">0</code>, the second qubit will also be <code class="language-plaintext highlighter-rouge">0</code>, and if the first qubit is <code class="language-plaintext highlighter-rouge">1</code>, the second qubit will also be <code class="language-plaintext highlighter-rouge">1</code>.</p>
+
+<h3 id="visualizing-the-circuit">Visualizing the Circuit:</h3>
+<p>You can also visualize the circuit to better understand the sequence of operations:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">qc</span><span class="p">.</span><span class="nf">draw</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="explanation">Explanation:</h3>
+<ul>
+  <li><strong>Hadamard Gate</strong>: Creates a superposition of the first qubit.</li>
+  <li><strong>CNOT Gate</strong>: Entangles the two qubits, creating a Bell state.</li>
+</ul>
+
+<h3 id="621-measuring-entangled-qubits">6.2.1 Measuring Entangled Qubits</h3>
+
+<p>Once the qubits are entangled, measuring one qubit will instantly determine the state of the other. This is a key feature of quantum entanglement and is used in various quantum algorithms and protocols.</p>
+
+<h3 id="example-measuring-entangled-qubits">Example: Measuring Entangled Qubits</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Execute the circuit and measure the results
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="expected-output-1">Expected Output:</h3>
+<p>The output will show the measurement counts for the two qubits. Since the qubits are entangled, the results will show a strong correlation between the states of the two qubits.</p>
+
+<h3 id="622-applications-of-entanglement">6.2.2 Applications of Entanglement</h3>
+
+<p>Quantum entanglement is a fundamental resource in quantum computing and is used in various applications, including:</p>
+<ul>
+  <li><strong>Quantum Teleportation</strong>: Transmitting quantum information from one location to another.</li>
+  <li><strong>Quantum Cryptography</strong>: Securely sharing encryption keys using entangled qubits.</li>
+  <li><strong>Quantum Error Correction</strong>: Protecting quantum information from errors using entangled states.</li>
+</ul>
+
+<h3 id="example-quantum-teleportation">Example: Quantum Teleportation</h3>
+
+<p>Quantum teleportation is a protocol that allows the transfer of quantum information from one qubit to another, even if they are far apart. This is achieved using entanglement and classical communication.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Example implementation of quantum teleportation
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># Create an entangled pair between qubit 1 and qubit 2
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Prepare the qubit to be teleported (qubit 0)
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Perform the teleportation protocol
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">apply_toffoli_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Measure the qubits
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="expected-output-2">Expected Output:</h3>
+<p>The output will show the measurement results, demonstrating that the state of qubit 0 has been successfully teleported to qubit 2.</p>
+
+<h2 id="63-conclusion">6.3 Conclusion</h2>
+
+<p>Quantum entanglement is a powerful and essential concept in quantum computing. By understanding how to create and manipulate entangled states using <code class="language-plaintext highlighter-rouge">qumat</code>, you can begin to explore more advanced quantum algorithms and applications. In the next section, we will delve into quantum algorithms, starting with the Deutsch-Jozsa algorithm.</p>
+
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Qumat Release Banner -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        🚀 Qumat 0.4 Released!
+    </div>
+    <div class="card-body">
+        <p class="mb-2">Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
+        <a href="/download/downloads.html">Download Qumat 0.4 →</a>
+    </div>
+</div>
+
+<!-- Apache Software Foundation Links -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        Apache Software Foundation
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li>
+                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/licenses/">Apache License</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Talks Widget -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        Talks
+    </div>
+    <div class="card-body">
+        <ul class="list mb-0">
+            <li>
+                FOSSY 2024, Portland Oregon - <a href="https://www.youtube.com/watch?v=tgFaUL1wYhY" target="_blank">
+                    QuMat: Apache Mahout's Quantum Computing Interface
+                </a>
+                [<a href="https://www.slideshare.net/slideshow/qumat_-apache-mahout-s-quantum-computing-interface-pptx/272300949" target="_blank">Slides</a>]
+            </li>
+                <li>
+                FOSDEM 2025, Brussels Belgium - <a href="https://mirrors.dotsrc.org/fosdem/2025/k4401/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-.av1.webm" target="_blank">Introducing Qumat!</a>
+                [<a href="https://fosdem.org/2025/schedule/event/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-/" target="_blank">More Info</a>]
+                [<a href="https://fosdem.org/2025/events/attachments/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-/slides/236541/Introdudi_JgkXqqT.pdf" target="_blank">Slides</a>]
+            </li>
+        </ul>
+    </div>
+</div>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2026 <a href="http://www.apache.org/">The Apache Software Foundation</a>, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
+
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+</body>
+</html>

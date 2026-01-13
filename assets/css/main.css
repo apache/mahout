@@ -7450,11 +7450,15 @@ h6 {
 .navbar-mahout {
   border-bottom: 1px solid #e9ecef;
 }
+.navbar-mahout .navbar-nav > .nav-item {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
 .navbar-mahout .navbar-nav > .nav-item > .nav-link {
   font-family: "Maven Pro", Arial, sans-serif;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.2rem;
+  letter-spacing: 0.15rem;
   font-size: 80%;
   color: #212529;
 }
@@ -7462,6 +7466,28 @@ h6 {
   font-size: 1rem;
 }
 .navbar-mahout .navbar-nav > .nav-item > .nav-link:hover {
+  color: #00bcd4;
+}
+.navbar-mahout .dropdown-menu {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+}
+.navbar-mahout .dropdown-menu .dropdown-item {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  color: #212529;
+  transition: all 0.2s ease;
+}
+.navbar-mahout .dropdown-menu .dropdown-item:hover {
+  background-color: rgba(0, 188, 212, 0.1);
+  color: #00bcd4;
+  padding-left: 1.75rem;
+}
+.navbar-mahout .dropdown-menu .dropdown-item:active {
+  background-color: rgba(0, 188, 212, 0.2);
   color: #00bcd4;
 }
 

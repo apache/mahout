@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang=" en ">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    Quantum Circuits
+    
+  </title>
+
+  <meta name="description" content="Distributed Linear Algebra">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/github-markdown.css">
+
+  <!-- Font Awesome -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro:400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i" rel="stylesheet">
+
+  <link rel="canonical" href="http://mahout.apache.org//qumat/quantum-computing-primer/05_quantum_circuits/">
+  <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML">
+    MathJax.Hub.Config({
+      "HTML-CSS": {
+        availableFonts: ["TeX"],
+      },
+      tex2jax: {
+        inlineMath: [['$','$'],["\\(","\\)"]]},
+      displayMath: [ ['$$','$$'], ['\[','\]'] ],
+      TeX: {
+        extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
+        equationNumbers: {
+          autoNumber: "AMS"
+        }
+      },
+      showProcessingMessages: false,
+      messageStyle: "none",
+      imageFont: null,
+      "AssistiveMML": { disabled: true }
+    });
+  </script>
+</head>
+
+<!-- Matomo -->
+<script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(["setDoNotTrack", true]);
+  _paq.push(["disableCookies"]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://analytics.apache.org/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '70']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-mahout">
+
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+          <img src="/assets/mahout-logo-blue.svg" alt="">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ml-auto">
+
+                <!-- About -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-about"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">About</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="https://www.apache.org/foundation/how-it-works.html">Overview of the Apache Software Foundation</a>
+                        <a class="dropdown-item"
+                           href="/about/distributed-matrix-math.html">Overview of Distributed Matrix Math</a>
+                        <a class="dropdown-item"
+                           href="/about/how-to-contribute.html">How to Contribute</a>
+                    </div>
+                </li>
+
+                <!-- Qumat -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-qumat"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Qumat</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/qumat">Overview</a>
+                        <a class="dropdown-item"
+                           href="/qumat/core">Qumat Core</a>
+                        <a class="dropdown-item"
+                           href="/qumat/qdp">QDP (Quantum Data Plane)</a>
+                        <a class="dropdown-item"
+                           href="/qumat/quantum-computing-primer">Quantum Computing Primer</a>
+                        <a class="dropdown-item"
+                           href="/qumat/papers">Papers</a>
+                    </div>
+                </li>
+
+                <!-- Download -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-download"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Download</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/download/downloads.html">Latest Release</a>
+                        <a class="dropdown-item"
+                           href="https://github.com/apache/mahout/">Github Repository</a>
+                    </div>
+                </li>
+
+                <!-- Community -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="" id="navbarDropdownMenuLink-community"
+                       data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">Community</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                        <a class="dropdown-item"
+                           href="/community/">Overview</a>
+                        <a class="dropdown-item"
+                           href="/community/who-we-are.html">Who We Are</a>
+                        <a class="dropdown-item"
+                           href="/community/mailing-lists.html">Mailing Lists</a>
+                        <a class="dropdown-item"
+                           href="https://issues.apache.org/jira/browse/MAHOUT">Issue Tracker</a>
+                        <a class="dropdown-item"
+                           href="/documentation/developers/">Developer Documentation</a>
+                        <a class="dropdown-item"
+                           href="/community/coc.html">Code of Conduct</a>
+                    </div>
+                </li>
+
+                <!-- News and Events -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="/news-and-events/news.html" id="navbarDropdownMenuLink-news-events"
+                       aria-haspopup="true"
+                       aria-expanded="false">News</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="/news-and-events/news.html">News</a>
+                    </div>
+                </li>
+
+
+                <!-- GitHub -->
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/apache/mahout"><i class="fa fa-github"></i></a>
+                </li>
+
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+  <div class="container mt-5 pb-4">
+
+  <div class="row">
+
+    <div class="col-lg-8 markdown-body">
+      <h1 id="5-quantum-circuits">5. Quantum Circuits</h1>
+
+<p>Quantum circuits are the backbone of quantum computing. They are composed of quantum gates that manipulate qubits to perform computations. In this section, we will explore how to build and visualize quantum circuits using the <code class="language-plaintext highlighter-rouge">qumat</code> library.</p>
+
+<h2 id="51-building-quantum-circuits">5.1 Building Quantum Circuits</h2>
+
+<p>A quantum circuit is a sequence of quantum gates applied to qubits. The <code class="language-plaintext highlighter-rouge">qumat</code> library provides a simple and intuitive way to create and manipulate quantum circuits. Let’s start by creating a basic quantum circuit.</p>
+
+<h3 id="example-creating-a-quantum-circuit-with-two-qubits">Example: Creating a Quantum Circuit with Two Qubits</h3>
+
+<p>To create a quantum circuit with two qubits, we first initialize the circuit and then apply gates to the qubits.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
+
+<span class="c1"># Initialize the quantum circuit with 2 qubits
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Apply a Hadamard gate to the first qubit
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Apply a CNOT gate with the first qubit as control and the second qubit as target
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Execute the circuit and get the results
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>In this example, we create a quantum circuit with two qubits. We apply a Hadamard gate to the first qubit, which puts it into a superposition state. Then, we apply a CNOT gate, which entangles the two qubits. Finally, we execute the circuit and print the measurement results.</p>
+
+<h3 id="example-creating-a-bell-state">Example: Creating a Bell State</h3>
+
+<p>A Bell state is a specific type of entangled quantum state. Let’s create a Bell state using <code class="language-plaintext highlighter-rouge">qumat</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
+
+<span class="c1"># Initialize the quantum circuit with 2 qubits
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Apply a Hadamard gate to the first qubit
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Apply a CNOT gate with the first qubit as control and the second qubit as target
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Execute the circuit and get the results
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This code creates a Bell state by applying a Hadamard gate to the first qubit and then a CNOT gate with the first qubit as the control and the second qubit as the target. The result is an entangled state where the measurement outcomes of the two qubits are correlated.</p>
+
+<h2 id="52-visualizing-circuits">5.2 Visualizing Circuits</h2>
+
+<p>Visualizing quantum circuits is an essential part of understanding and debugging quantum algorithms. The <code class="language-plaintext highlighter-rouge">qumat</code> library provides a simple way to draw quantum circuits.</p>
+
+<h3 id="example-drawing-a-quantum-circuit">Example: Drawing a Quantum Circuit</h3>
+
+<p>To visualize a quantum circuit, you can use the <code class="language-plaintext highlighter-rouge">draw</code> method provided by <code class="language-plaintext highlighter-rouge">qumat</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
+
+<span class="c1"># Initialize the quantum circuit with 2 qubits
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Apply a Hadamard gate to the first qubit
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Apply a CNOT gate with the first qubit as control and the second qubit as target
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Draw the circuit
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">draw</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>This code returns a textual representation of the quantum circuit, which you can print with <code class="language-plaintext highlighter-rouge">print(qc.draw())</code> or use programmatically. The visualization shows the sequence of gates applied to the qubits and helps in understanding the structure of the circuit and the flow of quantum information.</p>
+
+<h2 id="53-combining-gates-to-create-complex-circuits">5.3 Combining Gates to Create Complex Circuits</h2>
+
+<p>Quantum circuits can be made more complex by combining multiple gates. Let’s create a more complex circuit that involves multiple gates.</p>
+
+<h3 id="example-creating-a-complex-quantum-circuit">Example: Creating a Complex Quantum Circuit</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">qumat</span> <span class="kn">import</span> <span class="n">QuMat</span>
+
+<span class="c1"># Initialize the quantum circuit with 3 qubits
+</span><span class="n">backend_config</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">backend_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qiskit</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">backend_options</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">simulator_type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">qasm_simulator</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">shots</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}}</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="nc">QuMat</span><span class="p">(</span><span class="n">backend_config</span><span class="p">)</span>
+<span class="n">qc</span><span class="p">.</span><span class="nf">create_empty_circuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># Apply a Hadamard gate to the first qubit
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_hadamard_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Apply a CNOT gate with the first qubit as control and the second qubit as target
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_cnot_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Apply a Toffoli gate with the first and second qubits as controls and the third qubit as target
+</span><span class="n">qc</span><span class="p">.</span><span class="nf">apply_toffoli_gate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Execute the circuit and get the results
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">qc</span><span class="p">.</span><span class="nf">execute_circuit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>In this example, we create a quantum circuit with three qubits. We apply a Hadamard gate to the first qubit, a CNOT gate with the first qubit as control and the second qubit as target, and a Toffoli gate with the first and second qubits as controls and the third qubit as target. This creates a more complex entangled state.</p>
+
+<h2 id="54-summary">5.4 Summary</h2>
+
+<p>In this section, we explored how to build and visualize quantum circuits using the <code class="language-plaintext highlighter-rouge">qumat</code> library. We started with simple circuits and gradually built more complex ones by combining multiple gates. Visualizing these circuits helps in understanding the flow of quantum information and debugging quantum algorithms.</p>
+
+<p>Next, we will dive deeper into quantum entanglement and its applications in quantum computing.</p>
+
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Qumat Release Banner -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        🚀 Qumat 0.4 Released!
+    </div>
+    <div class="card-body">
+        <p class="mb-2">Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
+        <a href="/download/downloads.html">Download Qumat 0.4 →</a>
+    </div>
+</div>
+
+<!-- Apache Software Foundation Links -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        Apache Software Foundation
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li>
+                <a href="https://www.apache.org/foundation/how-it-works.html">Apache Software Foundation</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/licenses/">Apache License</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a>
+            </li>
+            <li>
+                <a href="http://www.apache.org/foundation/thanks.html">Thanks</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Talks Widget -->
+<div class="card mb-4 sidebar">
+    <div class="card-header">
+        Talks
+    </div>
+    <div class="card-body">
+        <ul class="list mb-0">
+            <li>
+                FOSSY 2024, Portland Oregon - <a href="https://www.youtube.com/watch?v=tgFaUL1wYhY" target="_blank">
+                    QuMat: Apache Mahout's Quantum Computing Interface
+                </a>
+                [<a href="https://www.slideshare.net/slideshow/qumat_-apache-mahout-s-quantum-computing-interface-pptx/272300949" target="_blank">Slides</a>]
+            </li>
+                <li>
+                FOSDEM 2025, Brussels Belgium - <a href="https://mirrors.dotsrc.org/fosdem/2025/k4401/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-.av1.webm" target="_blank">Introducing Qumat!</a>
+                [<a href="https://fosdem.org/2025/schedule/event/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-/" target="_blank">More Info</a>]
+                [<a href="https://fosdem.org/2025/events/attachments/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-/slides/236541/Introdudi_JgkXqqT.pdf" target="_blank">Slides</a>]
+            </li>
+        </ul>
+    </div>
+</div>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <footer class="footer bg-light">
+    <div class="container text-center small">
+        Copyright &copy; 2014-2026 <a href="http://www.apache.org/">The Apache Software Foundation</a>, Licensed under the Apache License, Version 2.0.
+    </div>
+</footer>
+
+  <script src="/assets/vendor/jquery/jquery-slim.min.js"></script>
+  <script src="/assets/vendor/popper/popper.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/assets/header.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+</body>
+</html>
