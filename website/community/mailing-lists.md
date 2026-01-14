@@ -53,10 +53,6 @@ to the dev@ mailing list or GitHub issues and discussions, and other people
 who are not on Slack should be given time to respond before any work is
 committed.
 
-To join the ASF Slack workspace, follow the instructions on the
-[ASF Slack](https://s.apache.org/slack-invite) page. Once you have joined,
-look for the `#mahout` channel to participate in real-time conversations.
-
 # IRC
 
 Mahout's IRC channel is **#mahout**. Note that real-time project discussions
