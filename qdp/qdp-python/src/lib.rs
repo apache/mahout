@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
+use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
 use pyo3::prelude::*;
@@ -217,7 +217,7 @@ impl QdpEngine {
     ///     data: Input data - supports:
     ///         - Python list: [1.0, 2.0, 3.0, 4.0]
     ///         - NumPy array: 1D (single sample) or 2D (batch) array
-    ///         - PyTorch tensor: CPU tensor (will be copied to GPU)
+    ///         - PyTorch tensor: CPU float64 tensor (C-contiguous recommended; converted via NumPy view)
     ///         - String path: .parquet, .arrow, .npy file
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
@@ -322,18 +322,44 @@ impl QdpEngine {
         // Check if it's a PyTorch tensor
         if is_pytorch_tensor(data)? {
             validate_tensor(data)?;
-            // NOTE(perf): `tolist()` + `extract()` makes extra copies (Tensor -> Python list -> Vec).
-            // TODO: Follow-up PR can use `numpy()`/buffer protocol (and possibly pinned host memory)
-            // to reduce copy overhead.
+            // PERF: Avoid Tensor -> Python list -> Vec deep copies.
+            //
+            // For CPU tensors, `tensor.detach().numpy()` returns a NumPy view that shares the same
+            // underlying memory (zero-copy) when the tensor is C-contiguous. We can then borrow a
+            // `&[f64]` directly via pyo3-numpy.
             let ndim: usize = data.call_method0("dim")?.extract()?;
+            let numpy_view = data
+                .call_method0("detach")?
+                .call_method0("numpy")
+                .map_err(|_| {
+                    PyRuntimeError::new_err(
+                        "Failed to convert torch.Tensor to NumPy view. Ensure the tensor is on CPU \
+                         and does not require grad (try: tensor = tensor.detach().cpu())",
+                    )
+                })?;
+
+            let array = numpy_view
+                .extract::<PyReadonlyArrayDyn<f64>>()
+                .map_err(|_| {
+                    PyRuntimeError::new_err(
+                        "Failed to extract NumPy view as float64 array. Ensure dtype is float64 \
+                         (try: tensor = tensor.to(torch.float64))",
+                    )
+                })?;
+
+            let data_slice = array.as_slice().map_err(|_| {
+                PyRuntimeError::new_err(
+                    "Tensor must be contiguous (C-order) to get zero-copy slice \
+                     (try: tensor = tensor.contiguous())",
+                )
+            })?;
 
             match ndim {
                 1 => {
                     // 1D tensor: single sample encoding
-                    let vec_data: Vec<f64> = data.call_method0("tolist")?.extract()?;
                     let ptr = self
                         .engine
-                        .encode(&vec_data, num_qubits, encoding_method)
+                        .encode(data_slice, num_qubits, encoding_method)
                         .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
                     return Ok(QuantumTensor {
                         ptr,
@@ -342,17 +368,19 @@ impl QdpEngine {
                 }
                 2 => {
                     // 2D tensor: batch encoding
-                    let shape: Vec<i64> = data.getattr("shape")?.extract()?;
-                    let num_samples = shape[0] as usize;
-                    let sample_size = shape[1] as usize;
-                    let vec_data: Vec<f64> = data
-                        .call_method0("flatten")?
-                        .call_method0("tolist")?
-                        .extract()?;
+                    let shape = array.shape();
+                    if shape.len() != 2 {
+                        return Err(PyRuntimeError::new_err(format!(
+                            "Unsupported tensor shape: {}D. Expected 2D tensor (batch_size, features).",
+                            shape.len()
+                        )));
+                    }
+                    let num_samples = shape[0];
+                    let sample_size = shape[1];
                     let ptr = self
                         .engine
                         .encode_batch(
-                            &vec_data,
+                            data_slice,
                             num_samples,
                             sample_size,
                             num_qubits,

@@ -154,7 +154,7 @@ def test_pytorch_precision_float64():
 
 @pytest.mark.gpu
 def test_encode_tensor_cpu():
-    """Test encoding from CPU PyTorch tensor."""
+    """Test encoding from CPU PyTorch tensor (1D, single sample)."""
     pytest.importorskip("torch")
     import torch
     from _qdp import QdpEngine
@@ -170,6 +170,32 @@ def test_encode_tensor_cpu():
     torch_tensor = torch.from_dlpack(qtensor)
     assert torch_tensor.is_cuda
     assert torch_tensor.shape == (1, 4)
+
+
+@pytest.mark.gpu
+def test_encode_tensor_batch():
+    """Test encoding from CPU PyTorch tensor (2D, batch encoding with zero-copy)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    # Create 2D tensor (batch_size=3, features=4)
+    data = torch.tensor(
+        [[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0], [9.0, 10.0, 11.0, 12.0]],
+        dtype=torch.float64,
+    )
+    assert data.is_contiguous(), "Test tensor should be contiguous for zero-copy"
+
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    # Verify result
+    torch_tensor = torch.from_dlpack(qtensor)
+    assert torch_tensor.is_cuda
+    assert torch_tensor.shape == (3, 4), "Batch encoding should preserve batch size"
 
 
 @pytest.mark.gpu
