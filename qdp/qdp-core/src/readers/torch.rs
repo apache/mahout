@@ -113,12 +113,12 @@ fn read_torch_tensor(path: &Path) -> Result<(Vec<f64>, usize, usize)> {
         ))
     })?;
 
+    let sizes = tensor.size();
+    let (num_samples, sample_size) = parse_shape(&sizes)?;
     let tensor = tensor
         .to_device(Device::Cpu)
         .to_kind(Kind::Double)
         .contiguous();
-    let sizes = tensor.size();
-    let (num_samples, sample_size) = parse_shape(&sizes)?;
 
     let expected = num_samples.checked_mul(sample_size).ok_or_else(|| {
         MahoutError::InvalidInput(format!(
