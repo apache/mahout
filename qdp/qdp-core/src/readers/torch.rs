@@ -29,6 +29,8 @@ use crate::reader::DataReader;
 pub struct TorchReader {
     path: std::path::PathBuf,
     read: bool,
+    num_samples: Option<usize>,
+    sample_size: Option<usize>,
 }
 
 impl TorchReader {
@@ -59,6 +61,8 @@ impl TorchReader {
         Ok(Self {
             path: path.to_path_buf(),
             read: false,
+            num_samples: None,
+            sample_size: None,
         })
     }
 }
@@ -74,7 +78,10 @@ impl DataReader for TorchReader {
 
         #[cfg(feature = "pytorch")]
         {
-            read_torch_tensor(&self.path)
+            let (data, num_samples, sample_size) = read_torch_tensor(&self.path)?;
+            self.num_samples = Some(num_samples);
+            self.sample_size = Some(sample_size);
+            Ok((data, num_samples, sample_size))
         }
 
         #[cfg(not(feature = "pytorch"))]
@@ -86,11 +93,11 @@ impl DataReader for TorchReader {
     }
 
     fn get_sample_size(&self) -> Option<usize> {
-        None
+        self.sample_size
     }
 
     fn get_num_samples(&self) -> Option<usize> {
-        None
+        self.num_samples
     }
 }
 
