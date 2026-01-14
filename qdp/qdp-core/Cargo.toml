@@ -26,3 +26,6 @@ name = "qdp_core"
 [features]
 default = []
 observability = ["nvtx"]
+
+[dev-dependencies]
+approx = "0.5.1"
