@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use approx::assert_relative_eq;
 use qdp_core::MahoutError;
 use qdp_core::preprocessing::Preprocessor;
 
@@ -53,8 +54,8 @@ fn test_validate_input_empty_data() {
 
 #[test]
 fn test_validate_input_data_too_large() {
-    let data = vec![1.0, 0.0, 0.0];
-    let result = Preprocessor::validate_input(&data, 1);
+    let data = vec![1.0, 0.0, 0.0]; // 3 elements
+    let result = Preprocessor::validate_input(&data, 1); // max size 2^1 = 2
     assert!(
         matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("exceeds state vector size"))
     );
@@ -63,7 +64,7 @@ fn test_validate_input_data_too_large() {
 #[test]
 fn test_validate_input_allows_partial_state() {
     let data = vec![0.5, -0.5, 0.25];
-    assert!(Preprocessor::validate_input(&data, 3).is_ok());
+    assert!(Preprocessor::validate_input(&data, 3).is_ok()); // state vector can hold up to 8 elements
 }
 
 #[test]
@@ -76,11 +77,11 @@ fn test_validate_input_max_qubits_boundary() {
 fn test_calculate_l2_norm_success() {
     let data = vec![3.0, 4.0];
     let norm = Preprocessor::calculate_l2_norm(&data).unwrap();
-    assert!((norm - 5.0).abs() < 1e-10);
+    assert_relative_eq!(norm, 5.0);
 
     let data = vec![1.0, 1.0];
     let norm = Preprocessor::calculate_l2_norm(&data).unwrap();
-    assert!((norm - 2.0_f64.sqrt()).abs() < 1e-10);
+    assert_relative_eq!(norm, 2.0_f64.sqrt());
 }
 
 #[test]
@@ -94,7 +95,7 @@ fn test_calculate_l2_norm_zero() {
 fn test_calculate_l2_norm_mixed_signs() {
     let data = vec![-3.0, 4.0];
     let norm = Preprocessor::calculate_l2_norm(&data).unwrap();
-    assert!((norm - 5.0).abs() < 1e-10);
+    assert_relative_eq!(norm, 5.0);
 }
 
 #[test]
@@ -103,7 +104,7 @@ fn test_calculate_l2_norm_matches_sequential_sum() {
     let norm_parallel = Preprocessor::calculate_l2_norm(&data).unwrap();
 
     let norm_sequential = data.iter().map(|x| x * x).sum::<f64>().sqrt();
-    assert!((norm_parallel - norm_sequential).abs() < 1e-10);
+    assert_relative_eq!(norm_parallel, norm_sequential);
 }
 
 #[test]
@@ -147,6 +148,6 @@ fn test_calculate_batch_l2_norms_success() {
     let batch_data = vec![3.0, 4.0, 5.0, 12.0];
     let norms = Preprocessor::calculate_batch_l2_norms(&batch_data, 2, 2).unwrap();
     assert_eq!(norms.len(), 2);
-    assert!((norms[0] - 5.0).abs() < 1e-10); // sqrt(3^2 + 4^2) = 5
-    assert!((norms[1] - 13.0).abs() < 1e-10); // sqrt(5^2 + 12^2) = 13
+    assert_relative_eq!(norms[0], 5.0); // sqrt(3^2 + 4^2) = 5
+    assert_relative_eq!(norms[1], 13.0); // sqrt(5^2 + 12^2) = 13
 }
