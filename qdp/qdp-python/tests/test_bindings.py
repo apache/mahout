@@ -19,6 +19,11 @@
 import pytest
 import _qdp
 
+TEST_DATA_1D = [1.0, 2.0, 3.0, 4.0]
+TEST_DATA_1D_NORMALIZED = [0.5, 0.5, 0.5, 0.5]
+NUM_QUBITS = 2
+SAMPLE_SIZE = 4  # 2^NUM_QUBITS
+
 
 def _has_multi_gpu():
     """Check if multiple GPUs are available via PyTorch."""
@@ -28,6 +33,22 @@ def _has_multi_gpu():
         return torch.cuda.is_available() and torch.cuda.device_count() >= 2
     except ImportError:
         return False
+
+
+@pytest.fixture
+def engine():
+    """Create QdpEngine instance for testing."""
+    from _qdp import QdpEngine
+
+    return QdpEngine(0)
+
+
+@pytest.fixture
+def engine_float64():
+    """Create QdpEngine instance with float64 precision."""
+    from _qdp import QdpEngine
+
+    return QdpEngine(0, precision="float64")
 
 
 def test_import():
@@ -43,25 +64,16 @@ def test_import():
 
 
 @pytest.mark.gpu
-def test_encode():
+def test_encode(engine):
     """Test encoding returns QuantumTensor (requires GPU)."""
-    from _qdp import QdpEngine
-
-    engine = QdpEngine(0)
-    data = [0.5, 0.5, 0.5, 0.5]
-    qtensor = engine.encode(data, 2, "amplitude")
+    qtensor = engine.encode(TEST_DATA_1D_NORMALIZED, NUM_QUBITS, "amplitude")
     assert isinstance(qtensor, _qdp.QuantumTensor)
 
 
 @pytest.mark.gpu
-def test_dlpack_device():
+def test_dlpack_device(engine):
     """Test __dlpack_device__ method (requires GPU)."""
-    from _qdp import QdpEngine
-
-    engine = QdpEngine(0)
-    data = [1.0, 2.0, 3.0, 4.0]
-    qtensor = engine.encode(data, 2, "amplitude")
-
+    qtensor = engine.encode(TEST_DATA_1D, NUM_QUBITS, "amplitude")
     device_info = qtensor.__dlpack_device__()
     assert device_info == (2, 0), "Expected (2, 0) for CUDA device 0"
 
@@ -76,149 +88,151 @@ def test_dlpack_device_id_non_zero():
     import torch
     from _qdp import QdpEngine
 
-    # Test with device_id=1 (second GPU)
     device_id = 1
     engine = QdpEngine(device_id)
-    data = [1.0, 2.0, 3.0, 4.0]
-    qtensor = engine.encode(data, 2, "amplitude")
+    qtensor = engine.encode(TEST_DATA_1D, NUM_QUBITS, "amplitude")
 
     device_info = qtensor.__dlpack_device__()
-    assert device_info == (
-        2,
-        device_id,
-    ), f"Expected (2, {device_id}) for CUDA device {device_id}"
+    assert device_info == (2, device_id), (
+        f"Expected (2, {device_id}) for CUDA device {device_id}"
+    )
 
-    # Verify PyTorch integration works with non-zero device_id
     torch_tensor = torch.from_dlpack(qtensor)
     assert torch_tensor.is_cuda
-    assert torch_tensor.device.index == device_id, (
-        f"PyTorch tensor should be on device {device_id}"
-    )
+    assert torch_tensor.device.index == device_id
 
 
 @pytest.mark.gpu
-def test_dlpack_single_use():
+def test_dlpack_single_use(engine):
     """Test that __dlpack__ can only be called once (requires GPU)."""
     import torch
-    from _qdp import QdpEngine
 
-    engine = QdpEngine(0)
-    data = [1.0, 2.0, 3.0, 4.0]
-    qtensor = engine.encode(data, 2, "amplitude")
-
-    # First call succeeds - let PyTorch consume it
+    qtensor = engine.encode(TEST_DATA_1D, NUM_QUBITS, "amplitude")
     _ = torch.from_dlpack(qtensor)
 
-    # Second call should fail because tensor was already consumed
-    qtensor2 = engine.encode(data, 2, "amplitude")
-    _ = qtensor2.__dlpack__()  # Consume the capsule
+    qtensor2 = engine.encode(TEST_DATA_1D, NUM_QUBITS, "amplitude")
+    _ = qtensor2.__dlpack__()
     with pytest.raises(RuntimeError, match="already consumed"):
         qtensor2.__dlpack__()
 
 
 @pytest.mark.gpu
-def test_pytorch_integration():
+def test_pytorch_integration(engine):
     """Test PyTorch integration via DLPack (requires GPU and PyTorch)."""
     pytest.importorskip("torch")
     import torch
-    from _qdp import QdpEngine
 
-    engine = QdpEngine(0)
-    data = [1.0, 2.0, 3.0, 4.0]
-    qtensor = engine.encode(data, 2, "amplitude")
-
-    # Convert to PyTorch tensor using DLPack
+    qtensor = engine.encode(TEST_DATA_1D, NUM_QUBITS, "amplitude")
     torch_tensor = torch.from_dlpack(qtensor)
+
     assert torch_tensor.is_cuda
     assert torch_tensor.device.index == 0
     assert torch_tensor.dtype == torch.complex64
-
-    # Verify shape (2 qubits = 2^2 = 4 elements) as 2D for consistency: [1, 4]
-    assert torch_tensor.shape == (1, 4)
+    assert torch_tensor.shape == (1, SAMPLE_SIZE)
 
 
 @pytest.mark.gpu
-def test_pytorch_precision_float64():
+def test_pytorch_precision_float64(engine_float64):
     """Verify optional float64 precision produces complex128 tensors."""
     pytest.importorskip("torch")
     import torch
-    from _qdp import QdpEngine
 
-    engine = QdpEngine(0, precision="float64")
-    data = [1.0, 2.0, 3.0, 4.0]
-    qtensor = engine.encode(data, 2, "amplitude")
-
+    qtensor = engine_float64.encode(TEST_DATA_1D, NUM_QUBITS, "amplitude")
     torch_tensor = torch.from_dlpack(qtensor)
     assert torch_tensor.dtype == torch.complex128
 
 
 @pytest.mark.gpu
-def test_encode_tensor_cpu():
-    """Test encoding from CPU PyTorch tensor (1D, single sample)."""
+def test_encode_pytorch_tensor(engine):
+    """Test encoding from CPU PyTorch tensor (1D and 2D)."""
     pytest.importorskip("torch")
     import torch
-    from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
 
-    engine = QdpEngine(0)
-    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64)
-    qtensor = engine.encode(data, 2, "amplitude")
+    # Test 1D tensor
+    data_1d = torch.tensor(TEST_DATA_1D, dtype=torch.float64)
+    qtensor_1d = engine.encode(data_1d, NUM_QUBITS, "amplitude")
+    torch_tensor_1d = torch.from_dlpack(qtensor_1d)
+    assert torch_tensor_1d.is_cuda and torch_tensor_1d.shape == (1, SAMPLE_SIZE)
 
-    # Verify result
-    torch_tensor = torch.from_dlpack(qtensor)
-    assert torch_tensor.is_cuda
-    assert torch_tensor.shape == (1, 4)
-
-
-@pytest.mark.gpu
-def test_encode_tensor_batch():
-    """Test encoding from CPU PyTorch tensor (2D, batch encoding with zero-copy)."""
-    pytest.importorskip("torch")
-    import torch
-    from _qdp import QdpEngine
-
-    if not torch.cuda.is_available():
-        pytest.skip("GPU required for QdpEngine")
-
-    engine = QdpEngine(0)
-    # Create 2D tensor (batch_size=3, features=4)
-    data = torch.tensor(
-        [[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0], [9.0, 10.0, 11.0, 12.0]],
-        dtype=torch.float64,
-    )
-    assert data.is_contiguous(), "Test tensor should be contiguous for zero-copy"
-
-    qtensor = engine.encode(data, 2, "amplitude")
-
-    # Verify result
-    torch_tensor = torch.from_dlpack(qtensor)
-    assert torch_tensor.is_cuda
-    assert torch_tensor.shape == (3, 4), "Batch encoding should preserve batch size"
+    # Test 2D tensor
+    data_2d = torch.randn(3, SAMPLE_SIZE, dtype=torch.float64)
+    qtensor_2d = engine.encode(data_2d, NUM_QUBITS, "amplitude")
+    torch_tensor_2d = torch.from_dlpack(qtensor_2d)
+    assert torch_tensor_2d.is_cuda and torch_tensor_2d.shape == (3, SAMPLE_SIZE)
 
 
 @pytest.mark.gpu
-def test_encode_errors():
+def test_encode_errors(engine):
     """Test error handling for unified encode method."""
     pytest.importorskip("torch")
     import torch
-    from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
 
-    engine = QdpEngine(0)
-
-    # Test unsupported file format
     with pytest.raises(RuntimeError, match="Unsupported file format"):
-        engine.encode("data.txt", 2, "amplitude")
+        engine.encode("data.txt", NUM_QUBITS, "amplitude")
 
-    # Test unsupported data type
     with pytest.raises(RuntimeError, match="Unsupported data type"):
-        engine.encode({"key": "value"}, 2, "amplitude")
+        engine.encode({"key": "value"}, NUM_QUBITS, "amplitude")
 
-    # Test GPU tensor input (should fail as only CPU is supported)
     gpu_tensor = torch.tensor([1.0, 2.0], device="cuda:0")
     with pytest.raises(RuntimeError, match="Only CPU tensors are currently supported"):
         engine.encode(gpu_tensor, 1, "amplitude")
+
+
+@pytest.mark.gpu
+def test_encode_numpy_array(engine):
+    """Test encoding from NumPy array (1D and 2D)."""
+    import torch
+    import numpy as np
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    # Test 1D array
+    data_1d = np.array(TEST_DATA_1D, dtype=np.float64)
+    qtensor_1d = engine.encode(
+        data_1d, num_qubits=NUM_QUBITS, encoding_method="amplitude"
+    )
+    torch_tensor_1d = torch.from_dlpack(qtensor_1d)
+    assert torch_tensor_1d.is_cuda and torch_tensor_1d.shape == (1, SAMPLE_SIZE)
+
+    # Test 2D array
+    data_2d = np.random.randn(5, SAMPLE_SIZE).astype(np.float64)
+    qtensor_2d = engine.encode(
+        data_2d, num_qubits=NUM_QUBITS, encoding_method="amplitude"
+    )
+    torch_tensor_2d = torch.from_dlpack(qtensor_2d)
+    assert torch_tensor_2d.is_cuda and torch_tensor_2d.shape == (5, SAMPLE_SIZE)
+
+
+@pytest.mark.gpu
+def test_encode_pathlib_path(engine):
+    """Test encoding from pathlib.Path object."""
+    from pathlib import Path
+    import tempfile
+    import os
+    import numpy as np
+    import torch
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    data = np.random.randn(2, SAMPLE_SIZE).astype(np.float64)
+    with tempfile.NamedTemporaryFile(suffix=".npy", delete=False) as f:
+        npy_path = f.name
+
+    try:
+        np.save(npy_path, data)
+        qtensor = engine.encode(
+            Path(npy_path), num_qubits=NUM_QUBITS, encoding_method="amplitude"
+        )
+        torch_tensor = torch.from_dlpack(qtensor)
+        assert torch_tensor.is_cuda and torch_tensor.shape == (2, SAMPLE_SIZE)
+    finally:
+        if os.path.exists(npy_path):
+            os.remove(npy_path)
