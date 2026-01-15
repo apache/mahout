@@ -36,6 +36,10 @@ testpaths = ["testing"]
 python_files = "test_*.py"
 python_functions = "test_*"
 addopts = ["-v", "--tb=short"]
+markers = [
+    "gpu: marks tests as requiring GPU and _qdp extension (auto-skipped if unavailable)",
+    "slow: marks tests as slow running",
+]
 
 [build-system]
 requires = ["hatchling"]
