@@ -79,6 +79,18 @@ impl Preprocessor {
             ));
         }
 
+        if norm.is_nan() {
+            return Err(MahoutError::InvalidInput(
+                "Input data contains NaN (Not a Number) values".to_string(),
+            ));
+        }
+
+        if norm.is_infinite() {
+            return Err(MahoutError::InvalidInput(
+                "Input data contains Infinity values".to_string(),
+            ));
+        }
+
         Ok(norm)
     }
 
@@ -140,6 +152,19 @@ impl Preprocessor {
                 if norm == 0.0 {
                     return Err(MahoutError::InvalidInput(format!(
                         "Sample {} has zero norm",
+                        i
+                    )));
+                }
+                // Check result for NaN and Infinity
+                if norm.is_nan() {
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Sample {} produced NaN norm",
+                        i
+                    )));
+                }
+                if norm.is_infinite() {
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Sample {} produced Infinity norm",
                         i
                     )));
                 }
