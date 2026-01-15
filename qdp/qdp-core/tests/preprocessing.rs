@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use approx::assert_relative_eq;
 use qdp_core::MahoutError;
 use qdp_core::preprocessing::Preprocessor;
 
@@ -76,11 +77,11 @@ fn test_validate_input_max_qubits_boundary() {
 fn test_calculate_l2_norm_success() {
     let data = vec![3.0, 4.0];
     let norm = Preprocessor::calculate_l2_norm(&data).unwrap();
-    assert!((norm - 5.0).abs() < 1e-10);
+    assert_relative_eq!(norm, 5.0);
 
     let data = vec![1.0, 1.0];
     let norm = Preprocessor::calculate_l2_norm(&data).unwrap();
-    assert!((norm - 2.0_f64.sqrt()).abs() < 1e-10);
+    assert_relative_eq!(norm, 2.0_f64.sqrt());
 }
 
 #[test]
@@ -94,7 +95,7 @@ fn test_calculate_l2_norm_zero() {
 fn test_calculate_l2_norm_mixed_signs() {
     let data = vec![-3.0, 4.0];
     let norm = Preprocessor::calculate_l2_norm(&data).unwrap();
-    assert!((norm - 5.0).abs() < 1e-10);
+    assert_relative_eq!(norm, 5.0);
 }
 
 #[test]
@@ -103,5 +104,50 @@ fn test_calculate_l2_norm_matches_sequential_sum() {
     let norm_parallel = Preprocessor::calculate_l2_norm(&data).unwrap();
 
     let norm_sequential = data.iter().map(|x| x * x).sum::<f64>().sqrt();
-    assert!((norm_parallel - norm_sequential).abs() < 1e-10);
+    assert_relative_eq!(norm_parallel, norm_sequential);
+}
+
+#[test]
+fn test_calculate_l2_norm_invalid_values() {
+    let cases = [
+        ("NaN", f64::NAN, "NaN"),
+        ("+Inf", f64::INFINITY, "Infinity"),
+        ("-Inf", f64::NEG_INFINITY, "Infinity"),
+    ];
+
+    for (label, bad_value, expected_fragment) in cases {
+        let data = vec![1.0, bad_value, 3.0];
+        let result = Preprocessor::calculate_l2_norm(&data);
+        assert!(
+            matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains(expected_fragment)),
+            "case {label} did not produce expected error"
+        );
+    }
+}
+
+#[test]
+fn test_calculate_batch_l2_norms_invalid_values() {
+    let cases = [
+        ("NaN", f64::NAN, "NaN"),
+        ("+Inf", f64::INFINITY, "Infinity"),
+        ("-Inf", f64::NEG_INFINITY, "Infinity"),
+    ];
+
+    for (label, bad_value, expected_fragment) in cases {
+        let batch_data = vec![1.0, 2.0, bad_value, 4.0];
+        let result = Preprocessor::calculate_batch_l2_norms(&batch_data, 2, 2);
+        assert!(
+            matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains(expected_fragment)),
+            "case {label} did not produce expected error"
+        );
+    }
+}
+
+#[test]
+fn test_calculate_batch_l2_norms_success() {
+    let batch_data = vec![3.0, 4.0, 5.0, 12.0];
+    let norms = Preprocessor::calculate_batch_l2_norms(&batch_data, 2, 2).unwrap();
+    assert_eq!(norms.len(), 2);
+    assert_relative_eq!(norms[0], 5.0); // sqrt(3^2 + 4^2) = 5
+    assert_relative_eq!(norms[1], 13.0); // sqrt(5^2 + 12^2) = 13
 }

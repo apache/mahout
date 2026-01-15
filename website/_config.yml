@@ -59,8 +59,6 @@ exclude:
 #   - vendor/gems/
 #   - vendor/ruby/
 
-collections_dir: qumat/papers
-
 collections:
   papers:
     output: true

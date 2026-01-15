@@ -44,13 +44,19 @@ questions and problems.
 * [Subscribe](mailto:commits-subscribe@mahout.apache.org)
 * [Unsubscribe](mailto:commits-unsubscribe@mahout.apache.org)
 
+# Slack
+
+Most discussions now happen on the mailing lists and via GitHub issues and
+discussions. It is a logged channel. Please keep in mind that it is for
+discussion purposes only and that (pseudo)decisions should be brought back
+to the dev@ mailing list or GitHub issues and discussions, and other people
+who are not on Slack should be given time to respond before any work is
+committed.
+
 # IRC
 
-Mahout's IRC channel is **#mahout**. It is a logged channel. Please keep in
-mind that it is for discussion purposes only and that (pseudo)decisions
-should be brought back to the dev@ mailing list or GitHub issues, and other
-people who are not on IRC should be given time to respond before any work
-is committed.
+Mahout's IRC channel is **#mahout**. Note that real-time project discussions
+primarily take place on Slack now (see the Slack section above).
 
 # Archives
 

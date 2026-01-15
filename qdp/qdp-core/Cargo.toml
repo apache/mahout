@@ -28,3 +28,6 @@ name = "qdp_core"
 default = []
 observability = ["nvtx"]
 pytorch = ["tch"]
+
+[dev-dependencies]
+approx = "0.5.1"
