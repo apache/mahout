@@ -15,6 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -23,6 +26,7 @@ jobs:
           command: build
           args: --release --out dist
           sccache: 'true'
+          manylinux: auto
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
