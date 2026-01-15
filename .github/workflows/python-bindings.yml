@@ -1,5 +1,4 @@
 name: Python Bindings
-
 on:
   push:
     branches:
@@ -15,21 +14,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
+      
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           python-version: '3.11'
-
-      - name: Build PyO3 bindings
-        working-directory: qdp/qdp-python
-        run: |
-          uv sync --group dev
-          uv run maturin develop
-
+      
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: qdp/qdp-python
+          command: build
+          args: --release --out dist
+          sccache: 'true'
+      
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
           name: python-wheel
-          path: qdp/qdp-python/target/wheels/*.whl
+          path: qdp/qdp-python/dist/*.whl
