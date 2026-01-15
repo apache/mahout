@@ -18,7 +18,13 @@ dependencies = [
 qdp = ["qumat-qdp"]
 
 [dependency-groups]
-dev = ["pytest>=8.1.1", "ruff>=0.13.1", "pre-commit>=3.0.0"]
+dev = ["pytest>=9.0.1", "ruff>=0.13.1", "pre-commit>=3.0.0"]
+qdp-dev = [
+    "maturin>=1.10.2",
+    "patchelf>=0.17.2.4",
+    "torch>=2.2",
+    "numpy>=1.24,<2.0",
+]
 
 [tool.uv]
 # Override to fix amazon-braket-default-simulator dependency on old numba/llvmlite
