@@ -31,8 +31,8 @@ import importlib.util
 import pytest
 
 # Check if QDP extension is available at module load time
-_qdp_spec = importlib.util.find_spec("_qdp")
-_QDP_AVAILABLE = _qdp_spec is not None
+_QDP_SPEC = importlib.util.find_spec("_qdp")
+_QDP_AVAILABLE = _QDP_SPEC is not None
 _QDP_IMPORT_ERROR = None if _QDP_AVAILABLE else "No module named '_qdp'"
 
 
