@@ -21,7 +21,7 @@ import pytest
 
 from qumat import QuMat
 
-from .utils import TESTING_BACKENDS, get_backend_config
+from ..utils import TESTING_BACKENDS, get_backend_config
 
 
 def get_state_probability(results, target_state, num_qubits=1):

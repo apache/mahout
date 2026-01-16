@@ -17,7 +17,7 @@
 
 import pytest
 
-from .utils import TESTING_BACKENDS, get_backend_config
+from ..utils import TESTING_BACKENDS, get_backend_config
 from qumat import QuMat
 
 

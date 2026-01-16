@@ -19,8 +19,8 @@ import pytest
 import numpy as np
 from importlib import import_module
 
-from .utils import TESTING_BACKENDS
-from .utils.qumat_helpers import get_qumat_example_final_state_vector
+from ..utils import TESTING_BACKENDS
+from ..utils.qumat_helpers import get_qumat_example_final_state_vector
 
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)

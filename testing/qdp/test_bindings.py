@@ -257,3 +257,110 @@ def test_encode_errors():
     gpu_tensor = torch.tensor([1.0, 2.0], device="cuda:0")
     with pytest.raises(RuntimeError, match="Only CPU tensors are currently supported"):
         engine.encode(gpu_tensor, 1, "amplitude")
+
+
+@pytest.mark.gpu
+def test_basis_encode_basic():
+    """Test basic basis encoding (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Encode basis state |0⟩ (index 0 with 2 qubits)
+    qtensor = engine.encode([0.0], 2, "basis")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.is_cuda
+    assert torch_tensor.shape == (1, 4)  # 2^2 = 4 amplitudes
+
+    # |0⟩ = [1, 0, 0, 0]
+    expected = torch.tensor([[1.0 + 0j, 0.0 + 0j, 0.0 + 0j, 0.0 + 0j]], device="cuda:0")
+    assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype))
+
+
+@pytest.mark.gpu
+def test_basis_encode_nonzero_index():
+    """Test basis encoding with non-zero index (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Encode basis state |3⟩ = |11⟩ (index 3 with 2 qubits)
+    qtensor = engine.encode([3.0], 2, "basis")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    # |3⟩ = [0, 0, 0, 1]
+    expected = torch.tensor([[0.0 + 0j, 0.0 + 0j, 0.0 + 0j, 1.0 + 0j]], device="cuda:0")
+    assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype))
+
+
+@pytest.mark.gpu
+def test_basis_encode_3_qubits():
+    """Test basis encoding with 3 qubits (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Encode basis state |5⟩ = |101⟩ (index 5 with 3 qubits)
+    qtensor = engine.encode([5.0], 3, "basis")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (1, 8)  # 2^3 = 8 amplitudes
+
+    # |5⟩ should have amplitude 1 at index 5
+    # Check that only index 5 is non-zero
+    host_tensor = torch_tensor.cpu().squeeze()
+    assert host_tensor[5].real == 1.0
+    assert host_tensor[5].imag == 0.0
+    for i in range(8):
+        if i != 5:
+            assert host_tensor[i].real == 0.0
+            assert host_tensor[i].imag == 0.0
+
+
+@pytest.mark.gpu
+def test_basis_encode_errors():
+    """Test error handling for basis encoding (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Test index out of bounds (2^2 = 4, so max index is 3)
+    with pytest.raises(RuntimeError, match="exceeds state vector size"):
+        engine.encode([4.0], 2, "basis")
+
+    # Test negative index
+    with pytest.raises(RuntimeError, match="non-negative"):
+        engine.encode([-1.0], 2, "basis")
+
+    # Test non-integer index
+    with pytest.raises(RuntimeError, match="integer"):
+        engine.encode([1.5], 2, "basis")
+
+    # Test empty input
+    with pytest.raises(RuntimeError, match="empty"):
+        engine.encode([], 2, "basis")
+
+    # Test multiple values (basis expects exactly 1)
+    with pytest.raises(RuntimeError, match="expects exactly 1"):
+        engine.encode([0.0, 1.0], 2, "basis")
