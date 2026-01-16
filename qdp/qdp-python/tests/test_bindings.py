@@ -199,6 +199,41 @@ def test_encode_tensor_batch():
 
 
 @pytest.mark.gpu
+def test_encode_from_tensorflow_binding():
+    """Test TensorFlow TensorProto binding path (requires GPU and TensorFlow)."""
+    pytest.importorskip("torch")
+    tf = pytest.importorskip("tensorflow")
+    import numpy as np
+    import torch
+    from _qdp import QdpEngine
+    import os
+    import tempfile
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    num_qubits = 2
+    sample_size = 2**num_qubits
+
+    data = np.array([[1.0, 2.0, 3.0, 4.0], [0.5, 0.5, 0.5, 0.5]], dtype=np.float64)
+    tensor_proto = tf.make_tensor_proto(data, dtype=tf.float64)
+
+    with tempfile.NamedTemporaryFile(suffix=".pb", delete=False) as f:
+        pb_path = f.name
+        f.write(tensor_proto.SerializeToString())
+
+    try:
+        qtensor = engine.encode_from_tensorflow(pb_path, num_qubits, "amplitude")
+        torch_tensor = torch.from_dlpack(qtensor)
+        assert torch_tensor.is_cuda
+        assert torch_tensor.shape == (2, sample_size)
+    finally:
+        if os.path.exists(pb_path):
+            os.remove(pb_path)
+
+
+@pytest.mark.gpu
 def test_encode_errors():
     """Test error handling for unified encode method."""
     pytest.importorskip("torch")
