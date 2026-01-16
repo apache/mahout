@@ -549,7 +549,6 @@ int convert_state_to_float(
 
 // TODO: Future encoding methods:
 // - launch_angle_encode (angle encoding)
-// - launch_basis_encode (basis encoding)
 // - launch_iqp_encode (IQP encoding)
 
 } // extern "C"

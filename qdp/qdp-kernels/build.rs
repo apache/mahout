@@ -27,8 +27,9 @@ use std::env;
 use std::process::Command;
 
 fn main() {
-    // Tell Cargo to rerun this script if the kernel source changes
+    // Tell Cargo to rerun this script if the kernel sources change
     println!("cargo:rerun-if-changed=src/amplitude.cu");
+    println!("cargo:rerun-if-changed=src/basis.cu");
 
     // Check if CUDA is available by looking for nvcc
     let has_cuda = Command::new("nvcc").arg("--version").output().is_ok();
@@ -81,5 +82,6 @@ fn main() {
         // .flag("-gencode")
         // .flag("arch=compute_89,code=sm_89")
         .file("src/amplitude.cu")
+        .file("src/basis.cu")
         .compile("kernels");
 }
