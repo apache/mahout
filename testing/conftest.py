@@ -17,7 +17,14 @@
 
 """Shared pytest configuration and fixtures for all tests."""
 
-import pytest
+# Skip qdp tests if dependencies are not available
+collect_ignore_glob = []
+
+try:
+    import _qdp  # noqa: F401
+    import torch  # noqa: F401
+except ImportError:
+    collect_ignore_glob.append("qdp/*.py")
 
 
 def pytest_configure(config):
