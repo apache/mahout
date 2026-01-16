@@ -15,14 +15,27 @@
 # limitations under the License.
 #
 import qiskit
-from qiskit_aer import Aer, AerSimulator
+from qiskit_aer import AerSimulator
 
 
 def initialize_backend(backend_config):
     backend_options = backend_config["backend_options"]
     simulator_type = backend_options["simulator_type"]
     shots = backend_options["shots"]
-    backend = Aer.get_backend(simulator_type)
+
+    # Map legacy simulator types to AerSimulator methods
+    simulator_methods = {
+        "aer_simulator": "automatic",
+        "statevector_simulator": "statevector",
+        "qasm_simulator": "automatic",
+        "unitary_simulator": "unitary",
+    }
+
+    if simulator_type in simulator_methods:
+        backend = AerSimulator(method=simulator_methods[simulator_type])
+    else:
+        backend = AerSimulator(method=simulator_type)
+
     backend.shots = shots
     return backend
 
