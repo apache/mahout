@@ -17,6 +17,8 @@
 // Basis encoding: map integers to computational basis states
 
 use super::QuantumEncoder;
+#[cfg(target_os = "linux")]
+use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
 use cudarc::driver::CudaDevice;
@@ -113,7 +115,7 @@ impl QuantumEncoder for BasisEncoder {
         #[cfg(not(target_os = "linux"))]
         {
             Err(MahoutError::Cuda(
-                "CUDA unavailable (non-Linux)".to_string(),
+                "CUDA unavailable (non-Linux stub)".to_string(),
             ))
         }
     }
@@ -294,25 +296,5 @@ impl BasisEncoder {
         }
 
         Ok(index)
-    }
-}
-
-/// Convert CUDA error code to human-readable string
-#[cfg(target_os = "linux")]
-fn cuda_error_to_string(code: i32) -> &'static str {
-    match code {
-        0 => "cudaSuccess",
-        1 => "cudaErrorInvalidValue",
-        2 => "cudaErrorMemoryAllocation",
-        3 => "cudaErrorInitializationError",
-        4 => "cudaErrorLaunchFailure",
-        6 => "cudaErrorInvalidDevice",
-        8 => "cudaErrorInvalidConfiguration",
-        11 => "cudaErrorInvalidHostPointer",
-        12 => "cudaErrorInvalidDevicePointer",
-        17 => "cudaErrorInvalidMemcpyDirection",
-        30 => "cudaErrorUnknown",
-        999 => "CUDA unavailable (non-Linux stub)",
-        _ => "Unknown CUDA error",
     }
 }

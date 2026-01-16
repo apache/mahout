@@ -19,6 +19,8 @@
 use std::sync::Arc;
 
 use super::QuantumEncoder;
+#[cfg(target_os = "linux")]
+use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
 use crate::gpu::pipeline::run_dual_stream_pipeline;
@@ -168,7 +170,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         #[cfg(not(target_os = "linux"))]
         {
             Err(MahoutError::Cuda(
-                "CUDA unavailable (non-Linux)".to_string(),
+                "CUDA unavailable (non-Linux stub)".to_string(),
             ))
         }
     }
@@ -450,24 +452,5 @@ impl AmplitudeEncoder {
         }
 
         Ok(inv_norm)
-    }
-}
-
-/// Convert CUDA error code to human-readable string
-#[cfg(target_os = "linux")]
-fn cuda_error_to_string(code: i32) -> &'static str {
-    match code {
-        0 => "cudaSuccess",
-        1 => "cudaErrorInvalidValue",
-        2 => "cudaErrorMemoryAllocation",
-        3 => "cudaErrorInitializationError",
-        4 => "cudaErrorLaunchFailure",
-        6 => "cudaErrorInvalidDevice",
-        8 => "cudaErrorInvalidConfiguration",
-        11 => "cudaErrorInvalidHostPointer",
-        12 => "cudaErrorInvalidDevicePointer",
-        17 => "cudaErrorInvalidMemcpyDirection",
-        30 => "cudaErrorUnknown",
-        _ => "Unknown CUDA error",
     }
 }
