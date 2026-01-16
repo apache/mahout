@@ -45,7 +45,8 @@ pub struct BasisEncoder;
 impl QuantumEncoder for BasisEncoder {
     fn encode(
         &self,
-        _device: &Arc<CudaDevice>,
+        #[cfg(target_os = "linux")] device: &Arc<CudaDevice>,
+        #[cfg(not(target_os = "linux"))] _device: &Arc<CudaDevice>,
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
@@ -69,7 +70,7 @@ impl QuantumEncoder for BasisEncoder {
             // Allocate GPU state vector
             let state_vector = {
                 crate::profile_scope!("GPU::Alloc");
-                GpuStateVector::new(_device, num_qubits)?
+                GpuStateVector::new(device, num_qubits)?
             };
 
             let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
@@ -101,7 +102,7 @@ impl QuantumEncoder for BasisEncoder {
 
             {
                 crate::profile_scope!("GPU::Synchronize");
-                _device.synchronize().map_err(|e| {
+                device.synchronize().map_err(|e| {
                     MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e))
                 })?;
             }
@@ -198,6 +199,7 @@ impl QuantumEncoder for BasisEncoder {
                     state_ptr as *mut c_void,
                     num_samples,
                     state_len,
+                    num_qubits as u32,
                     std::ptr::null_mut(), // default stream
                 )
             };
@@ -273,7 +275,7 @@ impl BasisEncoder {
         // Check if the value is an integer
         if value.fract() != 0.0 {
             return Err(MahoutError::InvalidInput(format!(
-                "Basis index must be an integer, got {}",
+                "Basis index must be an integer, got {} (hint: use .round() if needed)",
                 value
             )));
         }
@@ -310,6 +312,7 @@ fn cuda_error_to_string(code: i32) -> &'static str {
         12 => "cudaErrorInvalidDevicePointer",
         17 => "cudaErrorInvalidMemcpyDirection",
         30 => "cudaErrorUnknown",
+        999 => "CUDA unavailable (non-Linux stub)",
         _ => "Unknown CUDA error",
     }
 }

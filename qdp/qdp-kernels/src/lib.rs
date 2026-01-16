@@ -158,6 +158,7 @@ unsafe extern "C" {
         state_batch_d: *mut c_void,
         num_samples: usize,
         state_len: usize,
+        num_qubits: u32,
         stream: *mut c_void,
     ) -> i32;
 
@@ -243,6 +244,7 @@ pub extern "C" fn launch_basis_encode_batch(
     _state_batch_d: *mut c_void,
     _num_samples: usize,
     _state_len: usize,
+    _num_qubits: u32,
     _stream: *mut c_void,
 ) -> i32 {
     999

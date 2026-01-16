@@ -51,18 +51,21 @@ __global__ void basis_encode_batch_kernel(
     const size_t* __restrict__ basis_indices,
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
-    size_t state_len
+    size_t state_len,
+    unsigned int num_qubits
 ) {
     // Grid-stride loop over all elements across all samples
     const size_t total_elements = num_samples * state_len;
     const size_t stride = gridDim.x * blockDim.x;
+    const size_t state_mask = state_len - 1;
 
     for (size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
          global_idx < total_elements;
          global_idx += stride) {
         // Decompose into (sample_idx, element_idx)
-        const size_t sample_idx = global_idx / state_len;
-        const size_t element_idx = global_idx % state_len;
+        // state_len = 2^num_qubits, so division/modulo can use shift/mask
+        const size_t sample_idx = global_idx >> num_qubits;
+        const size_t element_idx = global_idx & state_mask;
 
         // Get basis index for this sample
         const size_t basis_index = basis_indices[sample_idx];
@@ -123,6 +126,7 @@ int launch_basis_encode(
 /// * state_batch_d - Device pointer to output batch state vectors
 /// * num_samples - Number of samples in batch
 /// * state_len - State vector size per sample (2^num_qubits)
+/// * num_qubits - Number of qubits (for bit-shift optimization)
 /// * stream - CUDA stream for async execution
 ///
 /// # Returns
@@ -132,6 +136,7 @@ int launch_basis_encode_batch(
     void* state_batch_d,
     size_t num_samples,
     size_t state_len,
+    unsigned int num_qubits,
     cudaStream_t stream
 ) {
     if (num_samples == 0 || state_len == 0) {
@@ -150,7 +155,8 @@ int launch_basis_encode_batch(
         basis_indices_d,
         state_complex_d,
         num_samples,
-        state_len
+        state_len,
+        num_qubits
     );
 
     return (int)cudaGetLastError();
