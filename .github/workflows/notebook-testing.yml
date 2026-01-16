@@ -23,22 +23,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Set up Python with uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install nbconvert nbclient ipykernel
-          pip install -e .
+        run: uv pip install --system nbclient ipykernel -e .
 
       - name: Run Jupyter Notebooks
         run: |
-          for notebook in $(find . -name '*.ipynb'); do
-            echo "Executing $notebook"
-            jupyter nbconvert --to notebook --execute --inplace $notebook
+          for nb in examples/*.ipynb; do
+            echo "Executing $nb"
+            python -m nbclient "$nb" --inplace
           done
