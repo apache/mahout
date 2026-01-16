@@ -135,7 +135,33 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
-    // TODO: launch_angle_encode, launch_basis_encode
+    /// Launch basis encoding kernel
+    /// Maps an integer index to a computational basis state.
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointer, must sync before freeing
+    pub fn launch_basis_encode(
+        basis_index: usize,
+        state_d: *mut c_void,
+        state_len: usize,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch batch basis encoding kernel
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_basis_encode_batch(
+        basis_indices_d: *const usize,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        stream: *mut c_void,
+    ) -> i32;
+
+    // TODO: launch_angle_encode
 }
 
 // Dummy implementation for non-Linux (allows compilation)
@@ -194,6 +220,29 @@ pub extern "C" fn convert_state_to_float(
     _input_state_d: *const CuDoubleComplex,
     _output_state_d: *mut CuComplex,
     _len: usize,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(not(target_os = "linux"))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_basis_encode(
+    _basis_index: usize,
+    _state_d: *mut c_void,
+    _state_len: usize,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(not(target_os = "linux"))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_basis_encode_batch(
+    _basis_indices_d: *const usize,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
+    _state_len: usize,
     _stream: *mut c_void,
 ) -> i32 {
     999
