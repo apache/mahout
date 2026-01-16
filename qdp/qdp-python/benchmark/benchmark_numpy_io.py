@@ -40,6 +40,7 @@ import numpy as np
 import torch
 
 from _qdp import QdpEngine
+from utils import normalize_batch
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -53,18 +54,27 @@ except ImportError:
 
 
 def generate_test_data(
-    num_samples: int, sample_size: int, seed: int = 42
+    num_samples: int,
+    sample_size: int,
+    encoding_method: str = "amplitude",
+    seed: int = 42,
 ) -> np.ndarray:
     """Generate deterministic test data."""
     rng = np.random.RandomState(seed)
-    data = rng.randn(num_samples, sample_size).astype(np.float64)
-    # Normalize each sample
-    norms = np.linalg.norm(data, axis=1, keepdims=True)
-    norms[norms == 0] = 1.0
-    return data / norms
+    if encoding_method == "basis":
+        # Basis encoding: single index per sample
+        data = rng.randint(0, sample_size, size=(num_samples, 1)).astype(np.float64)
+    else:
+        # Amplitude encoding: full vectors (using Gaussian distribution)
+        data = rng.randn(num_samples, sample_size).astype(np.float64)
+        # Normalize each sample
+        data = normalize_batch(data, encoding_method)
+    return data
 
 
-def run_mahout_numpy(num_qubits: int, num_samples: int, npy_path: str):
+def run_mahout_numpy(
+    num_qubits: int, num_samples: int, npy_path: str, encoding_method: str = "amplitude"
+):
     """Benchmark Mahout with NumPy file I/O."""
     print("\n[Mahout + NumPy] Loading and encoding...")
 
@@ -80,7 +90,7 @@ def run_mahout_numpy(num_qubits: int, num_samples: int, npy_path: str):
 
     try:
         # Use the unified encode API with file path
-        qtensor = engine.encode(npy_path, num_qubits, "amplitude")
+        qtensor = engine.encode(npy_path, num_qubits, encoding_method)
         tensor = torch.utils.dlpack.from_dlpack(qtensor)
 
         # Small computation to ensure GPU has processed the data
@@ -181,6 +191,13 @@ def main():
         default="all",
         help="Comma-separated list: mahout,pennylane or 'all'",
     )
+    parser.add_argument(
+        "--encoding-method",
+        type=str,
+        default="amplitude",
+        choices=["amplitude", "basis"],
+        help="Encoding method to use for Mahout (amplitude or basis).",
+    )
     args = parser.parse_args()
 
     # Parse frameworks
@@ -204,7 +221,7 @@ def main():
 
     # Generate test data
     print("\nGenerating test data...")
-    data = generate_test_data(num_samples, sample_size)
+    data = generate_test_data(num_samples, sample_size, args.encoding_method)
 
     # Save to NumPy file
     if args.output:
@@ -223,7 +240,7 @@ def main():
 
     if "mahout" in frameworks:
         t_total, throughput, avg_per_sample = run_mahout_numpy(
-            num_qubits, num_samples, npy_path
+            num_qubits, num_samples, npy_path, args.encoding_method
         )
         if throughput > 0:
             results["Mahout"] = {

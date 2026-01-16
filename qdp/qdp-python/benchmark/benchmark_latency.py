@@ -26,14 +26,12 @@ Run:
 from __future__ import annotations
 
 import argparse
-import queue
-import threading
 import time
 
-import numpy as np
 import torch
 
 from _qdp import QdpEngine
+from utils import normalize_batch, prefetched_batches
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -67,41 +65,6 @@ def sync_cuda() -> None:
         torch.cuda.synchronize()
 
 
-def build_sample(seed: int, vector_len: int) -> np.ndarray:
-    mask = np.uint64(vector_len - 1)
-    scale = 1.0 / vector_len
-    idx = np.arange(vector_len, dtype=np.uint64)
-    mixed = (idx + np.uint64(seed)) & mask
-    return mixed.astype(np.float64) * scale
-
-
-def prefetched_batches(
-    total_batches: int, batch_size: int, vector_len: int, prefetch: int
-):
-    q: queue.Queue[np.ndarray | None] = queue.Queue(maxsize=prefetch)
-
-    def producer():
-        for batch_idx in range(total_batches):
-            base = batch_idx * batch_size
-            batch = [build_sample(base + i, vector_len) for i in range(batch_size)]
-            q.put(np.stack(batch))
-        q.put(None)
-
-    threading.Thread(target=producer, daemon=True).start()
-
-    while True:
-        batch = q.get()
-        if batch is None:
-            break
-        yield batch
-
-
-def normalize_batch(batch: np.ndarray) -> np.ndarray:
-    norms = np.linalg.norm(batch, axis=1, keepdims=True)
-    norms[norms == 0] = 1.0
-    return batch / norms
-
-
 def parse_frameworks(raw: str) -> list[str]:
     if raw.lower() == "all":
         return list(FRAMEWORK_CHOICES)
@@ -122,7 +85,13 @@ def parse_frameworks(raw: str) -> list[str]:
     return selected if selected else list(FRAMEWORK_CHOICES)
 
 
-def run_mahout(num_qubits: int, total_batches: int, batch_size: int, prefetch: int):
+def run_mahout(
+    num_qubits: int,
+    total_batches: int,
+    batch_size: int,
+    prefetch: int,
+    encoding_method: str = "amplitude",
+):
     try:
         engine = QdpEngine(0)
     except Exception as exc:
@@ -134,9 +103,11 @@ def run_mahout(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
     start = time.perf_counter()
     processed = 0
 
-    for batch in prefetched_batches(total_batches, batch_size, vector_len, prefetch):
-        normalized = normalize_batch(batch)
-        qtensor = engine.encode(normalized, num_qubits, "amplitude")
+    for batch in prefetched_batches(
+        total_batches, batch_size, vector_len, prefetch, encoding_method
+    ):
+        normalized = normalize_batch(batch, encoding_method)
+        qtensor = engine.encode(normalized, num_qubits, encoding_method)
         _ = torch.utils.dlpack.from_dlpack(qtensor)
         processed += normalized.shape[0]
 
@@ -266,6 +237,13 @@ def main():
             "(pennylane,qiskit-init,qiskit-statevector,mahout) or 'all'."
         ),
     )
+    parser.add_argument(
+        "--encoding-method",
+        type=str,
+        default="amplitude",
+        choices=["amplitude", "basis"],
+        help="Encoding method to use for Mahout (amplitude or basis).",
+    )
     args = parser.parse_args()
 
     if not torch.cuda.is_available():
@@ -285,6 +263,7 @@ def main():
     print(f"  Batches      : {args.batches}")
     print(f"  Prefetch     : {args.prefetch}")
     print(f"  Frameworks   : {', '.join(frameworks)}")
+    print(f"  Encode method: {args.encoding_method}")
     bytes_per_vec = vector_len * 8
     print(f"  Generated {total_vectors} samples")
     print(
@@ -329,7 +308,11 @@ def main():
         print()
         print("[Mahout] Full Pipeline (DataLoader -> GPU)...")
         t_mahout, l_mahout = run_mahout(
-            args.qubits, args.batches, args.batch_size, args.prefetch
+            args.qubits,
+            args.batches,
+            args.batch_size,
+            args.prefetch,
+            args.encoding_method,
         )
 
     print()

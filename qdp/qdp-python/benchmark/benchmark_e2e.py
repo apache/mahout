@@ -40,6 +40,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pyarrow.ipc as ipc
 from _qdp import QdpEngine
+from utils import generate_batch_data
 
 # Competitors
 try:
@@ -81,7 +82,7 @@ class DummyQNN(nn.Module):
         return self.fc(x)
 
 
-def generate_data(n_qubits, n_samples):
+def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude"):
     for f in [DATA_FILE, ARROW_FILE]:
         if os.path.exists(f):
             os.remove(f)
@@ -90,8 +91,7 @@ def generate_data(n_qubits, n_samples):
     dim = 1 << n_qubits
 
     # Generate all data at once
-    np.random.seed(42)
-    all_data = np.random.rand(n_samples, dim).astype(np.float64)
+    all_data = generate_batch_data(n_samples, dim, encoding_method, seed=42)
 
     # Save as Parquet (List format for PennyLane/Qiskit)
     feature_vectors = [row.tolist() for row in all_data]
@@ -101,8 +101,14 @@ def generate_data(n_qubits, n_samples):
     pq.write_table(table, DATA_FILE)
 
     # Save as Arrow IPC (FixedSizeList format for Mahout)
-    arr = pa.FixedSizeListArray.from_arrays(pa.array(all_data.flatten()), dim)
-    arrow_table = pa.table({"data": arr})
+    if encoding_method == "basis":
+        # For basis encoding, create a simple array of indices
+        arr = pa.array(all_data.flatten(), type=pa.float64())
+        arrow_table = pa.table({"data": arr})
+    else:
+        # For amplitude encoding, use FixedSizeList format
+        arr = pa.FixedSizeListArray.from_arrays(pa.array(all_data.flatten()), dim)
+        arrow_table = pa.table({"data": arr})
     with ipc.RecordBatchFileWriter(ARROW_FILE, arrow_table.schema) as writer:
         writer.write_table(arrow_table)
 
@@ -255,7 +261,7 @@ def run_pennylane(n_qubits, n_samples):
 # -----------------------------------------------------------
 # 3. Mahout Parquet Pipeline
 # -----------------------------------------------------------
-def run_mahout_parquet(engine, n_qubits, n_samples):
+def run_mahout_parquet(engine, n_qubits, n_samples, encoding_method: str = "amplitude"):
     # Clean cache before starting benchmark
     clean_cache()
 
@@ -267,7 +273,13 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
 
     # Direct Parquet to GPU pipeline
     parquet_encode_start = time.perf_counter()
-    qtensor = engine.encode(DATA_FILE, n_qubits)
+    try:
+        qtensor = engine.encode(DATA_FILE, n_qubits, encoding_method)
+    except RuntimeError as e:
+        if "Only amplitude encoding supported" in str(e):
+            print("Basis encoding not supported for streaming from Parquet, skipping.")
+            return 0.0, None
+        raise
     parquet_encode_time = time.perf_counter() - parquet_encode_start
     print(f"  Parquet->GPU (IO+Encode): {parquet_encode_time:.4f} s")
 
@@ -307,7 +319,7 @@ def run_mahout_parquet(engine, n_qubits, n_samples):
 # -----------------------------------------------------------
 # 4. Mahout Arrow IPC Pipeline
 # -----------------------------------------------------------
-def run_mahout_arrow(engine, n_qubits, n_samples):
+def run_mahout_arrow(engine, n_qubits, n_samples, encoding_method: str = "amplitude"):
     # Clean cache before starting benchmark
     clean_cache()
 
@@ -318,7 +330,13 @@ def run_mahout_arrow(engine, n_qubits, n_samples):
     start_time = time.perf_counter()
 
     arrow_encode_start = time.perf_counter()
-    qtensor = engine.encode(ARROW_FILE, n_qubits)
+    try:
+        qtensor = engine.encode(ARROW_FILE, n_qubits, encoding_method)
+    except RuntimeError as e:
+        if "Only amplitude encoding supported" in str(e):
+            print("  Basis encoding not supported for streaming from Arrow, skipping.")
+            return 0.0, None
+        raise
     arrow_encode_time = time.perf_counter() - arrow_encode_start
     print(f"  Arrow->GPU (IO+Encode): {arrow_encode_time:.4f} s")
 
@@ -408,13 +426,20 @@ if __name__ == "__main__":
         choices=["mahout-parquet", "mahout-arrow", "pennylane", "qiskit", "all"],
         help="Frameworks to benchmark. Use 'all' to run all available frameworks.",
     )
+    parser.add_argument(
+        "--encoding-method",
+        type=str,
+        default="amplitude",
+        choices=["amplitude", "basis"],
+        help="Encoding method to use for Mahout (amplitude or basis).",
+    )
     args = parser.parse_args()
 
     # Expand "all" option
     if "all" in args.frameworks:
         args.frameworks = ["mahout-parquet", "mahout-arrow", "pennylane", "qiskit"]
 
-    generate_data(args.qubits, args.samples)
+    generate_data(args.qubits, args.samples, args.encoding_method)
 
     try:
         engine = QdpEngine(0)
@@ -448,14 +473,14 @@ if __name__ == "__main__":
 
     if "mahout-parquet" in args.frameworks:
         t_mahout_parquet, mahout_parquet_all_states = run_mahout_parquet(
-            engine, args.qubits, args.samples
+            engine, args.qubits, args.samples, args.encoding_method
         )
         # Clean cache between framework benchmarks
         clean_cache()
 
     if "mahout-arrow" in args.frameworks:
         t_mahout_arrow, mahout_arrow_all_states = run_mahout_arrow(
-            engine, args.qubits, args.samples
+            engine, args.qubits, args.samples, args.encoding_method
         )
         # Clean cache between framework benchmarks
         clean_cache()
