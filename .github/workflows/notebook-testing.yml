@@ -40,5 +40,5 @@ jobs:
         run: |
           for nb in examples/*.ipynb; do
             echo "Executing $nb"
-            uv run python -m nbclient "$nb" --inplace
+            uv run jupyter execute "$nb" --inplace
           done
