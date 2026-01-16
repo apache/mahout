@@ -32,11 +32,13 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv pip install --system nbclient ipykernel -e .
+        run: |
+          uv venv
+          uv pip install nbclient ipykernel -e .
 
       - name: Run Jupyter Notebooks
         run: |
           for nb in examples/*.ipynb; do
             echo "Executing $nb"
-            python -m nbclient "$nb" --inplace
+            uv run python -m nbclient "$nb" --inplace
           done
