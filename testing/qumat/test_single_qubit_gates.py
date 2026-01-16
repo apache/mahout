@@ -18,7 +18,7 @@
 import math
 import pytest
 
-from .utils import TESTING_BACKENDS, get_backend_config, get_state_probability
+from ..utils import TESTING_BACKENDS, get_backend_config, get_state_probability
 from qumat import QuMat
 
 
