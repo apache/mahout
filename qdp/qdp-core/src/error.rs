@@ -43,3 +43,23 @@ pub enum MahoutError {
 
 /// Result type alias for Mahout operations
 pub type Result<T> = std::result::Result<T, MahoutError>;
+
+/// Convert CUDA error code to human-readable string
+#[cfg(target_os = "linux")]
+pub fn cuda_error_to_string(code: i32) -> &'static str {
+    match code {
+        0 => "cudaSuccess",
+        1 => "cudaErrorInvalidValue",
+        2 => "cudaErrorMemoryAllocation",
+        3 => "cudaErrorInitializationError",
+        4 => "cudaErrorLaunchFailure",
+        6 => "cudaErrorInvalidDevice",
+        8 => "cudaErrorInvalidConfiguration",
+        11 => "cudaErrorInvalidHostPointer",
+        12 => "cudaErrorInvalidDevicePointer",
+        17 => "cudaErrorInvalidMemcpyDirection",
+        30 => "cudaErrorUnknown",
+        999 => "CUDA unavailable (non-Linux stub)",
+        _ => "Unknown CUDA error",
+    }
+}
