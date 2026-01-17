@@ -43,12 +43,14 @@ Additional options:
 ```bash
 python benchmark_e2e.py --qubits 16 --samples 200 --frameworks mahout-parquet mahout-arrow
 python benchmark_e2e.py --frameworks all
+python benchmark_e2e.py --encoding-method basis
 ```
 
 Notes:
 
 - `--frameworks` accepts a space-separated list or `all`.
   Options: `mahout-parquet`, `mahout-arrow`, `pennylane`, `qiskit`.
+- `--encoding-method` selects the encoding method: `amplitude` (default) or `basis`.
 - The script writes `final_benchmark_data.parquet` and
   `final_benchmark_data.arrow` in the current working directory and overwrites
   them on each run.
@@ -61,12 +63,14 @@ Notes:
 cd qdp/qdp-python/benchmark
 python benchmark_latency.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
 python benchmark_latency.py --frameworks mahout,pennylane
+python benchmark_latency.py --encoding-method basis
 ```
 
 Notes:
 
 - `--frameworks` is a comma-separated list or `all`.
   Options: `mahout`, `pennylane`, `qiskit-init`, `qiskit-statevector`.
+- `--encoding-method` selects the encoding method: `amplitude` (default) or `basis`.
 - The latency test reports average milliseconds per vector.
 - Flags:
   - `--qubits`: controls vector length (`2^qubits`).
@@ -88,12 +92,14 @@ output.
 cd qdp/qdp-python/benchmark
 python benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
 python benchmark_throughput.py --frameworks mahout,pennylane
+python benchmark_throughput.py --encoding-method basis
 ```
 
 Notes:
 
 - `--frameworks` is a comma-separated list or `all`.
   Options: `mahout`, `pennylane`, `qiskit`.
+- `--encoding-method` selects the encoding method: `amplitude` (default) or `basis`.
 - Throughput is reported in vectors/sec (higher is better).
 
 ## Dependency Notes
