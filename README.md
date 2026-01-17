@@ -44,7 +44,7 @@ git clone https://github.com/apache/mahout.git
 cd mahout
 pip install uv
 uv sync                     # Core Qumat
-uv sync --extra qdp         # With QDP (requires CUDA GPU)
+uv sync --group qdp         # With QDP (requires CUDA GPU)
 ```
 
 ### Qumat: Run a quantum circuit
