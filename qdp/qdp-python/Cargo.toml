@@ -15,3 +15,4 @@ qdp-core = { path = "../qdp-core" }
 [features]
 default = []
 observability = ["qdp-core/observability"]
+pytorch = ["qdp-core/pytorch"]

@@ -35,8 +35,8 @@ pub trait StreamingDataReader: DataReader {
 |--------|--------|-----------|--------|
 | Parquet | `ParquetReader` | ✅ `ParquetStreamingReader` | ✅ Complete |
 | Arrow IPC | `ArrowIPCReader` | ❌ | ✅ Complete |
-| NumPy | `NumpyReader` | ❌ | ❌ |
-| PyTorch | `TorchReader` | ❌ | ❌ |
+| NumPy | `NumpyReader` | ❌ | ✅ Complete |
+| PyTorch | `TorchReader` | ❌ | ✅ (feature: `pytorch`) |
 
 ## Benefits
 
@@ -123,7 +123,9 @@ fn read_quantum_data(path: &str) -> Result<(Vec<f64>, usize, usize)> {
     } else if path.ends_with(".arrow") {
         ArrowIPCReader::new(path)?.read_batch()
     } else if path.ends_with(".npy") {
-        NumpyReader::new(path)?.read_batch()  // When implemented
+        NumpyReader::new(path)?.read_batch()
+    } else if path.ends_with(".pt") || path.ends_with(".pth") {
+        TorchReader::new(path)?.read_batch()
     } else {
         Err(MahoutError::InvalidInput("Unsupported format".into()))
     }
@@ -150,8 +152,8 @@ qdp-core/src/
 │   ├── mod.rs            # Reader registry
 │   ├── parquet.rs        # Parquet implementation
 │   ├── arrow_ipc.rs      # Arrow IPC implementation
-│   ├── numpy.rs          # NumPy (placeholder)
-│   └── torch.rs          # PyTorch (placeholder)
+│   ├── numpy.rs          # NumPy implementation
+│   └── torch.rs          # PyTorch (feature-gated)
 ├── io.rs                 # Legacy API & helper functions
 └── lib.rs                # Main library
 
@@ -207,8 +209,8 @@ let reader = ParquetStreamingReader::new(path, None)?;
 ## Future Enhancements
 
 Planned format support:
-- **NumPy** (`.npy`): Python ecosystem integration
-- **PyTorch** (`.pt`): Deep learning workflows
+- **NumPy streaming**: Chunked reads for large `.npy` files
+- **PyTorch streaming**: Streaming support for large tensors
 - **HDF5** (`.h5`): Scientific data storage
 - **JSON**: Human-readable format for small datasets
 - **CSV**: Simple tabular data
