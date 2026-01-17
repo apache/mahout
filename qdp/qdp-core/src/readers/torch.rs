@@ -27,6 +27,8 @@ use crate::reader::DataReader;
 
 /// Reader for PyTorch `.pt`/`.pth` tensor files.
 pub struct TorchReader {
+    /// Path to the PyTorch file. Used only when the `pytorch` feature is enabled.
+    #[allow(dead_code)]
     path: std::path::PathBuf,
     read: bool,
     num_samples: Option<usize>,
