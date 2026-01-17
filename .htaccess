@@ -1,0 +1,38 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.
+
+# Enable custom error pages
+ErrorDocument 404 /404.html
+ErrorDocument 410 /404.html
+
+# Legacy documentation paths
+# These paths were removed in January 2026 when Mahout transitioned to Qumat
+
+# Legacy MapReduce algorithm documentation
+RedirectMatch 410 ^/users/(.*)$
+RedirectMatch 410 ^/documentation/users/(.*)$
+RedirectMatch 410 ^/documentation/tutorials/(.*)$
+
+# Legacy classification docs
+RedirectMatch 410 ^/users/classification/(.*)$
+
+# Legacy clustering docs
+RedirectMatch 410 ^/users/clustering/(.*)$
+
+# Legacy recommender docs
+RedirectMatch 410 ^/users/recommender/(.*)$
+
+# Legacy Spark/Flink bindings
+RedirectMatch 410 ^/users/sparkbindings/(.*)$
+RedirectMatch 410 ^/users/flinkbindings/(.*)$
+
+# Legacy basics/quickstart
+RedirectMatch 410 ^/users/basics/(.*)$
+
+# Old release notes
+RedirectMatch 410 ^/release-notes/(.*)$
+
+# Redirect old qumat documentation path to new structure
+RedirectMatch 301 ^/documentation/qumat/?$ /qumat/
+RedirectMatch 301 ^/quantum-computing-primer/?$ /qumat/quantum-computing-primer/
+RedirectMatch 301 ^/quantum-computing-primer/(.*)$ /qumat/quantum-computing-primer/$1
