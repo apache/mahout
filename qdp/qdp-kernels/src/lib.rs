@@ -174,6 +174,20 @@ unsafe extern "C" {
         num_qubits: u32,
         stream: *mut c_void,
     ) -> i32;
+
+    /// Launch batch angle encoding kernel
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_angle_encode_batch(
+        angles_batch_d: *const f64,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        num_qubits: u32,
+        stream: *mut c_void,
+    ) -> i32;
 }
 
 // Dummy implementation for non-Linux (allows compilation)
@@ -266,6 +280,19 @@ pub extern "C" fn launch_basis_encode_batch(
 pub extern "C" fn launch_angle_encode(
     _angles_d: *const f64,
     _state_d: *mut c_void,
+    _state_len: usize,
+    _num_qubits: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(not(target_os = "linux"))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_angle_encode_batch(
+    _angles_batch_d: *const f64,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
     _state_len: usize,
     _num_qubits: u32,
     _stream: *mut c_void,

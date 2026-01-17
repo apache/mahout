@@ -105,6 +105,105 @@ impl QuantumEncoder for AngleEncoder {
         }
     }
 
+    /// Encode multiple angle samples in a single GPU allocation and kernel launch
+    #[cfg(target_os = "linux")]
+    fn encode_batch(
+        &self,
+        device: &Arc<CudaDevice>,
+        batch_data: &[f64],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        crate::profile_scope!("AngleEncoder::encode_batch");
+
+        if sample_size != num_qubits {
+            return Err(MahoutError::InvalidInput(format!(
+                "Angle encoding expects sample_size={} (one angle per qubit), got {}",
+                num_qubits, sample_size
+            )));
+        }
+
+        if batch_data.len() != num_samples * sample_size {
+            return Err(MahoutError::InvalidInput(format!(
+                "Batch data length {} doesn't match num_samples {} * sample_size {}",
+                batch_data.len(),
+                num_samples,
+                sample_size
+            )));
+        }
+
+        if num_qubits == 0 || num_qubits > 30 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Number of qubits {} must be between 1 and 30",
+                num_qubits
+            )));
+        }
+
+        for (i, &val) in batch_data.iter().enumerate() {
+            if !val.is_finite() {
+                let sample_idx = i / sample_size;
+                let angle_idx = i % sample_size;
+                return Err(MahoutError::InvalidInput(format!(
+                    "Sample {} angle {} must be finite, got {}",
+                    sample_idx, angle_idx, val
+                )));
+            }
+        }
+
+        let state_len = 1 << num_qubits;
+
+        let batch_state_vector = {
+            crate::profile_scope!("GPU::AllocBatch");
+            GpuStateVector::new_batch(device, num_samples, num_qubits)?
+        };
+
+        let input_bytes = batch_data.len() * std::mem::size_of::<f64>();
+        let angles_gpu = {
+            crate::profile_scope!("GPU::H2D_BatchAngles");
+            device.htod_sync_copy(batch_data).map_err(|e| {
+                map_allocation_error(input_bytes, "angle batch upload", Some(num_qubits), e)
+            })?
+        };
+
+        let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "Batch state vector precision mismatch (expected float64 buffer)".to_string(),
+            )
+        })?;
+
+        {
+            crate::profile_scope!("GPU::BatchKernelLaunch");
+            let ret = unsafe {
+                qdp_kernels::launch_angle_encode_batch(
+                    *angles_gpu.device_ptr() as *const f64,
+                    state_ptr as *mut c_void,
+                    num_samples,
+                    state_len,
+                    num_qubits as u32,
+                    std::ptr::null_mut(),
+                )
+            };
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Batch angle encoding kernel failed: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            device
+                .synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+        }
+
+        Ok(batch_state_vector)
+    }
+
     fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
         if num_qubits == 0 {
             return Err(MahoutError::InvalidInput(

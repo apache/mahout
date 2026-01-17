@@ -364,3 +364,95 @@ def test_basis_encode_errors():
     # Test multiple values (basis expects exactly 1)
     with pytest.raises(RuntimeError, match="expects exactly 1"):
         engine.encode([0.0, 1.0], 2, "basis")
+
+
+@pytest.mark.gpu
+def test_angle_encode_basic():
+    """Test basic angle encoding (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Angles [0, 0] should map to |00> with amplitude 1 at index 0.
+    qtensor = engine.encode([0.0, 0.0], 2, "angle")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.is_cuda
+    assert torch_tensor.shape == (1, 4)
+
+    expected = torch.tensor([[1.0 + 0j, 0.0 + 0j, 0.0 + 0j, 0.0 + 0j]], device="cuda:0")
+    assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype))
+
+
+@pytest.mark.gpu
+def test_angle_encode_nonzero_angles():
+    """Test angle encoding with non-zero angles (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    angles = [torch.pi / 2, 0.0]
+    qtensor = engine.encode(angles, 2, "angle")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    expected = torch.tensor([[0.0 + 0j, 1.0 + 0j, 0.0 + 0j, 0.0 + 0j]], device="cuda:0")
+    assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6)
+
+
+@pytest.mark.gpu
+def test_angle_encode_batch():
+    """Test batch angle encoding (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    data = torch.tensor([[0.0, 0.0], [torch.pi / 2, 0.0]], dtype=torch.float64)
+    qtensor = engine.encode(data, 2, "angle")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (2, 4)
+
+    expected = torch.tensor(
+        [
+            [1.0 + 0j, 0.0 + 0j, 0.0 + 0j, 0.0 + 0j],
+            [0.0 + 0j, 1.0 + 0j, 0.0 + 0j, 0.0 + 0j],
+        ],
+        device="cuda:0",
+    )
+    assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6)
+
+
+@pytest.mark.gpu
+def test_angle_encode_errors():
+    """Test error handling for angle encoding (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Wrong length (expects one angle per qubit)
+    with pytest.raises(RuntimeError, match="expects 2 values"):
+        engine.encode([0.0], 2, "angle")
+
+    # Non-finite angle
+    with pytest.raises(RuntimeError, match="must be finite"):
+        engine.encode([float("nan"), 0.0], 2, "angle")
