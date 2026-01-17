@@ -45,7 +45,7 @@ jobs:
         ./website/build_site.sh
         rm -rf *
         git checkout asf-site
-        cp -r $WORKDIR/* .
+        cp -r $WORKDIR/. .
         git add .
         git commit -m "Automatic Site Publish by Buildbot"
         git push
