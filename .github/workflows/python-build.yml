@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -12,45 +13,49 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-name: Pre-commit
+#
+name: Python Build
 
 on:
   push:
-    branches: [main, dev-qdp]
+    branches: [main]
   pull_request:
-    branches: [main, dev-qdp]
   workflow_dispatch:
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
-
     steps:
       - uses: actions/checkout@v6
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
 
-      - name: Install uv
-        run: pip install uv
+      - run: pip install uv
+      - run: uv sync --group dev
 
-      - name: Install dependencies
-        run: uv sync --group dev
+      - uses: PyO3/maturin-action@v1
+        with:
+          working-directory: qdp/qdp-python
+          command: develop
+          args: --release
+          sccache: true
 
-      - name: Install libtorch (CPU)
-        run: |
-          set -euo pipefail
-          libtorch_version="2.2.0"
-          libtorch_zip="libtorch-cxx11-abi-shared-with-deps-${libtorch_version}%2Bcpu.zip"
-          curl -L -o libtorch.zip "https://download.pytorch.org/libtorch/cpu/${libtorch_zip}"
-          unzip -q libtorch.zip
-          echo "LIBTORCH=${GITHUB_WORKSPACE}/libtorch" >> "$GITHUB_ENV"
+      - run: uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: uv run pytest testing/ -v
 
-      - name: Run pre-commit hooks
-        run: uv run pre-commit run --all-files
+      - run: uv build
+      - uses: PyO3/maturin-action@v1
+        with:
+          working-directory: qdp/qdp-python
+          command: build
+          args: --release --out dist
+          sccache: true
+          manylinux: auto
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels
+          path: |
+            dist/*.whl
+            qdp/qdp-python/dist/*.whl
