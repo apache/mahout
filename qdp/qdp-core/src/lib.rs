@@ -15,6 +15,8 @@
 // limitations under the License.
 
 pub mod dlpack;
+#[cfg(target_os = "linux")]
+mod encoding;
 pub mod error;
 pub mod gpu;
 pub mod io;

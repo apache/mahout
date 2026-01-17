@@ -40,7 +40,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pyarrow.ipc as ipc
 from _qdp import QdpEngine
-from utils import generate_batch_data
+from utils import generate_batch_data, normalize_batch
 
 # Competitors
 try:
@@ -93,11 +93,16 @@ def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude"):
     # Generate all data at once
     all_data = generate_batch_data(n_samples, dim, encoding_method, seed=42)
 
-    # Save as Parquet (List format for PennyLane/Qiskit)
-    feature_vectors = [row.tolist() for row in all_data]
-    table = pa.table(
-        {"feature_vector": pa.array(feature_vectors, type=pa.list_(pa.float64()))}
-    )
+    # Save as Parquet
+    if encoding_method == "basis":
+        # For basis encoding, save single scalar indices (not lists)
+        table = pa.table({"index": pa.array(all_data.flatten(), type=pa.float64())})
+    else:
+        # For amplitude encoding, use List format for PennyLane/Qiskit compatibility
+        feature_vectors = [row.tolist() for row in all_data]
+        table = pa.table(
+            {"feature_vector": pa.array(feature_vectors, type=pa.list_(pa.float64()))}
+        )
     pq.write_table(table, DATA_FILE)
 
     # Save as Arrow IPC (FixedSizeList format for Mahout)
@@ -154,9 +159,7 @@ def run_qiskit(n_qubits, n_samples):
         batch = raw_data[i : i + BATCH_SIZE]
 
         # Normalize
-        norms = np.linalg.norm(batch, axis=1, keepdims=True)
-        norms[norms == 0] = 1.0
-        batch = batch / norms
+        batch = normalize_batch(batch)
 
         # State preparation
         batch_states = []
@@ -193,7 +196,7 @@ def run_qiskit(n_qubits, n_samples):
 # -----------------------------------------------------------
 # 2. PennyLane Full Pipeline
 # -----------------------------------------------------------
-def run_pennylane(n_qubits, n_samples):
+def run_pennylane(n_qubits, n_samples, encoding_method: str = "amplitude"):
     if not HAS_PENNYLANE:
         print("\n[PennyLane] Not installed, skipping.")
         return 0.0, None
@@ -201,15 +204,20 @@ def run_pennylane(n_qubits, n_samples):
     # Clean cache before starting benchmark
     clean_cache()
 
-    print("\n[PennyLane] Full Pipeline (Disk -> GPU)...")
+    print(f"\n[PennyLane] Full Pipeline (Disk -> GPU) - {encoding_method} encoding...")
 
     dev = qml.device("default.qubit", wires=n_qubits)
 
     @qml.qnode(dev, interface="torch")
-    def circuit(inputs):
+    def amplitude_circuit(inputs):
         qml.AmplitudeEmbedding(
             features=inputs, wires=range(n_qubits), normalize=True, pad_with=0.0
         )
+        return qml.state()
+
+    @qml.qnode(dev, interface="torch")
+    def basis_circuit(basis_state):
+        qml.BasisEmbedding(features=basis_state, wires=range(n_qubits))
         return qml.state()
 
     model = DummyQNN(n_qubits).cuda()
@@ -221,7 +229,10 @@ def run_pennylane(n_qubits, n_samples):
     import pandas as pd
 
     df = pd.read_parquet(DATA_FILE)
-    raw_data = np.stack(df["feature_vector"].values)
+    if encoding_method == "basis":
+        raw_data = df["index"].values.astype(np.int64)
+    else:
+        raw_data = np.stack(df["feature_vector"].values)
     io_time = time.perf_counter() - start_time
     print(f"  IO Time: {io_time:.4f} s")
 
@@ -229,13 +240,22 @@ def run_pennylane(n_qubits, n_samples):
 
     # Process batches
     for i in range(0, n_samples, BATCH_SIZE):
-        batch_cpu = torch.tensor(raw_data[i : i + BATCH_SIZE])
-
-        # Execute QNode
-        try:
-            state_cpu = circuit(batch_cpu)
-        except Exception:
-            state_cpu = torch.stack([circuit(x) for x in batch_cpu])
+        if encoding_method == "basis":
+            batch_indices = raw_data[i : i + BATCH_SIZE]
+            # Convert indices to binary representation for BasisEmbedding
+            batch_states = []
+            for idx in batch_indices:
+                binary_list = [int(b) for b in format(int(idx), f"0{n_qubits}b")]
+                state_cpu = basis_circuit(binary_list)
+                batch_states.append(state_cpu)
+            state_cpu = torch.stack(batch_states)
+        else:
+            batch_cpu = torch.tensor(raw_data[i : i + BATCH_SIZE])
+            # Execute QNode
+            try:
+                state_cpu = amplitude_circuit(batch_cpu)
+            except Exception:
+                state_cpu = torch.stack([amplitude_circuit(x) for x in batch_cpu])
 
         all_pl_states.append(state_cpu)
 
@@ -273,13 +293,7 @@ def run_mahout_parquet(engine, n_qubits, n_samples, encoding_method: str = "ampl
 
     # Direct Parquet to GPU pipeline
     parquet_encode_start = time.perf_counter()
-    try:
-        qtensor = engine.encode(DATA_FILE, n_qubits, encoding_method)
-    except RuntimeError as e:
-        if "Only amplitude encoding supported" in str(e):
-            print("Basis encoding not supported for streaming from Parquet, skipping.")
-            return 0.0, None
-        raise
+    qtensor = engine.encode(DATA_FILE, n_qubits, encoding_method)
     parquet_encode_time = time.perf_counter() - parquet_encode_start
     print(f"  Parquet->GPU (IO+Encode): {parquet_encode_time:.4f} s")
 
@@ -330,13 +344,7 @@ def run_mahout_arrow(engine, n_qubits, n_samples, encoding_method: str = "amplit
     start_time = time.perf_counter()
 
     arrow_encode_start = time.perf_counter()
-    try:
-        qtensor = engine.encode(ARROW_FILE, n_qubits, encoding_method)
-    except RuntimeError as e:
-        if "Only amplitude encoding supported" in str(e):
-            print("  Basis encoding not supported for streaming from Arrow, skipping.")
-            return 0.0, None
-        raise
+    qtensor = engine.encode(ARROW_FILE, n_qubits, encoding_method)
     arrow_encode_time = time.perf_counter() - arrow_encode_start
     print(f"  Arrow->GPU (IO+Encode): {arrow_encode_time:.4f} s")
 
@@ -462,7 +470,9 @@ if __name__ == "__main__":
 
     # Run benchmarks
     if "pennylane" in args.frameworks:
-        t_pl, pl_all_states = run_pennylane(args.qubits, args.samples)
+        t_pl, pl_all_states = run_pennylane(
+            args.qubits, args.samples, args.encoding_method
+        )
         # Clean cache between framework benchmarks
         clean_cache()
 

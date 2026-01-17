@@ -303,9 +303,12 @@ impl ParquetStreamingReader {
                     )));
                 }
             }
+            DataType::Float64 => {
+                // Scalar Float64 for basis encoding (one index per sample)
+            }
             _ => {
                 return Err(MahoutError::InvalidInput(format!(
-                    "Expected List<Float64> or FixedSizeList<Float64> column, got {:?}",
+                    "Expected Float64, List<Float64>, or FixedSizeList<Float64> column, got {:?}",
                     field.data_type()
                 )));
             }
@@ -484,9 +487,35 @@ impl StreamingDataReader for ParquetStreamingReader {
 
                             (current_sample_size, batch_values)
                         }
+                        DataType::Float64 => {
+                            // Scalar Float64 for basis encoding (one index per sample)
+                            let float_array = column
+                                .as_any()
+                                .downcast_ref::<Float64Array>()
+                                .ok_or_else(|| {
+                                    MahoutError::Io(
+                                        "Failed to downcast to Float64Array".to_string(),
+                                    )
+                                })?;
+
+                            if float_array.is_empty() {
+                                continue;
+                            }
+
+                            let current_sample_size = 1;
+
+                            let mut batch_values = Vec::new();
+                            if float_array.null_count() == 0 {
+                                batch_values.extend_from_slice(float_array.values());
+                            } else {
+                                return Err(MahoutError::Io("Null value encountered in Float64Array during quantum encoding. Please check data quality at the source.".to_string()));
+                            }
+
+                            (current_sample_size, batch_values)
+                        }
                         _ => {
                             return Err(MahoutError::Io(format!(
-                                "Expected List<Float64> or FixedSizeList<Float64>, got {:?}",
+                                "Expected Float64, List<Float64>, or FixedSizeList<Float64>, got {:?}",
                                 column.data_type()
                             )));
                         }
