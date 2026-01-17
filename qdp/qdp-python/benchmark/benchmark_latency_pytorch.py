@@ -25,14 +25,13 @@ instead of NumPy arrays to test the zero-copy optimization.
 from __future__ import annotations
 
 import argparse
-import queue
-import threading
 import time
 
 import numpy as np
 import torch
 
 from _qdp import QdpEngine
+from utils import build_sample, normalize_batch_torch, prefetched_batches_torch
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -43,50 +42,12 @@ def sync_cuda() -> None:
         torch.cuda.synchronize()
 
 
-def build_sample(seed: int, vector_len: int) -> np.ndarray:
-    mask = np.uint64(vector_len - 1)
-    scale = 1.0 / vector_len
-    idx = np.arange(vector_len, dtype=np.uint64)
-    mixed = (idx + np.uint64(seed)) & mask
-    return mixed.astype(np.float64) * scale
-
-
-def prefetched_batches_torch(
-    total_batches: int, batch_size: int, vector_len: int, prefetch: int
-):
-    """Generate batches as PyTorch tensors."""
-    q: queue.Queue[torch.Tensor | None] = queue.Queue(maxsize=prefetch)
-
-    def producer():
-        for batch_idx in range(total_batches):
-            base = batch_idx * batch_size
-            batch = [build_sample(base + i, vector_len) for i in range(batch_size)]
-            # Convert to PyTorch tensor (CPU, float64, contiguous)
-            batch_tensor = torch.tensor(
-                np.stack(batch), dtype=torch.float64, device="cpu"
-            )
-            assert batch_tensor.is_contiguous(), "Tensor should be contiguous"
-            q.put(batch_tensor)
-        q.put(None)
-
-    threading.Thread(target=producer, daemon=True).start()
-
-    while True:
-        batch = q.get()
-        if batch is None:
-            break
-        yield batch
-
-
-def normalize_batch_torch(batch: torch.Tensor) -> torch.Tensor:
-    """Normalize PyTorch tensor batch."""
-    norms = torch.norm(batch, dim=1, keepdim=True)
-    norms = torch.clamp(norms, min=1e-10)  # Avoid division by zero
-    return batch / norms
-
-
 def run_mahout_pytorch(
-    num_qubits: int, total_batches: int, batch_size: int, prefetch: int
+    num_qubits: int,
+    total_batches: int,
+    batch_size: int,
+    prefetch: int,
+    encoding_method: str = "amplitude",
 ):
     """Run Mahout benchmark with PyTorch tensor input."""
     try:
@@ -101,10 +62,10 @@ def run_mahout_pytorch(
     processed = 0
 
     for batch_tensor in prefetched_batches_torch(
-        total_batches, batch_size, vector_len, prefetch
+        total_batches, batch_size, vector_len, prefetch, encoding_method
     ):
-        normalized = normalize_batch_torch(batch_tensor)
-        qtensor = engine.encode(normalized, num_qubits, "amplitude")
+        normalized = normalize_batch_torch(batch_tensor, encoding_method)
+        qtensor = engine.encode(normalized, num_qubits, encoding_method)
         _ = torch.utils.dlpack.from_dlpack(qtensor)
         processed += normalized.shape[0]
 
@@ -116,7 +77,11 @@ def run_mahout_pytorch(
 
 
 def run_mahout_numpy(
-    num_qubits: int, total_batches: int, batch_size: int, prefetch: int
+    num_qubits: int,
+    total_batches: int,
+    batch_size: int,
+    prefetch: int,
+    encoding_method: str = "amplitude",
 ):
     """Run Mahout benchmark with NumPy array input (for comparison)."""
     try:
@@ -133,13 +98,19 @@ def run_mahout_numpy(
     # Use the same data generation but keep as NumPy
     for batch_idx in range(total_batches):
         base = batch_idx * batch_size
-        batch = [build_sample(base + i, vector_len) for i in range(batch_size)]
+        batch = [
+            build_sample(base + i, vector_len, encoding_method)
+            for i in range(batch_size)
+        ]
         batch_np = np.stack(batch)
-        norms = np.linalg.norm(batch_np, axis=1, keepdims=True)
-        norms[norms == 0] = 1.0
-        normalized = batch_np / norms
+        if encoding_method == "basis":
+            normalized = batch_np
+        else:
+            norms = np.linalg.norm(batch_np, axis=1, keepdims=True)
+            norms[norms == 0] = 1.0
+            normalized = batch_np / norms
 
-        qtensor = engine.encode(normalized, num_qubits, "amplitude")
+        qtensor = engine.encode(normalized, num_qubits, encoding_method)
         _ = torch.utils.dlpack.from_dlpack(qtensor)
         processed += normalized.shape[0]
 
@@ -164,6 +135,13 @@ def main():
     parser.add_argument("--batch-size", type=int, default=32, help="Vectors per batch.")
     parser.add_argument(
         "--prefetch", type=int, default=16, help="CPU-side prefetch depth."
+    )
+    parser.add_argument(
+        "--encoding-method",
+        type=str,
+        default="amplitude",
+        choices=["amplitude", "basis"],
+        help="Encoding method to use for Mahout (amplitude or basis).",
     )
     args = parser.parse_args()
 
@@ -191,13 +169,13 @@ def main():
     print()
     print("[Mahout-PyTorch] PyTorch Tensor Input (Zero-Copy Optimization)...")
     t_pytorch, l_pytorch = run_mahout_pytorch(
-        args.qubits, args.batches, args.batch_size, args.prefetch
+        args.qubits, args.batches, args.batch_size, args.prefetch, args.encoding_method
     )
 
     print()
     print("[Mahout-NumPy] NumPy Array Input (Baseline)...")
     t_numpy, l_numpy = run_mahout_numpy(
-        args.qubits, args.batches, args.batch_size, args.prefetch
+        args.qubits, args.batches, args.batch_size, args.prefetch, args.encoding_method
     )
 
     print()
