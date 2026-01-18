@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10, <3.13"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -1679,14 +1679,12 @@ qdp = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "ruff" },
-]
-qdp-dev = [
     { name = "maturin" },
     { name = "numpy" },
     { name = "patchelf" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "ruff" },
     { name = "torch" },
 ]
 
@@ -1703,14 +1701,12 @@ provides-extras = ["qdp"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "pre-commit", specifier = ">=3.0.0" },
-    { name = "pytest", specifier = ">=9.0.1" },
-    { name = "ruff", specifier = ">=0.13.1" },
-]
-qdp-dev = [
     { name = "maturin", specifier = ">=1.10.2" },
     { name = "numpy", specifier = ">=1.24,<2.0" },
     { name = "patchelf", specifier = ">=0.17.2.4" },
+    { name = "pre-commit", specifier = ">=3.0.0" },
+    { name = "pytest", specifier = ">=9.0.1" },
+    { name = "ruff", specifier = ">=0.13.1" },
     { name = "torch", specifier = ">=2.2" },
 ]
 

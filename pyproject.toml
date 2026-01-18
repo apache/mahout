@@ -18,8 +18,10 @@ dependencies = [
 qdp = ["qumat-qdp"]
 
 [dependency-groups]
-dev = ["pytest>=9.0.1", "ruff>=0.13.1", "pre-commit>=3.0.0"]
-qdp-dev = [
+dev = [
+    "pytest>=9.0.1",
+    "ruff>=0.13.1",
+    "pre-commit>=3.0.0",
     "maturin>=1.10.2",
     "patchelf>=0.17.2.4",
     "torch>=2.2",
