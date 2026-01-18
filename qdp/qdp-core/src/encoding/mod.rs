@@ -20,7 +20,7 @@ mod amplitude;
 mod basis;
 
 use std::ffi::c_void;
-use std::sync::mpsc::{SyncSender, sync_channel};
+use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 use std::thread;
 
 use cudarc::driver::DevicePtr;
@@ -38,8 +38,6 @@ pub(crate) const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_
 pub(crate) type FullBufferResult = std::result::Result<(PinnedHostBuffer, usize), MahoutError>;
 pub(crate) type FullBufferChannel = (SyncSender<FullBufferResult>, Receiver<FullBufferResult>);
 
-use std::sync::mpsc::Receiver;
-
 /// Trait for chunk-based quantum state encoding.
 ///
 /// Implementations provide the encoding-specific logic while the shared
@@ -50,6 +48,15 @@ pub(crate) trait ChunkEncoder {
 
     /// Validate that the sample size is appropriate for this encoding method.
     fn validate_sample_size(&self, sample_size: usize) -> Result<()>;
+
+    /// Whether this encoder needs the staging buffer H2D copy.
+    ///
+    /// If false, the streaming pipeline will skip the async copy to device
+    /// staging buffer, avoiding unnecessary memory bandwidth overhead.
+    /// Encoders that process data on CPU before uploading should return false.
+    fn needs_staging_copy(&self) -> bool {
+        true
+    }
 
     /// Initialize encoder-specific state.
     fn init_state(
@@ -133,6 +140,7 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     let mut encoder_state = encoder.init_state(engine, sample_size, num_qubits)?;
 
     let state_len = 1 << num_qubits;
+    let needs_staging_copy = encoder.needs_staging_copy();
 
     // Send first buffer to processing
     full_buf_tx
@@ -207,13 +215,15 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
                 crate::profile_scope!("GPU::Dispatch");
 
                 // Async copy to device
-                ctx.async_copy_to_device(
-                    host_buffer.ptr() as *const c_void,
-                    dev_ptr as *mut c_void,
-                    current_len,
-                )?;
-                ctx.record_copy_done(event_slot)?;
-                ctx.wait_for_copy(event_slot)?;
+                if needs_staging_copy {
+                    ctx.async_copy_to_device(
+                        host_buffer.ptr() as *const c_void,
+                        dev_ptr as *mut c_void,
+                        current_len,
+                    )?;
+                    ctx.record_copy_done(event_slot)?;
+                    ctx.wait_for_copy(event_slot)?;
+                }
 
                 // Calculate output offset
                 let offset_elements =
@@ -255,7 +265,9 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
                     global_sample_offset,
                 )?;
 
-                ctx.sync_copy_stream()?;
+                if needs_staging_copy {
+                    ctx.sync_copy_stream()?;
+                }
             }
 
             global_sample_offset = global_sample_offset
