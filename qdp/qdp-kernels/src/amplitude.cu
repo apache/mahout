@@ -549,6 +549,6 @@ int convert_state_to_float(
 
 // TODO: Future encoding methods:
 // - launch_angle_encode (angle encoding)
-// - launch_iqp_encode (IQP encoding)
+// NOTE: IQP encoding is implemented in iqp.cu
 
 } // extern "C"

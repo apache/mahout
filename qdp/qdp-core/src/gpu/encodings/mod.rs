@@ -24,7 +24,7 @@ use crate::preprocessing::Preprocessor;
 use cudarc::driver::CudaDevice;
 
 /// Quantum encoding strategy interface
-/// Implemented by: AmplitudeEncoder, AngleEncoder, BasisEncoder
+/// Implemented by: AmplitudeEncoder, AngleEncoder, BasisEncoder, IqpEncoder
 pub trait QuantumEncoder: Send + Sync {
     /// Encode classical data to quantum state on GPU
     fn encode(
@@ -65,19 +65,24 @@ pub trait QuantumEncoder: Send + Sync {
 pub mod amplitude;
 pub mod angle;
 pub mod basis;
+pub mod iqp;
 
 pub use amplitude::AmplitudeEncoder;
 pub use angle::AngleEncoder;
 pub use basis::BasisEncoder;
+pub use iqp::{IqpEncoder, IqpEntanglement};
 
-/// Create encoder by name: "amplitude", "angle", or "basis"
+/// Create encoder by name: "amplitude", "angle", "basis", "iqp", "iqp_linear", "iqp_full"
 pub fn get_encoder(name: &str) -> Result<Box<dyn QuantumEncoder>> {
     match name.to_lowercase().as_str() {
         "amplitude" => Ok(Box::new(AmplitudeEncoder)),
         "angle" => Ok(Box::new(AngleEncoder)),
         "basis" => Ok(Box::new(BasisEncoder)),
+        "iqp" | "iqp_none" => Ok(Box::new(IqpEncoder::no_entanglement())),
+        "iqp_linear" => Ok(Box::new(IqpEncoder::linear())),
+        "iqp_full" => Ok(Box::new(IqpEncoder::full())),
         _ => Err(crate::error::MahoutError::InvalidInput(format!(
-            "Unknown encoder: {}. Available: amplitude, angle, basis",
+            "Unknown encoder: {}. Available: amplitude, angle, basis, iqp, iqp_linear, iqp_full",
             name
         ))),
     }
