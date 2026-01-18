@@ -136,8 +136,11 @@ class TestIqpEncodingBasic:
         reference = iqp_reference_none(np.array(data), num_qubits)
 
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="IQP encoding (no entanglement) mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="IQP encoding (no entanglement) mismatch",
         )
 
         # Check normalization
@@ -158,8 +161,11 @@ class TestIqpEncodingBasic:
         reference = iqp_reference_linear(np.array(data), num_qubits)
 
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="IQP encoding (linear entanglement) mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="IQP encoding (linear entanglement) mismatch",
         )
 
     def test_iqp_full_entanglement(self, engine_float64):
@@ -174,8 +180,11 @@ class TestIqpEncodingBasic:
         reference = iqp_reference_full(np.array(data), num_qubits)
 
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="IQP encoding (full entanglement) mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="IQP encoding (full entanglement) mismatch",
         )
 
 
@@ -195,8 +204,11 @@ class TestIqpEncodingInputTypes:
         reference = iqp_reference_none(data, num_qubits)
 
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="IQP encoding with NumPy input mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="IQP encoding with NumPy input mismatch",
         )
 
     def test_pytorch_tensor_input(self, engine_float64):
@@ -211,8 +223,11 @@ class TestIqpEncodingInputTypes:
         reference = iqp_reference_none(data.numpy(), num_qubits)
 
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="IQP encoding with PyTorch input mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="IQP encoding with PyTorch input mismatch",
         )
 
 
@@ -222,11 +237,13 @@ class TestIqpBatchEncoding:
 
     def test_batch_encoding_no_entanglement(self, engine_float64):
         """Test IQP batch encoding with 2D NumPy array."""
-        batch_data = np.array([
-            [0.1, 0.2],
-            [0.5, 0.6],
-            [1.0, 1.5],
-        ])
+        batch_data = np.array(
+            [
+                [0.1, 0.2],
+                [0.5, 0.6],
+                [1.0, 1.5],
+            ]
+        )
         num_qubits = 2
         state_len = 1 << num_qubits
 
@@ -242,16 +259,21 @@ class TestIqpBatchEncoding:
         for i in range(3):
             reference = iqp_reference_none(batch_data[i], num_qubits)
             np.testing.assert_allclose(
-                gpu_np[i], reference, rtol=0, atol=FLOAT64_TOLERANCE,
-                err_msg=f"Batch sample {i} mismatch"
+                gpu_np[i],
+                reference,
+                rtol=0,
+                atol=FLOAT64_TOLERANCE,
+                err_msg=f"Batch sample {i} mismatch",
             )
 
     def test_batch_encoding_full_entanglement(self, engine_float64):
         """Test IQP batch encoding with full entanglement."""
-        batch_data = np.array([
-            [0.2, 0.3, 0.4],
-            [0.5, 0.6, 0.7],
-        ])
+        batch_data = np.array(
+            [
+                [0.2, 0.3, 0.4],
+                [0.5, 0.6, 0.7],
+            ]
+        )
         num_qubits = 3
         state_len = 1 << num_qubits
 
@@ -269,8 +291,11 @@ class TestIqpBatchEncoding:
         for i in range(2):
             reference = iqp_reference_full(batch_data[i], num_qubits)
             np.testing.assert_allclose(
-                gpu_np[i], reference, rtol=0, atol=FLOAT64_TOLERANCE,
-                err_msg=f"Batch sample {i} mismatch"
+                gpu_np[i],
+                reference,
+                rtol=0,
+                atol=FLOAT64_TOLERANCE,
+                err_msg=f"Batch sample {i} mismatch",
             )
 
 
@@ -340,8 +365,11 @@ class TestIqpEncodingEdgeCases:
         # Full comparison against reference
         reference = iqp_reference_linear(data, num_qubits)
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="Large state IQP encoding mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="Large state IQP encoding mismatch",
         )
 
     def test_negative_input_values(self, engine_float64):
@@ -356,8 +384,11 @@ class TestIqpEncodingEdgeCases:
         reference = iqp_reference_none(data, num_qubits)
 
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="IQP encoding with negative values mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="IQP encoding with negative values mismatch",
         )
 
     def test_features_more_than_qubits(self, engine_float64):
@@ -373,8 +404,11 @@ class TestIqpEncodingEdgeCases:
         reference = iqp_reference_none(data, num_qubits)
 
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="IQP encoding with features > qubits mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="IQP encoding with features > qubits mismatch",
         )
 
     def test_features_fewer_than_qubits(self, engine_float64):
@@ -389,8 +423,11 @@ class TestIqpEncodingEdgeCases:
         reference = iqp_reference_none(data, num_qubits)
 
         np.testing.assert_allclose(
-            gpu_np, reference, rtol=0, atol=FLOAT64_TOLERANCE,
-            err_msg="IQP encoding with features < qubits mismatch"
+            gpu_np,
+            reference,
+            rtol=0,
+            atol=FLOAT64_TOLERANCE,
+            err_msg="IQP encoding with features < qubits mismatch",
         )
 
 
