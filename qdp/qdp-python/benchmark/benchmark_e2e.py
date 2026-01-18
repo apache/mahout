@@ -107,8 +107,8 @@ def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude"):
 
     # Save as Arrow IPC (FixedSizeList format for Mahout)
     if encoding_method == "basis":
-        # For basis encoding, create a simple array of indices
-        arr = pa.array(all_data.flatten(), type=pa.float64())
+        # For basis encoding, use FixedSizeList(len=1) for Mahout Arrow reader compatibility
+        arr = pa.FixedSizeListArray.from_arrays(pa.array(all_data.flatten()), 1)
         arrow_table = pa.table({"data": arr})
     else:
         # For amplitude encoding, use FixedSizeList format
