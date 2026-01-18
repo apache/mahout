@@ -28,7 +28,7 @@ jobs:
       - name: Set up Python with uv
         uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           enable-cache: true
 
       - name: Install dependencies
@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Jupyter Notebooks
         run: |
-          for nb in examples/*.ipynb; do
+          for nb in $(find . -name '*.ipynb'); do
             echo "Executing $nb"
             uv run jupyter execute "$nb" --inplace
           done
