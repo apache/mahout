@@ -96,6 +96,7 @@ Create a pull request on GitHub. Please follow the [pull request template](.gith
 ## 3. Project Structure
 
 - `qumat/` - Core library code
+- `qdp/` - QDP (Quantum Data Plane)
 - `docs/` - Documentation
 - `examples/` - Examples and Jupyter notebooks
 - `testing/` - Test files (using pytest)
