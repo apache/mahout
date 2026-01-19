@@ -67,7 +67,7 @@ repos:
         args: ['--manifest-path', 'qdp/Cargo.toml', '--all']
   - repo: local
     hooks:
-      - id: cargo-clippy
+      - id: clippy
         name: cargo clippy
         language: system
         pass_filenames: false
