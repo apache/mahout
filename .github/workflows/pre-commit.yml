@@ -41,16 +41,9 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        run: uv sync --group dev
-
-      - name: Install libtorch (CPU)
-        run: |
-          set -euo pipefail
-          libtorch_version="2.2.0"
-          libtorch_zip="libtorch-cxx11-abi-shared-with-deps-${libtorch_version}%2Bcpu.zip"
-          curl -L -o libtorch.zip "https://download.pytorch.org/libtorch/cpu/${libtorch_zip}"
-          unzip -q libtorch.zip
-          echo "LIBTORCH=${GITHUB_WORKSPACE}/libtorch" >> "$GITHUB_ENV"
+        run: uv sync --extra qdp --group dev
 
       - name: Run pre-commit hooks
         run: uv run pre-commit run --all-files
+        env:
+          LIBTORCH_USE_PYTORCH: 1
