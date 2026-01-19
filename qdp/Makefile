@@ -2,27 +2,11 @@
 
 help:
 	@echo "Available targets:"
-	@echo "  make install             - Install the mahout python package"
-	@echo "  make install_profile     - Install the mahout python package with profiling support (observability features)"
-	@echo "  make install_benchmark   - Install benchmark dependencies"
 	@echo "  make build               - Build qdp-core"
 	@echo "  make build_nvtx_profile  - Build qdp-core with observability features"
 	@echo "  make run_nvtx_profile    - Build example, run with nsys, and show stats (EXAMPLE=nvtx_profile)"
-	@echo "  make test                - Run all unit tests (Python + Rust)"
-	@echo "  make test_python         - Run Python unit tests only"
 	@echo "  make test_rust           - Run Rust unit tests only"
-	@echo "  make benchmark           - Run all e2e benchmark tests"
 	@echo "  make clean               - Clean build artifacts"
-
-install:
-	@echo "Installing mahout python package..."
-	cd qdp-python && uv sync --group dev
-	cd qdp-python && uv run maturin develop
-
-install_profile:
-	@echo "Installing mahout python package with profiling support..."
-	cd qdp-python && uv sync --group dev
-	cd qdp-python && uv run maturin develop --release --features observability
 
 build:
 	@echo "Building qdp-core..."
@@ -32,23 +16,9 @@ build_nvtx_profile:
 	@echo "Building qdp-core with observability features..."
 	cargo build -p qdp-core --features observability --release
 
-test: test_python test_rust
-
-test_python:
-	@echo "Running Python unit tests..."
-	cd qdp-python && uv run pytest tests/
-
 test_rust:
 	@echo "Running Rust unit tests..."
 	cargo test --workspace
-
-install_benchmark:
-	cd qdp-python && uv sync --group benchmark
-
-benchmark: install install_benchmark
-	@echo "Running e2e benchmark tests..."
-	uv run python qdp-python/benchmark/benchmark_e2e.py
-	uv run python qdp-python/benchmark/benchmark_throughput.py
 
 run_nvtx_profile:
 	$(eval EXAMPLE ?= nvtx_profile)
