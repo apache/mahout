@@ -69,11 +69,15 @@ git push
 
 ### 2.3 Test
 
-Run the test suite using pytest:
+The project uses a unified test workflow with pytest. Tests are organized in the `testing/` directory.
 
-```bash
-pytest
-```
+**Test Structure:**
+- `testing/qumat/` - Tests for the Qumat quantum computing library
+- `testing/qdp/` - Tests for the Quantum Data Plane (GPU-accelerated, auto-skipped if extension unavailable)
+- `testing/utils/` - Shared test utilities and helpers
+- `testing/conftest.py` - Pytest configuration with shared fixtures
+
+See [testing/README.md](testing/README.md) for detailed testing documentation.
 
 ### 2.4 Pre-commit Checks
 
