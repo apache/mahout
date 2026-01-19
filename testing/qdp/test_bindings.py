@@ -406,7 +406,9 @@ def test_angle_encode_nonzero_angles():
     torch_tensor = torch.from_dlpack(qtensor)
 
     expected = torch.tensor([[0.0 + 0j, 1.0 + 0j, 0.0 + 0j, 0.0 + 0j]], device="cuda:0")
-    assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6)
+    assert torch.allclose(
+        torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6
+    )
 
 
 @pytest.mark.gpu
@@ -434,7 +436,9 @@ def test_angle_encode_batch():
         ],
         device="cuda:0",
     )
-    assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6)
+    assert torch.allclose(
+        torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6
+    )
 
 
 @pytest.mark.gpu
