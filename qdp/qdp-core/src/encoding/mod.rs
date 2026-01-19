@@ -20,10 +20,43 @@ mod amplitude;
 mod basis;
 
 use std::ffi::c_void;
+use std::sync::Arc;
 use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
-use std::thread;
+use std::thread::{self, JoinHandle};
 
-use cudarc::driver::DevicePtr;
+use cudarc::driver::{CudaDevice, DevicePtr};
+
+/// Guard that ensures GPU synchronization and IO thread cleanup on drop.
+/// Used to handle early returns in `stream_encode`.
+struct CleanupGuard<'a> {
+    device: &'a Arc<CudaDevice>,
+    io_handle: Option<JoinHandle<()>>,
+}
+
+impl<'a> CleanupGuard<'a> {
+    fn new(device: &'a Arc<CudaDevice>, io_handle: JoinHandle<()>) -> Self {
+        Self {
+            device,
+            io_handle: Some(io_handle),
+        }
+    }
+
+    /// Defuse the guard and return the IO handle for explicit cleanup.
+    /// After calling this, drop() will not perform cleanup.
+    fn defuse(mut self) -> JoinHandle<()> {
+        self.io_handle.take().expect("IO handle already taken")
+    }
+}
+
+impl Drop for CleanupGuard<'_> {
+    fn drop(&mut self) {
+        // Best-effort cleanup on early return
+        let _ = self.device.synchronize();
+        if let Some(handle) = self.io_handle.take() {
+            let _ = handle.join();
+        }
+    }
+}
 
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::PipelineContext;
@@ -180,6 +213,9 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
         }
     });
 
+    // Create cleanup guard to ensure resources are released on early return
+    let cleanup_guard = CleanupGuard::new(&engine.device, io_handle);
+
     // Main processing loop
     let mut global_sample_offset: usize = 0;
     let mut use_dev_a = true;
@@ -284,7 +320,9 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
         let _ = empty_buf_tx.send(host_buffer);
     }
 
-    // Cleanup
+    // Defuse guard for explicit cleanup with proper error handling
+    let io_handle = cleanup_guard.defuse();
+
     engine
         .device
         .synchronize()
