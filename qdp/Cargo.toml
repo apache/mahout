@@ -36,7 +36,7 @@ prost = "0.12"
 prost-build = "0.12"
 bytes = "1.5"
 # PyTorch tensor loading (optional)
-tch = "0.15"
+tch = "0.22"
 # Optional: vendored protoc to avoid build failures when protoc is missing
 protoc-bin-vendored = "3"
 

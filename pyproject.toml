@@ -24,8 +24,9 @@ dev = [
     "pre-commit>=3.0.0",
     "maturin>=1.10.2",
     "patchelf>=0.17.2.4",
-    "torch>=2.2",
+    "torch>=2.2,<=2.9.0",
     "numpy>=1.24,<2.0",
+    "setuptools>=80.9.0",
 ]
 
 [tool.uv]
