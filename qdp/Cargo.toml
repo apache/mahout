@@ -37,6 +37,8 @@ prost-build = "0.12"
 bytes = "1.5"
 # PyTorch tensor loading (optional)
 tch = "0.22"
+# Memory-mapped IO for large NumPy files
+memmap2 = "0.9"
 # Optional: vendored protoc to avoid build failures when protoc is missing
 protoc-bin-vendored = "3"
 

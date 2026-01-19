@@ -260,6 +260,24 @@ pub fn read_numpy_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usi
     reader.read_batch()
 }
 
+/// Reads batch data from a NumPy .npy file using streaming IO.
+///
+/// Avoids the intermediate `Array2` allocation used by `read_numpy_batch`.
+pub fn read_numpy_streaming_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
+    use crate::reader::DataReader;
+    let mut reader = crate::readers::NumpyStreamingReader::new(path)?;
+    reader.read_batch()
+}
+
+/// Reads batch data from a NumPy .npy file using memory-mapped IO.
+///
+/// Useful for large files when you want OS-managed paging.
+pub fn read_numpy_mmap_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
+    use crate::reader::DataReader;
+    let mut reader = crate::readers::NumpyMmapReader::new(path)?;
+    reader.read_batch()
+}
+
 /// Reads batch data from a PyTorch .pt/.pth file.
 ///
 /// Expects a 1D or 2D tensor saved with `torch.save`.

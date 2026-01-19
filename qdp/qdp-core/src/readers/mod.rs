@@ -22,7 +22,7 @@
 //! # Fully Implemented Formats
 //! - **Parquet**: [`ParquetReader`], [`ParquetStreamingReader`]
 //! - **Arrow IPC**: [`ArrowIPCReader`]
-//! - **NumPy**: [`NumpyReader`]
+//! - **NumPy**: [`NumpyReader`], [`NumpyStreamingReader`], [`NumpyMmapReader`]
 //! - **TensorFlow TensorProto**: [`TensorFlowReader`]
 //! - **PyTorch**: [`TorchReader`] (feature: `pytorch`)
 
@@ -33,7 +33,7 @@ pub mod tensorflow;
 pub mod torch;
 
 pub use arrow_ipc::ArrowIPCReader;
-pub use numpy::NumpyReader;
+pub use numpy::{NumpyMmapReader, NumpyReader, NumpyStreamingReader};
 pub use parquet::{ParquetReader, ParquetStreamingReader};
 pub use tensorflow::TensorFlowReader;
 pub use torch::TorchReader;
