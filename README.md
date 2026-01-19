@@ -47,7 +47,7 @@ uv sync                     # Core Qumat
 uv sync --extra qdp         # With QDP (requires CUDA GPU)
 ```
 
-### Qumat: Run a quantum circuit
+### Qumat: Run a Quantum Circuit
 
 ```python
 from qumat import QuMat
@@ -59,7 +59,7 @@ qumat.apply_cnot_gate(0, 1)
 qumat.execute_circuit()
 ```
 
-### QDP: Encode data for quantum ML
+### QDP: Encode data for Quantum ML
 
 ```python
 import qumat.qdp as qdp
