@@ -47,7 +47,7 @@ impl QuantumEncoder for AngleEncoder {
 
         #[cfg(target_os = "linux")]
         {
-            let input_bytes = data.len() * std::mem::size_of::<f64>();
+            let input_bytes = std::mem::size_of_val(data);
             let angles_gpu = {
                 crate::profile_scope!("GPU::H2D_Angles");
                 device.htod_sync_copy(data).map_err(|e| {
@@ -158,7 +158,7 @@ impl QuantumEncoder for AngleEncoder {
             GpuStateVector::new_batch(device, num_samples, num_qubits)?
         };
 
-        let input_bytes = batch_data.len() * std::mem::size_of::<f64>();
+        let input_bytes = std::mem::size_of_val(batch_data);
         let angles_gpu = {
             crate::profile_scope!("GPU::H2D_BatchAngles");
             device.htod_sync_copy(batch_data).map_err(|e| {
