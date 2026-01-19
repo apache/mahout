@@ -5,6 +5,7 @@ build-backend = "maturin"
 [project]
 name = "qumat-qdp"
 requires-python = ">=3.10,<3.13"
+dependencies = ["qumat>0.4.0"]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -26,6 +27,9 @@ benchmark = [
     "tqdm",
     "matplotlib",
 ]
+
+[tool.uv.sources]
+qumat = { path = "../..", editable = true }
 
 [[tool.uv.index]]
 name = "pytorch"
