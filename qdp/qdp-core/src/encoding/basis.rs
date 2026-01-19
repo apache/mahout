@@ -138,10 +138,11 @@ impl ChunkEncoder for BasisEncoder {
                 state.indices_cpu.push(index);
             }
 
-            // Copy indices to pre-allocated GPU buffer
+            // Copy indices to pre-allocated GPU buffer (slice to match actual chunk size)
+            let mut gpu_slice = state.indices_gpu.slice_mut(0..samples_in_chunk);
             engine
                 .device
-                .htod_sync_copy_into(&state.indices_cpu, &mut state.indices_gpu)
+                .htod_sync_copy_into(&state.indices_cpu, &mut gpu_slice)
                 .map_err(|e| {
                     MahoutError::MemoryAllocation(format!(
                         "Failed to upload basis indices to GPU: {:?}",

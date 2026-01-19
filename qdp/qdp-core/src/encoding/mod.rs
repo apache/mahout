@@ -148,11 +148,19 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     const PIPELINE_EVENT_SLOTS: usize = 2;
     let ctx = PipelineContext::new(&engine.device, PIPELINE_EVENT_SLOTS)?;
 
-    // Double-buffered device staging
-    let dev_in_a = unsafe { engine.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-        .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-    let dev_in_b = unsafe { engine.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-        .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+    // Check if encoder needs staging buffers before allocating
+    let needs_staging_copy = encoder.needs_staging_copy();
+
+    // Double-buffered device staging (only allocated if needed)
+    let dev_staging = if needs_staging_copy {
+        let dev_in_a = unsafe { engine.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+            .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+        let dev_in_b = unsafe { engine.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+            .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+        Some((dev_in_a, dev_in_b))
+    } else {
+        None
+    };
 
     // Channel setup for async IO
     let (full_buf_tx, full_buf_rx): FullBufferChannel = sync_channel(2);
@@ -173,7 +181,6 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     let mut encoder_state = encoder.init_state(engine, sample_size, num_qubits)?;
 
     let state_len = 1 << num_qubits;
-    let needs_staging_copy = encoder.needs_staging_copy();
 
     // Send first buffer to processing
     full_buf_tx
@@ -241,17 +248,23 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
         let samples_in_chunk = current_len / sample_size;
         if samples_in_chunk > 0 {
             let event_slot = if use_dev_a { 0 } else { 1 };
-            let dev_ptr = if use_dev_a {
-                *dev_in_a.device_ptr()
-            } else {
-                *dev_in_b.device_ptr()
-            };
+            // Get device pointer from staging buffers (0 if not allocated)
+            let dev_ptr = dev_staging
+                .as_ref()
+                .map(|(a, b)| {
+                    if use_dev_a {
+                        *a.device_ptr()
+                    } else {
+                        *b.device_ptr()
+                    }
+                })
+                .unwrap_or(0);
 
             unsafe {
                 crate::profile_scope!("GPU::Dispatch");
 
-                // Async copy to device
-                if needs_staging_copy {
+                // Async copy to device (only if staging buffers are allocated)
+                if dev_staging.is_some() {
                     ctx.async_copy_to_device(
                         host_buffer.ptr() as *const c_void,
                         dev_ptr as *mut c_void,
@@ -301,7 +314,7 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
                     global_sample_offset,
                 )?;
 
-                if needs_staging_copy {
+                if dev_staging.is_some() {
                     ctx.sync_copy_stream()?;
                 }
             }
