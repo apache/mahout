@@ -45,5 +45,3 @@ jobs:
 
       - name: Run pre-commit hooks
         run: uv run pre-commit run --all-files
-        env:
-          LIBTORCH_USE_PYTORCH: 1

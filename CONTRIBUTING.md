@@ -81,12 +81,6 @@ See [testing/README.md](testing/README.md) for detailed testing documentation.
 
 ### 2.4 Pre-commit Checks
 
-Set the environment variable for PyTorch detection (required for Rust clippy):
-
-```bash
-export LIBTORCH_USE_PYTORCH=1
-```
-
 Run pre-commit hooks:
 
 ```bash

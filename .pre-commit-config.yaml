@@ -65,13 +65,18 @@ repos:
       - id: fmt
         pass_filenames: false
         args: ['--manifest-path', 'qdp/Cargo.toml', '--all']
+  - repo: local
+    hooks:
       - id: clippy
-        # clippy needs context of the whole crate to compile correctly
+        name: cargo clippy
+        language: system
         pass_filenames: false
-        args: [
-          '--manifest-path', 'qdp/Cargo.toml',
-          '--all-targets',
-          '--all-features',
-          '--',
-          '-D', 'warnings'
-        ]
+        entry: bash -c 'LIBTORCH_USE_PYTORCH=1 cargo clippy "$@"' --
+        args:
+          - --manifest-path
+          - qdp/Cargo.toml
+          - --all-targets
+          - --all-features
+          - --
+          - -D
+          - warnings
