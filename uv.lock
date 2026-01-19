@@ -1662,7 +1662,7 @@ wheels = [
 
 [[package]]
 name = "qumat"
-version = "0.4"
+version = "0.5.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "amazon-braket-sdk" },
@@ -1715,8 +1715,12 @@ dev = [
 [[package]]
 name = "qumat-qdp"
 source = { editable = "qdp/qdp-python" }
+dependencies = [
+    { name = "qumat" },
+]
 
 [package.metadata]
+requires-dist = [{ name = "qumat", editable = "." }]
 
 [package.metadata.requires-dev]
 benchmark = [
