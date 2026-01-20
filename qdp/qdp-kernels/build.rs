@@ -27,14 +27,25 @@ use std::env;
 use std::process::Command;
 
 fn main() {
+    // Let rustc know about our build-script-defined cfg flags (avoids `unexpected_cfgs` warnings).
+    println!("cargo::rustc-check-cfg=cfg(qdp_no_cuda)");
+
     // Tell Cargo to rerun this script if the kernel sources change
     println!("cargo:rerun-if-changed=src/amplitude.cu");
     println!("cargo:rerun-if-changed=src/basis.cu");
+    println!("cargo:rerun-if-env-changed=QDP_NO_CUDA");
 
     // Check if CUDA is available by looking for nvcc
-    let has_cuda = Command::new("nvcc").arg("--version").output().is_ok();
+    let force_no_cuda = env::var("QDP_NO_CUDA")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true") || v.eq_ignore_ascii_case("yes"))
+        .unwrap_or(false);
+
+    let has_cuda = !force_no_cuda && Command::new("nvcc").arg("--version").output().is_ok();
 
     if !has_cuda {
+        // Expose a cfg for conditional compilation of stub symbols on Linux.
+        // This allows qdp-kernels (and dependents) to link on Linux machines without CUDA.
+        println!("cargo:rustc-cfg=qdp_no_cuda");
         println!("cargo:warning=CUDA not found (nvcc not in PATH). Skipping kernel compilation.");
         println!("cargo:warning=This is expected on macOS or non-CUDA environments.");
         println!(
