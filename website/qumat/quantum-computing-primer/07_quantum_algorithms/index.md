@@ -118,7 +118,7 @@ print(result)
 ```
 
 ### Explanation
-- The oracle marks the desired state (e.g., $|110\rangle$).
+- The oracle marks the desired state (e.g., $\vert 110\rangle$).
 - The diffusion operator amplifies the probability of measuring the marked state.
 - After running the algorithm, the marked state will have a higher probability of being measured.
 

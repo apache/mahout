@@ -30,9 +30,9 @@ Python (qumat.qdp)  →  _qdp (PyO3)  →  qdp-core (Rust)  →  qdp-kernels (CU
 
 ## 2. What QDP produces: a GPU-resident state vector
 
-QDP encodes classical data into a **state vector** \(|\psi\rangle\) for \(n\) qubits.
+QDP encodes classical data into a **state vector** $\vert\psi\rangle$ for $n$ qubits.
 
-- **State length**: \(2^{n}\)
+- **State length**: $2^{n}$
 - **Type**: complex numbers (on GPU)
 - **Shape exposed via DLPack**:
   - Single sample: `[1, 2^n]` (always 2D)
@@ -54,11 +54,11 @@ QDP uses a strategy pattern for encoding methods:
 
 All encoders perform input validation (at minimum):
 
-- \(1 \le n \le 30\)
+- $1 \le n \le 30$
 - input is not empty
 - for vector-based encodings: `len(data) <= 2^n`
 
-Note: \(n=30\) is already very large—just the output state for a single sample is on the order of \(2^{30}\) complex numbers.
+Note: $n=30$ is already very large—just the output state for a single sample is on the order of $2^{30}$ complex numbers.
 
 ---
 
@@ -66,15 +66,15 @@ Note: \(n=30\) is already very large—just the output state for a single sample
 
 ### 4.1 Amplitude encoding
 
-**Goal**: represent a real-valued feature vector \(x\) as quantum amplitudes:
+**Goal**: represent a real-valued feature vector $x$ as quantum amplitudes:
 
-\[
-|\psi\rangle = \sum_{i=0}^{2^{n}-1} \frac{x_i}{\|x\|_2}\,|i\rangle
-\]
+$$
+\vert\psi\rangle = \sum_{i=0}^{2^{n}-1} \frac{x_i}{\|x\|_2}\,\vert i\rangle
+$$
 
 Key properties in QDP:
 
-- **Normalization**: QDP computes \(\|x\|_2\) and rejects zero-norm inputs.
+- **Normalization**: QDP computes $\|x\|_2$ and rejects zero-norm inputs.
 - **Padding**: if `len(x) < 2^n`, the remaining amplitudes are treated as zeros.
 - **GPU execution**: the normalization and write into the GPU state vector is performed by CUDA kernels.
 - **Batch support**: amplitude encoding supports a batch path to reduce kernel launch / allocation overhead (recommended when encoding many samples).
@@ -85,16 +85,16 @@ When to use it:
 
 Trade-offs:
 
-- Output size grows exponentially with `num_qubits` (\(2^n\)), so it can become memory-heavy quickly.
+- Output size grows exponentially with `num_qubits` ($2^n$), so it can become memory-heavy quickly.
 
 ### 4.2 Basis encoding
 
-**Goal**: map an integer index \(i\) into a computational basis state \(|i\rangle\).
+**Goal**: map an integer index $i$ into a computational basis state $\vert i\rangle$.
 
-For \(n\) qubits with \(0 \le i < 2^n\):
+For $n$ qubits with $0 \le i < 2^n$:
 
-- \(\psi[i] = 1\)
-- \(\psi[j] = 0\) for all \(j \ne i\)
+- $\psi[i] = 1$
+- $\psi[j] = 0$ for all $j \ne i$
 
 Key properties in QDP:
 
@@ -110,7 +110,7 @@ When to use it:
 
 ### 4.3 Angle encoding (planned)
 
-Angle encoding typically maps features to rotation angles (e.g., via \(R_x(\theta)\), \(R_y(\theta)\), \(R_z(\theta)\)) and constructs a state by applying rotations across qubits.
+Angle encoding typically maps features to rotation angles (e.g., via $R_x(\theta)$, $R_y(\theta)$, $R_z(\theta)$) and constructs a state by applying rotations across qubits.
 
 **Current status in this codebase**:
 
@@ -125,12 +125,12 @@ QDP is designed to keep the encoded states on the GPU and to avoid unnecessary a
 
 ### 5.1 Output state vector allocation
 
-For each encoded sample, QDP allocates a state vector of size \(2^n\). Memory usage grows exponentially:
+For each encoded sample, QDP allocates a state vector of size $2^n$. Memory usage grows exponentially:
 
 - complex128 uses 16 bytes per element
 - rough output size (single sample) is:
-  - \(2^n \times 16\) bytes for complex128
-  - \(2^n \times 8\) bytes for complex64
+  - $2^n \times 16$ bytes for complex128
+  - $2^n \times 8$ bytes for complex64
 
 QDP performs **pre-flight checks** before large allocations to fail fast with an OOM-aware message (e.g., suggesting smaller `num_qubits` or batch size).
 
@@ -174,7 +174,7 @@ Conceptually:
 1. Rust allocates GPU memory for the state vector.
 2. Rust wraps it into a DLPack `DLManagedTensor`.
 3. Python returns an object that implements `__dlpack__`.
-4. PyTorch calls `torch.from_dlpack(qtensor)` and takes ownership via DLPack’s deleter.
+4. PyTorch calls `torch.from_dlpack(qtensor)` and takes ownership via DLPack's deleter.
 
 Important details:
 
@@ -194,7 +194,7 @@ Important details:
 ### 7.2 Choosing parameters wisely
 
 - **Prefer batch encoding** when encoding many samples (lower overhead, better GPU utilization).
-- **Keep `num_qubits` realistic**. Output size is \(2^n\) and becomes the dominant cost quickly.
+- **Keep `num_qubits` realistic**. Output size is $2^n$ and becomes the dominant cost quickly.
 - **Pick the right encoding**:
   - amplitude: dense real-valued vectors
   - basis: discrete indices / categorical states

@@ -24,14 +24,15 @@
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{'/feed.xml' | relative_url }}">
 
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML">
+  <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       "HTML-CSS": {
         availableFonts: ["TeX"],
       },
       tex2jax: {
-        inlineMath: [['$','$'],["\\(","\\)"]]},
-      displayMath: [ ['$$','$$'], ['\[','\]'] ],
+        inlineMath: [['$','$'],["\\(","\\)"]],
+        displayMath: [['$$','$$'],['\\[','\\]']]
+      },
       TeX: {
         extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
         equationNumbers: {
@@ -44,4 +45,5 @@
       "AssistiveMML": { disabled: true }
     });
   </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
