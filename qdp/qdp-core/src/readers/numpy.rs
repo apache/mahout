@@ -37,7 +37,6 @@ struct NpyHeader {
     num_samples: usize,
     sample_size: usize,
     data_offset: u64,
-    data_len_bytes: usize,
 }
 
 impl NpyHeader {
@@ -76,9 +75,9 @@ fn parse_quoted_value(header: &str, key: &str) -> Result<String> {
         )));
     }
     let rest = &rest[1..];
-    let end = rest.find(quote).ok_or_else(|| {
-        MahoutError::InvalidInput(format!("Unterminated string for '{}'", key))
-    })?;
+    let end = rest
+        .find(quote)
+        .ok_or_else(|| MahoutError::InvalidInput(format!("Unterminated string for '{}'", key)))?;
     Ok(rest[..end].to_string())
 }
 
@@ -100,11 +99,13 @@ fn parse_shape_value(header: &str, key: &str) -> Result<Vec<usize>> {
     let rest = parse_header_value(header, key)?;
     let rest = rest.trim_start();
     if !rest.starts_with('(') {
-        return Err(MahoutError::InvalidInput("Malformed shape in .npy header".to_string()));
+        return Err(MahoutError::InvalidInput(
+            "Malformed shape in .npy header".to_string(),
+        ));
     }
-    let end = rest.find(')').ok_or_else(|| {
-        MahoutError::InvalidInput("Malformed shape in .npy header".to_string())
-    })?;
+    let end = rest
+        .find(')')
+        .ok_or_else(|| MahoutError::InvalidInput("Malformed shape in .npy header".to_string()))?;
     let inner = &rest[1..end];
     let mut dims = Vec::new();
     for part in inner.split(',') {
@@ -127,7 +128,9 @@ fn parse_shape_value(header: &str, key: &str) -> Result<Vec<usize>> {
 
 fn validate_descr(descr: &str) -> Result<()> {
     let (endian, typecode) = match descr.chars().next() {
-        Some('<') | Some('>') | Some('|') | Some('=') => (Some(descr.chars().next().unwrap()), &descr[1..]),
+        Some('<') | Some('>') | Some('|') | Some('=') => {
+            (Some(descr.chars().next().unwrap()), &descr[1..])
+        }
         _ => (None, descr),
     };
 
@@ -186,16 +189,15 @@ fn read_npy_header(path: &Path, file: &mut File) -> Result<NpyHeader> {
             return Err(MahoutError::InvalidInput(format!(
                 "Unsupported .npy version {}.{}",
                 major, minor
-            )))
+            )));
         }
     };
 
     let mut header_bytes = vec![0u8; header_len];
     file.read_exact(&mut header_bytes)
         .map_err(|e| MahoutError::Io(format!("Failed to read NumPy header: {}", e)))?;
-    let header_str = std::str::from_utf8(&header_bytes).map_err(|e| {
-        MahoutError::InvalidInput(format!("Invalid .npy header encoding: {}", e))
-    })?;
+    let header_str = std::str::from_utf8(&header_bytes)
+        .map_err(|e| MahoutError::InvalidInput(format!("Invalid .npy header encoding: {}", e)))?;
 
     let descr = parse_quoted_value(header_str, "descr")?;
     validate_descr(&descr)?;
@@ -245,7 +247,6 @@ fn read_npy_header(path: &Path, file: &mut File) -> Result<NpyHeader> {
         num_samples,
         sample_size,
         data_offset,
-        data_len_bytes,
     })
 }
 
@@ -258,7 +259,7 @@ fn read_f64s_at(file: &mut File, offset: u64, out: &mut [f64]) -> Result<()> {
             "NumPy .npy reader only supports little-endian hosts".to_string(),
         ));
     }
-    let byte_len = out.len() * std::mem::size_of::<f64>();
+    let byte_len = std::mem::size_of_val(out);
     let out_bytes =
         unsafe { std::slice::from_raw_parts_mut(out.as_mut_ptr() as *mut u8, byte_len) };
     file.seek(SeekFrom::Start(offset))
@@ -272,7 +273,7 @@ fn copy_f64s_from_bytes(bytes: &[u8], out: &mut [f64]) -> Result<()> {
     if out.is_empty() {
         return Ok(());
     }
-    if bytes.len() != out.len() * std::mem::size_of::<f64>() {
+    if bytes.len() != std::mem::size_of_val(out) {
         return Err(MahoutError::InvalidInput(
             "Byte slice length does not match output buffer".to_string(),
         ));
@@ -284,7 +285,7 @@ fn copy_f64s_from_bytes(bytes: &[u8], out: &mut [f64]) -> Result<()> {
     }
 
     let align = std::mem::align_of::<f64>();
-    if (bytes.as_ptr() as usize) % align == 0 {
+    if (bytes.as_ptr() as usize).is_multiple_of(align) {
         let src = unsafe { std::slice::from_raw_parts(bytes.as_ptr() as *const f64, out.len()) };
         out.copy_from_slice(src);
         return Ok(());
@@ -431,7 +432,6 @@ impl DataReader for NumpyReader {
 ///
 /// Reads data in chunks without loading the entire file into memory.
 pub struct NumpyStreamingReader {
-    path: PathBuf,
     file: File,
     header: NpyHeader,
     row_cursor: usize,
@@ -465,7 +465,6 @@ impl NumpyStreamingReader {
         let header = read_npy_header(path, &mut file)?;
 
         Ok(Self {
-            path: path.to_path_buf(),
             file,
             header,
             row_cursor: 0,
@@ -490,11 +489,7 @@ impl DataReader for NumpyStreamingReader {
             data.truncate(written);
         }
 
-        Ok((
-            data,
-            self.header.num_samples,
-            self.header.sample_size,
-        ))
+        Ok((data, self.header.num_samples, self.header.sample_size))
     }
 
     fn get_sample_size(&self) -> Option<usize> {
@@ -558,7 +553,6 @@ impl StreamingDataReader for NumpyStreamingReader {
 ///
 /// Maps the file into memory and streams slices without an extra read + flatten pass.
 pub struct NumpyMmapReader {
-    path: PathBuf,
     mmap: Mmap,
     header: NpyHeader,
     row_cursor: usize,
@@ -596,7 +590,6 @@ impl NumpyMmapReader {
         };
 
         Ok(Self {
-            path: path.to_path_buf(),
             mmap,
             header,
             row_cursor: 0,
@@ -621,11 +614,7 @@ impl DataReader for NumpyMmapReader {
             data.truncate(written);
         }
 
-        Ok((
-            data,
-            self.header.num_samples,
-            self.header.sample_size,
-        ))
+        Ok((data, self.header.num_samples, self.header.sample_size))
     }
 
     fn get_sample_size(&self) -> Option<usize> {
@@ -658,8 +647,7 @@ impl StreamingDataReader for NumpyMmapReader {
         let data_base = self.header.data_offset as usize;
 
         if !self.header.fortran_order {
-            let start = data_base
-                + self.row_cursor * sample_size * std::mem::size_of::<f64>();
+            let start = data_base + self.row_cursor * sample_size * std::mem::size_of::<f64>();
             let end = start + elem_count * std::mem::size_of::<f64>();
             let bytes = &self.mmap[start..end];
             copy_f64s_from_bytes(bytes, &mut buffer[..elem_count])?;
@@ -693,8 +681,8 @@ impl StreamingDataReader for NumpyMmapReader {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ndarray::Array2;
     use crate::reader::StreamingDataReader;
+    use ndarray::Array2;
     use std::fs;
 
     #[test]
