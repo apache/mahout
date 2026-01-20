@@ -152,7 +152,7 @@ fn is_pytorch_tensor(obj: &Bound<'_, PyAny>) -> PyResult<bool> {
     Ok(module_name == "torch")
 }
 
-/// Helper to validate tensor
+/// Helper to validate CPU tensor
 fn validate_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<()> {
     if !is_pytorch_tensor(tensor)? {
         return Err(PyRuntimeError::new_err("Object is not a PyTorch Tensor"));
@@ -169,6 +169,145 @@ fn validate_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<()> {
     }
 
     Ok(())
+}
+
+/// Check if a PyTorch tensor is on a CUDA device
+fn is_cuda_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<bool> {
+    let device = tensor.getattr("device")?;
+    let device_type: String = device.getattr("type")?.extract()?;
+    Ok(device_type == "cuda")
+}
+
+/// Get the CUDA device index from a PyTorch tensor
+fn get_tensor_device_id(tensor: &Bound<'_, PyAny>) -> PyResult<i32> {
+    let device = tensor.getattr("device")?;
+    let device_index: i32 = device.getattr("index")?.extract()?;
+    Ok(device_index)
+}
+
+/// Validate a CUDA tensor for direct GPU encoding
+/// Checks: dtype=float64, contiguous, non-empty, device_id matches engine
+fn validate_cuda_tensor_for_encoding(
+    tensor: &Bound<'_, PyAny>,
+    expected_device_id: usize,
+    encoding_method: &str,
+) -> PyResult<()> {
+    // Check encoding method support (currently only amplitude is supported for CUDA tensors)
+    if encoding_method != "amplitude" {
+        return Err(PyRuntimeError::new_err(format!(
+            "CUDA tensor encoding currently only supports 'amplitude' method, got '{}'. \
+             Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
+            encoding_method
+        )));
+    }
+
+    // Check dtype is float64
+    let dtype = tensor.getattr("dtype")?;
+    let dtype_str: String = dtype.str()?.extract()?;
+    if !dtype_str.contains("float64") {
+        return Err(PyRuntimeError::new_err(format!(
+            "CUDA tensor must have dtype float64, got {}. Use tensor.to(torch.float64)",
+            dtype_str
+        )));
+    }
+
+    // Check contiguous
+    let is_contiguous: bool = tensor.call_method0("is_contiguous")?.extract()?;
+    if !is_contiguous {
+        return Err(PyRuntimeError::new_err(
+            "CUDA tensor must be contiguous. Use tensor.contiguous()",
+        ));
+    }
+
+    // Check non-empty
+    let numel: usize = tensor.call_method0("numel")?.extract()?;
+    if numel == 0 {
+        return Err(PyRuntimeError::new_err("CUDA tensor cannot be empty"));
+    }
+
+    // Check device matches engine
+    let tensor_device_id = get_tensor_device_id(tensor)?;
+    if tensor_device_id as usize != expected_device_id {
+        return Err(PyRuntimeError::new_err(format!(
+            "Device mismatch: tensor is on cuda:{}, but engine is on cuda:{}. \
+             Move tensor with tensor.to('cuda:{}')",
+            tensor_device_id, expected_device_id, expected_device_id
+        )));
+    }
+
+    Ok(())
+}
+
+/// DLPack tensor information extracted from a PyCapsule
+struct DLPackTensorInfo {
+    data_ptr: *const f64,
+    shape: Vec<i64>,
+    /// CUDA device ID from DLPack metadata.
+    /// Currently unused but kept for potential future device validation or multi-GPU support.
+    #[allow(dead_code)]
+    device_id: i32,
+}
+
+/// Extract GPU pointer from PyTorch tensor's __dlpack__() capsule
+///
+/// # Safety
+/// The returned `data_ptr` points to GPU memory owned by the source tensor.
+/// The caller must ensure the source tensor remains alive and unmodified
+/// for the entire duration that `data_ptr` is in use. Python's GIL ensures
+/// the tensor won't be garbage collected during `encode()`, but the caller
+/// must not deallocate or resize the tensor while encoding is in progress.
+fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult<DLPackTensorInfo> {
+    // Call tensor.__dlpack__() to get PyCapsule
+    // Note: PyTorch's __dlpack__ uses the default stream when called without arguments
+    let capsule = tensor.call_method0("__dlpack__")?;
+
+    // Extract the DLManagedTensor pointer from the capsule
+    const DLTENSOR_NAME: &[u8] = b"dltensor\0";
+
+    unsafe {
+        let capsule_ptr = capsule.as_ptr();
+        let managed_ptr =
+            ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
+                as *const DLManagedTensor;
+
+        if managed_ptr.is_null() {
+            return Err(PyRuntimeError::new_err(
+                "Failed to extract DLManagedTensor from PyCapsule",
+            ));
+        }
+
+        let dl_tensor = &(*managed_ptr).dl_tensor;
+
+        // Extract data pointer with null check
+        if dl_tensor.data.is_null() {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor has null data pointer",
+            ));
+        }
+        let data_ptr = dl_tensor.data as *const f64;
+
+        // Extract shape
+        let ndim = dl_tensor.ndim as usize;
+        let shape = if ndim > 0 && !dl_tensor.shape.is_null() {
+            std::slice::from_raw_parts(dl_tensor.shape, ndim).to_vec()
+        } else {
+            vec![]
+        };
+
+        // Extract device_id
+        let device_id = dl_tensor.device.device_id;
+
+        // Rename the capsule to "used_dltensor" as per DLPack protocol
+        // This prevents PyTorch from trying to delete it when the capsule is garbage collected
+        const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
+        ffi::PyCapsule_SetName(capsule_ptr, USED_DLTENSOR_NAME.as_ptr() as *const i8);
+
+        Ok(DLPackTensorInfo {
+            data_ptr,
+            shape,
+            device_id,
+        })
+    }
 }
 
 /// PyO3 wrapper for QdpEngine
@@ -321,6 +460,78 @@ impl QdpEngine {
 
         // Check if it's a PyTorch tensor
         if is_pytorch_tensor(data)? {
+            // Check if it's a CUDA tensor - use zero-copy GPU encoding
+            if is_cuda_tensor(data)? {
+                // Validate CUDA tensor for direct GPU encoding
+                validate_cuda_tensor_for_encoding(
+                    data,
+                    self.engine.device().ordinal(),
+                    encoding_method,
+                )?;
+
+                // Extract GPU pointer via DLPack
+                let dlpack_info = extract_dlpack_tensor(data.py(), data)?;
+
+                let ndim: usize = data.call_method0("dim")?.extract()?;
+
+                match ndim {
+                    1 => {
+                        // 1D CUDA tensor: single sample encoding
+                        let input_len = dlpack_info.shape[0] as usize;
+                        // SAFETY: dlpack_info.data_ptr was validated via DLPack protocol from a
+                        // valid PyTorch CUDA tensor. The tensor remains alive during this call
+                        // (held by Python's GIL), and we validated dtype/contiguity/device above.
+                        let ptr = unsafe {
+                            self.engine
+                                .encode_from_gpu_ptr(
+                                    dlpack_info.data_ptr,
+                                    input_len,
+                                    num_qubits,
+                                    encoding_method,
+                                )
+                                .map_err(|e| {
+                                    PyRuntimeError::new_err(format!("Encoding failed: {}", e))
+                                })?
+                        };
+                        return Ok(QuantumTensor {
+                            ptr,
+                            consumed: false,
+                        });
+                    }
+                    2 => {
+                        // 2D CUDA tensor: batch encoding
+                        let num_samples = dlpack_info.shape[0] as usize;
+                        let sample_size = dlpack_info.shape[1] as usize;
+                        // SAFETY: Same as above - pointer from validated DLPack tensor
+                        let ptr = unsafe {
+                            self.engine
+                                .encode_batch_from_gpu_ptr(
+                                    dlpack_info.data_ptr,
+                                    num_samples,
+                                    sample_size,
+                                    num_qubits,
+                                    encoding_method,
+                                )
+                                .map_err(|e| {
+                                    PyRuntimeError::new_err(format!("Encoding failed: {}", e))
+                                })?
+                        };
+                        return Ok(QuantumTensor {
+                            ptr,
+                            consumed: false,
+                        });
+                    }
+                    _ => {
+                        return Err(PyRuntimeError::new_err(format!(
+                            "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
+                             sample encoding or 2D tensor (batch_size, features) for batch encoding.",
+                            ndim
+                        )));
+                    }
+                }
+            }
+
+            // CPU tensor path (existing code)
             validate_tensor(data)?;
             // PERF: Avoid Tensor -> Python list -> Vec deep copies.
             //

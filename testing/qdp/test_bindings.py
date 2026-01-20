@@ -253,10 +253,314 @@ def test_encode_errors():
     with pytest.raises(RuntimeError, match="Unsupported data type"):
         engine.encode({"key": "value"}, 2, "amplitude")
 
-    # Test GPU tensor input (should fail as only CPU is supported)
-    gpu_tensor = torch.tensor([1.0, 2.0], device="cuda:0")
-    with pytest.raises(RuntimeError, match="Only CPU tensors are currently supported"):
-        engine.encode(gpu_tensor, 1, "amplitude")
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_1d():
+    """Test encoding from 1D CUDA tensor (single sample, zero-copy)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create 1D CUDA tensor
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64, device="cuda:0")
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    # Verify result
+    result = torch.from_dlpack(qtensor)
+    assert result.is_cuda
+    assert result.shape == (1, 4)  # 2^2 = 4 amplitudes
+
+    # Verify normalization (amplitudes should have unit norm)
+    norm = torch.sqrt(torch.sum(torch.abs(result) ** 2))
+    assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_2d_batch():
+    """Test encoding from 2D CUDA tensor (batch, zero-copy)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create 2D CUDA tensor (batch_size=3, features=4)
+    data = torch.tensor(
+        [[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0], [9.0, 10.0, 11.0, 12.0]],
+        dtype=torch.float64,
+        device="cuda:0",
+    )
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    # Verify result
+    result = torch.from_dlpack(qtensor)
+    assert result.is_cuda
+    assert result.shape == (3, 4)  # batch_size=3, 2^2=4
+
+    # Verify each sample is normalized
+    for i in range(3):
+        norm = torch.sqrt(torch.sum(torch.abs(result[i]) ** 2))
+        assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_wrong_dtype():
+    """Test error when CUDA tensor has wrong dtype (non-float64)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create CUDA tensor with float32 dtype (wrong)
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float32, device="cuda:0")
+    with pytest.raises(RuntimeError, match="CUDA tensor must have dtype float64"):
+        engine.encode(data, 2, "amplitude")
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_non_contiguous():
+    """Test error when CUDA tensor is non-contiguous."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create non-contiguous CUDA tensor (via transpose)
+    data = torch.tensor(
+        [[1.0, 2.0], [3.0, 4.0]], dtype=torch.float64, device="cuda:0"
+    ).t()
+    assert not data.is_contiguous()
+
+    with pytest.raises(RuntimeError, match="CUDA tensor must be contiguous"):
+        engine.encode(data, 2, "amplitude")
+
+
+@pytest.mark.gpu
+@pytest.mark.skipif(
+    not _has_multi_gpu(), reason="Multi-GPU setup required for this test"
+)
+def test_encode_cuda_tensor_device_mismatch():
+    """Test error when CUDA tensor is on wrong device (multi-GPU only)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    # Engine on device 0
+    engine = QdpEngine(0)
+
+    # Tensor on device 1 (wrong device)
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64, device="cuda:1")
+    with pytest.raises(RuntimeError, match="Device mismatch"):
+        engine.encode(data, 2, "amplitude")
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_empty():
+    """Test error when CUDA tensor is empty."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create empty CUDA tensor
+    data = torch.tensor([], dtype=torch.float64, device="cuda:0")
+    with pytest.raises(RuntimeError, match="CUDA tensor cannot be empty"):
+        engine.encode(data, 2, "amplitude")
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_preserves_input():
+    """Test that input CUDA tensor is not modified after encoding."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create CUDA tensor and save a copy
+    original_data = [1.0, 2.0, 3.0, 4.0]
+    data = torch.tensor(original_data, dtype=torch.float64, device="cuda:0")
+    data_clone = data.clone()
+
+    # Encode
+    qtensor = engine.encode(data, 2, "amplitude")
+    _ = torch.from_dlpack(qtensor)
+
+    # Verify original tensor is unchanged
+    assert torch.equal(data, data_clone)
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_unsupported_encoding():
+    """Test error when using CUDA tensor with unsupported encoding method."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # CUDA tensors currently only support amplitude encoding
+    # Use non-zero data to avoid normalization issues
+    data = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float64, device="cuda:0")
+
+    with pytest.raises(RuntimeError, match="only supports 'amplitude' method"):
+        engine.encode(data, 2, "basis")
+
+    with pytest.raises(RuntimeError, match="only supports 'amplitude' method"):
+        engine.encode(data, 2, "angle")
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_3d_rejected():
+    """Test error when CUDA tensor has 3+ dimensions."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create 3D CUDA tensor (should be rejected)
+    data = torch.randn(2, 3, 4, dtype=torch.float64, device="cuda:0")
+    with pytest.raises(RuntimeError, match="Unsupported CUDA tensor shape: 3D"):
+        engine.encode(data, 2, "amplitude")
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_zero_values():
+    """Test error when CUDA tensor contains all zeros (zero norm)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create CUDA tensor with all zeros (cannot be normalized)
+    data = torch.zeros(4, dtype=torch.float64, device="cuda:0")
+    with pytest.raises(RuntimeError, match="zero or non-finite norm"):
+        engine.encode(data, 2, "amplitude")
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_nan_values():
+    """Test error when CUDA tensor contains NaN values."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create CUDA tensor with NaN
+    data = torch.tensor(
+        [1.0, float("nan"), 3.0, 4.0], dtype=torch.float64, device="cuda:0"
+    )
+    with pytest.raises(RuntimeError, match="zero or non-finite norm"):
+        engine.encode(data, 2, "amplitude")
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_inf_values():
+    """Test error when CUDA tensor contains Inf values."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create CUDA tensor with Inf
+    data = torch.tensor(
+        [1.0, float("inf"), 3.0, 4.0], dtype=torch.float64, device="cuda:0"
+    )
+    with pytest.raises(RuntimeError, match="zero or non-finite norm"):
+        engine.encode(data, 2, "amplitude")
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_output_dtype():
+    """Test that CUDA tensor encoding produces correct output dtype."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    # Test default precision (float32 -> complex64)
+    engine_f32 = QdpEngine(0, precision="float32")
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64, device="cuda:0")
+    result = torch.from_dlpack(engine_f32.encode(data, 2, "amplitude"))
+    assert result.dtype == torch.complex64, f"Expected complex64, got {result.dtype}"
+
+    # Test float64 precision (float64 -> complex128)
+    engine_f64 = QdpEngine(0, precision="float64")
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64, device="cuda:0")
+    result = torch.from_dlpack(engine_f64.encode(data, 2, "amplitude"))
+    assert result.dtype == torch.complex128, f"Expected complex128, got {result.dtype}"
+
+
+@pytest.mark.gpu
+def test_encode_cuda_tensor_preserves_input_batch():
+    """Test that input 2D CUDA tensor (batch) is not modified after encoding."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Create 2D CUDA tensor and save a copy
+    data = torch.tensor(
+        [[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]],
+        dtype=torch.float64,
+        device="cuda:0",
+    )
+    data_clone = data.clone()
+
+    # Encode
+    qtensor = engine.encode(data, 2, "amplitude")
+    _ = torch.from_dlpack(qtensor)
+
+    # Verify original tensor is unchanged
+    assert torch.equal(data, data_clone)
 
 
 @pytest.mark.gpu
