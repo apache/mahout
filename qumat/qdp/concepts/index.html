@@ -180,7 +180,271 @@
     <div class="col-lg-8 markdown-body">
       <h1 id="core-concepts">Core Concepts</h1>
 
-<!-- TODO: Add core concepts documentation for QDP -->
+<p>This page explains the core concepts behind QDP (Quantum Data Plane): the architecture, the supported encoding methods, GPU memory management, DLPack zero-copy integration, and key performance characteristics.</p>
+
+<hr />
+
+<h2 id="1-architecture-overview">1. Architecture overview</h2>
+
+<p>At a high level, QDP is organized as layered components:</p>
+
+<ul>
+  <li><strong>Python API (Qumat)</strong>: <code class="language-plaintext highlighter-rouge">qumat.qdp</code> exposes a friendly Python entry point (<code class="language-plaintext highlighter-rouge">QdpEngine</code>).</li>
+  <li><strong>Python native extension (PyO3)</strong>: <code class="language-plaintext highlighter-rouge">qdp/qdp-python</code> builds the <code class="language-plaintext highlighter-rouge">_qdp</code> module, bridging Python ↔ Rust and implementing Python-side DLPack (<code class="language-plaintext highlighter-rouge">__dlpack__</code>).</li>
+  <li><strong>Rust core</strong>: <code class="language-plaintext highlighter-rouge">qdp/qdp-core</code> contains the engine (<code class="language-plaintext highlighter-rouge">QdpEngine</code>), encoder implementations, IO readers, GPU pipelines, and DLPack export.</li>
+  <li><strong>CUDA kernels</strong>: <code class="language-plaintext highlighter-rouge">qdp/qdp-kernels</code> provides the CUDA kernels invoked by the Rust encoders.</li>
+</ul>
+
+<p>Data flow (conceptual):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Python (qumat.qdp)  →  _qdp (PyO3)  →  qdp-core (Rust)  →  qdp-kernels (CUDA)
+        │                        │              │                 │
+        └──── torch.from_dlpack(qtensor) ◄──────┴── DLPack DLManagedTensor (GPU ptr)
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="2-what-qdp-produces-a-gpu-resident-state-vector">2. What QDP produces: a GPU-resident state vector</h2>
+
+<table>
+  <tbody>
+    <tr>
+      <td>QDP encodes classical data into a <strong>state vector</strong> (</td>
+      <td>\psi\rangle) for (n) qubits.</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li><strong>State length</strong>: (2^{n})</li>
+  <li><strong>Type</strong>: complex numbers (on GPU)</li>
+  <li><strong>Shape exposed via DLPack</strong>:
+    <ul>
+      <li>Single sample: <code class="language-plaintext highlighter-rouge">[1, 2^n]</code> (always 2D)</li>
+      <li>Batch: <code class="language-plaintext highlighter-rouge">[batch_size, 2^n]</code></li>
+    </ul>
+  </li>
+</ul>
+
+<p>QDP supports two output precisions:</p>
+
+<ul>
+  <li><strong>complex64</strong> (2×float32) when output precision is <code class="language-plaintext highlighter-rouge">float32</code></li>
+  <li><strong>complex128</strong> (2×float64) when output precision is <code class="language-plaintext highlighter-rouge">float64</code></li>
+</ul>
+
+<hr />
+
+<h2 id="3-encoder-selection-and-validation">3. Encoder selection and validation</h2>
+
+<p>QDP uses a strategy pattern for encoding methods:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">encoding_method</code> is a string, e.g. <code class="language-plaintext highlighter-rouge">"amplitude"</code>, <code class="language-plaintext highlighter-rouge">"basis"</code>, <code class="language-plaintext highlighter-rouge">"angle"</code></li>
+  <li>QDP maps it to a concrete encoder at runtime</li>
+</ul>
+
+<p>All encoders perform input validation (at minimum):</p>
+
+<ul>
+  <li>(1 \le n \le 30)</li>
+  <li>input is not empty</li>
+  <li>for vector-based encodings: <code class="language-plaintext highlighter-rouge">len(data) &lt;= 2^n</code></li>
+</ul>
+
+<p>Note: (n=30) is already very large—just the output state for a single sample is on the order of (2^{30}) complex numbers.</p>
+
+<hr />
+
+<h2 id="4-encoding-methods-amplitude-basis-angle">4. Encoding methods (amplitude, basis, angle)</h2>
+
+<h3 id="41-amplitude-encoding">4.1 Amplitude encoding</h3>
+
+<p><strong>Goal</strong>: represent a real-valued feature vector (x) as quantum amplitudes:</p>
+
+<p>[
+|\psi\rangle = \sum_{i=0}^{2^{n}-1} \frac{x_i}{|x|_2}\,|i\rangle
+]</p>
+
+<p>Key properties in QDP:</p>
+
+<ul>
+  <li><strong>Normalization</strong>: QDP computes (|x|_2) and rejects zero-norm inputs.</li>
+  <li><strong>Padding</strong>: if <code class="language-plaintext highlighter-rouge">len(x) &lt; 2^n</code>, the remaining amplitudes are treated as zeros.</li>
+  <li><strong>GPU execution</strong>: the normalization and write into the GPU state vector is performed by CUDA kernels.</li>
+  <li><strong>Batch support</strong>: amplitude encoding supports a batch path to reduce kernel launch / allocation overhead (recommended when encoding many samples).</li>
+</ul>
+
+<p>When to use it:</p>
+
+<ul>
+  <li>You have dense real-valued vectors and want a direct amplitude representation.</li>
+</ul>
+
+<p>Trade-offs:</p>
+
+<ul>
+  <li>Output size grows exponentially with <code class="language-plaintext highlighter-rouge">num_qubits</code> ((2^n)), so it can become memory-heavy quickly.</li>
+</ul>
+
+<h3 id="42-basis-encoding">4.2 Basis encoding</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><strong>Goal</strong>: map an integer index (i) into a computational basis state (</td>
+      <td>i\rangle).</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>For (n) qubits with (0 \le i &lt; 2^n):</p>
+
+<ul>
+  <li>(\psi[i] = 1)</li>
+  <li>(\psi[j] = 0) for all (j \ne i)</li>
+</ul>
+
+<p>Key properties in QDP:</p>
+
+<ul>
+  <li><strong>Input shape</strong>:
+    <ul>
+      <li>single sample expects exactly one value: <code class="language-plaintext highlighter-rouge">[index]</code></li>
+      <li>batch expects one index per sample (effectively <code class="language-plaintext highlighter-rouge">sample_size = 1</code>)</li>
+    </ul>
+  </li>
+  <li><strong>Range checking</strong>: indices must be valid for the chosen <code class="language-plaintext highlighter-rouge">num_qubits</code></li>
+  <li><strong>GPU execution</strong>: kernel sets the one-hot amplitude at the requested index</li>
+</ul>
+
+<p>When to use it:</p>
+
+<ul>
+  <li>Your data naturally represents discrete states (categories, token IDs, hashed features, etc.).</li>
+</ul>
+
+<h3 id="43-angle-encoding-planned">4.3 Angle encoding (planned)</h3>
+
+<p>Angle encoding typically maps features to rotation angles (e.g., via (R_x(\theta)), (R_y(\theta)), (R_z(\theta))) and constructs a state by applying rotations across qubits.</p>
+
+<p><strong>Current status in this codebase</strong>:</p>
+
+<ul>
+  <li>The <code class="language-plaintext highlighter-rouge">"angle"</code> encoder exists as a placeholder and <strong>returns an error stating it is not implemented yet</strong>.</li>
+  <li>Use <code class="language-plaintext highlighter-rouge">"amplitude"</code> or <code class="language-plaintext highlighter-rouge">"basis"</code> for now.</li>
+</ul>
+
+<hr />
+
+<h2 id="5-gpu-memory-management">5. GPU memory management</h2>
+
+<p>QDP is designed to keep the encoded states on the GPU and to avoid unnecessary allocations/copies where possible.</p>
+
+<h3 id="51-output-state-vector-allocation">5.1 Output state vector allocation</h3>
+
+<p>For each encoded sample, QDP allocates a state vector of size (2^n). Memory usage grows exponentially:</p>
+
+<ul>
+  <li>complex128 uses 16 bytes per element</li>
+  <li>rough output size (single sample) is:
+    <ul>
+      <li>(2^n \times 16) bytes for complex128</li>
+      <li>(2^n \times 8) bytes for complex64</li>
+    </ul>
+  </li>
+</ul>
+
+<p>QDP performs <strong>pre-flight checks</strong> before large allocations to fail fast with an OOM-aware message (e.g., suggesting smaller <code class="language-plaintext highlighter-rouge">num_qubits</code> or batch size).</p>
+
+<h3 id="52-pinned-host-memory-and-streaming-pipelines">5.2 Pinned host memory and streaming pipelines</h3>
+
+<p>For high-throughput IO → GPU workflows (especially streaming from Parquet), QDP uses:</p>
+
+<ul>
+  <li><strong>Pinned host buffers</strong> (page-locked memory) to speed up host↔device transfers.</li>
+  <li><strong>Double buffering</strong> (ping-pong) so one buffer can be filled while another is being processed.</li>
+  <li><strong>Device staging buffers</strong> (for streaming) so that copies and compute can overlap.</li>
+</ul>
+
+<p>Streaming Parquet encoding is implemented as a <strong>producer/consumer pipeline</strong>:</p>
+
+<ul>
+  <li>a background IO thread reads chunks into pinned host buffers</li>
+  <li>the GPU side processes each chunk while IO continues</li>
+</ul>
+
+<p>In the current implementation, streaming Parquet supports:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">"amplitude"</code></li>
+  <li><code class="language-plaintext highlighter-rouge">"basis"</code></li>
+</ul>
+
+<p>(<code class="language-plaintext highlighter-rouge">"angle"</code> is not supported for streaming yet.)</p>
+
+<h3 id="53-asynchronous-copycompute-overlap-dual-streams">5.3 Asynchronous copy/compute overlap (dual streams)</h3>
+
+<p>For large workloads, QDP uses multiple CUDA streams and CUDA events to overlap:</p>
+
+<ul>
+  <li><strong>H2D copies</strong> (copy stream)</li>
+  <li><strong>kernel execution</strong> (compute stream)</li>
+</ul>
+
+<p>This reduces time spent waiting on PCIe transfers and can improve throughput substantially for large batches.</p>
+
+<hr />
+
+<h2 id="6-dlpack-zero-copy-integration">6. DLPack zero-copy integration</h2>
+
+<p>QDP exposes results using the <strong>DLPack protocol</strong>, which allows frameworks like PyTorch to consume GPU memory <strong>without copying</strong>.</p>
+
+<p>Conceptually:</p>
+
+<ol>
+  <li>Rust allocates GPU memory for the state vector.</li>
+  <li>Rust wraps it into a DLPack <code class="language-plaintext highlighter-rouge">DLManagedTensor</code>.</li>
+  <li>Python returns an object that implements <code class="language-plaintext highlighter-rouge">__dlpack__</code>.</li>
+  <li>PyTorch calls <code class="language-plaintext highlighter-rouge">torch.from_dlpack(qtensor)</code> and takes ownership via DLPack’s deleter.</li>
+</ol>
+
+<p>Important details:</p>
+
+<ul>
+  <li>The returned DLPack capsule is <strong>single-consume</strong> (can only be used once). This prevents double-free bugs.</li>
+  <li>Memory lifetime is managed safely via reference counting on the Rust side, and freed by the DLPack deleter when the consumer releases it.</li>
+</ul>
+
+<hr />
+
+<h2 id="7-performance-characteristics-and-practical-guidance">7. Performance characteristics and practical guidance</h2>
+
+<h3 id="71-what-makes-qdp-fast">7.1 What makes QDP fast</h3>
+
+<ul>
+  <li>GPU kernels replace circuit-based state preparation for the supported encodings.</li>
+  <li>Batch APIs reduce allocation and kernel launch overhead.</li>
+  <li>Streaming pipelines overlap IO and GPU compute.</li>
+</ul>
+
+<h3 id="72-choosing-parameters-wisely">7.2 Choosing parameters wisely</h3>
+
+<ul>
+  <li><strong>Prefer batch encoding</strong> when encoding many samples (lower overhead, better GPU utilization).</li>
+  <li><strong>Keep <code class="language-plaintext highlighter-rouge">num_qubits</code> realistic</strong>. Output size is (2^n) and becomes the dominant cost quickly.</li>
+  <li><strong>Pick the right encoding</strong>:
+    <ul>
+      <li>amplitude: dense real-valued vectors</li>
+      <li>basis: discrete indices / categorical states</li>
+      <li>angle: planned, not implemented yet in this version</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="73-profiling">7.3 Profiling</h3>
+
+<p>If you need to understand where time is spent (copy vs compute), QDP supports NVTX-based profiling. See <code class="language-plaintext highlighter-rouge">qdp/docs/observability/NVTX_USAGE.md</code>.</p>
 
     </div>
 
