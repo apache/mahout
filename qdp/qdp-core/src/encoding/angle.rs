@@ -84,14 +84,12 @@ impl ChunkEncoder for AngleEncoder {
         num_qubits: usize,
         global_sample_offset: usize,
     ) -> Result<()> {
-        let total_values = samples_in_chunk
-            .checked_mul(sample_size)
-            .ok_or_else(|| {
-                MahoutError::MemoryAllocation(format!(
-                    "Angle chunk size overflow: {} * {}",
-                    samples_in_chunk, sample_size
-                ))
-            })?;
+        let total_values = samples_in_chunk.checked_mul(sample_size).ok_or_else(|| {
+            MahoutError::MemoryAllocation(format!(
+                "Angle chunk size overflow: {} * {}",
+                samples_in_chunk, sample_size
+            ))
+        })?;
 
         let data_slice = unsafe { std::slice::from_raw_parts(host_buffer.ptr(), total_values) };
         for (i, &val) in data_slice.iter().enumerate() {
