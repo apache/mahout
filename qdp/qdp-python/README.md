@@ -44,6 +44,8 @@ uv run maturin develop
 - **Parquet** - `.parquet` files
 - **Arrow IPC** - `.arrow` or `.feather` files
 - **NumPy** - `.npy` files
+- **PyTorch** - `.pt` or `.pth` files
+- **TensorFlow** - `.pb` files (TensorProto format)
 
 ## Adding new bindings
 
