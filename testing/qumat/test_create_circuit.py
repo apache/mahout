@@ -65,6 +65,44 @@ class TestCreateCircuit:
         )
 
 
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestDefaultShotsParameter:
+    """Test that backends work without explicitly specifying shots parameter."""
+
+    def test_execute_circuit_without_shots_parameter(self, backend_name):
+        """Test that circuits can be executed without specifying shots.
+
+        This is a regression test to ensure all backends have a default
+        value for the shots parameter, matching the README quick start example.
+        """
+        # Config without shots - should use default
+        configs = {
+            "qiskit": {
+                "backend_name": "qiskit",
+                "backend_options": {"simulator_type": "aer_simulator"},
+            },
+            "cirq": {
+                "backend_name": "cirq",
+                "backend_options": {"simulator_type": "default"},
+            },
+            "amazon_braket": {
+                "backend_name": "amazon_braket",
+                "backend_options": {"simulator_type": "local"},
+            },
+        }
+
+        backend_config = configs[backend_name]
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=2)
+        qumat.apply_hadamard_gate(0)
+        qumat.apply_cnot_gate(0, 1)
+
+        # Should not raise KeyError for missing 'shots'
+        result = qumat.execute_circuit()
+
+        assert result is not None
+
+
 class TestBackendConfigValidation:
     """Test class for backend configuration validation."""
 
