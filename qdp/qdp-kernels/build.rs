@@ -31,6 +31,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/amplitude.cu");
     println!("cargo:rerun-if-changed=src/basis.cu");
     println!("cargo:rerun-if-changed=src/angle.cu");
+    println!("cargo:rerun-if-changed=src/iqp.cu");
 
     // Check if CUDA is available by looking for nvcc
     let has_cuda = Command::new("nvcc").arg("--version").output().is_ok();
@@ -85,5 +86,6 @@ fn main() {
         .file("src/amplitude.cu")
         .file("src/basis.cu")
         .file("src/angle.cu")
+        .file("src/iqp.cu")
         .compile("kernels");
 }
