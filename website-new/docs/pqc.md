@@ -30,15 +30,15 @@ Welcome to the guide designed for developers interested in implementing paramete
 
 Quantum gates are the building blocks of quantum circuits, functioning similarly to classical logic gates but operating on qubits, the fundamental units of quantum information. Unlike classical bits, which can be either 0 or 1, qubits can exist in superpositions of states, represented as linear combinations of |0⟩ and |1⟩.
 
-**Universal Gate Sets:** To perform arbitrary quantum computations, it's essential to understand universal gate sets. A set of quantum gates is considered universal if any unitary operation (any quantum computation) can be approximated to arbitrary accuracy using these gates. Common universal gate sets include the set of Hadamard (H), CNOT, and \( T \) gates. The H gate creates superpositions, CNOT is an entangling operation, and the \( T \) gate provides a necessary phase shift.
+**Universal Gate Sets:** To perform arbitrary quantum computations, it's essential to understand universal gate sets. A set of quantum gates is considered universal if any unitary operation (any quantum computation) can be approximated to arbitrary accuracy using these gates. Common universal gate sets include the set of Hadamard (H), CNOT, and $T$ gates. The H gate creates superpositions, CNOT is an entangling operation, and the $T$ gate provides a necessary phase shift.
 
 ### Parameterized Gates
 
-Parameterized gates are quantum gates that include parameters that can be adjusted, often continuously. These gates are integral to parameterized quantum circuits, as their parameters can be optimized during algorithms. Common parameterized gates include rotation gates such as \( R_x(\theta) \), \( R_y(\theta) \), and \( R_z(\theta) \), each corresponding to a rotation around the respective axes in the Bloch sphere representation of a qubit.
+Parameterized gates are quantum gates that include parameters that can be adjusted, often continuously. These gates are integral to parameterized quantum circuits, as their parameters can be optimized during algorithms. Common parameterized gates include rotation gates such as $R_x(\theta)$, $R_y(\theta)$, and $R_z(\theta)$, each corresponding to a rotation around the respective axes in the Bloch sphere representation of a qubit.
 
-**Rotation Gates:** For instance, a rotation gate around the x-axis, \( R_x(\theta) \), can be represented by the unitary operation:
-\[ R_x(\theta) = \exp(-i \frac{\theta}{2} \sigma_x) \]
-where \( \sigma_x \) is the Pauli X matrix. The parameter \( \theta \) can be adjusted during the circuit's operation, which is key in variational and learning-based quantum algorithms.
+**Rotation Gates:** For instance, a rotation gate around the x-axis, $R_x(\theta)$, can be represented by the unitary operation:
+$$R_x(\theta) = \exp\left(-i \frac{\theta}{2} \sigma_x\right)$$
+where $\sigma_x$ is the Pauli X matrix. The parameter $\theta$ can be adjusted during the circuit's operation, which is key in variational and learning-based quantum algorithms.
 
 ### Motivation for PQCs
 
@@ -131,9 +131,9 @@ Mitigation strategies include using circuit architectures tailored to specific p
 
 ### Parameter Shift Rule
 
-The **parameter shift rule** is an essential tool for obtaining exact gradients of parameters in a PQC. It is specifically designed taking into account the unitary nature of quantum gates. For a parameterized gate \(U(\theta)\), the gradient of the expectation value \( \langle \psi | U^{\dagger}(\theta) O U(\theta) | \psi \rangle \) with respect to \(\theta\) can be calculated by evaluating the expectation with shifted parameters:
+The **parameter shift rule** is an essential tool for obtaining exact gradients of parameters in a PQC. It is specifically designed taking into account the unitary nature of quantum gates. For a parameterized gate $U(\theta)$, the gradient of the expectation value $\langle \psi | U^{\dagger}(\theta) O U(\theta) | \psi \rangle$ with respect to $\theta$ can be calculated by evaluating the expectation with shifted parameters:
 
-\[ \frac{d}{d\theta} \langle \psi | U^\dagger(\theta) O U(\theta) |\psi\rangle = \frac{1}{2}\left(\langle \psi | U^\dagger(\theta + \frac{\pi}{2}) O U(\theta + \frac{\pi}{2}) |\psi\rangle - \langle \psi | U^\dagger(\theta - \frac{\pi}{2}) O U(\theta - \frac{\pi}{2}) |\psi\rangle\right) \]
+$$\frac{d}{d\theta} \langle \psi | U^\dagger(\theta) O U(\theta) |\psi\rangle = \frac{1}{2}\left(\langle \psi | U^\dagger(\theta + \frac{\pi}{2}) O U(\theta + \frac{\pi}{2}) |\psi\rangle - \langle \psi | U^\dagger(\theta - \frac{\pi}{2}) O U(\theta - \frac{\pi}{2}) |\psi\rangle\right)$$
 
 This approach is hardware-efficient since it requires only a few additional circuit evaluations per parameter.
 
@@ -151,7 +151,7 @@ Quantum classifiers are used in machine learning to categorize or predict outcom
 
 To make use of quantum classifiers, efficient data encoding is crucial:
 
-- **Amplitude Encoding** utilizes the amplitudes of quantum states to encode classical data. This method can encode \(2^n\) dimensional data into n qubits, offering exponential data compression. However, the challenge lies in preparing the exact quantum state, which can be resource-intensive and sensitive to noise.
+- **Amplitude Encoding** utilizes the amplitudes of quantum states to encode classical data. This method can encode $2^n$ dimensional data into n qubits, offering exponential data compression. However, the challenge lies in preparing the exact quantum state, which can be resource-intensive and sensitive to noise.
 
 - **Angle Encoding** involves mapping classical data points directly to the rotation angles of quantum gates. This simple yet effective method can encode data by transforming features into angles that control the operations of parameterized gates (e.g., RX, RY, RZ). Its advantage lies in the straightforward implementation and flexibility, but it may not fully exploit the exponential scaling potential.
 

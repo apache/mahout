@@ -26,11 +26,13 @@ const config: Config = {
     locales: ['en'],
   },
 
-  // Use standard markdown format to avoid MDX parsing issues with HTML-like content
   markdown: {
     format: 'detect',
     hooks: {
       onBrokenMarkdownLinks: 'warn',
+    },
+    remarkRehypeOptions: {
+      // Allow HTML pass-through for math
     },
   },
 
@@ -43,12 +45,16 @@ const config: Config = {
           editUrl: 'https://github.com/apache/mahout/tree/main/docs/',
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],
-          // Versioning configuration - version 0.4 snapshot will be created after restructure
+          // Versioning configuration
           lastVersion: 'current',
           versions: {
             current: {
               label: '0.5-dev',
               path: '',
+            },
+            '0.4': {
+              label: '0.4',
+              path: '0.4',
             },
           },
         },

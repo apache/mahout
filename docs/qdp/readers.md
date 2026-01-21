@@ -134,7 +134,7 @@ fn read_quantum_data(path: &str) -> Result<(Vec<f64>, usize, usize)> {
 
 ## Adding New Formats
 
-See [../ADDING_INPUT_FORMATS.md](../ADDING_INPUT_FORMATS.md) for detailed instructions.
+See ADDING_INPUT_FORMATS.md (TODO) for detailed instructions.
 
 Quick overview:
 1. Create `readers/myformat.rs`
@@ -218,5 +218,5 @@ Planned format support:
 ## Questions?
 
 - See examples: `cargo run --example flexible_readers`
-- Read extension guide: [../ADDING_INPUT_FORMATS.md](../ADDING_INPUT_FORMATS.md)
+- Read extension guide: ADDING_INPUT_FORMATS.md (TODO)
 - Check tests: `qdp-core/tests/*_io.rs`

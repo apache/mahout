@@ -50,7 +50,7 @@ to this website, and we have a [guide for making website updates][2].
 We also have a [wide variety of books and slides][3] for learning more about
 machine learning algorithms.
 
-If you are interested in working towards being a committer, [general guidelines are available online](/documentation/developers/how-to-become-a-committer).
+If you are interested in working towards being a committer, general guidelines are available in the [Apache Community documentation](https://community.apache.org/contributors/).
 
 <a name="HowToContribute-ContributingCode(Features,BigFixes,Tests,etc...)"></a>
 ## Contributing Code (Features, Big Fixes, Tests, etc...)
@@ -76,19 +76,19 @@ and possibly improve it.
 <a name="HowToContribute-Gettingthesourcecode"></a>
 ## Getting the source code
 
-First of all, you need to get the [Mahout source code](/documentation/developers/version-control). Most development is done on the "trunk".  Mahout mirrors its codebase on [GitHub](https://github.com/apache/mahout). The first step to making a contribution is to fork Mahout's master branch to your GitHub repository.
+First of all, you need to get the Mahout source code from [GitHub](https://github.com/apache/mahout). Most development is done on the "main" branch. The first step to making a contribution is to fork Mahout's main branch to your GitHub repository.
 
 
 <a name="HowToContribute-MakingChanges"></a>
 ## Making Changes
 
 Before you start, you should send a message to the [Mahout developer mailing list](/docs/community/mailing-lists)
-(note: you have to subscribe before you can post), or file a ticket in  our [issue tracker](/documentation/developers/issue-tracker).
+(note: you have to subscribe before you can post), or file a ticket in our [issue tracker](https://issues.apache.org/jira/browse/MAHOUT).
 Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.
 
- 1. Create a JIRA Issue (if one does not already exist or you haven't already)
+ 1. Create a JIRA Issue in the [issue tracker](https://issues.apache.org/jira/browse/MAHOUT) (if one does not already exist)
  2. Pull the code from your GitHub repository
- 3. Ensure that you are working with the latest code from the [apache/mahout](https://github.com/apache/mahout) master branch.
+ 3. Ensure that you are working with the latest code from the [apache/mahout](https://github.com/apache/mahout) main branch.
  3. Modify the source code and add some (very) nice features.
      - Be sure to adhere to the following points:
          - All public classes and methods should have informative Javadoc

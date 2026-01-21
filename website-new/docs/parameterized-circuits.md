@@ -21,11 +21,11 @@ Rotation gates rotate a qubit around the X, Y, or Z axis of the Bloch sphere. Ea
 
 ### Rx Gate
 
-Rotates a qubit around the X-axis by angle θ.
+Rotates a qubit around the X-axis by angle $\theta$.
 
-\[ R_x(\theta) = \begin{pmatrix} \cos(\theta/2) & -i\sin(\theta/2) \\ -i\sin(\theta/2) & \cos(\theta/2) \end{pmatrix} \]
+$$R_x(\theta) = \begin{pmatrix} \cos(\theta/2) & -i\sin(\theta/2) \\ -i\sin(\theta/2) & \cos(\theta/2) \end{pmatrix}$$
 
-\[ R_x(\pi/2)|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle - i|1\rangle) \]
+$$R_x(\pi/2)|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle - i|1\rangle)$$
 
 ```python
 from qumat import QuMat
@@ -43,11 +43,11 @@ results = qumat.execute_circuit()
 
 ### Ry Gate
 
-Rotates a qubit around the Y-axis by angle θ.
+Rotates a qubit around the Y-axis by angle $\theta$.
 
-\[ R_y(\theta) = \begin{pmatrix} \cos(\theta/2) & -\sin(\theta/2) \\ \sin(\theta/2) & \cos(\theta/2) \end{pmatrix} \]
+$$R_y(\theta) = \begin{pmatrix} \cos(\theta/2) & -\sin(\theta/2) \\ \sin(\theta/2) & \cos(\theta/2) \end{pmatrix}$$
 
-\[ R_y(\pi/2)|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle) \]
+$$R_y(\pi/2)|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle)$$
 
 ```python
 qumat.create_empty_circuit(num_qubits=1)
@@ -57,11 +57,11 @@ results = qumat.execute_circuit()
 
 ### Rz Gate
 
-Rotates a qubit around the Z-axis by angle θ. Changes phase without affecting probability amplitudes.
+Rotates a qubit around the Z-axis by angle $\theta$. Changes phase without affecting probability amplitudes.
 
-\[ R_z(\theta) = \begin{pmatrix} e^{-i\theta/2} & 0 \\ 0 & e^{i\theta/2} \end{pmatrix} \]
+$$R_z(\theta) = \begin{pmatrix} e^{-i\theta/2} & 0 \\ 0 & e^{i\theta/2} \end{pmatrix}$$
 
-\[ R_z(\pi/2)\frac{1}{\sqrt{2}}(|0\rangle + |1\rangle) = \frac{1}{\sqrt{2}}(|0\rangle + i|1\rangle) \]
+$$R_z(\pi/2)\frac{1}{\sqrt{2}}(|0\rangle + |1\rangle) = \frac{1}{\sqrt{2}}(|0\rangle + i|1\rangle)$$
 
 Probabilities remain: P(|0⟩) = P(|1⟩) = 1/2
 

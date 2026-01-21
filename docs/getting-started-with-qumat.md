@@ -36,18 +36,19 @@ pip install .
 
 ## Examples
 
-Refer to the example notebooks in the 'examples' directory for practical implementations of basic commands and getting started. Notable examples include:
+Refer to the example notebooks in the `examples/` directory at the repository root for practical implementations:
 
-- [Simple_Example.ipynb](examples/Simple_Example.ipynb)
-- [Optimization_Example.ipynb](examples/Optimization_Example.ipynb)
+- `examples/Simple_Example.ipynb` - Basic quantum circuit example
+- `examples/Optimization_Example.ipynb` - Optimization with parameterized circuits
 
 ## Building the Website
 
-To serve the website locally, navigate to the 'website' directory and execute the following commands:
+To serve the website locally:
 
-```
-cd website
-bundle exec jekyll serve
+```bash
+cd website-new
+npm install
+npm run start
 ```
 
-The "build_site.sh" script is for deployment tooling and not necessary for users wanting to serve the website locally.
+See the [website README](https://github.com/apache/mahout/tree/main/website-new) for more details.

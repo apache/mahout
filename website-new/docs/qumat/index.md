@@ -12,10 +12,10 @@ Qumat is a high-level Python library for quantum computing that provides:
 
 ## Documentation
 
-- [Qumat Core](/qumat/core)
-- [QDP (Quantum Data Plane)](/qumat/qdp)
+- [Qumat Core](./core)
+- [QDP (Quantum Data Plane)](./qdp)
 
 ## Additional Resources
 
-- [Research Papers](/qumat/papers)
-- [Quantum Computing Primer](/qumat/quantum-computing-primer)
+- [Research Papers](./papers)
+- [Quantum Computing Primer](./quantum-computing-primer)

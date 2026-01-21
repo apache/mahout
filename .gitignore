@@ -31,6 +31,12 @@ website/Gemfile.lock
 website/.bundle
 website/.sass-cache
 
+# Docusaurus (website-new)
+website-new/node_modules/
+website-new/build/
+website-new/.docusaurus/
+website-new/.cache-loader/
+
 *.iml
 .idea
 
