@@ -26,14 +26,15 @@
   <link rel="canonical" href="http://mahout.apache.org//qumat/quantum-computing-primer/07_quantum_algorithms/">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML">
+  <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       "HTML-CSS": {
         availableFonts: ["TeX"],
       },
       tex2jax: {
-        inlineMath: [['$','$'],["\\(","\\)"]]},
-      displayMath: [ ['$$','$$'], ['\[','\]'] ],
+        inlineMath: [['$','$'],["\\(","\\)"]],
+        displayMath: [['$$','$$'],['\\[','\\]']]
+      },
       TeX: {
         extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
         equationNumbers: {
@@ -46,6 +47,7 @@
       "AssistiveMML": { disabled: true }
     });
   </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 
 <!-- Matomo -->
@@ -296,16 +298,7 @@ classical algorithms.</p>
 
 <h3 id="explanation-1">Explanation</h3>
 <ul>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>The oracle marks the desired state (e.g., $</td>
-          <td>110\rangle$).</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
+  <li>The oracle marks the desired state (e.g., $\vert 110\rangle$).</li>
   <li>The diffusion operator amplifies the probability of measuring the marked state.</li>
   <li>After running the algorithm, the marked state will have a higher probability of being measured.</li>
 </ul>
@@ -417,6 +410,5 @@ classical algorithms.</p>
   <script src="/assets/vendor/popper/popper.min.js"></script>
   <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
   <script src="/assets/header.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 </body>
 </html>

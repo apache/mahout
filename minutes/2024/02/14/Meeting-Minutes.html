@@ -26,14 +26,15 @@
   <link rel="canonical" href="http://mahout.apache.org//minutes/2024/02/14/Meeting-Minutes.html">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML">
+  <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       "HTML-CSS": {
         availableFonts: ["TeX"],
       },
       tex2jax: {
-        inlineMath: [['$','$'],["\\(","\\)"]]},
-      displayMath: [ ['$$','$$'], ['\[','\]'] ],
+        inlineMath: [['$','$'],["\\(","\\)"]],
+        displayMath: [['$$','$$'],['\\[','\\]']]
+      },
       TeX: {
         extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
         equationNumbers: {
@@ -46,6 +47,7 @@
       "AssistiveMML": { disabled: true }
     });
   </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 
 <!-- Matomo -->
@@ -244,6 +246,5 @@
   <script src="/assets/vendor/popper/popper.min.js"></script>
   <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
   <script src="/assets/header.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 </body>
 </html>

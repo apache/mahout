@@ -26,14 +26,15 @@
   <link rel="canonical" href="http://mahout.apache.org//qumat/quantum-computing-primer/03_qubits/">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML">
+  <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       "HTML-CSS": {
         availableFonts: ["TeX"],
       },
       tex2jax: {
-        inlineMath: [['$','$'],["\\(","\\)"]]},
-      displayMath: [ ['$$','$$'], ['\[','\]'] ],
+        inlineMath: [['$','$'],["\\(","\\)"]],
+        displayMath: [['$$','$$'],['\\[','\\]']]
+      },
       TeX: {
         extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
         equationNumbers: {
@@ -46,6 +47,7 @@
       "AssistiveMML": { disabled: true }
     });
   </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 
 <!-- Matomo -->
@@ -184,39 +186,32 @@
 
 <p>In classical computing, the fundamental unit of information is the <strong>bit</strong>, which can exist in one of two states: <code class="language-plaintext highlighter-rouge">0</code> or <code class="language-plaintext highlighter-rouge">1</code>. Quantum computing, however, introduces the concept of a <strong>qubit</strong>, which can exist in a <strong>superposition</strong> of both states simultaneously. This means a qubit can be in a state that is a combination of <code class="language-plaintext highlighter-rouge">0</code> and <code class="language-plaintext highlighter-rouge">1</code>, represented as:</p>
 
-\[|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\]
+\[\vert\psi\rangle = \alpha\vert 0\rangle + \beta\vert 1\rangle\]
 
 <p>where $\alpha$ and $\beta$ are complex numbers representing the probability
-amplitudes of the qubit being in the $|0\rangle$ and $|1\rangle$ states,
+amplitudes of the qubit being in the $\vert 0\rangle$ and $\vert 1\rangle$ states,
 respectively. The probabilities of measuring the qubit in either state are given
-by $|\alpha|^2$ and $|\beta|^2$, and they must satisfy the normalization condition:</p>
+by $\vert\alpha\vert^2$ and $\vert\beta\vert^2$, and they must satisfy the normalization condition:</p>
 
-\[|\alpha|^2 + |\beta|^2 = 1\]
+\[\vert\alpha\vert^2 + \vert\beta\vert^2 = 1\]
 
 <h2 id="32-representing-qubits">3.2 Representing Qubits</h2>
 
 <p>Qubits can be visualized using the <strong>Bloch sphere</strong>, a geometric representation
 of the quantum state of a single qubit. The Bloch sphere is a unit sphere where
-the north and south poles represent the $|0\rangle$ and $|1\rangle$ states,
+the north and south poles represent the $\vert 0\rangle$ and $\vert 1\rangle$ states,
 respectively. Any point on the surface of the sphere represents a valid quantum
 state of the qubit.</p>
 
 <p>The state of a qubit can also be described using a <strong>state vector</strong> in a
-two-dimensional complex vector space. For example, the state $|0\rangle$ is
+two-dimensional complex vector space. For example, the state $\vert 0\rangle$ is
 represented as:</p>
 
-\[|0\rangle = \begin{pmatrix} 1 \\ 0 \end{pmatrix}\]
+\[\vert 0\rangle = \begin{pmatrix} 1 \\ 0 \end{pmatrix}\]
 
-<table>
-  <tbody>
-    <tr>
-      <td>and the state $</td>
-      <td>1\rangle$ is represented as:</td>
-    </tr>
-  </tbody>
-</table>
+<p>and the state $\vert 1\rangle$ is represented as:</p>
 
-\[|1\rangle = \begin{pmatrix} 0 \\ 1 \end{pmatrix}\]
+\[\vert 1\rangle = \begin{pmatrix} 0 \\ 1 \end{pmatrix}\]
 
 <h2 id="33-creating-qubits-with-qumat">3.3 Creating Qubits with <code class="language-plaintext highlighter-rouge">qumat</code></h2>
 
@@ -241,11 +236,11 @@ represented as:</p>
 
 <h3 id="example-applying-a-hadamard-gate">Example: Applying a Hadamard Gate</h3>
 
-<p>The Hadamard gate ((H)) is a fundamental quantum gate that puts a qubit into a
+<p>The Hadamard gate ($H$) is a fundamental quantum gate that puts a qubit into a
 superposition state. Applying the Hadamard gate to a qubit initially in the
-$|0\rangle$ state results in the state:</p>
+$\vert 0\rangle$ state results in the state:</p>
 
-\[H|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle)\]
+\[H\vert 0\rangle = \frac{1}{\sqrt{2}}(\vert 0\rangle + \vert 1\rangle)\]
 
 <p>Here’s how you can apply a Hadamard gate to a qubit using qumat:</p>
 
@@ -259,7 +254,7 @@ $|0\rangle$ state results in the state:</p>
 
 <p>In this example, the Hadamard gate is applied to the qubit at index 0, and the
 circuit is executed to obtain the measurement results. The output will show the
-probabilities of measuring the qubit in the $|0\rangle$ and $|1\rangle$ states.</p>
+probabilities of measuring the qubit in the $\vert 0\rangle$ and $\vert 1\rangle$ states.</p>
 
 <h3 id="visualizing-the-circuit">Visualizing the Circuit</h3>
 
@@ -365,6 +360,5 @@ probabilities of measuring the qubit in the $|0\rangle$ and $|1\rangle$ states.<
   <script src="/assets/vendor/popper/popper.min.js"></script>
   <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
   <script src="/assets/header.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 </body>
 </html>

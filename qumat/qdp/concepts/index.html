@@ -26,14 +26,15 @@
   <link rel="canonical" href="http://mahout.apache.org//qumat/qdp/concepts/">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML">
+  <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       "HTML-CSS": {
         availableFonts: ["TeX"],
       },
       tex2jax: {
-        inlineMath: [['$','$'],["\\(","\\)"]]},
-      displayMath: [ ['$$','$$'], ['\[','\]'] ],
+        inlineMath: [['$','$'],["\\(","\\)"]],
+        displayMath: [['$$','$$'],['\\[','\\]']]
+      },
       TeX: {
         extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
         equationNumbers: {
@@ -46,6 +47,7 @@
       "AssistiveMML": { disabled: true }
     });
   </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 
 <!-- Matomo -->
@@ -206,17 +208,10 @@
 
 <h2 id="2-what-qdp-produces-a-gpu-resident-state-vector">2. What QDP produces: a GPU-resident state vector</h2>
 
-<table>
-  <tbody>
-    <tr>
-      <td>QDP encodes classical data into a <strong>state vector</strong> (</td>
-      <td>\psi\rangle) for (n) qubits.</td>
-    </tr>
-  </tbody>
-</table>
+<p>QDP encodes classical data into a <strong>state vector</strong> $\vert\psi\rangle$ for $n$ qubits.</p>
 
 <ul>
-  <li><strong>State length</strong>: (2^{n})</li>
+  <li><strong>State length</strong>: $2^{n}$</li>
   <li><strong>Type</strong>: complex numbers (on GPU)</li>
   <li><strong>Shape exposed via DLPack</strong>:
     <ul>
@@ -247,12 +242,12 @@
 <p>All encoders perform input validation (at minimum):</p>
 
 <ul>
-  <li>(1 \le n \le 30)</li>
+  <li>$1 \le n \le 30$</li>
   <li>input is not empty</li>
   <li>for vector-based encodings: <code class="language-plaintext highlighter-rouge">len(data) &lt;= 2^n</code></li>
 </ul>
 
-<p>Note: (n=30) is already very large—just the output state for a single sample is on the order of (2^{30}) complex numbers.</p>
+<p>Note: $n=30$ is already very large—just the output state for a single sample is on the order of $2^{30}$ complex numbers.</p>
 
 <hr />
 
@@ -260,16 +255,14 @@
 
 <h3 id="41-amplitude-encoding">4.1 Amplitude encoding</h3>
 
-<p><strong>Goal</strong>: represent a real-valued feature vector (x) as quantum amplitudes:</p>
+<p><strong>Goal</strong>: represent a real-valued feature vector $x$ as quantum amplitudes:</p>
 
-<p>[
-|\psi\rangle = \sum_{i=0}^{2^{n}-1} \frac{x_i}{|x|_2}\,|i\rangle
-]</p>
+\[\vert\psi\rangle = \sum_{i=0}^{2^{n}-1} \frac{x_i}{\|x\|_2}\,\vert i\rangle\]
 
 <p>Key properties in QDP:</p>
 
 <ul>
-  <li><strong>Normalization</strong>: QDP computes (|x|_2) and rejects zero-norm inputs.</li>
+  <li><strong>Normalization</strong>: QDP computes $|x|_2$ and rejects zero-norm inputs.</li>
   <li><strong>Padding</strong>: if <code class="language-plaintext highlighter-rouge">len(x) &lt; 2^n</code>, the remaining amplitudes are treated as zeros.</li>
   <li><strong>GPU execution</strong>: the normalization and write into the GPU state vector is performed by CUDA kernels.</li>
   <li><strong>Batch support</strong>: amplitude encoding supports a batch path to reduce kernel launch / allocation overhead (recommended when encoding many samples).</li>
@@ -284,25 +277,18 @@
 <p>Trade-offs:</p>
 
 <ul>
-  <li>Output size grows exponentially with <code class="language-plaintext highlighter-rouge">num_qubits</code> ((2^n)), so it can become memory-heavy quickly.</li>
+  <li>Output size grows exponentially with <code class="language-plaintext highlighter-rouge">num_qubits</code> ($2^n$), so it can become memory-heavy quickly.</li>
 </ul>
 
 <h3 id="42-basis-encoding">4.2 Basis encoding</h3>
 
-<table>
-  <tbody>
-    <tr>
-      <td><strong>Goal</strong>: map an integer index (i) into a computational basis state (</td>
-      <td>i\rangle).</td>
-    </tr>
-  </tbody>
-</table>
+<p><strong>Goal</strong>: map an integer index $i$ into a computational basis state $\vert i\rangle$.</p>
 
-<p>For (n) qubits with (0 \le i &lt; 2^n):</p>
+<p>For $n$ qubits with $0 \le i &lt; 2^n$:</p>
 
 <ul>
-  <li>(\psi[i] = 1)</li>
-  <li>(\psi[j] = 0) for all (j \ne i)</li>
+  <li>$\psi[i] = 1$</li>
+  <li>$\psi[j] = 0$ for all $j \ne i$</li>
 </ul>
 
 <p>Key properties in QDP:</p>
@@ -326,7 +312,7 @@
 
 <h3 id="43-angle-encoding-planned">4.3 Angle encoding (planned)</h3>
 
-<p>Angle encoding typically maps features to rotation angles (e.g., via (R_x(\theta)), (R_y(\theta)), (R_z(\theta))) and constructs a state by applying rotations across qubits.</p>
+<p>Angle encoding typically maps features to rotation angles (e.g., via $R_x(\theta)$, $R_y(\theta)$, $R_z(\theta)$) and constructs a state by applying rotations across qubits.</p>
 
 <p><strong>Current status in this codebase</strong>:</p>
 
@@ -343,14 +329,14 @@
 
 <h3 id="51-output-state-vector-allocation">5.1 Output state vector allocation</h3>
 
-<p>For each encoded sample, QDP allocates a state vector of size (2^n). Memory usage grows exponentially:</p>
+<p>For each encoded sample, QDP allocates a state vector of size $2^n$. Memory usage grows exponentially:</p>
 
 <ul>
   <li>complex128 uses 16 bytes per element</li>
   <li>rough output size (single sample) is:
     <ul>
-      <li>(2^n \times 16) bytes for complex128</li>
-      <li>(2^n \times 8) bytes for complex64</li>
+      <li>$2^n \times 16$ bytes for complex128</li>
+      <li>$2^n \times 8$ bytes for complex64</li>
     </ul>
   </li>
 </ul>
@@ -432,7 +418,7 @@
 
 <ul>
   <li><strong>Prefer batch encoding</strong> when encoding many samples (lower overhead, better GPU utilization).</li>
-  <li><strong>Keep <code class="language-plaintext highlighter-rouge">num_qubits</code> realistic</strong>. Output size is (2^n) and becomes the dominant cost quickly.</li>
+  <li><strong>Keep <code class="language-plaintext highlighter-rouge">num_qubits</code> realistic</strong>. Output size is $2^n$ and becomes the dominant cost quickly.</li>
   <li><strong>Pick the right encoding</strong>:
     <ul>
       <li>amplitude: dense real-valued vectors</li>
@@ -536,6 +522,5 @@
   <script src="/assets/vendor/popper/popper.min.js"></script>
   <script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
   <script src="/assets/header.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 </body>
 </html>
