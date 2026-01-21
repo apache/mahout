@@ -5,4 +5,131 @@ title: API Reference - QDP
 
 # API Reference
 
-<!-- TODO: Add API reference documentation for QDP -->
+Mahout QDP (Quantum Data Plane) provides GPU-accelerated quantum state encoding.
+It writes classical data directly into GPU memory and returns a DLPack-compatible
+handle for zero-copy integration with downstream frameworks.
+
+## Quickstart
+
+```python
+import qumat.qdp as qdp
+import torch
+
+engine = qdp.QdpEngine(device_id=0, precision="float32")
+qtensor = engine.encode([0.1, 0.2, 0.3, 0.4], num_qubits=2, encoding_method="amplitude")
+tensor = torch.utils.dlpack.from_dlpack(qtensor)  # single-use, zero-copy
+
+print(tensor.shape, tensor.dtype, tensor.device)
+```
+
+## Module: `qumat.qdp`
+
+Prefer importing from `qumat.qdp`; the native extension is `_qdp`.
+
+```python
+import qumat.qdp as qdp
+# or: from _qdp import QdpEngine, QuantumTensor
+```
+
+## Class: `QdpEngine`
+
+### `QdpEngine(device_id=0, precision="float32")`
+
+Create a GPU encoder instance.
+
+**Parameters**
+- `device_id` (int): CUDA device ID, default `0`.
+- `precision` (str): `"float32"` or `"float64"`.
+
+**Raises**
+- `RuntimeError`: Initialization failure or unsupported precision.
+
+### `encode(data, num_qubits, encoding_method="amplitude") -> QuantumTensor`
+
+Encode classical input into a quantum state and return a DLPack tensor on GPU.
+
+**Parameters**
+- `data`: Supported inputs
+  - `list[float]`
+  - `numpy.ndarray` (1D/2D, dtype=float64, C-contiguous)
+  - `torch.Tensor` (CPU, float64, contiguous)
+  - `str` / `pathlib.Path` file path
+    - `.parquet`, `.arrow` / `.feather`, `.npy`, `.pt` / `.pth`, `.pb`
+- `num_qubits` (int): Number of qubits, range 1–30.
+- `encoding_method` (str): `"amplitude" | "angle" | "basis"` (lowercase).
+
+**Returns**
+- `QuantumTensor` with 2D shape:
+  - single sample: `[1, 2^num_qubits]`
+  - batch: `[batch_size, 2^num_qubits]`
+
+**Notes**
+- Output dtype is `complex64` (`precision="float32"`) or `complex128` (`precision="float64"`).
+- Parquet streaming currently supports `"amplitude"` and `"basis"`.
+
+**Raises**
+- `RuntimeError`: Invalid inputs, shapes, dtypes, or unsupported formats.
+
+### `encode_from_tensorflow(path, num_qubits, encoding_method="amplitude") -> QuantumTensor`
+
+Encode directly from a TensorFlow TensorProto file (`.pb`).
+
+## Class: `QuantumTensor`
+
+DLPack wrapper for GPU-resident quantum states.
+
+### `__dlpack__(stream=None)`
+
+Return a DLPack PyCapsule. This can be consumed only once.
+
+### `__dlpack_device__()`
+
+Return `(device_type, device_id)`; CUDA devices report `(2, gpu_id)`.
+
+**Ownership & Lifetime**
+- If not consumed, memory is freed when the object is dropped.
+- If consumed, ownership transfers to the consumer (e.g., PyTorch).
+
+## Encoding Methods
+
+### `amplitude`
+
+- Input length `<= 2^num_qubits`; remaining entries are zero-padded.
+- L2 normalization is applied.
+- Zero vectors / NaN / Inf raise errors.
+
+### `angle`
+
+- Each sample must provide exactly `num_qubits` angles.
+- NaN / Inf raise errors.
+
+### `basis`
+
+- Each sample provides one integer index in `[0, 2^num_qubits)`.
+
+## Supported File Formats
+
+- **Parquet**: `.parquet`
+- **Arrow IPC**: `.arrow`, `.feather`
+- **NumPy**: `.npy`
+- **PyTorch**: `.pt`, `.pth`
+- **TensorFlow**: `.pb` (TensorProto)
+
+## Common Errors
+
+- `num_qubits` out of range.
+- Input length exceeds `2^num_qubits`.
+- Non-`float64` NumPy/Torch inputs.
+- Torch tensors not on CPU or not contiguous.
+- DLPack capsule consumed more than once.
+
+## Compatibility & Deprecation (PoC Target)
+
+- Rust >= 1.85
+- CUDA Toolkit >= 12.2.x
+- Python >= 3.11
+- PyTorch >= 2.2.x
+- PyArrow >= 16.x
+- PyO3 >= 0.21
+
+No deprecations are planned for the initial PoC.
