@@ -13,44 +13,72 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 name: Website
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the trunk branch
 on:
   push:
     branches:
       - main
+    paths:
+      - 'website-new/**'
+      - 'docs/**'
+      - 'qdp/docs/**'
 
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v6
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-    # Runs a single command using the runners shell
-    - name: Build Website
-      run: |
-        git config user.name "GitHub Actions Bot"
-        git config user.email "<>"
-        ./website/build_site.sh
-        rm -rf *
-        git checkout asf-site
-        cp -r $WORKDIR/. .
-        git add .
-        git commit -m "Automatic Site Publish by Buildbot"
-        git push
-      env:
-        WORKDIR: /tmp/mahout-site
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-        RUBY_PATH: ~/shared/.rvm
-        GEM_HOME: ${RUBY_PATH}/gems
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: website-new/package-lock.json
+
+      - name: Install dependencies
+        working-directory: website-new
+        run: npm ci
+
+      - name: Build website
+        working-directory: website-new
+        run: npm run build
+
+      - name: Deploy to asf-site branch
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+          # Save the build output
+          cp -r website-new/build /tmp/mahout-site
+
+          # Switch to asf-site branch
+          git checkout asf-site
+
+          # Clear existing content (except .git)
+          find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
+
+          # Copy new build
+          cp -r /tmp/mahout-site/. .
+
+          # Add .asf.yaml if it doesn't exist (ASF publishing config)
+          if [ ! -f .asf.yaml ]; then
+            cat > .asf.yaml << 'EOF'
+          publish:
+            whoami: asf-site
+          EOF
+          fi
+
+          # Commit and push
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to deploy"
+          else
+            git commit -m "Automatic Site Publish by GitHub Actions"
+            git push
+          fi

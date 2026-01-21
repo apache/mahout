@@ -97,11 +97,49 @@ pre-commit run --all-files
 
 Create a pull request on GitHub. Please follow the [pull request template](.github/PULL_REQUEST_TEMPLATE) to provide a detailed description of your changes.
 
-## 3. Project Structure
+## 3. Website Development
+
+The website is built with [Docusaurus](https://docusaurus.io/). The `/docs` directory is the source of truth for documentation.
+
+### Local Development
+
+```bash
+cd website-new
+npm install
+npm run start
+```
+
+This starts a local development server at `http://localhost:3000` with hot reload.
+
+### Building
+
+```bash
+cd website-new
+npm run build
+```
+
+The build syncs documentation from `/docs` and `/qdp/docs` automatically.
+
+### Documentation Workflow
+
+1. Edit documentation in the `/docs` directory (not `website-new/docs`)
+2. Run `npm run sync` in `website-new/` to update the website docs
+3. The sync runs automatically during `npm run start` and `npm run build`
+
+### Creating a Version Snapshot
+
+When releasing a new version, snapshot the current documentation:
+
+```bash
+cd website-new
+npm run docusaurus docs:version X.Y
+```
+
+## 4. Project Structure
 
 - `qumat/` - Core library code
 - `qdp/` - QDP (Quantum Data Plane)
-- `docs/` - Documentation
+- `docs/` - Documentation (source of truth)
 - `examples/` - Examples and Jupyter notebooks
 - `testing/` - Test files (using pytest)
-- `website/` - Website source code (using Jekyll)
+- `website-new/` - Website source code (using Docusaurus)
