@@ -238,17 +238,17 @@ fn validate_cuda_tensor_for_encoding(
     Ok(())
 }
 
-/// DLPack tensor information extracted from a PyCapsule
-struct DLPackTensorInfo {
+/// CUDA tensor information extracted directly from PyTorch tensor
+struct CudaTensorInfo {
     data_ptr: *const f64,
     shape: Vec<i64>,
-    /// CUDA device ID from DLPack metadata.
-    /// Currently unused but kept for potential future device validation or multi-GPU support.
-    #[allow(dead_code)]
-    device_id: i32,
 }
 
-/// Extract GPU pointer from PyTorch tensor's __dlpack__() capsule
+/// Extract GPU pointer directly from PyTorch CUDA tensor
+///
+/// Uses PyTorch's `data_ptr()` and `shape` APIs directly instead of DLPack protocol.
+/// This avoids the DLPack capsule lifecycle complexity and potential memory leaks
+/// from the capsule renaming pattern.
 ///
 /// # Safety
 /// The returned `data_ptr` points to GPU memory owned by the source tensor.
@@ -256,58 +256,19 @@ struct DLPackTensorInfo {
 /// for the entire duration that `data_ptr` is in use. Python's GIL ensures
 /// the tensor won't be garbage collected during `encode()`, but the caller
 /// must not deallocate or resize the tensor while encoding is in progress.
-fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult<DLPackTensorInfo> {
-    // Call tensor.__dlpack__() to get PyCapsule
-    // Note: PyTorch's __dlpack__ uses the default stream when called without arguments
-    let capsule = tensor.call_method0("__dlpack__")?;
-
-    // Extract the DLManagedTensor pointer from the capsule
-    const DLTENSOR_NAME: &[u8] = b"dltensor\0";
-
-    unsafe {
-        let capsule_ptr = capsule.as_ptr();
-        let managed_ptr =
-            ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
-                as *const DLManagedTensor;
-
-        if managed_ptr.is_null() {
-            return Err(PyRuntimeError::new_err(
-                "Failed to extract DLManagedTensor from PyCapsule",
-            ));
-        }
-
-        let dl_tensor = &(*managed_ptr).dl_tensor;
-
-        // Extract data pointer with null check
-        if dl_tensor.data.is_null() {
-            return Err(PyRuntimeError::new_err(
-                "DLPack tensor has null data pointer",
-            ));
-        }
-        let data_ptr = dl_tensor.data as *const f64;
-
-        // Extract shape
-        let ndim = dl_tensor.ndim as usize;
-        let shape = if ndim > 0 && !dl_tensor.shape.is_null() {
-            std::slice::from_raw_parts(dl_tensor.shape, ndim).to_vec()
-        } else {
-            vec![]
-        };
-
-        // Extract device_id
-        let device_id = dl_tensor.device.device_id;
-
-        // Rename the capsule to "used_dltensor" as per DLPack protocol
-        // This prevents PyTorch from trying to delete it when the capsule is garbage collected
-        const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
-        ffi::PyCapsule_SetName(capsule_ptr, USED_DLTENSOR_NAME.as_ptr() as *const i8);
-
-        Ok(DLPackTensorInfo {
-            data_ptr,
-            shape,
-            device_id,
-        })
+fn extract_cuda_tensor_info(tensor: &Bound<'_, PyAny>) -> PyResult<CudaTensorInfo> {
+    // Get GPU pointer directly via tensor.data_ptr()
+    let data_ptr_int: isize = tensor.call_method0("data_ptr")?.extract()?;
+    if data_ptr_int == 0 {
+        return Err(PyRuntimeError::new_err("CUDA tensor has null data pointer"));
     }
+    let data_ptr = data_ptr_int as *const f64;
+
+    // Get shape directly via tensor.shape
+    let shape_obj = tensor.getattr("shape")?;
+    let shape: Vec<i64> = shape_obj.extract()?;
+
+    Ok(CudaTensorInfo { data_ptr, shape })
 }
 
 /// PyO3 wrapper for QdpEngine
@@ -469,22 +430,22 @@ impl QdpEngine {
                     encoding_method,
                 )?;
 
-                // Extract GPU pointer via DLPack
-                let dlpack_info = extract_dlpack_tensor(data.py(), data)?;
+                // Extract GPU pointer directly from PyTorch tensor
+                let tensor_info = extract_cuda_tensor_info(data)?;
 
                 let ndim: usize = data.call_method0("dim")?.extract()?;
 
                 match ndim {
                     1 => {
                         // 1D CUDA tensor: single sample encoding
-                        let input_len = dlpack_info.shape[0] as usize;
-                        // SAFETY: dlpack_info.data_ptr was validated via DLPack protocol from a
-                        // valid PyTorch CUDA tensor. The tensor remains alive during this call
+                        let input_len = tensor_info.shape[0] as usize;
+                        // SAFETY: tensor_info.data_ptr was obtained via PyTorch's data_ptr() from a
+                        // valid CUDA tensor. The tensor remains alive during this call
                         // (held by Python's GIL), and we validated dtype/contiguity/device above.
                         let ptr = unsafe {
                             self.engine
                                 .encode_from_gpu_ptr(
-                                    dlpack_info.data_ptr,
+                                    tensor_info.data_ptr,
                                     input_len,
                                     num_qubits,
                                     encoding_method,
@@ -500,13 +461,13 @@ impl QdpEngine {
                     }
                     2 => {
                         // 2D CUDA tensor: batch encoding
-                        let num_samples = dlpack_info.shape[0] as usize;
-                        let sample_size = dlpack_info.shape[1] as usize;
-                        // SAFETY: Same as above - pointer from validated DLPack tensor
+                        let num_samples = tensor_info.shape[0] as usize;
+                        let sample_size = tensor_info.shape[1] as usize;
+                        // SAFETY: Same as above - pointer from validated PyTorch CUDA tensor
                         let ptr = unsafe {
                             self.engine
                                 .encode_batch_from_gpu_ptr(
-                                    dlpack_info.data_ptr,
+                                    tensor_info.data_ptr,
                                     num_samples,
                                     sample_size,
                                     num_qubits,

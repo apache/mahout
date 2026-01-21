@@ -428,7 +428,7 @@ impl AmplitudeEncoder {
     /// The caller must ensure `input_ptr` points to valid GPU memory containing
     /// at least `len` f64 elements on the same device as `device`.
     #[cfg(target_os = "linux")]
-    pub unsafe fn calculate_inv_norm_gpu(
+    pub(crate) unsafe fn calculate_inv_norm_gpu(
         device: &Arc<CudaDevice>,
         input_ptr: *const f64,
         len: usize,
