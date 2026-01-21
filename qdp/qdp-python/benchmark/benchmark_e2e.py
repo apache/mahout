@@ -231,9 +231,7 @@ def run_pennylane(n_qubits, n_samples, encoding_method: str = "amplitude"):
 
     @qml.qnode(dev, interface="torch")
     def angle_circuit(inputs):
-        qml.AngleEmbedding(
-            features=inputs * 2.0, wires=range(n_qubits), rotation="Y"
-        )
+        qml.AngleEmbedding(features=inputs * 2.0, wires=range(n_qubits), rotation="Y")
         return qml.state()
 
     model = DummyQNN(n_qubits).cuda()
