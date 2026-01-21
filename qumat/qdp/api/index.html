@@ -26,28 +26,21 @@
   <link rel="canonical" href="http://mahout.apache.org//qumat/qdp/api/">
   <link rel="alternate" type="application/rss+xml" title="Apache Mahout" href="/feed.xml">
 
-  <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-      "HTML-CSS": {
-        availableFonts: ["TeX"],
+  <!-- MathJax 3 Configuration (self-hosted to comply with CSP) -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        tags: 'ams'
       },
-      tex2jax: {
-        inlineMath: [['$','$'],["\\(","\\)"]],
-        displayMath: [['$$','$$'],['\\[','\\]']]
-      },
-      TeX: {
-        extensions: ["AMSmath.js", "AMSsymbols.js", "color.js"],
-        equationNumbers: {
-          autoNumber: "AMS"
-        }
-      },
-      showProcessingMessages: false,
-      messageStyle: "none",
-      imageFont: null,
-      "AssistiveMML": { disabled: true }
-    });
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    };
   </script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+  <script type="text/javascript" src="/assets/vendor/mathjax/tex-chtml.js" async></script>
 </head>
 
 <!-- Matomo -->
