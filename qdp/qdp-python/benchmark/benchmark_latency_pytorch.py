@@ -56,7 +56,7 @@ def run_mahout_pytorch(
         print(f"[Mahout-PyTorch] Init failed: {exc}")
         return 0.0, 0.0
 
-    vector_len = 1 << num_qubits
+    vector_len = num_qubits if encoding_method == "angle" else (1 << num_qubits)
     sync_cuda()
     start = time.perf_counter()
     processed = 0
@@ -90,7 +90,7 @@ def run_mahout_numpy(
         print(f"[Mahout-NumPy] Init failed: {exc}")
         return 0.0, 0.0
 
-    vector_len = 1 << num_qubits
+    vector_len = num_qubits if encoding_method == "angle" else (1 << num_qubits)
     sync_cuda()
     start = time.perf_counter()
     processed = 0
@@ -103,7 +103,7 @@ def run_mahout_numpy(
             for i in range(batch_size)
         ]
         batch_np = np.stack(batch)
-        if encoding_method == "basis":
+        if encoding_method in ("basis", "angle"):
             normalized = batch_np
         else:
             norms = np.linalg.norm(batch_np, axis=1, keepdims=True)
@@ -140,8 +140,8 @@ def main():
         "--encoding-method",
         type=str,
         default="amplitude",
-        choices=["amplitude", "basis"],
-        help="Encoding method to use for Mahout (amplitude or basis).",
+        choices=["amplitude", "angle", "basis"],
+        help="Encoding method to use for Mahout (amplitude, angle, or basis).",
     )
     args = parser.parse_args()
 
