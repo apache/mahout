@@ -95,11 +95,15 @@ impl QuantumEncoder for AmplitudeEncoder {
 
                 // GPU-accelerated norm for medium+ inputs, CPU fallback for tiny payloads
                 let inv_norm = if host_data.len() >= GPU_NORM_THRESHOLD {
-                    Self::calculate_inv_norm_gpu(
-                        _device,
-                        *input_slice.device_ptr() as *const f64,
-                        host_data.len(),
-                    )?
+                    // SAFETY: input_slice was just allocated and copied from host_data,
+                    // so the pointer is valid and contains host_data.len() elements
+                    unsafe {
+                        Self::calculate_inv_norm_gpu(
+                            _device,
+                            *input_slice.device_ptr() as *const f64,
+                            host_data.len(),
+                        )?
+                    }
                 } else {
                     let norm = Preprocessor::calculate_l2_norm(host_data)?;
                     1.0 / norm
@@ -411,8 +415,20 @@ impl AmplitudeEncoder {
 
 impl AmplitudeEncoder {
     /// Compute inverse L2 norm on GPU using the reduction kernel.
+    ///
+    /// # Arguments
+    /// * `device` - CUDA device reference
+    /// * `input_ptr` - Device pointer to input data (f64 array on GPU)
+    /// * `len` - Number of f64 elements
+    ///
+    /// # Returns
+    /// The inverse L2 norm (1/||x||_2) of the input data
+    ///
+    /// # Safety
+    /// The caller must ensure `input_ptr` points to valid GPU memory containing
+    /// at least `len` f64 elements on the same device as `device`.
     #[cfg(target_os = "linux")]
-    fn calculate_inv_norm_gpu(
+    pub(crate) unsafe fn calculate_inv_norm_gpu(
         device: &Arc<CudaDevice>,
         input_ptr: *const f64,
         len: usize,
@@ -447,7 +463,8 @@ impl AmplitudeEncoder {
         let inv_norm = inv_norm_host.first().copied().unwrap_or(0.0);
         if inv_norm == 0.0 || !inv_norm.is_finite() {
             return Err(MahoutError::InvalidInput(
-                "Input data has zero norm".to_string(),
+                "Input data has zero or non-finite norm (contains NaN, Inf, or all zeros)"
+                    .to_string(),
             ));
         }
 
