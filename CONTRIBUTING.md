@@ -19,45 +19,61 @@ limitations under the License.
 
 Thank you for your interest in contributing to Apache Mahout!
 
-## 1. Installation
+## Table of Contents
 
-**Prerequisites:** Python 3.10 (>=3.10,<3.14), uv, Git
+- [Quick Start](#quick-start)
+- [Development Workflow](#development-workflow)
+- [Testing](#testing)
+- [QDP Development](#qdp-development)
+- [Troubleshooting](#troubleshooting)
+- [References](#references)
 
-### Install uv
+## Quick Start
 
-```bash
-pip install uv
-```
+### Prerequisites
 
-or follow the instructions in the [uv documentation](https://docs.astral.sh/uv/).
+- Python 3.10 (>=3.10,<3.14)
+- `uv` package manager
+- Git
 
-### Clone and Install Dependencies
+### Installation
 
-```bash
-git clone https://github.com/apache/mahout.git
-cd mahout
-uv sync --group dev
-```
+1. **Install uv:**
+   ```bash
+   pip install uv
+   ```
+   Or follow the [uv documentation](https://docs.astral.sh/uv/).
 
-### Set Up Pre-commit Hooks
+2. **Clone and install:**
+   ```bash
+   git clone https://github.com/apache/mahout.git
+   cd mahout
+   uv sync --group dev              # Core Qumat (no GPU required)
+   # uv sync --group dev --extra qdp  # With QDP extension (requires CUDA GPU)
+   ```
 
-```bash
-pre-commit install
-```
+   **Note:** Add `--extra qdp` if you need GPU-accelerated encoding or want to run QDP tests. QDP tests are automatically skipped if the extension is not installed.
 
-## 2. Development Workflow
+3. **Set up pre-commit hooks:**
+   ```bash
+   pre-commit install
+   ```
 
-### 2.1 Open an Issue
+---
+
+## Development Workflow
+
+### 1. Open an Issue
 
 Create a new issue in [GitHub](https://github.com/apache/mahout/issues) and discuss your ideas with the community.
 
-### 2.2 Make Changes
-
-Create a new branch for your changes:
+### 2. Create a Branch
 
 ```bash
 git checkout -b your-feature-name
 ```
+
+### 3. Make Changes
 
 Make your changes, then commit (pre-commit hooks will run automatically):
 
@@ -67,11 +83,25 @@ git commit -m "Description of your changes"
 git push
 ```
 
-### 2.3 Test
+### 4. Pre-commit Checks
+
+Run pre-commit hooks:
+
+```bash
+pre-commit run              # Check staged files
+pre-commit run --all-files  # Check all files
+```
+
+### 5. Create a Pull Request
+
+Create a pull request on GitHub. Follow the [pull request template](.github/PULL_REQUEST_TEMPLATE) to provide a detailed description.
+
+## Testing
 
 The project uses a unified test workflow with pytest. Tests are organized in the `testing/` directory.
 
-**Test Structure:**
+### Test Structure
+
 - `testing/qumat/` - Tests for the Qumat quantum computing library
 - `testing/qdp/` - Tests for the Quantum Data Plane (GPU-accelerated, auto-skipped if extension unavailable)
 - `testing/utils/` - Shared test utilities and helpers
@@ -84,18 +114,42 @@ make tests
 
 See [testing/README.md](testing/README.md) for detailed testing documentation.
 
-### 2.4 Pre-commit Checks
+## QDP Development
 
-Run pre-commit hooks:
+> **Note:** QDP development requires Linux with NVIDIA GPU and CUDA toolkit.
 
+### Prerequisites
+
+- Linux machine
+- NVIDIA GPU with CUDA driver and toolkit installed
+- Python 3.10 (>=3.10,<3.14)
+- Rust & Cargo
+
+Verify CUDA installation:
 ```bash
-pre-commit run
+nvcc --version
 ```
 
-Or run pre-commit hooks on all files:
+### Setup Options
+
+**Option 1: Local Setup**
+
+Follow the [Quick Start](#quick-start) installation steps.
+
+**Option 2: DevContainer (Recommended)**
+
+1. Open the project in VS Code
+2. Click "Reopen in Container" when prompted
+3. Container includes: CUDA toolkit, Python 3.10, Rust, development tools, GPU access
+
+### Building
+
+From the `qdp/` directory:
 
 ```bash
-pre-commit run --all-files
+cargo build -p qdp-core    # Build Rust core
+make build                 # Or use Makefile
+make build_nvtx_profile    # With NVTX observability features
 ```
 
 Or run pre-commit with makefile style (that ensures you uses `pre-commit` in uv's venv)
@@ -105,7 +159,7 @@ make pre-commit
 
 ### 2.5 Create a Pull Request
 
-Create a pull request on GitHub. Please follow the [pull request template](.github/PULL_REQUEST_TEMPLATE) to provide a detailed description of your changes.
+From `qdp/qdp-python/`:
 
 ## 3. Website Development
 
