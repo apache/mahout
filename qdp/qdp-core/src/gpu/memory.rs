@@ -13,6 +13,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
+// The compiler can't statically determine which path is taken.
+#![allow(unused_unsafe)]
+
 use crate::error::{MahoutError, Result};
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
 use qdp_kernels::{CuComplex, CuDoubleComplex};

@@ -16,6 +16,10 @@
 
 // Amplitude encoding: state injection with L2 normalization
 
+// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
+// The compiler can't statically determine which path is taken.
+#![allow(unused_unsafe)]
+
 use std::sync::Arc;
 
 use super::QuantumEncoder;
