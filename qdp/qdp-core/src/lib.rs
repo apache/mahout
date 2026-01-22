@@ -28,7 +28,7 @@ pub mod tf_proto;
 #[macro_use]
 mod profiling;
 
-pub use error::{MahoutError, Result};
+pub use error::{cuda_error_to_string, MahoutError, Result};
 pub use gpu::memory::Precision;
 
 use std::sync::Arc;
@@ -394,8 +394,9 @@ impl QdpEngine {
 
             if ret != 0 {
                 return Err(MahoutError::KernelLaunch(format!(
-                    "Amplitude encode kernel failed with error code: {}",
-                    ret
+                    "Amplitude encode kernel failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
                 )));
             }
         }
@@ -498,8 +499,9 @@ impl QdpEngine {
 
             if ret != 0 {
                 return Err(MahoutError::KernelLaunch(format!(
-                    "Norm reduction kernel failed: {}",
-                    ret
+                    "Norm reduction kernel failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
                 )));
             }
 
@@ -546,8 +548,9 @@ impl QdpEngine {
 
             if ret != 0 {
                 return Err(MahoutError::KernelLaunch(format!(
-                    "Batch kernel launch failed: {}",
-                    ret
+                    "Batch kernel launch failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
                 )));
             }
         }
