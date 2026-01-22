@@ -598,25 +598,21 @@ impl QdpEngine {
                 )
             })?;
 
-        let array = numpy_view
-            .extract::<PyReadonlyArrayDyn<f64>>()
-            .map_err(|_| {
-                PyRuntimeError::new_err(
-                    "Failed to extract NumPy view as float64 array. Ensure dtype is float64 \
-                     (try: tensor = tensor.to(torch.float64))",
-                )
-            })?;
-
-        let data_slice = array.as_slice().map_err(|_| {
-            PyRuntimeError::new_err(
-                "Tensor must be contiguous (C-order) to get zero-copy slice \
-                 (try: tensor = tensor.contiguous())",
-            )
-        })?;
-
         match ndim {
             1 => {
                 // 1D tensor: single sample encoding
+                let array_1d = numpy_view.extract::<PyReadonlyArray1<f64>>().map_err(|_| {
+                    PyRuntimeError::new_err(
+                        "Failed to extract NumPy view as float64 array. Ensure dtype is float64 \
+                             (try: tensor = tensor.to(torch.float64))",
+                    )
+                })?;
+                let data_slice = array_1d.as_slice().map_err(|_| {
+                    PyRuntimeError::new_err(
+                        "Tensor must be contiguous (C-order) to get zero-copy slice \
+                         (try: tensor = tensor.contiguous())",
+                    )
+                })?;
                 let ptr = self
                     .engine
                     .encode(data_slice, num_qubits, encoding_method)
@@ -628,15 +624,21 @@ impl QdpEngine {
             }
             2 => {
                 // 2D tensor: batch encoding
-                let shape = array.shape();
-                if shape.len() != 2 {
-                    return Err(PyRuntimeError::new_err(format!(
-                        "Unsupported tensor shape: {}D. Expected 2D tensor (batch_size, features).",
-                        shape.len()
-                    )));
-                }
+                let array_2d = numpy_view.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+                    PyRuntimeError::new_err(
+                        "Failed to extract NumPy view as float64 array. Ensure dtype is float64 \
+                             (try: tensor = tensor.to(torch.float64))",
+                    )
+                })?;
+                let shape = array_2d.shape();
                 let num_samples = shape[0];
                 let sample_size = shape[1];
+                let data_slice = array_2d.as_slice().map_err(|_| {
+                    PyRuntimeError::new_err(
+                        "Tensor must be contiguous (C-order) to get zero-copy slice \
+                         (try: tensor = tensor.contiguous())",
+                    )
+                })?;
                 let ptr = self
                     .engine
                     .encode_batch(
