@@ -21,7 +21,7 @@ from qiskit_aer import AerSimulator
 def initialize_backend(backend_config):
     backend_options = backend_config["backend_options"]
     simulator_type = backend_options["simulator_type"]
-    shots = backend_options["shots"]
+    shots = backend_options.get("shots", 1)
 
     # Map legacy simulator types to AerSimulator methods
     simulator_methods = {
@@ -125,14 +125,14 @@ def execute_circuit(circuit, backend, backend_config):
         transpiled_circuit = qiskit.transpile(working_circuit, backend)
         bound_circuit = transpiled_circuit.assign_parameters(parameter_bindings)
         job = backend.run(
-            bound_circuit, shots=backend_config["backend_options"]["shots"]
+            bound_circuit, shots=backend_config["backend_options"].get("shots", 1)
         )
         result = job.result()
         return result.get_counts()
     else:
         transpiled_circuit = qiskit.transpile(working_circuit, backend)
         job = backend.run(
-            transpiled_circuit, shots=backend_config["backend_options"]["shots"]
+            transpiled_circuit, shots=backend_config["backend_options"].get("shots", 1)
         )
         result = job.result()
         return result.get_counts()

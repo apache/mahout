@@ -64,6 +64,9 @@ def generate_test_data(
     if encoding_method == "basis":
         # Basis encoding: single index per sample
         data = rng.randint(0, sample_size, size=(num_samples, 1)).astype(np.float64)
+    elif encoding_method == "angle":
+        # Angle encoding: per-qubit angles in [0, 2*pi)
+        data = (rng.rand(num_samples, sample_size) * (2.0 * np.pi)).astype(np.float64)
     else:
         # Amplitude encoding: full vectors (using Gaussian distribution)
         data = rng.randn(num_samples, sample_size).astype(np.float64)
@@ -195,8 +198,8 @@ def main():
         "--encoding-method",
         type=str,
         default="amplitude",
-        choices=["amplitude", "basis"],
-        help="Encoding method to use for Mahout (amplitude or basis).",
+        choices=["amplitude", "angle", "basis"],
+        help="Encoding method to use for Mahout (amplitude, angle, or basis).",
     )
     args = parser.parse_args()
 
@@ -208,7 +211,7 @@ def main():
 
     num_qubits = args.qubits
     num_samples = args.samples
-    sample_size = 1 << num_qubits  # 2^qubits
+    sample_size = num_qubits if args.encoding_method == "angle" else (1 << num_qubits)
 
     print(BAR)
     print("NUMPY I/O + ENCODING BENCHMARK")

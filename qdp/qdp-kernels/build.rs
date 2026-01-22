@@ -33,6 +33,7 @@ fn main() {
     // Tell Cargo to rerun this script if the kernel sources change
     println!("cargo:rerun-if-changed=src/amplitude.cu");
     println!("cargo:rerun-if-changed=src/basis.cu");
+    println!("cargo:rerun-if-changed=src/angle.cu");
     println!("cargo:rerun-if-env-changed=QDP_NO_CUDA");
 
     // Check if CUDA is available by looking for nvcc
@@ -94,5 +95,6 @@ fn main() {
         // .flag("arch=compute_89,code=sm_89")
         .file("src/amplitude.cu")
         .file("src/basis.cu")
+        .file("src/angle.cu")
         .compile("kernels");
 }
