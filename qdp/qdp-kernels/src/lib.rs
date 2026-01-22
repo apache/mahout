@@ -52,8 +52,8 @@ unsafe impl cudarc::driver::DeviceRepr for CuComplex {}
 #[cfg(target_os = "linux")]
 unsafe impl cudarc::driver::ValidAsZeroBits for CuComplex {}
 
-// CUDA kernel FFI (Linux only, dummy on other platforms)
-#[cfg(target_os = "linux")]
+// CUDA kernel FFI (Linux only; stubbed when built without nvcc/CUDA)
+#[cfg(all(target_os = "linux", not(qdp_no_cuda)))]
 unsafe extern "C" {
     /// Launch amplitude encoding kernel
     /// Returns CUDA error code (0 = success)
@@ -190,8 +190,8 @@ unsafe extern "C" {
     ) -> i32;
 }
 
-// Dummy implementation for non-Linux (allows compilation)
-#[cfg(not(target_os = "linux"))]
+// Dummy implementation for non-Linux and Linux builds without CUDA (allows linking)
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_amplitude_encode(
     _input_d: *const f64,
@@ -204,7 +204,7 @@ pub extern "C" fn launch_amplitude_encode(
     999 // Error: CUDA unavailable
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_amplitude_encode_f32(
     _input_d: *const f32,
@@ -217,7 +217,21 @@ pub extern "C" fn launch_amplitude_encode_f32(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_amplitude_encode_batch(
+    _input_batch_d: *const f64,
+    _state_batch_d: *mut c_void,
+    _inv_norms_d: *const f64,
+    _num_samples: usize,
+    _input_len: usize,
+    _state_len: usize,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_l2_norm(
     _input_d: *const f64,
@@ -228,7 +242,7 @@ pub extern "C" fn launch_l2_norm(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_l2_norm_batch(
     _input_batch_d: *const f64,
@@ -240,7 +254,7 @@ pub extern "C" fn launch_l2_norm_batch(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn convert_state_to_float(
     _input_state_d: *const CuDoubleComplex,
@@ -251,7 +265,7 @@ pub extern "C" fn convert_state_to_float(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_basis_encode(
     _basis_index: usize,
@@ -262,7 +276,7 @@ pub extern "C" fn launch_basis_encode(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_basis_encode_batch(
     _basis_indices_d: *const usize,
@@ -275,7 +289,7 @@ pub extern "C" fn launch_basis_encode_batch(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_angle_encode(
     _angles_d: *const f64,
@@ -287,7 +301,7 @@ pub extern "C" fn launch_angle_encode(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_angle_encode_batch(
     _angles_batch_d: *const f64,
