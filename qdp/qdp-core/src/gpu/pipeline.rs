@@ -19,6 +19,10 @@
 // Provides generic double-buffered execution for large data processing.
 // Separates the "streaming mechanics" from the "kernel logic".
 
+// Allow unused_unsafe: CUDA FFI functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
+// The compiler can't statically determine which path is taken.
+#![allow(unused_unsafe)]
+
 use crate::error::{MahoutError, Result};
 #[cfg(target_os = "linux")]
 use crate::gpu::buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
