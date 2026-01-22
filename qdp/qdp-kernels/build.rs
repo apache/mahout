@@ -35,6 +35,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/basis.cu");
     println!("cargo:rerun-if-changed=src/angle.cu");
     println!("cargo:rerun-if-env-changed=QDP_NO_CUDA");
+    println!("cargo:rerun-if-changed=src/kernel_config.h");
 
     // Check if CUDA is available by looking for nvcc
     let force_no_cuda = env::var("QDP_NO_CUDA")
@@ -72,6 +73,7 @@ fn main() {
     let mut build = cc::Build::new();
 
     build.include(format!("{}/include", cuda_path));
+    build.include("src"); // Include src directory for kernel_config.h
 
     build
         .cuda(true)

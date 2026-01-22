@@ -116,7 +116,7 @@ impl QdpEngine {
     /// * `num_samples` - Number of samples in the batch
     /// * `sample_size` - Size of each sample
     /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy (currently only "amplitude" supported for batch)
+    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
     ///
     /// # Returns
     /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
@@ -152,7 +152,7 @@ impl QdpEngine {
     /// # Arguments
     /// * `path` - Path to Parquet file with List<Float64> column
     /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Currently only "amplitude" supported for streaming
+    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
     ///
     /// # Returns
     /// DLPack pointer to encoded states [num_samples, 2^num_qubits]

@@ -20,6 +20,7 @@
 #include <cuComplex.h>
 #include <vector_types.h>
 #include <math.h>
+#include "kernel_config.h"
 
 __global__ void amplitude_encode_kernel(
     const double* __restrict__ input,
@@ -150,7 +151,7 @@ int launch_amplitude_encode(
 
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
 
-    const int blockSize = 256;
+    const int blockSize = DEFAULT_BLOCK_SIZE;
     // Halve the grid size because each thread now processes 2 elements
     const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
 
@@ -180,7 +181,7 @@ int launch_amplitude_encode_f32(
 
     cuComplex* state_complex_d = static_cast<cuComplex*>(state_d);
 
-    const int blockSize = 256;
+    const int blockSize = DEFAULT_BLOCK_SIZE;
     const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
 
     amplitude_encode_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
@@ -292,15 +293,15 @@ int launch_amplitude_encode_batch(
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_batch_d);
 
     // Optimal configuration for modern GPUs (SM 7.0+)
-    // - Block size: 256 threads (8 warps, good occupancy)
+    // - Block size: DEFAULT_BLOCK_SIZE threads (8 warps, good occupancy)
     // - Grid size: Enough blocks to saturate GPU, but not excessive
-    const int blockSize = 256;
+    const int blockSize = DEFAULT_BLOCK_SIZE;
     const size_t total_work = num_samples * (state_len / 2);
 
     // Calculate grid size: aim for high occupancy without too many blocks
     // Limit to reasonable number of blocks to avoid scheduler overhead
     const size_t blocks_needed = (total_work + blockSize - 1) / blockSize;
-    const size_t max_blocks = 2048;  // Reasonable limit for most GPUs
+    const size_t max_blocks = MAX_GRID_BLOCKS;
     const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
 
     amplitude_encode_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
@@ -429,11 +430,11 @@ int launch_l2_norm(
         return memset_status;
     }
 
-    const int blockSize = 256;
+    const int blockSize = DEFAULT_BLOCK_SIZE;
     const size_t elements_per_block = blockSize * 2; // double2 per thread
     size_t gridSize = (input_len + elements_per_block - 1) / elements_per_block;
     gridSize = (gridSize == 0) ? 1 : gridSize;
-    const size_t maxBlocks = 4096;
+    const size_t maxBlocks = MAX_GRID_BLOCKS_L2_NORM;
     if (gridSize > maxBlocks) gridSize = maxBlocks;
 
     l2_norm_kernel<<<gridSize, blockSize, 0, stream>>>(
@@ -474,17 +475,17 @@ int launch_l2_norm_batch(
         return memset_status;
     }
 
-    const int blockSize = 256;
+    const int blockSize = DEFAULT_BLOCK_SIZE;
     const size_t elements_per_block = blockSize * 2; // double2 per thread
     size_t blocks_per_sample = (sample_len + elements_per_block - 1) / elements_per_block;
-    const size_t max_blocks_per_sample = 32;
+    const size_t max_blocks_per_sample = MAX_BLOCKS_PER_SAMPLE;
     if (blocks_per_sample == 0) blocks_per_sample = 1;
     if (blocks_per_sample > max_blocks_per_sample) {
         blocks_per_sample = max_blocks_per_sample;
     }
 
     size_t gridSize = num_samples * blocks_per_sample;
-    const size_t max_grid = 65535; // CUDA grid dimension limit for 1D launch
+    const size_t max_grid = CUDA_MAX_GRID_DIM_1D; // CUDA grid dimension limit for 1D launch
     if (gridSize > max_grid) {
         blocks_per_sample = max_grid / num_samples;
         if (blocks_per_sample == 0) {
@@ -501,7 +502,7 @@ int launch_l2_norm_batch(
         inv_norms_out_d
     );
 
-    const int finalizeBlock = 256;
+    const int finalizeBlock = FINALIZE_BLOCK_SIZE;
     const int finalizeGrid = (num_samples + finalizeBlock - 1) / finalizeBlock;
     finalize_inv_norm_kernel<<<finalizeGrid, finalizeBlock, 0, stream>>>(
         inv_norms_out_d,
@@ -535,7 +536,7 @@ int convert_state_to_float(
         return cudaErrorInvalidValue;
     }
 
-    const int blockSize = 256;
+    const int blockSize = DEFAULT_BLOCK_SIZE;
     const int gridSize = (int)((len + blockSize - 1) / blockSize);
 
     convert_state_to_complex64_kernel<<<gridSize, blockSize, 0, stream>>>(
