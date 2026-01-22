@@ -173,9 +173,125 @@
   <div class="row">
 
     <div class="col-lg-8 markdown-body">
-      <h1 id="getting-started">Getting Started</h1>
+      <h1 id="getting-started-with-qdp">Getting Started with QDP</h1>
 
-<!-- TODO: Add getting started guide for QDP -->
+<p>QDP (Quantum Data Plane) is a GPU-accelerated library for encoding classical data into quantum states.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<ul>
+  <li>Linux with NVIDIA GPU</li>
+  <li>CUDA toolkit installed (<code class="language-plaintext highlighter-rouge">nvcc --version</code> to verify)</li>
+  <li>Python 3.10+</li>
+</ul>
+
+<h2 id="installation">Installation</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>qumat[qdp]
+</code></pre></div></div>
+
+<p>For development (from source):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/apache/mahout.git
+<span class="nb">cd </span>mahout/qdp/qdp-python
+uv venv <span class="nt">-p</span> python3.10 <span class="o">&amp;&amp;</span> <span class="nb">source</span> .venv/bin/activate
+uv <span class="nb">sync</span> <span class="nt">--group</span> dev <span class="o">&amp;&amp;</span> uv run maturin develop
+</code></pre></div></div>
+
+<h2 id="quick-start">Quick Start</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">from</span> <span class="n">qumat.qdp</span> <span class="kn">import</span> <span class="n">QdpEngine</span>
+
+<span class="n">engine</span> <span class="o">=</span> <span class="nc">QdpEngine</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># GPU device 0
+</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="n">qtensor</span> <span class="o">=</span> <span class="n">engine</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_qubits</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">encoding_method</span><span class="o">=</span><span class="sh">"</span><span class="s">amplitude</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Convert to PyTorch (zero-copy)
+</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">from_dlpack</span><span class="p">(</span><span class="n">qtensor</span><span class="p">)</span>  <span class="c1"># Note: can only be consumed once
+</span></code></pre></div></div>
+
+<h2 id="encoding-methods">Encoding Methods</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Constraint</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">amplitude</code></td>
+      <td>data length ≤ 2^num_qubits</td>
+      <td><code class="language-plaintext highlighter-rouge">encode([0.5, 0.5, 0.5, 0.5], num_qubits=2, encoding_method="amplitude")</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">angle</code></td>
+      <td>data length = num_qubits</td>
+      <td><code class="language-plaintext highlighter-rouge">encode([0.1, 0.2, 0.3, 0.4], num_qubits=4, encoding_method="angle")</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">basis</code></td>
+      <td>data length = num_qubits</td>
+      <td><code class="language-plaintext highlighter-rouge">encode([1, 0, 1, 1], num_qubits=4, encoding_method="basis")</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="file-inputs">File Inputs</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">engine</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="sh">"</span><span class="s">data.parquet</span><span class="sh">"</span><span class="p">,</span> <span class="n">num_qubits</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">encoding_method</span><span class="o">=</span><span class="sh">"</span><span class="s">amplitude</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># also: .arrow, .npy, .pt, .pb
+</span></code></pre></div></div>
+
+<h2 id="tips">Tips</h2>
+
+<ul>
+  <li>Use <code class="language-plaintext highlighter-rouge">precision="float64"</code> for higher precision: <code class="language-plaintext highlighter-rouge">QdpEngine(0, precision="float64")</code></li>
+  <li>NumPy inputs must be <code class="language-plaintext highlighter-rouge">float64</code> dtype</li>
+  <li>Streaming only works with Parquet files</li>
+</ul>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Problem</th>
+      <th>Solution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Import fails</td>
+      <td>Activate venv: <code class="language-plaintext highlighter-rouge">source .venv/bin/activate</code></td>
+    </tr>
+    <tr>
+      <td>CUDA errors</td>
+      <td>Run <code class="language-plaintext highlighter-rouge">cargo clean</code> in <code class="language-plaintext highlighter-rouge">qdp/</code> and rebuild</td>
+    </tr>
+    <tr>
+      <td>Out of memory</td>
+      <td>Reduce <code class="language-plaintext highlighter-rouge">num_qubits</code> or use <code class="language-plaintext highlighter-rouge">precision="float32"</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<ul>
+  <li><a href="../concepts/">Concepts</a> - Learn about quantum encoding concepts</li>
+  <li><a href="../api/">API Reference</a> - Detailed API documentation</li>
+  <li><a href="../examples/">Examples</a> - More usage examples</li>
+</ul>
+
+<h2 id="help">Help</h2>
+
+<ul>
+  <li>Mailing List: dev@mahout.apache.org</li>
+  <li><a href="https://github.com/apache/mahout/issues">GitHub Issues</a></li>
+</ul>
 
     </div>
 
