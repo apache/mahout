@@ -31,6 +31,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/amplitude.cu");
     println!("cargo:rerun-if-changed=src/basis.cu");
     println!("cargo:rerun-if-changed=src/angle.cu");
+    println!("cargo:rerun-if-changed=src/kernel_config.h");
 
     // Check if CUDA is available by looking for nvcc
     let has_cuda = Command::new("nvcc").arg("--version").output().is_ok();
@@ -61,6 +62,7 @@ fn main() {
     let mut build = cc::Build::new();
 
     build.include(format!("{}/include", cuda_path));
+    build.include("src"); // Include src directory for kernel_config.h
 
     build
         .cuda(true)
