@@ -289,7 +289,7 @@ pub extern "C" fn launch_basis_encode_batch(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_angle_encode(
     _angles_d: *const f64,
@@ -301,7 +301,7 @@ pub extern "C" fn launch_angle_encode(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_angle_encode_batch(
     _angles_batch_d: *const f64,
