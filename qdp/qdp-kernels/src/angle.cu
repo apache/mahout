@@ -22,6 +22,7 @@
 #include <cuda_runtime.h>
 #include <cuComplex.h>
 #include <math.h>
+#include "kernel_config.h"
 
 __global__ void angle_encode_kernel(
     const double* __restrict__ angles,
@@ -95,7 +96,7 @@ int launch_angle_encode(
 
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
 
-    const int blockSize = 256;
+    const int blockSize = DEFAULT_BLOCK_SIZE;
     const int gridSize = (state_len + blockSize - 1) / blockSize;
 
     angle_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
@@ -134,10 +135,10 @@ int launch_angle_encode_batch(
 
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_batch_d);
 
-    const int blockSize = 256;
+    const int blockSize = DEFAULT_BLOCK_SIZE;
     const size_t total_elements = num_samples * state_len;
     const size_t blocks_needed = (total_elements + blockSize - 1) / blockSize;
-    const size_t max_blocks = 2048;
+    const size_t max_blocks = MAX_GRID_BLOCKS;
     const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
 
     angle_encode_batch_kernel<<<gridSize, blockSize, 0, stream>>>(

@@ -88,7 +88,7 @@ def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude"):
             os.remove(f)
 
     print(f"Generating {n_samples} samples of {n_qubits} qubits...")
-    dim = 1 << n_qubits
+    dim = n_qubits if encoding_method == "angle" else (1 << n_qubits)
 
     # Generate all data at once
     all_data = generate_batch_data(n_samples, dim, encoding_method, seed=42)
@@ -98,7 +98,7 @@ def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude"):
         # For basis encoding, save single scalar indices (not lists)
         table = pa.table({"index": pa.array(all_data.flatten(), type=pa.float64())})
     else:
-        # For amplitude encoding, use List format for PennyLane/Qiskit compatibility
+        # For amplitude/angle encoding, use List format for PennyLane/Qiskit compatibility
         feature_vectors = [row.tolist() for row in all_data]
         table = pa.table(
             {"feature_vector": pa.array(feature_vectors, type=pa.list_(pa.float64()))}
@@ -111,7 +111,7 @@ def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude"):
         arr = pa.FixedSizeListArray.from_arrays(pa.array(all_data.flatten()), 1)
         arrow_table = pa.table({"data": arr})
     else:
-        # For amplitude encoding, use FixedSizeList format
+        # For amplitude/angle encoding, use FixedSizeList format
         arr = pa.FixedSizeListArray.from_arrays(pa.array(all_data.flatten()), dim)
         arrow_table = pa.table({"data": arr})
     with ipc.RecordBatchFileWriter(ARROW_FILE, arrow_table.schema) as writer:
@@ -129,7 +129,7 @@ def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude"):
 # -----------------------------------------------------------
 # 1. Qiskit Full Pipeline
 # -----------------------------------------------------------
-def run_qiskit(n_qubits, n_samples):
+def run_qiskit(n_qubits, n_samples, encoding_method: str = "amplitude"):
     if not HAS_QISKIT:
         print("\n[Qiskit] Not installed, skipping.")
         return 0.0, None
@@ -137,7 +137,7 @@ def run_qiskit(n_qubits, n_samples):
     # Clean cache before starting benchmark
     clean_cache()
 
-    print("\n[Qiskit] Full Pipeline (Disk -> GPU)...")
+    print(f"\n[Qiskit] Full Pipeline (Disk -> GPU) - {encoding_method} encoding...")
     model = DummyQNN(n_qubits).cuda()
     backend = AerSimulator(method="statevector")
 
@@ -148,7 +148,10 @@ def run_qiskit(n_qubits, n_samples):
     import pandas as pd
 
     df = pd.read_parquet(DATA_FILE)
-    raw_data = np.stack(df["feature_vector"].values)
+    if encoding_method == "basis":
+        raw_data = df["index"].values.astype(np.int64)
+    else:
+        raw_data = np.stack(df["feature_vector"].values)
     io_time = time.perf_counter() - start_time
     print(f"  IO Time: {io_time:.4f} s")
 
@@ -156,16 +159,22 @@ def run_qiskit(n_qubits, n_samples):
 
     # Process batches
     for i in range(0, n_samples, BATCH_SIZE):
-        batch = raw_data[i : i + BATCH_SIZE]
-
-        # Normalize
-        batch = normalize_batch(batch)
+        batch = normalize_batch(raw_data[i : i + BATCH_SIZE], encoding_method)
 
         # State preparation
         batch_states = []
         for vec_idx, vec in enumerate(batch):
             qc = QuantumCircuit(n_qubits)
-            qc.initialize(vec, range(n_qubits))
+            if encoding_method == "basis":
+                idx = int(vec)
+                for bit in range(n_qubits):
+                    if (idx >> bit) & 1:
+                        qc.x(bit)
+            elif encoding_method == "angle":
+                for qubit, angle in enumerate(vec):
+                    qc.ry(2.0 * float(angle), qubit)
+            else:
+                qc.initialize(vec, range(n_qubits))
             qc.save_statevector()
             t_qc = transpile(qc, backend)
             result = backend.run(t_qc).result().get_statevector().data
@@ -220,6 +229,11 @@ def run_pennylane(n_qubits, n_samples, encoding_method: str = "amplitude"):
         qml.BasisEmbedding(features=basis_state, wires=range(n_qubits))
         return qml.state()
 
+    @qml.qnode(dev, interface="torch")
+    def angle_circuit(inputs):
+        qml.AngleEmbedding(features=inputs * 2.0, wires=range(n_qubits), rotation="Y")
+        return qml.state()
+
     model = DummyQNN(n_qubits).cuda()
 
     torch.cuda.synchronize()
@@ -249,6 +263,13 @@ def run_pennylane(n_qubits, n_samples, encoding_method: str = "amplitude"):
                 state_cpu = basis_circuit(binary_list)
                 batch_states.append(state_cpu)
             state_cpu = torch.stack(batch_states)
+        elif encoding_method == "angle":
+            batch_cpu = torch.tensor(raw_data[i : i + BATCH_SIZE])
+            # Execute QNode
+            try:
+                state_cpu = angle_circuit(batch_cpu)
+            except Exception:
+                state_cpu = torch.stack([angle_circuit(x) for x in batch_cpu])
         else:
             batch_cpu = torch.tensor(raw_data[i : i + BATCH_SIZE])
             # Execute QNode
@@ -438,8 +459,8 @@ if __name__ == "__main__":
         "--encoding-method",
         type=str,
         default="amplitude",
-        choices=["amplitude", "basis"],
-        help="Encoding method to use for Mahout (amplitude or basis).",
+        choices=["amplitude", "angle", "basis"],
+        help="Encoding method to use for Mahout (amplitude, angle, or basis).",
     )
     args = parser.parse_args()
 
@@ -477,7 +498,9 @@ if __name__ == "__main__":
         clean_cache()
 
     if "qiskit" in args.frameworks:
-        t_qiskit, qiskit_all_states = run_qiskit(args.qubits, args.samples)
+        t_qiskit, qiskit_all_states = run_qiskit(
+            args.qubits, args.samples, args.encoding_method
+        )
         # Clean cache between framework benchmarks
         clean_cache()
 

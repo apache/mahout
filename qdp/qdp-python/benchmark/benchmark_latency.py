@@ -98,7 +98,7 @@ def run_mahout(
         print(f"[Mahout] Init failed: {exc}")
         return 0.0, 0.0
 
-    vector_len = 1 << num_qubits
+    vector_len = num_qubits if encoding_method == "angle" else (1 << num_qubits)
     sync_cuda()
     start = time.perf_counter()
     processed = 0
@@ -241,8 +241,8 @@ def main():
         "--encoding-method",
         type=str,
         default="amplitude",
-        choices=["amplitude", "basis"],
-        help="Encoding method to use for Mahout (amplitude or basis).",
+        choices=["amplitude", "angle", "basis"],
+        help="Encoding method to use for Mahout (amplitude, angle, or basis).",
     )
     args = parser.parse_args()
 
