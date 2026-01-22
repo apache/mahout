@@ -28,7 +28,7 @@ pub mod tf_proto;
 #[macro_use]
 mod profiling;
 
-pub use error::{cuda_error_to_string, MahoutError, Result};
+pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
 
 use std::sync::Arc;
