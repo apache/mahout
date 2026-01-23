@@ -27,6 +27,7 @@ dev = [
     "torch>=2.2,<=2.9.0",
     "numpy>=1.24,<2.0",
     "setuptools>=80.9.0",
+    "tensorflow>=2.20",
 ]
 
 [tool.uv]
