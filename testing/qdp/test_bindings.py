@@ -420,10 +420,19 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
 
 
 @pytest.mark.gpu
-def test_encode_cuda_tensor_3d_rejected():
-    """Test error when CUDA tensor has 3+ dimensions."""
+@pytest.mark.parametrize(
+    "input_type,error_match",
+    [
+        ("cuda_tensor", "Unsupported CUDA tensor shape: 3D"),
+        ("cpu_tensor", "Unsupported tensor shape: 3D"),
+        ("numpy_array", "Unsupported array shape: 3D"),
+    ],
+)
+def test_encode_3d_rejected(input_type, error_match):
+    """Test error when input has 3+ dimensions (CUDA tensor, CPU tensor, or NumPy array)."""
     pytest.importorskip("torch")
     import torch
+    import numpy as np
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -431,9 +440,17 @@ def test_encode_cuda_tensor_3d_rejected():
 
     engine = QdpEngine(0)
 
-    # Create 3D CUDA tensor (should be rejected)
-    data = torch.randn(2, 3, 4, dtype=torch.float64, device="cuda:0")
-    with pytest.raises(RuntimeError, match="Unsupported CUDA tensor shape: 3D"):
+    # Create 3D data based on input type
+    if input_type == "cuda_tensor":
+        data = torch.randn(2, 3, 4, dtype=torch.float64, device="cuda:0")
+    elif input_type == "cpu_tensor":
+        data = torch.randn(2, 3, 4, dtype=torch.float64)
+    elif input_type == "numpy_array":
+        data = np.random.randn(2, 3, 4).astype(np.float64)
+    else:
+        raise ValueError(f"Unknown input_type: {input_type}")
+
+    with pytest.raises(RuntimeError, match=error_match):
         engine.encode(data, 2, "amplitude")
 
 
