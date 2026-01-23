@@ -96,19 +96,23 @@ pub trait QuantumEncoder: Send + Sync {
 pub mod amplitude;
 pub mod angle;
 pub mod basis;
+pub mod iqp;
 
 pub use amplitude::AmplitudeEncoder;
 pub use angle::AngleEncoder;
 pub use basis::BasisEncoder;
+pub use iqp::IqpEncoder;
 
-/// Create encoder by name: "amplitude", "angle", or "basis"
+/// Create encoder by name: "amplitude", "angle", "basis", "iqp", or "iqp-z"
 pub fn get_encoder(name: &str) -> Result<Box<dyn QuantumEncoder>> {
     match name.to_lowercase().as_str() {
         "amplitude" => Ok(Box::new(AmplitudeEncoder)),
         "angle" => Ok(Box::new(AngleEncoder)),
         "basis" => Ok(Box::new(BasisEncoder)),
+        "iqp" => Ok(Box::new(IqpEncoder::full())),
+        "iqp-z" => Ok(Box::new(IqpEncoder::z_only())),
         _ => Err(crate::error::MahoutError::InvalidInput(format!(
-            "Unknown encoder: {}. Available: amplitude, angle, basis",
+            "Unknown encoder: {}. Available: amplitude, angle, basis, iqp, iqp-z",
             name
         ))),
     }

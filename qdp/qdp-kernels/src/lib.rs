@@ -188,6 +188,36 @@ unsafe extern "C" {
         num_qubits: u32,
         stream: *mut c_void,
     ) -> i32;
+
+    /// Launch IQP encoding kernel
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_iqp_encode(
+        data_d: *const f64,
+        state_d: *mut c_void,
+        state_len: usize,
+        num_qubits: u32,
+        enable_zz: i32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch batch IQP encoding kernel
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_iqp_encode_batch(
+        data_batch_d: *const f64,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        num_qubits: u32,
+        data_len: u32,
+        enable_zz: i32,
+        stream: *mut c_void,
+    ) -> i32;
 }
 
 // Dummy implementation for non-Linux and Linux builds without CUDA (allows linking)
@@ -309,6 +339,34 @@ pub extern "C" fn launch_angle_encode_batch(
     _num_samples: usize,
     _state_len: usize,
     _num_qubits: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_iqp_encode(
+    _data_d: *const f64,
+    _state_d: *mut c_void,
+    _state_len: usize,
+    _num_qubits: u32,
+    _enable_zz: i32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_iqp_encode_batch(
+    _data_batch_d: *const f64,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
+    _state_len: usize,
+    _num_qubits: u32,
+    _data_len: u32,
+    _enable_zz: i32,
     _stream: *mut c_void,
 ) -> i32 {
     999
