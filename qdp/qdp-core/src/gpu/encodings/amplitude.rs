@@ -31,7 +31,7 @@ use crate::gpu::pipeline::run_dual_stream_pipeline;
 use cudarc::driver::CudaDevice;
 
 #[cfg(target_os = "linux")]
-use crate::gpu::cuda_ffi::cudaMemsetAsync;
+use crate::gpu::cuda_ffi::{cudaMemsetAsync, cudaStreamSynchronize};
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 #[cfg(target_os = "linux")]
@@ -437,6 +437,16 @@ impl AmplitudeEncoder {
         input_ptr: *const f64,
         len: usize,
     ) -> Result<f64> {
+        Self::calculate_inv_norm_gpu_with_stream(device, input_ptr, len, std::ptr::null_mut())
+    }
+
+    #[cfg(target_os = "linux")]
+    pub(crate) unsafe fn calculate_inv_norm_gpu_with_stream(
+        device: &Arc<CudaDevice>,
+        input_ptr: *const f64,
+        len: usize,
+        stream: *mut c_void,
+    ) -> Result<f64> {
         crate::profile_scope!("GPU::NormSingle");
 
         let mut norm_buffer = device.alloc_zeros::<f64>(1).map_err(|e| {
@@ -448,13 +458,22 @@ impl AmplitudeEncoder {
                 input_ptr,
                 len,
                 *norm_buffer.device_ptr_mut() as *mut f64,
-                std::ptr::null_mut(), // default stream
+                stream,
             )
         };
 
         if ret != 0 {
             return Err(MahoutError::KernelLaunch(format!(
                 "Norm kernel failed: {} ({})",
+                ret,
+                cuda_error_to_string(ret)
+            )));
+        }
+
+        let ret = unsafe { cudaStreamSynchronize(stream) };
+        if ret != 0 {
+            return Err(MahoutError::Cuda(format!(
+                "CUDA stream synchronize failed: {} ({})",
                 ret,
                 cuda_error_to_string(ret)
             )));

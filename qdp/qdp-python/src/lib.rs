@@ -20,6 +20,7 @@ use pyo3::ffi;
 use pyo3::prelude::*;
 use qdp_core::dlpack::DLManagedTensor;
 use qdp_core::{Precision, QdpEngine as CoreEngine};
+use std::ffi::c_void;
 
 /// Quantum tensor wrapper implementing DLPack protocol
 ///
@@ -183,6 +184,23 @@ fn get_tensor_device_id(tensor: &Bound<'_, PyAny>) -> PyResult<i32> {
     let device = tensor.getattr("device")?;
     let device_index: i32 = device.getattr("index")?.extract()?;
     Ok(device_index)
+}
+
+/// Get the current CUDA stream pointer for the tensor's device.
+fn get_torch_cuda_stream_ptr(tensor: &Bound<'_, PyAny>) -> PyResult<*mut c_void> {
+    let py = tensor.py();
+    let torch = PyModule::import_bound(py, "torch")
+        .map_err(|_| PyRuntimeError::new_err("Failed to import torch module"))?;
+    let cuda = torch.getattr("cuda")?;
+    let device = tensor.getattr("device")?;
+    let stream = cuda.call_method1("current_stream", (device,))?;
+    let stream_ptr: u64 = stream.getattr("cuda_stream")?.extract()?;
+    if stream_ptr == 0 {
+        return Err(PyRuntimeError::new_err(
+            "PyTorch returned a null CUDA stream pointer",
+        ));
+    }
+    Ok(stream_ptr as *mut c_void)
 }
 
 /// Validate a CUDA tensor for direct GPU encoding
@@ -432,6 +450,7 @@ impl QdpEngine {
 
                 // Extract GPU pointer directly from PyTorch tensor
                 let tensor_info = extract_cuda_tensor_info(data)?;
+                let stream_ptr = get_torch_cuda_stream_ptr(data)?;
 
                 let ndim: usize = data.call_method0("dim")?.extract()?;
 
@@ -444,11 +463,12 @@ impl QdpEngine {
                         // (held by Python's GIL), and we validated dtype/contiguity/device above.
                         let ptr = unsafe {
                             self.engine
-                                .encode_from_gpu_ptr(
+                                .encode_from_gpu_ptr_with_stream(
                                     tensor_info.data_ptr,
                                     input_len,
                                     num_qubits,
                                     encoding_method,
+                                    stream_ptr,
                                 )
                                 .map_err(|e| {
                                     PyRuntimeError::new_err(format!("Encoding failed: {}", e))
@@ -466,12 +486,13 @@ impl QdpEngine {
                         // SAFETY: Same as above - pointer from validated PyTorch CUDA tensor
                         let ptr = unsafe {
                             self.engine
-                                .encode_batch_from_gpu_ptr(
+                                .encode_batch_from_gpu_ptr_with_stream(
                                     tensor_info.data_ptr,
                                     num_samples,
                                     sample_size,
                                     num_qubits,
                                     encoding_method,
+                                    stream_ptr,
                                 )
                                 .map_err(|e| {
                                     PyRuntimeError::new_err(format!("Encoding failed: {}", e))
