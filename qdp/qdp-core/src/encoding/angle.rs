@@ -16,6 +16,10 @@
 
 //! Angle encoding implementation.
 
+// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
+// The compiler can't statically determine which path is taken.
+#![allow(unused_unsafe)]
+
 use std::ffi::c_void;
 
 use qdp_kernels::launch_angle_encode_batch;
@@ -99,22 +103,22 @@ impl ChunkEncoder for AngleEncoder {
             }
         }
 
-        unsafe {
-            crate::profile_scope!("GPU::BatchEncode");
-            let ret = launch_angle_encode_batch(
+        crate::profile_scope!("GPU::BatchEncode");
+        let ret = unsafe {
+            launch_angle_encode_batch(
                 dev_ptr as *const f64,
                 state_ptr_offset,
                 samples_in_chunk,
                 state_len,
                 num_qubits as u32,
                 ctx.stream_compute.stream as *mut c_void,
-            );
-            if ret != 0 {
-                return Err(MahoutError::KernelLaunch(format!(
-                    "Angle encode kernel error: {}",
-                    ret
-                )));
-            }
+            )
+        };
+        if ret != 0 {
+            return Err(MahoutError::KernelLaunch(format!(
+                "Angle encode kernel error: {}",
+                ret
+            )));
         }
         Ok(())
     }
