@@ -178,6 +178,32 @@ fn is_cuda_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<bool> {
     Ok(device_type == "cuda")
 }
 
+/// Validate array/tensor shape (must be 1D or 2D)
+///
+/// Args:
+///     ndim: Number of dimensions
+///     context: Context string for error message (e.g., "array", "tensor", "CUDA tensor")
+///
+/// Returns:
+///     Ok(()) if shape is valid (1D or 2D), otherwise returns an error
+fn validate_shape(ndim: usize, context: &str) -> PyResult<()> {
+    match ndim {
+        1 | 2 => Ok(()),
+        _ => {
+            let item_type = if context.contains("array") {
+                "array"
+            } else {
+                "tensor"
+            };
+            Err(PyRuntimeError::new_err(format!(
+                "Unsupported {} shape: {}D. Expected 1D {} for single sample \
+                 encoding or 2D {} (batch_size, features) for batch encoding.",
+                context, ndim, item_type, item_type
+            )))
+        }
+    }
+}
+
 /// Get the CUDA device index from a PyTorch tensor
 fn get_tensor_device_id(tensor: &Bound<'_, PyAny>) -> PyResult<i32> {
     let device = tensor.getattr("device")?;
@@ -444,6 +470,7 @@ impl QdpEngine {
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
         let ndim: usize = data.getattr("ndim")?.extract()?;
+        validate_shape(ndim, "array")?;
 
         match ndim {
             1 => {
@@ -493,11 +520,7 @@ impl QdpEngine {
                     consumed: false,
                 })
             }
-            _ => Err(PyRuntimeError::new_err(format!(
-                "Unsupported array shape: {}D. Expected 1D array for single sample \
-                 encoding or 2D array (batch_size, features) for batch encoding.",
-                ndim
-            ))),
+            _ => unreachable!("validate_shape() should have caught invalid ndim"),
         }
     }
 
@@ -521,6 +544,7 @@ impl QdpEngine {
             let dlpack_info = extract_dlpack_tensor(data.py(), data)?;
 
             let ndim: usize = data.call_method0("dim")?.extract()?;
+            validate_shape(ndim, "CUDA tensor")?;
 
             match ndim {
                 1 => {
@@ -570,13 +594,7 @@ impl QdpEngine {
                         consumed: false,
                     });
                 }
-                _ => {
-                    return Err(PyRuntimeError::new_err(format!(
-                        "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
-                         sample encoding or 2D tensor (batch_size, features) for batch encoding.",
-                        ndim
-                    )));
-                }
+                _ => unreachable!("validate_shape() should have caught invalid ndim"),
             }
         }
 
@@ -588,6 +606,7 @@ impl QdpEngine {
         // underlying memory (zero-copy) when the tensor is C-contiguous. We can then borrow a
         // `&[f64]` directly via pyo3-numpy.
         let ndim: usize = data.call_method0("dim")?.extract()?;
+        validate_shape(ndim, "tensor")?;
         let numpy_view = data
             .call_method0("detach")?
             .call_method0("numpy")
@@ -654,11 +673,7 @@ impl QdpEngine {
                     consumed: false,
                 })
             }
-            _ => Err(PyRuntimeError::new_err(format!(
-                "Unsupported tensor shape: {}D. Expected 1D tensor for single sample \
-                 encoding or 2D tensor (batch_size, features) for batch encoding.",
-                ndim
-            ))),
+            _ => unreachable!("validate_shape() should have caught invalid ndim"),
         }
     }
 
