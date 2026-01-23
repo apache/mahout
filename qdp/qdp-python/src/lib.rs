@@ -54,7 +54,6 @@ impl QuantumTensor {
     ///     RuntimeError: If the tensor has already been consumed
     #[pyo3(signature = (stream=None))]
     fn __dlpack__<'py>(&mut self, py: Python<'py>, stream: Option<i64>) -> PyResult<Py<PyAny>> {
-        let _ = stream; // Suppress unused variable warning
         if self.consumed {
             return Err(PyRuntimeError::new_err(
                 "DLPack tensor already consumed (can only be used once)",
@@ -63,6 +62,14 @@ impl QuantumTensor {
 
         if self.ptr.is_null() {
             return Err(PyRuntimeError::new_err("Invalid DLPack tensor pointer"));
+        }
+
+        if let Some(stream) = stream {
+            if stream > 0 {
+                qdp_core::dlpack::synchronize_stream(stream as *mut std::ffi::c_void).map_err(
+                    |e| PyRuntimeError::new_err(format!("CUDA stream sync failed: {}", e)),
+                )?;
+            }
         }
 
         // Mark as consumed to prevent double-free

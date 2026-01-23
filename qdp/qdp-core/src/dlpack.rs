@@ -16,9 +16,71 @@
 
 // DLPack protocol for zero-copy GPU memory sharing with PyTorch
 
+use crate::error::Result;
+#[cfg(target_os = "linux")]
+use crate::error::{MahoutError, cuda_error_to_string};
 use crate::gpu::memory::{BufferStorage, GpuStateVector, Precision};
 use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
+
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_ffi::{
+    cudaEventCreateWithFlags, cudaEventDestroy, cudaEventRecord, cudaStreamWaitEvent,
+    CUDA_EVENT_DISABLE_TIMING,
+};
+
+#[cfg(target_os = "linux")]
+pub fn synchronize_stream(stream: *mut c_void) -> Result<()> {
+    if stream.is_null() {
+        return Ok(());
+    }
+
+    let mut event: *mut c_void = std::ptr::null_mut();
+    let ret = unsafe { cudaEventCreateWithFlags(&mut event, CUDA_EVENT_DISABLE_TIMING) };
+    if ret != 0 {
+        return Err(MahoutError::Cuda(format!(
+            "cudaEventCreateWithFlags failed: {} ({})",
+            ret,
+            cuda_error_to_string(ret)
+        )));
+    }
+
+    let record_ret = unsafe { cudaEventRecord(event, std::ptr::null_mut()) };
+    if record_ret != 0 {
+        let _ = unsafe { cudaEventDestroy(event) };
+        return Err(MahoutError::Cuda(format!(
+            "cudaEventRecord failed: {} ({})",
+            record_ret,
+            cuda_error_to_string(record_ret)
+        )));
+    }
+
+    let wait_ret = unsafe { cudaStreamWaitEvent(stream, event, 0) };
+    if wait_ret != 0 {
+        let _ = unsafe { cudaEventDestroy(event) };
+        return Err(MahoutError::Cuda(format!(
+            "cudaStreamWaitEvent failed: {} ({})",
+            wait_ret,
+            cuda_error_to_string(wait_ret)
+        )));
+    }
+
+    let destroy_ret = unsafe { cudaEventDestroy(event) };
+    if destroy_ret != 0 {
+        return Err(MahoutError::Cuda(format!(
+            "cudaEventDestroy failed: {} ({})",
+            destroy_ret,
+            cuda_error_to_string(destroy_ret)
+        )));
+    }
+
+    Ok(())
+}
+
+#[cfg(not(target_os = "linux"))]
+pub fn synchronize_stream(_stream: *mut c_void) -> Result<()> {
+    Ok(())
+}
 
 // DLPack C structures (matching dlpack/dlpack.h)
 

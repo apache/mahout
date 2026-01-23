@@ -20,6 +20,18 @@ use std::ffi::c_void;
 
 pub(crate) const CUDA_MEMCPY_HOST_TO_DEVICE: u32 = 1;
 pub(crate) const CUDA_EVENT_DISABLE_TIMING: u32 = 0x02;
+pub(crate) const CUDA_MEMORY_TYPE_DEVICE: i32 = 2;
+pub(crate) const CUDA_MEMORY_TYPE_MANAGED: i32 = 3;
+
+#[repr(C)]
+pub(crate) struct CudaPointerAttributes {
+    pub memory_type: i32,
+    pub device: i32,
+    pub device_pointer: *mut c_void,
+    pub host_pointer: *mut c_void,
+    pub is_managed: i32,
+    pub allocation_flags: u32,
+}
 
 unsafe extern "C" {
     pub(crate) fn cudaHostAlloc(pHost: *mut *mut c_void, size: usize, flags: u32) -> i32;
@@ -46,5 +58,10 @@ unsafe extern "C" {
         value: i32,
         count: usize,
         stream: *mut c_void,
+    ) -> i32;
+
+    pub(crate) fn cudaPointerGetAttributes(
+        attributes: *mut CudaPointerAttributes,
+        ptr: *const c_void,
     ) -> i32;
 }
