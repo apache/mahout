@@ -18,10 +18,41 @@
 
 use std::sync::Arc;
 
-use crate::error::Result;
+use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
 use crate::preprocessing::Preprocessor;
 use cudarc::driver::CudaDevice;
+
+/// Maximum number of qubits supported (16GB GPU memory limit)
+/// This constant must match MAX_QUBITS in qdp-kernels/src/kernel_config.h
+pub const MAX_QUBITS: usize = 30;
+
+/// Validates qubit count against practical limits.
+///
+/// Checks:
+/// - Qubit count is at least 1
+/// - Qubit count does not exceed MAX_QUBITS
+///
+/// # Arguments
+/// * `num_qubits` - The number of qubits to validate
+///
+/// # Returns
+/// * `Ok(())` if the qubit count is valid
+/// * `Err(MahoutError::InvalidInput)` if the qubit count is invalid
+pub fn validate_qubit_count(num_qubits: usize) -> Result<()> {
+    if num_qubits == 0 {
+        return Err(MahoutError::InvalidInput(
+            "Number of qubits must be at least 1".to_string(),
+        ));
+    }
+    if num_qubits > MAX_QUBITS {
+        return Err(MahoutError::InvalidInput(format!(
+            "Number of qubits {} exceeds practical limit of {}",
+            num_qubits, MAX_QUBITS
+        )));
+    }
+    Ok(())
+}
 
 /// Quantum encoding strategy interface
 /// Implemented by: AmplitudeEncoder, AngleEncoder, BasisEncoder
