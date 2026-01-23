@@ -290,7 +290,7 @@ pub extern "C" fn launch_l2_norm_f32(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_l2_norm_batch_f32(
     _input_batch_d: *const f32,
@@ -302,7 +302,7 @@ pub extern "C" fn launch_l2_norm_batch_f32(
     999
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn convert_state_to_float(
     _input_state_d: *const CuDoubleComplex,
