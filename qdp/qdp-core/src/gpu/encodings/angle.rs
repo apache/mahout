@@ -267,44 +267,46 @@ impl AngleEncoder {
             )
         })?;
 
-        run_dual_stream_pipeline_aligned(device, batch_data, sample_size, |stream, input_ptr, chunk_offset, chunk_len| {
-            if chunk_len % sample_size != 0 || chunk_offset % sample_size != 0 {
-                return Err(MahoutError::InvalidInput(
-                    "Angle batch chunk is not aligned to sample size".to_string(),
-                ));
-            }
+        run_dual_stream_pipeline_aligned(
+            device,
+            batch_data,
+            sample_size,
+            |stream, input_ptr, chunk_offset, chunk_len| {
+                if chunk_len % sample_size != 0 || chunk_offset % sample_size != 0 {
+                    return Err(MahoutError::InvalidInput(
+                        "Angle batch chunk is not aligned to sample size".to_string(),
+                    ));
+                }
 
-            let chunk_samples = chunk_len / sample_size;
-            let sample_offset = chunk_offset / sample_size;
-            let offset_elements = sample_offset.checked_mul(state_len).ok_or_else(|| {
-                MahoutError::InvalidInput(
-                    "Angle batch output offset overflow".to_string(),
-                )
-            })?;
+                let chunk_samples = chunk_len / sample_size;
+                let sample_offset = chunk_offset / sample_size;
+                let offset_elements = sample_offset.checked_mul(state_len).ok_or_else(|| {
+                    MahoutError::InvalidInput("Angle batch output offset overflow".to_string())
+                })?;
 
-            let state_ptr_offset =
-                unsafe { state_ptr.add(offset_elements) as *mut c_void };
-            let ret = unsafe {
-                qdp_kernels::launch_angle_encode_batch(
-                    input_ptr,
-                    state_ptr_offset,
-                    chunk_samples,
-                    state_len,
-                    num_qubits as u32,
-                    stream.stream as *mut c_void,
-                )
-            };
+                let state_ptr_offset = unsafe { state_ptr.add(offset_elements) as *mut c_void };
+                let ret = unsafe {
+                    qdp_kernels::launch_angle_encode_batch(
+                        input_ptr,
+                        state_ptr_offset,
+                        chunk_samples,
+                        state_len,
+                        num_qubits as u32,
+                        stream.stream as *mut c_void,
+                    )
+                };
 
-            if ret != 0 {
-                return Err(MahoutError::KernelLaunch(format!(
-                    "Batch angle encoding kernel failed: {} ({})",
-                    ret,
-                    cuda_error_to_string(ret)
-                )));
-            }
+                if ret != 0 {
+                    return Err(MahoutError::KernelLaunch(format!(
+                        "Batch angle encoding kernel failed: {} ({})",
+                        ret,
+                        cuda_error_to_string(ret)
+                    )));
+                }
 
-            Ok(())
-        })?;
+                Ok(())
+            },
+        )?;
 
         Ok(batch_state_vector)
     }

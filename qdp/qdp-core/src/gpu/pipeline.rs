@@ -248,7 +248,12 @@ where
     crate::profile_scope!("GPU::AsyncPipeline");
 
     const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
-    run_dual_stream_pipeline_with_chunk_size(device, host_data, CHUNK_SIZE_ELEMENTS, kernel_launcher)
+    run_dual_stream_pipeline_with_chunk_size(
+        device,
+        host_data,
+        CHUNK_SIZE_ELEMENTS,
+        kernel_launcher,
+    )
 }
 
 /// Executes a task using dual-stream double-buffering with aligned chunk boundaries.
@@ -272,7 +277,7 @@ where
             "Alignment must be greater than zero".to_string(),
         ));
     }
-    if host_data.len() % align_elements != 0 {
+    if !host_data.len().is_multiple_of(align_elements) {
         return Err(MahoutError::InvalidInput(format!(
             "Host data length {} is not aligned to {} elements",
             host_data.len(),
@@ -287,7 +292,12 @@ where
         BASE_CHUNK_SIZE_ELEMENTS - (BASE_CHUNK_SIZE_ELEMENTS % align_elements)
     };
 
-    run_dual_stream_pipeline_with_chunk_size(device, host_data, chunk_size_elements, kernel_launcher)
+    run_dual_stream_pipeline_with_chunk_size(
+        device,
+        host_data,
+        chunk_size_elements,
+        kernel_launcher,
+    )
 }
 
 #[cfg(target_os = "linux")]
