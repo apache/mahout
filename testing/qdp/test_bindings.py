@@ -895,7 +895,7 @@ def test_iqp_encode_3_qubits():
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
 
-    engine = QdpEngine(0, precision="float64")
+    engine = QdpEngine(0)
 
     # 3 qubits needs 6 parameters: [theta_0, theta_1, theta_2, J_01, J_02, J_12]
     # With all zeros, should get |000⟩ state
