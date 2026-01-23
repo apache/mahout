@@ -25,6 +25,8 @@ use super::{QuantumEncoder, validate_qubit_count};
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
+#[cfg(target_os = "linux")]
+use crate::gpu::pipeline::run_dual_stream_pipeline_aligned;
 use cudarc::driver::CudaDevice;
 use std::sync::Arc;
 
@@ -152,6 +154,18 @@ impl QuantumEncoder for AngleEncoder {
 
         let state_len = 1 << num_qubits;
 
+        const ASYNC_THRESHOLD_ELEMENTS: usize = 1024 * 1024 / std::mem::size_of::<f64>(); // 1MB
+        if batch_data.len() >= ASYNC_THRESHOLD_ELEMENTS {
+            return Self::encode_batch_async_pipeline(
+                device,
+                batch_data,
+                num_samples,
+                sample_size,
+                num_qubits,
+                state_len,
+            );
+        }
+
         let batch_state_vector = {
             crate::profile_scope!("GPU::AllocBatch");
             GpuStateVector::new_batch(device, num_samples, num_qubits)?
@@ -229,5 +243,69 @@ impl QuantumEncoder for AngleEncoder {
 
     fn description(&self) -> &'static str {
         "Angle encoding: per-qubit rotations into a product state"
+    }
+}
+
+impl AngleEncoder {
+    #[cfg(target_os = "linux")]
+    fn encode_batch_async_pipeline(
+        device: &Arc<CudaDevice>,
+        batch_data: &[f64],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        state_len: usize,
+    ) -> Result<GpuStateVector> {
+        let batch_state_vector = {
+            crate::profile_scope!("GPU::AllocBatch");
+            GpuStateVector::new_batch(device, num_samples, num_qubits)?
+        };
+
+        let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "Batch state vector precision mismatch (expected float64 buffer)".to_string(),
+            )
+        })?;
+
+        run_dual_stream_pipeline_aligned(device, batch_data, sample_size, |stream, input_ptr, chunk_offset, chunk_len| {
+            if chunk_len % sample_size != 0 || chunk_offset % sample_size != 0 {
+                return Err(MahoutError::InvalidInput(
+                    "Angle batch chunk is not aligned to sample size".to_string(),
+                ));
+            }
+
+            let chunk_samples = chunk_len / sample_size;
+            let sample_offset = chunk_offset / sample_size;
+            let offset_elements = sample_offset.checked_mul(state_len).ok_or_else(|| {
+                MahoutError::InvalidInput(
+                    "Angle batch output offset overflow".to_string(),
+                )
+            })?;
+
+            let state_ptr_offset =
+                unsafe { state_ptr.add(offset_elements) as *mut c_void };
+            let ret = unsafe {
+                qdp_kernels::launch_angle_encode_batch(
+                    input_ptr,
+                    state_ptr_offset,
+                    chunk_samples,
+                    state_len,
+                    num_qubits as u32,
+                    stream.stream as *mut c_void,
+                )
+            };
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Batch angle encoding kernel failed: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+
+            Ok(())
+        })?;
+
+        Ok(batch_state_vector)
     }
 }
