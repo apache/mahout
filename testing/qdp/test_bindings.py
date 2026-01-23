@@ -783,9 +783,6 @@ def test_encode_pathlib_path():
             os.remove(npy_path)
 
 
-# ==================== IQP Encoding Tests ====================
-
-
 @pytest.mark.gpu
 def test_iqp_z_encode_basic():
     """Test basic IQP-Z encoding with zero angles (requires GPU).
