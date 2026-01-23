@@ -17,7 +17,7 @@ import torch
 
 engine = qdp.QdpEngine(device_id=0, precision="float32")
 qtensor = engine.encode([0.1, 0.2, 0.3, 0.4], num_qubits=2, encoding_method="amplitude")
-tensor = torch.utils.dlpack.from_dlpack(qtensor)  # single-use, zero-copy
+tensor = torch.from_dlpack(qtensor)  # single-use, zero-copy
 
 print(tensor.shape, tensor.dtype, tensor.device)
 ```
@@ -123,13 +123,12 @@ Return `(device_type, device_id)`; CUDA devices report `(2, gpu_id)`.
 - Torch tensors not on CPU or not contiguous.
 - DLPack capsule consumed more than once.
 
-## Compatibility & Deprecation (PoC Target)
+## Requirements & Deprecation
 
-- Rust >= 1.85
-- CUDA Toolkit >= 12.2.x
-- Python >= 3.11
-- PyTorch >= 2.2.x
-- PyArrow >= 16.x
-- PyO3 >= 0.21
+- Linux with an NVIDIA GPU (CUDA).
+- CUDA driver/toolkit installed.
+- Python 3.10–3.12 (`requires-python >=3.10,<3.13`).
+- `qumat` installed (the QDP native extension ships as `qumat-qdp`).
+- Optional: `torch` for DLPack integration, `numpy` for NumPy inputs.
 
 No deprecations are planned for the initial PoC.
