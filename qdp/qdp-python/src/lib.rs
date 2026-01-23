@@ -20,6 +20,7 @@ use pyo3::ffi;
 use pyo3::prelude::*;
 use qdp_core::dlpack::DLManagedTensor;
 use qdp_core::{Precision, QdpEngine as CoreEngine};
+use std::ffi::c_void;
 
 /// Quantum tensor wrapper implementing DLPack protocol
 ///
@@ -218,23 +219,34 @@ fn validate_cuda_tensor_for_encoding(
     expected_device_id: usize,
     encoding_method: &str,
 ) -> PyResult<()> {
-    // Check encoding method support (currently only amplitude is supported for CUDA tensors)
-    if encoding_method != "amplitude" {
-        return Err(PyRuntimeError::new_err(format!(
-            "CUDA tensor encoding currently only supports 'amplitude' method, got '{}'. \
-             Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
-            encoding_method
-        )));
-    }
-
-    // Check dtype is float64
+    // Check encoding method support and dtype.
     let dtype = tensor.getattr("dtype")?;
     let dtype_str: String = dtype.str()?.extract()?;
-    if !dtype_str.contains("float64") {
-        return Err(PyRuntimeError::new_err(format!(
-            "CUDA tensor must have dtype float64, got {}. Use tensor.to(torch.float64)",
-            dtype_str
-        )));
+    match encoding_method {
+        "amplitude" => {
+            if !dtype_str.contains("float64") {
+                return Err(PyRuntimeError::new_err(format!(
+                    "CUDA tensor must have dtype float64, got {}. Use tensor.to(torch.float64)",
+                    dtype_str
+                )));
+            }
+        }
+        "basis" => {
+            if !dtype_str.contains("int64") {
+                return Err(PyRuntimeError::new_err(format!(
+                    "CUDA tensor must have dtype int64 for basis encoding, got {}. \
+                     Use tensor.to(torch.int64)",
+                    dtype_str
+                )));
+            }
+        }
+        _ => {
+            return Err(PyRuntimeError::new_err(format!(
+                "CUDA tensor encoding currently only supports 'amplitude' or 'basis' methods, got '{}'. \
+                 Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
+                encoding_method
+            )));
+        }
     }
 
     // Check contiguous
@@ -273,7 +285,7 @@ struct DLPackTensorInfo {
     /// This is owned by this struct and will be freed via deleter on drop
     managed_ptr: *mut DLManagedTensor,
     /// Data pointer inside dl_tensor (GPU memory, owned by managed_ptr)
-    data_ptr: *const f64,
+    data_ptr: *const c_void,
     shape: Vec<i64>,
     /// CUDA device ID from DLPack metadata.
     /// Currently unused but kept for potential future device validation or multi-GPU support.
@@ -336,7 +348,7 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
                 "DLPack tensor has null data pointer",
             ));
         }
-        let data_ptr = dl_tensor.data as *const f64;
+        let data_ptr = dl_tensor.data as *const c_void;
 
         // Extract shape
         let ndim = dl_tensor.ndim as usize;
