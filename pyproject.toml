@@ -44,7 +44,7 @@ qumat-qdp = { path = "qdp/qdp-python", editable = true }
 testpaths = ["testing"]
 python_files = "test_*.py"
 python_functions = "test_*"
-addopts = ["-v", "--tb=short"]
+addopts = ["-v", "--tb=short", "-rs"]
 markers = [
     "gpu: marks tests as requiring GPU and _qdp extension (auto-skipped if unavailable)",
     "slow: marks tests as slow running",
