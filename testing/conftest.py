@@ -26,11 +26,13 @@ QDP tests are automatically skipped if the _qdp extension is not available,
 allowing contributors without CUDA to run the qumat test suite.
 """
 
+from typing import Optional
+
 import pytest
 
 # Check if QDP extension is available at module load time
 _QDP_AVAILABLE = False
-_QDP_IMPORT_ERROR: str | None = "No module named '_qdp'"
+_QDP_IMPORT_ERROR: Optional[str] = "No module named '_qdp'"
 try:
     import _qdp  # noqa: F401, PLC0415
 
@@ -39,10 +41,6 @@ try:
 except ImportError as e:
     _QDP_IMPORT_ERROR = str(e)
 
-# Skip qdp tests at collection time if dependencies are not available
-collect_ignore_glob = []
-if not _QDP_AVAILABLE:
-    collect_ignore_glob.append("qdp/*.py")
 
 
 def pytest_configure(config):  # noqa: ARG001

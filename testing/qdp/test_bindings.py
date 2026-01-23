@@ -17,7 +17,8 @@
 """Simple tests for PyO3 bindings."""
 
 import pytest
-import _qdp
+
+_qdp = pytest.importorskip("_qdp", reason="QDP extension not built. Run: uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml")
 
 
 def _has_multi_gpu():
@@ -891,7 +892,7 @@ def test_iqp_encode_3_qubits():
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
 
-    engine = QdpEngine(0)
+    engine = QdpEngine(0, precision="float64")
 
     # 3 qubits needs 6 parameters: [theta_0, theta_1, theta_2, J_01, J_02, J_12]
     # With all zeros, should get |000⟩ state

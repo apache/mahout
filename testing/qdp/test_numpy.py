@@ -23,7 +23,8 @@ import numpy as np
 import pytest
 import torch
 
-from _qdp import QdpEngine
+_qdp = pytest.importorskip("_qdp", reason="QDP extension not built. Run: uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml")
+QdpEngine = _qdp.QdpEngine
 
 
 def _verify_tensor(tensor, expected_shape, check_normalization=False):

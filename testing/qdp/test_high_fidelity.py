@@ -23,7 +23,9 @@ import pytest
 import torch
 import numpy as np
 import concurrent.futures
-from _qdp import QdpEngine
+
+_qdp = pytest.importorskip("_qdp", reason="QDP extension not built. Run: uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml")
+QdpEngine = _qdp.QdpEngine
 
 np.random.seed(2026)
 
