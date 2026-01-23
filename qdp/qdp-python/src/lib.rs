@@ -18,7 +18,7 @@ use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
 use pyo3::prelude::*;
-use qdp_core::dlpack::DLManagedTensor;
+use qdp_core::dlpack::{DLDeviceType, DLManagedTensor, DL_FLOAT};
 use qdp_core::{Precision, QdpEngine as CoreEngine};
 
 /// Quantum tensor wrapper implementing DLPack protocol
@@ -318,6 +318,12 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
 
     unsafe {
         let capsule_ptr = capsule.as_ptr();
+        if ffi::PyCapsule_IsValid(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) == 0 {
+            return Err(PyRuntimeError::new_err(
+                "Invalid DLPack capsule (expected 'dltensor')",
+            ));
+        }
+
         let managed_ptr =
             ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
                 as *mut DLManagedTensor;
@@ -336,7 +342,32 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
                 "DLPack tensor has null data pointer",
             ));
         }
-        let data_ptr = dl_tensor.data as *const f64;
+
+        // Validate device type
+        if dl_tensor.device.device_type != DLDeviceType::kDLCUDA {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor must be on CUDA device",
+            ));
+        }
+
+        // Validate dtype: float64
+        if dl_tensor.dtype.code != DL_FLOAT || dl_tensor.dtype.bits != 64 || dl_tensor.dtype.lanes != 1
+        {
+            return Err(PyRuntimeError::new_err(format!(
+                "DLPack tensor must be float64 (code={}, bits={}, lanes={})",
+                dl_tensor.dtype.code, dl_tensor.dtype.bits, dl_tensor.dtype.lanes
+            )));
+        }
+
+        // Validate byte offset alignment for f64
+        if dl_tensor.byte_offset % std::mem::size_of::<f64>() as u64 != 0 {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor byte_offset is not aligned for float64",
+            ));
+        }
+
+        let data_ptr = (dl_tensor.data as *const u8)
+            .add(dl_tensor.byte_offset as usize) as *const f64;
 
         // Extract shape
         let ndim = dl_tensor.ndim as usize;
@@ -345,6 +376,38 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
         } else {
             vec![]
         };
+
+        if ndim == 0 || shape.is_empty() {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor must have at least 1 dimension",
+            ));
+        }
+
+        // Validate contiguous layout when strides are present
+        if !dl_tensor.strides.is_null() {
+            let strides = std::slice::from_raw_parts(dl_tensor.strides, ndim);
+            match ndim {
+                1 => {
+                    if strides[0] != 1 {
+                        return Err(PyRuntimeError::new_err(
+                            "DLPack tensor must be contiguous (stride != 1)",
+                        ));
+                    }
+                }
+                2 => {
+                    if shape.len() < 2 || strides[1] != 1 || strides[0] != shape[1] {
+                        return Err(PyRuntimeError::new_err(
+                            "DLPack tensor must be contiguous (unexpected strides)",
+                        ));
+                    }
+                }
+                _ => {
+                    return Err(PyRuntimeError::new_err(
+                        "DLPack tensor must be 1D or 2D for encoding",
+                    ));
+                }
+            }
+        }
 
         // Extract device_id
         let device_id = dl_tensor.device.device_id;
