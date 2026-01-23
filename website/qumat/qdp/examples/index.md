@@ -16,7 +16,7 @@ and typical usage patterns.
 Encode a classical vector into a GPU-backed quantum state using amplitude encoding.
 
 ```python
-import mahout_qdp as qdp
+import qumat.qdp as qdp
 import pyarrow as pa
 import torch
 
@@ -35,7 +35,7 @@ print("Device:", tensor.device)
 QDP automatically normalizes input vectors and pads them to the nearest power-of-two length.
 
 ```python
-import mahout_qdp as qdp
+import qumat.qdp as qdp
 import pyarrow as pa
 
 raw_vector = [3.0, 4.0, 5.0]
