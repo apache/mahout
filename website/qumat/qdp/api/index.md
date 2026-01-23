@@ -5,10 +5,6 @@ title: API Reference - QDP
 
 # API Reference
 
-Mahout QDP (Quantum Data Plane) provides GPU-accelerated quantum state encoding.
-It writes classical data directly into GPU memory and returns a DLPack-compatible
-handle for zero-copy integration with downstream frameworks.
-
 ## Quickstart
 
 ```python
