@@ -42,7 +42,6 @@ except ImportError as e:
     _QDP_IMPORT_ERROR = str(e)
 
 
-
 def pytest_configure(config):  # noqa: ARG001
     """Register custom pytest markers."""
     config.addinivalue_line(
