@@ -16,6 +16,11 @@
 
 // Tests for amplitude encoding CUDA kernel
 
+// Allow unused_unsafe: in no-CUDA builds, stub functions are not unsafe,
+// but in CUDA builds, the extern "C" functions require unsafe blocks.
+// The compiler can't statically determine which path is taken.
+#![allow(unused_unsafe)]
+
 #[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]

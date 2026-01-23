@@ -16,6 +16,10 @@
 
 // Amplitude encoding: state injection with L2 normalization
 
+// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
+// The compiler can't statically determine which path is taken.
+#![allow(unused_unsafe)]
+
 use std::sync::Arc;
 
 use super::QuantumEncoder;
@@ -54,7 +58,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         host_data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
-        // Validate qubits (max 30 = 16GB GPU memory)
+        // Validate qubits using Preprocessor (which uses validate_qubit_count internally)
         Preprocessor::validate_input(host_data, num_qubits)?;
         let state_len = 1 << num_qubits;
 

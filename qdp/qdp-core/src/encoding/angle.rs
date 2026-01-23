@@ -16,12 +16,17 @@
 
 //! Angle encoding implementation.
 
+// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
+// The compiler can't statically determine which path is taken.
+#![allow(unused_unsafe)]
+
 use std::ffi::c_void;
 
 use qdp_kernels::launch_angle_encode_batch;
 
 use super::{ChunkEncoder, STAGE_SIZE_ELEMENTS};
 use crate::gpu::PipelineContext;
+use crate::gpu::encodings::validate_qubit_count;
 use crate::gpu::memory::PinnedHostBuffer;
 use crate::{MahoutError, QdpEngine, Result};
 
@@ -55,12 +60,7 @@ impl ChunkEncoder for AngleEncoder {
         sample_size: usize,
         num_qubits: usize,
     ) -> Result<Self::State> {
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
-            )));
-        }
+        validate_qubit_count(num_qubits)?;
         if sample_size != num_qubits {
             return Err(MahoutError::InvalidInput(format!(
                 "Angle encoding expects sample_size={} (one angle per qubit), got {}",
@@ -103,22 +103,22 @@ impl ChunkEncoder for AngleEncoder {
             }
         }
 
-        unsafe {
-            crate::profile_scope!("GPU::BatchEncode");
-            let ret = launch_angle_encode_batch(
+        crate::profile_scope!("GPU::BatchEncode");
+        let ret = unsafe {
+            launch_angle_encode_batch(
                 dev_ptr as *const f64,
                 state_ptr_offset,
                 samples_in_chunk,
                 state_len,
                 num_qubits as u32,
                 ctx.stream_compute.stream as *mut c_void,
-            );
-            if ret != 0 {
-                return Err(MahoutError::KernelLaunch(format!(
-                    "Angle encode kernel error: {}",
-                    ret
-                )));
-            }
+            )
+        };
+        if ret != 0 {
+            return Err(MahoutError::KernelLaunch(format!(
+                "Angle encode kernel error: {}",
+                ret
+            )));
         }
         Ok(())
     }

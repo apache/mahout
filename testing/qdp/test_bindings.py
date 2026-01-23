@@ -781,3 +781,263 @@ def test_encode_pathlib_path():
     finally:
         if os.path.exists(npy_path):
             os.remove(npy_path)
+
+
+# ==================== IQP Encoding Tests ====================
+
+
+@pytest.mark.gpu
+def test_iqp_z_encode_basic():
+    """Test basic IQP-Z encoding with zero angles (requires GPU).
+
+    With zero parameters, IQP produces |00...0⟩ because:
+    - H^n|0⟩^n gives uniform superposition
+    - Zero phases leave state unchanged
+    - H^n transforms back to |0⟩^n
+    """
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # With zero angles, H^n * I * H^n |0⟩ = |0⟩, so amplitude 1 at index 0
+    qtensor = engine.encode([0.0, 0.0], 2, "iqp-z")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.is_cuda
+    assert torch_tensor.shape == (1, 4)
+
+    # Should get |00⟩ state: amplitude 1 at index 0, 0 elsewhere
+    expected = torch.tensor([[1.0 + 0j, 0.0 + 0j, 0.0 + 0j, 0.0 + 0j]], device="cuda:0")
+    assert torch.allclose(torch_tensor, expected, atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_iqp_z_encode_nonzero():
+    """Test IQP-Z encoding with non-zero angles (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # With non-zero angles, we get interference patterns
+    # Using pi on qubit 0: phase flip when qubit 0 is |1⟩
+    qtensor = engine.encode([torch.pi, 0.0], 2, "iqp-z")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (1, 4)
+
+    # The state should be different from |00⟩
+    # Verify normalization (sum of |amplitude|^2 = 1)
+    norm = torch.sum(torch.abs(torch_tensor) ** 2)
+    assert torch.allclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_iqp_encode_basic():
+    """Test basic IQP encoding with ZZ interactions (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # 2 qubits needs 3 parameters: [theta_0, theta_1, J_01]
+    # With all zeros, should get |00⟩ state
+    qtensor = engine.encode([0.0, 0.0, 0.0], 2, "iqp")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.is_cuda
+    assert torch_tensor.shape == (1, 4)
+
+    # Should get |00⟩ state: amplitude 1 at index 0, 0 elsewhere
+    expected = torch.tensor([[1.0 + 0j, 0.0 + 0j, 0.0 + 0j, 0.0 + 0j]], device="cuda:0")
+    assert torch.allclose(torch_tensor, expected, atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_iqp_encode_zz_effect():
+    """Test that ZZ interaction produces different result than Z-only (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Same single-qubit angles, but with ZZ interaction
+    angles_z_only = [torch.pi / 4, torch.pi / 4]
+    angles_with_zz = [torch.pi / 4, torch.pi / 4, torch.pi / 2]  # Add J_01
+
+    qtensor_z = engine.encode(angles_z_only, 2, "iqp-z")
+    qtensor_zz = engine.encode(angles_with_zz, 2, "iqp")
+
+    tensor_z = torch.from_dlpack(qtensor_z)
+    tensor_zz = torch.from_dlpack(qtensor_zz)
+
+    # The two should be different due to ZZ interaction
+    assert not torch.allclose(tensor_z, tensor_zz, atol=1e-6)
+
+    # Both should be normalized
+    norm_z = torch.sum(torch.abs(tensor_z) ** 2)
+    norm_zz = torch.sum(torch.abs(tensor_zz) ** 2)
+    assert torch.allclose(norm_z, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+    assert torch.allclose(norm_zz, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_iqp_encode_3_qubits():
+    """Test IQP encoding with 3 qubits (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # 3 qubits needs 6 parameters: [theta_0, theta_1, theta_2, J_01, J_02, J_12]
+    # With all zeros, should get |000⟩ state
+    qtensor = engine.encode([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 3, "iqp")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (1, 8)
+
+    # Should get |000⟩ state: amplitude 1 at index 0, 0 elsewhere
+    expected = torch.zeros((1, 8), dtype=torch.complex128, device="cuda:0")
+    expected[0, 0] = 1.0 + 0j
+    assert torch.allclose(torch_tensor, expected, atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_iqp_z_encode_batch():
+    """Test batch IQP-Z encoding (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Batch of 2 samples with different angles
+    data = torch.tensor([[0.0, 0.0], [torch.pi, 0.0]], dtype=torch.float64)
+    qtensor = engine.encode(data, 2, "iqp-z")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (2, 4)
+
+    # First sample (zero angles) should give |00⟩
+    expected_0 = torch.tensor([1.0 + 0j, 0.0 + 0j, 0.0 + 0j, 0.0 + 0j], device="cuda:0")
+    assert torch.allclose(torch_tensor[0], expected_0, atol=1e-6)
+
+    # Second sample should be different and normalized
+    norm_1 = torch.sum(torch.abs(torch_tensor[1]) ** 2)
+    assert torch.allclose(norm_1, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_iqp_encode_batch():
+    """Test batch IQP encoding with ZZ interactions (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Batch of 2 samples, each with 3 parameters (2 qubits)
+    data = torch.tensor(
+        [[0.0, 0.0, 0.0], [torch.pi / 4, torch.pi / 4, torch.pi / 2]],
+        dtype=torch.float64,
+    )
+    qtensor = engine.encode(data, 2, "iqp")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (2, 4)
+
+    # First sample (zero params) should give |00⟩
+    expected_0 = torch.tensor([1.0 + 0j, 0.0 + 0j, 0.0 + 0j, 0.0 + 0j], device="cuda:0")
+    assert torch.allclose(torch_tensor[0], expected_0, atol=1e-6)
+
+    # Second sample should be different and normalized
+    norm_1 = torch.sum(torch.abs(torch_tensor[1]) ** 2)
+    assert torch.allclose(norm_1, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_iqp_encode_single_qubit():
+    """Test IQP encoding with single qubit edge case (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # 1 qubit, iqp-z needs 1 parameter
+    qtensor = engine.encode([0.0], 1, "iqp-z")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (1, 2)
+
+    # Zero angle gives |0⟩
+    expected = torch.tensor([[1.0 + 0j, 0.0 + 0j]], device="cuda:0")
+    assert torch.allclose(torch_tensor, expected, atol=1e-6)
+
+    # 1 qubit, iqp needs 1 parameter (no pairs)
+    qtensor2 = engine.encode([0.0], 1, "iqp")
+    torch_tensor2 = torch.from_dlpack(qtensor2)
+    assert torch.allclose(torch_tensor2, expected, atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_iqp_encode_errors():
+    """Test error handling for IQP encoding (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Wrong length for iqp-z (expects 2 for 2 qubits, got 3)
+    with pytest.raises(RuntimeError, match="expects 2 values"):
+        engine.encode([0.0, 0.0, 0.0], 2, "iqp-z")
+
+    # Wrong length for iqp (expects 3 for 2 qubits, got 2)
+    with pytest.raises(RuntimeError, match="expects 3 values"):
+        engine.encode([0.0, 0.0], 2, "iqp")
+
+    # Non-finite parameter (NaN)
+    with pytest.raises(RuntimeError, match="must be finite"):
+        engine.encode([float("nan"), 0.0], 2, "iqp-z")
+
+    # Non-finite parameter (positive infinity)
+    with pytest.raises(RuntimeError, match="must be finite"):
+        engine.encode([0.0, float("inf"), 0.0], 2, "iqp")
+
+    # Non-finite parameter (negative infinity)
+    with pytest.raises(RuntimeError, match="must be finite"):
+        engine.encode([float("-inf"), 0.0], 2, "iqp-z")

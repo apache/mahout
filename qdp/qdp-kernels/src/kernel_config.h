@@ -51,6 +51,13 @@
 #define CUDA_MAX_GRID_DIM_1D 65535
 
 // ============================================================================
+// Qubit Limits
+// ============================================================================
+// Maximum qubits supported (16GB GPU memory limit)
+// This limit ensures state vectors fit within practical GPU memory constraints
+#define MAX_QUBITS 30
+
+// ============================================================================
 // Convenience Macros
 // ============================================================================
 // Common block size alias for consistency
