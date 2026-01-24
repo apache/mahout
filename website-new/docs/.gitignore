@@ -1,0 +1,18 @@
+# Ignore all synced content from /docs/
+# Only website-only directories are tracked here
+#
+# The sync script (scripts/sync-docs.js) copies documentation from /docs/
+# into this directory. That synced content should NOT be tracked in git
+# since /docs/ is the source of truth.
+#
+# Website-only content (community, about, download) is authored directly
+# here and SHOULD be tracked.
+
+*
+!.gitignore
+!about/
+!about/**
+!community/
+!community/**
+!download/
+!download/**
