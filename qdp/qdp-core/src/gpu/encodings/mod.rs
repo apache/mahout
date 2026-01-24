@@ -80,6 +80,53 @@ pub trait QuantumEncoder: Send + Sync {
         )))
     }
 
+    /// Encode from existing GPU pointer (Zero-copy)
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure:
+    /// - `input_d` points to valid GPU memory allocated on `device`
+    /// - `input_d` remains valid for the duration of this call
+    /// - `input_len` correctly represents the size of the GPU buffer
+    /// - No other code is concurrently accessing the memory at `input_d`
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr(
+        &self,
+        _device: &Arc<CudaDevice>,
+        _input_d: *const f64,
+        _input_len: usize,
+        _num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        Err(crate::error::MahoutError::NotImplemented(format!(
+            "GPU pointer encoding not implemented for {}",
+            self.name()
+        )))
+    }
+
+    /// Encode batch from existing GPU pointer (Zero-copy)
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure:
+    /// - `input_batch_d` points to valid GPU memory allocated on `device`
+    /// - `input_batch_d` remains valid for the duration of this call
+    /// - Total size (`num_samples * sample_size * sizeof(f64)`) is correctly allocated
+    /// - No other code is concurrently accessing the memory at `input_batch_d`
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_batch_from_gpu_ptr(
+        &self,
+        _device: &Arc<CudaDevice>,
+        _input_batch_d: *const f64,
+        _num_samples: usize,
+        _sample_size: usize,
+        _num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        Err(crate::error::MahoutError::NotImplemented(format!(
+            "GPU pointer batch encoding not implemented for {}",
+            self.name()
+        )))
+    }
+
     /// Validate input data before encoding
     fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
         Preprocessor::validate_input(data, num_qubits)
