@@ -20,8 +20,9 @@
 // For index i with n qubits: state[i] = 1.0, all others = 0.0
 // Example: index=3 with 3 qubits → |011⟩ (state[3] = 1.0)
 
-#include <cuda_runtime.h>
 #include <cuComplex.h>
+#include <cuda_runtime.h>
+
 #include "kernel_config.h"
 
 /// Single sample basis encoding kernel
@@ -36,6 +37,26 @@ __global__ void basis_encode_kernel(
     if (idx >= state_len) return;
 
     if (idx == basis_index) {
+        state[idx] = make_cuDoubleComplex(1.0, 0.0);
+    } else {
+        state[idx] = make_cuDoubleComplex(0.0, 0.0);
+    }
+}
+
+/// Single sample basis encoding kernel (input index from device f64 pointer)
+__global__ void basis_encode_from_f64_kernel(
+    const double* __restrict__ basis_index_d,
+    cuDoubleComplex* __restrict__ state,
+    size_t state_len
+) {
+    const double val = basis_index_d[0];
+    const size_t basis_index = (val >= 0.0) ? static_cast<size_t>(val)
+                                            : state_len;  // invalid -> no match
+
+    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx >= state_len) return;
+
+    if (basis_index < state_len && idx == basis_index) {
         state[idx] = make_cuDoubleComplex(1.0, 0.0);
     } else {
         state[idx] = make_cuDoubleComplex(0.0, 0.0);
@@ -80,6 +101,35 @@ __global__ void basis_encode_batch_kernel(
     }
 }
 
+/// Batch basis encoding kernel (input indices from device f64 pointer)
+__global__ void basis_encode_batch_from_f64_kernel(
+    const double* __restrict__ basis_indices_f64,
+    cuDoubleComplex* __restrict__ state_batch,
+    size_t num_samples,
+    size_t state_len,
+    unsigned int num_qubits
+) {
+    const size_t total_elements = num_samples * state_len;
+    const size_t stride = gridDim.x * blockDim.x;
+    const size_t state_mask = state_len - 1;
+
+    for (size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
+         global_idx < total_elements; global_idx += stride) {
+        const size_t sample_idx = global_idx >> num_qubits;
+        const size_t element_idx = global_idx & state_mask;
+
+        const double val = basis_indices_f64[sample_idx];
+        const size_t basis_index =
+            (val >= 0.0) ? static_cast<size_t>(val) : state_len;
+
+        if (basis_index < state_len && element_idx == basis_index) {
+            state_batch[global_idx] = make_cuDoubleComplex(1.0, 0.0);
+        } else {
+            state_batch[global_idx] = make_cuDoubleComplex(0.0, 0.0);
+        }
+    }
+}
+
 extern "C" {
 
 /// Launch basis encoding kernel
@@ -112,9 +162,30 @@ int launch_basis_encode(
     const int gridSize = (state_len + blockSize - 1) / blockSize;
 
     basis_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
-        basis_index,
-        state_complex_d,
-        state_len
+        basis_index, state_complex_d, state_len
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Launch basis encoding kernel (basis index read from device f64 pointer)
+int launch_basis_encode_from_f64(
+    const double* basis_index_d,
+    void* state_d,
+    size_t state_len,
+    cudaStream_t stream
+) {
+    if (state_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
+
+    const int blockSize = DEFAULT_BLOCK_SIZE;
+    const int gridSize = (state_len + blockSize - 1) / blockSize;
+
+    basis_encode_from_f64_kernel<<<gridSize, blockSize, 0, stream>>>(
+        basis_index_d, state_complex_d, state_len
     );
 
     return (int)cudaGetLastError();
@@ -153,14 +224,41 @@ int launch_basis_encode_batch(
     const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
 
     basis_encode_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
-        basis_indices_d,
-        state_complex_d,
-        num_samples,
-        state_len,
-        num_qubits
+        basis_indices_d, state_complex_d, num_samples, state_len, num_qubits
     );
 
     return (int)cudaGetLastError();
 }
 
-} // extern "C"
+/// Launch batch basis encoding kernel (basis indices read from device f64
+/// pointer)
+int launch_basis_encode_batch_from_f64(
+    const double* basis_indices_d,
+    void* state_batch_d,
+    size_t num_samples,
+    size_t state_len,
+    unsigned int num_qubits,
+    cudaStream_t stream
+) {
+    if (num_samples == 0 || state_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuDoubleComplex* state_complex_d =
+        static_cast<cuDoubleComplex*>(state_batch_d);
+
+    const int blockSize = DEFAULT_BLOCK_SIZE;
+    const size_t total_elements = num_samples * state_len;
+    const size_t blocks_needed = (total_elements + blockSize - 1) / blockSize;
+    const size_t max_blocks = MAX_GRID_BLOCKS;
+    const size_t gridSize =
+        (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
+
+    basis_encode_batch_from_f64_kernel<<<gridSize, blockSize, 0, stream>>>(
+        basis_indices_d, state_complex_d, num_samples, state_len, num_qubits
+    );
+
+    return (int)cudaGetLastError();
+}
+
+}  // extern "C"

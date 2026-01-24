@@ -148,6 +148,18 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Launch basis encoding kernel (basis index read from device f64 pointer)
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_basis_encode_from_f64(
+        basis_index_d: *const f64,
+        state_d: *mut c_void,
+        state_len: usize,
+        stream: *mut c_void,
+    ) -> i32;
+
     /// Launch batch basis encoding kernel
     /// Returns CUDA error code (0 = success)
     ///
@@ -155,6 +167,20 @@ unsafe extern "C" {
     /// Requires valid GPU pointers, must sync before freeing
     pub fn launch_basis_encode_batch(
         basis_indices_d: *const usize,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        num_qubits: u32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch batch basis encoding kernel (basis indices read from device f64 pointer)
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_basis_encode_batch_from_f64(
+        basis_indices_d: *const f64,
         state_batch_d: *mut c_void,
         num_samples: usize,
         state_len: usize,
@@ -308,8 +334,32 @@ pub extern "C" fn launch_basis_encode(
 
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
+pub extern "C" fn launch_basis_encode_from_f64(
+    _basis_index_d: *const f64,
+    _state_d: *mut c_void,
+    _state_len: usize,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
 pub extern "C" fn launch_basis_encode_batch(
     _basis_indices_d: *const usize,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
+    _state_len: usize,
+    _num_qubits: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_basis_encode_batch_from_f64(
+    _basis_indices_d: *const f64,
     _state_batch_d: *mut c_void,
     _num_samples: usize,
     _state_len: usize,

@@ -1105,3 +1105,68 @@ def test_angle_encode_batch_cuda_tensor():
     # Check sample 1 is normalized
     norm_1 = torch.sum(torch.abs(result[1]) ** 2)
     assert torch.isclose(norm_1, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_basis_encode_cuda_tensor():
+    """Test basis encoding directly from CUDA tensor (Zero-copy)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # 1. Prepare GPU data: state index 3 (corresponds to |11>, because 3 = 11_2)
+    # Basis encoding expects exactly 1 value per sample (the basis state index) in float64 format
+    data = torch.tensor([[3.0]], dtype=torch.float64, device="cuda:0")
+
+    # 2. Encode
+    qtensor = engine.encode(data, 2, "basis")
+
+    # 3. Verify result
+    result = torch.from_dlpack(qtensor)
+    assert result.is_cuda
+    assert result.shape == (1, 4)  # 1 sample, 4 amplitudes (2^2)
+    # Expected: Index 3 is 1.0, others are 0.0
+    # |00>, |01>, |10>, |11> -> [0, 0, 0, 1]
+    expected = torch.tensor([[0.0, 0.0, 0.0, 1.0]], device="cuda:0", dtype=result.dtype)
+    assert torch.allclose(result, expected)
+
+
+@pytest.mark.gpu
+def test_basis_encode_batch_cuda_tensor():
+    """Test batch basis encoding directly from CUDA tensor."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Batch of 2 samples
+    # Sample 0: Index 0 -> |00>
+    # Sample 1: Index 3 -> |11>
+    # Shape must be (2, 1) or (2)
+    # Note: QdpEngine.encode checks dimensions, if it's a 1D Tensor and encoding_method="basis",
+    # it may be treated as a Single Sample (feature vector).
+    # To explicitly indicate this is a Batch, it's recommended to use 2D Tensor (N, 1).
+    data = torch.tensor([[0.0], [3.0]], dtype=torch.float64, device="cuda:0")
+
+    qtensor = engine.encode(data, 2, "basis")
+    result = torch.from_dlpack(qtensor)
+
+    assert result.is_cuda
+    assert result.shape == (2, 4)
+
+    # Check Sample 0: |00> -> [1, 0, 0, 0]
+    expected_0 = torch.tensor([1.0, 0.0, 0.0, 0.0], device="cuda:0", dtype=result.dtype)
+    assert torch.allclose(result[0], expected_0)
+
+    # Check Sample 1: |11> -> [0, 0, 0, 1]
+    expected_1 = torch.tensor([0.0, 0.0, 0.0, 1.0], device="cuda:0", dtype=result.dtype)
+    assert torch.allclose(result[1], expected_1)
