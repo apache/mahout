@@ -4,7 +4,7 @@
 
 NVTX (NVIDIA Tools Extension) provides performance markers visible in Nsight Systems. This project uses zero-cost macros that compile to no-ops when the `observability` feature is disabled.
 
-## Run the NVTX Example (New Workflow)
+## Run the NVTX Example
 
 Default builds exclude NVTX for zero overhead. The example below uses the
 async pipeline workload (large input) to surface the new pipeline markers.
