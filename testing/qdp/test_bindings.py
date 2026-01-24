@@ -18,6 +18,7 @@
 
 import pytest
 import torch
+
 _qdp = pytest.importorskip(
     "_qdp",
     reason="QDP extension not built. Run: uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml",
