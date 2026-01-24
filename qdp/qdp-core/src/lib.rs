@@ -366,7 +366,11 @@ impl QdpEngine {
                     crate::profile_scope!("GPU::NormFromPtr");
                     // SAFETY: input_d validity is guaranteed by the caller's safety contract
                     unsafe {
-                        gpu::AmplitudeEncoder::calculate_inv_norm_gpu(&self.device, input_d, input_len)?
+                        gpu::AmplitudeEncoder::calculate_inv_norm_gpu(
+                            &self.device,
+                            input_d,
+                            input_len,
+                        )?
                     }
                 };
 
@@ -560,9 +564,10 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::NormValidation");
-                    let host_inv_norms = self.device.dtoh_sync_copy(&inv_norms_gpu).map_err(
-                        |e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)),
-                    )?;
+                    let host_inv_norms =
+                        self.device.dtoh_sync_copy(&inv_norms_gpu).map_err(|e| {
+                            MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e))
+                        })?;
 
                     if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
                         return Err(MahoutError::InvalidInput(
