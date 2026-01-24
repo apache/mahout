@@ -575,9 +575,10 @@ impl QdpEngine {
                 // Validate norms on host to catch zero or NaN samples early
                 {
                     crate::profile_scope!("GPU::NormValidation");
-                    let host_inv_norms = self.device.dtoh_sync_copy(&inv_norms_gpu).map_err(
-                        |e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)),
-                    )?;
+                    let host_inv_norms =
+                        self.device.dtoh_sync_copy(&inv_norms_gpu).map_err(|e| {
+                            MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e))
+                        })?;
 
                     if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
                         return Err(MahoutError::InvalidInput(
