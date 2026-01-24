@@ -20,6 +20,9 @@ const DEST_DIR = path.resolve(__dirname, '../docs');
 // Directories that are website-only and should NOT be deleted during sync
 const WEBSITE_ONLY_DIRS = ['community', 'about', 'download'];
 
+// Files that should be preserved during sync (not deleted)
+const PRESERVE_FILES = ['.gitignore'];
+
 // Files/directories to exclude from sync
 const EXCLUDE_PATTERNS = [
   /^\./, // Hidden files
@@ -59,6 +62,12 @@ function cleanDestination(destDir) {
     // Skip website-only directories
     if (entry.isDirectory() && WEBSITE_ONLY_DIRS.includes(entry.name)) {
       console.log(`  Preserving website-only: ${entry.name}/`);
+      continue;
+    }
+
+    // Skip preserved files (like .gitignore)
+    if (entry.isFile() && PRESERVE_FILES.includes(entry.name)) {
+      console.log(`  Preserving file: ${entry.name}`);
       continue;
     }
 
