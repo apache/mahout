@@ -5,9 +5,12 @@
  *
  * This script syncs documentation from the source /docs directory
  * into the Docusaurus website. It:
- * 1. Copies markdown files from /docs to website-new/docs
- * 2. Transforms frontmatter for Docusaurus compatibility
- * 3. Preserves website-only directories (community, about, download)
+ * 1. Cleans the destination (preserving only .gitignore)
+ * 2. Copies all markdown files from /docs to website-new/docs
+ * 3. Transforms frontmatter for Docusaurus compatibility
+ *
+ * /docs is the SINGLE SOURCE OF TRUTH for all documentation.
+ * website-new/docs is a build artifact that should not be edited directly.
  */
 
 const fs = require('fs');
@@ -16,9 +19,6 @@ const path = require('path');
 // Configuration
 const SOURCE_DIR = path.resolve(__dirname, '../../docs');
 const DEST_DIR = path.resolve(__dirname, '../docs');
-
-// Directories that are website-only and should NOT be deleted during sync
-const WEBSITE_ONLY_DIRS = ['community', 'about', 'download'];
 
 // Files that should be preserved during sync (not deleted)
 const PRESERVE_FILES = ['.gitignore'];
@@ -48,7 +48,7 @@ function ensureDir(dirPath) {
 }
 
 /**
- * Clean a directory but preserve website-only content
+ * Clean destination directory (preserving .gitignore)
  */
 function cleanDestination(destDir) {
   if (!fs.existsSync(destDir)) {
@@ -59,15 +59,9 @@ function cleanDestination(destDir) {
   const entries = fs.readdirSync(destDir, { withFileTypes: true });
 
   for (const entry of entries) {
-    // Skip website-only directories
-    if (entry.isDirectory() && WEBSITE_ONLY_DIRS.includes(entry.name)) {
-      console.log(`  Preserving website-only: ${entry.name}/`);
-      continue;
-    }
-
     // Skip preserved files (like .gitignore)
     if (entry.isFile() && PRESERVE_FILES.includes(entry.name)) {
-      console.log(`  Preserving file: ${entry.name}`);
+      console.log(`  Preserving: ${entry.name}`);
       continue;
     }
 
@@ -250,8 +244,8 @@ function main() {
   console.log(`Source: ${SOURCE_DIR}`);
   console.log(`Destination: ${DEST_DIR}\n`);
 
-  // Clean destination but preserve website-only content
-  console.log('Cleaning destination (preserving website-only content)...');
+  // Clean destination
+  console.log('Cleaning destination...');
   cleanDestination(DEST_DIR);
 
   // Sync documentation

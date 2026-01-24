@@ -16,7 +16,7 @@ This starts a local development server at `http://localhost:3000` with hot reloa
 
 ### Documentation Source of Truth
 
-**`/docs/`** (at repository root) is the **source of truth** for all code documentation.
+**`/docs/`** (at repository root) is the **source of truth** for ALL documentation.
 
 ```
 /docs/                          ← SOURCE OF TRUTH (edit here!)
@@ -27,14 +27,15 @@ This starts a local development server at `http://localhost:3000` with hot reloa
 │   ├── quantum-computing-primer/
 │   └── papers/
 ├── qdp/                        # QDP package internals
+├── community/                  # Community pages
+├── about/                      # About pages
+├── download/                   # Download pages
 ├── api.md, basic-gates.md...   # API reference docs
 └── adr/                        # Architecture decisions
 
 /website-new/docs/              ← BUILD ARTIFACT (auto-synced, don't edit!)
-├── [synced from /docs/]
-├── community/                  ← WEBSITE-ONLY (edit here)
-├── about/                      ← WEBSITE-ONLY (edit here)
-└── download/                   ← WEBSITE-ONLY (edit here)
+├── .gitignore                  # Only tracked file
+└── [everything synced from /docs/]
 ```
 
 ### Sync Workflow
@@ -48,8 +49,9 @@ npm run build     # Auto-syncs before building
 ```
 
 **Important:**
-- Edit documentation in `/docs/`, NOT in `website-new/docs/`
-- Website-only content (community, about, download) lives in `website-new/docs/`
+- Edit ALL documentation in `/docs/`, NOT in `website-new/docs/`
+- `website-new/docs/` is gitignored (except `.gitignore` itself)
+- Changes in `website-new/docs/` will be overwritten on next sync
 
 ## Adding New Documentation
 

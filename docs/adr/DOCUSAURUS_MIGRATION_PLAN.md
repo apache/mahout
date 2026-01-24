@@ -424,16 +424,15 @@ The initial migration created a fragmented structure:
    - `p_q_c.md` → `pqc.md`
    - Primer chapters: `01_introduction/index.md` → `introduction.md`
 
-4. **Cleaned up `website-new/docs/`:**
-   - Deleted all synced content
-   - Preserved website-only directories:
-     - `community/` (code of conduct, mailing lists, who we are)
-     - `about/` (how to contribute)
-     - `download/` (releases, quickstart)
+4. **Moved all content to `/docs/`:**
+   - `community/` moved from `website-new/docs/` to `/docs/`
+   - `about/` moved from `website-new/docs/` to `/docs/`
+   - `download/` moved from `website-new/docs/` to `/docs/`
+   - `website-new/docs/` is now 100% synced (build artifact, gitignored)
 
 5. **Updated sync script** (`scripts/sync-docs.js`):
-   - Single source: syncs only from `/docs/`
-   - Preserves website-only directories during clean
+   - Single source: syncs ALL content from `/docs/`
+   - Only preserves `.gitignore` during clean
    - No longer syncs from `/qdp/docs/` separately (content moved to `/docs/qdp/`)
 
 6. **Deleted old version snapshot:**
@@ -484,7 +483,10 @@ The initial migration created a fragmented structure:
 | `/docs/*.md` | Renamed to kebab-case |
 | `website-new/scripts/sync-docs.js` | Updated - new sync logic |
 | `website-new/docusaurus.config.ts` | Updated - removed 0.4 version |
-| `website-new/docs/` | Cleaned - only website-only content remains |
+| `website-new/docs/` | Build artifact - 100% synced, gitignored |
+| `/docs/community/` | Moved from website-new/docs/ |
+| `/docs/about/` | Moved from website-new/docs/ |
+| `/docs/download/` | Moved from website-new/docs/ |
 | `.github/workflows/website.yml` | Updated - Node.js/Docusaurus |
 | `CONTRIBUTING.md` | Updated - website dev instructions |
 | `/docs/adr/001-jekyll-to-docusaurus-migration.md` | Created |
