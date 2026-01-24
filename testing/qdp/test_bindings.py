@@ -399,7 +399,7 @@ def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
 
 
 @pytest.mark.gpu
-@pytest.mark.parametrize("encoding_method", ["basis", "angle"])
+@pytest.mark.parametrize("encoding_method", ["aaa", "bbb"])
 def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
     """Test error when using CUDA tensor with unsupported encoding method."""
     pytest.importorskip("torch")
@@ -415,7 +415,10 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
     # Use non-zero data to avoid normalization issues
     data = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float64, device="cuda:0")
 
-    with pytest.raises(RuntimeError, match="only supports 'amplitude' method"):
+    with pytest.raises(
+        RuntimeError,
+        match="CUDA tensor encoding currently supports 'amplitude', 'angle', and 'basis' methods",
+    ):
         engine.encode(data, 2, encoding_method)
 
 
@@ -1038,3 +1041,67 @@ def test_iqp_encode_errors():
     # Non-finite parameter (negative infinity)
     with pytest.raises(RuntimeError, match="must be finite"):
         engine.encode([float("-inf"), 0.0], 2, "iqp-z")
+
+
+@pytest.mark.gpu
+def test_angle_encode_cuda_tensor():
+    """Test angle encoding directly from CUDA tensor (Zero-copy)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # 1. Prepare data on GPU: Angles [pi/2, 0.0] -> |10> state (approx)
+    # Ry(pi/2)|0> = |+> (or similar depending on kernel implementation), let's assume standard rotation
+    # For integration test, checking shape and non-zero output is usually sufficient happy path
+    data = torch.tensor([torch.pi / 2, 0.0], dtype=torch.float64, device="cuda:0")
+
+    # 2. Encode
+    qtensor = engine.encode(data, 2, "angle")
+
+    # 3. Verify
+    result = torch.from_dlpack(qtensor)
+    assert result.is_cuda
+    assert result.shape == (1, 4)
+
+    # Check that we got a valid quantum state (norm = 1)
+    norm = torch.sum(torch.abs(result) ** 2)
+    assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+
+
+@pytest.mark.gpu
+def test_angle_encode_batch_cuda_tensor():
+    """Test batch angle encoding directly from CUDA tensor."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Batch of 2 samples
+    data = torch.tensor(
+        [[0.0, 0.0], [torch.pi / 2, 0.0]],  # -> |00>  # -> Rotated
+        dtype=torch.float64,
+        device="cuda:0",
+    )
+
+    qtensor = engine.encode(data, 2, "angle")
+    result = torch.from_dlpack(qtensor)
+
+    assert result.is_cuda
+    assert result.shape == (2, 4)
+
+    # Check sample 0 is |00>
+    expected_0 = torch.tensor([1.0, 0.0, 0.0, 0.0], device="cuda:0", dtype=result.dtype)
+    assert torch.allclose(result[0], expected_0)
+
+    # Check sample 1 is normalized
+    norm_1 = torch.sum(torch.abs(result[1]) ** 2)
+    assert torch.isclose(norm_1, torch.tensor(1.0, device="cuda:0"), atol=1e-6)

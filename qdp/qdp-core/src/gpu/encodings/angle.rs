@@ -203,6 +203,106 @@ impl QuantumEncoder for AngleEncoder {
         Ok(batch_state_vector)
     }
 
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_d: *const f64,
+        input_len: usize,
+        num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        crate::profile_scope!("AngleEncoder::encode_from_gpu_ptr");
+        if input_len > num_qubits {
+            return Err(MahoutError::InvalidInput(format!(
+                "Input size {} exceeds number of qubits {} for Angle encoding (1 feature per qubit limit)",
+                input_len, num_qubits
+            )));
+        }
+
+        let state_vector = {
+            crate::profile_scope!("GPU::Alloc");
+            GpuStateVector::new(device, num_qubits)?
+        };
+
+        let state_ptr = state_vector
+            .ptr_f64()
+            .ok_or_else(|| MahoutError::InvalidInput("State vector precision mismatch".into()))?;
+
+        let state_len = 1u32 << num_qubits;
+        unsafe {
+            let ret = qdp_kernels::launch_angle_encode(
+                input_d,
+                state_ptr as *mut std::ffi::c_void,
+                input_len,
+                state_len,
+                std::ptr::null_mut(),
+            );
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Angle kernel failed: {}",
+                    ret
+                )));
+            }
+        }
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            device
+                .synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+        }
+
+        Ok(state_vector)
+    }
+
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_batch_from_gpu_ptr(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_batch_d: *const f64,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        if sample_size != num_qubits {
+            return Err(MahoutError::InvalidInput(format!(
+                "Angle encoding expects input features ({}) to match number of qubits ({})",
+                sample_size, num_qubits
+            )));
+        }
+
+        let batch_state = GpuStateVector::new_batch(device, num_samples, num_qubits)?;
+        let state_ptr = batch_state
+            .ptr_f64()
+            .ok_or_else(|| MahoutError::InvalidInput("Precision mismatch".into()))?;
+        let state_len = 1usize << num_qubits;
+
+        unsafe {
+            let ret = qdp_kernels::launch_angle_encode_batch(
+                input_batch_d,
+                state_ptr as *mut std::ffi::c_void,
+                num_samples,
+                state_len,
+                num_qubits as u32,
+                std::ptr::null_mut(),
+            );
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Angle batch kernel failed: {}",
+                    ret
+                )));
+            }
+        }
+        {
+            device
+                .synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+        }
+
+        Ok(batch_state)
+    }
+
     fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
         validate_qubit_count(num_qubits)?;
         if data.len() != num_qubits {
