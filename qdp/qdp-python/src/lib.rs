@@ -18,7 +18,7 @@ use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
 use pyo3::prelude::*;
-use qdp_core::dlpack::{DLDeviceType, DLManagedTensor, DL_FLOAT};
+use qdp_core::dlpack::{DL_FLOAT, DLDeviceType, DLManagedTensor};
 use qdp_core::{Precision, QdpEngine as CoreEngine};
 
 /// Quantum tensor wrapper implementing DLPack protocol
@@ -351,7 +351,9 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
         }
 
         // Validate dtype: float64
-        if dl_tensor.dtype.code != DL_FLOAT || dl_tensor.dtype.bits != 64 || dl_tensor.dtype.lanes != 1
+        if dl_tensor.dtype.code != DL_FLOAT
+            || dl_tensor.dtype.bits != 64
+            || dl_tensor.dtype.lanes != 1
         {
             return Err(PyRuntimeError::new_err(format!(
                 "DLPack tensor must be float64 (code={}, bits={}, lanes={})",
@@ -360,14 +362,17 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
         }
 
         // Validate byte offset alignment for f64
-        if dl_tensor.byte_offset % std::mem::size_of::<f64>() as u64 != 0 {
+        if !dl_tensor
+            .byte_offset
+            .is_multiple_of(std::mem::size_of::<f64>() as u64)
+        {
             return Err(PyRuntimeError::new_err(
                 "DLPack tensor byte_offset is not aligned for float64",
             ));
         }
 
-        let data_ptr = (dl_tensor.data as *const u8)
-            .add(dl_tensor.byte_offset as usize) as *const f64;
+        let data_ptr =
+            (dl_tensor.data as *const u8).add(dl_tensor.byte_offset as usize) as *const f64;
 
         // Extract shape
         let ndim = dl_tensor.ndim as usize;
