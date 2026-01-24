@@ -25,12 +25,31 @@ use std::sync::Arc;
 
 #[cfg(target_os = "linux")]
 use crate::gpu::cuda_ffi::{
-    cudaEventCreateWithFlags, cudaEventDestroy, cudaEventRecord, cudaStreamWaitEvent,
-    CUDA_EVENT_DISABLE_TIMING,
+    CUDA_EVENT_DISABLE_TIMING, cudaEventCreateWithFlags, cudaEventDestroy, cudaEventRecord,
+    cudaStreamWaitEvent,
 };
 
+/// DLPack CUDA stream sentinel values (legacy/per-thread default).
+/// These match cudaStreamLegacy/cudaStreamPerThread in the CUDA runtime.
+#[allow(clippy::manual_dangling_ptr)]
+pub const CUDA_STREAM_LEGACY: *mut c_void = 1 as *mut c_void;
+#[allow(clippy::manual_dangling_ptr)]
+pub const CUDA_STREAM_PER_THREAD: *mut c_void = 2 as *mut c_void;
+
+/// Map DLPack stream integer to a CUDA stream pointer.
+pub fn dlpack_stream_to_cuda(stream: i64) -> *mut c_void {
+    match stream {
+        1 => CUDA_STREAM_LEGACY,
+        2 => CUDA_STREAM_PER_THREAD,
+        _ => stream as *mut c_void,
+    }
+}
+
 #[cfg(target_os = "linux")]
-pub fn synchronize_stream(stream: *mut c_void) -> Result<()> {
+/// # Safety
+/// `stream` must be a valid CUDA stream pointer or one of the CUDA sentinel
+/// values (legacy/per-thread default). Passing any other pointer is undefined.
+pub unsafe fn synchronize_stream(stream: *mut c_void) -> Result<()> {
     if stream.is_null() {
         return Ok(());
     }
@@ -78,7 +97,9 @@ pub fn synchronize_stream(stream: *mut c_void) -> Result<()> {
 }
 
 #[cfg(not(target_os = "linux"))]
-pub fn synchronize_stream(_stream: *mut c_void) -> Result<()> {
+/// # Safety
+/// No-op on non-Linux targets, kept unsafe to match the Linux signature.
+pub unsafe fn synchronize_stream(_stream: *mut c_void) -> Result<()> {
     Ok(())
 }
 

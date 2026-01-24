@@ -44,8 +44,8 @@ use cudarc::driver::CudaDevice;
 #[cfg(target_os = "linux")]
 fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const f64) -> Result<()> {
     use crate::gpu::cuda_ffi::{
-        cudaPointerGetAttributes, CudaPointerAttributes, CUDA_MEMORY_TYPE_DEVICE,
-        CUDA_MEMORY_TYPE_MANAGED,
+        CUDA_MEMORY_TYPE_DEVICE, CUDA_MEMORY_TYPE_MANAGED, CudaPointerAttributes,
+        cudaPointerGetAttributes,
     };
     use std::ffi::c_void;
 
@@ -73,8 +73,7 @@ fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const f64) -> Result<()> {
         )));
     }
 
-    if attrs.memory_type != CUDA_MEMORY_TYPE_DEVICE
-        && attrs.memory_type != CUDA_MEMORY_TYPE_MANAGED
+    if attrs.memory_type != CUDA_MEMORY_TYPE_DEVICE && attrs.memory_type != CUDA_MEMORY_TYPE_MANAGED
     {
         return Err(MahoutError::InvalidInput(format!(
             "Input pointer is not CUDA device memory (memory_type={})",

@@ -45,7 +45,7 @@ impl QuantumTensor {
     /// The capsule can only be consumed once to prevent double-free errors.
     ///
     /// Args:
-    ///     stream: Optional CUDA stream pointer (for DLPack 0.8+)
+    ///     stream: Optional CUDA stream (DLPack 0.8+; 1=legacy default, 2=per-thread default)
     ///
     /// Returns:
     ///     PyCapsule containing DLManagedTensor pointer
@@ -64,11 +64,14 @@ impl QuantumTensor {
             return Err(PyRuntimeError::new_err("Invalid DLPack tensor pointer"));
         }
 
-        if let Some(stream) = stream {
-            if stream > 0 {
-                qdp_core::dlpack::synchronize_stream(stream as *mut std::ffi::c_void).map_err(
-                    |e| PyRuntimeError::new_err(format!("CUDA stream sync failed: {}", e)),
-                )?;
+        if let Some(stream) = stream
+            && stream > 0
+        {
+            let stream_ptr = qdp_core::dlpack::dlpack_stream_to_cuda(stream);
+            unsafe {
+                qdp_core::dlpack::synchronize_stream(stream_ptr).map_err(|e| {
+                    PyRuntimeError::new_err(format!("CUDA stream sync failed: {}", e))
+                })?;
             }
         }
 
