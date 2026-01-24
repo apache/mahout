@@ -16,13 +16,13 @@
 
 // API workflow tests: Engine initialization and encoding
 
-use qdp_core::QdpEngine;
-#[cfg(target_os = "linux")]
-use qdp_core::MahoutError;
-#[cfg(target_os = "linux")]
-use qdp_core::gpu::pipeline::run_dual_stream_pipeline_aligned;
 #[cfg(target_os = "linux")]
 use cudarc::driver::CudaDevice;
+#[cfg(target_os = "linux")]
+use qdp_core::MahoutError;
+use qdp_core::QdpEngine;
+#[cfg(target_os = "linux")]
+use qdp_core::gpu::pipeline::run_dual_stream_pipeline_aligned;
 
 mod common;
 
@@ -137,13 +137,7 @@ fn test_angle_encoding_async_pipeline() {
     let num_samples = 32768; // 32768 * 4 = 131072 elements (>= 1MB threshold)
     let batch_data = common::create_test_data(num_samples * sample_size);
 
-    let result = engine.encode_batch(
-        &batch_data,
-        num_samples,
-        sample_size,
-        num_qubits,
-        "angle",
-    );
+    let result = engine.encode_batch(&batch_data, num_samples, sample_size, num_qubits, "angle");
     let dlpack_ptr = result.expect("Angle batch encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
     println!("PASS: Angle batch encoding succeeded, DLPack pointer valid");
@@ -176,9 +170,8 @@ fn test_angle_async_alignment_error() {
     };
 
     let misaligned_data = vec![0.0_f64; 10];
-    let result = run_dual_stream_pipeline_aligned(&device, &misaligned_data, 4, |_, _, _, _| {
-        Ok(())
-    });
+    let result =
+        run_dual_stream_pipeline_aligned(&device, &misaligned_data, 4, |_, _, _, _| Ok(()));
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
