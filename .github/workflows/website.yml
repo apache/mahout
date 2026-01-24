@@ -15,14 +15,14 @@
 
 name: Website
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'website-new/**'
-      - 'docs/**'
-      - 'qdp/docs/**'
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'website-new/**'
+#       - 'docs/**'
+#       - 'qdp/docs/**'
 
 jobs:
   build:
