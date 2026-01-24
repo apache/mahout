@@ -92,9 +92,10 @@ def run_mahout(
     torch.cuda.synchronize()
     start = time.perf_counter()
 
+    vector_len = num_qubits if encoding_method == "angle" else (1 << num_qubits)
     processed = 0
     for batch in prefetched_batches(
-        total_batches, batch_size, 1 << num_qubits, prefetch, encoding_method
+        total_batches, batch_size, vector_len, prefetch, encoding_method
     ):
         normalized = np.ascontiguousarray(
             normalize_batch(batch, encoding_method), dtype=np.float64
@@ -216,8 +217,8 @@ def main():
         "--encoding-method",
         type=str,
         default="amplitude",
-        choices=["amplitude", "basis"],
-        help="Encoding method to use for Mahout (amplitude or basis).",
+        choices=["amplitude", "angle", "basis"],
+        help="Encoding method to use for Mahout (amplitude, angle, or basis).",
     )
     args = parser.parse_args()
 
