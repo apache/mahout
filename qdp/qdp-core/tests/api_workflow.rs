@@ -17,6 +17,12 @@
 // API workflow tests: Engine initialization and encoding
 
 use qdp_core::QdpEngine;
+#[cfg(target_os = "linux")]
+use qdp_core::MahoutError;
+#[cfg(target_os = "linux")]
+use qdp_core::gpu::pipeline::run_dual_stream_pipeline_aligned;
+#[cfg(target_os = "linux")]
+use cudarc::driver::CudaDevice;
 
 mod common;
 
@@ -110,6 +116,81 @@ fn test_amplitude_encoding_async_pipeline() {
             .expect("Deleter function pointer is missing!");
         deleter(dlpack_ptr);
         println!("PASS: Memory freed successfully");
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_angle_encoding_async_pipeline() {
+    println!("Testing angle encoding async pipeline path...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    let num_qubits = 4;
+    let sample_size = num_qubits;
+    let num_samples = 32768; // 32768 * 4 = 131072 elements (>= 1MB threshold)
+    let batch_data = common::create_test_data(num_samples * sample_size);
+
+    let result = engine.encode_batch(
+        &batch_data,
+        num_samples,
+        sample_size,
+        num_qubits,
+        "angle",
+    );
+    let dlpack_ptr = result.expect("Angle batch encoding should succeed");
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+    println!("PASS: Angle batch encoding succeeded, DLPack pointer valid");
+
+    unsafe {
+        let managed = &mut *dlpack_ptr;
+        assert!(managed.deleter.is_some(), "Deleter must be present");
+
+        println!("Calling deleter to free GPU memory");
+        let deleter = managed
+            .deleter
+            .take()
+            .expect("Deleter function pointer is missing!");
+        deleter(dlpack_ptr);
+        println!("PASS: Memory freed successfully");
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_angle_async_alignment_error() {
+    println!("Testing angle async pipeline alignment error...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    let misaligned_data = vec![0.0_f64; 10];
+    let result = run_dual_stream_pipeline_aligned(&device, &misaligned_data, 4, |_, _, _, _| {
+        Ok(())
+    });
+
+    match result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(
+                msg.contains("not aligned"),
+                "Expected alignment error, got: {}",
+                msg
+            );
+            println!("PASS: Alignment error surfaced as expected");
+        }
+        Err(e) => panic!("Unexpected error: {:?}", e),
+        Ok(_) => panic!("Expected alignment error, got Ok"),
     }
 }
 
