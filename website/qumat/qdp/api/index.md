@@ -5,18 +5,9 @@ title: API Reference - QDP
 
 # API Reference
 
-## Quickstart
-
-```python
-import qumat.qdp as qdp
-import torch
-
-engine = qdp.QdpEngine(device_id=0, precision="float32")
-qtensor = engine.encode([0.1, 0.2, 0.3, 0.4], num_qubits=2, encoding_method="amplitude")
-tensor = torch.from_dlpack(qtensor)  # single-use, zero-copy
-
-print(tensor.shape, tensor.dtype, tensor.device)
-```
+Mahout QDP (Quantum Data Plane) provides GPU-accelerated quantum state encoding.
+It writes classical data directly into GPU memory and returns a DLPack-compatible
+handle for zero-copy integration with downstream frameworks.
 
 ## Module: `qumat.qdp`
 
