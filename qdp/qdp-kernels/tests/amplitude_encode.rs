@@ -623,6 +623,66 @@ fn test_l2_norm_batch_kernel_stream() {
 }
 
 #[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_odd_length_alignment() {
+    println!(
+        "Testing batched L2 norm reduction with odd-length samples to exercise alignment handling..."
+    );
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let batch: Vec<f64> = vec![
+        3.0, 4.0, 5.0, // norm = sqrt(9+16+25) = sqrt(50) ≈ 7.071
+        1.0, 1.0, 1.0, // norm = sqrt(3) ≈ 1.732 (misaligned base)
+        5.0, 12.0, 13.0, // norm = sqrt(25+144+169) = sqrt(338) ≈ 18.385
+    ];
+    let num_samples = 3;
+    let sample_len = 3;
+
+    let expected: Vec<f64> = vec![
+        1.0 / (3.0_f64.powi(2) + 4.0_f64.powi(2) + 5.0_f64.powi(2)).sqrt(), // ~0.141
+        1.0 / (1.0_f64.powi(2) + 1.0_f64.powi(2) + 1.0_f64.powi(2)).sqrt(), // ~0.577
+        1.0 / (5.0_f64.powi(2) + 12.0_f64.powi(2) + 13.0_f64.powi(2)).sqrt(), // ~0.054
+    ];
+
+    let batch_d = device.htod_sync_copy(batch.as_slice()).unwrap();
+    let mut norms_d = device.alloc_zeros::<f64>(num_samples).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch(
+            *batch_d.device_ptr() as *const f64,
+            num_samples,
+            sample_len,
+            *norms_d.device_ptr_mut() as *mut f64,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(status, 0, "Batch norm kernel should succeed");
+    device.synchronize().unwrap();
+
+    let norms_h = device.dtoh_sync_copy(&norms_d).unwrap();
+
+    for (i, (got, expect)) in norms_h.iter().zip(expected.iter()).enumerate() {
+        assert!(
+            (got - expect).abs() < EPSILON,
+            "Sample {} inv norm mismatch: expected {}, got {}",
+            i,
+            expect,
+            got
+        );
+    }
+
+    println!("PASS: Batched norm reduction with odd-length samples handles alignment correctly");
+}
+
+#[test]
 #[cfg(not(target_os = "linux"))]
 fn test_amplitude_encode_dummy_non_linux() {
     println!("Testing dummy implementation on non-Linux platform...");
