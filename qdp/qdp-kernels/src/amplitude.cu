@@ -371,17 +371,32 @@ __global__ void l2_norm_batch_kernel(
 
     double local_sum = 0.0;
 
-    size_t vec_offset = vec_idx;
-    size_t offset = vec_offset * 2;
-    while (offset + 1 < sample_len) {
-        const double2 v = __ldg(reinterpret_cast<const double2*>(input_batch + base) + vec_offset);
-        local_sum += v.x * v.x + v.y * v.y;
-        vec_offset += stride;
-        offset = vec_offset * 2;
+    // Alignment peel for double2 (16B) loads
+    const bool base_aligned = ((base & 1u) == 0u);
+
+    if (!base_aligned && block_in_sample == 0 && threadIdx.x == 0) {
+        const double v = __ldg(input_batch + base);
+        local_sum += v * v;
     }
 
-    if (offset < sample_len) {
-        const double v = __ldg(input_batch + base + offset);
+    const size_t aligned_start = base_aligned ? 0 : 1;
+    const size_t aligned_len = sample_len - aligned_start;
+
+    const double* aligned_ptr = input_batch + base + aligned_start;
+    const double2* aligned_ptr_double2 = reinterpret_cast<const double2*>(aligned_ptr);
+
+    size_t vec_offset = vec_idx;
+    size_t idx_in_aligned = vec_offset * 2;
+
+    while (idx_in_aligned + 1 < aligned_len) {
+        const double2 v = __ldg(aligned_ptr_double2 + vec_offset);
+        local_sum += v.x * v.x + v.y * v.y;
+        vec_offset += stride;
+        idx_in_aligned = vec_offset * 2;
+    }
+
+    if (idx_in_aligned < aligned_len) {
+        const double v = __ldg(aligned_ptr + idx_in_aligned);
         local_sum += v * v;
     }
 
