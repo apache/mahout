@@ -14,27 +14,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+.PHONY: test_rust test_python tests pre-commit setup-test-python
+
 # Detect NVIDIA GPU
-HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && echo yes || echo no)
+HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1 && echo yes || echo no)
+
+setup-test-python:
+	uv sync --group dev
 
 test_rust:
 ifeq ($(HAS_NVIDIA),yes)
 	cd qdp && cargo test
 else
-	@echo "No NVIDIA GPU detected, skipping test_rust"
+	@echo "[SKIP] No NVIDIA GPU detected, skipping test_rust"
 endif
 
-test_python:
-	uv sync --group dev
+test_python: setup-test-python
 ifeq ($(HAS_NVIDIA),yes)
 	unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 else
-	@echo "No NVIDIA GPU detected, skipping maturin develop"
+	@echo "[SKIP] No NVIDIA GPU detected, skipping maturin develop"
 endif
 	uv run pytest
 
 tests: test_rust test_python
 
-pre-commit:
-	uv sync --group dev
+pre-commit: setup-test-python
 	uv run pre-commit run --all-files
