@@ -35,9 +35,9 @@ mod profiling;
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
 
-use std::sync::Arc;
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
+use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
 #[cfg(target_os = "linux")]

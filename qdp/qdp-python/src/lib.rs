@@ -282,6 +282,38 @@ fn validate_cuda_tensor_for_encoding(
     Ok(())
 }
 
+/// Minimal CUDA tensor metadata extracted via PyTorch APIs.
+struct CudaTensorInfo {
+    data_ptr: *const f64,
+    shape: Vec<i64>,
+}
+
+/// Extract GPU pointer and shape directly from a PyTorch CUDA tensor.
+///
+/// # Safety
+/// The returned pointer is borrowed from the source tensor. The caller must
+/// ensure the tensor remains alive and unmodified for the duration of use.
+fn extract_cuda_tensor_info(tensor: &Bound<'_, PyAny>) -> PyResult<CudaTensorInfo> {
+    let data_ptr: u64 = tensor.call_method0("data_ptr")?.extract()?;
+    if data_ptr == 0 {
+        return Err(PyRuntimeError::new_err(
+            "PyTorch returned a null data pointer for CUDA tensor",
+        ));
+    }
+
+    let ndim: usize = tensor.call_method0("dim")?.extract()?;
+    let mut shape = Vec::with_capacity(ndim);
+    for axis in 0..ndim {
+        let dim: i64 = tensor.call_method1("size", (axis,))?.extract()?;
+        shape.push(dim);
+    }
+
+    Ok(CudaTensorInfo {
+        data_ptr: data_ptr as *const f64,
+        shape,
+    })
+}
+
 /// DLPack tensor information extracted from a PyCapsule
 ///
 /// This struct owns the DLManagedTensor pointer and ensures proper cleanup
@@ -545,6 +577,9 @@ impl QdpEngine {
                     }
                 }
             }
+            // CPU PyTorch tensor path
+            return self.encode_from_pytorch(data, num_qubits, encoding_method);
+        }
 
         // Fallback: try to extract as Vec<f64> (Python list)
         self.encode_from_list(data, num_qubits, encoding_method)
