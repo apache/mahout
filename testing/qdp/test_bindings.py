@@ -18,7 +18,8 @@
 
 import pytest
 import torch
-import _qdp
+
+from .qdp_test_utils import requires_qdp
 
 
 def _has_multi_gpu():
@@ -31,8 +32,11 @@ def _has_multi_gpu():
         return False
 
 
+@requires_qdp
 def test_import():
     """Test that PyO3 bindings are properly imported."""
+    import _qdp
+
     assert hasattr(_qdp, "QdpEngine")
     assert hasattr(_qdp, "QuantumTensor")
 
@@ -43,17 +47,19 @@ def test_import():
     assert callable(getattr(QdpEngine, "encode_from_tensorflow"))
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_encode():
     """Test encoding returns QuantumTensor (requires GPU)."""
-    from _qdp import QdpEngine
+    from _qdp import QdpEngine, QuantumTensor
 
     engine = QdpEngine(0)
     data = [0.5, 0.5, 0.5, 0.5]
     qtensor = engine.encode(data, 2, "amplitude")
-    assert isinstance(qtensor, _qdp.QuantumTensor)
+    assert isinstance(qtensor, QuantumTensor)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_dlpack_device():
     """Test __dlpack_device__ method (requires GPU)."""
@@ -67,6 +73,7 @@ def test_dlpack_device():
     assert device_info == (2, 0), "Expected (2, 0) for CUDA device 0"
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.skipif(
     not _has_multi_gpu(), reason="Multi-GPU setup required for this test"
@@ -97,6 +104,7 @@ def test_dlpack_device_id_non_zero():
     )
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_dlpack_single_use():
     """Test that __dlpack__ can only be called once (requires GPU)."""
@@ -117,6 +125,7 @@ def test_dlpack_single_use():
         qtensor2.__dlpack__()
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_pytorch_integration():
     """Test PyTorch integration via DLPack (requires GPU and PyTorch)."""
@@ -138,6 +147,7 @@ def test_pytorch_integration():
     assert torch_tensor.shape == (1, 4)
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "precision,expected_dtype",
@@ -163,6 +173,7 @@ def test_precision(precision, expected_dtype):
     )
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "data_shape,expected_shape",
@@ -196,6 +207,7 @@ def test_encode_tensor_cpu(data_shape, expected_shape):
     assert torch_tensor.shape == expected_shape
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_encode_from_tensorflow_binding():
     """Test TensorFlow TensorProto binding path (requires GPU and TensorFlow)."""
@@ -231,6 +243,7 @@ def test_encode_from_tensorflow_binding():
             os.remove(pb_path)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_encode_errors():
     """Test error handling for unified encode method."""
@@ -252,6 +265,7 @@ def test_encode_errors():
         engine.encode({"key": "value"}, 2, "amplitude")
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "data_shape,expected_shape,expected_batch_size",
@@ -290,6 +304,7 @@ def test_encode_cuda_tensor(data_shape, expected_shape, expected_batch_size):
         assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_encode_cuda_tensor_wrong_dtype():
     """Test error when CUDA tensor has wrong dtype (non-float64)."""
@@ -308,6 +323,7 @@ def test_encode_cuda_tensor_wrong_dtype():
         engine.encode(data, 2, "amplitude")
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_encode_cuda_tensor_non_contiguous():
     """Test error when CUDA tensor is non-contiguous."""
@@ -330,6 +346,7 @@ def test_encode_cuda_tensor_non_contiguous():
         engine.encode(data, 2, "amplitude")
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.skipif(
     not _has_multi_gpu(), reason="Multi-GPU setup required for this test"
@@ -349,6 +366,7 @@ def test_encode_cuda_tensor_device_mismatch():
         engine.encode(data, 2, "amplitude")
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_encode_cuda_tensor_empty():
     """Test error when CUDA tensor is empty."""
@@ -367,6 +385,7 @@ def test_encode_cuda_tensor_empty():
         engine.encode(data, 2, "amplitude")
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "data_shape,is_batch",
@@ -398,6 +417,7 @@ def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
     assert torch.equal(data, data_clone)
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize("encoding_method", ["basis", "angle"])
 def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
@@ -419,6 +439,7 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
         engine.encode(data, 2, encoding_method)
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "input_type,error_match",
@@ -454,6 +475,7 @@ def test_encode_3d_rejected(input_type, error_match):
         engine.encode(data, 2, "amplitude")
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "tensor_factory,description",
@@ -489,6 +511,7 @@ def test_encode_cuda_tensor_non_finite_values(tensor_factory, description):
         engine.encode(data, 2, "amplitude")
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "precision,expected_dtype",
@@ -514,6 +537,7 @@ def test_encode_cuda_tensor_output_dtype(precision, expected_dtype):
     )
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_basis_encode_basic():
     """Test basic basis encoding (requires GPU)."""
@@ -538,6 +562,7 @@ def test_basis_encode_basic():
     assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype))
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_basis_encode_nonzero_index():
     """Test basis encoding with non-zero index (requires GPU)."""
@@ -559,6 +584,7 @@ def test_basis_encode_nonzero_index():
     assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype))
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_basis_encode_3_qubits():
     """Test basis encoding with 3 qubits (requires GPU)."""
@@ -588,6 +614,7 @@ def test_basis_encode_3_qubits():
             assert host_tensor[i].imag == 0.0
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_basis_encode_errors():
     """Test error handling for basis encoding (requires GPU)."""
@@ -621,6 +648,7 @@ def test_basis_encode_errors():
         engine.encode([0.0, 1.0], 2, "basis")
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_angle_encode_basic():
     """Test basic angle encoding (requires GPU)."""
@@ -644,6 +672,7 @@ def test_angle_encode_basic():
     assert torch.allclose(torch_tensor, expected.to(torch_tensor.dtype))
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_angle_encode_nonzero_angles():
     """Test angle encoding with non-zero angles (requires GPU)."""
@@ -666,6 +695,7 @@ def test_angle_encode_nonzero_angles():
     )
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_angle_encode_batch():
     """Test batch angle encoding (requires GPU)."""
@@ -696,6 +726,7 @@ def test_angle_encode_batch():
     )
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_angle_encode_errors():
     """Test error handling for angle encoding (requires GPU)."""
@@ -717,6 +748,7 @@ def test_angle_encode_errors():
         engine.encode([float("nan"), 0.0], 2, "angle")
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "data_shape,expected_shape",
@@ -748,6 +780,7 @@ def test_encode_numpy_array(data_shape, expected_shape):
     assert torch_tensor.shape == expected_shape
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_encode_pathlib_path():
     """Test encoding from pathlib.Path object."""
@@ -783,6 +816,7 @@ def test_encode_pathlib_path():
             os.remove(npy_path)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_z_encode_basic():
     """Test basic IQP-Z encoding with zero angles (requires GPU).
@@ -813,6 +847,7 @@ def test_iqp_z_encode_basic():
     assert torch.allclose(torch_tensor, expected, atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_z_encode_nonzero():
     """Test IQP-Z encoding with non-zero angles (requires GPU)."""
@@ -838,6 +873,7 @@ def test_iqp_z_encode_nonzero():
     assert torch.allclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_encode_basic():
     """Test basic IQP encoding with ZZ interactions (requires GPU)."""
@@ -863,6 +899,7 @@ def test_iqp_encode_basic():
     assert torch.allclose(torch_tensor, expected, atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_encode_zz_effect():
     """Test that ZZ interaction produces different result than Z-only (requires GPU)."""
@@ -895,6 +932,7 @@ def test_iqp_encode_zz_effect():
     assert torch.allclose(norm_zz, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_encode_3_qubits():
     """Test IQP encoding with 3 qubits (requires GPU)."""
@@ -920,6 +958,7 @@ def test_iqp_encode_3_qubits():
     assert torch.allclose(torch_tensor, expected, atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_z_encode_batch():
     """Test batch IQP-Z encoding (requires GPU)."""
@@ -948,6 +987,7 @@ def test_iqp_z_encode_batch():
     assert torch.allclose(norm_1, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_encode_batch():
     """Test batch IQP encoding with ZZ interactions (requires GPU)."""
@@ -979,6 +1019,7 @@ def test_iqp_encode_batch():
     assert torch.allclose(norm_1, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_encode_single_qubit():
     """Test IQP encoding with single qubit edge case (requires GPU)."""
@@ -1007,6 +1048,7 @@ def test_iqp_encode_single_qubit():
     assert torch.allclose(torch_tensor2, expected, atol=1e-6)
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_iqp_encode_errors():
     """Test error handling for IQP encoding (requires GPU)."""

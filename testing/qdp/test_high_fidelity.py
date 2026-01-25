@@ -23,7 +23,8 @@ import pytest
 import torch
 import numpy as np
 import concurrent.futures
-from _qdp import QdpEngine
+
+from .qdp_test_utils import requires_qdp
 
 np.random.seed(2026)
 
@@ -55,6 +56,8 @@ def calculate_fidelity(
 @pytest.fixture(scope="module")
 def engine():
     """Initialize QDP engine (module-scoped singleton)."""
+    from _qdp import QdpEngine
+
     try:
         return QdpEngine(0)
     except RuntimeError as e:
@@ -64,6 +67,8 @@ def engine():
 @pytest.fixture(scope="module")
 def engine_float64():
     """High-precision engine for fidelity-sensitive tests."""
+    from _qdp import QdpEngine
+
     try:
         return QdpEngine(0, precision="float64")
     except RuntimeError as e:
@@ -73,6 +78,7 @@ def engine_float64():
 # 1. Core Logic and Boundary Tests
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "num_qubits, data_size, desc",
@@ -114,6 +120,7 @@ def test_amplitude_encoding_fidelity_comprehensive(
     assert fidelity > (1.0 - 1e-14), f"Fidelity loss in {desc}! F={fidelity}"
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_complex_integrity(engine):
     """Verify imaginary part is effectively zero for amplitude encoding."""
@@ -137,6 +144,7 @@ def test_complex_integrity(engine):
 # 2. Numerical Stability Tests
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_numerical_stability_underflow(engine_float64):
     """Test precision with extremely small values (1e-150)."""
@@ -156,6 +164,7 @@ def test_numerical_stability_underflow(engine_float64):
 # 3. Memory Leak Tests
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_memory_leak_quantitative(engine):
     """Quantitative memory leak test using torch.cuda.memory_allocated()."""
@@ -184,6 +193,7 @@ def test_memory_leak_quantitative(engine):
     )
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_memory_safety_stress(engine):
     """Stress test: rapid encode/release to verify DLPack deleter."""
@@ -209,6 +219,7 @@ def test_memory_safety_stress(engine):
 # 4. Thread Safety Tests
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_multithreaded_access(engine):
     """Test concurrent access from multiple threads (validates Send+Sync)."""
@@ -241,6 +252,7 @@ def test_multithreaded_access(engine):
 # 5. Error Propagation Tests
 
 
+@requires_qdp
 @pytest.mark.gpu
 def test_error_propagation(engine):
     """Verify Rust errors are correctly propagated to Python RuntimeError."""
