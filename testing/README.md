@@ -30,6 +30,20 @@ testing/
 └── conftest.py         # Pytest configuration and fixtures
 ```
 
+## To run QDP test
+
+Before running QDP tests, build the `_qdp` module into the main venv:
+
+```bash
+uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
+```
+
+Then run the tests:
+
+```bash
+uv run pytest testing/qdp/ -v
+```
+
 ## Running Tests
 
 ```bash

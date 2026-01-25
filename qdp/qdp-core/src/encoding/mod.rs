@@ -17,6 +17,7 @@
 //! Streaming encoding implementations for different quantum encoding methods.
 
 mod amplitude;
+mod angle;
 mod basis;
 
 use std::ffi::c_void;
@@ -359,6 +360,10 @@ pub(crate) fn encode_from_parquet(
         "amplitude" => {
             crate::profile_scope!("Mahout::EncodeAmplitudeFromParquet");
             stream_encode(engine, path, num_qubits, amplitude::AmplitudeEncoder)
+        }
+        "angle" => {
+            crate::profile_scope!("Mahout::EncodeAngleFromParquet");
+            stream_encode(engine, path, num_qubits, angle::AngleEncoder)
         }
         "basis" => {
             crate::profile_scope!("Mahout::EncodeBasisFromParquet");

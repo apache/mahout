@@ -16,7 +16,11 @@
 
 // Angle encoding: map per-qubit angles to product state amplitudes.
 
-use super::QuantumEncoder;
+// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
+// The compiler can't statically determine which path is taken.
+#![allow(unused_unsafe)]
+
+use super::{QuantumEncoder, validate_qubit_count};
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
@@ -133,12 +137,7 @@ impl QuantumEncoder for AngleEncoder {
             )));
         }
 
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
-            )));
-        }
+        validate_qubit_count(num_qubits)?;
 
         for (i, &val) in batch_data.iter().enumerate() {
             if !val.is_finite() {
@@ -205,17 +204,7 @@ impl QuantumEncoder for AngleEncoder {
     }
 
     fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
-        if num_qubits == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of qubits must be at least 1".to_string(),
-            ));
-        }
-        if num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} exceeds practical limit of 30",
-                num_qubits
-            )));
-        }
+        validate_qubit_count(num_qubits)?;
         if data.len() != num_qubits {
             return Err(MahoutError::InvalidInput(format!(
                 "Angle encoding expects {} values (one per qubit), got {}",
