@@ -69,11 +69,6 @@ git push
 
 ### 2.3 Test
 
-To run all tests:
-```
-make tests
-```
-
 The project uses a unified test workflow with pytest. Tests are organized in the `testing/` directory.
 
 **Test Structure:**
@@ -81,6 +76,11 @@ The project uses a unified test workflow with pytest. Tests are organized in the
 - `testing/qdp/` - Tests for the Quantum Data Plane (GPU-accelerated, auto-skipped if extension unavailable)
 - `testing/utils/` - Shared test utilities and helpers
 - `testing/conftest.py` - Pytest configuration with shared fixtures
+
+To run all tests:
+```
+make tests
+```
 
 See [testing/README.md](testing/README.md) for detailed testing documentation.
 
