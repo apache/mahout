@@ -33,7 +33,7 @@ else
 endif
 	uv run pytest
 
-test: test_rust test_python
+tests: test_rust test_python
 
 pre-commit:
 	uv sync --group dev
