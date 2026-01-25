@@ -6,11 +6,12 @@
  * This script syncs documentation from the source /docs directory
  * into the Docusaurus website. It:
  * 1. Cleans the destination (preserving only .gitignore)
- * 2. Copies all markdown files from /docs to website-new/docs
- * 3. Transforms frontmatter for Docusaurus compatibility
+ * 2. Copies all markdown files from /docs to website/docs
+ * 3. Copies all blog posts from /docs/blog to website/blog
+ * 4. Transforms frontmatter for Docusaurus compatibility
  *
- * /docs is the SINGLE SOURCE OF TRUTH for all documentation.
- * website-new/docs is a build artifact that should not be edited directly.
+ * /docs is the SINGLE SOURCE OF TRUTH for all documentation and blog posts.
+ * website/docs and website/blog are build artifacts that should not be edited directly.
  */
 
 const fs = require('fs');
@@ -19,16 +20,19 @@ const path = require('path');
 // Configuration
 const SOURCE_DIR = path.resolve(__dirname, '../../docs');
 const DEST_DIR = path.resolve(__dirname, '../docs');
+const BLOG_SOURCE_DIR = path.resolve(__dirname, '../../docs/blog');
+const BLOG_DEST_DIR = path.resolve(__dirname, '../blog');
 
 // Files that should be preserved during sync (not deleted)
 const PRESERVE_FILES = ['.gitignore'];
 
-// Files/directories to exclude from sync
+// Files/directories to exclude from docs sync (blog is synced separately)
 const EXCLUDE_PATTERNS = [
   /^\./, // Hidden files
   /^node_modules$/,
   /\.pyc$/,
   /^__pycache__$/,
+  /^blog$/, // Blog is synced separately to website/blog
 ];
 
 /**
@@ -241,20 +245,30 @@ function syncDirectory(srcDir, destDir, stats = { files: 0, dirs: 0 }) {
  */
 function main() {
   console.log('Starting documentation sync...\n');
-  console.log(`Source: ${SOURCE_DIR}`);
-  console.log(`Destination: ${DEST_DIR}\n`);
 
-  // Clean destination
-  console.log('Cleaning destination...');
+  // Sync docs
+  console.log(`Docs Source: ${SOURCE_DIR}`);
+  console.log(`Docs Destination: ${DEST_DIR}\n`);
+
+  console.log('Cleaning docs destination...');
   cleanDestination(DEST_DIR);
 
-  // Sync documentation
   console.log('\nSyncing documentation from /docs...');
-  const stats = syncDirectory(SOURCE_DIR, DEST_DIR);
+  const docsStats = syncDirectory(SOURCE_DIR, DEST_DIR);
+
+  // Sync blog
+  console.log(`\nBlog Source: ${BLOG_SOURCE_DIR}`);
+  console.log(`Blog Destination: ${BLOG_DEST_DIR}\n`);
+
+  console.log('Cleaning blog destination...');
+  cleanDestination(BLOG_DEST_DIR);
+
+  console.log('\nSyncing blog posts from /docs/blog...');
+  const blogStats = syncDirectory(BLOG_SOURCE_DIR, BLOG_DEST_DIR);
 
   console.log(`\nSync complete!`);
-  console.log(`  Files: ${stats.files}`);
-  console.log(`  Directories: ${stats.dirs}`);
+  console.log(`  Docs: ${docsStats.files} files, ${docsStats.dirs} directories`);
+  console.log(`  Blog: ${blogStats.files} files, ${blogStats.dirs} directories`);
 }
 
 // Run the sync

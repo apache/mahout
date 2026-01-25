@@ -24,18 +24,18 @@ math-tests/
 metastore_db/*
 bin/derby.log
 bin/metastore_db
-*jar
-*log
+*.jar
+*.log
+
+# Jekyll (legacy)
 website/_site
 website/Gemfile.lock
 website/.bundle
 website/.sass-cache
 
-# Docusaurus (website-new)
-website-new/node_modules/
-website-new/build/
-website-new/.docusaurus/
-website-new/.cache-loader/
+# Docusaurus build artifacts (synced from /docs)
+website/blog/
+website-new/
 
 *.iml
 .idea
