@@ -43,7 +43,7 @@ Encode classical input into a quantum state and return a DLPack tensor on GPU.
   - `str` / `pathlib.Path` file path
     - `.parquet`, `.arrow` / `.feather`, `.npy`, `.pt` / `.pth`, `.pb`
 - `num_qubits` (int): Number of qubits, range 1–30.
-- `encoding_method` (str): `"amplitude" | "angle" | "basis"` (lowercase).
+- `encoding_method` (str): `"amplitude" | "angle" | "basis" | "iqp" | "iqp-z"` (lowercase).
 
 **Returns**
 - `QuantumTensor` with 2D shape:
@@ -53,6 +53,7 @@ Encode classical input into a quantum state and return a DLPack tensor on GPU.
 **Notes**
 - Output dtype is `complex64` (`precision="float32"`) or `complex128` (`precision="float64"`).
 - Parquet streaming currently supports `"amplitude"` and `"basis"`.
+- PyTorch file inputs (`.pt`, `.pth`) require building with the `pytorch` feature.
 
 **Raises**
 - `RuntimeError`: Invalid inputs, shapes, dtypes, or unsupported formats.
@@ -94,12 +95,22 @@ Return `(device_type, device_id)`; CUDA devices report `(2, gpu_id)`.
 
 - Each sample provides one integer index in `[0, 2^num_qubits)`.
 
+### `iqp`
+
+- Expects `n + n*(n-1)/2` parameters for `n = num_qubits` (Z + ZZ terms).
+- All parameters must be finite (no NaN/Inf).
+
+### `iqp-z`
+
+- Expects `n` parameters for `n = num_qubits` (Z terms only).
+- All parameters must be finite (no NaN/Inf).
+
 ## Supported File Formats
 
 - **Parquet**: `.parquet`
 - **Arrow IPC**: `.arrow`, `.feather`
 - **NumPy**: `.npy`
-- **PyTorch**: `.pt`, `.pth`
+- **PyTorch**: `.pt`, `.pth` (requires `pytorch` feature)
 - **TensorFlow**: `.pb` (TensorProto)
 
 ## Common Errors
