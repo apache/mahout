@@ -358,13 +358,15 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
-        self.encode_from_gpu_ptr_with_stream(
-            input_d,
-            input_len,
-            num_qubits,
-            encoding_method,
-            std::ptr::null_mut(),
-        )
+        unsafe {
+            self.encode_from_gpu_ptr_with_stream(
+                input_d,
+                input_len,
+                num_qubits,
+                encoding_method,
+                std::ptr::null_mut(),
+            )
+        }
     }
 
     /// Encode from existing GPU pointer on a specified CUDA stream.
@@ -499,14 +501,16 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
-        self.encode_batch_from_gpu_ptr_with_stream(
-            input_batch_d,
-            num_samples,
-            sample_size,
-            num_qubits,
-            encoding_method,
-            std::ptr::null_mut(),
-        )
+        unsafe {
+            self.encode_batch_from_gpu_ptr_with_stream(
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                encoding_method,
+                std::ptr::null_mut(),
+            )
+        }
     }
 
     /// Encode batch from existing GPU pointer on a specified CUDA stream.

@@ -189,7 +189,7 @@ fn get_tensor_device_id(tensor: &Bound<'_, PyAny>) -> PyResult<i32> {
 /// Get the current CUDA stream pointer for the tensor's device.
 fn get_torch_cuda_stream_ptr(tensor: &Bound<'_, PyAny>) -> PyResult<*mut c_void> {
     let py = tensor.py();
-    let torch = PyModule::import_bound(py, "torch")
+    let torch = PyModule::import(py, "torch")
         .map_err(|_| PyRuntimeError::new_err("Failed to import torch module"))?;
     let cuda = torch.getattr("cuda")?;
     let device = tensor.getattr("device")?;

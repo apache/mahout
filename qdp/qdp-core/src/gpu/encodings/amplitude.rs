@@ -437,7 +437,9 @@ impl AmplitudeEncoder {
         input_ptr: *const f64,
         len: usize,
     ) -> Result<f64> {
-        Self::calculate_inv_norm_gpu_with_stream(device, input_ptr, len, std::ptr::null_mut())
+        unsafe {
+            Self::calculate_inv_norm_gpu_with_stream(device, input_ptr, len, std::ptr::null_mut())
+        }
     }
 
     #[cfg(target_os = "linux")]
