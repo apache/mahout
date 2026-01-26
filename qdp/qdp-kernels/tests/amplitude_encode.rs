@@ -26,7 +26,7 @@ use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
     CuComplex, CuDoubleComplex, launch_amplitude_encode, launch_amplitude_encode_f32,
-    launch_l2_norm, launch_l2_norm_batch,
+    launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_f32,
 };
 
 const EPSILON: f64 = 1e-10;
@@ -280,6 +280,55 @@ fn test_amplitude_encode_odd_input_length() {
     );
 
     println!("PASS: Odd input length handled correctly");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_amplitude_encode_odd_input_length_f32() {
+    println!("Testing amplitude encoding with odd input length (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    // Test with 3 input values, state size 4
+    let input: Vec<f32> = vec![1.0, 2.0, 2.0];
+    let norm = (1.0_f32 + 4.0 + 4.0).sqrt(); // 3.0
+    let inv_norm = 1.0f32 / norm;
+    let state_len = 4;
+
+    let input_d = device.htod_copy(input.clone()).unwrap();
+    let mut state_d = device.alloc_zeros::<CuComplex>(state_len).unwrap();
+
+    let result = unsafe {
+        launch_amplitude_encode_f32(
+            *input_d.device_ptr() as *const f32,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            input.len(),
+            state_len,
+            inv_norm,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(result, 0, "Kernel launch should succeed");
+
+    let state_h = device.dtoh_sync_copy(&state_d).unwrap();
+
+    // Verify: [1/3, 2/3, 2/3, 0]
+    assert!((state_h[0].x - 1.0 / 3.0).abs() < EPSILON_F32);
+    assert!((state_h[1].x - 2.0 / 3.0).abs() < EPSILON_F32);
+    assert!((state_h[2].x - 2.0 / 3.0).abs() < EPSILON_F32);
+    assert!(
+        state_h[3].x.abs() < EPSILON_F32,
+        "Fourth element should be padded with 0"
+    );
+
+    println!("PASS: Odd input length (float32) handled correctly");
 }
 
 #[test]
@@ -620,6 +669,52 @@ fn test_l2_norm_batch_kernel_stream() {
     }
 
     println!("PASS: Batched norm reduction on stream matches CPU");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_single_kernel_f32() {
+    println!("Testing L2 norm reduction kernel (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    // Test input: [3.0, 4.0] -> norm = 5.0, inv_norm = 0.2
+    let input: Vec<f32> = vec![3.0, 4.0];
+    let expected_norm = (3.0_f32.powi(2) + 4.0_f32.powi(2)).sqrt(); // 5.0
+    let expected_inv_norm = 1.0f32 / expected_norm; // 0.2
+
+    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
+    let mut inv_norm_d = device.alloc_zeros::<f32>(1).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_f32(
+            *input_d.device_ptr() as *const f32,
+            input.len(),
+            *inv_norm_d.device_ptr_mut() as *mut f32,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(status, 0, "Norm kernel should succeed");
+    device.synchronize().unwrap();
+
+    let inv_norm_h = device.dtoh_sync_copy(&inv_norm_d).unwrap();
+    let got = inv_norm_h[0];
+
+    assert!(
+        (got - expected_inv_norm).abs() < EPSILON_F32,
+        "Inv norm mismatch: expected {}, got {}",
+        expected_inv_norm,
+        got
+    );
+
+    println!("PASS: Single norm reduction (float32) matches CPU");
 }
 
 #[test]

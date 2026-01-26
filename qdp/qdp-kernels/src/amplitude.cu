@@ -103,6 +103,14 @@ __device__ __forceinline__ double warp_reduce_sum(double val) {
     return val;
 }
 
+// Warp-level reduction for sum using shuffle instructions (float32)
+__device__ __forceinline__ float warp_reduce_sum_f32(float val) {
+    for (int offset = warpSize / 2; offset > 0; offset >>= 1) {
+        val += __shfl_down_sync(0xffffffff, val, offset);
+    }
+    return val;
+}
+
 // Block-level reduction built on top of warp reduction
 __device__ __forceinline__ double block_reduce_sum(double val) {
     __shared__ double shared[32]; // supports up to 1024 threads (32 warps)
@@ -119,6 +127,27 @@ __device__ __forceinline__ double block_reduce_sum(double val) {
     val = (threadIdx.x < (blockDim.x + warpSize - 1) / warpSize) ? shared[lane] : 0.0;
     if (warp_id == 0) {
         val = warp_reduce_sum(val);
+    }
+    return val;
+}
+
+
+// Block-level reduction built on top of warp reduction (float32)
+__device__ __forceinline__ float block_reduce_sum_f32(float val) {
+    __shared__ float shared[32]; // supports up to 1024 threads (32 warps)
+    int lane = threadIdx.x & (warpSize - 1);
+    int warp_id = threadIdx.x >> 5;
+
+    val = warp_reduce_sum_f32(val);
+    if (lane == 0) {
+        shared[warp_id] = val;
+    }
+    __syncthreads();
+
+    // Only first warp participates in final reduction
+    val = (threadIdx.x < (blockDim.x + warpSize - 1) / warpSize) ? shared[lane] : 0.0f;
+    if (warp_id == 0) {
+        val = warp_reduce_sum_f32(val);
     }
     return val;
 }
@@ -351,6 +380,41 @@ __global__ void l2_norm_kernel(
     }
 }
 
+/// Kernel: accumulate L2 norm using coalesced vectorized loads (float32).
+/// Each block atomically adds its partial sum to the output accumulator.
+__global__ void l2_norm_kernel_f32(
+    const float* __restrict__ input,
+    size_t input_len,
+    float* __restrict__ out_accum
+) {
+    // Vectorized float2 loads for bandwidth and coalescing
+    const size_t vec_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    const size_t stride = gridDim.x * blockDim.x;
+
+    float local_sum = 0.0f;
+
+    // Process two elements per iteration via float2
+    size_t vec_offset = vec_idx;
+    size_t offset = vec_offset * 2;
+    while (offset + 1 < input_len) {
+        const float2 v = __ldg(reinterpret_cast<const float2*>(input) + vec_offset);
+        local_sum += v.x * v.x + v.y * v.y;
+        vec_offset += stride;
+        offset = vec_offset * 2;
+    }
+
+    // Handle tail element if input_len is odd
+    if (offset < input_len) {
+        const float v = __ldg(input + offset);
+        local_sum += v * v;
+    }
+
+    const float block_sum = block_reduce_sum_f32(local_sum);
+    if (threadIdx.x == 0) {
+        atomicAdd(out_accum, block_sum);
+    }
+}
+
 /// Kernel: accumulate L2 norms for a batch.
 /// Grid is organized as (blocks_per_sample * num_samples) blocks.
 __global__ void l2_norm_batch_kernel(
@@ -408,6 +472,23 @@ __global__ void finalize_inv_norm_kernel(
     }
 }
 
+/// Kernel: converts accumulated sum-of-squares into inverse norms (float32).
+__global__ void finalize_inv_norm_kernel_f32(
+    float* __restrict__ norms,
+    size_t count
+) {
+    const size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx >= count) return;
+
+    float sum = norms[idx];
+    // Guard against zero or NaN to avoid inf propagation
+    if (sum <= 0.0f || !isfinite(sum)) {
+        norms[idx] = 0.0f;
+    } else {
+        norms[idx] = rsqrtf(sum);
+    }
+}
+
 /// Launch L2 norm reduction for a single vector.
 /// Writes the inverse norm (1 / ||x||) into `inv_norm_out_d`.
 int launch_l2_norm(
@@ -445,6 +526,50 @@ int launch_l2_norm(
 
     // Finalize: convert accumulated sum to inverse norm
     finalize_inv_norm_kernel<<<1, 32, 0, stream>>>(
+        inv_norm_out_d,
+        1
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Launch L2 norm reduction for a single vector (float32).
+/// Writes the inverse norm (1 / ||x||) into `inv_norm_out_d`.
+int launch_l2_norm_f32(
+    const float* input_d,
+    size_t input_len,
+    float* inv_norm_out_d,
+    cudaStream_t stream
+) {
+    if (input_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cudaError_t memset_status = cudaMemsetAsync(
+        inv_norm_out_d,
+        0,
+        sizeof(float),
+        stream
+    );
+    if (memset_status != cudaSuccess) {
+        return memset_status;
+    }
+
+    const int blockSize = DEFAULT_BLOCK_SIZE;
+    const size_t elements_per_block = blockSize * 2; // float2 per thread
+    size_t gridSize = (input_len + elements_per_block - 1) / elements_per_block;
+    gridSize = (gridSize == 0) ? 1 : gridSize;
+    const size_t maxBlocks = MAX_GRID_BLOCKS_L2_NORM;
+    if (gridSize > maxBlocks) gridSize = maxBlocks;
+
+    l2_norm_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
+        input_d,
+        input_len,
+        inv_norm_out_d
+    );
+
+    // Finalize: convert accumulated sum to inverse norm
+    finalize_inv_norm_kernel_f32<<<1, 32, 0, stream>>>(
         inv_norm_out_d,
         1
     );

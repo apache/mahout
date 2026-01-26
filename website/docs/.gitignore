@@ -1,0 +1,10 @@
+# Ignore ALL content - everything is synced from /docs/
+#
+# This directory is a BUILD ARTIFACT. The sync script (scripts/sync-docs.js)
+# copies all documentation from /docs/ into this directory.
+#
+# DO NOT edit files here directly. Edit the source files in /docs/ instead.
+# Changes here will be overwritten on the next sync.
+
+*
+!.gitignore
