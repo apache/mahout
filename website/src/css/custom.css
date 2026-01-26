@@ -97,9 +97,12 @@
   color: white;
 }
 
-/* Dropdown menu keeps light background */
+/* Dropdown menu - solid opaque background */
 .dropdown__menu {
-  background-color: var(--ifm-background-color);
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .dropdown__link {
@@ -112,10 +115,9 @@
   --ifm-navbar-background-color: #00838f;
 }
 
-/* Dropdown menu styling */
-.dropdown__menu {
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+[data-theme='dark'] .dropdown__menu {
+  background-color: #1e1e1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Footer styling */

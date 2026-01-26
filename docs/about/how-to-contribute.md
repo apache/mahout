@@ -12,7 +12,7 @@ of ways to contribute!
 <a name="HowToContribute-BeInvolved"></a>
 ## Get Involved
 
-Discussions at Apache happen on the mailing list. To get involved, you should join the [Mahout mailing lists](/docs/community/mailing-lists).  In particular:
+Discussions at Apache happen on the mailing list. To get involved, you should join the [Mahout mailing lists](../community/mailing-lists).  In particular:
 
 * The **user list** (to help others)
 * The **development list** (to join discussions of changes)  -- This is the best place
@@ -82,7 +82,7 @@ First of all, you need to get the Mahout source code from [GitHub](https://githu
 <a name="HowToContribute-MakingChanges"></a>
 ## Making Changes
 
-Before you start, you should send a message to the [Mahout developer mailing list](/docs/community/mailing-lists)
+Before you start, you should send a message to the [Mahout developer mailing list](../community/mailing-lists)
 (note: you have to subscribe before you can post), or file a ticket in our [issue tracker](https://issues.apache.org/jira/browse/MAHOUT).
 Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.
 
