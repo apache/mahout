@@ -109,7 +109,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/mahout-social-card.jpg',
+    image: 'img/docusaurus-social-card.jpg',
     colorMode: {
       defaultMode: 'light',
       respectPrefersColorScheme: true,
