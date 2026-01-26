@@ -33,6 +33,10 @@ use crate::gpu::cuda_ffi::{
 };
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
+#[cfg(target_os = "linux")]
+use crate::gpu::overlap_tracker::OverlapTracker;
+#[cfg(target_os = "linux")]
+use crate::gpu::pool_metrics::PoolMetrics;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use std::ffi::c_void;
 use std::sync::Arc;
@@ -219,6 +223,7 @@ impl Drop for PipelineContext {
 /// - Data chunking and async H2D copy
 /// - Buffer lifetime management
 /// - Stream synchronization
+/// - Optional observability (pool metrics and overlap tracking)
 ///
 /// The caller provides a `kernel_launcher` closure that handles the
 /// specific kernel launch logic for each chunk.
@@ -227,6 +232,10 @@ impl Drop for PipelineContext {
 /// * `device` - The CUDA device
 /// * `host_data` - Full source data to process
 /// * `kernel_launcher` - Closure that launches the specific kernel for each chunk
+///
+/// # Environment Variables
+/// * `QDP_ENABLE_POOL_METRICS` - Enable pool utilization metrics (set to "1" or "true")
+/// * `QDP_ENABLE_OVERLAP_TRACKING` - Enable H2D overlap tracking (set to "1" or "true")
 ///
 /// # Example
 /// ```rust,ignore
@@ -250,10 +259,31 @@ where
     // Pinned host staging pool sized to the current chunking strategy (double-buffer by default).
     const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
     const PINNED_POOL_SIZE: usize = 2; // double buffering
+
+    // Check environment variables for observability features
+    let enable_pool_metrics = std::env::var("QDP_ENABLE_POOL_METRICS")
+        .map(|s| s == "1" || s.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+    let enable_overlap_tracking = std::env::var("QDP_ENABLE_OVERLAP_TRACKING")
+        .map(|s| s == "1" || s.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+
     // 1. Create dual streams with per-slot events to coordinate copy -> compute
     let ctx = PipelineContext::new(device, PINNED_POOL_SIZE)?;
     let pinned_pool = PinnedBufferPool::new(PINNED_POOL_SIZE, CHUNK_SIZE_ELEMENTS)
         .map_err(|e| MahoutError::Cuda(format!("Failed to create pinned buffer pool: {}", e)))?;
+
+    // Initialize observability tools (optional)
+    let pool_metrics = if enable_pool_metrics {
+        Some(Arc::new(PoolMetrics::new()))
+    } else {
+        None
+    };
+    let overlap_tracker = if enable_overlap_tracking {
+        Some(OverlapTracker::new(PINNED_POOL_SIZE, true)?)
+    } else {
+        None
+    };
 
     // 2. Chunk size: 8MB per chunk (balance between overhead and overlap opportunity)
     // TODO: tune dynamically based on GPU/PCIe bandwidth.
@@ -282,19 +312,35 @@ where
         })?;
 
         // Acquire pinned staging buffer and populate it with the current chunk
-        let mut pinned_buf = pinned_pool.acquire();
+        let mut pinned_buf = if let Some(ref metrics) = pool_metrics {
+            pinned_pool.acquire_with_metrics(Some(metrics.as_ref()))
+        } else {
+            pinned_pool.acquire()
+        };
         pinned_buf.as_slice_mut()[..chunk.len()].copy_from_slice(chunk);
 
         // Async copy: host to device (non-blocking, on specified stream)
         // Uses CUDA Runtime API (cudaMemcpyAsync) for true async copy
         {
             crate::profile_scope!("GPU::H2DCopyAsync");
+
+            // Record copy start if overlap tracking enabled
+            if let Some(ref tracker) = overlap_tracker {
+                tracker.record_copy_start(&ctx.stream_copy, event_slot)?;
+            }
+
             unsafe {
                 ctx.async_copy_to_device(
                     pinned_buf.ptr() as *const c_void,
                     *input_chunk_dev.device_ptr() as *mut c_void,
                     chunk.len(),
                 )?;
+
+                // Record copy end if overlap tracking enabled
+                if let Some(ref tracker) = overlap_tracker {
+                    tracker.record_copy_end(&ctx.stream_copy, event_slot)?;
+                }
+
                 ctx.record_copy_done(event_slot)?;
                 ctx.wait_for_copy(event_slot)?;
             }
@@ -316,7 +362,46 @@ where
         // Invoke caller's kernel launcher (non-blocking)
         {
             crate::profile_scope!("GPU::KernelLaunchAsync");
+
+            // Record compute start if overlap tracking enabled
+            if let Some(ref tracker) = overlap_tracker {
+                tracker.record_compute_start(&ctx.stream_compute, event_slot)?;
+            }
+
             kernel_launcher(&ctx.stream_compute, input_ptr, chunk_offset, chunk.len())?;
+
+            // Record compute end if overlap tracking enabled
+            if let Some(ref tracker) = overlap_tracker {
+                tracker.record_compute_end(&ctx.stream_compute, event_slot)?;
+            }
+        }
+
+        // Log overlap if tracking enabled
+        // Ref: https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
+        // We log after recording events. log_overlap will wait for events to complete
+        // before calculating elapsed time. This ensures accurate measurements.
+        //
+        // Note: log_overlap now handles both success and failure cases internally,
+        // logging at appropriate levels (INFO for visibility, DEBUG for details).
+        if let Some(ref tracker) = overlap_tracker
+            && (chunk_idx % 10 == 0 || chunk_idx == 0)
+        {
+            // Only log every Nth chunk to avoid excessive logging
+            // Note: log_overlap waits for events to complete, which may take time
+            // If events fail (e.g., invalid resource handle), log_overlap will log
+            // at INFO level so it's visible in both debug and info modes
+            if let Err(e) = tracker.log_overlap(chunk_idx) {
+                // log_overlap already logged the error at INFO level
+                // We only need to log additional details at DEBUG level if needed
+                if log::log_enabled!(log::Level::Debug) {
+                    log::debug!(
+                        "Overlap tracking failed for chunk {}: {}. Pipeline continues normally.",
+                        chunk_idx,
+                        e
+                    );
+                }
+                // Don't fail the pipeline - overlap tracking is optional observability
+            }
         }
 
         // Keep buffer alive until synchronization
@@ -343,6 +428,12 @@ where
     // Buffers are dropped here (after sync), freeing GPU memory
     // This is safe because all GPU operations have completed
     drop(keep_alive_buffers);
+
+    // Print pool metrics summary if enabled
+    if let Some(ref metrics) = pool_metrics {
+        let report = metrics.report();
+        report.print_summary();
+    }
 
     Ok(())
 }

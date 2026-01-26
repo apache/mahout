@@ -59,6 +59,8 @@ pub fn cuda_error_to_string(code: i32) -> &'static str {
         12 => "cudaErrorInvalidDevicePointer",
         17 => "cudaErrorInvalidMemcpyDirection",
         30 => "cudaErrorUnknown",
+        400 => "cudaErrorInvalidResourceHandle",
+        600 => "cudaErrorInvalidResourceHandle", // Alternative error code mapping
         999 => "CUDA unavailable (non-Linux stub)",
         _ => "Unknown CUDA error",
     }
