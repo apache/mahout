@@ -2,4 +2,5 @@ mahout-team:
   name: Mahout Team
   title: Apache Mahout
   url: https://mahout.apache.org
-  image_url: /img/mahout-favicon.svg
+  image_url: /img/mahout-favicon-black.svg
+  image_url_dark: /img/mahout-favicon.svg
