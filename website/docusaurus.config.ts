@@ -118,7 +118,7 @@ const config: Config = {
       title: 'Apache Mahout',
       logo: {
         alt: 'Apache Mahout Logo',
-        src: 'img/mahout-logo-blue.svg',
+        src: 'img/mahout-icon-white.svg',
       },
       items: [
         // About dropdown
