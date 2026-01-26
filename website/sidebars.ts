@@ -116,7 +116,7 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'about/how-to-contribute',
-        'adr/jekyll-to-docusaurus-migration',
+        'adr/001-jekyll-to-docusaurus-migration',
       ],
     },
   ],
