@@ -125,8 +125,8 @@ Set up a GitHub Actions workflow that:
 -   **Create versioned documentation**:
     ```bash
     cd website
-    npm run docusaurus docs:version 1.0
+    npm run version 1.0.0
     ```
-    This creates a snapshot of the current docs under `versioned_docs/version-1.0/` and adds the version to `versions.json`. Update `docusaurus.config.ts` to configure the new version label and path if needed.
+    This creates a snapshot of the current docs under `versioned_docs/version-1.0.0/` and adds the version to `versions.json`. Update `docusaurus.config.ts` to configure the new version label and path if needed.
 -   **Announce the release** on `dev@mahout.apache.org`.
 -   **Update website documentation** with the new release notes.
