@@ -46,9 +46,9 @@ Refer to the example notebooks in the `examples/` directory at the repository ro
 To serve the website locally:
 
 ```bash
-cd website-new
+cd website
 npm install
 npm run start
 ```
 
-See the [website README](https://github.com/apache/mahout/tree/main/website-new) for more details.
+See the [website README](https://github.com/apache/mahout/tree/main/website#readme) for more details.
