@@ -114,9 +114,14 @@ impl DataReader for ArrowIPCReader {
                         }
                     } else {
                         sample_size = Some(current_size);
-                        let new_capacity = current_size
-                            .checked_mul(batch.num_rows())
-                            .expect("Capacity overflowed usize");
+                        let new_capacity =
+                            current_size.checked_mul(batch.num_rows()).ok_or_else(|| {
+                                MahoutError::InvalidInput(format!(
+                                    "FixedSizeList capacity overflow: {} * {} would overflow usize",
+                                    current_size,
+                                    batch.num_rows()
+                                ))
+                            })?;
                         all_data.reserve(new_capacity);
                     }
 
@@ -161,7 +166,15 @@ impl DataReader for ArrowIPCReader {
                             }
                         } else {
                             sample_size = Some(current_size);
-                            all_data.reserve(current_size * list_array.len());
+                            let new_capacity =
+                                current_size.checked_mul(list_array.len()).ok_or_else(|| {
+                                    MahoutError::InvalidInput(format!(
+                                        "List capacity overflow: {} * {} would overflow usize",
+                                        current_size,
+                                        list_array.len()
+                                    ))
+                                })?;
+                            all_data.reserve(new_capacity);
                         }
 
                         if float_array.null_count() == 0 {
