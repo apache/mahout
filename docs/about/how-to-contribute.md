@@ -21,7 +21,7 @@ to understand where the project is headed.
 
 Please keep discussions about Mahout on list so that everyone benefits.
 Emailing individual committers with questions about specific Mahout issues
-is discouraged.  See [http://people.apache.org/~hossman/#private_q](http://people.apache.org/~hossman/#private_q)
+is discouraged.  See [https://www.apache.org/theapacheway/](https://www.apache.org/theapacheway/)
 .  Apache  has a number of [email tips for contributors][1] as well.
 
 <a name="HowToContribute-WhattoWorkOn?"></a>
