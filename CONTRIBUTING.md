@@ -77,6 +77,11 @@ The project uses a unified test workflow with pytest. Tests are organized in the
 - `testing/utils/` - Shared test utilities and helpers
 - `testing/conftest.py` - Pytest configuration with shared fixtures
 
+To run all tests:
+```
+make tests
+```
+
 See [testing/README.md](testing/README.md) for detailed testing documentation.
 
 ### 2.4 Pre-commit Checks
@@ -91,6 +96,11 @@ Or run pre-commit hooks on all files:
 
 ```bash
 pre-commit run --all-files
+```
+
+Or run pre-commit with makefile style (that ensures you uses `pre-commit` in uv's venv)
+```bash
+make pre-commit
 ```
 
 ### 2.5 Create a Pull Request
