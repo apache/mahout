@@ -5,7 +5,7 @@ This website is built using [Docusaurus](https://docusaurus.io/), a modern stati
 ## Quick Start
 
 ```bash
-cd website-new
+cd website
 npm install
 npm run start
 ```

@@ -130,6 +130,7 @@ impl PipelineContext {
     /// `slot` must refer to a live event created by this context, and the context must
     /// remain alive until the event is no longer used by any stream.
     pub unsafe fn record_copy_done(&self, slot: usize) -> Result<()> {
+        crate::profile_scope!("GPU::CopyEventRecord");
         validate_event_slot(&self.events_copy_done, slot)?;
 
         unsafe {
@@ -324,7 +325,10 @@ where
         } else {
             pinned_pool.acquire()
         };
-        pinned_buf.as_slice_mut()[..chunk.len()].copy_from_slice(chunk);
+        {
+            crate::profile_scope!("GPU::H2D_Stage");
+            pinned_buf.as_slice_mut()[..chunk.len()].copy_from_slice(chunk);
+        }
 
         // Async copy: host to device (non-blocking, on specified stream)
         // Uses CUDA Runtime API (cudaMemcpyAsync) for true async copy
@@ -455,9 +459,12 @@ where
         unsafe {
             ctx.sync_copy_stream()?;
         }
-        device
-            .wait_for(&ctx.stream_compute)
-            .map_err(|e| MahoutError::Cuda(format!("Compute stream sync failed: {:?}", e)))?;
+        {
+            crate::profile_scope!("GPU::ComputeSync");
+            device
+                .wait_for(&ctx.stream_compute)
+                .map_err(|e| MahoutError::Cuda(format!("Compute stream sync failed: {:?}", e)))?;
+        }
     }
 
     // Buffers are dropped here (after sync), freeing GPU memory

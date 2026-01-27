@@ -35,8 +35,11 @@ fn main() {
         }
     };
 
-    // Create test data
-    let data: Vec<f64> = (0..1024).map(|i| (i as f64) / 1024.0).collect();
+    // Create test data (large enough to trigger async pipeline)
+    let data_len: usize = 262_144; // 2MB of f64, exceeds async threshold
+    let data: Vec<f64> = (0..data_len)
+        .map(|i| (i as f64) / (data_len as f64))
+        .collect();
     println!("✓ Created test data: {} elements", data.len());
     println!();
 
@@ -46,11 +49,14 @@ fn main() {
     println!("  - CPU::L2Norm");
     println!("  - GPU::Alloc");
     println!("  - GPU::H2DCopy");
+    println!("  - GPU::CopyEventRecord");
+    println!("  - GPU::H2D_Stage");
     println!("  - GPU::Kernel");
+    println!("  - GPU::ComputeSync");
     println!();
 
     // Perform encoding (this will trigger NVTX markers)
-    match engine.encode(&data, 10, "amplitude") {
+    match engine.encode(&data, 18, "amplitude") {
         Ok(ptr) => {
             println!("✓ Encoding succeeded");
             println!("✓ DLPack pointer: {:p}", ptr);
