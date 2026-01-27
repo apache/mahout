@@ -62,7 +62,6 @@ fn validate_event_slot(events: &[*mut c_void], slot: usize) -> Result<()> {
 }
 
 #[cfg(target_os = "linux")]
-#[allow(unsafe_op_in_unsafe_fn)]
 impl PipelineContext {
     pub fn new(device: &Arc<CudaDevice>, event_slots: usize) -> Result<Self> {
         let stream_compute = device
@@ -107,18 +106,20 @@ impl PipelineContext {
         len_elements: usize,
     ) -> Result<()> {
         crate::profile_scope!("GPU::H2D_Copy");
-        let ret = cudaMemcpyAsync(
-            dst,
-            src,
-            len_elements * std::mem::size_of::<f64>(),
-            CUDA_MEMCPY_HOST_TO_DEVICE,
-            self.stream_copy.stream as *mut c_void,
-        );
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "Async H2D copy failed with CUDA error: {}",
-                ret
-            )));
+        unsafe {
+            let ret = cudaMemcpyAsync(
+                dst,
+                src,
+                len_elements * std::mem::size_of::<f64>(),
+                CUDA_MEMCPY_HOST_TO_DEVICE,
+                self.stream_copy.stream as *mut c_void,
+            );
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "Async H2D copy failed with CUDA error: {}",
+                    ret
+                )));
+            }
         }
         Ok(())
     }
@@ -131,15 +132,17 @@ impl PipelineContext {
     pub unsafe fn record_copy_done(&self, slot: usize) -> Result<()> {
         validate_event_slot(&self.events_copy_done, slot)?;
 
-        let ret = cudaEventRecord(
-            self.events_copy_done[slot],
-            self.stream_copy.stream as *mut c_void,
-        );
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "cudaEventRecord failed: {}",
-                ret
-            )));
+        unsafe {
+            let ret = cudaEventRecord(
+                self.events_copy_done[slot],
+                self.stream_copy.stream as *mut c_void,
+            );
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "cudaEventRecord failed: {}",
+                    ret
+                )));
+            }
         }
         Ok(())
     }
@@ -153,16 +156,18 @@ impl PipelineContext {
         crate::profile_scope!("GPU::StreamWait");
         validate_event_slot(&self.events_copy_done, slot)?;
 
-        let ret = cudaStreamWaitEvent(
-            self.stream_compute.stream as *mut c_void,
-            self.events_copy_done[slot],
-            0,
-        );
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "cudaStreamWaitEvent failed: {}",
-                ret
-            )));
+        unsafe {
+            let ret = cudaStreamWaitEvent(
+                self.stream_compute.stream as *mut c_void,
+                self.events_copy_done[slot],
+                0,
+            );
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "cudaStreamWaitEvent failed: {}",
+                    ret
+                )));
+            }
         }
         Ok(())
     }
@@ -173,12 +178,14 @@ impl PipelineContext {
     /// The context and its copy stream must be valid and not destroyed while syncing.
     pub unsafe fn sync_copy_stream(&self) -> Result<()> {
         crate::profile_scope!("Pipeline::SyncCopy");
-        let ret = cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "cudaStreamSynchronize(copy) failed: {}",
-                ret
-            )));
+        unsafe {
+            let ret = cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "cudaStreamSynchronize(copy) failed: {}",
+                    ret
+                )));
+            }
         }
         Ok(())
     }
@@ -325,8 +332,15 @@ where
             crate::profile_scope!("GPU::H2DCopyAsync");
 
             // Record copy start if overlap tracking enabled
-            if let Some(ref tracker) = overlap_tracker {
-                tracker.record_copy_start(&ctx.stream_copy, event_slot)?;
+            // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            if let Some(ref tracker) = overlap_tracker
+                && let Err(e) = tracker.record_copy_start(&ctx.stream_copy, event_slot)
+            {
+                log::warn!(
+                    "Chunk {}: Failed to record copy start event: {}. Overlap tracking may be incomplete.",
+                    chunk_idx,
+                    e
+                );
             }
 
             unsafe {
@@ -337,8 +351,15 @@ where
                 )?;
 
                 // Record copy end if overlap tracking enabled
-                if let Some(ref tracker) = overlap_tracker {
-                    tracker.record_copy_end(&ctx.stream_copy, event_slot)?;
+                // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+                if let Some(ref tracker) = overlap_tracker
+                    && let Err(e) = tracker.record_copy_end(&ctx.stream_copy, event_slot)
+                {
+                    log::warn!(
+                        "Chunk {}: Failed to record copy end event: {}. Overlap tracking may be incomplete.",
+                        chunk_idx,
+                        e
+                    );
                 }
 
                 ctx.record_copy_done(event_slot)?;
@@ -364,15 +385,29 @@ where
             crate::profile_scope!("GPU::KernelLaunchAsync");
 
             // Record compute start if overlap tracking enabled
-            if let Some(ref tracker) = overlap_tracker {
-                tracker.record_compute_start(&ctx.stream_compute, event_slot)?;
+            // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            if let Some(ref tracker) = overlap_tracker
+                && let Err(e) = tracker.record_compute_start(&ctx.stream_compute, event_slot)
+            {
+                log::warn!(
+                    "Chunk {}: Failed to record compute start event: {}. Overlap tracking may be incomplete.",
+                    chunk_idx,
+                    e
+                );
             }
 
             kernel_launcher(&ctx.stream_compute, input_ptr, chunk_offset, chunk.len())?;
 
             // Record compute end if overlap tracking enabled
-            if let Some(ref tracker) = overlap_tracker {
-                tracker.record_compute_end(&ctx.stream_compute, event_slot)?;
+            // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            if let Some(ref tracker) = overlap_tracker
+                && let Err(e) = tracker.record_compute_end(&ctx.stream_compute, event_slot)
+            {
+                log::warn!(
+                    "Chunk {}: Failed to record compute end event: {}. Overlap tracking may be incomplete.",
+                    chunk_idx,
+                    e
+                );
             }
         }
 

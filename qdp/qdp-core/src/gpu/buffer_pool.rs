@@ -124,19 +124,13 @@ impl PinnedBufferPool {
         self: &Arc<Self>,
         metrics: Option<&PoolMetrics>,
     ) -> PinnedBufferHandle {
-        let available = self.available();
+        let mut free = self.lock_free();
 
+        // Record available count while holding the lock to avoid TOCTOU race condition
+        let available = free.len();
         if let Some(m) = metrics {
             m.record_acquire(available);
         }
-
-        let start_time = if metrics.is_some() {
-            Some(Instant::now())
-        } else {
-            None
-        };
-
-        let mut free = self.lock_free();
         loop {
             if let Some(buffer) = free.pop() {
                 return PinnedBufferHandle {
@@ -147,7 +141,7 @@ impl PinnedBufferPool {
 
             // Record wait if metrics enabled
             if let Some(m) = metrics {
-                let wait_start = start_time.unwrap();
+                let wait_start = Instant::now();
                 free = self
                     .available_cv
                     .wait(free)

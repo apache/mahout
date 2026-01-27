@@ -119,6 +119,18 @@ impl OverlapTracker {
         })
     }
 
+    /// Destroys CUDA events. Caller must ensure all pointers are valid or null.
+    ///
+    /// # Safety
+    /// This function is `unsafe` because it calls `cudaEventDestroy` on raw pointers.
+    /// The inner `unsafe` block is required (Rust 2024: `unsafe fn` body is safe by default).
+    ///
+    /// ## Safety Requirements
+    /// - All pointers in `events` must either be valid CUDA event handles
+    ///   created with `cudaEventCreateWithFlags`, or null pointers.
+    /// - Each event must not be destroyed more than once.
+    /// - The events must not be in use by any active CUDA operations.
+    /// - The events must belong to the same CUDA context.
     unsafe fn cleanup_events(events: &[&Vec<*mut c_void>]) {
         for event_vec in events {
             for ev in event_vec.iter() {
@@ -243,7 +255,7 @@ impl OverlapTracker {
             // Wait for events to complete before calculating elapsed time
             // Ref: https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
             //
-            // Critical: According to CUDA docs (2026):
+            // Critical: According to the CUDA Runtime API documentation:
             // 1. cudaEventRecord() is asynchronous - the event may not be recorded immediately
             // 2. Before the first call to cudaEventRecord(), cudaEventQuery() returns cudaSuccess
             //    (because an empty event is considered "complete")

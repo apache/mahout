@@ -48,15 +48,42 @@ impl PoolMetrics {
     }
 
     /// Record an acquire operation with the number of available buffers at that time.
+    ///
+    /// Uses compare-and-swap loops to ensure atomicity of min/max updates
+    /// and avoid race conditions under concurrent access.
     pub fn record_acquire(&self, available: usize) {
-        let current_min = self.min_available.load(Ordering::Relaxed);
-        if available < current_min {
-            self.min_available.store(available, Ordering::Relaxed);
+        // Update minimum available using a compare-and-swap loop to avoid races
+        loop {
+            let current_min = self.min_available.load(Ordering::Relaxed);
+            if available >= current_min {
+                break; // Current value is already <= available, no update needed
+            }
+            match self.min_available.compare_exchange_weak(
+                current_min,
+                available,
+                Ordering::Relaxed,
+                Ordering::Relaxed,
+            ) {
+                Ok(_) => break,     // Successfully updated
+                Err(_) => continue, // Value changed, retry
+            }
         }
 
-        let current_max = self.max_available.load(Ordering::Relaxed);
-        if available > current_max {
-            self.max_available.store(available, Ordering::Relaxed);
+        // Update maximum available using a compare-and-swap loop to avoid races
+        loop {
+            let current_max = self.max_available.load(Ordering::Relaxed);
+            if available <= current_max {
+                break; // Current value is already >= available, no update needed
+            }
+            match self.max_available.compare_exchange_weak(
+                current_max,
+                available,
+                Ordering::Relaxed,
+                Ordering::Relaxed,
+            ) {
+                Ok(_) => break,     // Successfully updated
+                Err(_) => continue, // Value changed, retry
+            }
         }
 
         self.total_acquires.fetch_add(1, Ordering::Relaxed);
