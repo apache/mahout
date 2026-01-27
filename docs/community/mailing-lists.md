@@ -3,13 +3,13 @@ title: Mailing Lists, IRC and Archives
 sidebar_label: Mailing Lists, IRC and Archives
 ---
 
-# General
+## General
 
 Communication at Mahout happens primarily online via mailing lists. We have
 a user as well as a dev list for discussion. In addition, there is a commit
 list so we are able to monitor what happens in the GitHub repository.
 
-# Mailing lists
+## Mailing lists
 
 ## How to subscribe/unsubscribe
 
@@ -44,7 +44,7 @@ questions and problems.
 * [Subscribe](mailto:commits-subscribe@mahout.apache.org)
 * [Unsubscribe](mailto:commits-unsubscribe@mahout.apache.org)
 
-# Slack
+## Slack
 
 Most discussions now happen on the mailing lists and via GitHub issues and
 discussions. It is a logged channel. Please keep in mind that it is for
@@ -53,12 +53,12 @@ to the dev@ mailing list or GitHub issues and discussions, and other people
 who are not on Slack should be given time to respond before any work is
 committed.
 
-# IRC
+## IRC
 
 Mahout's IRC channel is **#mahout**. Note that real-time project discussions
 primarily take place on Slack now (see the Slack section above).
 
-# Archives
+## Archives
 
 ## Official Apache Archive
 
