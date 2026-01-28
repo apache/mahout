@@ -12,6 +12,64 @@ This document describes the process for releasing `qumat` and `qumat-qdp`. The p
 
 ---
 
+## Branching Strategy
+
+We follow the Airflow-style release branching model:
+
+```
+main ────●────●────●────●────●──→ (development continues)
+                   │
+                   ├── mahout-qumat-0.5.0-RC1 (tag)
+                   │
+                   └── v0.5-stable (branch) ──●──→ RC2 ──→ v0.5.0 ──→ v0.5.1
+```
+
+### Create Stable Branch
+
+When ready to cut a release, create a stable branch from `main`:
+
+```bash
+git checkout main
+git pull upstream main
+git checkout -b v0.5-stable
+git push -u upstream v0.5-stable
+```
+
+### Tag Release Candidates
+
+Tag RCs on the stable branch:
+
+```bash
+git checkout v0.5-stable
+git tag -a mahout-qumat-0.5.0-RC1 -m "Release Candidate 1 for qumat 0.5.0"
+git push upstream mahout-qumat-0.5.0-RC1
+```
+
+### Cherry-pick Bug Fixes
+
+If bugs are found during RC testing:
+
+1. **Fix on `main` first** (keeps main up-to-date):
+   ```bash
+   git checkout main
+   # ... fix and commit ...
+   git push upstream main
+   ```
+
+2. **Cherry-pick to stable branch**:
+   ```bash
+   # Using cherry-picker tool (auto-creates PR)
+   uvx cherry-picker <commit-hash> v0.5-stable
+   ```
+
+3. **Tag new RC**:
+   ```bash
+   git tag -a mahout-qumat-0.5.0-RC2 -m "Release Candidate 2 for qumat 0.5.0"
+   git push upstream mahout-qumat-0.5.0-RC2
+   ```
+
+---
+
 ## Phase 1: Community Pre-Release (RC Preparation)
 
 The goal of this phase is to ensure the release candidate is stable and ready for a formal vote.
