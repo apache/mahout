@@ -620,11 +620,67 @@ impl QdpEngine {
                 Ok(batch_state_vector.to_dlpack())
             }
             "angle" => {
+                use cudarc::driver::DevicePtrMut;
+
                 if sample_size != num_qubits {
                     return Err(MahoutError::InvalidInput(format!(
                         "Angle encoding expects sample_size={} (one angle per qubit), got {}",
                         num_qubits, sample_size
                     )));
+                }
+
+                // Validate that all input angles are finite (no NaN/Inf), consistent with
+                // CPU and host-side batch angle encoding paths.
+                let angle_validation_buffer = {
+                    crate::profile_scope!("GPU::AngleFiniteCheckBatch");
+
+                    let mut buffer =
+                        self.device.alloc_zeros::<f64>(num_samples).map_err(|e| {
+                            MahoutError::MemoryAllocation(format!(
+                                "Failed to allocate angle validation buffer: {:?}",
+                                e
+                            ))
+                        })?;
+
+                    let ret = unsafe {
+                        qdp_kernels::launch_l2_norm_batch(
+                            input_batch_d,
+                            num_samples,
+                            sample_size,
+                            *buffer.device_ptr_mut() as *mut f64,
+                            std::ptr::null_mut(), // default stream
+                        )
+                    };
+
+                    if ret != 0 {
+                        return Err(MahoutError::KernelLaunch(format!(
+                            "Angle validation norm kernel failed with CUDA error code: {} ({})",
+                            ret,
+                            cuda_error_to_string(ret)
+                        )));
+                    }
+
+                    buffer
+                };
+
+                {
+                    crate::profile_scope!("GPU::AngleFiniteValidationHostCopy");
+                    let host_norms = self
+                        .device
+                        .dtoh_sync_copy(&angle_validation_buffer)
+                        .map_err(|e| {
+                            MahoutError::Cuda(format!(
+                                "Failed to copy angle validation norms to host: {:?}",
+                                e
+                            ))
+                        })?;
+
+                    if host_norms.iter().any(|v| !v.is_finite()) {
+                        return Err(MahoutError::InvalidInput(
+                            "Angle encoding batch contains non-finite values (NaN or Inf)"
+                                .to_string(),
+                        ));
+                    }
                 }
 
                 let batch_state_vector = {
