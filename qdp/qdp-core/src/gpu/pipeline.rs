@@ -257,15 +257,83 @@ impl Drop for PipelineContext {
 pub fn run_dual_stream_pipeline<F>(
     device: &Arc<CudaDevice>,
     host_data: &[f64],
-    mut kernel_launcher: F,
+    kernel_launcher: F,
 ) -> Result<()>
 where
     F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
 {
     crate::profile_scope!("GPU::AsyncPipeline");
 
-    // Pinned host staging pool sized to the current chunking strategy (double-buffer by default).
     const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
+    run_dual_stream_pipeline_with_chunk_size(
+        device,
+        host_data,
+        CHUNK_SIZE_ELEMENTS,
+        kernel_launcher,
+    )
+}
+
+/// Executes a task using dual-stream double-buffering with aligned chunk boundaries.
+///
+/// `align_elements` must evenly divide the host data length and ensures chunks do not
+/// split logical records (e.g., per-sample data in batch encoding).
+#[cfg(target_os = "linux")]
+pub fn run_dual_stream_pipeline_aligned<F>(
+    device: &Arc<CudaDevice>,
+    host_data: &[f64],
+    align_elements: usize,
+    kernel_launcher: F,
+) -> Result<()>
+where
+    F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
+{
+    crate::profile_scope!("GPU::AsyncPipelineAligned");
+
+    if align_elements == 0 {
+        return Err(MahoutError::InvalidInput(
+            "Alignment must be greater than zero".to_string(),
+        ));
+    }
+    if !host_data.len().is_multiple_of(align_elements) {
+        return Err(MahoutError::InvalidInput(format!(
+            "Host data length {} is not aligned to {} elements",
+            host_data.len(),
+            align_elements
+        )));
+    }
+
+    const BASE_CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
+    let chunk_size_elements = if align_elements >= BASE_CHUNK_SIZE_ELEMENTS {
+        align_elements
+    } else {
+        BASE_CHUNK_SIZE_ELEMENTS - (BASE_CHUNK_SIZE_ELEMENTS % align_elements)
+    };
+
+    run_dual_stream_pipeline_with_chunk_size(
+        device,
+        host_data,
+        chunk_size_elements,
+        kernel_launcher,
+    )
+}
+
+#[cfg(target_os = "linux")]
+fn run_dual_stream_pipeline_with_chunk_size<F>(
+    device: &Arc<CudaDevice>,
+    host_data: &[f64],
+    chunk_size_elements: usize,
+    mut kernel_launcher: F,
+) -> Result<()>
+where
+    F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
+{
+    if chunk_size_elements == 0 {
+        return Err(MahoutError::InvalidInput(
+            "Chunk size must be greater than zero".to_string(),
+        ));
+    }
+
+    // Pinned host staging pool sized to the current chunking strategy (double-buffer by default).
     const PINNED_POOL_SIZE: usize = 2; // double buffering
 
     // Check environment variables for observability features
@@ -278,7 +346,7 @@ where
 
     // 1. Create dual streams with per-slot events to coordinate copy -> compute
     let ctx = PipelineContext::new(device, PINNED_POOL_SIZE)?;
-    let pinned_pool = PinnedBufferPool::new(PINNED_POOL_SIZE, CHUNK_SIZE_ELEMENTS)
+    let pinned_pool = PinnedBufferPool::new(PINNED_POOL_SIZE, chunk_size_elements)
         .map_err(|e| MahoutError::Cuda(format!("Failed to create pinned buffer pool: {}", e)))?;
 
     // Initialize observability tools (optional)
@@ -295,17 +363,19 @@ where
 
     // 2. Chunk size: 8MB per chunk (balance between overhead and overlap opportunity)
     // TODO: tune dynamically based on GPU/PCIe bandwidth.
-
     // 3. Keep temporary buffers alive until all streams complete
     // This prevents Rust from dropping them while GPU is still using them
     let mut keep_alive_buffers: Vec<CudaSlice<f64>> = Vec::new();
     // Keep pinned buffers alive until the copy stream has completed their H2D copy
     let mut in_flight_pinned: Vec<PinnedBufferHandle> = Vec::new();
 
-    let mut global_offset = 0;
-
     // 4. Pipeline loop: copy on copy stream, compute on compute stream with event handoff
-    for (chunk_idx, chunk) in host_data.chunks(CHUNK_SIZE_ELEMENTS).enumerate() {
+    let mut chunk_idx = 0usize;
+    let mut global_offset = 0usize;
+    while global_offset < host_data.len() {
+        let remaining = host_data.len() - global_offset;
+        let chunk_len = remaining.min(chunk_size_elements);
+        let chunk = &host_data[global_offset..global_offset + chunk_len];
         let chunk_offset = global_offset;
         let event_slot = chunk_idx % PINNED_POOL_SIZE;
 
@@ -422,6 +492,7 @@ where
         //
         // Note: log_overlap now handles both success and failure cases internally,
         // logging at appropriate levels (INFO for visibility, DEBUG for details).
+        #[allow(clippy::manual_is_multiple_of)]
         if let Some(ref tracker) = overlap_tracker
             && (chunk_idx % 10 == 0 || chunk_idx == 0)
         {
@@ -450,6 +521,7 @@ where
 
         // Update offset for next chunk
         global_offset += chunk.len();
+        chunk_idx += 1;
     }
 
     // 5. Synchronize all streams: wait for all work to complete
