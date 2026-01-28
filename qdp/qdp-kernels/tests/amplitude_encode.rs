@@ -540,7 +540,7 @@ fn test_amplitude_encode_small_input_large_state() {
     let inv_norm = 1.0 / norm;
     let state_len = 16;
 
-    let input_d = device.htod_copy(input.clone()).unwrap();
+    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
     let mut state_d = device.alloc_zeros::<CuDoubleComplex>(state_len).unwrap();
 
     let result = unsafe {
@@ -555,6 +555,7 @@ fn test_amplitude_encode_small_input_large_state() {
     };
 
     assert_eq!(result, 0, "Kernel launch should succeed");
+    device.synchronize().unwrap();
 
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
 
@@ -640,7 +641,7 @@ fn test_l2_norm_batch_kernel_stream() {
         .collect();
 
     let stream = device.fork_default_stream().unwrap();
-    let input_d = device.htod_copy(input).unwrap();
+    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
     let mut norms_d = device.alloc_zeros::<f64>(num_samples).unwrap();
 
     let status = unsafe {
