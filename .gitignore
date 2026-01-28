@@ -24,12 +24,18 @@ math-tests/
 metastore_db/*
 bin/derby.log
 bin/metastore_db
-*jar
-*log
+*.jar
+*.log
+
+# Jekyll (legacy)
 website/_site
 website/Gemfile.lock
 website/.bundle
 website/.sass-cache
+
+# Docusaurus build artifacts (synced from /docs)
+website/blog/
+website-new/
 
 *.iml
 .idea
@@ -46,3 +52,6 @@ __pycache__/
 
 # Testing and type checking (project uses these)
 .pytest_cache/
+
+# pypi
+.pypirc

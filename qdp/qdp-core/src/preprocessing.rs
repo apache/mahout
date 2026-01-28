@@ -15,6 +15,7 @@
 // limitations under the License.
 
 use crate::error::{MahoutError, Result};
+use crate::gpu::encodings::validate_qubit_count;
 use rayon::prelude::*;
 
 /// Shared CPU-based pre-processing pipeline for quantum encoding.
@@ -27,22 +28,12 @@ impl Preprocessor {
     /// Validates standard quantum input constraints.
     ///
     /// Checks:
-    /// - Qubit count within practical limits (1-30)
+    /// - Qubit count within practical limits (1-MAX_QUBITS)
     /// - Data availability
     /// - Data length against state vector size
     pub fn validate_input(host_data: &[f64], num_qubits: usize) -> Result<()> {
-        // Validate qubits (max 30 = 16GB GPU memory)
-        if num_qubits == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of qubits must be at least 1".to_string(),
-            ));
-        }
-        if num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} exceeds practical limit of 30",
-                num_qubits
-            )));
-        }
+        // Validate qubits using shared validation function (max MAX_QUBITS = 16GB GPU memory)
+        validate_qubit_count(num_qubits)?;
 
         // Validate input data
         if host_data.is_empty() {
@@ -116,12 +107,8 @@ impl Preprocessor {
             )));
         }
 
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
-            )));
-        }
+        // Validate qubits using shared validation function
+        validate_qubit_count(num_qubits)?;
 
         let state_len = 1 << num_qubits;
         if sample_size > state_len {
