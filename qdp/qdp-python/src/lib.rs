@@ -220,6 +220,42 @@ fn get_torch_cuda_stream_ptr(tensor: &Bound<'_, PyAny>) -> PyResult<*mut c_void>
     let cuda = torch.getattr("cuda")?;
     let device = tensor.getattr("device")?;
     let stream = cuda.call_method1("current_stream", (device,))?;
+
+    // Defensive validation: ensure the stream is a CUDA stream on the same device
+    let stream_device = stream.getattr("device").map_err(|_| {
+        PyRuntimeError::new_err("CUDA stream object from PyTorch is missing 'device' attribute")
+    })?;
+    let stream_device_type: String = stream_device
+        .getattr("type")
+        .and_then(|obj| obj.extract())
+        .map_err(|_| {
+            PyRuntimeError::new_err(
+                "Failed to extract CUDA stream device type from PyTorch stream.device",
+            )
+        })?;
+    if stream_device_type != "cuda" {
+        return Err(PyRuntimeError::new_err(format!(
+            "Expected CUDA stream device type 'cuda', got '{}'",
+            stream_device_type
+        )));
+    }
+
+    let stream_device_index: i32 = stream_device
+        .getattr("index")
+        .and_then(|obj| obj.extract())
+        .map_err(|_| {
+            PyRuntimeError::new_err(
+                "Failed to extract CUDA stream device index from PyTorch stream.device",
+            )
+        })?;
+    let tensor_device_index = get_tensor_device_id(tensor)?;
+    if stream_device_index != tensor_device_index {
+        return Err(PyRuntimeError::new_err(format!(
+            "CUDA stream device index ({}) does not match tensor device index ({})",
+            stream_device_index, tensor_device_index
+        )));
+    }
+
     let stream_ptr: u64 = stream.getattr("cuda_stream")?.extract()?;
     if stream_ptr == 0 {
         return Err(PyRuntimeError::new_err(
