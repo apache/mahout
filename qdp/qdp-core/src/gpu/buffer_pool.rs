@@ -19,9 +19,12 @@
 //! page-locked buffers to avoid repeated cudaHostAlloc / cudaFreeHost.
 
 use std::sync::{Arc, Condvar, Mutex, MutexGuard};
+use std::time::Instant;
 
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::PinnedHostBuffer;
+#[cfg(target_os = "linux")]
+use crate::gpu::pool_metrics::PoolMetrics;
 
 /// Handle that automatically returns a buffer to the pool on drop.
 #[cfg(target_os = "linux")]
@@ -107,7 +110,27 @@ impl PinnedBufferPool {
 
     /// Acquire a pinned buffer, blocking until one is available.
     pub fn acquire(self: &Arc<Self>) -> PinnedBufferHandle {
+        self.acquire_with_metrics(None)
+    }
+
+    /// Acquire a pinned buffer with optional metrics tracking.
+    ///
+    /// # Arguments
+    /// * `metrics` - Optional PoolMetrics instance for tracking utilization
+    ///
+    /// If metrics is provided, records the number of available buffers at acquire time
+    /// and tracks wait times if the pool is empty.
+    pub fn acquire_with_metrics(
+        self: &Arc<Self>,
+        metrics: Option<&PoolMetrics>,
+    ) -> PinnedBufferHandle {
         let mut free = self.lock_free();
+
+        // Record available count while holding the lock to avoid TOCTOU race condition
+        let available = free.len();
+        if let Some(m) = metrics {
+            m.record_acquire(available);
+        }
         loop {
             if let Some(buffer) = free.pop() {
                 return PinnedBufferHandle {
@@ -115,10 +138,22 @@ impl PinnedBufferPool {
                     pool: Arc::clone(self),
                 };
             }
-            free = self
-                .available_cv
-                .wait(free)
-                .unwrap_or_else(|poisoned| poisoned.into_inner());
+
+            // Record wait if metrics enabled
+            if let Some(m) = metrics {
+                let wait_start = Instant::now();
+                free = self
+                    .available_cv
+                    .wait(free)
+                    .unwrap_or_else(|poisoned| poisoned.into_inner());
+                let wait_time = wait_start.elapsed();
+                m.record_wait(wait_time.as_nanos() as u64);
+            } else {
+                free = self
+                    .available_cv
+                    .wait(free)
+                    .unwrap_or_else(|poisoned| poisoned.into_inner());
+            }
         }
     }
 
