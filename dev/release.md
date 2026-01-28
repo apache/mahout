@@ -229,5 +229,11 @@ Set up a GitHub Actions workflow that:
     git push origin v1.0.0
     ```
 -   **Bump the version** in `main` to the next development version (e.g., `1.1.0.dev0`).
+-   **Create versioned documentation**:
+    ```bash
+    cd website
+    npm run version 1.0.0
+    ```
+    This creates a snapshot of the current docs under `versioned_docs/version-1.0.0/` and adds the version to `versions.json`. Update `docusaurus.config.ts` to configure the new version label and path if needed.
 -   **Announce the release** on `dev@mahout.apache.org`.
 -   **Update website documentation** with the new release notes.
