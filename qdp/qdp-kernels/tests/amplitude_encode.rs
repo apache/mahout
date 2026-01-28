@@ -773,6 +773,49 @@ fn test_l2_norm_batch_kernel_f32() {
 }
 
 #[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_grid_limit_f32() {
+    println!("Testing batched L2 norm reduction with grid limit boundary (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    // Test that num_samples exceeding CUDA_MAX_GRID_DIM_1D (65535) returns error
+    const MAX_GRID_DIM: usize = 65535;
+    let num_samples = MAX_GRID_DIM + 1; // Exceeds limit
+    let sample_len = 2;
+
+    let input: Vec<f32> = vec![1.0; num_samples * sample_len];
+    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
+    let mut norms_d = device.alloc_zeros::<f32>(num_samples).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            num_samples,
+            sample_len,
+            *norms_d.device_ptr_mut() as *mut f32,
+            std::ptr::null_mut(),
+        )
+    };
+
+    // Should return error because num_samples exceeds grid limit
+    // cudaErrorInvalidValue = 1 (from cuda_error_to_string)
+    assert_eq!(
+        status, 1,
+        "Should reject num_samples exceeding CUDA_MAX_GRID_DIM_1D (f32), got error code {}",
+        status
+    );
+
+    println!("PASS: Correctly rejected num_samples exceeding grid limit (f32)");
+}
+
+#[test]
 #[cfg(not(target_os = "linux"))]
 fn test_amplitude_encode_dummy_non_linux() {
     println!("Testing dummy implementation on non-Linux platform...");
