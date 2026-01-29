@@ -213,25 +213,23 @@ fn get_tensor_device_id(tensor: &Bound<'_, PyAny>) -> PyResult<i32> {
 }
 
 /// Validate a CUDA tensor for direct GPU encoding
-/// Checks: dtype matches encoding method, contiguous, non-empty, device_id matches engine
+/// Checks: dtype=float64, contiguous, non-empty, device_id matches engine
 fn validate_cuda_tensor_for_encoding(
     tensor: &Bound<'_, PyAny>,
     expected_device_id: usize,
     encoding_method: &str,
 ) -> PyResult<()> {
-    let method = encoding_method.to_ascii_lowercase();
-
     // Check encoding method support and dtype (ASCII lowercase for case-insensitive match).
     let dtype = tensor.getattr("dtype")?;
     let dtype_str: String = dtype.str()?.extract()?;
+    let encoding_method = encoding_method.to_ascii_lowercase();
     let dtype_str_lower = dtype_str.to_ascii_lowercase();
-    match method.as_str() {
-        "amplitude" | "angle" => {
+    match encoding_method.as_str() {
+        "amplitude" => {
             if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
-                     Use tensor.to(torch.float64)",
-                    method, dtype_str
+                    "CUDA tensor must have dtype float64, got {}. Use tensor.to(torch.float64)",
+                    dtype_str
                 )));
             }
         }
@@ -246,7 +244,7 @@ fn validate_cuda_tensor_for_encoding(
         }
         _ => {
             return Err(PyRuntimeError::new_err(format!(
-                "CUDA tensor encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'. \
+                "CUDA tensor encoding currently only supports 'amplitude' or 'basis' methods, got '{}'. \
                  Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
                 encoding_method
             )));
