@@ -135,6 +135,19 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Launch batched L2 norm reduction (returns inverse norms per sample) for float32
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Pointers must reference valid device memory on the provided stream.
+    pub fn launch_l2_norm_batch_f32(
+        input_batch_d: *const f32,
+        num_samples: usize,
+        sample_len: usize,
+        inv_norms_out_d: *mut f32,
+        stream: *mut c_void,
+    ) -> i32;
+
     /// Convert a complex128 state vector to complex64 on GPU.
     /// Returns CUDA error code (0 = success).
     ///
@@ -302,6 +315,18 @@ pub extern "C" fn launch_l2_norm_f32(
     _input_d: *const f32,
     _input_len: usize,
     _inv_norm_out_d: *mut f32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_l2_norm_batch_f32(
+    _input_batch_d: *const f32,
+    _num_samples: usize,
+    _sample_len: usize,
+    _inv_norms_out_d: *mut f32,
     _stream: *mut c_void,
 ) -> i32 {
     999

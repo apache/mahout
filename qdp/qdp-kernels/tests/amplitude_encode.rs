@@ -26,7 +26,7 @@ use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
     CuComplex, CuDoubleComplex, launch_amplitude_encode, launch_amplitude_encode_f32,
-    launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_f32,
+    launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_batch_f32, launch_l2_norm_f32,
 };
 
 const EPSILON: f64 = 1e-10;
@@ -715,6 +715,104 @@ fn test_l2_norm_single_kernel_f32() {
     );
 
     println!("PASS: Single norm reduction (float32) matches CPU");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_f32() {
+    println!("Testing batched L2 norm reduction kernel (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    // Test batch: [[3.0, 4.0], [1.0, 1.0], [5.0, 12.0]]
+    let batch: Vec<f32> = vec![3.0, 4.0, 1.0, 1.0, 5.0, 12.0];
+    let num_samples = 3;
+    let sample_len = 2;
+
+    let expected: Vec<f32> = vec![
+        1.0 / (3.0_f32.powi(2) + 4.0_f32.powi(2)).sqrt(), // 0.2
+        1.0 / (1.0_f32.powi(2) + 1.0_f32.powi(2)).sqrt(), // ~0.707
+        1.0 / (5.0_f32.powi(2) + 12.0_f32.powi(2)).sqrt(), // ~0.077
+    ];
+
+    let batch_d = device.htod_sync_copy(batch.as_slice()).unwrap();
+    let mut norms_d = device.alloc_zeros::<f32>(num_samples).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch_f32(
+            *batch_d.device_ptr() as *const f32,
+            num_samples,
+            sample_len,
+            *norms_d.device_ptr_mut() as *mut f32,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(status, 0, "Batch norm kernel should succeed");
+    device.synchronize().unwrap();
+
+    let norms_h = device.dtoh_sync_copy(&norms_d).unwrap();
+
+    for (i, (got, expect)) in norms_h.iter().zip(expected.iter()).enumerate() {
+        assert!(
+            (got - expect).abs() < EPSILON_F32,
+            "Sample {} inv norm mismatch: expected {}, got {}",
+            i,
+            expect,
+            got
+        );
+    }
+
+    println!("PASS: Batched norm reduction (float32) matches CPU");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_grid_limit_f32() {
+    println!("Testing batched L2 norm reduction with grid limit boundary (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    // Test that num_samples exceeding CUDA_MAX_GRID_DIM_1D (65535) returns error
+    const MAX_GRID_DIM: usize = 65535;
+    let num_samples = MAX_GRID_DIM + 1; // Exceeds limit
+    let sample_len = 2;
+
+    let input: Vec<f32> = vec![1.0; num_samples * sample_len];
+    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
+    let mut norms_d = device.alloc_zeros::<f32>(num_samples).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            num_samples,
+            sample_len,
+            *norms_d.device_ptr_mut() as *mut f32,
+            std::ptr::null_mut(),
+        )
+    };
+
+    // Should return error because num_samples exceeds grid limit
+    // cudaErrorInvalidValue = 1 (from cuda_error_to_string)
+    assert_eq!(
+        status, 1,
+        "Should reject num_samples exceeding CUDA_MAX_GRID_DIM_1D (f32), got error code {}",
+        status
+    );
+
+    println!("PASS: Correctly rejected num_samples exceeding grid limit (f32)");
 }
 
 #[test]
