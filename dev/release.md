@@ -12,6 +12,64 @@ This document describes the process for releasing `qumat` and `qumat-qdp`. The p
 
 ---
 
+## Branching Strategy
+
+We follow the Airflow-style release branching model:
+
+```
+main ────●────●────●────●────●──→ (development continues)
+                   │
+                   ├── mahout-qumat-0.5.0-RC1 (tag)
+                   │
+                   └── v0.5-stable (branch) ──●──→ RC2 ──→ v0.5.0 ──→ v0.5.1
+```
+
+### Create Stable Branch
+
+When ready to cut a release, create a stable branch from `main`:
+
+```bash
+git checkout main
+git pull upstream main
+git checkout -b v0.5-stable
+git push -u upstream v0.5-stable
+```
+
+### Tag Release Candidates
+
+Tag RCs on the stable branch:
+
+```bash
+git checkout v0.5-stable
+git tag -a mahout-qumat-0.5.0-RC1 -m "Release Candidate 1 for qumat 0.5.0"
+git push upstream mahout-qumat-0.5.0-RC1
+```
+
+### Cherry-pick Bug Fixes
+
+If bugs are found during RC testing:
+
+1. **Fix on `main` first** (keeps main up-to-date):
+   ```bash
+   git checkout main
+   # ... fix and commit ...
+   git push upstream main
+   ```
+
+2. **Cherry-pick to stable branch**:
+   ```bash
+   # Using cherry-picker tool (auto-creates PR)
+   uvx cherry-picker <commit-hash> v0.5-stable
+   ```
+
+3. **Tag new RC**:
+   ```bash
+   git tag -a mahout-qumat-0.5.0-RC2 -m "Release Candidate 2 for qumat 0.5.0"
+   git push upstream mahout-qumat-0.5.0-RC2
+   ```
+
+---
+
 ## Phase 1: Community Pre-Release (RC Preparation)
 
 The goal of this phase is to ensure the release candidate is stable and ready for a formal vote.
@@ -23,41 +81,90 @@ The goal of this phase is to ensure the release candidate is stable and ready fo
 Update version numbers and build the artifacts locally.
 
 **Update Versions to RC:**
-Ensure the version includes the `rc` suffix (e.g., `1.0.0rc1`):
--   `qumat/pyproject.toml`
--   `qdp/qdp-python/pyproject.toml`
--   `qdp/Cargo.toml` (if releasing Rust core)
+Ensure the version includes the `rc` suffix (e.g., `0.5.0rc1`):
+-   `pyproject.toml` — set `version = "0.5.0rc1"`
+-   `qdp/Cargo.toml` — set `version = "0.1.0-rc1"`
 
 **Build:**
 ```bash
-# For Qumat
-cd qumat && python -m build
+# Build Qumat (pure Python — one wheel for all Python versions)
+uv build
 
-# For Qumat-QDP
-cd qdp/qdp-python && maturin build --release
+# Build Qumat-QDP (native Rust — one wheel per Python version)
+cd qdp/qdp-python
+uv tool run maturin build --release --interpreter python3.10
+uv tool run maturin build --release --interpreter python3.11
+uv tool run maturin build --release --interpreter python3.12
 ```
 
-**Important:** Store these build artifacts safely. They will be used for both PyPI upload and ATR submission.
+**Output locations:**
+-   `dist/qumat-0.5.0rc1-py3-none-any.whl`
+-   `dist/qumat-0.5.0rc1.tar.gz`
+-   `qdp/target/wheels/qumat_qdp-0.1.0rc1-cp3XX-*.whl`
 
 ### 1.3 Upload to PyPI (RC Version)
-Upload the generated artifacts to **PyPI** as a Release Candidate.
 
-```bash
-# Upload Qumat
-cd qumat
-twine upload dist/*
+**Configure `.pypirc`:**
+Create a `.pypirc` file with your API token (from https://pypi.org/manage/account/token/):
+```ini
+[testpypi]
+username = __token__
+password = pypi-xxxxx
 
-# Upload Qumat-QDP
-cd qdp/qdp-python
-twine upload target/wheels/*
+[pypi]
+username = __token__
+password = pypi-xxxxx
 ```
 
-*Note: This makes the RC available on the official PyPI for easy testing with `pip install --pre qumat==1.0.0rc1`.*
+**Upload to TestPyPI first (recommended):**
+```bash
+# Upload Qumat
+uv tool run twine upload --repository testpypi --config-file .pypirc dist/*
+
+# Upload Qumat-QDP
+uv tool run twine upload --repository testpypi --config-file .pypirc qdp/target/wheels/qumat_qdp-<version>-cp31{0,1,2}-*.whl
+```
+
+**Test install from TestPyPI:**
+```bash
+uv venv && source .venv/bin/activate
+uv pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  --index-strategy unsafe-best-match \
+  qumat==0.5.0rc1 qumat-qdp==0.1.0rc1
+pytest testing/
+```
+
+**Upload to PyPI:**
+```bash
+# Upload Qumat
+uv tool run twine upload --repository pypi --config-file .pypirc dist/*
+
+# Upload Qumat-QDP (exclude Python versions outside requires-python)
+uv tool run twine upload --repository pypi --config-file .pypirc qdp/target/wheels/qumat_qdp-<version>-cp31{0,1,2}-*.whl
+```
+
+*Note: This makes the RC available on PyPI for testing with `pip install --pre qumat==0.5.0rc1`.*
 
 ### 1.4 Open Testing Issue
-Open a GitHub Issue titled **"Testing Qumat <Version> RC1"**.
--   List the installation commands (e.g., `pip install --pre qumat`).
--   Track feedback, reported bugs, and verification results.
+Use the script to generate the RC testing issue:
+
+```bash
+# Generate issue content (dry run)
+./dev/generate-rc-issue.sh 0.5.0rc1 0.1.0rc1 "Qumat 0.5.0"
+
+# Create GitHub issue directly
+./dev/generate-rc-issue.sh 0.5.0rc1 0.1.0rc1 "Qumat 0.5.0" | \
+  gh issue create --repo apache/mahout \
+    --title "Status of testing Apache Mahout Qumat 0.5.0rc1" \
+    --body-file -
+```
+
+The script generates an issue with:
+-   Installation commands
+-   All PRs from the milestone with checkboxes
+-   Contributor mentions for testing
 
 ### 1.5 Community Testing & Closure
 -   Allow a testing interval (e.g., 3-5 days).
@@ -122,5 +229,11 @@ Set up a GitHub Actions workflow that:
     git push origin v1.0.0
     ```
 -   **Bump the version** in `main` to the next development version (e.g., `1.1.0.dev0`).
+-   **Create versioned documentation**:
+    ```bash
+    cd website
+    npm run version 1.0.0
+    ```
+    This creates a snapshot of the current docs under `versioned_docs/version-1.0.0/` and adds the version to `versions.json`. Update `docusaurus.config.ts` to configure the new version label and path if needed.
 -   **Announce the release** on `dev@mahout.apache.org`.
 -   **Update website documentation** with the new release notes.

@@ -574,7 +574,7 @@ impl QdpEngine {
         }
 
         let state_len = 1usize << num_qubits;
-        let method = encoding_method.to_lowercase();
+        let method = encoding_method.to_ascii_lowercase();
 
         match method.as_str() {
             "amplitude" => {
@@ -688,6 +688,8 @@ impl QdpEngine {
                     )));
                 }
 
+                // Validate that all input angles are finite (no NaN/Inf), consistent with
+                // CPU and host-side batch angle encoding paths.
                 let angle_validation_buffer = {
                     crate::profile_scope!("GPU::AngleFiniteCheckBatch");
 
