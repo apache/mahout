@@ -225,6 +225,104 @@ impl QuantumEncoder for BasisEncoder {
         Ok(batch_state_vector)
     }
 
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_d: *const f64,
+        input_len: usize,
+        num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        if input_len != 1 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Basis encoding (index mode) expects input_len=1, got {}",
+                input_len
+            )));
+        }
+
+        let state_len = 1usize << num_qubits;
+
+        let state_vector = {
+            crate::profile_scope!("GPU::Alloc");
+            GpuStateVector::new(device, num_qubits)?
+        };
+
+        let state_ptr = state_vector.ptr_void();
+
+        unsafe {
+            let ret = qdp_kernels::launch_basis_encode_from_f64(
+                input_d,
+                state_ptr,
+                state_len,
+                std::ptr::null_mut(),
+            );
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Basis encoding kernel failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            device
+                .synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+        }
+
+        Ok(state_vector)
+    }
+
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_batch_from_gpu_ptr(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_batch_d: *const f64,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        if sample_size != 1 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Basis encoding (index mode) expects sample_size=1 (one index per sample), got {}",
+                sample_size
+            )));
+        }
+
+        let state_len = 1usize << num_qubits;
+
+        let batch_state = GpuStateVector::new_batch(device, num_samples, num_qubits)?;
+        let state_ptr = batch_state.ptr_void();
+
+        unsafe {
+            let ret = qdp_kernels::launch_basis_encode_batch_from_f64(
+                input_batch_d,
+                state_ptr,
+                num_samples,
+                state_len,
+                num_qubits as u32,
+                std::ptr::null_mut(),
+            );
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Batch basis encoding kernel failed: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            device
+                .synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
+        }
+        Ok(batch_state)
+    }
+
     fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
         // Basic validation: qubits and data availability
         validate_qubit_count(num_qubits)?;

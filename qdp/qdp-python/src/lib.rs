@@ -219,12 +219,15 @@ fn validate_cuda_tensor_for_encoding(
     encoding_method: &str,
 ) -> PyResult<()> {
     // Check encoding method support (currently only amplitude is supported for CUDA tensors)
-    if encoding_method != "amplitude" {
-        return Err(PyRuntimeError::new_err(format!(
-            "CUDA tensor encoding currently only supports 'amplitude' method, got '{}'. \
-             Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
-            encoding_method
-        )));
+    match encoding_method {
+        "amplitude" | "angle" | "basis" => {}
+        _ => {
+            // If other encoding methods are added in the future, update this check
+            return Err(PyRuntimeError::new_err(format!(
+                "CUDA tensor encoding currently supports 'amplitude', 'angle', and 'basis' methods, got '{}'.",
+                encoding_method
+            )));
+        }
     }
 
     // Check dtype is float64
