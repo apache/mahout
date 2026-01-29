@@ -105,7 +105,17 @@ def execute_circuit(circuit, backend, backend_config):
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
     circuit.state_vector()
-    result = backend.run(circuit, shots=0).result()
+    parameter_values = backend_config.get("parameter_values", {})
+    if parameter_values and circuit.parameters:
+        # Braket accepts parameter names as strings in inputs dict
+        inputs = {
+            param_name: value
+            for param_name, value in parameter_values.items()
+            if param_name in {p.name for p in circuit.parameters}
+        }
+        result = backend.run(circuit, shots=0, inputs=inputs).result()
+    else:
+        result = backend.run(circuit, shots=0).result()
     state_vector = result.values[0]
 
     return state_vector
