@@ -19,7 +19,7 @@
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
 
-use crate::error::{cuda_error_to_string, MahoutError, Result};
+use crate::error::{MahoutError, Result, cuda_error_to_string};
 
 /// Synchronizes a CUDA stream and returns a consistent error with context.
 ///
@@ -66,7 +66,10 @@ mod tests {
         let code = 999i32;
         let desc = crate::error::cuda_error_to_string(code);
         let msg = format!("{}: {} ({})", context, code, desc);
-        assert!(msg.starts_with("TestContext:"), "format should start with context");
+        assert!(
+            msg.starts_with("TestContext:"),
+            "format should start with context"
+        );
         assert!(msg.contains("TestContext"), "format should contain context");
         assert!(msg.contains("999"), "format should contain error code");
     }

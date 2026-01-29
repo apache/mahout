@@ -181,7 +181,10 @@ impl PipelineContext {
     /// The context and its copy stream must be valid and not destroyed while syncing.
     pub unsafe fn sync_copy_stream(&self) -> Result<()> {
         crate::profile_scope!("Pipeline::SyncCopy");
-        sync_cuda_stream(self.stream_copy.stream as *mut c_void, "cudaStreamSynchronize(copy) failed")
+        sync_cuda_stream(
+            self.stream_copy.stream as *mut c_void,
+            "cudaStreamSynchronize(copy) failed",
+        )
     }
 }
 
