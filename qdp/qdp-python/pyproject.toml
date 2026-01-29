@@ -14,6 +14,7 @@ classifiers = [
 dynamic = ["version"]
 
 [dependency-groups]
+dev = ["pytest", "torch>=2.2,<=2.9.0"]
 benchmark = [
     "numpy>=1.24,<2.0",
     "pandas>=2.0",

@@ -22,6 +22,8 @@ use std::sync::Arc;
 
 // DLPack C structures (matching dlpack/dlpack.h)
 
+/// Device type enum for DLPack. Eq/PartialEq used for validation (e.g. device_type != kDLCUDA);
+/// Debug for diagnostics; Copy/Clone for FFI ergonomics when used in DLDevice.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
