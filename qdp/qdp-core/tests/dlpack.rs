@@ -21,7 +21,7 @@ mod dlpack_tests {
     use std::ffi::c_void;
 
     use cudarc::driver::CudaDevice;
-    use qdp_core::dlpack::{synchronize_stream, CUDA_STREAM_LEGACY};
+    use qdp_core::dlpack::{CUDA_STREAM_LEGACY, synchronize_stream};
     use qdp_core::gpu::memory::GpuStateVector;
 
     #[test]
