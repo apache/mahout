@@ -16,6 +16,7 @@ ndarray-npy = { workspace = true }
 prost = { workspace = true }
 bytes = { workspace = true }
 tch = { workspace = true, optional = true }
+log = "0.4"
 
 [build-dependencies]
 prost-build = { workspace = true }
@@ -31,3 +32,4 @@ pytorch = ["tch"]
 
 [dev-dependencies]
 approx = "0.5.1"
+env_logger = "0.11"

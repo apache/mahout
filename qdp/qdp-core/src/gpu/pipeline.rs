@@ -33,6 +33,10 @@ use crate::gpu::cuda_ffi::{
 };
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
+#[cfg(target_os = "linux")]
+use crate::gpu::overlap_tracker::OverlapTracker;
+#[cfg(target_os = "linux")]
+use crate::gpu::pool_metrics::PoolMetrics;
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
 use std::ffi::c_void;
 use std::sync::Arc;
@@ -58,7 +62,6 @@ fn validate_event_slot(events: &[*mut c_void], slot: usize) -> Result<()> {
 }
 
 #[cfg(target_os = "linux")]
-#[allow(unsafe_op_in_unsafe_fn)]
 impl PipelineContext {
     pub fn new(device: &Arc<CudaDevice>, event_slots: usize) -> Result<Self> {
         let stream_compute = device
@@ -103,18 +106,20 @@ impl PipelineContext {
         len_elements: usize,
     ) -> Result<()> {
         crate::profile_scope!("GPU::H2D_Copy");
-        let ret = cudaMemcpyAsync(
-            dst,
-            src,
-            len_elements * std::mem::size_of::<f64>(),
-            CUDA_MEMCPY_HOST_TO_DEVICE,
-            self.stream_copy.stream as *mut c_void,
-        );
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "Async H2D copy failed with CUDA error: {}",
-                ret
-            )));
+        unsafe {
+            let ret = cudaMemcpyAsync(
+                dst,
+                src,
+                len_elements * std::mem::size_of::<f64>(),
+                CUDA_MEMCPY_HOST_TO_DEVICE,
+                self.stream_copy.stream as *mut c_void,
+            );
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "Async H2D copy failed with CUDA error: {}",
+                    ret
+                )));
+            }
         }
         Ok(())
     }
@@ -125,17 +130,20 @@ impl PipelineContext {
     /// `slot` must refer to a live event created by this context, and the context must
     /// remain alive until the event is no longer used by any stream.
     pub unsafe fn record_copy_done(&self, slot: usize) -> Result<()> {
+        crate::profile_scope!("GPU::CopyEventRecord");
         validate_event_slot(&self.events_copy_done, slot)?;
 
-        let ret = cudaEventRecord(
-            self.events_copy_done[slot],
-            self.stream_copy.stream as *mut c_void,
-        );
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "cudaEventRecord failed: {}",
-                ret
-            )));
+        unsafe {
+            let ret = cudaEventRecord(
+                self.events_copy_done[slot],
+                self.stream_copy.stream as *mut c_void,
+            );
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "cudaEventRecord failed: {}",
+                    ret
+                )));
+            }
         }
         Ok(())
     }
@@ -149,16 +157,18 @@ impl PipelineContext {
         crate::profile_scope!("GPU::StreamWait");
         validate_event_slot(&self.events_copy_done, slot)?;
 
-        let ret = cudaStreamWaitEvent(
-            self.stream_compute.stream as *mut c_void,
-            self.events_copy_done[slot],
-            0,
-        );
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "cudaStreamWaitEvent failed: {}",
-                ret
-            )));
+        unsafe {
+            let ret = cudaStreamWaitEvent(
+                self.stream_compute.stream as *mut c_void,
+                self.events_copy_done[slot],
+                0,
+            );
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "cudaStreamWaitEvent failed: {}",
+                    ret
+                )));
+            }
         }
         Ok(())
     }
@@ -169,12 +179,14 @@ impl PipelineContext {
     /// The context and its copy stream must be valid and not destroyed while syncing.
     pub unsafe fn sync_copy_stream(&self) -> Result<()> {
         crate::profile_scope!("Pipeline::SyncCopy");
-        let ret = cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "cudaStreamSynchronize(copy) failed: {}",
-                ret
-            )));
+        unsafe {
+            let ret = cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
+            if ret != 0 {
+                return Err(MahoutError::Cuda(format!(
+                    "cudaStreamSynchronize(copy) failed: {}",
+                    ret
+                )));
+            }
         }
         Ok(())
     }
@@ -219,6 +231,7 @@ impl Drop for PipelineContext {
 /// - Data chunking and async H2D copy
 /// - Buffer lifetime management
 /// - Stream synchronization
+/// - Optional observability (pool metrics and overlap tracking)
 ///
 /// The caller provides a `kernel_launcher` closure that handles the
 /// specific kernel launch logic for each chunk.
@@ -227,6 +240,10 @@ impl Drop for PipelineContext {
 /// * `device` - The CUDA device
 /// * `host_data` - Full source data to process
 /// * `kernel_launcher` - Closure that launches the specific kernel for each chunk
+///
+/// # Environment Variables
+/// * `QDP_ENABLE_POOL_METRICS` - Enable pool utilization metrics (set to "1" or "true")
+/// * `QDP_ENABLE_OVERLAP_TRACKING` - Enable H2D overlap tracking (set to "1" or "true")
 ///
 /// # Example
 /// ```rust,ignore
@@ -240,34 +257,125 @@ impl Drop for PipelineContext {
 pub fn run_dual_stream_pipeline<F>(
     device: &Arc<CudaDevice>,
     host_data: &[f64],
-    mut kernel_launcher: F,
+    kernel_launcher: F,
 ) -> Result<()>
 where
     F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
 {
     crate::profile_scope!("GPU::AsyncPipeline");
 
-    // Pinned host staging pool sized to the current chunking strategy (double-buffer by default).
     const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
+    run_dual_stream_pipeline_with_chunk_size(
+        device,
+        host_data,
+        CHUNK_SIZE_ELEMENTS,
+        kernel_launcher,
+    )
+}
+
+/// Executes a task using dual-stream double-buffering with aligned chunk boundaries.
+///
+/// `align_elements` must evenly divide the host data length and ensures chunks do not
+/// split logical records (e.g., per-sample data in batch encoding).
+#[cfg(target_os = "linux")]
+pub fn run_dual_stream_pipeline_aligned<F>(
+    device: &Arc<CudaDevice>,
+    host_data: &[f64],
+    align_elements: usize,
+    kernel_launcher: F,
+) -> Result<()>
+where
+    F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
+{
+    crate::profile_scope!("GPU::AsyncPipelineAligned");
+
+    if align_elements == 0 {
+        return Err(MahoutError::InvalidInput(
+            "Alignment must be greater than zero".to_string(),
+        ));
+    }
+    if !host_data.len().is_multiple_of(align_elements) {
+        return Err(MahoutError::InvalidInput(format!(
+            "Host data length {} is not aligned to {} elements",
+            host_data.len(),
+            align_elements
+        )));
+    }
+
+    const BASE_CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
+    let chunk_size_elements = if align_elements >= BASE_CHUNK_SIZE_ELEMENTS {
+        align_elements
+    } else {
+        BASE_CHUNK_SIZE_ELEMENTS - (BASE_CHUNK_SIZE_ELEMENTS % align_elements)
+    };
+
+    run_dual_stream_pipeline_with_chunk_size(
+        device,
+        host_data,
+        chunk_size_elements,
+        kernel_launcher,
+    )
+}
+
+#[cfg(target_os = "linux")]
+fn run_dual_stream_pipeline_with_chunk_size<F>(
+    device: &Arc<CudaDevice>,
+    host_data: &[f64],
+    chunk_size_elements: usize,
+    mut kernel_launcher: F,
+) -> Result<()>
+where
+    F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
+{
+    if chunk_size_elements == 0 {
+        return Err(MahoutError::InvalidInput(
+            "Chunk size must be greater than zero".to_string(),
+        ));
+    }
+
+    // Pinned host staging pool sized to the current chunking strategy (double-buffer by default).
     const PINNED_POOL_SIZE: usize = 2; // double buffering
+
+    // Check environment variables for observability features
+    let enable_pool_metrics = std::env::var("QDP_ENABLE_POOL_METRICS")
+        .map(|s| s == "1" || s.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+    let enable_overlap_tracking = std::env::var("QDP_ENABLE_OVERLAP_TRACKING")
+        .map(|s| s == "1" || s.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+
     // 1. Create dual streams with per-slot events to coordinate copy -> compute
     let ctx = PipelineContext::new(device, PINNED_POOL_SIZE)?;
-    let pinned_pool = PinnedBufferPool::new(PINNED_POOL_SIZE, CHUNK_SIZE_ELEMENTS)
+    let pinned_pool = PinnedBufferPool::new(PINNED_POOL_SIZE, chunk_size_elements)
         .map_err(|e| MahoutError::Cuda(format!("Failed to create pinned buffer pool: {}", e)))?;
+
+    // Initialize observability tools (optional)
+    let pool_metrics = if enable_pool_metrics {
+        Some(Arc::new(PoolMetrics::new()))
+    } else {
+        None
+    };
+    let overlap_tracker = if enable_overlap_tracking {
+        Some(OverlapTracker::new(PINNED_POOL_SIZE, true)?)
+    } else {
+        None
+    };
 
     // 2. Chunk size: 8MB per chunk (balance between overhead and overlap opportunity)
     // TODO: tune dynamically based on GPU/PCIe bandwidth.
-
     // 3. Keep temporary buffers alive until all streams complete
     // This prevents Rust from dropping them while GPU is still using them
     let mut keep_alive_buffers: Vec<CudaSlice<f64>> = Vec::new();
     // Keep pinned buffers alive until the copy stream has completed their H2D copy
     let mut in_flight_pinned: Vec<PinnedBufferHandle> = Vec::new();
 
-    let mut global_offset = 0;
-
     // 4. Pipeline loop: copy on copy stream, compute on compute stream with event handoff
-    for (chunk_idx, chunk) in host_data.chunks(CHUNK_SIZE_ELEMENTS).enumerate() {
+    let mut chunk_idx = 0usize;
+    let mut global_offset = 0usize;
+    while global_offset < host_data.len() {
+        let remaining = host_data.len() - global_offset;
+        let chunk_len = remaining.min(chunk_size_elements);
+        let chunk = &host_data[global_offset..global_offset + chunk_len];
         let chunk_offset = global_offset;
         let event_slot = chunk_idx % PINNED_POOL_SIZE;
 
@@ -282,19 +390,52 @@ where
         })?;
 
         // Acquire pinned staging buffer and populate it with the current chunk
-        let mut pinned_buf = pinned_pool.acquire();
-        pinned_buf.as_slice_mut()[..chunk.len()].copy_from_slice(chunk);
+        let mut pinned_buf = if let Some(ref metrics) = pool_metrics {
+            pinned_pool.acquire_with_metrics(Some(metrics.as_ref()))
+        } else {
+            pinned_pool.acquire()
+        };
+        {
+            crate::profile_scope!("GPU::H2D_Stage");
+            pinned_buf.as_slice_mut()[..chunk.len()].copy_from_slice(chunk);
+        }
 
         // Async copy: host to device (non-blocking, on specified stream)
         // Uses CUDA Runtime API (cudaMemcpyAsync) for true async copy
         {
             crate::profile_scope!("GPU::H2DCopyAsync");
+
+            // Record copy start if overlap tracking enabled
+            // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            if let Some(ref tracker) = overlap_tracker
+                && let Err(e) = tracker.record_copy_start(&ctx.stream_copy, event_slot)
+            {
+                log::warn!(
+                    "Chunk {}: Failed to record copy start event: {}. Overlap tracking may be incomplete.",
+                    chunk_idx,
+                    e
+                );
+            }
+
             unsafe {
                 ctx.async_copy_to_device(
                     pinned_buf.ptr() as *const c_void,
                     *input_chunk_dev.device_ptr() as *mut c_void,
                     chunk.len(),
                 )?;
+
+                // Record copy end if overlap tracking enabled
+                // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+                if let Some(ref tracker) = overlap_tracker
+                    && let Err(e) = tracker.record_copy_end(&ctx.stream_copy, event_slot)
+                {
+                    log::warn!(
+                        "Chunk {}: Failed to record copy end event: {}. Overlap tracking may be incomplete.",
+                        chunk_idx,
+                        e
+                    );
+                }
+
                 ctx.record_copy_done(event_slot)?;
                 ctx.wait_for_copy(event_slot)?;
             }
@@ -316,7 +457,61 @@ where
         // Invoke caller's kernel launcher (non-blocking)
         {
             crate::profile_scope!("GPU::KernelLaunchAsync");
+
+            // Record compute start if overlap tracking enabled
+            // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            if let Some(ref tracker) = overlap_tracker
+                && let Err(e) = tracker.record_compute_start(&ctx.stream_compute, event_slot)
+            {
+                log::warn!(
+                    "Chunk {}: Failed to record compute start event: {}. Overlap tracking may be incomplete.",
+                    chunk_idx,
+                    e
+                );
+            }
+
             kernel_launcher(&ctx.stream_compute, input_ptr, chunk_offset, chunk.len())?;
+
+            // Record compute end if overlap tracking enabled
+            // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            if let Some(ref tracker) = overlap_tracker
+                && let Err(e) = tracker.record_compute_end(&ctx.stream_compute, event_slot)
+            {
+                log::warn!(
+                    "Chunk {}: Failed to record compute end event: {}. Overlap tracking may be incomplete.",
+                    chunk_idx,
+                    e
+                );
+            }
+        }
+
+        // Log overlap if tracking enabled
+        // Ref: https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
+        // We log after recording events. log_overlap will wait for events to complete
+        // before calculating elapsed time. This ensures accurate measurements.
+        //
+        // Note: log_overlap now handles both success and failure cases internally,
+        // logging at appropriate levels (INFO for visibility, DEBUG for details).
+        #[allow(clippy::manual_is_multiple_of)]
+        if let Some(ref tracker) = overlap_tracker
+            && (chunk_idx % 10 == 0 || chunk_idx == 0)
+        {
+            // Only log every Nth chunk to avoid excessive logging
+            // Note: log_overlap waits for events to complete, which may take time
+            // If events fail (e.g., invalid resource handle), log_overlap will log
+            // at INFO level so it's visible in both debug and info modes
+            if let Err(e) = tracker.log_overlap(chunk_idx) {
+                // log_overlap already logged the error at INFO level
+                // We only need to log additional details at DEBUG level if needed
+                if log::log_enabled!(log::Level::Debug) {
+                    log::debug!(
+                        "Overlap tracking failed for chunk {}: {}. Pipeline continues normally.",
+                        chunk_idx,
+                        e
+                    );
+                }
+                // Don't fail the pipeline - overlap tracking is optional observability
+            }
         }
 
         // Keep buffer alive until synchronization
@@ -326,6 +521,7 @@ where
 
         // Update offset for next chunk
         global_offset += chunk.len();
+        chunk_idx += 1;
     }
 
     // 5. Synchronize all streams: wait for all work to complete
@@ -335,14 +531,23 @@ where
         unsafe {
             ctx.sync_copy_stream()?;
         }
-        device
-            .wait_for(&ctx.stream_compute)
-            .map_err(|e| MahoutError::Cuda(format!("Compute stream sync failed: {:?}", e)))?;
+        {
+            crate::profile_scope!("GPU::ComputeSync");
+            device
+                .wait_for(&ctx.stream_compute)
+                .map_err(|e| MahoutError::Cuda(format!("Compute stream sync failed: {:?}", e)))?;
+        }
     }
 
     // Buffers are dropped here (after sync), freeing GPU memory
     // This is safe because all GPU operations have completed
     drop(keep_alive_buffers);
+
+    // Print pool metrics summary if enabled
+    if let Some(ref metrics) = pool_metrics {
+        let report = metrics.report();
+        report.print_summary();
+    }
 
     Ok(())
 }
