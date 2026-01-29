@@ -23,6 +23,7 @@ use std::sync::Arc;
 // DLPack C structures (matching dlpack/dlpack.h)
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
 pub enum DLDeviceType {
     kDLCPU = 1,
