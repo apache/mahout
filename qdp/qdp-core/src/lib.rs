@@ -340,7 +340,8 @@ impl QdpEngine {
         crate::profile_scope!("Mahout::EncodeFromGpuPtr");
 
         let state_len = 1usize << num_qubits;
-        match encoding_method {
+        let encoding_method = encoding_method.to_ascii_lowercase();
+        match encoding_method.as_str() {
             "amplitude" => {
                 if input_len == 0 {
                     return Err(MahoutError::InvalidInput(
@@ -438,6 +439,7 @@ impl QdpEngine {
                     )
                 })?;
 
+                // Use batch API with num_samples=1 to avoid D2H copy; launch_basis_encode takes host usize.
                 {
                     crate::profile_scope!("GPU::KernelLaunch");
                     let ret = unsafe {
@@ -510,7 +512,8 @@ impl QdpEngine {
         crate::profile_scope!("Mahout::EncodeBatchFromGpuPtr");
 
         let state_len = 1usize << num_qubits;
-        match encoding_method {
+        let encoding_method = encoding_method.to_ascii_lowercase();
+        match encoding_method.as_str() {
             "amplitude" => {
                 if num_samples == 0 {
                     return Err(MahoutError::InvalidInput(

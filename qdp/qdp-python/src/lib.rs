@@ -219,12 +219,14 @@ fn validate_cuda_tensor_for_encoding(
     expected_device_id: usize,
     encoding_method: &str,
 ) -> PyResult<()> {
-    // Check encoding method support and dtype.
+    // Check encoding method support and dtype (ASCII lowercase for case-insensitive match).
     let dtype = tensor.getattr("dtype")?;
     let dtype_str: String = dtype.str()?.extract()?;
-    match encoding_method {
+    let encoding_method = encoding_method.to_ascii_lowercase();
+    let dtype_str_lower = dtype_str.to_ascii_lowercase();
+    match encoding_method.as_str() {
         "amplitude" => {
-            if !dtype_str.contains("float64") {
+            if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype float64, got {}. Use tensor.to(torch.float64)",
                     dtype_str
@@ -232,7 +234,7 @@ fn validate_cuda_tensor_for_encoding(
             }
         }
         "basis" => {
-            if !dtype_str.contains("int64") {
+            if !dtype_str_lower.contains("int64") {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype int64 for basis encoding, got {}. \
                      Use tensor.to(torch.int64)",
