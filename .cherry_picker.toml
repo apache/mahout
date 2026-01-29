@@ -1,0 +1,5 @@
+team = "apache"
+repo = "mahout"
+check_sha = "72fe084c242ec34a68f1d8b52876d48b4f8e7915"
+fix_commit_msg = true
+default_branch = "main"
