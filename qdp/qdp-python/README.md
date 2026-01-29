@@ -1,68 +1,66 @@
-# qdp-python
+# qumat-qdp
 
-PyO3 Python bindings for Apache Mahout QDP.
+GPU-accelerated quantum state encoding for [Apache Mahout Qumat](https://github.com/apache/mahout).
+
+## Installation
+
+```bash
+pip install qumat[qdp]
+```
+
+Requires CUDA-capable GPU.
 
 ## Usage
 
 ```python
-from _qdp import QdpEngine
+import qumat.qdp as qdp
+import torch
 
-# Initialize on GPU 0 (defaults to float32 output)
-engine = QdpEngine(0)
+# Initialize engine on GPU 0
+engine = qdp.QdpEngine(device_id=0)
 
-# Optional: request float64 output if you need higher precision
-# engine = QdpEngine(0, precision="float64")
+# Encode data into quantum state
+qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], num_qubits=2, encoding_method="amplitude")
 
-# Encode data from Python list
-data = [0.5, 0.5, 0.5, 0.5]
-qtensor = engine.encode(data, num_qubits=2, encoding_method="amplitude")
-
-# Or encode from file formats
-tensor_parquet = engine.encode("data.parquet", 10, "amplitude")
-tensor_arrow = engine.encode("data.arrow", 10, "amplitude")
+# Zero-copy transfer to PyTorch
+tensor = torch.from_dlpack(qtensor)
+print(tensor)  # Complex tensor on CUDA
 ```
 
-## Build from source
-```bash
-# add a uv python 3.11 environment
-uv venv -p python3.11
-source .venv/bin/activate
-```
-```bash
-uv sync --group dev
-uv run maturin develop
-```
+## Encoding Methods
 
-## Encoding methods
+| Method | Description |
+|--------|-------------|
+| `amplitude` | Normalize input as quantum amplitudes |
+| `angle` | Map values to rotation angles (one per qubit) |
+| `basis` | Encode integer as computational basis state |
+| `iqp` | IQP-style encoding with entanglement |
 
-- `"amplitude"` - Amplitude encoding
-- `"angle"` - Angle encoding
-- `"basis"` - Basis encoding
+## Input Sources
 
-## File format support
-
-- **Parquet** - `.parquet` files
-- **Arrow IPC** - `.arrow` or `.feather` files
-- **NumPy** - `.npy` files
-- **PyTorch** - `.pt` or `.pth` files
-- **TensorFlow** - `.pb` files (TensorProto format)
-
-## Adding new bindings
-
-1. Add method to `#[pymethods]` in `src/lib.rs`:
-```rust
-#[pymethods]
-impl QdpEngine {
-    fn my_method(&self, arg: f64) -> PyResult<String> {
-        Ok(format!("Result: {}", arg))
-    }
-}
-```
-
-2. Rebuild: `uv run maturin develop`
-
-3. Use in Python:
 ```python
-engine = QdpEngine(0)
-result = engine.my_method(42.0)
+# Python list
+qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], 2, "amplitude")
+
+# NumPy array
+qtensor = engine.encode(np.array([[1, 2, 3, 4], [4, 3, 2, 1]]), 2, "amplitude")
+
+# PyTorch tensor (CPU or CUDA)
+qtensor = engine.encode(torch.tensor([1.0, 2.0, 3.0, 4.0]), 2, "amplitude")
+
+# File formats
+qtensor = engine.encode("data.parquet", 10, "amplitude")
+qtensor = engine.encode("data.arrow", 10, "amplitude")
+qtensor = engine.encode("data.npy", 10, "amplitude")
+qtensor = engine.encode("data.pt", 10, "amplitude")
 ```
+
+## Links
+
+- [Documentation](https://mahout.apache.org/)
+- [GitHub](https://github.com/apache/mahout)
+- [Qumat Package](https://pypi.org/project/qumat/)
+
+## License
+
+Apache License 2.0
