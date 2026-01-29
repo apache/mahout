@@ -8,7 +8,7 @@ QDP_VERSION=${2:-"0.1.0rc1"}
 MILESTONE=${3:-"Qumat 0.5.0"}
 
 cat << EOF
-# Testing Apache Mahout Qumat 0.5.0rc1
+# Testing Apache Mahout Qumat ${QUMAT_VERSION}
 We kindly request all contributors to help test the Release Candidate for [qumat ${QUMAT_VERSION}](https://pypi.org/project/qumat/${QUMAT_VERSION}/) and [qumat-qdp ${QDP_VERSION}](https://pypi.org/project/qumat-qdp/${QDP_VERSION}/).
 
 ## Requirements

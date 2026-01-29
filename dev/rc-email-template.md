@@ -29,7 +29,7 @@ Send this to `dev@mahout.apache.org` after the RC has been published to PyPI.
 
 ---
 
-**Subject:** [VOTE] Release Mahout qumat {QUMAT_VERSION}rc{N} and qumat-qdp {QDP_VERSION}rc{N}
+**Subject:** [VOTE] Release Mahout qumat from {QUMAT_VERSION}rc{N} and qumat-qdp from {QDP_VERSION}rc{N}
 
 ---
 
