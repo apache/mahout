@@ -328,7 +328,7 @@ impl QdpEngine {
     /// The input pointer must:
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `input_len` f64 elements
-    /// - Remain valid for the duration of this call
+    /// - Remain valid until all CUDA work launched by this call has completed
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_from_gpu_ptr(
         &self,
@@ -352,7 +352,13 @@ impl QdpEngine {
             ));
         }
 
-        let state_len = 1usize << num_qubits;
+        // let state_len = 1usize << num_qubits;
+        let state_len = 1usize.checked_shl(num_qubits as u32).ok_or_else(|| {
+            MahoutError::InvalidInput(format!(
+                "num_qubits={} is too large to compute state vector size safely",
+                num_qubits
+            ))
+        })?;
         if input_len > state_len {
             return Err(MahoutError::InvalidInput(format!(
                 "Input size {} exceeds state vector size {} (2^{} qubits)",
@@ -437,7 +443,7 @@ impl QdpEngine {
     /// The input pointer must:
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `num_samples * sample_size` f64 elements
-    /// - Remain valid for the duration of this call
+    /// - Remain valid until all CUDA work launched by this call has completed
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_batch_from_gpu_ptr(
         &self,
@@ -468,7 +474,12 @@ impl QdpEngine {
             ));
         }
 
-        let state_len = 1usize << num_qubits;
+        let state_len = 1usize.checked_shl(num_qubits as u32).ok_or_else(|| {
+            MahoutError::InvalidInput(format!(
+                "num_qubits={} is too large to compute state vector size safely",
+                num_qubits
+            ))
+        })?;
         if sample_size > state_len {
             return Err(MahoutError::InvalidInput(format!(
                 "Sample size {} exceeds state vector size {} (2^{} qubits)",
