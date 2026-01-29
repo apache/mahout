@@ -18,7 +18,10 @@
 
 #[cfg(test)]
 mod dlpack_tests {
+    use std::ffi::c_void;
+
     use cudarc::driver::CudaDevice;
+    use qdp_core::dlpack::{synchronize_stream, CUDA_STREAM_LEGACY};
     use qdp_core::gpu::memory::GpuStateVector;
 
     #[test]
@@ -80,6 +83,31 @@ mod dlpack_tests {
             if let Some(deleter) = (*dlpack_ptr).deleter {
                 deleter(dlpack_ptr);
             }
+        }
+    }
+
+    /// synchronize_stream(null) is a no-op and returns Ok(()) on all platforms.
+    #[test]
+    fn test_synchronize_stream_null() {
+        unsafe {
+            let result = synchronize_stream(std::ptr::null_mut::<c_void>());
+            assert!(
+                result.is_ok(),
+                "synchronize_stream(null) should return Ok(())"
+            );
+        }
+    }
+
+    /// synchronize_stream(CUDA_STREAM_LEGACY) syncs the legacy default stream (Linux + CUDA).
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_synchronize_stream_legacy() {
+        unsafe {
+            let result = synchronize_stream(CUDA_STREAM_LEGACY);
+            assert!(
+                result.is_ok(),
+                "synchronize_stream(CUDA_STREAM_LEGACY) should succeed on Linux with CUDA"
+            );
         }
     }
 }
