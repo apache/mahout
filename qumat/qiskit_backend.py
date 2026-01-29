@@ -151,8 +151,7 @@ def get_final_state_vector(circuit, backend, backend_config):
     if working_circuit.parameters:
         parameter_values = backend_config.get("parameter_values", {})
         parameter_bindings = {
-            param: parameter_values[str(param)]
-            for param in working_circuit.parameters
+            param: parameter_values[str(param)] for param in working_circuit.parameters
         }
         working_circuit = working_circuit.assign_parameters(parameter_bindings)
 
