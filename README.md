@@ -29,7 +29,7 @@ For additional information about Mahout, visit the [Mahout Home Page](http://mah
 ## Qumat
 
 <p align="center">
-  <img src="docs/assets/mascot_with_text.png" width="400" alt="Apache Mahout">
+  <img src="https://raw.githubusercontent.com/apache/mahout/refs/heads/main/docs/assets/mascot_with_text.png" width="400" alt="Apache Mahout">
 </p>
 
 Qumat is a high-level Python library for quantum computing that provides:
