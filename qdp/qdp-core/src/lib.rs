@@ -340,9 +340,8 @@ impl QdpEngine {
         crate::profile_scope!("Mahout::EncodeFromGpuPtr");
 
         let state_len = 1usize << num_qubits;
-        let method = encoding_method.to_ascii_lowercase();
-
-        match method.as_str() {
+        let encoding_method = encoding_method.to_ascii_lowercase();
+        match encoding_method.as_str() {
             "amplitude" => {
                 if input_len == 0 {
                     return Err(MahoutError::InvalidInput(
@@ -359,11 +358,13 @@ impl QdpEngine {
 
                 let input_d = input_d as *const f64;
 
+                // Allocate output state vector
                 let state_vector = {
                     crate::profile_scope!("GPU::Alloc");
                     gpu::GpuStateVector::new(&self.device, num_qubits)?
                 };
 
+                // Compute inverse L2 norm on GPU
                 let inv_norm = {
                     crate::profile_scope!("GPU::NormFromPtr");
                     // SAFETY: input_d validity is guaranteed by the caller's safety contract
@@ -376,12 +377,14 @@ impl QdpEngine {
                     }
                 };
 
+                // Get output pointer
                 let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
                     MahoutError::InvalidInput(
                         "State vector precision mismatch (expected float64 buffer)".to_string(),
                     )
                 })?;
 
+                // Launch encoding kernel
                 {
                     crate::profile_scope!("GPU::KernelLaunch");
                     let ret = unsafe {
@@ -404,6 +407,7 @@ impl QdpEngine {
                     }
                 }
 
+                // Synchronize
                 {
                     crate::profile_scope!("GPU::Synchronize");
                     self.device.synchronize().map_err(|e| {
@@ -415,6 +419,12 @@ impl QdpEngine {
                 Ok(state_vector.to_dlpack())
             }
             "angle" => {
+                if input_len == 0 {
+                    return Err(MahoutError::InvalidInput(
+                        "Input data cannot be empty".into(),
+                    ));
+                }
+
                 if input_len != num_qubits {
                     return Err(MahoutError::InvalidInput(format!(
                         "Angle encoding expects {} values (one per qubit), got {}",
@@ -522,7 +532,7 @@ impl QdpEngine {
             }
             _ => Err(MahoutError::NotImplemented(format!(
                 "GPU pointer encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'",
-                method
+                encoding_method
             ))),
         }
     }
@@ -560,9 +570,8 @@ impl QdpEngine {
         crate::profile_scope!("Mahout::EncodeBatchFromGpuPtr");
 
         let state_len = 1usize << num_qubits;
-        let method = encoding_method.to_ascii_lowercase();
-
-        match method.as_str() {
+        let encoding_method = encoding_method.to_ascii_lowercase();
+        match encoding_method.as_str() {
             "amplitude" => {
                 if num_samples == 0 {
                     return Err(MahoutError::InvalidInput(
@@ -585,11 +594,13 @@ impl QdpEngine {
 
                 let input_batch_d = input_batch_d as *const f64;
 
+                // Allocate output state vector
                 let batch_state_vector = {
                     crate::profile_scope!("GPU::AllocBatch");
                     gpu::GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?
                 };
 
+                // Compute inverse norms on GPU using warp-reduced kernel
                 let inv_norms_gpu = {
                     crate::profile_scope!("GPU::BatchNormKernel");
                     use cudarc::driver::DevicePtrMut;
@@ -637,6 +648,7 @@ impl QdpEngine {
                     }
                 }
 
+                // Launch batch kernel
                 {
                     crate::profile_scope!("GPU::BatchKernelLaunch");
                     use cudarc::driver::DevicePtr;
@@ -669,6 +681,7 @@ impl QdpEngine {
                     }
                 }
 
+                // Synchronize
                 {
                     crate::profile_scope!("GPU::Synchronize");
                     self.device
@@ -681,8 +694,6 @@ impl QdpEngine {
                 Ok(batch_state_vector.to_dlpack())
             }
             "angle" => {
-                use cudarc::driver::DevicePtrMut;
-
                 if num_samples == 0 {
                     return Err(MahoutError::InvalidInput(
                         "Number of samples cannot be zero".into(),
@@ -703,59 +714,6 @@ impl QdpEngine {
                 }
 
                 let input_batch_d = input_batch_d as *const f64;
-
-                // Validate that all input angles are finite (no NaN/Inf), consistent with
-                // CPU and host-side batch angle encoding paths.
-                let angle_validation_buffer = {
-                    crate::profile_scope!("GPU::AngleFiniteCheckBatch");
-
-                    let mut buffer = self.device.alloc_zeros::<f64>(num_samples).map_err(|e| {
-                        MahoutError::MemoryAllocation(format!(
-                            "Failed to allocate angle validation buffer: {:?}",
-                            e
-                        ))
-                    })?;
-
-                    let ret = unsafe {
-                        qdp_kernels::launch_l2_norm_batch(
-                            input_batch_d,
-                            num_samples,
-                            sample_size,
-                            *buffer.device_ptr_mut() as *mut f64,
-                            std::ptr::null_mut(), // default stream
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Angle validation norm kernel failed with CUDA error code: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-
-                    buffer
-                };
-
-                {
-                    crate::profile_scope!("GPU::AngleFiniteValidationHostCopy");
-                    let host_norms = self
-                        .device
-                        .dtoh_sync_copy(&angle_validation_buffer)
-                        .map_err(|e| {
-                            MahoutError::Cuda(format!(
-                                "Failed to copy angle validation norms to host: {:?}",
-                                e
-                            ))
-                        })?;
-
-                    if host_norms.iter().any(|v| !v.is_finite()) {
-                        return Err(MahoutError::InvalidInput(
-                            "Angle encoding batch contains non-finite values (NaN or Inf)"
-                                .to_string(),
-                        ));
-                    }
-                }
 
                 let batch_state_vector = {
                     crate::profile_scope!("GPU::AllocBatch");
@@ -784,7 +742,7 @@ impl QdpEngine {
 
                     if ret != 0 {
                         return Err(MahoutError::KernelLaunch(format!(
-                            "Batch angle encoding kernel failed: {} ({})",
+                            "Batch angle encoding kernel failed with CUDA error code: {} ({})",
                             ret,
                             cuda_error_to_string(ret)
                         )));
@@ -865,7 +823,7 @@ impl QdpEngine {
             }
             _ => Err(MahoutError::NotImplemented(format!(
                 "GPU pointer batch encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'",
-                method
+                encoding_method
             ))),
         }
     }
