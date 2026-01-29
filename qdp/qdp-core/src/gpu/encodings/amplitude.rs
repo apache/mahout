@@ -31,7 +31,9 @@ use crate::gpu::pipeline::run_dual_stream_pipeline;
 use cudarc::driver::CudaDevice;
 
 #[cfg(target_os = "linux")]
-use crate::gpu::cuda_ffi::{cudaMemsetAsync, cudaStreamSynchronize};
+use crate::gpu::cuda_ffi::cudaMemsetAsync;
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_sync::sync_cuda_stream;
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 #[cfg(target_os = "linux")]
@@ -472,14 +474,7 @@ impl AmplitudeEncoder {
             )));
         }
 
-        let ret = unsafe { cudaStreamSynchronize(stream) };
-        if ret != 0 {
-            return Err(MahoutError::Cuda(format!(
-                "CUDA stream synchronize failed: {} ({})",
-                ret,
-                cuda_error_to_string(ret)
-            )));
-        }
+        sync_cuda_stream(stream, "Norm stream synchronize failed")?;
 
         let inv_norm_host = device
             .dtoh_sync_copy(&norm_buffer)
