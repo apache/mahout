@@ -634,13 +634,12 @@ impl QdpEngine {
                 let angle_validation_buffer = {
                     crate::profile_scope!("GPU::AngleFiniteCheckBatch");
 
-                    let mut buffer =
-                        self.device.alloc_zeros::<f64>(num_samples).map_err(|e| {
-                            MahoutError::MemoryAllocation(format!(
-                                "Failed to allocate angle validation buffer: {:?}",
-                                e
-                            ))
-                        })?;
+                    let mut buffer = self.device.alloc_zeros::<f64>(num_samples).map_err(|e| {
+                        MahoutError::MemoryAllocation(format!(
+                            "Failed to allocate angle validation buffer: {:?}",
+                            e
+                        ))
+                    })?;
 
                     let ret = unsafe {
                         qdp_kernels::launch_l2_norm_batch(
