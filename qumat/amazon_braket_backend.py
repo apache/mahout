@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from braket.aws import AwsDevice
+import boto3
+from braket.aws import AwsDevice, AwsSession
 from braket.devices import LocalSimulator
 from braket.circuits import Circuit, FreeParameter
 
@@ -22,15 +23,29 @@ from braket.circuits import Circuit, FreeParameter
 def initialize_backend(backend_config):
     backend_options = backend_config["backend_options"]
     simulator_type = backend_options.get("simulator_type", "default")
+    region = backend_options.get("region")
+
+    # Create AWS session with region if specified
+    aws_session = None
+    if region:
+        boto_session = boto3.Session(region_name=region)
+        aws_session = AwsSession(boto_session=boto_session)
+
     if simulator_type == "local":
         return LocalSimulator()
     elif simulator_type == "default":
-        return AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
+        return AwsDevice(
+            "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
+            aws_session=aws_session,
+        )
     else:
         print(
             f"Simulator type '{simulator_type}' is not supported in Amazon Braket. Using default."
         )
-        return AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
+        return AwsDevice(
+            "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
+            aws_session=aws_session,
+        )
 
 
 def create_empty_circuit(num_qubits: int | None = None):
@@ -105,7 +120,17 @@ def execute_circuit(circuit, backend, backend_config):
 # placeholder method for use in the testing suite
 def get_final_state_vector(circuit, backend, backend_config):
     circuit.state_vector()
-    result = backend.run(circuit, shots=0).result()
+    parameter_values = backend_config.get("parameter_values", {})
+    if parameter_values and circuit.parameters:
+        # Braket accepts parameter names as strings in inputs dict
+        inputs = {
+            param_name: value
+            for param_name, value in parameter_values.items()
+            if param_name in {p.name for p in circuit.parameters}
+        }
+        result = backend.run(circuit, shots=0, inputs=inputs).result()
+    else:
+        result = backend.run(circuit, shots=0).result()
     state_vector = result.values[0]
 
     return state_vector

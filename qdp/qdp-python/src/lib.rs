@@ -213,23 +213,25 @@ fn get_tensor_device_id(tensor: &Bound<'_, PyAny>) -> PyResult<i32> {
 }
 
 /// Validate a CUDA tensor for direct GPU encoding
-/// Checks: dtype=float64, contiguous, non-empty, device_id matches engine
+/// Checks: dtype matches encoding method, contiguous, non-empty, device_id matches engine
 fn validate_cuda_tensor_for_encoding(
     tensor: &Bound<'_, PyAny>,
     expected_device_id: usize,
     encoding_method: &str,
 ) -> PyResult<()> {
+    let method = encoding_method.to_ascii_lowercase();
+
     // Check encoding method support and dtype (ASCII lowercase for case-insensitive match).
     let dtype = tensor.getattr("dtype")?;
     let dtype_str: String = dtype.str()?.extract()?;
-    let encoding_method = encoding_method.to_ascii_lowercase();
     let dtype_str_lower = dtype_str.to_ascii_lowercase();
-    match encoding_method.as_str() {
-        "amplitude" => {
+    match method.as_str() {
+        "amplitude" | "angle" => {
             if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64, got {}. Use tensor.to(torch.float64)",
-                    dtype_str
+                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
+                     Use tensor.to(torch.float64)",
+                    method, dtype_str
                 )));
             }
         }
@@ -244,7 +246,7 @@ fn validate_cuda_tensor_for_encoding(
         }
         _ => {
             return Err(PyRuntimeError::new_err(format!(
-                "CUDA tensor encoding currently only supports 'amplitude' or 'basis' methods, got '{}'. \
+                "CUDA tensor encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'. \
                  Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
                 encoding_method
             )));
@@ -290,8 +292,7 @@ struct DLPackTensorInfo {
     data_ptr: *const c_void,
     shape: Vec<i64>,
     /// CUDA device ID from DLPack metadata.
-    /// Currently unused but kept for potential future device validation or multi-GPU support.
-    #[allow(dead_code)]
+    /// Used for defensive validation against PyTorch API device ID.
     device_id: i32,
 }
 
@@ -557,6 +558,16 @@ impl QdpEngine {
             // Extract GPU pointer via DLPack (RAII wrapper ensures deleter is called)
             let dlpack_info = extract_dlpack_tensor(data.py(), data)?;
 
+            // ensure PyTorch API and DLPack metadata agree on device ID
+            let pytorch_device_id = get_tensor_device_id(data)?;
+            if dlpack_info.device_id != pytorch_device_id {
+                return Err(PyRuntimeError::new_err(format!(
+                    "Device ID mismatch: PyTorch reports device {}, but DLPack metadata reports {}. \
+                     This indicates an inconsistency between PyTorch and DLPack device information.",
+                    pytorch_device_id, dlpack_info.device_id
+                )));
+            }
+
             let ndim: usize = data.call_method0("dim")?.extract()?;
             validate_shape(ndim, "CUDA tensor")?;
 
@@ -801,6 +812,12 @@ impl QdpEngine {
 /// GPU-accelerated quantum data encoding with DLPack integration.
 #[pymodule]
 fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    // Initialize Rust logging system - respect RUST_LOG environment variable
+    // Ref: https://docs.rs/env_logger/latest/env_logger/
+    // try_init() won't fail if logger is already initialized (e.g., by another library)
+    // This allows Rust log messages to be visible when RUST_LOG is set
+    let _ = env_logger::Builder::from_default_env().try_init();
+
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
     Ok(())

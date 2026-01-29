@@ -23,7 +23,7 @@ import numpy as np
 import pytest
 import torch
 
-from _qdp import QdpEngine
+from .qdp_test_utils import requires_qdp
 
 
 def _verify_tensor(tensor, expected_shape, check_normalization=False):
@@ -40,6 +40,7 @@ def _verify_tensor(tensor, expected_shape, check_normalization=False):
         )
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "num_samples,num_qubits,check_norm",
@@ -51,6 +52,8 @@ def _verify_tensor(tensor, expected_shape, check_normalization=False):
 )
 def test_encode_from_numpy_file(num_samples, num_qubits, check_norm):
     """Test NumPy file encoding"""
+    from _qdp import QdpEngine
+
     pytest.importorskip("torch")
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
@@ -79,10 +82,13 @@ def test_encode_from_numpy_file(num_samples, num_qubits, check_norm):
             os.remove(npy_path)
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize("num_qubits", [1, 2, 3, 4])
 def test_encode_numpy_array_1d(num_qubits):
     """Test 1D NumPy array encoding (single sample)"""
+    from _qdp import QdpEngine
+
     pytest.importorskip("torch")
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
@@ -97,10 +103,13 @@ def test_encode_numpy_array_1d(num_qubits):
     _verify_tensor(tensor, (1, sample_size), check_normalization=True)
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize("num_samples,num_qubits", [(5, 2), (10, 3)])
 def test_encode_numpy_array_2d(num_samples, num_qubits):
     """Test 2D NumPy array encoding (batch)"""
+    from _qdp import QdpEngine
+
     pytest.importorskip("torch")
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
@@ -116,10 +125,13 @@ def test_encode_numpy_array_2d(num_samples, num_qubits):
     _verify_tensor(tensor, (num_samples, sample_size), check_normalization=True)
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize("encoding_method", ["amplitude"])
 def test_encode_numpy_encoding_methods(encoding_method):
     """Test different encoding methods"""
+    from _qdp import QdpEngine
+
     pytest.importorskip("torch")
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
@@ -135,6 +147,7 @@ def test_encode_numpy_encoding_methods(encoding_method):
     _verify_tensor(tensor, (1, sample_size))
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "precision,expected_dtype",
@@ -145,6 +158,8 @@ def test_encode_numpy_encoding_methods(encoding_method):
 )
 def test_encode_numpy_precision(precision, expected_dtype):
     """Test different precision settings"""
+    from _qdp import QdpEngine
+
     pytest.importorskip("torch")
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
@@ -160,6 +175,7 @@ def test_encode_numpy_precision(precision, expected_dtype):
     )
 
 
+@requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "data,error_match",
@@ -176,6 +192,8 @@ def test_encode_numpy_precision(precision, expected_dtype):
 )
 def test_encode_numpy_errors(data, error_match):
     """Test error handling for invalid inputs"""
+    from _qdp import QdpEngine
+
     pytest.importorskip("torch")
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")

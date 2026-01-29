@@ -18,7 +18,11 @@
 pub mod buffer_pool;
 pub mod encodings;
 pub mod memory;
+#[cfg(target_os = "linux")]
+pub mod overlap_tracker;
 pub mod pipeline;
+#[cfg(target_os = "linux")]
+pub mod pool_metrics;
 
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_ffi;
@@ -30,4 +34,8 @@ pub use memory::GpuStateVector;
 pub use pipeline::run_dual_stream_pipeline;
 
 #[cfg(target_os = "linux")]
+pub use overlap_tracker::OverlapTracker;
+#[cfg(target_os = "linux")]
 pub use pipeline::PipelineContext;
+#[cfg(target_os = "linux")]
+pub use pool_metrics::{PoolMetrics, PoolUtilizationReport};

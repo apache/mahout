@@ -147,6 +147,14 @@ def get_final_state_vector(circuit, backend, backend_config):
     # Add save_statevector instruction
     working_circuit.save_statevector()
 
+    # Bind parameters if present
+    if working_circuit.parameters:
+        parameter_values = backend_config.get("parameter_values", {})
+        parameter_bindings = {
+            param: parameter_values[str(param)] for param in working_circuit.parameters
+        }
+        working_circuit = working_circuit.assign_parameters(parameter_bindings)
+
     # Simulate the circuit
     transpiled_circuit = qiskit.transpile(working_circuit, simulator)
     job = simulator.run(transpiled_circuit)

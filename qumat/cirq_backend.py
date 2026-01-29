@@ -159,7 +159,12 @@ def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
 
 def get_final_state_vector(circuit, backend, backend_config):
     simulator = cirq.Simulator()
-    result = simulator.simulate(circuit)
+    parameter_values = backend_config.get("parameter_values", None)
+    if parameter_values:
+        resolver = cirq.ParamResolver(parameter_values)
+        result = simulator.simulate(circuit, param_resolver=resolver)
+    else:
+        result = simulator.simulate(circuit)
     return result.final_state_vector
 
 

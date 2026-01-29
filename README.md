@@ -29,12 +29,12 @@ For additional information about Mahout, visit the [Mahout Home Page](http://mah
 ## Qumat
 
 <p align="center">
-  <img src="docs/assets/mascot_with_text.png" width="400" alt="Apache Mahout">
+  <img src="https://raw.githubusercontent.com/apache/mahout/refs/heads/main/docs/assets/mascot_with_text.png" width="400" alt="Apache Mahout">
 </p>
 
 Qumat is a high-level Python library for quantum computing that provides:
 
-- **Quantum Circuit Abstraction** - Build quantum circuits with standard gates (Hadamard, CNOT, Pauli, etc.) and run them on Qiskit, Cirq, or Amazon Braket with a single unified API. Write once, execute anywhere. Check out [basic gates](docs/basic_gates.md) for a quick introduction to the basic gates supported across all backends.
+- **Quantum Circuit Abstraction** - Build quantum circuits with standard gates (Hadamard, CNOT, Pauli, etc.) and run them on Qiskit, Cirq, or Amazon Braket with a single unified API. Write once, execute anywhere. Check out [basic gates](docs/basic-gates.md) for a quick introduction to the basic gates supported across all backends.
 - **QDP (Quantum Data Plane)** - Encode classical data into quantum states using GPU-accelerated kernels. Zero-copy tensor transfer via DLPack lets you move data between PyTorch, NumPy, and TensorFlow without overhead.
 
 ## Quick Start
