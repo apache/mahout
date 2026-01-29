@@ -292,8 +292,7 @@ struct DLPackTensorInfo {
     data_ptr: *const c_void,
     shape: Vec<i64>,
     /// CUDA device ID from DLPack metadata.
-    /// Currently unused but kept for potential future device validation or multi-GPU support.
-    #[allow(dead_code)]
+    /// Used for defensive validation against PyTorch API device ID.
     device_id: i32,
 }
 
@@ -559,6 +558,16 @@ impl QdpEngine {
             // Extract GPU pointer via DLPack (RAII wrapper ensures deleter is called)
             let dlpack_info = extract_dlpack_tensor(data.py(), data)?;
 
+            // ensure PyTorch API and DLPack metadata agree on device ID
+            let pytorch_device_id = get_tensor_device_id(data)?;
+            if dlpack_info.device_id != pytorch_device_id {
+                return Err(PyRuntimeError::new_err(format!(
+                    "Device ID mismatch: PyTorch reports device {}, but DLPack metadata reports {}. \
+                     This indicates an inconsistency between PyTorch and DLPack device information.",
+                    pytorch_device_id, dlpack_info.device_id
+                )));
+            }
+
             let ndim: usize = data.call_method0("dim")?.extract()?;
             validate_shape(ndim, "CUDA tensor")?;
 
@@ -803,6 +812,12 @@ impl QdpEngine {
 /// GPU-accelerated quantum data encoding with DLPack integration.
 #[pymodule]
 fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    // Initialize Rust logging system - respect RUST_LOG environment variable
+    // Ref: https://docs.rs/env_logger/latest/env_logger/
+    // try_init() won't fail if logger is already initialized (e.g., by another library)
+    // This allows Rust log messages to be visible when RUST_LOG is set
+    let _ = env_logger::Builder::from_default_env().try_init();
+
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
     Ok(())
