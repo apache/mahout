@@ -1,5 +1,4 @@
 ---
-layout: page
 title: Core Concepts - QDP
 ---
 
@@ -202,4 +201,4 @@ Important details:
 
 ### 7.3 Profiling
 
-If you need to understand where time is spent (copy vs compute), QDP supports NVTX-based profiling. See `qdp/docs/observability/NVTX_USAGE.md`.
+If you need to understand where time is spent (copy vs compute), QDP supports NVTX-based profiling. See [Observability](./observability).

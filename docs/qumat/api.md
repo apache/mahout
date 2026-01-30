@@ -64,7 +64,7 @@
 - **Purpose**: Applies a Pauli-Y gate to a specified qubit.
 - **Parameters**:
     - `qubit_index` (int): Index of the qubit.
-- **Usage**: Impacts the phase and amplitude of a qubit’s state.
+- **Usage**: Impacts the phase and amplitude of a qubit's state.
 
 ## `apply_pauli_z_gate(self, qubit_index)`
 - **Purpose**: Applies a Pauli-Z gate to a specified qubit.

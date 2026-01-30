@@ -1,9 +1,8 @@
 ---
-layout: page
-title: Getting Started with Qumat Core
+title: Examples - QDP
 ---
 
-# Getting Started
+# Examples
 
 :::info Coming Soon
 This documentation is under development. Check back soon!
