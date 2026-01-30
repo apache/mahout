@@ -127,6 +127,25 @@ def test_dlpack_single_use():
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.parametrize("stream", [1, 2], ids=["stream_legacy", "stream_per_thread"])
+def test_dlpack_with_stream(stream):
+    """Test __dlpack__(stream=...) syncs CUDA stream before returning capsule (DLPack 0.8+)."""
+    import torch
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(0)
+    data = [1.0, 2.0, 3.0, 4.0]
+    qtensor = engine.encode(data, 2, "amplitude")
+
+    # stream=1 (legacy default) or 2 (per-thread default) should sync and return capsule
+    capsule = qtensor.__dlpack__(stream=stream)
+    torch_tensor = torch.from_dlpack(capsule)
+    assert torch_tensor.is_cuda
+    assert torch_tensor.shape == (1, 4)
+
+
+@requires_qdp
+@pytest.mark.gpu
 def test_pytorch_integration():
     """Test PyTorch integration via DLPack (requires GPU and PyTorch)."""
     pytest.importorskip("torch")

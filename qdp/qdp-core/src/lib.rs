@@ -41,6 +41,57 @@ use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 use cudarc::driver::CudaDevice;
 
+#[cfg(target_os = "linux")]
+fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const f64) -> Result<()> {
+    use crate::gpu::cuda_ffi::{
+        CUDA_MEMORY_TYPE_DEVICE, CUDA_MEMORY_TYPE_MANAGED, CudaPointerAttributes,
+        cudaPointerGetAttributes,
+    };
+    use std::ffi::c_void;
+
+    if ptr.is_null() {
+        return Err(MahoutError::InvalidInput(
+            "Input GPU pointer is null".to_string(),
+        ));
+    }
+
+    let mut attrs = CudaPointerAttributes {
+        memory_type: 0,
+        device: 0,
+        device_pointer: std::ptr::null_mut(),
+        host_pointer: std::ptr::null_mut(),
+        is_managed: 0,
+        allocation_flags: 0,
+    };
+
+    let ret = unsafe { cudaPointerGetAttributes(&mut attrs as *mut _, ptr as *const c_void) };
+    if ret != 0 {
+        return Err(MahoutError::InvalidInput(format!(
+            "cudaPointerGetAttributes failed for input pointer: {} ({})",
+            ret,
+            cuda_error_to_string(ret)
+        )));
+    }
+
+    if attrs.memory_type != CUDA_MEMORY_TYPE_DEVICE && attrs.memory_type != CUDA_MEMORY_TYPE_MANAGED
+    {
+        return Err(MahoutError::InvalidInput(format!(
+            "Input pointer is not CUDA device memory (memory_type={})",
+            attrs.memory_type
+        )));
+    }
+
+    let device_ordinal = device.ordinal() as i32;
+    if attrs.device >= 0 && attrs.device != device_ordinal {
+        return Err(MahoutError::InvalidInput(format!(
+            "Input pointer device mismatch: pointer on cuda:{}, engine on cuda:{}",
+            attrs.device, device_ordinal
+        )));
+    }
+
+    Ok(())
+}
+
 /// Main entry point for Mahout QDP
 ///
 /// Manages GPU context and dispatches encoding tasks.
@@ -345,6 +396,8 @@ impl QdpEngine {
             ));
         }
 
+        validate_cuda_input_ptr(&self.device, input_d)?;
+
         let state_len = 1usize << num_qubits;
         let method = encoding_method.to_ascii_lowercase();
 
@@ -512,6 +565,8 @@ impl QdpEngine {
                 "Sample size cannot be zero".into(),
             ));
         }
+
+        validate_cuda_input_ptr(&self.device, input_batch_d)?;
 
         let state_len = 1usize << num_qubits;
         let method = encoding_method.to_ascii_lowercase();
