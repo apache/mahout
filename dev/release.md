@@ -9,6 +9,46 @@ This document describes the process for releasing `qumat` and `qumat-qdp`. The p
 
 -   **ASF Account**: Required for PMC members to log in to the ATR platform.
 -   **PyPI Account**: Required for uploading RCs for community testing.
+-   **GPG Key**: Required for signing release artifacts. See [GPG Key Setup](#gpg-key-setup) below.
+
+### GPG Key Setup
+
+If you don't have a GPG key yet, generate one:
+
+```bash
+# Generate a 4096-bit RSA key (use your Apache email)
+gpg --full-generate-key
+# Select: RSA and RSA, 4096 bits, your_name <your_id@apache.org>
+
+# Find your key ID
+gpg --list-secret-keys --keyid-format SHORT
+# Example output: rsa4096/8EEFC01F
+
+# Upload your public key to a key server
+gpg --keyserver keys.openpgp.org --send-keys <YOUR_KEY_ID>
+
+# Append your public key to the project KEYS file
+(gpg --list-sigs <YOUR_KEY_ID> && gpg --armor --export <YOUR_KEY_ID>) >> KEYS
+```
+
+### PyPI Token Setup
+
+**Important:** Store your `.pypirc` in your **home directory** (`~/.pypirc`), **never** in the project directory — it can accidentally be included in source distributions.
+
+```bash
+# Create ~/.pypirc (not in the project directory!)
+cat > ~/.pypirc << 'EOF'
+[testpypi]
+username = __token__
+password = pypi-xxxxx
+
+[pypi]
+username = __token__
+password = pypi-xxxxx
+EOF
+
+chmod 600 ~/.pypirc
+```
 
 ---
 
@@ -102,27 +142,44 @@ uv tool run maturin build --release --interpreter python3.12
 -   `dist/qumat-0.5.0rc1.tar.gz`
 -   `qdp/target/wheels/qumat_qdp-0.1.0rc1-cp3XX-*.whl`
 
-### 1.3 Upload to PyPI (RC Version)
+### 1.3 Sign and Hash Artifacts
 
-**Configure `.pypirc`:**
-Create a `.pypirc` file with your API token (from https://pypi.org/manage/account/token/):
-```ini
-[testpypi]
-username = __token__
-password = pypi-xxxxx
+Sign each artifact with your GPG key and generate SHA-512 checksums:
 
-[pypi]
-username = __token__
-password = pypi-xxxxx
+```bash
+# Sign and hash Qumat artifacts
+cd dist
+for f in qumat-0.5.0rc1*; do
+  gpg --armor --detach-sign "$f"
+  sha512sum "$f" > "$f.sha512"
+done
+
+# Sign and hash Qumat-QDP wheels
+cd ../qdp/target/wheels
+for f in qumat_qdp-0.1.0rc1-*.whl; do
+  gpg --armor --detach-sign "$f"
+  sha512sum "$f" > "$f.sha512"
+done
 ```
+
+This produces `.asc` (GPG signature) and `.sha512` (checksum) files for each artifact. These are required by ATR for release validation.
+
+**Verify signatures locally:**
+```bash
+gpg --verify qumat-0.5.0rc1.tar.gz.asc qumat-0.5.0rc1.tar.gz
+```
+
+### 1.4 Upload to PyPI (RC Version)
+
+Ensure `~/.pypirc` is configured (see [PyPI Token Setup](#pypi-token-setup)).
 
 **Upload to TestPyPI first (recommended):**
 ```bash
 # Upload Qumat
-uv tool run twine upload --repository testpypi --config-file .pypirc dist/*
+uv tool run twine upload --repository testpypi --config-file ~/.pypirc dist/*
 
 # Upload Qumat-QDP
-uv tool run twine upload --repository testpypi --config-file .pypirc qdp/target/wheels/qumat_qdp-<version>-cp31{0,1,2}-*.whl
+uv tool run twine upload --repository testpypi --config-file ~/.pypirc qdp/target/wheels/qumat_qdp-<version>-cp31{0,1,2}-*.whl
 ```
 
 **Test install from TestPyPI:**
@@ -139,15 +196,15 @@ pytest testing/
 **Upload to PyPI:**
 ```bash
 # Upload Qumat
-uv tool run twine upload --repository pypi --config-file .pypirc dist/*
+uv tool run twine upload --repository pypi --config-file ~/.pypirc dist/*
 
 # Upload Qumat-QDP (exclude Python versions outside requires-python)
-uv tool run twine upload --repository pypi --config-file .pypirc qdp/target/wheels/qumat_qdp-<version>-cp31{0,1,2}-*.whl
+uv tool run twine upload --repository pypi --config-file ~/.pypirc qdp/target/wheels/qumat_qdp-<version>-cp31{0,1,2}-*.whl
 ```
 
 *Note: This makes the RC available on PyPI for testing with `pip install --pre qumat==0.5.0rc1`.*
 
-### 1.4 Open Testing Issue
+### 1.5 Open Testing Issue
 Use the script to generate the RC testing issue:
 
 ```bash
@@ -166,7 +223,7 @@ The script generates an issue with:
 -   All PRs from the milestone with checkboxes
 -   Contributor mentions for testing
 
-### 1.5 Community Testing & Closure
+### 1.6 Community Testing & Closure
 -   Allow a testing interval (e.g., 3-5 days).
 -   If critical bugs are found: Fix them, increment the RC number (e.g., RC2), and repeat from Step 1.2.
 -   Once the community is satisfied and the issue shows positive feedback, close the issue and proceed to Phase 2.
@@ -184,7 +241,7 @@ This phase is executed by a PMC member or Release Manager using the ATR platform
 4.  Upload the **source tarballs** from Phase 1.2:
     -   `qumat/dist/qumat-1.0.0.tar.gz`
     -   `qdp/qdp-python/target/wheels/qumat_qdp-1.0.0.tar.gz`
-    -   ATR will handle GPG signing and generate checksums (SHA256/SHA512).
+    -   You must sign artifacts and generate checksums yourself before uploading (see [Step 1.3](#13-sign-and-hash-artifacts)).
 
 ### 2.2 Verify Release
 Check the "Release Candidates" section in ATR to ensure:
