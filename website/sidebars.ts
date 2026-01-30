@@ -12,27 +12,33 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         'getting-started-with-qumat',
-        'basic-gates',
-        'api',
       ],
     },
     {
       type: 'category',
-      label: 'Qumat Core',
+      label: 'Qumat (Circuits)',
       collapsed: false,
       link: {type: 'doc', id: 'qumat/index'},
       items: [
-        'qumat/core/index',
-        'qumat/core/getting-started',
-        'qumat/core/concepts',
-        'qumat/core/api',
-        'qumat/core/examples',
+        'basic-gates',
+        'parameterized-circuits',
+        'api',
+        {
+          type: 'category',
+          label: 'Core Reference',
+          collapsed: true,
+          link: {type: 'doc', id: 'qumat/core/index'},
+          items: [
+            'qumat/core/concepts',
+            'qumat/core/examples',
+          ],
+        },
       ],
     },
     {
       type: 'category',
-      label: 'QDP (Quantum Data Plane)',
-      collapsed: true,
+      label: 'QDP (Data Encoding)',
+      collapsed: false,
       link: {type: 'doc', id: 'qumat/qdp/index'},
       items: [
         'qumat/qdp/getting-started',
@@ -73,7 +79,6 @@ const sidebars: SidebarsConfig = {
       label: 'Advanced Topics',
       collapsed: true,
       items: [
-        'parameterized-circuits',
         'pqc',
         'qumat-gap-analysis-for-pqc',
       ],
@@ -116,7 +121,6 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'about/how-to-contribute',
-        'adr/jekyll-to-docusaurus-migration',
       ],
     },
   ],

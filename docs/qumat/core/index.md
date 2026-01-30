@@ -8,7 +8,9 @@ Qumat Core provides a unified API for building quantum circuits across multiple 
 
 ## Documentation
 
-- [Getting Started](./getting-started)
+- [Getting Started](../getting-started-with-qumat)
+- [Basic Gates](../basic-gates)
+- [Parameterized Circuits](../parameterized-circuits)
+- [API Reference](../api)
 - [Core Concepts](./concepts)
-- [API Reference](./api)
 - [Examples](./examples)
