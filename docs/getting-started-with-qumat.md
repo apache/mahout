@@ -4,35 +4,31 @@
 
 Getting started with Qumat is easy, thanks to the simplified installation process. You can install Qumat by choosing one of the following methods.
 
-### Method 1: Clone and Install Locally
+### Method 1: Install from PyPI (Recommended)
 
+```bash
+pip install qumat
 ```
+
+### Method 2: Install from Source (Development)
+
+For development or to get the latest changes, use [uv](https://docs.astral.sh/uv/):
+
+```bash
 git clone https://github.com/apache/mahout
 cd mahout
-pip install .
+pip install uv
+uv sync                     # Core Qumat
+uv sync --extra qdp         # With QDP (requires NVIDIA GPU + CUDA)
 ```
 
-### Method 2: Install via Git directly
-
-```
-pip install git+https://github.com/apache/mahout
-```
-
-Users might think these instructions are "too easy" due to the previous complexity associated with installing Mahout. Rest assured, as part of the Qumat reboot, we have made significant strides in simplifying both installation and getting started.
+:::note Why uv?
+The project uses `uv` to handle dependency overrides required for Python 3.10+ compatibility with some backend dependencies.
+:::
 
 ## Dependencies
 
-Prior to installation, ensure Python 3.10+ is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK will be managed by pip.
-
-## Installation from Source
-
-If you wish to build from source, use the following command:
-
-```
-git clone https://github.com/apache/mahout
-cd mahout
-pip install .
-```
+Prior to installation, ensure Python 3.10-3.12 is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK will be managed automatically.
 
 ## Examples
 
