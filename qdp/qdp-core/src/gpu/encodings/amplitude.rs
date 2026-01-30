@@ -33,6 +33,8 @@ use cudarc::driver::CudaDevice;
 #[cfg(target_os = "linux")]
 use crate::gpu::cuda_ffi::cudaMemsetAsync;
 #[cfg(target_os = "linux")]
+use crate::gpu::cuda_sync::sync_cuda_stream;
+#[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 #[cfg(target_os = "linux")]
 use cudarc::driver::{DevicePtr, DevicePtrMut};
@@ -437,6 +439,18 @@ impl AmplitudeEncoder {
         input_ptr: *const f64,
         len: usize,
     ) -> Result<f64> {
+        unsafe {
+            Self::calculate_inv_norm_gpu_with_stream(device, input_ptr, len, std::ptr::null_mut())
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    pub(crate) unsafe fn calculate_inv_norm_gpu_with_stream(
+        device: &Arc<CudaDevice>,
+        input_ptr: *const f64,
+        len: usize,
+        stream: *mut c_void,
+    ) -> Result<f64> {
         crate::profile_scope!("GPU::NormSingle");
 
         let mut norm_buffer = device.alloc_zeros::<f64>(1).map_err(|e| {
@@ -448,7 +462,7 @@ impl AmplitudeEncoder {
                 input_ptr,
                 len,
                 *norm_buffer.device_ptr_mut() as *mut f64,
-                std::ptr::null_mut(), // default stream
+                stream,
             )
         };
 
@@ -459,6 +473,8 @@ impl AmplitudeEncoder {
                 cuda_error_to_string(ret)
             )));
         }
+
+        sync_cuda_stream(stream, "Norm stream synchronize failed")?;
 
         let inv_norm_host = device
             .dtoh_sync_copy(&norm_buffer)

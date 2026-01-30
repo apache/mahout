@@ -35,9 +35,13 @@ mod profiling;
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
 
+#[cfg(target_os = "linux")]
+use std::ffi::c_void;
 use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_sync::sync_cuda_stream;
 use crate::gpu::get_encoder;
 use cudarc::driver::CudaDevice;
 
@@ -362,6 +366,9 @@ impl QdpEngine {
     /// a raw GPU pointer directly, avoiding the GPU→CPU→GPU copy that would otherwise
     /// be required.
     ///
+    /// Uses the default CUDA stream. For PyTorch stream interop, use
+    /// `encode_from_gpu_ptr_with_stream`.
+    ///
     /// TODO: Refactor to use QuantumEncoder trait (add `encode_from_gpu_ptr` to trait)
     /// to reduce duplication with AmplitudeEncoder::encode(). This would also make it
     /// easier to add GPU pointer support for other encoders (angle, basis) in the future.
@@ -388,6 +395,34 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
+        unsafe {
+            self.encode_from_gpu_ptr_with_stream(
+                input_d,
+                input_len,
+                num_qubits,
+                encoding_method,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Encode from existing GPU pointer on a specified CUDA stream.
+    ///
+    /// The caller must ensure the stream is valid for the device, and that any
+    /// producer work on that stream has been enqueued before this call.
+    ///
+    /// # Safety
+    /// In addition to the `encode_from_gpu_ptr` requirements, the stream pointer
+    /// must remain valid for the duration of this call.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_from_gpu_ptr_with_stream(
+        &self,
+        input_d: *const f64,
+        input_len: usize,
+        num_qubits: usize,
+        encoding_method: &str,
+        stream: *mut c_void,
+    ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromGpuPtr");
 
         if input_len == 0 {
@@ -399,7 +434,7 @@ impl QdpEngine {
         validate_cuda_input_ptr(&self.device, input_d)?;
 
         let state_len = 1usize << num_qubits;
-        let method = encoding_method.to_ascii_lowercase();
+        let method = encoding_method.to_lowercase();
 
         match method.as_str() {
             "amplitude" => {
@@ -417,12 +452,12 @@ impl QdpEngine {
 
                 let inv_norm = {
                     crate::profile_scope!("GPU::NormFromPtr");
-                    // SAFETY: input_d validity is guaranteed by the caller's safety contract
                     unsafe {
-                        gpu::AmplitudeEncoder::calculate_inv_norm_gpu(
+                        gpu::AmplitudeEncoder::calculate_inv_norm_gpu_with_stream(
                             &self.device,
                             input_d,
                             input_len,
+                            stream,
                         )?
                     }
                 };
@@ -442,7 +477,7 @@ impl QdpEngine {
                             input_len,
                             state_len,
                             inv_norm,
-                            std::ptr::null_mut(), // default stream
+                            stream,
                         )
                     };
 
@@ -457,9 +492,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device.synchronize().map_err(|e| {
-                        MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e))
-                    })?;
+                    sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let state_vector = state_vector.to_precision(&self.device, self.precision)?;
@@ -492,7 +525,7 @@ impl QdpEngine {
                             state_ptr as *mut std::ffi::c_void,
                             state_len,
                             num_qubits as u32,
-                            std::ptr::null_mut(), // default stream
+                            stream,
                         )
                     };
 
@@ -507,9 +540,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device.synchronize().map_err(|e| {
-                        MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e))
-                    })?;
+                    sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let state_vector = state_vector.to_precision(&self.device, self.precision)?;
@@ -525,6 +556,8 @@ impl QdpEngine {
     /// Encode batch from existing GPU pointer (zero-copy for CUDA tensors)
     ///
     /// This method enables zero-copy batch encoding from PyTorch CUDA tensors.
+    /// Uses the default CUDA stream. For PyTorch stream interop, use
+    /// `encode_batch_from_gpu_ptr_with_stream`.
     ///
     /// TODO: Refactor to use QuantumEncoder trait (see `encode_from_gpu_ptr` TODO).
     ///
@@ -551,6 +584,33 @@ impl QdpEngine {
         sample_size: usize,
         num_qubits: usize,
         encoding_method: &str,
+    ) -> Result<*mut DLManagedTensor> {
+        unsafe {
+            self.encode_batch_from_gpu_ptr_with_stream(
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                encoding_method,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Encode batch from existing GPU pointer on a specified CUDA stream.
+    ///
+    /// # Safety
+    /// In addition to the `encode_batch_from_gpu_ptr` requirements, the stream pointer
+    /// must remain valid for the duration of this call.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_batch_from_gpu_ptr_with_stream(
+        &self,
+        input_batch_d: *const f64,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        encoding_method: &str,
+        stream: *mut c_void,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeBatchFromGpuPtr");
 
@@ -602,7 +662,7 @@ impl QdpEngine {
                             num_samples,
                             sample_size,
                             *buffer.device_ptr_mut() as *mut f64,
-                            std::ptr::null_mut(), // default stream
+                            stream,
                         )
                     };
 
@@ -619,6 +679,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::NormValidation");
+                    sync_cuda_stream(stream, "Norm stream synchronize failed")?;
                     let host_inv_norms =
                         self.device.dtoh_sync_copy(&inv_norms_gpu).map_err(|e| {
                             MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e))
@@ -650,7 +711,7 @@ impl QdpEngine {
                             num_samples,
                             sample_size,
                             state_len,
-                            std::ptr::null_mut(), // default stream
+                            stream,
                         )
                     };
 
@@ -665,9 +726,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device
-                        .synchronize()
-                        .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+                    sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let batch_state_vector =
@@ -702,7 +761,7 @@ impl QdpEngine {
                             num_samples,
                             sample_size,
                             *buffer.device_ptr_mut() as *mut f64,
-                            std::ptr::null_mut(), // default stream
+                            stream,
                         )
                     };
 
@@ -719,6 +778,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::AngleFiniteValidationHostCopy");
+                    sync_cuda_stream(stream, "Angle norm stream synchronize failed")?;
                     let host_norms = self
                         .device
                         .dtoh_sync_copy(&angle_validation_buffer)
@@ -758,7 +818,7 @@ impl QdpEngine {
                             num_samples,
                             state_len,
                             num_qubits as u32,
-                            std::ptr::null_mut(), // default stream
+                            stream,
                         )
                     };
 
@@ -773,9 +833,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device
-                        .synchronize()
-                        .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+                    sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let batch_state_vector =
