@@ -590,7 +590,7 @@ impl QdpEngine {
                         let ptr = unsafe {
                             self.engine
                                 .encode_from_gpu_ptr_with_stream(
-                                    tensor_info.data_ptr,
+                                    tensor_info.data_ptr as *const std::ffi::c_void,
                                     input_len,
                                     num_qubits,
                                     encoding_method,
@@ -613,7 +613,7 @@ impl QdpEngine {
                         let ptr = unsafe {
                             self.engine
                                 .encode_batch_from_gpu_ptr_with_stream(
-                                    tensor_info.data_ptr,
+                                    tensor_info.data_ptr as *const std::ffi::c_void,
                                     num_samples,
                                     sample_size,
                                     num_qubits,
