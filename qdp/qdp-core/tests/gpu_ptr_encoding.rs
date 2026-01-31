@@ -34,14 +34,7 @@ fn test_encode_from_gpu_ptr_unknown_method() {
         Err(_) => return,
     };
 
-    let result = unsafe {
-        engine.encode_from_gpu_ptr(
-            std::ptr::null(),
-            4,
-            2,
-            "unknown_encoding",
-        )
-    };
+    let result = unsafe { engine.encode_from_gpu_ptr(std::ptr::null(), 4, 2, "unknown_encoding") };
 
     assert!(result.is_err());
     match result {
@@ -59,9 +52,7 @@ fn test_encode_from_gpu_ptr_amplitude_empty_input() {
         Err(_) => return,
     };
 
-    let result = unsafe {
-        engine.encode_from_gpu_ptr(std::ptr::null(), 0, 2, "amplitude")
-    };
+    let result = unsafe { engine.encode_from_gpu_ptr(std::ptr::null(), 0, 2, "amplitude") };
 
     assert!(result.is_err());
     match result {
@@ -80,9 +71,7 @@ fn test_encode_from_gpu_ptr_amplitude_input_exceeds_state() {
     };
 
     // 2 qubits -> state_len = 4; request input_len = 10
-    let result = unsafe {
-        engine.encode_from_gpu_ptr(std::ptr::null(), 10, 2, "amplitude")
-    };
+    let result = unsafe { engine.encode_from_gpu_ptr(std::ptr::null(), 10, 2, "amplitude") };
 
     assert!(result.is_err());
     match result {
@@ -100,15 +89,8 @@ fn test_encode_batch_from_gpu_ptr_unknown_method() {
         Err(_) => return,
     };
 
-    let result = unsafe {
-        engine.encode_batch_from_gpu_ptr(
-            std::ptr::null(),
-            2,
-            4,
-            2,
-            "unknown_method",
-        )
-    };
+    let result =
+        unsafe { engine.encode_batch_from_gpu_ptr(std::ptr::null(), 2, 4, 2, "unknown_method") };
 
     assert!(result.is_err());
     match result {
@@ -126,15 +108,8 @@ fn test_encode_batch_from_gpu_ptr_amplitude_num_samples_zero() {
         Err(_) => return,
     };
 
-    let result = unsafe {
-        engine.encode_batch_from_gpu_ptr(
-            std::ptr::null(),
-            0,
-            4,
-            2,
-            "amplitude",
-        )
-    };
+    let result =
+        unsafe { engine.encode_batch_from_gpu_ptr(std::ptr::null(), 0, 4, 2, "amplitude") };
 
     assert!(result.is_err());
     match result {
@@ -288,13 +263,7 @@ fn test_encode_batch_from_gpu_ptr_amplitude_success() {
 
     let dlpack_ptr = unsafe {
         engine
-            .encode_batch_from_gpu_ptr(
-                ptr,
-                num_samples,
-                sample_size,
-                num_qubits,
-                "amplitude",
-            )
+            .encode_batch_from_gpu_ptr(ptr, num_samples, sample_size, num_qubits, "amplitude")
             .expect("encode_batch_from_gpu_ptr should succeed")
     };
 

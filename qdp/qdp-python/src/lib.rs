@@ -457,7 +457,6 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
                 "DLPack tensor has null data pointer",
             ));
         }
-        let data_ptr = dl_tensor.data as *const c_void;
 
         if dl_tensor.device.device_type != DLDeviceType::kDLCUDA {
             return Err(PyRuntimeError::new_err(
@@ -545,7 +544,7 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
 
         Ok(DLPackTensorInfo {
             managed_ptr,
-            data_ptr,
+            data_ptr: data_ptr as *const std::ffi::c_void,
             shape,
             device_id,
         })
