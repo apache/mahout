@@ -401,13 +401,88 @@ impl GpuStateVector {
 
     /// Convert the state vector to the requested precision (GPU-side).
     ///
-    /// For now only down-conversion from Float64 -> Float32 is supported.
+    /// Supports Float64 -> Float32 and Float32 -> Float64.
     pub fn to_precision(&self, device: &Arc<CudaDevice>, target: Precision) -> Result<Self> {
         if self.precision() == target {
             return Ok(self.clone());
         }
 
         match (self.precision(), target) {
+            (Precision::Float32, Precision::Float64) => {
+                #[cfg(target_os = "linux")]
+                {
+                    let requested_bytes = self
+                        .size_elements
+                        .checked_mul(std::mem::size_of::<CuDoubleComplex>())
+                        .ok_or_else(|| {
+                            MahoutError::MemoryAllocation(format!(
+                                "Requested GPU allocation size overflow (elements={})",
+                                self.size_elements
+                            ))
+                        })?;
+
+                    ensure_device_memory_available(
+                        requested_bytes,
+                        "state vector precision conversion",
+                        Some(self.num_qubits),
+                    )?;
+
+                    let slice = unsafe { device.alloc::<CuDoubleComplex>(self.size_elements) }
+                        .map_err(|e| {
+                            map_allocation_error(
+                                requested_bytes,
+                                "state vector precision conversion",
+                                Some(self.num_qubits),
+                                e,
+                            )
+                        })?;
+
+                    let src_ptr = self.ptr_f32().ok_or_else(|| {
+                        MahoutError::InvalidInput(
+                            "Source state vector is not Float32; cannot convert to Float64"
+                                .to_string(),
+                        )
+                    })?;
+
+                    let ret = unsafe {
+                        qdp_kernels::convert_state_to_double(
+                            src_ptr as *const CuComplex,
+                            *slice.device_ptr() as *mut CuDoubleComplex,
+                            self.size_elements,
+                            std::ptr::null_mut(),
+                        )
+                    };
+
+                    if ret != 0 {
+                        return Err(MahoutError::KernelLaunch(format!(
+                            "Precision conversion kernel failed: {}",
+                            ret
+                        )));
+                    }
+
+                    device.synchronize().map_err(|e| {
+                        MahoutError::Cuda(format!(
+                            "Failed to sync after precision conversion: {:?}",
+                            e
+                        ))
+                    })?;
+
+                    Ok(Self {
+                        buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
+                        num_qubits: self.num_qubits,
+                        size_elements: self.size_elements,
+                        num_samples: self.num_samples,
+                        device_id: device.ordinal(),
+                    })
+                }
+
+                #[cfg(not(target_os = "linux"))]
+                {
+                    Err(MahoutError::Cuda(
+                        "Precision conversion requires CUDA (Linux)".to_string(),
+                    ))
+                }
+            }
             (Precision::Float64, Precision::Float32) => {
                 #[cfg(target_os = "linux")]
                 {
