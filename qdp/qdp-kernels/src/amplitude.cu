@@ -617,6 +617,37 @@ int launch_l2_norm_f32(
     return (int)cudaGetLastError();
 }
 
+/// Returns the current device's max grid dimension (X), fallback to CUDA_MAX_GRID_DIM_1D if error.
+static size_t get_max_grid_dim_1d(void) {
+    static size_t cached_device = 0;
+    if (cached_device != 0) {
+        return cached_device;
+    }
+
+    int device = -1;
+    // Fallback to CUDA_MAX_GRID_DIM_1D if error
+    if (cudaGetDevice(&device) != cudaSuccess || device < 0) {
+        cached_device = CUDA_MAX_GRID_DIM_1D;
+        return cached_device;
+    }
+
+    int max_x = 0;
+    cudaError_t err = cudaDeviceGetAttribute(
+        &max_x,
+        cudaDevAttrMaxGridDimX,
+        device
+    );
+
+    // Fallback to CUDA_MAX_GRID_DIM_1D if error
+    if (err != cudaSuccess || max_x <= 0) {
+        cached_device = CUDA_MAX_GRID_DIM_1D;
+        return cached_device;
+    }
+
+    cached_device = (size_t)max_x;
+    return cached_device;
+}
+
 /// Launch L2 norm reduction for a batch of vectors.
 /// Writes inverse norms for each sample into `inv_norms_out_d`.
 int launch_l2_norm_batch(
@@ -642,7 +673,7 @@ int launch_l2_norm_batch(
 
     const int blockSize = DEFAULT_BLOCK_SIZE;
     const size_t elements_per_block = blockSize * 2; // double2 per thread
-    const size_t max_grid = CUDA_MAX_GRID_DIM_1D; // CUDA grid dimension limit for 1D launch
+    const size_t max_grid = get_max_grid_dim_1d();
 
     if (num_samples > max_grid) {
         return cudaErrorInvalidValue;
@@ -707,7 +738,7 @@ int launch_l2_norm_batch_f32(
 
     const int blockSize = DEFAULT_BLOCK_SIZE;
     const size_t elements_per_block = blockSize * 2; // float2 per thread
-    const size_t max_grid = CUDA_MAX_GRID_DIM_1D; // CUDA grid dimension limit for 1D launch
+    const size_t max_grid = get_max_grid_dim_1d();
     if (num_samples > max_grid) {
         return cudaErrorInvalidValue;
     }

@@ -684,11 +684,12 @@ fn test_l2_norm_batch_kernel_grid_limit() {
         }
     };
 
-    // Test that num_samples exceeding CUDA_MAX_GRID_DIM_1D (65535) returns error
-    const MAX_GRID_DIM: usize = 65535;
-    let num_samples = MAX_GRID_DIM + 1; // Exceeds limit
-    let sample_len = 4;
+    let sample_len = 4usize;
+    // Limit is queried at runtime (Fermi 65535, CC 3.0+ 2^31-1). Test boundary behavior.
+    const AT_FERMI_LIMIT: usize = 65535;
+    const ABOVE_FERMI_LIMIT: usize = 65536;
 
+    let num_samples = ABOVE_FERMI_LIMIT;
     let input: Vec<f64> = vec![1.0; num_samples * sample_len];
     let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
     let mut norms_d = device.alloc_zeros::<f64>(num_samples).unwrap();
@@ -703,15 +704,40 @@ fn test_l2_norm_batch_kernel_grid_limit() {
         )
     };
 
-    // Should return error because num_samples exceeds grid limit
-    // cudaErrorInvalidValue = 1 (from cuda_error_to_string)
-    assert_eq!(
-        status, 1,
-        "Should reject num_samples exceeding CUDA_MAX_GRID_DIM_1D, got error code {}",
-        status
-    );
+    if status == 0 {
+        // Modern device: max grid >= 65536
+        println!(
+            "PASS: num_samples {} accepted (device has high grid limit)",
+            num_samples
+        );
+        return;
+    }
 
-    println!("PASS: Correctly rejected num_samples exceeding grid limit");
+    // Device limit is 65535 (Fermi or conservative fallback). Boundary must be accepted.
+    let num_samples_at_limit = AT_FERMI_LIMIT;
+    let input_at: Vec<f64> = vec![1.0; num_samples_at_limit * sample_len];
+    let input_d_at = device.htod_sync_copy(input_at.as_slice()).unwrap();
+    let mut norms_d_at = device.alloc_zeros::<f64>(num_samples_at_limit).unwrap();
+
+    let status_at = unsafe {
+        launch_l2_norm_batch(
+            *input_d_at.device_ptr() as *const f64,
+            num_samples_at_limit,
+            sample_len,
+            *norms_d_at.device_ptr_mut() as *mut f64,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(
+        status_at, 0,
+        "num_samples at device limit ({}) should be accepted, got error code {}",
+        num_samples_at_limit, status_at
+    );
+    println!(
+        "PASS: grid limit enforced (65536 rejected, {} accepted)",
+        num_samples_at_limit
+    );
 }
 
 #[test]
@@ -828,11 +854,11 @@ fn test_l2_norm_batch_kernel_grid_limit_f32() {
         }
     };
 
-    // Test that num_samples exceeding CUDA_MAX_GRID_DIM_1D (65535) returns error
-    const MAX_GRID_DIM: usize = 65535;
-    let num_samples = MAX_GRID_DIM + 1; // Exceeds limit
-    let sample_len = 2;
+    let sample_len = 2usize;
+    const AT_FERMI_LIMIT: usize = 65535;
+    const ABOVE_FERMI_LIMIT: usize = 65536;
 
+    let num_samples = ABOVE_FERMI_LIMIT;
     let input: Vec<f32> = vec![1.0; num_samples * sample_len];
     let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
     let mut norms_d = device.alloc_zeros::<f32>(num_samples).unwrap();
@@ -847,15 +873,38 @@ fn test_l2_norm_batch_kernel_grid_limit_f32() {
         )
     };
 
-    // Should return error because num_samples exceeds grid limit
-    // cudaErrorInvalidValue = 1 (from cuda_error_to_string)
-    assert_eq!(
-        status, 1,
-        "Should reject num_samples exceeding CUDA_MAX_GRID_DIM_1D (f32), got error code {}",
-        status
-    );
+    if status == 0 {
+        println!(
+            "PASS: num_samples {} accepted (f32, device has high grid limit)",
+            num_samples
+        );
+        return;
+    }
 
-    println!("PASS: Correctly rejected num_samples exceeding grid limit (f32)");
+    let num_samples_at_limit = AT_FERMI_LIMIT;
+    let input_at: Vec<f32> = vec![1.0; num_samples_at_limit * sample_len];
+    let input_d_at = device.htod_sync_copy(input_at.as_slice()).unwrap();
+    let mut norms_d_at = device.alloc_zeros::<f32>(num_samples_at_limit).unwrap();
+
+    let status_at = unsafe {
+        launch_l2_norm_batch_f32(
+            *input_d_at.device_ptr() as *const f32,
+            num_samples_at_limit,
+            sample_len,
+            *norms_d_at.device_ptr_mut() as *mut f32,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(
+        status_at, 0,
+        "num_samples at device limit ({}) should be accepted (f32), got error code {}",
+        num_samples_at_limit, status_at
+    );
+    println!(
+        "PASS: grid limit enforced (f32): 65536 rejected, {} accepted",
+        num_samples_at_limit
+    );
 }
 
 #[test]
