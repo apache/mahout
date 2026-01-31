@@ -1,4 +1,3 @@
-
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,21 +15,51 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# https://cwiki.apache.org/confluence/display/INFRA/Git+-+.asf.yaml+features
-
-publish:
-  whoami:    asf-site
-
-notifications:
-  discussions: issues@mahout.apache.org
-
+# https://cwiki.apache.org/confluence/display/INFRA/git+-+.asf.yaml+features
+---
 github:
+  description: "Apache Mahout - an environment for quickly creating scalable, performant machine learning applications."
+  homepage: https://mahout.apache.org/
+  # Social media preview image is not supported by GitHub API/asf.yaml, need to be uploaded
+  # manually in GitHub repository --> Settings --> click "Edit" in "Social preview"
+  # See also:
+  # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview
+  labels:
+    # Note that GitHub only supports <=20 labels/topics per repo! Pipeline will fail if you add more.
+    - apache-mahout
+    - mahout-qumat
+    - qumat-qdp
+    - python
+    - rust
+    - cuda
   features:
-    # Enable wiki for documentation
-    wiki: true
-    # Enable issue management
+    # Enable issues management
     issues: true
     # Enable projects for project management boards
     projects: true
+    # Enable wiki for documentation
+    wiki: false
     # Enable discussions
     discussions: true
+
+  enabled_merge_buttons:
+    squash: true
+    merge: false
+    rebase: false
+
+  pull_requests:
+    # allow auto-merge
+    allow_auto_merge: false
+    # auto-delete head branches after being merged
+    del_branch_on_merge: true
+
+  protected_branches:
+    main:
+      required_linear_history: true
+      required_signatures: false
+
+notifications:
+  commits: commits@mahout.apache.org
+  issues: issue@mahout.apache.org
+  pullrequests: commits@mahout.apache.org
+  discussions: commits@mahout.apache.org
