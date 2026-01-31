@@ -87,7 +87,7 @@ impl QuantumEncoder for IqpEncoder {
 
             let state_vector = {
                 crate::profile_scope!("GPU::Alloc");
-                GpuStateVector::new(device, num_qubits)?
+                GpuStateVector::new(device, num_qubits, crate::gpu::memory::Precision::Float64)?
             };
 
             let state_ptr = state_vector.ptr_f64().ok_or_else(|| {

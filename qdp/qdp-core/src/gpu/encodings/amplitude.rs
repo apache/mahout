@@ -70,7 +70,7 @@ impl QuantumEncoder for AmplitudeEncoder {
             // Allocate GPU state vector
             let state_vector = {
                 crate::profile_scope!("GPU::Alloc");
-                GpuStateVector::new(_device, num_qubits)?
+                GpuStateVector::new(_device, num_qubits, crate::gpu::memory::Precision::Float64)?
             };
 
             // Async Pipeline for large data

@@ -447,7 +447,7 @@ impl QdpEngine {
 
                 let state_vector = {
                     crate::profile_scope!("GPU::Alloc");
-                    gpu::GpuStateVector::new(&self.device, num_qubits)?
+                    gpu::GpuStateVector::new(&self.device, num_qubits, Precision::Float64)?
                 };
 
                 let inv_norm = {
@@ -508,7 +508,7 @@ impl QdpEngine {
 
                 let state_vector = {
                     crate::profile_scope!("GPU::Alloc");
-                    gpu::GpuStateVector::new(&self.device, num_qubits)?
+                    gpu::GpuStateVector::new(&self.device, num_qubits, Precision::Float64)?
                 };
 
                 let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
