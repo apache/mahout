@@ -35,6 +35,19 @@ mod profiling;
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
 
+#[cfg(target_os = "linux")]
+use std::ffi::c_void;
+
+// Throughput/latency pipeline runner: single path using QdpEngine and encode_batch in Rust.
+#[cfg(target_os = "linux")]
+mod pipeline_runner;
+
+#[cfg(target_os = "linux")]
+pub use pipeline_runner::{
+    DataSource, PipelineConfig, PipelineIterator, PipelineRunResult, run_latency_pipeline,
+    run_throughput_pipeline,
+};
+
 use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
@@ -45,6 +58,7 @@ use cudarc::driver::CudaDevice;
 ///
 /// Manages GPU context and dispatches encoding tasks.
 /// Provides unified interface for device management, memory allocation, and DLPack.
+#[derive(Clone)]
 pub struct QdpEngine {
     device: Arc<CudaDevice>,
     precision: Precision,
@@ -110,6 +124,15 @@ impl QdpEngine {
         &self.device
     }
 
+    /// Block until all GPU work on the default stream has completed.
+    /// Used by the generic pipeline and other callers that need to sync before timing.
+    #[cfg(target_os = "linux")]
+    pub fn synchronize(&self) -> Result<()> {
+        self.device
+            .synchronize()
+            .map_err(|e| MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e)))
+    }
+
     /// Encode multiple samples in a single fused kernel (most efficient)
     ///
     /// Allocates one large GPU buffer and launches a single batch kernel.
@@ -146,6 +169,37 @@ impl QdpEngine {
         let state_vector = state_vector.to_precision(&self.device, self.precision)?;
         let dlpack_ptr = state_vector.to_dlpack();
         Ok(dlpack_ptr)
+    }
+
+    /// Run dual-stream pipeline for encoding (H2D + kernel overlap). Exposes gpu::pipeline::run_dual_stream_pipeline.
+    /// Currently supports amplitude encoding (1D host_data). Does not return a tensor;
+    /// use for throughput measurement or when the encoded state is not needed.
+    ///
+    /// # Arguments
+    /// * `host_data` - 1D input data (e.g. single sample for amplitude)
+    /// * `num_qubits` - Number of qubits
+    /// * `encoding_method` - Strategy (currently only "amplitude" supported for this path)
+    #[cfg(target_os = "linux")]
+    pub fn run_dual_stream_encode(
+        &self,
+        host_data: &[f64],
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> Result<()> {
+        crate::profile_scope!("Mahout::RunDualStreamEncode");
+        match encoding_method.to_lowercase().as_str() {
+            "amplitude" => {
+                gpu::encodings::amplitude::AmplitudeEncoder::run_amplitude_dual_stream_pipeline(
+                    &self.device,
+                    host_data,
+                    num_qubits,
+                )
+            }
+            _ => Err(MahoutError::InvalidInput(format!(
+                "run_dual_stream_encode supports only 'amplitude' for now, got '{}'",
+                encoding_method
+            ))),
+        }
     }
 
     /// Streaming Parquet encoder with multi-threaded IO

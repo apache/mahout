@@ -22,14 +22,26 @@ Runs throughput and latency benchmarks multiple times (default 5), computes
 median/p95, gathers system metadata, and writes CSV + markdown report to
 qdp/docs/optimization/results/.
 
+Uses the Rust-optimized pipeline only (qumat_qdp.QdpBenchmark -> _qdp.run_throughput_pipeline_py).
+No Python for loop; all scheduling is in Rust.
+
 Set observability before running (recommended):
   export QDP_ENABLE_POOL_METRICS=1
   export QDP_ENABLE_OVERLAP_TRACKING=1
   export RUST_LOG=info
 
-Usage:
-  cd qdp/qdp-python/benchmark
-  uv run python run_pipeline_baseline.py --qubits 16 --batch-size 64 --prefetch 16 --batches 500 --trials 20
+Usage (from qdp-python):
+  cd qdp/qdp-python
+  uv run python benchmark/run_pipeline_baseline.py --qubits 16 --batch-size 64 --batches 500 --trials 20
+
+If you see "run_throughput_pipeline_py is missing", uv is using a cached wheel. Force a rebuild:
+  uv sync --refresh-package qumat-qdp
+  uv run python benchmark/run_pipeline_baseline.py ...
+
+Alternatively build and run without uv run:
+  maturin develop
+  .venv/bin/python benchmark/run_pipeline_baseline.py ...
+  # or: ./benchmark/run_baseline.sh ...
 """
 
 from __future__ import annotations
@@ -48,12 +60,16 @@ os.environ.setdefault("QDP_ENABLE_POOL_METRICS", "1")
 os.environ.setdefault("QDP_ENABLE_OVERLAP_TRACKING", "1")
 os.environ.setdefault("RUST_LOG", "info")
 
-from benchmark_latency import run_mahout as run_mahout_latency
-from benchmark_throughput import run_mahout as run_mahout_throughput
+# Add project root to path so qumat_qdp is importable when run as script
+_benchmark_dir = Path(__file__).resolve().parent
+_project_root = _benchmark_dir.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+from qumat_qdp import QdpBenchmark  # noqa: E402
 
 
 def _repo_root() -> Path:
-    # benchmark -> qdp-python -> qdp -> mahout (workspace root)
     return Path(__file__).resolve().parent.parent.parent.parent
 
 
@@ -116,13 +132,19 @@ def run_throughput_trials(
     trials: int,
     encoding: str,
 ) -> list[float]:
+    """Run throughput trials using the generic user API (QdpBenchmark)."""
     throughputs: list[float] = []
-    for i in range(trials):
-        _duration, throughput = run_mahout_throughput(
-            qubits, batches, batch_size, prefetch, encoding
+    for _ in range(trials):
+        result = (
+            QdpBenchmark(device_id=0)
+            .qubits(qubits)
+            .encoding(encoding)
+            .batches(batches, size=batch_size)
+            .prefetch(prefetch)
+            .run_throughput()
         )
-        if throughput > 0:
-            throughputs.append(throughput)
+        if result.vectors_per_sec > 0:
+            throughputs.append(result.vectors_per_sec)
     return throughputs
 
 
@@ -134,13 +156,19 @@ def run_latency_trials(
     trials: int,
     encoding: str,
 ) -> list[float]:
+    """Run latency trials using the generic user API (QdpBenchmark)."""
     latencies_ms: list[float] = []
-    for i in range(trials):
-        _duration, latency_ms = run_mahout_latency(
-            qubits, batches, batch_size, prefetch, encoding
+    for _ in range(trials):
+        result = (
+            QdpBenchmark(device_id=0)
+            .qubits(qubits)
+            .encoding(encoding)
+            .batches(batches, size=batch_size)
+            .prefetch(prefetch)
+            .run_latency()
         )
-        if latency_ms > 0:
-            latencies_ms.append(latency_ms)
+        if result.latency_ms_per_vector > 0:
+            latencies_ms.append(result.latency_ms_per_vector)
     return latencies_ms
 
 

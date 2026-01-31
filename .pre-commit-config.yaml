@@ -71,7 +71,7 @@ repos:
         name: cargo clippy
         language: system
         pass_filenames: false
-        entry: bash -c 'LIBTORCH_USE_PYTORCH=1 cargo clippy "$@"' --
+        entry: bash -c 'LIBTORCH_USE_PYTORCH=1 LIBTORCH_BYPASS_VERSION_CHECK=1 cargo clippy "$@"' --
         args:
           - --manifest-path
           - qdp/Cargo.toml

@@ -15,12 +15,20 @@
 // limitations under the License.
 
 use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
-use pyo3::exceptions::PyRuntimeError;
+use pyo3::exceptions::{PyRuntimeError, PyStopIteration};
 use pyo3::ffi;
 use pyo3::prelude::*;
 use qdp_core::dlpack::{DL_FLOAT, DLDeviceType, DLManagedTensor};
 use qdp_core::{Precision, QdpEngine as CoreEngine};
 use std::ffi::c_void;
+
+#[cfg(target_os = "linux")]
+use qdp_core::{PipelineConfig, PipelineIterator, PipelineRunResult, run_throughput_pipeline};
+
+/// Wraps raw DLPack pointer so it can cross `py.allow_threads` (closure return must be `Send`).
+/// Safe: DLPack pointer handover across contexts; GIL is released only during the closure.
+struct SendPtr(pub *mut DLManagedTensor);
+unsafe impl Send for SendPtr {}
 
 /// Quantum tensor wrapper implementing DLPack protocol
 ///
@@ -112,9 +120,7 @@ impl QuantumTensor {
 
         unsafe {
             let tensor = &(*self.ptr).dl_tensor;
-            // device_type is an enum, convert to integer
-            // kDLCUDA = 2, kDLCPU = 1
-            // Ref: https://github.com/dmlc/dlpack/blob/6ea9b3eb64c881f614cd4537f95f0e125a35555c/include/dlpack/dlpack.h#L76-L80
+            // DLPack device_type: kDLCUDA = 2, kDLCPU = 1
             let device_type = match tensor.device.device_type {
                 qdp_core::dlpack::DLDeviceType::kDLCUDA => 2,
                 qdp_core::dlpack::DLDeviceType::kDLCPU => 1,
@@ -150,6 +156,74 @@ impl Drop for QuantumTensor {
 // The DLManagedTensor pointer management is thread-safe via Arc in the deleter
 unsafe impl Send for QuantumTensor {}
 unsafe impl Sync for QuantumTensor {}
+
+/// Python iterator yielding one QuantumTensor (batch) per __next__. Releases GIL during next_batch().
+#[cfg(target_os = "linux")]
+#[pyclass]
+struct PyQuantumLoader {
+    inner: Option<PipelineIterator>,
+}
+
+#[cfg(target_os = "linux")]
+#[pymethods]
+impl PyQuantumLoader {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    /// Returns the next batch as QuantumTensor; raises StopIteration when exhausted. Releases GIL during encode.
+    fn __next__(mut slf: PyRefMut<'_, Self>, py: Python<'_>) -> PyResult<QuantumTensor> {
+        let mut inner_iter = match slf.inner.take() {
+            Some(it) => it,
+            None => return Err(PyStopIteration::new_err("loader exhausted")),
+        };
+
+        #[allow(deprecated)]
+        let result = py.allow_threads(move || {
+            let res = inner_iter.next_batch();
+            match res {
+                Ok(Some(ptr)) => Ok((inner_iter, Some(SendPtr(ptr)))),
+                Ok(None) => Ok((inner_iter, None)),
+                Err(e) => Err((inner_iter, e)),
+            }
+        });
+
+        match result {
+            Ok((returned_iter, Some(send_ptr))) => {
+                slf.inner = Some(returned_iter);
+                Ok(QuantumTensor {
+                    ptr: send_ptr.0,
+                    consumed: false,
+                })
+            }
+            Ok((_, None)) => Err(PyStopIteration::new_err("loader exhausted")),
+            Err((returned_iter, e)) => {
+                slf.inner = Some(returned_iter);
+                Err(PyRuntimeError::new_err(e.to_string()))
+            }
+        }
+    }
+}
+
+/// Stub PyQuantumLoader when not on Linux (CUDA pipeline not available).
+#[cfg(not(target_os = "linux"))]
+#[pyclass]
+struct PyQuantumLoader {}
+
+#[cfg(not(target_os = "linux"))]
+#[pymethods]
+impl PyQuantumLoader {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(&self, _py: Python<'_>) -> PyResult<QuantumTensor> {
+        Err(PyRuntimeError::new_err(
+            "QuantumDataLoader is only available on Linux (CUDA pipeline). \
+             Build and run from a Linux host with CUDA.",
+        ))
+    }
+}
 
 /// Helper to detect PyTorch tensor
 fn is_pytorch_tensor(obj: &Bound<'_, PyAny>) -> PyResult<bool> {
@@ -1052,6 +1126,180 @@ impl QdpEngine {
             consumed: false,
         })
     }
+
+    /// Create a synthetic-data loader iterator for use in Python `for qt in loader`.
+    ///
+    /// Yields one QuantumTensor (batch) per iteration; releases GIL during encode.
+    /// Use with QuantumDataLoader builder or directly for streaming encode.
+    ///
+    /// Args:
+    ///     total_batches: Number of batches to yield
+    ///     batch_size: Samples per batch
+    ///     num_qubits: Qubits per sample
+    ///     encoding_method: "amplitude", "angle", or "basis"
+    ///     seed: Optional RNG seed for reproducible synthetic data
+    ///
+    /// Returns:
+    ///     PyQuantumLoader: iterator yielding QuantumTensor per __next__
+    #[cfg(target_os = "linux")]
+    #[pyo3(signature = (total_batches, batch_size=64, num_qubits=16, encoding_method="amplitude", seed=None))]
+    fn create_synthetic_loader(
+        &self,
+        total_batches: usize,
+        batch_size: usize,
+        num_qubits: u32,
+        encoding_method: &str,
+        seed: Option<u64>,
+    ) -> PyResult<PyQuantumLoader> {
+        let config = PipelineConfig {
+            device_id: 0,
+            num_qubits,
+            batch_size,
+            total_batches,
+            encoding_method: encoding_method.to_string(),
+            seed,
+            warmup_batches: 0,
+        };
+        let iter = PipelineIterator::new_synthetic(self.engine.clone(), config)
+            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
+        Ok(PyQuantumLoader { inner: Some(iter) })
+    }
+
+    /// Stub when not on Linux: create_synthetic_loader is only implemented on Linux.
+    #[cfg(not(target_os = "linux"))]
+    #[pyo3(signature = (total_batches, batch_size=64, num_qubits=16, encoding_method="amplitude", seed=None))]
+    fn create_synthetic_loader(
+        &self,
+        total_batches: usize,
+        batch_size: usize,
+        num_qubits: u32,
+        encoding_method: &str,
+        seed: Option<u64>,
+    ) -> PyResult<PyQuantumLoader> {
+        let _ = (total_batches, batch_size, num_qubits, encoding_method, seed);
+        Err(PyRuntimeError::new_err(
+            "create_synthetic_loader is only available on Linux (CUDA pipeline). \
+             Build and run from a Linux host with CUDA.",
+        ))
+    }
+
+    /// Run dual-stream pipeline for encoding (H2D + kernel overlap). Internal API.
+    ///
+    /// Exposes run_dual_stream_pipeline from qdp-core. Accepts 1D host data (single sample).
+    /// Does not return a tensor; use for throughput measurement or when state is not needed.
+    /// Currently supports amplitude encoding only.
+    ///
+    /// Args:
+    ///     host_data: 1D input (list or NumPy array, float64)
+    ///     num_qubits: Number of qubits
+    ///     encoding_method: "amplitude" (other methods not yet supported for this path)
+    #[cfg(target_os = "linux")]
+    fn _encode_stream_internal(
+        &self,
+        host_data: &Bound<'_, PyAny>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<()> {
+        let data_slice: Vec<f64> = if host_data.hasattr("__array_interface__")? {
+            let array_1d = host_data.extract::<PyReadonlyArray1<f64>>().map_err(|_| {
+                PyRuntimeError::new_err("host_data must be 1D NumPy array with dtype float64")
+            })?;
+            array_1d
+                .as_slice()
+                .map_err(|_| PyRuntimeError::new_err("NumPy array must be contiguous (C-order)"))?
+                .to_vec()
+        } else {
+            host_data.extract::<Vec<f64>>().map_err(|_| {
+                PyRuntimeError::new_err("host_data must be 1D list/array of float64")
+            })?
+        };
+        self.engine
+            .run_dual_stream_encode(&data_slice, num_qubits, encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("run_dual_stream_encode failed: {}", e)))
+    }
+}
+
+/// Runs the full throughput pipeline in Rust with GIL released. Returns (duration_sec, vectors_per_sec, latency_ms_per_vector).
+#[cfg(target_os = "linux")]
+#[pyfunction]
+#[pyo3(signature = (device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None))]
+#[allow(clippy::too_many_arguments)]
+fn run_throughput_pipeline_py_impl(
+    py: Python<'_>,
+    device_id: usize,
+    num_qubits: u32,
+    batch_size: usize,
+    total_batches: usize,
+    encoding_method: &str,
+    warmup_batches: usize,
+    seed: Option<u64>,
+) -> PyResult<(f64, f64, f64)> {
+    let encoding_method = encoding_method.to_string();
+    #[allow(deprecated)]
+    let result: Result<PipelineRunResult, qdp_core::MahoutError> = py.allow_threads(move || {
+        let config = PipelineConfig {
+            device_id,
+            num_qubits,
+            batch_size,
+            total_batches,
+            encoding_method,
+            seed,
+            warmup_batches,
+        };
+        run_throughput_pipeline(&config)
+    });
+    let res = result.map_err(|e: qdp_core::MahoutError| PyRuntimeError::new_err(e.to_string()))?;
+    Ok((
+        res.duration_sec,
+        res.vectors_per_sec,
+        res.latency_ms_per_vector,
+    ))
+}
+
+/// Stub when not on Linux: run_throughput_pipeline_py is only implemented on Linux (CUDA pipeline).
+#[cfg(not(target_os = "linux"))]
+#[pyfunction]
+#[pyo3(signature = (device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None))]
+fn run_throughput_pipeline_py_impl(
+    _py: Python<'_>,
+    _device_id: usize,
+    _num_qubits: u32,
+    _batch_size: usize,
+    _total_batches: usize,
+    _encoding_method: &str,
+    _warmup_batches: usize,
+    _seed: Option<u64>,
+) -> PyResult<(f64, f64, f64)> {
+    Err(PyRuntimeError::new_err(
+        "run_throughput_pipeline_py is only available on Linux (CUDA pipeline). \
+         Build and run from a Linux host with CUDA.",
+    ))
+}
+
+/// Public wrapper so the same name is always present in the module (import never fails).
+#[pyfunction]
+#[pyo3(signature = (device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None))]
+#[allow(clippy::too_many_arguments)]
+fn run_throughput_pipeline_py(
+    py: Python<'_>,
+    device_id: usize,
+    num_qubits: u32,
+    batch_size: usize,
+    total_batches: usize,
+    encoding_method: &str,
+    warmup_batches: usize,
+    seed: Option<u64>,
+) -> PyResult<(f64, f64, f64)> {
+    run_throughput_pipeline_py_impl(
+        py,
+        device_id,
+        num_qubits,
+        batch_size,
+        total_batches,
+        encoding_method,
+        warmup_batches,
+        seed,
+    )
 }
 
 /// Quantum Data Plane (QDP) Python module
@@ -1059,13 +1307,12 @@ impl QdpEngine {
 /// GPU-accelerated quantum data encoding with DLPack integration.
 #[pymodule]
 fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    // Initialize Rust logging system - respect RUST_LOG environment variable
-    // Ref: https://docs.rs/env_logger/latest/env_logger/
-    // try_init() won't fail if logger is already initialized (e.g., by another library)
-    // This allows Rust log messages to be visible when RUST_LOG is set
+    // Respect RUST_LOG; try_init() is idempotent if already initialized
     let _ = env_logger::Builder::from_default_env().try_init();
 
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
+    m.add_class::<PyQuantumLoader>()?;
+    m.add_function(pyo3::wrap_pyfunction!(run_throughput_pipeline_py, m)?)?;
     Ok(())
 }

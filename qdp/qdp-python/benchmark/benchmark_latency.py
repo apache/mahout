@@ -26,12 +26,20 @@ Run:
 from __future__ import annotations
 
 import argparse
+import sys
 import time
+from pathlib import Path
 
 import torch
 
-from _qdp import QdpEngine
-from utils import normalize_batch, prefetched_batches
+# Add project root to path so qumat_qdp is importable when run as script
+_script_dir = Path(__file__).resolve().parent
+_project_root = _script_dir.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+from benchmark.utils import normalize_batch, prefetched_batches  # noqa: E402
+from qumat_qdp import QdpBenchmark  # noqa: E402
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -92,30 +100,25 @@ def run_mahout(
     prefetch: int,
     encoding_method: str = "amplitude",
 ):
+    """Run Mahout latency using the generic user API (QdpBenchmark)."""
     try:
-        engine = QdpEngine(0)
+        result = (
+            QdpBenchmark(device_id=0)
+            .qubits(num_qubits)
+            .encoding(encoding_method)
+            .batches(total_batches, size=batch_size)
+            .prefetch(prefetch)
+            .run_latency()
+        )
     except Exception as exc:
         print(f"[Mahout] Init failed: {exc}")
         return 0.0, 0.0
 
-    vector_len = num_qubits if encoding_method == "angle" else (1 << num_qubits)
-    sync_cuda()
-    start = time.perf_counter()
-    processed = 0
-
-    for batch in prefetched_batches(
-        total_batches, batch_size, vector_len, prefetch, encoding_method
-    ):
-        normalized = normalize_batch(batch, encoding_method)
-        qtensor = engine.encode(normalized, num_qubits, encoding_method)
-        _ = torch.utils.dlpack.from_dlpack(qtensor)
-        processed += normalized.shape[0]
-
-    sync_cuda()
-    duration = time.perf_counter() - start
-    latency_ms = (duration / processed) * 1000 if processed > 0 else 0.0
-    print(f"  Total Time: {duration:.4f} s ({latency_ms:.3f} ms/vector)")
-    return duration, latency_ms
+    print(
+        f"  Total Time: {result.duration_sec:.4f} s "
+        f"({result.latency_ms_per_vector:.3f} ms/vector)"
+    )
+    return result.duration_sec, result.latency_ms_per_vector
 
 
 def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch: int):
