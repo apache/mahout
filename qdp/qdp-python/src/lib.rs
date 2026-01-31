@@ -18,7 +18,7 @@ use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::ffi;
 use pyo3::prelude::*;
-use qdp_core::dlpack::DLManagedTensor;
+use qdp_core::dlpack::{DL_FLOAT, DLDeviceType, DLManagedTensor};
 use qdp_core::{Precision, QdpEngine as CoreEngine};
 use std::ffi::c_void;
 
@@ -423,24 +423,35 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
     // Note: PyTorch's __dlpack__ uses the default stream when called without arguments
     let capsule = tensor.call_method0("__dlpack__")?;
 
-    // Extract the DLManagedTensor pointer from the capsule
     const DLTENSOR_NAME: &[u8] = b"dltensor\0";
 
-    unsafe {
+    // SAFETY: capsule is a valid PyCapsule from tensor.__dlpack__(). DLTENSOR_NAME is a
+    // null-terminated C string for the lifetime of the call. We only read the capsule
+    // and call PyCapsule_IsValid / PyCapsule_GetPointer; we do not invalidate the capsule.
+    let managed_ptr = unsafe {
         let capsule_ptr = capsule.as_ptr();
-        let managed_ptr =
-            ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
-                as *mut DLManagedTensor;
-
-        if managed_ptr.is_null() {
+        if ffi::PyCapsule_IsValid(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) == 0 {
+            return Err(PyRuntimeError::new_err(
+                "Invalid DLPack capsule (expected 'dltensor')",
+            ));
+        }
+        let ptr = ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
+            as *mut DLManagedTensor;
+        if ptr.is_null() {
             return Err(PyRuntimeError::new_err(
                 "Failed to extract DLManagedTensor from PyCapsule",
             ));
         }
+        ptr
+    };
 
+    // SAFETY: managed_ptr is non-null and was returned by PyCapsule_GetPointer for a valid
+    // "dltensor" capsule, so it points to a valid DLManagedTensor. The capsule (and thus
+    // the tensor) is held by the caller for the duration of this function. We read fields
+    // and create slices from shape/strides only when non-null and ndim is valid.
+    unsafe {
         let dl_tensor = &(*managed_ptr).dl_tensor;
 
-        // Extract data pointer with null check
         if dl_tensor.data.is_null() {
             return Err(PyRuntimeError::new_err(
                 "DLPack tensor has null data pointer",
@@ -448,21 +459,89 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
         }
         let data_ptr = dl_tensor.data as *const c_void;
 
-        // Extract shape
+        if dl_tensor.device.device_type != DLDeviceType::kDLCUDA {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor must be on CUDA device",
+            ));
+        }
+
+        if dl_tensor.dtype.code != DL_FLOAT
+            || dl_tensor.dtype.bits != 64
+            || dl_tensor.dtype.lanes != 1
+        {
+            return Err(PyRuntimeError::new_err(format!(
+                "DLPack tensor must be float64 (code={}, bits={}, lanes={})",
+                dl_tensor.dtype.code, dl_tensor.dtype.bits, dl_tensor.dtype.lanes
+            )));
+        }
+
+        if !dl_tensor
+            .byte_offset
+            .is_multiple_of(std::mem::size_of::<f64>() as u64)
+        {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor byte_offset is not aligned for float64",
+            ));
+        }
+
+        let data_ptr =
+            (dl_tensor.data as *const u8).add(dl_tensor.byte_offset as usize) as *const f64;
+
         let ndim = dl_tensor.ndim as usize;
+        // SAFETY: shape pointer is valid for ndim elements when non-null (DLPack contract).
         let shape = if ndim > 0 && !dl_tensor.shape.is_null() {
             std::slice::from_raw_parts(dl_tensor.shape, ndim).to_vec()
         } else {
             vec![]
         };
 
-        // Extract device_id
+        if ndim == 0 || shape.is_empty() {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor must have at least 1 dimension",
+            ));
+        }
+
+        if !dl_tensor.strides.is_null() {
+            // SAFETY: strides pointer is valid for ndim elements (DLPack contract).
+            let strides = std::slice::from_raw_parts(dl_tensor.strides, ndim);
+            match ndim {
+                1 => {
+                    let expected = 1_i64;
+                    if strides[0] != expected {
+                        return Err(PyRuntimeError::new_err(format!(
+                            "DLPack tensor must be contiguous: stride[0]={}, expected {}",
+                            strides[0], expected
+                        )));
+                    }
+                }
+                2 => {
+                    if shape.len() < 2 {
+                        return Err(PyRuntimeError::new_err(
+                            "DLPack tensor must be contiguous (shape len < 2)",
+                        ));
+                    }
+                    let expected_stride_1 = 1_i64;
+                    let expected_stride_0 = shape[1];
+                    if strides[1] != expected_stride_1 || strides[0] != expected_stride_0 {
+                        return Err(PyRuntimeError::new_err(format!(
+                            "DLPack tensor must be contiguous: strides=[{}, {}], expected [{}, {}] (expected[1]=shape[1])",
+                            strides[0], strides[1], expected_stride_0, expected_stride_1
+                        )));
+                    }
+                }
+                _ => {
+                    return Err(PyRuntimeError::new_err(
+                        "DLPack tensor must be 1D or 2D for encoding",
+                    ));
+                }
+            }
+        }
+
         let device_id = dl_tensor.device.device_id;
 
-        // Rename the capsule to "used_dltensor" as per DLPack protocol
-        // This prevents PyTorch from trying to delete it when the capsule is garbage collected
         const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
-        ffi::PyCapsule_SetName(capsule_ptr, USED_DLTENSOR_NAME.as_ptr() as *const i8);
+        // SAFETY: capsule is the same PyCapsule we used above; renaming is allowed and does not free it.
+        ffi::PyCapsule_SetName(capsule.as_ptr(), USED_DLTENSOR_NAME.as_ptr() as *const i8);
 
         Ok(DLPackTensorInfo {
             managed_ptr,
