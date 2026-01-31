@@ -148,20 +148,20 @@ const config: Config = {
               to: '/docs/qumat',
             },
             {
-              label: 'Qumat Core',
-              to: '/docs/qumat/core',
+              label: 'Getting Started',
+              to: '/docs/qumat/getting-started',
             },
             {
-              label: 'QDP (Quantum Data Plane)',
-              to: '/docs/qumat/qdp',
+              label: 'QDP (Data Encoding)',
+              to: '/docs/qdp',
             },
             {
               label: 'Quantum Computing Primer',
-              to: '/docs/qumat/quantum-computing-primer',
+              to: '/docs/learning/quantum-computing-primer',
             },
             {
-              label: 'Papers',
-              to: '/docs/qumat/papers',
+              label: 'Research Papers',
+              to: '/docs/learning/papers',
             },
           ],
         },
@@ -231,11 +231,11 @@ const config: Config = {
             },
             {
               label: 'Getting Started',
-              to: '/docs/getting-started',
+              to: '/docs/qumat/getting-started',
             },
             {
               label: 'API Reference',
-              to: '/docs/api',
+              to: '/docs/qumat/api',
             },
           ],
         },

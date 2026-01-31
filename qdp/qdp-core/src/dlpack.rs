@@ -16,9 +16,92 @@
 
 // DLPack protocol for zero-copy GPU memory sharing with PyTorch
 
+use crate::error::Result;
+#[cfg(target_os = "linux")]
+use crate::error::{MahoutError, cuda_error_to_string};
 use crate::gpu::memory::{BufferStorage, GpuStateVector, Precision};
 use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
+
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_ffi::{
+    CUDA_EVENT_DISABLE_TIMING, cudaEventCreateWithFlags, cudaEventDestroy, cudaEventRecord,
+    cudaStreamWaitEvent,
+};
+
+/// DLPack CUDA stream sentinel values (legacy/per-thread default).
+/// These match cudaStreamLegacy/cudaStreamPerThread in the CUDA runtime.
+#[allow(clippy::manual_dangling_ptr)]
+pub const CUDA_STREAM_LEGACY: *mut c_void = 1 as *mut c_void;
+#[allow(clippy::manual_dangling_ptr)]
+pub const CUDA_STREAM_PER_THREAD: *mut c_void = 2 as *mut c_void;
+
+/// Map DLPack stream integer to a CUDA stream pointer.
+pub fn dlpack_stream_to_cuda(stream: i64) -> *mut c_void {
+    match stream {
+        1 => CUDA_STREAM_LEGACY,
+        2 => CUDA_STREAM_PER_THREAD,
+        _ => stream as *mut c_void,
+    }
+}
+
+#[cfg(target_os = "linux")]
+/// # Safety
+/// `stream` must be a valid CUDA stream pointer or one of the CUDA sentinel
+/// values (legacy/per-thread default). Passing any other pointer is undefined.
+pub unsafe fn synchronize_stream(stream: *mut c_void) -> Result<()> {
+    if stream.is_null() {
+        return Ok(());
+    }
+
+    let mut event: *mut c_void = std::ptr::null_mut();
+    let ret = unsafe { cudaEventCreateWithFlags(&mut event, CUDA_EVENT_DISABLE_TIMING) };
+    if ret != 0 {
+        return Err(MahoutError::Cuda(format!(
+            "cudaEventCreateWithFlags failed: {} ({})",
+            ret,
+            cuda_error_to_string(ret)
+        )));
+    }
+
+    let record_ret = unsafe { cudaEventRecord(event, std::ptr::null_mut()) };
+    if record_ret != 0 {
+        let _ = unsafe { cudaEventDestroy(event) };
+        return Err(MahoutError::Cuda(format!(
+            "cudaEventRecord failed: {} ({})",
+            record_ret,
+            cuda_error_to_string(record_ret)
+        )));
+    }
+
+    let wait_ret = unsafe { cudaStreamWaitEvent(stream, event, 0) };
+    if wait_ret != 0 {
+        let _ = unsafe { cudaEventDestroy(event) };
+        return Err(MahoutError::Cuda(format!(
+            "cudaStreamWaitEvent failed: {} ({})",
+            wait_ret,
+            cuda_error_to_string(wait_ret)
+        )));
+    }
+
+    let destroy_ret = unsafe { cudaEventDestroy(event) };
+    if destroy_ret != 0 {
+        return Err(MahoutError::Cuda(format!(
+            "cudaEventDestroy failed: {} ({})",
+            destroy_ret,
+            cuda_error_to_string(destroy_ret)
+        )));
+    }
+
+    Ok(())
+}
+
+#[cfg(not(target_os = "linux"))]
+/// # Safety
+/// No-op on non-Linux targets, kept unsafe to match the Linux signature.
+pub unsafe fn synchronize_stream(_stream: *mut c_void) -> Result<()> {
+    Ok(())
+}
 
 // DLPack C structures (matching dlpack/dlpack.h)
 

@@ -16,6 +16,8 @@
 
 #[cfg(target_os = "linux")]
 pub mod buffer_pool;
+#[cfg(target_os = "linux")]
+pub(crate) mod cuda_sync;
 pub mod encodings;
 pub mod memory;
 #[cfg(target_os = "linux")]

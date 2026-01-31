@@ -55,7 +55,7 @@ The variational principle is a foundational concept in quantum mechanics, especi
 
 ### Algorithm Examples
 
-- **Variational Quantum Eigensolver (VQE):** A VQA designed to find the eigenvalues of a Hamiltonian, which is crucial in quantum chemistry for determining molecule energy levels. VQE encodes the Hamiltonian of a molecule into a PQC. The circuit parameters are tuned using a classical optimizer to minimize the expectation value of the Hamiltonian, thereby approximating the molecule’s ground state energy.
+- **Variational Quantum Eigensolver (VQE):** A VQA designed to find the eigenvalues of a Hamiltonian, which is crucial in quantum chemistry for determining molecule energy levels. VQE encodes the Hamiltonian of a molecule into a PQC. The circuit parameters are tuned using a classical optimizer to minimize the expectation value of the Hamiltonian, thereby approximating the molecule's ground state energy.
 - **Quantum Approximate Optimization Algorithm (QAOA):** This algorithm is used for solving combinatorial optimization problems. QAOA represents problem constraints as Hamiltonians and finds the bit string that minimizes these constraints. The algorithm uses a PQC to approximate the solution state, systematically optimizing its parameters to improve the solution quality.
 
 ### Role of PQCs
@@ -94,7 +94,7 @@ When designing parameterized quantum circuits, a critical challenge is balancing
 
 - **Circuit Depth:** A deeper circuit can potentially represent more complex states but also incurs higher noise and decoherence in real quantum hardware. The depth must stay within the coherence time limits of the quantum device to prevent excessive error accumulation.
 
-- **Expressibility:** This refers to the circuit’s ability to cover a vast swath of the Hilbert space. More expressibility generally means the circuit can represent a broader range of quantum states, thereby solving a more extensive set of problems or finding better approximations.
+- **Expressibility:** This refers to the circuit's ability to cover a vast swath of the Hilbert space. More expressibility generally means the circuit can represent a broader range of quantum states, thereby solving a more extensive set of problems or finding better approximations.
 
 The trade-offs must be carefully considered when designing circuits, especially in hardware where decoherence and gate error rates limit the practical depth of any quantum circuit.
 

@@ -33,12 +33,15 @@ use cudarc::driver::CudaDevice;
 #[cfg(target_os = "linux")]
 use crate::gpu::cuda_ffi::cudaMemsetAsync;
 #[cfg(target_os = "linux")]
+use crate::gpu::cuda_sync::sync_cuda_stream;
+#[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 #[cfg(target_os = "linux")]
 use cudarc::driver::{DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
     launch_amplitude_encode, launch_amplitude_encode_batch, launch_l2_norm, launch_l2_norm_batch,
+    launch_l2_norm_f32,
 };
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
@@ -437,6 +440,18 @@ impl AmplitudeEncoder {
         input_ptr: *const f64,
         len: usize,
     ) -> Result<f64> {
+        unsafe {
+            Self::calculate_inv_norm_gpu_with_stream(device, input_ptr, len, std::ptr::null_mut())
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    pub(crate) unsafe fn calculate_inv_norm_gpu_with_stream(
+        device: &Arc<CudaDevice>,
+        input_ptr: *const f64,
+        len: usize,
+        stream: *mut c_void,
+    ) -> Result<f64> {
         crate::profile_scope!("GPU::NormSingle");
 
         let mut norm_buffer = device.alloc_zeros::<f64>(1).map_err(|e| {
@@ -448,7 +463,7 @@ impl AmplitudeEncoder {
                 input_ptr,
                 len,
                 *norm_buffer.device_ptr_mut() as *mut f64,
-                std::ptr::null_mut(), // default stream
+                stream,
             )
         };
 
@@ -460,6 +475,8 @@ impl AmplitudeEncoder {
             )));
         }
 
+        sync_cuda_stream(stream, "Norm stream synchronize failed")?;
+
         let inv_norm_host = device
             .dtoh_sync_copy(&norm_buffer)
             .map_err(|e| MahoutError::Cuda(format!("Failed to copy norm to host: {:?}", e)))?;
@@ -468,6 +485,63 @@ impl AmplitudeEncoder {
         if inv_norm == 0.0 || !inv_norm.is_finite() {
             return Err(MahoutError::InvalidInput(
                 "Input data has zero or non-finite norm (contains NaN, Inf, or all zeros)"
+                    .to_string(),
+            ));
+        }
+
+        Ok(inv_norm)
+    }
+
+    /// Compute inverse L2 norm on GPU for float32 input using the reduction kernel.
+    ///
+    /// # Arguments
+    /// * `device` - CUDA device reference
+    /// * `input_ptr` - Device pointer to input data (f32 array on GPU)
+    /// * `len` - Number of f32 elements
+    ///
+    /// # Returns
+    /// The inverse L2 norm (1/||x||_2) of the input data as `f32`.
+    ///
+    /// # Safety
+    /// The caller must ensure `input_ptr` points to valid GPU memory containing
+    /// at least `len` f32 elements on the same device as `device`.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn calculate_inv_norm_gpu_f32(
+        device: &Arc<CudaDevice>,
+        input_ptr: *const f32,
+        len: usize,
+    ) -> Result<f32> {
+        crate::profile_scope!("GPU::NormSingleF32");
+
+        let mut norm_buffer = device.alloc_zeros::<f32>(1).map_err(|e| {
+            MahoutError::MemoryAllocation(format!("Failed to allocate f32 norm buffer: {:?}", e))
+        })?;
+
+        let ret = unsafe {
+            launch_l2_norm_f32(
+                input_ptr,
+                len,
+                *norm_buffer.device_ptr_mut() as *mut f32,
+                std::ptr::null_mut(), // default stream
+            )
+        };
+
+        if ret != 0 {
+            return Err(MahoutError::KernelLaunch(format!(
+                "Norm kernel f32 failed: {} ({})",
+                ret,
+                cuda_error_to_string(ret)
+            )));
+        }
+
+        let inv_norm_host = device
+            .dtoh_sync_copy(&norm_buffer)
+            .map_err(|e| MahoutError::Cuda(format!("Failed to copy f32 norm to host: {:?}", e)))?;
+
+        let inv_norm = inv_norm_host.first().copied().unwrap_or(0.0);
+        if inv_norm == 0.0 || !inv_norm.is_finite() {
+            return Err(MahoutError::InvalidInput(
+                "Input data (f32) has zero or non-finite norm (contains NaN, Inf, or all zeros)"
                     .to_string(),
             ));
         }

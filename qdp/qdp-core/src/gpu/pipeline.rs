@@ -29,8 +29,10 @@ use crate::gpu::buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
 #[cfg(target_os = "linux")]
 use crate::gpu::cuda_ffi::{
     CUDA_EVENT_DISABLE_TIMING, CUDA_MEMCPY_HOST_TO_DEVICE, cudaEventCreateWithFlags,
-    cudaEventDestroy, cudaEventRecord, cudaMemcpyAsync, cudaStreamSynchronize, cudaStreamWaitEvent,
+    cudaEventDestroy, cudaEventRecord, cudaMemcpyAsync, cudaStreamWaitEvent,
 };
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_sync::sync_cuda_stream;
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 #[cfg(target_os = "linux")]
@@ -179,16 +181,10 @@ impl PipelineContext {
     /// The context and its copy stream must be valid and not destroyed while syncing.
     pub unsafe fn sync_copy_stream(&self) -> Result<()> {
         crate::profile_scope!("Pipeline::SyncCopy");
-        unsafe {
-            let ret = cudaStreamSynchronize(self.stream_copy.stream as *mut c_void);
-            if ret != 0 {
-                return Err(MahoutError::Cuda(format!(
-                    "cudaStreamSynchronize(copy) failed: {}",
-                    ret
-                )));
-            }
-        }
-        Ok(())
+        sync_cuda_stream(
+            self.stream_copy.stream as *mut c_void,
+            "cudaStreamSynchronize(copy) failed",
+        )
     }
 }
 
