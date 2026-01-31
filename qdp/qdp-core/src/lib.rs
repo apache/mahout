@@ -775,13 +775,8 @@ impl QdpEngine {
             gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
         }
 
-        if self.precision == Precision::Float32 {
-            Ok(state_vector.to_dlpack())
-        } else {
-            Err(MahoutError::NotImplemented(
-                "encode_from_gpu_ptr_f32 returns float32 state; engine precision Float64 is not supported for this path. Use encode_from_gpu_ptr with f64 input or set engine precision to Float32.".to_string(),
-            ))
-        }
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
+        Ok(state_vector.to_dlpack())
     }
 
     /// Encode batch from existing GPU pointer (zero-copy for CUDA tensors)
