@@ -348,6 +348,14 @@ impl QdpEngine {
         }
     }
 
+    /// Encode from existing GPU pointer with a specific CUDA stream.
+    ///
+    /// Same as [`encode_from_gpu_ptr`](Self::encode_from_gpu_ptr) but uses the given `stream`
+    /// for kernel launches. Pass null for default stream.
+    ///
+    /// # Safety
+    /// Same as [`encode_from_gpu_ptr`](Self::encode_from_gpu_ptr). Additionally, `stream` must
+    /// be a valid CUDA stream on the same device as the engine, or null.
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_from_gpu_ptr_with_stream(
         &self,
@@ -589,6 +597,14 @@ impl QdpEngine {
         }
     }
 
+    /// Encode batch from existing GPU pointer with a specific CUDA stream.
+    ///
+    /// Same as [`encode_batch_from_gpu_ptr`](Self::encode_batch_from_gpu_ptr) but uses the given
+    /// `stream` for kernel launches. Pass null for default stream.
+    ///
+    /// # Safety
+    /// Same as [`encode_batch_from_gpu_ptr`](Self::encode_batch_from_gpu_ptr). Additionally,
+    /// `stream` must be a valid CUDA stream on the same device as the engine, or null.
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_batch_from_gpu_ptr_with_stream(
         &self,
