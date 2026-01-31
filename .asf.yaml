@@ -60,6 +60,6 @@ github:
 
 notifications:
   commits: commits@mahout.apache.org
-  issues: issue@mahout.apache.org
+  issues: issues@mahout.apache.org
   pullrequests: commits@mahout.apache.org
   discussions: commits@mahout.apache.org
