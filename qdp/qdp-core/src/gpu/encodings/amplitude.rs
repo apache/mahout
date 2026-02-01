@@ -26,7 +26,7 @@ use super::QuantumEncoder;
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
-use crate::gpu::memory::GpuStateVector;
+use crate::gpu::memory::{GpuStateVector, Precision};
 use crate::gpu::pipeline::run_dual_stream_pipeline;
 use cudarc::driver::CudaDevice;
 
@@ -70,7 +70,7 @@ impl QuantumEncoder for AmplitudeEncoder {
             // Allocate GPU state vector
             let state_vector = {
                 crate::profile_scope!("GPU::Alloc");
-                GpuStateVector::new(_device, num_qubits)?
+                GpuStateVector::new(_device, num_qubits, Precision::Float64)?
             };
 
             // Async Pipeline for large data

@@ -24,7 +24,7 @@ use super::{QuantumEncoder, validate_qubit_count};
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
-use crate::gpu::memory::GpuStateVector;
+use crate::gpu::memory::{GpuStateVector, Precision};
 #[cfg(target_os = "linux")]
 use crate::gpu::pipeline::run_dual_stream_pipeline_aligned;
 use cudarc::driver::CudaDevice;
@@ -63,7 +63,7 @@ impl QuantumEncoder for AngleEncoder {
 
             let state_vector = {
                 crate::profile_scope!("GPU::Alloc");
-                GpuStateVector::new(device, num_qubits)?
+                GpuStateVector::new(device, num_qubits, Precision::Float64)?
             };
 
             let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
