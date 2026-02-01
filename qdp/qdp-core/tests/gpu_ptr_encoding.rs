@@ -155,14 +155,16 @@ fn test_encode_batch_from_gpu_ptr_basis_sample_size_not_one() {
     };
 
     // Basis batch expects sample_size == 1 (one index per sample).
-    let result =
-        unsafe { engine.encode_batch_from_gpu_ptr(std::ptr::null(), 2, 4, 2, "basis") };
+    let result = unsafe { engine.encode_batch_from_gpu_ptr(std::ptr::null(), 2, 4, 2, "basis") };
     assert!(result.is_err());
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
             assert!(msg.contains("sample_size=1") || msg.contains("one index"));
         }
-        _ => panic!("expected InvalidInput for sample_size != 1, got {:?}", result),
+        _ => panic!(
+            "expected InvalidInput for sample_size != 1, got {:?}",
+            result
+        ),
     }
 }
 
@@ -365,7 +367,10 @@ fn test_encode_from_gpu_ptr_basis_success() {
     unsafe {
         let managed = &mut *dlpack_ptr;
         assert!(managed.deleter.is_some(), "Deleter must be present");
-        let deleter = managed.deleter.take().expect("Deleter function pointer is missing");
+        let deleter = managed
+            .deleter
+            .take()
+            .expect("Deleter function pointer is missing");
         deleter(dlpack_ptr);
     }
 }
