@@ -15,7 +15,7 @@
 
 [project]
 name = "qumat"
-version = "0.5.0.dev0"
+version = "0.6.0"
 description = "A library for composing quantum machine learning."
 authors = [{ name = "Apache Mahout", email = "dev@mahout.apache.org" }]
 license = "Apache-2.0"
