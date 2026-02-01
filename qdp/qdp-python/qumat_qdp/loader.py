@@ -31,7 +31,8 @@ from __future__ import annotations
 
 from typing import Iterator, Optional
 
-# Lazy import _qdp until __iter__ is used
+# Lazy import _qdp until __iter__ is used: avoids import-time load when only
+# importing QuantumDataLoader, and defers extension/CUDA requirement until first use.
 _qdp: Optional[object] = None
 
 

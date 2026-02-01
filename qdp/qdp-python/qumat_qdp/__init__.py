@@ -29,7 +29,8 @@ Usage:
 
 from __future__ import annotations
 
-# Rust extension (built by maturin)
+# Rust extension (built by maturin). QdpEngine/QuantumTensor are public for
+# advanced use; QdpBenchmark and QuantumDataLoader are the recommended high-level API.
 import _qdp
 
 from qumat_qdp.api import (

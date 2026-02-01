@@ -21,24 +21,16 @@ Throughput benchmark using QuantumDataLoader (for qt in loader).
 Compares iterator-based throughput with run_throughput_pipeline_py.
 Expectation: loader version slightly slower due to Python boundary per batch.
 
-Usage (from qdp-python):
+Run from qdp-python directory (qumat_qdp must be importable, e.g. via uv):
   uv run python benchmark/benchmark_loader_throughput.py --qubits 16 --batches 200 --batch-size 64
 """
 
 from __future__ import annotations
 
 import argparse
-import sys
 import time
-from pathlib import Path
 
-# Add project root to path so qumat_qdp is importable when run as script
-_script_dir = Path(__file__).resolve().parent
-_project_root = _script_dir.parent
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-
-from qumat_qdp import QuantumDataLoader, QdpBenchmark  # noqa: E402
+from qumat_qdp import QuantumDataLoader, QdpBenchmark
 
 
 def run_loader_throughput(

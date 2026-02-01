@@ -18,28 +18,20 @@
 """
 Data-to-State latency benchmark: CPU RAM -> GPU VRAM.
 
-Run:
-    python qdp/qdp-python/benchmark/benchmark_latency.py --qubits 16 \
+Run from qdp-python directory (qumat_qdp must be importable, e.g. via uv):
+    uv run python benchmark/benchmark_latency.py --qubits 16 \\
         --batches 200 --batch-size 64 --prefetch 16
 """
 
 from __future__ import annotations
 
 import argparse
-import sys
 import time
-from pathlib import Path
 
 import torch
 
-# Add project root to path so qumat_qdp is importable when run as script
-_script_dir = Path(__file__).resolve().parent
-_project_root = _script_dir.parent
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-
-from benchmark.utils import normalize_batch, prefetched_batches  # noqa: E402
-from qumat_qdp import QdpBenchmark  # noqa: E402
+from benchmark.utils import normalize_batch, prefetched_batches
+from qumat_qdp import QdpBenchmark
 
 BAR = "=" * 70
 SEP = "-" * 70

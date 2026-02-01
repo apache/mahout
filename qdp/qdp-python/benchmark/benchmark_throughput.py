@@ -23,26 +23,18 @@ The workload mirrors the `qdp-core/examples/dataloader_throughput.rs` pipeline:
 - Prefetch on the CPU side to keep the GPU fed.
 - Encode vectors into amplitude states on GPU and run a tiny consumer op.
 
-Run:
-    python qdp/benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64
+Run from qdp-python directory (qumat_qdp must be importable, e.g. via uv):
+    uv run python benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64
 """
 
 import argparse
-import sys
 import time
-from pathlib import Path
 
 import numpy as np
 import torch
 
-# Add project root to path so qumat_qdp is importable when run as script
-_script_dir = Path(__file__).resolve().parent
-_project_root = _script_dir.parent
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-
-from benchmark.utils import normalize_batch, prefetched_batches  # noqa: E402
-from qumat_qdp import QdpBenchmark  # noqa: E402
+from benchmark.utils import normalize_batch, prefetched_batches
+from qumat_qdp import QdpBenchmark
 
 BAR = "=" * 70
 SEP = "-" * 70
