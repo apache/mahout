@@ -20,12 +20,14 @@ from pathlib import Path
 
 import pytest
 
-# Allow importing benchmark API from qdp-python/benchmark
-_bench_dir = (
-    Path(__file__).resolve().parent.parent.parent / "qdp" / "qdp-python" / "benchmark"
-)
-if _bench_dir.exists() and str(_bench_dir) not in __import__("sys").path:
-    __import__("sys").path.insert(0, str(_bench_dir))
+# Allow importing benchmark API from qdp-python/benchmark and qumat_qdp from qdp-python
+_sys = __import__("sys")
+_qdp_python = Path(__file__).resolve().parent.parent.parent / "qdp" / "qdp-python"
+_bench_dir = _qdp_python / "benchmark"
+if _qdp_python.exists() and str(_qdp_python) not in _sys.path:
+    _sys.path.insert(0, str(_qdp_python))
+if _bench_dir.exists() and str(_bench_dir) not in _sys.path:
+    _sys.path.insert(0, str(_bench_dir))
 
 from .qdp_test_utils import requires_qdp  # noqa: E402
 

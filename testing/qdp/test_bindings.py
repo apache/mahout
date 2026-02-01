@@ -438,9 +438,9 @@ def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
 
 @requires_qdp
 @pytest.mark.gpu
-@pytest.mark.parametrize("encoding_method", ["basis", "angle"])
+@pytest.mark.parametrize("encoding_method", ["basis"])
 def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
-    """Test error when using CUDA tensor with unsupported encoding method."""
+    """Test error when using CUDA tensor with unsupported encoding (CUDA supports amplitude and angle only)."""
     pytest.importorskip("torch")
     import torch
     from _qdp import QdpEngine
@@ -454,7 +454,10 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
     # Use non-zero data to avoid normalization issues
     data = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float64, device="cuda:0")
 
-    with pytest.raises(RuntimeError, match="only supports 'amplitude' method"):
+    with pytest.raises(
+        RuntimeError,
+        match="only supports 'amplitude' and 'angle' methods.*Use tensor.cpu\\(\\)",
+    ):
         engine.encode(data, 2, encoding_method)
 
 

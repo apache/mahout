@@ -29,20 +29,20 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Iterator, Optional
+from functools import lru_cache
+from typing import TYPE_CHECKING, Iterator, Optional
 
-# Lazy import _qdp until __iter__ is used: avoids import-time load when only
-# importing QuantumDataLoader, and defers extension/CUDA requirement until first use.
-_qdp: Optional[object] = None
+if TYPE_CHECKING:
+    import _qdp  # noqa: F401 -- for type checkers only
+
+# Lazy import _qdp at runtime until __iter__ is used; TYPE_CHECKING import above
+# is for type checkers only so they can resolve "_qdp.*" annotations if needed.
 
 
+@lru_cache(maxsize=1)
 def _get_qdp():
-    global _qdp
-    if _qdp is not None:
-        return _qdp
     import _qdp as m
 
-    _qdp = m
     return m
 
 
