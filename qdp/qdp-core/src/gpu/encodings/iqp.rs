@@ -20,7 +20,7 @@ use super::QuantumEncoder;
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
-use crate::gpu::memory::GpuStateVector;
+use crate::gpu::memory::{GpuStateVector, Precision};
 use cudarc::driver::CudaDevice;
 use std::sync::Arc;
 
@@ -87,7 +87,7 @@ impl QuantumEncoder for IqpEncoder {
 
             let state_vector = {
                 crate::profile_scope!("GPU::Alloc");
-                GpuStateVector::new(device, num_qubits, crate::gpu::memory::Precision::Float64)?
+                GpuStateVector::new(device, num_qubits, Precision::Float64)?
             };
 
             let state_ptr = state_vector.ptr_f64().ok_or_else(|| {

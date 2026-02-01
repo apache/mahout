@@ -276,30 +276,44 @@ fn get_torch_cuda_stream_ptr(tensor: &Bound<'_, PyAny>) -> PyResult<*mut c_void>
 }
 
 /// Validate a CUDA tensor for direct GPU encoding
-/// Checks: dtype=float64, contiguous, non-empty, device_id matches engine
+/// Checks: dtype matches encoding method, contiguous, non-empty, device_id matches engine
 fn validate_cuda_tensor_for_encoding(
     tensor: &Bound<'_, PyAny>,
     expected_device_id: usize,
     encoding_method: &str,
 ) -> PyResult<()> {
     let method = encoding_method.to_ascii_lowercase();
-    // Check encoding method support (currently amplitude and angle are supported for CUDA tensors)
-    if method != "amplitude" && method != "angle" {
-        return Err(PyRuntimeError::new_err(format!(
-            "CUDA tensor encoding currently only supports 'amplitude' and 'angle' methods, got '{}'. \
-             Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
-            encoding_method
-        )));
-    }
 
-    // Check dtype is float64
+    // Check encoding method support and dtype (ASCII lowercase for case-insensitive match).
     let dtype = tensor.getattr("dtype")?;
     let dtype_str: String = dtype.str()?.extract()?;
-    if !dtype_str.contains("float64") {
-        return Err(PyRuntimeError::new_err(format!(
-            "CUDA tensor must have dtype float64, got {}. Use tensor.to(torch.float64)",
-            dtype_str
-        )));
+    let dtype_str_lower = dtype_str.to_ascii_lowercase();
+    match method.as_str() {
+        "amplitude" | "angle" => {
+            if !dtype_str_lower.contains("float64") {
+                return Err(PyRuntimeError::new_err(format!(
+                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
+                     Use tensor.to(torch.float64)",
+                    method, dtype_str
+                )));
+            }
+        }
+        "basis" => {
+            if !dtype_str_lower.contains("int64") {
+                return Err(PyRuntimeError::new_err(format!(
+                    "CUDA tensor must have dtype int64 for basis encoding, got {}. \
+                     Use tensor.to(torch.int64)",
+                    dtype_str
+                )));
+            }
+        }
+        _ => {
+            return Err(PyRuntimeError::new_err(format!(
+                "CUDA tensor encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'. \
+                 Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
+                encoding_method
+            )));
+        }
     }
 
     // Check contiguous
@@ -370,7 +384,7 @@ struct DLPackTensorInfo {
     /// This is owned by this struct and will be freed via deleter on drop
     managed_ptr: *mut DLManagedTensor,
     /// Data pointer inside dl_tensor (GPU memory, owned by managed_ptr)
-    data_ptr: *const f64,
+    data_ptr: *const c_void,
     shape: Vec<i64>,
     /// CUDA device ID from DLPack metadata.
     /// Used for defensive validation against PyTorch API device ID.
@@ -530,7 +544,7 @@ fn extract_dlpack_tensor(_py: Python<'_>, tensor: &Bound<'_, PyAny>) -> PyResult
 
         Ok(DLPackTensorInfo {
             managed_ptr,
-            data_ptr,
+            data_ptr: data_ptr as *const std::ffi::c_void,
             shape,
             device_id,
         })
@@ -654,7 +668,7 @@ impl QdpEngine {
                         let ptr = unsafe {
                             self.engine
                                 .encode_from_gpu_ptr_with_stream(
-                                    tensor_info.data_ptr,
+                                    tensor_info.data_ptr as *const std::ffi::c_void,
                                     input_len,
                                     num_qubits,
                                     encoding_method,
@@ -677,7 +691,7 @@ impl QdpEngine {
                         let ptr = unsafe {
                             self.engine
                                 .encode_batch_from_gpu_ptr_with_stream(
-                                    tensor_info.data_ptr,
+                                    tensor_info.data_ptr as *const std::ffi::c_void,
                                     num_samples,
                                     sample_size,
                                     num_qubits,
