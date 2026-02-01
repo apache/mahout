@@ -1203,7 +1203,8 @@ def test_iqp_fwt_shared_vs_global_memory_threshold():
     engine = QdpEngine(0)
 
     # Test at and around the shared memory threshold
-    for num_qubits in [9, 10]:
+    # n <= 10: shared memory FWT, n > 10: global memory FWT (multi-launch)
+    for num_qubits in [9, 10, 11]:
         data_len = num_qubits + num_qubits * (num_qubits - 1) // 2
         data = [0.05 * i for i in range(data_len)]
 
