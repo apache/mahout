@@ -434,9 +434,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device.synchronize().map_err(|e| {
-                        MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e))
-                    })?;
+                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let state_vector = state_vector.to_precision(&self.device, self.precision)?;
@@ -486,9 +484,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device.synchronize().map_err(|e| {
-                        MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e))
-                    })?;
+                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let state_vector = state_vector.to_precision(&self.device, self.precision)?;
@@ -540,9 +536,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device.synchronize().map_err(|e| {
-                        MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e))
-                    })?;
+                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let state_vector = state_vector.to_precision(&self.device, self.precision)?;
@@ -620,14 +614,14 @@ impl QdpEngine {
         let state_len = 1usize << num_qubits;
         let method = encoding_method.to_ascii_lowercase();
 
+        if num_samples == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Number of samples cannot be zero".into(),
+            ));
+        }
+
         match method.as_str() {
             "amplitude" => {
-                if num_samples == 0 {
-                    return Err(MahoutError::InvalidInput(
-                        "Number of samples cannot be zero".into(),
-                    ));
-                }
-
                 if sample_size == 0 {
                     return Err(MahoutError::InvalidInput(
                         "Sample size cannot be zero".into(),
@@ -729,9 +723,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device
-                        .synchronize()
-                        .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let batch_state_vector =
@@ -740,12 +732,6 @@ impl QdpEngine {
             }
             "angle" => {
                 use cudarc::driver::DevicePtrMut;
-
-                if num_samples == 0 {
-                    return Err(MahoutError::InvalidInput(
-                        "Number of samples cannot be zero".into(),
-                    ));
-                }
 
                 if sample_size == 0 {
                     return Err(MahoutError::InvalidInput(
@@ -851,9 +837,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device
-                        .synchronize()
-                        .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let batch_state_vector =
@@ -861,12 +845,6 @@ impl QdpEngine {
                 Ok(batch_state_vector.to_dlpack())
             }
             "basis" => {
-                if num_samples == 0 {
-                    return Err(MahoutError::InvalidInput(
-                        "Number of samples cannot be zero".into(),
-                    ));
-                }
-
                 if sample_size != 1 {
                     return Err(MahoutError::InvalidInput(format!(
                         "Basis encoding expects sample_size=1 (one index per sample), got {}",
@@ -912,9 +890,7 @@ impl QdpEngine {
 
                 {
                     crate::profile_scope!("GPU::Synchronize");
-                    self.device
-                        .synchronize()
-                        .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
                 }
 
                 let batch_state_vector =
