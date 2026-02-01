@@ -1108,7 +1108,9 @@ def test_iqp_fwt_zero_params_gives_zero_state():
 
         # Should get |0...0⟩: amplitude 1 at index 0, 0 elsewhere
         state_len = 1 << num_qubits
-        expected = torch.zeros((1, state_len), dtype=torch_tensor.dtype, device="cuda:0")
+        expected = torch.zeros(
+            (1, state_len), dtype=torch_tensor.dtype, device="cuda:0"
+        )
         expected[0, 0] = 1.0 + 0j
 
         assert torch.allclose(torch_tensor, expected, atol=1e-6), (
@@ -1134,8 +1136,11 @@ def test_iqp_fwt_batch_normalization():
         batch_size = 8
 
         data = torch.tensor(
-            [[0.1 * (i + j * data_len) for i in range(data_len)] for j in range(batch_size)],
-            dtype=torch.float64
+            [
+                [0.1 * (i + j * data_len) for i in range(data_len)]
+                for j in range(batch_size)
+            ],
+            dtype=torch.float64,
         )
 
         qtensor = engine.encode(data, num_qubits, "iqp")

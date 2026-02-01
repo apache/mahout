@@ -33,7 +33,6 @@ import argparse
 import time
 
 import torch
-import numpy as np
 
 from _qdp import QdpEngine
 
@@ -64,7 +63,7 @@ def theoretical_speedup(n: int) -> float:
     New: O(n * 2^n)
     Speedup: 2^n / n
     """
-    return (2 ** n) / n
+    return (2**n) / n
 
 
 def benchmark_single_encode(
@@ -79,7 +78,11 @@ def benchmark_single_encode(
     Returns:
         (avg_time_ms, throughput_samples_per_sec)
     """
-    data_len = iqp_full_data_len(num_qubits) if encoding == "iqp" else iqp_z_data_len(num_qubits)
+    data_len = (
+        iqp_full_data_len(num_qubits)
+        if encoding == "iqp"
+        else iqp_z_data_len(num_qubits)
+    )
     data = [0.1 * i for i in range(data_len)]
 
     # Warmup
@@ -115,12 +118,19 @@ def benchmark_batch_encode(
     Returns:
         (avg_time_ms, throughput_samples_per_sec)
     """
-    data_len = iqp_full_data_len(num_qubits) if encoding == "iqp" else iqp_z_data_len(num_qubits)
+    data_len = (
+        iqp_full_data_len(num_qubits)
+        if encoding == "iqp"
+        else iqp_z_data_len(num_qubits)
+    )
 
     # Create batch data
     batch_data = torch.tensor(
-        [[0.1 * (i + j * data_len) for i in range(data_len)] for j in range(batch_size)],
-        dtype=torch.float64
+        [
+            [0.1 * (i + j * data_len) for i in range(data_len)]
+            for j in range(batch_size)
+        ],
+        dtype=torch.float64,
     )
 
     # Warmup
@@ -146,7 +156,11 @@ def benchmark_batch_encode(
 
 def verify_correctness(engine: QdpEngine, num_qubits: int, encoding: str) -> bool:
     """Verify that encoding produces normalized quantum states."""
-    data_len = iqp_full_data_len(num_qubits) if encoding == "iqp" else iqp_z_data_len(num_qubits)
+    data_len = (
+        iqp_full_data_len(num_qubits)
+        if encoding == "iqp"
+        else iqp_z_data_len(num_qubits)
+    )
     data = [0.1 * i for i in range(data_len)]
 
     qtensor = engine.encode(data, num_qubits, encoding)
@@ -238,7 +252,9 @@ def main():
     print(BAR)
     print("SINGLE SAMPLE ENCODING PERFORMANCE")
     print(BAR)
-    print(f"{'Encoding':<10} {'Qubits':>6} {'Time (ms)':>12} {'Throughput':>15} {'Theory Speedup':>15}")
+    print(
+        f"{'Encoding':<10} {'Qubits':>6} {'Time (ms)':>12} {'Throughput':>15} {'Theory Speedup':>15}"
+    )
     print(SEP)
 
     for enc in encodings:
@@ -247,14 +263,18 @@ def main():
                 engine, n, enc, args.iterations, args.warmup
             )
             theory = theoretical_speedup(n)
-            print(f"{enc:<10} {n:>6} {avg_time:>12.4f} {throughput:>12.1f}/s {theory:>15.1f}x")
+            print(
+                f"{enc:<10} {n:>6} {avg_time:>12.4f} {throughput:>12.1f}/s {theory:>15.1f}x"
+            )
         print()
 
     # Batch encoding benchmark
     print(BAR)
     print(f"BATCH ENCODING PERFORMANCE (batch_size={args.batch_size})")
     print(BAR)
-    print(f"{'Encoding':<10} {'Qubits':>6} {'Batch Time':>12} {'Throughput':>15} {'State Size':>12}")
+    print(
+        f"{'Encoding':<10} {'Qubits':>6} {'Batch Time':>12} {'Throughput':>15} {'State Size':>12}"
+    )
     print(SEP)
 
     for enc in encodings:
@@ -262,8 +282,10 @@ def main():
             avg_time, throughput = benchmark_batch_encode(
                 engine, n, enc, args.batch_size, args.iterations, args.warmup
             )
-            state_size = 2 ** n
-            print(f"{enc:<10} {n:>6} {avg_time:>10.4f}ms {throughput:>12.1f}/s {state_size:>12}")
+            state_size = 2**n
+            print(
+                f"{enc:<10} {n:>6} {avg_time:>10.4f}ms {throughput:>12.1f}/s {state_size:>12}"
+            )
         print()
 
     # Summary with theoretical vs actual analysis
@@ -272,12 +294,14 @@ def main():
     print(BAR)
     print("FWT optimization reduces complexity from O(4^n) to O(n * 2^n)")
     print()
-    print(f"{'Qubits':>6} {'Old O(4^n)':>15} {'New O(n*2^n)':>15} {'Theory Speedup':>15}")
+    print(
+        f"{'Qubits':>6} {'Old O(4^n)':>15} {'New O(n*2^n)':>15} {'Theory Speedup':>15}"
+    )
     print(SEP)
 
     for n in args.qubits:
-        old_ops = 4 ** n
-        new_ops = n * (2 ** n)
+        old_ops = 4**n
+        new_ops = n * (2**n)
         speedup = old_ops / new_ops
         print(f"{n:>6} {old_ops:>15,} {new_ops:>15,} {speedup:>15.1f}x")
 

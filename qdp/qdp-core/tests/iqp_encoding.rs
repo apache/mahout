@@ -618,7 +618,11 @@ fn test_iqp_fwt_threshold_boundary() {
 
         assert_eq!(tensor.ndim, 2, "Tensor should be 2D");
         let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
-        assert_eq!(shape_slice[1], 1 << num_qubits, "Should have 2^n amplitudes");
+        assert_eq!(
+            shape_slice[1],
+            1 << num_qubits,
+            "Should have 2^n amplitudes"
+        );
 
         println!(
             "PASS: IQP FWT threshold boundary test with shape [{}, {}]",
@@ -650,7 +654,8 @@ fn test_iqp_fwt_larger_qubit_counts() {
             .collect();
 
         let result = engine.encode(&data, num_qubits, "iqp");
-        let dlpack_ptr = result.expect(&format!("IQP encoding for {} qubits should succeed", num_qubits));
+        let dlpack_ptr = result
+            .unwrap_or_else(|_| panic!("IQP encoding for {} qubits should succeed", num_qubits));
         assert!(!dlpack_ptr.is_null());
 
         unsafe {
@@ -665,7 +670,10 @@ fn test_iqp_fwt_larger_qubit_counts() {
                 num_qubits
             );
 
-            println!("  {} qubits: shape [{}, {}] - PASS", num_qubits, shape_slice[0], shape_slice[1]);
+            println!(
+                "  {} qubits: shape [{}, {}] - PASS",
+                num_qubits, shape_slice[0], shape_slice[1]
+            );
 
             if let Some(deleter) = managed.deleter {
                 deleter(dlpack_ptr);
@@ -696,7 +704,8 @@ fn test_iqp_z_fwt_correctness() {
             .collect();
 
         let result = engine.encode(&data, num_qubits, "iqp-z");
-        let dlpack_ptr = result.expect(&format!("IQP-Z encoding for {} qubits should succeed", num_qubits));
+        let dlpack_ptr = result
+            .unwrap_or_else(|_| panic!("IQP-Z encoding for {} qubits should succeed", num_qubits));
         assert!(!dlpack_ptr.is_null());
 
         unsafe {
@@ -706,7 +715,10 @@ fn test_iqp_z_fwt_correctness() {
             let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
             assert_eq!(shape_slice[1], (1 << num_qubits) as i64);
 
-            println!("  IQP-Z {} qubits: shape [{}, {}] - PASS", num_qubits, shape_slice[0], shape_slice[1]);
+            println!(
+                "  IQP-Z {} qubits: shape [{}, {}] - PASS",
+                num_qubits, shape_slice[0], shape_slice[1]
+            );
 
             if let Some(deleter) = managed.deleter {
                 deleter(dlpack_ptr);
@@ -740,7 +752,12 @@ fn test_iqp_fwt_batch_various_sizes() {
             .collect();
 
         let result = engine.encode_batch(&batch_data, num_samples, sample_size, num_qubits, "iqp");
-        let dlpack_ptr = result.expect(&format!("IQP batch encoding for {} qubits should succeed", num_qubits));
+        let dlpack_ptr = result.unwrap_or_else(|_| {
+            panic!(
+                "IQP batch encoding for {} qubits should succeed",
+                num_qubits
+            )
+        });
         assert!(!dlpack_ptr.is_null());
 
         unsafe {
@@ -793,7 +810,10 @@ fn test_iqp_fwt_zero_parameters_identity() {
             let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
             assert_eq!(shape_slice[1], (1 << num_qubits) as i64);
 
-            println!("  IQP zero params {} qubits: verified shape - PASS", num_qubits);
+            println!(
+                "  IQP zero params {} qubits: verified shape - PASS",
+                num_qubits
+            );
 
             if let Some(deleter) = managed.deleter {
                 deleter(dlpack_ptr);
