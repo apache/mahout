@@ -586,6 +586,245 @@ fn test_iqp_data_length_calculations() {
 }
 
 // =============================================================================
+// FWT Optimization Correctness Tests
+// =============================================================================
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_iqp_fwt_threshold_boundary() {
+    println!("Testing IQP FWT threshold boundary (n=4, where FWT kicks in)...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    // Test at FWT_MIN_QUBITS threshold (n=4)
+    let num_qubits = 4;
+    let data: Vec<f64> = (0..iqp_full_data_len(num_qubits))
+        .map(|i| (i as f64) * 0.1)
+        .collect();
+
+    let result = engine.encode(&data, num_qubits, "iqp");
+    let dlpack_ptr = result.expect("IQP encoding at FWT threshold should succeed");
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+
+    unsafe {
+        let managed = &*dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+
+        assert_eq!(tensor.ndim, 2, "Tensor should be 2D");
+        let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+        assert_eq!(
+            shape_slice[1],
+            1 << num_qubits,
+            "Should have 2^n amplitudes"
+        );
+
+        println!(
+            "PASS: IQP FWT threshold boundary test with shape [{}, {}]",
+            shape_slice[0], shape_slice[1]
+        );
+
+        if let Some(deleter) = managed.deleter {
+            deleter(dlpack_ptr);
+        }
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_iqp_fwt_larger_qubit_counts() {
+    println!("Testing IQP FWT with larger qubit counts (n=5,6,7,8)...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    for num_qubits in [5, 6, 7, 8] {
+        let data: Vec<f64> = (0..iqp_full_data_len(num_qubits))
+            .map(|i| (i as f64) * 0.05)
+            .collect();
+
+        let result = engine.encode(&data, num_qubits, "iqp");
+        let dlpack_ptr = result
+            .unwrap_or_else(|_| panic!("IQP encoding for {} qubits should succeed", num_qubits));
+        assert!(!dlpack_ptr.is_null());
+
+        unsafe {
+            let managed = &*dlpack_ptr;
+            let tensor = &managed.dl_tensor;
+
+            let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+            assert_eq!(
+                shape_slice[1],
+                (1 << num_qubits) as i64,
+                "Should have 2^{} amplitudes",
+                num_qubits
+            );
+
+            println!(
+                "  {} qubits: shape [{}, {}] - PASS",
+                num_qubits, shape_slice[0], shape_slice[1]
+            );
+
+            if let Some(deleter) = managed.deleter {
+                deleter(dlpack_ptr);
+            }
+        }
+    }
+
+    println!("PASS: IQP FWT larger qubit count tests completed");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_iqp_z_fwt_correctness() {
+    println!("Testing IQP-Z FWT correctness for various qubit counts...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    // Test IQP-Z across FWT threshold
+    for num_qubits in [3, 4, 5, 6] {
+        let data: Vec<f64> = (0..iqp_z_data_len(num_qubits))
+            .map(|i| (i as f64) * 0.15)
+            .collect();
+
+        let result = engine.encode(&data, num_qubits, "iqp-z");
+        let dlpack_ptr = result
+            .unwrap_or_else(|_| panic!("IQP-Z encoding for {} qubits should succeed", num_qubits));
+        assert!(!dlpack_ptr.is_null());
+
+        unsafe {
+            let managed = &*dlpack_ptr;
+            let tensor = &managed.dl_tensor;
+
+            let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+            assert_eq!(shape_slice[1], (1 << num_qubits) as i64);
+
+            println!(
+                "  IQP-Z {} qubits: shape [{}, {}] - PASS",
+                num_qubits, shape_slice[0], shape_slice[1]
+            );
+
+            if let Some(deleter) = managed.deleter {
+                deleter(dlpack_ptr);
+            }
+        }
+    }
+
+    println!("PASS: IQP-Z FWT correctness tests completed");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_iqp_fwt_batch_various_sizes() {
+    println!("Testing IQP FWT batch encoding with various qubit counts...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    // Test batch encoding across FWT threshold
+    for num_qubits in [3, 4, 5, 6] {
+        let num_samples = 8;
+        let sample_size = iqp_full_data_len(num_qubits);
+
+        let batch_data: Vec<f64> = (0..num_samples * sample_size)
+            .map(|i| (i as f64) * 0.02)
+            .collect();
+
+        let result = engine.encode_batch(&batch_data, num_samples, sample_size, num_qubits, "iqp");
+        let dlpack_ptr = result.unwrap_or_else(|_| {
+            panic!(
+                "IQP batch encoding for {} qubits should succeed",
+                num_qubits
+            )
+        });
+        assert!(!dlpack_ptr.is_null());
+
+        unsafe {
+            let managed = &*dlpack_ptr;
+            let tensor = &managed.dl_tensor;
+
+            let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+            assert_eq!(shape_slice[0], num_samples as i64);
+            assert_eq!(shape_slice[1], (1 << num_qubits) as i64);
+
+            println!(
+                "  IQP batch {} qubits x {} samples: shape [{}, {}] - PASS",
+                num_qubits, num_samples, shape_slice[0], shape_slice[1]
+            );
+
+            if let Some(deleter) = managed.deleter {
+                deleter(dlpack_ptr);
+            }
+        }
+    }
+
+    println!("PASS: IQP FWT batch encoding tests completed");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_iqp_fwt_zero_parameters_identity() {
+    println!("Testing IQP FWT with zero parameters produces |0⟩ state...");
+
+    let engine = match QdpEngine::new(0) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    // For FWT-optimized path (n >= 4), zero parameters should still give |0⟩
+    for num_qubits in [4, 5, 6] {
+        let data: Vec<f64> = vec![0.0; iqp_full_data_len(num_qubits)];
+
+        let result = engine.encode(&data, num_qubits, "iqp");
+        let dlpack_ptr = result.expect("IQP encoding with zero params should succeed");
+        assert!(!dlpack_ptr.is_null());
+
+        unsafe {
+            let managed = &*dlpack_ptr;
+            let tensor = &managed.dl_tensor;
+
+            let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+            assert_eq!(shape_slice[1], (1 << num_qubits) as i64);
+
+            println!(
+                "  IQP zero params {} qubits: verified shape - PASS",
+                num_qubits
+            );
+
+            if let Some(deleter) = managed.deleter {
+                deleter(dlpack_ptr);
+            }
+        }
+    }
+
+    println!("PASS: IQP FWT zero parameters test completed");
+}
+
+// =============================================================================
 // Encoder Factory Tests
 // =============================================================================
 

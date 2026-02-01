@@ -1997,6 +1997,10 @@ benchmark = [
     { name = "torch", specifier = ">=2.2,<=2.9.0" },
     { name = "tqdm" },
 ]
+dev = [
+    { name = "pytest" },
+    { name = "torch", specifier = ">=2.2,<=2.9.0" },
+]
 
 [[package]]
 name = "requests"

@@ -1099,3 +1099,196 @@ def test_iqp_encode_errors():
     # Non-finite parameter (negative infinity)
     with pytest.raises(RuntimeError, match="must be finite"):
         engine.encode([float("-inf"), 0.0], 2, "iqp-z")
+
+
+# ==================== IQP FWT Optimization Tests ====================
+
+
+@pytest.mark.gpu
+def test_iqp_fwt_normalization():
+    """Test that FWT-optimized IQP produces normalized states (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Test across FWT threshold (FWT_MIN_QUBITS = 4)
+    for num_qubits in [3, 4, 5, 6, 7, 8]:
+        # Full IQP (n + n*(n-1)/2 parameters)
+        data_len = num_qubits + num_qubits * (num_qubits - 1) // 2
+        data = [0.1 * i for i in range(data_len)]
+
+        qtensor = engine.encode(data, num_qubits, "iqp")
+        torch_tensor = torch.from_dlpack(qtensor)
+
+        # Verify normalization (sum of |amplitude|^2 = 1)
+        norm = torch.sum(torch.abs(torch_tensor) ** 2)
+        assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6), (
+            f"IQP {num_qubits} qubits not normalized: got {norm.item()}"
+        )
+
+
+@pytest.mark.gpu
+def test_iqp_z_fwt_normalization():
+    """Test that FWT-optimized IQP-Z produces normalized states (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Test across FWT threshold
+    for num_qubits in [3, 4, 5, 6, 7, 8]:
+        data = [0.2 * i for i in range(num_qubits)]
+
+        qtensor = engine.encode(data, num_qubits, "iqp-z")
+        torch_tensor = torch.from_dlpack(qtensor)
+
+        norm = torch.sum(torch.abs(torch_tensor) ** 2)
+        assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6), (
+            f"IQP-Z {num_qubits} qubits not normalized: got {norm.item()}"
+        )
+
+
+@pytest.mark.gpu
+def test_iqp_fwt_zero_params_gives_zero_state():
+    """Test that zero parameters produce |0...0⟩ state (requires GPU).
+
+    With zero parameters, the IQP circuit is H^n * I * H^n = I,
+    so |0⟩^n maps to |0⟩^n with amplitude 1 at index 0.
+    """
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Test FWT-optimized path (n >= 4)
+    for num_qubits in [4, 5, 6]:
+        data_len = num_qubits + num_qubits * (num_qubits - 1) // 2
+        data = [0.0] * data_len
+
+        qtensor = engine.encode(data, num_qubits, "iqp")
+        torch_tensor = torch.from_dlpack(qtensor)
+
+        # Should get |0...0⟩: amplitude 1 at index 0, 0 elsewhere
+        state_len = 1 << num_qubits
+        expected = torch.zeros(
+            (1, state_len), dtype=torch_tensor.dtype, device="cuda:0"
+        )
+        expected[0, 0] = 1.0 + 0j
+
+        assert torch.allclose(torch_tensor, expected, atol=1e-6), (
+            f"IQP {num_qubits} qubits with zero params should give |0⟩ state"
+        )
+
+
+@pytest.mark.gpu
+def test_iqp_fwt_batch_normalization():
+    """Test that FWT-optimized batch IQP produces normalized states (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Test batch encoding across FWT threshold
+    for num_qubits in [4, 5, 6]:
+        data_len = num_qubits + num_qubits * (num_qubits - 1) // 2
+        batch_size = 8
+
+        data = torch.tensor(
+            [
+                [0.1 * (i + j * data_len) for i in range(data_len)]
+                for j in range(batch_size)
+            ],
+            dtype=torch.float64,
+        )
+
+        qtensor = engine.encode(data, num_qubits, "iqp")
+        torch_tensor = torch.from_dlpack(qtensor)
+
+        assert torch_tensor.shape == (batch_size, 1 << num_qubits)
+
+        # Check each sample is normalized
+        for i in range(batch_size):
+            norm = torch.sum(torch.abs(torch_tensor[i]) ** 2)
+            assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6), (
+                f"IQP batch sample {i} not normalized: got {norm.item()}"
+            )
+
+
+@pytest.mark.gpu
+def test_iqp_fwt_deterministic():
+    """Test that FWT-optimized IQP is deterministic (requires GPU)."""
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    num_qubits = 6  # Uses FWT path
+    data_len = num_qubits + num_qubits * (num_qubits - 1) // 2
+    data = [0.3 * i for i in range(data_len)]
+
+    # Run encoding twice
+    qtensor1 = engine.encode(data, num_qubits, "iqp")
+    tensor1 = torch.from_dlpack(qtensor1).clone()
+
+    qtensor2 = engine.encode(data, num_qubits, "iqp")
+    tensor2 = torch.from_dlpack(qtensor2)
+
+    # Results should be identical
+    assert torch.allclose(tensor1, tensor2, atol=1e-10), (
+        "IQP FWT encoding should be deterministic"
+    )
+
+
+@pytest.mark.gpu
+def test_iqp_fwt_shared_vs_global_memory_threshold():
+    """Test IQP encoding at shared memory threshold boundary (requires GPU).
+
+    FWT_SHARED_MEM_THRESHOLD = 10, so:
+    - n <= 10: uses shared memory FWT
+    - n > 10: uses global memory FWT
+    """
+    pytest.importorskip("torch")
+    import torch
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Test at and around the shared memory threshold
+    # n <= 10: shared memory FWT, n > 10: global memory FWT (multi-launch)
+    for num_qubits in [9, 10, 11]:
+        data_len = num_qubits + num_qubits * (num_qubits - 1) // 2
+        data = [0.05 * i for i in range(data_len)]
+
+        qtensor = engine.encode(data, num_qubits, "iqp")
+        torch_tensor = torch.from_dlpack(qtensor)
+
+        assert torch_tensor.shape == (1, 1 << num_qubits)
+
+        norm = torch.sum(torch.abs(torch_tensor) ** 2)
+        assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6), (
+            f"IQP {num_qubits} qubits not normalized at threshold: got {norm.item()}"
+        )
