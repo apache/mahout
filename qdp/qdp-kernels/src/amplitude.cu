@@ -777,6 +777,42 @@ int convert_state_to_float(
     return (int)cudaGetLastError();
 }
 
+/// Kernel: convert complex64 state vector to complex128.
+__global__ void convert_state_to_complex128_kernel(
+    const cuComplex* __restrict__ input_state,
+    cuDoubleComplex* __restrict__ output_state,
+    size_t len
+) {
+    const size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx >= len) return;
+
+    const cuComplex v = input_state[idx];
+    output_state[idx] = make_cuDoubleComplex((double)v.x, (double)v.y);
+}
+
+/// Launch conversion kernel from complex64 to complex128.
+int convert_state_to_double(
+    const cuComplex* input_state_d,
+    cuDoubleComplex* output_state_d,
+    size_t len,
+    cudaStream_t stream
+) {
+    if (len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    const int blockSize = DEFAULT_BLOCK_SIZE;
+    const int gridSize = (int)((len + blockSize - 1) / blockSize);
+
+    convert_state_to_complex128_kernel<<<gridSize, blockSize, 0, stream>>>(
+        input_state_d,
+        output_state_d,
+        len
+    );
+
+    return (int)cudaGetLastError();
+}
+
 // TODO: Future encoding methods:
 // - launch_angle_encode (angle encoding)
 // - launch_iqp_encode (IQP encoding)

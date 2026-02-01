@@ -160,6 +160,18 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Convert a complex64 state vector to complex128 on GPU.
+    /// Returns CUDA error code (0 = success).
+    ///
+    /// # Safety
+    /// Pointers must reference valid device memory on the provided stream.
+    pub fn convert_state_to_double(
+        input_state_d: *const CuComplex,
+        output_state_d: *mut CuDoubleComplex,
+        len: usize,
+        stream: *mut c_void,
+    ) -> i32;
+
     /// Launch basis encoding kernel
     /// Maps an integer index to a computational basis state.
     /// Returns CUDA error code (0 = success)
@@ -337,6 +349,17 @@ pub extern "C" fn launch_l2_norm_batch_f32(
 pub extern "C" fn convert_state_to_float(
     _input_state_d: *const CuDoubleComplex,
     _output_state_d: *mut CuComplex,
+    _len: usize,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn convert_state_to_double(
+    _input_state_d: *const CuComplex,
+    _output_state_d: *mut CuDoubleComplex,
     _len: usize,
     _stream: *mut c_void,
 ) -> i32 {

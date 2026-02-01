@@ -21,6 +21,7 @@ mod dlpack_tests {
     use std::ffi::c_void;
 
     use cudarc::driver::CudaDevice;
+    use qdp_core::Precision;
     use qdp_core::dlpack::{CUDA_STREAM_LEGACY, synchronize_stream};
     use qdp_core::gpu::memory::GpuStateVector;
 
@@ -59,8 +60,8 @@ mod dlpack_tests {
         let device = CudaDevice::new(0).unwrap();
 
         let num_qubits = 2;
-        let state_vector =
-            GpuStateVector::new(&device, num_qubits).expect("Failed to create state vector");
+        let state_vector = GpuStateVector::new(&device, num_qubits, Precision::Float64)
+            .expect("Failed to create state vector");
 
         let dlpack_ptr = state_vector.to_dlpack();
         assert!(!dlpack_ptr.is_null());
@@ -80,6 +81,39 @@ mod dlpack_tests {
             assert_eq!(shape[1], (1 << num_qubits) as i64, "State size mismatch");
 
             // Clean up using the deleter
+            if let Some(deleter) = (*dlpack_ptr).deleter {
+                deleter(dlpack_ptr);
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_dlpack_single_shape_f32() {
+        let device = CudaDevice::new(0).unwrap();
+
+        let num_qubits = 2;
+        let state_vector = GpuStateVector::new(&device, num_qubits, Precision::Float32)
+            .expect("Failed to create Float32 state vector");
+
+        assert!(
+            state_vector.ptr_f32().is_some(),
+            "Float32 state vector should have ptr_f32()"
+        );
+        assert!(
+            state_vector.ptr_f64().is_none(),
+            "Float32 state vector should not have ptr_f64()"
+        );
+
+        let dlpack_ptr = state_vector.to_dlpack();
+        assert!(!dlpack_ptr.is_null());
+
+        unsafe {
+            let tensor = &(*dlpack_ptr).dl_tensor;
+            assert_eq!(tensor.ndim, 2, "DLPack tensor should be 2D");
+            let shape = std::slice::from_raw_parts(tensor.shape, 2);
+            assert_eq!(shape[0], 1);
+            assert_eq!(shape[1], (1 << num_qubits) as i64);
             if let Some(deleter) = (*dlpack_ptr).deleter {
                 deleter(dlpack_ptr);
             }
