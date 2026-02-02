@@ -619,16 +619,16 @@ int launch_l2_norm_f32(
 
 /// Returns the current device's max grid dimension (X), fallback to CUDA_MAX_GRID_DIM_1D if error.
 static size_t get_max_grid_dim_1d(void) {
-    static size_t cached_device = 0;
-    if (cached_device != 0) {
-        return cached_device;
+    static size_t cached_max_grid_dim_1d = 0;
+    if (cached_max_grid_dim_1d != 0) {
+        return cached_max_grid_dim_1d;
     }
 
     int device = -1;
     // Fallback to CUDA_MAX_GRID_DIM_1D if error
     if (cudaGetDevice(&device) != cudaSuccess || device < 0) {
-        cached_device = CUDA_MAX_GRID_DIM_1D;
-        return cached_device;
+        cached_max_grid_dim_1d = CUDA_MAX_GRID_DIM_1D;
+        return cached_max_grid_dim_1d;
     }
 
     int max_x = 0;
@@ -640,12 +640,12 @@ static size_t get_max_grid_dim_1d(void) {
 
     // Fallback to CUDA_MAX_GRID_DIM_1D if error
     if (err != cudaSuccess || max_x <= 0) {
-        cached_device = CUDA_MAX_GRID_DIM_1D;
-        return cached_device;
+        cached_max_grid_dim_1d = CUDA_MAX_GRID_DIM_1D;
+        return cached_max_grid_dim_1d;
     }
 
-    cached_device = (size_t)max_x;
-    return cached_device;
+    cached_max_grid_dim_1d = (size_t)max_x;
+    return cached_max_grid_dim_1d;
 }
 
 /// Launch L2 norm reduction for a batch of vectors.
