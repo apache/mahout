@@ -25,8 +25,6 @@ from .qdp_test_utils import requires_qdp
 def _has_multi_gpu():
     """Check if multiple GPUs are available via PyTorch."""
     try:
-        import torch
-
         return torch.cuda.is_available() and torch.cuda.device_count() >= 2
     except ImportError:
         return False
@@ -81,7 +79,6 @@ def test_dlpack_device():
 def test_dlpack_device_id_non_zero():
     """Test device_id propagation for non-zero devices (requires multi-GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     # Test with device_id=1 (second GPU)
@@ -108,7 +105,6 @@ def test_dlpack_device_id_non_zero():
 @pytest.mark.gpu
 def test_dlpack_single_use():
     """Test that __dlpack__ can only be called once (requires GPU)."""
-    import torch
     from _qdp import QdpEngine
 
     engine = QdpEngine(0)
@@ -130,7 +126,6 @@ def test_dlpack_single_use():
 @pytest.mark.parametrize("stream", [1, 2], ids=["stream_legacy", "stream_per_thread"])
 def test_dlpack_with_stream(stream):
     """Test __dlpack__(stream=...) syncs CUDA stream before returning capsule (DLPack 0.8+)."""
-    import torch
     from _qdp import QdpEngine
 
     engine = QdpEngine(0)
@@ -149,7 +144,6 @@ def test_dlpack_with_stream(stream):
 def test_pytorch_integration():
     """Test PyTorch integration via DLPack (requires GPU and PyTorch)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     engine = QdpEngine(0)
@@ -178,7 +172,6 @@ def test_pytorch_integration():
 def test_precision(precision, expected_dtype):
     """Test different precision settings produce correct output dtypes."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     engine = QdpEngine(0, precision=precision)
@@ -207,7 +200,6 @@ def test_precision(precision, expected_dtype):
 def test_encode_tensor_cpu(data_shape, expected_shape):
     """Test encoding from CPU PyTorch tensor (1D or 2D, zero-copy)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -233,7 +225,6 @@ def test_encode_from_tensorflow_binding():
     pytest.importorskip("torch")
     tf = pytest.importorskip("tensorflow")
     import numpy as np
-    import torch
     from _qdp import QdpEngine
     import os
     import tempfile
@@ -267,7 +258,6 @@ def test_encode_from_tensorflow_binding():
 def test_encode_errors():
     """Test error handling for unified encode method."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -300,7 +290,6 @@ def test_encode_errors():
 def test_encode_cuda_tensor(data_shape, expected_shape, expected_batch_size):
     """Test encoding from CUDA tensor (1D or 2D, zero-copy)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -328,7 +317,6 @@ def test_encode_cuda_tensor(data_shape, expected_shape, expected_batch_size):
 def test_encode_cuda_tensor_wrong_dtype():
     """Test error when CUDA tensor has wrong dtype (non-float64)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -347,7 +335,6 @@ def test_encode_cuda_tensor_wrong_dtype():
 def test_encode_cuda_tensor_non_contiguous():
     """Test error when CUDA tensor is non-contiguous."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -373,7 +360,6 @@ def test_encode_cuda_tensor_non_contiguous():
 def test_encode_cuda_tensor_device_mismatch():
     """Test error when CUDA tensor is on wrong device (multi-GPU only)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     # Engine on device 0
@@ -390,7 +376,6 @@ def test_encode_cuda_tensor_device_mismatch():
 def test_encode_cuda_tensor_empty():
     """Test error when CUDA tensor is empty."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -416,7 +401,6 @@ def test_encode_cuda_tensor_empty():
 def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
     """Test that input CUDA tensor (1D or 2D) is not modified after encoding."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -442,7 +426,6 @@ def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
 def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
     """Test error when using CUDA tensor with unsupported encoding (CUDA supports amplitude and angle only)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -450,8 +433,6 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
 
     engine = QdpEngine(0)
 
-    # CUDA tensors currently only support amplitude encoding
-    # Use non-zero data to avoid normalization issues
     data = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float64, device="cuda:0")
 
     with pytest.raises(
@@ -474,7 +455,6 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
 def test_encode_3d_rejected(input_type, error_match):
     """Test error when input has 3+ dimensions (CUDA tensor, CPU tensor, or NumPy array)."""
     pytest.importorskip("torch")
-    import torch
     import numpy as np
     from _qdp import QdpEngine
 
@@ -520,7 +500,6 @@ def test_encode_3d_rejected(input_type, error_match):
 def test_encode_cuda_tensor_non_finite_values(tensor_factory, description):
     """Test error when CUDA tensor contains non-finite values (zeros, NaN, Inf)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -545,7 +524,6 @@ def test_encode_cuda_tensor_non_finite_values(tensor_factory, description):
 def test_encode_cuda_tensor_output_dtype(precision, expected_dtype):
     """Test that CUDA tensor encoding produces correct output dtype."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -564,7 +542,6 @@ def test_encode_cuda_tensor_output_dtype(precision, expected_dtype):
 def test_basis_encode_basic():
     """Test basic basis encoding (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -589,7 +566,6 @@ def test_basis_encode_basic():
 def test_basis_encode_nonzero_index():
     """Test basis encoding with non-zero index (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -611,7 +587,6 @@ def test_basis_encode_nonzero_index():
 def test_basis_encode_3_qubits():
     """Test basis encoding with 3 qubits (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -641,7 +616,6 @@ def test_basis_encode_3_qubits():
 def test_basis_encode_errors():
     """Test error handling for basis encoding (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -675,7 +649,6 @@ def test_basis_encode_errors():
 def test_angle_encode_basic():
     """Test basic angle encoding (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -699,7 +672,6 @@ def test_angle_encode_basic():
 def test_angle_encode_nonzero_angles():
     """Test angle encoding with non-zero angles (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -722,7 +694,6 @@ def test_angle_encode_nonzero_angles():
 def test_angle_encode_batch():
     """Test batch angle encoding (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -753,7 +724,6 @@ def test_angle_encode_batch():
 def test_angle_encode_errors():
     """Test error handling for angle encoding (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -786,7 +756,6 @@ def test_encode_numpy_array(data_shape, expected_shape):
     """Test encoding from NumPy array (1D or 2D)."""
     pytest.importorskip("torch")
     import numpy as np
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -808,7 +777,6 @@ def test_encode_pathlib_path():
     """Test encoding from pathlib.Path object."""
     pytest.importorskip("torch")
     import numpy as np
-    import torch
     from pathlib import Path
     import tempfile
     import os
@@ -849,7 +817,6 @@ def test_iqp_z_encode_basic():
     - H^n transforms back to |0⟩^n
     """
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -874,7 +841,6 @@ def test_iqp_z_encode_basic():
 def test_iqp_z_encode_nonzero():
     """Test IQP-Z encoding with non-zero angles (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -900,7 +866,6 @@ def test_iqp_z_encode_nonzero():
 def test_iqp_encode_basic():
     """Test basic IQP encoding with ZZ interactions (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -926,7 +891,6 @@ def test_iqp_encode_basic():
 def test_iqp_encode_zz_effect():
     """Test that ZZ interaction produces different result than Z-only (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -959,7 +923,6 @@ def test_iqp_encode_zz_effect():
 def test_iqp_encode_3_qubits():
     """Test IQP encoding with 3 qubits (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -985,7 +948,6 @@ def test_iqp_encode_3_qubits():
 def test_iqp_z_encode_batch():
     """Test batch IQP-Z encoding (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1014,7 +976,6 @@ def test_iqp_z_encode_batch():
 def test_iqp_encode_batch():
     """Test batch IQP encoding with ZZ interactions (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1046,7 +1007,6 @@ def test_iqp_encode_batch():
 def test_iqp_encode_single_qubit():
     """Test IQP encoding with single qubit edge case (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1075,7 +1035,6 @@ def test_iqp_encode_single_qubit():
 def test_iqp_encode_errors():
     """Test error handling for IQP encoding (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1111,7 +1070,6 @@ def test_iqp_encode_errors():
 def test_iqp_fwt_normalization():
     """Test that FWT-optimized IQP produces normalized states (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1139,7 +1097,6 @@ def test_iqp_fwt_normalization():
 def test_iqp_z_fwt_normalization():
     """Test that FWT-optimized IQP-Z produces normalized states (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1168,7 +1125,6 @@ def test_iqp_fwt_zero_params_gives_zero_state():
     so |0⟩^n maps to |0⟩^n with amplitude 1 at index 0.
     """
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1200,7 +1156,6 @@ def test_iqp_fwt_zero_params_gives_zero_state():
 def test_iqp_fwt_batch_normalization():
     """Test that FWT-optimized batch IQP produces normalized states (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1238,7 +1193,6 @@ def test_iqp_fwt_batch_normalization():
 def test_iqp_fwt_deterministic():
     """Test that FWT-optimized IQP is deterministic (requires GPU)."""
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -1272,7 +1226,6 @@ def test_iqp_fwt_shared_vs_global_memory_threshold():
     - n > 10: uses global memory FWT
     """
     pytest.importorskip("torch")
-    import torch
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():

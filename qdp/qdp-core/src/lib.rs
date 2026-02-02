@@ -475,7 +475,7 @@ impl QdpEngine {
             ));
         }
 
-        validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
+        validate_cuda_input_ptr(&self.device, input_d)?;
 
         let state_len = 1usize << num_qubits;
         let method = encoding_method.to_ascii_lowercase();
@@ -670,7 +670,8 @@ impl QdpEngine {
     /// * `num_qubits` - Number of qubits for encoding
     ///
     /// # Returns
-    /// DLPack pointer (float32 state vector) for zero-copy PyTorch integration.
+    /// DLPack pointer (state vector in engine precision) for zero-copy PyTorch integration.
+    /// Internal computation is f32; output is converted to [`Precision`] of the engine.
     ///
     /// # Safety
     /// The input pointer must:
@@ -695,6 +696,9 @@ impl QdpEngine {
     }
 
     /// Encode from existing GPU pointer (float32) on a specified CUDA stream.
+    ///
+    /// # Returns
+    /// DLPack pointer (state vector in engine precision). Pass null for `stream` to use the default stream.
     ///
     /// # Safety
     /// In addition to the `encode_from_gpu_ptr_f32` requirements, the stream pointer
@@ -856,7 +860,7 @@ impl QdpEngine {
             ));
         }
 
-        validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
+        validate_cuda_input_ptr(&self.device, input_batch_d)?;
 
         match method.as_str() {
             "amplitude" => {
