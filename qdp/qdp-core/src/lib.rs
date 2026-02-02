@@ -35,9 +35,6 @@ mod profiling;
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
 
-#[cfg(target_os = "linux")]
-use std::ffi::c_void;
-
 // Throughput/latency pipeline runner: single path using QdpEngine and encode_batch in Rust.
 #[cfg(target_os = "linux")]
 mod pipeline_runner;

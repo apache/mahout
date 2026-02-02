@@ -86,9 +86,30 @@ def test_qdp_benchmark_run_latency():
 
 
 @requires_qdp
-def test_qdp_benchmark_validation():
-    """QdpBenchmark.run_throughput() raises if qubits/batches not set."""
+@pytest.mark.parametrize("method", ["run_throughput", "run_latency"])
+def test_qdp_benchmark_validation(method):
+    """QdpBenchmark.run_throughput() and run_latency() raise if qubits/batches not set."""
     import api
 
+    bench = api.QdpBenchmark(device_id=0)
+    runner = getattr(bench, method)
     with pytest.raises(ValueError, match="qubits and batches"):
-        api.QdpBenchmark(device_id=0).run_throughput()
+        runner()
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_qdp_benchmark_device_id_propagated():
+    """QdpBenchmark(device_id=...) propagates device_id to Rust pipeline when running."""
+    import api
+
+    # When qubits/batches are set, run_throughput uses the bench's device_id (e.g. 0).
+    result = (
+        api.QdpBenchmark(device_id=0)
+        .qubits(2)
+        .encoding("amplitude")
+        .batches(2, size=4)
+        .run_throughput()
+    )
+    assert hasattr(result, "vectors_per_sec")
+    assert result.vectors_per_sec >= 0

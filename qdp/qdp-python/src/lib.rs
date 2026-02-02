@@ -340,12 +340,8 @@ fn get_torch_cuda_stream_ptr(tensor: &Bound<'_, PyAny>) -> PyResult<*mut c_void>
         )));
     }
 
+    // PyTorch default stream can report cuda_stream as 0; treat as valid (Rust sync is no-op for null).
     let stream_ptr: u64 = stream.getattr("cuda_stream")?.extract()?;
-    if stream_ptr == 0 {
-        return Err(PyRuntimeError::new_err(
-            "PyTorch returned a null CUDA stream pointer",
-        ));
-    }
     Ok(stream_ptr as *mut c_void)
 }
 
@@ -1152,7 +1148,7 @@ impl QdpEngine {
         seed: Option<u64>,
     ) -> PyResult<PyQuantumLoader> {
         let config = PipelineConfig {
-            device_id: 0,
+            device_id: self.engine.device().ordinal(),
             num_qubits,
             batch_size,
             total_batches,
