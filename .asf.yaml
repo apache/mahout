@@ -27,7 +27,7 @@ github:
   labels:
     # Note that GitHub only supports <=20 labels/topics per repo! Pipeline will fail if you add more.
     - apache-mahout
-    - mahout-qumat
+    - qumat
     - qumat-qdp
     - python
     - rust
