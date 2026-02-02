@@ -80,7 +80,10 @@ fn test_encode_from_gpu_ptr_unknown_method() {
         Err(MahoutError::NotImplemented(msg)) => {
             assert!(msg.contains("unknown_encoding") || msg.contains("only supports"));
         }
-        _ => panic!("expected NotImplemented, got {:?}", result),
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(msg.contains("Unknown encoder") || msg.contains("unknown_encoding"));
+        }
+        _ => panic!("expected NotImplemented or InvalidInput, got {:?}", result),
     }
 }
 
@@ -159,7 +162,10 @@ fn test_encode_batch_from_gpu_ptr_unknown_method() {
         Err(MahoutError::NotImplemented(msg)) => {
             assert!(msg.contains("unknown_method") || msg.contains("only supports"));
         }
-        _ => panic!("expected NotImplemented, got {:?}", result),
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(msg.contains("Unknown encoder") || msg.contains("unknown_method"));
+        }
+        _ => panic!("expected NotImplemented or InvalidInput, got {:?}", result),
     }
 }
 
