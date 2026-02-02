@@ -15,51 +15,67 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Contributing to Apache Mahout (Qumat)
+# Contributing to Apache Mahout
 
 Thank you for your interest in contributing to Apache Mahout!
 
-## 1. Installation
+This document describes **repository-wide** setup and workflow. For **subproject-specific** build, test, and development details, see the [Project-Specific Guides](#project-specific-guides) below.
 
-**Prerequisites:** Python 3.10 (>=3.10,<3.14), uv, Git
+## Table of Contents
 
-### Install uv
+- [Quick Start](#quick-start)
+- [Development Workflow](#development-workflow)
+- [Testing](#testing)
+- [Project-Specific Guides](#project-specific-guides)
+- [Troubleshooting](#troubleshooting)
+- [References](#references)
 
-```bash
-pip install uv
-```
+## Quick Start
 
-or follow the instructions in the [uv documentation](https://docs.astral.sh/uv/).
+### Prerequisites
 
-### Clone and Install Dependencies
+- Python 3.10 (>=3.10,<3.14)
+- [`uv`](https://docs.astral.sh/uv/) package manager
+- Git
 
-```bash
-git clone https://github.com/apache/mahout.git
-cd mahout
-uv sync --group dev
-```
+### Installation
 
-### Set Up Pre-commit Hooks
+1. **Install uv:**
+   ```bash
+   pip install uv
+   ```
 
-```bash
-pre-commit install
-```
+2. **Clone and install:**
+   ```bash
+   git clone https://github.com/apache/mahout.git
+   cd mahout
+   uv sync --group dev              # Core Qumat (no GPU required)
+   # uv sync --group dev --extra qdp  # With QDP extension (requires CUDA GPU)
+   ```
+   Add `--extra qdp` if you need GPU-accelerated encoding or want to run QDP tests. QDP tests are auto-skipped if the extension is not installed.
 
-## 2. Development Workflow
+3. **Set up pre-commit hooks:**
+   ```bash
+   pre-commit install
+   ```
 
-### 2.1 Open an Issue
+---
 
-Create a new issue in [GitHub](https://github.com/apache/mahout/issues) and discuss your ideas with the community.
+## Development Workflow
 
-### 2.2 Make Changes
+### 1. Open an Issue
 
-Create a new branch for your changes:
+Create a new issue on [GitHub](https://github.com/apache/mahout/issues) and discuss your idea with the community.
+
+### 2. Create a Branch
 
 ```bash
 git checkout -b your-feature-name
 ```
 
-Make your changes, then commit (pre-commit hooks will run automatically):
+### 3. Make Changes
+
+Make your changes, then commit (pre-commit hooks run automatically):
 
 ```bash
 git add .
@@ -67,89 +83,75 @@ git commit -m "Description of your changes"
 git push
 ```
 
-### 2.3 Test
+### 4. Pre-commit Checks
 
-The project uses a unified test workflow with pytest. Tests are organized in the `testing/` directory.
-
-**Test Structure:**
-- `testing/qumat/` - Tests for the Qumat quantum computing library
-- `testing/qdp/` - Tests for the Quantum Data Plane (GPU-accelerated, auto-skipped if extension unavailable)
-- `testing/utils/` - Shared test utilities and helpers
-- `testing/conftest.py` - Pytest configuration with shared fixtures
-
-To run all tests:
-```
-make tests
-```
-
-See [testing/README.md](testing/README.md) for detailed testing documentation.
-
-### 2.4 Pre-commit Checks
-
-Run pre-commit hooks:
+Run pre-commit manually if needed:
 
 ```bash
-pre-commit run
+pre-commit run              # Staged files only
+pre-commit run --all-files  # All files
 ```
 
-Or run pre-commit hooks on all files:
+From the repo root you can also use:
 
-```bash
-pre-commit run --all-files
-```
-
-Or run pre-commit with makefile style (that ensures you uses `pre-commit` in uv's venv)
 ```bash
 make pre-commit
 ```
 
-### 2.5 Create a Pull Request
+### 5. Create a Pull Request
 
-Create a pull request on GitHub. Please follow the [pull request template](.github/PULL_REQUEST_TEMPLATE) to provide a detailed description of your changes.
+Open a pull request on GitHub and follow the [pull request template](.github/PULL_REQUEST_TEMPLATE).
 
-## 3. Website Development
+---
 
-The website is built with [Docusaurus](https://docusaurus.io/). The `/docs` directory is the source of truth for documentation.
+## Testing
 
-### Local Development
+Tests are unified under pytest in the `testing/` directory:
 
-```bash
-cd website-new
-npm install
-npm run start
-```
+| Directory         | Description |
+|-------------------|-------------|
+| `testing/qumat/`  | Qumat quantum computing library tests |
+| `testing/qdp/`    | Quantum Data Plane tests (GPU; auto-skipped if extension unavailable) |
+| `testing/utils/`  | Shared test utilities and fixtures |
 
-This starts a local development server at `http://localhost:3000` with hot reload.
-
-### Building
+**Run all tests:**
 
 ```bash
-cd website-new
-npm run build
+make tests
 ```
 
-The build syncs documentation from `/docs` and `/qdp/docs` automatically.
+You can also run subsets from the repo root:
 
-### Documentation Workflow
+| Command | Description |
+|---------|-------------|
+| `make test_rust` | QDP Rust unit tests (requires NVIDIA GPU; skipped if none detected) |
+| `make test_python` | Python tests via pytest (syncs dev deps; builds QDP extension if GPU present, then runs full suite) |
 
-1. Edit documentation in the `/docs` directory (not `website-new/docs`)
-2. Run `npm run sync` in `website-new/` to update the website docs
-3. The sync runs automatically during `npm run start` and `npm run build`
+See [testing/README.md](testing/README.md) for more options and details.
 
-### Creating a Version Snapshot
+---
 
-When releasing a new version, snapshot the current documentation:
+## Project-Specific Guides
 
-```bash
-cd website-new
-npm run docusaurus docs:version X.Y
-```
+Apache Mahout includes several subprojects. Use the root workflow above for issues, branches, and pull requests; use the guides below for **build, run, and test** in each area.
 
-## 4. Project Structure
+| Subproject | Guide | Description |
+|------------|-------|-------------|
+| **Qumat** | *(this document)* | Core Python library; use root Quick Start and [Testing](#testing). |
+| **QDP** (Quantum Data Plane) | [qdp/CONTRIBUTING.md](qdp/CONTRIBUTING.md) | GPU-accelerated pipeline: Rust/CUDA, DevContainer, build, install, benchmarks, profiling. |
+| **Website** | [website/CONTRIBUTING.md](website/CONTRIBUTING.md) | Docusaurus site: docs source in `/docs`, sync, versioning, deployment. |
 
-- `qumat/` - Core library code
-- `qdp/` - QDP (Quantum Data Plane)
-- `docs/` - Documentation (source of truth)
-- `examples/` - Examples and Jupyter notebooks
-- `testing/` - Test files (using pytest)
-- `website-new/` - Website source code (using Docusaurus)
+---
+
+## Troubleshooting
+
+- **Pre-commit fails:** Run `pre-commit run --all-files` to see errors. Common fixes: `cargo fmt` (Rust), `cargo clippy` (Rust lint), and ensuring you use the repo venv (`uv run pre-commit` or `make pre-commit`).
+- **Wrong Python or missing package:** Ensure the virtual environment is activated and you ran `uv sync --group dev` from the repo root. For QDP, see [qdp/CONTRIBUTING.md](qdp/CONTRIBUTING.md).
+
+---
+
+## References
+
+- [testing/README.md](testing/README.md) — Test structure and commands
+- [.github/PULL_REQUEST_TEMPLATE](.github/PULL_REQUEST_TEMPLATE) — PR description template
+- [docs/](docs/) — Documentation source (used by the website)
