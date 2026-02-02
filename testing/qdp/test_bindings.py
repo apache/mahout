@@ -422,9 +422,9 @@ def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
 
 @requires_qdp
 @pytest.mark.gpu
-@pytest.mark.parametrize("encoding_method", ["basis"])
+@pytest.mark.parametrize("encoding_method", ["iqp"])
 def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
-    """Test error when using CUDA tensor with unsupported encoding (CUDA supports amplitude and angle only)."""
+    """Test error when using CUDA tensor with unsupported encoding (CUDA supports amplitude, angle, and basis only)."""
     pytest.importorskip("torch")
     from _qdp import QdpEngine
 
@@ -437,7 +437,7 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
 
     with pytest.raises(
         RuntimeError,
-        match="only supports 'amplitude' and 'angle' methods.*Use tensor.cpu\\(\\)",
+        match="only supports 'amplitude', 'angle', or 'basis' methods.*Use tensor.cpu\\(\\)",
     ):
         engine.encode(data, 2, encoding_method)
 
