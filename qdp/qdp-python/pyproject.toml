@@ -38,5 +38,16 @@ name = "pytorch"
 url = "https://download.pytorch.org/whl/cu122"
 explicit = true
 
+# Invalidate uv cache when Rust or Cargo changes so extension is rebuilt (run_throughput_pipeline_py etc.).
+# Ref: https://docs.astral.sh/uv/concepts/cache/#dynamic-metadata
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "Cargo.toml" },
+    { file = "src/**" },
+]
+
 [tool.maturin]
 module-name = "_qdp"
+# Package at project root (qumat_qdp/) so editable install and uv run find it
+python-source = "."

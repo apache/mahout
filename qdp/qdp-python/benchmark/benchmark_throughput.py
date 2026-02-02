@@ -23,8 +23,8 @@ The workload mirrors the `qdp-core/examples/dataloader_throughput.rs` pipeline:
 - Prefetch on the CPU side to keep the GPU fed.
 - Encode vectors into amplitude states on GPU and run a tiny consumer op.
 
-Run:
-    python qdp/benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64
+Run from qdp-python directory (qumat_qdp must be importable, e.g. via uv):
+    uv run python benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64
 """
 
 import argparse
@@ -33,8 +33,8 @@ import time
 import numpy as np
 import torch
 
-from _qdp import QdpEngine
-from utils import normalize_batch, prefetched_batches
+from benchmark.utils import normalize_batch, prefetched_batches
+from qumat_qdp import QdpBenchmark
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -83,34 +83,26 @@ def run_mahout(
     prefetch: int,
     encoding_method: str = "amplitude",
 ):
+    """Run Mahout throughput using the generic user API (QdpBenchmark)."""
     try:
-        engine = QdpEngine(0)
+        result = (
+            QdpBenchmark(device_id=0)
+            .qubits(num_qubits)
+            .encoding(encoding_method)
+            .batches(total_batches, size=batch_size)
+            .prefetch(prefetch)
+            .run_throughput()
+        )
     except Exception as exc:
         print(f"[Mahout] Init failed: {exc}")
         return 0.0, 0.0
 
-    torch.cuda.synchronize()
-    start = time.perf_counter()
-
-    vector_len = num_qubits if encoding_method == "angle" else (1 << num_qubits)
-    processed = 0
-    for batch in prefetched_batches(
-        total_batches, batch_size, vector_len, prefetch, encoding_method
-    ):
-        normalized = np.ascontiguousarray(
-            normalize_batch(batch, encoding_method), dtype=np.float64
-        )
-        qtensor = engine.encode(normalized, num_qubits, encoding_method)
-        tensor = torch.from_dlpack(qtensor).abs().to(torch.float32)
-        _ = tensor.sum()
-        processed += normalized.shape[0]
-
-    torch.cuda.synchronize()
-    duration = time.perf_counter() - start
-    throughput = processed / duration if duration > 0 else 0.0
-    print(f"  IO + Encode Time: {duration:.4f} s")
-    print(f"  Total Time: {duration:.4f} s ({throughput:.1f} vectors/sec)")
-    return duration, throughput
+    print(f"  IO + Encode Time: {result.duration_sec:.4f} s")
+    print(
+        f"  Total Time: {result.duration_sec:.4f} s "
+        f"({result.vectors_per_sec:.1f} vectors/sec)"
+    )
+    return result.duration_sec, result.vectors_per_sec
 
 
 def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch: int):

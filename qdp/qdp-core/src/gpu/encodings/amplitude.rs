@@ -316,7 +316,7 @@ impl AmplitudeEncoder {
     /// streaming mechanics, while this method focuses on the amplitude
     /// encoding kernel logic.
     #[cfg(target_os = "linux")]
-    fn encode_async_pipeline(
+    pub(crate) fn encode_async_pipeline(
         device: &Arc<CudaDevice>,
         host_data: &[f64],
         _num_qubits: usize,
@@ -547,5 +547,28 @@ impl AmplitudeEncoder {
         }
 
         Ok(inv_norm)
+    }
+
+    /// Run dual-stream pipeline for amplitude encoding (exposed for Python / benchmark).
+    #[cfg(target_os = "linux")]
+    pub(crate) fn run_amplitude_dual_stream_pipeline(
+        device: &Arc<CudaDevice>,
+        host_data: &[f64],
+        num_qubits: usize,
+    ) -> Result<()> {
+        Preprocessor::validate_input(host_data, num_qubits)?;
+        let state_len = 1 << num_qubits;
+        let state_vector = GpuStateVector::new(device, num_qubits, Precision::Float64)?;
+        let norm = Preprocessor::calculate_l2_norm(host_data)?;
+        let inv_norm = 1.0 / norm;
+        Self::encode_async_pipeline(
+            device,
+            host_data,
+            num_qubits,
+            state_len,
+            inv_norm,
+            &state_vector,
+        )?;
+        Ok(())
     }
 }
