@@ -649,6 +649,23 @@ fn test_encode_from_gpu_ptr_f32_empty_input() {
 }
 
 #[test]
+fn test_encode_from_gpu_ptr_f32_null_pointer() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let result = unsafe { engine.encode_from_gpu_ptr_f32(std::ptr::null(), 4, 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
 fn test_encode_from_gpu_ptr_f32_input_exceeds_state_len() {
     let engine = match engine_f32() {
         Some(e) => e,
