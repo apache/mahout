@@ -16,9 +16,9 @@
 
 // DLPack protocol for zero-copy GPU memory sharing with PyTorch
 
-use crate::error::Result;
 #[cfg(target_os = "linux")]
-use crate::error::{MahoutError, cuda_error_to_string};
+use crate::error::cuda_error_to_string;
+use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{BufferStorage, GpuStateVector, Precision};
 use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
@@ -203,6 +203,45 @@ pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
 
     // 4. Free DLManagedTensor
     let _ = Box::from_raw(managed);
+}
+
+/// Safely free a `DLManagedTensor` pointer returned from encoding APIs.
+///
+/// This helper function centralizes the unsafe pointer dereference and deleter
+/// invocation logic, adding safety checks to prevent common errors like null
+/// pointer dereference and double-free.
+///
+/// # Safety
+/// The caller must ensure:
+/// - `ptr` is a valid `DLManagedTensor` pointer returned from `QdpEngine::encode()`
+///   or similar methods, or is null
+/// - The pointer has not been freed before (either by calling this function
+///   or by PyTorch's DLPack deleter)
+/// - The pointer is not used after this call
+///
+/// # Errors
+/// Returns `Err` if:
+/// - The pointer is null
+/// - The deleter is missing or has already been called
+#[allow(unsafe_op_in_unsafe_fn)]
+pub unsafe fn free_dlpack_tensor(ptr: *mut DLManagedTensor) -> Result<()> {
+    if ptr.is_null() {
+        return Err(MahoutError::InvalidInput(
+            "DLPack pointer is null (nothing to free)".into(),
+        ));
+    }
+
+    // SAFETY: Caller guarantees ptr is valid and not yet freed.
+    // We've checked it's not null above.
+    let managed = &mut *ptr;
+
+    let deleter = managed.deleter.take().ok_or_else(|| {
+        MahoutError::InvalidInput("DLPack deleter missing or already called".into())
+    })?;
+
+    // Call the DLPack deleter to free memory
+    deleter(ptr);
+    Ok(())
 }
 
 impl GpuStateVector {

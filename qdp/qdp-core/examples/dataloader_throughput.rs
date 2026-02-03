@@ -24,6 +24,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use qdp_core::QdpEngine;
+use qdp_core::dlpack::free_dlpack_tensor;
 
 const BATCH_SIZE: usize = 64;
 const VECTOR_LEN: usize = 1024; // 2^10
@@ -99,12 +100,15 @@ fn main() {
         debug_assert_eq!(batch.len() % VECTOR_LEN, 0);
         let num_samples = batch.len() / VECTOR_LEN;
         match engine.encode_batch(&batch, num_samples, VECTOR_LEN, NUM_QUBITS, "amplitude") {
-            Ok(ptr) => unsafe {
-                let managed = &mut *ptr;
-                if let Some(deleter) = managed.deleter.take() {
-                    deleter(ptr);
+            Ok(ptr) => {
+                if let Err(e) = unsafe { free_dlpack_tensor(ptr) } {
+                    eprintln!(
+                        "Failed to free DLPack tensor for batch {} (processed {} vectors): {:?}",
+                        batch_idx, total_vectors, e
+                    );
+                    return;
                 }
-            },
+            }
             Err(e) => {
                 eprintln!(
                     "Encode batch failed on batch {} (processed {} vectors): {:?}",

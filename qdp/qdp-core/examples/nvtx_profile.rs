@@ -18,6 +18,7 @@
 // Run: cargo run -p qdp-core --example nvtx_profile --features observability --release
 
 use qdp_core::QdpEngine;
+use qdp_core::dlpack::free_dlpack_tensor;
 
 fn main() {
     println!("=== NVTX Profiling Example ===");
@@ -61,13 +62,10 @@ fn main() {
             println!("✓ Encoding succeeded");
             println!("✓ DLPack pointer: {:p}", ptr);
 
-            // Clean up
-            unsafe {
-                let managed = &mut *ptr;
-                if let Some(deleter) = managed.deleter.take() {
-                    deleter(ptr);
-                    println!("✓ Memory freed");
-                }
+            // Clean up using shared helper with safety checks
+            match unsafe { free_dlpack_tensor(ptr) } {
+                Ok(()) => println!("✓ Memory freed"),
+                Err(e) => eprintln!("✗ Failed to free DLPack tensor: {:?}", e),
             }
         }
         Err(e) => {
