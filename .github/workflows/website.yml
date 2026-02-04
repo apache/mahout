@@ -61,14 +61,18 @@ jobs:
           BUILD_DIR=$(mktemp -d)
           cp -r website/build/* $BUILD_DIR/
 
-          # Checkout asf-site branch
-          git checkout asf-site
+          # Fetch and checkout asf-site branch
+          git fetch origin asf-site
+          git checkout -B asf-site origin/asf-site || git checkout --orphan asf-site
 
-          # Remove old content (except .git and .asf.yaml if present)
-          find . -maxdepth 1 ! -name '.git' ! -name '.asf.yaml' ! -name '.' ! -name '..' -exec rm -rf {} +
+          # Remove old content (except .git, .asf.yaml, and .claude if present)
+          find . -maxdepth 1 ! -name '.git' ! -name '.asf.yaml' ! -name '.claude' ! -name 'website' ! -name '.' ! -name '..' -exec rm -rf {} +
 
           # Copy new content
           cp -r $BUILD_DIR/* .
+
+          # Remove website source directory (only keep built site)
+          rm -rf website
 
           # Add and commit changes
           git add -A
@@ -77,7 +81,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to deploy"
           else
-            git commit -m "Automatic Site Publish by GitHub Actions"
+            git commit --no-verify -m "Automatic Site Publish by GitHub Actions"
             git push origin asf-site
-            echo "Website deployed successfully"
+            echo "Website deployed successfully to asf-site branch"
           fi
