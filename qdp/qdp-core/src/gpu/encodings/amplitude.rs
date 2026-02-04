@@ -511,6 +511,28 @@ impl AmplitudeEncoder {
         input_ptr: *const f32,
         len: usize,
     ) -> Result<f32> {
+        unsafe {
+            Self::calculate_inv_norm_gpu_f32_with_stream(
+                device,
+                input_ptr,
+                len,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Compute inverse L2 norm on GPU for float32 input on a given stream.
+    ///
+    /// # Safety
+    /// The caller must ensure `input_ptr` points to valid GPU memory containing
+    /// at least `len` f32 elements on the same device as `device`.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn calculate_inv_norm_gpu_f32_with_stream(
+        device: &Arc<CudaDevice>,
+        input_ptr: *const f32,
+        len: usize,
+        stream: *mut c_void,
+    ) -> Result<f32> {
         crate::profile_scope!("GPU::NormSingleF32");
 
         let mut norm_buffer = device.alloc_zeros::<f32>(1).map_err(|e| {
@@ -522,7 +544,7 @@ impl AmplitudeEncoder {
                 input_ptr,
                 len,
                 *norm_buffer.device_ptr_mut() as *mut f32,
-                std::ptr::null_mut(), // default stream
+                stream,
             )
         };
 
@@ -533,6 +555,8 @@ impl AmplitudeEncoder {
                 cuda_error_to_string(ret)
             )));
         }
+
+        sync_cuda_stream(stream, "Norm stream synchronize failed (f32)")?;
 
         let inv_norm_host = device
             .dtoh_sync_copy(&norm_buffer)

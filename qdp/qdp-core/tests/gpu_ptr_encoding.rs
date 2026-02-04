@@ -19,11 +19,38 @@
 #![cfg(target_os = "linux")]
 
 use std::ffi::c_void;
+use std::sync::Arc;
 
-use cudarc::driver::{CudaDevice, DevicePtr};
-use qdp_core::{MahoutError, QdpEngine};
+use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, DeviceSlice};
+use qdp_core::{MahoutError, Precision, QdpEngine};
 
 mod common;
+
+// ---- Helpers for f32 encode_from_gpu_ptr_f32 tests ----
+
+fn engine_f32() -> Option<QdpEngine> {
+    QdpEngine::new_with_precision(0, Precision::Float32).ok()
+}
+
+fn device_and_f32_slice(data: &[f32]) -> Option<(Arc<CudaDevice>, CudaSlice<f32>)> {
+    let device = CudaDevice::new(0).ok()?;
+    let slice = device.htod_sync_copy(data).ok()?;
+    Some((device, slice))
+}
+
+fn assert_dlpack_shape_2_4_and_delete(dlpack_ptr: *mut qdp_core::dlpack::DLManagedTensor) {
+    assert!(!dlpack_ptr.is_null());
+    unsafe {
+        let tensor = &(*dlpack_ptr).dl_tensor;
+        assert_eq!(tensor.ndim, 2);
+        let shape = std::slice::from_raw_parts(tensor.shape, 2);
+        assert_eq!(shape[0], 1);
+        assert_eq!(shape[1], 4);
+        if let Some(deleter) = (*dlpack_ptr).deleter {
+            deleter(dlpack_ptr);
+        }
+    }
+}
 
 // ---- Validation / error-path tests (return before using pointer) ----
 
@@ -34,7 +61,19 @@ fn test_encode_from_gpu_ptr_unknown_method() {
         Err(_) => return,
     };
 
-    let result = unsafe { engine.encode_from_gpu_ptr(std::ptr::null(), 4, 2, "unknown_encoding") };
+    // Need valid GPU pointer so we reach method dispatch (validation runs first)
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data = common::create_test_data(4);
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+
+    let result = unsafe { engine.encode_from_gpu_ptr(ptr, 4, 2, "unknown_encoding") };
 
     assert!(result.is_err());
     match result {
@@ -70,8 +109,20 @@ fn test_encode_from_gpu_ptr_amplitude_input_exceeds_state() {
         Err(_) => return,
     };
 
+    // Need valid GPU pointer so we reach input_len > state_len check (validation runs first)
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data = common::create_test_data(10);
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+
     // 2 qubits -> state_len = 4; request input_len = 10
-    let result = unsafe { engine.encode_from_gpu_ptr(std::ptr::null(), 10, 2, "amplitude") };
+    let result = unsafe { engine.encode_from_gpu_ptr(ptr, 10, 2, "amplitude") };
 
     assert!(result.is_err());
     match result {
@@ -89,8 +140,19 @@ fn test_encode_batch_from_gpu_ptr_unknown_method() {
         Err(_) => return,
     };
 
-    let result =
-        unsafe { engine.encode_batch_from_gpu_ptr(std::ptr::null(), 2, 4, 2, "unknown_method") };
+    // Need valid GPU pointer so we reach method dispatch (validation runs first)
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data = common::create_test_data(8);
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+
+    let result = unsafe { engine.encode_batch_from_gpu_ptr(ptr, 2, 4, 2, "unknown_method") };
 
     assert!(result.is_err());
     match result {
@@ -127,17 +189,34 @@ fn test_encode_from_gpu_ptr_basis_input_len_not_one() {
         Err(_) => return,
     };
 
-    // Basis single encoding expects exactly 1 value; input_len != 1 must return error.
-    let result = unsafe { engine.encode_from_gpu_ptr(std::ptr::null(), 0, 2, "basis") };
+    // Need valid GPU pointer so we reach basis input_len checks (validation runs first)
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let indices: Vec<usize> = vec![0, 1, 2];
+    let indices_d = match device.htod_sync_copy(indices.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *indices_d.device_ptr() as *const usize as *const c_void;
+
+    // Basis single encoding expects exactly 1 value; input_len == 0 returns empty error.
+    let result = unsafe { engine.encode_from_gpu_ptr(ptr, 0, 2, "basis") };
     assert!(result.is_err());
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
-            assert!(msg.contains("exactly 1") || msg.contains("basis"));
+            assert!(
+                msg.contains("exactly 1") || msg.contains("basis") || msg.contains("empty"),
+                "expected exactly 1 / basis / empty, got: {}",
+                msg
+            );
         }
         _ => panic!("expected InvalidInput for input_len != 1, got {:?}", result),
     }
 
-    let result = unsafe { engine.encode_from_gpu_ptr(std::ptr::null(), 3, 2, "basis") };
+    // input_len == 3 (basis expects 1)
+    let result = unsafe { engine.encode_from_gpu_ptr(ptr, 3, 2, "basis") };
     assert!(result.is_err());
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
@@ -154,8 +233,20 @@ fn test_encode_batch_from_gpu_ptr_basis_sample_size_not_one() {
         Err(_) => return,
     };
 
-    // Basis batch expects sample_size == 1 (one index per sample).
-    let result = unsafe { engine.encode_batch_from_gpu_ptr(std::ptr::null(), 2, 4, 2, "basis") };
+    // Need valid GPU pointer so we reach basis sample_size check (validation runs first)
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let indices: Vec<usize> = vec![0, 1];
+    let indices_d = match device.htod_sync_copy(indices.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *indices_d.device_ptr() as *const usize as *const c_void;
+
+    // Basis batch expects sample_size == 1 (one index per sample); sample_size=4.
+    let result = unsafe { engine.encode_batch_from_gpu_ptr(ptr, 2, 4, 2, "basis") };
     assert!(result.is_err());
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
@@ -326,7 +417,8 @@ fn test_encode_batch_from_gpu_ptr_amplitude_success() {
 
 #[test]
 fn test_encode_from_gpu_ptr_basis_success() {
-    let engine = match QdpEngine::new(0) {
+    // Basis path uses ptr_f64(); engine must be Float64
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
         Ok(e) => e,
         Err(_) => {
             println!("SKIP: No GPU available");
@@ -377,7 +469,8 @@ fn test_encode_from_gpu_ptr_basis_success() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_basis_success() {
-    let engine = match QdpEngine::new(0) {
+    // Basis path uses ptr_f64(); engine must be Float64
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
         Ok(e) => e,
         Err(_) => {
             println!("SKIP: No GPU available");
@@ -421,5 +514,184 @@ fn test_encode_batch_from_gpu_ptr_basis_success() {
         let managed = &mut *dlpack_ptr;
         let deleter = managed.deleter.take().expect("Deleter missing");
         deleter(dlpack_ptr);
+    }
+}
+
+// ---- encode_from_gpu_ptr_f32 (float32 amplitude) ----
+
+#[test]
+fn test_encode_from_gpu_ptr_f32_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr_f32(ptr, input_d.len(), 2)
+            .expect("encode_from_gpu_ptr_f32")
+    };
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_f32_with_stream_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let dlpack_ptr = unsafe {
+        engine.encode_from_gpu_ptr_f32_with_stream(ptr, input_d.len(), 2, std::ptr::null_mut())
+    }
+    .expect("encode_from_gpu_ptr_f32_with_stream");
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_f32_with_stream_non_default_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let stream = device.fork_default_stream().expect("fork_default_stream");
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr_f32_with_stream(
+                *input_d.device_ptr() as *const f32,
+                input_d.len(),
+                2,
+                stream.stream as *mut c_void,
+            )
+            .expect("encode_from_gpu_ptr_f32_with_stream (non-default stream)")
+    };
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_f32_success_f64_engine() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64).ok() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr_f32(ptr, input_d.len(), 2)
+            .expect("encode_from_gpu_ptr_f32 (Float64 engine)")
+    };
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_f32_empty_input() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match device_and_f32_slice(&[1.0]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let result = unsafe { engine.encode_from_gpu_ptr_f32(ptr, 0, 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("empty")),
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_f32_null_pointer() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let result = unsafe { engine.encode_from_gpu_ptr_f32(std::ptr::null(), 4, 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_f32_input_exceeds_state_len() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0, 0.0]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let result = unsafe { engine.encode_from_gpu_ptr_f32(ptr, input_d.len(), 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(
+                msg.contains("exceeds") || msg.contains("state vector"),
+                "expected 'exceeds' or 'state vector', got: {}",
+                msg
+            );
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
     }
 }
