@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmahout_website=globalThis.webpackChunkmahout_website||[]).push([[8947],{6600(a){a.exports=JSON.parse('{"authors":[{"name":"Mahout Team","title":"Apache Mahout","url":"https://mahout.apache.org","image_url_dark":"/img/mahout-favicon.svg","imageURL":"/img/mahout-favicon-black.svg","key":"mahout-team","page":null,"count":51}]}')}}]);
