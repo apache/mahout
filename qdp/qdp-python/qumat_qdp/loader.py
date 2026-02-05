@@ -112,7 +112,6 @@ class QuantumDataLoader:
         self._total_batches = total_batches
         self._encoding_method = encoding_method
         self._seed = seed
-        self._source_type: str = "synthetic"
         self._file_path: Optional[str] = None
         self._streaming_requested = (
             False  # set True by source_file(streaming=True); Phase 2b
@@ -151,7 +150,6 @@ class QuantumDataLoader:
         total_batches: Optional[int] = None,
     ) -> QuantumDataLoader:
         """Use synthetic data source (default). Optionally override total_batches. Returns self."""
-        self._source_type = "synthetic"
         self._synthetic_requested = True
         if total_batches is not None:
             if not isinstance(total_batches, int) or total_batches < 1:
@@ -173,7 +171,6 @@ class QuantumDataLoader:
             raise ValueError(
                 "streaming=True supports only .parquet files; use streaming=False for other formats."
             )
-        self._source_type = "file"
         self._file_path = path
         self._file_requested = True
         self._streaming_requested = streaming
@@ -199,17 +196,11 @@ class QuantumDataLoader:
             raise ValueError(
                 "Cannot set both synthetic and file sources; use either .source_synthetic() or .source_file(path), not both."
             )
-        if self._source_type == "file" and self._file_path is None:
+        if self._file_requested and self._file_path is None:
             raise ValueError(
                 "source_file() was not called with a path; set file source with .source_file(path)."
             )
-        if self._source_type not in ("synthetic", "file"):
-            raise ValueError(
-                f"Invalid _source_type {self._source_type!r}; use .source_synthetic() or .source_file(path)."
-            )
-        use_synthetic = self._source_type == "synthetic" or (
-            not self._synthetic_requested and not self._file_requested
-        )
+        use_synthetic = not self._file_requested
         if use_synthetic:
             _validate_loader_args(
                 device_id=self._device_id,
