@@ -46,9 +46,9 @@
 // Limits per-sample parallelism to maintain good load balancing
 #define MAX_BLOCKS_PER_SAMPLE 32
 
-// CUDA grid dimension limit for 1D launches
+// CUDA grid dimension limit for 1D launches (2^31 - 1, signed 32-bit int max)
 // This is a hardware limitation, not a tunable parameter
-#define CUDA_MAX_GRID_DIM_1D 65535
+#define CUDA_MAX_GRID_DIM_1D 2147483647
 
 // ============================================================================
 // Qubit Limits
