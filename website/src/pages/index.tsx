@@ -41,7 +41,7 @@ function HomepageHeader() {
                 Download Mahout Qumat
               </Link>
             </div>
-            <p className={styles.versionText}>Currently v0.5-dev</p>
+            <p className={styles.versionText}>Currently v0.5</p>
           </div>
         </div>
       </div>
