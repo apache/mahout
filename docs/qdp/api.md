@@ -1,8 +1,13 @@
 ---
 title: API Reference - QDP
+sidebar_label: API Reference
 ---
 
 # API Reference
+
+:::tip Auto-Generated API Documentation
+For the Rust implementation details, see the [qdp-core Rust API documentation](/api/rust/qdp_core/index.html). For Python usage, see the [Python API Reference](/docs/api/python).
+:::
 
 Mahout QDP (Quantum Data Plane) provides GPU-accelerated quantum state encoding.
 It writes classical data directly into GPU memory and returns a DLPack-compatible

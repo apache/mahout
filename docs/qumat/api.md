@@ -1,4 +1,15 @@
+---
+title: API Reference - Qumat
+sidebar_label: API Reference
+---
+
 # QuMat Class Methods
+
+:::tip Auto-Generated API Documentation
+For complete auto-generated API documentation with type signatures and examples extracted directly from source code, see the [Python API Reference](/docs/api/python).
+:::
+
+## Quick Reference
 
 ## `__init__(self, backend_config)`
 - **Purpose**: Initializes the QuMat instance with a specific backend.

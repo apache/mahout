@@ -1,0 +1,143 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: API Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qumat/**'
+      - 'qdp/qdp-core/**'
+      - 'scripts/generate-*-docs.sh'
+      - '.github/workflows/api-docs.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qumat/**'
+      - 'qdp/qdp-core/**'
+      - 'scripts/generate-*-docs.sh'
+      - '.github/workflows/api-docs.yml'
+  workflow_dispatch:
+
+jobs:
+  python-docs:
+    name: Generate Python API Docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pdoc
+          pip install -e .
+
+      - name: Generate Python API documentation
+        run: |
+          pdoc --output-dir docs/api/python \
+               --docformat restructuredtext \
+               qumat
+
+      - name: Verify generated docs
+        run: |
+          test -d docs/api/python/qumat
+          echo "Python docs generated successfully"
+          ls -la docs/api/python/
+
+      - name: Upload Python API docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-api-docs
+          path: docs/api/python/
+          retention-days: 7
+
+  rust-docs:
+    name: Generate Rust API Docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate Rust documentation
+        working-directory: qdp
+        run: |
+          cargo doc --no-deps --package qdp-core 2>&1 | tee rustdoc-output.txt
+          # Check for documentation generation errors
+          if grep -q "error\[" rustdoc-output.txt; then
+            echo "Rust documentation generation failed with errors"
+            exit 1
+          fi
+
+      - name: Verify generated docs
+        run: |
+          test -f qdp/target/doc/qdp_core/index.html
+          echo "Rust docs generated successfully"
+
+      - name: Upload Rust API docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-api-docs
+          path: qdp/target/doc/
+          retention-days: 7
+
+  verify-website-integration:
+    name: Verify Website Build with API Docs
+    needs: [python-docs, rust-docs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download Python API docs
+        uses: actions/download-artifact@v4
+        with:
+          name: python-api-docs
+          path: docs/api/python/
+
+      - name: Download Rust API docs
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-api-docs
+          path: website/static/api/rust/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Build website with API docs
+        working-directory: website
+        run: npm run build
+
+      - name: Verify API docs in build
+        run: |
+          test -d website/build/api/rust/qdp_core
+          echo "Website built successfully with API docs integrated"

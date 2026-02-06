@@ -107,7 +107,27 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Contributing',
       collapsed: true,
-      items: ['about/how-to-contribute'],
+      items: [
+        'about/how-to-contribute',
+        'about/documenting-api',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'API Reference',
+      collapsed: true,
+      items: [
+        {
+          type: 'doc',
+          id: 'api/python/index',
+          label: 'Python API',
+        },
+        {
+          type: 'link',
+          label: 'Rust API (qdp-core)',
+          href: '/api/rust/qdp_core/index.html',
+        },
+      ],
     },
   ],
 };

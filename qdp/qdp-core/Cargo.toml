@@ -3,6 +3,13 @@ name = "qdp-core"
 version.workspace = true
 edition.workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints.rust]
+missing_docs = "warn"
+
 [dependencies]
 cudarc = { workspace = true }
 qdp-kernels = { path = "../qdp-kernels" }
