@@ -206,7 +206,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Allocate single large GPU buffer for all states
         let batch_state_vector = {
             crate::profile_scope!("GPU::AllocBatch");
-            GpuStateVector::new_batch(device, num_samples, num_qubits)?
+            GpuStateVector::new_batch(device, num_samples, num_qubits, Precision::Float64)?
         };
 
         // Upload input data to GPU
