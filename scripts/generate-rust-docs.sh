@@ -16,12 +16,13 @@
 # limitations under the License.
 #
 
-# Generate Rust API documentation using cargo doc
-# Output is placed in website/static/api/rust/ for Docusaurus integration
+# Generate Rust API documentation as Markdown using rustdoc-md
+# Output is placed in docs/api/rust/ for Docusaurus integration
 
 set -euo pipefail
 
-# Ensure cargo is available via rustup toolchain if not already in PATH
+# Add ~/.cargo/bin and rustup toolchain to PATH if not already there
+[[ -d "$HOME/.cargo/bin" ]] && export PATH="$HOME/.cargo/bin:$PATH"
 if ! command -v cargo &>/dev/null; then
   RUSTUP_CARGO="$(find "$HOME/.rustup/toolchains" -path '*/bin/cargo' -print -quit 2>/dev/null || true)"
   if [[ -n "$RUSTUP_CARGO" ]]; then
@@ -32,10 +33,16 @@ if ! command -v cargo &>/dev/null; then
   fi
 fi
 
+# Ensure rustdoc-md is available
+if ! command -v rustdoc-md &>/dev/null; then
+  echo "Error: rustdoc-md not found. Install with: cargo install rustdoc-md" >&2
+  exit 1
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 QDP_DIR="$ROOT_DIR/qdp"
-OUTPUT_DIR="$ROOT_DIR/website/static/api/rust"
+OUTPUT_DIR="$ROOT_DIR/docs/api/rust"
 
 echo "Generating Rust API documentation..."
 echo "Output directory: $OUTPUT_DIR"
@@ -43,14 +50,38 @@ echo "Output directory: $OUTPUT_DIR"
 # Change to QDP workspace directory
 cd "$QDP_DIR"
 
-# Generate rustdoc for qdp-core package
-# --no-deps: Don't document dependencies
-# Using default features to avoid CUDA/GPU requirements
-cargo doc --no-deps --package qdp-core
+# Find nightly cargo (cargo +nightly requires rustup in PATH, so use direct path)
+NIGHTLY_CARGO="$(find "$HOME/.rustup/toolchains/nightly"* -path '*/bin/cargo' -print -quit 2>/dev/null || true)"
+if [[ -z "$NIGHTLY_CARGO" ]]; then
+  echo "Error: nightly toolchain not found. Install with: rustup install nightly" >&2
+  exit 1
+fi
 
-# Copy generated documentation to website static directory
+# Step 1: Generate rustdoc JSON (requires nightly)
+# Prepend nightly bin to PATH so both cargo AND rustdoc resolve from nightly
+NIGHTLY_BIN="$(dirname "$NIGHTLY_CARGO")"
+echo "Using nightly toolchain at: $NIGHTLY_BIN"
+echo "Generating rustdoc JSON..."
+PATH="$NIGHTLY_BIN:$PATH" RUSTDOCFLAGS="-Z unstable-options --output-format json" \
+  cargo doc --no-deps --package qdp-core
+
+# Step 2: Convert JSON to Markdown
+JSON_FILE="$QDP_DIR/target/doc/qdp_core.json"
 mkdir -p "$OUTPUT_DIR"
-cp -r "$QDP_DIR/target/doc/"* "$OUTPUT_DIR/"
+rustdoc-md --path "$JSON_FILE" --output "$OUTPUT_DIR/index.md"
+
+# Step 3: Add Docusaurus frontmatter
+TMPFILE=$(mktemp)
+cat > "$TMPFILE" <<'FRONTMATTER'
+---
+title: Rust API Reference
+sidebar_label: Rust API (qdp-core)
+sidebar_position: 2
+---
+
+FRONTMATTER
+cat "$OUTPUT_DIR/index.md" >> "$TMPFILE"
+mv "$TMPFILE" "$OUTPUT_DIR/index.md"
 
 echo "Rust API documentation generated successfully!"
-echo "Entry point: $OUTPUT_DIR/qdp_core/index.html"
+echo "Output: $OUTPUT_DIR/index.md"

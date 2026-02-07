@@ -1,0 +1,14 @@
+# scripts/pydoc-markdown.yml
+loaders:
+  - type: python
+    search_path: [".."]  # Tells it to look in the current directory
+    modules: ["qumat"]
+
+renderer:
+  type: markdown
+  render_toc: true
+  header_level_by_type:
+    Module: 1
+    Class: 2
+    Function: 2
+    Method: 2

@@ -16,17 +16,23 @@
 # limitations under the License.
 #
 
-# Generate Python API documentation using pdoc
+# Generate Python API documentation as Markdown using pydoc-markdown
 # Output is placed in docs/api/python/ for Docusaurus integration
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-OUTPUT_DIR="$ROOT_DIR/website/static/api/python"
+OUTPUT_DIR="$ROOT_DIR/docs/api/python"
 
 echo "Generating Python API documentation..."
 echo "Output directory: $OUTPUT_DIR"
+
+# Ensure pydoc-markdown is available
+if ! command -v pydoc-markdown &>/dev/null; then
+  echo "Error: pydoc-markdown not found. Install with: pip install pydoc-markdown" >&2
+  exit 1
+fi
 
 # Ensure output directory exists
 mkdir -p "$OUTPUT_DIR"
@@ -34,12 +40,5 @@ mkdir -p "$OUTPUT_DIR"
 # Change to root directory for proper module resolution
 cd "$ROOT_DIR"
 
-# Generate Qumat API documentation as markdown
-# Using restructuredtext format to match existing docstrings
-pdoc --output-dir "$OUTPUT_DIR" \
-     --docformat restructuredtext \
-     qumat
-
-echo "Python API documentation generated successfully!"
-echo "Files created:"
-find "$OUTPUT_DIR" -name "*.md" -o -name "*.html" 2>/dev/null | head -20 || true
+# Generate markdown for qumat module
+pydoc-markdown -I qumat -m qumat > "$OUTPUT_DIR/index.md"
