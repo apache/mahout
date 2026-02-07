@@ -35,12 +35,8 @@ from typing import TYPE_CHECKING, Iterator, Optional
 if TYPE_CHECKING:
     import _qdp  # noqa: F401 -- for type checkers only
 
-# Rust interface expects seed as Option<u64>: non-negative and <= 2^64 - 1.
-# Ref: qdp-core PipelineConfig seed: Option<u64>
+# Seed must fit Rust u64: 0 <= seed <= 2^64 - 1.
 _U64_MAX = 2**64 - 1
-
-# Lazy import _qdp at runtime until __iter__ is used; TYPE_CHECKING import above
-# is for type checkers only so they can resolve "_qdp.*" annotations if needed.
 
 
 @lru_cache(maxsize=1)
@@ -116,6 +112,12 @@ class QuantumDataLoader:
         self._total_batches = total_batches
         self._encoding_method = encoding_method
         self._seed = seed
+        self._file_path: Optional[str] = None
+        self._streaming_requested = (
+            False  # set True by source_file(streaming=True); Phase 2b
+        )
+        self._synthetic_requested = False  # set True only by source_synthetic()
+        self._file_requested = False
 
     def qubits(self, n: int) -> QuantumDataLoader:
         """Set number of qubits. Returns self for chaining."""
@@ -148,12 +150,30 @@ class QuantumDataLoader:
         total_batches: Optional[int] = None,
     ) -> QuantumDataLoader:
         """Use synthetic data source (default). Optionally override total_batches. Returns self."""
+        self._synthetic_requested = True
         if total_batches is not None:
             if not isinstance(total_batches, int) or total_batches < 1:
                 raise ValueError(
                     f"total_batches must be a positive integer, got {total_batches!r}"
                 )
             self._total_batches = total_batches
+        return self
+
+    def source_file(self, path: str, streaming: bool = False) -> QuantumDataLoader:
+        """Use file data source. Path must point to a supported format. Returns self.
+
+        For streaming=True (Phase 2b), only .parquet is supported; data is read in chunks to reduce memory.
+        For streaming=False, supports .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
+        """
+        if not path or not isinstance(path, str):
+            raise ValueError(f"path must be a non-empty string, got {path!r}")
+        if streaming and not (path.lower().endswith(".parquet")):
+            raise ValueError(
+                "streaming=True supports only .parquet files; use streaming=False for other formats."
+            )
+        self._file_path = path
+        self._file_requested = True
+        self._streaming_requested = streaming
         return self
 
     def seed(self, s: Optional[int] = None) -> QuantumDataLoader:
@@ -170,16 +190,26 @@ class QuantumDataLoader:
         self._seed = s
         return self
 
-    def __iter__(self) -> Iterator[object]:
-        """Return Rust-backed iterator that yields one QuantumTensor per batch."""
-        _validate_loader_args(
-            device_id=self._device_id,
-            num_qubits=self._num_qubits,
-            batch_size=self._batch_size,
-            total_batches=self._total_batches,
-            encoding_method=self._encoding_method,
-            seed=self._seed,
-        )
+    def _create_iterator(self) -> Iterator[object]:
+        """Build engine and return the Rust-backed loader iterator (synthetic or file)."""
+        if self._synthetic_requested and self._file_requested:
+            raise ValueError(
+                "Cannot set both synthetic and file sources; use either .source_synthetic() or .source_file(path), not both."
+            )
+        if self._file_requested and self._file_path is None:
+            raise ValueError(
+                "source_file() was not called with a path; set file source with .source_file(path)."
+            )
+        use_synthetic = not self._file_requested
+        if use_synthetic:
+            _validate_loader_args(
+                device_id=self._device_id,
+                num_qubits=self._num_qubits,
+                batch_size=self._batch_size,
+                total_batches=self._total_batches,
+                encoding_method=self._encoding_method,
+                seed=self._seed,
+            )
         qdp = _get_qdp()
         QdpEngine = getattr(qdp, "QdpEngine", None)
         if QdpEngine is None:
@@ -187,16 +217,43 @@ class QuantumDataLoader:
                 "_qdp.QdpEngine not found. Build the extension with maturin develop."
             )
         engine = QdpEngine(device_id=self._device_id)
+        if not use_synthetic:
+            if self._streaming_requested:
+                create_loader = getattr(engine, "create_streaming_file_loader", None)
+                if create_loader is None:
+                    raise RuntimeError(
+                        "create_streaming_file_loader not available (e.g. only on Linux with CUDA)."
+                    )
+            else:
+                create_loader = getattr(engine, "create_file_loader", None)
+                if create_loader is None:
+                    raise RuntimeError(
+                        "create_file_loader not available (e.g. only on Linux with CUDA)."
+                    )
+            return iter(
+                create_loader(
+                    path=self._file_path,
+                    batch_size=self._batch_size,
+                    num_qubits=self._num_qubits,
+                    encoding_method=self._encoding_method,
+                    batch_limit=None,
+                )
+            )
         create_synthetic_loader = getattr(engine, "create_synthetic_loader", None)
         if create_synthetic_loader is None:
             raise RuntimeError(
                 "create_synthetic_loader not available (e.g. only on Linux with CUDA)."
             )
-        loader = create_synthetic_loader(
-            total_batches=self._total_batches,
-            batch_size=self._batch_size,
-            num_qubits=self._num_qubits,
-            encoding_method=self._encoding_method,
-            seed=self._seed,
+        return iter(
+            create_synthetic_loader(
+                total_batches=self._total_batches,
+                batch_size=self._batch_size,
+                num_qubits=self._num_qubits,
+                encoding_method=self._encoding_method,
+                seed=self._seed,
+            )
         )
-        return iter(loader)
+
+    def __iter__(self) -> Iterator[object]:
+        """Return Rust-backed iterator that yields one QuantumTensor per batch."""
+        return self._create_iterator()
