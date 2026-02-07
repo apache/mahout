@@ -145,7 +145,8 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     let num_samples = reader_core.total_rows;
 
     // Allocate output state vector
-    let total_state_vector = GpuStateVector::new_batch(&engine.device, num_samples, num_qubits)?;
+    let total_state_vector =
+        GpuStateVector::new_batch(&engine.device, num_samples, num_qubits, engine.precision())?;
     const PIPELINE_EVENT_SLOTS: usize = 2;
     let ctx = PipelineContext::new(&engine.device, PIPELINE_EVENT_SLOTS)?;
 

@@ -31,8 +31,9 @@ mod dlpack_tests {
 
         let num_samples = 4;
         let num_qubits = 2; // 2^2 = 4 elements per sample
-        let state_vector = GpuStateVector::new_batch(&device, num_samples, num_qubits)
-            .expect("Failed to create batch state vector");
+        let state_vector =
+            GpuStateVector::new_batch(&device, num_samples, num_qubits, Precision::Float64)
+                .expect("Failed to create batch state vector");
 
         let dlpack_ptr = state_vector.to_dlpack();
         assert!(!dlpack_ptr.is_null());

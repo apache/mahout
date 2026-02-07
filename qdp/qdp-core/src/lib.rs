@@ -172,6 +172,11 @@ impl QdpEngine {
         &self.device
     }
 
+    /// Get output precision of the engine (Float32 or Float64).
+    pub fn precision(&self) -> Precision {
+        self.precision
+    }
+
     /// Block until all GPU work on the default stream has completed.
     /// Used by the generic pipeline and other callers that need to sync before timing.
     #[cfg(target_os = "linux")]
@@ -602,6 +607,98 @@ impl QdpEngine {
 
         let state_vector = state_vector.to_precision(&self.device, self.precision)?;
         Ok(state_vector.to_dlpack())
+    }
+
+    /// Encode batch from existing GPU pointer (float32 input, amplitude encoding only)
+    ///
+    /// Zero-copy batch encoding from PyTorch CUDA float32 tensors. Uses the default CUDA stream.
+    /// For stream interop use `encode_batch_from_gpu_ptr_f32_with_stream`.
+    ///
+    /// # Arguments
+    /// * `input_batch_d` - Device pointer to batch input data (f32 array, row-major [num_samples, sample_size])
+    /// * `num_samples` - Number of samples in the batch
+    /// * `sample_size` - Number of f32 elements per sample
+    /// * `num_qubits` - Number of qubits for encoding
+    ///
+    /// # Returns
+    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits]) in engine precision.
+    ///
+    /// # Safety
+    /// The input pointer must point to valid GPU memory on the same device, contain at least
+    /// `num_samples * sample_size` f32 elements, and remain valid for the duration of this call.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_batch_from_gpu_ptr_f32(
+        &self,
+        input_batch_d: *const f32,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<*mut DLManagedTensor> {
+        unsafe {
+            self.encode_batch_from_gpu_ptr_f32_with_stream(
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Encode batch from GPU pointer (float32) on a specified CUDA stream.
+    ///
+    /// Same as [`encode_batch_from_gpu_ptr_f32`](Self::encode_batch_from_gpu_ptr_f32) but uses the given
+    /// `stream`. Pass null for default stream.
+    ///
+    /// # Safety
+    /// Same as `encode_batch_from_gpu_ptr_f32`; `stream` must be a valid CUDA stream on the same device or null.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_batch_from_gpu_ptr_f32_with_stream(
+        &self,
+        input_batch_d: *const f32,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeBatchFromGpuPtrF32");
+
+        let state_len = 1usize << num_qubits;
+
+        if num_samples == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Number of samples cannot be zero".into(),
+            ));
+        }
+
+        if sample_size == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Sample size cannot be zero".into(),
+            ));
+        }
+
+        validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
+
+        if sample_size > state_len {
+            return Err(MahoutError::InvalidInput(format!(
+                "Sample size {} exceeds state vector size {} (2^{} qubits)",
+                sample_size, state_len, num_qubits
+            )));
+        }
+
+        let encoder = get_encoder("amplitude")?;
+        let batch_state_vector = unsafe {
+            encoder.encode_batch_from_gpu_ptr_f32(
+                &self.device,
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                stream,
+            )
+        }?;
+        let batch_state_vector = batch_state_vector.to_precision(&self.device, self.precision)?;
+        Ok(batch_state_vector.to_dlpack())
     }
 
     /// Encode batch from existing GPU pointer (zero-copy for CUDA tensors)
