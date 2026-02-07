@@ -14,7 +14,7 @@ The `qumat` package provides a unified interface for quantum circuit programming
 
 ### Core Classes
 
-- **[QuMat](./qumat.md)** - Main quantum circuit interface for creating and executing quantum circuits
+- **[QuMat](/api/python/qumat.html)** - Main quantum circuit interface for creating and executing quantum circuits
 
 ### Quick Example
 
@@ -39,7 +39,7 @@ results = qc.execute_circuit()
 The `qumat_qdp` package provides GPU-accelerated quantum state encoding for machine learning pipelines.
 
 :::note GPU Required
-The QDP Python bindings require a CUDA-capable GPU. See the [Rust API documentation](/api/rust/qdp_core/index.html) for the underlying implementation details.
+The QDP Python bindings require a CUDA-capable GPU. See the [Rust API documentation](/docs/api/rust) for the underlying implementation details.
 :::
 
 ### Core Classes

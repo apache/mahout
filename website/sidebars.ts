@@ -123,9 +123,9 @@ const sidebars: SidebarsConfig = {
           label: 'Python API',
         },
         {
-          type: 'link',
+          type: 'doc',
+          id: 'api/rust/index',
           label: 'Rust API (qdp-core)',
-          href: '/api/rust/qdp_core/index.html',
         },
       ],
     },

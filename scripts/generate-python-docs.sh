@@ -23,7 +23,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-OUTPUT_DIR="$ROOT_DIR/docs/api/python"
+OUTPUT_DIR="$ROOT_DIR/website/static/api/python"
 
 echo "Generating Python API documentation..."
 echo "Output directory: $OUTPUT_DIR"
