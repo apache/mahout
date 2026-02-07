@@ -100,7 +100,7 @@ This pattern allows:
 
 ### Versioning Strategy
 
-- `current` (0.5-dev): Active development, synced from `/docs`
+- `current` (0.5): Active development, synced from `/docs`
 - `0.4`: First stable snapshot, frozen documentation
 
 To create a new version:
