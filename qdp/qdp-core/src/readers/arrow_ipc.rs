@@ -49,11 +49,14 @@ impl ArrowIPCReader {
                 )));
             }
             Err(e) => {
-                return Err(MahoutError::Io(format!(
-                    "Failed to check if Arrow IPC file exists at {}: {}",
-                    path.display(),
-                    e
-                )));
+                return Err(MahoutError::IoWithSource {
+                    message: format!(
+                        "Failed to check if Arrow IPC file exists at {}: {}",
+                        path.display(),
+                        e
+                    ),
+                    source: e,
+                });
             }
             Ok(true) => {}
         }
@@ -74,8 +77,10 @@ impl DataReader for ArrowIPCReader {
         }
         self.read = true;
 
-        let file = File::open(&self.path)
-            .map_err(|e| MahoutError::Io(format!("Failed to open Arrow IPC file: {}", e)))?;
+        let file = File::open(&self.path).map_err(|e| MahoutError::IoWithSource {
+            message: format!("Failed to open Arrow IPC file: {}", e),
+            source: e,
+        })?;
 
         let reader = ArrowFileReader::try_new(file, None)
             .map_err(|e| MahoutError::Io(format!("Failed to create Arrow IPC reader: {}", e)))?;
