@@ -22,7 +22,6 @@ use crate::error::{MahoutError, Result};
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
 use qdp_kernels::{CuComplex, CuDoubleComplex};
 use std::ffi::c_void;
-#[cfg(target_os = "linux")]
 use std::sync::Arc;
 
 /// Precision of the GPU state vector.

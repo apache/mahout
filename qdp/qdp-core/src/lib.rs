@@ -32,7 +32,9 @@ pub mod tf_proto;
 #[macro_use]
 mod profiling;
 
-pub use error::{MahoutError, Result, cuda_error_to_string};
+pub use error::{MahoutError, Result};
+#[cfg(target_os = "linux")]
+pub use error::cuda_error_to_string;
 pub use gpu::memory::Precision;
 
 // Throughput/latency pipeline runner: single path using QdpEngine and encode_batch in Rust.

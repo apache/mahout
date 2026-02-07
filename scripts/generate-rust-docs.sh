@@ -21,6 +21,17 @@
 
 set -euo pipefail
 
+# Ensure cargo is available via rustup toolchain if not already in PATH
+if ! command -v cargo &>/dev/null; then
+  RUSTUP_CARGO="$(find "$HOME/.rustup/toolchains" -path '*/bin/cargo' -print -quit 2>/dev/null || true)"
+  if [[ -n "$RUSTUP_CARGO" ]]; then
+    export PATH="$(dirname "$RUSTUP_CARGO"):$PATH"
+  else
+    echo "Error: cargo not found. Please install Rust: https://rustup.rs" >&2
+    exit 1
+  fi
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 QDP_DIR="$ROOT_DIR/qdp"
