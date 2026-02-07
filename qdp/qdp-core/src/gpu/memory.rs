@@ -344,7 +344,13 @@ impl GpuStateVector {
 
     /// Create GPU state vector for a batch of samples
     /// Allocates num_samples * 2^qubits complex numbers on GPU
-    pub fn new_batch(_device: &Arc<CudaDevice>, num_samples: usize, qubits: usize) -> Result<Self> {
+    #[cfg(target_os = "linux")]
+    pub fn new_batch(
+        _device: &Arc<CudaDevice>,
+        num_samples: usize,
+        qubits: usize,
+        precision: Precision,
+    ) -> Result<Self> {
         let single_state_size: usize = 1usize << qubits;
         let total_elements = num_samples.checked_mul(single_state_size).ok_or_else(|| {
             MahoutError::MemoryAllocation(format!(
@@ -353,50 +359,84 @@ impl GpuStateVector {
             ))
         })?;
 
-        #[cfg(target_os = "linux")]
-        {
-            let requested_bytes = total_elements
-                .checked_mul(std::mem::size_of::<CuDoubleComplex>())
-                .ok_or_else(|| {
-                    MahoutError::MemoryAllocation(format!(
-                        "Requested GPU allocation size overflow (elements={})",
-                        total_elements
-                    ))
-                })?;
+        let buffer = match precision {
+            Precision::Float32 => {
+                let requested_bytes = total_elements
+                    .checked_mul(std::mem::size_of::<CuComplex>())
+                    .ok_or_else(|| {
+                        MahoutError::MemoryAllocation(format!(
+                            "Requested GPU allocation size overflow (elements={})",
+                            total_elements
+                        ))
+                    })?;
 
-            // Pre-flight check
-            ensure_device_memory_available(
-                requested_bytes,
-                "batch state vector allocation",
-                Some(qubits),
-            )?;
+                ensure_device_memory_available(
+                    requested_bytes,
+                    "batch state vector allocation (f32)",
+                    Some(qubits),
+                )?;
 
-            let slice =
-                unsafe { _device.alloc::<CuDoubleComplex>(total_elements) }.map_err(|e| {
+                let slice = unsafe { _device.alloc::<CuComplex>(total_elements) }.map_err(|e| {
                     map_allocation_error(
                         requested_bytes,
-                        "batch state vector allocation",
+                        "batch state vector allocation (f32)",
                         Some(qubits),
                         e,
                     )
                 })?;
 
-            Ok(Self {
-                buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
-                num_qubits: qubits,
-                size_elements: total_elements,
-                num_samples: Some(num_samples),
-                device_id: _device.ordinal(),
-            })
-        }
+                BufferStorage::F32(GpuBufferRaw { slice })
+            }
+            Precision::Float64 => {
+                let requested_bytes = total_elements
+                    .checked_mul(std::mem::size_of::<CuDoubleComplex>())
+                    .ok_or_else(|| {
+                        MahoutError::MemoryAllocation(format!(
+                            "Requested GPU allocation size overflow (elements={})",
+                            total_elements
+                        ))
+                    })?;
 
-        #[cfg(not(target_os = "linux"))]
-        {
-            Err(MahoutError::Cuda(
-                "CUDA is only available on Linux. This build does not support GPU operations."
-                    .to_string(),
-            ))
-        }
+                ensure_device_memory_available(
+                    requested_bytes,
+                    "batch state vector allocation",
+                    Some(qubits),
+                )?;
+
+                let slice =
+                    unsafe { _device.alloc::<CuDoubleComplex>(total_elements) }.map_err(|e| {
+                        map_allocation_error(
+                            requested_bytes,
+                            "batch state vector allocation",
+                            Some(qubits),
+                            e,
+                        )
+                    })?;
+
+                BufferStorage::F64(GpuBufferRaw { slice })
+            }
+        };
+
+        Ok(Self {
+            buffer: Arc::new(buffer),
+            num_qubits: qubits,
+            size_elements: total_elements,
+            num_samples: Some(num_samples),
+            device_id: _device.ordinal(),
+        })
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    pub fn new_batch(
+        _device: &Arc<CudaDevice>,
+        _num_samples: usize,
+        _qubits: usize,
+        _precision: Precision,
+    ) -> Result<Self> {
+        Err(MahoutError::Cuda(
+            "CUDA is only available on Linux. This build does not support GPU operations."
+                .to_string(),
+        ))
     }
 
     /// Convert the state vector to the requested precision (GPU-side).
