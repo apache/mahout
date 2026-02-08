@@ -98,8 +98,10 @@ pub fn write_parquet<P: AsRef<Path>>(
     let batch = RecordBatch::try_new(schema.clone(), vec![array_ref])
         .map_err(|e| MahoutError::Io(format!("Failed to create RecordBatch: {}", e)))?;
 
-    let file = File::create(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet file: {}", e)))?;
+    let file = File::create(path.as_ref()).map_err(|e| MahoutError::IoWithSource {
+        message: format!("Failed to create Parquet file: {}", e),
+        source: e,
+    })?;
 
     let props = WriterProperties::builder().build();
     let mut writer = ArrowWriter::try_new(file, schema, Some(props))
@@ -120,8 +122,10 @@ pub fn write_parquet<P: AsRef<Path>>(
 ///
 /// Returns one array per row group for zero-copy access.
 pub fn read_parquet_to_arrow<P: AsRef<Path>>(path: P) -> Result<Vec<Float64Array>> {
-    let file = File::open(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to open Parquet file: {}", e)))?;
+    let file = File::open(path.as_ref()).map_err(|e| MahoutError::IoWithSource {
+        message: format!("Failed to open Parquet file: {}", e),
+        source: e,
+    })?;
 
     let builder = ParquetRecordBatchReaderBuilder::try_new(file)
         .map_err(|e| MahoutError::Io(format!("Failed to create Parquet reader: {}", e)))?;
@@ -193,8 +197,10 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
     let batch = RecordBatch::try_new(schema.clone(), vec![array_ref])
         .map_err(|e| MahoutError::Io(format!("Failed to create RecordBatch: {}", e)))?;
 
-    let file = File::create(path.as_ref())
-        .map_err(|e| MahoutError::Io(format!("Failed to create Parquet file: {}", e)))?;
+    let file = File::create(path.as_ref()).map_err(|e| MahoutError::IoWithSource {
+        message: format!("Failed to create Parquet file: {}", e),
+        source: e,
+    })?;
 
     let props = WriterProperties::builder().build();
     let mut writer = ArrowWriter::try_new(file, schema, Some(props))

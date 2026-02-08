@@ -51,17 +51,22 @@ impl ParquetReader {
                 )));
             }
             Err(e) => {
-                return Err(MahoutError::Io(format!(
-                    "Failed to check if Parquet file exists at {}: {}",
-                    path.display(),
-                    e
-                )));
+                return Err(MahoutError::IoWithSource {
+                    message: format!(
+                        "Failed to check if Parquet file exists at {}: {}",
+                        path.display(),
+                        e
+                    ),
+                    source: e,
+                });
             }
             Ok(true) => {}
         }
 
-        let file = File::open(path)
-            .map_err(|e| MahoutError::Io(format!("Failed to open Parquet file: {}", e)))?;
+        let file = File::open(path).map_err(|e| MahoutError::IoWithSource {
+            message: format!("Failed to open Parquet file: {}", e),
+            source: e,
+        })?;
 
         let builder = ParquetRecordBatchReaderBuilder::try_new(file)
             .map_err(|e| MahoutError::Io(format!("Failed to create Parquet reader: {}", e)))?;
@@ -262,17 +267,22 @@ impl ParquetStreamingReader {
                 )));
             }
             Err(e) => {
-                return Err(MahoutError::Io(format!(
-                    "Failed to check if Parquet file exists at {}: {}",
-                    path.display(),
-                    e
-                )));
+                return Err(MahoutError::IoWithSource {
+                    message: format!(
+                        "Failed to check if Parquet file exists at {}: {}",
+                        path.display(),
+                        e
+                    ),
+                    source: e,
+                });
             }
             Ok(true) => {}
         }
 
-        let file = File::open(path)
-            .map_err(|e| MahoutError::Io(format!("Failed to open Parquet file: {}", e)))?;
+        let file = File::open(path).map_err(|e| MahoutError::IoWithSource {
+            message: format!("Failed to open Parquet file: {}", e),
+            source: e,
+        })?;
 
         let builder = ParquetRecordBatchReaderBuilder::try_new(file)
             .map_err(|e| MahoutError::Io(format!("Failed to create Parquet reader: {}", e)))?;
