@@ -24,7 +24,7 @@ setup-test-python:
 
 test_rust:
 ifeq ($(HAS_NVIDIA),yes)
-	cd qdp && cargo test
+	cd qdp && cargo test -p qdp-core -p qdp-kernels
 else
 	@echo "[SKIP] No NVIDIA GPU detected, skipping test_rust"
 endif
