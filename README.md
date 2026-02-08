@@ -21,7 +21,6 @@ limitations under the License.
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![PyPI version](https://img.shields.io/pypi/v/qumat.svg?color=blue)](https://pypi.org/project/qumat/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/qumat.svg?color=blue)](https://pypi.org/project/qumat/)
-[![License](https://img.shields.io/pypi/l/qumat?color=blue)](https://pypi.org/project/qumat/)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/qumat)
 [![GitHub Stars](https://img.shields.io/github/stars/apache/mahout.svg)](https://github.com/apache/mahout/stargazers)
 [![GitHub Contributors](https://img.shields.io/github/contributors/apache/mahout.svg)](https://github.com/apache/mahout/graphs/contributors)
