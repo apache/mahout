@@ -1089,92 +1089,8 @@ impl QdpEngine {
             })?;
         Ok(PyQuantumLoader::new(Some(iter)))
     }
-}
 
-// --- Loader bindings (Linux only; qdp-core pipeline types only built on Linux) ---
-#[cfg(target_os = "linux")]
-mod loader_bindings {
-    use super::*;
-    use pyo3::exceptions::PyStopIteration;
-    use qdp_core::{PipelineConfig, PipelineIterator};
-
-    /// Rust-backed iterator yielding one QuantumTensor per batch; used by QuantumDataLoader.
-    #[pyclass]
-    pub struct PyQuantumLoader {
-        inner: Option<PipelineIterator>,
-    }
-
-    impl PyQuantumLoader {
-        pub fn new(inner: Option<PipelineIterator>) -> Self {
-            Self { inner }
-        }
-    }
-
-    #[pymethods]
-    impl PyQuantumLoader {
-        fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-            slf
-        }
-
-        fn __next__(mut slf: PyRefMut<'_, Self>) -> PyResult<QuantumTensor> {
-            let mut iter: PipelineIterator = match slf.inner.take() {
-                Some(i) => i,
-                None => return Err(PyStopIteration::new_err("")),
-            };
-            // Call next_batch without releasing GIL (return type *mut DLManagedTensor is !Send).
-            let result = iter.next_batch();
-            match result {
-                Ok(Some(ptr)) => {
-                    slf.inner = Some(iter);
-                    Ok(QuantumTensor {
-                        ptr,
-                        consumed: false,
-                    })
-                }
-                Ok(None) => {
-                    // Exhausted; do not put iterator back
-                    Err(PyStopIteration::new_err(""))
-                }
-                Err(e) => {
-                    slf.inner = Some(iter);
-                    Err(PyRuntimeError::new_err(format!(
-                        "Pipeline next_batch failed: {}",
-                        e
-                    )))
-                }
-            }
-        }
-    }
-
-    /// Build PipelineConfig from Python args. device_id is 0 (engine does not expose it); iterator uses engine clone with correct device.
-    pub fn config_from_args(
-        _engine: &CoreEngine,
-        batch_size: usize,
-        num_qubits: u32,
-        encoding_method: &str,
-        total_batches: usize,
-        seed: Option<u64>,
-    ) -> PipelineConfig {
-        PipelineConfig {
-            device_id: 0,
-            num_qubits,
-            batch_size,
-            total_batches,
-            encoding_method: encoding_method.to_string(),
-            seed,
-            warmup_batches: 0,
-        }
-    }
-
-    /// Resolve path from Python str or pathlib.Path (__fspath__).
-    pub fn path_from_py(path: &Bound<'_, PyAny>) -> PyResult<String> {
-        path.extract::<String>().or_else(|_| {
-            path.call_method0("__fspath__")
-                .and_then(|m| m.extract::<String>())
-        })
-    }
-
-    /// encode directly from a PyTorch CUDA tensor. Internal helper.
+    /// Encode directly from a PyTorch CUDA tensor. Internal helper.
     ///
     /// Dispatches to the core f32 GPU pointer API for 1D float32 amplitude encoding,
     /// or to the float64/basis GPU pointer APIs for other dtypes and batch encoding.
@@ -1309,6 +1225,90 @@ mod loader_bindings {
                 ))),
             }
         }
+    }
+}
+
+// --- Loader bindings (Linux only; qdp-core pipeline types only built on Linux) ---
+#[cfg(target_os = "linux")]
+mod loader_bindings {
+    use super::*;
+    use pyo3::exceptions::PyStopIteration;
+    use qdp_core::{PipelineConfig, PipelineIterator};
+
+    /// Rust-backed iterator yielding one QuantumTensor per batch; used by QuantumDataLoader.
+    #[pyclass]
+    pub struct PyQuantumLoader {
+        inner: Option<PipelineIterator>,
+    }
+
+    impl PyQuantumLoader {
+        pub fn new(inner: Option<PipelineIterator>) -> Self {
+            Self { inner }
+        }
+    }
+
+    #[pymethods]
+    impl PyQuantumLoader {
+        fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+            slf
+        }
+
+        fn __next__(mut slf: PyRefMut<'_, Self>) -> PyResult<QuantumTensor> {
+            let mut iter: PipelineIterator = match slf.inner.take() {
+                Some(i) => i,
+                None => return Err(PyStopIteration::new_err("")),
+            };
+            // Call next_batch without releasing GIL (return type *mut DLManagedTensor is !Send).
+            let result = iter.next_batch();
+            match result {
+                Ok(Some(ptr)) => {
+                    slf.inner = Some(iter);
+                    Ok(QuantumTensor {
+                        ptr,
+                        consumed: false,
+                    })
+                }
+                Ok(None) => {
+                    // Exhausted; do not put iterator back
+                    Err(PyStopIteration::new_err(""))
+                }
+                Err(e) => {
+                    slf.inner = Some(iter);
+                    Err(PyRuntimeError::new_err(format!(
+                        "Pipeline next_batch failed: {}",
+                        e
+                    )))
+                }
+            }
+        }
+    }
+
+    /// Build PipelineConfig from Python args. device_id is 0 (engine does not expose it); iterator uses engine clone with correct device.
+    pub fn config_from_args(
+        _engine: &CoreEngine,
+        batch_size: usize,
+        num_qubits: u32,
+        encoding_method: &str,
+        total_batches: usize,
+        seed: Option<u64>,
+    ) -> PipelineConfig {
+        PipelineConfig {
+            device_id: 0,
+            num_qubits,
+            batch_size,
+            total_batches,
+            encoding_method: encoding_method.to_string(),
+            seed,
+            warmup_batches: 0,
+        }
+    }
+
+    /// Resolve path from Python str or pathlib.Path (__fspath__).
+    pub fn path_from_py(path: &Bound<'_, PyAny>) -> PyResult<String> {
+        path.extract::<String>().or_else(|_| {
+            path.call_method0("__fspath__")
+                .and_then(|m| m.extract::<String>())
+        })
     }
 }
 
