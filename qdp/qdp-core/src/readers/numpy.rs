@@ -65,11 +65,14 @@ impl NumpyReader {
                 )));
             }
             Err(e) => {
-                return Err(MahoutError::Io(format!(
-                    "Failed to check if NumPy file exists at {}: {}",
-                    path.display(),
-                    e
-                )));
+                return Err(MahoutError::IoWithSource {
+                    message: format!(
+                        "Failed to check if NumPy file exists at {}: {}",
+                        path.display(),
+                        e
+                    ),
+                    source: e,
+                });
             }
             Ok(true) => {}
         }
@@ -92,9 +95,10 @@ impl DataReader for NumpyReader {
 
         // Read the .npy file
         let array: Array2<f64> = ndarray_npy::read_npy(&self.path).map_err(|e| match e {
-            ReadNpyError::Io(io_err) => {
-                MahoutError::Io(format!("Failed to read NumPy file: {}", io_err))
-            }
+            ReadNpyError::Io(io_err) => MahoutError::IoWithSource {
+                message: format!("Failed to read NumPy file: {}", io_err),
+                source: io_err,
+            },
             _ => MahoutError::InvalidInput(format!("Failed to parse NumPy file: {}", e)),
         })?;
 
