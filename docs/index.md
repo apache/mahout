@@ -2,7 +2,7 @@
 title: QuMat Documentation
 ---
 
-![QuMat Logo](assets/mascot.png)
+![QuMat Logo](assets/mascot_with_text.png)
 
 # QuMat
 

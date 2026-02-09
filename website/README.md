@@ -163,8 +163,7 @@ circuit.h(0)
 
 ### Current Versions
 
-- **0.5** - Current development version (synced from `/docs/`)
-- **0.4** - Stable release snapshot
+- **0.5** - Current stable release (synced from `/docs/`)
 
 ### Creating a New Version
 
