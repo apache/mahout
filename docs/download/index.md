@@ -1,42 +1,42 @@
 ---
-title: Downloads
-sidebar_label: Downloads
+title: Install
+sidebar_label: Install
 ---
 
-<a name="Downloads-OfficialRelease"></a>
-# Official Release
-Apache Mahout is an official Apache project and thus available from any of
-the Apache mirrors. The latest Mahout release is available for download at:
+# Install
 
-* [Download Latest](http://www.apache.org/dist/mahout)
-* [Release Archive](http://archive.apache.org/dist/mahout)
-  * To validate artifacts:
-    * (From KEYS file): `gpg --import KEYS`
-```
-$ gpg mahout-qumat-0.4.zip.gpg
-gpg: assuming signed data in `mahout-qumat-0.4.zip.gpg'
-gpg: Signature made Fri 01 Mar 2019 09:59:00 AM PST using RSA key ID 140A5BE9
-gpg: Good signature from "Apache B. Committer (ASF Signing Key) <abc@apache.org>"
+```bash
+pip install qumat
 ```
 
-# Source code for the current snapshot
+To install with QDP (Quantum Data Plane) support:
 
-Apache Mahout is mirrored to [Github](https://github.com/apache/mahout). To get all source:
-
-    git clone https://github.com/apache/mahout.git mahout
-
-## Getting started
-
-To install dependencies, run the following:
+```bash
+pip install qumat[qdp]
 ```
+
+## From Source
+
+```bash
+git clone https://github.com/apache/mahout.git
+cd mahout
 pip install uv
-uv sync --group dev
+uv sync                     # Core Qumat
+uv sync --extra qdp         # With QDP (requires CUDA GPU)
 ```
 
-<a name="Downloads-FutureReleases"></a>
-# Future Releases
+## Apache Release
 
-Official releases are usually created when the developers feel there are
-sufficient changes, improvements and bug fixes to warrant a release. Watch
-the <a href="https://mahout.apache.org/community/mailing-lists.html">Mailing lists</a>
- for latest release discussions and check the Github repo.
+Official source releases are available at [apache.org/dist/mahout](http://www.apache.org/dist/mahout).
+
+To verify the integrity of a downloaded release:
+
+```bash
+gpg --import KEYS
+gpg --verify mahout-qumat-0.5.zip.asc mahout-qumat-0.5.zip
+```
+
+## Links
+
+- [PyPI](https://pypi.org/project/qumat/)
+- [Apache SVN](http://www.apache.org/dist/mahout)
