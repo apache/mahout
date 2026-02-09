@@ -1,13 +1,9 @@
-### Purpose of PR
-<!-- Describe what this PR does. -->
+### Related Issues
 
-### Related Issues or PRs
-<!-- Add links to related issues or PRs. -->
-<!-- - Closes #123  -->
-<!-- - Related to #123   -->
+<!-- Closes #123 -->
 
-### Changes Made
-<!-- Please mark one with an "x"   -->
+### Changes
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Refactoring
@@ -16,18 +12,10 @@
 - [ ] CI/CD pipeline
 - [ ] Other
 
-### Breaking Changes
-<!-- Does this PR introduce a breaking change? -->
-- [ ] Yes
-- [ ] No
+### Why
 
-### Checklist
-<!-- Please mark each item with an "x" when complete -->
-<!-- If not all items are complete, please open this as a **Draft PR**.
-Once all requirements are met, mark as ready for review. -->
+<!-- Why is this change needed? -->
 
-- [ ] Added or updated unit tests for all changes
-- [ ] Added or updated documentation for all changes
-- [ ] Successfully built and ran all unit tests or manual tests locally
-- [ ] PR title follows "MAHOUT-XXX: Brief Description" format (if related to an issue)
-- [ ] Code follows ASF guidelines
+### How
+
+<!-- What was done? -->
