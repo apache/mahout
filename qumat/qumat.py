@@ -356,13 +356,34 @@ class QuMat:
         """Return the final state vector of the quantum circuit.
 
         The complete quantum state vector after circuit execution,
-        representing the full quantum state of all qubits.
+        representing the full quantum state of all qubits. For parameterized
+        circuits, call bind_parameters() first to set parameter values.
 
         :returns: The final state vector as a numpy array.
         :rtype: numpy.ndarray
         :raises RuntimeError: If the circuit has not been initialized.
+        :raises ValueError: If parameterized circuit has unbound parameters.
         """
         self._ensure_circuit_initialized()
+
+        # Only pass bound parameters (non-None values) to backend
+        bound_parameters = {
+            param: value
+            for param, value in self.parameters.items()
+            if value is not None
+        }
+
+        # Check if there are unbound parameters in the circuit
+        if self.parameters and len(bound_parameters) < len(self.parameters):
+            unbound_params = [
+                p for p in self.parameters.keys() if self.parameters[p] is None
+            ]
+            raise ValueError(
+                f"Circuit contains unbound parameters: {unbound_params}. "
+                f"Please call bind_parameters() before get_final_state_vector()."
+            )
+
+        self.backend_config["parameter_values"] = bound_parameters
         return self.backend_module.get_final_state_vector(
             self.circuit, self.backend, self.backend_config
         )

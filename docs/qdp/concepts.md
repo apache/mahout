@@ -1,5 +1,4 @@
 ---
-layout: page
 title: Core Concepts - QDP
 ---
 
@@ -56,7 +55,7 @@ All encoders perform input validation (at minimum):
 
 - $1 \le n \le 30$
 - input is not empty
-- for vector-based encodings: `len(data) <= 2^n`
+- for amplitude: `len(data) <= 2^n`; for angle: `len(data) = n` (one per qubit); for basis: index in range
 
 Note: $n=30$ is already very large—just the output state for a single sample is on the order of $2^{30}$ complex numbers.
 
@@ -108,14 +107,30 @@ When to use it:
 
 - Your data naturally represents discrete states (categories, token IDs, hashed features, etc.).
 
-### 4.3 Angle encoding (planned)
+### 4.3 Angle encoding
 
-Angle encoding typically maps features to rotation angles (e.g., via $R_x(\theta)$, $R_y(\theta)$, $R_z(\theta)$) and constructs a state by applying rotations across qubits.
+**Goal**: map one real angle per qubit to a product state. For angles $x_0, \ldots, x_{n-1}$ (one per qubit):
 
-**Current status in this codebase**:
+$$
+\vert\psi(x)\rangle = \bigotimes_{k=0}^{n-1} \bigl( \cos(x_k)\,\vert 0\rangle + \sin(x_k)\,\vert 1\rangle \bigr)
+$$
 
-- The `"angle"` encoder exists as a placeholder and **returns an error stating it is not implemented yet**.
-- Use `"amplitude"` or `"basis"` for now.
+So each basis state $\vert i\rangle$ gets a real amplitude $\prod_{k} \bigl( (i_k=0 \Rightarrow \cos(x_k)),\ (i_k=1 \Rightarrow \sin(x_k)) \bigr)$ (no phase; state is real-valued in the computational basis).
+
+Key properties in QDP:
+
+- **Input shape**: exactly **one angle per qubit** — `sample_size` must equal `num_qubits`. Single sample: length-`n` vector; batch: shape `[batch_size, n]`.
+- **Validation**: all angles must be finite (no NaN/Inf). Input is not normalized.
+- **GPU execution**: CUDA kernels compute the product-state amplitudes directly (no circuit simulation).
+- **Batch support**: angle encoding supports a batch path for many samples; streaming Parquet with `"angle"` is also supported.
+
+When to use it:
+
+- You have per-qubit or per-feature rotation angles (e.g. from classical preprocessing or embedding) and want a product state on GPU.
+
+Trade-offs:
+
+- Only $n$ real numbers per sample, so input is compact. Output is still $2^n$ complex amplitudes. Does not by itself create entanglement (product state).
 
 ---
 
@@ -150,9 +165,8 @@ Streaming Parquet encoding is implemented as a **producer/consumer pipeline**:
 In the current implementation, streaming Parquet supports:
 
 - `"amplitude"`
+- `"angle"`
 - `"basis"`
-
-(`"angle"` is not supported for streaming yet.)
 
 ### 5.3 Asynchronous copy/compute overlap (dual streams)
 
@@ -197,9 +211,9 @@ Important details:
 - **Keep `num_qubits` realistic**. Output size is $2^n$ and becomes the dominant cost quickly.
 - **Pick the right encoding**:
   - amplitude: dense real-valued vectors
+  - angle: one real angle per qubit (product state)
   - basis: discrete indices / categorical states
-  - angle: planned, not implemented yet in this version
 
 ### 7.3 Profiling
 
-If you need to understand where time is spent (copy vs compute), QDP supports NVTX-based profiling. See `qdp/docs/observability/NVTX_USAGE.md`.
+If you need to understand where time is spent (copy vs compute), QDP supports NVTX-based profiling. See [Observability](./observability).

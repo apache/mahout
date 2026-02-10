@@ -49,11 +49,14 @@ impl ArrowIPCReader {
                 )));
             }
             Err(e) => {
-                return Err(MahoutError::Io(format!(
-                    "Failed to check if Arrow IPC file exists at {}: {}",
-                    path.display(),
-                    e
-                )));
+                return Err(MahoutError::IoWithSource {
+                    message: format!(
+                        "Failed to check if Arrow IPC file exists at {}: {}",
+                        path.display(),
+                        e
+                    ),
+                    source: e,
+                });
             }
             Ok(true) => {}
         }
@@ -74,8 +77,10 @@ impl DataReader for ArrowIPCReader {
         }
         self.read = true;
 
-        let file = File::open(&self.path)
-            .map_err(|e| MahoutError::Io(format!("Failed to open Arrow IPC file: {}", e)))?;
+        let file = File::open(&self.path).map_err(|e| MahoutError::IoWithSource {
+            message: format!("Failed to open Arrow IPC file: {}", e),
+            source: e,
+        })?;
 
         let reader = ArrowFileReader::try_new(file, None)
             .map_err(|e| MahoutError::Io(format!("Failed to create Arrow IPC reader: {}", e)))?;
@@ -114,9 +119,14 @@ impl DataReader for ArrowIPCReader {
                         }
                     } else {
                         sample_size = Some(current_size);
-                        let new_capacity = current_size
-                            .checked_mul(batch.num_rows())
-                            .expect("Capacity overflowed usize");
+                        let new_capacity =
+                            current_size.checked_mul(batch.num_rows()).ok_or_else(|| {
+                                MahoutError::InvalidInput(format!(
+                                    "FixedSizeList capacity overflow: {} * {} would overflow usize",
+                                    current_size,
+                                    batch.num_rows()
+                                ))
+                            })?;
                         all_data.reserve(new_capacity);
                     }
 
@@ -161,7 +171,15 @@ impl DataReader for ArrowIPCReader {
                             }
                         } else {
                             sample_size = Some(current_size);
-                            all_data.reserve(current_size * list_array.len());
+                            let new_capacity =
+                                current_size.checked_mul(list_array.len()).ok_or_else(|| {
+                                    MahoutError::InvalidInput(format!(
+                                        "List capacity overflow: {} * {} would overflow usize",
+                                        current_size,
+                                        list_array.len()
+                                    ))
+                                })?;
+                            all_data.reserve(new_capacity);
                         }
 
                         if float_array.null_count() == 0 {

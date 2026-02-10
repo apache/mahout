@@ -49,12 +49,17 @@ impl TensorFlowReader {
     /// Create a new TensorFlow reader from a file path.
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         // Read entire file into memory (single read to avoid multiple I/O operations)
-        let mut file = File::open(path.as_ref())
-            .map_err(|e| MahoutError::Io(format!("Failed to open TensorFlow file: {}", e)))?;
+        let mut file = File::open(path.as_ref()).map_err(|e| MahoutError::IoWithSource {
+            message: format!("Failed to open TensorFlow file: {}", e),
+            source: e,
+        })?;
 
         let mut buffer = Vec::new();
         file.read_to_end(&mut buffer)
-            .map_err(|e| MahoutError::Io(format!("Failed to read TensorFlow file: {}", e)))?;
+            .map_err(|e| MahoutError::IoWithSource {
+                message: format!("Failed to read TensorFlow file: {}", e),
+                source: e,
+            })?;
 
         // Use Bytes for decode input; with build.rs config.bytes(...) this avoids copying tensor_content during decode
         let buffer = Bytes::from(buffer);

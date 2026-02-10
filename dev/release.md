@@ -9,6 +9,104 @@ This document describes the process for releasing `qumat` and `qumat-qdp`. The p
 
 -   **ASF Account**: Required for PMC members to log in to the ATR platform.
 -   **PyPI Account**: Required for uploading RCs for community testing.
+-   **GPG Key**: Required for signing release artifacts. See [GPG Key Setup](#gpg-key-setup) below.
+
+### GPG Key Setup
+
+If you don't have a GPG key yet, generate one:
+
+```bash
+# Generate a 4096-bit RSA key (use your Apache email)
+gpg --full-generate-key
+# Select: RSA and RSA, 4096 bits, your_name <your_id@apache.org>
+
+# Find your key ID
+gpg --list-secret-keys --keyid-format SHORT
+# Example output: rsa4096/8EEFC01F
+
+# Upload your public key to a key server
+gpg --keyserver keys.openpgp.org --send-keys <YOUR_KEY_ID>
+
+# Append your public key to the project KEYS file
+(gpg --list-sigs <YOUR_KEY_ID> && gpg --armor --export <YOUR_KEY_ID>) >> KEYS
+```
+
+### PyPI Token Setup
+
+**Important:** Store your `.pypirc` in your **home directory** (`~/.pypirc`), **never** in the project directory — it can accidentally be included in source distributions.
+
+```bash
+# Create ~/.pypirc (not in the project directory!)
+cat > ~/.pypirc << 'EOF'
+[testpypi]
+username = __token__
+password = pypi-xxxxx
+
+[pypi]
+username = __token__
+password = pypi-xxxxx
+EOF
+
+chmod 600 ~/.pypirc
+```
+
+---
+
+## Branching Strategy
+
+We follow the Airflow-style release branching model:
+
+```
+main ────●────●────●────●────●──→ (development continues)
+                   │
+                   ├── mahout-qumat-0.5.0-RC1 (tag)
+                   │
+                   └── v0.5-stable (branch) ──●──→ RC2 ──→ v0.5.0 ──→ v0.5.1
+```
+
+### Create Stable Branch
+
+When ready to cut a release, create a stable branch from `main`:
+
+```bash
+git checkout main
+git pull upstream main
+git checkout -b v0.5-stable
+git push -u upstream v0.5-stable
+```
+
+### Tag Release Candidates
+
+Tag RCs on the stable branch:
+
+```bash
+git checkout v0.5-stable
+git tag -a mahout-qumat-0.5.0-RC1 -m "Release Candidate 1 for qumat 0.5.0"
+git push upstream mahout-qumat-0.5.0-RC1
+```
+
+### Cherry-pick Bug Fixes
+
+If bugs are found during RC testing:
+
+1. **Fix on `main` first** (keeps main up-to-date):
+   ```bash
+   git checkout main
+   # ... fix and commit ...
+   git push upstream main
+   ```
+
+2. **Cherry-pick to stable branch**:
+   ```bash
+   # Using cherry-picker tool (auto-creates PR)
+   uvx cherry-picker <commit-hash> v0.5-stable
+   ```
+
+3. **Tag new RC**:
+   ```bash
+   git tag -a mahout-qumat-0.5.0-RC2 -m "Release Candidate 2 for qumat 0.5.0"
+   git push upstream mahout-qumat-0.5.0-RC2
+   ```
 
 ---
 
@@ -23,43 +121,109 @@ The goal of this phase is to ensure the release candidate is stable and ready fo
 Update version numbers and build the artifacts locally.
 
 **Update Versions to RC:**
-Ensure the version includes the `rc` suffix (e.g., `1.0.0rc1`):
--   `qumat/pyproject.toml`
--   `qdp/qdp-python/pyproject.toml`
--   `qdp/Cargo.toml` (if releasing Rust core)
+Ensure the version includes the `rc` suffix (e.g., `0.5.0rc1`):
+-   `pyproject.toml` — set `version = "0.5.0rc1"`
+-   `qdp/Cargo.toml` — set `version = "0.1.0-rc1"`
 
 **Build:**
 ```bash
-# For Qumat
-cd qumat && python -m build
+# Build Qumat (pure Python — one wheel for all Python versions)
+uv build
 
-# For Qumat-QDP
-cd qdp/qdp-python && maturin build --release
+# Build Qumat-QDP (native Rust — one wheel per Python version)
+cd qdp/qdp-python
+uv tool run maturin build --release --interpreter python3.10
+uv tool run maturin build --release --interpreter python3.11
+uv tool run maturin build --release --interpreter python3.12
 ```
 
-**Important:** Store these build artifacts safely. They will be used for both PyPI upload and ATR submission.
+**Output locations:**
+-   `dist/qumat-0.5.0rc1-py3-none-any.whl`
+-   `dist/qumat-0.5.0rc1.tar.gz`
+-   `qdp/target/wheels/qumat_qdp-0.1.0rc1-cp3XX-*.whl`
 
-### 1.3 Upload to PyPI (RC Version)
-Upload the generated artifacts to **PyPI** as a Release Candidate.
+### 1.3 Sign and Hash Artifacts
+
+Sign each artifact with your GPG key and generate SHA-512 checksums:
 
 ```bash
-# Upload Qumat
-cd qumat
-twine upload dist/*
+# Sign and hash Qumat artifacts
+cd dist
+for f in qumat-0.5.0rc1*; do
+  gpg --armor --detach-sign "$f"
+  sha512sum "$f" > "$f.sha512"
+done
 
-# Upload Qumat-QDP
-cd qdp/qdp-python
-twine upload target/wheels/*
+# Sign and hash Qumat-QDP wheels
+cd ../qdp/target/wheels
+for f in qumat_qdp-0.1.0rc1-*.whl; do
+  gpg --armor --detach-sign "$f"
+  sha512sum "$f" > "$f.sha512"
+done
 ```
 
-*Note: This makes the RC available on the official PyPI for easy testing with `pip install --pre qumat==1.0.0rc1`.*
+This produces `.asc` (GPG signature) and `.sha512` (checksum) files for each artifact. These are required by ATR for release validation.
 
-### 1.4 Open Testing Issue
-Open a GitHub Issue titled **"Testing Qumat <Version> RC1"**.
--   List the installation commands (e.g., `pip install --pre qumat`).
--   Track feedback, reported bugs, and verification results.
+**Verify signatures locally:**
+```bash
+gpg --verify qumat-0.5.0rc1.tar.gz.asc qumat-0.5.0rc1.tar.gz
+```
 
-### 1.5 Community Testing & Closure
+### 1.4 Upload to PyPI (RC Version)
+
+Ensure `~/.pypirc` is configured (see [PyPI Token Setup](#pypi-token-setup)).
+
+**Upload to TestPyPI first (recommended):**
+```bash
+# Upload Qumat
+uv tool run twine upload --repository testpypi --config-file ~/.pypirc dist/*
+
+# Upload Qumat-QDP
+uv tool run twine upload --repository testpypi --config-file ~/.pypirc qdp/target/wheels/qumat_qdp-<version>-cp31{0,1,2}-*.whl
+```
+
+**Test install from TestPyPI:**
+```bash
+uv venv && source .venv/bin/activate
+uv pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  --index-strategy unsafe-best-match \
+  qumat==0.5.0rc1 qumat-qdp==0.1.0rc1
+pytest testing/
+```
+
+**Upload to PyPI:**
+```bash
+# Upload Qumat
+uv tool run twine upload --repository pypi --config-file ~/.pypirc dist/*
+
+# Upload Qumat-QDP (exclude Python versions outside requires-python)
+uv tool run twine upload --repository pypi --config-file ~/.pypirc qdp/target/wheels/qumat_qdp-<version>-cp31{0,1,2}-*.whl
+```
+
+*Note: This makes the RC available on PyPI for testing with `pip install --pre qumat==0.5.0rc1`.*
+
+### 1.5 Open Testing Issue
+Use the script to generate the RC testing issue:
+
+```bash
+# Generate issue content (dry run)
+./dev/generate-rc-issue.sh 0.5.0rc1 0.1.0rc1 "Qumat 0.5.0"
+
+# Create GitHub issue directly
+./dev/generate-rc-issue.sh 0.5.0rc1 0.1.0rc1 "Qumat 0.5.0" | \
+  gh issue create --repo apache/mahout \
+    --title "Status of testing Apache Mahout Qumat 0.5.0rc1" \
+    --body-file -
+```
+
+The script generates an issue with:
+-   Installation commands
+-   All PRs from the milestone with checkboxes
+-   Contributor mentions for testing
+
+### 1.6 Community Testing & Closure
 -   Allow a testing interval (e.g., 3-5 days).
 -   If critical bugs are found: Fix them, increment the RC number (e.g., RC2), and repeat from Step 1.2.
 -   Once the community is satisfied and the issue shows positive feedback, close the issue and proceed to Phase 2.
@@ -77,7 +241,7 @@ This phase is executed by a PMC member or Release Manager using the ATR platform
 4.  Upload the **source tarballs** from Phase 1.2:
     -   `qumat/dist/qumat-1.0.0.tar.gz`
     -   `qdp/qdp-python/target/wheels/qumat_qdp-1.0.0.tar.gz`
-    -   ATR will handle GPG signing and generate checksums (SHA256/SHA512).
+    -   You must sign artifacts and generate checksums yourself before uploading (see [Step 1.3](#13-sign-and-hash-artifacts)).
 
 ### 2.2 Verify Release
 Check the "Release Candidates" section in ATR to ensure:
@@ -122,5 +286,11 @@ Set up a GitHub Actions workflow that:
     git push origin v1.0.0
     ```
 -   **Bump the version** in `main` to the next development version (e.g., `1.1.0.dev0`).
+-   **Create versioned documentation**:
+    ```bash
+    cd website
+    npm run version 1.0.0
+    ```
+    This creates a snapshot of the current docs under `versioned_docs/version-1.0.0/` and adds the version to `versions.json`. Update `docusaurus.config.ts` to configure the new version label and path if needed.
 -   **Announce the release** on `dev@mahout.apache.org`.
 -   **Update website documentation** with the new release notes.

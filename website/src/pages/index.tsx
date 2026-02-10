@@ -1,5 +1,4 @@
 import type {ReactNode} from 'react';
-import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
@@ -35,13 +34,15 @@ function HomepageHeader() {
               For Creating Scalable Performant Machine Learning Applications
             </Heading>
             <div className={styles.buttons}>
-              <Link
-                className={clsx('button button--lg', styles.downloadButton)}
-                to="/docs/download">
-                Download Mahout Qumat
-              </Link>
+              <a
+                href="https://pypi.org/project/qumat/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.pipInstall}>
+                pip install qumat
+              </a>
             </div>
-            <p className={styles.versionText}>Currently v0.4</p>
+            <p className={styles.versionText}>Currently v0.5</p>
           </div>
         </div>
       </div>
@@ -54,10 +55,10 @@ function Sidebar() {
     <aside className={styles.sidebar}>
       {/* Qumat Release Banner */}
       <div className={styles.sidebarCard}>
-        <div className={styles.cardHeader}>Qumat 0.4 Released!</div>
+        <div className={styles.cardHeader}>Qumat 0.5 Released!</div>
         <div className={styles.cardBody}>
           <p>Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
-          <Link to="/docs/download">Download Qumat 0.4 →</Link>
+          <Link to="/docs/download">Download Qumat 0.5 →</Link>
         </div>
       </div>
 

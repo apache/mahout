@@ -37,6 +37,14 @@ pub enum MahoutError {
     #[error("I/O error: {0}")]
     Io(String),
 
+    /// I/O error with underlying cause (enables Error::source() and downcast).
+    #[error("I/O error: {message}")]
+    IoWithSource {
+        message: String,
+        #[source]
+        source: std::io::Error,
+    },
+
     #[error("Not implemented: {0}")]
     NotImplemented(String),
 }
@@ -59,7 +67,27 @@ pub fn cuda_error_to_string(code: i32) -> &'static str {
         12 => "cudaErrorInvalidDevicePointer",
         17 => "cudaErrorInvalidMemcpyDirection",
         30 => "cudaErrorUnknown",
+        400 => "cudaErrorInvalidResourceHandle",
         999 => "CUDA unavailable (non-Linux stub)",
         _ => "Unknown CUDA error",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::error::Error as StdError;
+    use std::io;
+
+    #[test]
+    fn io_with_source_provides_source_and_downcast() {
+        let inner = io::Error::new(io::ErrorKind::NotFound, "file not found");
+        let err = MahoutError::IoWithSource {
+            message: format!("open failed: {}", inner),
+            source: inner,
+        };
+        assert!(err.to_string().contains("open failed"));
+        let source = err.source().expect("IoWithSource must have source");
+        assert!(source.downcast_ref::<io::Error>().is_some());
     }
 }

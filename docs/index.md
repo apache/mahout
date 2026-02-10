@@ -2,7 +2,7 @@
 title: QuMat Documentation
 ---
 
-![QuMat Logo](assets/mascot.png)
+![QuMat Logo](assets/mascot_with_text.png)
 
 # QuMat
 
@@ -14,19 +14,19 @@ anywhere.'
 ## Documentation
 
 ### Getting Started
-- [Getting Started with QuMat](./getting-started-with-qumat) - Introduction and setup guide
+- [Getting Started with QuMat](./qumat/getting-started) - Introduction and setup guide
 
 ### Core Concepts
-- [Basic Gates](./basic-gates) - Introduction to fundamental quantum gates (NOT, Hadamard, CNOT, Toffoli, SWAP, Pauli gates, CSWAP, U gate)
-- [Parameterized Quantum Circuits and Rotation Gates](./parameterized-circuits) - Rotation gates (Rx, Ry, Rz) and creating/optimizing parameterized circuits
+- [Basic Gates](./qumat/basic-gates) - Introduction to fundamental quantum gates (NOT, Hadamard, CNOT, Toffoli, SWAP, Pauli gates, CSWAP, U gate)
+- [Parameterized Quantum Circuits and Rotation Gates](./qumat/parameterized-circuits) - Rotation gates (Rx, Ry, Rz) and creating/optimizing parameterized circuits
 
 ### API Reference
-- [API Documentation](./api) - Complete reference for all QuMat class methods
+- [API Documentation](./qumat/api) - Complete reference for all QuMat class methods
 
 ### Additional Resources
-- [Parameterized Quantum Circuits: Developer's Guide](./pqc) - In-depth guide to PQCs
-- [Qumat Gap Analysis for PQC](./qumat-gap-analysis-for-pqc) - Analysis of PQC capabilities
+- [Parameterized Quantum Circuits: Developer's Guide](./advanced/pqc) - In-depth guide to PQCs
+- [Qumat Gap Analysis for PQC](./advanced/gap-analysis) - Analysis of PQC capabilities
 
-### Qumat Subprojects
-- [Qumat Core](./qumat) - Quantum circuit abstraction layer
-- [QDP (Quantum Data Plane)](./qumat/qdp) - GPU-accelerated data encoding
+### Qumat Components
+- [Qumat (Circuits)](./qumat) - Quantum circuit abstraction layer
+- [QDP (Quantum Data Plane)](./qdp) - GPU-accelerated data encoding

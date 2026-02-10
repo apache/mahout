@@ -46,9 +46,9 @@
 // Limits per-sample parallelism to maintain good load balancing
 #define MAX_BLOCKS_PER_SAMPLE 32
 
-// CUDA grid dimension limit for 1D launches
+// CUDA grid dimension limit for 1D launches (2^31 - 1, signed 32-bit int max)
 // This is a hardware limitation, not a tunable parameter
-#define CUDA_MAX_GRID_DIM_1D 65535
+#define CUDA_MAX_GRID_DIM_1D 2147483647
 
 // ============================================================================
 // Qubit Limits
@@ -56,6 +56,18 @@
 // Maximum qubits supported (16GB GPU memory limit)
 // This limit ensures state vectors fit within practical GPU memory constraints
 #define MAX_QUBITS 30
+
+// ============================================================================
+// FWT (Fast Walsh-Hadamard Transform) Configuration
+// ============================================================================
+// Threshold for shared memory FWT optimization
+// For n <= this threshold, use shared memory FWT (single kernel launch)
+// For n > threshold, use global memory FWT (multiple kernel launches)
+// 10 qubits = 2^10 * 16 bytes (cuDoubleComplex) = 16KB shared memory
+#define FWT_SHARED_MEM_THRESHOLD 10
+
+// Minimum qubits to use FWT optimization (below this, naive is competitive)
+#define FWT_MIN_QUBITS 4
 
 // ============================================================================
 // Convenience Macros

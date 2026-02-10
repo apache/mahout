@@ -14,8 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Creates normalized test data
+/// Creates normalized test data (f64)
 #[allow(dead_code)] // Used by multiple test modules
 pub fn create_test_data(size: usize) -> Vec<f64> {
     (0..size).map(|i| (i as f64) / (size as f64)).collect()
+}
+
+/// Creates normalized test data (f32)
+#[allow(dead_code)]
+pub fn create_test_data_f32(size: usize) -> Vec<f32> {
+    (0..size).map(|i| (i as f32) / (size as f32)).collect()
 }
