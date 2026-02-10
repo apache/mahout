@@ -61,9 +61,16 @@ jobs:
           BUILD_DIR=$(mktemp -d)
           cp -r website/build/* $BUILD_DIR/
 
-          # Fetch and checkout asf-site branch
-          git fetch origin asf-site
-          git checkout -B asf-site origin/asf-site || git checkout --orphan asf-site
+          # Check if remote branch exists and checkout or create orphan
+          if git ls-remote --exit-code --heads origin asf-site; then
+            echo "Branch asf-site exists on remote, fetching..."
+            git fetch origin asf-site
+            git checkout -B asf-site origin/asf-site
+          else
+            echo "Branch asf-site does not exist on remote, creating orphan branch..."
+            git checkout --orphan asf-site
+            git reset --hard || true
+          fi
 
           # Remove old content (except .git, .asf.yaml, and .claude if present)
           find . -maxdepth 1 ! -name '.git' ! -name '.asf.yaml' ! -name '.claude' ! -name 'website' ! -name '.' ! -name '..' -exec rm -rf {} +
