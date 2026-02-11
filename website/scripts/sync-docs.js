@@ -20,7 +20,6 @@ const path = require('path');
 // Configuration
 const SOURCE_DIR = path.resolve(__dirname, '../../docs');
 const DEST_DIR = path.resolve(__dirname, '../docs');
-const VERSIONED_DOCS_DIR = path.resolve(__dirname, '../versioned_docs/version-0.5');
 const BLOG_SOURCE_DIR = path.resolve(__dirname, '../../docs/blog');
 const BLOG_DEST_DIR = path.resolve(__dirname, '../blog');
 
@@ -256,14 +255,6 @@ function main() {
 
   console.log('\nSyncing documentation from /docs...');
   const docsStats = syncDirectory(SOURCE_DIR, DEST_DIR);
-
-  // Sync versioned_docs (version 0.5) to fix build without committing files
-  console.log(`\nVersioned Docs Destination: ${VERSIONED_DOCS_DIR}\n`);
-  console.log('Cleaning versioned docs destination...');
-  cleanDestination(VERSIONED_DOCS_DIR);
-
-  console.log('\nSyncing documentation to versioned_docs/version-0.5...');
-  syncDirectory(SOURCE_DIR, VERSIONED_DOCS_DIR);
 
   // Sync blog
   console.log(`\nBlog Source: ${BLOG_SOURCE_DIR}`);

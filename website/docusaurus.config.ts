@@ -49,11 +49,11 @@ const config: Config = {
           lastVersion: '0.5',
           versions: {
             current: {
-              label: 'latest',
+              label: 'next',
               path: 'next',
             },
             '0.5': {
-              label: '0.5',
+              label: 'latest', // or '0.5' if preferred
               path: '',
             },
             '0.4': {
