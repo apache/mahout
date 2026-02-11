@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-adr/DOCUSAURUS_MIGRATION_PLAN" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">DOCUSAURUS MIGRATION PLAN | Apache Mahout</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://mahout.apache.org/img/mahout-social-card.svg"><meta data-rh="true" name="twitter:image" content="https://mahout.apache.org/img/mahout-social-card.svg"><meta data-rh="true" property="og:url" content="https://mahout.apache.org/docs/next/adr/DOCUSAURUS_MIGRATION_PLAN"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="DOCUSAURUS MIGRATION PLAN | Apache Mahout"><meta data-rh="true" name="description" content="Overview"><meta data-rh="true" property="og:description" content="Overview"><link data-rh="true" rel="icon" href="/img/mahout-favicon.svg"><link data-rh="true" rel="canonical" href="https://mahout.apache.org/docs/next/adr/DOCUSAURUS_MIGRATION_PLAN"><link data-rh="true" rel="alternate" href="https://mahout.apache.org/docs/next/adr/DOCUSAURUS_MIGRATION_PLAN" hreflang="en"><link data-rh="true" rel="alternate" href="https://mahout.apache.org/docs/next/adr/DOCUSAURUS_MIGRATION_PLAN" hreflang="x-default"><link rel="alternate" type="application/rss+xml" href="/blog/rss.xml" title="Apache Mahout RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/blog/atom.xml" title="Apache Mahout Atom Feed">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css" integrity="sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM" crossorigin="anonymous"><link rel="stylesheet" href="/assets/css/styles.bc3a0846.css">
+<script src="/assets/js/runtime~main.75140d76.js" defer="defer"></script>
+<script src="/assets/js/main.4994ff39.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/img/mahout-icon-white.svg"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/mahout-icon-white.svg" alt="Apache Mahout Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/mahout-icon-white.svg" alt="Apache Mahout Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Apache Mahout</b></a><div class="navbar__item dropdown dropdown--hoverable"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">About</a><ul class="dropdown__menu"><li><a href="https://www.apache.org/foundation/how-it-works.html" target="_blank" rel="noopener noreferrer" class="dropdown__link">Overview of the Apache Software Foundation<svg width="12" height="12" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li><a class="dropdown__link" href="/docs/about/how-to-contribute">How to Contribute</a></li></ul></div><div class="navbar__item dropdown dropdown--hoverable"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">Qumat</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/docs/qumat">Overview</a></li><li><a class="dropdown__link" href="/docs/qumat/getting-started">Getting Started</a></li><li><a class="dropdown__link" href="/docs/qdp">QDP (Data Encoding)</a></li><li><a class="dropdown__link" href="/docs/learning/quantum-computing-primer">Quantum Computing Primer</a></li><li><a class="dropdown__link" href="/docs/learning/papers">Research Papers</a></li></ul></div><a class="navbar__item navbar__link" href="/docs/download">Download</a><div class="navbar__item dropdown dropdown--hoverable"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">Community</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/docs/community">Overview</a></li><li><a class="dropdown__link" href="/docs/community/who-we-are">Who We Are</a></li><li><a class="dropdown__link" href="/docs/community/mailing-lists">Mailing Lists</a></li><li><a href="https://issues.apache.org/jira/browse/MAHOUT" target="_blank" rel="noopener noreferrer" class="dropdown__link">Issue Tracker<svg width="12" height="12" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li><a class="dropdown__link" href="/docs/community/code-of-conduct">Code of Conduct</a></li></ul></div><a class="navbar__item navbar__link" href="/blog">News</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a aria-current="page" class="navbar__link active" aria-haspopup="true" aria-expanded="false" role="button" href="/docs/next/adr/DOCUSAURUS_MIGRATION_PLAN">next</a><ul class="dropdown__menu"><li><a aria-current="page" class="dropdown__link dropdown__link--active" href="/docs/next/adr/DOCUSAURUS_MIGRATION_PLAN">next</a></li><li><a class="dropdown__link" href="/docs/adr/DOCUSAURUS_MIGRATION_PLAN">latest</a></li><li><a class="dropdown__link" href="/docs/0.4/">0.4</a></li></ul></div><a href="https://github.com/apache/mahout" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><main class="docMainContainer_TBSr docMainContainerEnhanced_lQrH"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="theme-doc-version-banner alert alert--warning margin-bottom--md" role="alert"><div>This is unreleased documentation for <!-- -->Apache Mahout<!-- --> <b>next</b> version.</div><div class="margin-top--md">For up-to-date documentation, see the <b><a href="/docs/adr/DOCUSAURUS_MIGRATION_PLAN">latest version</a></b> (<!-- -->latest<!-- -->).</div></div><div class="docItemContainer_Djhp"><article><span class="theme-doc-version-badge badge badge--secondary">Version: next</span><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Jekyll to Docusaurus Migration Plan</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="overview">Overview<a href="#overview" class="hash-link" aria-label="Direct link to Overview" title="Direct link to Overview" translate="no">​</a></h2>
+<p>Migrate the Apache Mahout website from Jekyll 4.3.2 to Docusaurus 3.x, implementing a documentation sync workflow where <code>/docs</code> is the source of truth.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="current-state">Current State<a href="#current-state" class="hash-link" aria-label="Direct link to Current State" title="Direct link to Current State" translate="no">​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component</th><th>Current Technology</th></tr></thead><tbody><tr><td>Framework</td><td>Jekyll 4.3.2 (Ruby)</td></tr><tr><td>Styling</td><td>Bootstrap 5 + custom SCSS</td></tr><tr><td>Math</td><td>MathJax 3 (self-hosted)</td></tr><tr><td>Markdown</td><td>Kramdown</td></tr><tr><td>Hosting</td><td>ASF infrastructure via <code>asf-site</code> branch</td></tr><tr><td>CI/CD</td><td>GitHub Actions</td></tr></tbody></table>
+<p><strong>Content inventory:</strong></p>
+<ul>
+<li class="">51 blog posts in <code>/website/_posts/</code></li>
+<li class="">22+ Qumat documentation pages in <code>/website/qumat/</code></li>
+<li class="">8 markdown files in <code>/docs/</code> (proposed source of truth)</li>
+<li class="">4 papers in <code>/website/_papers/</code></li>
+<li class="">3 QDP docs in <code>/qdp/docs/</code></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="decision-summary">Decision Summary<a href="#decision-summary" class="hash-link" aria-label="Direct link to Decision Summary" title="Direct link to Decision Summary" translate="no">​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Decision</th><th>Choice</th></tr></thead><tbody><tr><td>Math rendering</td><td>KaTeX (faster, lighter)</td></tr><tr><td>Migration approach</td><td>New directory (<code>website-new/</code>) then rename</td></tr><tr><td>Documentation versioning</td><td>Enabled from start</td></tr></tbody></table>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="target-architecture">Target Architecture<a href="#target-architecture" class="hash-link" aria-label="Direct link to Target Architecture" title="Direct link to Target Architecture" translate="no">​</a></h2>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">website-new/                    # During migration (rename to website/ after)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── docusaurus.config.js       # Main configuration</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── sidebars.js                # Sidebar configuration</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── package.json</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── scripts/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   └── sync-docs.js           # Syncs /docs → website-new/docs</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── docs/                      # Current version (synced from /docs)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── versioned_docs/            # Previous versions</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   └── version-0.4/           # Snapshot of v0.4 docs</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── versioned_sidebars/        # Sidebars for each version</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── versions.json              # Version manifest</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── blog/                      # Migrated from _posts</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── src/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   ├── components/            # React components (navbar, footer, hero)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   ├── css/custom.css         # Migrated styles</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   └── pages/index.js         # Custom homepage</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── static/                    # Images, API docs, vendor assets</span><br></span></code></pre></div></div>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="implementation-phases">Implementation Phases<a href="#implementation-phases" class="hash-link" aria-label="Direct link to Implementation Phases" title="Direct link to Implementation Phases" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-1-foundation-setup">Phase 1: Foundation Setup<a href="#phase-1-foundation-setup" class="hash-link" aria-label="Direct link to Phase 1: Foundation Setup" title="Direct link to Phase 1: Foundation Setup" translate="no">​</a></h3>
+<p><strong>Tasks:</strong></p>
+<ol>
+<li class="">Initialize Docusaurus 3.x project in <code>/website-new/</code></li>
+<li class="">Configure <code>docusaurus.config.js</code>:
+<ul>
+<li class="">Site metadata (title, URL, baseUrl)</li>
+<li class="">Theme colors (primary: <code>#00bcd4</code>)</li>
+<li class="">Math support via KaTeX (remark-math + rehype-katex)</li>
+<li class="">Versioning configuration (current = 0.5-dev, initial snapshot = 0.4)</li>
+</ul>
+</li>
+<li class="">Create <code>scripts/sync-docs.js</code> based on gofannon pattern:
+<ul>
+<li class="">Copy markdown from <code>/docs</code> → <code>website-new/docs/</code></li>
+<li class="">Transform frontmatter (Jekyll → Docusaurus format)</li>
+<li class="">Handle relative link transformations</li>
+</ul>
+</li>
+<li class="">Set up <code>package.json</code> with sync integration:
+<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token property" style="color:#36acaa">&quot;scripts&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;sync&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;node scripts/sync-docs.js&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;prebuild&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;npm run sync&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;start&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;npm run sync &amp;&amp; docusaurus start&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;version&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;docusaurus docs:version&quot;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><br></span></code></pre></div></div>
+</li>
+<li class="">Create initial version snapshot for v0.4 (current stable)</li>
+</ol>
+<p><strong>Files to create:</strong></p>
+<ul>
+<li class=""><code>website-new/docusaurus.config.js</code></li>
+<li class=""><code>website-new/sidebars.js</code></li>
+<li class=""><code>website-new/package.json</code></li>
+<li class=""><code>website-new/scripts/sync-docs.js</code></li>
+<li class=""><code>website-new/versions.json</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-2-content-migration">Phase 2: Content Migration<a href="#phase-2-content-migration" class="hash-link" aria-label="Direct link to Phase 2: Content Migration" title="Direct link to Phase 2: Content Migration" translate="no">​</a></h3>
+<p><strong>Tasks:</strong></p>
+<ol>
+<li class="">Migrate static assets from <code>/website/assets/</code> → <code>website-new/static/</code></li>
+<li class="">Create blog post migration script (<code>scripts/migrate-posts.js</code>):
+<ul>
+<li class="">Transform Jekyll frontmatter to Docusaurus format</li>
+<li class="">Convert <code>category</code> → <code>tags</code></li>
+<li class="">Preserve dates and content</li>
+</ul>
+</li>
+<li class="">Run migration for all 51 blog posts</li>
+<li class="">Migrate papers collection to custom pages or docs section</li>
+<li class="">Configure sidebar structure in <code>sidebars.js</code></li>
+</ol>
+<p><strong>Frontmatter transformation:</strong></p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token comment" style="color:#999988;font-style:italic"># Jekyll (before)                    # Docusaurus (after)</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">layout</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">post                         title</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> Example Post</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">title</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">Example Post          →       date</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token datetime number" style="color:#36acaa">2025-04-17</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">date</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">2025-04-17                     tags</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token plain">news</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">category</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">news                       authors</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token plain">mahout</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">team</span><span class="token punctuation" style="color:#393A34">]</span><br></span></code></pre></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-3-layout--styling">Phase 3: Layout &amp; Styling<a href="#phase-3-layout--styling" class="hash-link" aria-label="Direct link to Phase 3: Layout &amp; Styling" title="Direct link to Phase 3: Layout &amp; Styling" translate="no">​</a></h3>
+<p><strong>Tasks:</strong></p>
+<ol>
+<li class="">Migrate navbar structure to <code>docusaurus.config.js</code>:
+<ul>
+<li class="">About dropdown</li>
+<li class="">Qumat dropdown (Core, QDP, Primer, Papers)</li>
+<li class="">Download, Community, News links</li>
+<li class="">GitHub icon</li>
+</ul>
+</li>
+<li class="">Create custom homepage component (<code>src/pages/index.js</code>):
+<ul>
+<li class="">Hero section with gradient background</li>
+<li class="">Feature cards</li>
+<li class="">Download CTA</li>
+</ul>
+</li>
+<li class="">Migrate SCSS to CSS custom properties in <code>src/css/custom.css</code>:
+<div class="language-css codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-css codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token selector pseudo-class" style="color:#00009f">:root</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token variable" style="color:#36acaa">--ifm-color-primary</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token hexcode color">#00bcd4</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token variable" style="color:#36acaa">--ifm-font-family-base</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;Muli&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> sans-serif</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><br></span></code></pre></div></div>
+</li>
+<li class="">Configure footer with ASF copyright</li>
+</ol>
+<p><strong>Key files to reference:</strong></p>
+<ul>
+<li class=""><code>/website/_includes/navbar.html</code> → navbar config</li>
+<li class=""><code>/website/_sass/mahout.scss</code> → CSS variables</li>
+<li class=""><code>/website/_layouts/home.html</code> → homepage structure</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-4-documentation-integration">Phase 4: Documentation Integration<a href="#phase-4-documentation-integration" class="hash-link" aria-label="Direct link to Phase 4: Documentation Integration" title="Direct link to Phase 4: Documentation Integration" translate="no">​</a></h3>
+<p><strong>Tasks:</strong></p>
+<ol>
+<li class="">Verify sync workflow copies all <code>/docs</code> content correctly</li>
+<li class="">Integrate QDP documentation from <code>/qdp/docs/</code></li>
+<li class="">Migrate existing <code>/website/qumat/</code> documentation</li>
+<li class="">Configure Quantum Computing Primer sidebar navigation</li>
+<li class="">Test all internal documentation links</li>
+<li class="">Verify LaTeX/math rendering in all docs (e.g., <code>basic_gates.md</code>)</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-5-deployment--cutover">Phase 5: Deployment &amp; Cutover<a href="#phase-5-deployment--cutover" class="hash-link" aria-label="Direct link to Phase 5: Deployment &amp; Cutover" title="Direct link to Phase 5: Deployment &amp; Cutover" translate="no">​</a></h3>
+<p><strong>Tasks:</strong></p>
+<ol>
+<li class="">Update GitHub Actions workflow (<code>.github/workflows/website.yml</code>):
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token punctuation" style="color:#393A34">-</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">uses</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> actions/setup</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">node@v4</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">with</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">node-version</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;18&#x27;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">run</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> npm ci</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">working-directory</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> website</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">new</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">run</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> npm run build</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">working-directory</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> website</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">new</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">name</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> Deploy to asf</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">site</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">run</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">|</span><span class="token scalar string" style="color:#e3116c"></span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    git config user.name &quot;GitHub Actions Bot&quot;</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    git config user.email &quot;&lt;&gt;&quot;</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    git checkout asf-site</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    rm -rf *</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    cp -r website-new/build/* .</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    git add .</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    git commit -m &quot;Automatic Site Publish by Buildbot&quot;</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    git push</span><br></span></code></pre></div></div>
+</li>
+<li class="">Configure URL redirects using <code>@docusaurus/plugin-client-redirects</code>:
+<ul>
+<li class=""><code>/news.html</code> → <code>/blog</code></li>
+<li class="">Handle <code>.html</code> extension removal</li>
+</ul>
+</li>
+<li class="">Run link checker on built site</li>
+<li class="">Test deployment to <code>asf-site</code> branch</li>
+<li class="">Rename <code>website-new/</code> → <code>website/</code> (archive old Jekyll site)</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-6-documentation--cleanup">Phase 6: Documentation &amp; Cleanup<a href="#phase-6-documentation--cleanup" class="hash-link" aria-label="Direct link to Phase 6: Documentation &amp; Cleanup" title="Direct link to Phase 6: Documentation &amp; Cleanup" translate="no">​</a></h3>
+<p><strong>Tasks:</strong></p>
+<ol>
+<li class="">Create ADR at <code>/docs/adr/001-jekyll-to-docusaurus-migration.md</code></li>
+<li class="">Update <code>CONTRIBUTING.md</code> with new website development instructions</li>
+<li class="">Remove old Jekyll configuration files</li>
+<li class="">Update README with new local development commands</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="versioning-configuration">Versioning Configuration<a href="#versioning-configuration" class="hash-link" aria-label="Direct link to Versioning Configuration" title="Direct link to Versioning Configuration" translate="no">​</a></h2>
+<p>Docusaurus versioning will be configured to support multiple documentation versions:</p>
+<p><strong>Initial setup:</strong></p>
+<div class="language-javascript codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-javascript codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token comment" style="color:#999988;font-style:italic">// docusaurus.config.js</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token literal-property property" style="color:#36acaa">docs</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token literal-property property" style="color:#36acaa">lastVersion</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;current&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token literal-property property" style="color:#36acaa">versions</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token literal-property property" style="color:#36acaa">current</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token literal-property property" style="color:#36acaa">label</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;0.5-dev&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token literal-property property" style="color:#36acaa">path</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token string-property property" style="color:#36acaa">&#x27;0.4&#x27;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token literal-property property" style="color:#36acaa">label</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;0.4&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token literal-property property" style="color:#36acaa">path</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;0.4&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><br></span></code></pre></div></div>
+<p><strong>Creating a new version:</strong></p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token function" style="color:#d73a49">npm</span><span class="token plain"> run docusaurus docs:version </span><span class="token number" style="color:#36acaa">0.4</span><br></span></code></pre></div></div>
+<p>This snapshots the current <code>/docs</code> to <code>/versioned_docs/version-0.4/</code>.</p>
+<p><strong>Version workflow:</strong></p>
+<ol>
+<li class=""><code>/docs</code> always contains the &quot;next&quot; (development) version</li>
+<li class="">When releasing, run <code>docs:version X.Y</code> to snapshot</li>
+<li class="">Users can switch versions via dropdown in navbar</li>
+<li class="">Sync script only updates current <code>/docs</code>, versioned docs are static snapshots</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="sync-script-design">Sync Script Design<a href="#sync-script-design" class="hash-link" aria-label="Direct link to Sync Script Design" title="Direct link to Sync Script Design" translate="no">​</a></h2>
+<p>Based on the <a href="https://github.com/The-AI-Alliance/gofannon/blob/2eaf7d22a80f4ed8794c02b074ccda137b51ea0b/website/scripts/sync_docs.py" target="_blank" rel="noopener noreferrer" class="">gofannon sync_docs.py</a> reference, the sync script will:</p>
+<div class="language-javascript codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-javascript codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token comment" style="color:#999988;font-style:italic">// scripts/sync-docs.js</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token keyword" style="color:#00009f">const</span><span class="token plain"> </span><span class="token constant" style="color:#36acaa">SYNC_SOURCES</span><span class="token plain"> </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">source</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;../docs&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">dest</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;./docs&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">prefix</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;&#x27;</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">source</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;../qdp/docs&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">dest</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;./docs/qdp&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">prefix</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;qdp/&#x27;</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">]</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// For each source:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// 1. Clean destination directory</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// 2. Copy markdown files recursively</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// 3. Transform frontmatter (add sidebar_position, remove layout)</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// 4. Convert relative links to Docusaurus format</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// 5. Copy associated assets (images)</span><br></span></code></pre></div></div>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="url-preservation-strategy">URL Preservation Strategy<a href="#url-preservation-strategy" class="hash-link" aria-label="Direct link to URL Preservation Strategy" title="Direct link to URL Preservation Strategy" translate="no">​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Content</th><th>Old URL</th><th>New URL</th><th>Redirect</th></tr></thead><tbody><tr><td>Homepage</td><td><code>/</code></td><td><code>/</code></td><td>None</td></tr><tr><td>Blog listing</td><td><code>/news.html</code></td><td><code>/blog</code></td><td>Yes</td></tr><tr><td>Blog posts</td><td><code>/YYYY/MM/DD/title.html</code></td><td><code>/blog/YYYY/MM/DD/title</code></td><td>Automatic</td></tr><tr><td>Qumat docs</td><td><code>/qumat/core/</code></td><td><code>/docs/qumat/core</code></td><td>Yes</td></tr><tr><td>Papers</td><td><code>/qumat/papers/:name/</code></td><td><code>/docs/papers/:name</code></td><td>Yes</td></tr></tbody></table>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="verification-checklist">Verification Checklist<a href="#verification-checklist" class="hash-link" aria-label="Direct link to Verification Checklist" title="Direct link to Verification Checklist" translate="no">​</a></h2>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled=""> All 51 blog posts migrated and rendering correctly</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Math/LaTeX displays properly via KaTeX (test with <code>basic_gates.md</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Navbar matches current structure with version dropdown</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Homepage hero section renders</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Sync script copies <code>/docs</code> content on build</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Version switching works (0.4 ↔ 0.5-dev)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> All internal links resolve in both versions</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Redirects work for old URLs</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> GitHub Actions deploys successfully to <code>asf-site</code></li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Lighthouse performance score &gt; 90</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>website-new/</code> renamed to <code>website/</code> and old Jekyll archived</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="key-dependencies">Key Dependencies<a href="#key-dependencies" class="hash-link" aria-label="Direct link to Key Dependencies" title="Direct link to Key Dependencies" translate="no">​</a></h2>
+<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;@docusaurus/core&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;^3.0.0&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;@docusaurus/preset-classic&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;^3.0.0&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;@docusaurus/plugin-client-redirects&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;^3.0.0&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;remark-math&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;^3.0.0&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;rehype-katex&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;^5.0.0&quot;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><br></span></code></pre></div></div>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="risk-mitigation">Risk Mitigation<a href="#risk-mitigation" class="hash-link" aria-label="Direct link to Risk Mitigation" title="Direct link to Risk Mitigation" translate="no">​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Risk</th><th>Mitigation</th></tr></thead><tbody><tr><td>Broken links</td><td>Run link checker in CI, comprehensive redirects</td></tr><tr><td>Math rendering differences</td><td>Test all LaTeX content; KaTeX covers 95%+ of MathJax syntax. Audit <code>basic_gates.md</code> and quantum primer for edge cases.</td></tr><tr><td>SEO impact</td><td>Maintain URL structure, proper 301 redirects, sitemap</td></tr><tr><td>Content loss</td><td>Keep Jekyll site archived in git history until migration verified</td></tr><tr><td>Versioning complexity</td><td>Start with just 0.4 + current; add versions incrementally as releases happen</td></tr><tr><td>Version URL changes</td><td>Configure <code>path</code> options to maintain clean URLs (<code>/docs/0.4/...</code>)</td></tr></tbody></table>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="architecture-decision-record-adr">Architecture Decision Record (ADR)<a href="#architecture-decision-record-adr" class="hash-link" aria-label="Direct link to Architecture Decision Record (ADR)" title="Direct link to Architecture Decision Record (ADR)" translate="no">​</a></h2>
+<p>An ADR should be created at <code>/docs/adr/001-jekyll-to-docusaurus-migration.md</code> documenting:</p>
+<ul>
+<li class=""><strong>Status:</strong> Accepted</li>
+<li class=""><strong>Context:</strong> Current Jekyll setup challenges (Ruby dependency management, manual doc sync, limited modern features)</li>
+<li class=""><strong>Decision:</strong> Migrate to Docusaurus 3.x with sync workflow</li>
+<li class=""><strong>Rationale:</strong> React-based, built-in versioning/search, purpose-built for technical docs, active community</li>
+<li class=""><strong>Consequences:</strong> Initial migration effort, team learns React/Docusaurus, but simplified long-term maintenance</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="work-log---january-22-2026">Work Log - January 22, 2026<a href="#work-log---january-22-2026" class="hash-link" aria-label="Direct link to Work Log - January 22, 2026" title="Direct link to Work Log - January 22, 2026" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="session-1-initial-docusaurus-setup--content-migration">Session 1: Initial Docusaurus Setup &amp; Content Migration<a href="#session-1-initial-docusaurus-setup--content-migration" class="hash-link" aria-label="Direct link to Session 1: Initial Docusaurus Setup &amp; Content Migration" title="Direct link to Session 1: Initial Docusaurus Setup &amp; Content Migration" translate="no">​</a></h3>
+<p><strong>Completed Tasks:</strong></p>
+<ol>
+<li class="">
+<p><strong>Initialized Docusaurus 3.x project</strong> in <code>/website-new/</code></p>
+<ul>
+<li class="">Created <code>docusaurus.config.ts</code> with TypeScript</li>
+<li class="">Configured KaTeX for math rendering (remark-math + rehype-katex)</li>
+<li class="">Set up navbar with dropdowns (About, Qumat, Download, Community, News)</li>
+<li class="">Configured footer with ASF copyright</li>
+<li class="">Added Prism syntax highlighting for Python, Java, Scala, Rust, Bash</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Created documentation sync script</strong> (<code>scripts/sync-docs.js</code>)</p>
+<ul>
+<li class="">Syncs markdown from <code>/docs</code> to <code>website-new/docs/</code></li>
+<li class="">Transforms Jekyll frontmatter to Docusaurus format</li>
+<li class="">Removes <code>layout:</code> field, preserves titles</li>
+<li class="">Handles link transformations (removes <code>.md</code> extensions)</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Migrated blog posts</strong> (51 posts)</p>
+<ul>
+<li class="">Created <code>scripts/migrate-posts.js</code></li>
+<li class="">Transformed Jekyll frontmatter (<code>category</code> → <code>tags</code>)</li>
+<li class="">Preserved dates and content</li>
+<li class="">Fixed MDX parsing issues with <code>markdown: { format: &#x27;detect&#x27; }</code></li>
+</ul>
+</li>
+<li class="">
+<p><strong>Created WaveAnimation component</strong> (<code>src/components/WaveAnimation/</code>)</p>
+<ul>
+<li class="">Ported jQuery sine wave animation to React</li>
+<li class="">Canvas-based animation matching original Jekyll site hero</li>
+<li class="">Responsive sizing</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Built custom homepage</strong> (<code>src/pages/index.tsx</code>)</p>
+<ul>
+<li class="">Hero section with wave animation and gradient background</li>
+<li class="">Mahout logo (120px) and ASF logo (100px)</li>
+<li class="">Download button and version text</li>
+<li class="">Sidebar with release info, ASF links, and talks</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Migrated static assets</strong></p>
+<ul>
+<li class="">Logos: <code>mahout-logo-white.svg</code>, <code>mahout-logo-blue.svg</code>, <code>asf_new_logo.svg</code></li>
+<li class="">Mascot image: <code>mascot_with_text.png</code></li>
+<li class="">Favicon</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Updated GitHub Actions workflow</strong> (<code>.github/workflows/website.yml</code>)</p>
+<ul>
+<li class="">Changed from Ruby/Jekyll to Node.js 20/Docusaurus</li>
+<li class="">Added path triggers for <code>website-new/</code>, <code>docs/</code>, <code>qdp/docs/</code></li>
+<li class="">Deploy to <code>asf-site</code> branch</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Configured URL redirects</strong></p>
+<ul>
+<li class=""><code>/news.html</code> → <code>/blog</code></li>
+<li class=""><code>/news</code> → <code>/blog</code></li>
+</ul>
+</li>
+<li class="">
+<p><strong>Created ADR document</strong> (<code>/docs/adr/001-jekyll-to-docusaurus-migration.md</code>)</p>
+<ul>
+<li class="">Documented migration rationale and decisions</li>
+<li class="">Architecture overview</li>
+<li class="">Versioning strategy</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Updated CONTRIBUTING.md</strong></p>
+<ul>
+<li class="">Added website development instructions</li>
+<li class="">Documented sync workflow</li>
+<li class="">Added version snapshot instructions</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="session-2-documentation-restructuring">Session 2: Documentation Restructuring<a href="#session-2-documentation-restructuring" class="hash-link" aria-label="Direct link to Session 2: Documentation Restructuring" title="Direct link to Session 2: Documentation Restructuring" translate="no">​</a></h3>
+<p><strong>Problem Identified:</strong>
+The initial migration created a fragmented structure:</p>
+<ul>
+<li class=""><code>/docs/</code> at root had only 8 sparse API files</li>
+<li class=""><code>/website/qumat/</code> had 22+ documentation pages</li>
+<li class=""><code>/website-new/docs/</code> had mixed content from multiple sources</li>
+<li class="">No clear source of truth</li>
+</ul>
+<p><strong>Solution Implemented:</strong></p>
+<ol>
+<li class="">
+<p><strong>Restructured <code>/docs/</code> as single source of truth</strong></p>
+<p>New structure:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">/docs/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── index.md                     # Main Qumat overview</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── api.md                       # API reference</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── basic-gates.md               # Gates documentation</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── getting-started.md           # Getting started guide</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── getting-started-with-qumat.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── parameterized-circuits.md    # PQC guide</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── pqc.md                       # In-depth PQC</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── qumat-gap-analysis-for-pqc.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── adr/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   └── 001-jekyll-to-docusaurus-migration.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── qdp/                         # QDP package docs</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   ├── observability.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   ├── readers.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│   └── testing.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── qumat/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    ├── index.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    ├── core/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── index.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── api.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── concepts.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── examples.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   └── getting-started.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    ├── qdp/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── index.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── api.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── concepts.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── examples.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   └── getting-started.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    ├── quantum-computing-primer/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── index.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── introduction.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── qubits.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── quantum-gates.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── quantum-circuits.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── quantum-entanglement.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── quantum-algorithms.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── quantum-error-correction.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   ├── applications.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    │   └── advanced-topics.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    └── papers/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        ├── index.md</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        └── [4 paper summaries]</span><br></span></code></pre></div></div>
+</li>
+<li class="">
+<p><strong>Moved content from multiple sources:</strong></p>
+<ul>
+<li class=""><code>/website/qumat/</code> → <code>/docs/qumat/</code></li>
+<li class=""><code>/website/_papers/</code> → <code>/docs/qumat/papers/</code></li>
+<li class=""><code>/qdp/docs/</code> → <code>/docs/qdp/</code></li>
+</ul>
+</li>
+<li class="">
+<p><strong>Renamed files to kebab-case:</strong></p>
+<ul>
+<li class=""><code>basic_gates.md</code> → <code>basic-gates.md</code></li>
+<li class=""><code>getting_started.md</code> → <code>getting-started.md</code></li>
+<li class=""><code>parameterized_circuits.md</code> → <code>parameterized-circuits.md</code></li>
+<li class=""><code>p_q_c.md</code> → <code>pqc.md</code></li>
+<li class="">Primer chapters: <code>01_introduction/index.md</code> → <code>introduction.md</code></li>
+</ul>
+</li>
+<li class="">
+<p><strong>Moved all content to <code>/docs/</code>:</strong></p>
+<ul>
+<li class=""><code>community/</code> moved from <code>website-new/docs/</code> to <code>/docs/</code></li>
+<li class=""><code>about/</code> moved from <code>website-new/docs/</code> to <code>/docs/</code></li>
+<li class=""><code>download/</code> moved from <code>website-new/docs/</code> to <code>/docs/</code></li>
+<li class=""><code>website-new/docs/</code> is now 100% synced (build artifact, gitignored)</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Updated sync script</strong> (<code>scripts/sync-docs.js</code>):</p>
+<ul>
+<li class="">Single source: syncs ALL content from <code>/docs/</code></li>
+<li class="">Only preserves <code>.gitignore</code> during clean</li>
+<li class="">No longer syncs from <code>/qdp/docs/</code> separately (content moved to <code>/docs/qdp/</code>)</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Deleted old version snapshot:</strong></p>
+<ul>
+<li class="">Removed <code>versioned_docs/version-0.4/</code> (based on old messy structure)</li>
+<li class="">Removed <code>versions.json</code></li>
+<li class="">Updated <code>docusaurus.config.ts</code> to remove 0.4 version config</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Verified build succeeds:</strong></p>
+<ul>
+<li class=""><code>npm run sync</code> - Synced 40 files, 8 directories</li>
+<li class=""><code>npm run build</code> - SUCCESS with broken link warnings</li>
+<li class="">Broken links are due to incorrect paths in source docs (e.g., <code>/qumat/core</code> should be <code>./core</code>)</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="current-state-1">Current State<a href="#current-state-1" class="hash-link" aria-label="Direct link to Current State" title="Direct link to Current State" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component</th><th>Status</th></tr></thead><tbody><tr><td>Docusaurus setup</td><td>✅ Complete</td></tr><tr><td>Blog migration (51 posts)</td><td>✅ Complete</td></tr><tr><td>Homepage with wave animation</td><td>✅ Complete</td></tr><tr><td><code>/docs/</code> restructured</td><td>✅ Complete</td></tr><tr><td>Sync script</td><td>✅ Complete</td></tr><tr><td>GitHub Actions</td><td>✅ Complete</td></tr><tr><td>ADR document</td><td>✅ Complete</td></tr><tr><td>Build</td><td>✅ Succeeds</td></tr></tbody></table>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="remaining-work">Remaining Work<a href="#remaining-work" class="hash-link" aria-label="Direct link to Remaining Work" title="Direct link to Remaining Work" translate="no">​</a></h3>
+<ol>
+<li class="">
+<p><strong>Fix broken internal links in <code>/docs/</code>:</strong></p>
+<ul>
+<li class="">Links like <code>/qumat/core</code> should be <code>./core</code> (relative)</li>
+<li class="">Primer links like <code>01_introduction/</code> should be <code>./introduction</code></li>
+</ul>
+</li>
+<li class="">
+<p><strong>Create version 0.4 snapshot</strong> (after links are fixed):</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token function" style="color:#d73a49">npm</span><span class="token plain"> run docusaurus docs:version </span><span class="token number" style="color:#36acaa">0.4</span><br></span></code></pre></div></div>
+</li>
+<li class="">
+<p><strong>Final cutover:</strong></p>
+<ul>
+<li class="">Test deployment to <code>asf-site</code> branch</li>
+<li class="">Rename <code>website-new/</code> → <code>website/</code></li>
+<li class="">Archive old Jekyll site</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="files-createdmodified-today">Files Created/Modified Today<a href="#files-createdmodified-today" class="hash-link" aria-label="Direct link to Files Created/Modified Today" title="Direct link to Files Created/Modified Today" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>File</th><th>Action</th></tr></thead><tbody><tr><td><code>/docs/qumat/**</code></td><td>Created - moved from /website/qumat/</td></tr><tr><td><code>/docs/qdp/**</code></td><td>Created - moved from /qdp/docs/</td></tr><tr><td><code>/docs/*.md</code></td><td>Renamed to kebab-case</td></tr><tr><td><code>website-new/scripts/sync-docs.js</code></td><td>Updated - new sync logic</td></tr><tr><td><code>website-new/docusaurus.config.ts</code></td><td>Updated - removed 0.4 version</td></tr><tr><td><code>website-new/docs/</code></td><td>Build artifact - 100% synced, gitignored</td></tr><tr><td><code>/docs/community/</code></td><td>Moved from website-new/docs/</td></tr><tr><td><code>/docs/about/</code></td><td>Moved from website-new/docs/</td></tr><tr><td><code>/docs/download/</code></td><td>Moved from website-new/docs/</td></tr><tr><td><code>.github/workflows/website.yml</code></td><td>Updated - Node.js/Docusaurus</td></tr><tr><td><code>CONTRIBUTING.md</code></td><td>Updated - website dev instructions</td></tr><tr><td><code>/docs/adr/001-jekyll-to-docusaurus-migration.md</code></td><td>Created</td></tr></tbody></table></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/apache/mahout/tree/main/docs/docs/adr/DOCUSAURUS_MIGRATION_PLAN.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview" class="table-of-contents__link toc-highlight">Overview</a></li><li><a href="#current-state" class="table-of-contents__link toc-highlight">Current State</a></li><li><a href="#decision-summary" class="table-of-contents__link toc-highlight">Decision Summary</a></li><li><a href="#target-architecture" class="table-of-contents__link toc-highlight">Target Architecture</a></li><li><a href="#implementation-phases" class="table-of-contents__link toc-highlight">Implementation Phases</a><ul><li><a href="#phase-1-foundation-setup" class="table-of-contents__link toc-highlight">Phase 1: Foundation Setup</a></li><li><a href="#phase-2-content-migration" class="table-of-contents__link toc-highlight">Phase 2: Content Migration</a></li><li><a href="#phase-3-layout--styling" class="table-of-contents__link toc-highlight">Phase 3: Layout &amp; Styling</a></li><li><a href="#phase-4-documentation-integration" class="table-of-contents__link toc-highlight">Phase 4: Documentation Integration</a></li><li><a href="#phase-5-deployment--cutover" class="table-of-contents__link toc-highlight">Phase 5: Deployment &amp; Cutover</a></li><li><a href="#phase-6-documentation--cleanup" class="table-of-contents__link toc-highlight">Phase 6: Documentation &amp; Cleanup</a></li></ul></li><li><a href="#versioning-configuration" class="table-of-contents__link toc-highlight">Versioning Configuration</a></li><li><a href="#sync-script-design" class="table-of-contents__link toc-highlight">Sync Script Design</a></li><li><a href="#url-preservation-strategy" class="table-of-contents__link toc-highlight">URL Preservation Strategy</a></li><li><a href="#verification-checklist" class="table-of-contents__link toc-highlight">Verification Checklist</a></li><li><a href="#key-dependencies" class="table-of-contents__link toc-highlight">Key Dependencies</a></li><li><a href="#risk-mitigation" class="table-of-contents__link toc-highlight">Risk Mitigation</a></li><li><a href="#architecture-decision-record-adr" class="table-of-contents__link toc-highlight">Architecture Decision Record (ADR)</a></li><li><a href="#work-log---january-22-2026" class="table-of-contents__link toc-highlight">Work Log - January 22, 2026</a><ul><li><a href="#session-1-initial-docusaurus-setup--content-migration" class="table-of-contents__link toc-highlight">Session 1: Initial Docusaurus Setup &amp; Content Migration</a></li><li><a href="#session-2-documentation-restructuring" class="table-of-contents__link toc-highlight">Session 2: Documentation Restructuring</a></li><li><a href="#current-state-1" class="table-of-contents__link toc-highlight">Current State</a></li><li><a href="#remaining-work" class="table-of-contents__link toc-highlight">Remaining Work</a></li><li><a href="#files-createdmodified-today" class="table-of-contents__link toc-highlight">Files Created/Modified Today</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Documentation</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/qumat">Qumat Overview</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/qumat/getting-started">Getting Started</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/qumat/api">API Reference</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/community/mailing-lists">Mailing Lists</a></li><li class="footer__item"><a href="https://issues.apache.org/jira/browse/MAHOUT" target="_blank" rel="noopener noreferrer" class="footer__link-item">Issue Tracker<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a class="footer__link-item" href="/docs/community/who-we-are">Who We Are</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/blog">News</a></li><li class="footer__item"><a href="https://github.com/apache/mahout" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://www.apache.org/" target="_blank" rel="noopener noreferrer" class="footer__link-item">Apache Software Foundation<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 The Apache Software Foundation. Apache Mahout, Mahout, Apache, the Apache feather logo, and the Apache Mahout project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries.</div></div></div></footer></div>
+</body>
+</html>
