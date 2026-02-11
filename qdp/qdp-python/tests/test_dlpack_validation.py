@@ -18,23 +18,17 @@
 
 import pytest
 
-try:
-    import torch
-    from _qdp import QdpEngine
-except ImportError:
-    torch = None
-    QdpEngine = None
+torch = pytest.importorskip("torch")
+_qdp = pytest.importorskip("_qdp")
+QdpEngine = _qdp.QdpEngine
 
 
 def _cuda_available():
-    return torch is not None and torch.cuda.is_available()
+    return torch.cuda.is_available()
 
 
 def _engine():
-    if QdpEngine is None:
-        pytest.skip("_qdp not built")
-    e = QdpEngine(0)
-    return e
+    return QdpEngine(0)
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
