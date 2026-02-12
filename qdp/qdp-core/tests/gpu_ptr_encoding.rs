@@ -943,3 +943,144 @@ fn test_encode_batch_from_gpu_ptr_f32_zero_norm_sample() {
         e => panic!("Expected InvalidInput, got {:?}", e),
     }
 }
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_success_f64_engine() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+
+    let num_qubits = 2;
+    let state_len = 1 << num_qubits;
+    let num_samples = 2;
+    let sample_size = state_len;
+    let data = common::create_test_data_f32(num_samples * sample_size);
+
+    let (_device, data_d) = match device_and_f32_slice(&data) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+
+    let ptr = *data_d.device_ptr() as *const f32;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr_f32(ptr, num_samples, sample_size, num_qubits)
+            .expect("encode_batch_from_gpu_ptr_f32 with Float64 engine should succeed")
+    };
+
+    unsafe {
+        let managed = &mut *dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+        assert_eq!(tensor.ndim, 2);
+        let shape = std::slice::from_raw_parts(tensor.shape, 2);
+        assert_eq!(shape[0], num_samples as i64);
+        assert_eq!(shape[1], state_len as i64);
+        assert_eq!(
+            tensor.dtype.code, 5,
+            "DLPack should be complex type (code=5)"
+        );
+        assert_eq!(
+            tensor.dtype.bits, 128,
+            "Float64 engine should produce complex128 (bits=128)"
+        );
+        let deleter = managed.deleter.take().expect("Deleter missing");
+        deleter(dlpack_ptr);
+    }
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_sample_size_less_than_state_len() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+
+    let num_qubits = 2;
+    let state_len = 1 << num_qubits; // 4
+    let num_samples = 2;
+    let sample_size = 2usize; // less than state_len; kernel pads with zeros
+    let data = common::create_test_data_f32(num_samples * sample_size);
+
+    let (_device, data_d) = match device_and_f32_slice(&data) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+
+    let ptr = *data_d.device_ptr() as *const f32;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr_f32(ptr, num_samples, sample_size, num_qubits)
+            .expect("encode_batch_from_gpu_ptr_f32 with sample_size < state_len should succeed")
+    };
+
+    assert!(!dlpack_ptr.is_null());
+    unsafe {
+        let managed = &mut *dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+        let shape = std::slice::from_raw_parts(tensor.shape, 2);
+        assert_eq!(shape[0], num_samples as i64);
+        assert_eq!(shape[1], state_len as i64);
+        let deleter = managed.deleter.take().expect("Deleter missing");
+        deleter(dlpack_ptr);
+    }
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_dlpack_dtype_f32_engine() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+
+    let num_qubits = 2;
+    let state_len = 1 << num_qubits;
+    let num_samples = 1;
+    let sample_size = state_len;
+    let data = common::create_test_data_f32(num_samples * sample_size);
+
+    let (_device, data_d) = match device_and_f32_slice(&data) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+
+    let ptr = *data_d.device_ptr() as *const f32;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr_f32(ptr, num_samples, sample_size, num_qubits)
+            .expect("encode_batch_from_gpu_ptr_f32 should succeed")
+    };
+
+    unsafe {
+        let managed = &mut *dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+        assert_eq!(
+            tensor.dtype.code, 5,
+            "DLPack should be complex type (code=5)"
+        );
+        assert_eq!(
+            tensor.dtype.bits, 64,
+            "Float32 engine should produce complex64 (bits=64)"
+        );
+        let deleter = managed.deleter.take().expect("Deleter missing");
+        deleter(dlpack_ptr);
+    }
+}
