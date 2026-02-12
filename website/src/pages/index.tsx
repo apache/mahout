@@ -58,7 +58,7 @@ function Sidebar() {
         <div className={styles.cardHeader}>Qumat 0.5 Released!</div>
         <div className={styles.cardBody}>
           <p>Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
-          <Link to="/docs/download">Download Qumat 0.5 →</Link>
+          <Link to="/downloads">Download Qumat 0.5 →</Link>
         </div>
       </div>
 
