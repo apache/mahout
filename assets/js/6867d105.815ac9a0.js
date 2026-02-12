@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmahout_website=globalThis.webpackChunkmahout_website||[]).push([[2424],{212(t,a,e){e.r(a),e.d(a,{default:()=>o});var s=e(6347),u=e(4848);function o(){return(0,u.jsx)(s.rd,{to:"/downloads"})}}}]);
