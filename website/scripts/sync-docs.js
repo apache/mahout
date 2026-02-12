@@ -97,7 +97,7 @@ function parseFrontmatter(content) {
       let value = line.slice(colonIndex + 1).trim();
       // Remove quotes if present
       if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
+          (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1);
       }
       frontmatter[key] = value;
