@@ -23,11 +23,14 @@ repos:
         files: \.py$
 
   # Static type checking
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.0
+  - repo: local
     hooks:
-      - id: mypy
-        args: ["--ignore-missing-imports"]
+      - id: ty
+        name: ty check
+        entry: uv run ty check .
+        language: system
+        pass_filenames: false
+        types: [python]
 
   # Check Apache license headers
   - repo: https://github.com/lucas-c/pre-commit-hooks
