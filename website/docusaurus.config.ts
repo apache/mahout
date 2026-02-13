@@ -280,6 +280,10 @@ const config: Config = {
               label: 'Apache Software Foundation',
               href: 'https://www.apache.org/',
             },
+            {
+              label: 'Security',
+              href: 'https://www.apache.org/security/',
+            },
           ],
         },
       ],
