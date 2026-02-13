@@ -291,7 +291,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} The Apache Software Foundation. Apache Mahout, Mahout, Apache, the Apache feather logo, and the Apache Mahout project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries.`,
+      copyright: `Copyright © ${new Date().getFullYear()} The Apache Software Foundation.<br/>Apache Mahout, Mahout, Apache, the Apache feather logo, and the Apache Mahout project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries.`,
     },
     prism: {
       theme: prismThemes.github,
