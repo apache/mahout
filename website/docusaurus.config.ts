@@ -284,6 +284,10 @@ const config: Config = {
               label: 'Security',
               href: 'https://www.apache.org/security/',
             },
+            {
+              label: 'Privacy',
+              href: 'https://privacy.apache.org/policies/privacy-policy-public.html',
+            },
           ],
         },
       ],
