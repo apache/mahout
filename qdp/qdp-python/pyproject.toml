@@ -27,8 +27,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Framework :: PyTorch",
     "Framework :: TensorFlow",
-    # Note: NumPy and CUDA classifiers are not standard PyPI classifiers yet, but added per user request context
-    # "Environment :: GPU :: NVIDIA CUDA", # Uncomment if/when available or desired despite not being standard
+
 ]
 dynamic = ["version"]
 
