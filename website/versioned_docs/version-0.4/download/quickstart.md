@@ -47,12 +47,12 @@ print(result)
 
 ## Next Steps
 
-- [Getting Started with Qumat](../getting-started-with-qumat.md)
-- [Basic Gates](../basic-gates.md)
-- [API Reference](../api.md)
+- [Getting Started with Qumat](/docs/getting-started-with-qumat)
+- [Basic Gates](/docs/basic-gates)
+- [API Reference](/docs/api)
 
 ## Legacy Mahout MapReduce
 
 :::note
-The legacy Mahout MapReduce functionality is deprecated. For current quantum computing features, see the [Qumat documentation](../qumat).
+The legacy Mahout MapReduce functionality is deprecated. For current quantum computing features, see the [Qumat documentation](/docs/qumat).
 :::
