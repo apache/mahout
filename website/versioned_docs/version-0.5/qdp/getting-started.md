@@ -71,9 +71,9 @@ engine.encode("data.parquet", num_qubits=10, encoding_method="amplitude")  # als
 
 ## Next Steps
 
-- [Concepts](../concepts/) - Learn about quantum encoding concepts
-- [API Reference](../api/) - Detailed API documentation
-- [Examples](../examples/) - More usage examples
+- [Concepts](concepts.md) - Learn about quantum encoding concepts
+- [API Reference](api.md) - Detailed API documentation
+- [Examples](examples.md) - More usage examples
 
 ## Help
 

@@ -47,9 +47,9 @@ print(result)
 
 ## Next Steps
 
-- [Getting Started with Qumat](../getting-started-with-qumat)
-- [Basic Gates](../basic-gates)
-- [API Reference](../api)
+- [Getting Started with Qumat](../qumat/getting-started.md)
+- [Basic Gates](../qumat/basic-gates.md)
+- [API Reference](../qumat/api.md)
 
 ## Legacy Mahout MapReduce
 
