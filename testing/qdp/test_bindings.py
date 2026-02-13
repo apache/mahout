@@ -939,8 +939,8 @@ def test_iqp_encode_3_qubits():
     assert torch_tensor.shape == (1, 8)
 
     # Should get |000⟩ state: amplitude 1 at index 0, 0 elsewhere
-    expected = torch.zeros((1, 8), dtype=torch.complex128, device="cuda:0")
-    expected[0, 0] = 1.0 + 0j
+    row = [1.0 + 0j] + [0.0 + 0j] * 7
+    expected = torch.tensor([row], dtype=torch.complex128, device="cuda:0")
     assert torch.allclose(torch_tensor, expected, atol=1e-6)
 
 
@@ -1143,10 +1143,8 @@ def test_iqp_fwt_zero_params_gives_zero_state():
 
         # Should get |0...0⟩: amplitude 1 at index 0, 0 elsewhere
         state_len = 1 << num_qubits
-        expected = torch.zeros(
-            (1, state_len), dtype=torch_tensor.dtype, device="cuda:0"
-        )
-        expected[0, 0] = 1.0 + 0j
+        row = [1.0 + 0j] + [0.0 + 0j] * (state_len - 1)
+        expected = torch.tensor([row], dtype=torch_tensor.dtype, device="cuda:0")
 
         assert torch.allclose(torch_tensor, expected, atol=1e-6), (
             f"IQP {num_qubits} qubits with zero params should give |0⟩ state"

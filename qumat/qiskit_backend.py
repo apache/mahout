@@ -36,7 +36,7 @@ def initialize_backend(backend_config):
     else:
         backend = AerSimulator(method=simulator_type)
 
-    backend.shots = shots
+    backend.shots = shots  # type: ignore[unresolved-attribute]  # runtime-settable
     return backend
 
 

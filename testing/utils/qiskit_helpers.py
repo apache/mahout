@@ -64,7 +64,7 @@ def get_native_example_final_state_vector(
     qc.h(0)  # Apply Hadamard gate on qubit 0
 
     # Add save_statevector instruction
-    qc.save_statevector()
+    qc.save_statevector()  # type: ignore[unresolved-attribute]  # qiskit-aer extension
 
     # Simulate the circuit
     transpiled_qc = transpile(qc, simulator)

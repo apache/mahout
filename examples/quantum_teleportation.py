@@ -45,6 +45,7 @@ quantum_computer.apply_cnot_gate(0, 1)
 quantum_computer.apply_hadamard_gate(0)
 
 # Measure qubits 0 and 1
+assert quantum_computer.circuit is not None
 quantum_computer.circuit.measure([0, 1], [0, 1])
 
 # Step 4: Communicate measurement results to the receiver
@@ -69,6 +70,7 @@ if received_measurement_results[0] == 1:
 # The state on qubit 2 now matches the original state on qubit 0
 
 # Step 6: Measure the received state (optional)
+assert receiver_quantum_computer.circuit is not None
 receiver_quantum_computer.circuit.measure(2, 2)
 
 # Execute the quantum circuits and get the measurement results

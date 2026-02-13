@@ -106,6 +106,11 @@ const config: Config = {
           if (existingPath === '/blog') {
             return ['/news.html', '/news'];
           }
+          // Keep /downloads as the canonical public download entry URL.
+          if (existingPath === '/downloads') {
+            return [
+            ];
+          }
           return undefined;
         },
       },
@@ -171,7 +176,7 @@ const config: Config = {
         },
         // Download
         {
-          to: '/docs/download',
+          to: '/downloads',
           label: 'Download',
           position: 'left',
         },
