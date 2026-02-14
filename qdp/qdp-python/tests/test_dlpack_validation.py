@@ -32,23 +32,30 @@ def _engine():
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_dtype_validation_float32_rejected():
-    """DLPack tensor must be float64; float32 CUDA tensor should fail with clear message."""
+def test_cuda_float32_amplitude_supported():
+    """1D float32 CUDA tensor should be supported for amplitude encoding via GPU pointer f32 path."""
     engine = _engine()
     # 1D float32 CUDA tensor (contiguous)
     t = torch.randn(4, dtype=torch.float32, device="cuda")
-    with pytest.raises(RuntimeError) as exc_info:
+    result = engine.encode(t, num_qubits=2, encoding_method="amplitude")
+    assert result is not None
+
+    # Verify DLPack round-trip works and tensor is on CUDA
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    # With default engine precision=float32, complex64 is expected
+    assert qt.dtype in (torch.complex64, torch.complex128)
+
+
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
+def test_cuda_float32_amplitude_2d_unsupported():
+    """2D float32 CUDA tensor with amplitude encoding should raise a clear error."""
+    engine = _engine()
+    t = torch.randn(2, 4, dtype=torch.float32, device="cuda")
+    with pytest.raises(
+        RuntimeError, match="float32 batch amplitude encoding is not yet supported"
+    ):
         engine.encode(t, num_qubits=2, encoding_method="amplitude")
-    msg = str(exc_info.value).lower()
-    assert "float64" in msg
-    # Accept either DLPack-style (code=/bits=/lanes=) or user-facing (float32/dtype) message
-    assert (
-        "code=" in msg
-        or "bits=" in msg
-        or "lanes=" in msg
-        or "float32" in msg
-        or "dtype" in msg
-    )
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")

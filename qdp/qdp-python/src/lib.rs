@@ -286,7 +286,16 @@ fn validate_cuda_tensor_for_encoding(
     let dtype_str: String = dtype.str()?.extract()?;
     let dtype_str_lower = dtype_str.to_ascii_lowercase();
     match method.as_str() {
-        "amplitude" | "angle" => {
+        "amplitude" => {
+            if !(dtype_str_lower.contains("float64") || dtype_str_lower.contains("float32")) {
+                return Err(PyRuntimeError::new_err(format!(
+                    "CUDA tensor must have dtype float64 or float32 for amplitude encoding, got {}. \
+                     Use tensor.to(torch.float64) or tensor.to(torch.float32)",
+                    dtype_str
+                )));
+            }
+        }
+        "angle" => {
             if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype float64 for {} encoding, got {}. \
@@ -642,76 +651,7 @@ impl QdpEngine {
         if is_pytorch_tensor(data)? {
             // Check if it's a CUDA tensor - use zero-copy GPU encoding
             if is_cuda_tensor(data)? {
-                // Validate CUDA tensor for direct GPU encoding
-                validate_cuda_tensor_for_encoding(
-                    data,
-                    self.engine.device().ordinal(),
-                    encoding_method,
-                )?;
-
-                // Extract GPU pointer directly from PyTorch tensor
-                let tensor_info = extract_cuda_tensor_info(data)?;
-                let stream_ptr = get_torch_cuda_stream_ptr(data)?;
-
-                let ndim: usize = data.call_method0("dim")?.extract()?;
-
-                match ndim {
-                    1 => {
-                        // 1D CUDA tensor: single sample encoding
-                        let input_len = tensor_info.shape[0] as usize;
-                        // SAFETY: tensor_info.data_ptr was obtained via PyTorch's data_ptr() from a
-                        // valid CUDA tensor. The tensor remains alive during this call
-                        // (held by Python's GIL), and we validated dtype/contiguity/device above.
-                        let ptr = unsafe {
-                            self.engine
-                                .encode_from_gpu_ptr_with_stream(
-                                    tensor_info.data_ptr as *const std::ffi::c_void,
-                                    input_len,
-                                    num_qubits,
-                                    encoding_method,
-                                    stream_ptr,
-                                )
-                                .map_err(|e| {
-                                    PyRuntimeError::new_err(format!("Encoding failed: {}", e))
-                                })?
-                        };
-                        return Ok(QuantumTensor {
-                            ptr,
-                            consumed: false,
-                        });
-                    }
-                    2 => {
-                        // 2D CUDA tensor: batch encoding
-                        let num_samples = tensor_info.shape[0] as usize;
-                        let sample_size = tensor_info.shape[1] as usize;
-                        // SAFETY: Same as above - pointer from validated PyTorch CUDA tensor
-                        let ptr = unsafe {
-                            self.engine
-                                .encode_batch_from_gpu_ptr_with_stream(
-                                    tensor_info.data_ptr as *const std::ffi::c_void,
-                                    num_samples,
-                                    sample_size,
-                                    num_qubits,
-                                    encoding_method,
-                                    stream_ptr,
-                                )
-                                .map_err(|e| {
-                                    PyRuntimeError::new_err(format!("Encoding failed: {}", e))
-                                })?
-                        };
-                        return Ok(QuantumTensor {
-                            ptr,
-                            consumed: false,
-                        });
-                    }
-                    _ => {
-                        return Err(PyRuntimeError::new_err(format!(
-                            "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
-                             sample encoding or 2D tensor (batch_size, features) for batch encoding.",
-                            ndim
-                        )));
-                    }
-                }
+                return self._encode_from_cuda_tensor(data, num_qubits, encoding_method);
             }
             // CPU PyTorch tensor path
             return self.encode_from_pytorch(data, num_qubits, encoding_method);
@@ -1148,6 +1088,143 @@ impl QdpEngine {
                 PyRuntimeError::new_err(format!("create_streaming_file_loader failed: {}", e))
             })?;
         Ok(PyQuantumLoader::new(Some(iter)))
+    }
+
+    /// encode directly from a PyTorch CUDA tensor. Internal helper.
+    ///
+    /// Dispatches to the core f32 GPU pointer API for 1D float32 amplitude encoding,
+    /// or to the float64/basis GPU pointer APIs for other dtypes and batch encoding.
+    ///
+    /// Args:
+    ///     data: PyTorch CUDA tensor
+    ///     num_qubits: Number of qubits
+    ///     encoding_method: Encoding strategy (currently only "amplitude")
+    fn _encode_from_cuda_tensor(
+        &self,
+        data: &Bound<'_, PyAny>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        // Validate CUDA tensor for direct GPU encoding (shape, contiguity, device, dtype)
+        validate_cuda_tensor_for_encoding(data, self.engine.device().ordinal(), encoding_method)?;
+
+        // Determine dtype for dispatch (float32 vs float64, etc.).
+        let dtype = data.getattr("dtype")?;
+        let dtype_str: String = dtype.str()?.extract()?;
+        let dtype_str_lower = dtype_str.to_ascii_lowercase();
+        let is_f32 = dtype_str_lower.contains("float32");
+        let method = encoding_method.to_ascii_lowercase();
+
+        // Current f32 CUDA path only supports amplitude encoding for 1D tensors.
+        let ndim: usize = data.call_method0("dim")?.extract()?;
+
+        if method.as_str() == "amplitude" && is_f32 {
+            match ndim {
+                1 => {
+                    // 1D CUDA tensor, float32 amplitude encoding using core f32 GPU pointer API.
+                    let input_len: usize = data.call_method0("numel")?.extract()?;
+                    if input_len == 0 {
+                        return Err(PyRuntimeError::new_err("CUDA tensor cannot be empty"));
+                    }
+
+                    let stream_ptr = get_torch_cuda_stream_ptr(data)?;
+                    let data_ptr_u64: u64 = data.call_method0("data_ptr")?.extract()?;
+                    if data_ptr_u64 == 0 {
+                        return Err(PyRuntimeError::new_err(
+                            "PyTorch returned a null data pointer for CUDA tensor",
+                        ));
+                    }
+                    let data_ptr = data_ptr_u64 as *const f32;
+
+                    let ptr = unsafe {
+                        self.engine
+                            .encode_from_gpu_ptr_f32_with_stream(
+                                data_ptr, input_len, num_qubits, stream_ptr,
+                            )
+                            .map_err(|e| {
+                                PyRuntimeError::new_err(format!(
+                                    "Encoding failed (float32 amplitude): {}",
+                                    e
+                                ))
+                            })?
+                    };
+
+                    Ok(QuantumTensor {
+                        ptr,
+                        consumed: false,
+                    })
+                }
+                2 => Err(PyRuntimeError::new_err(
+                    "CUDA float32 batch amplitude encoding is not yet supported. \
+                     Use float64 (tensor.to(torch.float64)) or encode samples individually.",
+                )),
+                _ => Err(PyRuntimeError::new_err(format!(
+                    "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
+                     sample encoding or 2D tensor (batch_size, features) for batch encoding.",
+                    ndim
+                ))),
+            }
+        } else {
+            // Existing float64 (and basis/int64) CUDA path using direct GPU pointer.
+            let tensor_info = extract_cuda_tensor_info(data)?;
+            let stream_ptr = get_torch_cuda_stream_ptr(data)?;
+
+            match ndim {
+                1 => {
+                    // 1D CUDA tensor: single sample encoding
+                    let input_len = tensor_info.shape[0] as usize;
+                    // SAFETY: tensor_info.data_ptr was obtained via PyTorch's data_ptr() from a
+                    // valid CUDA tensor. The tensor remains alive during this call
+                    // (held by Python's GIL), and we validated dtype/contiguity/device above.
+                    let ptr = unsafe {
+                        self.engine
+                            .encode_from_gpu_ptr_with_stream(
+                                tensor_info.data_ptr as *const std::ffi::c_void,
+                                input_len,
+                                num_qubits,
+                                encoding_method,
+                                stream_ptr,
+                            )
+                            .map_err(|e| {
+                                PyRuntimeError::new_err(format!("Encoding failed: {}", e))
+                            })?
+                    };
+                    Ok(QuantumTensor {
+                        ptr,
+                        consumed: false,
+                    })
+                }
+                2 => {
+                    // 2D CUDA tensor: batch encoding
+                    let num_samples = tensor_info.shape[0] as usize;
+                    let sample_size = tensor_info.shape[1] as usize;
+                    // SAFETY: Same as above - pointer from validated PyTorch CUDA tensor
+                    let ptr = unsafe {
+                        self.engine
+                            .encode_batch_from_gpu_ptr_with_stream(
+                                tensor_info.data_ptr as *const std::ffi::c_void,
+                                num_samples,
+                                sample_size,
+                                num_qubits,
+                                encoding_method,
+                                stream_ptr,
+                            )
+                            .map_err(|e| {
+                                PyRuntimeError::new_err(format!("Encoding failed: {}", e))
+                            })?
+                    };
+                    Ok(QuantumTensor {
+                        ptr,
+                        consumed: false,
+                    })
+                }
+                _ => Err(PyRuntimeError::new_err(format!(
+                    "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
+                     sample encoding or 2D tensor (batch_size, features) for batch encoding.",
+                    ndim
+                ))),
+            }
+        }
     }
 }
 

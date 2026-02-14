@@ -345,6 +345,89 @@ int launch_amplitude_encode_batch(
     return (int)cudaGetLastError();
 }
 
+/// Batch amplitude encoding kernel (float32 input -> cuComplex output).
+///
+/// Memory layout same as amplitude_encode_batch_kernel but with float input and cuComplex state.
+__global__ void amplitude_encode_batch_kernel_f32(
+    const float* __restrict__ input_batch,
+    cuComplex* __restrict__ state_batch,
+    const float* __restrict__ inv_norms,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len
+) {
+    const size_t elements_per_sample = state_len / 2;
+    const size_t total_work = num_samples * elements_per_sample;
+    const size_t stride = gridDim.x * blockDim.x;
+
+    size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    for (size_t idx = global_idx; idx < total_work; idx += stride) {
+        const size_t sample_idx = idx / elements_per_sample;
+        const size_t elem_pair = idx % elements_per_sample;
+
+        const size_t input_base = sample_idx * input_len;
+        const size_t state_base = sample_idx * state_len;
+        const size_t elem_offset = elem_pair * 2;
+
+        const float inv_norm = inv_norms[sample_idx];
+
+        float v1, v2;
+        if (elem_offset + 1 < input_len) {
+            const float2 vec_data = __ldg(reinterpret_cast<const float2*>(input_batch + input_base) + elem_pair);
+            v1 = vec_data.x;
+            v2 = vec_data.y;
+        } else if (elem_offset < input_len) {
+            v1 = __ldg(input_batch + input_base + elem_offset);
+            v2 = 0.0f;
+        } else {
+            v1 = v2 = 0.0f;
+        }
+
+        state_batch[state_base + elem_offset] = make_cuComplex(v1 * inv_norm, 0.0f);
+        if (elem_offset + 1 < state_len) {
+            state_batch[state_base + elem_offset + 1] = make_cuComplex(v2 * inv_norm, 0.0f);
+        }
+    }
+}
+
+/// Launch batch amplitude encoding kernel (float32).
+///
+/// # Returns
+/// CUDA error code (0 = cudaSuccess)
+int launch_amplitude_encode_batch_f32(
+    const float* input_batch_d,
+    void* state_batch_d,
+    const float* inv_norms_d,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len,
+    cudaStream_t stream
+) {
+    if (num_samples == 0 || state_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuComplex* state_complex_d = static_cast<cuComplex*>(state_batch_d);
+
+    const int blockSize = DEFAULT_BLOCK_SIZE;
+    const size_t total_work = num_samples * (state_len / 2);
+    const size_t blocks_needed = (total_work + blockSize - 1) / blockSize;
+    const size_t max_blocks = MAX_GRID_BLOCKS;
+    const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
+
+    amplitude_encode_batch_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
+        input_batch_d,
+        state_complex_d,
+        inv_norms_d,
+        num_samples,
+        input_len,
+        state_len
+    );
+
+    return (int)cudaGetLastError();
+}
+
 /// Kernel: accumulate L2 norm using coalesced vectorized loads.
 /// Each block atomically adds its partial sum to the output accumulator.
 __global__ void l2_norm_kernel(
