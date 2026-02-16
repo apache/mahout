@@ -1119,21 +1119,17 @@ impl QdpEngine {
         let ndim: usize = data.call_method0("dim")?.extract()?;
 
         if method.as_str() == "amplitude" && is_f32 {
+            // NOTE: This f32 fast path intentionally bypasses `extract_cuda_tensor_info`/DLPack
+            // and uses PyTorch's `data_ptr()`/`numel()` directly, after
+            // `validate_cuda_tensor_for_encoding` has already enforced dtype/shape/contiguity/device.
+            // If additional validation is added to `extract_cuda_tensor_info` in the future, it must
+            // be mirrored here to keep behavior consistent.
             match ndim {
                 1 => {
                     // 1D CUDA tensor, float32 amplitude encoding using core f32 GPU pointer API.
                     let input_len: usize = data.call_method0("numel")?.extract()?;
-                    if input_len == 0 {
-                        return Err(PyRuntimeError::new_err("CUDA tensor cannot be empty"));
-                    }
-
                     let stream_ptr = get_torch_cuda_stream_ptr(data)?;
                     let data_ptr_u64: u64 = data.call_method0("data_ptr")?.extract()?;
-                    if data_ptr_u64 == 0 {
-                        return Err(PyRuntimeError::new_err(
-                            "PyTorch returned a null data pointer for CUDA tensor",
-                        ));
-                    }
                     let data_ptr = data_ptr_u64 as *const f32;
 
                     let ptr = unsafe {
