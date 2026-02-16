@@ -24,7 +24,8 @@ setup-test-python:
 
 test_rust:
 ifeq ($(HAS_NVIDIA),yes)
-	cd qdp && cargo test --workspace --exclude qdp-python
+	cd qdp && cargo llvm-cov test --workspace --exclude qdp-python --html --output-dir target/llvm-cov/html
+	cd qdp && cargo llvm-cov report --summary-only
 else
 	@echo "[SKIP] No NVIDIA GPU detected, skipping test_rust"
 endif
@@ -35,8 +36,7 @@ ifeq ($(HAS_NVIDIA),yes)
 else
 	@echo "[SKIP] No NVIDIA GPU detected, skipping maturin develop"
 endif
-	uv run pytest
-
+	uv run pytest --cov=qumat --cov=qumat_qdp --cov-report=term-missing --cov-report=html:htmlcov
 tests: test_rust test_python
 
 pre-commit: setup-test-python

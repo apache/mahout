@@ -55,3 +55,6 @@ __pycache__/
 
 # pypi
 .pypirc
+
+# coverage
+.coverage
