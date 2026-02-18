@@ -49,5 +49,5 @@ cache-keys = [
 
 [tool.maturin]
 module-name = "_qdp"
-# Package at project root (qumat_qdp/) so editable install and uv run find it
-python-source = "."
+# Include qumat_qdp/ Python package in wheel alongside compiled _qdp extension
+python-packages = ["qumat_qdp"]
