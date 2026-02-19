@@ -315,7 +315,7 @@ def test_encode_cuda_tensor(data_shape, expected_shape, expected_batch_size):
 @requires_qdp
 @pytest.mark.gpu
 def test_encode_cuda_tensor_wrong_dtype():
-    """Test error when CUDA tensor has wrong dtype (non-float64)."""
+    """Test error when CUDA tensor has wrong dtype for amplitude (e.g. float16)."""
     pytest.importorskip("torch")
     from _qdp import QdpEngine
 
@@ -324,9 +324,9 @@ def test_encode_cuda_tensor_wrong_dtype():
 
     engine = QdpEngine(0)
 
-    # Create CUDA tensor with float32 dtype (wrong)
-    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float32, device="cuda:0")
-    with pytest.raises(RuntimeError, match="CUDA tensor must have dtype float64"):
+    # Amplitude encoding accepts float64 or float32 only; float16 is invalid
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float16, device="cuda:0")
+    with pytest.raises(RuntimeError, match="float64 or float32"):
         engine.encode(data, 2, "amplitude")
 
 
@@ -532,6 +532,31 @@ def test_encode_cuda_tensor_output_dtype(precision, expected_dtype):
 
     engine = QdpEngine(0, precision=precision)
     data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64, device="cuda:0")
+    result = torch.from_dlpack(engine.encode(data, 2, "amplitude"))
+    assert result.dtype == expected_dtype, (
+        f"Expected {expected_dtype}, got {result.dtype}"
+    )
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    "precision,expected_dtype",
+    [
+        ("float32", torch.complex64),
+        ("float64", torch.complex128),
+    ],
+)
+def test_encode_cuda_tensor_float32_input_output_dtype(precision, expected_dtype):
+    """Test that 1D float32 CUDA amplitude encoding respects engine precision (f32 path)."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0, precision=precision)
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float32, device="cuda:0")
     result = torch.from_dlpack(engine.encode(data, 2, "amplitude"))
     assert result.dtype == expected_dtype, (
         f"Expected {expected_dtype}, got {result.dtype}"
