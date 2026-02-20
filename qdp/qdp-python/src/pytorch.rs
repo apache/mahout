@@ -155,12 +155,21 @@ pub fn validate_cuda_tensor_for_encoding(
     let dtype_str: String = dtype.str()?.extract()?;
     let dtype_str_lower = dtype_str.to_ascii_lowercase();
     match method.as_str() {
-        "amplitude" | "angle" => {
+        "amplitude" => {
+            if !(dtype_str_lower.contains("float64") || dtype_str_lower.contains("float32")) {
+                return Err(PyRuntimeError::new_err(format!(
+                    "CUDA tensor must have dtype float64 or float32 for amplitude encoding, got {}. \
+                     Use tensor.to(torch.float64) or tensor.to(torch.float32)",
+                    dtype_str
+                )));
+            }
+        }
+        "angle" => {
             if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
+                    "CUDA tensor must have dtype float64 for angle encoding, got {}. \
                      Use tensor.to(torch.float64)",
-                    method, dtype_str
+                    dtype_str
                 )));
             }
         }
