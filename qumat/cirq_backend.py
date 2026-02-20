@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import copy
 import cirq
 import sympy
 
@@ -106,23 +107,26 @@ def execute_circuit(circuit, backend, backend_config):
         shots = backend_config["backend_options"].get("shots", 1)
         return [{0: shots}]
 
+    # Create a working copy to avoid mutating the original circuit
+    working_circuit = copy.deepcopy(circuit)
+
     # Ensure measurement is added to capture the results
-    if not circuit.has_measurements():
-        circuit.append(cirq.measure(*circuit.all_qubits(), key="result"))
+    if not working_circuit.has_measurements():
+        working_circuit.append(cirq.measure(*working_circuit.all_qubits(), key="result"))
     simulator = cirq.Simulator()
     parameter_values = backend_config.get("parameter_values", None)
     if parameter_values:
         # Convert parameter_values to applicable resolvers
         res = [cirq.ParamResolver(parameter_values)]
         results = simulator.run_sweep(
-            circuit,
+            working_circuit,
             repetitions=backend_config["backend_options"].get("shots", 1),
             params=res,
         )
         return [result.histogram(key="result") for result in results]
     else:
         result = simulator.run(
-            circuit, repetitions=backend_config["backend_options"].get("shots", 1)
+            working_circuit, repetitions=backend_config["backend_options"].get("shots", 1)
         )
         return [result.histogram(key="result")]
 
