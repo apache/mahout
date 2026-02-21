@@ -108,27 +108,24 @@ class TestCircuitMutationPrevention:
     """Test that circuits are not mutated during execution."""
 
     def test_execute_circuit_multiple_times_no_mutation(self, backend_name):
-        """Test that executing a circuit multiple times doesn't mutate it.
-
-        Regression test for issue #1069: Verifies that circuits are not mutated
-        when execute_circuit() is called multiple times.
-        """
+        """Test that executing a circuit multiple times doesn't mutate it"""
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
         qumat.create_empty_circuit(num_qubits=2)
         qumat.apply_hadamard_gate(0)
         qumat.apply_cnot_gate(0, 1)
 
+        assert qumat.circuit is not None
+        circuit = qumat.circuit
+
         # Record initial circuit state
         if backend_name == "cirq":
-            import cirq
-
-            initial_length = len(qumat.circuit)
-            initial_has_measurements = qumat.circuit.has_measurements()
+            initial_length = len(circuit)
+            initial_has_measurements = circuit.has_measurements()
         elif backend_name == "qiskit":
-            initial_length = len(qumat.circuit.data)
+            initial_length = len(circuit.data)
         else:
-            initial_length = len(qumat.circuit.instructions)
+            initial_length = len(circuit.instructions)
 
         # Execute circuit multiple times
         result1 = qumat.execute_circuit()
@@ -136,9 +133,11 @@ class TestCircuitMutationPrevention:
         result3 = qumat.execute_circuit()
 
         # Verify circuit hasn't been mutated
+        assert qumat.circuit is not None
+        circuit_after = qumat.circuit
         if backend_name == "cirq":
-            final_length = len(qumat.circuit)
-            final_has_measurements = qumat.circuit.has_measurements()
+            final_length = len(circuit_after)
+            final_has_measurements = circuit_after.has_measurements()
             assert initial_length == final_length, (
                 f"Circuit length changed from {initial_length} to {final_length}. "
                 "Circuit was mutated!"
@@ -147,13 +146,13 @@ class TestCircuitMutationPrevention:
                 "Circuit measurement state changed. Circuit was mutated!"
             )
         elif backend_name == "qiskit":
-            final_length = len(qumat.circuit.data)
+            final_length = len(circuit_after.data)
             assert initial_length == final_length, (
                 f"Circuit length changed from {initial_length} to {final_length}. "
                 "Circuit was mutated!"
             )
         else:
-            final_length = len(qumat.circuit.instructions)
+            final_length = len(circuit_after.instructions)
             assert initial_length == final_length, (
                 f"Circuit length changed from {initial_length} to {final_length}. "
                 "Circuit was mutated!"
