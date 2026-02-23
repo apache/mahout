@@ -182,9 +182,18 @@ pub fn validate_cuda_tensor_for_encoding(
                 )));
             }
         }
+        "iqp" | "iqp-z" => {
+            if !dtype_str_lower.contains("float64") {
+                return Err(PyRuntimeError::new_err(format!(
+                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
+                     Use tensor.to(torch.float64)",
+                    method, dtype_str
+                )));
+            }
+        }
         _ => {
             return Err(PyRuntimeError::new_err(format!(
-                "CUDA tensor encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'. \
+                "CUDA tensor encoding currently only supports 'amplitude', 'angle', 'basis', 'iqp', or 'iqp-z' methods, got '{}'. \
                  Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
                 encoding_method
             )));
