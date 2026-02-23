@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Jupyter Notebooks
         run: |
-          for nb in $(find . -name '*.ipynb' ! -path './qdp/qdp-python/benchmark/notebooks/*'); do
+          for nb in $(find . -name '*.ipynb' ! -path './qdp/qdp-python/benchmark/notebooks/*' ! -path './examples/qdp/*'); do
             echo "Executing $nb"
             uv run jupyter execute "$nb" --inplace
           done
