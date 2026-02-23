@@ -1,0 +1,56 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# GitHub CODEOWNERS file
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Order matters. The last matching pattern takes precedence.
+# Per ASF policy, committers have global write permission.
+
+# QDP - Core
+/qdp/qdp-core/                 @guan404ming @ryankert01
+
+# QDP - Kernels
+/qdp/qdp-kernels/              @ryankert01
+
+# QDP - Python bindings
+/qdp/qdp-python/               @guan404ming @ryankert01
+
+# Qumat
+/qumat/                        @guan404ming
+
+# Website
+/website/                      @guan404ming @ryankert01
+
+# Docs
+/docs/                         @guan404ming @ryankert01
+
+# Examples
+/examples/
+
+# CI / GitHub workflows
+/.github/workflows/            @guan404ming
+
+# Build and project config
+/Makefile                      @guan404ming
+/pyproject.toml                @guan404ming
+
+# Release and legal
+/dev/                          @guan404ming
+/LICENSE                       @guan404ming
+/NOTICE                        @guan404ming
+/KEYS                          @guan404ming
