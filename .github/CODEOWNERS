@@ -22,22 +22,22 @@
 # Per ASF policy, committers have global write permission.
 
 # QDP - Core
-/qdp/qdp-core/                 @guan404ming
+/qdp/qdp-core/                 @guan404ming @ryankert01
 
 # QDP - Kernels
-/qdp/qdp-kernels/
+/qdp/qdp-kernels/              @ryankert01
 
 # QDP - Python bindings
-/qdp/qdp-python/               @guan404ming
+/qdp/qdp-python/               @guan404ming @ryankert01
 
 # Qumat
 /qumat/                        @guan404ming
 
 # Website
-/website/                      @guan404ming
+/website/                      @guan404ming @ryankert01
 
 # Docs
-/docs/                         @guan404ming
+/docs/                         @guan404ming @ryankert01
 
 # Examples
 /examples/
