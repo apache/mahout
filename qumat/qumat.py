@@ -60,12 +60,12 @@ class QuMat:
                 "Please provide a dictionary with backend-specific options "
             )
 
-        self.backend_config = backend_config
-        self.backend_name = backend_config["backend_name"]
+        self.backend_config = backend_config.copy()
+        self.backend_name = self.backend_config["backend_name"]
         self.backend_module = import_module(
             f".{self.backend_name}_backend", package="qumat"
         )
-        self.backend = self.backend_module.initialize_backend(backend_config)
+        self.backend = self.backend_module.initialize_backend(self.backend_config)
         self.circuit = None
         self.num_qubits = None
         self.parameters = {}
