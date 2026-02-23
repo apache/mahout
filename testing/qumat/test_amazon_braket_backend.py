@@ -1,4 +1,19 @@
-import pytest
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from unittest.mock import MagicMock, patch
 from braket.circuits import FreeParameter
 
@@ -49,10 +64,11 @@ def test_initialize_backend_invalid_type():
 
 
 def test_initialize_backend_with_region():
-    with patch("qumat.amazon_braket_backend.boto3.Session") as mock_boto, \
-         patch("qumat.amazon_braket_backend.AwsSession") as mock_aws_session, \
-         patch("qumat.amazon_braket_backend.AwsDevice") as mock_device:
-
+    with (
+        patch("qumat.amazon_braket_backend.boto3.Session") as mock_boto,
+        patch("qumat.amazon_braket_backend.AwsSession") as mock_aws_session,
+        patch("qumat.amazon_braket_backend.AwsDevice") as mock_device,
+    ):
         config = {
             "backend_options": {
                 "simulator_type": "default",
@@ -67,7 +83,6 @@ def test_initialize_backend_with_region():
         mock_device.assert_called_once()
 
 
-
 # create_empty_circuit
 
 
@@ -79,7 +94,6 @@ def test_create_empty_circuit_with_qubits():
 def test_create_empty_circuit_without_qubits():
     circuit = create_empty_circuit()
     assert len(circuit.instructions) == 0
-
 
 
 # Basic gate wrappers
@@ -108,7 +122,6 @@ def test_basic_gate_wrappers():
     circuit.y.assert_called()
     circuit.z.assert_called()
     circuit.t.assert_called()
-
 
 
 # RX / RY / RZ
@@ -165,7 +178,6 @@ def test_apply_u_gate_sequence():
     circuit.rz.assert_any_call(0, 0.3)
 
 
-
 # execute_circuit
 
 
@@ -210,7 +222,6 @@ def test_execute_circuit_with_parameters():
 
     execute_circuit(circuit, mock_backend, config)
     mock_backend.run.assert_called_once()
-
 
 
 # get_final_state_vector
@@ -267,7 +278,6 @@ def test_get_final_state_vector_with_parameters_full_branch():
     assert kwargs["inputs"] == {"theta": 0.5}
 
     assert result == [1, 0]
-
 
 
 # calculate_prob_zero

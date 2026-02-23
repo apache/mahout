@@ -29,9 +29,6 @@ use qdp_kernels::{
     launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_batch_f32, launch_l2_norm_f32,
 };
 
-const EPSILON: f64 = 1e-10;
-const EPSILON_F32: f32 = 1e-5;
-
 #[test]
 #[cfg(target_os = "linux")]
 fn test_amplitude_encode_basic() {
