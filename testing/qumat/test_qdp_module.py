@@ -15,60 +15,54 @@
 # limitations under the License.
 
 import sys
-import builtins
+import importlib
 import pytest
+from unittest.mock import patch
 
 
-def test_qdp_import_fallback_warning(monkeypatch):
+def _reload_qdp_without_extension():
     """
-    Force the ImportError branch to execute and ensure
-    the warning line is covered.
+    Safely reload qumat.qdp while simulating missing _qdp extension.
     """
+    # Remove cached modules
+    sys.modules.pop("qumat.qdp", None)
+    sys.modules.pop("_qdp", None)
 
-    # Remove module if already imported
-    if "qumat.qdp" in sys.modules:
-        del sys.modules["qumat.qdp"]
+    # Simulate missing compiled extension
+    with patch.dict(sys.modules, {"_qdp": None}):
+        import qumat.qdp
+        return importlib.reload(qumat.qdp)
 
-    original_import = builtins.__import__
 
-    def fake_import(name, *args, **kwargs):
-        if name == "_qdp":
-            raise ImportError("Forced import failure for coverage")
-        return original_import(name, *args, **kwargs)
-
-    # Force _qdp import to fail
-    monkeypatch.setattr(builtins, "__import__", fake_import)
-
+def test_qdp_import_fallback_warning():
     with pytest.warns(ImportWarning):
-        pass
+        qdp = _reload_qdp_without_extension()
+        assert qdp is not None
 
 
 def test_qdp_engine_stub_raises_import_error():
-    import qumat.qdp as qdp
+    qdp = _reload_qdp_without_extension()
 
     with pytest.raises(ImportError):
         qdp.QdpEngine()
 
 
 def test_quantum_tensor_stub_raises_import_error():
-    import qumat.qdp as qdp
+    qdp = _reload_qdp_without_extension()
 
     with pytest.raises(ImportError):
         qdp.QuantumTensor()
 
 
 def test_qdp_all_exports():
-    import qumat.qdp as qdp
+    qdp = _reload_qdp_without_extension()
 
     assert "QdpEngine" in qdp.__all__
     assert "QuantumTensor" in qdp.__all__
 
 
 def test_make_stub_direct_call():
-    """
-    Directly test the _make_stub factory to ensure full coverage.
-    """
-    import qumat.qdp as qdp
+    qdp = _reload_qdp_without_extension()
 
     StubClass = qdp._make_stub("TestStub")
 
