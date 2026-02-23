@@ -220,3 +220,35 @@ class TestParameterBinding:
         # This should raise ValueError
         with pytest.raises(ValueError, match="unbound parameters"):
             qumat.execute_circuit(parameter_values={"theta0": math.pi})
+
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_execute_circuit_does_not_mutate_backend_config(self, backend_name):
+        """Test that execute_circuit does not mutate the user's backend_config across all backends."""
+        backend_config = get_backend_config(backend_name).copy()
+        original_config = backend_config.copy()
+
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+        qumat.apply_rx_gate(0, "theta")
+        qumat.execute_circuit(parameter_values={"theta": math.pi})
+
+        assert backend_config == original_config, (
+            f"backend_config was mutated in {backend_name}; "
+            "parameter_values or other keys must not be added."
+        )
+
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_get_final_state_vector_does_not_mutate_backend_config(self, backend_name):
+        """Test that get_final_state_vector does not mutate the user's backend_config across all backends."""
+        backend_config = get_backend_config(backend_name).copy()
+        original_config = backend_config.copy()
+
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+        qumat.apply_rx_gate(0, "theta")
+        qumat.bind_parameters({"theta": math.pi / 2})
+        qumat.get_final_state_vector()
+
+        assert backend_config == original_config, (
+            f"backend_config was mutated by get_final_state_vector in {backend_name}."
+        )
