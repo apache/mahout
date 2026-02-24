@@ -23,49 +23,69 @@ from unittest.mock import patch
 def _reload_qdp_without_extension():
     """
     Safely reload qumat.qdp while simulating missing _qdp extension.
+    Restores sys.modules after execution to avoid test pollution.
     """
-    # Remove cached modules
-    sys.modules.pop("qumat.qdp", None)
-    sys.modules.pop("_qdp", None)
+    original_qdp = sys.modules.get("qumat.qdp")
+    original_ext = sys.modules.get("_qdp")
 
-    # Simulate missing compiled extension
-    with patch.dict(sys.modules, {"_qdp": None}):
-        import qumat.qdp
+    try:
+        # Remove cached modules
+        sys.modules.pop("qumat.qdp", None)
+        sys.modules.pop("_qdp", None)
 
-        return importlib.reload(qumat.qdp)
+        # Simulate missing compiled extension
+        with patch.dict(sys.modules, {"_qdp": None}):
+            module = importlib.import_module("qumat.qdp")
+            return importlib.reload(module)
+
+    finally:
+        # Restore previous state
+        if original_qdp is not None:
+            sys.modules["qumat.qdp"] = original_qdp
+        else:
+            sys.modules.pop("qumat.qdp", None)
+
+        if original_ext is not None:
+            sys.modules["_qdp"] = original_ext
+        else:
+            sys.modules.pop("_qdp", None)
 
 
 def test_qdp_import_fallback_warning():
     with pytest.warns(ImportWarning):
         qdp = _reload_qdp_without_extension()
-        assert qdp is not None
+    assert qdp is not None
 
 
 def test_qdp_engine_stub_raises_import_error():
-    qdp = _reload_qdp_without_extension()
+    with pytest.warns(ImportWarning):
+        qdp = _reload_qdp_without_extension()
 
-    with pytest.raises(ImportError):
+    with pytest.raises(ImportError, match="install"):
         qdp.QdpEngine()
 
 
 def test_quantum_tensor_stub_raises_import_error():
-    qdp = _reload_qdp_without_extension()
+    with pytest.warns(ImportWarning):
+        qdp = _reload_qdp_without_extension()
 
-    with pytest.raises(ImportError):
+    with pytest.raises(ImportError, match="install"):
         qdp.QuantumTensor()
 
 
 def test_qdp_all_exports():
-    qdp = _reload_qdp_without_extension()
+    with pytest.warns(ImportWarning):
+        qdp = _reload_qdp_without_extension()
 
     assert "QdpEngine" in qdp.__all__
     assert "QuantumTensor" in qdp.__all__
 
 
 def test_make_stub_direct_call():
-    qdp = _reload_qdp_without_extension()
+    with pytest.warns(ImportWarning):
+        qdp = _reload_qdp_without_extension()
 
     StubClass = qdp._make_stub("TestStub")
 
-    with pytest.raises(ImportError):
+    with pytest.raises(ImportError, match="install"):
         StubClass()
