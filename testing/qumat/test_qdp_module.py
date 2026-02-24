@@ -31,6 +31,7 @@ def _reload_qdp_without_extension():
     # Simulate missing compiled extension
     with patch.dict(sys.modules, {"_qdp": None}):
         import qumat.qdp
+
         return importlib.reload(qumat.qdp)
 
 
