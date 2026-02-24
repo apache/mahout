@@ -79,8 +79,14 @@ def test_initialize_backend_with_region():
         initialize_backend(config)
 
         mock_boto.assert_called_once_with(region_name="us-west-2")
-        mock_aws_session.assert_called_once()
+
+        # Ensure boto3 session passed into AwsSession
+        mock_aws_session.assert_called_once_with(boto_session=mock_boto.return_value)
+
+        # Ensure AwsSession passed into AwsDevice
         mock_device.assert_called_once()
+        _, device_kwargs = mock_device.call_args
+        assert device_kwargs.get("aws_session") is mock_aws_session.return_value
 
 
 # create_empty_circuit
@@ -217,11 +223,19 @@ def test_execute_circuit_with_parameters():
 
     config = {
         "backend_options": {"shots": 1},
-        "parameter_values": {"theta": 0.5},
+        "parameter_values": {"theta": 0.5, "extra": 0.9},  # extra should be ignored
     }
 
-    execute_circuit(circuit, mock_backend, config)
+    result = execute_circuit(circuit, mock_backend, config)
+
     mock_backend.run.assert_called_once()
+
+    # Ensure only valid circuit parameters are passed
+    _, kwargs = mock_backend.run.call_args
+    assert kwargs["inputs"] == {"theta": 0.5}
+
+    # Ensure backend result is returned
+    assert result == {"00": 1}
 
 
 # get_final_state_vector
