@@ -11,7 +11,7 @@
 
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css" integrity="sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM" crossorigin="anonymous"><link rel="stylesheet" href="/assets/css/styles.bc3a0846.css">
-<script src="/assets/js/runtime~main.1f89c2b7.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.d173fe6d.js" defer="defer"></script>
 <script src="/assets/js/main.5346b2f5.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -39,7 +39,7 @@ is discouraged.  See <a href="https://www.apache.org/theapacheway/" target="_bla
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-to-work-on">What to Work On?<a href="#what-to-work-on" class="hash-link" aria-label="Direct link to What to Work On?" title="Direct link to What to Work On?" translate="no">​</a></h2>
 <p>What do you like to work on?  There are a ton of things in Mahout that we
 would love to have contributions for: documentation, performance improvements, better tests, etc.
-The best place to start is by looking into our <a href="https://issues.apache.org/jira/browse/MAHOUT" target="_blank" rel="noopener noreferrer" class="">issue tracker</a> and
+The best place to start is by looking into our <a href="https://github.com/apache/mahout/issues" target="_blank" rel="noopener noreferrer" class="">issue tracker</a> and
 seeing what bugs have been reported and seeing if any look like you could
 take them on.  Small, well written, well tested patches are a great way to
 get your feet wet.  It could be something as simple as fixing a typo.  The
@@ -48,7 +48,7 @@ for making changes to the code.  Mahout is a pretty big beast at this
 point, so changes, especially from non-committers, need to be evolutionary
 not revolutionary since it is often very difficult to evaluate the merits
 of a very large patch.	Think small, at least to start!</p>
-<p>Beyond JIRA, hang out on the dev@ mailing list. That&#x27;s where we discuss
+<p>Beyond GitHub Issues, hang out on the dev@ mailing list. That&#x27;s where we discuss
 what we are working on in the internals and where you can get a sense of
 where people are working.</p>
 <p>Also, documentation is a great way to familiarize yourself with the code
@@ -69,7 +69,7 @@ against possible future changes).</p>
 don&#x27;t have the time or resources to do everything outlined on this below
 should not be discouraged from submitting their ideas &quot;as is&quot; per &quot;Yonik
 Seeley&#x27;s (Solr committer) Law of Patches&quot;:</p>
-<p><em>A half-baked patch in Jira, with no documentation, no tests and no backwards compatibility is better than no patch at all.</em></p>
+<p><em>A half-baked patch in GitHub Issues, with no documentation, no tests and no backwards compatibility is better than no patch at all.</em></p>
 <p>Just because you may not have the time to write unit tests, or cleanup
 backwards compatibility issues, or add documentation, doesn&#x27;t mean other
 people don&#x27;t. Putting your patch out there allows other people to try it
@@ -80,10 +80,10 @@ and possibly improve it.</p>
 <p><a name="HowToContribute-MakingChanges" class=""></a></p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="making-changes">Making Changes<a href="#making-changes" class="hash-link" aria-label="Direct link to Making Changes" title="Direct link to Making Changes" translate="no">​</a></h2>
 <p>Before you start, you should send a message to the <a class="" href="/docs/next/community/mailing-lists">Mahout developer mailing list</a>
-(note: you have to subscribe before you can post), or file a ticket in our <a href="https://issues.apache.org/jira/browse/MAHOUT" target="_blank" rel="noopener noreferrer" class="">issue tracker</a>.
+(note: you have to subscribe before you can post), or file a ticket in our <a href="https://github.com/apache/mahout/issues" target="_blank" rel="noopener noreferrer" class="">issue tracker</a>.
 Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.</p>
 <ol>
-<li class="">Create a JIRA Issue in the <a href="https://issues.apache.org/jira/browse/MAHOUT" target="_blank" rel="noopener noreferrer" class="">issue tracker</a> (if one does not already exist)</li>
+<li class="">Create a GitHub Issue in the <a href="https://github.com/apache/mahout/issues" target="_blank" rel="noopener noreferrer" class="">issue tracker</a> (if one does not already exist)</li>
 <li class="">Pull the code from your GitHub repository</li>
 <li class="">Ensure that you are working with the latest code from the <a href="https://github.com/apache/mahout" target="_blank" rel="noopener noreferrer" class="">apache/mahout</a> main branch.</li>
 <li class="">Modify the source code and add some (very) nice features.
@@ -108,13 +108,9 @@ with two exceptions:
 </li>
 <li class="">Commit the changes to your local repository.</li>
 <li class="">Push the code back up to your GitHub repository.</li>
-<li class="">Create a <a href="https://help.github.com/articles/creating-a-pull-request" target="_blank" rel="noopener noreferrer" class="">Pull Request</a> to the to apache/mahout repository on Github.
+<li class="">Create a <a href="https://help.github.com/articles/creating-a-pull-request" target="_blank" rel="noopener noreferrer" class="">Pull Request</a> to the apache/mahout repository on GitHub.
 <ul>
-<li class="">Include the corresponding JIRA Issue number and description in the title of the pull request:
-<ul>
-<li class="">ie. MAHOUT-xxxx: &lt; JIRA-Issue-Description &gt;</li>
-</ul>
-</li>
+<li class="">Reference the related GitHub Issue in your pull request (for example, by including <code>Closes #xxxx</code> in the PR description).</li>
 </ul>
 </li>
 <li class="">Committers and other members of the Mahout community can then comment on the Pull Request.  Be sure to watch for comments, respond and make any necessary changes.</li>
@@ -144,7 +140,7 @@ subversion to figure out what&#x27;s changed and by whom.</li>
 </ul>
 <p><a name="HowToContribute-Review/ImproveExistingPatches" class=""></a></p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="reviewimprove-existing-pull-requests">Review/Improve Existing Pull Requests<a href="#reviewimprove-existing-pull-requests" class="hash-link" aria-label="Direct link to Review/Improve Existing Pull Requests" title="Direct link to Review/Improve Existing Pull Requests" translate="no">​</a></h2>
-<p>If there&#x27;s a JIRA issue that already has a Pull Request with changes that you think are really good, and works well for you -- please add a comment saying so.   If there&#x27;s room
+<p>If there&#x27;s a GitHub issue that already has a Pull Request with changes that you think are really good, and works well for you -- please add a comment saying so.   If there&#x27;s room
 for improvement (more tests, better javadocs, etc...) then make the changes on your GitHub branch and add a comment about them.	If a lot of people review a Pull Request and give it a
 thumbs up, that&#x27;s a good sign for committers when deciding if it&#x27;s worth spending time to review it -- and if other people have already put in
 effort to improve the docs/tests for an issue, that helps even more.</p>
