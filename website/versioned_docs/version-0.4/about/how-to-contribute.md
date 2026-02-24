@@ -102,9 +102,8 @@ Describe your proposed changes and check that they fit in with what others are d
          - New unit tests should be provided to demonstrate bugs and fixes.
  4. Commit the changes to your local repository.
  4. Push the code back up to your GitHub repository.
- 5. Create a [Pull Request](https://help.github.com/articles/creating-a-pull-request) to the to apache/mahout repository on Github.
-     - Include the corresponding GitHub Issue number and description in the title of the pull request:
-        - ie. #xxxx: < Issue-Description >
+ 5. Create a [Pull Request](https://help.github.com/articles/creating-a-pull-request) to the apache/mahout repository on GitHub.
+     - Reference the related GitHub Issue in your pull request (for example, by including `Closes #xxxx` in the PR description).
  6. Committers and other members of the Mahout community can then comment on the Pull Request.  Be sure to watch for comments, respond and make any necessary changes.
 
 Please be patient. Committers are busy people too. If no one responds to your Pull Request after a few days, please make friendly reminders on the mailing list.  Please

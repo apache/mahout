@@ -89,7 +89,7 @@ Describe your proposed changes and check that they fit in with what others are d
  1. Create a GitHub Issue in the [issue tracker](https://github.com/apache/mahout/issues) (if one does not already exist)
  2. Pull the code from your GitHub repository
  3. Ensure that you are working with the latest code from the [apache/mahout](https://github.com/apache/mahout) main branch.
- 3. Modify the source code and add some (very) nice features.
+ 4. Modify the source code and add some (very) nice features.
      - Be sure to adhere to the following points:
          - All public classes and methods should have informative Javadoc
     comments.
@@ -100,12 +100,11 @@ Describe your proposed changes and check that they fit in with what others are d
              - lines can be 120 characters, not 80.
          - Contributions should pass existing unit tests.
          - New unit tests should be provided to demonstrate bugs and fixes.
- 4. Commit the changes to your local repository.
- 4. Push the code back up to your GitHub repository.
- 5. Create a [Pull Request](https://help.github.com/articles/creating-a-pull-request) to the to apache/mahout repository on Github.
-     - Include the corresponding GitHub Issue number and description in the title of the pull request:
-        - ie. #xxxx: < Issue-Description >
- 6. Committers and other members of the Mahout community can then comment on the Pull Request.  Be sure to watch for comments, respond and make any necessary changes.
+ 5. Commit the changes to your local repository.
+ 6. Push the code back up to your GitHub repository.
+ 7. Create a [Pull Request](https://help.github.com/articles/creating-a-pull-request) to the apache/mahout repository on GitHub.
+     - Reference the related GitHub Issue in your pull request (for example, by including `Closes #xxxx` in the pull request description).
+ 8. Committers and other members of the Mahout community can then comment on the Pull Request.  Be sure to watch for comments, respond and make any necessary changes.
 
 Please be patient. Committers are busy people too. If no one responds to your Pull Request after a few days, please make friendly reminders on the mailing list.  Please
 incorporate other's suggestions into into your changes if you think they're reasonable.  Finally, remember that even changes that are not committed are useful to the community.
