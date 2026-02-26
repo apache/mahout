@@ -255,6 +255,32 @@ unsafe extern "C" {
         enable_zz: i32,
         stream: *mut c_void,
     ) -> i32;
+
+    /// Launch ZZFeatureMap encoding kernel
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Arguments
+    /// * data_d - Device pointer to encoding parameters (all layers concatenated)
+    /// * state_d - Device pointer to output state vector
+    /// * state_len - State vector size (2^num_qubits)
+    /// * num_qubits - Number of qubits
+    /// * reps - Number of repetition layers
+    /// * params_per_layer - Number of parameters per layer (n + |E|)
+    /// * entanglement_mode - 0=full, 1=linear, 2=circular
+    /// * stream - CUDA stream for async execution (nullptr = default stream)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_zzfeaturemap_encode(
+        data_d: *const f64,
+        state_d: *mut c_void,
+        state_len: usize,
+        num_qubits: u32,
+        reps: u32,
+        params_per_layer: u32,
+        entanglement_mode: i32,
+        stream: *mut c_void,
+    ) -> i32;
 }
 
 // Dummy implementation for non-Linux and Linux builds without CUDA (allows linking)
@@ -441,4 +467,19 @@ pub extern "C" fn launch_iqp_encode_batch(
     _stream: *mut c_void,
 ) -> i32 {
     999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_zzfeaturemap_encode(
+    _data_d: *const f64,
+    _state_d: *mut c_void,
+    _state_len: usize,
+    _num_qubits: u32,
+    _reps: u32,
+    _params_per_layer: u32,
+    _entanglement_mode: i32,
+    _stream: *mut c_void,
+) -> i32 {
+    999 // Error: CUDA unavailable
 }

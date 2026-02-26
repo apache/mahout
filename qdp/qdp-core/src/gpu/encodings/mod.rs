@@ -141,22 +141,41 @@ pub mod amplitude;
 pub mod angle;
 pub mod basis;
 pub mod iqp;
+pub mod zzfeaturemap;
 
 pub use amplitude::AmplitudeEncoder;
 pub use angle::AngleEncoder;
 pub use basis::BasisEncoder;
 pub use iqp::IqpEncoder;
+pub use zzfeaturemap::{ZZEntanglement, ZZFeatureMapEncoder, parse_zzfeaturemap_config};
 
-/// Create encoder by name: "amplitude", "angle", "basis", "iqp", or "iqp-z"
+/// Create encoder by name: "amplitude", "angle", "basis", "iqp", "iqp-z", or "zzfeaturemap-*"
+///
+/// ZZFeatureMap supports configuration via the name string:
+/// - `"zzfeaturemap"` → full entanglement, reps=2
+/// - `"zzfeaturemap-full"` → full entanglement, reps=2
+/// - `"zzfeaturemap-linear"` → linear entanglement, reps=2
+/// - `"zzfeaturemap-circular"` → circular entanglement, reps=2
+/// - `"zzfeaturemap-full-reps3"` → full entanglement, reps=3
+/// - `"zzfeaturemap-linear-reps1"` → linear entanglement, reps=1
 pub fn get_encoder(name: &str) -> Result<Box<dyn QuantumEncoder>> {
-    match name.to_lowercase().as_str() {
+    let name_lower = name.to_lowercase();
+
+    // Check for ZZFeatureMap variants first (they have configurable suffixes)
+    if name_lower.starts_with("zzfeaturemap") || name_lower.starts_with("zz_feature_map") {
+        if let Some(encoder) = parse_zzfeaturemap_config(name) {
+            return Ok(Box::new(encoder));
+        }
+    }
+
+    match name_lower.as_str() {
         "amplitude" => Ok(Box::new(AmplitudeEncoder)),
         "angle" => Ok(Box::new(AngleEncoder)),
         "basis" => Ok(Box::new(BasisEncoder)),
         "iqp" => Ok(Box::new(IqpEncoder::full())),
         "iqp-z" => Ok(Box::new(IqpEncoder::z_only())),
         _ => Err(crate::error::MahoutError::InvalidInput(format!(
-            "Unknown encoder: {}. Available: amplitude, angle, basis, iqp, iqp-z",
+            "Unknown encoder: {}. Available: amplitude, angle, basis, iqp, iqp-z, zzfeaturemap[-entanglement][-repsN]",
             name
         ))),
     }
