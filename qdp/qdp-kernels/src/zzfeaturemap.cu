@@ -184,25 +184,30 @@ int launch_zzfeaturemap_encode(
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) return (int)err;
 
-    for (unsigned int layer = 0; layer < reps; ++layer) {
-        const size_t num_pairs = state_len >> 1;
-        const int fwt_grid_size = (num_pairs + blockSize - 1) / blockSize;
+    // Apply H^n once at the start (not per layer)
+    const size_t num_pairs = state_len >> 1;
+    const int fwt_grid_size = (num_pairs + blockSize - 1) / blockSize;
 
-        for (unsigned int stage = 0; stage < num_qubits; ++stage) {
-            zzfeaturemap_fwt_butterfly_kernel<<<fwt_grid_size, blockSize, 0, stream>>>(
-                state_complex_d,
-                state_len,
-                stage
-            );
-        }
-
-        double h_norm = 1.0 / sqrt((double)state_len);
-        zzfeaturemap_normalize_kernel<<<gridSize, blockSize, 0, stream>>>(
+    for (unsigned int stage = 0; stage < num_qubits; ++stage) {
+        zzfeaturemap_fwt_butterfly_kernel<<<fwt_grid_size, blockSize, 0, stream>>>(
             state_complex_d,
             state_len,
-            h_norm
+            stage
         );
+    }
 
+    double h_norm = 1.0 / sqrt((double)state_len);
+    zzfeaturemap_normalize_kernel<<<gridSize, blockSize, 0, stream>>>(
+        state_complex_d,
+        state_len,
+        h_norm
+    );
+
+    err = cudaGetLastError();
+    if (err != cudaSuccess) return (int)err;
+
+    // Apply phase rotations for each layer
+    for (unsigned int layer = 0; layer < reps; ++layer) {
         const double* layer_data = data_d + layer * params_per_layer;
         zzfeaturemap_phase_kernel<<<gridSize, blockSize, 0, stream>>>(
             layer_data,

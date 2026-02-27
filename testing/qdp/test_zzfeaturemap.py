@@ -76,15 +76,15 @@ def expand_features_to_qdp_params(features, num_qubits, reps, entanglement='full
     
     params = []
     for layer in range(reps):
-        # Single-qubit Z angles: alpha_i = x_i
+        # Single-qubit Z angles: alpha_i = 2 * x_i (factor of 2 for RZ gate)
         for i in range(num_qubits):
-            params.append(x[i % len(x)])
+            params.append(2.0 * x[i % len(x)])
         
-        # Two-qubit ZZ angles: beta_ij = (pi - x_i) * (pi - x_j)
+        # Two-qubit ZZ angles: beta_ij = 2 * (pi - x_i) * (pi - x_j)
         for (i, j) in pairs:
             xi = x[i % len(x)]
             xj = x[j % len(x)]
-            params.append((math.pi - xi) * (math.pi - xj))
+            params.append(2.0 * (math.pi - xi) * (math.pi - xj))
     
     return np.array(params, dtype=np.float64)
 
@@ -135,13 +135,13 @@ class TestZZFeatureMapUnit:
         params = expand_features_to_qdp_params(features, num_qubits, reps, 'full')
         
         # Expected: [alpha_0, alpha_1, beta_01]
-        # alpha_0 = 0.5, alpha_1 = 0.7
-        # beta_01 = (pi - 0.5) * (pi - 0.7)
-        expected_beta = (math.pi - 0.5) * (math.pi - 0.7)
+        # alpha_0 = 2 * 0.5 = 1.0, alpha_1 = 2 * 0.7 = 1.4
+        # beta_01 = 2 * (pi - 0.5) * (pi - 0.7)
+        expected_beta = 2.0 * (math.pi - 0.5) * (math.pi - 0.7)
         
         assert len(params) == 3  # n + n*(n-1)/2 = 2 + 1 = 3
-        assert abs(params[0] - 0.5) < 1e-10
-        assert abs(params[1] - 0.7) < 1e-10
+        assert abs(params[0] - 1.0) < 1e-10
+        assert abs(params[1] - 1.4) < 1e-10
         assert abs(params[2] - expected_beta) < 1e-10
     
     def test_parameter_expansion_linear(self):
