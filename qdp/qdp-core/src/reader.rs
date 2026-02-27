@@ -45,7 +45,47 @@
 //! }
 //! ```
 
+use arrow::array::{Array, Float64Array};
+
 use crate::error::Result;
+
+/// Policy for handling null values in Float64 arrays.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum NullHandling {
+    /// Replace nulls with 0.0 (backward-compatible default).
+    #[default]
+    FillZero,
+    /// Return an error when a null is encountered.
+    Reject,
+}
+
+/// Append values from a `Float64Array` into `output`, applying the given null policy.
+///
+/// When there are no nulls the fast path copies the underlying buffer directly.
+pub fn handle_float64_nulls(
+    output: &mut Vec<f64>,
+    float_array: &Float64Array,
+    null_handling: NullHandling,
+) -> crate::error::Result<()> {
+    if float_array.null_count() == 0 {
+        output.extend_from_slice(float_array.values());
+    } else {
+        match null_handling {
+            NullHandling::FillZero => {
+                output.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
+            }
+            NullHandling::Reject => {
+                return Err(crate::error::MahoutError::InvalidInput(
+                    "Null value encountered in Float64Array. \
+                     Use NullHandling::FillZero to replace nulls with 0.0, \
+                     or clean the data at the source."
+                        .to_string(),
+                ));
+            }
+        }
+    }
+    Ok(())
+}
 
 /// Generic data reader interface for batch quantum data.
 ///

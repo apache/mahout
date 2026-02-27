@@ -20,6 +20,7 @@ mod loader_impl {
     use crate::tensor::QuantumTensor;
     use pyo3::exceptions::PyRuntimeError;
     use pyo3::prelude::*;
+    use qdp_core::reader::NullHandling;
     use qdp_core::{PipelineConfig, PipelineIterator, QdpEngine as CoreEngine};
 
     /// Rust-backed iterator yielding one QuantumTensor per batch; used by QuantumDataLoader.
@@ -70,6 +71,18 @@ mod loader_impl {
         }
     }
 
+    /// Parse a Python null-handling string into the Rust enum.
+    pub fn parse_null_handling(s: Option<&str>) -> PyResult<NullHandling> {
+        match s {
+            None | Some("fill_zero") => Ok(NullHandling::FillZero),
+            Some("reject") => Ok(NullHandling::Reject),
+            Some(other) => Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "Invalid null_handling policy '{}'. Expected 'fill_zero' or 'reject'.",
+                other
+            ))),
+        }
+    }
+
     /// Build PipelineConfig from Python args. device_id is 0 (engine does not expose it); iterator uses engine clone with correct device.
     pub fn config_from_args(
         _engine: &CoreEngine,
@@ -78,6 +91,7 @@ mod loader_impl {
         encoding_method: &str,
         total_batches: usize,
         seed: Option<u64>,
+        null_handling: NullHandling,
     ) -> PipelineConfig {
         PipelineConfig {
             device_id: 0,
@@ -87,6 +101,7 @@ mod loader_impl {
             encoding_method: encoding_method.to_string(),
             seed,
             warmup_batches: 0,
+            null_handling,
         }
     }
 
@@ -100,4 +115,4 @@ mod loader_impl {
 }
 
 #[cfg(target_os = "linux")]
-pub use loader_impl::{PyQuantumLoader, config_from_args, path_from_py};
+pub use loader_impl::{PyQuantumLoader, config_from_args, parse_null_handling, path_from_py};
