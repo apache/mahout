@@ -44,11 +44,14 @@ __device__ double compute_zzfeaturemap_phase(
 
     unsigned int pair_idx = num_qubits;
 
+    // ZZ interaction uses CX-P-CX which adds phase when exactly one qubit is |1⟩ (XOR)
     switch (entanglement_mode) {
         case ENTANGLEMENT_FULL:
             for (unsigned int i = 0; i < num_qubits; ++i) {
                 for (unsigned int j = i + 1; j < num_qubits; ++j) {
-                    if (((x >> i) & 1U) && ((x >> j) & 1U)) {
+                    unsigned int bit_i = (x >> i) & 1U;
+                    unsigned int bit_j = (x >> j) & 1U;
+                    if (bit_i ^ bit_j) {
                         phase += layer_data[pair_idx];
                     }
                     pair_idx++;
@@ -58,7 +61,9 @@ __device__ double compute_zzfeaturemap_phase(
 
         case ENTANGLEMENT_LINEAR:
             for (unsigned int i = 0; i + 1 < num_qubits; ++i) {
-                if (((x >> i) & 1U) && ((x >> (i + 1)) & 1U)) {
+                unsigned int bit_i = (x >> i) & 1U;
+                unsigned int bit_j = (x >> (i + 1)) & 1U;
+                if (bit_i ^ bit_j) {
                     phase += layer_data[pair_idx];
                 }
                 pair_idx++;
@@ -67,13 +72,17 @@ __device__ double compute_zzfeaturemap_phase(
 
         case ENTANGLEMENT_CIRCULAR:
             for (unsigned int i = 0; i + 1 < num_qubits; ++i) {
-                if (((x >> i) & 1U) && ((x >> (i + 1)) & 1U)) {
+                unsigned int bit_i = (x >> i) & 1U;
+                unsigned int bit_j = (x >> (i + 1)) & 1U;
+                if (bit_i ^ bit_j) {
                     phase += layer_data[pair_idx];
                 }
                 pair_idx++;
             }
             if (num_qubits > 1) {
-                if (((x >> (num_qubits - 1)) & 1U) && ((x >> 0) & 1U)) {
+                unsigned int bit_last = (x >> (num_qubits - 1)) & 1U;
+                unsigned int bit_first = (x >> 0) & 1U;
+                if (bit_last ^ bit_first) {
                     phase += layer_data[pair_idx];
                 }
             }
