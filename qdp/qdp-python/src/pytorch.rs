@@ -59,15 +59,18 @@ pub fn is_cuda_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<bool> {
 const CUDA_ENCODING_METHODS: &[&str] = &["amplitude", "angle", "basis", "iqp", "iqp-z"];
 
 fn format_supported_cuda_encoding_methods() -> String {
-    let quoted: Vec<String> = CUDA_ENCODING_METHODS
-        .iter()
-        .map(|method| format!("'{}'", method))
-        .collect();
-    let len = quoted.len();
-    if len == 1 {
-        return quoted[0].clone();
+    match CUDA_ENCODING_METHODS.split_last() {
+        None => String::new(),
+        Some((last, [])) => format!("'{}'", last),
+        Some((last, rest)) => {
+            let rest = rest
+                .iter()
+                .map(|method| format!("'{}'", method))
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("{}, or '{}'", rest, last)
+        }
     }
-    format!("{}, or {}", quoted[..len - 1].join(", "), quoted[len - 1])
 }
 
 /// Validate array/tensor shape (must be 1D or 2D)
