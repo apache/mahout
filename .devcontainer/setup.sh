@@ -21,6 +21,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 source $HOME/.local/bin/env
 
 # setup pre-commit hooks
-cd /workspaces/mahout
+cd /workspace
 uv sync --group dev
 uv run pre-commit install
