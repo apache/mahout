@@ -141,7 +141,8 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     encoder: E,
 ) -> Result<*mut DLManagedTensor> {
     // Initialize reader
-    let mut reader_core = crate::io::ParquetBlockReader::new(path, None)?;
+    let mut reader_core =
+        crate::io::ParquetBlockReader::new(path, None, crate::reader::NullHandling::FillZero)?;
     let num_samples = reader_core.total_rows;
 
     // Allocate output state vector

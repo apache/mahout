@@ -141,3 +141,46 @@ def test_streaming_parquet_extension_ok():
     # Iteration may raise RuntimeError (no CUDA) or fail on missing file; we only check builder accepts.
     assert loader._streaming_requested is True
     assert loader._file_path == "/tmp/data.parquet"
+
+
+# --- NullHandling builder tests ---
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_null_handling_fill_zero():
+    """null_handling('fill_zero') sets the field correctly."""
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(4)
+        .batches(10, size=4)
+        .null_handling("fill_zero")
+    )
+    assert loader._null_handling == "fill_zero"
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_null_handling_reject():
+    """null_handling('reject') sets the field correctly."""
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(4)
+        .batches(10, size=4)
+        .null_handling("reject")
+    )
+    assert loader._null_handling == "reject"
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_null_handling_invalid_raises():
+    """null_handling with an invalid string raises ValueError."""
+    with pytest.raises(ValueError) as exc_info:
+        QuantumDataLoader(device_id=0).null_handling("invalid_policy")
+    msg = str(exc_info.value)
+    assert "fill_zero" in msg or "reject" in msg
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_null_handling_default_is_none():
+    """By default, _null_handling is None (Rust will use FillZero)."""
+    loader = QuantumDataLoader(device_id=0)
+    assert loader._null_handling is None

@@ -26,37 +26,35 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
-use arrow::array::{Array, ArrayRef, Float64Array, RecordBatch};
+use arrow::array::{ArrayRef, Float64Array, RecordBatch};
 use arrow::datatypes::{DataType, Field, Schema};
 use parquet::arrow::ArrowWriter;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::file::properties::WriterProperties;
 
 use crate::error::{MahoutError, Result};
+use crate::reader::{NullHandling, handle_float64_nulls};
 
 /// Converts an Arrow Float64Array to Vec<f64>.
-pub fn arrow_to_vec(array: &Float64Array) -> Vec<f64> {
-    if array.null_count() == 0 {
-        array.values().to_vec()
-    } else {
-        array.iter().map(|opt| opt.unwrap_or(0.0)).collect()
-    }
+pub fn arrow_to_vec(array: &Float64Array, null_handling: NullHandling) -> Result<Vec<f64>> {
+    let mut result = Vec::with_capacity(array.len());
+    handle_float64_nulls(&mut result, array, null_handling)?;
+    Ok(result)
 }
 
 /// Flattens multiple Arrow Float64Arrays into a single Vec<f64>.
-pub fn arrow_to_vec_chunked(arrays: &[Float64Array]) -> Vec<f64> {
+pub fn arrow_to_vec_chunked(
+    arrays: &[Float64Array],
+    null_handling: NullHandling,
+) -> Result<Vec<f64>> {
     let total_len: usize = arrays.iter().map(|a| a.len()).sum();
     let mut result = Vec::with_capacity(total_len);
 
     for array in arrays {
-        if array.null_count() == 0 {
-            result.extend_from_slice(array.values());
-        } else {
-            result.extend(array.iter().map(|opt| opt.unwrap_or(0.0)));
-        }
+        handle_float64_nulls(&mut result, array, null_handling)?;
     }
 
-    result
+    Ok(result)
 }
 
 /// Reads Float64 data from a Parquet file.
@@ -64,7 +62,7 @@ pub fn arrow_to_vec_chunked(arrays: &[Float64Array]) -> Vec<f64> {
 /// Expects a single Float64 column. For zero-copy access, use [`read_parquet_to_arrow`].
 pub fn read_parquet<P: AsRef<Path>>(path: P) -> Result<Vec<f64>> {
     let chunks = read_parquet_to_arrow(path)?;
-    Ok(arrow_to_vec_chunked(&chunks))
+    arrow_to_vec_chunked(&chunks, NullHandling::FillZero)
 }
 
 /// Writes Float64 data to a Parquet file.
@@ -228,7 +226,7 @@ pub fn write_arrow_to_parquet<P: AsRef<Path>>(
 /// Add OOM protection for very large files
 pub fn read_parquet_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
     use crate::reader::DataReader;
-    let mut reader = crate::readers::ParquetReader::new(path, None)?;
+    let mut reader = crate::readers::ParquetReader::new(path, None, NullHandling::FillZero)?;
     reader.read_batch()
 }
 
@@ -244,7 +242,7 @@ pub fn read_parquet_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, u
 /// Add OOM protection for very large files
 pub fn read_arrow_ipc_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize, usize)> {
     use crate::reader::DataReader;
-    let mut reader = crate::readers::ArrowIPCReader::new(path)?;
+    let mut reader = crate::readers::ArrowIPCReader::new(path, NullHandling::FillZero)?;
     reader.read_batch()
 }
 
