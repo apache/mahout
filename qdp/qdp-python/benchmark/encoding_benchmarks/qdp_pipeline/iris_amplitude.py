@@ -27,7 +27,7 @@ Data sources (default: sklearn, not the official file):
     see baseline docstring URL).
   - Total samples: 100 (2-class Iris). Full Iris has 150 (3 classes).
 
-Only difference from baseline: encoding. Here we use QDP (QuantumDataLoader + amplitude) → StatePrep(encoded);
+Only difference from baseline: encoding. Here we use QDP (QdpEngine.encode + amplitude) → StatePrep(encoded);
 baseline uses get_angles → state_preparation(angles). Rest: same circuit (Rot + CNOT), loss, optimizer, CLI.
 """
 
@@ -36,8 +36,6 @@ from __future__ import annotations
 # --- Imports ---
 
 import argparse
-import os
-import tempfile
 import time
 from typing import Any
 
@@ -60,7 +58,7 @@ except ImportError as e:
         "scikit-learn is required. Install with: uv sync --group benchmark"
     ) from e
 
-from qumat_qdp import QuantumDataLoader
+from qumat_qdp import QdpEngine
 import torch
 
 
@@ -113,38 +111,32 @@ def load_iris_binary_4d(seed: int = 42) -> tuple[np.ndarray, np.ndarray]:
     return X_norm, Y
 
 
-# --- Encoding: QDP (QuantumDataLoader + amplitude); 4-D → GPU tensor ---
+# --- Encoding: QDP (QdpEngine.encode + amplitude); 4-D → GPU tensor ---
 def encode_via_qdp(
     X_norm: np.ndarray,
-    batch_size: int,
+    batch_size: int,  # kept for CLI symmetry; not used here
     device_id: int = 0,
     data_dir: str | None = None,
     filename: str = "iris_4d.npy",
 ) -> torch.Tensor:
-    """QDP: save 4-D vectors to .npy, run QuantumDataLoader (amplitude), return encoded (n, 4) on GPU."""
+    """QDP: use QdpEngine.encode on 4-D vectors (amplitude), return encoded (n, 4) on GPU.
+
+    Uses in-memory encoding via QdpEngine instead of writing/reading .npy files. The returned
+    tensor stays on the selected CUDA device and can be fed directly to qml.StatePrep.
+    """
     n, dim = X_norm.shape
     if dim != STATE_DIM:
         raise ValueError(
             f"X_norm must have {STATE_DIM} features for 2 qubits, got {dim}"
         )
-    if data_dir is None:
-        data_dir = tempfile.gettempdir()
-    os.makedirs(data_dir, exist_ok=True)
-    path = os.path.join(data_dir, filename)
-    np.save(path, X_norm.astype(np.float64))
-    total_batches = (n + batch_size - 1) // batch_size
-    loader = (
-        QuantumDataLoader(device_id=device_id)
-        .qubits(NUM_QUBITS)
-        .encoding("amplitude")
-        .batches(total_batches, size=batch_size)
-        .source_file(path)
+    engine = QdpEngine(device_id=device_id, precision="float32")
+    qt = engine.encode(
+        X_norm.astype(np.float64),
+        num_qubits=NUM_QUBITS,
+        encoding_method="amplitude",
     )
-    batches = []
-    for qt in loader:
-        t = torch.from_dlpack(qt)
-        batches.append(t)  # keep on GPU
-    return torch.cat(batches, dim=0)[:n].clone()
+    encoded = torch.from_dlpack(qt)
+    return encoded[:n]
 
 
 # --- Training: StatePrep(encoded) + Rot layers, square loss, optional early stop ---
