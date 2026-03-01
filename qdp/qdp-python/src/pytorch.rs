@@ -56,6 +56,23 @@ pub fn is_cuda_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<bool> {
     Ok(device_type == "cuda")
 }
 
+const CUDA_ENCODING_METHODS: &[&str] = &["amplitude", "angle", "basis", "iqp", "iqp-z"];
+
+fn format_supported_cuda_encoding_methods() -> String {
+    match CUDA_ENCODING_METHODS.split_last() {
+        None => String::new(),
+        Some((last, [])) => format!("'{}'", last),
+        Some((last, rest)) => {
+            let rest = rest
+                .iter()
+                .map(|method| format!("'{}'", method))
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("{}, or '{}'", rest, last)
+        }
+    }
+}
+
 /// Validate array/tensor shape (must be 1D or 2D)
 ///
 /// Args:
@@ -164,12 +181,12 @@ pub fn validate_cuda_tensor_for_encoding(
                 )));
             }
         }
-        "angle" => {
+        "angle" | "iqp" | "iqp-z" => {
             if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64 for angle encoding, got {}. \
+                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
                      Use tensor.to(torch.float64)",
-                    dtype_str
+                    method, dtype_str
                 )));
             }
         }
@@ -184,8 +201,9 @@ pub fn validate_cuda_tensor_for_encoding(
         }
         _ => {
             return Err(PyRuntimeError::new_err(format!(
-                "CUDA tensor encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'. \
+                "CUDA tensor encoding currently only supports {} methods, got '{}'. \
                  Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
+                format_supported_cuda_encoding_methods(),
                 encoding_method
             )));
         }
