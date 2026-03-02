@@ -136,7 +136,11 @@ def encode_via_qdp(
         encoding_method="amplitude",
     )
     encoded = torch.from_dlpack(qt)
-    return encoded[:n]
+    # DLPack exports complex dtype even though imaginary parts are always 0.0
+    # (CUDA kernel hardcodes imag=0.0). Taking .real gives a real-valued zero-copy view.
+    if encoded.is_complex():
+        encoded = encoded.real
+    return encoded[:n].clone()
 
 
 # --- Training: StatePrep(encoded) + Rot layers, square loss, optional early stop ---
@@ -235,14 +239,18 @@ def _run_training_cpu(
         pnp.random.seed(seed)
     except Exception:
         pass
-    feats_train = pnp.array(encoded_train)
+    # Plain np.ndarray: PennyLane autograd treats as non-differentiable constant.
+    # Avoids pnp.tensor subclass overhead and prevents AdamOptimizer from computing
+    # ∂cost/∂feats_train (unnecessary gradient over state vectors).
+    feats_train = np.asarray(encoded_train)
     feats_test = encoded_test
-    Y_train_pnp = pnp.array(Y_train)
+    Y_train_pnp = pnp.array(np.asarray(Y_train, dtype=np.float64), requires_grad=False)
     Y_test_np = np.asarray(Y_test)
 
     @qml.qnode(dev_qml, interface="autograd", diff_method="backprop")
     def circuit(weights, state_vector):
-        qml.StatePrep(state_vector, wires=(0, 1))
+        # normalize=False: QDP pre-normalizes to unit norm, skipping PennyLane's re-normalization.
+        qml.AmplitudeEmbedding(state_vector, wires=(0, 1), normalize=False)
         for lw in weights:
             layer(lw, wires=(0, 1))
         return qml.expval(qml.PauliZ(0))
@@ -329,7 +337,8 @@ def _run_training_gpu(
 
     @qml.qnode(dev_qml, interface="torch", diff_method="adjoint")
     def circuit(weights, state_vector):
-        qml.StatePrep(state_vector, wires=(0, 1))
+        # normalize=False: QDP pre-normalizes to unit norm, skipping PennyLane's re-normalization.
+        qml.AmplitudeEmbedding(state_vector, wires=(0, 1), normalize=False)
         for lw in weights:
             layer(lw, wires=(0, 1))
         return qml.expval(qml.PauliZ(0))

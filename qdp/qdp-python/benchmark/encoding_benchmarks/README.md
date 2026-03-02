@@ -75,3 +75,25 @@ To see the full list of options and defaults, append `--help`:
 uv run python benchmark/encoding_benchmarks/pennylane_baseline/iris_amplitude.py --help
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/iris_amplitude.py --help
 ```
+
+## Credit Card Fraud amplitude baseline (PennyLane)
+
+Minimal, reproducible steps (run from `qdp/qdp-python`):
+
+1. **Download dataset (once)** — Kaggle `creditcard.csv` mirror:
+
+   ```bash
+   mkdir -p benchmark/encoding_benchmarks/pennylane_baseline/data
+   curl -L -o benchmark/encoding_benchmarks/pennylane_baseline/data/creditcard.csv \
+     https://raw.githubusercontent.com/nsethi31/Kaggle-Data-Credit-Card-Fraud-Detection/master/creditcard.csv
+   ```
+
+2. **Run the PennyLane baseline** — StandardScaler → PCA(16) → L2 norm → 4‑qubit amplitude VQC:
+
+   ```bash
+   uv run python benchmark/encoding_benchmarks/pennylane_baseline/creditcardfraud_amplitude.py \
+     --data-file benchmark/encoding_benchmarks/pennylane_baseline/data/creditcard.csv \
+     --max-samples 300000 --iters 200 --batch-size 512 --trials 1
+   ```
+
+This prints compile time, train time / throughput, and task metrics (AUPRC, F1, precision, recall) on the test set.

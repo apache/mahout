@@ -635,6 +635,57 @@ impl QdpEngine {
     }
 
     #[cfg(target_os = "linux")]
+    /// Create an array-backed pipeline iterator (QuantumDataLoader.source_array(X)).
+    /// PyO3 best practice: one copy (to_vec) to own data for iterator lifetime; then detach()
+    /// so Rust work (new_from_array) runs without GIL. Iterator's next_batch uses &[f64] (no per-batch to_vec).
+    #[pyo3(signature = (data, batch_size, num_qubits, encoding_method, batch_limit=None))]
+    fn create_array_loader(
+        &self,
+        py: Python<'_>,
+        data: &Bound<'_, PyAny>,
+        batch_size: usize,
+        num_qubits: u32,
+        encoding_method: &str,
+        batch_limit: Option<usize>,
+    ) -> PyResult<PyQuantumLoader> {
+        let array_2d = data.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+            PyRuntimeError::new_err(
+                "create_array_loader requires a 2D NumPy array (float64, C-contiguous).",
+            )
+        })?;
+        let shape = array_2d.shape();
+        let num_samples = shape[0];
+        let sample_size = shape[1];
+        let data_slice = array_2d
+            .as_slice()
+            .map_err(|_| PyRuntimeError::new_err("NumPy array must be C-contiguous."))?;
+        let data_vec = data_slice.to_vec();
+        let batch_limit = batch_limit.unwrap_or(usize::MAX);
+        let config = config_from_args(
+            &self.engine,
+            batch_size,
+            num_qubits,
+            encoding_method,
+            0,
+            None,
+        );
+        let engine = self.engine.clone();
+        let iter = py
+            .detach(|| {
+                qdp_core::PipelineIterator::new_from_array(
+                    engine,
+                    data_vec,
+                    num_samples,
+                    sample_size,
+                    config,
+                    batch_limit,
+                )
+            })
+            .map_err(|e| PyRuntimeError::new_err(format!("create_array_loader failed: {}", e)))?;
+        Ok(PyQuantumLoader::new(Some(iter)))
+    }
+
+    #[cfg(target_os = "linux")]
     /// Create a streaming Parquet pipeline iterator (for QuantumDataLoader.source_file(path, streaming=True)).
     #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None))]
     fn create_streaming_file_loader(

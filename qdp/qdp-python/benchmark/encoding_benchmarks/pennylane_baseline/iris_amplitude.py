@@ -174,8 +174,12 @@ def run_training(
     rng = np.random.default_rng(seed)
     idx = rng.permutation(n)
     n_train = int(n * (1 - test_size))
-    feats_train = pnp.array(features[idx[:n_train]])
-    Y_train = pnp.array(Y[idx[:n_train]])
+    # Plain np.ndarray: PennyLane autograd treats as non-differentiable constant.
+    # Prevents AdamOptimizer from computing ∂cost/∂feats_train (unnecessary gradient over angle features).
+    feats_train = np.asarray(features[idx[:n_train]])
+    Y_train = pnp.array(
+        np.asarray(Y[idx[:n_train]], dtype=np.float64), requires_grad=False
+    )
     feats_test = features[idx[n_train:]]
     Y_test = Y[idx[n_train:]]
 
